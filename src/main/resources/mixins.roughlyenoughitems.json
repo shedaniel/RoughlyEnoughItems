@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "minVersion": "0.7.7",
+  "compatibilityLevel": "JAVA_8",
+  "target": "@env(DEFAULT)",
+  "package": "me.shedaniel.mixins",
+  "refmap": "mixins.roughlyenoughitems.refmap.json",
+  "mixins": [
+    "MixinDoneLoading"
+  ],
+  "client": [
+    "MixinGuiContainer",
+    "MixinMinecraftResize",
+    "MixinKeyboardListener",
+    "MixinRecipeManager",
+    "MixinGuiContainerCreative"
+  ]
+}
