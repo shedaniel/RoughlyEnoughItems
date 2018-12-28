@@ -1,2 +1,2 @@
 # RoughlyEnoughItems
-1.13 Version of JustEnoughItems
+A project to make almostenoughitems to look like jei
