@@ -1,6 +1,6 @@
 package me.shedaniel.listeners;
 
-import me.shedaniel.gui.AEIRenderHelper;
+import me.shedaniel.gui.REIRenderHelper;
 import me.shedaniel.listenerdefinitions.MinecraftResize;
 
 /**
@@ -8,7 +8,7 @@ import me.shedaniel.listenerdefinitions.MinecraftResize;
  */
 public class ResizeListener implements MinecraftResize {
     @Override
-    public void resize() {
-        AEIRenderHelper.resize();
+    public void resize(int scaledWidth, int scaledHeight) {
+        REIRenderHelper.resize(scaledWidth, scaledHeight);
     }
 }

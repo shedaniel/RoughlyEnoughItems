@@ -2,14 +2,17 @@ package me.shedaniel.gui;
 
 import me.shedaniel.api.IDisplayCategory;
 import me.shedaniel.api.IRecipe;
-import me.shedaniel.gui.widget.AEISlot;
 import me.shedaniel.gui.widget.Button;
 import me.shedaniel.gui.widget.Control;
+import me.shedaniel.gui.widget.REISlot;
+import me.shedaniel.gui.widget.Tab;
+import me.shedaniel.impl.REIRecipeManager;
 import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.inventory.Container;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
@@ -20,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 
 public class RecipeGui extends GuiContainer {
+    
+    private static final ResourceLocation CREATIVE_INVENTORY_TABS = new ResourceLocation("textures/gui/container/creative_inventory/tabs.png");
     private static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("almostenoughitems", "textures/gui/recipecontainer.png");
     private final MainWindow mainWindow;
     private final Container container;
@@ -28,12 +33,15 @@ public class RecipeGui extends GuiContainer {
     private int guiWidth = 176;
     private int guiHeight = 222;
     ArrayList<IDisplayCategory> categories = new ArrayList<>();
-    private int categoryPointer = 0;
+    private int categoryTabPage = 0;
+    private IDisplayCategory selectedCategory;
     private int recipePointer = 0;
-    private List<AEISlot> slots;
+    private List<REISlot> slots;
     private int cycleCounter = 0;
     private int[] itemPointer;
     List<Control> controls = new LinkedList<>();
+    private List<Tab> tabs;
+    private boolean tabsEnabled = false;
     
     public RecipeGui(Container p_i1072_1_, GuiScreen prevScreen, Map<IDisplayCategory, List<IRecipe>> recipes) {
         super(new RecipeContainer());
@@ -49,7 +57,17 @@ public class RecipeGui extends GuiContainer {
     }
     
     private void setupCategories() {
-        categories.addAll(recipes.keySet());
+        for(IDisplayCategory adapter : REIRecipeManager.instance().getDisplayAdapters())
+            if (recipes.containsKey(adapter))
+                categories.add(adapter);
+        selectedCategory = categories.get(0);
+        categoryTabPage = 0;
+        tabs = new ArrayList<>();
+        for(int i = 0; i < 6; i++)
+            tabs.add(new Tab(i, 0, 0, 0, 28, 32));
+        tabs.forEach(tab -> tab.setOnClick(i -> {
+            return onClickTab(tab.getId());
+        }));
         updateRecipe();
     }
     
@@ -58,7 +76,7 @@ public class RecipeGui extends GuiContainer {
     public void render(int mouseX, int mouseY, float partialTicks) {
         super.render(mouseX, mouseY, partialTicks);
         int y = (int) ((mainWindow.getScaledHeight() / 2 - this.guiHeight / 2));
-        drawCenteredString(this.fontRenderer, categories.get(categoryPointer).getDisplayName(), guiLeft + guiWidth / 2, y + 11, -1);
+        drawCenteredString(this.fontRenderer, selectedCategory.getDisplayName(), guiLeft + guiWidth / 2, y + 11, -1);
         drawCenteredString(this.fontRenderer, String.format("%d/%d", 1 + getCurrentPage(), getTotalPages()), guiLeft + guiWidth / 2, y + 34, -1);
         controls.forEach(Control::draw);
     }
@@ -70,7 +88,7 @@ public class RecipeGui extends GuiContainer {
     @Override
     public void tick() {
         super.tick();
-        slots.forEach(AEISlot::tick);
+        slots.forEach(REISlot::tick);
         controls.forEach(Control::tick);
     }
     
@@ -82,6 +100,7 @@ public class RecipeGui extends GuiContainer {
     }
     
     private void updateRecipe() {
+        int categoryPointer = categories.indexOf(selectedCategory);
         IRecipe recipe = recipes.get(categories.get(categoryPointer)).get(recipePointer);
         categories.get(categoryPointer).resetRecipes();
         categories.get(categoryPointer).addRecipe(recipe);
@@ -95,9 +114,7 @@ public class RecipeGui extends GuiContainer {
         guiLeft = (int) ((mainWindow.getScaledWidth() / 2 - this.guiWidth / 2));
         guiTop = (int) ((mainWindow.getScaledHeight() / 2 - this.guiHeight / 2));
         
-        for(AEISlot slot : slots) {
-            slot.move(guiLeft, guiTop);
-        }
+        slots.forEach(reiSlot -> reiSlot.move(guiLeft, guiTop));
         
         Button btnCategoryLeft = new Button(guiLeft + 10, guiTop + 5, 15, 20, "<");
         Button btnCategoryRight = new Button(guiLeft + guiWidth - 25, guiTop + 5, 15, 20, ">");
@@ -114,7 +131,7 @@ public class RecipeGui extends GuiContainer {
         controls.clear();
         controls.add(btnCategoryLeft);
         controls.add(btnCategoryRight);
-        if (categories.size() <= 2) {
+        if (categories.size() <= 1) {
             btnCategoryLeft.setEnabled(false);
             btnCategoryRight.setEnabled(false);
         }
@@ -129,15 +146,46 @@ public class RecipeGui extends GuiContainer {
         
         List<Control> newControls = new LinkedList<>();
         categories.get(categoryPointer).addWidget(newControls, 0);
-        if (recipes.get(categories.get(categoryPointer)).size() >= categoryPointer + 2) {
+        if (recipes.get(categories.get(categoryPointer)).size() >= categoryPointer + 2)
             categories.get(categoryPointer).addWidget(newControls, 1);
-        }
         newControls.forEach(f -> f.move(guiLeft, guiTop));
         controls.addAll(newControls);
+        
+        updateTabs();
+    }
+    
+    private void updateTabs() {
+        tabsEnabled = guiTop - 28 > 4;
+        if (tabsEnabled) {
+            tabs.forEach(tab -> tab.moveTo(guiLeft + 4, guiLeft + 2 + tabs.indexOf(tab) * 28, guiTop - 28));
+            for(int i = 0; i < tabs.size(); i++) {
+                int ref = i + categoryTabPage * 6;
+                if (categories.size() > ref) {
+                    tabs.get(i).setItem(categories.get(ref).getCategoryIcon(), categories.get(ref).getDisplayName(), categories.get(ref).equals(selectedCategory));
+                } else tabs.get(i).setItem(null, null, false);
+            }
+            controls.addAll(tabs);
+        }
+    }
+    
+    private boolean onClickTab(int index) {
+        System.out.println(index);
+        if (index + categoryTabPage * 6 == categories.indexOf(selectedCategory))
+            return false;
+        selectedCategory = categories.get(index + categoryTabPage * 6);
+        return false;
     }
     
     @Override
     protected void drawGuiContainerBackgroundLayer(float v, int i, int i1) {
+        //Tabs
+        if (tabsEnabled) {
+            GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+            RenderHelper.enableGUIStandardItemLighting();
+            this.mc.getTextureManager().bindTexture(CREATIVE_INVENTORY_TABS);
+            tabs.stream().filter(tab -> tab.getId() + categoryTabPage * 6 == categories.indexOf(selectedCategory)).forEach(Tab::drawTab);
+        }
+        
         drawDefaultBackground();
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.mc.getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
@@ -146,18 +194,20 @@ public class RecipeGui extends GuiContainer {
         int lvt_5_1_ = (int) ((mainWindow.getScaledHeight() / 2 - this.guiHeight / 2));
         
         this.drawTexturedModalRect(lvt_4_1_, lvt_5_1_, 0, 0, this.guiWidth, this.guiHeight);
-        slots.forEach(AEISlot::draw);
-    }
-    
-    
-    @Override
-    protected void initGui() {
-        super.initGui();
+        slots.forEach(REISlot::draw);
+        
+        if (tabsEnabled)
+            tabs.stream().filter(tab -> tab.getId() + categoryTabPage * 6 != categories.indexOf(selectedCategory)).forEach(tab -> {
+                GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+                RenderHelper.enableGUIStandardItemLighting();
+                this.mc.getTextureManager().bindTexture(CREATIVE_INVENTORY_TABS);
+                tab.drawTab();
+            });
     }
     
     @Override
     public boolean keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_) {
-        if (p_keyPressed_1_ == 259 && prevScreen != null && AEIRenderHelper.focusedControl == null) {
+        if (p_keyPressed_1_ == 259 && prevScreen != null && REIRenderHelper.focusedControl == null) {
             Minecraft.getInstance().displayGuiScreen(prevScreen);
             return true;
         }
@@ -172,20 +222,24 @@ public class RecipeGui extends GuiContainer {
     
     private boolean btnCategoryLeft(int button) {
         recipePointer = 0;
+        int categoryPointer = categories.indexOf(selectedCategory);
         categoryPointer--;
-        if (categoryPointer < 0) {
+        if (categoryPointer < 0)
             categoryPointer = categories.size() - 1;
-        }
+        selectedCategory = categories.get(categoryPointer);
+        categoryTabPage = categoryPointer / 6;
         updateRecipe();
         return true;
     }
     
     private boolean btnCategoryRight(int button) {
         recipePointer = 0;
+        int categoryPointer = categories.indexOf(selectedCategory);
         categoryPointer++;
-        if (categoryPointer >= categories.size()) {
+        if (categoryPointer >= categories.size())
             categoryPointer = 0;
-        }
+        selectedCategory = categories.get(categoryPointer);
+        categoryTabPage = categoryPointer / 6;
         updateRecipe();
         return true;
     }
@@ -201,7 +255,7 @@ public class RecipeGui extends GuiContainer {
     
     private boolean btnRecipeRight(int button) {
         recipePointer += 2;
-        if (recipePointer >= recipes.get(categories.get(categoryPointer)).size()) {
+        if (recipePointer >= recipes.get(selectedCategory).size()) {
             recipePointer = 0;
         }
         updateRecipe();
@@ -213,6 +267,6 @@ public class RecipeGui extends GuiContainer {
     }
     
     private int getTotalPages() {
-        return MathHelper.clamp(riseDoublesToInt(recipes.get(categories.get(categoryPointer)).size() / 2), 1, Integer.MAX_VALUE);
+        return MathHelper.clamp(riseDoublesToInt(recipes.get(selectedCategory).size() / 2), 1, Integer.MAX_VALUE);
     }
 }

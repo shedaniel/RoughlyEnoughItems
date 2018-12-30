@@ -6,7 +6,8 @@
   "package": "me.shedaniel.mixins",
   "refmap": "mixins.roughlyenoughitems.refmap.json",
   "mixins": [
-    "MixinDoneLoading"
+    "MixinDoneLoading",
+    "MixinPotionBrewing"
   ],
   "client": [
     "MixinGuiContainer",

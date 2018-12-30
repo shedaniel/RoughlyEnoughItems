@@ -91,6 +91,25 @@ public abstract class Control extends Drawable {
         lvt_9_1_.draw();
     }
     
+    protected void drawTexturedModalRect(int x, int y, int u, int v, int width, int height, float zLevel) {
+        float lvt_7_1_ = 0.00390625F;
+        float lvt_8_1_ = 0.00390625F;
+        Tessellator lvt_9_1_ = Tessellator.getInstance();
+        BufferBuilder lvt_10_1_ = lvt_9_1_.getBuffer();
+        lvt_10_1_.begin(7, DefaultVertexFormats.POSITION_TEX);
+        lvt_10_1_.pos((double) (x + 0), (double) (y + height), zLevel).tex((double) ((float) (u + 0) * 0.00390625F), (double) ((float) (v + height) * 0.00390625F)).endVertex();
+        lvt_10_1_.pos((double) (x + width), (double) (y + height), zLevel).tex((double) ((float) (u + width) * 0.00390625F), (double) ((float) (v + height) * 0.00390625F)).endVertex();
+        lvt_10_1_.pos((double) (x + width), (double) (y + 0), zLevel).tex((double) ((float) (u + width) * 0.00390625F), (double) ((float) (v + 0) * 0.00390625F)).endVertex();
+        lvt_10_1_.pos((double) (x + 0), (double) (y + 0), zLevel).tex((double) ((float) (u + 0) * 0.00390625F), (double) ((float) (v + 0) * 0.00390625F)).endVertex();
+        lvt_9_1_.draw();
+    }
+    
+    
     public void tick() {
     }
+    
+    public void setOnClick(IntFunction<Boolean> onClick) {
+        this.onClick = onClick;
+    }
+    
 }

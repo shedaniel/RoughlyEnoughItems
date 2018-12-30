@@ -1,7 +1,8 @@
 package me.shedaniel.gui.widget;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.gui.AEIRenderHelper;
+import me.shedaniel.gui.REIRenderHelper;
+import me.shedaniel.impl.REIRecipeManager;
 import me.shedaniel.listenerdefinitions.IMixinGuiContainer;
 import me.shedaniel.network.CheatPacket;
 import me.shedaniel.network.DeletePacket;
@@ -20,7 +21,7 @@ import java.util.List;
 /**
  * Created by James on 7/28/2018.
  */
-public class AEISlot extends Control {
+public class REISlot extends Control {
     private static final ResourceLocation RECIPE_GUI = new ResourceLocation("almostenoughitems", "textures/gui/recipecontainer.png");
     private boolean cheatable = false;
     private List<ItemStack> itemList = new LinkedList<>();
@@ -62,7 +63,7 @@ public class AEISlot extends Control {
     private boolean drawBackground = false;
     private Point backgroundUV = new Point(0, 222);
     
-    public AEISlot(int x, int y) {
+    public REISlot(int x, int y) {
         super(x, y, 18, 18);
         this.onClick = this::onClick;
     }
@@ -96,16 +97,16 @@ public class AEISlot extends Control {
             drawTooltip();
     }
     
-    private void drawTooltip() {
+    protected void drawTooltip() {
         List<String> toolTip = getTooltip();
-        toolTip.add("§9" + getMod());
-        Point mouse = AEIRenderHelper.getMouseLoc();
-        AEIRenderHelper.addToolTip(toolTip, mouse.x, mouse.y);
+        toolTip.add("§9§o" + getMod());
+        Point mouse = REIRenderHelper.getMouseLoc();
+        REIRenderHelper.addToolTip(toolTip, mouse.x, mouse.y);
     }
     
     private boolean onClick(int button) {
         EntityPlayer player = Minecraft.getInstance().player;
-        if (AEIRenderHelper.aeiGui.canCheat() && !(player.inventory.getItemStack().isEmpty())) {
+        if (REIRenderHelper.reiGui.canCheat() && !(player.inventory.getItemStack().isEmpty())) {
             //Delete the itemstack.
             Minecraft.getInstance().getConnection().sendPacket(new DeletePacket());
             return true;
@@ -114,7 +115,7 @@ public class AEISlot extends Control {
             return false;
         }
         
-        if (AEIRenderHelper.aeiGui.canCheat() && this.cheatable) {
+        if (REIRenderHelper.reiGui.canCheat() && this.cheatable) {
             if (getStack() != null && !getStack().isEmpty()) {
                 ItemStack cheatedStack = getStack().copy();
                 if (button == 0)
@@ -126,36 +127,36 @@ public class AEISlot extends Control {
                 return true;
             }
         } else {
-            AEIRenderHelper.recipeKeybind();
+            REIRenderHelper.recipeKeybind();
         }
         return false;
     }
     
     
     private void drawStack(int x, int y) {
-        GuiContainer gui = AEIRenderHelper.getOverlayedGui();
-        AEIRenderHelper.getItemRender().zLevel = 200.0F;
-        AEIRenderHelper.getItemRender().renderItemAndEffectIntoGUI(getStack(), x, y);
+        GuiContainer gui = REIRenderHelper.getOverlayedGui();
+        REIRenderHelper.getItemRender().zLevel = 200.0F;
+        REIRenderHelper.getItemRender().renderItemAndEffectIntoGUI(getStack(), x, y);
         assert gui != null;
         if (((IMixinGuiContainer) gui).getDraggedStack().isEmpty())
-            AEIRenderHelper.getItemRender().renderItemOverlayIntoGUI(Minecraft.getInstance().fontRenderer, getStack(), x, y - 0, "");
+            REIRenderHelper.getItemRender().renderItemOverlayIntoGUI(Minecraft.getInstance().fontRenderer, getStack(), x, y - 0, "");
         else
-            AEIRenderHelper.getItemRender().renderItemOverlayIntoGUI(Minecraft.getInstance().fontRenderer, getStack(), x, y - 8, "");
-        AEIRenderHelper.getItemRender().zLevel = 0.0F;
+            REIRenderHelper.getItemRender().renderItemOverlayIntoGUI(Minecraft.getInstance().fontRenderer, getStack(), x, y - 8, "");
+        REIRenderHelper.getItemRender().zLevel = 0.0F;
     }
     
     public String getMod() {
         if (!getStack().isEmpty()) {
             ResourceLocation location = IRegistry.ITEM.getKey(getStack().getItem());
             assert location != null;
-            return location.getNamespace();
+            return REIRenderHelper.tryGettingModName(location.getNamespace());
         }
         return "";
     }
     
-    private List<String> getTooltip() {
+    protected List<String> getTooltip() {
         Minecraft mc = Minecraft.getInstance();
-        GuiContainer gui = AEIRenderHelper.getOverlayedGui();
+        GuiContainer gui = REIRenderHelper.getOverlayedGui();
         List<String> toolTip = Lists.newArrayList();
         if (gui != null) {
             toolTip = gui.getItemToolTip(getStack());

@@ -1,7 +1,9 @@
 package me.shedaniel.api;
 
-import me.shedaniel.gui.widget.AEISlot;
 import me.shedaniel.gui.widget.Control;
+import me.shedaniel.gui.widget.REISlot;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 
 import java.util.List;
 
@@ -17,11 +19,13 @@ public interface IDisplayCategory<T extends IRecipe> {
     
     public void resetRecipes();
     
-    public List<AEISlot> setupDisplay(int number);
+    public List<REISlot> setupDisplay(int number);
     
     public boolean canDisplay(T recipe);
     
     public void drawExtras();
     
     public void addWidget(List<Control> controls, int number);
+    
+    public ItemStack getCategoryIcon();
 }

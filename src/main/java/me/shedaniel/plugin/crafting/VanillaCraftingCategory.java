@@ -1,11 +1,14 @@
 package me.shedaniel.plugin.crafting;
 
 import me.shedaniel.api.IDisplayCategory;
-import me.shedaniel.gui.widget.AEISlot;
+import me.shedaniel.gui.widget.REISlot;
 import me.shedaniel.gui.widget.Control;
 import me.shedaniel.gui.widget.WidgetArrow;
 import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.init.Blocks;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 import java.util.ArrayList;
@@ -23,7 +26,7 @@ public class VanillaCraftingCategory implements IDisplayCategory<VanillaCrafting
     
     @Override
     public String getDisplayName() {
-        return "Crafting";
+        return I18n.format("category.rei.crafting");
     }
     
     @Override
@@ -39,13 +42,13 @@ public class VanillaCraftingCategory implements IDisplayCategory<VanillaCrafting
     }
     
     @Override
-    public List<AEISlot> setupDisplay(int number) {
-        List<AEISlot> slots = new LinkedList<>();
+    public List<REISlot> setupDisplay(int number) {
+        List<REISlot> slots = new LinkedList<>();
         int count = 0;
         List<List<ItemStack>> input = recipes.get(number).getInput();
         for(int y = 0; y < 3; y++) {
             for(int x = 0; x < 3; x++) {
-                AEISlot slot = new AEISlot(20 + x * 18, 75 + y * 18 + number * 75);
+                REISlot slot = new REISlot(20 + x * 18, 75 + y * 18 + number * 75);
                 slot.setDrawBackground(true);
                 slots.add(slot);
                 count++;
@@ -58,7 +61,7 @@ public class VanillaCraftingCategory implements IDisplayCategory<VanillaCrafting
             } else if (!input.get(i).isEmpty())
                 slots.get(i).setStackList(input.get(i));
         }
-        AEISlot slot = new AEISlot(130, 75 + 18 + number * 75);
+        REISlot slot = new REISlot(130, 75 + 18 + number * 75);
         
         slot.setDrawBackground(true);
         slot.setStack(recipes.get(number).getOutput().get(0).copy());
@@ -103,4 +106,10 @@ public class VanillaCraftingCategory implements IDisplayCategory<VanillaCrafting
         }
         return num;
     }
+    
+    @Override
+    public ItemStack getCategoryIcon() {
+        return new ItemStack(Blocks.CRAFTING_TABLE.asItem());
+    }
+    
 }

@@ -78,6 +78,7 @@ public abstract class MixinGuiContainerCreative extends InventoryEffectRenderer 
         return super.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
     }
     
+    @Overwrite
     public boolean mouseScrolled(double p_mouseScrolled_1_) {
         if (!this.needsScrollBars()) {
             return super.mouseScrolled(p_mouseScrolled_1_);

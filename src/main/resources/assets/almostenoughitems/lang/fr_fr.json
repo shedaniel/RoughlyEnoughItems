@@ -1,8 +1,8 @@
 {
-  "key.aei.category":"Almost Enough Items",
-  "key.aei.recipe":"Afficher la recette",
-  "key.aei.hide":"Masquer/afficher AEI",
-  "key.aei.use":"Afficher les utilisations",
-  "text.aei.cheat":"Triche",
-  "text.aei.nocheat":"§4§mTriche"
+  "key.rei.category":"Roughly Enough Items",
+  "key.rei.recipe":"Afficher la recette",
+  "key.rei.hide":"Masquer/afficher REI",
+  "key.rei.use":"Afficher les utilisations",
+  "text.rei.cheat":"Triche",
+  "text.rei.nocheat":"§4§mTriche"
 }

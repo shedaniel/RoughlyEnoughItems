@@ -1,9 +1,9 @@
 package me.shedaniel.gui;
 
 import me.shedaniel.ClientListener;
-import me.shedaniel.gui.widget.AEISlot;
 import me.shedaniel.gui.widget.Button;
 import me.shedaniel.gui.widget.Control;
+import me.shedaniel.gui.widget.REISlot;
 import me.shedaniel.gui.widget.TextBox;
 import me.shedaniel.listenerdefinitions.IMixinGuiContainer;
 import net.minecraft.client.MainWindow;
@@ -19,13 +19,17 @@ import net.minecraft.util.text.TextComponentTranslation;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class GuiItemList extends Drawable {
     
     public static final int FOOTERSIZE = 44;
     private GuiContainer overlayedGui;
     private static int page = 0;
-    private ArrayList<AEISlot> displaySlots;
+    private ArrayList<REISlot> displaySlots;
     protected ArrayList<Control> controls;
     private boolean needsResize = false;
     Button buttonLeft;
@@ -60,14 +64,14 @@ public class GuiItemList extends Drawable {
     }
     
     private static Rectangle calculateRect(GuiContainer overlayedGui) {
-        MainWindow res = AEIRenderHelper.getResolution();
+        MainWindow res = REIRenderHelper.getResolution();
         int startX = (((IMixinGuiContainer) overlayedGui).getGuiLeft() + ((IMixinGuiContainer) overlayedGui).getXSize()) + 10;
         int width = res.getScaledWidth() - startX;
         return new Rectangle(startX, 0, width, res.getScaledHeight());
     }
     
     protected void resize() {
-        MainWindow res = AEIRenderHelper.getResolution();
+        MainWindow res = REIRenderHelper.getResolution();
         
         if (overlayedGui != Minecraft.getInstance().currentScreen) {
             if (Minecraft.getInstance().currentScreen instanceof GuiContainer) {
@@ -117,24 +121,41 @@ public class GuiItemList extends Drawable {
     }
     
     private void calculateSlots() {
-        int x = rect.x;
-        int y = rect.y + 20;
-        MainWindow res = AEIRenderHelper.getResolution();
+        int x = rect.x, y = rect.y + 20;
+        MainWindow res = REIRenderHelper.getResolution();
         displaySlots.clear();
-        int xOffset = 4;
-        int yOffset = 4;
+        int xOffset = 0, yOffset = 0, row = 0, perRow = 0, currentX = 0, currentY = 0;
         while (true) {
-            AEISlot slot = new AEISlot(x + xOffset, y + yOffset);
-            slot.setCheatable(true);
             xOffset += 18;
-            displaySlots.add(slot);
-            if (x + xOffset + 18 > res.getScaledWidth()) {
-                xOffset = 4;
+            if (row == 0)
+                perRow++;
+            if (x + xOffset + 22 > res.getScaledWidth()) {
+                xOffset = 0;
                 yOffset += 18;
+                row++;
             }
             if (y + yOffset + 9 + FOOTERSIZE > rect.height) {
+                xOffset = 0;
+                yOffset = 0;
                 break;
             }
+        }
+        x += (rect.width - perRow * 18) / 2;
+        y += (rect.height - FOOTERSIZE - 2 - row * 18) / 2;
+        while (true) {
+            REISlot slot = new REISlot(x + xOffset, y + yOffset);
+            slot.setCheatable(true);
+            xOffset += 18;
+            currentX++;
+            displaySlots.add(slot);
+            if (currentX >= perRow) {
+                xOffset = 0;
+                yOffset += 18;
+                currentX = 0;
+                currentY++;
+            }
+            if (currentY >= row)
+                break;
         }
     }
     
@@ -196,50 +217,68 @@ public class GuiItemList extends Drawable {
     
     private String getCheatModeText() {
         if (cheatMode) {
-            TextComponentTranslation cheat = new TextComponentTranslation("text.aei.cheat", new Object[]{null});
+            TextComponentTranslation cheat = new TextComponentTranslation("text.rei.cheat", new Object[]{null});
             return cheat.getFormattedText();
         }
-        TextComponentTranslation noCheat = new TextComponentTranslation("text.aei.nocheat", new Object[]{null});
+        TextComponentTranslation noCheat = new TextComponentTranslation("text.rei.nocheat", new Object[]{null});
         return noCheat.getFormattedText();
     }
     
     protected void updateView() {
         String searchText = searchBox.getText();
-        String modText = null;
-        if (searchText.contains("@")) {
-            int nextBreak = searchText.indexOf(' ', searchText.indexOf('@'));
-            if (nextBreak == 0 || nextBreak == -1)
-                nextBreak = searchText.length();
-            modText = searchText.substring(searchText.indexOf('@'), nextBreak);
-            searchText = searchText.replace(modText, "").trim();
-            modText = modText.replace("@", "").toLowerCase();
-        }
-        
         view.clear();
-        if (searchText.equals("") || searchText == null) {
-            for(ItemStack stack : ClientListener.stackList) {
-                if (modText != null) {
-                    if (getMod(stack).contains(modText)) {
-                        view.add(stack);
-                    }
-                } else {
-                    view.add(stack);
-                }
-            }
-        } else {
-            for(ItemStack stack : ClientListener.stackList) {
-                if (stack.getItem().getName().getString().toLowerCase().contains(searchText))
-                    if (modText != null) {
-                        if (getMod(stack).contains(modText)) {
-                            view.add(stack);
-                        }
-                    } else {
-                        view.add(stack);
-                    }
-            }
-        }
+        List<ItemStack> stacks = new ArrayList<>();
+        Arrays.stream(searchText.split("\\|")).forEachOrdered(s -> {
+            List<SearchArgument> arguments = new ArrayList<>();
+            while (s.startsWith(" ")) s = s.substring(1);
+            while (s.endsWith(" ")) s = s.substring(0, s.length());
+            if (s.startsWith("@-") || s.startsWith("-@"))
+                arguments.add(new SearchArgument(SearchArgument.ArgumentType.MOD, s.substring(2), false));
+            else if (s.startsWith("@"))
+                arguments.add(new SearchArgument(SearchArgument.ArgumentType.MOD, s.substring(1), true));
+            else if (s.startsWith("#-") || s.startsWith("-#"))
+                arguments.add(new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, s.substring(2), false));
+            else if (s.startsWith("#"))
+                arguments.add(new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, s.substring(1), true));
+            else if (s.startsWith("-"))
+                arguments.add(new SearchArgument(SearchArgument.ArgumentType.TEXT, s.substring(1), false));
+            else
+                arguments.add(new SearchArgument(SearchArgument.ArgumentType.TEXT, s, true));
+            ClientListener.stackList.stream().filter(itemStack -> filterItem(itemStack, arguments)).forEachOrdered(stacks::add);
+        });
+        view.addAll(stacks.stream().distinct().collect(Collectors.toList()));
         page = 0;
         fillSlots();
+    }
+    
+    private boolean filterItem(ItemStack itemStack, List<SearchArgument> arguments) {
+        String mod = getMod(itemStack);
+        List<String> toolTipsList = REIRenderHelper.getOverlayedGui().getItemToolTip(itemStack);
+        String toolTipsMixed = toolTipsList.stream().skip(1).collect(Collectors.joining()).toLowerCase();
+        String allMixed = Stream.of(itemStack.getDisplayName().getString(), toolTipsMixed).collect(Collectors.joining()).toLowerCase();
+        for(SearchArgument searchArgument : arguments.stream().filter(searchArgument -> !searchArgument.isInclude()).collect(Collectors.toList())) {
+            if (searchArgument.getArgumentType().equals(SearchArgument.ArgumentType.MOD))
+                if (mod.toLowerCase().contains(searchArgument.getText().toLowerCase()))
+                    return false;
+            if (searchArgument.getArgumentType().equals(SearchArgument.ArgumentType.TOOLTIP))
+                if (toolTipsMixed.contains(searchArgument.getText().toLowerCase()))
+                    return false;
+            if (searchArgument.getArgumentType().equals(SearchArgument.ArgumentType.TEXT))
+                if (allMixed.contains(searchArgument.getText().toLowerCase()))
+                    return false;
+        }
+        for(SearchArgument searchArgument : arguments.stream().filter(SearchArgument::isInclude).collect(Collectors.toList())) {
+            if (searchArgument.getArgumentType().equals(SearchArgument.ArgumentType.MOD))
+                if (!mod.toLowerCase().contains(searchArgument.getText().toLowerCase()))
+                    return false;
+            if (searchArgument.getArgumentType().equals(SearchArgument.ArgumentType.TOOLTIP))
+                if (!toolTipsMixed.contains(searchArgument.getText().toLowerCase()))
+                    return false;
+            if (searchArgument.getArgumentType().equals(SearchArgument.ArgumentType.TEXT))
+                if (!allMixed.contains(searchArgument.getText().toLowerCase()))
+                    return false;
+        }
+        return true;
     }
     
     public void tick() {
@@ -261,4 +300,5 @@ public class GuiItemList extends Drawable {
         }
         return "";
     }
+    
 }
