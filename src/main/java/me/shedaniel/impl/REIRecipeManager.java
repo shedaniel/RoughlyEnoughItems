@@ -1,6 +1,6 @@
 package me.shedaniel.impl;
 
-import me.shedaniel.api.IAEIPlugin;
+import me.shedaniel.api.IREIPlugin;
 import me.shedaniel.api.IDisplayCategory;
 import me.shedaniel.api.IRecipe;
 import me.shedaniel.api.IRecipeManager;
@@ -9,8 +9,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.RecipeManager;
-import net.minecraft.item.crafting.ShapelessRecipe;
-import net.minecraft.util.ResourceLocation;
 import org.dimdev.riftloader.RiftLoader;
 
 import java.util.HashMap;
@@ -21,22 +19,26 @@ import java.util.Map;
 /**
  * Created by James on 8/7/2018.
  */
-public class AEIRecipeManager implements IRecipeManager {
+public class REIRecipeManager implements IRecipeManager {
     private Map<String, List<IRecipe>> recipeList;
     private List<IDisplayCategory> displayAdapters;
     public static RecipeManager recipeManager;
     
-    private static AEIRecipeManager myInstance;
+    private static REIRecipeManager myInstance;
     
-    private AEIRecipeManager() {
+    private REIRecipeManager() {
         recipeList = new HashMap<>();
         displayAdapters = new LinkedList<>();
     }
     
-    public static AEIRecipeManager instance() {
+    public List<IDisplayCategory> getDisplayAdapters() {
+        return displayAdapters;
+    }
+    
+    public static REIRecipeManager instance() {
         if (myInstance == null) {
             System.out.println("Newing me up.");
-            myInstance = new AEIRecipeManager();
+            myInstance = new REIRecipeManager();
         }
         return myInstance;
     }
@@ -50,8 +52,6 @@ public class AEIRecipeManager implements IRecipeManager {
             recipeList.put(id, recipes);
             recipes.add(recipe);
         }
-        
-        
     }
     
     @Override
@@ -135,12 +135,12 @@ public class AEIRecipeManager implements IRecipeManager {
     public void RecipesLoaded(RecipeManager manager) {
         recipeList.clear();
         displayAdapters.clear();
-        AEIRecipeManager.instance().recipeManager = manager;
-        RiftLoader.instance.getListeners(IAEIPlugin.class).forEach(IAEIPlugin::register);
+        REIRecipeManager.instance().recipeManager = manager;
+        RiftLoader.instance.getListeners(IREIPlugin.class).forEach(IREIPlugin::register);
     }
     
     public void displayRecipesFor(ItemStack stack) {
-        Map<IDisplayCategory, List<IRecipe>> recipes = AEIRecipeManager.instance().getRecipesFor(stack);
+        Map<IDisplayCategory, List<IRecipe>> recipes = REIRecipeManager.instance().getRecipesFor(stack);
         if (recipes.isEmpty())
             return;
         RecipeGui gui = new RecipeGui(null, Minecraft.getInstance().currentScreen, recipes);
@@ -148,7 +148,7 @@ public class AEIRecipeManager implements IRecipeManager {
     }
     
     public void displayUsesFor(ItemStack stack) {
-        Map<IDisplayCategory, List<IRecipe>> recipes = AEIRecipeManager.instance().getUsesFor(stack);
+        Map<IDisplayCategory, List<IRecipe>> recipes = REIRecipeManager.instance().getUsesFor(stack);
         if (recipes.isEmpty())
             return;
         RecipeGui gui = new RecipeGui(null, Minecraft.getInstance().currentScreen, recipes);

@@ -1,10 +1,11 @@
 package me.shedaniel.plugin.furnace;
 
 import me.shedaniel.api.IDisplayCategory;
-import me.shedaniel.gui.widget.AEISlot;
+import me.shedaniel.gui.widget.REISlot;
 import me.shedaniel.gui.widget.Control;
 import me.shedaniel.gui.widget.WidgetArrow;
-import me.shedaniel.plugin.crafting.VanillaCraftingRecipe;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFurnace;
@@ -24,7 +25,7 @@ public class VanillaFurnaceCategory implements IDisplayCategory<VanillaFurnaceRe
     
     @Override
     public String getDisplayName() {
-        return "Smelting";
+        return I18n.format("category.rei.smelting");
     }
     
     @Override
@@ -40,20 +41,20 @@ public class VanillaFurnaceCategory implements IDisplayCategory<VanillaFurnaceRe
     }
     
     @Override
-    public List<AEISlot> setupDisplay(int number) {
-        List<AEISlot> slots = new LinkedList<>();
-        AEISlot inputSlot = new AEISlot(50, 70 + number * 75);
+    public List<REISlot> setupDisplay(int number) {
+        List<REISlot> slots = new LinkedList<>();
+        REISlot inputSlot = new REISlot(50, 70 + number * 75);
         inputSlot.setStackList(recipes.get(number).getInput().get(0));
         inputSlot.setDrawBackground(true);
         
-        AEISlot outputSlot = new AEISlot(110, 70 + number * 75);
+        REISlot outputSlot = new REISlot(110, 70 + number * 75);
         outputSlot.setStackList(recipes.get(number).getOutput());
         outputSlot.setDrawBackground(true);
         
-        AEISlot fuelSlot = new AEISlot(80, 100 + number * 75);
+        REISlot fuelSlot = new REISlot(80, 100 + number * 75);
         fuelSlot.setStackList(getFuel());
         fuelSlot.setDrawBackground(true);
-        fuelSlot.setExtraTooltip("Fuel");
+        fuelSlot.setExtraTooltip(I18n.format("category.rei.smelting.fuel"));
         
         slots.add(inputSlot);
         slots.add(outputSlot);
@@ -79,5 +80,10 @@ public class VanillaFurnaceCategory implements IDisplayCategory<VanillaFurnaceRe
     
     private List<ItemStack> getFuel() {
         return TileEntityFurnace.getBurnTimes().keySet().stream().map(Item::getDefaultInstance).collect(Collectors.toList());
+    }
+    
+    @Override
+    public ItemStack getCategoryIcon() {
+        return new ItemStack(Blocks.FURNACE.asItem());
     }
 }

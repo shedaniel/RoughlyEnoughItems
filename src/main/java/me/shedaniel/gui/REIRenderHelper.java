@@ -1,9 +1,9 @@
 package me.shedaniel.gui;
 
-import me.shedaniel.gui.widget.AEISlot;
 import me.shedaniel.gui.widget.Control;
 import me.shedaniel.gui.widget.IFocusable;
-import me.shedaniel.impl.AEIRecipeManager;
+import me.shedaniel.gui.widget.REISlot;
+import me.shedaniel.impl.REIRecipeManager;
 import me.shedaniel.library.KeyBindManager;
 import me.shedaniel.listenerdefinitions.IMixinGuiContainer;
 import net.minecraft.client.MainWindow;
@@ -13,6 +13,7 @@ import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.item.ItemStack;
+import org.dimdev.riftloader.RiftLoader;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -23,9 +24,9 @@ import java.util.Optional;
 /**
  * Created by James on 7/28/2018.
  */
-public class AEIRenderHelper {
+public class REIRenderHelper {
     static Point mouseLoc;
-    static public GuiItemList aeiGui;
+    static public GuiItemList reiGui;
     static GuiContainer overlayedGui;
     static List<TooltipData> tooltipsToRender = new ArrayList<>();
     
@@ -40,25 +41,36 @@ public class AEIRenderHelper {
     }
     
     public static MainWindow getResolution() {
-        
         return Minecraft.getInstance().mainWindow;
     }
     
-    public static void drawAEI(GuiContainer overlayedGui) {
-        AEIRenderHelper.overlayedGui = overlayedGui;
-        if (aeiGui == null) {
-            aeiGui = new GuiItemList(overlayedGui);
+    public static String tryGettingModName(String modid) {
+        if (modid.equalsIgnoreCase("minecraft"))
+            return "Minecraft";
+        return RiftLoader.instance.getMods().stream()
+                .filter(modInfo -> modInfo.id.equals(modid) || (modInfo.name != null && modInfo.name.equals(modid)))
+                .findFirst().map(modInfo -> {
+                    if (modInfo.name != null)
+                        return modInfo.name;
+                    return modid;
+                }).orElse(modid);
+    }
+    
+    public static void drawREI(GuiContainer overlayedGui) {
+        REIRenderHelper.overlayedGui = overlayedGui;
+        if (reiGui == null) {
+            reiGui = new GuiItemList(overlayedGui);
         }
-        aeiGui.draw();
+        reiGui.draw();
         renderTooltips();
     }
     
-    public static void resize() {
-        if (aeiGui != null) {
-            aeiGui.resize();
+    public static void resize(int scaledWidth, int scaledHeight) {
+        if (reiGui != null) {
+            reiGui.resize();
         }
         if (overlayedGui instanceof RecipeGui) {
-            overlayedGui.onResize(Minecraft.getInstance(), 0, 0);
+            overlayedGui.onResize(Minecraft.getInstance(), scaledWidth, scaledHeight);
         }
     }
     
@@ -94,8 +106,8 @@ public class AEIRenderHelper {
     }
     
     public static boolean mouseClick(int x, int y, int button) {
-        if (aeiGui.visible) {
-            for(Control control : aeiGui.controls) {
+        if (reiGui.visible) {
+            for(Control control : reiGui.controls) {
                 if (control.isHighlighted() && control.isEnabled() && control.onClick != null) {
                     if (focusedControl != null)
                         focusedControl.setFocused(false);
@@ -164,12 +176,12 @@ public class AEIRenderHelper {
     }
     
     public static boolean mouseScrolled(double direction) {
-        if (!aeiGui.visible)
+        if (!reiGui.visible)
             return false;
-        if (direction > 0 && aeiGui.buttonLeft.isEnabled())
-            aeiGui.buttonLeft.onClick.apply(0);
-        else if (direction < 0 && aeiGui.buttonRight.isEnabled())
-            aeiGui.buttonRight.onClick.apply(0);
+        if (direction > 0 && reiGui.buttonLeft.isEnabled())
+            reiGui.buttonLeft.onClick.apply(0);
+        else if (direction < 0 && reiGui.buttonRight.isEnabled())
+            reiGui.buttonRight.onClick.apply(0);
         return true;
     }
     
@@ -187,26 +199,26 @@ public class AEIRenderHelper {
     }
     
     public static void updateSearch() {
-        aeiGui.updateView();
+        reiGui.updateView();
     }
     
     public static void tick() {
-        if (aeiGui != null && Minecraft.getInstance().currentScreen == overlayedGui)
-            aeiGui.tick();
+        if (reiGui != null && Minecraft.getInstance().currentScreen == overlayedGui)
+            reiGui.tick();
     }
     
     public static void recipeKeybind() {
         if (!(Minecraft.getInstance().currentScreen instanceof GuiContainer))
             return;
-        Control control = aeiGui.getLastHovered();
-        if (control != null && control.isHighlighted() && control instanceof AEISlot) {
-            AEISlot slot = (AEISlot) control;
-            AEIRecipeManager.instance().displayRecipesFor(slot.getStack());
+        Control control = reiGui.getLastHovered();
+        if (control != null && control.isHighlighted() && control instanceof REISlot) {
+            REISlot slot = (REISlot) control;
+            REIRecipeManager.instance().displayRecipesFor(slot.getStack());
             return;
         }
         if (((IMixinGuiContainer) overlayedGui).getHoveredSlot() != null) {
             ItemStack stack = ((IMixinGuiContainer) overlayedGui).getHoveredSlot().getStack();
-            AEIRecipeManager.instance().displayRecipesFor(stack);
+            REIRecipeManager.instance().displayRecipesFor(stack);
         }
         
     }
@@ -214,22 +226,22 @@ public class AEIRenderHelper {
     public static void useKeybind() {
         if (!(Minecraft.getInstance().currentScreen instanceof GuiContainer))
             return;
-        Control control = aeiGui.getLastHovered();
-        if (control != null && control.isHighlighted() && control instanceof AEISlot) {
-            AEISlot slot = (AEISlot) control;
-            AEIRecipeManager.instance().displayUsesFor(slot.getStack());
+        Control control = reiGui.getLastHovered();
+        if (control != null && control.isHighlighted() && control instanceof REISlot) {
+            REISlot slot = (REISlot) control;
+            REIRecipeManager.instance().displayUsesFor(slot.getStack());
             return;
         }
         if (((IMixinGuiContainer) overlayedGui).getHoveredSlot() != null) {
             ItemStack stack = ((IMixinGuiContainer) overlayedGui).getHoveredSlot().getStack();
-            AEIRecipeManager.instance().displayUsesFor(stack);
+            REIRecipeManager.instance().displayUsesFor(stack);
         }
         
     }
     
     public static void hideKeybind() {
-        if (Minecraft.getInstance().currentScreen == overlayedGui && aeiGui != null) {
-            aeiGui.visible = !aeiGui.visible;
+        if (Minecraft.getInstance().currentScreen == overlayedGui && reiGui != null) {
+            reiGui.visible = !reiGui.visible;
         }
     }
 }

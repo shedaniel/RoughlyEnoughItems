@@ -1,8 +1,16 @@
 {
-  "key.aei.category":"Almost Enough Items",
-  "key.aei.recipe":"Show Recipe",
-  "key.aei.hide":"Hide/Show AEI",
-  "key.aei.use":"Show Uses",
-  "text.aei.cheat":"Cheat",
-  "text.aei.nocheat":"§4§mCheat"
+  "key.rei.category":"Roughly Enough Items",
+  "key.rei.recipe":"Show Recipe",
+  "key.rei.hide":"Hide/Show REI",
+  "key.rei.use":"Show Uses",
+  "text.rei.cheat":"Cheat",
+  "text.rei.nocheat":"§4§mCheat",
+  "text.rei.mod": "§9§o%s",
+  "category.rei.crafting": "Crafting",
+  "category.rei.smelting": "Smelting",
+  "category.rei.smelting.fuel": "§eFuel",
+  "category.rei.brewing": "Brewing",
+  "category.rei.brewing.input": "§eOriginal Potion",
+  "category.rei.brewing.reactant": "§eIngredient",
+  "category.rei.brewing.result": "§eResulted Potion"
 }

@@ -14,9 +14,8 @@ public class InitListener implements InitializationListener {
     
     @Override
     public void onInitialization() {
-        LOGGER.info("Adding AEI Mixins");
+        LOGGER.info("Adding REI Mixins");
         MixinBootstrap.init();
         Mixins.addConfiguration("mixins.roughlyenoughitems.json");
-        
     }
 }

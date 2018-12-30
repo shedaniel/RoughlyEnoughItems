@@ -22,10 +22,10 @@ public abstract class Drawable implements IDrawable {
     public abstract void draw();
     
     public boolean isHighlighted() {
-        Point mousePoint = AEIRenderHelper.getMouseLoc();
+        Point mousePoint = REIRenderHelper.getMouseLoc();
         if (rect.contains(mousePoint.x, mousePoint.y)) {
             if (this instanceof Control)
-                AEIRenderHelper.aeiGui.setLastHovered((Control) this);
+                REIRenderHelper.reiGui.setLastHovered((Control) this);
             return true;
         }
         return false;

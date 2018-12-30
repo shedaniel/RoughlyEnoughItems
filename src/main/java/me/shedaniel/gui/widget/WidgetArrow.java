@@ -1,6 +1,8 @@
 package me.shedaniel.gui.widget;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.util.ResourceLocation;
 
 public class WidgetArrow extends Control {
@@ -16,6 +18,8 @@ public class WidgetArrow extends Control {
     
     @Override
     public void draw() {
+        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderHelper.disableStandardItemLighting();
         Minecraft.getInstance().getTextureManager().bindTexture(RECIPE_GUI);
         this.drawTexturedModalRect(rect.x, rect.y, 18, 222, 22, 18);
         if (animated) {
