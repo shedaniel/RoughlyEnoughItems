@@ -2,6 +2,7 @@
 A project to make (AEI) [https://minecraft.curseforge.com/projects/almost-enough-items] to look like JEI
 
 **Only supports 1.13.2 for now**
+![](https://media.discordapp.net/attachments/480755664675667980/528908880424730636/unknown.png?width=935&height=489)
 
 ### Features added from JEI
 - Better Searching
