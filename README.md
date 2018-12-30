@@ -7,7 +7,7 @@ A project to make (AEI) [https://minecraft.curseforge.com/projects/almost-enough
 - Better Searching
   - Accepts Searching by Tooltip (Prefix: #)
   - Accepts Excluding (Prefix: -)
-  - Accepts Multiple Searching (Use: |)
+  - Accepts Multiple Searching (Use: \|)
   - Example: `-@randommod stone` will search items not from randommod named stone
 - Fixed Creative Gui
 - Added Useless Tabs lol _(I will make them useful in the future)_
