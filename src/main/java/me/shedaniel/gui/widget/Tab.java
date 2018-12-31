@@ -1,10 +1,9 @@
 package me.shedaniel.gui.widget;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.gui.REIRenderHelper;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.ItemRenderer;
-import net.minecraft.item.Item;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.item.ItemStack;
 
 import java.awt.*;
@@ -22,7 +21,7 @@ public class Tab extends Control {
         super(x, y, width, height);
         this.id = id;
         this.guiLeft = guiLeft;
-        itemRender = Minecraft.getInstance().getItemRenderer();
+        itemRender = MinecraftClient.getInstance().getItemRenderer();
     }
     
     public void moveTo(int guiLeft, int x, int y) {
@@ -79,13 +78,13 @@ public class Tab extends Control {
             GlStateManager.disableLighting();
             this.drawTexturedModalRect(rect.x, rect.y - (selected ? 0 : 2), 28, (selected ? 32 : 0), 28, (selected ? 32 : 31));
             this.zLevel = 100.0F;
-            this.itemRender.zLevel = 100.0F;
+            this.itemRender.zOffset = 100.0F;
             GlStateManager.enableLighting();
             GlStateManager.enableRescaleNormal();
-            this.itemRender.renderItemAndEffectIntoGUI(getItemStack(), l, i1);
-            this.itemRender.renderItemOverlays(Minecraft.getInstance().fontRenderer, getItemStack(), l, i1);
+            this.itemRender.renderItemAndGlowInGui(getItemStack(), l, i1);
+            this.itemRender.renderItemOverlaysInGUI(MinecraftClient.getInstance().fontRenderer, getItemStack(), l, i1);
             GlStateManager.disableLighting();
-            this.itemRender.zLevel = 0.0F;
+            this.itemRender.zOffset = 0.0F;
             this.zLevel = 0.0F;
             if (isHighlighted())
                 drawTooltip();

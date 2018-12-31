@@ -1,8 +1,8 @@
 package me.shedaniel.listenerdefinitions;
 
 import net.minecraft.item.Item;
-import net.minecraft.potion.PotionType;
+import net.minecraft.potion.Potion;
 
-public interface PotionCraftingAdder {
-    public void addPotionRecipe(PotionType inputType, Item reagent, PotionType outputType);
+public interface PotionCraftingAdder extends IEvent {
+    public void addPotionRecipe(Potion inputType, Item reagent, Potion outputType);
 }

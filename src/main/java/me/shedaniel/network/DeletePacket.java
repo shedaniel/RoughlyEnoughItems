@@ -1,32 +1,33 @@
 package me.shedaniel.network;
 
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.play.INetHandlerPlayServer;
+import net.minecraft.server.network.ServerPlayNetworkHandler;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.PacketByteBuf;
 
 import java.io.IOException;
 
-public class DeletePacket implements Packet<INetHandlerPlayServer> {
-    @Override
-    public void readPacketData(PacketBuffer packetBuffer) throws IOException {
-    
-    }
+public class DeletePacket implements Packet<ServerPlayNetworkHandler> {
     
     @Override
-    public void writePacketData(PacketBuffer packetBuffer) throws IOException {
-    
-    }
-    
-    @Override
-    public void processPacket(INetHandlerPlayServer iNetHandlerPlayServer) {
-        NetHandlerPlayServer server = (NetHandlerPlayServer) iNetHandlerPlayServer;
-        EntityPlayerMP player = server.player;
+    public void apply(ServerPlayNetworkHandler iNetHandlerPlayServer) {
+        ServerPlayNetworkHandler server = (ServerPlayNetworkHandler) iNetHandlerPlayServer;
+        ServerPlayerEntity player = server.player;
         
-        if (!player.inventory.getItemStack().isEmpty()) {
-            player.inventory.setItemStack(ItemStack.EMPTY);
+        if (!player.inventory.getCursorStack().isEmpty()) {
+            player.inventory.setCursorStack(ItemStack.EMPTY);
         }
     }
+    
+    @Override
+    public void read(PacketByteBuf packetByteBuf) throws IOException {
+    
+    }
+    
+    @Override
+    public void write(PacketByteBuf packetByteBuf) throws IOException {
+    
+    }
+    
 }

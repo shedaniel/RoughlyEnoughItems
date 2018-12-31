@@ -1,11 +1,11 @@
-package me.shedaniel.plugin.furnace;
+package me.shedaniel.plugin.smoker;
 
 import me.shedaniel.api.IDisplayCategory;
 import me.shedaniel.gui.widget.Control;
 import me.shedaniel.gui.widget.REISlot;
 import me.shedaniel.gui.widget.WidgetArrow;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.FurnaceBlockEntity;
+import net.minecraft.block.entity.SmokerBlockEntity;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -15,21 +15,21 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class VanillaFurnaceCategory implements IDisplayCategory<VanillaFurnaceRecipe> {
-    private List<VanillaFurnaceRecipe> recipes;
+public class VanillaSmokerCategory implements IDisplayCategory<VanillaSmokerRecipe> {
+    private List<VanillaSmokerRecipe> recipes;
     
     @Override
     public String getId() {
-        return "furnace";
+        return "smoker";
     }
     
     @Override
     public String getDisplayName() {
-        return I18n.translate("category.rei.smelting");
+        return I18n.translate("category.rei.smoking");
     }
     
     @Override
-    public void addRecipe(VanillaFurnaceRecipe recipe) {
+    public void addRecipe(VanillaSmokerRecipe recipe) {
         if (this.recipes == null)
             this.recipes = new ArrayList<>();
         this.recipes.add(recipe);
@@ -63,7 +63,7 @@ public class VanillaFurnaceCategory implements IDisplayCategory<VanillaFurnaceRe
     }
     
     @Override
-    public boolean canDisplay(VanillaFurnaceRecipe recipe) {
+    public boolean canDisplay(VanillaSmokerRecipe recipe) {
         return false;
     }
     
@@ -74,16 +74,16 @@ public class VanillaFurnaceCategory implements IDisplayCategory<VanillaFurnaceRe
     
     @Override
     public void addWidget(List<Control> controls, int number) {
-        WidgetArrow wa = new WidgetArrow(75, 70 + number * 75, true);
+        WidgetArrow wa = new WidgetArrow(75, 70 + number * 75, true, 10);
         controls.add(wa);
     }
     
     private List<ItemStack> getFuel() {
-        return FurnaceBlockEntity.getBurnTimeMap().keySet().stream().map(Item::getDefaultStack).collect(Collectors.toList());
+        return SmokerBlockEntity.getBurnTimeMap().keySet().stream().map(Item::getDefaultStack).collect(Collectors.toList());
     }
     
     @Override
     public ItemStack getCategoryIcon() {
-        return new ItemStack(Blocks.FURNACE.getItem());
+        return new ItemStack(Blocks.SMOKER.getItem());
     }
 }

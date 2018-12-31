@@ -1,22 +1,23 @@
-package me.shedaniel.plugin.furnace;
+package me.shedaniel.plugin.smoker;
 
 import me.shedaniel.api.IRecipe;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.smelting.SmeltingRecipe;
+import net.minecraft.recipe.smelting.SmokingRecipe;
 
 import java.util.LinkedList;
 import java.util.List;
 
-public class VanillaFurnaceRecipe implements IRecipe<ItemStack> {
-    private final SmeltingRecipe recipe;
+public class VanillaSmokerRecipe implements IRecipe<ItemStack> {
+    private final SmokingRecipe recipe;
     
     @Override
     public String getId() {
-        return "furnace";
+        return "smoker";
     }
     
-    public VanillaFurnaceRecipe(SmeltingRecipe recipe) {
+    public VanillaSmokerRecipe(SmokingRecipe recipe) {
         this.recipe = recipe;
     }
     

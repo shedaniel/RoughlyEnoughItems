@@ -3,9 +3,6 @@ package me.shedaniel.plugin;
 import me.shedaniel.api.IDisplayCategory;
 import me.shedaniel.gui.widget.Control;
 import me.shedaniel.gui.widget.REISlot;
-import me.shedaniel.plugin.crafting.VanillaCraftingRecipe;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 import java.util.ArrayList;

@@ -1,76 +1,75 @@
 package me.shedaniel.mixins;
 
+import me.shedaniel.Core;
 import me.shedaniel.listenerdefinitions.GuiKeyDown;
-import net.minecraft.client.gui.GuiTextField;
-import net.minecraft.client.gui.inventory.GuiContainerCreative;
-import net.minecraft.client.renderer.InventoryEffectRenderer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.Slot;
+import net.minecraft.client.gui.ingame.AbstractPlayerInventoryGui;
+import net.minecraft.client.gui.ingame.CreativePlayerInventoryGui;
+import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.container.Container;
+import net.minecraft.container.Slot;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.util.math.MathHelper;
-import org.dimdev.riftloader.RiftLoader;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
 
-@Mixin(GuiContainerCreative.class)
-public abstract class MixinGuiContainerCreative extends InventoryEffectRenderer {
+@Mixin(CreativePlayerInventoryGui.class)
+public abstract class MixinGuiContainerCreative extends AbstractPlayerInventoryGui {
     
     @Shadow
-    private static int selectedTabIndex = ItemGroup.BUILDING_BLOCKS.getIndex();
-    @Shadow
-    private GuiTextField searchField;
+    private boolean field_2888;
     
     @Shadow
-    protected abstract boolean hasTmpInventory(@Nullable Slot p_208018_1_);
+    public abstract int method_2469();
     
     @Shadow
-    protected abstract void setCurrentCreativeTab(ItemGroup tab);
+    protected abstract void setSelectedTab(ItemGroup itemGroup_1);
     
     @Shadow
-    protected abstract void updateCreativeSearch();
+    protected abstract boolean method_2470(Slot slot_1);
     
     @Shadow
-    private boolean field_195377_F;
+    private TextFieldWidget searchBox;
     
     @Shadow
-    protected abstract boolean needsScrollBars();
+    protected abstract void method_2464();
     
     @Shadow
-    private float currentScroll;
+    protected abstract boolean doRenderScrollBar();
     
-    public MixinGuiContainerCreative(Container inventorySlotsIn) {
-        super(inventorySlotsIn);
+    @Shadow
+    private float scrollPosition;
+    
+    public MixinGuiContainerCreative(Container container_1) {
+        super(container_1);
     }
     
     @Overwrite
     public boolean keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_) {
-        this.field_195377_F = false;
-        if (selectedTabIndex != ItemGroup.SEARCH.getIndex()) {
-            if (selectedTabIndex != ItemGroup.INVENTORY.getIndex()) {
-                if (this.mc.gameSettings.keyBindChat.matchesKey(p_keyPressed_1_, p_keyPressed_2_)) {
-                    this.field_195377_F = true;
-                    this.setCurrentCreativeTab(ItemGroup.SEARCH);
+        this.field_2888 = false;
+        if (method_2469() != ItemGroup.SEARCH.getId()) {
+            if (method_2469() != ItemGroup.INVENTORY.getId()) {
+                if (this.client.options.keyChat.matches(p_keyPressed_1_, p_keyPressed_2_)) {
+                    this.field_2888 = true;
+                    this.setSelectedTab(ItemGroup.SEARCH);
                     return true;
                 }
-            } else for(GuiKeyDown listener : RiftLoader.instance.getListeners(GuiKeyDown.class))
+            } else for(GuiKeyDown listener : Core.getListeners(GuiKeyDown.class))
                 if (listener.keyDown(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_))
                     return true;
         } else {
-            boolean flag = !this.hasTmpInventory(this.hoveredSlot) || this.hoveredSlot != null && this.hoveredSlot.getHasStack();
-            
-            if (flag && this.func_195363_d(p_keyPressed_1_, p_keyPressed_2_)) {
-                this.field_195377_F = true;
+            boolean flag = !this.method_2470(this.focusedSlot) || this.focusedSlot != null && this.focusedSlot.hasStack();
+            if (flag && this.handleHotbarKeyPressed(p_keyPressed_1_, p_keyPressed_2_)) {
+                this.field_2888 = true;
                 return true;
             } else {
-                String s = this.searchField.getText();
+                String s = this.searchBox.getText();
                 
-                if (this.searchField.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_)) {
-                    if (!Objects.equals(s, this.searchField.getText()))
-                        this.updateCreativeSearch();
+                if (this.searchBox.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_)) {
+                    if (!Objects.equals(s, this.searchBox.getText()))
+                        this.method_2464();
                     return true;
                 }
             }
@@ -80,13 +79,13 @@ public abstract class MixinGuiContainerCreative extends InventoryEffectRenderer 
     
     @Overwrite
     public boolean mouseScrolled(double p_mouseScrolled_1_) {
-        if (!this.needsScrollBars()) {
+        if (!this.doRenderScrollBar()) {
             return super.mouseScrolled(p_mouseScrolled_1_);
         } else {
-            int i = (((GuiContainerCreative.ContainerCreative) this.inventorySlots).itemList.size() + 9 - 1) / 9 - 5;
-            this.currentScroll = (float) ((double) this.currentScroll - p_mouseScrolled_1_ / (double) i);
-            this.currentScroll = MathHelper.clamp(this.currentScroll, 0.0F, 1.0F);
-            ((GuiContainerCreative.ContainerCreative) this.inventorySlots).scrollTo(this.currentScroll);
+            int i = (((CreativePlayerInventoryGui.CreativeContainer) this.container).itemList.size() + 9 - 1) / 9 - 5;
+            this.scrollPosition = (float) ((double) this.scrollPosition - p_mouseScrolled_1_ / (double) i);
+            this.scrollPosition = MathHelper.clamp(this.scrollPosition, 0.0F, 1.0F);
+            ((CreativePlayerInventoryGui.CreativeContainer) this.container).method_2473(this.scrollPosition);
             return true;
         }
     }

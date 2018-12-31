@@ -1,10 +1,10 @@
 package me.shedaniel.library;
 
+import me.shedaniel.listenerdefinitions.KeybindHandler;
 import me.shedaniel.listenerdefinitions.PreLoadOptions;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.settings.KeyBinding;
 import org.apache.commons.lang3.ArrayUtils;
-import org.dimdev.rift.listener.client.KeybindHandler;
 
 import java.util.*;
 
@@ -21,7 +21,7 @@ public class KeyBindManager implements PreLoadOptions, KeybindHandler {
         KeyBinding newBinding;
         newBinding = new KeyBinding(bindingName, key, categoryName);
         if (optionsLoaded) {
-            ArrayUtils.add(Minecraft.getInstance().gameSettings.keyBindings, newBinding);
+            ArrayUtils.add(MinecraftClient.getInstance().options.keysAll, newBinding);
         } else {
             bindingsToAdd.add(newBinding);
         }
@@ -44,11 +44,11 @@ public class KeyBindManager implements PreLoadOptions, KeybindHandler {
     
     @Override
     public void processKeybinds() {
-        bindingFunctions.keySet().stream().filter(KeyBinding::isPressed).forEach(f -> bindingFunctions.get(f).Sink());
+        bindingFunctions.keySet().stream().filter(KeyBinding::method_1434).forEach(f -> bindingFunctions.get(f).Sink()); //isPressed
     }
     
     public static boolean processGuiKeybinds(int typedChar) {
-        Optional<KeyBinding> binding = bindingFunctions.keySet().stream().filter(f -> f.getDefault().getKeyCode() == typedChar).findFirst();
+        Optional<KeyBinding> binding = bindingFunctions.keySet().stream().filter(f -> f.getDefaultKeyCode().getKeyCode() == typedChar).findFirst();
         if (binding.isPresent()) {
             bindingFunctions.get(binding.get()).Sink();
             return true;

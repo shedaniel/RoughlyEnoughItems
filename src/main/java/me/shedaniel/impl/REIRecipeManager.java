@@ -1,15 +1,15 @@
 package me.shedaniel.impl;
 
-import me.shedaniel.api.IREIPlugin;
+import me.shedaniel.Core;
 import me.shedaniel.api.IDisplayCategory;
+import me.shedaniel.api.IREIPlugin;
 import me.shedaniel.api.IRecipe;
 import me.shedaniel.api.IRecipeManager;
 import me.shedaniel.gui.RecipeGui;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.RecipeManager;
-import org.dimdev.riftloader.RiftLoader;
+import net.minecraft.recipe.RecipeManager;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -78,7 +78,7 @@ public class REIRecipeManager implements IRecipeManager {
             for(IRecipe iRecipe : value) {
                 for(Object o : iRecipe.getOutput()) {
                     if (o instanceof ItemStack) {
-                        if (ItemStack.areItemsEqual(stack, (ItemStack) o)) {
+                        if (ItemStack.areEqualIgnoreTags(stack, (ItemStack) o)) {
                             for(IDisplayCategory iDisplayCategory : categories.keySet()) {
                                 if (iDisplayCategory.getId() == iRecipe.getId()) {
                                     categories.get(iDisplayCategory).add(iRecipe);
@@ -103,7 +103,7 @@ public class REIRecipeManager implements IRecipeManager {
                     List<ItemStack> input = (List<ItemStack>) o;
                     
                     for(ItemStack itemStack : input) {
-                        if (ItemStack.areItemsEqual(itemStack, stack)) {
+                        if (ItemStack.areEqualIgnoreTags(itemStack, stack)) {
                             for(IDisplayCategory iDisplayCategory : categories.keySet()) {
                                 if (iDisplayCategory.getId() == iRecipe.getId()) {
                                     categories.get(iDisplayCategory).add(iRecipe);
@@ -136,22 +136,22 @@ public class REIRecipeManager implements IRecipeManager {
         recipeList.clear();
         displayAdapters.clear();
         REIRecipeManager.instance().recipeManager = manager;
-        RiftLoader.instance.getListeners(IREIPlugin.class).forEach(IREIPlugin::register);
+        Core.getListeners(IREIPlugin.class).forEach(IREIPlugin::register);
     }
     
     public void displayRecipesFor(ItemStack stack) {
         Map<IDisplayCategory, List<IRecipe>> recipes = REIRecipeManager.instance().getRecipesFor(stack);
         if (recipes.isEmpty())
             return;
-        RecipeGui gui = new RecipeGui(null, Minecraft.getInstance().currentScreen, recipes);
-        Minecraft.getInstance().displayGuiScreen(gui);
+        RecipeGui gui = new RecipeGui(null, MinecraftClient.getInstance().currentGui, recipes);
+        MinecraftClient.getInstance().openGui(gui);
     }
     
     public void displayUsesFor(ItemStack stack) {
         Map<IDisplayCategory, List<IRecipe>> recipes = REIRecipeManager.instance().getUsesFor(stack);
         if (recipes.isEmpty())
             return;
-        RecipeGui gui = new RecipeGui(null, Minecraft.getInstance().currentScreen, recipes);
-        Minecraft.getInstance().displayGuiScreen(gui);
+        RecipeGui gui = new RecipeGui(null, MinecraftClient.getInstance().currentGui, recipes);
+        MinecraftClient.getInstance().openGui(gui);
     }
 }

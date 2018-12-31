@@ -1,8 +1,8 @@
 package me.shedaniel.plugin.crafting;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.item.crafting.ShapedRecipe;
+import net.minecraft.recipe.Ingredient;
+import net.minecraft.recipe.crafting.ShapedRecipe;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -34,7 +34,7 @@ public class VanillaShapedCraftingRecipe extends VanillaCraftingRecipe {
     @Override
     public List<ItemStack> getOutput() {
         List<ItemStack> output = new LinkedList<>();
-        output.add(recipe.getRecipeOutput());
+        output.add(recipe.getOutput());
         return output;
     }
     
@@ -42,9 +42,9 @@ public class VanillaShapedCraftingRecipe extends VanillaCraftingRecipe {
     public List<List<ItemStack>> getInput() {
         List<List<ItemStack>> input = new LinkedList<>();
         int count = 0;
-        for(Ingredient ingredient : recipe.getIngredients()) {
+        for(Ingredient ingredient : recipe.getPreviewInputs()) {
             List<ItemStack> ingList = new LinkedList<>();
-            for(ItemStack matchingStack : ingredient.getMatchingStacks()) {
+            for(ItemStack matchingStack : ingredient.getStackArray()) {
                 ingList.add(matchingStack);
             }
             input.add(ingList);

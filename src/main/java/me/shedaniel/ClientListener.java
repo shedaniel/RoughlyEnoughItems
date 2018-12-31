@@ -9,12 +9,12 @@ import me.shedaniel.listenerdefinitions.RecipeLoadListener;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.registry.IRegistry;
+import net.minecraft.item.Items;
+import net.minecraft.recipe.RecipeManager;
+import net.minecraft.util.DefaultedList;
+import net.minecraft.util.registry.Registry;
 
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -43,24 +43,24 @@ public class ClientListener implements DoneLoading, RecipeLoadListener {
     }
     
     private void buildItemList() {
-        if (!IRegistry.ITEM.isEmpty())
-            IRegistry.ITEM.forEach(this::processItem);
-        if (!IRegistry.ENCHANTMENT.isEmpty())
-            IRegistry.ENCHANTMENT.forEach(enchantment -> {
-                for(int i = enchantment.getMinLevel(); i < enchantment.getMaxLevel(); i++) {
+        if (!Registry.ITEM.isEmpty())
+            Registry.ITEM.forEach(this::processItem);
+        if (Registry.ENCHANTMENT.stream().count() > 0)
+            Registry.ENCHANTMENT.forEach(enchantment -> {
+                for(int i = enchantment.getMinimumLevel(); i < enchantment.getMaximumLevel(); i++) {
                     ItemStack stack = new ItemStack(Items.ENCHANTED_BOOK);
                     Map<Enchantment, Integer> map = new HashMap<>();
                     map.put(enchantment, i);
-                    EnchantmentHelper.setEnchantments(map, stack);
+                    EnchantmentHelper.set(map, stack);
                     processItemStack(stack);
                 }
             });
     }
     
     private void processItem(Item item) {
-        NonNullList<ItemStack> items = NonNullList.create();
+        DefaultedList<ItemStack> items = DefaultedList.create();
         try {
-            item.fillItemGroup(item.getGroup(), items);
+            item.addStacksForDisplay(item.getItemGroup(), items);
             items.forEach(stackList::add);
         } catch (NullPointerException e) {
 //            if (item == Items.ENCHANTED_BOOK) {
@@ -75,7 +75,7 @@ public class ClientListener implements DoneLoading, RecipeLoadListener {
     }
     
     @Override
-    public void recipesLoaded(net.minecraft.item.crafting.RecipeManager recipeManager) {
+    public void recipesLoaded(RecipeManager recipeManager) {
         REIRecipeManager.instance().RecipesLoaded(recipeManager);
     }
 }

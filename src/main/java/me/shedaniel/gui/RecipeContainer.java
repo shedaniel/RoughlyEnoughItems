@@ -1,13 +1,14 @@
 package me.shedaniel.gui;
 
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
+import net.minecraft.container.Container;
+import net.minecraft.entity.player.PlayerEntity;
 
 public class RecipeContainer extends Container {
     
     @Override
-    public boolean canInteractWith(EntityPlayer entityPlayer) {
+    public boolean canUse(PlayerEntity playerEntity) {
         return true;
     }
+    
 }
