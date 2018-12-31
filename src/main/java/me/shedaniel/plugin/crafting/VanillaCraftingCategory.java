@@ -60,8 +60,14 @@ public class VanillaCraftingCategory implements IDisplayCategory<VanillaCrafting
             } else if (!input.get(i).isEmpty())
                 slots.get(i).setStackList(input.get(i));
         }
-        REISlot slot = new REISlot(130, 75 + 18 + number * 75);
-        
+        REISlot slot = new REISlot(130, 75 + 18 + number * 75) {
+            @Override
+            public String getTextOverlay(ItemStack stack) {
+                if (stack.getAmount() == 1)
+                    return "";
+                return stack.getAmount() + "";
+            }
+        };
         slot.setDrawBackground(true);
         slot.setStack(recipes.get(number).getOutput().get(0).copy());
         slots.add(slot);

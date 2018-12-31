@@ -30,11 +30,4 @@ public class MixinMinecraftClient {
         profiler.end();
     }
     
-    @Inject(method = "method_1508", at = @At("HEAD"))
-    public void onProcessKeyBinds(CallbackInfo ci) {
-        for (KeybindHandler keybindHandler : Core.getListeners(KeybindHandler.class)) {
-            keybindHandler.processKeybinds();
-        }
-    }
-    
 }

@@ -2,14 +2,20 @@ package me.shedaniel;
 
 import me.shedaniel.library.KeyBindManager;
 import me.shedaniel.listenerdefinitions.IEvent;
+import me.shedaniel.listenerdefinitions.KeybindHandler;
 import me.shedaniel.listenerdefinitions.PacketAdder;
 import me.shedaniel.listeners.DrawContainerListener;
 import me.shedaniel.listeners.ResizeListener;
 import me.shedaniel.network.CheatPacket;
 import me.shedaniel.network.DeletePacket;
 import me.shedaniel.plugin.VanillaPlugin;
+import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.events.client.SpriteEvent;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.network.NetworkSide;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -18,7 +24,7 @@ import java.util.List;
 /**
  * Created by James on 7/27/2018.
  */
-public class Core implements ModInitializer, PacketAdder {
+public class Core implements PacketAdder, ClientModInitializer {
     @Override
     public void registerHandshakingPackets(PacketRegistrationReceiver receiver) {
     }
@@ -42,14 +48,13 @@ public class Core implements ModInitializer, PacketAdder {
     private static List<IEvent> events = new LinkedList<>();
     
     @Override
-    public void onInitialize() {
+    public void onInitializeClient() {
         registerEvents();
     }
     
     private void registerEvents() {
         registerEvent(new DrawContainerListener());
         registerEvent(new ResizeListener());
-        registerEvent(new KeyBindManager());
         registerEvent(new VanillaPlugin());
         registerEvent(new ClientListener());
     }
@@ -66,5 +71,4 @@ public class Core implements ModInitializer, PacketAdder {
         });
         return list;
     }
-    
 }
