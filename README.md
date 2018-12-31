@@ -20,6 +20,8 @@ A project to make (AEI) [https://minecraft.curseforge.com/projects/almost-enough
 ### 1.14 Port
 - Not Called Listeners
   - PacketAdder
+- Cheating is buggy
+- Using like 100 billion mixins
 
 ### Features that I will work on in the future
 - Hide Gui with Control / Command + O

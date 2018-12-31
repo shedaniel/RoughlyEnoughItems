@@ -3,6 +3,8 @@ package me.shedaniel.plugin;
 import me.shedaniel.api.IREIPlugin;
 import me.shedaniel.impl.REIRecipeManager;
 import me.shedaniel.listenerdefinitions.PotionCraftingAdder;
+import me.shedaniel.plugin.blastfurnace.VanillaBlastFurnaceCategory;
+import me.shedaniel.plugin.blastfurnace.VanillaBlastFurnaceRecipe;
 import me.shedaniel.plugin.crafting.VanillaCraftingCategory;
 import me.shedaniel.plugin.crafting.VanillaCraftingRecipe;
 import me.shedaniel.plugin.crafting.VanillaShapedCraftingRecipe;
@@ -23,6 +25,7 @@ import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.crafting.ShapedRecipe;
 import net.minecraft.recipe.crafting.ShapelessRecipe;
+import net.minecraft.recipe.smelting.BlastingRecipe;
 import net.minecraft.recipe.smelting.SmeltingRecipe;
 import net.minecraft.recipe.smelting.SmokingRecipe;
 import net.minecraft.util.registry.Registry;
@@ -40,10 +43,12 @@ public class VanillaPlugin implements IREIPlugin, PotionCraftingAdder {
         List<VanillaCraftingRecipe> recipes = new LinkedList<>();
         List<VanillaFurnaceRecipe> furnaceRecipes = new LinkedList<>();
         List<VanillaSmokerRecipe> smokerRecipes = new LinkedList<>();
+        List<VanillaBlastFurnaceRecipe> blastFurnaceRecipes = new LinkedList<>();
         REIRecipeManager.instance().addDisplayAdapter(new VanillaCraftingCategory());
         REIRecipeManager.instance().addDisplayAdapter(new VanillaFurnaceCategory());
         REIRecipeManager.instance().addDisplayAdapter(new VanillaPotionCategory());
         REIRecipeManager.instance().addDisplayAdapter(new VanillaSmokerCategory());
+        REIRecipeManager.instance().addDisplayAdapter(new VanillaBlastFurnaceCategory());
 //        REIRecipeManager.instance().addDisplayAdapter(new TestRandomCategory("a", new ItemStack(Blocks.ACACIA_BUTTON.asItem())));
 //        REIRecipeManager.instance().addDisplayAdapter(new TestRandomCategory("b", new ItemStack(Blocks.ACACIA_LOG.asItem())));
 //        REIRecipeManager.instance().addDisplayAdapter(new TestRandomCategory("c", new ItemStack(Blocks.ACACIA_LOG.asItem())));
@@ -63,6 +68,9 @@ public class VanillaPlugin implements IREIPlugin, PotionCraftingAdder {
             if (recipe instanceof SmokingRecipe) {
                 smokerRecipes.add(new VanillaSmokerRecipe((SmokingRecipe) recipe));
             }
+            if (recipe instanceof BlastingRecipe) {
+                blastFurnaceRecipes.add(new VanillaBlastFurnaceRecipe((BlastingRecipe) recipe));
+            }
         }
         Registry.POTION.stream().filter(potion -> !potion.equals(Potions.EMPTY)).forEach(potion -> {
             ItemStack basePotion = PotionUtil.setPotion(new ItemStack(Items.POTION), potion),
@@ -73,20 +81,12 @@ public class VanillaPlugin implements IREIPlugin, PotionCraftingAdder {
             potionRecipes.add(new VanillaPotionRecipe(new ItemStack[]{splashPotion}, Ingredient.ofItems(Items.DRAGON_BREATH).getStackArray(),
                     new ItemStack[]{lingeringPotion}));
         });
-        /*PotionType.REGISTRY.stream().filter(potionType -> !potionType.equals(PotionTypes.EMPTY)).forEach(potionType -> {
-            ItemStack basePotion = PotionUtils.addPotionToItemStack(new ItemStack(Items.POTION), potionType),
-                    splashPotion = PotionUtils.addPotionToItemStack(new ItemStack(Items.SPLASH_POTION), potionType),
-                    lingeringPotion = PotionUtils.addPotionToItemStack(new ItemStack(Items.LINGERING_POTION), potionType);
-            potionRecipes.add(new VanillaPotionRecipe(new ItemStack[]{basePotion}, Ingredient.ofItems(Items.GUNPOWDER).getStackArray(),
-                    new ItemStack[]{splashPotion}));
-            potionRecipes.add(new VanillaPotionRecipe(new ItemStack[]{splashPotion}, Ingredient.ofItems(Items.DRAGON_BREATH).getStackArray(),
-                    new ItemStack[]{lingeringPotion}));
-        });*/
         
         REIRecipeManager.instance().addRecipe("vanilla", recipes);
         REIRecipeManager.instance().addRecipe("furnace", furnaceRecipes);
         REIRecipeManager.instance().addRecipe("smoker", smokerRecipes);
         REIRecipeManager.instance().addRecipe("potion", potionRecipes.stream().distinct().collect(Collectors.toList()));
+        REIRecipeManager.instance().addRecipe("blastingfurnace", blastFurnaceRecipes);
 //        REIRecipeManager.instance().addPotionRecipe("a", new RandomRecipe("a"));
 //        REIRecipeManager.instance().addPotionRecipe("b", new RandomRecipe("b"));
 //        REIRecipeManager.instance().addPotionRecipe("c", new RandomRecipe("c"));
