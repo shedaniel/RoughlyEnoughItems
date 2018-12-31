@@ -2,7 +2,6 @@ package me.shedaniel.gui.widget;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.gui.REIRenderHelper;
-import me.shedaniel.impl.REIRecipeManager;
 import me.shedaniel.listenerdefinitions.IMixinGuiContainer;
 import me.shedaniel.network.CheatPacket;
 import me.shedaniel.network.DeletePacket;
@@ -139,10 +138,14 @@ public class REISlot extends Control {
         REIRenderHelper.getItemRender().renderItemAndEffectIntoGUI(getStack(), x, y);
         assert gui != null;
         if (((IMixinGuiContainer) gui).getDraggedStack().isEmpty())
-            REIRenderHelper.getItemRender().renderItemOverlayIntoGUI(Minecraft.getInstance().fontRenderer, getStack(), x, y - 0, "");
+            REIRenderHelper.getItemRender().renderItemOverlayIntoGUI(Minecraft.getInstance().fontRenderer, getStack(), x, y - 0, getTextOverlay(getStack()));
         else
-            REIRenderHelper.getItemRender().renderItemOverlayIntoGUI(Minecraft.getInstance().fontRenderer, getStack(), x, y - 8, "");
+            REIRenderHelper.getItemRender().renderItemOverlayIntoGUI(Minecraft.getInstance().fontRenderer, getStack(), x, y - 8, getTextOverlay(getStack()));
         REIRenderHelper.getItemRender().zLevel = 0.0F;
+    }
+    
+    public String getTextOverlay(ItemStack stack) {
+        return "";
     }
     
     public String getMod() {

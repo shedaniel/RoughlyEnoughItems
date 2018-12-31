@@ -8,7 +8,6 @@ import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 import java.util.ArrayList;
@@ -61,7 +60,14 @@ public class VanillaCraftingCategory implements IDisplayCategory<VanillaCrafting
             } else if (!input.get(i).isEmpty())
                 slots.get(i).setStackList(input.get(i));
         }
-        REISlot slot = new REISlot(130, 75 + 18 + number * 75);
+        REISlot slot = new REISlot(130, 75 + 18 + number * 75) {
+            @Override
+            public String getTextOverlay(ItemStack stack) {
+                if (stack.getCount() == 1)
+                    return "";
+                return stack.getCount() + "";
+            }
+        };
         
         slot.setDrawBackground(true);
         slot.setStack(recipes.get(number).getOutput().get(0).copy());
