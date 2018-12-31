@@ -19,8 +19,8 @@ import java.util.List;
 
 @Mixin(GameOptions.class)
 public class SettingsMixin {
-    @Shadow
-    public KeyBinding[] keyBindings;
+    
+    @Shadow public KeyBinding[] keysAll;
     
     public SettingsMixin() {
         System.out.println("loaded");
@@ -34,9 +34,9 @@ public class SettingsMixin {
     private void processNewBindings(List<KeyBinding> newBindings) {
         List<KeyBinding> toAdd = new ArrayList<>();
         toAdd.addAll(newBindings);
-        for(KeyBinding keyBinding : keyBindings)
+        for(KeyBinding keyBinding : keysAll)
             toAdd.add(keyBinding);
-        keyBindings = (KeyBinding[]) toAdd.toArray(new KeyBinding[0]);
+        keysAll = (KeyBinding[]) toAdd.toArray(new KeyBinding[0]);
     }
     
 }
