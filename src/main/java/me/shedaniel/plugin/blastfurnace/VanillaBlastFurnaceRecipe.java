@@ -2,13 +2,18 @@ package me.shedaniel.plugin.blastfurnace;
 
 import me.shedaniel.api.IRecipe;
 import net.minecraft.block.BlastFurnaceBlock;
+import net.minecraft.block.entity.BlastFurnaceBlockEntity;
+import net.minecraft.block.entity.FurnaceBlockEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.smelting.BlastingRecipe;
 import net.minecraft.recipe.smelting.SmokingRecipe;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class VanillaBlastFurnaceRecipe implements IRecipe<ItemStack> {
     private final BlastingRecipe recipe;
@@ -33,12 +38,10 @@ public class VanillaBlastFurnaceRecipe implements IRecipe<ItemStack> {
     public List<List<ItemStack>> getInput() {
         List<List<ItemStack>> input = new LinkedList<>();
         for(Ingredient ingredient : recipe.getPreviewInputs()) {
-            List<ItemStack> ingredients = new LinkedList<>();
-            for(ItemStack matchingStack : ingredient.getStackArray()) {
-                ingredients.add(matchingStack);
-            }
+            List<ItemStack> ingredients = Arrays.asList(ingredient.getStackArray());
             input.add(ingredients);
         }
+        input.add(BlastFurnaceBlockEntity.getBurnTimeMap().keySet().stream().map(Item::getDefaultStack).collect(Collectors.toList()));
         return input;
     }
 }

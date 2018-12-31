@@ -6,6 +6,7 @@ import me.shedaniel.impl.REIRecipeManager;
 import me.shedaniel.library.KeyBindManager;
 import me.shedaniel.listenerdefinitions.DoneLoading;
 import me.shedaniel.listenerdefinitions.RecipeLoadListener;
+import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -22,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ClientListener implements DoneLoading, RecipeLoadListener {
+public class ClientListener implements DoneLoading, ClientModInitializer, RecipeLoadListener {
     public static KeyBinding recipeKeybind;
     public static KeyBinding hideKeybind;
     public static KeyBinding useKeybind;
@@ -35,11 +36,14 @@ public class ClientListener implements DoneLoading, RecipeLoadListener {
         plugins = new ArrayList<>();
         stackList = new ArrayList<>();
         
+        buildItemList();
+    }
+    
+    @Override
+    public void onInitializeClient() {
         recipeKeybind = KeyBindManager.createKeybinding("key.rei.recipe", KeyEvent.VK_R, "key.rei.category", REIRenderHelper::recipeKeybind);
         hideKeybind = KeyBindManager.createKeybinding("key.rei.hide", KeyEvent.VK_O, "key.rei.category", REIRenderHelper::hideKeybind);
         useKeybind = KeyBindManager.createKeybinding("key.rei.use", KeyEvent.VK_U, "key.rei.category", REIRenderHelper::useKeybind);
-        
-        buildItemList();
     }
     
     private void buildItemList() {
@@ -78,4 +82,5 @@ public class ClientListener implements DoneLoading, RecipeLoadListener {
     public void recipesLoaded(RecipeManager recipeManager) {
         REIRecipeManager.instance().RecipesLoaded(recipeManager);
     }
+    
 }

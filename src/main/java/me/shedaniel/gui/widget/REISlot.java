@@ -138,10 +138,14 @@ public class REISlot extends Control {
         REIRenderHelper.getItemRender().renderItemAndGlowInGui(getStack(), x, y);
         assert gui != null;
         if (((IMixinContainerGui) gui).getDraggedStack().isEmpty())
-            REIRenderHelper.getItemRender().renderItemOverlaysInGUIWithText(MinecraftClient.getInstance().fontRenderer, getStack(), x, y - 0, "");
+            REIRenderHelper.getItemRender().renderItemOverlaysInGUIWithText(MinecraftClient.getInstance().fontRenderer, getStack(), x, y - 0, getTextOverlay(getStack()));
         else
-            REIRenderHelper.getItemRender().renderItemOverlaysInGUIWithText(MinecraftClient.getInstance().fontRenderer, getStack(), x, y - 8, "");
+            REIRenderHelper.getItemRender().renderItemOverlaysInGUIWithText(MinecraftClient.getInstance().fontRenderer, getStack(), x, y - 8, getTextOverlay(getStack()));
         REIRenderHelper.getItemRender().zOffset = 0.0F;
+    }
+    
+    public String getTextOverlay(ItemStack stack) {
+        return "";
     }
     
     public String getMod() {
