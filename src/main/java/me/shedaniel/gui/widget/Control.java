@@ -1,11 +1,11 @@
 package me.shedaniel.gui.widget;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.api.TriBooleanProducer;
 import me.shedaniel.gui.Drawable;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexFormats;
 
 import java.awt.*;
 import java.util.function.BiConsumer;
@@ -61,19 +61,19 @@ public abstract class Control extends Drawable {
         float lvt_7_1_ = (float) (p_drawRect_4_ >> 8 & 255) / 255.0F;
         float lvt_8_1_ = (float) (p_drawRect_4_ & 255) / 255.0F;
         Tessellator lvt_9_1_ = Tessellator.getInstance();
-        BufferBuilder lvt_10_1_ = lvt_9_1_.getBuffer();
+        BufferBuilder lvt_10_1_ = lvt_9_1_.getBufferBuilder();
         GlStateManager.enableAlphaTest();
         GlStateManager.enableBlend();
-        GlStateManager.disableTexture2D();
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        GlStateManager.disableTexture();
+        GlStateManager.blendFuncSeparate(GlStateManager.SrcBlendFactor.SRC_ALPHA, GlStateManager.DstBlendFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SrcBlendFactor.ONE, GlStateManager.DstBlendFactor.ZERO);
         GlStateManager.color4f(lvt_6_1_, lvt_7_1_, lvt_8_1_, lvt_5_3_1);
-        lvt_10_1_.begin(7, DefaultVertexFormats.POSITION);
-        lvt_10_1_.pos((double) p_drawRect_0_, (double) p_drawRect_3_, 0.0D).endVertex();
-        lvt_10_1_.pos((double) p_drawRect_2_, (double) p_drawRect_3_, 0.0D).endVertex();
-        lvt_10_1_.pos((double) p_drawRect_2_, (double) p_drawRect_1_, 0.0D).endVertex();
-        lvt_10_1_.pos((double) p_drawRect_0_, (double) p_drawRect_1_, 0.0D).endVertex();
+        lvt_10_1_.begin(7, VertexFormats.POSITION);
+        lvt_10_1_.vertex((double) p_drawRect_0_, (double) p_drawRect_3_, 0.0D).next();
+        lvt_10_1_.vertex((double) p_drawRect_2_, (double) p_drawRect_3_, 0.0D).next();
+        lvt_10_1_.vertex((double) p_drawRect_2_, (double) p_drawRect_1_, 0.0D).next();
+        lvt_10_1_.vertex((double) p_drawRect_0_, (double) p_drawRect_1_, 0.0D).next();
         lvt_9_1_.draw();
-        GlStateManager.enableTexture2D();
+        GlStateManager.enableTexture();
         GlStateManager.disableBlend();
         GlStateManager.disableAlphaTest();
     }
@@ -82,12 +82,12 @@ public abstract class Control extends Drawable {
         float lvt_7_1_ = 0.00390625F;
         float lvt_8_1_ = 0.00390625F;
         Tessellator lvt_9_1_ = Tessellator.getInstance();
-        BufferBuilder lvt_10_1_ = lvt_9_1_.getBuffer();
-        lvt_10_1_.begin(7, DefaultVertexFormats.POSITION_TEX);
-        lvt_10_1_.pos((double) (x + 0), (double) (y + height), (double) 200).tex((double) ((float) (u + 0) * 0.00390625F), (double) ((float) (v + height) * 0.00390625F)).endVertex();
-        lvt_10_1_.pos((double) (x + width), (double) (y + height), (double) 200).tex((double) ((float) (u + width) * 0.00390625F), (double) ((float) (v + height) * 0.00390625F)).endVertex();
-        lvt_10_1_.pos((double) (x + width), (double) (y + 0), (double) 200).tex((double) ((float) (u + width) * 0.00390625F), (double) ((float) (v + 0) * 0.00390625F)).endVertex();
-        lvt_10_1_.pos((double) (x + 0), (double) (y + 0), (double) 200).tex((double) ((float) (u + 0) * 0.00390625F), (double) ((float) (v + 0) * 0.00390625F)).endVertex();
+        BufferBuilder lvt_10_1_ = lvt_9_1_.getBufferBuilder();
+        lvt_10_1_.begin(7, VertexFormats.POSITION_UV);
+        lvt_10_1_.vertex((double) (x + 0), (double) (y + height), (double) 200).texture((double) ((float) (u + 0) * 0.00390625F), (double) ((float) (v + height) * 0.00390625F)).next();
+        lvt_10_1_.vertex((double) (x + width), (double) (y + height), (double) 200).texture((double) ((float) (u + width) * 0.00390625F), (double) ((float) (v + height) * 0.00390625F)).next();
+        lvt_10_1_.vertex((double) (x + width), (double) (y + 0), (double) 200).texture((double) ((float) (u + width) * 0.00390625F), (double) ((float) (v + 0) * 0.00390625F)).next();
+        lvt_10_1_.vertex((double) (x + 0), (double) (y + 0), (double) 200).texture((double) ((float) (u + 0) * 0.00390625F), (double) ((float) (v + 0) * 0.00390625F)).next();
         lvt_9_1_.draw();
     }
     
@@ -95,12 +95,12 @@ public abstract class Control extends Drawable {
         float lvt_7_1_ = 0.00390625F;
         float lvt_8_1_ = 0.00390625F;
         Tessellator lvt_9_1_ = Tessellator.getInstance();
-        BufferBuilder lvt_10_1_ = lvt_9_1_.getBuffer();
-        lvt_10_1_.begin(7, DefaultVertexFormats.POSITION_TEX);
-        lvt_10_1_.pos((double) (x + 0), (double) (y + height), zLevel).tex((double) ((float) (u + 0) * 0.00390625F), (double) ((float) (v + height) * 0.00390625F)).endVertex();
-        lvt_10_1_.pos((double) (x + width), (double) (y + height), zLevel).tex((double) ((float) (u + width) * 0.00390625F), (double) ((float) (v + height) * 0.00390625F)).endVertex();
-        lvt_10_1_.pos((double) (x + width), (double) (y + 0), zLevel).tex((double) ((float) (u + width) * 0.00390625F), (double) ((float) (v + 0) * 0.00390625F)).endVertex();
-        lvt_10_1_.pos((double) (x + 0), (double) (y + 0), zLevel).tex((double) ((float) (u + 0) * 0.00390625F), (double) ((float) (v + 0) * 0.00390625F)).endVertex();
+        BufferBuilder lvt_10_1_ = lvt_9_1_.getBufferBuilder();
+        lvt_10_1_.begin(7, VertexFormats.POSITION_UV);
+        lvt_10_1_.vertex((double) (x + 0), (double) (y + height), zLevel).texture((double) ((float) (u + 0) * 0.00390625F), (double) ((float) (v + height) * 0.00390625F)).next();
+        lvt_10_1_.vertex((double) (x + width), (double) (y + height), zLevel).texture((double) ((float) (u + width) * 0.00390625F), (double) ((float) (v + height) * 0.00390625F)).next();
+        lvt_10_1_.vertex((double) (x + width), (double) (y + 0), zLevel).texture((double) ((float) (u + width) * 0.00390625F), (double) ((float) (v + 0) * 0.00390625F)).next();
+        lvt_10_1_.vertex((double) (x + 0), (double) (y + 0), zLevel).texture((double) ((float) (u + 0) * 0.00390625F), (double) ((float) (v + 0) * 0.00390625F)).next();
         lvt_9_1_.draw();
     }
     

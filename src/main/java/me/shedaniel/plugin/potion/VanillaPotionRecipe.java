@@ -1,7 +1,7 @@
 package me.shedaniel.plugin.potion;
 
 import me.shedaniel.api.IRecipe;
-import net.minecraft.init.Blocks;
+import net.minecraft.block.Blocks;
 import net.minecraft.item.ItemStack;
 
 import java.util.ArrayList;

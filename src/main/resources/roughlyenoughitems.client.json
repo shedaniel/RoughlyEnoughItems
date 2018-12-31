@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "package": "me.shedaniel.mixins",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "MixinDoneLoading",
+    "MixinBrewingRecipeRegistry",
+    "MixinGuiContainer",
+    "MixinMinecraftResize",
+    "MixinKeyboardListener",
+    "MixinRecipeManager",
+    "MixinGuiContainerCreative",
+    "MixinMinecraftClient"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

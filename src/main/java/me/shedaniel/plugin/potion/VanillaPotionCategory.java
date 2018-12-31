@@ -1,16 +1,16 @@
 package me.shedaniel.plugin.potion;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.api.IDisplayCategory;
 import me.shedaniel.gui.REIRenderHelper;
 import me.shedaniel.gui.widget.Control;
 import me.shedaniel.gui.widget.REISlot;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
+import net.minecraft.block.Blocks;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.item.Items;
+import net.minecraft.util.Identifier;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ public class VanillaPotionCategory implements IDisplayCategory<VanillaPotionReci
     
     @Override
     public String getDisplayName() {
-        return I18n.format("category.rei.brewing");
+        return I18n.translate("category.rei.brewing");
     }
     
     @Override
@@ -76,7 +76,7 @@ public class VanillaPotionCategory implements IDisplayCategory<VanillaPotionReci
     
     }
     
-    private static final ResourceLocation RECIPE_GUI = new ResourceLocation("textures/gui/container/brewing_stand.png");
+    private static final Identifier RECIPE_GUI = new Identifier("textures/gui/container/brewing_stand.png");
     
     @Override
     public void addWidget(List<Control> controls, int number) {
@@ -118,7 +118,7 @@ public class VanillaPotionCategory implements IDisplayCategory<VanillaPotionReci
     
     @Override
     public ItemStack getCategoryIcon() {
-        return new ItemStack(Blocks.BREWING_STAND.asItem());
+        return new ItemStack(Blocks.BREWING_STAND.getItem());
     }
     
     private class PotionScreen extends Control {
@@ -131,7 +131,7 @@ public class VanillaPotionCategory implements IDisplayCategory<VanillaPotionReci
         public void draw() {
             GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             GlStateManager.disableLighting();
-            Minecraft.getInstance().getTextureManager().bindTexture(RECIPE_GUI);
+            MinecraftClient.getInstance().getTextureManager().bindTexture(RECIPE_GUI);
             this.drawTexturedModalRect(rect.x, rect.y, 16, 15, 103, 60, 0);
             this.drawTexturedModalRect(rect.x + 97 - 16, rect.y + 16 - 15, 176, 0, 9, (int) (((double) System.currentTimeMillis() % 2800d / 2800d) * 28), 0);
             this.drawTexturedModalRect(rect.x + 45, rect.y, 110, 15, 15, 27, 0);
@@ -156,7 +156,7 @@ public class VanillaPotionCategory implements IDisplayCategory<VanillaPotionReci
             if (getStack().isEmpty())
                 return;
             if (drawMiniBackground) {
-                Minecraft.getInstance().getTextureManager().bindTexture(RECIPE_GUI);
+                MinecraftClient.getInstance().getTextureManager().bindTexture(RECIPE_GUI);
                 drawTexturedModalRect(rect.x + 1, rect.y + 1, 0 + 2, 222 + 2, rect.width - 4, rect.height - 4);
             }
             super.draw();
@@ -165,20 +165,20 @@ public class VanillaPotionCategory implements IDisplayCategory<VanillaPotionReci
         @Override
         protected void drawTooltip() {
             List<String> toolTip = getTooltip();
-            toolTip.add(I18n.format("text.rei.mod", getMod()));
+            toolTip.add(I18n.translate("text.rei.mod", getMod()));
             Point mouse = REIRenderHelper.getMouseLoc();
-            Minecraft.getInstance().currentScreen.drawHoveringText(toolTip, mouse.x, mouse.y);
+            MinecraftClient.getInstance().currentGui.drawTooltip(toolTip, mouse.x, mouse.y);
         }
     }
     
     public static String getTooltip(SlotType slotType) {
         switch (slotType) {
             case INPUT:
-                return I18n.format("category.rei.brewing.input");
+                return I18n.translate("category.rei.brewing.input");
             case REACT:
-                return I18n.format("category.rei.brewing.reactant");
+                return I18n.translate("category.rei.brewing.reactant");
             case OUTPUT:
-                return I18n.format("category.rei.brewing.result");
+                return I18n.translate("category.rei.brewing.result");
         }
         return null;
     }

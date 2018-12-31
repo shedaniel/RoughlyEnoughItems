@@ -1,7 +1,7 @@
 package me.shedaniel.gui.widget;
 
 import me.shedaniel.gui.REIRenderHelper;
-import net.minecraft.client.gui.GuiTextField;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 
 import java.awt.*;
 
@@ -10,11 +10,11 @@ import java.awt.*;
  */
 public class TextBox extends Control implements IFocusable {
     
-    private GuiTextField textField;
+    private TextFieldWidget textField;
     
     public TextBox(int x, int y, int width, int height) {
         super(x, y, width, height);
-        textField = new GuiTextField(-1, REIRenderHelper.getFontRenderer(), x, y, width, height);
+        textField = new TextFieldWidget(-1, REIRenderHelper.getFontRenderer(), x, y, width, height);
         this.onClick = this::doMouseClick;
         this.onKeyDown = this::onKeyPressed;
         this.charPressed = this::charTyped;
@@ -22,7 +22,7 @@ public class TextBox extends Control implements IFocusable {
     
     @Override
     public void draw() {
-        textField.drawTextField(0, 0, 0);
+        textField.render(0, 0, 0);
     }
     
     @Override

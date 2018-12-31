@@ -1,0 +1,19 @@
+{
+  "id": "roughlyenoughitems",
+  "name": "RoughlyEnoughItems",
+  "description": "This is an example description! Tell everyone what your mod is about!",
+  "version": "1.0-SNAPSHOT",
+  "side": "client",
+  "authors": [
+    "Danielshe"
+  ],
+  "initializers": [
+    "me.shedaniel.Core"
+  ],
+  "requires": {
+    "fabric": "*"
+  },
+  "mixins": {
+    "client": "roughlyenoughitems.client.json"
+  }
+}

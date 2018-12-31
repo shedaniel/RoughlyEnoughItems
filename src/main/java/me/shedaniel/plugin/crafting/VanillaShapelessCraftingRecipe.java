@@ -1,8 +1,8 @@
 package me.shedaniel.plugin.crafting;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.item.crafting.ShapelessRecipe;
+import net.minecraft.recipe.Ingredient;
+import net.minecraft.recipe.crafting.ShapelessRecipe;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -24,16 +24,16 @@ public class VanillaShapelessCraftingRecipe extends VanillaCraftingRecipe {
     @Override
     public List<ItemStack> getOutput() {
         List<ItemStack> output = new LinkedList<>();
-        output.add(recipe.getRecipeOutput());
+        output.add(recipe.getOutput());
         return output;
     }
     
     @Override
     public List<List<ItemStack>> getInput() {
         List<List<ItemStack>> input = new LinkedList<>();
-        for(Ingredient ingredient : recipe.getIngredients()) {
+        for(Ingredient ingredient : recipe.getPreviewInputs()) {
             List<ItemStack> ingList = new LinkedList<>();
-            for(ItemStack matchingStack : ingredient.getMatchingStacks()) {
+            for(ItemStack matchingStack : ingredient.getStackArray()) {
                 ingList.add(matchingStack);
             }
             input.add(ingList);
@@ -43,14 +43,14 @@ public class VanillaShapelessCraftingRecipe extends VanillaCraftingRecipe {
     
     @Override
     public int getWidth() {
-        if (recipe.getIngredients().size() > 4)
+        if (recipe.getPreviewInputs().size() > 4)
             return 3;
         return 2;
     }
     
     @Override
     public int getHeight() {
-        if (recipe.getIngredients().size() > 4)
+        if (recipe.getPreviewInputs().size() > 4)
             return 3;
         return 2;
     }

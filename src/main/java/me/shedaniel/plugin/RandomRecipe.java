@@ -1,7 +1,7 @@
 package me.shedaniel.plugin;
 
 import me.shedaniel.api.IRecipe;
-import net.minecraft.init.Blocks;
+import net.minecraft.block.Blocks;
 import net.minecraft.item.ItemStack;
 
 import java.util.Arrays;
@@ -23,11 +23,11 @@ public class RandomRecipe implements IRecipe<ItemStack> {
     
     @Override
     public List<ItemStack> getOutput() {
-        return new LinkedList<>(Arrays.asList(new ItemStack[]{new ItemStack(Blocks.BEETROOTS.asItem())}));
+        return new LinkedList<>(Arrays.asList(new ItemStack[]{new ItemStack(Blocks.BEETROOTS.getItem())}));
     }
     
     @Override
     public List<List<ItemStack>> getInput() {
-        return new LinkedList<>(Arrays.asList(new LinkedList<>(Arrays.asList(new ItemStack[]{new ItemStack(Blocks.OAK_LOG.asItem())}))));
+        return new LinkedList<>(Arrays.asList(new LinkedList<>(Arrays.asList(new ItemStack[]{new ItemStack(Blocks.OAK_LOG.getItem())}))));
     }
 }

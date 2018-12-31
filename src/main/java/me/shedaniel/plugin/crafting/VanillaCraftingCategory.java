@@ -1,14 +1,13 @@
 package me.shedaniel.plugin.crafting;
 
 import me.shedaniel.api.IDisplayCategory;
-import me.shedaniel.gui.widget.REISlot;
 import me.shedaniel.gui.widget.Control;
+import me.shedaniel.gui.widget.REISlot;
 import me.shedaniel.gui.widget.WidgetArrow;
-import net.minecraft.client.MainWindow;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
+import net.minecraft.block.Blocks;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.util.Window;
 import net.minecraft.item.ItemStack;
 
 import java.util.ArrayList;
@@ -16,7 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class VanillaCraftingCategory implements IDisplayCategory<VanillaCraftingRecipe> {
-    MainWindow mainWindow = Minecraft.getInstance().mainWindow;
+    Window mainWindow = MinecraftClient.getInstance().window;
     private List<VanillaCraftingRecipe> recipes;
     
     @Override
@@ -26,7 +25,7 @@ public class VanillaCraftingCategory implements IDisplayCategory<VanillaCrafting
     
     @Override
     public String getDisplayName() {
-        return I18n.format("category.rei.crafting");
+        return I18n.translate("category.rei.crafting");
     }
     
     @Override
@@ -109,7 +108,7 @@ public class VanillaCraftingCategory implements IDisplayCategory<VanillaCrafting
     
     @Override
     public ItemStack getCategoryIcon() {
-        return new ItemStack(Blocks.CRAFTING_TABLE.asItem());
+        return new ItemStack(Blocks.CRAFTING_TABLE.getItem());
     }
     
 }

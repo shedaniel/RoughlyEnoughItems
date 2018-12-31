@@ -1,19 +1,18 @@
 package me.shedaniel.network;
 
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.NetHandlerPlayServer;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Packet;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.play.INetHandlerPlayServer;
+import net.minecraft.server.network.ServerPlayNetworkHandler;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.PacketByteBuf;
 
 import java.io.IOException;
 
 /**
  * Created by James on 7/29/2018.
  */
-public class CheatPacket implements Packet<INetHandlerPlayServer> {
+public class CheatPacket implements Packet<ServerPlayNetworkHandler> {
     
     private ItemStack stack;
     
@@ -25,21 +24,22 @@ public class CheatPacket implements Packet<INetHandlerPlayServer> {
     }
     
     @Override
-    public void readPacketData(PacketBuffer packetBuffer) throws IOException {
-        stack = ItemStack.read(packetBuffer.readCompoundTag());
+    public void read(PacketByteBuf packetBuffer) throws IOException {
+        stack = ItemStack.fromTag(packetBuffer.readCompoundTag());
     }
     
     @Override
-    public void writePacketData(PacketBuffer packetBuffer) throws IOException {
-        NBTTagCompound tag = new NBTTagCompound();
-        stack.write(tag);
+    public void write(PacketByteBuf packetBuffer) throws IOException {
+        CompoundTag tag = new CompoundTag();
+        stack.setTag(tag);
         packetBuffer.writeCompoundTag(tag);
     }
     
     @Override
-    public void processPacket(INetHandlerPlayServer iNetHandlerPlayServer) {
-        NetHandlerPlayServer server = (NetHandlerPlayServer) iNetHandlerPlayServer;
-        EntityPlayerMP player = server.player;
-        player.inventory.addItemStackToInventory(stack);
+    public void apply(ServerPlayNetworkHandler iNetHandlerPlayServer) {
+        ServerPlayNetworkHandler server = (ServerPlayNetworkHandler) iNetHandlerPlayServer;
+        ServerPlayerEntity player = server.player;
+        player.inventory.addPickBlock(stack);
     }
+    
 }

@@ -1,21 +1,23 @@
 package me.shedaniel.gui;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.ClientListener;
+import me.shedaniel.Core;
 import me.shedaniel.gui.widget.Button;
 import me.shedaniel.gui.widget.Control;
 import me.shedaniel.gui.widget.REISlot;
 import me.shedaniel.gui.widget.TextBox;
-import me.shedaniel.listenerdefinitions.IMixinGuiContainer;
-import net.minecraft.client.MainWindow;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.entity.player.EntityPlayer;
+import me.shedaniel.listenerdefinitions.IMixinContainerGui;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.ContainerGui;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.util.Window;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.text.TextComponent;
+import net.minecraft.text.TranslatableTextComponent;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.registry.IRegistry;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.registry.Registry;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -27,7 +29,7 @@ import java.util.stream.Stream;
 public class GuiItemList extends Drawable {
     
     public static final int FOOTERSIZE = 44;
-    private GuiContainer overlayedGui;
+    private ContainerGui overlayedGui;
     private static int page = 0;
     private ArrayList<REISlot> displaySlots;
     protected ArrayList<Control> controls;
@@ -42,7 +44,7 @@ public class GuiItemList extends Drawable {
     private int oldGuiLeft = 0;
     private boolean cheatMode = false;
     
-    public GuiItemList(GuiContainer overlayedGui) {
+    public GuiItemList(ContainerGui overlayedGui) {
         super(calculateRect(overlayedGui));
         displaySlots = new ArrayList<>();
         controls = new ArrayList<>();
@@ -52,9 +54,9 @@ public class GuiItemList extends Drawable {
     }
     
     public boolean canCheat() {
-        EntityPlayer player = Minecraft.getInstance().player;
+        ClientPlayerEntity player = MinecraftClient.getInstance().player;
         if (cheatMode) {
-            if (!player.hasPermissionLevel(1)) {
+            if (!player.allowsPermissionLevel(1)) {
                 cheatClicked(0);
                 return false;
             }
@@ -63,26 +65,25 @@ public class GuiItemList extends Drawable {
         return false;
     }
     
-    private static Rectangle calculateRect(GuiContainer overlayedGui) {
-        MainWindow res = REIRenderHelper.getResolution();
-        int startX = (((IMixinGuiContainer) overlayedGui).getGuiLeft() + ((IMixinGuiContainer) overlayedGui).getXSize()) + 10;
+    private static Rectangle calculateRect(ContainerGui overlayedGui) {
+        Window res = REIRenderHelper.getResolution();
+        int startX = (((IMixinContainerGui) overlayedGui).getGuiLeft() + ((IMixinContainerGui) overlayedGui).getXSize()) + 10;
         int width = res.getScaledWidth() - startX;
         return new Rectangle(startX, 0, width, res.getScaledHeight());
     }
     
     protected void resize() {
-        MainWindow res = REIRenderHelper.getResolution();
+        Window res = REIRenderHelper.getResolution();
         
-        if (overlayedGui != Minecraft.getInstance().currentScreen) {
-            if (Minecraft.getInstance().currentScreen instanceof GuiContainer) {
-                overlayedGui = (GuiContainer) Minecraft.getInstance().currentScreen;
-                
+        if (overlayedGui != MinecraftClient.getInstance().currentGui) {
+            if (MinecraftClient.getInstance().currentGui instanceof ContainerGui) {
+                overlayedGui = (ContainerGui) MinecraftClient.getInstance().currentGui;
             } else {
                 needsResize = true;
                 return;
             }
         }
-        oldGuiLeft = ((IMixinGuiContainer) overlayedGui).getGuiLeft();
+        oldGuiLeft = ((IMixinContainerGui) overlayedGui).getGuiLeft();
         rect = calculateRect(overlayedGui);
         page = 0;
         buttonLeft = new Button(rect.x, rect.y + 3, 16, 20, "<");
@@ -122,7 +123,7 @@ public class GuiItemList extends Drawable {
     
     private void calculateSlots() {
         int x = rect.x, y = rect.y + 20;
-        MainWindow res = REIRenderHelper.getResolution();
+        Window res = REIRenderHelper.getResolution();
         displaySlots.clear();
         int xOffset = 0, yOffset = 0, row = 0, perRow = 0, currentX = 0, currentY = 0;
         while (true) {
@@ -165,13 +166,13 @@ public class GuiItemList extends Drawable {
             return;
         if (needsResize == true)
             resize();
-        if (oldGuiLeft != ((IMixinGuiContainer) overlayedGui).getGuiLeft())
+        if (oldGuiLeft != ((IMixinContainerGui) overlayedGui).getGuiLeft())
             resize();
         GlStateManager.pushMatrix();
         updateButtons();
         controls.forEach(Control::draw);
         String header = String.format("%s/%s", page + 1, ((int) Math.floor(view.size() / displaySlots.size())) + 1);
-        Minecraft.getInstance().fontRenderer.drawStringWithShadow(header, rect.x + (rect.width / 2) - (Minecraft.getInstance().fontRenderer.getStringWidth(header) / 2), rect.y + 10, -1);
+        MinecraftClient.getInstance().fontRenderer.drawWithShadow(header, rect.x + (rect.width / 2) - (MinecraftClient.getInstance().fontRenderer.getStringWidth(header) / 2), rect.y + 10, -1);
         GlStateManager.popMatrix();
     }
     
@@ -217,10 +218,10 @@ public class GuiItemList extends Drawable {
     
     private String getCheatModeText() {
         if (cheatMode) {
-            TextComponentTranslation cheat = new TextComponentTranslation("text.rei.cheat", new Object[]{null});
+            TextComponent cheat = new TranslatableTextComponent("text.rei.cheat", new Object[]{null});
             return cheat.getFormattedText();
         }
-        TextComponentTranslation noCheat = new TextComponentTranslation("text.rei.nocheat", new Object[]{null});
+        TextComponent noCheat = new TranslatableTextComponent("text.rei.nocheat", new Object[]{null});
         return noCheat.getFormattedText();
     }
     
@@ -228,24 +229,27 @@ public class GuiItemList extends Drawable {
         String searchText = searchBox.getText();
         view.clear();
         List<ItemStack> stacks = new ArrayList<>();
-        Arrays.stream(searchText.split("\\|")).forEachOrdered(s -> {
-            List<SearchArgument> arguments = new ArrayList<>();
-            while (s.startsWith(" ")) s = s.substring(1);
-            while (s.endsWith(" ")) s = s.substring(0, s.length());
-            if (s.startsWith("@-") || s.startsWith("-@"))
-                arguments.add(new SearchArgument(SearchArgument.ArgumentType.MOD, s.substring(2), false));
-            else if (s.startsWith("@"))
-                arguments.add(new SearchArgument(SearchArgument.ArgumentType.MOD, s.substring(1), true));
-            else if (s.startsWith("#-") || s.startsWith("-#"))
-                arguments.add(new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, s.substring(2), false));
-            else if (s.startsWith("#"))
-                arguments.add(new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, s.substring(1), true));
-            else if (s.startsWith("-"))
-                arguments.add(new SearchArgument(SearchArgument.ArgumentType.TEXT, s.substring(1), false));
-            else
-                arguments.add(new SearchArgument(SearchArgument.ArgumentType.TEXT, s, true));
-            ClientListener.stackList.stream().filter(itemStack -> filterItem(itemStack, arguments)).forEachOrdered(stacks::add);
-        });
+        if (ClientListener.stackList == null && !Registry.ITEM.isEmpty())
+            Core.getListeners(ClientListener.class).forEach(ClientListener::onDoneLoading);
+        if (ClientListener.stackList != null)
+            Arrays.stream(searchText.split("\\|")).forEachOrdered(s -> {
+                List<SearchArgument> arguments = new ArrayList<>();
+                while (s.startsWith(" ")) s = s.substring(1);
+                while (s.endsWith(" ")) s = s.substring(0, s.length());
+                if (s.startsWith("@-") || s.startsWith("-@"))
+                    arguments.add(new SearchArgument(SearchArgument.ArgumentType.MOD, s.substring(2), false));
+                else if (s.startsWith("@"))
+                    arguments.add(new SearchArgument(SearchArgument.ArgumentType.MOD, s.substring(1), true));
+                else if (s.startsWith("#-") || s.startsWith("-#"))
+                    arguments.add(new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, s.substring(2), false));
+                else if (s.startsWith("#"))
+                    arguments.add(new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, s.substring(1), true));
+                else if (s.startsWith("-"))
+                    arguments.add(new SearchArgument(SearchArgument.ArgumentType.TEXT, s.substring(1), false));
+                else
+                    arguments.add(new SearchArgument(SearchArgument.ArgumentType.TEXT, s, true));
+                ClientListener.stackList.stream().filter(itemStack -> filterItem(itemStack, arguments)).forEachOrdered(stacks::add);
+            });
         view.addAll(stacks.stream().distinct().collect(Collectors.toList()));
         page = 0;
         fillSlots();
@@ -253,7 +257,7 @@ public class GuiItemList extends Drawable {
     
     private boolean filterItem(ItemStack itemStack, List<SearchArgument> arguments) {
         String mod = getMod(itemStack);
-        List<String> toolTipsList = REIRenderHelper.getOverlayedGui().getItemToolTip(itemStack);
+        List<String> toolTipsList = REIRenderHelper.getOverlayedGui().getStackTooltip(itemStack);
         String toolTipsMixed = toolTipsList.stream().skip(1).collect(Collectors.joining()).toLowerCase();
         String allMixed = Stream.of(itemStack.getDisplayName().getString(), toolTipsMixed).collect(Collectors.joining()).toLowerCase();
         for(SearchArgument searchArgument : arguments.stream().filter(searchArgument -> !searchArgument.isInclude()).collect(Collectors.toList())) {
@@ -295,7 +299,7 @@ public class GuiItemList extends Drawable {
     
     private String getMod(ItemStack stack) {
         if (stack != null && !stack.isEmpty()) {
-            ResourceLocation location = IRegistry.ITEM.getKey(stack.getItem());
+            Identifier location = Registry.ITEM.getId(stack.getItem());
             return location.getNamespace();
         }
         return "";

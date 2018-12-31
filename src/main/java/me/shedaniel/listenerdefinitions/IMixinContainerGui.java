@@ -1,9 +1,9 @@
 package me.shedaniel.listenerdefinitions;
 
-import net.minecraft.inventory.Slot;
+import net.minecraft.container.Slot;
 import net.minecraft.item.ItemStack;
 
-public interface IMixinGuiContainer {
+public interface IMixinContainerGui {
     public ItemStack getDraggedStack();
     
     public int getGuiLeft();
