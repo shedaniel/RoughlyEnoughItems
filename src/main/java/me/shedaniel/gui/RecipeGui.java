@@ -169,11 +169,11 @@ public class RecipeGui extends GuiContainer {
     }
     
     private boolean onClickTab(int index) {
-        System.out.println(index);
         if (index + categoryTabPage * 6 == categories.indexOf(selectedCategory))
             return false;
         selectedCategory = categories.get(index + categoryTabPage * 6);
-        return false;
+        updateRecipe();
+        return true;
     }
     
     @Override
