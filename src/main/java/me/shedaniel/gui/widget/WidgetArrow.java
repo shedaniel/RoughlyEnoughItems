@@ -6,7 +6,7 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.util.ResourceLocation;
 
 public class WidgetArrow extends Control {
-    private static final ResourceLocation RECIPE_GUI = new ResourceLocation("almostenoughitems", "textures/gui/recipecontainer.png");
+    private static final ResourceLocation RECIPE_GUI = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private int progress = 0;
     private int updateTick = 0;
     private boolean animated;

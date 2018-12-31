@@ -25,7 +25,7 @@ import java.util.Map;
 public class RecipeGui extends GuiContainer {
     
     private static final ResourceLocation CREATIVE_INVENTORY_TABS = new ResourceLocation("textures/gui/container/creative_inventory/tabs.png");
-    private static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("almostenoughitems", "textures/gui/recipecontainer.png");
+    private static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private final MainWindow mainWindow;
     private final Container container;
     private final GuiScreen prevScreen;
