@@ -1,7 +1,7 @@
 {
   "id": "roughlyenoughitems",
   "name": "RoughlyEnoughItems",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "description": "To allow players to view items and recipes.",
   "version": "1.0-SNAPSHOT",
   "side": "client",
   "authors": [
@@ -11,7 +11,7 @@
     "me.shedaniel.Core"
   ],
   "requires": {
-    "fabric": "*"
+
   },
   "mixins": {
     "client": "roughlyenoughitems.client.json"

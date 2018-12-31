@@ -5,11 +5,11 @@
   "mixins": [
     "MixinDoneLoading",
     "MixinBrewingRecipeRegistry",
-    "MixinGuiContainer",
+    "MixinContainerGui",
     "MixinMinecraftResize",
     "MixinKeyboardListener",
     "MixinRecipeManager",
-    "MixinGuiContainerCreative",
+    "MixinCreativePlayerInventoryGui",
     "MixinMinecraftClient"
   ],
   "injectors": {
