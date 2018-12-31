@@ -1,94 +1,68 @@
 package me.shedaniel.mixins;
 
+import me.shedaniel.listenerdefinitions.GuiCickListener;
 import me.shedaniel.listenerdefinitions.GuiKeyDown;
-import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainerCreative;
 import net.minecraft.client.renderer.InventoryEffectRenderer;
 import net.minecraft.inventory.Container;
-import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemGroup;
-import net.minecraft.util.math.MathHelper;
 import org.dimdev.riftloader.RiftLoader;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-
-import javax.annotation.Nullable;
-import java.util.Objects;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(GuiContainerCreative.class)
 public abstract class MixinGuiContainerCreative extends InventoryEffectRenderer {
     
     @Shadow
-    private static int selectedTabIndex = ItemGroup.BUILDING_BLOCKS.getIndex();
-    @Shadow
-    private GuiTextField searchField;
-    
-    @Shadow
-    protected abstract boolean hasTmpInventory(@Nullable Slot p_208018_1_);
-    
-    @Shadow
-    protected abstract void setCurrentCreativeTab(ItemGroup tab);
-    
-    @Shadow
-    protected abstract void updateCreativeSearch();
-    
-    @Shadow
-    private boolean field_195377_F;
+    public abstract int getSelectedTabIndex();
     
     @Shadow
     protected abstract boolean needsScrollBars();
     
-    @Shadow
-    private float currentScroll;
-    
-    public MixinGuiContainerCreative(Container inventorySlotsIn) {
-        super(inventorySlotsIn);
+    public MixinGuiContainerCreative(Container container_1) {
+        super(container_1);
     }
     
-    @Overwrite
-    public boolean keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_) {
-        this.field_195377_F = false;
-        if (selectedTabIndex != ItemGroup.SEARCH.getIndex()) {
-            if (selectedTabIndex != ItemGroup.INVENTORY.getIndex()) {
-                if (this.mc.gameSettings.keyBindChat.matchesKey(p_keyPressed_1_, p_keyPressed_2_)) {
-                    this.field_195377_F = true;
-                    this.setCurrentCreativeTab(ItemGroup.SEARCH);
-                    return true;
-                }
-            } else for(GuiKeyDown listener : RiftLoader.instance.getListeners(GuiKeyDown.class))
-                if (listener.keyDown(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_))
-                    return true;
-        } else {
-            boolean flag = !this.hasTmpInventory(this.hoveredSlot) || this.hoveredSlot != null && this.hoveredSlot.getHasStack();
-            
-            if (flag && this.func_195363_d(p_keyPressed_1_, p_keyPressed_2_)) {
-                this.field_195377_F = true;
-                return true;
-            } else {
-                String s = this.searchField.getText();
-                
-                if (this.searchField.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_)) {
-                    if (!Objects.equals(s, this.searchField.getText()))
-                        this.updateCreativeSearch();
-                    return true;
-                }
+    @Inject(method = "keyPressed(III)Z", at = @At("HEAD"), cancellable = true)
+    public void keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_, CallbackInfoReturnable<Boolean> ci) {
+        boolean handled = false;
+        if (getSelectedTabIndex() != ItemGroup.SEARCH.getIndex()) {
+            if (getSelectedTabIndex() == ItemGroup.INVENTORY.getIndex()) {
+                for(GuiKeyDown listener : RiftLoader.instance.getListeners(GuiKeyDown.class))
+                    if (listener.keyDown(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_)) {
+                        ci.setReturnValue(true);
+                        handled = true;
+                    }
             }
         }
-        return super.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
+        if (handled)
+            ci.cancel();
     }
     
-    @Overwrite
-    public boolean mouseScrolled(double p_mouseScrolled_1_) {
+    @Inject(method = "mouseScrolled(D)Z", at = @At("HEAD"), cancellable = true)
+    public void mouseScrolled(double p_mouseScrolled_1_, CallbackInfoReturnable<Boolean> ci) {
         if (!this.needsScrollBars()) {
-            return super.mouseScrolled(p_mouseScrolled_1_);
-        } else {
-            int i = (((GuiContainerCreative.ContainerCreative) this.inventorySlots).itemList.size() + 9 - 1) / 9 - 5;
-            this.currentScroll = (float) ((double) this.currentScroll - p_mouseScrolled_1_ / (double) i);
-            this.currentScroll = MathHelper.clamp(this.currentScroll, 0.0F, 1.0F);
-            ((GuiContainerCreative.ContainerCreative) this.inventorySlots).scrollTo(this.currentScroll);
-            return true;
+            ci.setReturnValue(super.mouseScrolled(p_mouseScrolled_1_));
+            ci.cancel();
         }
+    }
+    
+    @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
+    private void onMouseClicked(double p_mouseClicked_1_, double p_mouseClicked_3_, int p_mouseClicked_5_, CallbackInfoReturnable<Boolean> ci) {
+        if (getSelectedTabIndex() != ItemGroup.INVENTORY.getIndex())
+            return;
+        boolean handled = false;
+        for(GuiCickListener listener : RiftLoader.instance.getListeners(GuiCickListener.class)) {
+            if (listener.onClick((int) p_mouseClicked_1_, (int) p_mouseClicked_3_, p_mouseClicked_5_)) {
+                ci.setReturnValue(true);
+                handled = true;
+            }
+        }
+        if (handled)
+            ci.cancel();
     }
     
 }

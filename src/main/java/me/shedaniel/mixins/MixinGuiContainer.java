@@ -50,7 +50,6 @@ public abstract class MixinGuiContainer implements IGuiEventListenerDeferred, IM
         }
         if (handled)
             ci.cancel();
-        
     }
     
     @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)

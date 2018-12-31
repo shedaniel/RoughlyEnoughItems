@@ -113,7 +113,6 @@ public class REISlot extends Control {
         if (!player.inventory.getItemStack().isEmpty()) {
             return false;
         }
-        
         if (REIRenderHelper.reiGui.canCheat() && this.cheatable) {
             if (getStack() != null && !getStack().isEmpty()) {
                 ItemStack cheatedStack = getStack().copy();
