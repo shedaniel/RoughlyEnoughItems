@@ -15,7 +15,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.registry.IRegistry;
 
-import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,9 +33,9 @@ public class ClientListener implements DoneLoading, RecipeLoadListener {
         plugins = new ArrayList<>();
         stackList = new ArrayList<>();
         
-        recipeKeybind = KeyBindManager.createKeybinding("key.rei.recipe", KeyEvent.VK_R, "key.rei.category", REIRenderHelper::recipeKeybind);
-        hideKeybind = KeyBindManager.createKeybinding("key.rei.hide", KeyEvent.VK_O, "key.rei.category", REIRenderHelper::hideKeybind);
-        useKeybind = KeyBindManager.createKeybinding("key.rei.use", KeyEvent.VK_U, "key.rei.category", REIRenderHelper::useKeybind);
+        recipeKeybind = KeyBindManager.createKeybinding("key.rei.recipe", Core.config.recipeKeyBind, REIRenderHelper::recipeKeybind);
+        hideKeybind = KeyBindManager.createKeybinding("key.rei.hide", Core.config.hideKeyBind, REIRenderHelper::hideKeybind);
+        useKeybind = KeyBindManager.createKeybinding("key.rei.use", Core.config.usageKeyBind, REIRenderHelper::useKeybind);
         
         buildItemList();
     }
