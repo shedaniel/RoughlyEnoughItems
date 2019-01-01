@@ -47,13 +47,6 @@ public class VanillaPlugin implements IREIPlugin, PotionCraftingAdder {
         REIRecipeManager.instance().addDisplayAdapter(new VanillaCraftingCategory());
         REIRecipeManager.instance().addDisplayAdapter(new VanillaFurnaceCategory());
         REIRecipeManager.instance().addDisplayAdapter(new VanillaPotionCategory());
-        REIRecipeManager.instance().addDisplayAdapter(new VanillaSmokerCategory());
-        REIRecipeManager.instance().addDisplayAdapter(new VanillaBlastFurnaceCategory());
-//        REIRecipeManager.instance().addDisplayAdapter(new TestRandomCategory("a", new ItemStack(Blocks.ACACIA_BUTTON.asItem())));
-//        REIRecipeManager.instance().addDisplayAdapter(new TestRandomCategory("b", new ItemStack(Blocks.ACACIA_LOG.asItem())));
-//        REIRecipeManager.instance().addDisplayAdapter(new TestRandomCategory("c", new ItemStack(Blocks.ACACIA_LOG.asItem())));
-//        REIRecipeManager.instance().addDisplayAdapter(new TestRandomCategory("d", new ItemStack(Blocks.ACACIA_LOG.asItem())));
-//        REIRecipeManager.instance().addDisplayAdapter(new TestRandomCategory("e", new ItemStack(Blocks.ACACIA_LOG.asItem())));
         
         for(Recipe recipe : REIRecipeManager.instance().recipeManager.values()) {
             if (recipe instanceof ShapelessRecipe) {
@@ -87,11 +80,6 @@ public class VanillaPlugin implements IREIPlugin, PotionCraftingAdder {
         REIRecipeManager.instance().addRecipe("smoker", smokerRecipes);
         REIRecipeManager.instance().addRecipe("potion", potionRecipes.stream().distinct().collect(Collectors.toList()));
         REIRecipeManager.instance().addRecipe("blastingfurnace", blastFurnaceRecipes);
-//        REIRecipeManager.instance().addPotionRecipe("a", new RandomRecipe("a"));
-//        REIRecipeManager.instance().addPotionRecipe("b", new RandomRecipe("b"));
-//        REIRecipeManager.instance().addPotionRecipe("c", new RandomRecipe("c"));
-//        REIRecipeManager.instance().addPotionRecipe("d", new RandomRecipe("d"));
-//        REIRecipeManager.instance().addPotionRecipe("e", new RandomRecipe("e"));
     }
     
     

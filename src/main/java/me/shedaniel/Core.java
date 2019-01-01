@@ -1,8 +1,7 @@
 package me.shedaniel;
 
-import me.shedaniel.library.KeyBindManager;
+import me.shedaniel.config.REIConfig;
 import me.shedaniel.listenerdefinitions.IEvent;
-import me.shedaniel.listenerdefinitions.KeybindHandler;
 import me.shedaniel.listenerdefinitions.PacketAdder;
 import me.shedaniel.listeners.DrawContainerListener;
 import me.shedaniel.listeners.ResizeListener;
@@ -10,13 +9,11 @@ import me.shedaniel.network.CheatPacket;
 import me.shedaniel.network.DeletePacket;
 import me.shedaniel.plugin.VanillaPlugin;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.events.client.SpriteEvent;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.settings.KeyBinding;
+import net.fabricmc.loader.FabricLoader;
 import net.minecraft.network.NetworkSide;
-import org.apache.commons.lang3.ArrayUtils;
 
+import java.io.*;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -46,10 +43,17 @@ public class Core implements PacketAdder, ClientModInitializer {
     }
     
     private static List<IEvent> events = new LinkedList<>();
+    public static final File configFile = new File(FabricLoader.INSTANCE.getConfigDirectory(), "rei.json");
+    public static REIConfig config;
     
     @Override
     public void onInitializeClient() {
         registerEvents();
+        try {
+            loadConfig();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     
     private void registerEvents() {
@@ -71,4 +75,37 @@ public class Core implements PacketAdder, ClientModInitializer {
         });
         return list;
     }
+    
+    public static void loadConfig() throws IOException {
+        if (!configFile.exists())
+            loadDefaultConfig();
+        boolean failed = false;
+        try {
+            InputStream in = Files.newInputStream(configFile.toPath());
+            config = REIConfig.GSON.fromJson(new InputStreamReader(in), REIConfig.class);
+        } catch (Exception e){
+            failed = true;
+        }
+        if (failed || config == null) {
+            System.out.println("[REI] Failed to load config! Overwriting with default config.");
+            config = new REIConfig();
+        }
+        saveConfig();
+    }
+    
+    public static void loadDefaultConfig() throws IOException {
+        config = new REIConfig();
+        saveConfig();
+    }
+    
+    public static void saveConfig() throws IOException {
+        configFile.getParentFile().mkdirs();
+        if (configFile.exists())
+            configFile.delete();
+        try (PrintWriter writer = new PrintWriter(configFile)) {
+            REIConfig.GSON.toJson(config, writer);
+            writer.close();
+        }
+    }
+    
 }
