@@ -37,7 +37,6 @@ public class KeyBindButton extends GuiButton {
         this.displayString = editMode ? I18n.format("text.rei.listeningkey") : KeyEvent.getKeyText(currentKey);
         if (!editMode && ClientListener.keyBinds.stream().map(KeyBindFunction::getKey).filter(integer -> integer == currentKey).count() > 1)
             this.displayString = TextFormatting.RED + this.displayString;
-        System.out.println(displayString);
         super.render(mouseX, mouseY, partialTicks);
     }
     
