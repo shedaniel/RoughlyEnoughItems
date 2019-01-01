@@ -1,10 +1,10 @@
 package me.shedaniel.gui;
 
+import me.shedaniel.ClientListener;
 import me.shedaniel.gui.widget.Control;
 import me.shedaniel.gui.widget.IFocusable;
 import me.shedaniel.gui.widget.REISlot;
 import me.shedaniel.impl.REIRecipeManager;
-import me.shedaniel.library.KeyBindManager;
 import me.shedaniel.listenerdefinitions.IMixinGuiContainer;
 import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
@@ -151,7 +151,7 @@ public class REIRenderHelper {
             handled = true;
         }
         if (!handled) {
-            return KeyBindManager.processGuiKeybinds(typedChar);
+            return ClientListener.processGuiKeybinds(typedChar);
         }
         return handled;
     }

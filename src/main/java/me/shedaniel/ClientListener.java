@@ -3,10 +3,9 @@ package me.shedaniel;
 import me.shedaniel.api.IREIPlugin;
 import me.shedaniel.gui.REIRenderHelper;
 import me.shedaniel.impl.REIRecipeManager;
-import me.shedaniel.library.KeyBindManager;
+import me.shedaniel.library.KeyBindFunction;
 import me.shedaniel.listenerdefinitions.DoneLoading;
 import me.shedaniel.listenerdefinitions.RecipeLoadListener;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.init.Items;
@@ -15,28 +14,55 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.registry.IRegistry;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ClientListener implements DoneLoading, RecipeLoadListener {
-    public static KeyBinding recipeKeybind;
-    public static KeyBinding hideKeybind;
-    public static KeyBinding useKeybind;
+    
+    public static KeyBindFunction recipeKeybind;
+    public static KeyBindFunction hideKeybind;
+    public static KeyBindFunction useKeybind;
+    public static List<KeyBindFunction> keyBinds = new ArrayList<>();
     
     private List<IREIPlugin> plugins;
     public static List<ItemStack> stackList;
+    
+    public static boolean processGuiKeybinds(int typedChar) {
+        for(KeyBindFunction keyBind : keyBinds)
+            if (keyBind.apply(typedChar))
+                return true;
+        return false;
+    }
     
     @Override
     public void onDoneLoading() {
         plugins = new ArrayList<>();
         stackList = new ArrayList<>();
         
-        recipeKeybind = KeyBindManager.createKeybinding("key.rei.recipe", Core.config.recipeKeyBind, REIRenderHelper::recipeKeybind);
-        hideKeybind = KeyBindManager.createKeybinding("key.rei.hide", Core.config.hideKeyBind, REIRenderHelper::hideKeybind);
-        useKeybind = KeyBindManager.createKeybinding("key.rei.use", Core.config.usageKeyBind, REIRenderHelper::useKeybind);
-        
+        recipeKeybind = new KeyBindFunction(Core.config.recipeKeyBind) {
+            @Override
+            public boolean apply(int key) {
+                if (key == this.getKey())
+                    REIRenderHelper.recipeKeybind();
+                return key == this.getKey();
+            }
+        };
+        hideKeybind = new KeyBindFunction(Core.config.hideKeyBind) {
+            @Override
+            public boolean apply(int key) {
+                if (key == this.getKey())
+                    REIRenderHelper.hideKeybind();
+                return key == this.getKey();
+            }
+        };
+        useKeybind = new KeyBindFunction(Core.config.usageKeyBind) {
+            @Override
+            public boolean apply(int key) {
+                if (key == this.getKey())
+                    REIRenderHelper.useKeybind();
+                return key == this.getKey();
+            }
+        };
+        keyBinds.addAll(Arrays.asList(recipeKeybind, hideKeybind, useKeybind));
         buildItemList();
     }
     

@@ -10,6 +10,7 @@ import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -35,6 +36,7 @@ public class GuiItemList extends Drawable {
     Button buttonLeft;
     Button buttonRight;
     Button buttonCheating;
+    Button buttonConfig;
     TextBox searchBox;
     private ArrayList<ItemStack> view;
     private Control lastHovered;
@@ -101,6 +103,12 @@ public class GuiItemList extends Drawable {
         controls.add(searchBox);
         buttonCheating = new Button(5, 5, 45, 20, getCheatModeText());
         buttonCheating.onClick = this::cheatClicked;
+        buttonConfig = new Button(5, 28, 45, 20, I18n.format("text.rei.config"));
+        buttonConfig.onClick = i -> {
+            Minecraft.getInstance().displayGuiScreen(new ConfigGui(overlayedGui));
+            return true;
+        };
+        controls.add(buttonConfig);
         controls.add(buttonCheating);
         calculateSlots();
         updateView();

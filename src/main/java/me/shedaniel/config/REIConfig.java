@@ -7,7 +7,7 @@ import java.awt.event.KeyEvent;
 
 public class REIConfig {
     
-    public static Gson GSON = new GsonBuilder().create();
+    public static Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     
     public int recipeKeyBind = KeyEvent.VK_R;
     public int usageKeyBind = KeyEvent.VK_U;

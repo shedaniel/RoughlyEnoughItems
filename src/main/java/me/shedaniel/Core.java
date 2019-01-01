@@ -55,8 +55,18 @@ public class Core implements PacketAdder, InitializationListener {
     public static void loadConfig() throws IOException {
         if (!configFile.exists())
             loadDefaultConfig();
-        InputStream in = Files.newInputStream(configFile.toPath());
-        config = REIConfig.GSON.fromJson(new InputStreamReader(in), REIConfig.class);
+        boolean failed = false;
+        try {
+            InputStream in = Files.newInputStream(configFile.toPath());
+            config = REIConfig.GSON.fromJson(new InputStreamReader(in), REIConfig.class);
+        } catch (Exception e){
+            failed = true;
+        }
+        if (failed || config == null) {
+            System.out.println("[REI] Failed to load config! Overwriting with default config.");
+            config = new REIConfig();
+        }
+        saveConfig();
     }
     
     public static void loadDefaultConfig() throws IOException {
@@ -68,7 +78,7 @@ public class Core implements PacketAdder, InitializationListener {
         configFile.getParentFile().mkdirs();
         if (configFile.exists())
             configFile.delete();
-        try (Writer writer = new FileWriter(configFile)) {
+        try (PrintWriter writer = new PrintWriter(configFile)) {
             REIConfig.GSON.toJson(config, writer);
             writer.close();
         }
