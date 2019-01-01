@@ -8,8 +8,7 @@
     "Danielshe"
   ],
   "initializers": [
-    "me.shedaniel.Core",
-    "me.shedaniel.ClientListener"
+    "me.shedaniel.Core"
   ],
   "requires": {
 

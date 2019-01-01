@@ -45,22 +45,25 @@ public class Core implements PacketAdder, ClientModInitializer {
     private static List<IEvent> events = new LinkedList<>();
     public static final File configFile = new File(FabricLoader.INSTANCE.getConfigDirectory(), "rei.json");
     public static REIConfig config;
+    public static ClientListener clientListener;
     
     @Override
     public void onInitializeClient() {
+        this.clientListener = new ClientListener();
         registerEvents();
         try {
             loadConfig();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        this.clientListener.onInitializeKeyBind();
     }
     
     private void registerEvents() {
         registerEvent(new DrawContainerListener());
         registerEvent(new ResizeListener());
         registerEvent(new VanillaPlugin());
-        registerEvent(new ClientListener());
+        registerEvent(clientListener);
     }
     
     public static void registerEvent(IEvent event) {

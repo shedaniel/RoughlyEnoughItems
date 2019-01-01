@@ -73,6 +73,7 @@ public class RecipeGui extends ContainerGui {
     
     @Override
     public void draw(int mouseX, int mouseY, float partialTicks) {
+        drawBackground();
         super.draw(mouseX, mouseY, partialTicks);
         int y = (int) ((mainWindow.getScaledHeight() / 2 - this.guiHeight / 2));
         drawStringCentered(this.fontRenderer, selectedCategory.getDisplayName(), left + guiWidth / 2, y + 11, -1);

@@ -1,11 +1,11 @@
 package me.shedaniel.gui;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import me.shedaniel.ClientListener;
 import me.shedaniel.gui.widget.Control;
 import me.shedaniel.gui.widget.IFocusable;
 import me.shedaniel.gui.widget.REISlot;
 import me.shedaniel.impl.REIRecipeManager;
-import me.shedaniel.library.KeyBindManager;
 import me.shedaniel.listenerdefinitions.IMixinContainerGui;
 import net.fabricmc.loader.FabricLoader;
 import net.minecraft.client.MinecraftClient;
@@ -154,7 +154,7 @@ public class REIRenderHelper {
             handled = true;
         }
         if (!handled) {
-            return KeyBindManager.processGuiKeybinds(typedChar);
+            return ClientListener.processGuiKeybinds(typedChar);
         }
         return handled;
     }

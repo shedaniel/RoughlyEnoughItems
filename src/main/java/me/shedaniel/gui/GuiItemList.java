@@ -11,6 +11,7 @@ import me.shedaniel.listenerdefinitions.IMixinContainerGui;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ContainerGui;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.Window;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.TextComponent;
@@ -37,6 +38,7 @@ public class GuiItemList extends Drawable {
     Button buttonLeft;
     Button buttonRight;
     Button buttonCheating;
+    Button buttonConfig;
     TextBox searchBox;
     private ArrayList<ItemStack> view;
     private Control lastHovered;
@@ -102,6 +104,12 @@ public class GuiItemList extends Drawable {
         controls.add(searchBox);
         buttonCheating = new Button(5, 5, 45, 20, getCheatModeText());
         buttonCheating.onClick = this::cheatClicked;
+        buttonConfig = new Button(5, 28, 45, 20, I18n.translate("text.rei.config"));
+        buttonConfig.onClick = i -> {
+            MinecraftClient.getInstance().openGui(new ConfigGui(overlayedGui));
+            return true;
+        };
+        controls.add(buttonConfig);
         controls.add(buttonCheating);
         calculateSlots();
         updateView();
