@@ -4,9 +4,7 @@ import me.shedaniel.Core;
 import me.shedaniel.listenerdefinitions.GuiKeyDown;
 import net.minecraft.client.gui.ingame.AbstractPlayerInventoryGui;
 import net.minecraft.client.gui.ingame.CreativePlayerInventoryGui;
-import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.container.Container;
-import net.minecraft.container.Slot;
 import net.minecraft.item.ItemGroup;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -30,15 +28,12 @@ public abstract class MixinCreativePlayerInventoryGui extends AbstractPlayerInve
     @Inject(method = "keyPressed(III)Z", at = @At("HEAD"), cancellable = true)
     public void keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_, CallbackInfoReturnable<Boolean> ci) {
         boolean handled = false;
-        if (method_2469() != ItemGroup.SEARCH.getId()) {
-            if (method_2469() == ItemGroup.INVENTORY.getId()) {
-                for(GuiKeyDown listener : Core.getListeners(GuiKeyDown.class))
-                    if (listener.keyDown(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_)) {
-                        ci.setReturnValue(true);
-                        handled = true;
-                    }
-            }
-        }
+        if (method_2469() == ItemGroup.INVENTORY.getId())
+            for(GuiKeyDown listener : Core.getListeners(GuiKeyDown.class))
+                if (listener.keyDown(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_)) {
+                    ci.setReturnValue(true);
+                    handled = true;
+                }
         if (handled)
             ci.cancel();
     }

@@ -16,5 +16,7 @@
   "category.rei.brewing.reactant": "§e材料",
   "category.rei.brewing.result": "§e輸出藥水",
   "text.rei.config": "設置",
-  "text.rei.listeningkey": "正聆聽按鍵"
+  "text.rei.listeningkey": "正聆聽按鍵",
+  "text.rei.centre_searchbox": "置中搜索欄: %s%b",
+  "text.rei.centre_searchbox.tooltip": "更改此設置後請調整窗口大小以完成更改"
 }

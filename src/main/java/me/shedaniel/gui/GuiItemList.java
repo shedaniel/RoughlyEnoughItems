@@ -99,7 +99,7 @@ public class GuiItemList extends Drawable {
         if (searchBox != null) {
             savedText = searchBox.getText();
         }
-        searchBox = new TextBox(rect.x, rect.height - 31, rect.width - 4, 18);
+        searchBox = new TextBox(getSearchBoxArea());
         searchBox.setText(savedText);
         controls.add(searchBox);
         buttonCheating = new Button(5, 5, 45, 20, getCheatModeText());
@@ -115,6 +115,16 @@ public class GuiItemList extends Drawable {
         updateView();
         fillSlots();
         controls.addAll(displaySlots);
+    }
+    
+    private Rectangle getSearchBoxArea() {
+        int ch = ((IMixinContainerGui) overlayedGui).getContainerHeight(), cw = ((IMixinContainerGui) overlayedGui).getContainerWidth();
+        if (Core.config.centreSearchBox) {
+            if (ch + 4 + 18 > rect.height) //Will be out of bounds
+                return new Rectangle(overlayedGui.width / 2 - cw / 2, rect.height + 100, cw, 18);
+            return new Rectangle(overlayedGui.width / 2 - cw / 2, rect.height - 31, cw, 18);
+        }
+        return new Rectangle(rect.x, rect.height - 31, rect.width - 4, 18);
     }
     
     private void fillSlots() {

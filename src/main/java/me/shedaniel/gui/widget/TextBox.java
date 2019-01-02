@@ -20,6 +20,14 @@ public class TextBox extends Control implements IFocusable {
         this.charPressed = this::charTyped;
     }
     
+    public TextBox(Rectangle rectangle) {
+        super(rectangle);
+        textField = new TextFieldWidget(-1, REIRenderHelper.getFontRenderer(), rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+        this.onClick = this::doMouseClick;
+        this.onKeyDown = this::onKeyPressed;
+        this.charPressed = this::charTyped;
+    }
+    
     @Override
     public void draw() {
         textField.render(0, 0, 0);
