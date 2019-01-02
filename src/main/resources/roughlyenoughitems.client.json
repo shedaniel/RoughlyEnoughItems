@@ -9,8 +9,7 @@
     "MixinMinecraftResize",
     "MixinKeyboardListener",
     "MixinRecipeManager",
-    "MixinCreativePlayerInventoryGui",
-    "MixinMinecraftClient"
+    "MixinCreativePlayerInventoryGui"
   ],
   "injectors": {
     "defaultRequire": 1

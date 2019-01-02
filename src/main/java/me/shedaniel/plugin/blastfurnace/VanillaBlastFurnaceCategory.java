@@ -80,7 +80,7 @@ public class VanillaBlastFurnaceCategory implements IDisplayCategory<VanillaBlas
     }
     
     private List<ItemStack> getFuel() {
-        return BlastFurnaceBlockEntity.getBurnTimeMap().keySet().stream().map(Item::getDefaultStack).collect(Collectors.toList());
+        return BlastFurnaceBlockEntity.createBurnableMap().keySet().stream().map(Item::getDefaultStack).collect(Collectors.toList());
     }
     
     @Override

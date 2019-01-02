@@ -1,16 +1,16 @@
 package me.shedaniel;
 
 import me.shedaniel.config.REIConfig;
+import me.shedaniel.listenerdefinitions.ClientTickable;
 import me.shedaniel.listenerdefinitions.IEvent;
-import me.shedaniel.listenerdefinitions.PacketAdder;
 import me.shedaniel.listeners.DrawContainerListener;
-import me.shedaniel.listeners.ResizeListener;
 import me.shedaniel.network.CheatPacket;
-import me.shedaniel.network.DeletePacket;
 import me.shedaniel.plugin.VanillaPlugin;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.events.client.ClientTickEvent;
 import net.fabricmc.loader.FabricLoader;
-import net.minecraft.network.NetworkSide;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.item.ItemStack;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -21,26 +21,7 @@ import java.util.List;
 /**
  * Created by James on 7/27/2018.
  */
-public class Core implements PacketAdder, ClientModInitializer {
-    @Override
-    public void registerHandshakingPackets(PacketRegistrationReceiver receiver) {
-    }
-    
-    @Override
-    public void registerPlayPackets(PacketRegistrationReceiver receiver) {
-        receiver.registerPacket(NetworkSide.SERVER, CheatPacket.class);
-        receiver.registerPacket(NetworkSide.SERVER, DeletePacket.class);
-    }
-    
-    @Override
-    public void registerStatusPackets(PacketRegistrationReceiver receiver) {
-    
-    }
-    
-    @Override
-    public void registerLoginPackets(PacketRegistrationReceiver receiver) {
-    
-    }
+public class Core implements ClientModInitializer {
     
     private static List<IEvent> events = new LinkedList<>();
     public static final File configFile = new File(FabricLoader.INSTANCE.getConfigDirectory(), "rei.json");
@@ -51,7 +32,8 @@ public class Core implements PacketAdder, ClientModInitializer {
     @Override
     public void onInitializeClient() {
         this.clientListener = new ClientListener();
-        registerEvents();
+        registerSelfEvents();
+        registerFabricEvents();
         try {
             loadConfig();
             centreSearchBox = config.centreSearchBox;
@@ -61,14 +43,23 @@ public class Core implements PacketAdder, ClientModInitializer {
         this.clientListener.onInitializeKeyBind();
     }
     
-    private void registerEvents() {
-        registerEvent(new DrawContainerListener());
-        registerEvent(new ResizeListener());
-        registerEvent(new VanillaPlugin());
-        registerEvent(clientListener);
+    private void registerFabricEvents() {
+        ClientTickEvent.CLIENT.register(minecraftClient -> {
+            getListeners(ClientTickable.class).forEach(ClientTickable::clientTick);
+        });
     }
     
-    public static void registerEvent(IEvent event) {
+    private void registerSelfEvents() {
+        registerEvent(new DrawContainerListener());
+        registerEvent(clientListener);
+        registerPlugin(new VanillaPlugin());
+    }
+    
+    public static void registerPlugin(VanillaPlugin vanillaPlugin) {
+        registerEvent(vanillaPlugin);
+    }
+    
+    private static void registerEvent(IEvent event) {
         events.add(event);
     }
     
@@ -88,7 +79,7 @@ public class Core implements PacketAdder, ClientModInitializer {
         try {
             InputStream in = Files.newInputStream(configFile.toPath());
             config = REIConfig.GSON.fromJson(new InputStreamReader(in), REIConfig.class);
-        } catch (Exception e){
+        } catch (Exception e) {
             failed = true;
         }
         if (failed || config == null) {
@@ -111,6 +102,10 @@ public class Core implements PacketAdder, ClientModInitializer {
             REIConfig.GSON.toJson(config, writer);
             writer.close();
         }
+    }
+    
+    public static void cheatItems(ItemStack cheatedStack) {
+        MinecraftClient.getInstance().getNetworkHandler().sendPacket(new CheatPacket(cheatedStack));
     }
     
 }

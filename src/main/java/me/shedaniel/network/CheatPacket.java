@@ -5,6 +5,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Packet;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sortme.ChatMessageType;
+import net.minecraft.text.TranslatableTextComponent;
 import net.minecraft.util.PacketByteBuf;
 
 import java.io.IOException;
@@ -39,7 +41,9 @@ public class CheatPacket implements Packet<ServerPlayNetworkHandler> {
     public void apply(ServerPlayNetworkHandler iNetHandlerPlayServer) {
         ServerPlayNetworkHandler server = (ServerPlayNetworkHandler) iNetHandlerPlayServer;
         ServerPlayerEntity player = server.player;
-        player.inventory.addPickBlock(stack);
+        if (player.inventory.insertStack(stack.copy()))
+            player.sendChatMessage(new TranslatableTextComponent("text.rei.cheat_items", stack.getDisplayName().getFormattedText(), stack.getAmount(), player.getEntityName()), ChatMessageType.SYSTEM);
+        else player.sendChatMessage(new TranslatableTextComponent("text.rei.failed_cheat_items"), ChatMessageType.SYSTEM);
     }
     
 }

@@ -87,7 +87,7 @@ public class ConfigGui extends Gui {
     
     @Override
     public boolean keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_) {
-        if (p_keyPressed_1_ == 256 && this.canClose()) {
+        if (p_keyPressed_1_ == 256 && this.doesEscapeKeyClose()) {
             this.close();
             if (parent != null)
                 MinecraftClient.getInstance().openGui(parent);

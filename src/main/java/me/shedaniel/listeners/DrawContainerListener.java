@@ -12,7 +12,7 @@ import net.minecraft.item.ItemGroup;
 /**
  * Created by James on 7/27/2018.
  */
-public class DrawContainerListener implements DrawContainer, GuiCickListener, GuiKeyDown, CharInput, ClientTickable, MouseScrollListener {
+public class DrawContainerListener implements DrawContainer, GuiCickListener, GuiKeyDown, CharInput, ClientTickable, MouseScrollListener, MinecraftResize {
     
     @Override
     public void draw(int x, int y, float dunno, ContainerGui gui) {
@@ -57,5 +57,10 @@ public class DrawContainerListener implements DrawContainer, GuiCickListener, Gu
     @Override
     public void clientTick() {
         REIRenderHelper.tick();
+    }
+    
+    @Override
+    public void resize(int scaledWidth, int scaledHeight) {
+        REIRenderHelper.resize(scaledWidth, scaledHeight);
     }
 }
