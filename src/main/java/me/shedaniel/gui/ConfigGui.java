@@ -21,7 +21,7 @@ public class ConfigGui extends Gui {
     protected void onInitialized() {
         addButton(new KeyBindButton(997, parent.width / 2 - 20, 30, 80, 20, Core.config.recipeKeyBind, key -> {
             Core.config.recipeKeyBind = key;
-            ClientListener.recipeKeybind.setKey(key);
+            ClientListener.recipeKeyBind.setKey(key);
             try {
                 Core.saveConfig();
             } catch (IOException e) {
@@ -30,7 +30,7 @@ public class ConfigGui extends Gui {
         }));
         addButton(new KeyBindButton(997, parent.width / 2 - 20, 60, 80, 20, Core.config.usageKeyBind, key -> {
             Core.config.usageKeyBind = key;
-            ClientListener.useKeybind.setKey(key);
+            ClientListener.usageKeyBind.setKey(key);
             try {
                 Core.saveConfig();
             } catch (IOException e) {
@@ -39,7 +39,7 @@ public class ConfigGui extends Gui {
         }));
         addButton(new KeyBindButton(997, parent.width / 2 - 20, 90, 80, 20, Core.config.hideKeyBind, key -> {
             Core.config.hideKeyBind = key;
-            ClientListener.hideKeybind.setKey(key);
+            ClientListener.hideKeyBind.setKey(key);
             try {
                 Core.saveConfig();
             } catch (IOException e) {
