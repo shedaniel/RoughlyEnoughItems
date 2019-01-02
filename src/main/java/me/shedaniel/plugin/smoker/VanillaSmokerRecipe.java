@@ -38,7 +38,7 @@ public class VanillaSmokerRecipe implements IRecipe<ItemStack> {
             List<ItemStack> ingredients = Arrays.asList(ingredient.getStackArray());
             input.add(ingredients);
         }
-        input.add(SmokerBlockEntity.getBurnTimeMap().keySet().stream().map(Item::getDefaultStack).collect(Collectors.toList()));
+        input.add(SmokerBlockEntity.createBurnableMap().keySet().stream().map(Item::getDefaultStack).collect(Collectors.toList()));
         return input;
     }
 }

@@ -79,7 +79,7 @@ public class VanillaSmokerCategory implements IDisplayCategory<VanillaSmokerReci
     }
     
     private List<ItemStack> getFuel() {
-        return SmokerBlockEntity.getBurnTimeMap().keySet().stream().map(Item::getDefaultStack).collect(Collectors.toList());
+        return SmokerBlockEntity.createBurnableMap().keySet().stream().map(Item::getDefaultStack).collect(Collectors.toList());
     }
     
     @Override

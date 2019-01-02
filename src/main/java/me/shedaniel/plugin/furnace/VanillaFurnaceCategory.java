@@ -79,7 +79,7 @@ public class VanillaFurnaceCategory implements IDisplayCategory<VanillaFurnaceRe
     }
     
     private List<ItemStack> getFuel() {
-        return FurnaceBlockEntity.getBurnTimeMap().keySet().stream().map(Item::getDefaultStack).collect(Collectors.toList());
+        return FurnaceBlockEntity.createBurnableMap().keySet().stream().map(Item::getDefaultStack).collect(Collectors.toList());
     }
     
     @Override

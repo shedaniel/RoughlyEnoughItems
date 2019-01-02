@@ -41,7 +41,7 @@ public class VanillaBlastFurnaceRecipe implements IRecipe<ItemStack> {
             List<ItemStack> ingredients = Arrays.asList(ingredient.getStackArray());
             input.add(ingredients);
         }
-        input.add(BlastFurnaceBlockEntity.getBurnTimeMap().keySet().stream().map(Item::getDefaultStack).collect(Collectors.toList()));
+        input.add(BlastFurnaceBlockEntity.createBurnableMap().keySet().stream().map(Item::getDefaultStack).collect(Collectors.toList()));
         return input;
     }
 }

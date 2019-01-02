@@ -17,10 +17,7 @@ import net.minecraft.container.Container;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class RecipeGui extends ContainerGui {
     
@@ -29,19 +26,19 @@ public class RecipeGui extends ContainerGui {
     private final Window mainWindow;
     private final Container container;
     private final Gui prevScreen;
-    private final Map<IDisplayCategory, List<IRecipe>> recipes;
-    private int guiWidth = 176;
-    private int guiHeight = 222;
+    public final Map<IDisplayCategory, List<IRecipe>> recipes;
+    public final int guiWidth = 176;
+    public final int guiHeight = 222;
     ArrayList<IDisplayCategory> categories = new ArrayList<>();
     private int categoryTabPage = 0;
-    private IDisplayCategory selectedCategory;
+    public IDisplayCategory selectedCategory;
     private int recipePointer = 0;
-    private List<REISlot> slots;
-    private int cycleCounter = 0;
-    private int[] itemPointer;
+    public List<REISlot> slots;
     List<Control> controls = new LinkedList<>();
     private List<Tab> tabs;
     private boolean tabsEnabled = false;
+    private Button btnCategoryPageLeft, btnCategoryPageRight;
+    public Button btnRecipeLeft, btnRecipeRight;
     
     public RecipeGui(Container p_i1072_1_, Gui prevScreen, Map<IDisplayCategory, List<IRecipe>> recipes) {
         super(new RecipeContainer());
@@ -66,7 +63,12 @@ public class RecipeGui extends ContainerGui {
         for(int i = 0; i < 6; i++)
             tabs.add(new Tab(i, 0, 0, 0, 28, 32));
         tabs.forEach(tab -> tab.setOnClick(i -> {
-            return onClickTab(tab.getId());
+            if (tab.getId() + categoryTabPage * 6 == categories.indexOf(selectedCategory))
+                return false;
+            selectedCategory = categories.get(tab.getId() + categoryTabPage * 6);
+            recipePointer = 0;
+            updateRecipe();
+            return false;
         }));
         updateRecipe();
     }
@@ -100,14 +102,15 @@ public class RecipeGui extends ContainerGui {
     
     private void updateRecipe() {
         int categoryPointer = categories.indexOf(selectedCategory);
+        
         IRecipe recipe = recipes.get(categories.get(categoryPointer)).get(recipePointer);
-        categories.get(categoryPointer).resetRecipes();
-        categories.get(categoryPointer).addRecipe(recipe);
-        slots = categories.get(categoryPointer).setupDisplay(0);
-        if (recipes.get(categories.get(categoryPointer)).size() >= categoryPointer + 2) {
-            IRecipe recipe2 = recipes.get(categories.get(categoryPointer)).get(recipePointer + 1);
-            categories.get(categoryPointer).addRecipe(recipe2);
-            slots.addAll(categories.get(categoryPointer).setupDisplay(1));
+        selectedCategory.resetRecipes();
+        selectedCategory.addRecipe(recipe);
+        slots = selectedCategory.setupDisplay(0);
+        if (recipes.get(selectedCategory).size() >= recipePointer + 2) {
+            IRecipe recipe2 = recipes.get(selectedCategory).get(recipePointer + 1);
+            selectedCategory.addRecipe(recipe2);
+            slots.addAll(selectedCategory.setupDisplay(1));
         }
         
         left = (int) ((mainWindow.getScaledWidth() / 2 - this.guiWidth / 2));
@@ -120,10 +123,10 @@ public class RecipeGui extends ContainerGui {
         btnCategoryRight.onClick = this::btnCategoryRight;
         btnCategoryLeft.onClick = this::btnCategoryLeft;
         
-        Button btnRecipeLeft = new Button(left + 10, top + 28, 15, 20, "<");
-        Button btnRecipeRight = new Button(left + guiWidth - 25, top + 28, 15, 20, ">");
-        btnRecipeLeft.setEnabled(recipes.get(categories.get(categoryPointer)).size() > 1 && recipePointer > 0);
-        btnRecipeRight.setEnabled(recipes.get(categories.get(categoryPointer)).size() > 1 && getCurrentPage() + 1 < getTotalPages());
+        btnRecipeLeft = new Button(left + 10, top + 28, 15, 20, "<");
+        btnRecipeRight = new Button(left + guiWidth - 25, top + 28, 15, 20, ">");
+        btnRecipeLeft.setEnabled(recipes.get(selectedCategory).size() > 2);
+        btnRecipeRight.setEnabled(recipes.get(selectedCategory).size() > 2);
         btnRecipeRight.onClick = this::btnRecipeRight;
         btnRecipeLeft.onClick = this::btnRecipeLeft;
         
@@ -133,19 +136,33 @@ public class RecipeGui extends ContainerGui {
         if (categories.size() <= 1) {
             btnCategoryLeft.setEnabled(false);
             btnCategoryRight.setEnabled(false);
+        } else if (categories.size() > 6) {
+            btnCategoryPageLeft = new Button(left, top - 52, 20, 20, "<");
+            btnCategoryPageRight = new Button(left + guiWidth - 20, top - 52, 20, 20, ">");
+            btnCategoryPageLeft.setOnClick(i -> {
+                categoryTabPage--;
+                if (categoryTabPage <= 0)
+                    categoryTabPage = MathHelper.ceil(categories.size() / 6d);
+                updateRecipe();
+                return true;
+            });
+            btnCategoryPageRight.setOnClick(i -> {
+                categoryTabPage++;
+                if (categoryTabPage >= MathHelper.ceil(categories.size() / 6d))
+                    categoryTabPage = 0;
+                updateRecipe();
+                return true;
+            });
+            if (top - 52 >= 2)
+                controls.addAll(Arrays.asList(btnCategoryPageLeft, btnCategoryPageRight));
         }
         
         controls.add(btnRecipeLeft);
         controls.add(btnRecipeRight);
         
-        itemPointer = new int[9];
-        for(int i = 0; i < itemPointer.length; i++) {
-            itemPointer[i] = 0;
-        }
-        
         List<Control> newControls = new LinkedList<>();
         categories.get(categoryPointer).addWidget(newControls, 0);
-        if (recipes.get(categories.get(categoryPointer)).size() >= categoryPointer + 2)
+        if (recipes.get(categories.get(categoryPointer)).size() >= recipePointer + 2)
             categories.get(categoryPointer).addWidget(newControls, 1);
         newControls.forEach(f -> f.move(left, top));
         controls.addAll(newControls);
@@ -167,14 +184,6 @@ public class RecipeGui extends ContainerGui {
         }
     }
     
-    private boolean onClickTab(int index) {
-        if (index + categoryTabPage * 6 == categories.indexOf(selectedCategory))
-            return false;
-        selectedCategory = categories.get(index + categoryTabPage * 6);
-        updateRecipe();
-        return false;
-    }
-    
     @Override
     protected void drawBackground(float v, int i, int i1) {
         //Tabs
@@ -187,13 +196,18 @@ public class RecipeGui extends ContainerGui {
         
         drawBackground();
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        GuiLighting.disable();
         this.client.getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
         
         int lvt_4_1_ = (int) ((mainWindow.getScaledWidth() / 2 - this.guiWidth / 2));
         int lvt_5_1_ = (int) ((mainWindow.getScaledHeight() / 2 - this.guiHeight / 2));
         
         this.drawTexturedRect(lvt_4_1_, lvt_5_1_, 0, 0, this.guiWidth, this.guiHeight);
-        slots.forEach(REISlot::draw);
+        slots.forEach(reiSlot -> {
+            GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+            GuiLighting.disable();
+            reiSlot.draw();
+        });
         
         if (tabsEnabled)
             tabs.stream().filter(tab -> tab.getId() + categoryTabPage * 6 != categories.indexOf(selectedCategory)).forEach(tab -> {
@@ -210,7 +224,6 @@ public class RecipeGui extends ContainerGui {
             this.client.openGui(prevScreen);
             return true;
         }
-        
         return super.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
     }
     
@@ -218,7 +231,7 @@ public class RecipeGui extends ContainerGui {
         recipePointer = 0;
         int categoryPointer = categories.indexOf(selectedCategory);
         categoryPointer--;
-        if (categoryPointer < 0)
+        if (categoryPointer <= 0)
             categoryPointer = categories.size() - 1;
         selectedCategory = categories.get(categoryPointer);
         categoryTabPage = categoryPointer / 6;
@@ -240,27 +253,25 @@ public class RecipeGui extends ContainerGui {
     
     private boolean btnRecipeLeft(int button) {
         recipePointer -= 2;
-        if (recipePointer < 0) {
-            recipePointer = (getTotalPages() - 1) * 2;
-        }
+        if (recipePointer <= 0)
+            recipePointer = MathHelper.floor((recipes.get(selectedCategory).size() - 1) / 2d) * 2;
         updateRecipe();
         return true;
     }
     
     private boolean btnRecipeRight(int button) {
         recipePointer += 2;
-        if (recipePointer >= recipes.get(selectedCategory).size()) {
+        if (recipePointer >= recipes.get(selectedCategory).size())
             recipePointer = 0;
-        }
         updateRecipe();
         return true;
     }
     
     private int riseDoublesToInt(double i) {
-        return (int) (i + (i % 1 == 0 ? 0 : 1));
+        return MathHelper.ceil(i);
     }
     
     private int getTotalPages() {
-        return MathHelper.clamp(riseDoublesToInt(recipes.get(selectedCategory).size() / 2), 1, Integer.MAX_VALUE);
+        return MathHelper.clamp(riseDoublesToInt(recipes.get(selectedCategory).size() / 2d), 1, Integer.MAX_VALUE);
     }
 }

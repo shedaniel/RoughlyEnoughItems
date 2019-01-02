@@ -2,7 +2,7 @@
   "id": "roughlyenoughitems",
   "name": "RoughlyEnoughItems",
   "description": "To allow players to view items and recipes.",
-  "version": "1.3",
+  "version": "1.4",
   "side": "client",
   "authors": [
     "Danielshe"
@@ -11,7 +11,7 @@
     "me.shedaniel.Core"
   ],
   "requires": {
-
+    "fabric": "*"
   },
   "mixins": {
     "client": "roughlyenoughitems.client.json"

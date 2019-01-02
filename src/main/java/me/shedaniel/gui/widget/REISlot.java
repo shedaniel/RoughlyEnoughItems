@@ -1,9 +1,9 @@
 package me.shedaniel.gui.widget;
 
 import com.google.common.collect.Lists;
+import me.shedaniel.Core;
 import me.shedaniel.gui.REIRenderHelper;
 import me.shedaniel.listenerdefinitions.IMixinContainerGui;
-import me.shedaniel.network.CheatPacket;
 import me.shedaniel.network.DeletePacket;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ContainerGui;
@@ -16,6 +16,7 @@ import net.minecraft.util.registry.Registry;
 import java.awt.*;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by James on 7/28/2018.
@@ -122,7 +123,7 @@ public class REISlot extends Control {
                 if (button == 1) {
                     cheatedStack.setAmount(cheatedStack.getMaxAmount());
                 }
-                MinecraftClient.getInstance().getNetworkHandler().sendPacket(new CheatPacket(cheatedStack));
+                Core.cheatItems(cheatedStack);
                 return true;
             }
         } else {
@@ -158,18 +159,16 @@ public class REISlot extends Control {
     }
     
     protected List<String> getTooltip() {
+        final String modString = "§9§o" + getMod();
         MinecraftClient mc = MinecraftClient.getInstance();
         ContainerGui gui = REIRenderHelper.getOverlayedGui();
         List<String> toolTip = Lists.newArrayList();
-        if (gui != null) {
-            toolTip = gui.getStackTooltip(getStack());
-        } else {
+        if (gui != null)
+            toolTip = gui.getStackTooltip(getStack()).stream().filter(s -> !s.equals(modString)).collect(Collectors.toList());
+        else
             toolTip.add(getStack().getDisplayName().getFormattedText());
-        }
-        if (extraTooltip != null) {
+        if (extraTooltip != null)
             toolTip.add(extraTooltip);
-        }
-        
         return toolTip;
     }
     
