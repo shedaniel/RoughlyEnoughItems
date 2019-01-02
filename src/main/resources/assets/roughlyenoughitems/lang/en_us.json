@@ -18,5 +18,5 @@
   "text.rei.config": "Config",
   "text.rei.listeningkey": "Listening Key",
   "text.rei.centre_searchbox": "Center Search Box: %s%b",
-  "text.rei.centre_searchbox.tooltip": "Please resize the window after editing\nthis config to apply the changes"
+  "text.rei.centre_searchbox.tooltip": "Please restart Minecraft after editing\nthis config to apply the changes"
 }

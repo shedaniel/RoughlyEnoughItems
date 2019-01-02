@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 
 public class GuiItemList extends Drawable {
     
-    public static final int FOOTERSIZE = 44;
+    public final int FOOTERSIZE;
     private ContainerGui overlayedGui;
     private static int page = 0;
     private ArrayList<REISlot> displaySlots;
@@ -48,6 +48,7 @@ public class GuiItemList extends Drawable {
     
     public GuiItemList(ContainerGui overlayedGui) {
         super(calculateRect(overlayedGui));
+        FOOTERSIZE = Core.centreSearchBox ? 18 : 44;
         displaySlots = new ArrayList<>();
         controls = new ArrayList<>();
         this.overlayedGui = overlayedGui;
@@ -119,7 +120,7 @@ public class GuiItemList extends Drawable {
     
     private Rectangle getSearchBoxArea() {
         int ch = ((IMixinContainerGui) overlayedGui).getContainerHeight(), cw = ((IMixinContainerGui) overlayedGui).getContainerWidth();
-        if (Core.config.centreSearchBox) {
+        if (Core.centreSearchBox) {
             if (ch + 4 + 18 > rect.height) //Will be out of bounds
                 return new Rectangle(overlayedGui.width / 2 - cw / 2, rect.height + 100, cw, 18);
             return new Rectangle(overlayedGui.width / 2 - cw / 2, rect.height - 31, cw, 18);

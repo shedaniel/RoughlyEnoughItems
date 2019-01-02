@@ -46,6 +46,7 @@ public class Core implements PacketAdder, ClientModInitializer {
     public static final File configFile = new File(FabricLoader.INSTANCE.getConfigDirectory(), "rei.json");
     public static REIConfig config;
     public static ClientListener clientListener;
+    public static boolean centreSearchBox;
     
     @Override
     public void onInitializeClient() {
@@ -53,6 +54,7 @@ public class Core implements PacketAdder, ClientModInitializer {
         registerEvents();
         try {
             loadConfig();
+            centreSearchBox = config.centreSearchBox;
         } catch (IOException e) {
             e.printStackTrace();
         }
