@@ -90,4 +90,14 @@ public abstract class MixinContainerGui extends Gui implements IMixinContainerGu
     public Slot getHoveredSlot() {
         return focusedSlot;
     }
+    
+    @Override
+    public int getContainerHeight() {
+        return containerHeight;
+    }
+    
+    @Override
+    public int getContainerWidth() {
+        return containerWidth;
+    }
 }

@@ -12,5 +12,6 @@ public class REIConfig {
     public int recipeKeyBind = KeyEvent.VK_R;
     public int usageKeyBind = KeyEvent.VK_U;
     public int hideKeyBind = KeyEvent.VK_O;
+    public boolean centreSearchBox = false;
     
 }
