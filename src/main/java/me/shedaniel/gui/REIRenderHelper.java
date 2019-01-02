@@ -196,9 +196,6 @@ public class REIRenderHelper {
             mouse = new Point(mouseX, mouseY);
             
             RecipeGui recipeGui = (RecipeGui) MinecraftClient.getInstance().currentGui;
-            System.out.printf("%b.%b.%b.%b.%b%n", mouse.getX() < window.getScaledWidth() / 2 + recipeGui.guiWidth / 2, mouse.getX() > window.getScaledWidth() / 2 - recipeGui.guiWidth / 2,
-                    mouse.getY() < window.getScaledHeight() / 2 + recipeGui.guiHeight / 2, mouse.getY() > window.getScaledHeight() / 2 - recipeGui.guiHeight / 2,
-                    recipeGui.recipes.get(recipeGui.selectedCategory).size() > 2);
             if (mouse.getX() < window.getScaledWidth() / 2 + recipeGui.guiWidth / 2 && mouse.getX() > window.getScaledWidth() / 2 - recipeGui.guiWidth / 2 &&
                     mouse.getY() < window.getScaledHeight() / 2 + recipeGui.guiHeight / 2 && mouse.getY() > window.getScaledHeight() / 2 - recipeGui.guiHeight / 2 &&
                     recipeGui.recipes.get(recipeGui.selectedCategory).size() > 2) {
