@@ -1,5 +1,5 @@
 {
-  "key.rei.category": "大致足夠的物品（REI）",
+  "key.rei.category": "Roughly Enough Items",
   "key.rei.recipe": "顯示配方",
   "key.rei.hide": "隱藏／顯示REI",
   "key.rei.use": "顯示用途",
@@ -9,8 +9,12 @@
   "category.rei.crafting": "合成",
   "category.rei.smelting": "冶煉",
   "category.rei.smelting.fuel": "§e燃料",
+  "category.rei.smoking": "煙燻",
+  "category.rei.blasting": "熔煉",
   "category.rei.brewing": "釀造",
   "category.rei.brewing.input": "§e輸入藥水",
   "category.rei.brewing.reactant": "§e材料",
-  "category.rei.brewing.result": "§e輸出藥水"
+  "category.rei.brewing.result": "§e輸出藥水",
+  "text.rei.config": "設置",
+  "text.rei.listeningkey": "正聆聽按鍵"
 }

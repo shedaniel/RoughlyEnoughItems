@@ -2,6 +2,7 @@ package me.shedaniel.listeners;
 
 import me.shedaniel.gui.REIRenderHelper;
 import me.shedaniel.listenerdefinitions.*;
+import net.fabricmc.fabric.networking.CustomPayloadPacketRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ContainerGui;
 import net.minecraft.client.gui.Gui;

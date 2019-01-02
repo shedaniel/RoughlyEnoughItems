@@ -154,7 +154,7 @@ public class REIRenderHelper {
             handled = true;
         }
         if (!handled) {
-            return ClientListener.processGuiKeybinds(typedChar);
+            return ClientListener.processGuiKeyBinds(typedChar);
         }
         return handled;
     }

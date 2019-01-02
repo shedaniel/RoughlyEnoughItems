@@ -6,9 +6,6 @@ import me.shedaniel.impl.REIRecipeManager;
 import me.shedaniel.library.KeyBindFunction;
 import me.shedaniel.listenerdefinitions.DoneLoading;
 import me.shedaniel.listenerdefinitions.RecipeLoadListener;
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.api.ModInitializer;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.item.Item;
@@ -18,20 +15,19 @@ import net.minecraft.recipe.RecipeManager;
 import net.minecraft.util.DefaultedList;
 import net.minecraft.util.registry.Registry;
 
-import java.awt.event.KeyEvent;
 import java.util.*;
 
 public class ClientListener implements DoneLoading, RecipeLoadListener {
     
-    public static KeyBindFunction recipeKeybind;
-    public static KeyBindFunction hideKeybind;
-    public static KeyBindFunction useKeybind;
+    public static KeyBindFunction recipeKeyBind;
+    public static KeyBindFunction hideKeyBind;
+    public static KeyBindFunction usageKeyBind;
     public static List<KeyBindFunction> keyBinds = new ArrayList<>();
     
     private List<IREIPlugin> plugins;
     public static List<ItemStack> stackList;
     
-    public static boolean processGuiKeybinds(int typedChar) {
+    public static boolean processGuiKeyBinds(int typedChar) {
         for(KeyBindFunction keyBind : keyBinds)
             if (keyBind.apply(typedChar))
                 return true;
@@ -47,7 +43,7 @@ public class ClientListener implements DoneLoading, RecipeLoadListener {
     }
     
     public void onInitializeKeyBind() {
-        recipeKeybind = new KeyBindFunction(Core.config.recipeKeyBind) {
+        recipeKeyBind = new KeyBindFunction(Core.config.recipeKeyBind) {
             @Override
             public boolean apply(int key) {
                 if (key == this.getKey())
@@ -55,7 +51,7 @@ public class ClientListener implements DoneLoading, RecipeLoadListener {
                 return key == this.getKey();
             }
         };
-        hideKeybind = new KeyBindFunction(Core.config.hideKeyBind) {
+        hideKeyBind = new KeyBindFunction(Core.config.hideKeyBind) {
             @Override
             public boolean apply(int key) {
                 if (key == this.getKey())
@@ -63,7 +59,7 @@ public class ClientListener implements DoneLoading, RecipeLoadListener {
                 return key == this.getKey();
             }
         };
-        useKeybind = new KeyBindFunction(Core.config.usageKeyBind) {
+        usageKeyBind = new KeyBindFunction(Core.config.usageKeyBind) {
             @Override
             public boolean apply(int key) {
                 if (key == this.getKey())
@@ -71,7 +67,7 @@ public class ClientListener implements DoneLoading, RecipeLoadListener {
                 return key == this.getKey();
             }
         };
-        keyBinds.addAll(Arrays.asList(recipeKeybind, hideKeybind, useKeybind));
+        keyBinds.addAll(Arrays.asList(recipeKeyBind, hideKeyBind, usageKeyBind));
     }
     
     private void buildItemList() {
