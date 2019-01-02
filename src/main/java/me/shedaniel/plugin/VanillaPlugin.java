@@ -51,11 +51,11 @@ public class VanillaPlugin implements IREIPlugin, PotionCraftingAdder {
         REIRecipeManager.instance().addDisplayAdapter(new VanillaSmokerCategory());
         REIRecipeManager.instance().addDisplayAdapter(new VanillaBlastFurnaceCategory());
         REIRecipeManager.instance().addDisplayAdapter(new VanillaPotionCategory());
-        REIRecipeManager.instance().addDisplayAdapter(new TestRandomCategory("a", new ItemStack(Items.ITEM_FRAME)));
-        REIRecipeManager.instance().addDisplayAdapter(new TestRandomCategory("b", new ItemStack(Items.ITEM_FRAME)));
-        REIRecipeManager.instance().addDisplayAdapter(new TestRandomCategory("c", new ItemStack(Items.ITEM_FRAME)));
-        REIRecipeManager.instance().addDisplayAdapter(new TestRandomCategory("d", new ItemStack(Items.ITEM_FRAME)));
-        REIRecipeManager.instance().addDisplayAdapter(new TestRandomCategory("e", new ItemStack(Items.ITEM_FRAME)));
+//        REIRecipeManager.instance().addDisplayAdapter(new TestRandomCategory("a", new ItemStack(Items.ITEM_FRAME)));
+//        REIRecipeManager.instance().addDisplayAdapter(new TestRandomCategory("b", new ItemStack(Items.ITEM_FRAME)));
+//        REIRecipeManager.instance().addDisplayAdapter(new TestRandomCategory("c", new ItemStack(Items.ITEM_FRAME)));
+//        REIRecipeManager.instance().addDisplayAdapter(new TestRandomCategory("d", new ItemStack(Items.ITEM_FRAME)));
+//        REIRecipeManager.instance().addDisplayAdapter(new TestRandomCategory("e", new ItemStack(Items.ITEM_FRAME)));
         
         
         for(Recipe recipe : REIRecipeManager.instance().recipeManager.values()) {
@@ -90,17 +90,16 @@ public class VanillaPlugin implements IREIPlugin, PotionCraftingAdder {
         REIRecipeManager.instance().addRecipe("smoker", smokerRecipes);
         REIRecipeManager.instance().addRecipe("potion", potionRecipes.stream().distinct().collect(Collectors.toList()));
         REIRecipeManager.instance().addRecipe("blastingfurnace", blastFurnaceRecipes);
-        REIRecipeManager.instance().addRecipe("a", Arrays.asList(new RandomRecipe("a")));
-        REIRecipeManager.instance().addRecipe("b", Arrays.asList(new RandomRecipe("b")));
-        REIRecipeManager.instance().addRecipe("c", Arrays.asList(new RandomRecipe("c")));
-        REIRecipeManager.instance().addRecipe("d", Arrays.asList(new RandomRecipe("d")));
-        REIRecipeManager.instance().addRecipe("e", Arrays.asList(new RandomRecipe("e")));
+//        REIRecipeManager.instance().addRecipe("a", Arrays.asList(new RandomRecipe("a")));
+//        REIRecipeManager.instance().addRecipe("b", Arrays.asList(new RandomRecipe("b")));
+//        REIRecipeManager.instance().addRecipe("c", Arrays.asList(new RandomRecipe("c")));
+//        REIRecipeManager.instance().addRecipe("d", Arrays.asList(new RandomRecipe("d")));
+//        REIRecipeManager.instance().addRecipe("e", Arrays.asList(new RandomRecipe("e")));
     }
     
     
     @Override
     public void addPotionRecipe(Potion inputType, Item reagent, Potion outputType) {
-        System.out.printf("%s%s%n", inputType.getName(""), outputType.getName(""));
         potionRecipes.add(new VanillaPotionRecipe(new ItemStack[]{PotionUtil.setPotion(new ItemStack(Items.POTION), inputType)},
                 Ingredient.ofItems(reagent).getStackArray(),
                 new ItemStack[]{PotionUtil.setPotion(new ItemStack(Items.POTION), outputType)}));
