@@ -29,14 +29,12 @@ public abstract class MixinGuiContainerCreative extends InventoryEffectRenderer 
     @Inject(method = "keyPressed(III)Z", at = @At("HEAD"), cancellable = true)
     public void keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_, CallbackInfoReturnable<Boolean> ci) {
         boolean handled = false;
-        if (getSelectedTabIndex() != ItemGroup.SEARCH.getIndex()) {
-            if (getSelectedTabIndex() == ItemGroup.INVENTORY.getIndex()) {
-                for(GuiKeyDown listener : RiftLoader.instance.getListeners(GuiKeyDown.class))
-                    if (listener.keyDown(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_)) {
-                        ci.setReturnValue(true);
-                        handled = true;
-                    }
-            }
+        if (getSelectedTabIndex() == ItemGroup.INVENTORY.getIndex()) {
+            for(GuiKeyDown listener : RiftLoader.instance.getListeners(GuiKeyDown.class))
+                if (listener.keyDown(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_)) {
+                    ci.setReturnValue(true);
+                    handled = true;
+                }
         }
         if (handled)
             ci.cancel();

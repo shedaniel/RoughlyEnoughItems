@@ -17,8 +17,10 @@ import org.dimdev.riftloader.RiftLoader;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 /**
@@ -124,7 +126,12 @@ public class REIRenderHelper {
             }
         }
         if (overlayedGui instanceof RecipeGui) {
-            List<Control> controls = ((RecipeGui) overlayedGui).controls;
+            List<Control> controls = new LinkedList<>(((RecipeGui) overlayedGui).controls);
+            if (((RecipeGui) overlayedGui).slots != null)
+                controls.addAll(((RecipeGui) overlayedGui).slots);
+            controls.addAll(reiGui.controls.stream().filter(control -> {
+                return control instanceof REISlot;
+            }).collect(Collectors.toList()));
             Optional<Control> ctrl = controls.stream().filter(Control::isHighlighted).filter(Control::isEnabled).findFirst();
             if (ctrl.isPresent()) {
                 try {
@@ -178,6 +185,27 @@ public class REIRenderHelper {
     public static boolean mouseScrolled(double direction) {
         if (!reiGui.visible)
             return false;
+        if (Minecraft.getInstance().currentScreen instanceof RecipeGui) {
+            MainWindow window = REIRenderHelper.getResolution();
+            Point mouse = new Point((int) Minecraft.getInstance().mouseHelper.getMouseX(), (int) Minecraft.getInstance().mouseHelper.getMouseY());
+            int mouseX = (int) (mouse.x * (double) window.getScaledWidth() / (double) window.getWidth());
+            int mouseY = (int) (mouse.y * (double) window.getScaledHeight() / (double) window.getHeight());
+            mouse = new Point(mouseX, mouseY);
+            
+            RecipeGui recipeGui = (RecipeGui) Minecraft.getInstance().currentScreen;
+            if (mouse.getX() < window.getScaledWidth() / 2 + recipeGui.guiWidth / 2 && mouse.getX() > window.getScaledWidth() / 2 - recipeGui.guiWidth / 2 &&
+                    mouse.getY() < window.getScaledHeight() / 2 + recipeGui.guiHeight / 2 && mouse.getY() > window.getScaledHeight() / 2 - recipeGui.guiHeight / 2 &&
+                    recipeGui.recipes.get(recipeGui.selectedCategory).size() > 2) {
+                boolean failed = false;
+                if (direction > 0 && recipeGui.btnRecipeLeft.isEnabled())
+                    recipeGui.btnRecipeLeft.onClick.apply(0);
+                else if (direction < 0 && recipeGui.btnRecipeRight.isEnabled())
+                    recipeGui.btnRecipeRight.onClick.apply(0);
+                else failed = true;
+                if (!failed)
+                    return true;
+            }
+        }
         if (direction > 0 && reiGui.buttonLeft.isEnabled())
             reiGui.buttonLeft.onClick.apply(0);
         else if (direction < 0 && reiGui.buttonRight.isEnabled())

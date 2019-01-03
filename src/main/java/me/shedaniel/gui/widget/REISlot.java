@@ -1,6 +1,7 @@
 package me.shedaniel.gui.widget;
 
 import com.google.common.collect.Lists;
+import me.shedaniel.Core;
 import me.shedaniel.gui.REIRenderHelper;
 import me.shedaniel.listenerdefinitions.IMixinGuiContainer;
 import me.shedaniel.network.CheatPacket;
@@ -121,7 +122,7 @@ public class REISlot extends Control {
                 if (button == 1) {
                     cheatedStack.setCount(cheatedStack.getMaxStackSize());
                 }
-                Minecraft.getInstance().getConnection().sendPacket(new CheatPacket(cheatedStack));
+                Core.cheatItems(cheatedStack.copy());
                 return true;
             }
         } else {

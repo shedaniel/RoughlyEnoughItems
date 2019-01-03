@@ -1,7 +1,7 @@
 {
   "id": "roughlyenoughitems",
   "name": "RoughlyEnoughItems",
-  "version": "1.2",
+  "version": "1.4",
   "authors": [
     "ZenDarva",
     "Danielshe"
@@ -10,7 +10,6 @@
     "me.shedaniel.Core",
     "me.shedaniel.listeners.InitListener",
     "me.shedaniel.listeners.DrawContainerListener",
-    "me.shedaniel.listeners.ResizeListener",
     {
       "class": "me.shedaniel.plugin.VanillaPlugin",
       "side": "client"

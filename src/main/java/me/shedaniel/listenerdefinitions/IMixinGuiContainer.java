@@ -11,4 +11,9 @@ public interface IMixinGuiContainer {
     public int getXSize();
     
     public Slot getHoveredSlot();
+    
+    public int getContainerHeight();
+    
+    public int getContainerWidth();
+    
 }

@@ -4,11 +4,13 @@ import me.shedaniel.ClientListener;
 import me.shedaniel.Core;
 import me.shedaniel.gui.widget.KeyBindButton;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.InputMappings;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class ConfigGui extends GuiScreen {
     
@@ -29,7 +31,7 @@ public class ConfigGui extends GuiScreen {
                 e.printStackTrace();
             }
         }));
-        addButton(new KeyBindButton(997, parent.width / 2 - 20, 60, 80, 20, Core.config.usageKeyBind, key -> {
+        addButton(new KeyBindButton(998, parent.width / 2 - 20, 60, 80, 20, Core.config.usageKeyBind, key -> {
             Core.config.usageKeyBind = key;
             ClientListener.useKeybind.setKey(key);
             try {
@@ -38,7 +40,7 @@ public class ConfigGui extends GuiScreen {
                 e.printStackTrace();
             }
         }));
-        addButton(new KeyBindButton(997, parent.width / 2 - 20, 90, 80, 20, Core.config.hideKeyBind, key -> {
+        addButton(new KeyBindButton(999, parent.width / 2 - 20, 90, 80, 20, Core.config.hideKeyBind, key -> {
             Core.config.hideKeyBind = key;
             ClientListener.hideKeybind.setKey(key);
             try {
@@ -47,6 +49,29 @@ public class ConfigGui extends GuiScreen {
                 e.printStackTrace();
             }
         }));
+        addButton(new GuiButton(1000, parent.width / 2 - 90, 120, 150, 20, "") {
+            @Override
+            public void onClick(double double_1, double double_2) {
+                Core.config.centreSearchBox = !Core.config.centreSearchBox;
+                try {
+                    Core.saveConfig();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        
+            @Override
+            public void render(int int_1, int int_2, float float_1) {
+                this.displayString = I18n.format("text.rei.centre_searchbox", Core.config.centreSearchBox ? "§a" : "§c", Core.config.centreSearchBox);
+                super.render(int_1, int_2, float_1);
+                if (this.hovered)
+                    drawSuggestion(int_1, int_2);
+            }
+        
+            protected void drawSuggestion(int x, int y) {
+                drawHoveringText(Arrays.asList(I18n.format("text.rei.centre_searchbox.tooltip").split("\n")), x, y);
+            }
+        });
     }
     
     @Override

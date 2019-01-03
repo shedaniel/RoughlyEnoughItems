@@ -94,4 +94,14 @@ public abstract class MixinGuiContainer implements IGuiEventListenerDeferred, IM
     public Slot getHoveredSlot() {
         return hoveredSlot;
     }
+    
+    @Override
+    public int getContainerHeight() {
+        return ySize;
+    }
+    
+    @Override
+    public int getContainerWidth() {
+        return xSize;
+    }
 }

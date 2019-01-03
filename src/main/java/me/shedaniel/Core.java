@@ -8,6 +8,8 @@ import com.google.gson.stream.JsonWriter;
 import me.shedaniel.config.REIConfig;
 import me.shedaniel.network.CheatPacket;
 import me.shedaniel.network.DeletePacket;
+import net.minecraft.client.Minecraft;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.EnumPacketDirection;
 import org.dimdev.rift.listener.PacketAdder;
 import org.dimdev.riftloader.RiftLoader;
@@ -42,11 +44,13 @@ public class Core implements PacketAdder, InitializationListener {
     
     public static final File configFile = new File(RiftLoader.instance.configDir, "rei.json");
     public static REIConfig config;
+    public static boolean centreSearchBox;
     
     @Override
     public void onInitialization() {
         try {
             loadConfig();
+            centreSearchBox = config.centreSearchBox;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -82,6 +86,10 @@ public class Core implements PacketAdder, InitializationListener {
             REIConfig.GSON.toJson(config, writer);
             writer.close();
         }
+    }
+    
+    public static void cheatItems(ItemStack cheatedStack) {
+        Minecraft.getInstance().getConnection().sendPacket(new CheatPacket(cheatedStack));
     }
     
 }

@@ -1,6 +1,7 @@
 package me.shedaniel.gui;
 
 import me.shedaniel.ClientListener;
+import me.shedaniel.Core;
 import me.shedaniel.gui.widget.Button;
 import me.shedaniel.gui.widget.Control;
 import me.shedaniel.gui.widget.REISlot;
@@ -10,6 +11,7 @@ import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -27,7 +29,7 @@ import java.util.stream.Stream;
 
 public class GuiItemList extends Drawable {
     
-    public static final int FOOTERSIZE = 44;
+    public final int FOOTERSIZE;
     private GuiContainer overlayedGui;
     private static int page = 0;
     private ArrayList<REISlot> displaySlots;
@@ -42,10 +44,12 @@ public class GuiItemList extends Drawable {
     private Control lastHovered;
     protected boolean visible = true;
     private int oldGuiLeft = 0;
-    private boolean cheatMode = false;
+    private boolean cheatMode = false; private Button btnCategoryPageLeft, btnCategoryPageRight;
+    public Button btnRecipeLeft, btnRecipeRight;
     
     public GuiItemList(GuiContainer overlayedGui) {
         super(calculateRect(overlayedGui));
+        FOOTERSIZE = Core.centreSearchBox ? 18 : 44;
         displaySlots = new ArrayList<>();
         controls = new ArrayList<>();
         this.overlayedGui = overlayedGui;
@@ -98,7 +102,7 @@ public class GuiItemList extends Drawable {
         if (searchBox != null) {
             savedText = searchBox.getText();
         }
-        searchBox = new TextBox(rect.x, rect.height - 31, rect.width - 4, 18);
+        searchBox = new TextBox(getSearchBoxArea());
         searchBox.setText(savedText);
         controls.add(searchBox);
         buttonCheating = new Button(5, 5, 45, 20, getCheatModeText());
@@ -114,6 +118,16 @@ public class GuiItemList extends Drawable {
         updateView();
         fillSlots();
         controls.addAll(displaySlots);
+    }
+    
+    private Rectangle getSearchBoxArea() {
+        int ch = ((IMixinGuiContainer) overlayedGui).getContainerHeight(), cw = ((IMixinGuiContainer) overlayedGui).getContainerWidth();
+        if (Core.config.centreSearchBox) {
+            if (ch + 4 + 18 > rect.height) //Will be out of bounds
+                return new Rectangle(overlayedGui.width / 2 - cw / 2, rect.height + 100, cw, 18);
+            return new Rectangle(overlayedGui.width / 2 - cw / 2, rect.height - 31, cw, 18);
+        }
+        return new Rectangle(rect.x, rect.height - 31, rect.width - 4, 18);
     }
     
     private void fillSlots() {
@@ -179,6 +193,7 @@ public class GuiItemList extends Drawable {
         updateButtons();
         controls.forEach(Control::draw);
         String header = String.format("%s/%s", page + 1, ((int) Math.floor(view.size() / displaySlots.size())) + 1);
+        RenderHelper.disableStandardItemLighting();
         Minecraft.getInstance().fontRenderer.drawStringWithShadow(header, rect.x + (rect.width / 2) - (Minecraft.getInstance().fontRenderer.getStringWidth(header) / 2), rect.y + 10, -1);
         GlStateManager.popMatrix();
     }
