@@ -13,5 +13,7 @@ public class REIConfig {
     public int usageKeyBind = KeyEvent.VK_U;
     public int hideKeyBind = KeyEvent.VK_O;
     public boolean centreSearchBox = false;
+    public REIItemListOrdering itemListOrdering = REIItemListOrdering.REGISTRY;
+    public boolean isAscending = true;
     
 }

@@ -2,6 +2,7 @@ package me.shedaniel.gui;
 
 import me.shedaniel.ClientListener;
 import me.shedaniel.Core;
+import me.shedaniel.config.REIItemListOrdering;
 import me.shedaniel.gui.widget.KeyBindButton;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Gui;
@@ -71,6 +72,29 @@ public class ConfigGui extends Gui {
                 drawTooltip(Arrays.asList(I18n.translate("text.rei.centre_searchbox.tooltip").split("\n")), x, y);
             }
         });
+        addButton(new ButtonWidget(1001, parent.width / 2 - 90, 150, 150, 20, "") {
+            @Override
+            public void onPressed(double double_1, double double_2) {
+                int index = Arrays.asList(REIItemListOrdering.values()).indexOf(Core.config.itemListOrdering);
+                if (index >= REIItemListOrdering.values().length) {
+                    index = 0;
+                    Core.config.isAscending = !Core.config.isAscending;
+                }
+                Core.config.itemListOrdering = REIItemListOrdering.values()[index];
+                try {
+                    Core.saveConfig();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+    
+            @Override
+            public void draw(int int_1, int int_2, float float_1) {
+                this.text = I18n.translate("text.rei.list_ordering_button", I18n.translate(Core.config.itemListOrdering.getNameTranslationKey()),
+                        I18n.translate(Core.config.isAscending ? "ordering.rei.ascending" : "ordering.rei.descending"));
+                super.draw(int_1, int_2, float_1);
+            }
+        });
     }
     
     @Override
@@ -83,6 +107,8 @@ public class ConfigGui extends Gui {
         drawString(MinecraftClient.getInstance().fontRenderer, text, parent.width / 2 - 40 - MinecraftClient.getInstance().fontRenderer.getStringWidth(text), 60 + 6, -1);
         text = I18n.translate("key.rei.hide") + ": ";
         drawString(MinecraftClient.getInstance().fontRenderer, text, parent.width / 2 - 40 - MinecraftClient.getInstance().fontRenderer.getStringWidth(text), 90 + 6, -1);
+        text = I18n.translate("text.rei.list_ordering") + ": ";
+        drawString(MinecraftClient.getInstance().fontRenderer, text, parent.width / 2 - 110 - MinecraftClient.getInstance().fontRenderer.getStringWidth(text), 150 + 6, -1);
     }
     
     @Override
