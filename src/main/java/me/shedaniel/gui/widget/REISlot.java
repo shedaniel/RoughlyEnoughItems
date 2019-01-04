@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import me.shedaniel.Core;
 import me.shedaniel.gui.REIRenderHelper;
 import me.shedaniel.listenerdefinitions.IMixinGuiContainer;
-import me.shedaniel.network.CheatPacket;
 import me.shedaniel.network.DeletePacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -126,7 +125,10 @@ public class REISlot extends Control {
                 return true;
             }
         } else {
-            REIRenderHelper.recipeKeybind();
+            if (button == 0)
+                return REIRenderHelper.recipeKeyBind();
+            else if (button == 1)
+                return REIRenderHelper.useKeyBind();
         }
         return false;
     }

@@ -35,16 +35,14 @@ public class GuiItemList extends Drawable {
     private ArrayList<REISlot> displaySlots;
     protected ArrayList<Control> controls;
     private boolean needsResize = false;
-    Button buttonLeft;
-    Button buttonRight;
-    Button buttonCheating;
-    Button buttonConfig;
-    TextBox searchBox;
+    Button buttonLeft, buttonRight, buttonCheating, buttonConfig;
+    private TextBox searchBox;
     private ArrayList<ItemStack> view;
     private Control lastHovered;
     protected boolean visible = true;
     private int oldGuiLeft = 0;
-    private boolean cheatMode = false; private Button btnCategoryPageLeft, btnCategoryPageRight;
+    private boolean cheatMode = false;
+    private Button btnCategoryPageLeft, btnCategoryPageRight;
     public Button btnRecipeLeft, btnRecipeRight;
     
     public GuiItemList(GuiContainer overlayedGui) {

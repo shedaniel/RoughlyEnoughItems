@@ -235,41 +235,45 @@ public class REIRenderHelper {
             reiGui.tick();
     }
     
-    public static void recipeKeybind() {
+    public static boolean recipeKeyBind() {
         if (!(Minecraft.getInstance().currentScreen instanceof GuiContainer))
-            return;
+            return false;
         Control control = reiGui.getLastHovered();
         if (control != null && control.isHighlighted() && control instanceof REISlot) {
             REISlot slot = (REISlot) control;
             REIRecipeManager.instance().displayRecipesFor(slot.getStack());
-            return;
+            return true;
         }
         if (((IMixinGuiContainer) overlayedGui).getHoveredSlot() != null) {
             ItemStack stack = ((IMixinGuiContainer) overlayedGui).getHoveredSlot().getStack();
             REIRecipeManager.instance().displayRecipesFor(stack);
+            return true;
         }
-        
+        return false;
     }
     
-    public static void useKeybind() {
+    public static boolean useKeyBind() {
         if (!(Minecraft.getInstance().currentScreen instanceof GuiContainer))
-            return;
+            return false;
         Control control = reiGui.getLastHovered();
         if (control != null && control.isHighlighted() && control instanceof REISlot) {
             REISlot slot = (REISlot) control;
             REIRecipeManager.instance().displayUsesFor(slot.getStack());
-            return;
+            return true;
         }
         if (((IMixinGuiContainer) overlayedGui).getHoveredSlot() != null) {
             ItemStack stack = ((IMixinGuiContainer) overlayedGui).getHoveredSlot().getStack();
             REIRecipeManager.instance().displayUsesFor(stack);
+            return true;
         }
-        
+        return false;
     }
     
-    public static void hideKeybind() {
+    public static boolean hideKeyBind() {
         if (Minecraft.getInstance().currentScreen == overlayedGui && reiGui != null) {
             reiGui.visible = !reiGui.visible;
+            return true;
         }
+        return true;
     }
 }
