@@ -127,7 +127,10 @@ public class REISlot extends Control {
                 return true;
             }
         } else {
-            REIRenderHelper.recipeKeybind();
+            if (button == 0)
+                return REIRenderHelper.recipeKeyBind();
+            else if (button == 1)
+                return REIRenderHelper.useKeyBind();
         }
         return false;
     }

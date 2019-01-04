@@ -238,41 +238,45 @@ public class REIRenderHelper {
             reiGui.tick();
     }
     
-    public static void recipeKeybind() {
+    public static boolean recipeKeyBind() {
         if (!(MinecraftClient.getInstance().currentGui instanceof ContainerGui))
-            return;
+            return false;
         Control control = reiGui.getLastHovered();
         if (control != null && control.isHighlighted() && control instanceof REISlot) {
             REISlot slot = (REISlot) control;
             REIRecipeManager.instance().displayRecipesFor(slot.getStack());
-            return;
+            return true;
         }
         if (((IMixinContainerGui) overlayedGui).getHoveredSlot() != null) {
             ItemStack stack = ((IMixinContainerGui) overlayedGui).getHoveredSlot().getStack();
             REIRecipeManager.instance().displayRecipesFor(stack);
+            return true;
         }
-        
+        return false;
     }
     
-    public static void useKeybind() {
+    public static boolean useKeyBind() {
         if (!(MinecraftClient.getInstance().currentGui instanceof ContainerGui))
-            return;
+            return false;
         Control control = reiGui.getLastHovered();
         if (control != null && control.isHighlighted() && control instanceof REISlot) {
             REISlot slot = (REISlot) control;
             REIRecipeManager.instance().displayUsesFor(slot.getStack());
-            return;
+            return true;
         }
         if (((IMixinContainerGui) overlayedGui).getHoveredSlot() != null) {
             ItemStack stack = ((IMixinContainerGui) overlayedGui).getHoveredSlot().getStack();
             REIRecipeManager.instance().displayUsesFor(stack);
+            return true;
         }
-        
+        return false;
     }
     
-    public static void hideKeybind() {
+    public static boolean hideKeyBind() {
         if (MinecraftClient.getInstance().currentGui == overlayedGui && reiGui != null) {
             reiGui.visible = !reiGui.visible;
+            return true;
         }
+        return false;
     }
 }

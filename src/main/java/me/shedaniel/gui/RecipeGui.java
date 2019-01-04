@@ -220,7 +220,7 @@ public class RecipeGui extends ContainerGui {
     
     @Override
     public boolean keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_) {
-        if (p_keyPressed_1_ == 259 && prevScreen != null && REIRenderHelper.focusedControl == null) {
+        if (p_keyPressed_1_ == 256 && prevScreen != null) {
             this.client.openGui(prevScreen);
             return true;
         }
