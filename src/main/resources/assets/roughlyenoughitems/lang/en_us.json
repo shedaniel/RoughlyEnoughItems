@@ -20,5 +20,12 @@
   "text.rei.centre_searchbox": "Center Search Box: %s%b",
   "text.rei.centre_searchbox.tooltip": "Please restart Minecraft after editing\nthis config to apply the changes",
   "text.rei.cheat_items": "Given [%s] x%d to %s.",
-  "text.rei.failed_cheat_items": "§cFailed to give items."
+  "text.rei.failed_cheat_items": "§cFailed to give items.",
+  "text.rei.list_ordering": "Item List Ordering",
+  "text.rei.list_ordering_button": "%s [%s]",
+  "ordering.rei.ascending": "Ascending",
+  "ordering.rei.descending": "Descending",
+  "ordering.rei.registry": "Registry",
+  "ordering.rei.name": "Name",
+  "ordering.rei.item_groups": "Item Groups"
 }
