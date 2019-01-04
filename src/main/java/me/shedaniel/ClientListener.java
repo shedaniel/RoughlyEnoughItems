@@ -47,7 +47,7 @@ public class ClientListener implements DoneLoading, RecipeLoadListener {
             @Override
             public boolean apply(int key) {
                 if (key == this.getKey())
-                    REIRenderHelper.recipeKeybind();
+                    REIRenderHelper.recipeKeyBind();
                 return key == this.getKey();
             }
         };
@@ -55,7 +55,7 @@ public class ClientListener implements DoneLoading, RecipeLoadListener {
             @Override
             public boolean apply(int key) {
                 if (key == this.getKey())
-                    REIRenderHelper.hideKeybind();
+                    REIRenderHelper.hideKeyBind();
                 return key == this.getKey();
             }
         };
@@ -63,7 +63,7 @@ public class ClientListener implements DoneLoading, RecipeLoadListener {
             @Override
             public boolean apply(int key) {
                 if (key == this.getKey())
-                    REIRenderHelper.useKeybind();
+                    REIRenderHelper.useKeyBind();
                 return key == this.getKey();
             }
         };
