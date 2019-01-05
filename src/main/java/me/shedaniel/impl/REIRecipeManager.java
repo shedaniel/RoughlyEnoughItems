@@ -11,12 +11,10 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.RecipeManager;
-import net.minecraft.util.BooleanBiFunction;
 
 import java.awt.*;
 import java.util.*;
 import java.util.List;
-import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
 /**
@@ -165,7 +163,11 @@ public class REIRecipeManager implements IRecipeManager {
         Map<IDisplayCategory, List<IRecipe>> recipes = REIRecipeManager.instance().getRecipesFor(stack);
         if (recipes.isEmpty())
             return;
-        RecipeGui gui = new RecipeGui(null, MinecraftClient.getInstance().currentGui, recipes);
+        RecipeGui gui;
+        if (MinecraftClient.getInstance().currentGui instanceof RecipeGui)
+            gui = new RecipeGui(null, ((RecipeGui) MinecraftClient.getInstance().currentGui).getPrevScreen(), recipes);
+        else
+            gui = new RecipeGui(null, MinecraftClient.getInstance().currentGui, recipes);
         MinecraftClient.getInstance().openGui(gui);
     }
     
@@ -173,7 +175,11 @@ public class REIRecipeManager implements IRecipeManager {
         Map<IDisplayCategory, List<IRecipe>> recipes = REIRecipeManager.instance().getUsesFor(stack);
         if (recipes.isEmpty())
             return;
-        RecipeGui gui = new RecipeGui(null, MinecraftClient.getInstance().currentGui, recipes);
+        RecipeGui gui;
+        if (MinecraftClient.getInstance().currentGui instanceof RecipeGui)
+            gui = new RecipeGui(null, ((RecipeGui) MinecraftClient.getInstance().currentGui).getPrevScreen(), recipes);
+        else
+            gui = new RecipeGui(null, MinecraftClient.getInstance().currentGui, recipes);
         MinecraftClient.getInstance().openGui(gui);
     }
 }

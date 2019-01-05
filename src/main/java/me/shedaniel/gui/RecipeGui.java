@@ -1,6 +1,7 @@
 package me.shedaniel.gui;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import me.shedaniel.api.DisplayCategoryCraftable;
 import me.shedaniel.api.IDisplayCategory;
 import me.shedaniel.api.IRecipe;
 import me.shedaniel.gui.widget.Button;
@@ -53,6 +54,10 @@ public class RecipeGui extends ContainerGui {
         setupCategories();
     }
     
+    public Gui getPrevScreen() {
+        return prevScreen;
+    }
+    
     private void setupCategories() {
         for(IDisplayCategory adapter : REIRecipeManager.instance().getDisplayAdapters())
             if (recipes.containsKey(adapter))
@@ -101,9 +106,7 @@ public class RecipeGui extends ContainerGui {
     }
     
     private void updateRecipe() {
-        int categoryPointer = categories.indexOf(selectedCategory);
-        
-        IRecipe recipe = recipes.get(categories.get(categoryPointer)).get(recipePointer);
+        IRecipe recipe = recipes.get(selectedCategory).get(recipePointer);
         selectedCategory.resetRecipes();
         selectedCategory.addRecipe(recipe);
         slots = selectedCategory.setupDisplay(0);
@@ -161,9 +164,14 @@ public class RecipeGui extends ContainerGui {
         controls.add(btnRecipeRight);
         
         List<Control> newControls = new LinkedList<>();
-        categories.get(categoryPointer).addWidget(newControls, 0);
-        if (recipes.get(categories.get(categoryPointer)).size() >= recipePointer + 2)
-            categories.get(categoryPointer).addWidget(newControls, 1);
+        selectedCategory.addWidget(newControls, 0);
+        if (selectedCategory instanceof DisplayCategoryCraftable)
+            ((DisplayCategoryCraftable) selectedCategory).registerAutoCraftButton(newControls, this, getPrevScreen(), recipe, 0);
+        if (recipes.get(selectedCategory).size() >= recipePointer + 2) {
+            selectedCategory.addWidget(newControls, 1);
+            if (selectedCategory instanceof DisplayCategoryCraftable)
+                ((DisplayCategoryCraftable) selectedCategory).registerAutoCraftButton(newControls, this, getPrevScreen(), recipes.get(selectedCategory).get(recipePointer + 1), 1);
+        }
         newControls.forEach(f -> f.move(left, top));
         controls.addAll(newControls);
         

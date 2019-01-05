@@ -12,4 +12,5 @@ public interface IRecipe<T> {
     public List<T> getOutput();
 
     public List<List<T>> getInput();
+    
 }
