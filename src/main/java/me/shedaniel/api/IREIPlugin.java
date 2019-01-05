@@ -7,5 +7,10 @@ import me.shedaniel.listenerdefinitions.IEvent;
  */
 public interface IREIPlugin extends IEvent {
     
-    public void register();
+    public void registerCategories();
+    
+    public void registerRecipes();
+    
+    public void registerSpecialGuiExclusion();
+    
 }
