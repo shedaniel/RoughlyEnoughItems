@@ -9,21 +9,18 @@ import net.minecraft.util.Identifier;
 
 import java.awt.*;
 
-/**
- * Created by James on 7/29/2018.
- */
-public class Button extends Control {
+public class SmallButton extends Control {
     
     private String buttonText;
-    protected static final Identifier BUTTON_TEXTURES = new Identifier("textures/gui/widgets.png");
+    protected static final Identifier BUTTON_TEXTURES = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     
     
-    public Button(int x, int y, int width, int height, String buttonText) {
+    public SmallButton(int x, int y, int width, int height, String buttonText) {
         super(x, y, width, height);
         this.buttonText = buttonText;
     }
     
-    public Button(Rectangle rect, String buttonText) {
+    public SmallButton(Rectangle rect, String buttonText) {
         super(rect);
         this.buttonText = buttonText;
     }
@@ -53,8 +50,7 @@ public class Button extends Control {
         GlStateManager.enableBlend();
         GlStateManager.blendFuncSeparate(GlStateManager.SrcBlendFactor.SRC_ALPHA, GlStateManager.DstBlendFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SrcBlendFactor.ONE, GlStateManager.DstBlendFactor.ZERO);
         GlStateManager.blendFunc(GlStateManager.SrcBlendFactor.SRC_ALPHA, GlStateManager.DstBlendFactor.ONE_MINUS_SRC_ALPHA);
-        gui.drawTexturedRect(rect.x, rect.y, 0, 46 + hoverState * 20, rect.width / 2, rect.height);
-        gui.drawTexturedRect(rect.x + rect.width / 2, rect.y, 200 - rect.width / 2, 46 + hoverState * 20, rect.width / 2, rect.height);
+        gui.drawTexturedRect(rect.x, rect.y, 18 + 44, 222 + hoverState * 10, rect.width, rect.height);
         int lvt_7_1_ = 14737632;
         
         gui.drawStringCentered(lvt_5_1_, this.buttonText, rect.x + rect.width / 2, rect.y + (rect.height - 8) / 2, lvt_7_1_);

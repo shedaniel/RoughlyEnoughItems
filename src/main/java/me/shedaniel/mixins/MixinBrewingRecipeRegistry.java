@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(BrewingRecipeRegistry.class)
 public class MixinBrewingRecipeRegistry {
     
-    @Inject(method = "registerPotionRecipe", at = @At("RETURN"))
+    @Inject(method = "registerPotionRecipe", at = @At("HEAD"))
     private static void registerPotionRecipe(Potion potion_1, Item item_1, Potion potion_2, CallbackInfo info) {
         Core.getListeners(PotionCraftingAdder.class).forEach(potionCraftingAdder -> potionCraftingAdder.addPotionRecipe(potion_1, item_1, potion_2));
     }

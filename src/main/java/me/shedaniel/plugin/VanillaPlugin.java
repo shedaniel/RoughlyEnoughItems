@@ -30,8 +30,6 @@ import net.minecraft.recipe.smelting.SmeltingRecipe;
 import net.minecraft.recipe.smelting.SmokingRecipe;
 import net.minecraft.util.registry.Registry;
 
-import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,13 +37,13 @@ import java.util.stream.Collectors;
 public class VanillaPlugin implements IREIPlugin, PotionCraftingAdder {
     
     private List<VanillaPotionRecipe> potionRecipes = new LinkedList<>();
+    private List<VanillaCraftingRecipe> recipes = new LinkedList<>();
+    private List<VanillaFurnaceRecipe> furnaceRecipes = new LinkedList<>();
+    private List<VanillaSmokerRecipe> smokerRecipes = new LinkedList<>();
+    private List<VanillaBlastFurnaceRecipe> blastFurnaceRecipes = new LinkedList<>();
     
     @Override
-    public void register() {
-        List<VanillaCraftingRecipe> recipes = new LinkedList<>();
-        List<VanillaFurnaceRecipe> furnaceRecipes = new LinkedList<>();
-        List<VanillaSmokerRecipe> smokerRecipes = new LinkedList<>();
-        List<VanillaBlastFurnaceRecipe> blastFurnaceRecipes = new LinkedList<>();
+    public void registerCategories() {
         REIRecipeManager.instance().addDisplayAdapter(new VanillaCraftingCategory());
         REIRecipeManager.instance().addDisplayAdapter(new VanillaFurnaceCategory());
         REIRecipeManager.instance().addDisplayAdapter(new VanillaSmokerCategory());
@@ -56,25 +54,21 @@ public class VanillaPlugin implements IREIPlugin, PotionCraftingAdder {
 //        REIRecipeManager.instance().addDisplayAdapter(new TestRandomCategory("c", new ItemStack(Items.ITEM_FRAME)));
 //        REIRecipeManager.instance().addDisplayAdapter(new TestRandomCategory("d", new ItemStack(Items.ITEM_FRAME)));
 //        REIRecipeManager.instance().addDisplayAdapter(new TestRandomCategory("e", new ItemStack(Items.ITEM_FRAME)));
-        
-        
-        for(Recipe recipe : REIRecipeManager.instance().recipeManager.values()) {
-            if (recipe instanceof ShapelessRecipe) {
+    }
+    
+    @Override
+    public void registerRecipes() {
+        for(Recipe recipe : REIRecipeManager.instance().recipeManager.values())
+            if (recipe instanceof ShapelessRecipe)
                 recipes.add(new VanillaShapelessCraftingRecipe((ShapelessRecipe) recipe));
-            }
-            if (recipe instanceof ShapedRecipe) {
+            else if (recipe instanceof ShapedRecipe)
                 recipes.add(new VanillaShapedCraftingRecipe((ShapedRecipe) recipe));
-            }
-            if (recipe instanceof SmeltingRecipe) {
+            else if (recipe instanceof SmeltingRecipe)
                 furnaceRecipes.add(new VanillaFurnaceRecipe((SmeltingRecipe) recipe));
-            }
-            if (recipe instanceof SmokingRecipe) {
+            else if (recipe instanceof SmokingRecipe)
                 smokerRecipes.add(new VanillaSmokerRecipe((SmokingRecipe) recipe));
-            }
-            if (recipe instanceof BlastingRecipe) {
+            else if (recipe instanceof BlastingRecipe)
                 blastFurnaceRecipes.add(new VanillaBlastFurnaceRecipe((BlastingRecipe) recipe));
-            }
-        }
         Registry.POTION.stream().filter(potion -> !potion.equals(Potions.EMPTY)).forEach(potion -> {
             ItemStack basePotion = PotionUtil.setPotion(new ItemStack(Items.POTION), potion),
                     splashPotion = PotionUtil.setPotion(new ItemStack(Items.SPLASH_POTION), potion),
@@ -97,6 +91,10 @@ public class VanillaPlugin implements IREIPlugin, PotionCraftingAdder {
 //        REIRecipeManager.instance().addRecipe("e", Arrays.asList(new RandomRecipe("e")));
     }
     
+    @Override
+    public void registerSpecialGuiExclusion() {
+    
+    }
     
     @Override
     public void addPotionRecipe(Potion inputType, Item reagent, Potion outputType) {
