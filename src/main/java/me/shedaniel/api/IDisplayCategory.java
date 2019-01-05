@@ -2,6 +2,7 @@ package me.shedaniel.api;
 
 import me.shedaniel.gui.widget.Control;
 import me.shedaniel.gui.widget.REISlot;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
@@ -10,22 +11,31 @@ import java.util.List;
 /**
  * Created by James on 8/7/2018.
  */
-public interface IDisplayCategory<T extends IRecipe> {
-    public String getId();
+public abstract class IDisplayCategory<T extends IRecipe> {
+    public abstract String getId();
     
-    public String getDisplayName();
+    public abstract String getDisplayName();
     
-    public void addRecipe(T recipe);
+    public abstract void addRecipe(T recipe);
     
-    public void resetRecipes();
+    public abstract void resetRecipes();
     
-    public List<REISlot> setupDisplay(int number);
+    public abstract List<REISlot> setupDisplay(int number);
     
-    public boolean canDisplay(T recipe);
+    public abstract boolean canDisplay(T recipe);
     
-    public void drawExtras();
+    public abstract void drawExtras();
     
-    public void addWidget(List<Control> controls, int number);
+    public abstract void addWidget(List<Control> controls, int number);
     
-    public ItemStack getCategoryIcon();
+    public abstract ItemStack getCategoryIcon();
+    
+    public boolean canAutoCraft(Class<? extends Gui> guiClass, T recipe) {
+        return false;
+    }
+    
+    public boolean performAutoCraft(Gui guiClass, T recipe) {
+    
+    }
+    
 }

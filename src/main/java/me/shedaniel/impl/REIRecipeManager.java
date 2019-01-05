@@ -7,14 +7,17 @@ import me.shedaniel.api.IRecipe;
 import me.shedaniel.api.IRecipeManager;
 import me.shedaniel.gui.RecipeGui;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.RecipeManager;
+import net.minecraft.util.BooleanBiFunction;
 
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.awt.*;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
+import java.util.function.BooleanSupplier;
+import java.util.function.Function;
 
 /**
  * Created by James on 8/7/2018.
@@ -23,12 +26,14 @@ public class REIRecipeManager implements IRecipeManager {
     private Map<String, List<IRecipe>> recipeList;
     private List<IDisplayCategory> displayAdapters;
     public static RecipeManager recipeManager;
+    private Map<Class<? extends Gui>, List<Function<Rectangle, Boolean>>> guiExcludeMap;
     
     private static REIRecipeManager myInstance;
     
     private REIRecipeManager() {
         recipeList = new HashMap<>();
         displayAdapters = new LinkedList<>();
+        guiExcludeMap = new HashMap<>();
     }
     
     public List<IDisplayCategory> getDisplayAdapters() {
@@ -41,6 +46,22 @@ public class REIRecipeManager implements IRecipeManager {
             myInstance = new REIRecipeManager();
         }
         return myInstance;
+    }
+    
+    public void addExclusionOnGui(Class<? extends Gui> guiClass, Function<Rectangle, Boolean>... functions) {
+        List<Function<Rectangle, Boolean>> list = guiExcludeMap.containsKey(guiClass) ? new LinkedList<>(guiExcludeMap.get(guiClass)) : new ArrayList<>();
+        list.addAll(Arrays.asList(functions));
+        guiExcludeMap.put(guiClass, list);
+    }
+    
+    public boolean canAddSlot(Class<? extends Gui> guiClass, Rectangle slotRect) {
+        if (!guiExcludeMap.containsKey(guiClass))
+            return true;
+        for(Function<Rectangle, Boolean> rectangleBooleanFunction : guiExcludeMap.get(guiClass)) {
+            if (!rectangleBooleanFunction.apply(slotRect))
+                return false;
+        }
+        return true;
     }
     
     @Override
@@ -136,7 +157,8 @@ public class REIRecipeManager implements IRecipeManager {
         recipeList.clear();
         displayAdapters.clear();
         REIRecipeManager.instance().recipeManager = manager;
-        Core.getListeners(IREIPlugin.class).forEach(IREIPlugin::register);
+        Core.getListeners(IREIPlugin.class).forEach(IREIPlugin::registerCategories);
+        Core.getListeners(IREIPlugin.class).forEach(IREIPlugin::registerRecipes);
     }
     
     public void displayRecipesFor(ItemStack stack) {

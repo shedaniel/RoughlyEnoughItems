@@ -3,16 +3,20 @@ package me.shedaniel.gui;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.ClientListener;
 import me.shedaniel.Core;
+import me.shedaniel.config.REIItemListOrdering;
 import me.shedaniel.gui.widget.Button;
 import me.shedaniel.gui.widget.Control;
 import me.shedaniel.gui.widget.REISlot;
 import me.shedaniel.gui.widget.TextBox;
+import me.shedaniel.impl.REIRecipeManager;
 import me.shedaniel.listenerdefinitions.IMixinContainerGui;
+import net.fabricmc.fabric.client.itemgroup.FabricCreativeGuiComponents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ContainerGui;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.Window;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.TextComponent;
 import net.minecraft.text.TranslatableTextComponent;
@@ -21,8 +25,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -118,7 +121,7 @@ public class GuiItemList extends Drawable {
     private Rectangle getSearchBoxArea() {
         int ch = ((IMixinContainerGui) overlayedGui).getContainerHeight(), cw = ((IMixinContainerGui) overlayedGui).getContainerWidth();
         if (Core.centreSearchBox) {
-            if (ch + 4 + 18 > rect.height) //Will be out of bounds
+            if (ch + 4 + 18 > MinecraftClient.getInstance().window.getScaledHeight()) //Will be out of bounds
                 return new Rectangle(overlayedGui.width / 2 - cw / 2, rect.height + 100, cw, 18);
             return new Rectangle(overlayedGui.width / 2 - cw / 2, rect.height - 31, cw, 18);
         }
@@ -162,9 +165,10 @@ public class GuiItemList extends Drawable {
         while (true) {
             REISlot slot = new REISlot(x + xOffset, y + yOffset);
             slot.setCheatable(true);
+            if (REIRecipeManager.instance().canAddSlot(MinecraftClient.getInstance().currentGui.getClass(), slot.rect))
+                displaySlots.add(slot);
             xOffset += 18;
             currentX++;
-            displaySlots.add(slot);
             if (currentX >= perRow) {
                 xOffset = 0;
                 yOffset += 18;
@@ -247,7 +251,23 @@ public class GuiItemList extends Drawable {
         List<ItemStack> stacks = new ArrayList<>();
         if (ClientListener.stackList == null && !Registry.ITEM.isEmpty())
             Core.getListeners(ClientListener.class).forEach(ClientListener::onDoneLoading);
-        if (ClientListener.stackList != null)
+        if (ClientListener.stackList != null) {
+            List<ItemStack> stackList = new LinkedList<>(ClientListener.stackList);
+            List<ItemGroup> itemGroups = new LinkedList<>(Arrays.asList(ItemGroup.GROUPS));
+            FabricCreativeGuiComponents.COMMON_GROUPS.forEach(itemGroups::add);
+            itemGroups.add(null);
+            if (Core.config.itemListOrdering != REIItemListOrdering.REGISTRY)
+                Collections.sort(stackList, (itemStack, t1) -> {
+                    switch (Core.config.itemListOrdering) {
+                        case NAME:
+                            return itemStack.getDisplayName().getFormattedText().compareToIgnoreCase(t1.getDisplayName().getFormattedText());
+                        case ITEM_GROUPS:
+                            return itemGroups.indexOf(itemStack.getItem().getItemGroup()) - itemGroups.indexOf(t1.getItem().getItemGroup());
+                    }
+                    return 0;
+                });
+            if (!Core.config.isAscending)
+                Collections.reverse(stackList);
             Arrays.stream(searchText.split("\\|")).forEachOrdered(s -> {
                 List<SearchArgument> arguments = new ArrayList<>();
                 while (s.startsWith(" ")) s = s.substring(1);
@@ -264,8 +284,9 @@ public class GuiItemList extends Drawable {
                     arguments.add(new SearchArgument(SearchArgument.ArgumentType.TEXT, s.substring(1), false));
                 else
                     arguments.add(new SearchArgument(SearchArgument.ArgumentType.TEXT, s, true));
-                ClientListener.stackList.stream().filter(itemStack -> filterItem(itemStack, arguments)).forEachOrdered(stacks::add);
+                stackList.stream().filter(itemStack -> filterItem(itemStack, arguments)).forEachOrdered(stacks::add);
             });
+        }
         view.addAll(stacks.stream().distinct().collect(Collectors.toList()));
         page = 0;
         fillSlots();
