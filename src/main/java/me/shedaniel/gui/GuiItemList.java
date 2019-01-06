@@ -129,7 +129,7 @@ public class GuiItemList extends Drawable {
     }
     
     private void fillSlots() {
-        page = MathHelper.clamp(page, 0, (int) Math.floor(view.size() / displaySlots.size()));
+        page = MathHelper.clamp(page, 0, MathHelper.ceil(view.size() / displaySlots.size()));
         int firstSlot = page * displaySlots.size();
         for(int i = 0; i < displaySlots.size(); i++) {
             if (firstSlot + i < view.size() && firstSlot + i >= 0) {
@@ -184,33 +184,27 @@ public class GuiItemList extends Drawable {
     public void draw() {
         if (!visible)
             return;
-        if (needsResize == true)
-            resize();
-        if (oldGuiLeft != ((IMixinContainerGui) overlayedGui).getGuiLeft())
+        if (needsResize == true || oldGuiLeft != ((IMixinContainerGui) overlayedGui).getGuiLeft())
             resize();
         GlStateManager.pushMatrix();
         updateButtons();
         controls.forEach(Control::draw);
-        String header = String.format("%s/%s", page + 1, ((int) Math.floor(view.size() / displaySlots.size())) + 1);
+        String header = String.format("%s/%s", page + 1, MathHelper.ceil(view.size() / displaySlots.size()) + 1);
         MinecraftClient.getInstance().fontRenderer.drawWithShadow(header, rect.x + (rect.width / 2) - (MinecraftClient.getInstance().fontRenderer.getStringWidth(header) / 2), rect.y + 10, -1);
         GlStateManager.popMatrix();
     }
     
     private void updateButtons() {
-        if (page == 0)
-            buttonLeft.setEnabled(false);
-        else
-            buttonLeft.setEnabled(true);
-        if (displaySlots.size() + displaySlots.size() * page >= view.size())
-            buttonRight.setEnabled(false);
-        else
-            buttonRight.setEnabled(true);
+        buttonLeft.setEnabled(MathHelper.ceil(view.size() / displaySlots.size()) > 1);
+        buttonRight.setEnabled(MathHelper.ceil(view.size() / displaySlots.size()) > 1);
     }
     
     
     public boolean btnRightClicked(int button) {
         if (button == 0) {
             page++;
+            if (page > MathHelper.ceil(view.size() / displaySlots.size()))
+                page = 0;
             fillSlots();
             return true;
         }
@@ -220,6 +214,8 @@ public class GuiItemList extends Drawable {
     public boolean btnLeftClicked(int button) {
         if (button == 0) {
             page--;
+            if (page < 0)
+                page = MathHelper.ceil(view.size() / displaySlots.size());
             fillSlots();
             return true;
         }

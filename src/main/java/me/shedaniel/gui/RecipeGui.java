@@ -83,6 +83,7 @@ public class RecipeGui extends ContainerGui {
         drawBackground();
         super.draw(mouseX, mouseY, partialTicks);
         int y = (int) ((mainWindow.getScaledHeight() / 2 - this.guiHeight / 2));
+        GuiLighting.disable();
         drawStringCentered(this.fontRenderer, selectedCategory.getDisplayName(), left + guiWidth / 2, y + 11, -1);
         drawStringCentered(this.fontRenderer, String.format("%d/%d", 1 + getCurrentPage(), getTotalPages()), left + guiWidth / 2, y + 34, -1);
         controls.forEach(Control::draw);

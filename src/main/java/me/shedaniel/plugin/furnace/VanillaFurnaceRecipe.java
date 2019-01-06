@@ -5,6 +5,7 @@ import net.minecraft.block.entity.FurnaceBlockEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Ingredient;
+import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.smelting.SmeltingRecipe;
 
 import java.util.Arrays;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class VanillaFurnaceRecipe implements IRecipe<ItemStack> {
+    
     private final SmeltingRecipe recipe;
     
     @Override
@@ -41,4 +43,9 @@ public class VanillaFurnaceRecipe implements IRecipe<ItemStack> {
         input.add(FurnaceBlockEntity.createBurnableMap().keySet().stream().map(Item::getDefaultStack).collect(Collectors.toList()));
         return input;
     }
+    
+    public Recipe getRecipe() {
+        return recipe;
+    }
+    
 }

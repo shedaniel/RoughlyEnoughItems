@@ -132,6 +132,7 @@ public class VanillaCraftingCategory implements DisplayCategoryCraftable<Vanilla
             ((IMixinRecipeBookGui) (((CraftingTableGui) gui).getRecipeBookGui())).getGhostSlots().reset();
         else if (gui.getClass().isAssignableFrom(PlayerInventoryGui.class))
             ((IMixinRecipeBookGui) (((PlayerInventoryGui) gui).getRecipeBookGui())).getGhostSlots().reset();
+        else return false;
         MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, recipe.getRecipe(), Gui.isShiftPressed());
         return true;
     }
@@ -140,7 +141,6 @@ public class VanillaCraftingCategory implements DisplayCategoryCraftable<Vanilla
     public void registerAutoCraftButton(List<Control> control, RecipeGui recipeGui, Gui parentGui, VanillaCraftingRecipe recipe, int number) {
         SmallButton button = new SmallButton(78, 75 + 6 + 36 + number * 75, 10, 10, "+");
         button.setOnClick(mouse -> {
-            System.out.println(parentGui.getClass().getName());
             recipeGui.close();
             MinecraftClient.getInstance().openGui(parentGui);
             return canAutoCraftHere(parentGui.getClass(), recipe) && performAutoCraft(parentGui, recipe);
