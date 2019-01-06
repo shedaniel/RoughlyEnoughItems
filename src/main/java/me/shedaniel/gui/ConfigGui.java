@@ -7,6 +7,7 @@ import me.shedaniel.gui.widget.KeyBindButton;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 
 import java.io.IOException;
@@ -91,6 +92,7 @@ public class ConfigGui extends Gui {
     
             @Override
             public void draw(int int_1, int int_2, float float_1) {
+                GuiLighting.disable();
                 this.text = I18n.translate("text.rei.list_ordering_button", I18n.translate(Core.config.itemListOrdering.getNameTranslationKey()),
                         I18n.translate(Core.config.isAscending ? "ordering.rei.ascending" : "ordering.rei.descending"));
                 super.draw(int_1, int_2, float_1);
@@ -102,6 +104,7 @@ public class ConfigGui extends Gui {
     public void draw(int mouseX, int mouseY, float partialTicks) {
         drawBackground();
         super.draw(mouseX, mouseY, partialTicks);
+        GuiLighting.disable();
         String text = I18n.translate("key.rei.recipe") + ": ";
         drawString(MinecraftClient.getInstance().fontRenderer, text, parent.width / 2 - 25 - MinecraftClient.getInstance().fontRenderer.getStringWidth(text), 30 + 6, -1);
         text = I18n.translate("key.rei.use") + ": ";

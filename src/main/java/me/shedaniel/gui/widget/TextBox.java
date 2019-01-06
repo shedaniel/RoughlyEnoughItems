@@ -2,6 +2,7 @@ package me.shedaniel.gui.widget;
 
 import me.shedaniel.gui.REIRenderHelper;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.render.GuiLighting;
 
 import java.awt.*;
 
@@ -30,6 +31,7 @@ public class TextBox extends Control implements IFocusable {
     
     @Override
     public void draw() {
+        GuiLighting.disable();
         textField.render(0, 0, 0);
     }
     
@@ -44,6 +46,11 @@ public class TextBox extends Control implements IFocusable {
     }
     
     protected boolean doMouseClick(int button) {
+        if (button == 1) {
+            textField.setText("");
+            REIRenderHelper.updateSearch();
+            return true;
+        }
         Point mouseLoc = REIRenderHelper.getMouseLoc();
         if (!hasFocus())
             setFocused(true);
@@ -52,10 +59,8 @@ public class TextBox extends Control implements IFocusable {
     
     protected boolean onKeyPressed(int first, int second, int third) {
         boolean handled = textField.keyPressed(first, second, third);
-        if (handled) {
+        if (handled)
             REIRenderHelper.updateSearch();
-        }
-        
         return handled;
     }
     

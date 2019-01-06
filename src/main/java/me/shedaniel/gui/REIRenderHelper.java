@@ -1,6 +1,5 @@
 package me.shedaniel.gui;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.ClientListener;
 import me.shedaniel.gui.widget.Control;
 import me.shedaniel.gui.widget.IFocusable;
@@ -99,15 +98,8 @@ public class REIRenderHelper {
     
     
     private static void renderTooltips() {
-        GlStateManager.pushMatrix();
-        GlStateManager.enableLighting();
-        for(TooltipData tooltipData : tooltipsToRender) {
-            getOverlayedGui().drawTooltip(tooltipData.text, tooltipData.x, tooltipData.y);
-        }
-        GlStateManager.disableLighting();
+        tooltipsToRender.forEach(tooltipData -> getOverlayedGui().drawTooltip(tooltipData.text, tooltipData.x, tooltipData.y));
         tooltipsToRender.clear();
-        GlStateManager.popMatrix();
-        
     }
     
     public static boolean mouseClick(int x, int y, int button) {
