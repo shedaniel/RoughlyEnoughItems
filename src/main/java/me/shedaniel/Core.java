@@ -11,8 +11,13 @@ import net.fabricmc.fabric.events.client.ClientTickEvent;
 import net.fabricmc.loader.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -28,6 +33,7 @@ public class Core implements ClientModInitializer {
     public static REIConfig config;
     public static ClientListener clientListener;
     public static boolean centreSearchBox;
+    public static Logger LOGGER = LogManager.getFormatterLogger("REI");
     
     @Override
     public void onInitializeClient() {
@@ -73,33 +79,35 @@ public class Core implements ClientModInitializer {
     }
     
     public static void loadConfig() throws IOException {
-        if (!configFile.exists())
-            loadDefaultConfig();
+        if (!configFile.exists() || !configFile.canRead()) {
+            config = new REIConfig();
+            saveConfig();
+            return;
+        }
         boolean failed = false;
         try {
-            InputStream in = Files.newInputStream(configFile.toPath());
-            config = REIConfig.GSON.fromJson(new InputStreamReader(in), REIConfig.class);
+            config = REIConfig.GSON.fromJson(new InputStreamReader(Files.newInputStream(configFile.toPath())), REIConfig.class);
         } catch (Exception e) {
             failed = true;
         }
         if (failed || config == null) {
-            System.out.println("[REI] Failed to load config! Overwriting with default config.");
+            Core.LOGGER.error("Failed to load config! Overwriting with default config.");
             config = new REIConfig();
         }
         saveConfig();
     }
     
-    public static void loadDefaultConfig() throws IOException {
-        config = new REIConfig();
-        saveConfig();
-    }
-    
     public static void saveConfig() throws IOException {
         configFile.getParentFile().mkdirs();
-        if (configFile.exists())
-            configFile.delete();
-        try (PrintWriter writer = new PrintWriter(configFile)) {
+        if (!configFile.exists() && !configFile.createNewFile()) {
+            Core.LOGGER.error("Failed to save config! Overwriting with default config.");
+            config = new REIConfig();
+            return;
+        }
+        FileWriter writer = new FileWriter(configFile, false);
+        try {
             REIConfig.GSON.toJson(config, writer);
+        } finally {
             writer.close();
         }
     }
