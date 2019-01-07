@@ -62,8 +62,9 @@ public class SmallButton extends Control {
         gui.drawStringCentered(lvt_5_1_, this.buttonText, rect.x + rect.width / 2, rect.y + (rect.height - 8) / 2, lvt_7_1_);
         GlStateManager.enableLighting();
         GlStateManager.popMatrix();
-        if (isHighlighted()) {
-            List<String> toolTip = Arrays.asList(toolTipSupplier.apply(isEnabled()).split("\n"));
+        String ttS = toolTipSupplier.apply(isEnabled());
+        if (isHighlighted() && ttS != "") {
+            List<String> toolTip = Arrays.asList(ttS.split("\n"));
             if (toolTip != null && toolTip.size() != 0)
                 gui.drawTooltip(toolTip, REIRenderHelper.getMouseLoc().x, REIRenderHelper.getMouseLoc().y);
         }
