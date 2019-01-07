@@ -11,6 +11,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.FurnaceBlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.container.BlastFurnaceGui;
 import net.minecraft.client.gui.container.FurnaceGui;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.Item;
@@ -109,7 +110,11 @@ public class VanillaFurnaceCategory implements DisplayCategoryCraftable<VanillaF
     
     @Override
     public void registerAutoCraftButton(List<Control> control, RecipeGui recipeGui, Gui parentGui, VanillaFurnaceRecipe recipe, int number) {
-        SmallButton button = new SmallButton(128, 75 + 6 + 26 + number * 75, 10, 10, "+");
+        SmallButton button = new SmallButton(128, 75 + 6 + 26 + number * 75, 10, 10, "+", enabled -> {
+            if (!(parentGui instanceof FurnaceGui))
+                return I18n.translate("text.auto_craft.wrong_gui");
+            return "";
+        });
         button.setOnClick(mouse -> {
             recipeGui.close();
             MinecraftClient.getInstance().openGui(parentGui);

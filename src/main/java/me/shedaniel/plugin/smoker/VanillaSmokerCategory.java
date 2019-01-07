@@ -1,7 +1,6 @@
 package me.shedaniel.plugin.smoker;
 
 import me.shedaniel.api.DisplayCategoryCraftable;
-import me.shedaniel.api.IDisplayCategory;
 import me.shedaniel.gui.RecipeGui;
 import me.shedaniel.gui.widget.Control;
 import me.shedaniel.gui.widget.REISlot;
@@ -12,7 +11,6 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.SmokerBlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.container.FurnaceGui;
 import net.minecraft.client.gui.container.SmokerGui;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.Item;
@@ -111,7 +109,11 @@ public class VanillaSmokerCategory implements DisplayCategoryCraftable<VanillaSm
     
     @Override
     public void registerAutoCraftButton(List<Control> control, RecipeGui recipeGui, Gui parentGui, VanillaSmokerRecipe recipe, int number) {
-        SmallButton button = new SmallButton(128, 75 + 6 + 26 + number * 75, 10, 10, "+");
+        SmallButton button = new SmallButton(128, 75 + 6 + 26 + number * 75, 10, 10, "+", enabled -> {
+            if (!(parentGui instanceof SmokerGui))
+                return I18n.translate("text.auto_craft.wrong_gui");
+            return "";
+        });
         button.setOnClick(mouse -> {
             recipeGui.close();
             MinecraftClient.getInstance().openGui(parentGui);

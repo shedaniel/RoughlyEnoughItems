@@ -27,5 +27,7 @@
   "ordering.rei.descending": "Descending",
   "ordering.rei.registry": "Registry",
   "ordering.rei.name": "Name",
-  "ordering.rei.item_groups": "Item Groups"
+  "ordering.rei.item_groups": "Item Groups",
+  "text.auto_craft.wrong_gui": "§cCan't auto craft in this inventory!",
+  "text.auto_craft.crafting.too_small": "§cThis inventory is too small!"
 }
