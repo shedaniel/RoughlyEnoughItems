@@ -139,7 +139,13 @@ public class VanillaCraftingCategory implements DisplayCategoryCraftable<Vanilla
     
     @Override
     public void registerAutoCraftButton(List<Control> control, RecipeGui recipeGui, Gui parentGui, VanillaCraftingRecipe recipe, int number) {
-        SmallButton button = new SmallButton(78, 75 + 6 + 36 + number * 75, 10, 10, "+");
+        SmallButton button = new SmallButton(78, 75 + 6 + 36 + number * 75, 10, 10, "+", enabled -> {
+            if (!(parentGui instanceof CraftingTableGui || parentGui instanceof PlayerInventoryGui))
+                return I18n.translate("text.auto_craft.wrong_gui");
+            if (parentGui instanceof PlayerInventoryGui && !(recipe.getHeight() < 3 && recipe.getWidth() < 3))
+                return I18n.translate("text.auto_craft.crafting.too_small");
+            return "";
+        });
         button.setOnClick(mouse -> {
             recipeGui.close();
             MinecraftClient.getInstance().openGui(parentGui);

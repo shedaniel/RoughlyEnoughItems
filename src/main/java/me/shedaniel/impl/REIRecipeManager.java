@@ -40,7 +40,7 @@ public class REIRecipeManager implements IRecipeManager {
     
     public static REIRecipeManager instance() {
         if (myInstance == null) {
-            Core.LOGGER.info("Newing me up.");
+            Core.LOGGER.info("REI: Newing me up.");
             myInstance = new REIRecipeManager();
         }
         return myInstance;

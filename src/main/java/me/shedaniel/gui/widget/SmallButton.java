@@ -5,30 +5,36 @@ import me.shedaniel.gui.REIRenderHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.FontRenderer;
 import net.minecraft.client.gui.ContainerGui;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.util.Identifier;
 
 import java.awt.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
 
 public class SmallButton extends Control {
     
     private String buttonText;
+    private Function<Boolean, String> toolTipSupplier;
     protected static final Identifier BUTTON_TEXTURES = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     
     
-    public SmallButton(int x, int y, int width, int height, String buttonText) {
+    public SmallButton(int x, int y, int width, int height, String buttonText, Function<Boolean, String> toolTipSupplier) {
         super(x, y, width, height);
         this.buttonText = buttonText;
+        this.toolTipSupplier = toolTipSupplier;
     }
     
-    public SmallButton(Rectangle rect, String buttonText) {
+    public SmallButton(Rectangle rect, String buttonText, Function<Boolean, String> toolTipSupplier) {
         super(rect);
         this.buttonText = buttonText;
+        this.toolTipSupplier = toolTipSupplier;
     }
     
     public void setString(String text) {
         buttonText = text;
     }
-    
     
     @Override
     public void draw() {
@@ -56,6 +62,11 @@ public class SmallButton extends Control {
         gui.drawStringCentered(lvt_5_1_, this.buttonText, rect.x + rect.width / 2, rect.y + (rect.height - 8) / 2, lvt_7_1_);
         GlStateManager.enableLighting();
         GlStateManager.popMatrix();
+        if (isHighlighted()) {
+            List<String> toolTip = Arrays.asList(toolTipSupplier.apply(isEnabled()).split("\n"));
+            if (toolTip != null && toolTip.size() != 0)
+                gui.drawTooltip(toolTip, REIRenderHelper.getMouseLoc().x, REIRenderHelper.getMouseLoc().y);
+        }
     }
     
 }

@@ -91,7 +91,7 @@ public class Core implements ClientModInitializer {
             failed = true;
         }
         if (failed || config == null) {
-            Core.LOGGER.error("Failed to load config! Overwriting with default config.");
+            Core.LOGGER.error("REI: Failed to load config! Overwriting with default config.");
             config = new REIConfig();
         }
         saveConfig();
@@ -100,7 +100,7 @@ public class Core implements ClientModInitializer {
     public static void saveConfig() throws IOException {
         configFile.getParentFile().mkdirs();
         if (!configFile.exists() && !configFile.createNewFile()) {
-            Core.LOGGER.error("Failed to save config! Overwriting with default config.");
+            Core.LOGGER.error("REI: Failed to save config! Overwriting with default config.");
             config = new REIConfig();
             return;
         }
