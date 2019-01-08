@@ -13,9 +13,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  */
 @Mixin(Bootstrap.class)
 public class MixinDoneLoading {
+    
     @Inject(method = "initialize", at = @At("RETURN"))
     private static void onBootstrapRegister(CallbackInfo ci) {
         Core.LOGGER.info("REI: Done Loading");
         Core.getListeners(DoneLoading.class).forEach(DoneLoading::onDoneLoading);
     }
+    
 }

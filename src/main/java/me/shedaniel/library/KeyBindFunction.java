@@ -19,4 +19,5 @@ public abstract class KeyBindFunction {
     }
     
     public abstract boolean apply(int key);
+    
 }

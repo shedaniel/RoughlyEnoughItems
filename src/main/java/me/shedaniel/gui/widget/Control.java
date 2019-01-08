@@ -1,7 +1,7 @@
 package me.shedaniel.gui.widget;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import me.shedaniel.api.TriBooleanProducer;
+import me.shedaniel.api.TriBooleanSupplier;
 import me.shedaniel.gui.Drawable;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
@@ -15,9 +15,10 @@ import java.util.function.IntFunction;
  * Created by James on 7/29/2018.
  */
 public abstract class Control extends Drawable {
+    
     private boolean enabled = true;
     public IntFunction<Boolean> onClick;
-    public TriBooleanProducer onKeyDown;
+    public TriBooleanSupplier onKeyDown;
     public BiConsumer<Character, Integer> charPressed;
     
     public Control(int x, int y, int width, int height) {
@@ -55,7 +56,6 @@ public abstract class Control extends Drawable {
             p_drawRect_1_ = p_drawRect_3_;
             p_drawRect_3_ = lvt_5_3_;
         }
-        
         float lvt_5_3_1 = (float) (p_drawRect_4_ >> 24 & 255) / 255.0F;
         float lvt_6_1_ = (float) (p_drawRect_4_ >> 16 & 255) / 255.0F;
         float lvt_7_1_ = (float) (p_drawRect_4_ >> 8 & 255) / 255.0F;

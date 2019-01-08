@@ -9,8 +9,6 @@ public class REIConfig {
     
     public static Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
-            .serializeNulls()
-            .disableHtmlEscaping()
             .create();
     
     public int recipeKeyBind = KeyEvent.VK_R;
@@ -19,5 +17,6 @@ public class REIConfig {
     public boolean centreSearchBox = false;
     public REIItemListOrdering itemListOrdering = REIItemListOrdering.REGISTRY;
     public boolean isAscending = true;
+    public boolean enableCraftableOnlyButton = false;
     
 }

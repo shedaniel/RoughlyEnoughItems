@@ -1,6 +1,6 @@
 package me.shedaniel.plugin.furnace;
 
-import me.shedaniel.api.DisplayCategoryCraftable;
+import me.shedaniel.api.IDisplayCategoryCraftable;
 import me.shedaniel.gui.RecipeGui;
 import me.shedaniel.gui.widget.Control;
 import me.shedaniel.gui.widget.REISlot;
@@ -11,7 +11,6 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.FurnaceBlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.container.BlastFurnaceGui;
 import net.minecraft.client.gui.container.FurnaceGui;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.Item;
@@ -22,7 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class VanillaFurnaceCategory implements DisplayCategoryCraftable<VanillaFurnaceRecipe> {
+public class VanillaFurnaceCategory implements IDisplayCategoryCraftable<VanillaFurnaceRecipe> {
     private List<VanillaFurnaceRecipe> recipes;
     
     @Override

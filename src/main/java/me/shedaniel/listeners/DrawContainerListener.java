@@ -2,7 +2,6 @@ package me.shedaniel.listeners;
 
 import me.shedaniel.gui.REIRenderHelper;
 import me.shedaniel.listenerdefinitions.*;
-import net.fabricmc.fabric.networking.CustomPayloadPacketRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ContainerGui;
 import net.minecraft.client.gui.Gui;
@@ -12,7 +11,7 @@ import net.minecraft.item.ItemGroup;
 /**
  * Created by James on 7/27/2018.
  */
-public class DrawContainerListener implements DrawContainer, GuiCickListener, GuiKeyDown, CharInput, ClientTickable, MouseScrollListener, MinecraftResize {
+public class DrawContainerListener implements DrawContainer, GuiClick, GuiKeyDown, CharInput, ClientTickable, GuiMouseScroll, MinecraftResize {
     
     @Override
     public void draw(int x, int y, float dunno, ContainerGui gui) {

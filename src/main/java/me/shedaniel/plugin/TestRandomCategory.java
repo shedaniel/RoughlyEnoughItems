@@ -66,4 +66,5 @@ public class TestRandomCategory implements IDisplayCategory<RandomRecipe> {
     public ItemStack getCategoryIcon() {
         return item;
     }
+    
 }

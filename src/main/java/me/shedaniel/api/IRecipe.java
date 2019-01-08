@@ -1,5 +1,7 @@
 package me.shedaniel.api;
 
+import net.minecraft.item.ItemStack;
+
 import java.util.List;
 
 /**
@@ -12,5 +14,7 @@ public interface IRecipe<T> {
     public List<T> getOutput();
 
     public List<List<T>> getInput();
+    
+    public List<List<T>> getRecipeRequiredInput();
     
 }

@@ -9,6 +9,7 @@ import java.awt.*;
  * Created by James on 7/28/2018.
  */
 public abstract class Drawable implements IDrawable {
+    
     protected Rectangle rect;
     
     public Drawable(int x, int y, int width, int height) {
@@ -30,4 +31,5 @@ public abstract class Drawable implements IDrawable {
         }
         return false;
     }
+    
 }

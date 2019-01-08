@@ -4,6 +4,7 @@ import me.shedaniel.api.IRecipe;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.ItemStack;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,4 +31,10 @@ public class RandomRecipe implements IRecipe<ItemStack> {
     public List<List<ItemStack>> getInput() {
         return new LinkedList<>(Arrays.asList(new LinkedList<>(Arrays.asList(new ItemStack[]{new ItemStack(Blocks.OAK_LOG.getItem())}))));
     }
+    
+    @Override
+    public List<List<ItemStack>> getRecipeRequiredInput() {
+        return new ArrayList<>();
+    }
+    
 }

@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
  * Created by James on 7/28/2018.
  */
 public class REISlot extends Control {
+    
     private static final Identifier RECIPE_GUI = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private boolean cheatable = false;
     private List<ItemStack> itemList = new LinkedList<>();

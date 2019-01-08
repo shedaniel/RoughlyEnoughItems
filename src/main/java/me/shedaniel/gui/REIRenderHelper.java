@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
  * Created by James on 7/28/2018.
  */
 public class REIRenderHelper {
+    
     static Point mouseLoc;
     static public GuiItemList reiGui;
     static ContainerGui overlayedGui;
@@ -230,6 +231,10 @@ public class REIRenderHelper {
             reiGui.tick();
     }
     
+    public static boolean isGuiVisible() {
+        return reiGui != null && reiGui.visible;
+    }
+    
     public static boolean recipeKeyBind() {
         if (!(MinecraftClient.getInstance().currentGui instanceof ContainerGui))
             return false;
@@ -271,4 +276,5 @@ public class REIRenderHelper {
         }
         return false;
     }
+    
 }

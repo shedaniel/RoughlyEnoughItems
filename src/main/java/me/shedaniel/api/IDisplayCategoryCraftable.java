@@ -8,7 +8,7 @@ import net.minecraft.client.gui.Gui;
 
 import java.util.List;
 
-public interface DisplayCategoryCraftable<T extends IRecipe> extends IDisplayCategory<T> {
+public interface IDisplayCategoryCraftable<T extends IRecipe> extends IDisplayCategory<T> {
     
     public boolean canAutoCraftHere(Class<? extends Gui> guiClass, T recipe);
     

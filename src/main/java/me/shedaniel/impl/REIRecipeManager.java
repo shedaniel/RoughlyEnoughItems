@@ -21,6 +21,7 @@ import java.util.function.Function;
  * Created by James on 8/7/2018.
  */
 public class REIRecipeManager implements IRecipeManager {
+    
     private Map<String, List<IRecipe>> recipeList;
     private List<IDisplayCategory> displayAdapters;
     public static RecipeManager recipeManager;
@@ -32,6 +33,10 @@ public class REIRecipeManager implements IRecipeManager {
         recipeList = new HashMap<>();
         displayAdapters = new LinkedList<>();
         guiExcludeMap = new HashMap<>();
+    }
+    
+    public Map<String, List<IRecipe>> getRecipeList() {
+        return recipeList;
     }
     
     public List<IDisplayCategory> getDisplayAdapters() {
@@ -55,18 +60,17 @@ public class REIRecipeManager implements IRecipeManager {
     public boolean canAddSlot(Class<? extends Gui> guiClass, Rectangle slotRect) {
         if (!guiExcludeMap.containsKey(guiClass))
             return true;
-        for(Function<Rectangle, Boolean> rectangleBooleanFunction : guiExcludeMap.get(guiClass)) {
+        for(Function<Rectangle, Boolean> rectangleBooleanFunction : guiExcludeMap.get(guiClass))
             if (!rectangleBooleanFunction.apply(slotRect))
                 return false;
-        }
         return true;
     }
     
     @Override
     public void addRecipe(String id, IRecipe recipe) {
-        if (recipeList.containsKey(id)) {
+        if (recipeList.containsKey(id))
             recipeList.get(id).add(recipe);
-        } else {
+        else {
             List<IRecipe> recipes = new LinkedList<>();
             recipeList.put(id, recipes);
             recipes.add(recipe);
@@ -75,9 +79,9 @@ public class REIRecipeManager implements IRecipeManager {
     
     @Override
     public void addRecipe(String id, List<? extends IRecipe> recipes) {
-        if (recipeList.containsKey(id)) {
+        if (recipeList.containsKey(id))
             recipeList.get(id).addAll(recipes);
-        } else {
+        else {
             List<IRecipe> newRecipeList = new LinkedList<>();
             recipeList.put(id, newRecipeList);
             newRecipeList.addAll(recipes);
@@ -93,21 +97,15 @@ public class REIRecipeManager implements IRecipeManager {
     public Map<IDisplayCategory, List<IRecipe>> getRecipesFor(ItemStack stack) {
         Map<IDisplayCategory, List<IRecipe>> categories = new HashMap<>();
         displayAdapters.forEach(f -> categories.put(f, new LinkedList<>()));
-        for(List<IRecipe> value : recipeList.values()) {
-            for(IRecipe iRecipe : value) {
-                for(Object o : iRecipe.getOutput()) {
-                    if (o instanceof ItemStack) {
-                        if (ItemStack.areEqualIgnoreTags(stack, (ItemStack) o)) {
-                            for(IDisplayCategory iDisplayCategory : categories.keySet()) {
+        for(List<IRecipe> value : recipeList.values())
+            for(IRecipe iRecipe : value)
+                for(Object o : iRecipe.getOutput())
+                    if (o instanceof ItemStack)
+                        if (ItemStack.areEqualIgnoreTags(stack, (ItemStack) o))
+                            for(IDisplayCategory iDisplayCategory : categories.keySet())
                                 if (iDisplayCategory.getId() == iRecipe.getId()) {
                                     categories.get(iDisplayCategory).add(iRecipe);
                                 }
-                            }
-                        }
-                    }
-                }
-            }
-        }
         categories.keySet().removeIf(f -> categories.get(f).isEmpty());
         return categories;
     }
@@ -115,20 +113,18 @@ public class REIRecipeManager implements IRecipeManager {
     public Map<IDisplayCategory, List<IRecipe>> getUsesFor(ItemStack stack) {
         Map<IDisplayCategory, List<IRecipe>> categories = new HashMap<>();
         displayAdapters.forEach(f -> categories.put(f, new LinkedList<>()));
-        for(List<IRecipe> value : recipeList.values()) {
+        for(List<IRecipe> value : recipeList.values())
             for(IRecipe iRecipe : value) {
                 boolean found = false;
                 for(Object o : iRecipe.getInput()) {
                     List<ItemStack> input = (List<ItemStack>) o;
-                    
                     for(ItemStack itemStack : input) {
                         if (ItemStack.areEqualIgnoreTags(itemStack, stack)) {
-                            for(IDisplayCategory iDisplayCategory : categories.keySet()) {
+                            for(IDisplayCategory iDisplayCategory : categories.keySet())
                                 if (iDisplayCategory.getId() == iRecipe.getId()) {
                                     categories.get(iDisplayCategory).add(iRecipe);
                                     found = true;
                                 }
-                            }
                             if (found)
                                 break;
                         }
@@ -137,11 +133,18 @@ public class REIRecipeManager implements IRecipeManager {
                         break;
                 }
             }
-        }
         categories.keySet().removeIf(f -> categories.get(f).isEmpty());
         return categories;
     }
     
+    public List<IRecipe> findUsageForItems(List<ItemStack> types) {
+        List<IRecipe> recipes = new ArrayList<>();
+        types.forEach(item -> {
+            Map<IDisplayCategory, List<IRecipe>> itemUsages = getUsesFor(item);
+            itemUsages.values().forEach(iRecipes -> recipes.addAll(iRecipes));
+        });
+        return recipes;
+    }
     
     public List<IDisplayCategory> getAdatapersForOutput(ItemStack stack) {
         return null;
@@ -166,8 +169,7 @@ public class REIRecipeManager implements IRecipeManager {
         RecipeGui gui;
         if (MinecraftClient.getInstance().currentGui instanceof RecipeGui)
             gui = new RecipeGui(null, ((RecipeGui) MinecraftClient.getInstance().currentGui).getPrevScreen(), recipes);
-        else
-            gui = new RecipeGui(null, MinecraftClient.getInstance().currentGui, recipes);
+        else gui = new RecipeGui(null, MinecraftClient.getInstance().currentGui, recipes);
         MinecraftClient.getInstance().openGui(gui);
     }
     
@@ -178,8 +180,8 @@ public class REIRecipeManager implements IRecipeManager {
         RecipeGui gui;
         if (MinecraftClient.getInstance().currentGui instanceof RecipeGui)
             gui = new RecipeGui(null, ((RecipeGui) MinecraftClient.getInstance().currentGui).getPrevScreen(), recipes);
-        else
-            gui = new RecipeGui(null, MinecraftClient.getInstance().currentGui, recipes);
+        else gui = new RecipeGui(null, MinecraftClient.getInstance().currentGui, recipes);
         MinecraftClient.getInstance().openGui(gui);
     }
+    
 }

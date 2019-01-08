@@ -19,6 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  */
 @Mixin(ContainerGui.class)
 public abstract class MixinContainerGui extends Gui implements IMixinContainerGui {
+    
     @Shadow
     protected Slot focusedSlot;
     @Shadow
@@ -40,32 +41,24 @@ public abstract class MixinContainerGui extends Gui implements IMixinContainerGu
     
     @Inject(method = "mouseClicked(DDI)Z", at = @At("HEAD"), cancellable = true)
     private void mouseClick(double p_mouseClicked_1_, double p_mouseClicked_3_, int p_mouseClicked_5_, CallbackInfoReturnable<Boolean> ci) {
-        boolean handled = false;
-        for(GuiCickListener listener : Core.getListeners(GuiCickListener.class)) {
+        for(GuiClick listener : Core.getListeners(GuiClick.class))
             if (listener.onClick((int) p_mouseClicked_1_, (int) p_mouseClicked_3_, p_mouseClicked_5_)) {
                 ci.setReturnValue(true);
-                handled = true;
+                ci.cancel();
             }
-        }
-        if (handled)
-            ci.cancel();
     }
     
     @Inject(method = "keyPressed(III)Z", at = @At("HEAD"), cancellable = true)
     private void onKeyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_, CallbackInfoReturnable<Boolean> ci) {
-        boolean handled = false;
-        for(GuiKeyDown listener : Core.getListeners(GuiKeyDown.class)) {
-            if (listener.keyDown(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_))
-                handled = true;
-        }
-        if (handled) {
-            ci.setReturnValue(handled);
-            ci.cancel();
-        }
+        for(GuiKeyDown listener : Core.getListeners(GuiKeyDown.class))
+            if (listener.keyDown(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_)) {
+                ci.setReturnValue(true);
+                ci.cancel();
+            }
     }
     
     public boolean mouseScrolled(double p_mouseScrolled_1_) {
-        for(MouseScrollListener listener : Core.getListeners(MouseScrollListener.class))
+        for(GuiMouseScroll listener : Core.getListeners(GuiMouseScroll.class))
             if (listener.mouseScrolled(p_mouseScrolled_1_))
                 return true;
         return super.mouseScrolled(p_mouseScrolled_1_);
@@ -100,4 +93,5 @@ public abstract class MixinContainerGui extends Gui implements IMixinContainerGu
     public int getContainerWidth() {
         return containerWidth;
     }
+    
 }

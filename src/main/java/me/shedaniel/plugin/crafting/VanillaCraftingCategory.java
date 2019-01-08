@@ -1,10 +1,9 @@
 package me.shedaniel.plugin.crafting;
 
-import me.shedaniel.api.DisplayCategoryCraftable;
+import me.shedaniel.api.IDisplayCategoryCraftable;
 import me.shedaniel.gui.RecipeGui;
 import me.shedaniel.gui.widget.*;
 import me.shedaniel.listenerdefinitions.IMixinRecipeBookGui;
-import me.shedaniel.mixins.MixinRecipeBookGui;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Gui;
@@ -18,7 +17,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public class VanillaCraftingCategory implements DisplayCategoryCraftable<VanillaCraftingRecipe> {
+public class VanillaCraftingCategory implements IDisplayCategoryCraftable<VanillaCraftingRecipe> {
     Window mainWindow = MinecraftClient.getInstance().window;
     private List<VanillaCraftingRecipe> recipes;
     

@@ -7,9 +7,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.smelting.SmokingRecipe;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class VanillaSmokerRecipe implements IRecipe<ItemStack> {
@@ -39,6 +37,14 @@ public class VanillaSmokerRecipe implements IRecipe<ItemStack> {
             input.add(ingredients);
         }
         input.add(SmokerBlockEntity.createBurnableMap().keySet().stream().map(Item::getDefaultStack).collect(Collectors.toList()));
+        return input;
+    }
+    
+    @Override
+    public List<List<ItemStack>> getRecipeRequiredInput() {
+        List<List<ItemStack>> input = new LinkedList<>();
+        for(Ingredient ingredient : recipe.getPreviewInputs())
+            Collections.addAll(input, new LinkedList<>(Arrays.asList(ingredient.getStackArray())));
         return input;
     }
     

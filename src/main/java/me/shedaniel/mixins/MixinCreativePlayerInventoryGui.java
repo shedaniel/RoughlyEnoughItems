@@ -1,6 +1,8 @@
 package me.shedaniel.mixins;
 
 import me.shedaniel.Core;
+import me.shedaniel.gui.REIRenderHelper;
+import me.shedaniel.listenerdefinitions.GuiClick;
 import me.shedaniel.listenerdefinitions.GuiKeyDown;
 import net.minecraft.client.gui.ingame.AbstractPlayerInventoryGui;
 import net.minecraft.client.gui.ingame.CreativePlayerInventoryGui;
@@ -27,15 +29,13 @@ public abstract class MixinCreativePlayerInventoryGui extends AbstractPlayerInve
     
     @Inject(method = "keyPressed(III)Z", at = @At("HEAD"), cancellable = true)
     public void keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_, CallbackInfoReturnable<Boolean> ci) {
-        boolean handled = false;
         if (method_2469() == ItemGroup.INVENTORY.getId())
             for(GuiKeyDown listener : Core.getListeners(GuiKeyDown.class))
                 if (listener.keyDown(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_)) {
                     ci.setReturnValue(true);
-                    handled = true;
+                    ci.cancel();
+                    return;
                 }
-        if (handled)
-            ci.cancel();
     }
     
     @Inject(method = "mouseScrolled(D)Z", at = @At("HEAD"), cancellable = true)
@@ -44,6 +44,16 @@ public abstract class MixinCreativePlayerInventoryGui extends AbstractPlayerInve
             ci.setReturnValue(super.mouseScrolled(p_mouseScrolled_1_));
             ci.cancel();
         }
+    }
+    
+    @Inject(method = "mouseClicked(DDI)Z", at = @At("HEAD"), cancellable = true)
+    public void mouseClicked(double double_1, double double_2, int int_1, CallbackInfoReturnable<Boolean> ci) {
+        if (method_2469() == ItemGroup.INVENTORY.getId() && REIRenderHelper.isGuiVisible())
+            for(GuiClick guiClick : Core.getListeners(GuiClick.class))
+                if (guiClick.onClick((int) double_1, (int) double_2, int_1)) {
+                    ci.setReturnValue(true);
+                    ci.cancel();
+                }
     }
     
 }

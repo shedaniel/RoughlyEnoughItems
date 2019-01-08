@@ -9,6 +9,7 @@ import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.smelting.SmeltingRecipe;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,6 +42,14 @@ public class VanillaFurnaceRecipe implements IRecipe<ItemStack> {
             input.add(ingredients);
         }
         input.add(FurnaceBlockEntity.createBurnableMap().keySet().stream().map(Item::getDefaultStack).collect(Collectors.toList()));
+        return input;
+    }
+    
+    @Override
+    public List<List<ItemStack>> getRecipeRequiredInput() {
+        List<List<ItemStack>> input = new LinkedList<>();
+        for(Ingredient ingredient : recipe.getPreviewInputs())
+            Collections.addAll(input, new LinkedList<>(Arrays.asList(ingredient.getStackArray())));
         return input;
     }
     

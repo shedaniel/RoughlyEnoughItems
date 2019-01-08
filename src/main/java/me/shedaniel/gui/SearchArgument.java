@@ -32,4 +32,5 @@ public class SearchArgument {
     public String toString() {
         return String.format("Argument[%s]: name = %s, include = %b", argumentType.name(), text, include);
     }
+    
 }
