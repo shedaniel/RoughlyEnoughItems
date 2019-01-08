@@ -1,6 +1,7 @@
 package me.shedaniel;
 
 import me.shedaniel.config.REIConfig;
+import me.shedaniel.config.REIRuntimeConfig;
 import me.shedaniel.listenerdefinitions.ClientTickable;
 import me.shedaniel.listenerdefinitions.IEvent;
 import me.shedaniel.listeners.DrawContainerListener;
@@ -31,8 +32,8 @@ public class Core implements ClientModInitializer {
     private static List<IEvent> events = new LinkedList<>();
     public static final File configFile = new File(FabricLoader.INSTANCE.getConfigDirectory(), "rei.json");
     public static REIConfig config;
+    public static REIRuntimeConfig runtimeConfig;
     public static ClientListener clientListener;
-    public static boolean centreSearchBox;
     public static Logger LOGGER = LogManager.getFormatterLogger("REI");
     
     @Override
@@ -42,7 +43,7 @@ public class Core implements ClientModInitializer {
         registerFabricEvents();
         try {
             loadConfig();
-            centreSearchBox = config.centreSearchBox;
+            runtimeConfig = new REIRuntimeConfig();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -52,6 +53,8 @@ public class Core implements ClientModInitializer {
     private void registerFabricEvents() {
         ClientTickEvent.CLIENT.register(minecraftClient -> {
             getListeners(ClientTickable.class).forEach(ClientTickable::clientTick);
+            if (!Core.config.enableCraftableOnlyButton)
+                Core.runtimeConfig.craftableOnly = false;
         });
     }
     

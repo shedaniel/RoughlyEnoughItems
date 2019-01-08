@@ -23,4 +23,5 @@ public class MixinRecipeManager {
             listener.recipesLoaded(recipeManager);
         }
     }
+    
 }

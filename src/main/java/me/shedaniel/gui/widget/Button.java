@@ -17,7 +17,6 @@ public class Button extends Control {
     private String buttonText;
     protected static final Identifier BUTTON_TEXTURES = new Identifier("textures/gui/widgets.png");
     
-    
     public Button(int x, int y, int width, int height, String buttonText) {
         super(x, y, width, height);
         this.buttonText = buttonText;
@@ -31,7 +30,6 @@ public class Button extends Control {
     public void setString(String text) {
         buttonText = text;
     }
-    
     
     @Override
     public void draw() {

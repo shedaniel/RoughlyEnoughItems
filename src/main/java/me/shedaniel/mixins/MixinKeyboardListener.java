@@ -13,6 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  */
 @Mixin(Keyboard.class)
 public class MixinKeyboardListener {
+    
     @Inject(method = "onChar", at = @At("RETURN"), cancellable = true)
     private void onCharEvent(long p_onCharEvent_1_, int p_onCharEvent_3_, int p_onCharEvent_4_, CallbackInfo ci) {
         boolean handled = false;
@@ -24,4 +25,5 @@ public class MixinKeyboardListener {
         if (handled)
             ci.cancel();
     }
+    
 }

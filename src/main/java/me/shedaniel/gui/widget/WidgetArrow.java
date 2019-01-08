@@ -6,6 +6,7 @@ import net.minecraft.client.render.GuiLighting;
 import net.minecraft.util.Identifier;
 
 public class WidgetArrow extends Control {
+    
     private static final Identifier RECIPE_GUI = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private int progress = 0;
     private int updateTick = 0;
@@ -45,4 +46,5 @@ public class WidgetArrow extends Control {
                 progress = 0;
         }
     }
+    
 }

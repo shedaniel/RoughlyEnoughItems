@@ -1,8 +1,10 @@
 package me.shedaniel.gui;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.ClientListener;
 import me.shedaniel.Core;
+import me.shedaniel.api.IRecipe;
 import me.shedaniel.config.REIItemListOrdering;
 import me.shedaniel.gui.widget.Button;
 import me.shedaniel.gui.widget.Control;
@@ -14,12 +16,15 @@ import net.fabricmc.fabric.client.itemgroup.FabricCreativeGuiComponents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ContainerGui;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.Window;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.TextComponent;
 import net.minecraft.text.TranslatableTextComponent;
+import net.minecraft.util.DefaultedList;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
@@ -45,10 +50,11 @@ public class GuiItemList extends Drawable {
     protected boolean visible = true;
     private int oldGuiLeft = 0;
     private boolean cheatMode = false;
+    private List<ItemStack> lastPlayerItems = new ArrayList<>();
     
     public GuiItemList(ContainerGui overlayedGui) {
         super(calculateRect(overlayedGui));
-        FOOTERSIZE = Core.centreSearchBox ? 18 : 44;
+        FOOTERSIZE = Core.runtimeConfig.centreSearchBox ? 18 : 44;
         displaySlots = new ArrayList<>();
         controls = new ArrayList<>();
         this.overlayedGui = overlayedGui;
@@ -102,11 +108,21 @@ public class GuiItemList extends Drawable {
         }
         searchBox = new TextBox(getSearchBoxArea());
         searchBox.setText(savedText);
+        if (Core.config.enableCraftableOnlyButton) {
+            Button buttonCraftableOnly = new Button(getCraftableToggleArea(), "");
+            buttonCraftableOnly.setOnClick(i -> {
+                Core.runtimeConfig.craftableOnly = !Core.runtimeConfig.craftableOnly;
+                REIRenderHelper.updateSearch();
+                return true;
+            });
+            controls.add(buttonCraftableOnly);
+        }
         controls.add(searchBox);
         buttonCheating = new Button(5, 5, 45, 20, getCheatModeText());
         buttonCheating.onClick = this::cheatClicked;
         buttonConfig = new Button(5, 28, 45, 20, I18n.translate("text.rei.config"));
         buttonConfig.onClick = i -> {
+            MinecraftClient.getInstance().openGui(null);
             MinecraftClient.getInstance().openGui(new ConfigGui(overlayedGui));
             return true;
         };
@@ -119,13 +135,21 @@ public class GuiItemList extends Drawable {
     }
     
     private Rectangle getSearchBoxArea() {
+        int widthOffset = Core.config.enableCraftableOnlyButton ? -24 : 0;
         int ch = ((IMixinContainerGui) overlayedGui).getContainerHeight(), cw = ((IMixinContainerGui) overlayedGui).getContainerWidth();
-        if (Core.centreSearchBox) {
+        if (Core.runtimeConfig.centreSearchBox) {
             if (ch + 4 + 18 > MinecraftClient.getInstance().window.getScaledHeight()) //Will be out of bounds
-                return new Rectangle(overlayedGui.width / 2 - cw / 2, rect.height + 100, cw, 18);
-            return new Rectangle(overlayedGui.width / 2 - cw / 2, rect.height - 31, cw, 18);
+                return new Rectangle(overlayedGui.width / 2 - cw / 2, rect.height + 100, cw + widthOffset, 18);
+            return new Rectangle(overlayedGui.width / 2 - cw / 2, rect.height - 31, cw + widthOffset, 18);
         }
-        return new Rectangle(rect.x, rect.height - 31, rect.width - 4, 18);
+        return new Rectangle(rect.x, rect.height - 31, rect.width - 4 + widthOffset, 18);
+    }
+    
+    private Rectangle getCraftableToggleArea() {
+        Rectangle searchBoxArea = getSearchBoxArea();
+        searchBoxArea.setLocation(searchBoxArea.x + searchBoxArea.width + 4, searchBoxArea.y - 2);
+        searchBoxArea.setSize(20, 20);
+        return searchBoxArea;
     }
     
     private void fillSlots() {
@@ -184,11 +208,22 @@ public class GuiItemList extends Drawable {
     public void draw() {
         if (!visible)
             return;
+        if (MinecraftClient.getInstance().currentGui instanceof ContainerGui)
+            overlayedGui = (ContainerGui) MinecraftClient.getInstance().currentGui;
+        if (Core.runtimeConfig.craftableOnly) {
+            List<ItemStack> currentPlayerItems = getInventoryItemsTypes();
+            for(ItemStack item : lastPlayerItems)
+                if (!currentPlayerItems.contains(item) || currentPlayerItems.size() != lastPlayerItems.size()) {
+                    lastPlayerItems = new ArrayList<>(currentPlayerItems);
+                    updateView();
+                }
+        }
         if (needsResize == true || oldGuiLeft != ((IMixinContainerGui) overlayedGui).getGuiLeft())
             resize();
         GlStateManager.pushMatrix();
         updateButtons();
         controls.forEach(Control::draw);
+        GuiLighting.disable();
         String header = String.format("%s/%s", page + 1, MathHelper.ceil(view.size() / displaySlots.size()) + 1);
         MinecraftClient.getInstance().fontRenderer.drawWithShadow(header, rect.x + (rect.width / 2) - (MinecraftClient.getInstance().fontRenderer.getStringWidth(header) / 2), rect.y + 10, -1);
         GlStateManager.popMatrix();
@@ -283,9 +318,36 @@ public class GuiItemList extends Drawable {
                 stackList.stream().filter(itemStack -> filterItem(itemStack, arguments)).forEachOrdered(stacks::add);
             });
         }
-        view.addAll(stacks.stream().distinct().collect(Collectors.toList()));
+        List<ItemStack> workingItems = ClientListener.stackList == null ? new ArrayList<>() : ClientListener.stackList;
+        if (Core.runtimeConfig.craftableOnly) {
+            List<IRecipe> workingRecipes = new ArrayList<>();
+            REIRecipeManager.instance().findUsageForItems(getInventoryItemsTypes()).forEach(workingRecipes::add);
+            workingItems = new ArrayList<>();
+            for(IRecipe workingRecipe : workingRecipes) {
+                List list = workingRecipe.getOutput();
+                try {
+                    workingItems.addAll((List<ItemStack>) list);
+                } catch (Exception e) {
+                }
+            }
+        }
+        final List<ItemStack> finalWorkingItems = workingItems;
+        view.addAll(stacks.stream().filter(itemStack -> {
+            for(ItemStack workingItem : finalWorkingItems)
+                if (itemStack.isEqualIgnoreTags(workingItem))
+                    return true;
+            return false;
+        }).distinct().collect(Collectors.toList()));
         page = 0;
         fillSlots();
+    }
+    
+    private List<ItemStack> getInventoryItemsTypes() {
+        List<DefaultedList<ItemStack>> field_7543 = ImmutableList.of(MinecraftClient.getInstance().player.inventory.main, MinecraftClient.getInstance().player.inventory.armor
+                , MinecraftClient.getInstance().player.inventory.offHand);
+        List<ItemStack> inventoryStacks = new ArrayList<>();
+        field_7543.forEach(inventoryStacks::addAll);
+        return inventoryStacks.stream().distinct().collect(Collectors.toList());
     }
     
     private boolean filterItem(ItemStack itemStack, List<SearchArgument> arguments) {

@@ -1,7 +1,7 @@
 package me.shedaniel.gui;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import me.shedaniel.api.DisplayCategoryCraftable;
+import me.shedaniel.api.IDisplayCategoryCraftable;
 import me.shedaniel.api.IDisplayCategory;
 import me.shedaniel.api.IRecipe;
 import me.shedaniel.gui.widget.Button;
@@ -166,12 +166,12 @@ public class RecipeGui extends ContainerGui {
         
         List<Control> newControls = new LinkedList<>();
         selectedCategory.addWidget(newControls, 0);
-        if (selectedCategory instanceof DisplayCategoryCraftable)
-            ((DisplayCategoryCraftable) selectedCategory).registerAutoCraftButton(newControls, this, getPrevScreen(), recipe, 0);
+        if (selectedCategory instanceof IDisplayCategoryCraftable)
+            ((IDisplayCategoryCraftable) selectedCategory).registerAutoCraftButton(newControls, this, getPrevScreen(), recipe, 0);
         if (recipes.get(selectedCategory).size() >= recipePointer + 2) {
             selectedCategory.addWidget(newControls, 1);
-            if (selectedCategory instanceof DisplayCategoryCraftable)
-                ((DisplayCategoryCraftable) selectedCategory).registerAutoCraftButton(newControls, this, getPrevScreen(), recipes.get(selectedCategory).get(recipePointer + 1), 1);
+            if (selectedCategory instanceof IDisplayCategoryCraftable)
+                ((IDisplayCategoryCraftable) selectedCategory).registerAutoCraftButton(newControls, this, getPrevScreen(), recipes.get(selectedCategory).get(recipePointer + 1), 1);
         }
         newControls.forEach(f -> f.move(left, top));
         controls.addAll(newControls);
@@ -283,4 +283,5 @@ public class RecipeGui extends ContainerGui {
     private int getTotalPages() {
         return MathHelper.clamp(riseDoublesToInt(recipes.get(selectedCategory).size() / 2d), 1, Integer.MAX_VALUE);
     }
+    
 }

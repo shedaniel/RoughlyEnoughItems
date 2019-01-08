@@ -76,6 +76,30 @@ public class ConfigGui extends Gui {
         addButton(new ButtonWidget(1001, parent.width / 2 - 90, 150, 150, 20, "") {
             @Override
             public void onPressed(double double_1, double double_2) {
+                Core.config.enableCraftableOnlyButton = !Core.config.enableCraftableOnlyButton;
+                try {
+                    Core.saveConfig();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            
+            @Override
+            public void draw(int int_1, int int_2, float float_1) {
+                GuiLighting.disable();
+                this.text = I18n.translate("text.rei.enable_craftable_only.button", Core.config.enableCraftableOnlyButton ? "§a" : "§c", Core.config.enableCraftableOnlyButton);
+                super.draw(int_1, int_2, float_1);
+                if (this.hovered)
+                    drawSuggestion(int_1, int_2);
+            }
+            
+            protected void drawSuggestion(int x, int y) {
+                drawTooltip(Arrays.asList(I18n.translate("text.rei.enable_craftable_only.tooltip").split("\n")), x, y);
+            }
+        });
+        addButton(new ButtonWidget(1002, parent.width / 2 - 90, 180, 150, 20, "") {
+            @Override
+            public void onPressed(double double_1, double double_2) {
                 int index = Arrays.asList(REIItemListOrdering.values()).indexOf(Core.config.itemListOrdering) + 1;
                 if (index >= REIItemListOrdering.values().length) {
                     index = 0;
@@ -89,7 +113,7 @@ public class ConfigGui extends Gui {
                     e.printStackTrace();
                 }
             }
-    
+            
             @Override
             public void draw(int int_1, int int_2, float float_1) {
                 GuiLighting.disable();
@@ -112,7 +136,7 @@ public class ConfigGui extends Gui {
         text = I18n.translate("key.rei.hide") + ": ";
         drawString(MinecraftClient.getInstance().fontRenderer, text, parent.width / 2 - 25 - MinecraftClient.getInstance().fontRenderer.getStringWidth(text), 90 + 6, -1);
         text = I18n.translate("text.rei.list_ordering") + ": ";
-        drawString(MinecraftClient.getInstance().fontRenderer, text, parent.width / 2 - 95 - MinecraftClient.getInstance().fontRenderer.getStringWidth(text), 150 + 6, -1);
+        drawString(MinecraftClient.getInstance().fontRenderer, text, parent.width / 2 - 95 - MinecraftClient.getInstance().fontRenderer.getStringWidth(text), 180 + 6, -1);
     }
     
     @Override
@@ -126,4 +150,5 @@ public class ConfigGui extends Gui {
             return super.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
         }
     }
+    
 }

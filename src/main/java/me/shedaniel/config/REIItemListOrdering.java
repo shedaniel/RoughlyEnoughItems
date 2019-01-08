@@ -17,4 +17,5 @@ public enum REIItemListOrdering {
     public String getNameTranslationKey() {
         return nameTranslationKey;
     }
+    
 }

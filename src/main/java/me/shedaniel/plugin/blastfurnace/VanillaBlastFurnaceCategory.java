@@ -1,6 +1,6 @@
 package me.shedaniel.plugin.blastfurnace;
 
-import me.shedaniel.api.DisplayCategoryCraftable;
+import me.shedaniel.api.IDisplayCategoryCraftable;
 import me.shedaniel.gui.RecipeGui;
 import me.shedaniel.gui.widget.Control;
 import me.shedaniel.gui.widget.REISlot;
@@ -21,7 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class VanillaBlastFurnaceCategory implements DisplayCategoryCraftable<VanillaBlastFurnaceRecipe> {
+public class VanillaBlastFurnaceCategory implements IDisplayCategoryCraftable<VanillaBlastFurnaceRecipe> {
     private List<VanillaBlastFurnaceRecipe> recipes;
     
     @Override

@@ -17,4 +17,5 @@ public interface IRecipeManager {
     public void addDisplayAdapter(IDisplayCategory adapter);
     
     public Map<IDisplayCategory, List<IRecipe>> getRecipesFor(ItemStack stack);
+    
 }
