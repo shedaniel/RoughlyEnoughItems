@@ -8,7 +8,7 @@
     "Danielshe"
   ],
   "initializers": [
-    "me.shedaniel.Core"
+    "me.shedaniel.rei.RoughlyEnoughItemsCore"
   ],
   "requires": {
     "fabric": "*"
