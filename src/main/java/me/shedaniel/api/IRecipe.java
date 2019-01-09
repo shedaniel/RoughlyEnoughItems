@@ -15,6 +15,6 @@ public interface IRecipe<T> {
 
     public List<List<T>> getInput();
     
-    public List<List<T>> getRecipeRequiredInput();
+    public List<List<ItemStack>> getRecipeRequiredInput();
     
 }
