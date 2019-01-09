@@ -8,23 +8,27 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 
 import java.awt.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
 
-/**
- * Created by James on 7/29/2018.
- */
-public class Button extends Control {
+public class SmallButton extends Control {
     
     private String buttonText;
-    protected static final ResourceLocation BUTTON_TEXTURES = new ResourceLocation("textures/gui/widgets.png");
+    private Function<Boolean, String> toolTipSupplier;
+    protected static final ResourceLocation BUTTON_TEXTURES = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
     
-    public Button(int x, int y, int width, int height, String buttonText) {
+    
+    public SmallButton(int x, int y, int width, int height, String buttonText, Function<Boolean, String> toolTipSupplier) {
         super(x, y, width, height);
         this.buttonText = buttonText;
+        this.toolTipSupplier = toolTipSupplier;
     }
     
-    public Button(Rectangle rect, String buttonText) {
+    public SmallButton(Rectangle rect, String buttonText, Function<Boolean, String> toolTipSupplier) {
         super(rect);
         this.buttonText = buttonText;
+        this.toolTipSupplier = toolTipSupplier;
     }
     
     public void setString(String text) {
@@ -51,13 +55,18 @@ public class Button extends Control {
         GlStateManager.enableBlend();
         GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        gui.drawTexturedModalRect(rect.x, rect.y, 0, 46 + hoverState * 20, rect.width / 2, rect.height);
-        gui.drawTexturedModalRect(rect.x + rect.width / 2, rect.y, 200 - rect.width / 2, 46 + hoverState * 20, rect.width / 2, rect.height);
+        gui.drawTexturedModalRect(rect.x, rect.y, 18 + 44, 222 + hoverState * 10, rect.width, rect.height);
         int lvt_7_1_ = 14737632;
         
         gui.drawCenteredString(lvt_5_1_, this.buttonText, rect.x + rect.width / 2, rect.y + (rect.height - 8) / 2, lvt_7_1_);
         GlStateManager.enableLighting();
         GlStateManager.popMatrix();
+        String ttS = toolTipSupplier.apply(isEnabled());
+        if (isHighlighted() && ttS != "") {
+            List<String> toolTip = Arrays.asList(ttS.split("\n"));
+            if (toolTip != null && toolTip.size() != 0)
+                gui.drawHoveringText(toolTip, REIRenderHelper.getMouseLoc().x, REIRenderHelper.getMouseLoc().y);
+        }
     }
     
 }

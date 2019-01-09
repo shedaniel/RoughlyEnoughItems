@@ -1,28 +1,30 @@
 package me.shedaniel.gui;
 
+import com.google.common.collect.ImmutableList;
 import me.shedaniel.ClientListener;
 import me.shedaniel.Core;
+import me.shedaniel.config.REIItemListOrdering;
 import me.shedaniel.gui.widget.Button;
-import me.shedaniel.gui.widget.Control;
-import me.shedaniel.gui.widget.REISlot;
-import me.shedaniel.gui.widget.TextBox;
+import me.shedaniel.gui.widget.*;
+import me.shedaniel.impl.REIRecipeManager;
 import me.shedaniel.listenerdefinitions.IMixinGuiContainer;
 import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.IRegistry;
-import net.minecraft.util.text.TextComponentTranslation;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -42,12 +44,11 @@ public class GuiItemList extends Drawable {
     protected boolean visible = true;
     private int oldGuiLeft = 0;
     private boolean cheatMode = false;
-    private Button btnCategoryPageLeft, btnCategoryPageRight;
-    public Button btnRecipeLeft, btnRecipeRight;
+    private List<ItemStack> lastPlayerItems = new ArrayList<>();
     
     public GuiItemList(GuiContainer overlayedGui) {
         super(calculateRect(overlayedGui));
-        FOOTERSIZE = Core.centreSearchBox ? 18 : 44;
+        FOOTERSIZE = Core.runtimeConfig.centreSearchBox ? 18 : 44;
         displaySlots = new ArrayList<>();
         controls = new ArrayList<>();
         this.overlayedGui = overlayedGui;
@@ -56,7 +57,7 @@ public class GuiItemList extends Drawable {
     }
     
     public boolean canCheat() {
-        EntityPlayer player = Minecraft.getInstance().player;
+        EntityPlayerSP player = Minecraft.getInstance().player;
         if (cheatMode) {
             if (!player.hasPermissionLevel(1)) {
                 cheatClicked(0);
@@ -80,7 +81,6 @@ public class GuiItemList extends Drawable {
         if (overlayedGui != Minecraft.getInstance().currentScreen) {
             if (Minecraft.getInstance().currentScreen instanceof GuiContainer) {
                 overlayedGui = (GuiContainer) Minecraft.getInstance().currentScreen;
-                
             } else {
                 needsResize = true;
                 return;
@@ -102,11 +102,21 @@ public class GuiItemList extends Drawable {
         }
         searchBox = new TextBox(getSearchBoxArea());
         searchBox.setText(savedText);
+        if (Core.config.enableCraftableOnlyButton) {
+            CraftableToggleButton buttonCraftableOnly = new CraftableToggleButton(getCraftableToggleArea());
+            buttonCraftableOnly.setOnClick(i -> {
+                Core.runtimeConfig.craftableOnly = !Core.runtimeConfig.craftableOnly;
+                REIRenderHelper.updateSearch();
+                return true;
+            });
+            controls.add(buttonCraftableOnly);
+        }
         controls.add(searchBox);
         buttonCheating = new Button(5, 5, 45, 20, getCheatModeText());
         buttonCheating.onClick = this::cheatClicked;
         buttonConfig = new Button(5, 28, 45, 20, I18n.format("text.rei.config"));
         buttonConfig.onClick = i -> {
+            Minecraft.getInstance().displayGuiScreen(null);
             Minecraft.getInstance().displayGuiScreen(new ConfigGui(overlayedGui));
             return true;
         };
@@ -119,17 +129,25 @@ public class GuiItemList extends Drawable {
     }
     
     private Rectangle getSearchBoxArea() {
+        int widthOffset = Core.config.enableCraftableOnlyButton ? -24 : 0;
         int ch = ((IMixinGuiContainer) overlayedGui).getContainerHeight(), cw = ((IMixinGuiContainer) overlayedGui).getContainerWidth();
-        if (Core.config.centreSearchBox) {
-            if (ch + 4 + 18 > rect.height) //Will be out of bounds
-                return new Rectangle(overlayedGui.width / 2 - cw / 2, rect.height + 100, cw, 18);
-            return new Rectangle(overlayedGui.width / 2 - cw / 2, rect.height - 31, cw, 18);
+        if (Core.runtimeConfig.centreSearchBox) {
+            if (ch + 4 + 18 > Minecraft.getInstance().mainWindow.getScaledHeight()) //Will be out of bounds
+                return new Rectangle(overlayedGui.width / 2 - cw / 2, rect.height + 100, cw + widthOffset, 18);
+            return new Rectangle(overlayedGui.width / 2 - cw / 2, rect.height - 31, cw + widthOffset, 18);
         }
-        return new Rectangle(rect.x, rect.height - 31, rect.width - 4, 18);
+        return new Rectangle(rect.x, rect.height - 31, rect.width - 4 + widthOffset, 18);
+    }
+    
+    private Rectangle getCraftableToggleArea() {
+        Rectangle searchBoxArea = getSearchBoxArea();
+        searchBoxArea.setLocation(searchBoxArea.x + searchBoxArea.width + 4, searchBoxArea.y - 1);
+        searchBoxArea.setSize(20, 20);
+        return searchBoxArea;
     }
     
     private void fillSlots() {
-        page = MathHelper.clamp(page, 0, (int) Math.floor(view.size() / displaySlots.size()));
+        page = MathHelper.clamp(page, 0, MathHelper.ceil(view.size() / displaySlots.size()));
         int firstSlot = page * displaySlots.size();
         for(int i = 0; i < displaySlots.size(); i++) {
             if (firstSlot + i < view.size() && firstSlot + i >= 0) {
@@ -165,9 +183,10 @@ public class GuiItemList extends Drawable {
         while (true) {
             REISlot slot = new REISlot(x + xOffset, y + yOffset);
             slot.setCheatable(true);
+            if (REIRecipeManager.instance().canAddSlot(Minecraft.getInstance().currentScreen.getClass(), slot.rect))
+                displaySlots.add(slot);
             xOffset += 18;
             currentX++;
-            displaySlots.add(slot);
             if (currentX >= perRow) {
                 xOffset = 0;
                 yOffset += 18;
@@ -183,34 +202,48 @@ public class GuiItemList extends Drawable {
     public void draw() {
         if (!visible)
             return;
-        if (needsResize == true)
+        if (Minecraft.getInstance().currentScreen instanceof GuiContainer)
+            overlayedGui = (GuiContainer) Minecraft.getInstance().currentScreen;
+        if (needsResize == true || oldGuiLeft != ((IMixinGuiContainer) overlayedGui).getGuiLeft())
             resize();
-        if (oldGuiLeft != ((IMixinGuiContainer) overlayedGui).getGuiLeft())
-            resize();
+        else if (Core.runtimeConfig.craftableOnly && (!hasSameListContent(new LinkedList<>(lastPlayerItems), getInventoryItemsTypes()) || (getInventoryItemsTypes().size() != lastPlayerItems.size()))) {
+            this.lastPlayerItems = new LinkedList<>(getInventoryItemsTypes());
+            updateView();
+        }
         GlStateManager.pushMatrix();
         updateButtons();
         controls.forEach(Control::draw);
-        String header = String.format("%s/%s", page + 1, ((int) Math.floor(view.size() / displaySlots.size())) + 1);
         RenderHelper.disableStandardItemLighting();
+        String header = String.format("%s/%s", page + 1, MathHelper.ceil(view.size() / displaySlots.size()) + 1);
         Minecraft.getInstance().fontRenderer.drawStringWithShadow(header, rect.x + (rect.width / 2) - (Minecraft.getInstance().fontRenderer.getStringWidth(header) / 2), rect.y + 10, -1);
         GlStateManager.popMatrix();
     }
     
-    private void updateButtons() {
-        if (page == 0)
-            buttonLeft.setEnabled(false);
-        else
-            buttonLeft.setEnabled(true);
-        if (displaySlots.size() + displaySlots.size() * page >= view.size())
-            buttonRight.setEnabled(false);
-        else
-            buttonRight.setEnabled(true);
+    private boolean hasSameListContent(List<ItemStack> list1, List<ItemStack> list2) {
+        Collections.sort(list1, (itemStack, t1) -> {
+            return itemStack.getDisplayName().getFormattedText().compareToIgnoreCase(t1.getDisplayName().getFormattedText());
+        });
+        Collections.sort(list2, (itemStack, t1) -> {
+            return itemStack.getDisplayName().getFormattedText().compareToIgnoreCase(t1.getDisplayName().getFormattedText());
+        });
+        String lastString = String.join("", list1.stream().map(itemStack -> {
+            return itemStack.getDisplayName().getFormattedText();
+        }).collect(Collectors.toList())), currentString = String.join("", list2.stream().map(itemStack -> {
+            return itemStack.getDisplayName().getFormattedText();
+        }).collect(Collectors.toList()));
+        return lastString.equals(currentString);
     }
     
+    private void updateButtons() {
+        buttonLeft.setEnabled(MathHelper.ceil(view.size() / displaySlots.size()) > 1);
+        buttonRight.setEnabled(MathHelper.ceil(view.size() / displaySlots.size()) > 1);
+    }
     
     public boolean btnRightClicked(int button) {
         if (button == 0) {
             page++;
+            if (page > MathHelper.ceil(view.size() / displaySlots.size()))
+                page = 0;
             fillSlots();
             return true;
         }
@@ -220,6 +253,8 @@ public class GuiItemList extends Drawable {
     public boolean btnLeftClicked(int button) {
         if (button == 0) {
             page--;
+            if (page < 0)
+                page = MathHelper.ceil(view.size() / displaySlots.size());
             fillSlots();
             return true;
         }
@@ -229,7 +264,6 @@ public class GuiItemList extends Drawable {
     public boolean cheatClicked(int button) {
         if (button == 0) {
             cheatMode = !cheatMode;
-            
             buttonCheating.setString(getCheatModeText());
             return true;
         }
@@ -237,39 +271,73 @@ public class GuiItemList extends Drawable {
     }
     
     private String getCheatModeText() {
-        if (cheatMode) {
-            TextComponentTranslation cheat = new TextComponentTranslation("text.rei.cheat", new Object[]{null});
-            return cheat.getFormattedText();
-        }
-        TextComponentTranslation noCheat = new TextComponentTranslation("text.rei.nocheat", new Object[]{null});
-        return noCheat.getFormattedText();
+        return I18n.format(String.format("%s%s", "text.rei.", cheatMode ? "cheat" : "nocheat"));
     }
     
     protected void updateView() {
         String searchText = searchBox.getText();
         view.clear();
         List<ItemStack> stacks = new ArrayList<>();
-        Arrays.stream(searchText.split("\\|")).forEachOrdered(s -> {
-            List<SearchArgument> arguments = new ArrayList<>();
-            while (s.startsWith(" ")) s = s.substring(1);
-            while (s.endsWith(" ")) s = s.substring(0, s.length());
-            if (s.startsWith("@-") || s.startsWith("-@"))
-                arguments.add(new SearchArgument(SearchArgument.ArgumentType.MOD, s.substring(2), false));
-            else if (s.startsWith("@"))
-                arguments.add(new SearchArgument(SearchArgument.ArgumentType.MOD, s.substring(1), true));
-            else if (s.startsWith("#-") || s.startsWith("-#"))
-                arguments.add(new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, s.substring(2), false));
-            else if (s.startsWith("#"))
-                arguments.add(new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, s.substring(1), true));
-            else if (s.startsWith("-"))
-                arguments.add(new SearchArgument(SearchArgument.ArgumentType.TEXT, s.substring(1), false));
-            else
-                arguments.add(new SearchArgument(SearchArgument.ArgumentType.TEXT, s, true));
-            ClientListener.stackList.stream().filter(itemStack -> filterItem(itemStack, arguments)).forEachOrdered(stacks::add);
-        });
-        view.addAll(stacks.stream().distinct().collect(Collectors.toList()));
+        if (ClientListener.stackList != null) {
+            List<ItemStack> stackList = new LinkedList<>(ClientListener.stackList);
+            List<ItemGroup> itemGroups = new LinkedList<>(Arrays.asList(ItemGroup.GROUPS));
+            itemGroups.add(null);
+            if (Core.config.itemListOrdering != REIItemListOrdering.REGISTRY)
+                Collections.sort(stackList, (itemStack, t1) -> {
+                    if (Core.config.itemListOrdering.equals(REIItemListOrdering.NAME))
+                        return itemStack.getDisplayName().getFormattedText().compareToIgnoreCase(t1.getDisplayName().getFormattedText());
+                    if (Core.config.itemListOrdering.equals(REIItemListOrdering.ITEM_GROUPS))
+                        return itemGroups.indexOf(itemStack.getItem().getGroup()) - itemGroups.indexOf(t1.getItem().getGroup());
+                    return 0;
+                });
+            if (!Core.config.isAscending)
+                Collections.reverse(stackList);
+            Arrays.stream(searchText.split("\\|")).forEachOrdered(s -> {
+                List<SearchArgument> arguments = new ArrayList<>();
+                while (s.startsWith(" ")) s = s.substring(1);
+                while (s.endsWith(" ")) s = s.substring(0, s.length());
+                if (s.startsWith("@-") || s.startsWith("-@"))
+                    arguments.add(new SearchArgument(SearchArgument.ArgumentType.MOD, s.substring(2), false));
+                else if (s.startsWith("@"))
+                    arguments.add(new SearchArgument(SearchArgument.ArgumentType.MOD, s.substring(1), true));
+                else if (s.startsWith("#-") || s.startsWith("-#"))
+                    arguments.add(new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, s.substring(2), false));
+                else if (s.startsWith("#"))
+                    arguments.add(new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, s.substring(1), true));
+                else if (s.startsWith("-"))
+                    arguments.add(new SearchArgument(SearchArgument.ArgumentType.TEXT, s.substring(1), false));
+                else
+                    arguments.add(new SearchArgument(SearchArgument.ArgumentType.TEXT, s, true));
+                stackList.stream().filter(itemStack -> filterItem(itemStack, arguments)).forEachOrdered(stacks::add);
+            });
+        }
+        List<ItemStack> workingItems = ClientListener.stackList == null || (Core.runtimeConfig.craftableOnly && lastPlayerItems.size() > 0) ? new ArrayList<>() : ClientListener.stackList;
+        if (Core.runtimeConfig.craftableOnly) {
+            REIRecipeManager.instance().findCraftableByItems(lastPlayerItems).forEach(workingItems::add);
+            workingItems.addAll(lastPlayerItems);
+        }
+        final List<ItemStack> finalWorkingItems = workingItems;
+        view.addAll(stacks.stream().filter(itemStack -> {
+            if (!Core.runtimeConfig.craftableOnly)
+                return true;
+            for(ItemStack workingItem : finalWorkingItems)
+                if (itemStack.isItemEqual(workingItem))
+                    return true;
+            return false;
+        }).distinct().collect(Collectors.toList()));
         page = 0;
         fillSlots();
+    }
+    
+    private List<ItemStack> getInventoryItemsTypes() {
+        List<NonNullList<ItemStack>> field_7543 = ImmutableList.of(Minecraft.getInstance().player.inventory.mainInventory, Minecraft.getInstance().player.inventory.armorInventory
+                , Minecraft.getInstance().player.inventory.offHandInventory);
+        List<ItemStack> inventoryStacks = new ArrayList<>();
+        field_7543.forEach(itemStacks -> itemStacks.forEach(itemStack -> {
+            if (!itemStack.getItem().equals(Items.AIR))
+                inventoryStacks.add(itemStack);
+        }));
+        return inventoryStacks;
     }
     
     private boolean filterItem(ItemStack itemStack, List<SearchArgument> arguments) {

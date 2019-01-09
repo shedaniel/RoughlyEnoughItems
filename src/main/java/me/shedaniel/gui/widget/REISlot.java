@@ -21,6 +21,7 @@ import java.util.List;
  * Created by James on 7/28/2018.
  */
 public class REISlot extends Control {
+    
     private static final ResourceLocation RECIPE_GUI = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private boolean cheatable = false;
     private List<ItemStack> itemList = new LinkedList<>();
@@ -32,7 +33,6 @@ public class REISlot extends Control {
     }
     
     private String extraTooltip;
-    
     
     @Override
     public void tick() {
@@ -182,6 +182,5 @@ public class REISlot extends Control {
     public void setCheatable(boolean cheatable) {
         this.cheatable = cheatable;
     }
-    
     
 }

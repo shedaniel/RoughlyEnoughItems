@@ -1,5 +1,7 @@
 package me.shedaniel.listenerdefinitions;
 
-public interface MouseScrollListener {
+public interface GuiMouseScroll {
+    
     public boolean mouseScrolled(double direction);
+    
 }

@@ -10,4 +10,5 @@ public class RecipeContainer extends Container {
     public boolean canInteractWith(EntityPlayer entityPlayer) {
         return true;
     }
+    
 }

@@ -1,6 +1,6 @@
 package me.shedaniel.gui.widget;
 
-import me.shedaniel.api.TriBooleanProducer;
+import me.shedaniel.api.TriBooleanSupplier;
 import me.shedaniel.gui.Drawable;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -15,9 +15,10 @@ import java.util.function.IntFunction;
  * Created by James on 7/29/2018.
  */
 public abstract class Control extends Drawable {
+    
     private boolean enabled = true;
     public IntFunction<Boolean> onClick;
-    public TriBooleanProducer onKeyDown;
+    public TriBooleanSupplier onKeyDown;
     public BiConsumer<Character, Integer> charPressed;
     
     public Control(int x, int y, int width, int height) {

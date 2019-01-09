@@ -12,8 +12,12 @@ public class VanillaShapedCraftingRecipe extends VanillaCraftingRecipe {
     private final ShapedRecipe recipe;
     
     public VanillaShapedCraftingRecipe(ShapedRecipe recipe) {
-        
         this.recipe = recipe;
+    }
+    
+    @Override
+    public ShapedRecipe getRecipe() {
+        return recipe;
     }
     
     @Override

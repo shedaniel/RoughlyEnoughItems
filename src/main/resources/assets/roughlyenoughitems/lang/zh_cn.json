@@ -16,5 +16,14 @@
   "text.rei.config": "设置",
   "text.rei.listeningkey": "正聆听按键",
   "text.rei.centre_searchbox": "置中搜索栏: %s%b",
-  "text.rei.centre_searchbox.tooltip": "更改此设置后请重启游戏以完成更改"
+  "text.rei.centre_searchbox.tooltip": "更改此设置后请重启游戏以完成更改",
+  "text.rei.list_ordering": "物品清单排序",
+  "text.rei.list_ordering_button": "%s [%s]",
+  "ordering.rei.ascending": "顺序",
+  "ordering.rei.descending": "倒序",
+  "ordering.rei.registry": "注册",
+  "ordering.rei.name": "名字",
+  "ordering.rei.item_groups": "物品分类",
+  "text.auto_craft.wrong_gui": "§c不能在此菜单中自动合成!",
+  "text.auto_craft.crafting.too_small": "§c合成格太小!"
 }

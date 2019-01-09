@@ -6,11 +6,14 @@ import com.google.gson.JsonObject;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
 import me.shedaniel.config.REIConfig;
+import me.shedaniel.config.REIRuntimeConfig;
 import me.shedaniel.network.CheatPacket;
 import me.shedaniel.network.DeletePacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.EnumPacketDirection;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.dimdev.rift.listener.PacketAdder;
 import org.dimdev.riftloader.RiftLoader;
 import org.dimdev.riftloader.listener.InitializationListener;
@@ -44,46 +47,49 @@ public class Core implements PacketAdder, InitializationListener {
     
     public static final File configFile = new File(RiftLoader.instance.configDir, "rei.json");
     public static REIConfig config;
-    public static boolean centreSearchBox;
+    public static REIRuntimeConfig runtimeConfig;
+    public static Logger LOGGER = LogManager.getFormatterLogger("REI");
     
     @Override
     public void onInitialization() {
         try {
             loadConfig();
-            centreSearchBox = config.centreSearchBox;
+            runtimeConfig = new REIRuntimeConfig();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
     
     public static void loadConfig() throws IOException {
-        if (!configFile.exists())
-            loadDefaultConfig();
+        if (!configFile.exists() || !configFile.canRead()) {
+            config = new REIConfig();
+            saveConfig();
+            return;
+        }
         boolean failed = false;
         try {
-            InputStream in = Files.newInputStream(configFile.toPath());
-            config = REIConfig.GSON.fromJson(new InputStreamReader(in), REIConfig.class);
-        } catch (Exception e){
+            config = REIConfig.GSON.fromJson(new InputStreamReader(Files.newInputStream(configFile.toPath())), REIConfig.class);
+        } catch (Exception e) {
             failed = true;
         }
         if (failed || config == null) {
-            System.out.println("[REI] Failed to load config! Overwriting with default config.");
+            Core.LOGGER.error("REI: Failed to load config! Overwriting with default config.");
             config = new REIConfig();
         }
         saveConfig();
     }
     
-    public static void loadDefaultConfig() throws IOException {
-        config = new REIConfig();
-        saveConfig();
-    }
-    
     public static void saveConfig() throws IOException {
         configFile.getParentFile().mkdirs();
-        if (configFile.exists())
-            configFile.delete();
-        try (PrintWriter writer = new PrintWriter(configFile)) {
+        if (!configFile.exists() && !configFile.createNewFile()) {
+            Core.LOGGER.error("REI: Failed to save config! Overwriting with default config.");
+            config = new REIConfig();
+            return;
+        }
+        FileWriter writer = new FileWriter(configFile, false);
+        try {
             REIConfig.GSON.toJson(config, writer);
+        } finally {
             writer.close();
         }
     }

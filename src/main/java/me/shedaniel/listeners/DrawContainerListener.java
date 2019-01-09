@@ -12,7 +12,8 @@ import org.dimdev.rift.listener.client.ClientTickable;
 /**
  * Created by James on 7/27/2018.
  */
-public class DrawContainerListener implements MinecraftResize, DrawContainer, GuiCickListener, GuiKeyDown, CharInput, ClientTickable, MouseScrollListener {
+public class DrawContainerListener implements MinecraftResize, DrawContainer, GuiClick, GuiKeyDown, CharInput, ClientTickable, GuiMouseScroll {
+    
     @Override
     public void draw(int x, int y, float dunno, GuiContainer gui) {
         if (!(gui instanceof GuiContainerCreative) || ((GuiContainerCreative) gui).getSelectedTabIndex() == ItemGroup.INVENTORY.getIndex()) {

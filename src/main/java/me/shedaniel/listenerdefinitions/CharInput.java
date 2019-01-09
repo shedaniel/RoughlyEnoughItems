@@ -6,4 +6,5 @@ package me.shedaniel.listenerdefinitions;
 public interface CharInput {
     
     public boolean charInput(long p_onCharEvent_1_, int p_onCharEvent_3_, int p_onCharEvent_4_);
+    
 }

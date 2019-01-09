@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
  * Created by James on 7/28/2018.
  */
 public class REIRenderHelper {
+    
     static Point mouseLoc;
     static public GuiItemList reiGui;
     static GuiContainer overlayedGui;
@@ -96,15 +97,8 @@ public class REIRenderHelper {
     
     
     private static void renderTooltips() {
-        GlStateManager.pushMatrix();
-        GlStateManager.enableLighting();
-        for(TooltipData tooltipData : tooltipsToRender) {
-            getOverlayedGui().drawHoveringText(tooltipData.text, tooltipData.x, tooltipData.y);
-        }
-        GlStateManager.disableLighting();
+        tooltipsToRender.forEach(tooltipData -> getOverlayedGui().drawHoveringText(tooltipData.text, tooltipData.x, tooltipData.y));
         tooltipsToRender.clear();
-        GlStateManager.popMatrix();
-        
     }
     
     public static boolean mouseClick(int x, int y, int button) {
@@ -141,6 +135,10 @@ public class REIRenderHelper {
             }
         }
         return false;
+    }
+    
+    public static boolean isGuiVisible() {
+        return reiGui != null && reiGui.visible;
     }
     
     public static boolean keyDown(int typedChar, int keyCode, int unknown) {

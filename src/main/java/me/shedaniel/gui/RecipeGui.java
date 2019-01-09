@@ -1,6 +1,7 @@
 package me.shedaniel.gui;
 
 import me.shedaniel.api.IDisplayCategory;
+import me.shedaniel.api.IDisplayCategoryCraftable;
 import me.shedaniel.api.IRecipe;
 import me.shedaniel.gui.widget.Button;
 import me.shedaniel.gui.widget.Control;
@@ -27,8 +28,8 @@ public class RecipeGui extends GuiContainer {
     private final Container container;
     private final GuiScreen prevScreen;
     public final Map<IDisplayCategory, List<IRecipe>> recipes;
-    public int guiWidth = 176;
-    public int guiHeight = 222;
+    public final int guiWidth = 176;
+    public final int guiHeight = 222;
     ArrayList<IDisplayCategory> categories = new ArrayList<>();
     private int categoryTabPage = 0;
     public IDisplayCategory selectedCategory;
@@ -48,9 +49,13 @@ public class RecipeGui extends GuiContainer {
         this.mc = Minecraft.getInstance();
         this.itemRender = mc.getItemRenderer();
         this.fontRenderer = mc.fontRenderer;
-        this.mainWindow = Minecraft.getInstance().mainWindow;
+        this.mainWindow = mc.mainWindow;
         
         setupCategories();
+    }
+    
+    public GuiScreen getPrevScreen() {
+        return prevScreen;
     }
     
     private void setupCategories() {
@@ -68,17 +73,17 @@ public class RecipeGui extends GuiContainer {
             selectedCategory = categories.get(tab.getId() + categoryTabPage * 6);
             recipePointer = 0;
             updateRecipe();
-            return true;
+            return false;
         }));
         updateRecipe();
     }
-    
     
     @Override
     public void render(int mouseX, int mouseY, float partialTicks) {
         drawDefaultBackground();
         super.render(mouseX, mouseY, partialTicks);
         int y = (int) ((mainWindow.getScaledHeight() / 2 - this.guiHeight / 2));
+        RenderHelper.disableStandardItemLighting();
         drawCenteredString(this.fontRenderer, selectedCategory.getDisplayName(), guiLeft + guiWidth / 2, y + 11, -1);
         drawCenteredString(this.fontRenderer, String.format("%d/%d", 1 + getCurrentPage(), getTotalPages()), guiLeft + guiWidth / 2, y + 34, -1);
         controls.forEach(Control::draw);
@@ -95,7 +100,6 @@ public class RecipeGui extends GuiContainer {
         controls.forEach(Control::tick);
     }
     
-    
     @Override
     public void onResize(Minecraft p_onResize_1_, int p_onResize_2_, int p_onResize_3_) {
         super.onResize(p_onResize_1_, p_onResize_2_, p_onResize_3_);
@@ -103,8 +107,6 @@ public class RecipeGui extends GuiContainer {
     }
     
     private void updateRecipe() {
-        int categoryPointer = categories.indexOf(selectedCategory);
-        
         IRecipe recipe = recipes.get(selectedCategory).get(recipePointer);
         selectedCategory.resetRecipes();
         selectedCategory.addRecipe(recipe);
@@ -164,8 +166,13 @@ public class RecipeGui extends GuiContainer {
         
         List<Control> newControls = new LinkedList<>();
         selectedCategory.addWidget(newControls, 0);
-        if (recipes.get(selectedCategory).size() >= recipePointer + 2)
+        if (selectedCategory instanceof IDisplayCategoryCraftable)
+            ((IDisplayCategoryCraftable) selectedCategory).registerAutoCraftButton(newControls, this, getPrevScreen(), recipe, 0);
+        if (recipes.get(selectedCategory).size() >= recipePointer + 2) {
             selectedCategory.addWidget(newControls, 1);
+            if (selectedCategory instanceof IDisplayCategoryCraftable)
+                ((IDisplayCategoryCraftable) selectedCategory).registerAutoCraftButton(newControls, this, getPrevScreen(), recipes.get(selectedCategory).get(recipePointer + 1), 1);
+        }
         newControls.forEach(f -> f.move(guiLeft, guiTop));
         controls.addAll(newControls);
         
@@ -191,7 +198,7 @@ public class RecipeGui extends GuiContainer {
         //Tabs
         if (tabsEnabled) {
             GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-            RenderHelper.enableGUIStandardItemLighting();
+            RenderHelper.enableStandardItemLighting();
             this.mc.getTextureManager().bindTexture(CREATIVE_INVENTORY_TABS);
             tabs.stream().filter(tab -> tab.getId() + categoryTabPage * 6 == categories.indexOf(selectedCategory)).forEach(Tab::drawTab);
         }
@@ -214,7 +221,7 @@ public class RecipeGui extends GuiContainer {
         if (tabsEnabled)
             tabs.stream().filter(tab -> tab.getId() + categoryTabPage * 6 != categories.indexOf(selectedCategory)).forEach(tab -> {
                 GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-                RenderHelper.enableGUIStandardItemLighting();
+                RenderHelper.enableStandardItemLighting();
                 this.mc.getTextureManager().bindTexture(CREATIVE_INVENTORY_TABS);
                 tab.drawTab();
             });
@@ -223,15 +230,10 @@ public class RecipeGui extends GuiContainer {
     @Override
     public boolean keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_) {
         if (p_keyPressed_1_ == 256 && prevScreen != null) {
-            Minecraft.getInstance().displayGuiScreen(prevScreen);
+            this.mc.displayGuiScreen(prevScreen);
             return true;
         }
         return super.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
-    }
-    
-    @Override
-    public void onGuiClosed() {
-        super.onGuiClosed();
     }
     
     private boolean btnCategoryLeft(int button) {
@@ -281,4 +283,5 @@ public class RecipeGui extends GuiContainer {
     private int getTotalPages() {
         return MathHelper.clamp(riseDoublesToInt(recipes.get(selectedCategory).size() / 2d), 1, Integer.MAX_VALUE);
     }
+    
 }

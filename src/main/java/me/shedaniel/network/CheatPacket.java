@@ -46,4 +46,5 @@ public class CheatPacket implements Packet<INetHandlerPlayServer> {
             player.sendMessage(new TextComponentTranslation("text.rei.cheat_items", stack.getDisplayName().getFormattedText(), stack.getCount(), player.getScoreboardName()), ChatType.SYSTEM);
         else player.sendMessage(new TextComponentTranslation("text.rei.failed_cheat_items"), ChatType.SYSTEM);
     }
+    
 }

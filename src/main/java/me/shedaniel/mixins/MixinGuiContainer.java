@@ -42,7 +42,7 @@ public abstract class MixinGuiContainer implements IGuiEventListenerDeferred, IM
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
     private void onMouseClicked(double p_mouseClicked_1_, double p_mouseClicked_3_, int p_mouseClicked_5_, CallbackInfoReturnable<Boolean> ci) {
         boolean handled = false;
-        for(GuiCickListener listener : RiftLoader.instance.getListeners(GuiCickListener.class)) {
+        for(GuiClick listener : RiftLoader.instance.getListeners(GuiClick.class)) {
             if (listener.onClick((int) p_mouseClicked_1_, (int) p_mouseClicked_3_, p_mouseClicked_5_)) {
                 ci.setReturnValue(true);
                 handled = true;
@@ -67,7 +67,7 @@ public abstract class MixinGuiContainer implements IGuiEventListenerDeferred, IM
     
     public boolean mouseScrolled(double p_mouseScrolled_1_) {
         boolean handled = false;
-        for(MouseScrollListener listener : RiftLoader.instance.getListeners(MouseScrollListener.class)) {
+        for(GuiMouseScroll listener : RiftLoader.instance.getListeners(GuiMouseScroll.class)) {
             if (listener.mouseScrolled(p_mouseScrolled_1_)) {
                 handled = true;
             }

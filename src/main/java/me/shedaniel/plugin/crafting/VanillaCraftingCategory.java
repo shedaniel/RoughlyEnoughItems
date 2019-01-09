@@ -1,11 +1,17 @@
 package me.shedaniel.plugin.crafting;
 
-import me.shedaniel.api.IDisplayCategory;
-import me.shedaniel.gui.widget.REISlot;
+import me.shedaniel.api.IDisplayCategoryCraftable;
+import me.shedaniel.gui.RecipeGui;
 import me.shedaniel.gui.widget.Control;
+import me.shedaniel.gui.widget.REISlot;
+import me.shedaniel.gui.widget.SmallButton;
 import me.shedaniel.gui.widget.WidgetArrow;
+import me.shedaniel.listenerdefinitions.IMixinGuiRecipeBook;
 import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.inventory.GuiCrafting;
+import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
@@ -14,7 +20,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public class VanillaCraftingCategory implements IDisplayCategory<VanillaCraftingRecipe> {
+public class VanillaCraftingCategory implements IDisplayCategoryCraftable<VanillaCraftingRecipe> {
+    
     MainWindow mainWindow = Minecraft.getInstance().mainWindow;
     private List<VanillaCraftingRecipe> recipes;
     
@@ -116,6 +123,40 @@ public class VanillaCraftingCategory implements IDisplayCategory<VanillaCrafting
     @Override
     public ItemStack getCategoryIcon() {
         return new ItemStack(Blocks.CRAFTING_TABLE.asItem());
+    }
+    
+    @Override
+    public boolean canAutoCraftHere(Class<? extends GuiScreen> guiClass, VanillaCraftingRecipe recipe) {
+        return guiClass.isAssignableFrom(GuiCrafting.class) || (guiClass.isAssignableFrom(GuiInventory.class) && recipe.getHeight() < 3 && recipe.getWidth() < 3);
+    }
+    
+    @Override
+    public boolean performAutoCraft(GuiScreen gui, VanillaCraftingRecipe recipe) {
+        if (gui.getClass().isAssignableFrom(GuiCrafting.class))
+            ((IMixinGuiRecipeBook) (((GuiCrafting) gui).func_194310_f())).getGhostSlots().clear();
+        else if (gui.getClass().isAssignableFrom(GuiInventory.class))
+            ((IMixinGuiRecipeBook) (((GuiInventory) gui).func_194310_f())).getGhostSlots().clear();
+        else return false;
+        Minecraft.getInstance().playerController.func_203413_a(Minecraft.getInstance().player.openContainer.windowId, recipe.getRecipe(), GuiScreen.isShiftKeyDown());
+        return true;
+    }
+    
+    @Override
+    public void registerAutoCraftButton(List<Control> control, RecipeGui recipeGui, GuiScreen parentGui, VanillaCraftingRecipe recipe, int number) {
+        SmallButton button = new SmallButton(78, 75 + 6 + 36 + number * 75, 10, 10, "+", enabled -> {
+            if (!(parentGui instanceof GuiCrafting || parentGui instanceof GuiInventory))
+                return I18n.format("text.auto_craft.wrong_gui");
+            if (parentGui instanceof GuiInventory && !(recipe.getHeight() < 3 && recipe.getWidth() < 3))
+                return I18n.format("text.auto_craft.crafting.too_small");
+            return "";
+        });
+        button.setOnClick(mouse -> {
+            recipeGui.close();
+            Minecraft.getInstance().displayGuiScreen(parentGui);
+            return canAutoCraftHere(parentGui.getClass(), recipe) && performAutoCraft(parentGui, recipe);
+        });
+        button.setEnabled(canAutoCraftHere(parentGui.getClass(), recipe));
+        control.add(button);
     }
     
 }

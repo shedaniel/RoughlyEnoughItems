@@ -1,9 +1,15 @@
 package me.shedaniel.plugin.furnace;
 
-import me.shedaniel.api.IDisplayCategory;
-import me.shedaniel.gui.widget.REISlot;
+import me.shedaniel.api.IDisplayCategoryCraftable;
+import me.shedaniel.gui.RecipeGui;
 import me.shedaniel.gui.widget.Control;
+import me.shedaniel.gui.widget.REISlot;
+import me.shedaniel.gui.widget.SmallButton;
 import me.shedaniel.gui.widget.WidgetArrow;
+import me.shedaniel.listenerdefinitions.IMixinGuiRecipeBook;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.inventory.GuiFurnace;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
@@ -15,7 +21,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class VanillaFurnaceCategory implements IDisplayCategory<VanillaFurnaceRecipe> {
+public class VanillaFurnaceCategory implements IDisplayCategoryCraftable<VanillaFurnaceRecipe> {
+    
     private List<VanillaFurnaceRecipe> recipes;
     
     @Override
@@ -86,4 +93,35 @@ public class VanillaFurnaceCategory implements IDisplayCategory<VanillaFurnaceRe
     public ItemStack getCategoryIcon() {
         return new ItemStack(Blocks.FURNACE.asItem());
     }
+    
+    @Override
+    public boolean canAutoCraftHere(Class<? extends GuiScreen> guiClass, VanillaFurnaceRecipe recipe) {
+        return guiClass.isAssignableFrom(GuiFurnace.class);
+    }
+    
+    @Override
+    public boolean performAutoCraft(GuiScreen gui, VanillaFurnaceRecipe recipe) {
+        if (!gui.getClass().isAssignableFrom(GuiFurnace.class))
+            return false;
+        ((IMixinGuiRecipeBook) (((GuiFurnace) gui).recipeBook)).getGhostSlots().clear();
+        Minecraft.getInstance().playerController.func_203413_a(Minecraft.getInstance().player.openContainer.windowId, recipe.getRecipe(), GuiScreen.isShiftKeyDown());
+        return true;
+    }
+    
+    @Override
+    public void registerAutoCraftButton(List<Control> control, RecipeGui recipeGui, GuiScreen parentGui, VanillaFurnaceRecipe recipe, int number) {
+        SmallButton button = new SmallButton(128, 75 + 6 + 26 + number * 75, 10, 10, "+", enabled -> {
+            if (!(parentGui instanceof GuiFurnace))
+                return I18n.format("text.auto_craft.wrong_gui");
+            return "";
+        });
+        button.setOnClick(mouse -> {
+            recipeGui.close();
+            Minecraft.getInstance().displayGuiScreen(parentGui);
+            return canAutoCraftHere(parentGui.getClass(), recipe) && performAutoCraft(parentGui, recipe);
+        });
+        button.setEnabled(canAutoCraftHere(parentGui.getClass(), recipe));
+        control.add(button);
+    }
+    
 }

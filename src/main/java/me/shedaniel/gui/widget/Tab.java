@@ -4,6 +4,7 @@ import me.shedaniel.gui.REIRenderHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.ItemRenderer;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
@@ -80,8 +81,7 @@ public class Tab extends Control {
             this.drawTexturedModalRect(rect.x, rect.y - (selected ? 0 : 2), 28, (selected ? 32 : 0), 28, (selected ? 32 : 31));
             this.zLevel = 100.0F;
             this.itemRender.zLevel = 100.0F;
-            GlStateManager.enableLighting();
-            GlStateManager.enableRescaleNormal();
+            RenderHelper.enableGUIStandardItemLighting();
             this.itemRender.renderItemAndEffectIntoGUI(getItemStack(), l, i1);
             this.itemRender.renderItemOverlays(Minecraft.getInstance().fontRenderer, getItemStack(), l, i1);
             GlStateManager.disableLighting();
@@ -98,4 +98,5 @@ public class Tab extends Control {
         Point mouse = REIRenderHelper.getMouseLoc();
         REIRenderHelper.addToolTip(toolTip, mouse.x, mouse.y);
     }
+    
 }

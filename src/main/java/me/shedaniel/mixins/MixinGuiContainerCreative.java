@@ -1,6 +1,6 @@
 package me.shedaniel.mixins;
 
-import me.shedaniel.listenerdefinitions.GuiCickListener;
+import me.shedaniel.listenerdefinitions.GuiClick;
 import me.shedaniel.listenerdefinitions.GuiKeyDown;
 import net.minecraft.client.gui.inventory.GuiContainerCreative;
 import net.minecraft.client.renderer.InventoryEffectRenderer;
@@ -53,7 +53,7 @@ public abstract class MixinGuiContainerCreative extends InventoryEffectRenderer 
         if (getSelectedTabIndex() != ItemGroup.INVENTORY.getIndex())
             return;
         boolean handled = false;
-        for(GuiCickListener listener : RiftLoader.instance.getListeners(GuiCickListener.class)) {
+        for(GuiClick listener : RiftLoader.instance.getListeners(GuiClick.class)) {
             if (listener.onClick((int) p_mouseClicked_1_, (int) p_mouseClicked_3_, p_mouseClicked_5_)) {
                 ci.setReturnValue(true);
                 handled = true;

@@ -5,5 +5,10 @@ package me.shedaniel.api;
  */
 public interface IREIPlugin {
     
-    public void register();
+    public void registerCategories();
+    
+    public void registerRecipes();
+    
+    public void registerSpecialGuiExclusion();
+    
 }

@@ -18,9 +18,9 @@ public class MixinRecipeManager {
     RecipeManager recipeManager;
     
     @Inject(method = "handleUpdateRecipes", at = @At("RETURN"))
-    private void onUpdateRecipies(SPacketUpdateRecipes packetIn, CallbackInfo ci) {
-        for(RecipeLoadListener listener : RiftLoader.instance.getListeners(RecipeLoadListener.class)) {
+    private void onUpdateRecipes(SPacketUpdateRecipes packetIn, CallbackInfo ci) {
+        for(RecipeLoadListener listener : RiftLoader.instance.getListeners(RecipeLoadListener.class))
             listener.recipesLoaded(recipeManager);
-        }
     }
+    
 }

@@ -8,11 +8,13 @@ import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.tileentity.TileEntityFurnace;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class VanillaFurnaceRecipe implements IRecipe<ItemStack> {
+    
     private final FurnaceRecipe recipe;
     
     @Override
@@ -41,4 +43,17 @@ public class VanillaFurnaceRecipe implements IRecipe<ItemStack> {
         input.add(TileEntityFurnace.getBurnTimes().keySet().stream().map(Item::getDefaultInstance).collect(Collectors.toList()));
         return input;
     }
+    
+    @Override
+    public List<List<ItemStack>> getRecipeRequiredInput() {
+        List<List<ItemStack>> input = new LinkedList<>();
+        for(Ingredient ingredient : recipe.getIngredients())
+            Collections.addAll(input, new LinkedList<>(Arrays.asList(ingredient.getMatchingStacks())));
+        return input;
+    }
+    
+    public FurnaceRecipe getRecipe() {
+        return recipe;
+    }
+    
 }

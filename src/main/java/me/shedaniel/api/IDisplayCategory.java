@@ -11,6 +11,7 @@ import java.util.List;
  * Created by James on 8/7/2018.
  */
 public interface IDisplayCategory<T extends IRecipe> {
+    
     public String getId();
     
     public String getDisplayName();
@@ -28,4 +29,5 @@ public interface IDisplayCategory<T extends IRecipe> {
     public void addWidget(List<Control> controls, int number);
     
     public ItemStack getCategoryIcon();
+    
 }

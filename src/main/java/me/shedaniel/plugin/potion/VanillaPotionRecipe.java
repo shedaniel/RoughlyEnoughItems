@@ -37,6 +37,14 @@ public class VanillaPotionRecipe implements IRecipe<ItemStack> {
         return input;
     }
     
+    @Override
+    public List<List<ItemStack>> getRecipeRequiredInput() {
+        List<List<ItemStack>> input = new LinkedList<>();
+        input.add(new ArrayList<>(Arrays.asList(this.input)));
+        input.add(new ArrayList<>(Arrays.asList(this.reactWith)));
+        return input;
+    }
+    
     public List<ItemStack> getOutput(int slot) {
         List<ItemStack> stack = new ArrayList<>();
         for(int i = 0; i < slot * 2; i++)
@@ -45,4 +53,5 @@ public class VanillaPotionRecipe implements IRecipe<ItemStack> {
             stack.addAll(getOutput());
         return stack;
     }
+    
 }

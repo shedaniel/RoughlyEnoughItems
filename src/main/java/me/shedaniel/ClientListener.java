@@ -18,9 +18,9 @@ import java.util.*;
 
 public class ClientListener implements DoneLoading, RecipeLoadListener {
     
-    public static KeyBindFunction recipeKeybind;
-    public static KeyBindFunction hideKeybind;
-    public static KeyBindFunction useKeybind;
+    public static KeyBindFunction recipeKeyBind;
+    public static KeyBindFunction hideKeyBind;
+    public static KeyBindFunction useKeyBind;
     public static List<KeyBindFunction> keyBinds = new ArrayList<>();
     
     private List<IREIPlugin> plugins;
@@ -38,7 +38,7 @@ public class ClientListener implements DoneLoading, RecipeLoadListener {
         plugins = new ArrayList<>();
         stackList = new ArrayList<>();
         
-        recipeKeybind = new KeyBindFunction(Core.config.recipeKeyBind) {
+        recipeKeyBind = new KeyBindFunction(Core.config.recipeKeyBind) {
             @Override
             public boolean apply(int key) {
                 if (key == this.getKey())
@@ -46,7 +46,7 @@ public class ClientListener implements DoneLoading, RecipeLoadListener {
                 return key == this.getKey();
             }
         };
-        hideKeybind = new KeyBindFunction(Core.config.hideKeyBind) {
+        hideKeyBind = new KeyBindFunction(Core.config.hideKeyBind) {
             @Override
             public boolean apply(int key) {
                 if (key == this.getKey())
@@ -54,7 +54,7 @@ public class ClientListener implements DoneLoading, RecipeLoadListener {
                 return key == this.getKey();
             }
         };
-        useKeybind = new KeyBindFunction(Core.config.usageKeyBind) {
+        useKeyBind = new KeyBindFunction(Core.config.usageKeyBind) {
             @Override
             public boolean apply(int key) {
                 if (key == this.getKey())
@@ -62,7 +62,7 @@ public class ClientListener implements DoneLoading, RecipeLoadListener {
                 return key == this.getKey();
             }
         };
-        keyBinds.addAll(Arrays.asList(recipeKeybind, hideKeybind, useKeybind));
+        keyBinds.addAll(Arrays.asList(recipeKeyBind, hideKeyBind, useKeyBind));
         buildItemList();
     }
     

@@ -27,25 +27,25 @@ import java.util.stream.Collectors;
 public class VanillaPlugin implements IREIPlugin, PotionCraftingAdder {
     
     private List<VanillaPotionRecipe> potionRecipes = new LinkedList<>();
+    private List<VanillaCraftingRecipe> recipes = new LinkedList<>();
+    private List<VanillaFurnaceRecipe> furnaceRecipes = new LinkedList<>();
     
     @Override
-    public void register() {
-        List<VanillaCraftingRecipe> recipes = new LinkedList<>();
-        List<VanillaFurnaceRecipe> furnaceRecipes = new LinkedList<>();
+    public void registerCategories() {
         REIRecipeManager.instance().addDisplayAdapter(new VanillaCraftingCategory());
         REIRecipeManager.instance().addDisplayAdapter(new VanillaFurnaceCategory());
         REIRecipeManager.instance().addDisplayAdapter(new VanillaPotionCategory());
-        
+    }
+    
+    @Override
+    public void registerRecipes() {
         for(IRecipe recipe : REIRecipeManager.instance().recipeManager.getRecipes()) {
-            if (recipe instanceof ShapelessRecipe) {
+            if (recipe instanceof ShapelessRecipe)
                 recipes.add(new VanillaShapelessCraftingRecipe((ShapelessRecipe) recipe));
-            }
-            if (recipe instanceof ShapedRecipe) {
+            else if (recipe instanceof ShapedRecipe)
                 recipes.add(new VanillaShapedCraftingRecipe((ShapedRecipe) recipe));
-            }
-            if (recipe instanceof FurnaceRecipe) {
+            else if (recipe instanceof FurnaceRecipe)
                 furnaceRecipes.add(new VanillaFurnaceRecipe((FurnaceRecipe) recipe));
-            }
         }
         IRegistry.POTION.stream().filter(potionType -> !potionType.equals(PotionTypes.EMPTY)).forEach(potionType -> {
             ItemStack basePotion = PotionUtils.addPotionToItemStack(new ItemStack(Items.POTION), potionType),
@@ -56,10 +56,14 @@ public class VanillaPlugin implements IREIPlugin, PotionCraftingAdder {
             potionRecipes.add(new VanillaPotionRecipe(new ItemStack[]{splashPotion}, Ingredient.fromItems(Items.DRAGON_BREATH).getMatchingStacks(),
                     new ItemStack[]{lingeringPotion}));
         });
-        
         REIRecipeManager.instance().addRecipe("vanilla", recipes);
         REIRecipeManager.instance().addRecipe("furnace", furnaceRecipes);
         REIRecipeManager.instance().addRecipe("potion", potionRecipes.stream().collect(Collectors.toList()));
+    }
+    
+    @Override
+    public void registerSpecialGuiExclusion() {
+    
     }
     
     @Override

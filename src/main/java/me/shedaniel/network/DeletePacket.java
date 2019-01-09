@@ -10,6 +10,7 @@ import net.minecraft.network.play.INetHandlerPlayServer;
 import java.io.IOException;
 
 public class DeletePacket implements Packet<INetHandlerPlayServer> {
+    
     @Override
     public void readPacketData(PacketBuffer packetBuffer) throws IOException {
     
@@ -29,4 +30,5 @@ public class DeletePacket implements Packet<INetHandlerPlayServer> {
             player.inventory.setItemStack(ItemStack.EMPTY);
         }
     }
+    
 }
