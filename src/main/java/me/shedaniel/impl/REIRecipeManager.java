@@ -10,6 +10,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.recipe.RecipeManager;
 
 import java.awt.*;
@@ -153,7 +154,12 @@ public class REIRecipeManager implements IRecipeManager {
         for(List<IRecipe> value : recipeList.values())
             for(IRecipe iRecipe : value) {
                 int slotsCraftable = 0;
-                for(List<ItemStack> slot : ((List<List<ItemStack>>) iRecipe.getRecipeRequiredInput())) {
+                List<List<ItemStack>> requiredInput = (List<List<ItemStack>>) iRecipe.getRecipeRequiredInput();
+                for(List<ItemStack> slot : requiredInput) {
+                    if (slot.isEmpty()) {
+                        slotsCraftable++;
+                        continue;
+                    }
                     boolean slotDone = false;
                     for(ItemStack possibleType : types) {
                         for(ItemStack slotPossible : slot)
