@@ -16,6 +16,7 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Created by James on 8/7/2018.
@@ -137,6 +138,7 @@ public class REIRecipeManager implements IRecipeManager {
         return categories;
     }
     
+    @Deprecated
     public List<IRecipe> findUsageForItems(List<ItemStack> types) {
         List<IRecipe> recipes = new ArrayList<>();
         types.forEach(item -> {
@@ -144,6 +146,30 @@ public class REIRecipeManager implements IRecipeManager {
             itemUsages.values().forEach(iRecipes -> recipes.addAll(iRecipes));
         });
         return recipes;
+    }
+    
+    public List<ItemStack> findCraftableByItems(List<ItemStack> types) {
+        List<ItemStack> craftables = new ArrayList<>();
+        for(List<IRecipe> value : recipeList.values())
+            for(IRecipe iRecipe : value) {
+                int slotsCraftable = 0;
+                for(List<ItemStack> slot : ((List<List<ItemStack>>) iRecipe.getRecipeRequiredInput())) {
+                    boolean slotDone = false;
+                    for(ItemStack possibleType : types) {
+                        for(ItemStack slotPossible : slot)
+                            if (ItemStack.areEqualIgnoreTags(slotPossible, possibleType)) {
+                                slotsCraftable++;
+                                slotDone = true;
+                                break;
+                            }
+                        if (slotDone)
+                            break;
+                    }
+                }
+                if (slotsCraftable == iRecipe.getRecipeRequiredInput().size())
+                    craftables.addAll((List<ItemStack>) iRecipe.getOutput());
+            }
+        return craftables.stream().distinct().collect(Collectors.toList());
     }
     
     public List<IDisplayCategory> getAdatapersForOutput(ItemStack stack) {
