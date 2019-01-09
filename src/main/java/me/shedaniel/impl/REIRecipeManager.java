@@ -192,6 +192,7 @@ public class REIRecipeManager implements IRecipeManager {
         REIRecipeManager.instance().recipeManager = manager;
         Core.getListeners(IREIPlugin.class).forEach(IREIPlugin::registerCategories);
         Core.getListeners(IREIPlugin.class).forEach(IREIPlugin::registerRecipes);
+        Core.getListeners(IREIPlugin.class).forEach(IREIPlugin::registerSpecialGuiExclusion);
     }
     
     public void displayRecipesFor(ItemStack stack) {
