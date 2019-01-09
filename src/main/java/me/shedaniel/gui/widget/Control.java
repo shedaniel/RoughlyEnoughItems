@@ -104,6 +104,18 @@ public abstract class Control extends Drawable {
         lvt_9_1_.draw();
     }
     
+    public void drawTexturedRect(int int_1, int int_2, int int_3, int int_4, int int_5, int int_6, double zOffset) {
+        float float_1 = 0.00390625F;
+        float float_2 = 0.00390625F;
+        Tessellator tessellator_1 = Tessellator.getInstance();
+        BufferBuilder bufferBuilder_1 = tessellator_1.getBufferBuilder();
+        bufferBuilder_1.begin(7, VertexFormats.POSITION_UV);
+        bufferBuilder_1.vertex((double)(int_1 + 0), (double)(int_2 + int_6), zOffset).texture((double)((float)(int_3 + 0) * 0.00390625F), (double)((float)(int_4 + int_6) * 0.00390625F)).next();
+        bufferBuilder_1.vertex((double)(int_1 + int_5), (double)(int_2 + int_6), zOffset).texture((double)((float)(int_3 + int_5) * 0.00390625F), (double)((float)(int_4 + int_6) * 0.00390625F)).next();
+        bufferBuilder_1.vertex((double)(int_1 + int_5), (double)(int_2 + 0), zOffset).texture((double)((float)(int_3 + int_5) * 0.00390625F), (double)((float)(int_4 + 0) * 0.00390625F)).next();
+        bufferBuilder_1.vertex((double)(int_1 + 0), (double)(int_2 + 0), zOffset).texture((double)((float)(int_3 + 0) * 0.00390625F), (double)((float)(int_4 + 0) * 0.00390625F)).next();
+        tessellator_1.draw();
+    }
     
     public void tick() {
     }

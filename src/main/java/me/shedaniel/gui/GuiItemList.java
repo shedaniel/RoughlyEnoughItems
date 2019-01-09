@@ -5,10 +5,8 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.ClientListener;
 import me.shedaniel.Core;
 import me.shedaniel.config.REIItemListOrdering;
+import me.shedaniel.gui.widget.*;
 import me.shedaniel.gui.widget.Button;
-import me.shedaniel.gui.widget.Control;
-import me.shedaniel.gui.widget.REISlot;
-import me.shedaniel.gui.widget.TextBox;
 import me.shedaniel.impl.REIRecipeManager;
 import me.shedaniel.listenerdefinitions.IMixinContainerGui;
 import net.fabricmc.fabric.client.itemgroup.FabricCreativeGuiComponents;
@@ -106,7 +104,7 @@ public class GuiItemList extends Drawable {
         searchBox = new TextBox(getSearchBoxArea());
         searchBox.setText(savedText);
         if (Core.config.enableCraftableOnlyButton) {
-            Button buttonCraftableOnly = new Button(getCraftableToggleArea(), "");
+            CraftableToggleButton buttonCraftableOnly = new CraftableToggleButton(getCraftableToggleArea());
             buttonCraftableOnly.setOnClick(i -> {
                 Core.runtimeConfig.craftableOnly = !Core.runtimeConfig.craftableOnly;
                 REIRenderHelper.updateSearch();

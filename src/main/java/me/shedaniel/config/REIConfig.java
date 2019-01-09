@@ -17,6 +17,6 @@ public class REIConfig {
     public boolean centreSearchBox = false;
     public REIItemListOrdering itemListOrdering = REIItemListOrdering.REGISTRY;
     public boolean isAscending = true;
-    public boolean enableCraftableOnlyButton = false;
+    public boolean enableCraftableOnlyButton = true;
     
 }
