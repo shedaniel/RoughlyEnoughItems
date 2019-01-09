@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.ClientListener;
 import me.shedaniel.Core;
-import me.shedaniel.api.IRecipe;
 import me.shedaniel.config.REIItemListOrdering;
 import me.shedaniel.gui.widget.Button;
 import me.shedaniel.gui.widget.Control;
@@ -19,11 +18,9 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.Window;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.TextComponent;
-import net.minecraft.text.TranslatableTextComponent;
+import net.minecraft.item.Items;
 import net.minecraft.util.DefaultedList;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
@@ -147,7 +144,7 @@ public class GuiItemList extends Drawable {
     
     private Rectangle getCraftableToggleArea() {
         Rectangle searchBoxArea = getSearchBoxArea();
-        searchBoxArea.setLocation(searchBoxArea.x + searchBoxArea.width + 4, searchBoxArea.y - 2);
+        searchBoxArea.setLocation(searchBoxArea.x + searchBoxArea.width + 4, searchBoxArea.y - 1);
         searchBoxArea.setSize(20, 20);
         return searchBoxArea;
     }
@@ -210,16 +207,12 @@ public class GuiItemList extends Drawable {
             return;
         if (MinecraftClient.getInstance().currentGui instanceof ContainerGui)
             overlayedGui = (ContainerGui) MinecraftClient.getInstance().currentGui;
-        if (Core.runtimeConfig.craftableOnly) {
-            List<ItemStack> currentPlayerItems = getInventoryItemsTypes();
-            for(ItemStack item : lastPlayerItems)
-                if (!currentPlayerItems.contains(item) || currentPlayerItems.size() != lastPlayerItems.size()) {
-                    lastPlayerItems = new ArrayList<>(currentPlayerItems);
-                    updateView();
-                }
-        }
         if (needsResize == true || oldGuiLeft != ((IMixinContainerGui) overlayedGui).getGuiLeft())
             resize();
+        else if (Core.runtimeConfig.craftableOnly && (!hasSameListContent(new LinkedList<>(lastPlayerItems), getInventoryItemsTypes()) || (getInventoryItemsTypes().size() != lastPlayerItems.size()))) {
+            this.lastPlayerItems = new LinkedList<>(getInventoryItemsTypes());
+            updateView();
+        }
         GlStateManager.pushMatrix();
         updateButtons();
         controls.forEach(Control::draw);
@@ -229,11 +222,25 @@ public class GuiItemList extends Drawable {
         GlStateManager.popMatrix();
     }
     
+    private boolean hasSameListContent(List<ItemStack> list1, List<ItemStack> list2) {
+        Collections.sort(list1, (itemStack, t1) -> {
+            return itemStack.getDisplayName().getFormattedText().compareToIgnoreCase(t1.getDisplayName().getFormattedText());
+        });
+        Collections.sort(list2, (itemStack, t1) -> {
+            return itemStack.getDisplayName().getFormattedText().compareToIgnoreCase(t1.getDisplayName().getFormattedText());
+        });
+        String lastString = String.join("", list1.stream().map(itemStack -> {
+            return itemStack.getDisplayName().getFormattedText();
+        }).collect(Collectors.toList())), currentString = String.join("", list2.stream().map(itemStack -> {
+            return itemStack.getDisplayName().getFormattedText();
+        }).collect(Collectors.toList()));
+        return lastString.equals(currentString);
+    }
+    
     private void updateButtons() {
         buttonLeft.setEnabled(MathHelper.ceil(view.size() / displaySlots.size()) > 1);
         buttonRight.setEnabled(MathHelper.ceil(view.size() / displaySlots.size()) > 1);
     }
-    
     
     public boolean btnRightClicked(int button) {
         if (button == 0) {
@@ -260,7 +267,6 @@ public class GuiItemList extends Drawable {
     public boolean cheatClicked(int button) {
         if (button == 0) {
             cheatMode = !cheatMode;
-            
             buttonCheating.setString(getCheatModeText());
             return true;
         }
@@ -268,12 +274,7 @@ public class GuiItemList extends Drawable {
     }
     
     private String getCheatModeText() {
-        if (cheatMode) {
-            TextComponent cheat = new TranslatableTextComponent("text.rei.cheat", new Object[]{null});
-            return cheat.getFormattedText();
-        }
-        TextComponent noCheat = new TranslatableTextComponent("text.rei.nocheat", new Object[]{null});
-        return noCheat.getFormattedText();
+        return I18n.translate(String.format("%s%s", "text.rei.", cheatMode ? "cheat" : "nocheat"));
     }
     
     protected void updateView() {
@@ -289,12 +290,10 @@ public class GuiItemList extends Drawable {
             itemGroups.add(null);
             if (Core.config.itemListOrdering != REIItemListOrdering.REGISTRY)
                 Collections.sort(stackList, (itemStack, t1) -> {
-                    switch (Core.config.itemListOrdering) {
-                        case NAME:
-                            return itemStack.getDisplayName().getFormattedText().compareToIgnoreCase(t1.getDisplayName().getFormattedText());
-                        case ITEM_GROUPS:
-                            return itemGroups.indexOf(itemStack.getItem().getItemGroup()) - itemGroups.indexOf(t1.getItem().getItemGroup());
-                    }
+                    if (Core.config.itemListOrdering.equals(REIItemListOrdering.NAME))
+                        return itemStack.getDisplayName().getFormattedText().compareToIgnoreCase(t1.getDisplayName().getFormattedText());
+                    if (Core.config.itemListOrdering.equals(REIItemListOrdering.ITEM_GROUPS))
+                        return itemGroups.indexOf(itemStack.getItem().getItemGroup()) - itemGroups.indexOf(t1.getItem().getItemGroup());
                     return 0;
                 });
             if (!Core.config.isAscending)
@@ -318,21 +317,15 @@ public class GuiItemList extends Drawable {
                 stackList.stream().filter(itemStack -> filterItem(itemStack, arguments)).forEachOrdered(stacks::add);
             });
         }
-        List<ItemStack> workingItems = ClientListener.stackList == null ? new ArrayList<>() : ClientListener.stackList;
+        List<ItemStack> workingItems = ClientListener.stackList == null || (Core.runtimeConfig.craftableOnly && lastPlayerItems.size() > 0) ? new ArrayList<>() : ClientListener.stackList;
         if (Core.runtimeConfig.craftableOnly) {
-            List<IRecipe> workingRecipes = new ArrayList<>();
-            REIRecipeManager.instance().findUsageForItems(getInventoryItemsTypes()).forEach(workingRecipes::add);
-            workingItems = new ArrayList<>();
-            for(IRecipe workingRecipe : workingRecipes) {
-                List list = workingRecipe.getOutput();
-                try {
-                    workingItems.addAll((List<ItemStack>) list);
-                } catch (Exception e) {
-                }
-            }
+            REIRecipeManager.instance().findCraftableByItems(lastPlayerItems).forEach(workingItems::add);
+            workingItems.addAll(lastPlayerItems);
         }
         final List<ItemStack> finalWorkingItems = workingItems;
         view.addAll(stacks.stream().filter(itemStack -> {
+            if (!Core.runtimeConfig.craftableOnly)
+                return true;
             for(ItemStack workingItem : finalWorkingItems)
                 if (itemStack.isEqualIgnoreTags(workingItem))
                     return true;
@@ -346,8 +339,11 @@ public class GuiItemList extends Drawable {
         List<DefaultedList<ItemStack>> field_7543 = ImmutableList.of(MinecraftClient.getInstance().player.inventory.main, MinecraftClient.getInstance().player.inventory.armor
                 , MinecraftClient.getInstance().player.inventory.offHand);
         List<ItemStack> inventoryStacks = new ArrayList<>();
-        field_7543.forEach(inventoryStacks::addAll);
-        return inventoryStacks.stream().distinct().collect(Collectors.toList());
+        field_7543.forEach(itemStacks -> itemStacks.forEach(itemStack -> {
+            if (!itemStack.getItem().equals(Items.AIR))
+                inventoryStacks.add(itemStack);
+        }));
+        return inventoryStacks;
     }
     
     private boolean filterItem(ItemStack itemStack, List<SearchArgument> arguments) {
