@@ -97,4 +97,5 @@ public class Tab extends Control {
         Point mouse = REIRenderHelper.getMouseLoc();
         REIRenderHelper.addToolTip(toolTip, mouse.x, mouse.y);
     }
+    
 }
