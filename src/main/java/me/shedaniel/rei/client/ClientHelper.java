@@ -3,7 +3,12 @@ package me.shedaniel.rei.client;
 import com.google.common.collect.Lists;
 import io.netty.buffer.Unpooled;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.api.IRecipeCategory;
+import me.shedaniel.rei.api.IRecipeDisplay;
+import me.shedaniel.rei.gui.ContainerGuiOverlay;
+import me.shedaniel.rei.gui.widget.RecipeViewingWidget;
 import me.shedaniel.rei.listeners.ClientLoaded;
+import me.shedaniel.rei.listeners.IMixinContainerGui;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.FabricLoader;
 import net.minecraft.client.MinecraftClient;
@@ -19,9 +24,11 @@ import net.minecraft.util.PacketByteBuf;
 import net.minecraft.util.registry.Registry;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ClientHelper implements ClientLoaded, ClientModInitializer {
     
@@ -69,6 +76,10 @@ public class ClientHelper implements ClientLoaded, ClientModInitializer {
         return cheating;
     }
     
+    public static void setCheating(boolean cheating) {
+        ClientHelper.cheating = cheating;
+    }
+    
     public static void sendDeletePacket() {
         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
         MinecraftClient.getInstance().getNetworkHandler().sendPacket(new CustomPayloadServerPacket(RoughlyEnoughItemsCore.DELETE_ITEMS_PACKET, buf));
@@ -85,8 +96,11 @@ public class ClientHelper implements ClientLoaded, ClientModInitializer {
         }
     }
     
-    public static boolean executeRecipeKeyBind() {
-        return false;
+    public static boolean executeRecipeKeyBind(ContainerGuiOverlay overlay, ItemStack stack, IMixinContainerGui parent) {
+        Map<IRecipeCategory, List<IRecipeDisplay>> map = RecipeHelper.getRecipesFor(stack);
+        if (map.keySet().size() > 0)
+            MinecraftClient.getInstance().openGui(new RecipeViewingWidget(overlay, MinecraftClient.getInstance().window, parent, map));
+        return map.keySet().size() > 0;
     }
     
     public static boolean executeUsageKeyBind() {
@@ -118,7 +132,7 @@ public class ClientHelper implements ClientLoaded, ClientModInitializer {
     
     @Override
     public void onInitializeClient() {
-        this.cheating = true;
+        this.cheating = false;
     }
     
 }

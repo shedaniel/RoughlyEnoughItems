@@ -3,19 +3,27 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.ClientHelper;
+import me.shedaniel.rei.client.REIItemListOrdering;
+import me.shedaniel.rei.client.RecipeHelper;
+import me.shedaniel.rei.client.SearchArgument;
 import me.shedaniel.rei.gui.ContainerGuiOverlay;
 import me.shedaniel.rei.listeners.ClientLoaded;
 import me.shedaniel.rei.listeners.IMixinContainerGui;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Drawable;
+import net.minecraft.client.item.TooltipOptions;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.TextComponent;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ItemListOverlay extends Drawable implements IWidget {
     
@@ -24,8 +32,10 @@ public class ItemListOverlay extends Drawable implements IWidget {
     private List<IWidget> widgets = new ArrayList<>();
     private int width, height, page;
     private Rectangle rectangle;
+    private List<ItemStack> currentDisplayed;
     
     public ItemListOverlay(ContainerGuiOverlay containerGuiOverlay, IMixinContainerGui containerGui, int page) {
+        this.currentDisplayed = Lists.newArrayList();
         this.containerGuiOverlay = containerGuiOverlay;
         this.containerGui = containerGui;
         this.width = 0;
@@ -42,15 +52,15 @@ public class ItemListOverlay extends Drawable implements IWidget {
         widgets.forEach(widget -> widget.draw(int_1, int_2, float_1));
     }
     
-    public void updateList(int page) {
-        updateList(rectangle, page);
+    public void updateList(int page, String searchTerm) {
+        updateList(rectangle, page, searchTerm);
     }
     
-    public void updateList(Rectangle rect, int page) {
+    public void updateList(Rectangle rect, int page, String searchTerm) {
         this.rectangle = rect;
         if (ClientHelper.getItemList().isEmpty())
             RoughlyEnoughItemsCore.getListeners(ClientLoaded.class).forEach(ClientLoaded::clientLoaded);
-        List<ItemStack> stacks = ClientHelper.getItemList();
+        currentDisplayed = processSearchTerm(searchTerm, ClientHelper.getItemList(), Lists.newArrayList());
         this.widgets.clear();
         this.page = page;
         calculateListSize(rect);
@@ -58,10 +68,10 @@ public class ItemListOverlay extends Drawable implements IWidget {
         double startY = rect.getCenterY() - height * 9;
         for(int i = 0; i < getTotalSlotsPerPage(); i++) {
             int j = i + page * getTotalSlotsPerPage();
-            if (j >= stacks.size())
+            if (j >= currentDisplayed.size())
                 break;
             widgets.add(new ItemSlotWidget((int) (startX + (i % width) * 18), (int) (startY + MathHelper.floor(i / width) * 18),
-                    stacks.get(j), false, true, containerGui) {
+                    currentDisplayed.get(j), false, true, containerGui) {
                 @Override
                 protected List<String> getTooltip(ItemStack itemStack) {
                     if (!ClientHelper.isCheating() || MinecraftClient.getInstance().player.inventory.getCursorStack().isEmpty())
@@ -89,7 +99,7 @@ public class ItemListOverlay extends Drawable implements IWidget {
                             }
                         } else {
                             if (button == 0)
-                                return ClientHelper.executeRecipeKeyBind();
+                                return ClientHelper.executeRecipeKeyBind(containerGuiOverlay, getCurrentStack().copy(), containerGui);
                             else if (button == 1)
                                 return ClientHelper.executeUsageKeyBind();
                         }
@@ -98,6 +108,97 @@ public class ItemListOverlay extends Drawable implements IWidget {
                 }
             });
         }
+    }
+    
+    public List<ItemStack> getCurrentDisplayed() {
+        return currentDisplayed;
+    }
+    
+    private List<ItemStack> processSearchTerm(String searchTerm, List<ItemStack> ol, List<ItemStack> inventoryItems) {
+        List<ItemStack> os = new LinkedList<>(ol), stacks = Lists.newArrayList(), finalStacks = Lists.newArrayList();
+        List<ItemGroup> itemGroups = new LinkedList<>(Arrays.asList(ItemGroup.GROUPS));
+        itemGroups.add(null);
+        REIItemListOrdering ordering = RoughlyEnoughItemsCore.getConfigManager().getItemListOrdering();
+        if (ordering != REIItemListOrdering.REGISTRY)
+            Collections.sort(os, (itemStack, t1) -> {
+                if (ordering.equals(REIItemListOrdering.NAME))
+                    return itemStack.getDisplayName().getFormattedText().compareToIgnoreCase(t1.getDisplayName().getFormattedText());
+                if (ordering.equals(REIItemListOrdering.ITEM_GROUPS))
+                    return itemGroups.indexOf(itemStack.getItem().getItemGroup()) - itemGroups.indexOf(t1.getItem().getItemGroup());
+                return 0;
+            });
+        if (!RoughlyEnoughItemsCore.getConfigManager().isAscending())
+            Collections.reverse(os);
+        Arrays.stream(searchTerm.split("\\|")).forEachOrdered(s -> {
+            List<SearchArgument> arguments = new ArrayList<>();
+            while (s.startsWith(" ")) s = s.substring(1);
+            while (s.endsWith(" ")) s = s.substring(0, s.length());
+            if (s.startsWith("@-") || s.startsWith("-@"))
+                arguments.add(new SearchArgument(SearchArgument.ArgumentType.MOD, s.substring(2), false));
+            else if (s.startsWith("@"))
+                arguments.add(new SearchArgument(SearchArgument.ArgumentType.MOD, s.substring(1), true));
+            else if (s.startsWith("#-") || s.startsWith("-#"))
+                arguments.add(new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, s.substring(2), false));
+            else if (s.startsWith("#"))
+                arguments.add(new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, s.substring(1), true));
+            else if (s.startsWith("-"))
+                arguments.add(new SearchArgument(SearchArgument.ArgumentType.TEXT, s.substring(1), false));
+            else
+                arguments.add(new SearchArgument(SearchArgument.ArgumentType.TEXT, s, true));
+            os.stream().filter(itemStack -> filterItem(itemStack, arguments)).forEachOrdered(stacks::add);
+        });
+        List<ItemStack> workingItems = RoughlyEnoughItemsCore.getConfigManager().craftableOnly() && inventoryItems.size() > 0 ? new ArrayList<>() : new LinkedList<>(ol);
+        if (RoughlyEnoughItemsCore.getConfigManager().craftableOnly()) {
+            RecipeHelper.findCraftableByItems(inventoryItems).forEach(workingItems::add);
+            workingItems.addAll(inventoryItems);
+        }
+        final List<ItemStack> finalWorkingItems = workingItems;
+        finalStacks.addAll(stacks.stream().filter(itemStack -> {
+            if (!RoughlyEnoughItemsCore.getConfigManager().craftableOnly())
+                return true;
+            for(ItemStack workingItem : finalWorkingItems)
+                if (itemStack.isEqualIgnoreTags(workingItem))
+                    return true;
+            return false;
+        }).distinct().collect(Collectors.toList()));
+        return finalStacks;
+    }
+    
+    private boolean filterItem(ItemStack itemStack, List<SearchArgument> arguments) {
+        String mod = ClientHelper.getModFromItemStack(itemStack);
+        List<String> toolTipsList = getStackTooltip(itemStack);
+        String toolTipsMixed = toolTipsList.stream().skip(1).collect(Collectors.joining()).toLowerCase();
+        String allMixed = Stream.of(itemStack.getDisplayName().getString(), toolTipsMixed).collect(Collectors.joining()).toLowerCase();
+        for(SearchArgument searchArgument : arguments.stream().filter(searchArgument -> !searchArgument.isInclude()).collect(Collectors.toList())) {
+            if (searchArgument.getArgumentType().equals(SearchArgument.ArgumentType.MOD))
+                if (mod.toLowerCase().contains(searchArgument.getText().toLowerCase()))
+                    return false;
+            if (searchArgument.getArgumentType().equals(SearchArgument.ArgumentType.TOOLTIP))
+                if (toolTipsMixed.contains(searchArgument.getText().toLowerCase()))
+                    return false;
+            if (searchArgument.getArgumentType().equals(SearchArgument.ArgumentType.TEXT))
+                if (allMixed.contains(searchArgument.getText().toLowerCase()))
+                    return false;
+        }
+        for(SearchArgument searchArgument : arguments.stream().filter(SearchArgument::isInclude).collect(Collectors.toList())) {
+            if (searchArgument.getArgumentType().equals(SearchArgument.ArgumentType.MOD))
+                if (!mod.toLowerCase().contains(searchArgument.getText().toLowerCase()))
+                    return false;
+            if (searchArgument.getArgumentType().equals(SearchArgument.ArgumentType.TOOLTIP))
+                if (!toolTipsMixed.contains(searchArgument.getText().toLowerCase()))
+                    return false;
+            if (searchArgument.getArgumentType().equals(SearchArgument.ArgumentType.TEXT))
+                if (!allMixed.contains(searchArgument.getText().toLowerCase()))
+                    return false;
+        }
+        return true;
+    }
+    
+    private List<String> getStackTooltip(ItemStack itemStack) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        return itemStack.getTooltipText(client.player, client.options.advancedItemTooltips ?
+                TooltipOptions.Instance.ADVANCED : TooltipOptions.Instance.NORMAL).stream().map(
+                        TextComponent::getFormattedText).collect(Collectors.toList());
     }
     
     private void calculateListSize(Rectangle rect) {

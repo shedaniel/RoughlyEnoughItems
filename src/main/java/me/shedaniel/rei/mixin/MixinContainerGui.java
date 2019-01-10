@@ -8,11 +8,11 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiEventListener;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ContainerGui.class)
 public class MixinContainerGui extends Gui implements IMixinContainerGui {
@@ -25,8 +25,10 @@ public class MixinContainerGui extends Gui implements IMixinContainerGui {
     protected int containerWidth;
     @Shadow
     protected int containerHeight;
+    
     private ContainerGuiOverlay overlay;
     private ContainerGui lastGui;
+    
     @Shadow
     private ItemStack field_2782;
     
@@ -81,12 +83,31 @@ public class MixinContainerGui extends Gui implements IMixinContainerGui {
         return lastGui;
     }
     
+    // WIP into an inject
     @Override
     public boolean mouseScrolled(double double_1) {
         for(GuiEventListener entry : this.getEntries())
             if (entry.mouseScrolled(double_1))
                 return true;
         return false;
+    }
+    
+    // WIP into an inject
+    @Override
+    public boolean charTyped(char char_1, int int_1) {
+        for(GuiEventListener entry : this.getEntries())
+            if (entry.charTyped(char_1, int_1))
+                return true;
+        return false;
+    }
+    
+    @Inject(method = "keyPressed(III)Z", at = @At("HEAD"), cancellable = true)
+    public void keyPressed(int int_1, int int_2, int int_3, CallbackInfoReturnable<Boolean> ci) {
+        for(GuiEventListener entry : this.getEntries())
+            if (entry.keyPressed(int_1, int_2, int_3)) {
+                ci.cancel();
+                ci.setReturnValue(true);
+            }
     }
     
 }
