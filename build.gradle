@@ -6,18 +6,18 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 archivesBaseName = "RoughlyEnoughItems"
-version = "2.0-23"
+version = "2.0-24"
 
 minecraft {
 }
 
 dependencies {
-	minecraft "com.mojang:minecraft:18w50a"
-	mappings "net.fabricmc:yarn:18w50a.90"
-	modCompile "net.fabricmc:fabric-loader:0.3.1.84"
+	minecraft "com.mojang:minecraft:19w02a"
+	mappings "net.fabricmc:yarn:19w02a.12"
+	modCompile "net.fabricmc:fabric-loader:0.3.2.92"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
-	modCompile "net.fabricmc:fabric:0.1.3.68"
+	modCompile "net.fabricmc:fabric:0.1.4.71"
 }
 
 // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
