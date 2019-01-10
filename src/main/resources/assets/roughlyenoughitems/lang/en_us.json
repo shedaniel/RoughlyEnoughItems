@@ -33,5 +33,6 @@
   "text.rei.enable_craftable_only.button": "Craftable Only: %s%b",
   "text.rei.enable_craftable_only.tooltip": "Please resize the window after editing\nthis config to apply the changes",
   "text.rei.showing_craftable": "Showing Craftable",
-  "text.rei.showing_all": "Showing All"
+  "text.rei.showing_all": "Showing All",
+  "text.rei.delete_items": "§cDelete Item"
 }
