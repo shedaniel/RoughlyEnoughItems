@@ -15,6 +15,9 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.util.Window;
 import net.minecraft.container.Container;
+import net.minecraft.container.Slot;
+import net.minecraft.container.SlotActionType;
+import net.minecraft.text.TextComponent;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
@@ -42,7 +45,7 @@ public class RecipeGui extends ContainerGui {
     public Button btnRecipeLeft, btnRecipeRight;
     
     public RecipeGui(Container p_i1072_1_, Gui prevScreen, Map<IDisplayCategory, List<IRecipe>> recipes) {
-        super(new RecipeContainer());
+        super(new RecipeContainer(), MinecraftClient.getInstance().player.inventory, TextComponent.Serializer.fromJsonString("{\"text\":\"test\"}"));
         this.container = p_i1072_1_;
         this.prevScreen = prevScreen;
         this.recipes = recipes;
@@ -225,6 +228,11 @@ public class RecipeGui extends ContainerGui {
                 this.client.getTextureManager().bindTexture(CREATIVE_INVENTORY_TABS);
                 tab.drawTab();
             });
+    }
+    
+    @Override
+    protected void onMouseClick(Slot slot_1, int int_1, int int_2, SlotActionType slotActionType_1) {
+        // Disable mouse click on slot action (We don't want container slot interaction)
     }
     
     @Override
