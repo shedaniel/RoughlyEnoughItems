@@ -4,6 +4,9 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.GuiEventListener;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class LabelWidget extends Drawable implements IWidget {
     
     public int x;
@@ -14,6 +17,11 @@ public class LabelWidget extends Drawable implements IWidget {
         this.x = x;
         this.y = y;
         this.text = text;
+    }
+    
+    @Override
+    public List<IWidget> getListeners() {
+        return new ArrayList<>();
     }
     
     @Override
