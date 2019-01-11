@@ -18,8 +18,6 @@ public interface IMixinContainerGui {
     
     public ItemStack getDraggedStack();
     
-    public ContainerGuiOverlay getOverlay();
-    
     public ContainerGui getContainerGui();
     
     public void setOverlay(ContainerGuiOverlay overlay);

@@ -3,6 +3,7 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.ClientHelper;
+import me.shedaniel.rei.client.GuiHelper;
 import me.shedaniel.rei.listeners.IMixinContainerGui;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Drawable;
@@ -81,7 +82,7 @@ public class ItemSlotWidget extends Drawable implements HighlightableWidget {
     
     protected void drawToolTip(ItemStack itemStack) {
         List<String> toolTip = getTooltip(itemStack);
-        containerGui.getOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), toolTip));
+        GuiHelper.getOverlay(containerGui.getContainerGui()).addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), toolTip));
     }
     
     protected List<String> getTooltip(ItemStack itemStack) {
@@ -120,9 +121,9 @@ public class ItemSlotWidget extends Drawable implements HighlightableWidget {
             return false;
         if (getBounds().contains(mouseX, mouseY)) {
             if (button == 0)
-                return ClientHelper.executeRecipeKeyBind(containerGui.getOverlay(), getCurrentStack().copy(), containerGui);
+                return ClientHelper.executeRecipeKeyBind(GuiHelper.getOverlay(containerGui.getContainerGui()), getCurrentStack().copy(), containerGui);
             else if (button == 1)
-                return ClientHelper.executeUsageKeyBind(containerGui.getOverlay(), getCurrentStack().copy(), containerGui);
+                return ClientHelper.executeUsageKeyBind(GuiHelper.getOverlay(containerGui.getContainerGui()), getCurrentStack().copy(), containerGui);
         }
         return false;
     }
