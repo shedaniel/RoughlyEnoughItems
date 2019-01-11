@@ -86,6 +86,33 @@ public class RecipeHelper implements RecipeSync {
         return recipeManager;
     }
     
+    public static Map<IRecipeCategory, List<IRecipeDisplay>> getUsagesFor(ItemStack stack) {
+        Map<Identifier, List<IRecipeDisplay>> categoriesMap = new HashMap<>();
+        categories.forEach(f -> categoriesMap.put(f.getIdentifier(), new LinkedList<>()));
+        for(List<IRecipeDisplay> value : recipeCategoryListMap.values())
+            for(IRecipeDisplay recipeDisplay : value) {
+                boolean found = false;
+                for(List<ItemStack> input : (List<List<ItemStack>>) recipeDisplay.getInput()) {
+                    for(ItemStack itemStack : input) {
+                        if (ItemStack.areEqualIgnoreTags(itemStack, stack)) {
+                            categoriesMap.get(recipeDisplay.getRecipeCategory()).add(recipeDisplay);
+                            if (found)
+                                break;
+                        }
+                    }
+                    if (found)
+                        break;
+                }
+            }
+        categoriesMap.keySet().removeIf(f -> categoriesMap.get(f).isEmpty());
+        Map<IRecipeCategory, List<IRecipeDisplay>> recipeCategoryListMap = Maps.newHashMap();
+        categories.forEach(category -> {
+            if (categoriesMap.containsKey(category.getIdentifier()))
+                recipeCategoryListMap.put(category, categoriesMap.get(category.getIdentifier()));
+        });
+        return recipeCategoryListMap;
+    }
+    
     @Override
     public void recipesLoaded(RecipeManager recipeManager) {
         this.recipeManager = recipeManager;

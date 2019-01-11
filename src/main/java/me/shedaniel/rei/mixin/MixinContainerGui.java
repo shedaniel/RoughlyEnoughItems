@@ -83,7 +83,7 @@ public class MixinContainerGui extends Gui implements IMixinContainerGui {
         return lastGui;
     }
     
-    // WIP into an inject
+    // TODO into an inject
     @Override
     public boolean mouseScrolled(double double_1) {
         for(GuiEventListener entry : this.getEntries())
@@ -92,7 +92,7 @@ public class MixinContainerGui extends Gui implements IMixinContainerGui {
         return false;
     }
     
-    // WIP into an inject
+    // TODO into an inject
     @Override
     public boolean charTyped(char char_1, int int_1) {
         for(GuiEventListener entry : this.getEntries())

@@ -102,7 +102,7 @@ public abstract class ButtonWidget extends Drawable implements IWidget {
     
     @Override
     public boolean onMouseClick(int button, double mouseX, double mouseY) {
-        if (bounds.contains(mouseX, mouseY)) {
+        if (bounds.contains(mouseX, mouseY) && enabled) {
             MinecraftClient.getInstance().getSoundLoader().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             onPressed(button, mouseX, mouseY);
             return true;
