@@ -7,7 +7,10 @@ import me.shedaniel.listenerdefinitions.GuiKeyDown;
 import net.minecraft.client.gui.ingame.AbstractPlayerInventoryGui;
 import net.minecraft.client.gui.ingame.CreativePlayerInventoryGui;
 import net.minecraft.container.Container;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.text.TextComponent;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -24,8 +27,8 @@ public abstract class MixinCreativePlayerInventoryGui extends AbstractPlayerInve
     @Shadow
     private static int selectedTab;
     
-    public MixinCreativePlayerInventoryGui(Container container_1) {
-        super(container_1);
+    public MixinCreativePlayerInventoryGui(Container container_1, PlayerInventory playerInventory_1, TextComponent textComponent_1) {
+        super(container_1, playerInventory_1, textComponent_1);
     }
     
     @Inject(method = "keyPressed(III)Z", at = @At("HEAD"), cancellable = true)
