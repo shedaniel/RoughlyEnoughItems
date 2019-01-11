@@ -9,6 +9,7 @@ import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
@@ -90,7 +91,13 @@ public class ItemSlotWidget extends Drawable implements HighlightableWidget {
     }
     
     protected ItemStack getCurrentStack() {
+        if (itemList.size() == 0)
+            return new ItemStack(Items.AIR);
         return itemList.get(MathHelper.clamp((int) (System.currentTimeMillis() / 500) % itemList.size(), 0, itemList.size() - 1));
+    }
+    
+    public void setItemList(List<ItemStack> itemList) {
+        this.itemList = itemList;
     }
     
     @Override

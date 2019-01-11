@@ -42,4 +42,18 @@ public class DefaultShapelessDisplay implements DefaultCraftingDisplay {
         return input;
     }
     
+    @Override
+    public int getWidth() {
+        if (display.getPreviewInputs().size() > 4)
+            return 3;
+        return 2;
+    }
+    
+    @Override
+    public int getHeight() {
+        if (display.getPreviewInputs().size() > 4)
+            return 3;
+        return 2;
+    }
+    
 }

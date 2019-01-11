@@ -12,4 +12,12 @@ public interface DefaultCraftingDisplay<T> extends IRecipeDisplay<Recipe> {
         return DefaultPlugin.CRAFTING;
     }
     
+    default public int getWidth() {
+        return 2;
+    }
+    
+    default public int getHeight() {
+        return 2;
+    }
+    
 }

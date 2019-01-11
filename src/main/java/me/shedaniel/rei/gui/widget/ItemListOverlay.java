@@ -101,7 +101,7 @@ public class ItemListOverlay extends Drawable implements IWidget {
                             if (button == 0)
                                 return ClientHelper.executeRecipeKeyBind(containerGuiOverlay, getCurrentStack().copy(), containerGui);
                             else if (button == 1)
-                                return ClientHelper.executeUsageKeyBind();
+                                return ClientHelper.executeUsageKeyBind(containerGuiOverlay, getCurrentStack().copy(), containerGui);
                         }
                     }
                     return false;

@@ -27,7 +27,7 @@ public class RecipeViewingWidget extends Gui {
     private static final Identifier CREATIVE_INVENTORY_TABS = new Identifier("textures/gui/container/creative_inventory/tabs.png");
     private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     public final int guiWidth = 176;
-    public final int guiHeight = 158;
+    public final int guiHeight = 186;
     
     private List<IWidget> widgets;
     private List<TabWidget> tabs;
@@ -84,11 +84,25 @@ public class RecipeViewingWidget extends Gui {
         widgets.add(categoryBack = new ButtonWidget((int) bounds.getX() + 5, (int) bounds.getY() + 5, 12, 12, "<") {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
+                int currentCategoryIndex = categories.indexOf(selectedCategory);
+                currentCategoryIndex--;
+                if (currentCategoryIndex < 0)
+                    currentCategoryIndex = categories.size() - 1;
+                selectedCategory = categories.get(currentCategoryIndex);
+                categoryPages = MathHelper.floor(currentCategoryIndex / 6d);
+                RecipeViewingWidget.this.onInitialized();
             }
         });
         widgets.add(categoryNext = new ButtonWidget((int) bounds.getX() + 159, (int) bounds.getY() + 5, 12, 12, ">") {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
+                int currentCategoryIndex = categories.indexOf(selectedCategory);
+                currentCategoryIndex++;
+                if (currentCategoryIndex >= categories.size())
+                    currentCategoryIndex = 0;
+                selectedCategory = categories.get(currentCategoryIndex);
+                categoryPages = MathHelper.floor(currentCategoryIndex / 6d);
+                RecipeViewingWidget.this.onInitialized();
             }
         });
         categoryBack.enabled = categories.size() > 1;
@@ -97,11 +111,19 @@ public class RecipeViewingWidget extends Gui {
         widgets.add(recipeBack = new ButtonWidget((int) bounds.getX() + 5, (int) bounds.getY() + 21, 12, 12, "<") {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
+                page--;
+                if (page < 0)
+                    page = getTotalPages(selectedCategory) - 1;
+                RecipeViewingWidget.this.onInitialized();
             }
         });
         widgets.add(recipeNext = new ButtonWidget((int) bounds.getX() + 159, (int) bounds.getY() + 21, 12, 12, ">") {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
+                page++;
+                if (page >= getTotalPages(selectedCategory))
+                    page = 0;
+                RecipeViewingWidget.this.onInitialized();
             }
         });
         recipeBack.enabled = categoriesMap.get(selectedCategory).size() > getRecipesPerPage();
@@ -140,7 +162,15 @@ public class RecipeViewingWidget extends Gui {
                         return false;
                     }
                 });
-                tab.setItem(selectedCategory.getCategoryIcon(), selectedCategory.getCategoryName(), tab.getId() + categoryPages * 6 == categories.indexOf(selectedCategory));
+                tab.setItem(categories.get(j).getCategoryIcon(), categories.get(j).getCategoryName(), tab.getId() + categoryPages * 6 == categories.indexOf(selectedCategory));
+            }
+        }
+        if (page * getRecipesPerPage() < categoriesMap.get(selectedCategory).size()) {
+            IRecipeDisplay topDisplay = categoriesMap.get(selectedCategory).get(page * getRecipesPerPage());
+            widgets.addAll(selectedCategory.setupDisplay(getParent(), topDisplay, new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 40, 150, selectedCategory.usesFullPage() ? 118 : 66)));
+            if (!selectedCategory.usesFullPage() && page * getRecipesPerPage() + 1 < categoriesMap.get(selectedCategory).size()) {
+                IRecipeDisplay middleDisplay = categoriesMap.get(selectedCategory).get(page * getRecipesPerPage() + 1);
+                widgets.addAll(selectedCategory.setupDisplay(getParent(), middleDisplay, new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 108, 150, 66)));
             }
         }
         
@@ -159,7 +189,9 @@ public class RecipeViewingWidget extends Gui {
     @Override
     public void draw(int mouseX, int mouseY, float partialTicks) {
         drawBackground();
-        tabs.stream().filter(TabWidget::isSelected).forEach(tabWidget -> tabWidget.draw(mouseX, mouseY, partialTicks));
+        tabs.stream().filter(tabWidget -> {
+            return !tabWidget.isSelected();
+        }).forEach(tabWidget -> tabWidget.draw(mouseX, mouseY, partialTicks));
         GuiLighting.disable();
         super.draw(mouseX, mouseY, partialTicks);
         widgets.forEach(widget -> {
@@ -168,10 +200,8 @@ public class RecipeViewingWidget extends Gui {
         });
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GuiLighting.disable();
+        tabs.stream().filter(TabWidget::isSelected).forEach(tabWidget -> tabWidget.draw(mouseX, mouseY, partialTicks));
         overlay.render(mouseX, mouseY, partialTicks);
-        tabs.stream().filter(tabWidget -> {
-            return !tabWidget.isSelected();
-        }).forEach(tabWidget -> tabWidget.draw(mouseX, mouseY, partialTicks));
     }
     
     @Override
@@ -200,6 +230,14 @@ public class RecipeViewingWidget extends Gui {
     }
     
     @Override
+    public boolean mouseScrolled(double amount) {
+        for(GuiEventListener listener : listeners)
+            if (listener.mouseScrolled(amount))
+                return true;
+        return super.mouseScrolled(amount);
+    }
+    
+    @Override
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
         for(GuiEventListener entry : getEntries())
             if (entry.mouseClicked(double_1, double_2, int_1)) {
@@ -210,4 +248,5 @@ public class RecipeViewingWidget extends Gui {
             }
         return false;
     }
+    
 }

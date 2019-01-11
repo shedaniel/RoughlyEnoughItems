@@ -8,12 +8,15 @@ import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Identifier;
 
 import java.awt.*;
 import java.util.Arrays;
 import java.util.List;
 
 public class TabWidget extends Drawable implements HighlightableWidget {
+    
+    private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     
     private boolean shown = false, selected = false;
     private ItemStack item;
@@ -67,9 +70,11 @@ public class TabWidget extends Drawable implements HighlightableWidget {
     public void draw(int mouseX, int mouseY, float partialTicks) {
         if (shown) {
             int l = (int) this.bounds.getCenterX() - 8, i1 = (int) this.bounds.getCenterY() - 6;
-            
+    
+            GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             GuiLighting.disable();
-            this.drawTexturedRect(bounds.x, bounds.y, selected ? 28 : 0, 158, 28, (selected ? 31 : 28));
+            MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
+            this.drawTexturedRect(bounds.x, bounds.y + 2, selected ? 28 : 0, 192, 28, (selected ? 30 : 27));
             this.zOffset = 100.0F;
             this.itemRenderer.zOffset = 100.0F;
             GuiLighting.enableForItems();

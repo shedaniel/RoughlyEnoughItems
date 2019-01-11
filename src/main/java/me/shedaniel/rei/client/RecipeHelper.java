@@ -55,7 +55,7 @@ public class RecipeHelper implements RecipeSync {
     }
     
     public static void registerCategory(IRecipeCategory category) {
-        categories.add(category);
+        categories.add(0, category);
         recipeCategoryListMap.put(category.getIdentifier(), Lists.newArrayList());
     }
     
@@ -96,8 +96,8 @@ public class RecipeHelper implements RecipeSync {
                     for(ItemStack itemStack : input) {
                         if (ItemStack.areEqualIgnoreTags(itemStack, stack)) {
                             categoriesMap.get(recipeDisplay.getRecipeCategory()).add(recipeDisplay);
-                            if (found)
-                                break;
+                            found = true;
+                            break;
                         }
                     }
                     if (found)
