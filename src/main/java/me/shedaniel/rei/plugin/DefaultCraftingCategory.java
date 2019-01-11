@@ -55,7 +55,7 @@ public class DefaultCraftingCategory implements IRecipeCategory<DefaultCraftingD
         List<ItemSlotWidget> slots = Lists.newArrayList();
         for(int y = 0; y < 3; y++)
             for(int x = 0; x < 3; x++)
-                slots.add(new ItemSlotWidget(startPoint.x + 1 + x * 18, startPoint.y + 1 + y * 18, Lists.newArrayList(), true, true, containerGui));
+                slots.add(new ItemSlotWidget(startPoint.x + 1 + x * 18, startPoint.y + 1 + y * 18, Lists.newArrayList(), true, true, containerGui, true));
         for(int i = 0; i < input.size(); i++) {
             if (recipeDisplay instanceof DefaultShapedDisplay) {
                 if (!input.get(i).isEmpty())
@@ -64,7 +64,7 @@ public class DefaultCraftingCategory implements IRecipeCategory<DefaultCraftingD
                 slots.get(i).setItemList(input.get(i));
         }
         widgets.addAll(slots);
-        widgets.add(new ItemSlotWidget(startPoint.x + 95, startPoint.y + 19, recipeDisplay.getOutput(), false, true, containerGui) {
+        widgets.add(new ItemSlotWidget(startPoint.x + 95, startPoint.y + 19, recipeDisplay.getOutput(), false, true, containerGui, true) {
             @Override
             protected String getItemCountOverlay(ItemStack currentStack) {
                 if (currentStack.getAmount() == 1)

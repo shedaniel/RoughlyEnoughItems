@@ -18,16 +18,17 @@ public class DefaultSmeltingDisplay implements IRecipeDisplay<SmeltingRecipe> {
     
     private SmeltingRecipe display;
     private List<List<ItemStack>> input;
-    private List<ItemStack> fuel, output;
+    private List<ItemStack> output;
     
     public DefaultSmeltingDisplay(SmeltingRecipe recipe) {
         this.display = recipe;
-        this.fuel = Lists.newArrayList();
+        List<ItemStack> fuel = Lists.newArrayList();
         this.input = Lists.newArrayList();
         fuel.addAll(FurnaceBlockEntity.createBurnableMap().keySet().stream().map(Item::getDefaultStack).collect(Collectors.toList()));
         recipe.getPreviewInputs().forEach(ingredient -> {
             input.add(Arrays.asList(ingredient.getStackArray()));
         });
+        input.add(fuel);
         this.output = Arrays.asList(recipe.getOutput());
     }
     
@@ -42,7 +43,7 @@ public class DefaultSmeltingDisplay implements IRecipeDisplay<SmeltingRecipe> {
     }
     
     public List<ItemStack> getFuel() {
-        return fuel;
+        return input.get(1);
     }
     
     @Override
