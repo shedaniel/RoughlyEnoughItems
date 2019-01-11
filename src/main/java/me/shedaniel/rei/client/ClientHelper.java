@@ -103,8 +103,11 @@ public class ClientHelper implements ClientLoaded, ClientModInitializer {
         return map.keySet().size() > 0;
     }
     
-    public static boolean executeUsageKeyBind() {
-        return false;
+    public static boolean executeUsageKeyBind(ContainerGuiOverlay overlay, ItemStack stack, IMixinContainerGui parent) {
+        Map<IRecipeCategory, List<IRecipeDisplay>> map = RecipeHelper.getUsagesFor(stack);
+        if (map.keySet().size() > 0)
+            MinecraftClient.getInstance().openGui(new RecipeViewingWidget(overlay, MinecraftClient.getInstance().window, parent, map));
+        return map.keySet().size() > 0;
     }
     
     @Override

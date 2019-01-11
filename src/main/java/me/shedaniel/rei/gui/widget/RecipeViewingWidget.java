@@ -7,15 +7,17 @@ import me.shedaniel.rei.api.IRecipeDisplay;
 import me.shedaniel.rei.gui.ContainerGuiOverlay;
 import me.shedaniel.rei.listeners.IMixinContainerGui;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.ContainerGui;
+import net.minecraft.client.audio.PositionedSoundInstance;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiEventListener;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.util.Window;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +30,7 @@ public class RecipeViewingWidget extends Gui {
     public final int guiHeight = 158;
     
     private List<IWidget> widgets;
+    private List<TabWidget> tabs;
     private Window window;
     private Rectangle bounds;
     private Map<IRecipeCategory, List<IRecipeDisplay>> categoriesMap;
@@ -35,9 +38,11 @@ public class RecipeViewingWidget extends Gui {
     private IRecipeCategory selectedCategory;
     private IMixinContainerGui parent;
     private ContainerGuiOverlay overlay;
-    private int page;
+    private int page, categoryPages;
+    private ButtonWidget recipeBack, recipeNext, categoryBack, categoryNext;
     
     public RecipeViewingWidget(ContainerGuiOverlay overlay, Window window, IMixinContainerGui parent, Map<IRecipeCategory, List<IRecipeDisplay>> categoriesMap) {
+        this.categoryPages = 0;
         this.parent = parent;
         this.window = window;
         this.widgets = Lists.newArrayList();
@@ -46,10 +51,15 @@ public class RecipeViewingWidget extends Gui {
         this.categories = new LinkedList<>(categoriesMap.keySet());
         this.selectedCategory = categories.get(0);
         this.overlay = overlay;
+        this.tabs = new ArrayList<>();
     }
     
-    public ContainerGui getParent() {
-        return parent.getContainerGui();
+    public IMixinContainerGui getParent() {
+        return parent;
+    }
+    
+    public ContainerGuiOverlay getOverlay() {
+        return overlay;
     }
     
     @Override
@@ -67,30 +77,36 @@ public class RecipeViewingWidget extends Gui {
     @Override
     protected void onInitialized() {
         super.onInitialized();
+        this.tabs.clear();
         this.widgets.clear();
         this.bounds = new Rectangle(window.getScaledWidth() / 2 - guiWidth / 2, window.getScaledHeight() / 2 - guiHeight / 2, guiWidth, guiHeight);
         
-        widgets.add(new ButtonWidget((int) bounds.getX() + 5, (int) bounds.getY() + 5, 12, 12, "<") {
+        widgets.add(categoryBack = new ButtonWidget((int) bounds.getX() + 5, (int) bounds.getY() + 5, 12, 12, "<") {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
             }
         });
-        widgets.add(new ButtonWidget((int) bounds.getX() + 159, (int) bounds.getY() + 5, 12, 12, ">") {
+        widgets.add(categoryNext = new ButtonWidget((int) bounds.getX() + 159, (int) bounds.getY() + 5, 12, 12, ">") {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
             }
         });
+        categoryBack.enabled = categories.size() > 1;
+        categoryNext.enabled = categories.size() > 1;
         
-        widgets.add(new ButtonWidget((int) bounds.getX() + 5, (int) bounds.getY() + 21, 12, 12, "<") {
+        widgets.add(recipeBack = new ButtonWidget((int) bounds.getX() + 5, (int) bounds.getY() + 21, 12, 12, "<") {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
             }
         });
-        widgets.add(new ButtonWidget((int) bounds.getX() + 159, (int) bounds.getY() + 21, 12, 12, ">") {
+        widgets.add(recipeNext = new ButtonWidget((int) bounds.getX() + 159, (int) bounds.getY() + 21, 12, 12, ">") {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
             }
         });
+        recipeBack.enabled = categoriesMap.get(selectedCategory).size() > getRecipesPerPage();
+        recipeNext.enabled = categoriesMap.get(selectedCategory).size() > getRecipesPerPage();
+        
         widgets.add(new LabelWidget((int) bounds.getCenterX(), (int) bounds.getY() + 7, "") {
             @Override
             public void draw(int mouseX, int mouseY, float partialTicks) {
@@ -105,19 +121,45 @@ public class RecipeViewingWidget extends Gui {
                 super.draw(mouseX, mouseY, partialTicks);
             }
         });
+        for(int i = 0; i < 6; i++) {
+            int j = i + categoryPages * 6;
+            if (categories.size() > j) {
+                TabWidget tab;
+                tabs.add(tab = new TabWidget(i, this, new Rectangle(bounds.x + 4 + 28 * i, bounds.y - 28, 28, 28)) {
+                    @Override
+                    public boolean onMouseClick(int button, double mouseX, double mouseY) {
+                        if (getBounds().contains(mouseX, mouseY)) {
+                            MinecraftClient.getInstance().getSoundLoader().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                            if (getId() + categoryPages * 6 == categories.indexOf(selectedCategory))
+                                return false;
+                            selectedCategory = categories.get(getId() + categoryPages * 6);
+                            page = 0;
+                            RecipeViewingWidget.this.onInitialized();
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+                tab.setItem(selectedCategory.getCategoryIcon(), selectedCategory.getCategoryName(), tab.getId() + categoryPages * 6 == categories.indexOf(selectedCategory));
+            }
+        }
+        
         overlay.onInitialized();
+        listeners.addAll(tabs);
         listeners.add(overlay);
         listeners.addAll(widgets);
+    }
+    
+    private int getRecipesPerPage() {
+        if (selectedCategory.usesFullPage())
+            return 1;
+        return 2;
     }
     
     @Override
     public void draw(int mouseX, int mouseY, float partialTicks) {
         drawBackground();
-        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        GuiLighting.disable();
-        this.client.getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
-        this.drawTexturedRect((int) bounds.getX(), (int) bounds.getY(), 0, 0, (int) bounds.getWidth(), (int) bounds.getHeight());
-        
+        tabs.stream().filter(TabWidget::isSelected).forEach(tabWidget -> tabWidget.draw(mouseX, mouseY, partialTicks));
         GuiLighting.disable();
         super.draw(mouseX, mouseY, partialTicks);
         widgets.forEach(widget -> {
@@ -127,12 +169,22 @@ public class RecipeViewingWidget extends Gui {
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GuiLighting.disable();
         overlay.render(mouseX, mouseY, partialTicks);
+        tabs.stream().filter(tabWidget -> {
+            return !tabWidget.isSelected();
+        }).forEach(tabWidget -> tabWidget.draw(mouseX, mouseY, partialTicks));
+    }
+    
+    @Override
+    public void drawBackground() {
+        drawBackground(0);
+        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        GuiLighting.disable();
+        this.client.getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
+        this.drawTexturedRect((int) bounds.getX(), (int) bounds.getY(), 0, 0, (int) bounds.getWidth(), (int) bounds.getHeight());
     }
     
     public int getTotalPages(IRecipeCategory category) {
-        if (category.usesFullPage())
-            return categoriesMap.get(category).size();
-        return MathHelper.ceil(categoriesMap.get(category).size() / 2.0);
+        return MathHelper.ceil(categoriesMap.get(category).size() / (double) getRecipesPerPage());
     }
     
     public Rectangle getBounds() {
