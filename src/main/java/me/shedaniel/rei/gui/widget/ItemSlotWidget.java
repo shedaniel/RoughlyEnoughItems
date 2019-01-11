@@ -100,7 +100,7 @@ public class ItemSlotWidget extends Drawable implements HighlightableWidget {
         return "";
     }
     
-    protected ItemStack getCurrentStack() {
+    public ItemStack getCurrentStack() {
         if (itemList.size() == 0)
             return new ItemStack(Items.AIR);
         return itemList.get(MathHelper.floor((System.currentTimeMillis() / 500 % (double) itemList.size()) / 1f));

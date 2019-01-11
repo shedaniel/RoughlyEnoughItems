@@ -7,6 +7,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ContainerGui;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiEventListener;
+import net.minecraft.container.Slot;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -31,6 +32,8 @@ public class MixinContainerGui extends Gui implements IMixinContainerGui {
     
     @Shadow
     private ItemStack field_2782;
+    
+    @Shadow protected Slot focusedSlot;
     
     @Override
     public int getContainerLeft() {
@@ -105,6 +108,11 @@ public class MixinContainerGui extends Gui implements IMixinContainerGui {
                 ci.cancel();
                 ci.setReturnValue(true);
             }
+    }
+    
+    @Override
+    public Slot getHoveredSlot() {
+        return focusedSlot;
     }
     
 }

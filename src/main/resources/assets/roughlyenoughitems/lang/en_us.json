@@ -1,8 +1,8 @@
 {
   "key.rei.category": "Roughly Enough Items",
-  "key.rei.recipe": "Show Recipe",
-  "key.rei.hide": "Hide/Show REI",
-  "key.rei.use": "Show Uses",
+  "key.roughlyenoughitems.recipe_keybind": "Show Recipe",
+  "key.roughlyenoughitems.hide_keybind": "Hide/Show REI",
+  "key.roughlyenoughitems.usage_keybind": "Show Uses",
   "text.rei.cheat": "Cheat",
   "text.rei.nocheat": "§4§mCheat",
   "text.rei.mod": "§9§o%s",

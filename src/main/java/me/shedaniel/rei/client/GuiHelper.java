@@ -6,8 +6,17 @@ import net.minecraft.client.gui.ContainerGui;
 
 public class GuiHelper {
     
+    private static boolean overlayVisible = true;
     private static ContainerGuiOverlay overlay;
     public static TextFieldWidget searchField;
+    
+    public static boolean isOverlayVisible() {
+        return overlayVisible;
+    }
+    
+    public static void toggleOverlayVisible() {
+        overlayVisible = !overlayVisible;
+    }
     
     public static ContainerGuiOverlay getOverlay(ContainerGui lastGui) {
         if (overlay == null) {

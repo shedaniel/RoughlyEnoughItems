@@ -2,7 +2,6 @@ package me.shedaniel.rei.client;
 
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import net.fabricmc.loader.FabricLoader;
-import org.apache.logging.log4j.core.Core;
 
 import java.io.File;
 import java.io.FileWriter;
