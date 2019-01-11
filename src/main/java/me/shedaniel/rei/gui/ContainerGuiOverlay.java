@@ -12,6 +12,7 @@ import net.minecraft.client.gui.GuiEventListener;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.Window;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
@@ -22,12 +23,12 @@ public class ContainerGuiOverlay extends Gui {
     
     public static String searchTerm = "";
     private static int page = 0;
+    private static ItemListOverlay itemListOverlay;
     private final List<IWidget> widgets;
     private final List<QueuedTooltip> queuedTooltips;
     private Rectangle rectangle;
     private IMixinContainerGui containerGui;
     private Window window;
-    private static ItemListOverlay itemListOverlay;
     private ButtonWidget buttonLeft, buttonRight;
     
     public ContainerGuiOverlay(ContainerGui containerGui) {
@@ -147,6 +148,8 @@ public class ContainerGuiOverlay extends Gui {
     
     @Override
     public void draw(int int_1, int int_2, float float_1) {
+        if (!GuiHelper.isOverlayVisible())
+            return;
         widgets.forEach(widget -> {
             GuiLighting.disable();
             widget.draw(int_1, int_2, float_1);
@@ -193,6 +196,34 @@ public class ContainerGuiOverlay extends Gui {
         for(GuiEventListener listener : listeners)
             if (listener.keyPressed(int_1, int_2, int_3))
                 return true;
+        Point point = ClientHelper.getMouseLocation();
+        ItemStack itemStack = null;
+        for(IWidget widget : itemListOverlay.getListeners())
+            if (widget instanceof ItemSlotWidget && ((ItemSlotWidget) widget).isHighlighted(point.x, point.y)) {
+                itemStack = ((ItemSlotWidget) widget).getCurrentStack();
+                break;
+            }
+        if (itemStack == null && MinecraftClient.getInstance().currentGui instanceof RecipeViewingWidget) {
+            RecipeViewingWidget recipeViewingWidget = (RecipeViewingWidget) MinecraftClient.getInstance().currentGui;
+            for(GuiEventListener entry : recipeViewingWidget.getEntries())
+                if (entry instanceof ItemSlotWidget && ((ItemSlotWidget) entry).isHighlighted(point.x, point.y)) {
+                    itemStack = ((ItemSlotWidget) entry).getCurrentStack();
+                    break;
+                }
+        }
+        if (itemStack == null && MinecraftClient.getInstance().currentGui instanceof ContainerGui)
+            if (containerGui.getHoveredSlot() != null)
+                itemStack = containerGui.getHoveredSlot().getStack();
+        if (itemStack != null && !itemStack.isEmpty()) {
+            if (ClientHelper.RECIPE.matchesKey(int_1, int_2))
+                return ClientHelper.executeRecipeKeyBind(this, itemStack, containerGui);
+            else if (ClientHelper.USAGE.matchesKey(int_1, int_2))
+                return ClientHelper.executeUsageKeyBind(this, itemStack, containerGui);
+        }
+        if (ClientHelper.HIDE.matchesKey(int_1, int_2)) {
+            GuiHelper.toggleOverlayVisible();
+            return true;
+        }
         return false;
     }
     

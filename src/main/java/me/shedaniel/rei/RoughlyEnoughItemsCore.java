@@ -90,7 +90,8 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
             ItemStack stack = packetByteBuf.readItemStack();
             if (player.inventory.insertStack(stack.copy()))
                 player.sendChatMessage(new TranslatableTextComponent("text.rei.cheat_items", stack.getDisplayName().getFormattedText(), stack.getAmount(), player.getEntityName()), ChatMessageType.SYSTEM);
-            else player.sendChatMessage(new TranslatableTextComponent("text.rei.failed_cheat_items"), ChatMessageType.SYSTEM);
+            else
+                player.sendChatMessage(new TranslatableTextComponent("text.rei.failed_cheat_items"), ChatMessageType.SYSTEM);
         });
     }
     

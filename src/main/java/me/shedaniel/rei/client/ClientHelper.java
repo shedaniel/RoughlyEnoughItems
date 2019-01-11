@@ -10,9 +10,13 @@ import me.shedaniel.rei.gui.widget.RecipeViewingWidget;
 import me.shedaniel.rei.listeners.ClientLoaded;
 import me.shedaniel.rei.listeners.IMixinContainerGui;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
+import net.fabricmc.fabric.impl.client.keybinding.KeyBindingRegistryImpl;
 import net.fabricmc.loader.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.item.Item;
@@ -24,12 +28,17 @@ import net.minecraft.util.PacketByteBuf;
 import net.minecraft.util.registry.Registry;
 
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class ClientHelper implements ClientLoaded, ClientModInitializer {
     
+    private static final Identifier RECIPE_KEYBIND = new Identifier("roughlyenoughitems", "recipe_keybind");
+    private static final Identifier USAGE_KEYBIND = new Identifier("roughlyenoughitems", "usage_keybind");
+    private static final Identifier HIDE_KEYBIND = new Identifier("roughlyenoughitems", "hide_keybind");
+    public static FabricKeyBinding RECIPE, USAGE, HIDE;
     private static List<ItemStack> itemList;
     private static boolean cheating;
     
@@ -134,6 +143,15 @@ public class ClientHelper implements ClientLoaded, ClientModInitializer {
     @Override
     public void onInitializeClient() {
         this.cheating = false;
+        registerFabricKeyBinds();
+    }
+    
+    private void registerFabricKeyBinds() {
+        String category = "key.rei.category";
+        KeyBindingRegistryImpl.INSTANCE.addCategory(category);
+        KeyBindingRegistryImpl.INSTANCE.register(RECIPE = FabricKeyBinding.Builder.create(RECIPE_KEYBIND, InputUtil.Type.KEY_KEYBOARD, 82, category).build());
+        KeyBindingRegistryImpl.INSTANCE.register(USAGE = FabricKeyBinding.Builder.create(USAGE_KEYBIND, InputUtil.Type.KEY_KEYBOARD, 85, category).build());
+        KeyBindingRegistryImpl.INSTANCE.register(HIDE = FabricKeyBinding.Builder.create(HIDE_KEYBIND, InputUtil.Type.KEY_KEYBOARD, 79, category).build());
     }
     
 }

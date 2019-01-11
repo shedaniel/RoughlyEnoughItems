@@ -6,6 +6,7 @@ import me.shedaniel.rei.api.IRecipeCategory;
 import me.shedaniel.rei.api.IRecipeDisplay;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
+import me.shedaniel.rei.client.RecipeHelper;
 import me.shedaniel.rei.listeners.IMixinContainerGui;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.audio.PositionedSoundInstance;
@@ -18,8 +19,9 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class RecipeViewingWidget extends Gui {
     
@@ -46,8 +48,11 @@ public class RecipeViewingWidget extends Gui {
         this.widgets = Lists.newArrayList();
         this.bounds = new Rectangle(window.getScaledWidth() / 2 - guiWidth / 2, window.getScaledHeight() / 2 - guiHeight / 2, guiWidth, guiHeight);
         this.categoriesMap = categoriesMap;
-        this.categories = new LinkedList<>(categoriesMap.keySet());
-        Collections.reverse(categories);
+        this.categories = Lists.newArrayList();
+        RecipeHelper.getCategories().forEach(category -> {
+            if (categoriesMap.containsKey(category))
+                categories.add(category);
+        });
         this.selectedCategory = categories.get(0);
         this.tabs = new ArrayList<>();
     }
@@ -172,7 +177,7 @@ public class RecipeViewingWidget extends Gui {
                 widgets.addAll(selectedCategory.setupDisplay(getParent(), middleDisplay, new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 108, 150, 66)));
             }
         }
-    
+        
         GuiHelper.getOverlay(parent.getContainerGui()).onInitialized();
         listeners.addAll(tabs);
         listeners.add(GuiHelper.getOverlay(parent.getContainerGui()));
