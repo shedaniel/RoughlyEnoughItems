@@ -75,10 +75,13 @@ public class ItemSlotWidget extends Drawable implements HighlightableWidget {
         else
             itemRenderer.renderItemOverlaysInGUIWithText(MinecraftClient.getInstance().fontRenderer, itemStack, x, y - 8, getItemCountOverlay(itemStack));
         itemRenderer.zOffset = 0.0F;
-        if (isHighlighted(mouseX, mouseY) && showToolTips) {
-            List<String> toolTip = getTooltip(itemStack);
-            containerGui.getOverlay().addTooltip(new QueuedTooltip(new Point(mouseX, mouseY), toolTip));
-        }
+        if (isHighlighted(mouseX, mouseY) && showToolTips)
+            drawToolTip(itemStack);
+    }
+    
+    protected void drawToolTip(ItemStack itemStack) {
+        List<String> toolTip = getTooltip(itemStack);
+        containerGui.getOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), toolTip));
     }
     
     protected List<String> getTooltip(ItemStack itemStack) {

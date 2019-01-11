@@ -89,7 +89,7 @@ public class TabWidget extends Drawable implements HighlightableWidget {
     }
     
     private void drawTooltip() {
-        recipeViewingWidget.getOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(categoryName)));
+        recipeViewingWidget.getParent().getOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(categoryName)));
     }
     
     @Override

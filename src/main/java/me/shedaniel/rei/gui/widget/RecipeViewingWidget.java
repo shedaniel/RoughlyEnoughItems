@@ -40,7 +40,7 @@ public class RecipeViewingWidget extends Gui {
     private int page, categoryPages;
     private ButtonWidget recipeBack, recipeNext, categoryBack, categoryNext;
     
-    public RecipeViewingWidget(ContainerGuiOverlay overlay, Window window, IMixinContainerGui parent, Map<IRecipeCategory, List<IRecipeDisplay>> categoriesMap) {
+    public RecipeViewingWidget(Window window, IMixinContainerGui parent, Map<IRecipeCategory, List<IRecipeDisplay>> categoriesMap) {
         this.categoryPages = 0;
         this.parent = parent;
         this.window = window;
@@ -50,7 +50,7 @@ public class RecipeViewingWidget extends Gui {
         this.categories = new LinkedList<>(categoriesMap.keySet());
         Collections.reverse(categories);
         this.selectedCategory = categories.get(0);
-        this.overlay = overlay;
+        this.overlay = parent.getOverlay();
         this.tabs = new ArrayList<>();
     }
     
@@ -72,6 +72,11 @@ public class RecipeViewingWidget extends Gui {
             if (listener.keyPressed(int_1, int_2, int_3))
                 return true;
         return super.keyPressed(int_1, int_2, int_3);
+    }
+    
+    @Override
+    public void onClosed() {
+        parent.setOverlay(overlay);
     }
     
     @Override
