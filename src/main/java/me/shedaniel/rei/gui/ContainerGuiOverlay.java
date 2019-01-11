@@ -81,6 +81,7 @@ public class ContainerGuiOverlay extends Gui {
         this.widgets.add(new LabelWidget(rectangle.x + (rectangle.width / 2), rectangle.y + 10, "") {
             @Override
             public void draw(int mouseX, int mouseY, float partialTicks) {
+                page = MathHelper.clamp(page, 0, getTotalPage());
                 this.text = String.format("%s/%s", page + 1, getTotalPage() + 1);
                 super.draw(mouseX, mouseY, partialTicks);
             }
@@ -148,7 +149,8 @@ public class ContainerGuiOverlay extends Gui {
         int width = window.getScaledWidth() - startX;
         if (MinecraftClient.getInstance().currentGui instanceof RecipeViewingWidget) {
             RecipeViewingWidget widget = (RecipeViewingWidget) MinecraftClient.getInstance().currentGui;
-            width = window.getScaledWidth() - (widget.getBounds().x + widget.getBounds().width + 10);
+            startX = widget.getBounds().x + widget.getBounds().width + 10;
+            width = window.getScaledWidth() - startX;
         }
         return new Rectangle(startX, 0, width, window.getScaledHeight());
     }

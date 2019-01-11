@@ -4,12 +4,10 @@ import me.shedaniel.rei.api.IRecipePlugin;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.ConfigManager;
 import me.shedaniel.rei.client.RecipeHelper;
-import me.shedaniel.rei.listeners.ClientTick;
 import me.shedaniel.rei.listeners.IListener;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.events.client.ClientTickEvent;
 import net.fabricmc.fabric.networking.CustomPayloadPacketRegistry;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -46,7 +44,6 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
     @Override
     public void onInitializeClient() {
         registerREIListeners();
-        registerFabricEvents();
         registerDefaultPlugin();
         configManager = new ConfigManager();
     }
@@ -75,12 +72,6 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
             return false;
         listeners.remove(listener);
         return true;
-    }
-    
-    private void registerFabricEvents() {
-        ClientTickEvent.CLIENT.register(minecraftClient -> {
-            getListeners(ClientTick.class).forEach(clientTick -> clientTick.onTick(minecraftClient));
-        });
     }
     
     @Override

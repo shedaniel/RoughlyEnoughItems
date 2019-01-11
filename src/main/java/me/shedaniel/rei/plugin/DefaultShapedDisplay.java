@@ -42,4 +42,14 @@ public class DefaultShapedDisplay implements DefaultCraftingDisplay<ShapedRecipe
         return input;
     }
     
+    @Override
+    public int getHeight() {
+        return display.getHeight();
+    }
+    
+    @Override
+    public int getWidth() {
+        return display.getWidth();
+    }
+    
 }
