@@ -12,6 +12,7 @@ import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -48,6 +49,10 @@ public class DefaultSmeltingCategory implements IRecipeCategory<DefaultSmeltingD
                 GuiLighting.disable();
                 MinecraftClient.getInstance().getTextureManager().bindTexture(DISPLAY_TEXTURE);
                 drawTexturedRect(startPoint.x, startPoint.y, 0, 54, 82, 54);
+                int height = MathHelper.ceil((System.currentTimeMillis() / 250 % 14d) / 1f);
+                drawTexturedRect(startPoint.x + 2, startPoint.y + 21 + (14 - height), 82, 77 + (14 - height), 14, height);
+                int width = MathHelper.ceil((System.currentTimeMillis() / 250 % 24d) / 1f);
+                drawTexturedRect(startPoint.x + 24, startPoint.y + 19, 82, 92, width, 17);
             }
         }));
         List<List<ItemStack>> input = recipeDisplay.getInput();
