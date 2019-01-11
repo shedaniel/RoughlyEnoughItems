@@ -1,15 +1,14 @@
 package me.shedaniel.rei.gui;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.ClientHelper;
+import me.shedaniel.rei.client.GuiHelper;
 import me.shedaniel.rei.gui.widget.*;
 import me.shedaniel.rei.listeners.IMixinContainerGui;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ContainerGui;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiEventListener;
-import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.Window;
@@ -21,16 +20,15 @@ import java.util.List;
 
 public class ContainerGuiOverlay extends Gui {
     
+    public static String searchTerm = "";
     private static int page = 0;
     private final List<IWidget> widgets;
     private final List<QueuedTooltip> queuedTooltips;
     private Rectangle rectangle;
     private IMixinContainerGui containerGui;
     private Window window;
-    private ItemListOverlay itemListOverlay;
+    private static ItemListOverlay itemListOverlay;
     private ButtonWidget buttonLeft, buttonRight;
-    private TextFieldWidget searchField;
-    public static String searchTerm= "";
     
     public ContainerGuiOverlay(ContainerGui containerGui) {
         this.queuedTooltips = new ArrayList<>();
@@ -87,17 +85,28 @@ public class ContainerGuiOverlay extends Gui {
                 super.draw(mouseX, mouseY, partialTicks);
             }
         });
-        Rectangle textFieldArea = getTextFieldArea();
-        this.listeners.add(searchField = new TextFieldWidget(-1, MinecraftClient.getInstance().fontRenderer,
-                (int) textFieldArea.getX(), (int) textFieldArea.getY(), (int) textFieldArea.getWidth(), (int) textFieldArea.getHeight()) {
-            @Override
-            public void addText(String string_1) {
-                super.addText(string_1);
-                searchTerm = this.getText();
-                itemListOverlay.updateList(page, searchTerm);
-            }
-        });
-        searchField.setText(searchTerm);
+//        Rectangle textFieldArea = getTextFieldArea();
+//        this.widgets.add(searchField = new TextFieldWidget(-1, MinecraftClient.getInstance().fontRenderer,
+//                (int) textFieldArea.getX(), (int) textFieldArea.getY(), (int) textFieldArea.getWidth(), (int) textFieldArea.getHeight()) {
+//            @Override
+//            public void addText(String string_1) {
+//                super.addText(string_1);
+//                searchTerm = this.getText();
+//                itemListOverlay.updateList(page, searchTerm);
+//            }
+//        });
+        if (GuiHelper.searchField == null)
+            GuiHelper.searchField = new TextFieldWidget(0, 0, 0, 0) {
+                @Override
+                public void addText(String string_1) {
+                    super.addText(string_1);
+                    searchTerm = this.getText();
+                    itemListOverlay.updateList(page, searchTerm);
+                }
+            };
+        GuiHelper.searchField.setBounds(getTextFieldArea());
+        this.widgets.add(GuiHelper.searchField);
+        GuiHelper.searchField.setText(searchTerm);
         
         this.listeners.addAll(widgets);
     }
@@ -130,7 +139,6 @@ public class ContainerGuiOverlay extends Gui {
         queuedTooltips.forEach(queuedTooltip -> containerGui.getContainerGui().drawTooltip(queuedTooltip.text, queuedTooltip.mouse.x, queuedTooltip.mouse.y));
         queuedTooltips.clear();
         GuiLighting.disable();
-        searchField.render(mouseX, mouseY, partialTicks);
     }
     
     public void addTooltip(QueuedTooltip queuedTooltip) {

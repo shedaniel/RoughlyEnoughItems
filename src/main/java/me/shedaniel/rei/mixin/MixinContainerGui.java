@@ -1,5 +1,6 @@
 package me.shedaniel.rei.mixin;
 
+import me.shedaniel.rei.client.GuiHelper;
 import me.shedaniel.rei.gui.ContainerGuiOverlay;
 import me.shedaniel.rei.listeners.IMixinContainerGui;
 import net.minecraft.client.MinecraftClient;
@@ -26,7 +27,6 @@ public class MixinContainerGui extends Gui implements IMixinContainerGui {
     @Shadow
     protected int containerHeight;
     
-    private ContainerGuiOverlay overlay;
     private ContainerGui lastGui;
     
     @Shadow
@@ -53,24 +53,21 @@ public class MixinContainerGui extends Gui implements IMixinContainerGui {
     }
     
     @Override
-    public ContainerGuiOverlay getOverlay() {
-        if (this.overlay == null)
-            this.overlay = new ContainerGuiOverlay(lastGui);
-        return this.overlay;
+    public void setOverlay(ContainerGuiOverlay overlay) {
+        GuiHelper.setOverlay(overlay);
     }
     
     @Inject(method = "onInitialized()V", at = @At("RETURN"))
     protected void onInitialized(CallbackInfo info) {
-        this.overlay = null;
-        this.listeners.add(getOverlay());
-        getOverlay().onInitialized();
+        GuiHelper.resetOverlay();
+        this.listeners.add(GuiHelper.getOverlay(lastGui));
     }
     
     @Inject(method = "draw(IIF)V", at = @At("RETURN"))
     public void draw(int int_1, int int_2, float float_1, CallbackInfo info) {
         if (MinecraftClient.getInstance().currentGui instanceof ContainerGui)
             this.lastGui = (ContainerGui) MinecraftClient.getInstance().currentGui;
-        getOverlay().render(int_1, int_2, float_1);
+        GuiHelper.getOverlay(lastGui).render(int_1, int_2, float_1);
     }
     
     @Override
@@ -110,9 +107,4 @@ public class MixinContainerGui extends Gui implements IMixinContainerGui {
             }
     }
     
-    @Override
-    public void setOverlay(ContainerGuiOverlay overlay) {
-        this.overlay = overlay;
-        overlay.onInitialized();
-    }
 }

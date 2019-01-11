@@ -5,7 +5,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.api.IRecipeCategory;
 import me.shedaniel.rei.api.IRecipeDisplay;
 import me.shedaniel.rei.client.ClientHelper;
-import me.shedaniel.rei.gui.ContainerGuiOverlay;
+import me.shedaniel.rei.client.GuiHelper;
 import me.shedaniel.rei.listeners.IMixinContainerGui;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.audio.PositionedSoundInstance;
@@ -36,7 +36,6 @@ public class RecipeViewingWidget extends Gui {
     private List<IRecipeCategory> categories;
     private IRecipeCategory selectedCategory;
     private IMixinContainerGui parent;
-    private ContainerGuiOverlay overlay;
     private int page, categoryPages;
     private ButtonWidget recipeBack, recipeNext, categoryBack, categoryNext;
     
@@ -50,16 +49,11 @@ public class RecipeViewingWidget extends Gui {
         this.categories = new LinkedList<>(categoriesMap.keySet());
         Collections.reverse(categories);
         this.selectedCategory = categories.get(0);
-        this.overlay = parent.getOverlay();
         this.tabs = new ArrayList<>();
     }
     
     public IMixinContainerGui getParent() {
         return parent;
-    }
-    
-    public ContainerGuiOverlay getOverlay() {
-        return overlay;
     }
     
     @Override
@@ -76,7 +70,7 @@ public class RecipeViewingWidget extends Gui {
     
     @Override
     public void onClosed() {
-        parent.setOverlay(overlay);
+        GuiHelper.resetOverlay();
     }
     
     @Override
@@ -178,10 +172,10 @@ public class RecipeViewingWidget extends Gui {
                 widgets.addAll(selectedCategory.setupDisplay(getParent(), middleDisplay, new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 108, 150, 66)));
             }
         }
-        
-        overlay.onInitialized();
+    
+        GuiHelper.getOverlay(parent.getContainerGui()).onInitialized();
         listeners.addAll(tabs);
-        listeners.add(overlay);
+        listeners.add(GuiHelper.getOverlay(parent.getContainerGui()));
         listeners.addAll(widgets);
     }
     
@@ -206,7 +200,7 @@ public class RecipeViewingWidget extends Gui {
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GuiLighting.disable();
         tabs.stream().filter(TabWidget::isSelected).forEach(tabWidget -> tabWidget.draw(mouseX, mouseY, partialTicks));
-        overlay.render(mouseX, mouseY, partialTicks);
+        GuiHelper.getOverlay(parent.getContainerGui()).render(mouseX, mouseY, partialTicks);
     }
     
     @Override

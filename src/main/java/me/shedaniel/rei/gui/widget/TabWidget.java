@@ -3,6 +3,7 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.client.ClientHelper;
+import me.shedaniel.rei.client.GuiHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.render.GuiLighting;
@@ -89,7 +90,7 @@ public class TabWidget extends Drawable implements HighlightableWidget {
     }
     
     private void drawTooltip() {
-        recipeViewingWidget.getParent().getOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(categoryName)));
+        GuiHelper.getOverlay(recipeViewingWidget.getParent().getContainerGui()).addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(categoryName)));
     }
     
     @Override
