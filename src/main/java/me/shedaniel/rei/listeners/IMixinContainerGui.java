@@ -22,4 +22,6 @@ public interface IMixinContainerGui {
     
     public ContainerGui getContainerGui();
     
+    public void setOverlay(ContainerGuiOverlay overlay);
+    
 }

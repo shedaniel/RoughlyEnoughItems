@@ -110,4 +110,9 @@ public class MixinContainerGui extends Gui implements IMixinContainerGui {
             }
     }
     
+    @Override
+    public void setOverlay(ContainerGuiOverlay overlay) {
+        this.overlay = overlay;
+        overlay.onInitialized();
+    }
 }

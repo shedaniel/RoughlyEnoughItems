@@ -24,11 +24,9 @@ import net.minecraft.util.PacketByteBuf;
 import net.minecraft.util.registry.Registry;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class ClientHelper implements ClientLoaded, ClientModInitializer {
     
@@ -99,14 +97,14 @@ public class ClientHelper implements ClientLoaded, ClientModInitializer {
     public static boolean executeRecipeKeyBind(ContainerGuiOverlay overlay, ItemStack stack, IMixinContainerGui parent) {
         Map<IRecipeCategory, List<IRecipeDisplay>> map = RecipeHelper.getRecipesFor(stack);
         if (map.keySet().size() > 0)
-            MinecraftClient.getInstance().openGui(new RecipeViewingWidget(overlay, MinecraftClient.getInstance().window, parent, map));
+            MinecraftClient.getInstance().openGui(new RecipeViewingWidget(MinecraftClient.getInstance().window, parent, map));
         return map.keySet().size() > 0;
     }
     
     public static boolean executeUsageKeyBind(ContainerGuiOverlay overlay, ItemStack stack, IMixinContainerGui parent) {
         Map<IRecipeCategory, List<IRecipeDisplay>> map = RecipeHelper.getUsagesFor(stack);
         if (map.keySet().size() > 0)
-            MinecraftClient.getInstance().openGui(new RecipeViewingWidget(overlay, MinecraftClient.getInstance().window, parent, map));
+            MinecraftClient.getInstance().openGui(new RecipeViewingWidget(MinecraftClient.getInstance().window, parent, map));
         return map.keySet().size() > 0;
     }
     

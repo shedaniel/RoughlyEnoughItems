@@ -122,6 +122,11 @@ public class RecipeHelper implements RecipeSync {
             plugin.registerPluginCategories();
             plugin.registerRecipes();
         });
+        Collections.reverse(categories);
+        RoughlyEnoughItemsCore.LOGGER.info("Registered REI Categories: " + String.join(", ", categories.stream().map(category -> {return category.getCategoryName();}).collect(Collectors.toList())));
     }
     
+    public static List<IRecipeCategory> getCategories() {
+        return categories;
+    }
 }

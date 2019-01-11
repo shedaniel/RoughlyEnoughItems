@@ -5,20 +5,21 @@ import me.shedaniel.rei.api.IRecipeDisplay;
 import net.minecraft.block.entity.FurnaceBlockEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.smelting.SmeltingRecipe;
+import net.minecraft.recipe.smelting.BlastingRecipe;
+import net.minecraft.recipe.smelting.SmokingRecipe;
 import net.minecraft.util.Identifier;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DefaultSmeltingDisplay implements IRecipeDisplay<SmeltingRecipe> {
+public class DefaultBlastingDisplay implements IRecipeDisplay<BlastingRecipe> {
     
-    private SmeltingRecipe display;
+    private BlastingRecipe display;
     private List<List<ItemStack>> input;
     private List<ItemStack> output;
     
-    public DefaultSmeltingDisplay(SmeltingRecipe recipe) {
+    public DefaultBlastingDisplay(BlastingRecipe recipe) {
         this.display = recipe;
         List<ItemStack> fuel = Lists.newArrayList();
         this.input = Lists.newArrayList();
@@ -31,7 +32,7 @@ public class DefaultSmeltingDisplay implements IRecipeDisplay<SmeltingRecipe> {
     }
     
     @Override
-    public SmeltingRecipe getRecipe() {
+    public BlastingRecipe getRecipe() {
         return display;
     }
     
@@ -51,7 +52,7 @@ public class DefaultSmeltingDisplay implements IRecipeDisplay<SmeltingRecipe> {
     
     @Override
     public Identifier getRecipeCategory() {
-        return DefaultPlugin.SMELTING;
+        return DefaultPlugin.BLASTING;
     }
     
     @Override

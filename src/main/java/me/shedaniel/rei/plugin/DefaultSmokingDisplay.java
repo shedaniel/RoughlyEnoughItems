@@ -6,19 +6,20 @@ import net.minecraft.block.entity.FurnaceBlockEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.smelting.SmeltingRecipe;
+import net.minecraft.recipe.smelting.SmokingRecipe;
 import net.minecraft.util.Identifier;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DefaultSmeltingDisplay implements IRecipeDisplay<SmeltingRecipe> {
+public class DefaultSmokingDisplay implements IRecipeDisplay<SmokingRecipe> {
     
-    private SmeltingRecipe display;
+    private SmokingRecipe display;
     private List<List<ItemStack>> input;
     private List<ItemStack> output;
     
-    public DefaultSmeltingDisplay(SmeltingRecipe recipe) {
+    public DefaultSmokingDisplay(SmokingRecipe recipe) {
         this.display = recipe;
         List<ItemStack> fuel = Lists.newArrayList();
         this.input = Lists.newArrayList();
@@ -31,7 +32,7 @@ public class DefaultSmeltingDisplay implements IRecipeDisplay<SmeltingRecipe> {
     }
     
     @Override
-    public SmeltingRecipe getRecipe() {
+    public SmokingRecipe getRecipe() {
         return display;
     }
     
@@ -51,7 +52,7 @@ public class DefaultSmeltingDisplay implements IRecipeDisplay<SmeltingRecipe> {
     
     @Override
     public Identifier getRecipeCategory() {
-        return DefaultPlugin.SMELTING;
+        return DefaultPlugin.SMOKING;
     }
     
     @Override

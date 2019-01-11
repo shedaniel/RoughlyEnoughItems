@@ -6,7 +6,6 @@ import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.REIItemListOrdering;
 import me.shedaniel.rei.client.RecipeHelper;
 import me.shedaniel.rei.client.SearchArgument;
-import me.shedaniel.rei.gui.ContainerGuiOverlay;
 import me.shedaniel.rei.listeners.ClientLoaded;
 import me.shedaniel.rei.listeners.IMixinContainerGui;
 import net.minecraft.client.MinecraftClient;
@@ -27,16 +26,14 @@ import java.util.stream.Stream;
 
 public class ItemListOverlay extends Drawable implements IWidget {
     
-    private ContainerGuiOverlay containerGuiOverlay;
     private IMixinContainerGui containerGui;
     private List<IWidget> widgets = new ArrayList<>();
     private int width, height, page;
     private Rectangle rectangle;
     private List<ItemStack> currentDisplayed;
     
-    public ItemListOverlay(ContainerGuiOverlay containerGuiOverlay, IMixinContainerGui containerGui, int page) {
+    public ItemListOverlay(IMixinContainerGui containerGui, int page) {
         this.currentDisplayed = Lists.newArrayList();
-        this.containerGuiOverlay = containerGuiOverlay;
         this.containerGui = containerGui;
         this.width = 0;
         this.height = 0;
@@ -50,6 +47,9 @@ public class ItemListOverlay extends Drawable implements IWidget {
     @Override
     public void draw(int int_1, int int_2, float float_1) {
         widgets.forEach(widget -> widget.draw(int_1, int_2, float_1));
+        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        if (rectangle.contains(ClientHelper.getMouseLocation()) && ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty())
+            containerGui.getOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.translate("text.rei.delete_items"))));
     }
     
     public void updateList(int page, String searchTerm) {
@@ -73,24 +73,15 @@ public class ItemListOverlay extends Drawable implements IWidget {
             widgets.add(new ItemSlotWidget((int) (startX + (i % width) * 18), (int) (startY + MathHelper.floor(i / width) * 18),
                     currentDisplayed.get(j), false, true, containerGui) {
                 @Override
-                protected List<String> getTooltip(ItemStack itemStack) {
-                    if (!ClientHelper.isCheating() || MinecraftClient.getInstance().player.inventory.getCursorStack().isEmpty())
-                        return super.getTooltip(itemStack);
-                    List<String> list = Lists.newArrayList();
-                    list.add(I18n.translate("text.rei.delete_items"));
-                    return list;
+                protected void drawToolTip(ItemStack itemStack) {
+                    ClientPlayerEntity player = MinecraftClient.getInstance().player;
+                    if (!ClientHelper.isCheating() || player.inventory.getCursorStack().isEmpty())
+                        super.drawToolTip(itemStack);
                 }
                 
                 @Override
                 public boolean onMouseClick(int button, double mouseX, double mouseY) {
-                    ClientPlayerEntity player = MinecraftClient.getInstance().player;
                     if (getBounds().contains(mouseX, mouseY)) {
-                        if (ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty()) {
-                            ClientHelper.sendDeletePacket();
-                            return true;
-                        }
-                        if (!player.inventory.getCursorStack().isEmpty())
-                            return false;
                         if (ClientHelper.isCheating()) {
                             if (getCurrentStack() != null && !getCurrentStack().isEmpty()) {
                                 ItemStack cheatedStack = getCurrentStack().copy();
@@ -99,9 +90,9 @@ public class ItemListOverlay extends Drawable implements IWidget {
                             }
                         } else {
                             if (button == 0)
-                                return ClientHelper.executeRecipeKeyBind(containerGuiOverlay, getCurrentStack().copy(), containerGui);
+                                return ClientHelper.executeRecipeKeyBind(containerGui.getOverlay(), getCurrentStack().copy(), containerGui);
                             else if (button == 1)
-                                return ClientHelper.executeUsageKeyBind(containerGuiOverlay, getCurrentStack().copy(), containerGui);
+                                return ClientHelper.executeUsageKeyBind(containerGui.getOverlay(), getCurrentStack().copy(), containerGui);
                         }
                     }
                     return false;
@@ -198,7 +189,7 @@ public class ItemListOverlay extends Drawable implements IWidget {
         MinecraftClient client = MinecraftClient.getInstance();
         return itemStack.getTooltipText(client.player, client.options.advancedItemTooltips ?
                 TooltipOptions.Instance.ADVANCED : TooltipOptions.Instance.NORMAL).stream().map(
-                        TextComponent::getFormattedText).collect(Collectors.toList());
+                TextComponent::getFormattedText).collect(Collectors.toList());
     }
     
     private void calculateListSize(Rectangle rect) {
@@ -217,6 +208,24 @@ public class ItemListOverlay extends Drawable implements IWidget {
             if (yOffset + 19 > rect.height)
                 break;
         }
+    }
+    
+    @Override
+    public boolean mouseClicked(double double_1, double double_2, int int_1) {
+        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        if (rectangle.contains(double_1, double_2))
+            if (ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty()) {
+                ClientHelper.sendDeletePacket();
+                return true;
+            }
+        if (!player.inventory.getCursorStack().isEmpty())
+            return false;
+        if (onMouseClick(int_1, double_1, double_2))
+            return true;
+        for(IWidget widget : getListeners())
+            if (widget.mouseClicked(double_1, double_2, int_1))
+                return true;
+        return false;
     }
     
     @Override

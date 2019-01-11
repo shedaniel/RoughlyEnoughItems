@@ -1,6 +1,7 @@
 package me.shedaniel.rei.gui;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.gui.widget.*;
 import me.shedaniel.rei.listeners.IMixinContainerGui;
@@ -29,6 +30,7 @@ public class ContainerGuiOverlay extends Gui {
     private ItemListOverlay itemListOverlay;
     private ButtonWidget buttonLeft, buttonRight;
     private TextFieldWidget searchField;
+    public static String searchTerm= "";
     
     public ContainerGuiOverlay(ContainerGui containerGui) {
         this.queuedTooltips = new ArrayList<>();
@@ -37,14 +39,13 @@ public class ContainerGuiOverlay extends Gui {
     }
     
     public void onInitialized() {
-        String searchTerm = searchField != null ? searchField.getText() : "";
         //Update Variables
         this.widgets.clear();
         this.window = MinecraftClient.getInstance().window;
         if (MinecraftClient.getInstance().currentGui instanceof ContainerGui)
             this.containerGui = (IMixinContainerGui) MinecraftClient.getInstance().currentGui;
         this.rectangle = calculateBoundary();
-        widgets.add(this.itemListOverlay = new ItemListOverlay(this, containerGui, page));
+        widgets.add(this.itemListOverlay = new ItemListOverlay(containerGui, page));
         
         this.itemListOverlay.updateList(getItemListArea(), page, searchTerm);
         widgets.add(buttonLeft = new ButtonWidget(rectangle.x, rectangle.y + 5, 16, 16, "<") {
@@ -53,7 +54,7 @@ public class ContainerGuiOverlay extends Gui {
                 page--;
                 if (page < 0)
                     page = getTotalPage();
-                itemListOverlay.updateList(getItemListArea(), page, searchField.getText());
+                itemListOverlay.updateList(getItemListArea(), page, searchTerm);
             }
         });
         widgets.add(buttonRight = new ButtonWidget(rectangle.x + rectangle.width - 18, rectangle.y + 5, 16, 16, ">") {
@@ -62,7 +63,7 @@ public class ContainerGuiOverlay extends Gui {
                 page++;
                 if (page > getTotalPage())
                     page = 0;
-                itemListOverlay.updateList(getItemListArea(), page, searchField.getText());
+                itemListOverlay.updateList(getItemListArea(), page, searchTerm);
             }
         });
         page = MathHelper.clamp(page, 0, getTotalPage());
@@ -88,9 +89,13 @@ public class ContainerGuiOverlay extends Gui {
         });
         Rectangle textFieldArea = getTextFieldArea();
         this.listeners.add(searchField = new TextFieldWidget(-1, MinecraftClient.getInstance().fontRenderer,
-                (int) textFieldArea.getX(), (int) textFieldArea.getY(), (int) textFieldArea.getWidth(), (int) textFieldArea.getHeight()));
-        searchField.setChangedListener((id, text) -> {
-            itemListOverlay.updateList(page, text);
+                (int) textFieldArea.getX(), (int) textFieldArea.getY(), (int) textFieldArea.getWidth(), (int) textFieldArea.getHeight()) {
+            @Override
+            public void addText(String string_1) {
+                super.addText(string_1);
+                searchTerm = this.getText();
+                itemListOverlay.updateList(page, searchTerm);
+            }
         });
         searchField.setText(searchTerm);
         
