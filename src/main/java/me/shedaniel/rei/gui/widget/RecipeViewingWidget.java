@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.api.IRecipeCategory;
 import me.shedaniel.rei.api.IRecipeDisplay;
+import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.gui.ContainerGuiOverlay;
 import me.shedaniel.rei.listeners.IMixinContainerGui;
 import net.minecraft.client.MinecraftClient;
@@ -17,10 +18,8 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 public class RecipeViewingWidget extends Gui {
     
@@ -49,6 +48,7 @@ public class RecipeViewingWidget extends Gui {
         this.bounds = new Rectangle(window.getScaledWidth() / 2 - guiWidth / 2, window.getScaledHeight() / 2 - guiHeight / 2, guiWidth, guiHeight);
         this.categoriesMap = categoriesMap;
         this.categories = new LinkedList<>(categoriesMap.keySet());
+        Collections.reverse(categories);
         this.selectedCategory = categories.get(0);
         this.overlay = overlay;
         this.tabs = new ArrayList<>();
@@ -234,6 +234,18 @@ public class RecipeViewingWidget extends Gui {
         for(GuiEventListener listener : listeners)
             if (listener.mouseScrolled(amount))
                 return true;
+        if (getBounds().contains(ClientHelper.getMouseLocation())) {
+            if (amount > 0 && recipeBack.enabled)
+                recipeBack.onPressed(0, 0, 0);
+            else if (amount < 0 && recipeNext.enabled)
+                recipeNext.onPressed(0, 0, 0);
+        }
+        if ((new Rectangle(bounds.x, bounds.y - 28, bounds.width, 28)).contains(ClientHelper.getMouseLocation())) {
+            if (amount > 0 && categoryBack.enabled)
+                categoryBack.onPressed(0, 0, 0);
+            else if (amount < 0 && categoryNext.enabled)
+                categoryNext.onPressed(0, 0, 0);
+        }
         return super.mouseScrolled(amount);
     }
     

@@ -1,10 +1,10 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.listeners.IMixinContainerGui;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.ContainerGui;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.render.item.ItemRenderer;
@@ -24,7 +24,7 @@ public class ItemSlotWidget extends Drawable implements HighlightableWidget {
     
     private static final Identifier RECIPE_GUI = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private List<ItemStack> itemList = new LinkedList<>();
-    private boolean drawBackground, showToolTips;
+    private boolean drawBackground, showToolTips, clickToMoreRecipes;
     private int x, y;
     private IMixinContainerGui containerGui;
     
@@ -39,6 +39,12 @@ public class ItemSlotWidget extends Drawable implements HighlightableWidget {
         this.x = x;
         this.y = y;
         this.containerGui = containerGui;
+        this.clickToMoreRecipes = false;
+    }
+    
+    public ItemSlotWidget(int x, int y, List<ItemStack> itemList, boolean drawBackground, boolean showToolTips, IMixinContainerGui containerGui, boolean clickToMoreRecipes) {
+        this(x, y, itemList, drawBackground, showToolTips, containerGui);
+        this.clickToMoreRecipes = clickToMoreRecipes;
     }
     
     public boolean isDrawBackground() {
@@ -93,7 +99,7 @@ public class ItemSlotWidget extends Drawable implements HighlightableWidget {
     protected ItemStack getCurrentStack() {
         if (itemList.size() == 0)
             return new ItemStack(Items.AIR);
-        return itemList.get(MathHelper.clamp((int) (System.currentTimeMillis() / 500) % itemList.size(), 0, itemList.size() - 1));
+        return itemList.get(MathHelper.floor((System.currentTimeMillis() / 500 % (double) itemList.size()) / 1f));
     }
     
     public void setItemList(List<ItemStack> itemList) {
@@ -103,6 +109,19 @@ public class ItemSlotWidget extends Drawable implements HighlightableWidget {
     @Override
     public Rectangle getBounds() {
         return new Rectangle(this.x, this.y, 18, 18);
+    }
+    
+    @Override
+    public boolean onMouseClick(int button, double mouseX, double mouseY) {
+        if (!clickToMoreRecipes)
+            return false;
+        if (getBounds().contains(mouseX, mouseY)) {
+            if (button == 0)
+                return ClientHelper.executeRecipeKeyBind(containerGui.getOverlay(), getCurrentStack().copy(), containerGui);
+            else if (button == 1)
+                return ClientHelper.executeUsageKeyBind(containerGui.getOverlay(), getCurrentStack().copy(), containerGui);
+        }
+        return false;
     }
     
 }
