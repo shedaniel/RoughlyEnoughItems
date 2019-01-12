@@ -63,6 +63,14 @@ public class ConfigHelper {
         return config.itemListOrdering;
     }
     
+    public void setItemListOrdering(REIItemListOrdering ordering) {
+        config.itemListOrdering = ordering;
+    }
+    
+    public void setAscending(boolean ascending) {
+        config.isAscending = ascending;
+    }
+    
     public boolean isAscending() {
         return config.isAscending;
     }

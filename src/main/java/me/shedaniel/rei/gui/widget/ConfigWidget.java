@@ -2,14 +2,17 @@ package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.client.REIItemListOrdering;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiEventListener;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.Window;
+import org.apache.logging.log4j.core.Core;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 public class ConfigWidget extends Gui {
@@ -77,6 +80,32 @@ public class ConfigWidget extends Gui {
                 int width = fontRenderer.getStringWidth(t);
                 fontRenderer.drawWithShadow(t, this.x - width - 10, this.y + (this.height - 8) / 2, -1);
                 super.draw(mouseX, mouseY, partialTicks);
+            }
+        });
+        widgets.add(new ButtonWidget(window.getScaledWidth() / 2 - 90, 90, 150, 20, "") {
+            @Override
+            public void onPressed(int button, double mouseX, double mouseY) {
+                int index = Arrays.asList(REIItemListOrdering.values()).indexOf(RoughlyEnoughItemsCore.getConfigHelper().getItemListOrdering()) + 1;
+                if (index >= REIItemListOrdering.values().length) {
+                    index = 0;
+                    RoughlyEnoughItemsCore.getConfigHelper().setAscending(!RoughlyEnoughItemsCore.getConfigHelper().isAscending());
+                }
+                RoughlyEnoughItemsCore.getConfigHelper().setItemListOrdering(REIItemListOrdering.values()[index]);
+                try {
+                    RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        
+            @Override
+            public void draw(int int_1, int int_2, float float_1) {
+                GuiLighting.disable();
+                this.text = I18n.translate("text.rei.list_ordering_button", I18n.translate(RoughlyEnoughItemsCore.getConfigHelper().getItemListOrdering().getNameTranslationKey()),
+                        I18n.translate(RoughlyEnoughItemsCore.getConfigHelper().isAscending() ? "ordering.rei.ascending" : "ordering.rei.descending"));
+                String t = I18n.translate("text.rei.list_ordering") + ": ";
+                drawString(MinecraftClient.getInstance().fontRenderer, t, parent.width / 2 - 95 - MinecraftClient.getInstance().fontRenderer.getStringWidth(t), 90 + 6, -1);
+                super.draw(int_1, int_2, float_1);
             }
         });
     }
