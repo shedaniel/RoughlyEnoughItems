@@ -9,6 +9,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.item.TooltipOptions;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -57,7 +58,7 @@ public class ItemListOverlay extends Drawable implements IWidget {
         this.rectangle = rect;
         if (ClientHelper.getItemList().isEmpty())
             RoughlyEnoughItemsCore.getListeners(ClientLoaded.class).forEach(ClientLoaded::clientLoaded);
-        currentDisplayed = processSearchTerm(searchTerm, ClientHelper.getItemList(), Lists.newArrayList());
+        currentDisplayed = processSearchTerm(searchTerm, ClientHelper.getItemList(), GuiHelper.inventoryStacks);
         this.widgets.clear();
         this.page = page;
         calculateListSize(rect);

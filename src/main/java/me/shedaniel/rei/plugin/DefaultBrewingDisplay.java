@@ -1,8 +1,10 @@
 package me.shedaniel.rei.plugin;
 
+import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.IRecipeDisplay;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.util.Identifier;
@@ -51,4 +53,8 @@ public class DefaultBrewingDisplay implements IRecipeDisplay {
         return stack;
     }
     
+    @Override
+    public List<List<ItemStack>> getRequiredItems() {
+        return Arrays.asList(Arrays.asList(new ItemStack(Items.AIR)));
+    }
 }
