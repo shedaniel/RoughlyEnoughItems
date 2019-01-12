@@ -1,5 +1,6 @@
 package me.shedaniel.rei.client;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import io.netty.buffer.Unpooled;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
@@ -16,9 +17,7 @@ import net.fabricmc.fabric.impl.client.keybinding.KeyBindingRegistryImpl;
 import net.fabricmc.loader.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
-import net.minecraft.client.gui.ContainerGui;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -32,9 +31,8 @@ import net.minecraft.util.PacketByteBuf;
 import net.minecraft.util.registry.Registry;
 
 import java.awt.*;
-import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -124,6 +122,17 @@ public class ClientHelper implements ClientLoaded, ClientModInitializer {
     
     public static void openConfigWindow(Gui parent) {
         MinecraftClient.getInstance().openGui(new ConfigWidget(parent));
+    }
+    
+    public static List<ItemStack> getInventoryItemsTypes() {
+        List<DefaultedList<ItemStack>> field_7543 = ImmutableList.of(MinecraftClient.getInstance().player.inventory.main, MinecraftClient.getInstance().player.inventory.armor
+                , MinecraftClient.getInstance().player.inventory.offHand);
+        List<ItemStack> inventoryStacks = new ArrayList<>();
+        field_7543.forEach(itemStacks -> itemStacks.forEach(itemStack -> {
+            if (!itemStack.getItem().equals(Items.AIR))
+                inventoryStacks.add(itemStack);
+        }));
+        return inventoryStacks;
     }
     
     @Override

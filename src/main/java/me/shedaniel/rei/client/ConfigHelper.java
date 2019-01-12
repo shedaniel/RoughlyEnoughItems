@@ -67,16 +67,20 @@ public class ConfigHelper {
         config.itemListOrdering = ordering;
     }
     
-    public void setAscending(boolean ascending) {
-        config.isAscending = ascending;
-    }
-    
     public boolean isAscending() {
         return config.isAscending;
     }
     
+    public void setAscending(boolean ascending) {
+        config.isAscending = ascending;
+    }
+    
     public boolean craftableOnly() {
         return craftableOnly && config.enableCraftableOnlyButton;
+    }
+    
+    public void toggleCraftableOnly() {
+        craftableOnly = !craftableOnly;
     }
     
     public boolean showCraftableOnlyButton() {

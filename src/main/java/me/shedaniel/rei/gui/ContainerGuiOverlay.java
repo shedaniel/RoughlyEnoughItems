@@ -18,7 +18,10 @@ import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ContainerGuiOverlay extends Gui {
     
@@ -113,18 +116,34 @@ public class ContainerGuiOverlay extends Gui {
         GuiHelper.searchField.setBounds(getTextFieldArea());
         this.widgets.add(GuiHelper.searchField);
         GuiHelper.searchField.setText(searchTerm);
+        if (RoughlyEnoughItemsCore.getConfigHelper().showCraftableOnlyButton())
+            this.widgets.add(new CraftableToggleButtonWidget(containerGui, getCraftableToggleArea()) {
+                @Override
+                public void onPressed(int button, double mouseX, double mouseY) {
+                    RoughlyEnoughItemsCore.getConfigHelper().toggleCraftableOnly();
+                    itemListOverlay.updateList(page, searchTerm);
+                }
+            });
         
         this.listeners.addAll(widgets);
     }
     
     private Rectangle getTextFieldArea() {
+        int widthRemoved = RoughlyEnoughItemsCore.getConfigHelper().showCraftableOnlyButton() ? 22 : 0;
         if (RoughlyEnoughItemsCore.getConfigHelper().sideSearchField())
-            return new Rectangle(rectangle.x + 2, window.getScaledHeight() - 22, rectangle.width - 6, 18);
+            return new Rectangle(rectangle.x + 2, window.getScaledHeight() - 22, rectangle.width - 6 - widthRemoved, 18);
         if (MinecraftClient.getInstance().currentGui instanceof RecipeViewingWidget) {
             RecipeViewingWidget widget = (RecipeViewingWidget) MinecraftClient.getInstance().currentGui;
-            return new Rectangle(widget.getBounds().x, window.getScaledHeight() - 22, widget.getBounds().width, 18);
+            return new Rectangle(widget.getBounds().x, window.getScaledHeight() - 22, widget.getBounds().width - widthRemoved, 18);
         }
-        return new Rectangle(containerGui.getContainerLeft(), window.getScaledHeight() - 22, containerGui.getContainerWidth(), 18);
+        return new Rectangle(containerGui.getContainerLeft(), window.getScaledHeight() - 22, containerGui.getContainerWidth() - widthRemoved, 18);
+    }
+    
+    private Rectangle getCraftableToggleArea() {
+        Rectangle searchBoxArea = getTextFieldArea();
+        searchBoxArea.setLocation(searchBoxArea.x + searchBoxArea.width + 4, searchBoxArea.y - 1);
+        searchBoxArea.setSize(20, 20);
+        return searchBoxArea;
     }
     
     private String getCheatModeText() {
@@ -140,8 +159,13 @@ public class ContainerGuiOverlay extends Gui {
     }
     
     public void render(int mouseX, int mouseY, float partialTicks) {
+        List<ItemStack> currentStacks = ClientHelper.getInventoryItemsTypes();
         if (getLeft() != lastLeft)
             onInitialized();
+        else if (RoughlyEnoughItemsCore.getConfigHelper().craftableOnly() && (!hasSameListContent(new LinkedList<>(GuiHelper.inventoryStacks), currentStacks) || (currentStacks.size() != GuiHelper.inventoryStacks.size()))) {
+            GuiHelper.inventoryStacks = ClientHelper.getInventoryItemsTypes();
+            itemListOverlay.updateList(page, searchTerm);
+        }
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GuiLighting.disable();
         this.draw(mouseX, mouseY, partialTicks);
@@ -149,6 +173,21 @@ public class ContainerGuiOverlay extends Gui {
         queuedTooltips.forEach(queuedTooltip -> containerGui.getContainerGui().drawTooltip(queuedTooltip.text, queuedTooltip.mouse.x, queuedTooltip.mouse.y));
         queuedTooltips.clear();
         GuiLighting.disable();
+    }
+    
+    private boolean hasSameListContent(List<ItemStack> list1, List<ItemStack> list2) {
+        Collections.sort(list1, (itemStack, t1) -> {
+            return itemStack.getDisplayName().getFormattedText().compareToIgnoreCase(t1.getDisplayName().getFormattedText());
+        });
+        Collections.sort(list2, (itemStack, t1) -> {
+            return itemStack.getDisplayName().getFormattedText().compareToIgnoreCase(t1.getDisplayName().getFormattedText());
+        });
+        String lastString = String.join("", list1.stream().map(itemStack -> {
+            return itemStack.getDisplayName().getFormattedText();
+        }).collect(Collectors.toList())), currentString = String.join("", list2.stream().map(itemStack -> {
+            return itemStack.getDisplayName().getFormattedText();
+        }).collect(Collectors.toList()));
+        return lastString.equals(currentString);
     }
     
     public void setContainerGui(IMixinContainerGui containerGui) {
