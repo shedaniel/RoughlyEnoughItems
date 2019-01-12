@@ -1,7 +1,6 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
 import me.shedaniel.rei.listeners.IMixinContainerGui;
@@ -92,8 +91,13 @@ public class ItemSlotWidget extends Drawable implements HighlightableWidget {
         if (containerGui != null)
             toolTip = containerGui.getContainerGui().getStackTooltip(itemStack).stream().filter(s -> !s.equals(modString)).collect(Collectors.toList());
         else toolTip.add(itemStack.getDisplayName().getFormattedText());
-        toolTip.add("§9§o" + ClientHelper.getModFromItemStack(itemStack));
+        toolTip.addAll(getExtraToolTips(itemStack));
+        toolTip.add(modString);
         return toolTip;
+    }
+    
+    protected List<String> getExtraToolTips(ItemStack stack) {
+        return Lists.newArrayList();
     }
     
     protected String getItemCountOverlay(ItemStack currentStack) {

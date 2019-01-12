@@ -55,11 +55,36 @@ public class DefaultBrewingCategory implements IRecipeCategory<DefaultBrewingDis
             }
         }));
         widgets.add(new ItemSlotWidget(startPoint.x + 1, startPoint.y + 1, Arrays.asList(new ItemStack(Items.BLAZE_POWDER)), false, true, containerGui, true));
-        widgets.add(new ItemSlotWidget(startPoint.x + 63, startPoint.y + 1, recipeDisplay.getInput().get(0), false, true, containerGui, true));
-        widgets.add(new ItemSlotWidget(startPoint.x + 40, startPoint.y + 1, recipeDisplay.getInput().get(1), false, true, containerGui, true));
-        widgets.add(new ItemSlotWidget(startPoint.x + 40, startPoint.y + 35, recipeDisplay.getOutput(0), false, true, containerGui, true));
-        widgets.add(new ItemSlotWidget(startPoint.x + 63, startPoint.y + 42, recipeDisplay.getOutput(1), false, true, containerGui, true));
-        widgets.add(new ItemSlotWidget(startPoint.x + 86, startPoint.y + 35, recipeDisplay.getOutput(2), false, true, containerGui, true));
+        widgets.add(new ItemSlotWidget(startPoint.x + 63, startPoint.y + 1, recipeDisplay.getInput().get(0), false, true, containerGui, true) {
+            @Override
+            protected List<String> getExtraToolTips(ItemStack stack) {
+                return Arrays.asList(I18n.translate("category.rei.brewing.input"));
+            }
+        });
+        widgets.add(new ItemSlotWidget(startPoint.x + 40, startPoint.y + 1, recipeDisplay.getInput().get(1), false, true, containerGui, true) {
+            @Override
+            protected List<String> getExtraToolTips(ItemStack stack) {
+                return Arrays.asList(I18n.translate("category.rei.brewing.reactant"));
+            }
+        });
+        widgets.add(new ItemSlotWidget(startPoint.x + 40, startPoint.y + 35, recipeDisplay.getOutput(0), false, true, containerGui, true) {
+            @Override
+            protected List<String> getExtraToolTips(ItemStack stack) {
+                return Arrays.asList(I18n.translate("category.rei.brewing.result"));
+            }
+        });
+        widgets.add(new ItemSlotWidget(startPoint.x + 63, startPoint.y + 42, recipeDisplay.getOutput(1), false, true, containerGui, true) {
+            @Override
+            protected List<String> getExtraToolTips(ItemStack stack) {
+                return Arrays.asList(I18n.translate("category.rei.brewing.result"));
+            }
+        });
+        widgets.add(new ItemSlotWidget(startPoint.x + 86, startPoint.y + 35, recipeDisplay.getOutput(2), false, true, containerGui, true) {
+            @Override
+            protected List<String> getExtraToolTips(ItemStack stack) {
+                return Arrays.asList(I18n.translate("category.rei.brewing.result"));
+            }
+        });
         return widgets;
     }
     

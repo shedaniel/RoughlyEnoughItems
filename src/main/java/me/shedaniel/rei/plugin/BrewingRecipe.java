@@ -14,4 +14,5 @@ public class BrewingRecipe {
         this.ingredient = ingredient_1;
         this.output = object_2;
     }
+    
 }
