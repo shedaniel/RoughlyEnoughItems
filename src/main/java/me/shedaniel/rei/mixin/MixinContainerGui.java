@@ -1,13 +1,18 @@
 package me.shedaniel.rei.mixin;
 
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
 import me.shedaniel.rei.gui.ContainerGuiOverlay;
 import me.shedaniel.rei.listeners.IMixinContainerGui;
+import me.shedaniel.rei.listeners.IMixinTabGetter;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ContainerGui;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiEventListener;
+import net.minecraft.client.gui.ingame.CreativePlayerInventoryGui;
 import net.minecraft.container.Slot;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -27,13 +32,11 @@ public class MixinContainerGui extends Gui implements IMixinContainerGui {
     protected int containerWidth;
     @Shadow
     protected int containerHeight;
-    
+    @Shadow
+    protected Slot focusedSlot;
     private ContainerGui lastGui;
-    
     @Shadow
     private ItemStack field_2782;
-    
-    @Shadow protected Slot focusedSlot;
     
     @Override
     public int getContainerLeft() {
@@ -68,6 +71,11 @@ public class MixinContainerGui extends Gui implements IMixinContainerGui {
     
     @Inject(method = "draw(IIF)V", at = @At("RETURN"))
     public void draw(int int_1, int int_2, float float_1, CallbackInfo info) {
+        if (MinecraftClient.getInstance().currentGui instanceof CreativePlayerInventoryGui) {
+            IMixinTabGetter tabGetter = (IMixinTabGetter) MinecraftClient.getInstance().currentGui;
+            if (tabGetter.getSelectedTab() != ItemGroup.INVENTORY.getId())
+                return;
+        }
         if (MinecraftClient.getInstance().currentGui instanceof ContainerGui)
             this.lastGui = (ContainerGui) MinecraftClient.getInstance().currentGui;
         GuiHelper.getOverlay(lastGui).render(int_1, int_2, float_1);
@@ -83,24 +91,6 @@ public class MixinContainerGui extends Gui implements IMixinContainerGui {
         return lastGui;
     }
     
-    // TODO into an inject
-    @Override
-    public boolean mouseScrolled(double double_1) {
-        for(GuiEventListener entry : this.getEntries())
-            if (entry.mouseScrolled(double_1))
-                return true;
-        return false;
-    }
-    
-    // TODO into an inject
-    @Override
-    public boolean charTyped(char char_1, int int_1) {
-        for(GuiEventListener entry : this.getEntries())
-            if (entry.charTyped(char_1, int_1))
-                return true;
-        return false;
-    }
-    
     @Inject(method = "keyPressed(III)Z", at = @At("HEAD"), cancellable = true)
     public void keyPressed(int int_1, int int_2, int int_3, CallbackInfoReturnable<Boolean> ci) {
         for(GuiEventListener entry : this.getEntries())
@@ -113,6 +103,16 @@ public class MixinContainerGui extends Gui implements IMixinContainerGui {
     @Override
     public Slot getHoveredSlot() {
         return focusedSlot;
+    }
+    
+    @Override
+    public boolean mouseScrolled(double double_1) {
+        ContainerGuiOverlay overlay = GuiHelper.getOverlay(lastGui);
+        if (GuiHelper.isOverlayVisible() && overlay.getRectangle().contains(ClientHelper.getMouseLocation()))
+            for(GuiEventListener entry : this.getEntries())
+                if (entry.mouseScrolled(double_1))
+                    return true;
+        return super.mouseScrolled(double_1);
     }
     
 }

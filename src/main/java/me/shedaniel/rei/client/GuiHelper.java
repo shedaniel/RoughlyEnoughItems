@@ -2,13 +2,14 @@ package me.shedaniel.rei.client;
 
 import me.shedaniel.rei.gui.ContainerGuiOverlay;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
+import me.shedaniel.rei.listeners.IMixinContainerGui;
 import net.minecraft.client.gui.ContainerGui;
 
 public class GuiHelper {
     
+    public static TextFieldWidget searchField;
     private static boolean overlayVisible = true;
     private static ContainerGuiOverlay overlay;
-    public static TextFieldWidget searchField;
     
     public static boolean isOverlayVisible() {
         return overlayVisible;
