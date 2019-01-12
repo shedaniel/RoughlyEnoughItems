@@ -14,5 +14,6 @@ public class REIConfig {
     public REIItemListOrdering itemListOrdering = REIItemListOrdering.REGISTRY;
     public boolean isAscending = true;
     public boolean enableCraftableOnlyButton = true;
+    public boolean sideSearchField = false;
     
 }

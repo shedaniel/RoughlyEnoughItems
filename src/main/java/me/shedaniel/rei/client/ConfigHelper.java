@@ -9,13 +9,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 
-public class ConfigManager {
+public class ConfigHelper {
     
     private final File configFile;
     private REIConfig config;
     private boolean craftableOnly;
     
-    public ConfigManager() {
+    public ConfigHelper() {
         this.configFile = new File(FabricLoader.INSTANCE.getConfigDirectory(), "rei.json");
         this.craftableOnly = false;
         try {
@@ -69,6 +69,22 @@ public class ConfigManager {
     
     public boolean craftableOnly() {
         return craftableOnly && config.enableCraftableOnlyButton;
+    }
+    
+    public boolean showCraftableOnlyButton() {
+        return config.enableCraftableOnlyButton;
+    }
+    
+    public void setShowCraftableOnlyButton(boolean enableCraftableOnlyButton) {
+        config.enableCraftableOnlyButton = enableCraftableOnlyButton;
+    }
+    
+    public boolean sideSearchField() {
+        return config.sideSearchField;
+    }
+    
+    public void setSideSearchField(boolean sideSearchField) {
+        config.sideSearchField = sideSearchField;
     }
     
 }

@@ -2,7 +2,7 @@ package me.shedaniel.rei;
 
 import me.shedaniel.rei.api.IRecipePlugin;
 import me.shedaniel.rei.client.ClientHelper;
-import me.shedaniel.rei.client.ConfigManager;
+import me.shedaniel.rei.client.ConfigHelper;
 import me.shedaniel.rei.client.RecipeHelper;
 import me.shedaniel.rei.listeners.IListener;
 import me.shedaniel.rei.plugin.DefaultPlugin;
@@ -27,7 +27,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
     public static final Identifier DELETE_ITEMS_PACKET = new Identifier("roughlyenoughitems", "deleteitem");
     public static final Identifier CREATE_ITEMS_PACKET = new Identifier("roughlyenoughitems", "createitem");
     private static final List<IListener> listeners = new ArrayList<>();
-    private static ConfigManager configManager;
+    private static ConfigHelper configHelper;
     
     public static <T> List<T> getListeners(Class<T> listenerClass) {
         return listeners.stream().filter(listener -> {
@@ -37,15 +37,15 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
         }).collect(Collectors.toList());
     }
     
-    public static ConfigManager getConfigManager() {
-        return configManager;
+    public static ConfigHelper getConfigHelper() {
+        return configHelper;
     }
     
     @Override
     public void onInitializeClient() {
         registerREIListeners();
         registerDefaultPlugin();
-        configManager = new ConfigManager();
+        configHelper = new ConfigHelper();
     }
     
     private void registerDefaultPlugin() {
