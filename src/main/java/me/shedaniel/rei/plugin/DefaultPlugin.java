@@ -51,7 +51,6 @@ public class DefaultPlugin implements IRecipePlugin {
             else if (value instanceof BlastingRecipe)
                 RecipeHelper.registerRecipe(BLASTING, new DefaultBlastingDisplay((BlastingRecipe) value));
         BREWING_DISPLAYS.forEach(display -> RecipeHelper.registerRecipe(BREWING, display));
-        RoughlyEnoughItemsCore.LOGGER.info("bad lol " + BREWING_DISPLAYS.size());
     }
     
 }
