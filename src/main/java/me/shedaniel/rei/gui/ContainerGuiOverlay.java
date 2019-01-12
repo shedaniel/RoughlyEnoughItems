@@ -1,6 +1,7 @@
 package me.shedaniel.rei.gui;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
 import me.shedaniel.rei.gui.widget.*;
@@ -30,6 +31,7 @@ public class ContainerGuiOverlay extends Gui {
     private IMixinContainerGui containerGui;
     private Window window;
     private ButtonWidget buttonLeft, buttonRight;
+    private int lastLeft;
     
     public ContainerGuiOverlay(ContainerGui containerGui) {
         this.queuedTooltips = new ArrayList<>();
@@ -45,6 +47,7 @@ public class ContainerGuiOverlay extends Gui {
             this.containerGui = (IMixinContainerGui) MinecraftClient.getInstance().currentGui;
         this.rectangle = calculateBoundary();
         widgets.add(this.itemListOverlay = new ItemListOverlay(containerGui, page));
+        this.lastLeft = getLeft();
         
         this.itemListOverlay.updateList(getItemListArea(), page, searchTerm);
         widgets.add(buttonLeft = new ButtonWidget(rectangle.x, rectangle.y + 5, 16, 16, "<") {
@@ -133,6 +136,8 @@ public class ContainerGuiOverlay extends Gui {
     }
     
     public void render(int mouseX, int mouseY, float partialTicks) {
+        if (getLeft() != lastLeft)
+            onInitialized();
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GuiLighting.disable();
         this.draw(mouseX, mouseY, partialTicks);
@@ -140,6 +145,10 @@ public class ContainerGuiOverlay extends Gui {
         queuedTooltips.forEach(queuedTooltip -> containerGui.getContainerGui().drawTooltip(queuedTooltip.text, queuedTooltip.mouse.x, queuedTooltip.mouse.y));
         queuedTooltips.clear();
         GuiLighting.disable();
+    }
+    
+    public void setContainerGui(IMixinContainerGui containerGui) {
+        this.containerGui = containerGui;
     }
     
     public void addTooltip(QueuedTooltip queuedTooltip) {
@@ -169,6 +178,14 @@ public class ContainerGuiOverlay extends Gui {
             width = window.getScaledWidth() - startX;
         }
         return new Rectangle(startX, 0, width, window.getScaledHeight());
+    }
+    
+    private int getLeft() {
+        if (MinecraftClient.getInstance().currentGui instanceof RecipeViewingWidget) {
+            RecipeViewingWidget widget = (RecipeViewingWidget) MinecraftClient.getInstance().currentGui;
+            return widget.getBounds().x;
+        }
+        return containerGui.getContainerLeft();
     }
     
     private int getTotalPage() {

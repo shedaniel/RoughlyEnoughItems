@@ -4,7 +4,10 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "MixinContainerGui",
-    "MixinClientPlayNetworkHandler"
+    "MixinClientPlayNetworkHandler",
+    "MixinPlayerInventoryGui",
+    "MixinCraftingTableGui",
+    "MixinCreativePlayerInventoryGui"
   ],
   "injectors": {
     "defaultRequire": 1
