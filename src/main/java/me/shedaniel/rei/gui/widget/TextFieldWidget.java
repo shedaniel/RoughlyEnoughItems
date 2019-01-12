@@ -49,13 +49,6 @@ public class TextFieldWidget extends Drawable implements IWidget {
         this(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
     }
     
-    public void setBounds(Rectangle rectangle) {
-        this.x = rectangle.x;
-        this.y = rectangle.y;
-        this.width = rectangle.width;
-        this.height = rectangle.height;
-    }
-    
     public TextFieldWidget(int x, int y, int width, int height) {
         this.text = "";
         this.maxLength = 32;
@@ -74,6 +67,17 @@ public class TextFieldWidget extends Drawable implements IWidget {
         this.y = y;
         this.width = width;
         this.height = height;
+    }
+    
+    public Rectangle getBounds() {
+        return new Rectangle(x, y, width, height);
+    }
+    
+    public void setBounds(Rectangle rectangle) {
+        this.x = rectangle.x;
+        this.y = rectangle.y;
+        this.width = rectangle.width;
+        this.height = rectangle.height;
     }
     
     public void setChangedListener(Consumer<String> biConsumer_1) {

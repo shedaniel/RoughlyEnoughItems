@@ -74,6 +74,11 @@ public class RecipeViewingWidget extends Gui {
     }
     
     @Override
+    public boolean isPauseScreen() {
+        return false;
+    }
+    
+    @Override
     public void onClosed() {
         GuiHelper.resetOverlay();
     }

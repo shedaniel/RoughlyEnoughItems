@@ -28,17 +28,17 @@ public abstract class ButtonWidget extends Drawable implements IWidget {
     private boolean pressed;
     private Rectangle bounds;
     
-    public ButtonWidget(int int_2, int int_3, int int_4, int int_5, String string_1) {
+    public ButtonWidget(int x, int y, int width, int height, String text) {
         this.width = 200;
         this.height = 20;
         this.enabled = true;
         this.visible = true;
-        this.x = int_2;
-        this.y = int_3;
-        this.width = int_4;
-        this.height = int_5;
-        this.text = string_1;
-        this.bounds = new Rectangle(x, y, width, height);
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.text = text;
+        this.bounds = new Rectangle(x, this.y, this.width, this.height);
     }
     
     public Rectangle getBounds() {

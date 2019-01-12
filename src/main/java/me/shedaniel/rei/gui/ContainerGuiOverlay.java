@@ -81,6 +81,12 @@ public class ContainerGuiOverlay extends Gui {
                 ClientHelper.setCheating(!ClientHelper.isCheating());
             }
         });
+        widgets.add(new ButtonWidget(10, 35, 40, 20, I18n.translate("text.rei.config")) {
+            @Override
+            public void onPressed(int button, double mouseX, double mouseY) {
+                ClientHelper.openConfigWindow(containerGui.getContainerGui());
+            }
+        });
         this.widgets.add(new LabelWidget(rectangle.x + (rectangle.width / 2), rectangle.y + 10, "") {
             @Override
             public void draw(int mouseX, int mouseY, float partialTicks) {
@@ -89,25 +95,21 @@ public class ContainerGuiOverlay extends Gui {
                 super.draw(mouseX, mouseY, partialTicks);
             }
         });
-//        Rectangle textFieldArea = getTextFieldArea();
-//        this.widgets.add(searchField = new TextFieldWidget(-1, MinecraftClient.getInstance().fontRenderer,
-//                (int) textFieldArea.getX(), (int) textFieldArea.getY(), (int) textFieldArea.getWidth(), (int) textFieldArea.getHeight()) {
-//            @Override
-//            public void addText(String string_1) {
-//                super.addText(string_1);
-//                searchTerm = this.getText();
-//                itemListOverlay.updateList(page, searchTerm);
-//            }
-//        });
         if (GuiHelper.searchField == null)
             GuiHelper.searchField = new TextFieldWidget(0, 0, 0, 0) {
                 @Override
-                public void addText(String string_1) {
-                    super.addText(string_1);
-                    searchTerm = this.getText();
-                    itemListOverlay.updateList(page, searchTerm);
+                public boolean mouseClicked(double double_1, double double_2, int int_1) {
+                    if (isVisible() && getBounds().contains(double_1, double_2) && int_1 == 1) {
+                        setText("");
+                        return true;
+                    }
+                    return super.mouseClicked(double_1, double_2, int_1);
                 }
             };
+        GuiHelper.searchField.setChangedListener(s -> {
+            searchTerm = s;
+            itemListOverlay.updateList(page, searchTerm);
+        });
         GuiHelper.searchField.setBounds(getTextFieldArea());
         this.widgets.add(GuiHelper.searchField);
         GuiHelper.searchField.setText(searchTerm);
@@ -116,6 +118,8 @@ public class ContainerGuiOverlay extends Gui {
     }
     
     private Rectangle getTextFieldArea() {
+        if (RoughlyEnoughItemsCore.getConfigHelper().sideSearchField())
+            return new Rectangle(rectangle.x + 2, window.getScaledHeight() - 22, rectangle.width - 6, 18);
         if (MinecraftClient.getInstance().currentGui instanceof RecipeViewingWidget) {
             RecipeViewingWidget widget = (RecipeViewingWidget) MinecraftClient.getInstance().currentGui;
             return new Rectangle(widget.getBounds().x, window.getScaledHeight() - 22, widget.getBounds().width, 18);
@@ -128,7 +132,7 @@ public class ContainerGuiOverlay extends Gui {
     }
     
     private Rectangle getItemListArea() {
-        return new Rectangle(rectangle.x + 2, rectangle.y + 24, rectangle.width - 4, rectangle.height - 27);
+        return new Rectangle(rectangle.x + 2, rectangle.y + 24, rectangle.width - 4, rectangle.height - (RoughlyEnoughItemsCore.getConfigHelper().sideSearchField() ? 27 + 22 : 27));
     }
     
     public Rectangle getRectangle() {

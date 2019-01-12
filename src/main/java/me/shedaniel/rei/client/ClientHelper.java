@@ -6,6 +6,7 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.IRecipeCategory;
 import me.shedaniel.rei.api.IRecipeDisplay;
 import me.shedaniel.rei.gui.ContainerGuiOverlay;
+import me.shedaniel.rei.gui.widget.ConfigWidget;
 import me.shedaniel.rei.gui.widget.RecipeViewingWidget;
 import me.shedaniel.rei.listeners.ClientLoaded;
 import me.shedaniel.rei.listeners.IMixinContainerGui;
@@ -15,6 +16,8 @@ import net.fabricmc.fabric.impl.client.keybinding.KeyBindingRegistryImpl;
 import net.fabricmc.loader.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
+import net.minecraft.client.gui.ContainerGui;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.enchantment.Enchantment;
@@ -23,6 +26,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.server.network.packet.CustomPayloadServerPacket;
+import net.minecraft.util.DefaultedList;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.PacketByteBuf;
 import net.minecraft.util.registry.Registry;
@@ -30,6 +34,7 @@ import net.minecraft.util.registry.Registry;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -117,9 +122,16 @@ public class ClientHelper implements ClientLoaded, ClientModInitializer {
         return map.keySet().size() > 0;
     }
     
+    public static void openConfigWindow(Gui parent) {
+        MinecraftClient.getInstance().openGui(new ConfigWidget(parent));
+    }
+    
     @Override
     public void clientLoaded() {
-        Registry.ITEM.forEach(this::registerItem);
+        Registry.ITEM.forEach(item -> {
+            if (!item.equals(Items.ENCHANTED_BOOK))
+                registerItem(item);
+        });
         Registry.ENCHANTMENT.forEach(enchantment -> {
             for(int i = enchantment.getMinimumLevel(); i < enchantment.getMaximumLevel(); i++) {
                 Map<Enchantment, Integer> map = new HashMap<>();
@@ -133,11 +145,21 @@ public class ClientHelper implements ClientLoaded, ClientModInitializer {
     
     public void registerItem(Item item) {
         registerItemStack(item.getDefaultStack());
+        DefaultedList<ItemStack> stacks = DefaultedList.create();
+        item.addStacksForDisplay(item.getItemGroup(), stacks);
+        stacks.forEach(this::registerItemStack);
     }
     
     public void registerItemStack(ItemStack stack) {
-        if (!stack.getItem().equals(Items.AIR))
+        if (!stack.getItem().equals(Items.AIR) && !alreadyContain(stack))
             itemList.add(stack);
+    }
+    
+    private boolean alreadyContain(ItemStack stack) {
+        for(ItemStack itemStack : itemList)
+            if (ItemStack.areEqual(stack, itemStack))
+                return true;
+        return false;
     }
     
     @Override
