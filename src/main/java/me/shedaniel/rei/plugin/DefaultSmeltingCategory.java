@@ -57,7 +57,12 @@ public class DefaultSmeltingCategory implements IRecipeCategory<DefaultSmeltingD
         }));
         List<List<ItemStack>> input = recipeDisplay.getInput();
         widgets.add(new ItemSlotWidget(startPoint.x + 1, startPoint.y + 1, input.get(0), true, true, containerGui, true));
-        widgets.add(new ItemSlotWidget(startPoint.x + 1, startPoint.y + 37, recipeDisplay.getFuel(), true, true, containerGui, true));
+        widgets.add(new ItemSlotWidget(startPoint.x + 1, startPoint.y + 37, recipeDisplay.getFuel(), true, true, containerGui, true) {
+            @Override
+            protected List<String> getExtraToolTips(ItemStack stack) {
+                return Arrays.asList(I18n.translate("category.rei.smelting.fuel"));
+            }
+        });
         widgets.add(new ItemSlotWidget(startPoint.x + 61, startPoint.y + 19, recipeDisplay.getOutput(), false, true, containerGui, true));
         return widgets;
     }
