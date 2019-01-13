@@ -3,6 +3,7 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.api.IRecipeCategory;
+import me.shedaniel.rei.api.IRecipeCategoryCraftable;
 import me.shedaniel.rei.api.IRecipeDisplay;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
@@ -177,9 +178,17 @@ public class RecipeViewingWidget extends Gui {
         if (page * getRecipesPerPage() < categoriesMap.get(selectedCategory).size()) {
             IRecipeDisplay topDisplay = categoriesMap.get(selectedCategory).get(page * getRecipesPerPage());
             widgets.addAll(selectedCategory.setupDisplay(getParent(), topDisplay, new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 40, 150, selectedCategory.usesFullPage() ? 118 : 66)));
+            IRecipeCategoryCraftable craftable = RecipeHelper.getCategoryCraftable(topDisplay);
+            if (craftable != null)
+                craftable.registerAutoCraftButton(widgets, new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 40, 150, selectedCategory.usesFullPage() ? 118 : 66),
+                        getParent(), topDisplay);
             if (!selectedCategory.usesFullPage() && page * getRecipesPerPage() + 1 < categoriesMap.get(selectedCategory).size()) {
                 IRecipeDisplay middleDisplay = categoriesMap.get(selectedCategory).get(page * getRecipesPerPage() + 1);
                 widgets.addAll(selectedCategory.setupDisplay(getParent(), middleDisplay, new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 108, 150, 66)));
+                craftable = RecipeHelper.getCategoryCraftable(middleDisplay);
+                if (craftable != null)
+                    craftable.registerAutoCraftButton(widgets, new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 108, 150, 66),
+                            getParent(), middleDisplay);
             }
         }
         

@@ -8,4 +8,6 @@ public interface IRecipePlugin extends IListener {
     
     public void registerRecipes();
     
+    public void registerAutoCraftingGui();
+    
 }
