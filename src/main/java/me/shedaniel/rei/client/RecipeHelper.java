@@ -4,9 +4,11 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.IRecipeCategory;
+import me.shedaniel.rei.api.IRecipeCategoryCraftable;
 import me.shedaniel.rei.api.IRecipeDisplay;
 import me.shedaniel.rei.api.IRecipePlugin;
 import me.shedaniel.rei.listeners.RecipeSync;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.util.Identifier;
@@ -19,10 +21,12 @@ public class RecipeHelper implements RecipeSync {
     private static Map<Identifier, List<IRecipeDisplay>> recipeCategoryListMap;
     private static List<IRecipeCategory> categories;
     private static RecipeManager recipeManager;
+    private static Map<Class, IRecipeCategoryCraftable> craftables;
     
     public RecipeHelper() {
         this.recipeCategoryListMap = Maps.newHashMap();
         this.categories = Lists.newArrayList();
+        this.craftables = Maps.newHashMap();
     }
     
     public static List<ItemStack> findCraftableByItems(List<ItemStack> inventoryItems) {
@@ -113,20 +117,39 @@ public class RecipeHelper implements RecipeSync {
         return recipeCategoryListMap;
     }
     
+    public static List<IRecipeCategory> getCategories() {
+        return categories;
+    }
+    
+    public static void registerCategoryCraftable(Class<? extends IRecipeDisplay> guiClass, IRecipeCategoryCraftable categoryCraftable) {
+        craftables.put(guiClass, categoryCraftable);
+    }
+    
+    public static void registerCategoryCraftable(Class<? extends IRecipeDisplay>[] guiClasses, IRecipeCategoryCraftable categoryCraftable) {
+        for(Class<? extends IRecipeDisplay> guiClass : guiClasses) craftables.put(guiClass, categoryCraftable);
+    }
+    
+    public static IRecipeCategoryCraftable getCategoryCraftable(IRecipeDisplay gui) {
+        if (!craftables.containsKey(gui.getClass()))
+            return null;
+        return craftables.get(gui.getClass());
+    }
+    
     @Override
     public void recipesLoaded(RecipeManager recipeManager) {
         this.recipeManager = recipeManager;
         this.recipeCategoryListMap.clear();
         this.categories.clear();
+        this.craftables.clear();
         RoughlyEnoughItemsCore.getListeners(IRecipePlugin.class).forEach(plugin -> {
             plugin.registerPluginCategories();
             plugin.registerRecipes();
+            plugin.registerAutoCraftingGui();
         });
         Collections.reverse(categories);
-        RoughlyEnoughItemsCore.LOGGER.info("Registered REI Categories: " + String.join(", ", categories.stream().map(category -> {return category.getCategoryName();}).collect(Collectors.toList())));
+        RoughlyEnoughItemsCore.LOGGER.info("Registered REI Categories: " + String.join(", ", categories.stream().map(category -> {
+            return category.getCategoryName();
+        }).collect(Collectors.toList())));
     }
     
-    public static List<IRecipeCategory> getCategories() {
-        return categories;
-    }
 }
