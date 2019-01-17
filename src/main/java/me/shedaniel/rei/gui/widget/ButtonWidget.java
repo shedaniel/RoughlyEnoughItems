@@ -28,6 +28,10 @@ public abstract class ButtonWidget extends Drawable implements IWidget {
     private boolean pressed;
     private Rectangle bounds;
     
+    public ButtonWidget(Rectangle rectangle, String text) {
+        this(rectangle.x, rectangle.y, rectangle.width, rectangle.height, text);
+    }
+    
     public ButtonWidget(int x, int y, int width, int height, String text) {
         this.width = 200;
         this.height = 20;

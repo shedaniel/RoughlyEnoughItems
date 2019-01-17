@@ -3,8 +3,9 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.api.IRecipeCategory;
-import me.shedaniel.rei.api.IRecipeCategoryCraftable;
 import me.shedaniel.rei.api.IRecipeDisplay;
+import me.shedaniel.rei.api.SpeedCraftAreaSupplier;
+import me.shedaniel.rei.api.SpeedCraftFunctional;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
 import me.shedaniel.rei.client.RecipeHelper;
@@ -14,6 +15,7 @@ import net.minecraft.client.audio.PositionedSoundInstance;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiEventListener;
 import net.minecraft.client.render.GuiLighting;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.Window;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
@@ -21,6 +23,7 @@ import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -175,20 +178,64 @@ public class RecipeViewingWidget extends Gui {
                 tab.setItem(categories.get(j).getCategoryIcon(), categories.get(j).getCategoryName(), tab.getId() + categoryPages * 6 == categories.indexOf(selectedCategory));
             }
         }
+        SpeedCraftAreaSupplier supplier = RecipeHelper.getSpeedCraftButtonArea(selectedCategory);
+        final SpeedCraftFunctional[] functional0 = {null};
+        RecipeHelper.getSpeedCraftFunctional(selectedCategory).forEach(functional1 -> {
+            for(Class aClass : functional1.getFunctioningFor())
+                if (parent.getContainerGui().getClass().isAssignableFrom(aClass)) {
+                    functional0[0] = functional1;
+                    break;
+                }
+        });
+        final SpeedCraftFunctional functional = functional0[0];
         if (page * getRecipesPerPage() < categoriesMap.get(selectedCategory).size()) {
             IRecipeDisplay topDisplay = categoriesMap.get(selectedCategory).get(page * getRecipesPerPage());
             widgets.addAll(selectedCategory.setupDisplay(getParent(), topDisplay, new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 40, 150, selectedCategory.usesFullPage() ? 118 : 66)));
-            IRecipeCategoryCraftable craftable = RecipeHelper.getCategoryCraftable(topDisplay);
-            if (craftable != null)
-                craftable.registerAutoCraftButton(widgets, new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 40, 150, selectedCategory.usesFullPage() ? 118 : 66),
-                        getParent(), topDisplay);
+            if (supplier != null) {
+                ButtonWidget btn;
+                widgets.add(btn = new ButtonWidget(supplier.get(new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 40, 150, selectedCategory.usesFullPage() ? 118 : 66)), "+") {
+                    @Override
+                    public void onPressed(int button, double mouseX, double mouseY) {
+                        MinecraftClient.getInstance().openGui(parent.getContainerGui());
+                        functional.performAutoCraft(parent.getContainerGui(), topDisplay);
+                    }
+                    
+                    @Override
+                    public void draw(int mouseX, int mouseY, float partialTicks) {
+                        super.draw(mouseX, mouseY, partialTicks);
+                        if (getBounds().contains(mouseX, mouseY))
+                            if (enabled)
+                                GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.translate("text.speed_craft.move_items"))));
+                            else
+                                GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.translate("text.speed_craft.failed_move_items"))));
+                    }
+                });
+                btn.enabled = functional != null && functional.acceptRecipe(parent.getContainerGui(), topDisplay);
+            }
             if (!selectedCategory.usesFullPage() && page * getRecipesPerPage() + 1 < categoriesMap.get(selectedCategory).size()) {
                 IRecipeDisplay middleDisplay = categoriesMap.get(selectedCategory).get(page * getRecipesPerPage() + 1);
                 widgets.addAll(selectedCategory.setupDisplay(getParent(), middleDisplay, new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 108, 150, 66)));
-                craftable = RecipeHelper.getCategoryCraftable(middleDisplay);
-                if (craftable != null)
-                    craftable.registerAutoCraftButton(widgets, new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 108, 150, 66),
-                            getParent(), middleDisplay);
+                if (supplier != null) {
+                    ButtonWidget btn;
+                    widgets.add(btn = new ButtonWidget(supplier.get(new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 108, 150, 66)), "+") {
+                        @Override
+                        public void onPressed(int button, double mouseX, double mouseY) {
+                            MinecraftClient.getInstance().openGui(parent.getContainerGui());
+                            functional.performAutoCraft(parent.getContainerGui(), middleDisplay);
+                        }
+                        
+                        @Override
+                        public void draw(int mouseX, int mouseY, float partialTicks) {
+                            super.draw(mouseX, mouseY, partialTicks);
+                            if (getBounds().contains(mouseX, mouseY))
+                                if (enabled)
+                                    GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.translate("text.speed_craft.move_items"))));
+                                else
+                                    GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.translate("text.speed_craft.failed_move_items"))));
+                        }
+                    });
+                    btn.enabled = functional != null && functional.acceptRecipe(parent.getContainerGui(), middleDisplay);
+                }
             }
         }
         

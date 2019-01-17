@@ -3,17 +3,15 @@ package me.shedaniel.rei.client;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.IRecipeCategory;
-import me.shedaniel.rei.api.IRecipeCategoryCraftable;
-import me.shedaniel.rei.api.IRecipeDisplay;
-import me.shedaniel.rei.api.IRecipePlugin;
+import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.listeners.RecipeSync;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.util.Identifier;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class RecipeHelper implements RecipeSync {
@@ -21,12 +19,14 @@ public class RecipeHelper implements RecipeSync {
     private static Map<Identifier, List<IRecipeDisplay>> recipeCategoryListMap;
     private static List<IRecipeCategory> categories;
     private static RecipeManager recipeManager;
-    private static Map<Class, IRecipeCategoryCraftable> craftables;
+    private static Map<Identifier, SpeedCraftAreaSupplier> speedCraftAreaSupplierMap;
+    private static Map<Identifier, List<SpeedCraftFunctional>> speedCraftFunctionalMap;
     
     public RecipeHelper() {
         this.recipeCategoryListMap = Maps.newHashMap();
         this.categories = Lists.newArrayList();
-        this.craftables = Maps.newHashMap();
+        this.speedCraftAreaSupplierMap = Maps.newHashMap();
+        this.speedCraftFunctionalMap = Maps.newHashMap();
     }
     
     public static List<ItemStack> findCraftableByItems(List<ItemStack> inventoryItems) {
@@ -59,7 +59,7 @@ public class RecipeHelper implements RecipeSync {
     }
     
     public static void registerCategory(IRecipeCategory category) {
-        categories.add(0, category);
+        categories.add(category);
         recipeCategoryListMap.put(category.getIdentifier(), Lists.newArrayList());
     }
     
@@ -121,18 +121,28 @@ public class RecipeHelper implements RecipeSync {
         return categories;
     }
     
-    public static void registerCategoryCraftable(Class<? extends IRecipeDisplay> guiClass, IRecipeCategoryCraftable categoryCraftable) {
-        craftables.put(guiClass, categoryCraftable);
+    public static SpeedCraftAreaSupplier getSpeedCraftButtonArea(IRecipeCategory category) {
+        if (!speedCraftAreaSupplierMap.containsKey(category.getIdentifier()))
+            return bounds -> {
+                return new Rectangle((int) bounds.getMaxX() - 16, (int) bounds.getMaxY() - 16, 10, 10);
+            };
+        return speedCraftAreaSupplierMap.get(category.getIdentifier());
     }
     
-    public static void registerCategoryCraftable(Class<? extends IRecipeDisplay>[] guiClasses, IRecipeCategoryCraftable categoryCraftable) {
-        for(Class<? extends IRecipeDisplay> guiClass : guiClasses) craftables.put(guiClass, categoryCraftable);
+    public static void registerSpeedCraftButtonArea(Identifier category, SpeedCraftAreaSupplier rectangle) {
+        speedCraftAreaSupplierMap.put(category, rectangle);
     }
     
-    public static IRecipeCategoryCraftable getCategoryCraftable(IRecipeDisplay gui) {
-        if (!craftables.containsKey(gui.getClass()))
-            return null;
-        return craftables.get(gui.getClass());
+    public static List<SpeedCraftFunctional> getSpeedCraftFunctional(IRecipeCategory category) {
+        if (speedCraftFunctionalMap.get(category.getIdentifier()) == null)
+            return Lists.newArrayList();
+        return speedCraftFunctionalMap.get(category.getIdentifier());
+    }
+    
+    public static void registerSpeedCraftFunctional(Identifier category, SpeedCraftFunctional functional) {
+        List<SpeedCraftFunctional> list = speedCraftFunctionalMap.containsKey(category) ? new LinkedList<>(speedCraftFunctionalMap.get(category)) : Lists.newLinkedList();
+        list.add(functional);
+        speedCraftFunctionalMap.put(category, list);
     }
     
     @Override
@@ -140,13 +150,22 @@ public class RecipeHelper implements RecipeSync {
         this.recipeManager = recipeManager;
         this.recipeCategoryListMap.clear();
         this.categories.clear();
-        this.craftables.clear();
-        RoughlyEnoughItemsCore.getListeners(IRecipePlugin.class).forEach(plugin -> {
+        this.speedCraftAreaSupplierMap.clear();
+        this.speedCraftFunctionalMap.clear();
+        List<IRecipePlugin> plugins = new LinkedList<>(RoughlyEnoughItemsCore.getPlugins());
+        plugins.sort((first, second) -> {
+            return second.getPriority() - first.getPriority();
+        });
+        RoughlyEnoughItemsCore.LOGGER.info("Loading %d REI plugins: %s", plugins.size(), String.join(", ", plugins.stream().map(plugin -> {
+            Identifier identifier = RoughlyEnoughItemsCore.getPluginIdentifier(plugin);
+            return identifier == null ? "NULL" : identifier.toString();
+        }).collect(Collectors.toList())));
+        Collections.reverse(plugins);
+        plugins.forEach(plugin -> {
             plugin.registerPluginCategories();
             plugin.registerRecipes();
-            plugin.registerAutoCraftingGui();
+            plugin.registerSpeedCraft();
         });
-        Collections.reverse(categories);
         RoughlyEnoughItemsCore.LOGGER.info("Registered REI Categories: " + String.join(", ", categories.stream().map(category -> {
             return category.getCategoryName();
         }).collect(Collectors.toList())));
