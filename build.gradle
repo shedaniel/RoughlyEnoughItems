@@ -6,7 +6,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 archivesBaseName = "RoughlyEnoughItems"
-version = "2.0.0.37"
+version = "2.0.0.38"
 
 minecraft {
 }

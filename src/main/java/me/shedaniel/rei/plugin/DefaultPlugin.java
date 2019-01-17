@@ -1,25 +1,18 @@
 package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.rei.api.IRecipeCategoryCraftable;
+import me.shedaniel.rei.api.IRecipeDisplay;
 import me.shedaniel.rei.api.IRecipePlugin;
-import me.shedaniel.rei.client.ClientHelper;
-import me.shedaniel.rei.client.GuiHelper;
+import me.shedaniel.rei.api.SpeedCraftFunctional;
 import me.shedaniel.rei.client.RecipeHelper;
-import me.shedaniel.rei.gui.widget.ButtonWidget;
-import me.shedaniel.rei.gui.widget.IWidget;
-import me.shedaniel.rei.gui.widget.QueuedTooltip;
-import me.shedaniel.rei.listeners.IMixinContainerGui;
 import me.shedaniel.rei.listeners.IMixinRecipeBookGui;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.ContainerGui;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.container.BlastFurnaceGui;
 import net.minecraft.client.gui.container.CraftingTableGui;
 import net.minecraft.client.gui.container.FurnaceGui;
 import net.minecraft.client.gui.container.SmokerGui;
 import net.minecraft.client.gui.ingame.PlayerInventoryGui;
-import net.minecraft.client.resource.language.I18n;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.crafting.ShapedRecipe;
 import net.minecraft.recipe.crafting.ShapelessRecipe;
@@ -29,7 +22,6 @@ import net.minecraft.recipe.smelting.SmokingRecipe;
 import net.minecraft.util.Identifier;
 
 import java.awt.*;
-import java.util.Arrays;
 import java.util.List;
 
 public class DefaultPlugin implements IRecipePlugin {
@@ -72,11 +64,12 @@ public class DefaultPlugin implements IRecipePlugin {
     }
     
     @Override
-    public void registerAutoCraftingGui() {
-        RecipeHelper.registerCategoryCraftable(new Class[]{DefaultShapelessDisplay.class, DefaultShapedDisplay.class}, new IRecipeCategoryCraftable<DefaultCraftingDisplay>() {
+    public void registerSpeedCraft() {
+        RecipeHelper.registerSpeedCraftButtonArea(DefaultPlugin.BREWING, null);
+        RecipeHelper.registerSpeedCraftFunctional(DefaultPlugin.CRAFTING, new SpeedCraftFunctional<DefaultCraftingDisplay>() {
             @Override
-            public boolean canAutoCraftHere(Class<? extends Gui> guiClass, DefaultCraftingDisplay recipe) {
-                return guiClass.isAssignableFrom(CraftingTableGui.class) || (guiClass.isAssignableFrom(PlayerInventoryGui.class) && recipe.getHeight() < 3 && recipe.getWidth() < 3);
+            public Class[] getFunctioningFor() {
+                return new Class[]{PlayerInventoryGui.class, CraftingTableGui.class};
             }
             
             @Override
@@ -91,168 +84,75 @@ public class DefaultPlugin implements IRecipePlugin {
             }
             
             @Override
-            public void registerAutoCraftButton(List<IWidget> widgets, Rectangle rectangle, IMixinContainerGui parentGui, DefaultCraftingDisplay recipe) {
-                Point startPoint = new Point((int) rectangle.getCenterX() - 58, (int) rectangle.getCenterY() - 27);
-                ButtonWidget widget;
-                widgets.add(widget = new ButtonWidget(rectangle.x + 134, startPoint.y + 45, 10, 10, "+") {
-                    @Override
-                    public void onPressed(int button, double mouseX, double mouseY) {
-                        MinecraftClient.getInstance().openGui(parentGui.getContainerGui());
-                        if (canAutoCraftHere(parentGui.getContainerGui().getClass(), recipe))
-                            performAutoCraft(parentGui.getContainerGui(), recipe);
-                    }
-                    
-                    @Override
-                    public void draw(int mouseX, int mouseY, float partialTicks) {
-                        super.draw(mouseX, mouseY, partialTicks);
-                        List<String> tooltips = getToolTip(parentGui.getContainerGui(), recipe);
-                        if (tooltips.size() > 0 && getBounds().contains(mouseX, mouseY))
-                            GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), tooltips));
-                    }
-                });
-                widget.enabled = canAutoCraftHere(parentGui.getContainerGui().getClass(), recipe);
-            }
-            
-            private List<String> getToolTip(ContainerGui parentGui, DefaultCraftingDisplay recipe) {
-                if (!(parentGui instanceof CraftingTableGui || parentGui instanceof PlayerInventoryGui))
-                    return Arrays.asList(I18n.translate("text.auto_craft.wrong_gui"));
-                if (parentGui instanceof PlayerInventoryGui && !(recipe.getHeight() < 3 && recipe.getWidth() < 3))
-                    return Arrays.asList(I18n.translate("text.auto_craft.crafting.too_small"));
-                return Lists.newArrayList();
+            public boolean acceptRecipe(Gui gui, DefaultCraftingDisplay recipe) {
+                return gui instanceof CraftingTableGui || (gui instanceof PlayerInventoryGui && recipe.getHeight() < 3 && recipe.getWidth() < 3);
             }
         });
-        RecipeHelper.registerCategoryCraftable(DefaultSmeltingDisplay.class, new IRecipeCategoryCraftable<DefaultSmeltingDisplay>() {
+        RecipeHelper.registerSpeedCraftFunctional(DefaultPlugin.SMELTING, new SpeedCraftFunctional<DefaultSmeltingDisplay>() {
             @Override
-            public boolean canAutoCraftHere(Class<? extends Gui> guiClass, DefaultSmeltingDisplay recipe) {
-                return guiClass.isAssignableFrom(FurnaceGui.class);
+            public Class[] getFunctioningFor() {
+                return new Class[]{FurnaceGui.class};
             }
-            
+    
             @Override
             public boolean performAutoCraft(Gui gui, DefaultSmeltingDisplay recipe) {
-                if (gui.getClass().isAssignableFrom(FurnaceGui.class))
+                if (gui instanceof FurnaceGui)
                     ((IMixinRecipeBookGui) (((FurnaceGui) gui).getRecipeBookGui())).getGhostSlots().reset();
                 else return false;
                 MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, recipe.getRecipe(), Gui.isShiftPressed());
                 return true;
             }
-            
+    
             @Override
-            public void registerAutoCraftButton(List<IWidget> widgets, Rectangle rectangle, IMixinContainerGui parentGui, DefaultSmeltingDisplay recipe) {
-                Point startPoint = new Point((int) rectangle.getCenterX() - 58, (int) rectangle.getCenterY() - 27);
-                ButtonWidget widget;
-                widgets.add(widget = new ButtonWidget(rectangle.x + 134, startPoint.y + 45, 10, 10, "+") {
-                    @Override
-                    public void onPressed(int button, double mouseX, double mouseY) {
-                        MinecraftClient.getInstance().openGui(parentGui.getContainerGui());
-                        if (canAutoCraftHere(parentGui.getContainerGui().getClass(), recipe))
-                            performAutoCraft(parentGui.getContainerGui(), recipe);
-                    }
-                    
-                    @Override
-                    public void draw(int mouseX, int mouseY, float partialTicks) {
-                        super.draw(mouseX, mouseY, partialTicks);
-                        List<String> tooltips = getToolTip(parentGui.getContainerGui(), recipe);
-                        if (tooltips.size() > 0 && getBounds().contains(mouseX, mouseY))
-                            GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), tooltips));
-                    }
-                });
-                widget.enabled = canAutoCraftHere(parentGui.getContainerGui().getClass(), recipe);
-            }
-            
-            private List<String> getToolTip(ContainerGui parentGui, DefaultSmeltingDisplay recipe) {
-                if (!(parentGui instanceof FurnaceGui))
-                    return Arrays.asList(I18n.translate("text.auto_craft.wrong_gui"));
-                return Lists.newArrayList();
+            public boolean acceptRecipe(Gui gui, DefaultSmeltingDisplay recipe) {
+                return gui instanceof FurnaceGui;
             }
         });
-        RecipeHelper.registerCategoryCraftable(DefaultSmokingDisplay.class, new IRecipeCategoryCraftable<DefaultSmokingDisplay>() {
+        RecipeHelper.registerSpeedCraftFunctional(DefaultPlugin.SMOKING, new SpeedCraftFunctional<DefaultSmokingDisplay>() {
             @Override
-            public boolean canAutoCraftHere(Class<? extends Gui> guiClass, DefaultSmokingDisplay recipe) {
-                return guiClass.isAssignableFrom(SmokerGui.class);
+            public Class[] getFunctioningFor() {
+                return new Class[]{SmokerGui.class};
             }
-            
+        
             @Override
             public boolean performAutoCraft(Gui gui, DefaultSmokingDisplay recipe) {
-                if (gui.getClass().isAssignableFrom(SmokerGui.class))
+                if (gui instanceof SmokerGui)
                     ((IMixinRecipeBookGui) (((SmokerGui) gui).getRecipeBookGui())).getGhostSlots().reset();
                 else return false;
                 MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, recipe.getRecipe(), Gui.isShiftPressed());
                 return true;
             }
-            
+        
             @Override
-            public void registerAutoCraftButton(List<IWidget> widgets, Rectangle rectangle, IMixinContainerGui parentGui, DefaultSmokingDisplay recipe) {
-                Point startPoint = new Point((int) rectangle.getCenterX() - 58, (int) rectangle.getCenterY() - 27);
-                ButtonWidget widget;
-                widgets.add(widget = new ButtonWidget(rectangle.x + 134, startPoint.y + 45, 10, 10, "+") {
-                    @Override
-                    public void onPressed(int button, double mouseX, double mouseY) {
-                        MinecraftClient.getInstance().openGui(parentGui.getContainerGui());
-                        if (canAutoCraftHere(parentGui.getContainerGui().getClass(), recipe))
-                            performAutoCraft(parentGui.getContainerGui(), recipe);
-                    }
-                    
-                    @Override
-                    public void draw(int mouseX, int mouseY, float partialTicks) {
-                        super.draw(mouseX, mouseY, partialTicks);
-                        List<String> tooltips = getToolTip(parentGui.getContainerGui(), recipe);
-                        if (tooltips.size() > 0 && getBounds().contains(mouseX, mouseY))
-                            GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), tooltips));
-                    }
-                });
-                widget.enabled = canAutoCraftHere(parentGui.getContainerGui().getClass(), recipe);
-            }
-            
-            private List<String> getToolTip(ContainerGui parentGui, DefaultSmokingDisplay recipe) {
-                if (!(parentGui instanceof SmokerGui))
-                    return Arrays.asList(I18n.translate("text.auto_craft.wrong_gui"));
-                return Lists.newArrayList();
+            public boolean acceptRecipe(Gui gui, DefaultSmokingDisplay recipe) {
+                return gui instanceof SmokerGui;
             }
         });
-        RecipeHelper.registerCategoryCraftable(DefaultBlastingDisplay.class, new IRecipeCategoryCraftable<DefaultBlastingDisplay>() {
+        RecipeHelper.registerSpeedCraftFunctional(DefaultPlugin.BLASTING, new SpeedCraftFunctional<DefaultBlastingDisplay>() {
             @Override
-            public boolean canAutoCraftHere(Class<? extends Gui> guiClass, DefaultBlastingDisplay recipe) {
-                return guiClass.isAssignableFrom(BlastFurnaceGui.class);
+            public Class[] getFunctioningFor() {
+                return new Class[]{BlastFurnaceGui.class};
             }
-            
+        
             @Override
             public boolean performAutoCraft(Gui gui, DefaultBlastingDisplay recipe) {
-                if (gui.getClass().isAssignableFrom(BlastFurnaceGui.class))
+                if (gui instanceof BlastFurnaceGui)
                     ((IMixinRecipeBookGui) (((BlastFurnaceGui) gui).getRecipeBookGui())).getGhostSlots().reset();
                 else return false;
                 MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, recipe.getRecipe(), Gui.isShiftPressed());
                 return true;
             }
-            
+        
             @Override
-            public void registerAutoCraftButton(List<IWidget> widgets, Rectangle rectangle, IMixinContainerGui parentGui, DefaultBlastingDisplay recipe) {
-                Point startPoint = new Point((int) rectangle.getCenterX() - 58, (int) rectangle.getCenterY() - 27);
-                ButtonWidget widget;
-                widgets.add(widget = new ButtonWidget(rectangle.x + 134, startPoint.y + 45, 10, 10, "+") {
-                    @Override
-                    public void onPressed(int button, double mouseX, double mouseY) {
-                        MinecraftClient.getInstance().openGui(parentGui.getContainerGui());
-                        if (canAutoCraftHere(parentGui.getContainerGui().getClass(), recipe))
-                            performAutoCraft(parentGui.getContainerGui(), recipe);
-                    }
-                    
-                    @Override
-                    public void draw(int mouseX, int mouseY, float partialTicks) {
-                        super.draw(mouseX, mouseY, partialTicks);
-                        List<String> tooltips = getToolTip(parentGui.getContainerGui(), recipe);
-                        if (tooltips.size() > 0 && getBounds().contains(mouseX, mouseY))
-                            GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), tooltips));
-                    }
-                });
-                widget.enabled = canAutoCraftHere(parentGui.getContainerGui().getClass(), recipe);
-            }
-            
-            private List<String> getToolTip(ContainerGui parentGui, DefaultBlastingDisplay recipe) {
-                if (!(parentGui instanceof BlastFurnaceGui))
-                    return Arrays.asList(I18n.translate("text.auto_craft.wrong_gui"));
-                return Lists.newArrayList();
+            public boolean acceptRecipe(Gui gui, DefaultBlastingDisplay recipe) {
+                return gui instanceof BlastFurnaceGui;
             }
         });
+    }
+    
+    @Override
+    public int getPriority() {
+        return -1;
     }
     
 }

@@ -1,11 +1,10 @@
 {
   "key.rei.category": "Roughly Enough Items",
-  "key.rei.recipe": "顯示配方",
-  "key.rei.hide": "隱藏／顯示REI",
-  "key.rei.use": "顯示用途",
+  "key.roughlyenoughitems.recipe_keybind": "顯示配方",
+  "key.roughlyenoughitems.hide_keybind": "隱藏／顯示 REI",
+  "key.roughlyenoughitems.usage_keybind": "顯示用途",
   "text.rei.cheat": "作弊",
   "text.rei.nocheat": "§4§m作弊",
-  "text.rei.mod": "§9§o%s",
   "category.rei.crafting": "合成",
   "category.rei.smelting": "冶煉",
   "category.rei.smelting.fuel": "§e燃料",
@@ -16,9 +15,7 @@
   "category.rei.brewing.reactant": "§e材料",
   "category.rei.brewing.result": "§e輸出藥水",
   "text.rei.config": "設置",
-  "text.rei.listeningkey": "正聆聽按鍵",
-  "text.rei.centre_searchbox": "置中搜索欄: %s%b",
-  "text.rei.centre_searchbox.tooltip": "更改此設置後請重啟遊戲以完成更改",
+  "text.rei.centre_searchbox": "右置搜索欄: ",
   "text.rei.list_ordering": "物品清單排序",
   "text.rei.list_ordering_button": "%s [%s]",
   "ordering.rei.ascending": "順序",
@@ -26,6 +23,9 @@
   "ordering.rei.registry": "註冊",
   "ordering.rei.name": "名字",
   "ordering.rei.item_groups": "物品分類",
-  "text.auto_craft.wrong_gui": "§c不能在此菜單中自動合成!",
-  "text.auto_craft.crafting.too_small": "§c合成格太小!"
+  "text.speed_craft.failed_move_items": "§c不能移動物品!",
+  "text.speed_craft.move_items": "移動物品",
+  "text.rei.showing_craftable": "顯示可合成的物品",
+  "text.rei.showing_all": "顯示所有物品",
+  "text.rei.delete_items": "§c刪除物品"
 }
