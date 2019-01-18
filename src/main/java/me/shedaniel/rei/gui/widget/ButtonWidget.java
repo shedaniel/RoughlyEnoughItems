@@ -76,8 +76,8 @@ public abstract class ButtonWidget extends Drawable implements IWidget {
             this.hovered = bounds.contains(mouseX, mouseY);
             int textureOffset = this.getTextureId(this.hovered);
             GlStateManager.enableBlend();
-            GlStateManager.blendFuncSeparate(GlStateManager.SrcBlendFactor.SRC_ALPHA, GlStateManager.DstBlendFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SrcBlendFactor.ONE, GlStateManager.DstBlendFactor.ZERO);
-            GlStateManager.blendFunc(GlStateManager.SrcBlendFactor.SRC_ALPHA, GlStateManager.DstBlendFactor.ONE_MINUS_SRC_ALPHA);
+            GlStateManager.blendFuncSeparate(GlStateManager.class_1033.SRC_ALPHA, GlStateManager.class_1027.ONE_MINUS_SRC_ALPHA, GlStateManager.class_1033.ONE, GlStateManager.class_1027.ZERO);
+            GlStateManager.blendFunc(GlStateManager.class_1033.SRC_ALPHA, GlStateManager.class_1027.ONE_MINUS_SRC_ALPHA);
             //Four Corners
             this.drawTexturedRect(this.x, this.y, 0, 46 + textureOffset * 20, 4, 4);
             this.drawTexturedRect(this.x + this.width - 4, this.y, 196, 46 + textureOffset * 20, 4, 4);

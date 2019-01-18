@@ -5,8 +5,7 @@ import me.shedaniel.rei.api.IRecipeDisplay;
 import net.minecraft.block.entity.FurnaceBlockEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.smelting.SmeltingRecipe;
-import net.minecraft.recipe.smelting.SmokingRecipe;
+import net.minecraft.recipe.cooking.SmokingRecipe;
 import net.minecraft.util.Identifier;
 
 import java.util.Arrays;

@@ -77,8 +77,8 @@ public class ClientHelper implements ClientLoaded, ClientModInitializer {
     public static Point getMouseLocation() {
         MinecraftClient client = MinecraftClient.getInstance();
         Mouse mouse = client.mouse;
-        double double_1 = mouse.getX() * (double) client.window.getScaledWidth() / (double) client.window.method_4480();
-        double double_2 = mouse.getY() * (double) client.window.getScaledHeight() / (double) client.window.method_4507();
+        double double_1 = mouse.getX() * (double) client.window.getScaledWidth() / (double) client.window.getWidth();
+        double double_2 = mouse.getY() * (double) client.window.getScaledHeight() / (double) client.window.getHeight();
         return new Point((int) double_1, (int) double_2);
     }
     
