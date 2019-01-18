@@ -1,7 +1,7 @@
 package me.shedaniel.rei.client;
 
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import net.fabricmc.loader.FabricLoader;
+import org.dimdev.riftloader.RiftLoader;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -16,9 +16,11 @@ public class ConfigHelper {
     private boolean craftableOnly;
     
     public ConfigHelper() {
-        this.configFile = new File(FabricLoader.INSTANCE.getConfigDirectory(), "rei.json");
+        this.configFile = new File(RiftLoader.instance.configDir, "rei.json");
         this.craftableOnly = false;
         try {
+            if (!configFile.getParentFile().exists() || !configFile.getParentFile().isDirectory())
+                configFile.getParentFile().mkdirs();
             loadConfig();
         } catch (IOException e) {
             e.printStackTrace();

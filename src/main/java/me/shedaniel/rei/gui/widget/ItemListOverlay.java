@@ -4,17 +4,16 @@ import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.*;
 import me.shedaniel.rei.listeners.ClientLoaded;
-import me.shedaniel.rei.listeners.IMixinContainerGui;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Drawable;
-import net.minecraft.client.item.TooltipOptions;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.render.GuiLighting;
-import net.minecraft.client.resource.language.I18n;
+import me.shedaniel.rei.listeners.IMixinGuiContainer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.TextComponent;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ITextComponent;
 
 import java.awt.*;
 import java.util.*;
@@ -22,15 +21,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ItemListOverlay extends Drawable implements IWidget {
+public class ItemListOverlay extends Gui implements IWidget {
     
-    private IMixinContainerGui containerGui;
+    private IMixinGuiContainer containerGui;
     private List<IWidget> widgets = new ArrayList<>();
     private int width, height, page;
     private Rectangle rectangle;
     private List<ItemStack> currentDisplayed;
     
-    public ItemListOverlay(IMixinContainerGui containerGui, int page) {
+    public ItemListOverlay(IMixinGuiContainer containerGui, int page) {
         this.currentDisplayed = Lists.newArrayList();
         this.containerGui = containerGui;
         this.width = 0;
@@ -45,9 +44,9 @@ public class ItemListOverlay extends Drawable implements IWidget {
     @Override
     public void draw(int int_1, int int_2, float float_1) {
         widgets.forEach(widget -> widget.draw(int_1, int_2, float_1));
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
-        if (rectangle.contains(ClientHelper.getMouseLocation()) && ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty())
-            GuiHelper.getOverlay(containerGui.getContainerGui()).addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.translate("text.rei.delete_items"))));
+        EntityPlayerSP player = Minecraft.getInstance().player;
+        if (rectangle.contains(ClientHelper.getMouseLocation()) && ClientHelper.isCheating() && !player.inventory.getItemStack().isEmpty())
+            GuiHelper.getOverlay(containerGui.getContainerGui()).addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.format("text.rei.delete_items"))));
     }
     
     public void updateList(int page, String searchTerm) {
@@ -72,8 +71,8 @@ public class ItemListOverlay extends Drawable implements IWidget {
                     currentDisplayed.get(j), false, true, containerGui) {
                 @Override
                 protected void drawToolTip(ItemStack itemStack) {
-                    ClientPlayerEntity player = MinecraftClient.getInstance().player;
-                    if (!ClientHelper.isCheating() || player.inventory.getCursorStack().isEmpty())
+                    EntityPlayerSP player = Minecraft.getInstance().player;
+                    if (!ClientHelper.isCheating() || player.inventory.getItemStack().isEmpty())
                         super.drawToolTip(itemStack);
                 }
                 
@@ -83,7 +82,7 @@ public class ItemListOverlay extends Drawable implements IWidget {
                         if (ClientHelper.isCheating()) {
                             if (getCurrentStack() != null && !getCurrentStack().isEmpty()) {
                                 ItemStack cheatedStack = getCurrentStack().copy();
-                                cheatedStack.setAmount(button == 0 ? 1 : button == 1 ? cheatedStack.getMaxAmount() : cheatedStack.getAmount());
+                                cheatedStack.setCount(button == 0 ? 1 : button == 1 ? cheatedStack.getMaxStackSize() : cheatedStack.getCount());
                                 return ClientHelper.tryCheatingStack(cheatedStack);
                             }
                         } else {
@@ -113,7 +112,7 @@ public class ItemListOverlay extends Drawable implements IWidget {
                 if (ordering.equals(REIItemListOrdering.NAME))
                     return itemStack.getDisplayName().getFormattedText().compareToIgnoreCase(t1.getDisplayName().getFormattedText());
                 if (ordering.equals(REIItemListOrdering.ITEM_GROUPS))
-                    return itemGroups.indexOf(itemStack.getItem().getItemGroup()) - itemGroups.indexOf(t1.getItem().getItemGroup());
+                    return itemGroups.indexOf(itemStack.getItem().getGroup()) - itemGroups.indexOf(t1.getItem().getGroup());
                 return 0;
             });
         if (!RoughlyEnoughItemsCore.getConfigHelper().isAscending())
@@ -146,7 +145,7 @@ public class ItemListOverlay extends Drawable implements IWidget {
             if (!RoughlyEnoughItemsCore.getConfigHelper().craftableOnly())
                 return true;
             for(ItemStack workingItem : finalWorkingItems)
-                if (itemStack.isEqualIgnoreTags(workingItem))
+                if (itemStack.isItemEqual(workingItem))
                     return true;
             return false;
         }).distinct().collect(Collectors.toList()));
@@ -184,10 +183,10 @@ public class ItemListOverlay extends Drawable implements IWidget {
     }
     
     private List<String> getStackTooltip(ItemStack itemStack) {
-        MinecraftClient client = MinecraftClient.getInstance();
-        return itemStack.getTooltipText(client.player, client.options.advancedItemTooltips ?
-                TooltipOptions.Instance.ADVANCED : TooltipOptions.Instance.NORMAL).stream().map(
-                TextComponent::getFormattedText).collect(Collectors.toList());
+        Minecraft client = Minecraft.getInstance();
+        return itemStack.getTooltip(client.player, client.gameSettings.advancedItemTooltips ?
+                ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL).stream().map(
+                ITextComponent::getFormattedText).collect(Collectors.toList());
     }
     
     private void calculateListSize(Rectangle rect) {
@@ -210,13 +209,13 @@ public class ItemListOverlay extends Drawable implements IWidget {
     
     @Override
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        EntityPlayerSP player = Minecraft.getInstance().player;
         if (rectangle.contains(double_1, double_2))
-            if (ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty()) {
+            if (ClientHelper.isCheating() && !player.inventory.getItemStack().isEmpty()) {
                 ClientHelper.sendDeletePacket();
                 return true;
             }
-        if (!player.inventory.getCursorStack().isEmpty())
+        if (!player.inventory.getItemStack().isEmpty())
             return false;
         if (onMouseClick(int_1, double_1, double_2))
             return true;

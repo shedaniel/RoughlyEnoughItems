@@ -3,13 +3,13 @@
   "package": "me.shedaniel.rei.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "MixinContainerGui",
-    "MixinClientPlayNetworkHandler",
-    "MixinPlayerInventoryGui",
-    "MixinCraftingTableGui",
-    "MixinCreativePlayerInventoryGui",
-    "MixinBrewingRecipeRegistry",
-    "MixinRecipeBookGui"
+    "MixinGuiContainer",
+    "MixinNetHandlerPlayClient",
+    "MixinGuiInventory",
+    "MixinGuiCrafting",
+    "MixinGuiContainerCreative",
+    "MixinPotionBrewing",
+    "MixinGuiRecipeBook"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -1,15 +1,15 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.google.common.base.Predicates;
-import com.mojang.blaze3d.platform.GlStateManager;
-import net.minecraft.SharedConstants;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.FontRenderer;
-import net.minecraft.client.gui.Drawable;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.SharedConstants;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
@@ -19,7 +19,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class TextFieldWidget extends Drawable implements IWidget {
+public class TextFieldWidget extends Gui implements IWidget {
     
     private final FontRenderer fontRenderer;
     private int width;
@@ -62,7 +62,7 @@ public class TextFieldWidget extends Drawable implements IWidget {
         this.field_2099 = (string_1, integer_1) -> {
             return string_1;
         };
-        this.fontRenderer = MinecraftClient.getInstance().fontRenderer;
+        this.fontRenderer = Minecraft.getInstance().fontRenderer;
         this.x = x;
         this.y = y;
         this.width = width;
@@ -121,7 +121,7 @@ public class TextFieldWidget extends Drawable implements IWidget {
     
     public void addText(String string_1) {
         String string_2 = "";
-        String string_3 = SharedConstants.stripInvalidChars(string_1);
+        String string_3 = SharedConstants.filterAllowedCharacters(string_1);
         int int_1 = this.cursorMax < this.cursorMin ? this.cursorMax : this.cursorMin;
         int int_2 = this.cursorMax < this.cursorMin ? this.cursorMin : this.cursorMax;
         int int_3 = this.maxLength - this.text.length() - (int_1 - int_2);
@@ -158,7 +158,7 @@ public class TextFieldWidget extends Drawable implements IWidget {
     }
     
     private void method_16873(int int_1) {
-        if (Gui.isControlPressed()) {
+        if (GuiScreen.isCtrlKeyDown()) {
             this.method_1877(int_1);
         } else {
             this.method_1878(int_1);
@@ -266,22 +266,22 @@ public class TextFieldWidget extends Drawable implements IWidget {
     
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (this.isVisible() && this.isFocused()) {
-            this.field_17037 = Gui.isShiftPressed();
-            if (Gui.isSelectAllShortcutPressed(int_1)) {
+            this.field_17037 = GuiScreen.isShiftKeyDown();
+            if (GuiScreen.isKeyComboCtrlA(int_1)) {
                 this.method_1872();
                 this.method_1884(0);
                 return true;
-            } else if (Gui.isCopyShortcutPressed(int_1)) {
-                MinecraftClient.getInstance().keyboard.setClipboard(this.getSelectedText());
+            } else if (GuiScreen.isKeyComboCtrlC(int_1)) {
+                Minecraft.getInstance().keyboardListener.setClipboardString(this.getSelectedText());
                 return true;
-            } else if (Gui.isPasteShortcutPressed(int_1)) {
+            } else if (GuiScreen.isKeyComboCtrlV(int_1)) {
                 if (this.editable) {
-                    this.addText(MinecraftClient.getInstance().keyboard.getClipboard());
+                    this.addText(Minecraft.getInstance().keyboardListener.getClipboardString());
                 }
                 
                 return true;
-            } else if (Gui.isCutShortcutPressed(int_1)) {
-                MinecraftClient.getInstance().keyboard.setClipboard(this.getSelectedText());
+            } else if (GuiScreen.isKeyComboCtrlX(int_1)) {
+                Minecraft.getInstance().keyboardListener.setClipboardString(this.getSelectedText());
                 if (this.editable) {
                     this.addText("");
                 }
@@ -309,7 +309,7 @@ public class TextFieldWidget extends Drawable implements IWidget {
                         
                         return true;
                     case 262:
-                        if (Gui.isControlPressed()) {
+                        if (GuiScreen.isCtrlKeyDown()) {
                             this.method_1883(this.method_1853(1));
                         } else {
                             this.moveCursor(1);
@@ -317,7 +317,7 @@ public class TextFieldWidget extends Drawable implements IWidget {
                         
                         return true;
                     case 263:
-                        if (Gui.isControlPressed()) {
+                        if (GuiScreen.isCtrlKeyDown()) {
                             this.method_1883(this.method_1853(-1));
                         } else {
                             this.moveCursor(-1);
@@ -339,7 +339,7 @@ public class TextFieldWidget extends Drawable implements IWidget {
     
     public boolean charTyped(char char_1, int int_1) {
         if (this.isVisible() && this.isFocused()) {
-            if (SharedConstants.isValidChar(char_1)) {
+            if (SharedConstants.isAllowedCharacter(char_1)) {
                 if (this.editable) {
                     this.addText(Character.toString(char_1));
                 }
@@ -373,8 +373,8 @@ public class TextFieldWidget extends Drawable implements IWidget {
                     int_2 -= 4;
                 }
                 
-                String string_1 = this.fontRenderer.method_1714(this.text.substring(this.field_2103), this.method_1859());
-                this.method_1883(this.fontRenderer.method_1714(string_1, int_2).length() + this.field_2103);
+                String string_1 = this.fontRenderer.trimStringToWidth(this.text.substring(this.field_2103), this.method_1859());
+                this.method_1883(this.fontRenderer.trimStringToWidth(string_1, int_2).length() + this.field_2103);
                 return true;
             } else {
                 return false;
@@ -382,6 +382,7 @@ public class TextFieldWidget extends Drawable implements IWidget {
         }
     }
     
+    @Override
     public void draw(int int_1, int int_2, float float_1) {
         if (this.isVisible()) {
             if (this.hasBorder()) {
@@ -392,7 +393,7 @@ public class TextFieldWidget extends Drawable implements IWidget {
             int int_3 = this.editable ? this.field_2100 : this.field_2098;
             int int_4 = this.cursorMax - this.field_2103;
             int int_5 = this.cursorMin - this.field_2103;
-            String string_1 = this.fontRenderer.method_1714(this.text.substring(this.field_2103), this.method_1859());
+            String string_1 = this.fontRenderer.trimStringToWidth(this.text.substring(this.field_2103), this.method_1859());
             boolean boolean_1 = int_4 >= 0 && int_4 <= string_1.length();
             boolean boolean_2 = this.focused && this.focusedTicks / 6 % 2 == 0 && boolean_1;
             int int_6 = this.hasBorder ? this.x + 4 : this.x;
@@ -404,7 +405,7 @@ public class TextFieldWidget extends Drawable implements IWidget {
             
             if (!string_1.isEmpty()) {
                 String string_2 = boolean_1 ? string_1.substring(0, int_4) : string_1;
-                int_8 = this.fontRenderer.drawWithShadow((String) this.field_2099.apply(string_2, this.field_2103), (float) int_6, (float) int_7, int_3);
+                int_8 = this.fontRenderer.drawStringWithShadow((String) this.field_2099.apply(string_2, this.field_2103), (float) int_6, (float) int_7, int_3);
             }
             
             boolean boolean_3 = this.cursorMax < this.text.length() || this.text.length() >= this.getMaxLength();
@@ -417,11 +418,11 @@ public class TextFieldWidget extends Drawable implements IWidget {
             }
             
             if (!string_1.isEmpty() && boolean_1 && int_4 < string_1.length()) {
-                this.fontRenderer.drawWithShadow((String) this.field_2099.apply(string_1.substring(int_4), this.cursorMax), (float) int_8, (float) int_7, int_3);
+                this.fontRenderer.drawStringWithShadow((String) this.field_2099.apply(string_1.substring(int_4), this.cursorMax), (float) int_8, (float) int_7, int_3);
             }
             
             if (!boolean_3 && this.suggestion != null) {
-                this.fontRenderer.drawWithShadow(this.suggestion, (float) (int_9 - 1), (float) int_7, -8355712);
+                this.fontRenderer.drawStringWithShadow(this.suggestion, (float) (int_9 - 1), (float) int_7, -8355712);
             }
             
             int var10002;
@@ -432,9 +433,9 @@ public class TextFieldWidget extends Drawable implements IWidget {
                     var10002 = int_9 + 1;
                     var10003 = int_7 + 1;
                     this.fontRenderer.getClass();
-                    Drawable.drawRect(int_9, var10001, var10002, var10003 + 9, -3092272);
+                    drawRect(int_9, var10001, var10002, var10003 + 9, -3092272);
                 } else {
-                    this.fontRenderer.drawWithShadow("_", (float) int_9, (float) int_7, int_3);
+                    this.fontRenderer.drawStringWithShadow("_", (float) int_9, (float) int_7, int_3);
                 }
             }
             
@@ -473,19 +474,19 @@ public class TextFieldWidget extends Drawable implements IWidget {
         }
         
         Tessellator tessellator_1 = Tessellator.getInstance();
-        BufferBuilder bufferBuilder_1 = tessellator_1.getBufferBuilder();
+        BufferBuilder bufferBuilder_1 = tessellator_1.getBuffer();
         GlStateManager.color4f(0.0F, 0.0F, 255.0F, 255.0F);
-        GlStateManager.disableTexture();
-        GlStateManager.enableColorLogicOp();
+        GlStateManager.disableTexture2D();
+        GlStateManager.enableColorLogic();
         GlStateManager.logicOp(GlStateManager.LogicOp.OR_REVERSE);
-        bufferBuilder_1.begin(7, VertexFormats.POSITION);
-        bufferBuilder_1.vertex((double) int_1, (double) int_4, 0.0D).next();
-        bufferBuilder_1.vertex((double) int_3, (double) int_4, 0.0D).next();
-        bufferBuilder_1.vertex((double) int_3, (double) int_2, 0.0D).next();
-        bufferBuilder_1.vertex((double) int_1, (double) int_2, 0.0D).next();
+        bufferBuilder_1.begin(7, DefaultVertexFormats.POSITION);
+        bufferBuilder_1.pos((double) int_1, (double) int_4, 0.0D).endVertex();
+        bufferBuilder_1.pos((double) int_3, (double) int_4, 0.0D).endVertex();
+        bufferBuilder_1.pos((double) int_3, (double) int_2, 0.0D).endVertex();
+        bufferBuilder_1.pos((double) int_1, (double) int_2, 0.0D).endVertex();
         tessellator_1.draw();
-        GlStateManager.disableColorLogicOp();
-        GlStateManager.enableTexture();
+        GlStateManager.disableColorLogic();
+        GlStateManager.enableTexture2D();
     }
     
     public int getMaxLength() {
@@ -561,10 +562,10 @@ public class TextFieldWidget extends Drawable implements IWidget {
             }
             
             int int_3 = this.method_1859();
-            String string_1 = this.fontRenderer.method_1714(this.text.substring(this.field_2103), int_3);
+            String string_1 = this.fontRenderer.trimStringToWidth(this.text.substring(this.field_2103), int_3);
             int int_4 = string_1.length() + this.field_2103;
             if (this.cursorMin == this.field_2103) {
-                this.field_2103 -= this.fontRenderer.method_1711(this.text, int_3, true).length();
+                this.field_2103 -= this.fontRenderer.trimStringToWidth(this.text, int_3, true).length();
             }
             
             if (this.cursorMin > int_4) {

@@ -2,36 +2,36 @@ package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.IRecipeDisplay;
-import net.minecraft.block.entity.FurnaceBlockEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.cooking.SmeltingRecipe;
-import net.minecraft.util.Identifier;
+import net.minecraft.item.crafting.FurnaceRecipe;
+import net.minecraft.tileentity.TileEntityFurnace;
+import net.minecraft.util.ResourceLocation;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DefaultSmeltingDisplay implements IRecipeDisplay<SmeltingRecipe> {
+public class DefaultSmeltingDisplay implements IRecipeDisplay<FurnaceRecipe> {
     
-    private SmeltingRecipe display;
+    private FurnaceRecipe display;
     private List<List<ItemStack>> input;
     private List<ItemStack> output;
     
-    public DefaultSmeltingDisplay(SmeltingRecipe recipe) {
+    public DefaultSmeltingDisplay(FurnaceRecipe recipe) {
         this.display = recipe;
         List<ItemStack> fuel = Lists.newArrayList();
         this.input = Lists.newArrayList();
-        fuel.addAll(FurnaceBlockEntity.createBurnableMap().keySet().stream().map(Item::getDefaultStack).collect(Collectors.toList()));
-        recipe.getPreviewInputs().forEach(ingredient -> {
-            input.add(Arrays.asList(ingredient.getStackArray()));
+        fuel.addAll(TileEntityFurnace.getBurnTimes().keySet().stream().map(Item::getDefaultInstance).collect(Collectors.toList()));
+        recipe.getIngredients().forEach(ingredient -> {
+            input.add(Arrays.asList(ingredient.getMatchingStacks()));
         });
         input.add(fuel);
-        this.output = Arrays.asList(recipe.getOutput());
+        this.output = Arrays.asList(recipe.getRecipeOutput());
     }
     
     @Override
-    public SmeltingRecipe getRecipe() {
+    public FurnaceRecipe getRecipe() {
         return display;
     }
     
@@ -50,7 +50,7 @@ public class DefaultSmeltingDisplay implements IRecipeDisplay<SmeltingRecipe> {
     }
     
     @Override
-    public Identifier getRecipeCategory() {
+    public ResourceLocation getRecipeCategory() {
         return DefaultPlugin.SMELTING;
     }
     
