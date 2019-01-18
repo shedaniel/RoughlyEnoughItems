@@ -1,7 +1,6 @@
 package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.rei.api.IRecipeDisplay;
 import me.shedaniel.rei.api.IRecipePlugin;
 import me.shedaniel.rei.api.SpeedCraftFunctional;
 import me.shedaniel.rei.client.RecipeHelper;
@@ -14,14 +13,13 @@ import net.minecraft.client.gui.container.FurnaceGui;
 import net.minecraft.client.gui.container.SmokerGui;
 import net.minecraft.client.gui.ingame.PlayerInventoryGui;
 import net.minecraft.recipe.Recipe;
+import net.minecraft.recipe.cooking.BlastingRecipe;
+import net.minecraft.recipe.cooking.SmeltingRecipe;
+import net.minecraft.recipe.cooking.SmokingRecipe;
 import net.minecraft.recipe.crafting.ShapedRecipe;
 import net.minecraft.recipe.crafting.ShapelessRecipe;
-import net.minecraft.recipe.smelting.BlastingRecipe;
-import net.minecraft.recipe.smelting.SmeltingRecipe;
-import net.minecraft.recipe.smelting.SmokingRecipe;
 import net.minecraft.util.Identifier;
 
-import java.awt.*;
 import java.util.List;
 
 public class DefaultPlugin implements IRecipePlugin {
@@ -93,7 +91,7 @@ public class DefaultPlugin implements IRecipePlugin {
             public Class[] getFunctioningFor() {
                 return new Class[]{FurnaceGui.class};
             }
-    
+            
             @Override
             public boolean performAutoCraft(Gui gui, DefaultSmeltingDisplay recipe) {
                 if (gui instanceof FurnaceGui)
@@ -102,7 +100,7 @@ public class DefaultPlugin implements IRecipePlugin {
                 MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, recipe.getRecipe(), Gui.isShiftPressed());
                 return true;
             }
-    
+            
             @Override
             public boolean acceptRecipe(Gui gui, DefaultSmeltingDisplay recipe) {
                 return gui instanceof FurnaceGui;
@@ -113,7 +111,7 @@ public class DefaultPlugin implements IRecipePlugin {
             public Class[] getFunctioningFor() {
                 return new Class[]{SmokerGui.class};
             }
-        
+            
             @Override
             public boolean performAutoCraft(Gui gui, DefaultSmokingDisplay recipe) {
                 if (gui instanceof SmokerGui)
@@ -122,7 +120,7 @@ public class DefaultPlugin implements IRecipePlugin {
                 MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, recipe.getRecipe(), Gui.isShiftPressed());
                 return true;
             }
-        
+            
             @Override
             public boolean acceptRecipe(Gui gui, DefaultSmokingDisplay recipe) {
                 return gui instanceof SmokerGui;
@@ -133,7 +131,7 @@ public class DefaultPlugin implements IRecipePlugin {
             public Class[] getFunctioningFor() {
                 return new Class[]{BlastFurnaceGui.class};
             }
-        
+            
             @Override
             public boolean performAutoCraft(Gui gui, DefaultBlastingDisplay recipe) {
                 if (gui instanceof BlastFurnaceGui)
@@ -142,7 +140,7 @@ public class DefaultPlugin implements IRecipePlugin {
                 MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, recipe.getRecipe(), Gui.isShiftPressed());
                 return true;
             }
-        
+            
             @Override
             public boolean acceptRecipe(Gui gui, DefaultBlastingDisplay recipe) {
                 return gui instanceof BlastFurnaceGui;
