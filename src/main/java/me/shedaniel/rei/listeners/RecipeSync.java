@@ -1,6 +1,6 @@
 package me.shedaniel.rei.listeners;
 
-import net.minecraft.recipe.RecipeManager;
+import net.minecraft.item.crafting.RecipeManager;
 
 public interface RecipeSync extends IListener {
     

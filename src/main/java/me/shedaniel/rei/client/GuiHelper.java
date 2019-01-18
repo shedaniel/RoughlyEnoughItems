@@ -3,8 +3,7 @@ package me.shedaniel.rei.client;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.gui.ContainerGuiOverlay;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
-import me.shedaniel.rei.listeners.IMixinContainerGui;
-import net.minecraft.client.gui.ContainerGui;
+import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.item.ItemStack;
 
 import java.util.List;
@@ -12,9 +11,9 @@ import java.util.List;
 public class GuiHelper {
     
     public static TextFieldWidget searchField;
+    public static List<ItemStack> inventoryStacks = Lists.newArrayList();
     private static boolean overlayVisible = true;
     private static ContainerGuiOverlay overlay;
-    public static List<ItemStack> inventoryStacks = Lists.newArrayList();
     
     public static boolean isOverlayVisible() {
         return overlayVisible;
@@ -24,7 +23,7 @@ public class GuiHelper {
         overlayVisible = !overlayVisible;
     }
     
-    public static ContainerGuiOverlay getOverlay(ContainerGui lastGui) {
+    public static ContainerGuiOverlay getOverlay(GuiContainer lastGui) {
         if (overlay == null) {
             overlay = new ContainerGuiOverlay(lastGui);
             overlay.onInitialized();

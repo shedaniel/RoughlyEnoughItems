@@ -1,25 +1,18 @@
 package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.GlStateManager;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.IRecipeCategory;
-import me.shedaniel.rei.api.IRecipeCategoryCraftable;
-import me.shedaniel.rei.client.ClientHelper;
-import me.shedaniel.rei.client.GuiHelper;
-import me.shedaniel.rei.gui.widget.*;
-import me.shedaniel.rei.listeners.IMixinContainerGui;
-import me.shedaniel.rei.listeners.IMixinRecipeBookGui;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.ContainerGui;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.container.CraftingTableGui;
-import net.minecraft.client.gui.ingame.PlayerInventoryGui;
-import net.minecraft.client.render.GuiLighting;
-import net.minecraft.client.resource.language.I18n;
+import me.shedaniel.rei.gui.widget.IWidget;
+import me.shedaniel.rei.gui.widget.ItemSlotWidget;
+import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
+import me.shedaniel.rei.listeners.IMixinGuiContainer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.util.ResourceLocation;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -28,34 +21,34 @@ import java.util.List;
 
 public class DefaultCraftingCategory implements IRecipeCategory<DefaultCraftingDisplay> {
     
-    private static final Identifier DISPLAY_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/display.png");
+    private static final ResourceLocation DISPLAY_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/display.png");
     
     @Override
-    public Identifier getIdentifier() {
+    public ResourceLocation getResourceLocation() {
         return DefaultPlugin.CRAFTING;
     }
     
     @Override
     public ItemStack getCategoryIcon() {
-        return new ItemStack(Blocks.CRAFTING_TABLE.getItem());
+        return new ItemStack(Blocks.CRAFTING_TABLE.asItem());
     }
     
     @Override
     public String getCategoryName() {
-        return I18n.translate("category.rei.crafting");
+        return I18n.format("category.rei.crafting");
     }
     
     @Override
-    public List<IWidget> setupDisplay(IMixinContainerGui containerGui, DefaultCraftingDisplay recipeDisplay, Rectangle bounds) {
+    public List<IWidget> setupDisplay(IMixinGuiContainer containerGui, DefaultCraftingDisplay recipeDisplay, Rectangle bounds) {
         Point startPoint = new Point((int) bounds.getCenterX() - 58, (int) bounds.getCenterY() - 27);
         List<IWidget> widgets = new LinkedList<>(Arrays.asList(new RecipeBaseWidget(bounds) {
             @Override
             public void draw(int mouseX, int mouseY, float partialTicks) {
                 super.draw(mouseX, mouseY, partialTicks);
                 GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-                GuiLighting.disable();
-                MinecraftClient.getInstance().getTextureManager().bindTexture(DISPLAY_TEXTURE);
-                drawTexturedRect(startPoint.x, startPoint.y, 0, 0, 116, 54);
+                RenderHelper.disableStandardItemLighting();
+                Minecraft.getInstance().getTextureManager().bindTexture(DISPLAY_TEXTURE);
+                drawTexturedModalRect(startPoint.x, startPoint.y, 0, 0, 116, 54);
             }
         }));
         List<List<ItemStack>> input = recipeDisplay.getInput();
@@ -74,11 +67,11 @@ public class DefaultCraftingCategory implements IRecipeCategory<DefaultCraftingD
         widgets.add(new ItemSlotWidget(startPoint.x + 95, startPoint.y + 19, recipeDisplay.getOutput(), false, true, containerGui, true) {
             @Override
             protected String getItemCountOverlay(ItemStack currentStack) {
-                if (currentStack.getAmount() == 1)
+                if (currentStack.getCount() == 1)
                     return "";
-                if (currentStack.getAmount() < 1)
-                    return "§c" + currentStack.getAmount();
-                return currentStack.getAmount() + "";
+                if (currentStack.getCount() < 1)
+                    return "§c" + currentStack.getCount();
+                return currentStack.getCount() + "";
             }
         });
         return widgets;

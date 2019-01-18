@@ -3,32 +3,31 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.REIItemListOrdering;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiEventListener;
-import net.minecraft.client.render.GuiLighting;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.util.Window;
-import org.apache.logging.log4j.core.Core;
+import net.minecraft.client.MainWindow;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.resources.I18n;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-public class ConfigWidget extends Gui {
+public class ConfigWidget extends GuiScreen {
     
     private List<IWidget> widgets;
-    private Gui parent;
+    private GuiScreen parent;
     
-    public ConfigWidget(Gui parent) {
+    public ConfigWidget(GuiScreen parent) {
         this.parent = parent;
         this.widgets = Lists.newArrayList();
     }
     
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
-        if (int_1 == 256 && this.doesEscapeKeyClose()) {
-            MinecraftClient.getInstance().openGui(parent);
+        if (int_1 == 256 && this.allowCloseWithEscape()) {
+            Minecraft.getInstance().displayGuiScreen(parent);
             return true;
         } else {
             return super.keyPressed(int_1, int_2, int_3);
@@ -36,10 +35,10 @@ public class ConfigWidget extends Gui {
     }
     
     @Override
-    protected void onInitialized() {
-        super.onInitialized();
+    protected void initGui() {
+        super.initGui();
         widgets.clear();
-        Window window = MinecraftClient.getInstance().window;
+        MainWindow window = Minecraft.getInstance().mainWindow;
         widgets.add(new ButtonWidget(window.getScaledWidth() / 2 - 20, 30, 40, 20, "") {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
@@ -51,13 +50,13 @@ public class ConfigWidget extends Gui {
                     e.printStackTrace();
                 }
             }
-        
+            
             @Override
             public void draw(int mouseX, int mouseY, float partialTicks) {
                 text = getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().sideSearchField());
-                String t = I18n.translate("text.rei.centre_searchbox");
+                String t = I18n.format("text.rei.centre_searchbox");
                 int width = fontRenderer.getStringWidth(t);
-                fontRenderer.drawWithShadow(t, this.x - width - 10, this.y + (this.height - 8) / 2, -1);
+                fontRenderer.drawStringWithShadow(t, this.x - width - 10, this.y + (this.height - 8) / 2, -1);
                 super.draw(mouseX, mouseY, partialTicks);
             }
         });
@@ -76,9 +75,9 @@ public class ConfigWidget extends Gui {
             @Override
             public void draw(int mouseX, int mouseY, float partialTicks) {
                 text = getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().showCraftableOnlyButton());
-                String t = I18n.translate("text.rei.enable_craftable_only");
+                String t = I18n.format("text.rei.enable_craftable_only");
                 int width = fontRenderer.getStringWidth(t);
-                fontRenderer.drawWithShadow(t, this.x - width - 10, this.y + (this.height - 8) / 2, -1);
+                fontRenderer.drawStringWithShadow(t, this.x - width - 10, this.y + (this.height - 8) / 2, -1);
                 super.draw(mouseX, mouseY, partialTicks);
             }
         });
@@ -97,14 +96,14 @@ public class ConfigWidget extends Gui {
                     e.printStackTrace();
                 }
             }
-        
+            
             @Override
             public void draw(int int_1, int int_2, float float_1) {
-                GuiLighting.disable();
-                this.text = I18n.translate("text.rei.list_ordering_button", I18n.translate(RoughlyEnoughItemsCore.getConfigHelper().getItemListOrdering().getNameTranslationKey()),
-                        I18n.translate(RoughlyEnoughItemsCore.getConfigHelper().isAscending() ? "ordering.rei.ascending" : "ordering.rei.descending"));
-                String t = I18n.translate("text.rei.list_ordering") + ": ";
-                drawString(MinecraftClient.getInstance().fontRenderer, t, parent.width / 2 - 95 - MinecraftClient.getInstance().fontRenderer.getStringWidth(t), 90 + 6, -1);
+                RenderHelper.disableStandardItemLighting();
+                this.text = I18n.format("text.rei.list_ordering_button", I18n.format(RoughlyEnoughItemsCore.getConfigHelper().getItemListOrdering().getNameTranslationKey()),
+                        I18n.format(RoughlyEnoughItemsCore.getConfigHelper().isAscending() ? "ordering.rei.ascending" : "ordering.rei.descending"));
+                String t = I18n.format("text.rei.list_ordering") + ": ";
+                drawString(Minecraft.getInstance().fontRenderer, t, parent.width / 2 - 95 - Minecraft.getInstance().fontRenderer.getStringWidth(t), 90 + 6, -1);
                 super.draw(int_1, int_2, float_1);
             }
         });
@@ -115,22 +114,22 @@ public class ConfigWidget extends Gui {
     }
     
     @Override
-    public void draw(int int_1, int int_2, float float_1) {
+    public void render(int int_1, int int_2, float float_1) {
         drawBackground(0);
-        super.draw(int_1, int_2, float_1);
+        super.render(int_1, int_2, float_1);
         widgets.forEach(widget -> {
-            GuiLighting.disable();
+            RenderHelper.disableStandardItemLighting();
             widget.draw(int_1, int_2, float_1);
         });
     }
     
     @Override
-    public boolean isPauseScreen() {
+    public boolean doesGuiPauseGame() {
         return false;
     }
     
     @Override
-    public List<? extends GuiEventListener> getEntries() {
+    public List<? extends IGuiEventListener> getChildren() {
         return widgets;
     }
     

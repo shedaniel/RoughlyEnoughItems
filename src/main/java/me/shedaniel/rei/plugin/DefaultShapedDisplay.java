@@ -2,7 +2,7 @@ package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Lists;
 import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.crafting.ShapedRecipe;
+import net.minecraft.item.crafting.ShapedRecipe;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,10 +16,10 @@ public class DefaultShapedDisplay implements DefaultCraftingDisplay<ShapedRecipe
     public DefaultShapedDisplay(ShapedRecipe recipe) {
         this.display = recipe;
         this.input = Lists.newArrayList();
-        recipe.getPreviewInputs().forEach(ingredient -> {
-            input.add(Arrays.asList(ingredient.getStackArray()));
+        recipe.getIngredients().forEach(ingredient -> {
+            input.add(Arrays.asList(ingredient.getMatchingStacks()));
         });
-        this.output = Arrays.asList(recipe.getOutput());
+        this.output = Arrays.asList(recipe.getRecipeOutput());
     }
     
     @Override

@@ -1,11 +1,10 @@
 package me.shedaniel.rei.gui.widget;
 
-import com.google.common.collect.Lists;
-import net.minecraft.client.gui.GuiEventListener;
+import net.minecraft.client.gui.IGuiEventListener;
 
 import java.util.List;
 
-public interface IWidget extends GuiEventListener {
+public interface IWidget extends IGuiEventListener {
     
     public List<IWidget> getListeners();
     

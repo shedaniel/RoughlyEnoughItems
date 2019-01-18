@@ -7,32 +7,31 @@ import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.ConfigHelper;
 import me.shedaniel.rei.client.RecipeHelper;
 import me.shedaniel.rei.listeners.IListener;
+import me.shedaniel.rei.network.CreateItemsMessage;
+import me.shedaniel.rei.network.DeleteItemsMessage;
 import me.shedaniel.rei.plugin.DefaultPlugin;
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.networking.CustomPayloadPacketRegistry;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sortme.ChatMessageType;
-import net.minecraft.text.TranslatableTextComponent;
-import net.minecraft.util.Identifier;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.IRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.dimdev.rift.listener.MessageAdder;
+import org.dimdev.rift.network.Message;
+import org.dimdev.riftloader.listener.InitializationListener;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitializer {
+public class RoughlyEnoughItemsCore {
     
     public static final Logger LOGGER = LogManager.getFormatterLogger("REI");
-    public static final Identifier DELETE_ITEMS_PACKET = new Identifier("roughlyenoughitems", "delete_item");
-    public static final Identifier CREATE_ITEMS_PACKET = new Identifier("roughlyenoughitems", "create_item");
-    public static final Identifier DEFAULT_PLUGIN = new Identifier("roughlyenoughitems", "default_plugin");
+    public static final ResourceLocation DELETE_ITEMS_PACKET = new ResourceLocation("roughlyenoughitems", "delete_item");
+    public static final ResourceLocation CREATE_ITEMS_PACKET = new ResourceLocation("roughlyenoughitems", "create_item");
+    public static final ResourceLocation DEFAULT_PLUGIN = new ResourceLocation("roughlyenoughitems", "default_plugin");
     private static final List<IListener> listeners = Lists.newArrayList();
-    private static final Map<Identifier, IRecipePlugin> plugins = Maps.newHashMap();
-    private static ConfigHelper configHelper;
+    private static final Map<ResourceLocation, IRecipePlugin> plugins = Maps.newHashMap();
+    private static final ConfigHelper configHelper = new ConfigHelper();
     
     public static <T> List<T> getListeners(Class<T> listenerClass) {
         return listeners.stream().filter(listener -> {
@@ -46,13 +45,13 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
         return configHelper;
     }
     
-    private static IListener registerListener(IListener listener) {
+    static IListener registerListener(IListener listener) {
         listeners.add(listener);
         return listener;
     }
     
-    public static IRecipePlugin registerPlugin(Identifier identifier, IRecipePlugin plugin) {
-        plugins.put(identifier, plugin);
+    public static IRecipePlugin registerPlugin(ResourceLocation ResourceLocation, IRecipePlugin plugin) {
+        plugins.put(ResourceLocation, plugin);
         return plugin;
     }
     
@@ -60,27 +59,11 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
         return new LinkedList<>(plugins.values());
     }
     
-    public static Identifier getPluginIdentifier(IRecipePlugin plugin) {
-        for(Identifier identifier : plugins.keySet())
-            if (plugins.get(identifier).equals(plugin))
-                return identifier;
+    public static ResourceLocation getPluginResourceLocation(IRecipePlugin plugin) {
+        for(ResourceLocation ResourceLocation : plugins.keySet())
+            if (plugins.get(ResourceLocation).equals(plugin))
+                return ResourceLocation;
         return null;
-    }
-    
-    @Override
-    public void onInitializeClient() {
-        registerREIListeners();
-        registerDefaultPlugin();
-        configHelper = new ConfigHelper();
-    }
-    
-    private void registerDefaultPlugin() {
-        registerPlugin(RoughlyEnoughItemsCore.DEFAULT_PLUGIN, new DefaultPlugin());
-    }
-    
-    private void registerREIListeners() {
-        registerListener(new ClientHelper());
-        registerListener(new RecipeHelper());
     }
     
     private boolean removeListener(IListener listener) {
@@ -88,27 +71,6 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
             return false;
         listeners.remove(listener);
         return true;
-    }
-    
-    @Override
-    public void onInitialize() {
-        registerFabricPackets();
-    }
-    
-    private void registerFabricPackets() {
-        CustomPayloadPacketRegistry.SERVER.register(DELETE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
-            ServerPlayerEntity player = (ServerPlayerEntity) packetContext.getPlayer();
-            if (!player.inventory.getCursorStack().isEmpty())
-                player.inventory.setCursorStack(ItemStack.EMPTY);
-        });
-        CustomPayloadPacketRegistry.SERVER.register(CREATE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
-            ServerPlayerEntity player = (ServerPlayerEntity) packetContext.getPlayer();
-            ItemStack stack = packetByteBuf.readItemStack();
-            if (player.inventory.insertStack(stack.copy()))
-                player.sendChatMessage(new TranslatableTextComponent("text.rei.cheat_items", stack.getDisplayName().getFormattedText(), stack.getAmount(), player.getEntityName()), ChatMessageType.SYSTEM);
-            else
-                player.sendChatMessage(new TranslatableTextComponent("text.rei.failed_cheat_items"), ChatMessageType.SYSTEM);
-        });
     }
     
 }

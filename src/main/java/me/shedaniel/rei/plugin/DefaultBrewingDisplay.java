@@ -1,13 +1,12 @@
 package me.shedaniel.rei.plugin;
 
-import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.IRecipeDisplay;
-import net.minecraft.block.Blocks;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.util.Identifier;
+import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.util.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,13 +24,13 @@ public class DefaultBrewingDisplay implements IRecipeDisplay {
     }
     
     @Override
-    public Recipe getRecipe() {
+    public IRecipe getRecipe() {
         return null;
     }
     
     @Override
     public List<List<ItemStack>> getInput() {
-        return Arrays.asList(Arrays.asList(input), Arrays.asList(reactant.getStackArray()));
+        return Arrays.asList(Arrays.asList(input), Arrays.asList(reactant.getMatchingStacks()));
     }
     
     @Override
@@ -40,7 +39,7 @@ public class DefaultBrewingDisplay implements IRecipeDisplay {
     }
     
     @Override
-    public Identifier getRecipeCategory() {
+    public ResourceLocation getRecipeCategory() {
         return DefaultPlugin.BREWING;
     }
     

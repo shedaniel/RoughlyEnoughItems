@@ -1,33 +1,46 @@
-plugins {
-	id 'fabric-loom' version '0.2.0-SNAPSHOT'
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url 'https://www.jitpack.io' }
+        maven { url 'https://files.minecraftforge.net/maven' }
+        maven { url 'http://repo.spongepowered.org/maven' }
+    }
+    dependencies {
+        classpath 'com.github.Chocohead:ForgeGradle:jitpack-SNAPSHOT'
+        classpath 'org.spongepowered:mixingradle:0.6-SNAPSHOT'
+    }
 }
+
+apply plugin: 'net.minecraftforge.gradle.tweaker-client'
+apply plugin: 'org.spongepowered.mixin'
+apply plugin: 'java'
+
+group 'me.shedaniel'
+version '2.0.0.9'
+archivesBaseName = 'RoughlyEnoughItems'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-archivesBaseName = "RoughlyEnoughItems"
-version = "2.0.0.39"
+repositories {
+    mavenCentral()
+    maven { url 'https://www.dimdev.org/maven/' }
+    maven { url 'https://www.jitpack.io' }
+}
 
-def minecraftVersion = "19w03b"
-def yarnVersion = "19w03b.2"
-def fabricVersion = "0.1.4.76"
-
-minecraft {
+mixin {
+    defaultObfuscationEnv notch
+    add sourceSets.main, 'mixins.roughlyenoughitems.refmap.json'
 }
 
 dependencies {
-	minecraft "com.mojang:minecraft:${minecraftVersion}"
-	mappings "net.fabricmc:yarn:${yarnVersion}"
-	modCompile "net.fabricmc:fabric-loader:0.3.2.96"
-
-	// Fabric API. This is technically optional, but you probably want it anyway.
-	modCompile "net.fabricmc:fabric:${fabricVersion}"
+    implementation 'com.github.Chocohead:Rift:jitpack-SNAPSHOT:dev'
+    implementation 'com.google.code.gson:gson:2.8.5'
 }
 
-// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-// if it is present.
-// If you remove this task, sources will not be generated.
-task sourcesJar(type: Jar, dependsOn: classes) {
-	classifier = 'sources'
-	from sourceSets.main.allSource
+minecraft {
+    version = '1.13.2'
+    mappings = 'snapshot_20181130'
+    runDir = 'run'
+    tweakClass = 'org.dimdev.riftloader.launch.RiftLoaderClientTweaker'
 }

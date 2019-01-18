@@ -1,22 +1,21 @@
 package me.shedaniel.rei.gui.widget;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.audio.PositionedSoundInstance;
-import net.minecraft.client.font.FontRenderer;
-import net.minecraft.client.gui.Drawable;
-import net.minecraft.client.render.GuiLighting;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.SimpleSound;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.init.SoundEvents;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class ButtonWidget extends Drawable implements IWidget {
+public abstract class ButtonWidget extends Gui implements IWidget {
     
-    protected static final Identifier WIDGET_TEX = new Identifier("textures/gui/widgets.png");
+    protected static final ResourceLocation WIDGET_TEX = new ResourceLocation("textures/gui/widgets.png");
     public int x;
     public int y;
     public String text;
@@ -69,28 +68,28 @@ public abstract class ButtonWidget extends Drawable implements IWidget {
     public void draw(int mouseX, int mouseY, float partialTicks) {
         
         if (this.visible) {
-            MinecraftClient minecraftClient_1 = MinecraftClient.getInstance();
+            Minecraft minecraftClient_1 = Minecraft.getInstance();
             FontRenderer fontRenderer_1 = minecraftClient_1.fontRenderer;
             minecraftClient_1.getTextureManager().bindTexture(WIDGET_TEX);
             GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             this.hovered = bounds.contains(mouseX, mouseY);
             int textureOffset = this.getTextureId(this.hovered);
             GlStateManager.enableBlend();
-            GlStateManager.blendFuncSeparate(GlStateManager.class_1033.SRC_ALPHA, GlStateManager.class_1027.ONE_MINUS_SRC_ALPHA, GlStateManager.class_1033.ONE, GlStateManager.class_1027.ZERO);
-            GlStateManager.blendFunc(GlStateManager.class_1033.SRC_ALPHA, GlStateManager.class_1027.ONE_MINUS_SRC_ALPHA);
+            GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+            GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
             //Four Corners
-            this.drawTexturedRect(this.x, this.y, 0, 46 + textureOffset * 20, 4, 4);
-            this.drawTexturedRect(this.x + this.width - 4, this.y, 196, 46 + textureOffset * 20, 4, 4);
-            this.drawTexturedRect(this.x, this.y + this.height - 4, 0, 62 + textureOffset * 20, 4, 4);
-            this.drawTexturedRect(this.x + this.width - 4, this.y + this.height - 4, 196, 62 + textureOffset * 20, 4, 4);
+            this.drawTexturedModalRect(this.x, this.y, 0, 46 + textureOffset * 20, 4, 4);
+            this.drawTexturedModalRect(this.x + this.width - 4, this.y, 196, 46 + textureOffset * 20, 4, 4);
+            this.drawTexturedModalRect(this.x, this.y + this.height - 4, 0, 62 + textureOffset * 20, 4, 4);
+            this.drawTexturedModalRect(this.x + this.width - 4, this.y + this.height - 4, 196, 62 + textureOffset * 20, 4, 4);
             
             //Sides
-            this.drawTexturedRect(this.x + 4, this.y, 4, 46 + textureOffset * 20, this.width - 8, 4);
-            this.drawTexturedRect(this.x + 4, this.y + this.height - 4, 4, 62 + textureOffset * 20, this.width - 8, 4);
+            this.drawTexturedModalRect(this.x + 4, this.y, 4, 46 + textureOffset * 20, this.width - 8, 4);
+            this.drawTexturedModalRect(this.x + 4, this.y + this.height - 4, 4, 62 + textureOffset * 20, this.width - 8, 4);
             
             for(int i = this.y + 4; i < this.y + this.height - 4; i += 4) {
-                this.drawTexturedRect(this.x, i, 0, 50 + textureOffset * 20, this.width / 2, MathHelper.clamp(this.y + this.height - 4 - i, 0, 4));
-                this.drawTexturedRect(this.x + this.width / 2, i, 200 - this.width / 2, 50 + textureOffset * 20, this.width / 2, MathHelper.clamp(this.y + this.height - 4 - i, 0, 4));
+                this.drawTexturedModalRect(this.x, i, 0, 50 + textureOffset * 20, this.width / 2, MathHelper.clamp(this.y + this.height - 4 - i, 0, 4));
+                this.drawTexturedModalRect(this.x + this.width / 2, i, 200 - this.width / 2, 50 + textureOffset * 20, this.width / 2, MathHelper.clamp(this.y + this.height - 4 - i, 0, 4));
             }
             
             int colour = 14737632;
@@ -100,14 +99,14 @@ public abstract class ButtonWidget extends Drawable implements IWidget {
                 colour = 16777120;
             }
             
-            this.drawStringCentered(fontRenderer_1, this.text, this.x + this.width / 2, this.y + (this.height - 8) / 2, colour);
+            this.drawCenteredString(fontRenderer_1, this.text, this.x + this.width / 2, this.y + (this.height - 8) / 2, colour);
         }
     }
     
     @Override
     public boolean onMouseClick(int button, double mouseX, double mouseY) {
         if (bounds.contains(mouseX, mouseY) && enabled) {
-            MinecraftClient.getInstance().getSoundLoader().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            Minecraft.getInstance().getSoundHandler().play(SimpleSound.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             onPressed(button, mouseX, mouseY);
             return true;
         }

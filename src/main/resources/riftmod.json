@@ -1,0 +1,13 @@
+{
+  "id": "roughlyenoughitems",
+  "name": "RoughlyEnoughItems",
+  "version": "2.0.0.9",
+  "authors": [
+    "Danielshe"
+  ],
+  "listeners": [
+    "me.shedaniel.rei.RoughlyEnoughItemsInit"
+  ],
+  "url": "https://shedaniel.me",
+  "description": "To allow players to view items and recipes."
+}
