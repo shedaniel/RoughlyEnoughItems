@@ -78,7 +78,7 @@ public class TabWidget extends Gui implements HighlightableWidget {
             this.drawTexturedModalRect(bounds.x, bounds.y + 2, selected ? 28 : 0, 192, 28, (selected ? 30 : 27));
             this.zLevel = 100.0F;
             this.itemRenderer.zLevel = 100.0F;
-            RenderHelper.enableStandardItemLighting();
+            RenderHelper.enableGUIStandardItemLighting();
             this.itemRenderer.renderItemAndEffectIntoGUI(getItemStack(), l, i1);
             this.itemRenderer.renderItemOverlays(Minecraft.getInstance().fontRenderer, getItemStack(), l, i1);
             GlStateManager.disableLighting();

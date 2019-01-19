@@ -1,6 +1,9 @@
 {
   "required": true,
+  "minVersion": "0.7.7",
+  "target": "@env(DEFAULT)",
   "package": "me.shedaniel.rei.mixin",
+  "refmap": "mixins.roughlyenoughitems.refmap.json",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "MixinGuiContainer",
@@ -9,9 +12,7 @@
     "MixinGuiCrafting",
     "MixinGuiContainerCreative",
     "MixinPotionBrewing",
-    "MixinGuiRecipeBook"
-  ],
-  "injectors": {
-    "defaultRequire": 1
-  }
+    "MixinGuiRecipeBook",
+    "MixinKeyBinding"
+  ]
 }

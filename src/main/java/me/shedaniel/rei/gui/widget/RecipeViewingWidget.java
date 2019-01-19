@@ -271,7 +271,7 @@ public class RecipeViewingWidget extends GuiScreen {
     
     @Override
     public void drawDefaultBackground() {
-        drawBackground(0);
+        drawWorldBackground(0);
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         RenderHelper.disableStandardItemLighting();
         this.mc.getTextureManager().bindTexture(CHEST_GUI_TEXTURE);

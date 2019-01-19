@@ -2,6 +2,7 @@ package me.shedaniel.rei.client;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.IRecipeCategory;
 import me.shedaniel.rei.api.IRecipeDisplay;
 import me.shedaniel.rei.gui.ContainerGuiOverlay;
@@ -9,11 +10,13 @@ import me.shedaniel.rei.gui.widget.ConfigWidget;
 import me.shedaniel.rei.gui.widget.RecipeViewingWidget;
 import me.shedaniel.rei.listeners.ClientLoaded;
 import me.shedaniel.rei.listeners.IMixinGuiContainer;
-import me.shedaniel.rei.network.CreateItemsMessage;
-import me.shedaniel.rei.network.DeleteItemsMessage;
+import me.shedaniel.rei.listeners.IMixinKeyBinding;
+import me.shedaniel.rei.network.CreateItemsPacket;
+import me.shedaniel.rei.network.DeleteItemsPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHelper;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.enchantment.Enchantment;
@@ -21,7 +24,6 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.EnumPacketDirection;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.IRegistry;
@@ -84,14 +86,14 @@ public class ClientHelper implements ClientLoaded, KeyBindingAdder {
     }
     
     public static void sendDeletePacket() {
-        DeleteItemsMessage message = new DeleteItemsMessage();
-        Minecraft.getInstance().getConnection().sendPacket(message.toPacket(EnumPacketDirection.CLIENTBOUND));
+        DeleteItemsPacket message = new DeleteItemsPacket();
+        Minecraft.getInstance().getConnection().sendPacket(message);
     }
     
     public static boolean tryCheatingStack(ItemStack cheatedStack) {
         try {
-            CreateItemsMessage message = new CreateItemsMessage(cheatedStack.copy());
-            Minecraft.getInstance().getConnection().sendPacket(message.toPacket(EnumPacketDirection.CLIENTBOUND));
+            CreateItemsPacket message = new CreateItemsPacket(cheatedStack.copy());
+            Minecraft.getInstance().getConnection().sendPacket(message);
             return true;
         } catch (Exception e) {
             return false;
@@ -167,9 +169,21 @@ public class ClientHelper implements ClientLoaded, KeyBindingAdder {
     public Collection<? extends KeyBinding> getKeyBindings() {
         String category = "key.rei.category";
         List<KeyBinding> keyBindings = Lists.newArrayList();
-        keyBindings.add(RECIPE = new KeyBinding(RECIPE_KEYBIND.toString().replaceAll(":", "."), InputMappings.Type.KEYSYM, 82, category));
-        keyBindings.add(USAGE = new KeyBinding(USAGE_KEYBIND.toString().replaceAll(":", "."), InputMappings.Type.KEYSYM, 85, category));
-        keyBindings.add(HIDE = new KeyBinding(HIDE_KEYBIND.toString().replaceAll(":", "."), InputMappings.Type.KEYSYM, 79, category));
+        keyBindings.add(RECIPE = createKeyBinding(RECIPE_KEYBIND, InputMappings.Type.KEYSYM, 82, category));
+        keyBindings.add(USAGE = createKeyBinding(USAGE_KEYBIND, InputMappings.Type.KEYSYM, 85, category));
+        keyBindings.add(HIDE = createKeyBinding(HIDE_KEYBIND, InputMappings.Type.KEYSYM, 79, category));
+        addCategoryIfMissing(RECIPE, category);
         return keyBindings;
     }
+    
+    private void addCategoryIfMissing(KeyBinding keyBinding, String category) {
+        if (!((IMixinKeyBinding) keyBinding).hasCategory(category))
+            ((IMixinKeyBinding) keyBinding).addCategory(category);
+    }
+    
+    private KeyBinding createKeyBinding(ResourceLocation location, InputMappings.Type inputType, int keyCode, String category) {
+        RoughlyEnoughItemsCore.LOGGER.info("Registering: key." + location.toString().replaceAll(":", ".") + " in " + category);
+        return new KeyBinding("key." + location.toString().replaceAll(":", "."), inputType, keyCode, category);
+    }
+    
 }

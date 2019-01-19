@@ -17,8 +17,6 @@ public abstract class MixinGuiContainerCreative extends InventoryEffectRenderer 
     @Shadow
     private static int selectedTabIndex;
     @Shadow
-    private boolean field_2888;
-    @Shadow
     private boolean field_195377_F;
     
     public MixinGuiContainerCreative(Container inventorySlotsIn) {
