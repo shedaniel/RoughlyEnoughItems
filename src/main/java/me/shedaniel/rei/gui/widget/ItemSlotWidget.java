@@ -65,7 +65,7 @@ public class ItemSlotWidget extends Gui implements HighlightableWidget {
         }
         if (itemStack.isEmpty())
             return;
-        RenderHelper.enableStandardItemLighting();
+        RenderHelper.enableGUIStandardItemLighting();
         ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
         itemRenderer.zLevel = 200.0F;
         itemRenderer.renderItemAndEffectIntoGUI(itemStack, x, y);

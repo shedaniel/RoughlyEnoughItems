@@ -115,7 +115,7 @@ public class ConfigWidget extends GuiScreen {
     
     @Override
     public void render(int int_1, int int_2, float float_1) {
-        drawBackground(0);
+        drawWorldBackground(0);
         super.render(int_1, int_2, float_1);
         widgets.forEach(widget -> {
             RenderHelper.disableStandardItemLighting();

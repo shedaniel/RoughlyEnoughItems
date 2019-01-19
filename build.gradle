@@ -16,7 +16,7 @@ apply plugin: 'org.spongepowered.mixin'
 apply plugin: 'java'
 
 group 'me.shedaniel'
-version '2.0.0.9'
+version '2.0.0.10'
 archivesBaseName = 'RoughlyEnoughItems'
 
 sourceCompatibility = 1.8
@@ -26,16 +26,18 @@ repositories {
     mavenCentral()
     maven { url 'https://www.dimdev.org/maven/' }
     maven { url 'https://www.jitpack.io' }
-}
-
-mixin {
-    defaultObfuscationEnv notch
-    add sourceSets.main, 'mixins.roughlyenoughitems.refmap.json'
+    maven { url 'https://repo.spongepowered.org/maven/' }
+    maven { url "http://repo.strezz.org/artifactory/list/Strezz-Central" }
 }
 
 dependencies {
     implementation 'com.github.Chocohead:Rift:jitpack-SNAPSHOT:dev'
     implementation 'com.google.code.gson:gson:2.8.5'
+}
+
+mixin {
+    defaultObfuscationEnv notch
+    add sourceSets.main, 'mixins.roughlyenoughitems.refmap.json'
 }
 
 minecraft {

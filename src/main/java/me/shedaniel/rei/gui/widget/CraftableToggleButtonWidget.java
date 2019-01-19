@@ -36,7 +36,7 @@ public abstract class CraftableToggleButtonWidget extends ButtonWidget {
     public void draw(int mouseX, int mouseY, float partialTicks) {
         super.draw(mouseX, mouseY, partialTicks);
         
-        RenderHelper.enableStandardItemLighting();
+        RenderHelper.enableGUIStandardItemLighting();
         this.itemRenderer.zLevel = 0.0F;
         this.itemRenderer.renderItemAndEffectIntoGUI(new ItemStack(Blocks.CRAFTING_TABLE), x + 2, y + 2);
         this.itemRenderer.zLevel = 0.0F;
