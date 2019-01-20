@@ -91,6 +91,10 @@ public class ClientHelper implements ClientLoaded, ClientModInitializer {
     }
     
     public static void sendDeletePacket() {
+        if (MinecraftClient.getInstance().interactionManager.hasCreativeInventory()) {
+            MinecraftClient.getInstance().player.inventory.setCursorStack(ItemStack.EMPTY);
+            return;
+        }
         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
         MinecraftClient.getInstance().getNetworkHandler().sendPacket(new CustomPayloadServerPacket(RoughlyEnoughItemsCore.DELETE_ITEMS_PACKET, buf));
     }
