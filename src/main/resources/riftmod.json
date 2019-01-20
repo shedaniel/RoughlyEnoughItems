@@ -1,13 +1,24 @@
 {
   "id": "roughlyenoughitems",
   "name": "RoughlyEnoughItems",
-  "version": "2.0.0.10",
+  "version": "2.0.0.11",
   "authors": [
     "Danielshe"
   ],
   "listeners": [
-    "me.shedaniel.rei.RoughlyEnoughItemsInit",
-    "me.shedaniel.rei.client.ClientHelper"
+    {
+      "class": "me.shedaniel.rei.REIMixinInit",
+      "side": "client"
+    },
+    {
+      "class": "me.shedaniel.rei.api.RoughlyEnoughItemsPlugin",
+      "side": "client",
+      "priority": -1000
+    },
+    {
+      "class": "me.shedaniel.rei.client.KeyBindHelper",
+      "side": "client"
+    }
   ],
   "url": "https://shedaniel.me",
   "description": "To allow players to view items and recipes."

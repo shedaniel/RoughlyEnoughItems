@@ -3,6 +3,7 @@ package me.shedaniel.rei.gui;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
+import me.shedaniel.rei.client.KeyBindHelper;
 import me.shedaniel.rei.gui.widget.*;
 import me.shedaniel.rei.listeners.IMixinGuiContainer;
 import net.minecraft.client.MainWindow;
@@ -17,9 +18,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -77,11 +76,15 @@ public class ContainerGuiOverlay extends GuiScreen {
             public void draw(int int_1, int int_2, float float_1) {
                 this.text = getCheatModeText();
                 super.draw(int_1, int_2, float_1);
+                if (getBounds().contains(int_1, int_2) && !Minecraft.getInstance().isSingleplayer())
+                    ContainerGuiOverlay.this.addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(),
+                            Arrays.asList(I18n.format("text.rei.nocheating_in_servers").split("\n"))));
             }
             
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
-                ClientHelper.setCheating(!ClientHelper.isCheating());
+                if (Minecraft.getInstance().isSingleplayer())
+                    ClientHelper.setCheating(!ClientHelper.isCheating());
             }
         });
         widgets.add(new ButtonWidget(10, 35, 40, 20, I18n.format("text.rei.config")) {
@@ -275,12 +278,12 @@ public class ContainerGuiOverlay extends GuiScreen {
             if (containerGui.getHoveredSlot() != null)
                 itemStack = containerGui.getHoveredSlot().getStack();
         if (itemStack != null && !itemStack.isEmpty()) {
-            if (ClientHelper.RECIPE.matchesKey(int_1, int_2))
+            if (KeyBindHelper.RECIPE.matchesKey(int_1, int_2))
                 return ClientHelper.executeRecipeKeyBind(this, itemStack, containerGui);
-            else if (ClientHelper.USAGE.matchesKey(int_1, int_2))
+            else if (KeyBindHelper.USAGE.matchesKey(int_1, int_2))
                 return ClientHelper.executeUsageKeyBind(this, itemStack, containerGui);
         }
-        if (ClientHelper.HIDE.matchesKey(int_1, int_2)) {
+        if (KeyBindHelper.HIDE.matchesKey(int_1, int_2)) {
             GuiHelper.toggleOverlayVisible();
             return true;
         }

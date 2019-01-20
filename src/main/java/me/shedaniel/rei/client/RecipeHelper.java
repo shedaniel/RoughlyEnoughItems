@@ -152,12 +152,12 @@ public class RecipeHelper implements RecipeSync {
         this.categories.clear();
         this.speedCraftAreaSupplierMap.clear();
         this.speedCraftFunctionalMap.clear();
-        List<IRecipePlugin> plugins = new LinkedList<>(RoughlyEnoughItemsCore.getPlugins());
+        List<IRecipePlugin> plugins = new LinkedList<>(RoughlyEnoughItemsPlugin.getPlugins());
         plugins.sort((first, second) -> {
             return second.getPriority() - first.getPriority();
         });
         RoughlyEnoughItemsCore.LOGGER.info("Loading %d REI plugins: %s", plugins.size(), String.join(", ", plugins.stream().map(plugin -> {
-            ResourceLocation ResourceLocation = RoughlyEnoughItemsCore.getPluginResourceLocation(plugin);
+            ResourceLocation ResourceLocation = RoughlyEnoughItemsPlugin.getPluginResourceLocation(plugin);
             return ResourceLocation == null ? "NULL" : ResourceLocation.toString();
         }).collect(Collectors.toList())));
         Collections.reverse(plugins);
