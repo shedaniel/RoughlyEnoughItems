@@ -91,6 +91,10 @@ public class ConfigHelper {
         config.enableCraftableOnlyButton = enableCraftableOnlyButton;
     }
     
+    public String getGiveCommandPrefix() {
+        return config.giveCommandPrefix;
+    }
+    
     public boolean sideSearchField() {
         return config.sideSearchField;
     }

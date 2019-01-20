@@ -212,11 +212,11 @@ public class ItemListOverlay extends Drawable implements IWidget {
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
         if (rectangle.contains(double_1, double_2))
-            if (ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty()) {
+            if (ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty() && MinecraftClient.getInstance().isInSingleplayer()) {
                 ClientHelper.sendDeletePacket();
                 return true;
             }
-        if (!player.inventory.getCursorStack().isEmpty())
+        if (!player.inventory.getCursorStack().isEmpty() && MinecraftClient.getInstance().isInSingleplayer())
             return false;
         if (onMouseClick(int_1, double_1, double_2))
             return true;

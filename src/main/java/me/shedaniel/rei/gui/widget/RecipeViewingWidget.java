@@ -30,7 +30,7 @@ import java.util.Map;
 public class RecipeViewingWidget extends Gui {
     
     private static final Identifier CREATIVE_INVENTORY_TABS = new Identifier("textures/gui/container/creative_inventory/tabs.png");
-    private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
+    public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     public final int guiWidth = 176;
     public final int guiHeight = 186;
     
@@ -272,10 +272,14 @@ public class RecipeViewingWidget extends Gui {
     @Override
     public void drawBackground() {
         drawBackground(0);
-        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        GuiLighting.disable();
-        this.client.getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
-        this.drawTexturedRect((int) bounds.getX(), (int) bounds.getY(), 0, 0, (int) bounds.getWidth(), (int) bounds.getHeight());
+        if (selectedCategory != null)
+            selectedCategory.drawCategoryBackground(bounds);
+        else {
+            GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+            GuiLighting.disable();
+            this.client.getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
+            this.drawTexturedRect((int) bounds.getX(), (int) bounds.getY(), 0, 0, (int) bounds.getWidth(), (int) bounds.getHeight());
+        }
     }
     
     public int getTotalPages(IRecipeCategory category) {

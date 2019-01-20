@@ -96,13 +96,25 @@ public class ClientHelper implements ClientLoaded, ClientModInitializer {
     }
     
     public static boolean tryCheatingStack(ItemStack cheatedStack) {
-        try {
-            PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-            buf.writeItemStack(cheatedStack.copy());
-            MinecraftClient.getInstance().getNetworkHandler().sendPacket(new CustomPayloadServerPacket(RoughlyEnoughItemsCore.CREATE_ITEMS_PACKET, buf));
+        if (MinecraftClient.getInstance().isInSingleplayer()) {
+            try {
+                PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+                buf.writeItemStack(cheatedStack.copy());
+                MinecraftClient.getInstance().getNetworkHandler().sendPacket(new CustomPayloadServerPacket(RoughlyEnoughItemsCore.CREATE_ITEMS_PACKET, buf));
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        } else {
+            Identifier location = Registry.ITEM.getId(cheatedStack.getItem());
+            String tagMessage = cheatedStack.copy().getTag() != null && !cheatedStack.copy().getTag().isEmpty() ? cheatedStack.copy().getTag().asString() : "";
+            String madeUpCommand = RoughlyEnoughItemsCore.getConfigHelper().getGiveCommandPrefix() + " " + MinecraftClient.getInstance().player.getEntityName() + " " +
+                    location.toString() + tagMessage + (cheatedStack.getAmount() != 1 ? " " + cheatedStack.getAmount() : "");
+            if (madeUpCommand.length() > 256)
+                madeUpCommand = RoughlyEnoughItemsCore.getConfigHelper().getGiveCommandPrefix() + " " + MinecraftClient.getInstance().player.getEntityName() + " " +
+                        location.toString() + (cheatedStack.getAmount() != 1 ? " " + cheatedStack.getAmount() : "");
+            MinecraftClient.getInstance().player.sendChatMessage(madeUpCommand);
             return true;
-        } catch (Exception e) {
-            return false;
         }
     }
     

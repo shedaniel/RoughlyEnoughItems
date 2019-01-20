@@ -8,11 +8,18 @@ targetCompatibility = 1.8
 archivesBaseName = "RoughlyEnoughItems"
 version = "2.0.0.39"
 
-def minecraftVersion = "19w03b"
-def yarnVersion = "19w03b.2"
+def minecraftVersion = "19w03c"
+def yarnVersion = "19w03c.4"
 def fabricVersion = "0.1.4.76"
 
 minecraft {
+}
+
+processResources {
+	filesMatching('fabric.mod.json') {
+		expand 'version': project.version
+	}
+	inputs.property "version", project.version
 }
 
 dependencies {
