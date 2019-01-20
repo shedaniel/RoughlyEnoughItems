@@ -46,7 +46,7 @@ public class ItemListOverlay extends Drawable implements IWidget {
     public void draw(int int_1, int int_2, float float_1) {
         widgets.forEach(widget -> widget.draw(int_1, int_2, float_1));
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
-        if (rectangle.contains(ClientHelper.getMouseLocation()) && ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty())
+        if (rectangle.contains(ClientHelper.getMouseLocation()) && ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty() && MinecraftClient.getInstance().isInSingleplayer())
             GuiHelper.getOverlay(containerGui.getContainerGui()).addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.translate("text.rei.delete_items"))));
     }
     

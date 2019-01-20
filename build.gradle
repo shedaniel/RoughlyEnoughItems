@@ -6,7 +6,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 archivesBaseName = "RoughlyEnoughItems"
-version = "2.0.0.39"
+version = "2.0.0.40"
 
 def minecraftVersion = "19w03c"
 def yarnVersion = "19w03c.4"
