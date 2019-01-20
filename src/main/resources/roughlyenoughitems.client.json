@@ -5,7 +5,7 @@
   "package": "me.shedaniel.rei.mixin",
   "refmap": "mixins.roughlyenoughitems.refmap.json",
   "compatibilityLevel": "JAVA_8",
-  "mixins": [
+  "client": [
     "MixinGuiContainer",
     "MixinNetHandlerPlayClient",
     "MixinGuiInventory",

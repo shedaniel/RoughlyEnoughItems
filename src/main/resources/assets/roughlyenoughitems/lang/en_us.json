@@ -30,5 +30,6 @@
   "text.rei.enable_craftable_only": "Enable Craftable Only: ",
   "text.rei.showing_craftable": "Showing Craftable",
   "text.rei.showing_all": "Showing All",
-  "text.rei.delete_items": "§cDelete Item"
+  "text.rei.delete_items": "§cDelete Item",
+  "text.rei.nocheating_in_servers": "§cCheating is disabled in servers."
 }
