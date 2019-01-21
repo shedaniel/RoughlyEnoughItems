@@ -6,7 +6,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 archivesBaseName = "RoughlyEnoughItems"
-version = "2.1.0.41"
+version = "2.1.0.42"
 
 def minecraftVersion = "19w03c"
 def yarnVersion = "19w03c.4"
@@ -25,7 +25,7 @@ processResources {
 dependencies {
 	minecraft "com.mojang:minecraft:${minecraftVersion}"
 	mappings "net.fabricmc:yarn:${yarnVersion}"
-	modCompile "net.fabricmc:fabric-loader:0.3.2.96"
+	modCompile "net.fabricmc:fabric-loader:0.3.3.100"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modCompile "net.fabricmc:fabric:${fabricVersion}"

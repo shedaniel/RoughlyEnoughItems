@@ -15,18 +15,22 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.networking.CustomPayloadPacketRegistry;
 import net.fabricmc.loader.FabricLoader;
 import net.fabricmc.loader.ModContainer;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sortme.ChatMessageType;
+import net.minecraft.text.StringTextComponent;
 import net.minecraft.text.TranslatableTextComponent;
 import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -103,41 +107,46 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
     
     private void discoverPlugins() {
         Collection<ModContainer> modContainers = FabricLoader.INSTANCE.getModContainers();
-        List<REIPluginInfo> pluginInfos = Lists.newArrayList();
+        List<REIPluginInfo> pluginInfoList = Lists.newArrayList();
         JsonParser parser = new JsonParser();
         modContainers.forEach(modContainer -> {
+            InputStream inputStream = null;
             if (modContainer.getOriginFile().isFile())
                 try (JarFile file = new JarFile(modContainer.getOriginFile())) {
-                    ZipEntry entry = file.getEntry("plugins" + File.separator + "rei.plugin.json");
-                    if (entry != null) {
-                        InputStream in = file.getInputStream(entry);
-                        JsonElement jsonElement = parser.parse(new InputStreamReader(in));
-                        if (jsonElement != null && jsonElement.isJsonObject()) {
-                            REIPluginInfo info = REIPluginInfo.GSON.fromJson(jsonElement, REIPluginInfo.class);
-                            if (info != null)
-                                pluginInfos.add(info);
-                        }
-                    }
+                    ZipEntry entry = file.getEntry("plugins" + File.separatorChar + "rei.plugin.json");
+                    if (entry != null)
+                        inputStream = file.getInputStream(entry);
                 } catch (Exception e) {
-                    RoughlyEnoughItemsCore.LOGGER.error("REI: Failed to load REI plugin info from " + modContainer.getInfo().getId() + " when it should can. (" + e.getLocalizedMessage() + ")");
+                    RoughlyEnoughItemsCore.LOGGER.error("REI: Failed to load plugin file from " + modContainer.getInfo().getId() + ". (" + e.getLocalizedMessage() + ")");
                 }
             else if (modContainer.getOriginFile().isDirectory()) {
-                File modInfo = new File(modContainer.getOriginFile(), "plugins" + File.separator + "rei.plugin.json");
+                File modInfo = new File(modContainer.getOriginFile(), "plugins" + File.separatorChar + "rei.plugin.json");
                 if (modInfo.exists())
                     try {
-                        InputStream in = Files.newInputStream(modInfo.toPath());
-                        JsonElement jsonElement = parser.parse(new InputStreamReader(in));
-                        if (jsonElement != null && jsonElement.isJsonObject()) {
-                            REIPluginInfo info = REIPluginInfo.GSON.fromJson(jsonElement, REIPluginInfo.class);
-                            if (info != null)
-                                pluginInfos.add(info);
-                        }
+                        inputStream = Files.newInputStream(modInfo.toPath(), StandardOpenOption.READ);
                     } catch (Exception e) {
-                        RoughlyEnoughItemsCore.LOGGER.error("REI: Failed to load REI plugin info from " + modContainer.getInfo().getId() + " when it should can. (" + e.getLocalizedMessage() + ")");
+                        RoughlyEnoughItemsCore.LOGGER.error("REI: Failed to load plugin file from " + modContainer.getInfo().getId() + ". (" + e.getLocalizedMessage() + ")");
                     }
             }
+            if (inputStream != null)
+                try {
+                    JsonElement jsonElement = parser.parse(new InputStreamReader(inputStream));
+                    if (jsonElement != null && jsonElement.isJsonObject()) {
+                        REIPluginInfo info = REIPluginInfo.GSON.fromJson(jsonElement, REIPluginInfo.class);
+                        if (info != null)
+                            pluginInfoList.add(info);
+                    }
+                } catch (Exception e) {
+                    RoughlyEnoughItemsCore.LOGGER.error("REI: Failed to load REI plugin info from " + modContainer.getInfo().getId() + ". (" + e.getLocalizedMessage() + ")");
+                } finally {
+                    try {
+                        inputStream.close();
+                    } catch (IOException e) {
+                        RoughlyEnoughItemsCore.LOGGER.error("REI: Failed to close input stream from " + modContainer.getInfo().getId() + ". (" + e.getLocalizedMessage() + ")");
+                    }
+                }
         });
-        pluginInfos.stream().forEachOrdered(reiPluginInfo -> {
+        pluginInfoList.stream().forEachOrdered(reiPluginInfo -> {
             reiPluginInfo.getPlugins().forEach(reiPlugin -> {
                 try {
                     Identifier identifier = new Identifier(reiPlugin.getIdentifier());
@@ -146,7 +155,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
                     RoughlyEnoughItemsCore.registerPlugin(identifier, plugin);
                     RoughlyEnoughItemsCore.LOGGER.info("REI: Registered REI plugin: " + reiPlugin.getIdentifier());
                 } catch (Exception e) {
-                    RoughlyEnoughItemsCore.LOGGER.error("REI: Failed to load REI plugin: " + reiPlugin.getIdentifier() + " (" + e.getLocalizedMessage() + ")");
+                    RoughlyEnoughItemsCore.LOGGER.error("REI: Failed to register REI plugin: " + reiPlugin.getIdentifier() + ". (" + e.getLocalizedMessage() + ")");
                 }
             });
         });
@@ -162,7 +171,11 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
             ServerPlayerEntity player = (ServerPlayerEntity) packetContext.getPlayer();
             ItemStack stack = packetByteBuf.readItemStack();
             if (player.inventory.insertStack(stack.copy()))
-                player.sendChatMessage(new TranslatableTextComponent("text.rei.cheat_items", stack.getDisplayName().getFormattedText(), stack.getAmount(), player.getEntityName()), ChatMessageType.SYSTEM);
+                player.sendChatMessage(new StringTextComponent(I18n.translate("text.rei.cheat_items")
+                        .replaceAll("\\{item_name}", stack.copy().getDisplayName().getFormattedText())
+                        .replaceAll("\\{item_count}", stack.copy().getAmount() + "")
+                        .replaceAll("\\{player_name}", player.getEntityName())
+                ), ChatMessageType.SYSTEM);
             else
                 player.sendChatMessage(new TranslatableTextComponent("text.rei.failed_cheat_items"), ChatMessageType.SYSTEM);
         });
