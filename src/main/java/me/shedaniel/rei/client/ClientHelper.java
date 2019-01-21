@@ -2,6 +2,8 @@ package me.shedaniel.rei.client;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import io.netty.buffer.Unpooled;
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.IRecipeCategory;
 import me.shedaniel.rei.api.IRecipeDisplay;
 import me.shedaniel.rei.gui.ContainerGuiOverlay;
@@ -70,8 +72,6 @@ public class ClientHelper implements ClientLoaded {
     }
     
     public static boolean isCheating() {
-        if (!Minecraft.getInstance().isSingleplayer())
-            cheating = false;
         return cheating;
     }
     
@@ -80,17 +80,33 @@ public class ClientHelper implements ClientLoaded {
     }
     
     public static void sendDeletePacket() {
+        if (Minecraft.getInstance().playerController.isInCreativeMode()) {
+            Minecraft.getInstance().player.inventory.setItemStack(ItemStack.EMPTY);
+            return;
+        }
         DeleteItemsPacket message = new DeleteItemsPacket();
         Minecraft.getInstance().getConnection().sendPacket(message);
     }
     
     public static boolean tryCheatingStack(ItemStack cheatedStack) {
-        try {
-            CreateItemsPacket message = new CreateItemsPacket(cheatedStack.copy());
-            Minecraft.getInstance().getConnection().sendPacket(message);
+        if (Minecraft.getInstance().isSingleplayer()) {
+            try {
+                CreateItemsPacket message = new CreateItemsPacket(cheatedStack.copy());
+                Minecraft.getInstance().getConnection().sendPacket(message);
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        } else {
+            ResourceLocation location = IRegistry.ITEM.getKey(cheatedStack.getItem());
+            String tagMessage = cheatedStack.copy().getTag() != null && !cheatedStack.copy().getTag().isEmpty() ? cheatedStack.copy().getTag().toString() : "";
+            String madeUpCommand = RoughlyEnoughItemsCore.getConfigHelper().getGiveCommandPrefix() + " " + Minecraft.getInstance().player.getScoreboardName() + " " +
+                    location.toString() + tagMessage + (cheatedStack.getCount() != 1 ? " " + cheatedStack.getCount() : "");
+            if (madeUpCommand.length() > 256)
+                madeUpCommand = RoughlyEnoughItemsCore.getConfigHelper().getGiveCommandPrefix() + " " + Minecraft.getInstance().player.getScoreboardName() + " " +
+                        location.toString() + (cheatedStack.getCount() != 1 ? " " + cheatedStack.getCount() : "");
+            Minecraft.getInstance().player.sendChatMessage(madeUpCommand);
             return true;
-        } catch (Exception e) {
-            return false;
         }
     }
     

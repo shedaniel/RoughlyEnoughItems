@@ -29,8 +29,8 @@ import java.util.Map;
 
 public class RecipeViewingWidget extends GuiScreen {
     
+    public static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private static final ResourceLocation CREATIVE_INVENTORY_TABS = new ResourceLocation("textures/gui/container/creative_inventory/tabs.png");
-    private static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
     public final int guiWidth = 176;
     public final int guiHeight = 186;
     
@@ -190,10 +190,10 @@ public class RecipeViewingWidget extends GuiScreen {
         final SpeedCraftFunctional functional = functional0[0];
         if (page * getRecipesPerPage() < categoriesMap.get(selectedCategory).size()) {
             IRecipeDisplay topDisplay = categoriesMap.get(selectedCategory).get(page * getRecipesPerPage());
-            widgets.addAll(selectedCategory.setupDisplay(getParent(), topDisplay, new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 40, 150, selectedCategory.usesFullPage() ? 118 : 66)));
+            widgets.addAll(selectedCategory.setupDisplay(getParent(), topDisplay, new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 40, 150, selectedCategory.usesFullPage() ? 140 : 66)));
             if (supplier != null) {
                 ButtonWidget btn;
-                widgets.add(btn = new ButtonWidget(supplier.get(new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 40, 150, selectedCategory.usesFullPage() ? 118 : 66)), "+") {
+                widgets.add(btn = new ButtonWidget(supplier.get(new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 40, 150, selectedCategory.usesFullPage() ? 140 : 66)), "+") {
                     @Override
                     public void onPressed(int button, double mouseX, double mouseY) {
                         Minecraft.getInstance().displayGuiScreen(parent.getContainerGui());
@@ -214,10 +214,10 @@ public class RecipeViewingWidget extends GuiScreen {
             }
             if (!selectedCategory.usesFullPage() && page * getRecipesPerPage() + 1 < categoriesMap.get(selectedCategory).size()) {
                 IRecipeDisplay middleDisplay = categoriesMap.get(selectedCategory).get(page * getRecipesPerPage() + 1);
-                widgets.addAll(selectedCategory.setupDisplay(getParent(), middleDisplay, new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 108, 150, 66)));
+                widgets.addAll(selectedCategory.setupDisplay(getParent(), middleDisplay, new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 113, 150, 66)));
                 if (supplier != null) {
                     ButtonWidget btn;
-                    widgets.add(btn = new ButtonWidget(supplier.get(new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 108, 150, 66)), "+") {
+                    widgets.add(btn = new ButtonWidget(supplier.get(new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 113, 150, 66)), "+") {
                         @Override
                         public void onPressed(int button, double mouseX, double mouseY) {
                             Minecraft.getInstance().displayGuiScreen(parent.getContainerGui());
@@ -272,10 +272,14 @@ public class RecipeViewingWidget extends GuiScreen {
     @Override
     public void drawDefaultBackground() {
         drawWorldBackground(0);
-        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderHelper.disableStandardItemLighting();
-        this.mc.getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
-        this.drawTexturedModalRect((int) bounds.getX(), (int) bounds.getY(), 0, 0, (int) bounds.getWidth(), (int) bounds.getHeight());
+        if (selectedCategory != null)
+            selectedCategory.drawCategoryBackground(bounds);
+        else {
+            GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+            RenderHelper.disableStandardItemLighting();
+            this.mc.getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
+            this.drawTexturedModalRect((int) bounds.getX(), (int) bounds.getY(), 0, 0, (int) bounds.getWidth(), (int) bounds.getHeight());
+        }
     }
     
     public int getTotalPages(IRecipeCategory category) {

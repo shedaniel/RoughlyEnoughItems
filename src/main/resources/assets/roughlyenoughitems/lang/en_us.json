@@ -16,7 +16,7 @@
   "category.rei.brewing.result": "§eResulted Potion",
   "text.rei.config": "Config",
   "text.rei.centre_searchbox": "Right Search Box: ",
-  "text.rei.cheat_items": "Given [%s] x%d to %s.",
+  "text.rei.cheat_items": "Given [{item_name}] x{item_count} to {player_name}.",
   "text.rei.failed_cheat_items": "§cFailed to give items.",
   "text.rei.list_ordering": "Item List Ordering",
   "text.rei.list_ordering_button": "%s [%s]",

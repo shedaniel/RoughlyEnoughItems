@@ -61,6 +61,10 @@ public class ConfigHelper {
         saveConfig();
     }
     
+    public String getGiveCommandPrefix() {
+        return config.giveCommandPrefix;
+    }
+    
     public REIItemListOrdering getItemListOrdering() {
         return config.itemListOrdering;
     }

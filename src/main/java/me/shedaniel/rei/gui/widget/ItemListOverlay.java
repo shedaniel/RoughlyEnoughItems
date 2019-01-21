@@ -45,7 +45,7 @@ public class ItemListOverlay extends Gui implements IWidget {
     public void draw(int int_1, int int_2, float float_1) {
         widgets.forEach(widget -> widget.draw(int_1, int_2, float_1));
         EntityPlayerSP player = Minecraft.getInstance().player;
-        if (rectangle.contains(ClientHelper.getMouseLocation()) && ClientHelper.isCheating() && !player.inventory.getItemStack().isEmpty())
+        if (rectangle.contains(ClientHelper.getMouseLocation()) && ClientHelper.isCheating() && !player.inventory.getItemStack().isEmpty() && Minecraft.getInstance().isSingleplayer())
             GuiHelper.getOverlay(containerGui.getContainerGui()).addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.format("text.rei.delete_items"))));
     }
     
@@ -72,7 +72,7 @@ public class ItemListOverlay extends Gui implements IWidget {
                 @Override
                 protected void drawToolTip(ItemStack itemStack) {
                     EntityPlayerSP player = Minecraft.getInstance().player;
-                    if (!ClientHelper.isCheating() || player.inventory.getItemStack().isEmpty())
+                    if (!ClientHelper.isCheating() || player.inventory.getItemStack().isEmpty() || !Minecraft.getInstance().isSingleplayer())
                         super.drawToolTip(itemStack);
                 }
                 
@@ -211,11 +211,11 @@ public class ItemListOverlay extends Gui implements IWidget {
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
         EntityPlayerSP player = Minecraft.getInstance().player;
         if (rectangle.contains(double_1, double_2))
-            if (ClientHelper.isCheating() && !player.inventory.getItemStack().isEmpty()) {
+            if (ClientHelper.isCheating() && !player.inventory.getItemStack().isEmpty() && Minecraft.getInstance().isSingleplayer()) {
                 ClientHelper.sendDeletePacket();
                 return true;
             }
-        if (!player.inventory.getItemStack().isEmpty())
+        if (!player.inventory.getItemStack().isEmpty() && Minecraft.getInstance().isSingleplayer())
             return false;
         if (onMouseClick(int_1, double_1, double_2))
             return true;

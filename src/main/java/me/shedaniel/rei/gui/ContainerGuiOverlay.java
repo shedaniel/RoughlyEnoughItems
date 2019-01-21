@@ -18,7 +18,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -76,15 +78,11 @@ public class ContainerGuiOverlay extends GuiScreen {
             public void draw(int int_1, int int_2, float float_1) {
                 this.text = getCheatModeText();
                 super.draw(int_1, int_2, float_1);
-                if (getBounds().contains(int_1, int_2) && !Minecraft.getInstance().isSingleplayer())
-                    ContainerGuiOverlay.this.addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(),
-                            Arrays.asList(I18n.format("text.rei.nocheating_in_servers").split("\n"))));
             }
             
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
-                if (Minecraft.getInstance().isSingleplayer())
-                    ClientHelper.setCheating(!ClientHelper.isCheating());
+                ClientHelper.setCheating(!ClientHelper.isCheating());
             }
         });
         widgets.add(new ButtonWidget(10, 35, 40, 20, I18n.format("text.rei.config")) {
@@ -245,7 +243,8 @@ public class ContainerGuiOverlay extends GuiScreen {
                 buttonLeft.onPressed(0, 0, 0);
             else if (amount < 0 && buttonRight.enabled)
                 buttonRight.onPressed(0, 0, 0);
-            else return false;
+            else
+                return false;
             return true;
         }
         for(IWidget widget : widgets)
