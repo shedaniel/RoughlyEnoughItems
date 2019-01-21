@@ -16,6 +16,8 @@
   "category.rei.brewing.result": "§e輸出藥水",
   "text.rei.config": "設置",
   "text.rei.centre_searchbox": "右置搜索欄: ",
+  "text.rei.cheat_items": "已將 {item_count} 個 [{item_name}] 給予 {player_name}",
+  "text.rei.failed_cheat_items": "§c不能給予物品.",
   "text.rei.list_ordering": "物品清單排序",
   "text.rei.list_ordering_button": "%s [%s]",
   "ordering.rei.ascending": "順序",

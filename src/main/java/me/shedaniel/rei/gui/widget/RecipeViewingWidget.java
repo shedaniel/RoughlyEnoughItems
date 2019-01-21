@@ -190,10 +190,10 @@ public class RecipeViewingWidget extends Gui {
         final SpeedCraftFunctional functional = functional0[0];
         if (page * getRecipesPerPage() < categoriesMap.get(selectedCategory).size()) {
             IRecipeDisplay topDisplay = categoriesMap.get(selectedCategory).get(page * getRecipesPerPage());
-            widgets.addAll(selectedCategory.setupDisplay(getParent(), topDisplay, new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 40, 150, selectedCategory.usesFullPage() ? 118 : 66)));
+            widgets.addAll(selectedCategory.setupDisplay(getParent(), topDisplay, new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 40, 150, selectedCategory.usesFullPage() ? 140 : 66)));
             if (supplier != null) {
                 ButtonWidget btn;
-                widgets.add(btn = new ButtonWidget(supplier.get(new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 40, 150, selectedCategory.usesFullPage() ? 118 : 66)), "+") {
+                widgets.add(btn = new ButtonWidget(supplier.get(new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 40, 150, selectedCategory.usesFullPage() ? 140 : 66)), "+") {
                     @Override
                     public void onPressed(int button, double mouseX, double mouseY) {
                         MinecraftClient.getInstance().openGui(parent.getContainerGui());
@@ -214,10 +214,10 @@ public class RecipeViewingWidget extends Gui {
             }
             if (!selectedCategory.usesFullPage() && page * getRecipesPerPage() + 1 < categoriesMap.get(selectedCategory).size()) {
                 IRecipeDisplay middleDisplay = categoriesMap.get(selectedCategory).get(page * getRecipesPerPage() + 1);
-                widgets.addAll(selectedCategory.setupDisplay(getParent(), middleDisplay, new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 108, 150, 66)));
+                widgets.addAll(selectedCategory.setupDisplay(getParent(), middleDisplay, new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 113, 150, 66)));
                 if (supplier != null) {
                     ButtonWidget btn;
-                    widgets.add(btn = new ButtonWidget(supplier.get(new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 108, 150, 66)), "+") {
+                    widgets.add(btn = new ButtonWidget(supplier.get(new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 113, 150, 66)), "+") {
                         @Override
                         public void onPressed(int button, double mouseX, double mouseY) {
                             MinecraftClient.getInstance().openGui(parent.getContainerGui());
