@@ -15,5 +15,6 @@ public class REIConfig {
     public boolean isAscending = true;
     public boolean enableCraftableOnlyButton = true;
     public boolean sideSearchField = false;
+    public String giveCommandPrefix = "/give";
     
 }

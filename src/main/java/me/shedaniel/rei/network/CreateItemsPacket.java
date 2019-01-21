@@ -1,5 +1,6 @@
 package me.shedaniel.rei.network;
 
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -8,9 +9,8 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraft.util.text.ChatType;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
-import org.dimdev.rift.network.Message;
-import org.dimdev.rift.network.ServerMessageContext;
 
 import java.io.IOException;
 
@@ -42,8 +42,13 @@ public class CreateItemsPacket implements Packet<INetHandlerPlayServer> {
         NetHandlerPlayServer server = (NetHandlerPlayServer) iNetHandlerPlayServer;
         EntityPlayerMP player = server.player;
         if (player.inventory.addItemStackToInventory(stack.copy()))
-            player.sendMessage(new TextComponentTranslation("text.rei.cheat_items", stack.getDisplayName().getFormattedText(), stack.getCount(), player.getScoreboardName()), ChatType.SYSTEM);
-        else player.sendMessage(new TextComponentTranslation("text.rei.failed_cheat_items"), ChatType.SYSTEM);
+            player.sendMessage(new TextComponentString(I18n.format("text.rei.cheat_items")
+                    .replaceAll("\\{item_name}", stack.copy().getDisplayName().getFormattedText())
+                    .replaceAll("\\{item_count}", stack.copy().getCount() + "")
+                    .replaceAll("\\{player_name}", player.getScoreboardName())
+            ), ChatType.SYSTEM);
+        else
+            player.sendMessage(new TextComponentTranslation("text.rei.failed_cheat_items"), ChatType.SYSTEM);
     }
     
 }

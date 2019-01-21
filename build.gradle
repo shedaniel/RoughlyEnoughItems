@@ -16,7 +16,7 @@ apply plugin: 'org.spongepowered.mixin'
 apply plugin: 'java'
 
 group 'me.shedaniel'
-version '2.0.0.11'
+version '2.1.0.12'
 archivesBaseName = 'RoughlyEnoughItems'
 
 sourceCompatibility = 1.8
@@ -33,6 +33,13 @@ repositories {
 dependencies {
     implementation 'com.github.Chocohead:Rift:jitpack-SNAPSHOT:dev'
     implementation 'com.google.code.gson:gson:2.8.5'
+}
+
+processResources {
+    filesMatching('riftmod.json') {
+        expand 'version': project.version
+    }
+    inputs.property "version", project.version
 }
 
 mixin {
