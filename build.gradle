@@ -30,7 +30,7 @@ repositories {
 dependencies {
 	minecraft "com.mojang:minecraft:${minecraftVersion}"
 	mappings "net.fabricmc:yarn:${yarnVersion}"
-	modCompile "net.fabricmc:fabric-loader:0.3.3.100"
+	modCompile "net.fabricmc:fabric-loader:0.3.3.101"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modCompile "net.fabricmc:fabric:${fabricVersion}"
