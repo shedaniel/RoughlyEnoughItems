@@ -2,19 +2,16 @@ package me.shedaniel.rei;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 import me.shedaniel.rei.api.IRecipePlugin;
-import me.shedaniel.rei.api.REIPluginInfo;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.ConfigHelper;
 import me.shedaniel.rei.client.RecipeHelper;
 import me.shedaniel.rei.listeners.IListener;
+import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.api.loader.Loader;
 import net.fabricmc.fabric.networking.CustomPayloadPacketRegistry;
-import net.fabricmc.loader.FabricLoader;
-import net.fabricmc.loader.ModContainer;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -25,19 +22,10 @@ import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.jar.JarFile;
 import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
 
 public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitializer {
     
@@ -84,7 +72,9 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
     @Override
     public void onInitializeClient() {
         registerREIListeners();
-        discoverPlugins();
+        // If pluginloader is not installed, base functionality should still remain
+        if (!Loader.getInstance().isModLoaded("pluginloader"))
+            registerPlugin(new Identifier("roughlyenoughitems", "default_plugin"), new DefaultPlugin());
         configHelper = new ConfigHelper();
     }
     
@@ -103,62 +93,6 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
     @Override
     public void onInitialize() {
         registerFabricPackets();
-    }
-    
-    private void discoverPlugins() {
-        Collection<ModContainer> modContainers = FabricLoader.INSTANCE.getModContainers();
-        List<REIPluginInfo> pluginInfoList = Lists.newArrayList();
-        JsonParser parser = new JsonParser();
-        modContainers.forEach(modContainer -> {
-            InputStream inputStream = null;
-            if (modContainer.getOriginFile().isFile())
-                try (JarFile file = new JarFile(modContainer.getOriginFile())) {
-                    ZipEntry entry = file.getEntry("plugins" + File.separatorChar + "rei.plugin.json");
-                    if (entry != null)
-                        inputStream = file.getInputStream(entry);
-                } catch (Exception e) {
-                    RoughlyEnoughItemsCore.LOGGER.error("REI: Failed to load plugin file from " + modContainer.getInfo().getId() + ". (" + e.getLocalizedMessage() + ")");
-                }
-            else if (modContainer.getOriginFile().isDirectory()) {
-                File modInfo = new File(modContainer.getOriginFile(), "plugins" + File.separatorChar + "rei.plugin.json");
-                if (modInfo.exists())
-                    try {
-                        inputStream = Files.newInputStream(modInfo.toPath(), StandardOpenOption.READ);
-                    } catch (Exception e) {
-                        RoughlyEnoughItemsCore.LOGGER.error("REI: Failed to load plugin file from " + modContainer.getInfo().getId() + ". (" + e.getLocalizedMessage() + ")");
-                    }
-            }
-            if (inputStream != null)
-                try {
-                    JsonElement jsonElement = parser.parse(new InputStreamReader(inputStream));
-                    if (jsonElement != null && jsonElement.isJsonObject()) {
-                        REIPluginInfo info = REIPluginInfo.GSON.fromJson(jsonElement, REIPluginInfo.class);
-                        if (info != null)
-                            pluginInfoList.add(info);
-                    }
-                } catch (Exception e) {
-                    RoughlyEnoughItemsCore.LOGGER.error("REI: Failed to load REI plugin info from " + modContainer.getInfo().getId() + ". (" + e.getLocalizedMessage() + ")");
-                } finally {
-                    try {
-                        inputStream.close();
-                    } catch (IOException e) {
-                        RoughlyEnoughItemsCore.LOGGER.error("REI: Failed to close input stream from " + modContainer.getInfo().getId() + ". (" + e.getLocalizedMessage() + ")");
-                    }
-                }
-        });
-        pluginInfoList.stream().forEachOrdered(reiPluginInfo -> {
-            reiPluginInfo.getPlugins().forEach(reiPlugin -> {
-                try {
-                    Identifier identifier = new Identifier(reiPlugin.getIdentifier());
-                    Class<?> aClass = Class.forName(reiPlugin.getPluginClass());
-                    IRecipePlugin plugin = IRecipePlugin.class.cast(aClass.newInstance());
-                    RoughlyEnoughItemsCore.registerPlugin(identifier, plugin);
-                    RoughlyEnoughItemsCore.LOGGER.info("REI: Registered REI plugin: " + reiPlugin.getIdentifier());
-                } catch (Exception e) {
-                    RoughlyEnoughItemsCore.LOGGER.error("REI: Failed to register REI plugin: " + reiPlugin.getIdentifier() + ". (" + e.getLocalizedMessage() + ")");
-                }
-            });
-        });
     }
     
     private void registerFabricPackets() {

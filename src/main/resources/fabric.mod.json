@@ -14,6 +14,9 @@
   "requires": {
     "fabric": "0.1.4.76"
   },
+  "recommended": {
+    "pluginloader": "1.0.7"
+  },
   "mixins": {
     "client": "roughlyenoughitems.client.json"
   }
