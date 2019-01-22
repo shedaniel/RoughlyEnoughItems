@@ -67,7 +67,7 @@ public class RecipeViewingWidget extends Gui {
     
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
-        if (int_1 == 256 && this.doesEscapeKeyClose()) {
+        if ((int_1 == 256 || this.client.options.keyInventory.matchesKey(int_1, int_2)) && this.doesEscapeKeyClose()) {
             MinecraftClient.getInstance().openGui(parent.getContainerGui());
             return true;
         }

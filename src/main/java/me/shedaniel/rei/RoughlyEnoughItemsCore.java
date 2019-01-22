@@ -55,6 +55,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
     
     public static IRecipePlugin registerPlugin(Identifier identifier, IRecipePlugin plugin) {
         plugins.put(identifier, plugin);
+        RoughlyEnoughItemsCore.LOGGER.info("REI: Registered plugin %s from %s", identifier.toString(), plugin.getClass());
         return plugin;
     }
     
@@ -73,8 +74,10 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
     public void onInitializeClient() {
         registerREIListeners();
         // If pluginloader is not installed, base functionality should still remain
-        if (!Loader.getInstance().isModLoaded("pluginloader"))
+        if (!Loader.getInstance().isModLoaded("pluginloader")) {
+            RoughlyEnoughItemsCore.LOGGER.warn("REI: Plugin Loader is not loaded! Please consider installing https://minecraft.curseforge.com/projects/pluginloader for REI plugin compatibility!");
             registerPlugin(new Identifier("roughlyenoughitems", "default_plugin"), new DefaultPlugin());
+        }
         configHelper = new ConfigHelper();
     }
     
