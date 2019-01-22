@@ -170,7 +170,7 @@ public class ClientHelper implements ClientLoaded {
     
     private boolean alreadyContain(ItemStack stack) {
         for(ItemStack itemStack : itemList)
-            if (ItemStack.areItemsEqual(stack, itemStack))
+            if (ItemStack.areItemStacksEqual(stack, itemStack))
                 return true;
         return false;
     }

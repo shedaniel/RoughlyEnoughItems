@@ -3,6 +3,7 @@ package me.shedaniel.rei.client;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.RoughlyEnoughItemsPlugin;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.listeners.RecipeSync;
 import net.minecraft.item.ItemStack;
