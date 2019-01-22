@@ -11,7 +11,7 @@
       "side": "client"
     },
     {
-      "class": "me.shedaniel.rei.api.RoughlyEnoughItemsPlugin",
+      "class": "me.shedaniel.rei.RoughlyEnoughItemsPlugin",
       "side": "client",
       "priority": -1000
     },

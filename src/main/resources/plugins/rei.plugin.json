@@ -1,8 +1,0 @@
-{
-  "plugins": [
-    {
-      "identifier": "roughlyenoughitems:default_plugin",
-      "class": "me.shedaniel.rei.plugin.DefaultPlugin"
-    }
-  ]
-}

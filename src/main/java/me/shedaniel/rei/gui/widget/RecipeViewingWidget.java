@@ -67,7 +67,7 @@ public class RecipeViewingWidget extends GuiScreen {
     
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
-        if (int_1 == 256 && this.allowCloseWithEscape()) {
+        if ((int_1 == 256 || mc.gameSettings.keyBindInventory.matchesKey(int_1, int_2)) && this.allowCloseWithEscape()) {
             Minecraft.getInstance().displayGuiScreen(parent.getContainerGui());
             return true;
         }
