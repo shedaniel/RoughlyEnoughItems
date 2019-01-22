@@ -11,6 +11,7 @@ version = "2.1.0.42"
 def minecraftVersion = "19w03c"
 def yarnVersion = "19w03c.4"
 def fabricVersion = "0.1.4.76"
+def pluginLoaderVersion = "1.14-1.0.6-8"
 
 minecraft {
 }
@@ -22,6 +23,10 @@ processResources {
 	inputs.property "version", project.version
 }
 
+repositories {
+	maven { url "https://tehnut.info/maven/" }
+}
+
 dependencies {
 	minecraft "com.mojang:minecraft:${minecraftVersion}"
 	mappings "net.fabricmc:yarn:${yarnVersion}"
@@ -29,6 +34,8 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modCompile "net.fabricmc:fabric:${fabricVersion}"
+	
+	modCompile "info.tehnut.pluginloader:plugin-loader:${pluginLoaderVersion}"
 }
 
 // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
