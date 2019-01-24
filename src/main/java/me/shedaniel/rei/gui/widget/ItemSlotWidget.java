@@ -88,9 +88,11 @@ public class ItemSlotWidget extends Drawable implements HighlightableWidget {
         final String modString = "§9§o" + ClientHelper.getModFromItemStack(itemStack);
         MinecraftClient mc = MinecraftClient.getInstance();
         List<String> toolTip = Lists.newArrayList();
-        if (containerGui != null)
+        try {
             toolTip = containerGui.getContainerGui().getStackTooltip(itemStack).stream().filter(s -> !s.equals(modString)).collect(Collectors.toList());
-        else toolTip.add(itemStack.getDisplayName().getFormattedText());
+        } catch (Exception e) {
+            toolTip.add(itemStack.getDisplayName().getFormattedText());
+        }
         toolTip.addAll(getExtraToolTips(itemStack));
         toolTip.add(modString);
         return toolTip;

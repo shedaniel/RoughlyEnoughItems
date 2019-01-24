@@ -55,7 +55,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
     
     public static IRecipePlugin registerPlugin(Identifier identifier, IRecipePlugin plugin) {
         plugins.put(identifier, plugin);
-        RoughlyEnoughItemsCore.LOGGER.info("REI: Registered plugin %s from %s", identifier.toString(), plugin.getClass());
+        RoughlyEnoughItemsCore.LOGGER.info("REI: Registered plugin %s from %s", identifier.toString(), plugin.getClass().getSimpleName());
         return plugin;
     }
     
