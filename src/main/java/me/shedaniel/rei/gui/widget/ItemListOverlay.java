@@ -14,6 +14,7 @@ import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
+import org.apache.commons.lang3.StringUtils;
 
 import java.awt.*;
 import java.util.*;
@@ -67,8 +68,7 @@ public class ItemListOverlay extends Gui implements IWidget {
             int j = i + page * getTotalSlotsPerPage();
             if (j >= currentDisplayed.size())
                 break;
-            widgets.add(new ItemSlotWidget((int) (startX + (i % width) * 18), (int) (startY + MathHelper.floor(i / width) * 18),
-                    currentDisplayed.get(j), false, true, containerGui) {
+            widgets.add(new ItemSlotWidget((int) (startX + (i % width) * 18), (int) (startY + MathHelper.floor(i / width) * 18), currentDisplayed.get(j), false, true, containerGui) {
                 @Override
                 protected void drawToolTip(ItemStack itemStack) {
                     EntityPlayerSP player = Minecraft.getInstance().player;
@@ -117,24 +117,27 @@ public class ItemListOverlay extends Gui implements IWidget {
             });
         if (!RoughlyEnoughItemsCore.getConfigHelper().isAscending())
             Collections.reverse(os);
-        Arrays.stream(searchTerm.split("\\|")).forEachOrdered(s -> {
-            List<SearchArgument> arguments = new ArrayList<>();
-            while (s.startsWith(" ")) s = s.substring(1);
-            while (s.endsWith(" ")) s = s.substring(0, s.length());
-            if (s.startsWith("@-") || s.startsWith("-@"))
-                arguments.add(new SearchArgument(SearchArgument.ArgumentType.MOD, s.substring(2), false));
-            else if (s.startsWith("@"))
-                arguments.add(new SearchArgument(SearchArgument.ArgumentType.MOD, s.substring(1), true));
-            else if (s.startsWith("#-") || s.startsWith("-#"))
-                arguments.add(new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, s.substring(2), false));
-            else if (s.startsWith("#"))
-                arguments.add(new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, s.substring(1), true));
-            else if (s.startsWith("-"))
-                arguments.add(new SearchArgument(SearchArgument.ArgumentType.TEXT, s.substring(1), false));
-            else
-                arguments.add(new SearchArgument(SearchArgument.ArgumentType.TEXT, s, true));
-            os.stream().filter(itemStack -> filterItem(itemStack, arguments)).forEachOrdered(stacks::add);
+        String[] splitSearchTerm = StringUtils.splitByWholeSeparatorPreserveAllTokens(searchTerm, "|");
+        Arrays.stream(splitSearchTerm).forEachOrdered(s -> {
+            List<SearchArgument> arguments = Lists.newArrayList();
+            Arrays.stream(StringUtils.split(s)).forEachOrdered(s1 -> {
+                if (s1.startsWith("@-") || s1.startsWith("-@"))
+                    arguments.add(new SearchArgument(SearchArgument.ArgumentType.MOD, s1.substring(2), false));
+                else if (s1.startsWith("@"))
+                    arguments.add(new SearchArgument(SearchArgument.ArgumentType.MOD, s1.substring(1), true));
+                else if (s1.startsWith("#-") || s1.startsWith("-#"))
+                    arguments.add(new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, s1.substring(2), false));
+                else if (s1.startsWith("#"))
+                    arguments.add(new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, s1.substring(1), true));
+                else if (s1.startsWith("-"))
+                    arguments.add(new SearchArgument(SearchArgument.ArgumentType.TEXT, s1.substring(1), false));
+                else
+                    arguments.add(new SearchArgument(SearchArgument.ArgumentType.TEXT, s1, true));
+            });
+            os.stream().filter(itemStack -> arguments.isEmpty() || filterItem(itemStack, arguments)).forEachOrdered(stacks::add);
         });
+        if (splitSearchTerm.length == 0)
+            stacks.addAll(os);
         List<ItemStack> workingItems = RoughlyEnoughItemsCore.getConfigHelper().craftableOnly() && inventoryItems.size() > 0 ? new ArrayList<>() : new LinkedList<>(ol);
         if (RoughlyEnoughItemsCore.getConfigHelper().craftableOnly()) {
             RecipeHelper.findCraftableByItems(inventoryItems).forEach(workingItems::add);
@@ -184,9 +187,7 @@ public class ItemListOverlay extends Gui implements IWidget {
     
     private List<String> getStackTooltip(ItemStack itemStack) {
         Minecraft client = Minecraft.getInstance();
-        return itemStack.getTooltip(client.player, client.gameSettings.advancedItemTooltips ?
-                ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL).stream().map(
-                ITextComponent::getFormattedText).collect(Collectors.toList());
+        return itemStack.getTooltip(client.player, client.gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL).stream().map(ITextComponent::getFormattedText).collect(Collectors.toList());
     }
     
     private void calculateListSize(Rectangle rect) {
