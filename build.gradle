@@ -16,7 +16,7 @@ apply plugin: 'org.spongepowered.mixin'
 apply plugin: 'java'
 
 group 'me.shedaniel'
-version '2.1.0.13'
+version '2.1.0.14'
 archivesBaseName = 'RoughlyEnoughItems'
 
 sourceCompatibility = 1.8

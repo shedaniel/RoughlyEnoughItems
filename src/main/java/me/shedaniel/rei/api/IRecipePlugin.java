@@ -1,8 +1,8 @@
 package me.shedaniel.rei.api;
 
-import me.shedaniel.rei.listeners.IListener;
-
 public interface IRecipePlugin {
+    
+    default public void onFirstLoad() {}
     
     public void registerPluginCategories();
     
