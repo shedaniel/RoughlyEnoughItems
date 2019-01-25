@@ -10,7 +10,9 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(RecipeBookGui.class)
 public class MixinRecipeBookGui implements IMixinRecipeBookGui {
     
-    @Shadow @Final protected RecipeBookGhostSlots ghostSlots;
+    @Shadow
+    @Final
+    protected RecipeBookGhostSlots ghostSlots;
     
     @Override
     public RecipeBookGhostSlots getGhostSlots() {

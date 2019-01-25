@@ -10,6 +10,8 @@
   "category.rei.smelting.fuel": "§eFuel",
   "category.rei.smoking": "Smoking",
   "category.rei.blasting": "Blasting",
+  "category.rei.campfire": "Campfire",
+  "category.rei.campfire.time": "%d Seconds",
   "category.rei.brewing": "Brewing",
   "category.rei.brewing.input": "§eOriginal Potion",
   "category.rei.brewing.reactant": "§eIngredient",

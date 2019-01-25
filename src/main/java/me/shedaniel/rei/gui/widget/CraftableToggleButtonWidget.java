@@ -51,9 +51,7 @@ public abstract class CraftableToggleButtonWidget extends ButtonWidget {
     }
     
     private void drawTooltip() {
-        GuiHelper.getLastOverlay()
-                .addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.translate(RoughlyEnoughItemsCore.getConfigHelper().craftableOnly()
-                        ? "text.rei.showing_craftable" : "text.rei.showing_all"))));
+        GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.translate(RoughlyEnoughItemsCore.getConfigHelper().craftableOnly() ? "text.rei.showing_craftable" : "text.rei.showing_all"))));
     }
     
 }

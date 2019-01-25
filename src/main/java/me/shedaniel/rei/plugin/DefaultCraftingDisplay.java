@@ -2,7 +2,6 @@ package me.shedaniel.rei.plugin;
 
 import me.shedaniel.rei.api.IRecipeDisplay;
 import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.crafting.ShapelessRecipe;
 import net.minecraft.util.Identifier;
 
 public interface DefaultCraftingDisplay<T> extends IRecipeDisplay<Recipe> {

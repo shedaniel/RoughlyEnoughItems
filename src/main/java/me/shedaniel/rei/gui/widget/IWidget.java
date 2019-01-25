@@ -1,6 +1,5 @@
 package me.shedaniel.rei.gui.widget;
 
-import com.google.common.collect.Lists;
 import net.minecraft.client.gui.GuiEventListener;
 
 import java.util.List;

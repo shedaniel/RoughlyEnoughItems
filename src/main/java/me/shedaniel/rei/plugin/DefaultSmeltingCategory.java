@@ -1,19 +1,13 @@
 package me.shedaniel.rei.plugin;
 
-import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.api.IRecipeCategory;
-import me.shedaniel.rei.api.IRecipeCategoryCraftable;
-import me.shedaniel.rei.client.ClientHelper;
-import me.shedaniel.rei.client.GuiHelper;
-import me.shedaniel.rei.gui.widget.*;
+import me.shedaniel.rei.gui.widget.IWidget;
+import me.shedaniel.rei.gui.widget.ItemSlotWidget;
+import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.listeners.IMixinContainerGui;
-import me.shedaniel.rei.listeners.IMixinRecipeBookGui;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.ContainerGui;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.container.FurnaceGui;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.ItemStack;

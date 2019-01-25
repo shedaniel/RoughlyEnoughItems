@@ -1,6 +1,5 @@
 package me.shedaniel.rei.mixin;
 
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
 import me.shedaniel.rei.gui.ContainerGuiOverlay;
@@ -66,7 +65,7 @@ public class MixinContainerGui extends Gui implements IMixinContainerGui {
     @Inject(method = "onInitialized()V", at = @At("RETURN"))
     protected void onInitialized(CallbackInfo info) {
         GuiHelper.resetOverlay();
-        this.listeners.add(GuiHelper.getOverlay(lastGui));
+        this.listeners.add(GuiHelper.getOverlay((IMixinContainerGui) lastGui));
     }
     
     @Inject(method = "draw(IIF)V", at = @At("RETURN"))
@@ -78,7 +77,7 @@ public class MixinContainerGui extends Gui implements IMixinContainerGui {
         }
         if (MinecraftClient.getInstance().currentGui instanceof ContainerGui)
             this.lastGui = (ContainerGui) MinecraftClient.getInstance().currentGui;
-        GuiHelper.getOverlay(lastGui).render(int_1, int_2, float_1);
+        GuiHelper.getOverlay((IMixinContainerGui) lastGui).render(int_1, int_2, float_1);
     }
     
     @Override
@@ -91,15 +90,6 @@ public class MixinContainerGui extends Gui implements IMixinContainerGui {
         return lastGui;
     }
     
-    @Inject(method = "keyPressed(III)Z", at = @At("HEAD"), cancellable = true)
-    public void keyPressed(int int_1, int int_2, int int_3, CallbackInfoReturnable<Boolean> ci) {
-        for(GuiEventListener entry : this.getEntries())
-            if (entry.keyPressed(int_1, int_2, int_3)) {
-                ci.cancel();
-                ci.setReturnValue(true);
-            }
-    }
-    
     @Override
     public Slot getHoveredSlot() {
         return focusedSlot;
@@ -107,12 +97,21 @@ public class MixinContainerGui extends Gui implements IMixinContainerGui {
     
     @Override
     public boolean mouseScrolled(double double_1) {
-        ContainerGuiOverlay overlay = GuiHelper.getOverlay(lastGui);
+        ContainerGuiOverlay overlay = GuiHelper.getOverlay((IMixinContainerGui) lastGui);
         if (GuiHelper.isOverlayVisible() && overlay.getRectangle().contains(ClientHelper.getMouseLocation()))
             for(GuiEventListener entry : this.getEntries())
                 if (entry.mouseScrolled(double_1))
                     return true;
         return super.mouseScrolled(double_1);
+    }
+    
+    @Inject(method = "keyPressed(III)Z", at = @At("HEAD"), cancellable = true)
+    public void keyPressed(int int_1, int int_2, int int_3, CallbackInfoReturnable<Boolean> ci) {
+        for(GuiEventListener entry : this.getEntries())
+            if (entry.keyPressed(int_1, int_2, int_3)) {
+                ci.setReturnValue(true);
+                ci.cancel();
+            }
     }
     
 }

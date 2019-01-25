@@ -1,6 +1,5 @@
 package me.shedaniel.rei.plugin;
 
-import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.IRecipeDisplay;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.ItemStack;

@@ -71,7 +71,7 @@ public class TabWidget extends Drawable implements HighlightableWidget {
     public void draw(int mouseX, int mouseY, float partialTicks) {
         if (shown) {
             int l = (int) this.bounds.getCenterX() - 8, i1 = (int) this.bounds.getCenterY() - 6;
-    
+            
             GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             GuiLighting.disable();
             MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
@@ -90,7 +90,7 @@ public class TabWidget extends Drawable implements HighlightableWidget {
     }
     
     private void drawTooltip() {
-        GuiHelper.getOverlay(recipeViewingWidget.getParent().getContainerGui()).addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(categoryName)));
+        GuiHelper.getOverlay(recipeViewingWidget.getParent()).addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(categoryName)));
     }
     
     @Override

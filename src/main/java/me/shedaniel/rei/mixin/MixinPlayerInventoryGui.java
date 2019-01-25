@@ -18,7 +18,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(PlayerInventoryGui.class)
 public abstract class MixinPlayerInventoryGui extends AbstractPlayerInventoryGui<PlayerContainer> implements RecipeBookProvider {
     
-    @Shadow @Final private RecipeBookGui recipeBook;
+    @Shadow
+    @Final
+    private RecipeBookGui recipeBook;
     
     public MixinPlayerInventoryGui(PlayerContainer container_1, PlayerInventory playerInventory_1, TextComponent textComponent_1) {
         super(container_1, playerInventory_1, textComponent_1);

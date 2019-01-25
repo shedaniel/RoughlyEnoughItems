@@ -12,7 +12,7 @@
     "me.shedaniel.rei.client.ClientHelper"
   ],
   "requires": {
-    "fabric": "0.1.4.76"
+    "fabric": "0.1.4.79"
   },
   "recommended": {
     "pluginloader": "1.0.6"

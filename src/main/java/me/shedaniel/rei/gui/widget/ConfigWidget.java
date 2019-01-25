@@ -9,7 +9,6 @@ import net.minecraft.client.gui.GuiEventListener;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.Window;
-import org.apache.logging.log4j.core.Core;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -51,7 +50,7 @@ public class ConfigWidget extends Gui {
                     e.printStackTrace();
                 }
             }
-        
+            
             @Override
             public void draw(int mouseX, int mouseY, float partialTicks) {
                 text = getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().sideSearchField());
@@ -97,12 +96,11 @@ public class ConfigWidget extends Gui {
                     e.printStackTrace();
                 }
             }
-        
+            
             @Override
             public void draw(int int_1, int int_2, float float_1) {
                 GuiLighting.disable();
-                this.text = I18n.translate("text.rei.list_ordering_button", I18n.translate(RoughlyEnoughItemsCore.getConfigHelper().getItemListOrdering().getNameTranslationKey()),
-                        I18n.translate(RoughlyEnoughItemsCore.getConfigHelper().isAscending() ? "ordering.rei.ascending" : "ordering.rei.descending"));
+                this.text = I18n.translate("text.rei.list_ordering_button", I18n.translate(RoughlyEnoughItemsCore.getConfigHelper().getItemListOrdering().getNameTranslationKey()), I18n.translate(RoughlyEnoughItemsCore.getConfigHelper().isAscending() ? "ordering.rei.ascending" : "ordering.rei.descending"));
                 String t = I18n.translate("text.rei.list_ordering") + ": ";
                 drawString(MinecraftClient.getInstance().fontRenderer, t, parent.width / 2 - 95 - MinecraftClient.getInstance().fontRenderer.getStringWidth(t), 90 + 6, -1);
                 super.draw(int_1, int_2, float_1);
