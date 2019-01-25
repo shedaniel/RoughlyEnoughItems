@@ -81,7 +81,7 @@ public class ItemSlotWidget extends Drawable implements HighlightableWidget {
     
     protected void drawToolTip(ItemStack itemStack) {
         List<String> toolTip = getTooltip(itemStack);
-        GuiHelper.getOverlay(containerGui.getContainerGui()).addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), toolTip));
+        GuiHelper.getOverlay(containerGui).addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), toolTip));
     }
     
     protected List<String> getTooltip(ItemStack itemStack) {
@@ -127,9 +127,9 @@ public class ItemSlotWidget extends Drawable implements HighlightableWidget {
             return false;
         if (getBounds().contains(mouseX, mouseY)) {
             if (button == 0)
-                return ClientHelper.executeRecipeKeyBind(GuiHelper.getOverlay(containerGui.getContainerGui()), getCurrentStack().copy(), containerGui);
+                return ClientHelper.executeRecipeKeyBind(GuiHelper.getOverlay(containerGui), getCurrentStack().copy(), containerGui);
             else if (button == 1)
-                return ClientHelper.executeUsageKeyBind(GuiHelper.getOverlay(containerGui.getContainerGui()), getCurrentStack().copy(), containerGui);
+                return ClientHelper.executeUsageKeyBind(GuiHelper.getOverlay(containerGui), getCurrentStack().copy(), containerGui);
         }
         return false;
     }

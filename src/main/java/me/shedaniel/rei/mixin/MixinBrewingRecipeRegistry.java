@@ -48,8 +48,7 @@ public class MixinBrewingRecipeRegistry {
             registerPotionType(potion_2);
         SELF_POTION_TYPES.forEach(ingredient -> {
             for(ItemStack stack : ingredient.getStackArray()) {
-                DefaultPlugin.registerBrewingDisplay(new DefaultBrewingDisplay(PotionUtil.setPotion(stack.copy(), potion_1), Ingredient.ofItems(new ItemProvider[]{item_1}),
-                        PotionUtil.setPotion(stack.copy(), potion_2)));
+                DefaultPlugin.registerBrewingDisplay(new DefaultBrewingDisplay(PotionUtil.setPotion(stack.copy(), potion_1), Ingredient.ofItems(new ItemProvider[]{item_1}), PotionUtil.setPotion(stack.copy(), potion_2)));
             }
         });
     }
@@ -57,8 +56,7 @@ public class MixinBrewingRecipeRegistry {
     private static void registerPotionType(Potion potion) {
         REGISTERED_POTION_TYPES.add(potion);
         SELF_ITEM_RECIPES.forEach(recipe -> {
-            DefaultPlugin.registerBrewingDisplay(new DefaultBrewingDisplay(PotionUtil.setPotion(recipe.input.getDefaultStack(), potion), recipe.ingredient,
-                    PotionUtil.setPotion(recipe.output.getDefaultStack(), potion)));
+            DefaultPlugin.registerBrewingDisplay(new DefaultBrewingDisplay(PotionUtil.setPotion(recipe.input.getDefaultStack(), potion), recipe.ingredient, PotionUtil.setPotion(recipe.output.getDefaultStack(), potion)));
         });
     }
     

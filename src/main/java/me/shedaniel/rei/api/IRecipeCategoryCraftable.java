@@ -1,7 +1,6 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.gui.widget.IWidget;
-import me.shedaniel.rei.gui.widget.RecipeViewingWidget;
 import me.shedaniel.rei.listeners.IMixinContainerGui;
 import net.minecraft.client.gui.Gui;
 

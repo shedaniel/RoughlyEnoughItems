@@ -22,7 +22,7 @@ public class DefaultSmokingDisplay implements IRecipeDisplay<SmokingRecipe> {
         this.display = recipe;
         List<ItemStack> fuel = Lists.newArrayList();
         this.input = Lists.newArrayList();
-        fuel.addAll(FurnaceBlockEntity.createBurnableMap().keySet().stream().map(Item::getDefaultStack).collect(Collectors.toList()));
+        fuel.addAll(FurnaceBlockEntity.createFuelTimeMap().keySet().stream().map(Item::getDefaultStack).collect(Collectors.toList()));
         recipe.getPreviewInputs().forEach(ingredient -> {
             input.add(Arrays.asList(ingredient.getStackArray()));
         });

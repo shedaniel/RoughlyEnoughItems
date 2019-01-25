@@ -5,8 +5,6 @@ import net.minecraft.client.gui.ContainerGui;
 import net.minecraft.container.Slot;
 import net.minecraft.item.ItemStack;
 
-import java.util.List;
-
 public interface IMixinContainerGui {
     
     public int getContainerLeft();

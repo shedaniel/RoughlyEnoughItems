@@ -8,9 +8,9 @@ targetCompatibility = 1.8
 archivesBaseName = "RoughlyEnoughItems"
 version = "2.1.0.44"
 
-def minecraftVersion = "19w03c"
-def yarnVersion = "19w03c.4"
-def fabricVersion = "0.1.4.76"
+def minecraftVersion = "19w04a"
+def yarnVersion = "19w04a.1"
+def fabricVersion = "0.1.4.79"
 def pluginLoaderVersion = "1.14-1.0.6-8"
 
 minecraft {

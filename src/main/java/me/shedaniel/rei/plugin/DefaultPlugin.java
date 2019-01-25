@@ -14,6 +14,7 @@ import net.minecraft.client.gui.container.SmokerGui;
 import net.minecraft.client.gui.ingame.PlayerInventoryGui;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.cooking.BlastingRecipe;
+import net.minecraft.recipe.cooking.CampfireCookingRecipe;
 import net.minecraft.recipe.cooking.SmeltingRecipe;
 import net.minecraft.recipe.cooking.SmokingRecipe;
 import net.minecraft.recipe.crafting.ShapedRecipe;
@@ -24,13 +25,14 @@ import java.util.List;
 
 public class DefaultPlugin implements IRecipePlugin {
     
-    static final Identifier CRAFTING = new Identifier("roughlyenoughitems", "plugins/crafting");
-    static final Identifier SMELTING = new Identifier("roughlyenoughitems", "plugins/smelting");
-    static final Identifier SMOKING = new Identifier("roughlyenoughitems", "plugins/smoking");
-    static final Identifier BLASTING = new Identifier("roughlyenoughitems", "plugins/blasting");
-    static final Identifier BREWING = new Identifier("roughlyenoughitems", "plugins/brewing");
+    public static final Identifier CRAFTING = new Identifier("roughlyenoughitems", "plugins/crafting");
+    public static final Identifier SMELTING = new Identifier("roughlyenoughitems", "plugins/smelting");
+    public static final Identifier SMOKING = new Identifier("roughlyenoughitems", "plugins/smoking");
+    public static final Identifier BLASTING = new Identifier("roughlyenoughitems", "plugins/blasting");
+    public static final Identifier CAMPFIRE = new Identifier("roughlyenoughitems", "plugins/campfire");
+    public static final Identifier BREWING = new Identifier("roughlyenoughitems", "plugins/brewing");
     
-    static final List<DefaultBrewingDisplay> BREWING_DISPLAYS = Lists.newArrayList();
+    private static final List<DefaultBrewingDisplay> BREWING_DISPLAYS = Lists.newArrayList();
     
     public static void registerBrewingDisplay(DefaultBrewingDisplay display) {
         BREWING_DISPLAYS.add(display);
@@ -42,6 +44,7 @@ public class DefaultPlugin implements IRecipePlugin {
         RecipeHelper.registerCategory(new DefaultSmeltingCategory());
         RecipeHelper.registerCategory(new DefaultSmokingCategory());
         RecipeHelper.registerCategory(new DefaultBlastingCategory());
+        RecipeHelper.registerCategory(new DefaultCampfireCategory());
         RecipeHelper.registerCategory(new DefaultBrewingCategory());
     }
     
@@ -58,11 +61,14 @@ public class DefaultPlugin implements IRecipePlugin {
                 RecipeHelper.registerRecipe(SMOKING, new DefaultSmokingDisplay((SmokingRecipe) value));
             else if (value instanceof BlastingRecipe)
                 RecipeHelper.registerRecipe(BLASTING, new DefaultBlastingDisplay((BlastingRecipe) value));
+            else if (value instanceof CampfireCookingRecipe)
+                RecipeHelper.registerRecipe(CAMPFIRE, new DefaultCampfireDisplay((CampfireCookingRecipe) value));
         BREWING_DISPLAYS.forEach(display -> RecipeHelper.registerRecipe(BREWING, display));
     }
     
     @Override
     public void registerSpeedCraft() {
+        RecipeHelper.registerSpeedCraftButtonArea(DefaultPlugin.CAMPFIRE, null);
         RecipeHelper.registerSpeedCraftButtonArea(DefaultPlugin.BREWING, null);
         RecipeHelper.registerSpeedCraftFunctional(DefaultPlugin.CRAFTING, new SpeedCraftFunctional<DefaultCraftingDisplay>() {
             @Override
@@ -76,7 +82,8 @@ public class DefaultPlugin implements IRecipePlugin {
                     ((IMixinRecipeBookGui) (((CraftingTableGui) gui).getRecipeBookGui())).getGhostSlots().reset();
                 else if (gui.getClass().isAssignableFrom(PlayerInventoryGui.class))
                     ((IMixinRecipeBookGui) (((PlayerInventoryGui) gui).getRecipeBookGui())).getGhostSlots().reset();
-                else return false;
+                else
+                    return false;
                 MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, recipe.getRecipe(), Gui.isShiftPressed());
                 return true;
             }
@@ -96,7 +103,8 @@ public class DefaultPlugin implements IRecipePlugin {
             public boolean performAutoCraft(Gui gui, DefaultSmeltingDisplay recipe) {
                 if (gui instanceof FurnaceGui)
                     ((IMixinRecipeBookGui) (((FurnaceGui) gui).getRecipeBookGui())).getGhostSlots().reset();
-                else return false;
+                else
+                    return false;
                 MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, recipe.getRecipe(), Gui.isShiftPressed());
                 return true;
             }
@@ -116,7 +124,8 @@ public class DefaultPlugin implements IRecipePlugin {
             public boolean performAutoCraft(Gui gui, DefaultSmokingDisplay recipe) {
                 if (gui instanceof SmokerGui)
                     ((IMixinRecipeBookGui) (((SmokerGui) gui).getRecipeBookGui())).getGhostSlots().reset();
-                else return false;
+                else
+                    return false;
                 MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, recipe.getRecipe(), Gui.isShiftPressed());
                 return true;
             }
@@ -136,7 +145,8 @@ public class DefaultPlugin implements IRecipePlugin {
             public boolean performAutoCraft(Gui gui, DefaultBlastingDisplay recipe) {
                 if (gui instanceof BlastFurnaceGui)
                     ((IMixinRecipeBookGui) (((BlastFurnaceGui) gui).getRecipeBookGui())).getGhostSlots().reset();
-                else return false;
+                else
+                    return false;
                 MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, recipe.getRecipe(), Gui.isShiftPressed());
                 return true;
             }

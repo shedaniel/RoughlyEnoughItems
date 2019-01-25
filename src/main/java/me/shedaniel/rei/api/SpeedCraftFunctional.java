@@ -1,6 +1,5 @@
 package me.shedaniel.rei.api;
 
-import me.shedaniel.rei.plugin.DefaultCraftingDisplay;
 import net.minecraft.client.gui.Gui;
 
 public interface SpeedCraftFunctional<T extends IRecipeDisplay> {

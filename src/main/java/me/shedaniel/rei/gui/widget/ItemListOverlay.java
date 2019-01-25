@@ -3,7 +3,6 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.*;
-import me.shedaniel.rei.listeners.ClientLoaded;
 import me.shedaniel.rei.listeners.IMixinContainerGui;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Drawable;
@@ -47,7 +46,7 @@ public class ItemListOverlay extends Drawable implements IWidget {
         widgets.forEach(widget -> widget.draw(int_1, int_2, float_1));
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
         if (rectangle.contains(ClientHelper.getMouseLocation()) && ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty() && MinecraftClient.getInstance().isInSingleplayer())
-            GuiHelper.getOverlay(containerGui.getContainerGui()).addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.translate("text.rei.delete_items"))));
+            GuiHelper.getOverlay(containerGui).addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.translate("text.rei.delete_items"))));
     }
     
     public void updateList(int page, String searchTerm) {
@@ -57,7 +56,7 @@ public class ItemListOverlay extends Drawable implements IWidget {
     public void updateList(Rectangle rect, int page, String searchTerm) {
         this.rectangle = rect;
         if (ClientHelper.getItemList().isEmpty())
-            RoughlyEnoughItemsCore.getListeners(ClientLoaded.class).forEach(ClientLoaded::clientLoaded);
+            RoughlyEnoughItemsCore.getClientHelper().clientLoaded();
         currentDisplayed = processSearchTerm(searchTerm, ClientHelper.getItemList(), GuiHelper.inventoryStacks);
         this.widgets.clear();
         this.page = page;
@@ -87,9 +86,9 @@ public class ItemListOverlay extends Drawable implements IWidget {
                             }
                         } else {
                             if (button == 0)
-                                return ClientHelper.executeRecipeKeyBind(GuiHelper.getOverlay(containerGui.getContainerGui()), getCurrentStack().copy(), containerGui);
+                                return ClientHelper.executeRecipeKeyBind(GuiHelper.getOverlay(containerGui), getCurrentStack().copy(), containerGui);
                             else if (button == 1)
-                                return ClientHelper.executeUsageKeyBind(GuiHelper.getOverlay(containerGui.getContainerGui()), getCurrentStack().copy(), containerGui);
+                                return ClientHelper.executeUsageKeyBind(GuiHelper.getOverlay(containerGui), getCurrentStack().copy(), containerGui);
                         }
                     }
                     return false;

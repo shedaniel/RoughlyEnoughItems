@@ -1,7 +1,6 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.render.GuiLighting;

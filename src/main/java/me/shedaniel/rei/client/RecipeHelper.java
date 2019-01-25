@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.listeners.RecipeSync;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.util.Identifier;
@@ -14,7 +13,7 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class RecipeHelper implements RecipeSync {
+public class RecipeHelper {
     
     private static Map<Identifier, List<IRecipeDisplay>> recipeCategoryListMap;
     private static List<IRecipeCategory> categories;
@@ -145,7 +144,6 @@ public class RecipeHelper implements RecipeSync {
         speedCraftFunctionalMap.put(category, list);
     }
     
-    @Override
     public void recipesLoaded(RecipeManager recipeManager) {
         this.recipeManager = recipeManager;
         this.recipeCategoryListMap.clear();

@@ -9,7 +9,6 @@ import me.shedaniel.rei.api.IRecipeDisplay;
 import me.shedaniel.rei.gui.ContainerGuiOverlay;
 import me.shedaniel.rei.gui.widget.ConfigWidget;
 import me.shedaniel.rei.gui.widget.RecipeViewingWidget;
-import me.shedaniel.rei.listeners.ClientLoaded;
 import me.shedaniel.rei.listeners.IMixinContainerGui;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
@@ -36,7 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ClientHelper implements ClientLoaded, ClientModInitializer {
+public class ClientHelper implements ClientModInitializer {
     
     private static final Identifier RECIPE_KEYBIND = new Identifier("roughlyenoughitems", "recipe_keybind");
     private static final Identifier USAGE_KEYBIND = new Identifier("roughlyenoughitems", "usage_keybind");
@@ -56,16 +55,13 @@ public class ClientHelper implements ClientLoaded, ClientModInitializer {
             String modid = location.getNamespace();
             if (modid.equalsIgnoreCase("minecraft"))
                 return "Minecraft";
-            return FabricLoader.INSTANCE.getModContainers().stream()
-                    .map(modContainer -> {
-                        return modContainer.getInfo();
-                    })
-                    .filter(modInfo -> modInfo.getId().equals(modid) || (modInfo.getName() != null && modInfo.getName().equals(modid)))
-                    .findFirst().map(modInfo -> {
-                        if (modInfo.getName() != null)
-                            return modInfo.getName();
-                        return modid;
-                    }).orElse(modid);
+            return FabricLoader.INSTANCE.getModContainers().stream().map(modContainer -> {
+                return modContainer.getInfo();
+            }).filter(modInfo -> modInfo.getId().equals(modid) || (modInfo.getName() != null && modInfo.getName().equals(modid))).findFirst().map(modInfo -> {
+                if (modInfo.getName() != null)
+                    return modInfo.getName();
+                return modid;
+            }).orElse(modid);
         }
         return "";
     }
@@ -112,11 +108,9 @@ public class ClientHelper implements ClientLoaded, ClientModInitializer {
         } else {
             Identifier location = Registry.ITEM.getId(cheatedStack.getItem());
             String tagMessage = cheatedStack.copy().getTag() != null && !cheatedStack.copy().getTag().isEmpty() ? cheatedStack.copy().getTag().asString() : "";
-            String madeUpCommand = RoughlyEnoughItemsCore.getConfigHelper().getGiveCommandPrefix() + " " + MinecraftClient.getInstance().player.getEntityName() + " " +
-                    location.toString() + tagMessage + (cheatedStack.getAmount() != 1 ? " " + cheatedStack.getAmount() : "");
+            String madeUpCommand = RoughlyEnoughItemsCore.getConfigHelper().getGiveCommandPrefix() + " " + MinecraftClient.getInstance().player.getEntityName() + " " + location.toString() + tagMessage + (cheatedStack.getAmount() != 1 ? " " + cheatedStack.getAmount() : "");
             if (madeUpCommand.length() > 256)
-                madeUpCommand = RoughlyEnoughItemsCore.getConfigHelper().getGiveCommandPrefix() + " " + MinecraftClient.getInstance().player.getEntityName() + " " +
-                        location.toString() + (cheatedStack.getAmount() != 1 ? " " + cheatedStack.getAmount() : "");
+                madeUpCommand = RoughlyEnoughItemsCore.getConfigHelper().getGiveCommandPrefix() + " " + MinecraftClient.getInstance().player.getEntityName() + " " + location.toString() + (cheatedStack.getAmount() != 1 ? " " + cheatedStack.getAmount() : "");
             MinecraftClient.getInstance().player.sendChatMessage(madeUpCommand);
             return true;
         }
@@ -141,8 +135,7 @@ public class ClientHelper implements ClientLoaded, ClientModInitializer {
     }
     
     public static List<ItemStack> getInventoryItemsTypes() {
-        List<DefaultedList<ItemStack>> field_7543 = ImmutableList.of(MinecraftClient.getInstance().player.inventory.main, MinecraftClient.getInstance().player.inventory.armor
-                , MinecraftClient.getInstance().player.inventory.offHand);
+        List<DefaultedList<ItemStack>> field_7543 = ImmutableList.of(MinecraftClient.getInstance().player.inventory.main, MinecraftClient.getInstance().player.inventory.armor, MinecraftClient.getInstance().player.inventory.offHand);
         List<ItemStack> inventoryStacks = new ArrayList<>();
         field_7543.forEach(itemStacks -> itemStacks.forEach(itemStack -> {
             if (!itemStack.getItem().equals(Items.AIR))
@@ -151,7 +144,6 @@ public class ClientHelper implements ClientLoaded, ClientModInitializer {
         return inventoryStacks;
     }
     
-    @Override
     public void clientLoaded() {
         Registry.ITEM.forEach(item -> {
             if (!item.equals(Items.ENCHANTED_BOOK))

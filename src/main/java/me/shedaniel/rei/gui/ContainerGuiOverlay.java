@@ -36,9 +36,9 @@ public class ContainerGuiOverlay extends Gui {
     private ButtonWidget buttonLeft, buttonRight;
     private int lastLeft;
     
-    public ContainerGuiOverlay(ContainerGui containerGui) {
+    public ContainerGuiOverlay(IMixinContainerGui containerGui) {
         this.queuedTooltips = new ArrayList<>();
-        this.containerGui = (IMixinContainerGui) containerGui;
+        this.containerGui = containerGui;
         this.widgets = new ArrayList<>();
     }
     
@@ -242,7 +242,8 @@ public class ContainerGuiOverlay extends Gui {
                 buttonLeft.onPressed(0, 0, 0);
             else if (amount < 0 && buttonRight.enabled)
                 buttonRight.onPressed(0, 0, 0);
-            else return false;
+            else
+                return false;
             return true;
         }
         for(IWidget widget : widgets)

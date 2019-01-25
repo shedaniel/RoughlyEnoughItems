@@ -24,7 +24,7 @@ public class GuiHelper {
         overlayVisible = !overlayVisible;
     }
     
-    public static ContainerGuiOverlay getOverlay(ContainerGui lastGui) {
+    public static ContainerGuiOverlay getOverlay(IMixinContainerGui lastGui) {
         if (overlay == null) {
             overlay = new ContainerGuiOverlay(lastGui);
             overlay.onInitialized();
