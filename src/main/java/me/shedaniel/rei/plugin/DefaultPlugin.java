@@ -13,6 +13,7 @@ import net.minecraft.client.gui.container.FurnaceGui;
 import net.minecraft.client.gui.container.SmokerGui;
 import net.minecraft.client.gui.ingame.PlayerInventoryGui;
 import net.minecraft.recipe.Recipe;
+import net.minecraft.recipe.StonecuttingRecipe;
 import net.minecraft.recipe.cooking.BlastingRecipe;
 import net.minecraft.recipe.cooking.CampfireCookingRecipe;
 import net.minecraft.recipe.cooking.SmeltingRecipe;
@@ -30,6 +31,7 @@ public class DefaultPlugin implements IRecipePlugin {
     public static final Identifier SMOKING = new Identifier("roughlyenoughitems", "plugins/smoking");
     public static final Identifier BLASTING = new Identifier("roughlyenoughitems", "plugins/blasting");
     public static final Identifier CAMPFIRE = new Identifier("roughlyenoughitems", "plugins/campfire");
+    public static final Identifier STONE_CUTTING = new Identifier("roughlyenoughitems", "plugins/stone_cutting");
     public static final Identifier BREWING = new Identifier("roughlyenoughitems", "plugins/brewing");
     
     private static final List<DefaultBrewingDisplay> BREWING_DISPLAYS = Lists.newArrayList();
@@ -45,30 +47,34 @@ public class DefaultPlugin implements IRecipePlugin {
         RecipeHelper.registerCategory(new DefaultSmokingCategory());
         RecipeHelper.registerCategory(new DefaultBlastingCategory());
         RecipeHelper.registerCategory(new DefaultCampfireCategory());
+        RecipeHelper.registerCategory(new DefaultStoneCuttingCategory());
         RecipeHelper.registerCategory(new DefaultBrewingCategory());
     }
     
     @Override
     public void registerRecipes() {
-        for(Recipe value : RecipeHelper.getRecipeManager().values())
-            if (value instanceof ShapelessRecipe)
-                RecipeHelper.registerRecipe(CRAFTING, new DefaultShapelessDisplay((ShapelessRecipe) value));
-            else if (value instanceof ShapedRecipe)
-                RecipeHelper.registerRecipe(CRAFTING, new DefaultShapedDisplay((ShapedRecipe) value));
-            else if (value instanceof SmeltingRecipe)
-                RecipeHelper.registerRecipe(SMELTING, new DefaultSmeltingDisplay((SmeltingRecipe) value));
-            else if (value instanceof SmokingRecipe)
-                RecipeHelper.registerRecipe(SMOKING, new DefaultSmokingDisplay((SmokingRecipe) value));
-            else if (value instanceof BlastingRecipe)
-                RecipeHelper.registerRecipe(BLASTING, new DefaultBlastingDisplay((BlastingRecipe) value));
-            else if (value instanceof CampfireCookingRecipe)
-                RecipeHelper.registerRecipe(CAMPFIRE, new DefaultCampfireDisplay((CampfireCookingRecipe) value));
+        for(Recipe recipe : RecipeHelper.getRecipeManager().values())
+            if (recipe instanceof ShapelessRecipe)
+                RecipeHelper.registerRecipe(CRAFTING, new DefaultShapelessDisplay((ShapelessRecipe) recipe));
+            else if (recipe instanceof ShapedRecipe)
+                RecipeHelper.registerRecipe(CRAFTING, new DefaultShapedDisplay((ShapedRecipe) recipe));
+            else if (recipe instanceof SmeltingRecipe)
+                RecipeHelper.registerRecipe(SMELTING, new DefaultSmeltingDisplay((SmeltingRecipe) recipe));
+            else if (recipe instanceof SmokingRecipe)
+                RecipeHelper.registerRecipe(SMOKING, new DefaultSmokingDisplay((SmokingRecipe) recipe));
+            else if (recipe instanceof BlastingRecipe)
+                RecipeHelper.registerRecipe(BLASTING, new DefaultBlastingDisplay((BlastingRecipe) recipe));
+            else if (recipe instanceof CampfireCookingRecipe)
+                RecipeHelper.registerRecipe(CAMPFIRE, new DefaultCampfireDisplay((CampfireCookingRecipe) recipe));
+            else if (recipe instanceof StonecuttingRecipe)
+                RecipeHelper.registerRecipe(STONE_CUTTING, new DefaultStoneCuttingDisplay((StonecuttingRecipe) recipe));
         BREWING_DISPLAYS.forEach(display -> RecipeHelper.registerRecipe(BREWING, display));
     }
     
     @Override
     public void registerSpeedCraft() {
         RecipeHelper.registerSpeedCraftButtonArea(DefaultPlugin.CAMPFIRE, null);
+        RecipeHelper.registerSpeedCraftButtonArea(DefaultPlugin.STONE_CUTTING, null);
         RecipeHelper.registerSpeedCraftButtonArea(DefaultPlugin.BREWING, null);
         RecipeHelper.registerSpeedCraftFunctional(DefaultPlugin.CRAFTING, new SpeedCraftFunctional<DefaultCraftingDisplay>() {
             @Override
