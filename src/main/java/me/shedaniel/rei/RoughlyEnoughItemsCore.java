@@ -4,11 +4,13 @@ import com.google.common.collect.Maps;
 import me.shedaniel.rei.api.IRecipePlugin;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.ConfigHelper;
+import me.shedaniel.rei.client.GuiHelper;
 import me.shedaniel.rei.client.RecipeHelper;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.api.loader.Loader;
+import net.fabricmc.fabric.events.client.ClientTickEvent;
 import net.fabricmc.fabric.networking.CustomPayloadPacketRegistry;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.ItemStack;
@@ -71,6 +73,8 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
             registerPlugin(new Identifier("roughlyenoughitems", "default_plugin"), new DefaultPlugin());
         }
         configHelper = new ConfigHelper();
+        
+        ClientTickEvent.CLIENT.register(GuiHelper::onTick);
     }
     
     @Override

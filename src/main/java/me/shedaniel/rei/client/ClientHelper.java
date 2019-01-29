@@ -9,7 +9,6 @@ import me.shedaniel.rei.api.IRecipeDisplay;
 import me.shedaniel.rei.gui.ContainerGuiOverlay;
 import me.shedaniel.rei.gui.widget.ConfigWidget;
 import me.shedaniel.rei.gui.widget.RecipeViewingWidget;
-import me.shedaniel.rei.listeners.IMixinContainerGui;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
 import net.fabricmc.fabric.impl.client.keybinding.KeyBindingRegistryImpl;
@@ -116,17 +115,17 @@ public class ClientHelper implements ClientModInitializer {
         }
     }
     
-    public static boolean executeRecipeKeyBind(ContainerGuiOverlay overlay, ItemStack stack, IMixinContainerGui parent) {
-        Map<IRecipeCategory, List<IRecipeDisplay>> map = RecipeHelper.getRecipesFor(stack);
+    public static boolean executeRecipeKeyBind(ContainerGuiOverlay overlay, ItemStack stack) {
+        Map<IRecipeCategory, List<IRecipeDisplay>> map = RecipeHelper.getInstance().getRecipesFor(stack);
         if (map.keySet().size() > 0)
-            MinecraftClient.getInstance().openGui(new RecipeViewingWidget(MinecraftClient.getInstance().window, parent, map));
+            MinecraftClient.getInstance().openGui(new RecipeViewingWidget(MinecraftClient.getInstance().window, map));
         return map.keySet().size() > 0;
     }
     
-    public static boolean executeUsageKeyBind(ContainerGuiOverlay overlay, ItemStack stack, IMixinContainerGui parent) {
-        Map<IRecipeCategory, List<IRecipeDisplay>> map = RecipeHelper.getUsagesFor(stack);
+    public static boolean executeUsageKeyBind(ContainerGuiOverlay overlay, ItemStack stack) {
+        Map<IRecipeCategory, List<IRecipeDisplay>> map = RecipeHelper.getInstance().getUsagesFor(stack);
         if (map.keySet().size() > 0)
-            MinecraftClient.getInstance().openGui(new RecipeViewingWidget(MinecraftClient.getInstance().window, parent, map));
+            MinecraftClient.getInstance().openGui(new RecipeViewingWidget(MinecraftClient.getInstance().window, map));
         return map.keySet().size() > 0;
     }
     

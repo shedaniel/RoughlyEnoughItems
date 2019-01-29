@@ -6,7 +6,6 @@ import me.shedaniel.rei.plugin.DefaultBrewingDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemProvider;
-import net.minecraft.item.ItemStack;
 import net.minecraft.item.PotionItem;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionUtil;
@@ -17,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Mixin(BrewingRecipeRegistry.class)
@@ -28,16 +28,14 @@ public class MixinBrewingRecipeRegistry {
     
     @Inject(method = "method_8080", at = @At("RETURN"))
     private static void method_8080(Item item_1, CallbackInfo ci) {
-        if (item_1 instanceof PotionItem) {
+        if (item_1 instanceof PotionItem)
             SELF_POTION_TYPES.add(Ingredient.ofItems(new ItemProvider[]{item_1}));
-        }
     }
     
     @Inject(method = "method_8071", at = @At("RETURN"))
     private static void method_8071(Item item_1, Item item_2, Item item_3, CallbackInfo ci) {
-        if (item_1 instanceof PotionItem && item_3 instanceof PotionItem) {
+        if (item_1 instanceof PotionItem && item_3 instanceof PotionItem)
             SELF_ITEM_RECIPES.add(new BrewingRecipe(item_1, Ingredient.ofItems(new ItemProvider[]{item_2}), item_3));
-        }
     }
     
     @Inject(method = "registerPotionRecipe", at = @At("RETURN"))
@@ -46,11 +44,9 @@ public class MixinBrewingRecipeRegistry {
             registerPotionType(potion_1);
         if (!REGISTERED_POTION_TYPES.contains(potion_2))
             registerPotionType(potion_2);
-        SELF_POTION_TYPES.forEach(ingredient -> {
-            for(ItemStack stack : ingredient.getStackArray()) {
-                DefaultPlugin.registerBrewingDisplay(new DefaultBrewingDisplay(PotionUtil.setPotion(stack.copy(), potion_1), Ingredient.ofItems(new ItemProvider[]{item_1}), PotionUtil.setPotion(stack.copy(), potion_2)));
-            }
-        });
+        SELF_POTION_TYPES.stream().map(Ingredient::getStackArray).forEach(itemStacks -> Arrays.stream(itemStacks).forEach(stack -> {
+            DefaultPlugin.registerBrewingDisplay(new DefaultBrewingDisplay(PotionUtil.setPotion(stack.copy(), potion_1), Ingredient.ofItems(new ItemProvider[]{item_1}), PotionUtil.setPotion(stack.copy(), potion_2)));
+        }));
     }
     
     private static void registerPotionType(Potion potion) {

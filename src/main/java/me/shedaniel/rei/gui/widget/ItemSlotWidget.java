@@ -3,7 +3,6 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
-import me.shedaniel.rei.listeners.IMixinContainerGui;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.render.GuiLighting;
@@ -26,24 +25,22 @@ public class ItemSlotWidget extends Drawable implements HighlightableWidget {
     private List<ItemStack> itemList = new LinkedList<>();
     private boolean drawBackground, showToolTips, clickToMoreRecipes;
     private int x, y;
-    private IMixinContainerGui containerGui;
     
-    public ItemSlotWidget(int x, int y, ItemStack itemStack, boolean drawBackground, boolean showToolTips, IMixinContainerGui containerGui) {
-        this(x, y, Arrays.asList(itemStack), drawBackground, showToolTips, containerGui);
+    public ItemSlotWidget(int x, int y, ItemStack itemStack, boolean drawBackground, boolean showToolTips) {
+        this(x, y, Arrays.asList(itemStack), drawBackground, showToolTips);
     }
     
-    public ItemSlotWidget(int x, int y, List<ItemStack> itemList, boolean drawBackground, boolean showToolTips, IMixinContainerGui containerGui) {
+    public ItemSlotWidget(int x, int y, List<ItemStack> itemList, boolean drawBackground, boolean showToolTips) {
         this.itemList = itemList;
         this.drawBackground = drawBackground;
         this.showToolTips = showToolTips;
         this.x = x;
         this.y = y;
-        this.containerGui = containerGui;
         this.clickToMoreRecipes = false;
     }
     
-    public ItemSlotWidget(int x, int y, List<ItemStack> itemList, boolean drawBackground, boolean showToolTips, IMixinContainerGui containerGui, boolean clickToMoreRecipes) {
-        this(x, y, itemList, drawBackground, showToolTips, containerGui);
+    public ItemSlotWidget(int x, int y, List<ItemStack> itemList, boolean drawBackground, boolean showToolTips, boolean clickToMoreRecipes) {
+        this(x, y, itemList, drawBackground, showToolTips);
         this.clickToMoreRecipes = clickToMoreRecipes;
     }
     
@@ -69,11 +66,7 @@ public class ItemSlotWidget extends Drawable implements HighlightableWidget {
         ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
         itemRenderer.zOffset = 200.0F;
         itemRenderer.renderItemAndGlowInGui(itemStack, x, y);
-        assert containerGui != null;
-        if (containerGui.getDraggedStack().isEmpty())
-            itemRenderer.renderItemOverlaysInGUIWithText(MinecraftClient.getInstance().fontRenderer, itemStack, x, y - 0, getItemCountOverlay(itemStack));
-        else
-            itemRenderer.renderItemOverlaysInGUIWithText(MinecraftClient.getInstance().fontRenderer, itemStack, x, y - 8, getItemCountOverlay(itemStack));
+        itemRenderer.renderItemOverlaysInGUIWithText(MinecraftClient.getInstance().fontRenderer, itemStack, x, y, getItemCountOverlay(itemStack));
         itemRenderer.zOffset = 0.0F;
         if (isHighlighted(mouseX, mouseY) && showToolTips)
             drawToolTip(itemStack);
@@ -81,7 +74,7 @@ public class ItemSlotWidget extends Drawable implements HighlightableWidget {
     
     protected void drawToolTip(ItemStack itemStack) {
         List<String> toolTip = getTooltip(itemStack);
-        GuiHelper.getOverlay(containerGui).addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), toolTip));
+        GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), toolTip));
     }
     
     protected List<String> getTooltip(ItemStack itemStack) {
@@ -89,7 +82,7 @@ public class ItemSlotWidget extends Drawable implements HighlightableWidget {
         MinecraftClient mc = MinecraftClient.getInstance();
         List<String> toolTip = Lists.newArrayList();
         try {
-            toolTip = containerGui.getContainerGui().getStackTooltip(itemStack).stream().filter(s -> !s.equals(modString)).collect(Collectors.toList());
+            toolTip = GuiHelper.getLastOverlay().getStackTooltip(itemStack).stream().filter(s -> !s.equals(modString)).collect(Collectors.toList());
         } catch (Exception e) {
             toolTip.add(itemStack.getDisplayName().getFormattedText());
         }
@@ -118,7 +111,7 @@ public class ItemSlotWidget extends Drawable implements HighlightableWidget {
     
     @Override
     public Rectangle getBounds() {
-        return new Rectangle(this.x, this.y, 18, 18);
+        return new Rectangle(this.x - 1, this.y - 1, 18, 18);
     }
     
     @Override
@@ -127,9 +120,9 @@ public class ItemSlotWidget extends Drawable implements HighlightableWidget {
             return false;
         if (getBounds().contains(mouseX, mouseY)) {
             if (button == 0)
-                return ClientHelper.executeRecipeKeyBind(GuiHelper.getOverlay(containerGui), getCurrentStack().copy(), containerGui);
+                return ClientHelper.executeRecipeKeyBind(GuiHelper.getLastOverlay(), getCurrentStack().copy());
             else if (button == 1)
-                return ClientHelper.executeUsageKeyBind(GuiHelper.getOverlay(containerGui), getCurrentStack().copy(), containerGui);
+                return ClientHelper.executeUsageKeyBind(GuiHelper.getLastOverlay(), getCurrentStack().copy());
         }
         return false;
     }

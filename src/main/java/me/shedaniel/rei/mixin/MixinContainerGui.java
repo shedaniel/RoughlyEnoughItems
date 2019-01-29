@@ -33,7 +33,6 @@ public class MixinContainerGui extends Gui implements IMixinContainerGui {
     protected int containerHeight;
     @Shadow
     protected Slot focusedSlot;
-    private ContainerGui lastGui;
     @Shadow
     private ItemStack field_2782;
     
@@ -64,8 +63,10 @@ public class MixinContainerGui extends Gui implements IMixinContainerGui {
     
     @Inject(method = "onInitialized()V", at = @At("RETURN"))
     protected void onInitialized(CallbackInfo info) {
-        GuiHelper.resetOverlay();
-        this.listeners.add(GuiHelper.getOverlay((IMixinContainerGui) lastGui));
+        GuiHelper.setLastContainerGui((ContainerGui) (Object) this);
+        GuiHelper.setLastMixinContainerGui((IMixinContainerGui) this);
+        GuiHelper.setOverlay(new ContainerGuiOverlay());
+        this.listeners.add(GuiHelper.getLastOverlay());
     }
     
     @Inject(method = "draw(IIF)V", at = @At("RETURN"))
@@ -75,19 +76,12 @@ public class MixinContainerGui extends Gui implements IMixinContainerGui {
             if (tabGetter.getSelectedTab() != ItemGroup.INVENTORY.getId())
                 return;
         }
-        if (MinecraftClient.getInstance().currentGui instanceof ContainerGui)
-            this.lastGui = (ContainerGui) MinecraftClient.getInstance().currentGui;
-        GuiHelper.getOverlay((IMixinContainerGui) lastGui).render(int_1, int_2, float_1);
+        GuiHelper.getLastOverlay().render(int_1, int_2, float_1);
     }
     
     @Override
     public ItemStack getDraggedStack() {
         return this.field_2782;
-    }
-    
-    @Override
-    public ContainerGui getContainerGui() {
-        return lastGui;
     }
     
     @Override
@@ -97,7 +91,7 @@ public class MixinContainerGui extends Gui implements IMixinContainerGui {
     
     @Override
     public boolean mouseScrolled(double double_1) {
-        ContainerGuiOverlay overlay = GuiHelper.getOverlay((IMixinContainerGui) lastGui);
+        ContainerGuiOverlay overlay = GuiHelper.getLastOverlay();
         if (GuiHelper.isOverlayVisible() && overlay.getRectangle().contains(ClientHelper.getMouseLocation()))
             for(GuiEventListener entry : this.getEntries())
                 if (entry.mouseScrolled(double_1))
@@ -107,11 +101,10 @@ public class MixinContainerGui extends Gui implements IMixinContainerGui {
     
     @Inject(method = "keyPressed(III)Z", at = @At("HEAD"), cancellable = true)
     public void keyPressed(int int_1, int int_2, int int_3, CallbackInfoReturnable<Boolean> ci) {
-        for(GuiEventListener entry : this.getEntries())
-            if (entry.keyPressed(int_1, int_2, int_3)) {
-                ci.setReturnValue(true);
-                ci.cancel();
-            }
+        if (GuiHelper.getLastOverlay().keyPressed(int_1, int_2, int_3)) {
+            ci.setReturnValue(true);
+            ci.cancel();
+        }
     }
     
 }

@@ -15,20 +15,17 @@ import java.util.stream.Collectors;
 
 public class RecipeHelper {
     
-    private static Map<Identifier, List<IRecipeDisplay>> recipeCategoryListMap;
-    private static List<IRecipeCategory> categories;
-    private static RecipeManager recipeManager;
-    private static Map<Identifier, SpeedCraftAreaSupplier> speedCraftAreaSupplierMap;
-    private static Map<Identifier, List<SpeedCraftFunctional>> speedCraftFunctionalMap;
+    private final Map<Identifier, List<IRecipeDisplay>> recipeCategoryListMap = Maps.newHashMap();
+    private final List<IRecipeCategory> categories = Lists.newArrayList();
+    private final Map<Identifier, SpeedCraftAreaSupplier> speedCraftAreaSupplierMap = Maps.newHashMap();
+    private final Map<Identifier, List<SpeedCraftFunctional>> speedCraftFunctionalMap = Maps.newHashMap();
+    private RecipeManager recipeManager;
     
-    public RecipeHelper() {
-        this.recipeCategoryListMap = Maps.newHashMap();
-        this.categories = Lists.newArrayList();
-        this.speedCraftAreaSupplierMap = Maps.newHashMap();
-        this.speedCraftFunctionalMap = Maps.newHashMap();
+    public static RecipeHelper getInstance() {
+        return RoughlyEnoughItemsCore.getRecipeHelper();
     }
     
-    public static List<ItemStack> findCraftableByItems(List<ItemStack> inventoryItems) {
+    public List<ItemStack> findCraftableByItems(List<ItemStack> inventoryItems) {
         List<ItemStack> craftables = new ArrayList<>();
         for(List<IRecipeDisplay> value : recipeCategoryListMap.values())
             for(IRecipeDisplay recipeDisplay : value) {
@@ -57,25 +54,27 @@ public class RecipeHelper {
         return craftables.stream().distinct().collect(Collectors.toList());
     }
     
-    public static void registerCategory(IRecipeCategory category) {
+    public void registerCategory(IRecipeCategory category) {
         categories.add(category);
         recipeCategoryListMap.put(category.getIdentifier(), Lists.newArrayList());
     }
     
-    public static void registerRecipe(Identifier categoryIdentifier, IRecipeDisplay display) {
+    public void registerRecipe(Identifier categoryIdentifier, IRecipeDisplay display) {
         if (!recipeCategoryListMap.containsKey(categoryIdentifier))
             return;
         recipeCategoryListMap.get(categoryIdentifier).add(display);
     }
     
-    public static Map<IRecipeCategory, List<IRecipeDisplay>> getRecipesFor(ItemStack stack) {
+    public Map<IRecipeCategory, List<IRecipeDisplay>> getRecipesFor(ItemStack stack) {
         Map<Identifier, List<IRecipeDisplay>> categoriesMap = new HashMap<>();
         categories.forEach(f -> categoriesMap.put(f.getIdentifier(), new LinkedList<>()));
-        for(List<IRecipeDisplay> value : recipeCategoryListMap.values())
-            for(IRecipeDisplay recipeDisplay : value)
+        for(Map.Entry<Identifier, List<IRecipeDisplay>> entry : recipeCategoryListMap.entrySet()) {
+            IRecipeCategory category = getCategory(entry.getKey());
+            for(IRecipeDisplay recipeDisplay : entry.getValue())
                 for(ItemStack outputStack : (List<ItemStack>) recipeDisplay.getOutput())
-                    if (ItemStack.areEqualIgnoreTags(stack, outputStack))
+                    if (category.checkTags() ? ItemStack.areEqual(stack, outputStack) : ItemStack.areEqualIgnoreTags(stack, outputStack))
                         categoriesMap.get(recipeDisplay.getRecipeCategory()).add(recipeDisplay);
+        }
         categoriesMap.keySet().removeIf(f -> categoriesMap.get(f).isEmpty());
         Map<IRecipeCategory, List<IRecipeDisplay>> recipeCategoryListMap = Maps.newHashMap();
         categories.forEach(category -> {
@@ -85,19 +84,24 @@ public class RecipeHelper {
         return recipeCategoryListMap;
     }
     
-    public static RecipeManager getRecipeManager() {
+    private IRecipeCategory getCategory(Identifier identifier) {
+        return categories.stream().filter(category -> category.getIdentifier().equals(identifier)).findFirst().orElse(null);
+    }
+    
+    public RecipeManager getRecipeManager() {
         return recipeManager;
     }
     
-    public static Map<IRecipeCategory, List<IRecipeDisplay>> getUsagesFor(ItemStack stack) {
+    public Map<IRecipeCategory, List<IRecipeDisplay>> getUsagesFor(ItemStack stack) {
         Map<Identifier, List<IRecipeDisplay>> categoriesMap = new HashMap<>();
         categories.forEach(f -> categoriesMap.put(f.getIdentifier(), new LinkedList<>()));
-        for(List<IRecipeDisplay> value : recipeCategoryListMap.values())
-            for(IRecipeDisplay recipeDisplay : value) {
+        for(Map.Entry<Identifier, List<IRecipeDisplay>> entry : recipeCategoryListMap.entrySet()) {
+            IRecipeCategory category = getCategory(entry.getKey());
+            for(IRecipeDisplay recipeDisplay : entry.getValue()) {
                 boolean found = false;
                 for(List<ItemStack> input : (List<List<ItemStack>>) recipeDisplay.getInput()) {
                     for(ItemStack itemStack : input) {
-                        if (ItemStack.areEqualIgnoreTags(itemStack, stack)) {
+                        if (category.checkTags() ? ItemStack.areEqual(itemStack, stack) : ItemStack.areEqualIgnoreTags(itemStack, stack)) {
                             categoriesMap.get(recipeDisplay.getRecipeCategory()).add(recipeDisplay);
                             found = true;
                             break;
@@ -107,6 +111,7 @@ public class RecipeHelper {
                         break;
                 }
             }
+        }
         categoriesMap.keySet().removeIf(f -> categoriesMap.get(f).isEmpty());
         Map<IRecipeCategory, List<IRecipeDisplay>> recipeCategoryListMap = Maps.newHashMap();
         categories.forEach(category -> {
@@ -116,11 +121,11 @@ public class RecipeHelper {
         return recipeCategoryListMap;
     }
     
-    public static List<IRecipeCategory> getCategories() {
-        return categories;
+    public List<IRecipeCategory> getCategories() {
+        return new LinkedList<>(categories);
     }
     
-    public static SpeedCraftAreaSupplier getSpeedCraftButtonArea(IRecipeCategory category) {
+    public SpeedCraftAreaSupplier getSpeedCraftButtonArea(IRecipeCategory category) {
         if (!speedCraftAreaSupplierMap.containsKey(category.getIdentifier()))
             return bounds -> {
                 return new Rectangle((int) bounds.getMaxX() - 16, (int) bounds.getMaxY() - 16, 10, 10);
@@ -128,17 +133,17 @@ public class RecipeHelper {
         return speedCraftAreaSupplierMap.get(category.getIdentifier());
     }
     
-    public static void registerSpeedCraftButtonArea(Identifier category, SpeedCraftAreaSupplier rectangle) {
+    public void registerSpeedCraftButtonArea(Identifier category, SpeedCraftAreaSupplier rectangle) {
         speedCraftAreaSupplierMap.put(category, rectangle);
     }
     
-    public static List<SpeedCraftFunctional> getSpeedCraftFunctional(IRecipeCategory category) {
+    public List<SpeedCraftFunctional> getSpeedCraftFunctional(IRecipeCategory category) {
         if (speedCraftFunctionalMap.get(category.getIdentifier()) == null)
             return Lists.newArrayList();
         return speedCraftFunctionalMap.get(category.getIdentifier());
     }
     
-    public static void registerSpeedCraftFunctional(Identifier category, SpeedCraftFunctional functional) {
+    public void registerSpeedCraftFunctional(Identifier category, SpeedCraftFunctional functional) {
         List<SpeedCraftFunctional> list = speedCraftFunctionalMap.containsKey(category) ? new LinkedList<>(speedCraftFunctionalMap.get(category)) : Lists.newLinkedList();
         list.add(functional);
         speedCraftFunctionalMap.put(category, list);

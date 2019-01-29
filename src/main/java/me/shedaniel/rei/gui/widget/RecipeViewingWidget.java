@@ -9,13 +9,12 @@ import me.shedaniel.rei.api.SpeedCraftFunctional;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
 import me.shedaniel.rei.client.RecipeHelper;
-import me.shedaniel.rei.listeners.IMixinContainerGui;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.audio.PositionedSoundInstance;
+import net.minecraft.client.gui.ContainerGui;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiEventListener;
 import net.minecraft.client.render.GuiLighting;
-import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.Window;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
@@ -23,14 +22,13 @@ import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 public class RecipeViewingWidget extends Gui {
     
-    private static final Identifier CREATIVE_INVENTORY_TABS = new Identifier("textures/gui/container/creative_inventory/tabs.png");
     public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
+    private static final Identifier CREATIVE_INVENTORY_TABS = new Identifier("textures/gui/container/creative_inventory/tabs.png");
     public final int guiWidth = 176;
     public final int guiHeight = 186;
     
@@ -41,19 +39,17 @@ public class RecipeViewingWidget extends Gui {
     private Map<IRecipeCategory, List<IRecipeDisplay>> categoriesMap;
     private List<IRecipeCategory> categories;
     private IRecipeCategory selectedCategory;
-    private IMixinContainerGui parent;
     private int page, categoryPages;
     private ButtonWidget recipeBack, recipeNext, categoryBack, categoryNext;
     
-    public RecipeViewingWidget(Window window, IMixinContainerGui parent, Map<IRecipeCategory, List<IRecipeDisplay>> categoriesMap) {
+    public RecipeViewingWidget(Window window, Map<IRecipeCategory, List<IRecipeDisplay>> categoriesMap) {
         this.categoryPages = 0;
-        this.parent = parent;
         this.window = window;
         this.widgets = Lists.newArrayList();
         this.bounds = new Rectangle(window.getScaledWidth() / 2 - guiWidth / 2, window.getScaledHeight() / 2 - guiHeight / 2, guiWidth, guiHeight);
         this.categoriesMap = categoriesMap;
         this.categories = Lists.newArrayList();
-        RecipeHelper.getCategories().forEach(category -> {
+        RecipeHelper.getInstance().getCategories().forEach(category -> {
             if (categoriesMap.containsKey(category))
                 categories.add(category);
         });
@@ -61,14 +57,18 @@ public class RecipeViewingWidget extends Gui {
         this.tabs = new ArrayList<>();
     }
     
-    public IMixinContainerGui getParent() {
-        return parent;
+    public static SpeedCraftFunctional getSpeedCraftFunctionalByCategory(ContainerGui containerGui, IRecipeCategory category) {
+        for(SpeedCraftFunctional functional : RecipeHelper.getInstance().getSpeedCraftFunctional(category))
+            for(Class aClass : functional.getFunctioningFor())
+                if (containerGui.getClass().isAssignableFrom(aClass))
+                    return functional;
+        return null;
     }
     
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if ((int_1 == 256 || this.client.options.keyInventory.matchesKey(int_1, int_2)) && this.doesEscapeKeyClose()) {
-            MinecraftClient.getInstance().openGui(parent.getContainerGui());
+            MinecraftClient.getInstance().openGui(GuiHelper.getLastContainerGui());
             return true;
         }
         for(GuiEventListener listener : listeners)
@@ -80,11 +80,6 @@ public class RecipeViewingWidget extends Gui {
     @Override
     public boolean isPauseScreen() {
         return false;
-    }
-    
-    @Override
-    public void onClosed() {
-        GuiHelper.resetOverlay();
     }
     
     @Override
@@ -178,71 +173,33 @@ public class RecipeViewingWidget extends Gui {
                 tab.setItem(categories.get(j).getCategoryIcon(), categories.get(j).getCategoryName(), tab.getId() + categoryPages * 6 == categories.indexOf(selectedCategory));
             }
         }
-        SpeedCraftAreaSupplier supplier = RecipeHelper.getSpeedCraftButtonArea(selectedCategory);
-        final SpeedCraftFunctional[] functional0 = {null};
-        RecipeHelper.getSpeedCraftFunctional(selectedCategory).forEach(functional1 -> {
-            for(Class aClass : functional1.getFunctioningFor())
-                if (parent.getContainerGui().getClass().isAssignableFrom(aClass)) {
-                    functional0[0] = functional1;
-                    break;
-                }
-        });
-        final SpeedCraftFunctional functional = functional0[0];
+        SpeedCraftAreaSupplier supplier = RecipeHelper.getInstance().getSpeedCraftButtonArea(selectedCategory);
+        final SpeedCraftFunctional functional = getSpeedCraftFunctionalByCategory(GuiHelper.getLastContainerGui(), selectedCategory);
         if (page * getRecipesPerPage() < categoriesMap.get(selectedCategory).size()) {
-            IRecipeDisplay topDisplay = categoriesMap.get(selectedCategory).get(page * getRecipesPerPage());
-            widgets.addAll(selectedCategory.setupDisplay(getParent(), topDisplay, new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 40, 150, selectedCategory.usesFullPage() ? 140 : 66)));
-            if (supplier != null) {
-                ButtonWidget btn;
-                widgets.add(btn = new ButtonWidget(supplier.get(new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 40, 150, selectedCategory.usesFullPage() ? 140 : 66)), "+") {
-                    @Override
-                    public void onPressed(int button, double mouseX, double mouseY) {
-                        MinecraftClient.getInstance().openGui(parent.getContainerGui());
-                        functional.performAutoCraft(parent.getContainerGui(), topDisplay);
-                    }
-                    
-                    @Override
-                    public void draw(int mouseX, int mouseY, float partialTicks) {
-                        super.draw(mouseX, mouseY, partialTicks);
-                        if (getBounds().contains(mouseX, mouseY))
-                            if (enabled)
-                                GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.translate("text.speed_craft.move_items"))));
-                            else
-                                GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.translate("text.speed_craft.failed_move_items"))));
-                    }
-                });
-                btn.enabled = functional != null && functional.acceptRecipe(parent.getContainerGui(), topDisplay);
-            }
+            final IRecipeDisplay topDisplay = categoriesMap.get(selectedCategory).get(page * getRecipesPerPage());
+            widgets.addAll(selectedCategory.setupDisplay(topDisplay, new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 40, 150, selectedCategory.usesFullPage() ? 140 : 66)));
+            if (supplier != null)
+                widgets.add(new SpeedCraftingButtonWidget(supplier.get(new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 40, 150, selectedCategory.usesFullPage() ? 140 : 66)), supplier.getButtonText(), functional, topDisplay));
             if (!selectedCategory.usesFullPage() && page * getRecipesPerPage() + 1 < categoriesMap.get(selectedCategory).size()) {
-                IRecipeDisplay middleDisplay = categoriesMap.get(selectedCategory).get(page * getRecipesPerPage() + 1);
-                widgets.addAll(selectedCategory.setupDisplay(getParent(), middleDisplay, new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 113, 150, 66)));
-                if (supplier != null) {
-                    ButtonWidget btn;
-                    widgets.add(btn = new ButtonWidget(supplier.get(new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 113, 150, 66)), "+") {
-                        @Override
-                        public void onPressed(int button, double mouseX, double mouseY) {
-                            MinecraftClient.getInstance().openGui(parent.getContainerGui());
-                            functional.performAutoCraft(parent.getContainerGui(), middleDisplay);
-                        }
-                        
-                        @Override
-                        public void draw(int mouseX, int mouseY, float partialTicks) {
-                            super.draw(mouseX, mouseY, partialTicks);
-                            if (getBounds().contains(mouseX, mouseY))
-                                if (enabled)
-                                    GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.translate("text.speed_craft.move_items"))));
-                                else
-                                    GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.translate("text.speed_craft.failed_move_items"))));
-                        }
-                    });
-                    btn.enabled = functional != null && functional.acceptRecipe(parent.getContainerGui(), middleDisplay);
-                }
+                final IRecipeDisplay middleDisplay = categoriesMap.get(selectedCategory).get(page * getRecipesPerPage() + 1);
+                widgets.addAll(selectedCategory.setupDisplay(middleDisplay, new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 113, 150, 66)));
+                if (supplier != null)
+                    widgets.add(new SpeedCraftingButtonWidget(supplier.get(new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 113, 150, 66)), supplier.getButtonText(), functional, middleDisplay));
             }
         }
         
-        GuiHelper.getOverlay(parent).onInitialized();
+        GuiHelper.getLastOverlay().onInitialized();
         listeners.addAll(tabs);
-        listeners.add(GuiHelper.getOverlay(parent));
+        listeners.add(GuiHelper.getLastOverlay());
         listeners.addAll(widgets);
+    }
+    
+    public int getPage() {
+        return page;
+    }
+    
+    public int getCategoryPage() {
+        return categoryPages;
     }
     
     private int getRecipesPerPage() {
@@ -266,7 +223,7 @@ public class RecipeViewingWidget extends Gui {
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GuiLighting.disable();
         tabs.stream().filter(TabWidget::isSelected).forEach(tabWidget -> tabWidget.draw(mouseX, mouseY, partialTicks));
-        GuiHelper.getOverlay(parent).render(mouseX, mouseY, partialTicks);
+        GuiHelper.getLastOverlay().render(mouseX, mouseY, partialTicks);
     }
     
     @Override
