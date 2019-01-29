@@ -4,7 +4,6 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.gui.widget.IWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.RecipeViewingWidget;
-import me.shedaniel.rei.listeners.IMixinContainerGui;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.render.GuiLighting;
@@ -28,7 +27,7 @@ public interface IRecipeCategory<T extends IRecipeDisplay> {
         return false;
     }
     
-    default public List<IWidget> setupDisplay(IMixinContainerGui containerGui, T recipeDisplay, Rectangle bounds) {
+    default public List<IWidget> setupDisplay(T recipeDisplay, Rectangle bounds) {
         return Arrays.asList(new RecipeBaseWidget(bounds));
     }
     
@@ -39,6 +38,10 @@ public interface IRecipeCategory<T extends IRecipeDisplay> {
         new Drawable() {
         
         }.drawTexturedRect((int) bounds.getX(), (int) bounds.getY(), 0, 0, (int) bounds.getWidth(), (int) bounds.getHeight());
+    }
+    
+    default public boolean checkTags() {
+        return false;
     }
     
 }

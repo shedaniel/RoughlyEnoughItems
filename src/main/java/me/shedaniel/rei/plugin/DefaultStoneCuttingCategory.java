@@ -5,14 +5,12 @@ import me.shedaniel.rei.api.IRecipeCategory;
 import me.shedaniel.rei.gui.widget.IWidget;
 import me.shedaniel.rei.gui.widget.ItemSlotWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
-import me.shedaniel.rei.listeners.IMixinContainerGui;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -39,7 +37,7 @@ public class DefaultStoneCuttingCategory implements IRecipeCategory<DefaultStone
     }
     
     @Override
-    public List<IWidget> setupDisplay(IMixinContainerGui containerGui, DefaultStoneCuttingDisplay recipeDisplay, Rectangle bounds) {
+    public List<IWidget> setupDisplay(DefaultStoneCuttingDisplay recipeDisplay, Rectangle bounds) {
         Point startPoint = new Point((int) bounds.getCenterX() - 41, (int) bounds.getCenterY() - 13);
         List<IWidget> widgets = new LinkedList<>(Arrays.asList(new RecipeBaseWidget(bounds) {
             @Override
@@ -51,8 +49,8 @@ public class DefaultStoneCuttingCategory implements IRecipeCategory<DefaultStone
                 drawTexturedRect(startPoint.x, startPoint.y, 0, 221, 82, 26);
             }
         }));
-        widgets.add(new ItemSlotWidget(startPoint.x + 4, startPoint.y + 5, recipeDisplay.getInput().get(0), true, true, containerGui, true));
-        widgets.add(new ItemSlotWidget(startPoint.x + 61, startPoint.y + 5, recipeDisplay.getOutput(), false, true, containerGui, true));
+        widgets.add(new ItemSlotWidget(startPoint.x + 4, startPoint.y + 5, recipeDisplay.getInput().get(0), true, true, true));
+        widgets.add(new ItemSlotWidget(startPoint.x + 61, startPoint.y + 5, recipeDisplay.getOutput(), false, true, true));
         return widgets;
     }
     

@@ -4,7 +4,6 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
-import me.shedaniel.rei.listeners.IMixinContainerGui;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GuiLighting;
@@ -20,14 +19,13 @@ public abstract class CraftableToggleButtonWidget extends ButtonWidget {
     
     protected static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private ItemRenderer itemRenderer;
-    private IMixinContainerGui containerGui;
     
-    public CraftableToggleButtonWidget(IMixinContainerGui containerGui, Rectangle rectangle) {
-        this(containerGui, rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+    public CraftableToggleButtonWidget(Rectangle rectangle) {
+        this(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         this.itemRenderer = MinecraftClient.getInstance().getItemRenderer();
     }
     
-    public CraftableToggleButtonWidget(IMixinContainerGui containerGui, int x, int y, int width, int height) {
+    public CraftableToggleButtonWidget(int x, int y, int width, int height) {
         super(x, y, width, height, "");
         this.itemRenderer = MinecraftClient.getInstance().getItemRenderer();
     }

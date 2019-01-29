@@ -3,7 +3,6 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.*;
-import me.shedaniel.rei.listeners.IMixinContainerGui;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.item.TooltipOptions;
@@ -23,15 +22,13 @@ import java.util.stream.Stream;
 
 public class ItemListOverlay extends Drawable implements IWidget {
     
-    private IMixinContainerGui containerGui;
     private List<IWidget> widgets = new ArrayList<>();
     private int width, height, page;
-    private Rectangle rectangle;
+    private Rectangle rectangle, listArea;
     private List<ItemStack> currentDisplayed;
     
-    public ItemListOverlay(IMixinContainerGui containerGui, int page) {
+    public ItemListOverlay(int page) {
         this.currentDisplayed = Lists.newArrayList();
-        this.containerGui = containerGui;
         this.width = 0;
         this.height = 0;
         this.page = page;
@@ -46,28 +43,29 @@ public class ItemListOverlay extends Drawable implements IWidget {
         widgets.forEach(widget -> widget.draw(int_1, int_2, float_1));
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
         if (rectangle.contains(ClientHelper.getMouseLocation()) && ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty() && MinecraftClient.getInstance().isInSingleplayer())
-            GuiHelper.getOverlay(containerGui).addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.translate("text.rei.delete_items"))));
+            GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.translate("text.rei.delete_items"))));
     }
     
     public void updateList(int page, String searchTerm) {
         updateList(rectangle, page, searchTerm);
     }
     
-    public void updateList(Rectangle rect, int page, String searchTerm) {
-        this.rectangle = rect;
+    public void updateList(Rectangle bounds, int page, String searchTerm) {
+        this.rectangle = bounds;
         if (ClientHelper.getItemList().isEmpty())
             RoughlyEnoughItemsCore.getClientHelper().clientLoaded();
         currentDisplayed = processSearchTerm(searchTerm, ClientHelper.getItemList(), GuiHelper.inventoryStacks);
         this.widgets.clear();
         this.page = page;
-        calculateListSize(rect);
-        double startX = rect.getCenterX() - width * 9;
-        double startY = rect.getCenterY() - height * 9;
+        calculateListSize(rectangle);
+        double startX = rectangle.getCenterX() - width * 9;
+        double startY = rectangle.getCenterY() - height * 9;
+        this.listArea = new Rectangle((int) startX, (int) startY, width * 18, height * 18);
         for(int i = 0; i < getTotalSlotsPerPage(); i++) {
             int j = i + page * getTotalSlotsPerPage();
             if (j >= currentDisplayed.size())
                 break;
-            widgets.add(new ItemSlotWidget((int) (startX + (i % width) * 18), (int) (startY + MathHelper.floor(i / width) * 18), currentDisplayed.get(j), false, true, containerGui) {
+            ItemSlotWidget slotWidget = new ItemSlotWidget((int) (startX + (i % width) * 18), (int) (startY + MathHelper.floor(i / width) * 18), currentDisplayed.get(j), false, true) {
                 @Override
                 protected void drawToolTip(ItemStack itemStack) {
                     ClientPlayerEntity player = MinecraftClient.getInstance().player;
@@ -77,23 +75,23 @@ public class ItemListOverlay extends Drawable implements IWidget {
                 
                 @Override
                 public boolean onMouseClick(int button, double mouseX, double mouseY) {
-                    if (getBounds().contains(mouseX, mouseY)) {
+                    if (isHighlighted(mouseX, mouseY)) {
                         if (ClientHelper.isCheating()) {
                             if (getCurrentStack() != null && !getCurrentStack().isEmpty()) {
                                 ItemStack cheatedStack = getCurrentStack().copy();
                                 cheatedStack.setAmount(button == 0 ? 1 : button == 1 ? cheatedStack.getMaxAmount() : cheatedStack.getAmount());
                                 return ClientHelper.tryCheatingStack(cheatedStack);
                             }
-                        } else {
-                            if (button == 0)
-                                return ClientHelper.executeRecipeKeyBind(GuiHelper.getOverlay(containerGui), getCurrentStack().copy(), containerGui);
-                            else if (button == 1)
-                                return ClientHelper.executeUsageKeyBind(GuiHelper.getOverlay(containerGui), getCurrentStack().copy(), containerGui);
-                        }
+                        } else if (button == 0)
+                            return ClientHelper.executeRecipeKeyBind(GuiHelper.getLastOverlay(), getCurrentStack().copy());
+                        else if (button == 1)
+                            return ClientHelper.executeUsageKeyBind(GuiHelper.getLastOverlay(), getCurrentStack().copy());
                     }
                     return false;
                 }
-            });
+            };
+            if (this.rectangle.contains(slotWidget.getBounds()))
+                widgets.add(slotWidget);
         }
     }
     
@@ -139,7 +137,7 @@ public class ItemListOverlay extends Drawable implements IWidget {
             stacks.addAll(os);
         List<ItemStack> workingItems = RoughlyEnoughItemsCore.getConfigHelper().craftableOnly() && inventoryItems.size() > 0 ? new ArrayList<>() : new LinkedList<>(ol);
         if (RoughlyEnoughItemsCore.getConfigHelper().craftableOnly()) {
-            RecipeHelper.findCraftableByItems(inventoryItems).forEach(workingItems::add);
+            RecipeHelper.getInstance().findCraftableByItems(inventoryItems).forEach(workingItems::add);
             workingItems.addAll(inventoryItems);
         }
         final List<ItemStack> finalWorkingItems = workingItems;

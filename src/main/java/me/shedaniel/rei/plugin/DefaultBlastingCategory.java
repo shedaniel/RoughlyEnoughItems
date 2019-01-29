@@ -5,7 +5,6 @@ import me.shedaniel.rei.api.IRecipeCategory;
 import me.shedaniel.rei.gui.widget.IWidget;
 import me.shedaniel.rei.gui.widget.ItemSlotWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
-import me.shedaniel.rei.listeners.IMixinContainerGui;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GuiLighting;
@@ -39,7 +38,7 @@ public class DefaultBlastingCategory implements IRecipeCategory<DefaultBlastingD
     }
     
     @Override
-    public List<IWidget> setupDisplay(IMixinContainerGui containerGui, DefaultBlastingDisplay recipeDisplay, Rectangle bounds) {
+    public List<IWidget> setupDisplay(DefaultBlastingDisplay recipeDisplay, Rectangle bounds) {
         Point startPoint = new Point((int) bounds.getCenterX() - 41, (int) bounds.getCenterY() - 27);
         List<IWidget> widgets = new LinkedList<>(Arrays.asList(new RecipeBaseWidget(bounds) {
             @Override
@@ -56,14 +55,14 @@ public class DefaultBlastingCategory implements IRecipeCategory<DefaultBlastingD
             }
         }));
         List<List<ItemStack>> input = recipeDisplay.getInput();
-        widgets.add(new ItemSlotWidget(startPoint.x + 1, startPoint.y + 1, input.get(0), true, true, containerGui, true));
-        widgets.add(new ItemSlotWidget(startPoint.x + 1, startPoint.y + 37, recipeDisplay.getFuel(), true, true, containerGui, true) {
+        widgets.add(new ItemSlotWidget(startPoint.x + 1, startPoint.y + 1, input.get(0), true, true, true));
+        widgets.add(new ItemSlotWidget(startPoint.x + 1, startPoint.y + 37, recipeDisplay.getFuel(), true, true, true) {
             @Override
             protected List<String> getExtraToolTips(ItemStack stack) {
                 return Arrays.asList(I18n.translate("category.rei.smelting.fuel"));
             }
         });
-        widgets.add(new ItemSlotWidget(startPoint.x + 61, startPoint.y + 19, recipeDisplay.getOutput(), false, true, containerGui, true));
+        widgets.add(new ItemSlotWidget(startPoint.x + 61, startPoint.y + 19, recipeDisplay.getOutput(), false, true, true));
         return widgets;
     }
     
