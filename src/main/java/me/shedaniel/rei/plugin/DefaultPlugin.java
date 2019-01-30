@@ -4,15 +4,14 @@ import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.IRecipePlugin;
 import me.shedaniel.rei.api.SpeedCraftFunctional;
-import me.shedaniel.rei.client.RecipeHelper;
 import me.shedaniel.rei.listeners.IMixinRecipeBookGui;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.container.BlastFurnaceGui;
-import net.minecraft.client.gui.container.CraftingTableGui;
-import net.minecraft.client.gui.container.FurnaceGui;
-import net.minecraft.client.gui.container.SmokerGui;
-import net.minecraft.client.gui.ingame.PlayerInventoryGui;
+import net.minecraft.client.gui.Screen;
+import net.minecraft.client.gui.container.BlastFurnaceScreen;
+import net.minecraft.client.gui.container.CraftingTableScreen;
+import net.minecraft.client.gui.container.FurnaceScreen;
+import net.minecraft.client.gui.container.SmokerScreen;
+import net.minecraft.client.gui.ingame.PlayerInventoryScreen;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.StonecuttingRecipe;
 import net.minecraft.recipe.cooking.BlastingRecipe;
@@ -80,87 +79,87 @@ public class DefaultPlugin implements IRecipePlugin {
         RoughlyEnoughItemsCore.getRecipeHelper().registerSpeedCraftFunctional(DefaultPlugin.CRAFTING, new SpeedCraftFunctional<DefaultCraftingDisplay>() {
             @Override
             public Class[] getFunctioningFor() {
-                return new Class[]{PlayerInventoryGui.class, CraftingTableGui.class};
+                return new Class[]{PlayerInventoryScreen.class, CraftingTableScreen.class};
             }
             
             @Override
-            public boolean performAutoCraft(Gui gui, DefaultCraftingDisplay recipe) {
-                if (gui.getClass().isAssignableFrom(CraftingTableGui.class))
-                    ((IMixinRecipeBookGui) (((CraftingTableGui) gui).getRecipeBookGui())).getGhostSlots().reset();
-                else if (gui.getClass().isAssignableFrom(PlayerInventoryGui.class))
-                    ((IMixinRecipeBookGui) (((PlayerInventoryGui) gui).getRecipeBookGui())).getGhostSlots().reset();
+            public boolean performAutoCraft(Screen screen, DefaultCraftingDisplay recipe) {
+                if (screen.getClass().isAssignableFrom(CraftingTableScreen.class))
+                    ((IMixinRecipeBookGui) (((CraftingTableScreen) screen).getRecipeBookGui())).getGhostSlots().reset();
+                else if (screen.getClass().isAssignableFrom(PlayerInventoryScreen.class))
+                    ((IMixinRecipeBookGui) (((PlayerInventoryScreen) screen).getRecipeBookGui())).getGhostSlots().reset();
                 else
                     return false;
-                MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, recipe.getRecipe(), Gui.isShiftPressed());
+                MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, recipe.getRecipe(), Screen.isShiftPressed());
                 return true;
             }
             
             @Override
-            public boolean acceptRecipe(Gui gui, DefaultCraftingDisplay recipe) {
-                return gui instanceof CraftingTableGui || (gui instanceof PlayerInventoryGui && recipe.getHeight() < 3 && recipe.getWidth() < 3);
+            public boolean acceptRecipe(Screen screen, DefaultCraftingDisplay recipe) {
+                return screen instanceof CraftingTableScreen || (screen instanceof PlayerInventoryScreen && recipe.getHeight() < 3 && recipe.getWidth() < 3);
             }
         });
         RoughlyEnoughItemsCore.getRecipeHelper().registerSpeedCraftFunctional(DefaultPlugin.SMELTING, new SpeedCraftFunctional<DefaultSmeltingDisplay>() {
             @Override
             public Class[] getFunctioningFor() {
-                return new Class[]{FurnaceGui.class};
+                return new Class[]{FurnaceScreen.class};
             }
             
             @Override
-            public boolean performAutoCraft(Gui gui, DefaultSmeltingDisplay recipe) {
-                if (gui instanceof FurnaceGui)
-                    ((IMixinRecipeBookGui) (((FurnaceGui) gui).getRecipeBookGui())).getGhostSlots().reset();
+            public boolean performAutoCraft(Screen screen, DefaultSmeltingDisplay recipe) {
+                if (screen instanceof FurnaceScreen)
+                    ((IMixinRecipeBookGui) (((FurnaceScreen) screen).getRecipeBookGui())).getGhostSlots().reset();
                 else
                     return false;
-                MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, recipe.getRecipe(), Gui.isShiftPressed());
+                MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, recipe.getRecipe(), Screen.isShiftPressed());
                 return true;
             }
             
             @Override
-            public boolean acceptRecipe(Gui gui, DefaultSmeltingDisplay recipe) {
-                return gui instanceof FurnaceGui;
+            public boolean acceptRecipe(Screen screen, DefaultSmeltingDisplay recipe) {
+                return screen instanceof FurnaceScreen;
             }
         });
         RoughlyEnoughItemsCore.getRecipeHelper().registerSpeedCraftFunctional(DefaultPlugin.SMOKING, new SpeedCraftFunctional<DefaultSmokingDisplay>() {
             @Override
             public Class[] getFunctioningFor() {
-                return new Class[]{SmokerGui.class};
+                return new Class[]{SmokerScreen.class};
             }
             
             @Override
-            public boolean performAutoCraft(Gui gui, DefaultSmokingDisplay recipe) {
-                if (gui instanceof SmokerGui)
-                    ((IMixinRecipeBookGui) (((SmokerGui) gui).getRecipeBookGui())).getGhostSlots().reset();
+            public boolean performAutoCraft(Screen screen, DefaultSmokingDisplay recipe) {
+                if (screen instanceof SmokerScreen)
+                    ((IMixinRecipeBookGui) (((SmokerScreen) screen).getRecipeBookGui())).getGhostSlots().reset();
                 else
                     return false;
-                MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, recipe.getRecipe(), Gui.isShiftPressed());
+                MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, recipe.getRecipe(), Screen.isShiftPressed());
                 return true;
             }
             
             @Override
-            public boolean acceptRecipe(Gui gui, DefaultSmokingDisplay recipe) {
-                return gui instanceof SmokerGui;
+            public boolean acceptRecipe(Screen screen, DefaultSmokingDisplay recipe) {
+                return screen instanceof SmokerScreen;
             }
         });
         RoughlyEnoughItemsCore.getRecipeHelper().registerSpeedCraftFunctional(DefaultPlugin.BLASTING, new SpeedCraftFunctional<DefaultBlastingDisplay>() {
             @Override
             public Class[] getFunctioningFor() {
-                return new Class[]{BlastFurnaceGui.class};
+                return new Class[]{BlastFurnaceScreen.class};
             }
             
             @Override
-            public boolean performAutoCraft(Gui gui, DefaultBlastingDisplay recipe) {
-                if (gui instanceof BlastFurnaceGui)
-                    ((IMixinRecipeBookGui) (((BlastFurnaceGui) gui).getRecipeBookGui())).getGhostSlots().reset();
+            public boolean acceptRecipe(Screen screen, DefaultBlastingDisplay recipe) {
+                return screen instanceof BlastFurnaceScreen;
+            }
+            
+            @Override
+            public boolean performAutoCraft(Screen screen, DefaultBlastingDisplay recipe) {
+                if (screen instanceof BlastFurnaceScreen)
+                    ((IMixinRecipeBookGui) (((BlastFurnaceScreen) screen).getRecipeBookGui())).getGhostSlots().reset();
                 else
                     return false;
-                MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, recipe.getRecipe(), Gui.isShiftPressed());
+                MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, recipe.getRecipe(), Screen.isShiftPressed());
                 return true;
-            }
-            
-            @Override
-            public boolean acceptRecipe(Gui gui, DefaultBlastingDisplay recipe) {
-                return gui instanceof BlastFurnaceGui;
             }
         });
     }

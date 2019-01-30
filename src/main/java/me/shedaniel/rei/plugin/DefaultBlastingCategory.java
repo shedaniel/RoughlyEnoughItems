@@ -17,6 +17,7 @@ import java.awt.*;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class DefaultBlastingCategory implements IRecipeCategory<DefaultBlastingDisplay> {
     
@@ -38,7 +39,8 @@ public class DefaultBlastingCategory implements IRecipeCategory<DefaultBlastingD
     }
     
     @Override
-    public List<IWidget> setupDisplay(DefaultBlastingDisplay recipeDisplay, Rectangle bounds) {
+    public List<IWidget> setupDisplay(Supplier<DefaultBlastingDisplay> recipeDisplaySupplier, Rectangle bounds) {
+        final DefaultBlastingDisplay recipeDisplay = recipeDisplaySupplier.get();
         Point startPoint = new Point((int) bounds.getCenterX() - 41, (int) bounds.getCenterY() - 27);
         List<IWidget> widgets = new LinkedList<>(Arrays.asList(new RecipeBaseWidget(bounds) {
             @Override

@@ -18,6 +18,7 @@ import java.awt.*;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class DefaultBrewingCategory implements IRecipeCategory<DefaultBrewingDisplay> {
     
@@ -39,7 +40,8 @@ public class DefaultBrewingCategory implements IRecipeCategory<DefaultBrewingDis
     }
     
     @Override
-    public List<IWidget> setupDisplay(DefaultBrewingDisplay recipeDisplay, Rectangle bounds) {
+    public List<IWidget> setupDisplay(Supplier<DefaultBrewingDisplay> recipeDisplaySupplier, Rectangle bounds) {
+        final DefaultBrewingDisplay recipeDisplay = recipeDisplaySupplier.get();
         Point startPoint = new Point((int) bounds.getCenterX() - 52, (int) bounds.getCenterY() - 29);
         List<IWidget> widgets = new LinkedList<>(Arrays.asList(new RecipeBaseWidget(bounds) {
             @Override

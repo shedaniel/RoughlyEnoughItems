@@ -6,7 +6,7 @@ import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.FontRenderer;
 import net.minecraft.client.gui.Drawable;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.Screen;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
@@ -158,7 +158,7 @@ public class TextFieldWidget extends Drawable implements IWidget {
     }
     
     private void method_16873(int int_1) {
-        if (Gui.isControlPressed()) {
+        if (Screen.isControlPressed()) {
             this.method_1877(int_1);
         } else {
             this.method_1878(int_1);
@@ -266,21 +266,21 @@ public class TextFieldWidget extends Drawable implements IWidget {
     
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (this.isVisible() && this.isFocused()) {
-            this.field_17037 = Gui.isShiftPressed();
-            if (Gui.isSelectAllShortcutPressed(int_1)) {
+            this.field_17037 = Screen.isShiftPressed();
+            if (Screen.isSelectAllShortcutPressed(int_1)) {
                 this.method_1872();
                 this.method_1884(0);
                 return true;
-            } else if (Gui.isCopyShortcutPressed(int_1)) {
+            } else if (Screen.isCopyShortcutPressed(int_1)) {
                 MinecraftClient.getInstance().keyboard.setClipboard(this.getSelectedText());
                 return true;
-            } else if (Gui.isPasteShortcutPressed(int_1)) {
+            } else if (Screen.isPasteShortcutPressed(int_1)) {
                 if (this.editable) {
                     this.addText(MinecraftClient.getInstance().keyboard.getClipboard());
                 }
                 
                 return true;
-            } else if (Gui.isCutShortcutPressed(int_1)) {
+            } else if (Screen.isCutShortcutPressed(int_1)) {
                 MinecraftClient.getInstance().keyboard.setClipboard(this.getSelectedText());
                 if (this.editable) {
                     this.addText("");
@@ -309,7 +309,7 @@ public class TextFieldWidget extends Drawable implements IWidget {
                         
                         return true;
                     case 262:
-                        if (Gui.isControlPressed()) {
+                        if (Screen.isControlPressed()) {
                             this.method_1883(this.method_1853(1));
                         } else {
                             this.moveCursor(1);
@@ -317,7 +317,7 @@ public class TextFieldWidget extends Drawable implements IWidget {
                         
                         return true;
                     case 263:
-                        if (Gui.isControlPressed()) {
+                        if (Screen.isControlPressed()) {
                             this.method_1883(this.method_1853(-1));
                         } else {
                             this.moveCursor(-1);

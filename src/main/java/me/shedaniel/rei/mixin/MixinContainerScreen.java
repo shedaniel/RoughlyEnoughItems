@@ -2,14 +2,14 @@ package me.shedaniel.rei.mixin;
 
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
-import me.shedaniel.rei.gui.ContainerGuiOverlay;
-import me.shedaniel.rei.listeners.IMixinContainerGui;
+import me.shedaniel.rei.gui.ContainerScreenOverlay;
+import me.shedaniel.rei.listeners.IMixinContainerScreen;
 import me.shedaniel.rei.listeners.IMixinTabGetter;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.ContainerGui;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.ContainerScreen;
 import net.minecraft.client.gui.GuiEventListener;
-import net.minecraft.client.gui.ingame.CreativePlayerInventoryGui;
+import net.minecraft.client.gui.Screen;
+import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
 import net.minecraft.container.Slot;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -20,8 +20,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(ContainerGui.class)
-public class MixinContainerGui extends Gui implements IMixinContainerGui {
+@Mixin(ContainerScreen.class)
+public class MixinContainerScreen extends Screen implements IMixinContainerScreen {
     
     @Shadow
     protected int left;
@@ -57,22 +57,22 @@ public class MixinContainerGui extends Gui implements IMixinContainerGui {
     }
     
     @Override
-    public void setOverlay(ContainerGuiOverlay overlay) {
+    public void setOverlay(ContainerScreenOverlay overlay) {
         GuiHelper.setOverlay(overlay);
     }
     
     @Inject(method = "onInitialized()V", at = @At("RETURN"))
     protected void onInitialized(CallbackInfo info) {
-        GuiHelper.setLastContainerGui((ContainerGui) (Object) this);
-        GuiHelper.setLastMixinContainerGui((IMixinContainerGui) this);
-        GuiHelper.setOverlay(new ContainerGuiOverlay());
+        GuiHelper.setLastContainerScreen((ContainerScreen) (Object) this);
+        GuiHelper.setLastMixinContainerScreen((IMixinContainerScreen) this);
+        GuiHelper.setOverlay(new ContainerScreenOverlay());
         this.listeners.add(GuiHelper.getLastOverlay());
     }
     
     @Inject(method = "draw(IIF)V", at = @At("RETURN"))
     public void draw(int int_1, int int_2, float float_1, CallbackInfo info) {
-        if (MinecraftClient.getInstance().currentGui instanceof CreativePlayerInventoryGui) {
-            IMixinTabGetter tabGetter = (IMixinTabGetter) MinecraftClient.getInstance().currentGui;
+        if (MinecraftClient.getInstance().currentScreen instanceof CreativePlayerInventoryScreen) {
+            IMixinTabGetter tabGetter = (IMixinTabGetter) MinecraftClient.getInstance().currentScreen;
             if (tabGetter.getSelectedTab() != ItemGroup.INVENTORY.getId())
                 return;
         }
@@ -91,7 +91,7 @@ public class MixinContainerGui extends Gui implements IMixinContainerGui {
     
     @Override
     public boolean mouseScrolled(double double_1) {
-        ContainerGuiOverlay overlay = GuiHelper.getLastOverlay();
+        ContainerScreenOverlay overlay = GuiHelper.getLastOverlay();
         if (GuiHelper.isOverlayVisible() && overlay.getRectangle().contains(ClientHelper.getMouseLocation()))
             for(GuiEventListener entry : this.getEntries())
                 if (entry.mouseScrolled(double_1))

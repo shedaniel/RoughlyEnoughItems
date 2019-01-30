@@ -56,7 +56,7 @@ public class RecipeHelper {
     
     public void registerCategory(IRecipeCategory category) {
         categories.add(category);
-        recipeCategoryListMap.put(category.getIdentifier(), Lists.newArrayList());
+        recipeCategoryListMap.put(category.getIdentifier(), Lists.newLinkedList());
     }
     
     public void registerRecipe(Identifier categoryIdentifier, IRecipeDisplay display) {
@@ -67,7 +67,7 @@ public class RecipeHelper {
     
     public Map<IRecipeCategory, List<IRecipeDisplay>> getRecipesFor(ItemStack stack) {
         Map<Identifier, List<IRecipeDisplay>> categoriesMap = new HashMap<>();
-        categories.forEach(f -> categoriesMap.put(f.getIdentifier(), new LinkedList<>()));
+        categories.forEach(f -> categoriesMap.put(f.getIdentifier(), Lists.newArrayList()));
         for(Map.Entry<Identifier, List<IRecipeDisplay>> entry : recipeCategoryListMap.entrySet()) {
             IRecipeCategory category = getCategory(entry.getKey());
             for(IRecipeDisplay recipeDisplay : entry.getValue())
@@ -75,10 +75,9 @@ public class RecipeHelper {
                     if (category.checkTags() ? ItemStack.areEqual(stack, outputStack) : ItemStack.areEqualIgnoreTags(stack, outputStack))
                         categoriesMap.get(recipeDisplay.getRecipeCategory()).add(recipeDisplay);
         }
-        categoriesMap.keySet().removeIf(f -> categoriesMap.get(f).isEmpty());
-        Map<IRecipeCategory, List<IRecipeDisplay>> recipeCategoryListMap = Maps.newHashMap();
+        Map<IRecipeCategory, List<IRecipeDisplay>> recipeCategoryListMap = Maps.newLinkedHashMap();
         categories.forEach(category -> {
-            if (categoriesMap.containsKey(category.getIdentifier()))
+            if (categoriesMap.containsKey(category.getIdentifier()) && !categoriesMap.get(category.getIdentifier()).isEmpty())
                 recipeCategoryListMap.put(category, categoriesMap.get(category.getIdentifier()));
         });
         return recipeCategoryListMap;
@@ -94,7 +93,7 @@ public class RecipeHelper {
     
     public Map<IRecipeCategory, List<IRecipeDisplay>> getUsagesFor(ItemStack stack) {
         Map<Identifier, List<IRecipeDisplay>> categoriesMap = new HashMap<>();
-        categories.forEach(f -> categoriesMap.put(f.getIdentifier(), new LinkedList<>()));
+        categories.forEach(f -> categoriesMap.put(f.getIdentifier(), Lists.newArrayList()));
         for(Map.Entry<Identifier, List<IRecipeDisplay>> entry : recipeCategoryListMap.entrySet()) {
             IRecipeCategory category = getCategory(entry.getKey());
             for(IRecipeDisplay recipeDisplay : entry.getValue()) {
@@ -112,10 +111,9 @@ public class RecipeHelper {
                 }
             }
         }
-        categoriesMap.keySet().removeIf(f -> categoriesMap.get(f).isEmpty());
-        Map<IRecipeCategory, List<IRecipeDisplay>> recipeCategoryListMap = Maps.newHashMap();
+        Map<IRecipeCategory, List<IRecipeDisplay>> recipeCategoryListMap = Maps.newLinkedHashMap();
         categories.forEach(category -> {
-            if (categoriesMap.containsKey(category.getIdentifier()))
+            if (categoriesMap.containsKey(category.getIdentifier()) && !categoriesMap.get(category.getIdentifier()).isEmpty())
                 recipeCategoryListMap.put(category, categoriesMap.get(category.getIdentifier()));
         });
         return recipeCategoryListMap;

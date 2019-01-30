@@ -16,6 +16,7 @@ import java.awt.*;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class DefaultStoneCuttingCategory implements IRecipeCategory<DefaultStoneCuttingDisplay> {
     
@@ -37,7 +38,7 @@ public class DefaultStoneCuttingCategory implements IRecipeCategory<DefaultStone
     }
     
     @Override
-    public List<IWidget> setupDisplay(DefaultStoneCuttingDisplay recipeDisplay, Rectangle bounds) {
+    public List<IWidget> setupDisplay(Supplier<DefaultStoneCuttingDisplay> recipeDisplaySupplier, Rectangle bounds) {
         Point startPoint = new Point((int) bounds.getCenterX() - 41, (int) bounds.getCenterY() - 13);
         List<IWidget> widgets = new LinkedList<>(Arrays.asList(new RecipeBaseWidget(bounds) {
             @Override
@@ -49,8 +50,8 @@ public class DefaultStoneCuttingCategory implements IRecipeCategory<DefaultStone
                 drawTexturedRect(startPoint.x, startPoint.y, 0, 221, 82, 26);
             }
         }));
-        widgets.add(new ItemSlotWidget(startPoint.x + 4, startPoint.y + 5, recipeDisplay.getInput().get(0), true, true, true));
-        widgets.add(new ItemSlotWidget(startPoint.x + 61, startPoint.y + 5, recipeDisplay.getOutput(), false, true, true));
+        widgets.add(new ItemSlotWidget(startPoint.x + 4, startPoint.y + 5, recipeDisplaySupplier.get().getInput().get(0), true, true, true));
+        widgets.add(new ItemSlotWidget(startPoint.x + 61, startPoint.y + 5, recipeDisplaySupplier.get().getOutput(), false, true, true));
         return widgets;
     }
     

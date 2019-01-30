@@ -11,29 +11,28 @@ import net.minecraft.item.ItemStack;
 
 import java.awt.*;
 import java.util.Arrays;
+import java.util.function.Supplier;
 
 public class SpeedCraftingButtonWidget extends ButtonWidget {
     
-    private final IRecipeDisplay display;
+    private final Supplier<IRecipeDisplay> displaySupplier;
     private final SpeedCraftFunctional functional;
     
-    public SpeedCraftingButtonWidget(Rectangle rectangle, String text, SpeedCraftFunctional functional, IRecipeDisplay display) {
+    public SpeedCraftingButtonWidget(Rectangle rectangle, String text, SpeedCraftFunctional functional, Supplier<IRecipeDisplay> displaySupplier) {
         super(rectangle, text);
-        this.display = display;
-        //RoughlyEnoughItemsCore.LOGGER.info("Registered %s.", ((ItemStack) this.display.getOutput().get(0)).getDisplayName().getFormattedText());
+        this.displaySupplier = displaySupplier;
         this.functional = functional;
     }
     
     @Override
     public void onPressed(int button, double mouseX, double mouseY) {
-        //RoughlyEnoughItemsCore.LOGGER.info("Crafting %s.", ((ItemStack) this.display.getOutput().get(0)).getDisplayName().getFormattedText());
-        MinecraftClient.getInstance().openGui(GuiHelper.getLastContainerGui());
-        functional.performAutoCraft(GuiHelper.getLastContainerGui(), display);
+        MinecraftClient.getInstance().openScreen(GuiHelper.getLastContainerScreen());
+        functional.performAutoCraft(GuiHelper.getLastContainerScreen(), displaySupplier.get());
     }
     
     @Override
     public void draw(int mouseX, int mouseY, float partialTicks) {
-        this.enabled = functional != null && functional.acceptRecipe(GuiHelper.getLastContainerGui(), display);
+        this.enabled = functional != null && functional.acceptRecipe(GuiHelper.getLastContainerScreen(), displaySupplier.get());
         super.draw(mouseX, mouseY, partialTicks);
         if (getBounds().contains(mouseX, mouseY))
             if (enabled)

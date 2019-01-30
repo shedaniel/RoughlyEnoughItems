@@ -11,9 +11,9 @@ import me.shedaniel.rei.client.GuiHelper;
 import me.shedaniel.rei.client.RecipeHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.audio.PositionedSoundInstance;
-import net.minecraft.client.gui.ContainerGui;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.ContainerScreen;
 import net.minecraft.client.gui.GuiEventListener;
+import net.minecraft.client.gui.Screen;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.util.Window;
 import net.minecraft.sound.SoundEvents;
@@ -24,8 +24,9 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
-public class RecipeViewingWidget extends Gui {
+public class RecipeViewingWidgetScreen extends Screen {
     
     public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private static final Identifier CREATIVE_INVENTORY_TABS = new Identifier("textures/gui/container/creative_inventory/tabs.png");
@@ -42,7 +43,7 @@ public class RecipeViewingWidget extends Gui {
     private int page, categoryPages;
     private ButtonWidget recipeBack, recipeNext, categoryBack, categoryNext;
     
-    public RecipeViewingWidget(Window window, Map<IRecipeCategory, List<IRecipeDisplay>> categoriesMap) {
+    public RecipeViewingWidgetScreen(Window window, Map<IRecipeCategory, List<IRecipeDisplay>> categoriesMap) {
         this.categoryPages = 0;
         this.window = window;
         this.widgets = Lists.newArrayList();
@@ -57,10 +58,10 @@ public class RecipeViewingWidget extends Gui {
         this.tabs = new ArrayList<>();
     }
     
-    public static SpeedCraftFunctional getSpeedCraftFunctionalByCategory(ContainerGui containerGui, IRecipeCategory category) {
+    public static SpeedCraftFunctional getSpeedCraftFunctionalByCategory(ContainerScreen containerScreen, IRecipeCategory category) {
         for(SpeedCraftFunctional functional : RecipeHelper.getInstance().getSpeedCraftFunctional(category))
             for(Class aClass : functional.getFunctioningFor())
-                if (containerGui.getClass().isAssignableFrom(aClass))
+                if (containerScreen.getClass().isAssignableFrom(aClass))
                     return functional;
         return null;
     }
@@ -68,7 +69,7 @@ public class RecipeViewingWidget extends Gui {
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if ((int_1 == 256 || this.client.options.keyInventory.matchesKey(int_1, int_2)) && this.doesEscapeKeyClose()) {
-            MinecraftClient.getInstance().openGui(GuiHelper.getLastContainerGui());
+            MinecraftClient.getInstance().openScreen(GuiHelper.getLastContainerScreen());
             return true;
         }
         for(GuiEventListener listener : listeners)
@@ -98,7 +99,7 @@ public class RecipeViewingWidget extends Gui {
                     currentCategoryIndex = categories.size() - 1;
                 selectedCategory = categories.get(currentCategoryIndex);
                 categoryPages = MathHelper.floor(currentCategoryIndex / 6d);
-                RecipeViewingWidget.this.onInitialized();
+                RecipeViewingWidgetScreen.this.onInitialized();
             }
         });
         widgets.add(categoryNext = new ButtonWidget((int) bounds.getX() + 159, (int) bounds.getY() + 5, 12, 12, ">") {
@@ -110,7 +111,7 @@ public class RecipeViewingWidget extends Gui {
                     currentCategoryIndex = 0;
                 selectedCategory = categories.get(currentCategoryIndex);
                 categoryPages = MathHelper.floor(currentCategoryIndex / 6d);
-                RecipeViewingWidget.this.onInitialized();
+                RecipeViewingWidgetScreen.this.onInitialized();
             }
         });
         categoryBack.enabled = categories.size() > 1;
@@ -122,7 +123,7 @@ public class RecipeViewingWidget extends Gui {
                 page--;
                 if (page < 0)
                     page = getTotalPages(selectedCategory) - 1;
-                RecipeViewingWidget.this.onInitialized();
+                RecipeViewingWidgetScreen.this.onInitialized();
             }
         });
         widgets.add(recipeNext = new ButtonWidget((int) bounds.getX() + 159, (int) bounds.getY() + 21, 12, 12, ">") {
@@ -131,7 +132,7 @@ public class RecipeViewingWidget extends Gui {
                 page++;
                 if (page >= getTotalPages(selectedCategory))
                     page = 0;
-                RecipeViewingWidget.this.onInitialized();
+                RecipeViewingWidgetScreen.this.onInitialized();
             }
         });
         recipeBack.enabled = categoriesMap.get(selectedCategory).size() > getRecipesPerPage();
@@ -164,7 +165,7 @@ public class RecipeViewingWidget extends Gui {
                                 return false;
                             selectedCategory = categories.get(getId() + categoryPages * 6);
                             page = 0;
-                            RecipeViewingWidget.this.onInitialized();
+                            RecipeViewingWidgetScreen.this.onInitialized();
                             return true;
                         }
                         return false;
@@ -174,17 +175,23 @@ public class RecipeViewingWidget extends Gui {
             }
         }
         SpeedCraftAreaSupplier supplier = RecipeHelper.getInstance().getSpeedCraftButtonArea(selectedCategory);
-        final SpeedCraftFunctional functional = getSpeedCraftFunctionalByCategory(GuiHelper.getLastContainerGui(), selectedCategory);
+        final SpeedCraftFunctional functional = getSpeedCraftFunctionalByCategory(GuiHelper.getLastContainerScreen(), selectedCategory);
         if (page * getRecipesPerPage() < categoriesMap.get(selectedCategory).size()) {
-            final IRecipeDisplay topDisplay = categoriesMap.get(selectedCategory).get(page * getRecipesPerPage());
-            widgets.addAll(selectedCategory.setupDisplay(topDisplay, new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 40, 150, selectedCategory.usesFullPage() ? 140 : 66)));
+            final Supplier<IRecipeDisplay> topDisplaySupplier = () -> {
+                return categoriesMap.get(selectedCategory).get(page * getRecipesPerPage());
+            };
+            final Rectangle topBounds = new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 40, 150, selectedCategory.usesFullPage() ? 140 : 66);
+            widgets.addAll(selectedCategory.setupDisplay(topDisplaySupplier, topBounds));
             if (supplier != null)
-                widgets.add(new SpeedCraftingButtonWidget(supplier.get(new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 40, 150, selectedCategory.usesFullPage() ? 140 : 66)), supplier.getButtonText(), functional, topDisplay));
+                widgets.add(new SpeedCraftingButtonWidget(supplier.get(topBounds), supplier.getButtonText(), functional, topDisplaySupplier));
             if (!selectedCategory.usesFullPage() && page * getRecipesPerPage() + 1 < categoriesMap.get(selectedCategory).size()) {
-                final IRecipeDisplay middleDisplay = categoriesMap.get(selectedCategory).get(page * getRecipesPerPage() + 1);
-                widgets.addAll(selectedCategory.setupDisplay(middleDisplay, new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 113, 150, 66)));
+                final Supplier<IRecipeDisplay> middleDisplaySupplier = () -> {
+                    return categoriesMap.get(selectedCategory).get(page * getRecipesPerPage() + 1);
+                };
+                final Rectangle middleBounds = new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 113, 150, 66);
+                widgets.addAll(selectedCategory.setupDisplay(middleDisplaySupplier, middleBounds));
                 if (supplier != null)
-                    widgets.add(new SpeedCraftingButtonWidget(supplier.get(new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 113, 150, 66)), supplier.getButtonText(), functional, middleDisplay));
+                    widgets.add(new SpeedCraftingButtonWidget(supplier.get(middleBounds), supplier.getButtonText(), functional, middleDisplaySupplier));
             }
         }
         

@@ -4,8 +4,8 @@ import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.REIItemListOrdering;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiEventListener;
+import net.minecraft.client.gui.Screen;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.Window;
@@ -14,12 +14,12 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-public class ConfigWidget extends Gui {
+public class ConfigWidget extends Screen {
     
     private List<IWidget> widgets;
-    private Gui parent;
+    private Screen parent;
     
-    public ConfigWidget(Gui parent) {
+    public ConfigWidget(Screen parent) {
         this.parent = parent;
         this.widgets = Lists.newArrayList();
     }
@@ -27,7 +27,7 @@ public class ConfigWidget extends Gui {
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (int_1 == 256 && this.doesEscapeKeyClose()) {
-            MinecraftClient.getInstance().openGui(parent);
+            MinecraftClient.getInstance().openScreen(parent);
             return true;
         } else {
             return super.keyPressed(int_1, int_2, int_3);
