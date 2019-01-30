@@ -6,10 +6,10 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 archivesBaseName = "RoughlyEnoughItems"
-version = "2.2.0.47"
+version = "2.2.0.48"
 
-def minecraftVersion = "19w04b"
-def yarnVersion = "19w04b.5"
+def minecraftVersion = "19w05a"
+def yarnVersion = "19w05a.3"
 def fabricVersion = "0.1.5.83"
 def pluginLoaderVersion = "1.14-1.0.6-8"
 
