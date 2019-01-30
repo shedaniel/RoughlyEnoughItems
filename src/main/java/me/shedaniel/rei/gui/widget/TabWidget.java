@@ -22,12 +22,12 @@ public class TabWidget extends Drawable implements HighlightableWidget {
     private boolean shown = false, selected = false;
     private ItemStack item;
     private int id;
-    private RecipeViewingWidget recipeViewingWidget;
+    private RecipeViewingWidgetScreen recipeViewingWidget;
     private String categoryName;
     private Rectangle bounds;
     private ItemRenderer itemRenderer;
     
-    public TabWidget(int id, RecipeViewingWidget recipeViewingWidget, Rectangle bounds) {
+    public TabWidget(int id, RecipeViewingWidgetScreen recipeViewingWidget, Rectangle bounds) {
         this.id = id;
         this.recipeViewingWidget = recipeViewingWidget;
         this.bounds = bounds;

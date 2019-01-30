@@ -1,11 +1,11 @@
 package me.shedaniel.rei.client;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.rei.gui.ContainerGuiOverlay;
+import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
-import me.shedaniel.rei.listeners.IMixinContainerGui;
+import me.shedaniel.rei.listeners.IMixinContainerScreen;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.ContainerGui;
+import net.minecraft.client.gui.ContainerScreen;
 import net.minecraft.item.ItemStack;
 
 import java.util.List;
@@ -13,11 +13,11 @@ import java.util.List;
 public class GuiHelper {
     
     public static TextFieldWidget searchField;
-    private static boolean overlayVisible = true;
-    private static ContainerGuiOverlay overlay;
     public static List<ItemStack> inventoryStacks = Lists.newArrayList();
-    private static ContainerGui lastContainerGui;
-    private static IMixinContainerGui lastMixinContainerGui;
+    private static boolean overlayVisible = true;
+    private static ContainerScreenOverlay overlay;
+    private static ContainerScreen lastContainerScreen;
+    private static IMixinContainerScreen lastMixinContainerScreen;
     
     public static boolean isOverlayVisible() {
         return overlayVisible;
@@ -27,36 +27,36 @@ public class GuiHelper {
         overlayVisible = !overlayVisible;
     }
     
-    public static ContainerGuiOverlay getLastOverlay() {
+    public static ContainerScreenOverlay getLastOverlay() {
         return overlay;
     }
     
-    public static void setOverlay(ContainerGuiOverlay overlay) {
+    public static void setOverlay(ContainerScreenOverlay overlay) {
         GuiHelper.overlay = overlay;
         overlay.onInitialized();
     }
     
     public static void onTick(MinecraftClient client) {
-        if (client.currentGui instanceof ContainerGui && lastContainerGui != client.currentGui) {
-            GuiHelper.lastContainerGui = (ContainerGui) client.currentGui;
-            GuiHelper.lastMixinContainerGui = (IMixinContainerGui) lastContainerGui;
+        if (client.currentScreen instanceof ContainerScreen && lastContainerScreen != client.currentScreen) {
+            GuiHelper.lastContainerScreen = (ContainerScreen) client.currentScreen;
+            GuiHelper.lastMixinContainerScreen = (IMixinContainerScreen) lastContainerScreen;
         }
     }
     
-    public static ContainerGui getLastContainerGui() {
-        return lastContainerGui;
+    public static ContainerScreen getLastContainerScreen() {
+        return lastContainerScreen;
     }
     
-    public static IMixinContainerGui getLastMixinContainerGui() {
-        return lastMixinContainerGui;
+    public static void setLastContainerScreen(ContainerScreen lastContainerScreen) {
+        GuiHelper.lastContainerScreen = lastContainerScreen;
     }
     
-    public static void setLastContainerGui(ContainerGui lastContainerGui) {
-        GuiHelper.lastContainerGui = lastContainerGui;
+    public static IMixinContainerScreen getLastMixinContainerScreen() {
+        return lastMixinContainerScreen;
     }
     
-    public static void setLastMixinContainerGui(IMixinContainerGui lastMixinContainerGui) {
-        GuiHelper.lastMixinContainerGui = lastMixinContainerGui;
+    public static void setLastMixinContainerScreen(IMixinContainerScreen lastMixinContainerScreen) {
+        GuiHelper.lastMixinContainerScreen = lastMixinContainerScreen;
     }
     
 }

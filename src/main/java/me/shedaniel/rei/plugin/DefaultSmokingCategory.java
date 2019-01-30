@@ -17,6 +17,7 @@ import java.awt.*;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class DefaultSmokingCategory implements IRecipeCategory<DefaultSmokingDisplay> {
     
@@ -38,7 +39,7 @@ public class DefaultSmokingCategory implements IRecipeCategory<DefaultSmokingDis
     }
     
     @Override
-    public List<IWidget> setupDisplay(DefaultSmokingDisplay recipeDisplay, Rectangle bounds) {
+    public List<IWidget> setupDisplay(Supplier<DefaultSmokingDisplay> recipeDisplaySupplier, Rectangle bounds) {
         Point startPoint = new Point((int) bounds.getCenterX() - 41, (int) bounds.getCenterY() - 27);
         List<IWidget> widgets = new LinkedList<>(Arrays.asList(new RecipeBaseWidget(bounds) {
             @Override
@@ -54,15 +55,15 @@ public class DefaultSmokingCategory implements IRecipeCategory<DefaultSmokingDis
                 drawTexturedRect(startPoint.x + 24, startPoint.y + 19, 82, 92, width, 17);
             }
         }));
-        List<List<ItemStack>> input = recipeDisplay.getInput();
+        List<List<ItemStack>> input = recipeDisplaySupplier.get().getInput();
         widgets.add(new ItemSlotWidget(startPoint.x + 1, startPoint.y + 1, input.get(0), true, true, true));
-        widgets.add(new ItemSlotWidget(startPoint.x + 1, startPoint.y + 37, recipeDisplay.getFuel(), true, true, true) {
+        widgets.add(new ItemSlotWidget(startPoint.x + 1, startPoint.y + 37, recipeDisplaySupplier.get().getFuel(), true, true, true) {
             @Override
             protected List<String> getExtraToolTips(ItemStack stack) {
                 return Arrays.asList(I18n.translate("category.rei.smelting.fuel"));
             }
         });
-        widgets.add(new ItemSlotWidget(startPoint.x + 61, startPoint.y + 19, recipeDisplay.getOutput(), false, true, true));
+        widgets.add(new ItemSlotWidget(startPoint.x + 61, startPoint.y + 19, recipeDisplaySupplier.get().getOutput(), false, true, true));
         return widgets;
     }
     

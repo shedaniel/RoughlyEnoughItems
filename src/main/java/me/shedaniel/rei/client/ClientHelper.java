@@ -6,16 +6,16 @@ import io.netty.buffer.Unpooled;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.IRecipeCategory;
 import me.shedaniel.rei.api.IRecipeDisplay;
-import me.shedaniel.rei.gui.ContainerGuiOverlay;
+import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.widget.ConfigWidget;
-import me.shedaniel.rei.gui.widget.RecipeViewingWidget;
+import me.shedaniel.rei.gui.widget.RecipeViewingWidgetScreen;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
 import net.fabricmc.fabric.impl.client.keybinding.KeyBindingRegistryImpl;
 import net.fabricmc.loader.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.Screen;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -115,22 +115,22 @@ public class ClientHelper implements ClientModInitializer {
         }
     }
     
-    public static boolean executeRecipeKeyBind(ContainerGuiOverlay overlay, ItemStack stack) {
+    public static boolean executeRecipeKeyBind(ContainerScreenOverlay overlay, ItemStack stack) {
         Map<IRecipeCategory, List<IRecipeDisplay>> map = RecipeHelper.getInstance().getRecipesFor(stack);
         if (map.keySet().size() > 0)
-            MinecraftClient.getInstance().openGui(new RecipeViewingWidget(MinecraftClient.getInstance().window, map));
+            MinecraftClient.getInstance().openScreen(new RecipeViewingWidgetScreen(MinecraftClient.getInstance().window, map));
         return map.keySet().size() > 0;
     }
     
-    public static boolean executeUsageKeyBind(ContainerGuiOverlay overlay, ItemStack stack) {
+    public static boolean executeUsageKeyBind(ContainerScreenOverlay overlay, ItemStack stack) {
         Map<IRecipeCategory, List<IRecipeDisplay>> map = RecipeHelper.getInstance().getUsagesFor(stack);
         if (map.keySet().size() > 0)
-            MinecraftClient.getInstance().openGui(new RecipeViewingWidget(MinecraftClient.getInstance().window, map));
+            MinecraftClient.getInstance().openScreen(new RecipeViewingWidgetScreen(MinecraftClient.getInstance().window, map));
         return map.keySet().size() > 0;
     }
     
-    public static void openConfigWindow(Gui parent) {
-        MinecraftClient.getInstance().openGui(new ConfigWidget(parent));
+    public static void openConfigWindow(Screen parent) {
+        MinecraftClient.getInstance().openScreen(new ConfigWidget(parent));
     }
     
     public static List<ItemStack> getInventoryItemsTypes() {

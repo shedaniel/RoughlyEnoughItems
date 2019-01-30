@@ -1,10 +1,10 @@
 package me.shedaniel.rei.listeners;
 
-import me.shedaniel.rei.gui.ContainerGuiOverlay;
+import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import net.minecraft.container.Slot;
 import net.minecraft.item.ItemStack;
 
-public interface IMixinContainerGui {
+public interface IMixinContainerScreen {
     
     public int getContainerLeft();
     
@@ -18,6 +18,6 @@ public interface IMixinContainerGui {
     
     public Slot getHoveredSlot();
     
-    public void setOverlay(ContainerGuiOverlay overlay);
+    public void setOverlay(ContainerScreenOverlay overlay);
     
 }

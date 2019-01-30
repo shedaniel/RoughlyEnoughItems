@@ -17,6 +17,7 @@ import java.awt.*;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class DefaultCraftingCategory implements IRecipeCategory<DefaultCraftingDisplay> {
     
@@ -38,7 +39,7 @@ public class DefaultCraftingCategory implements IRecipeCategory<DefaultCraftingD
     }
     
     @Override
-    public List<IWidget> setupDisplay(DefaultCraftingDisplay recipeDisplay, Rectangle bounds) {
+    public List<IWidget> setupDisplay(Supplier<DefaultCraftingDisplay> recipeDisplaySupplier, Rectangle bounds) {
         Point startPoint = new Point((int) bounds.getCenterX() - 58, (int) bounds.getCenterY() - 27);
         List<IWidget> widgets = new LinkedList<>(Arrays.asList(new RecipeBaseWidget(bounds) {
             @Override
@@ -50,20 +51,20 @@ public class DefaultCraftingCategory implements IRecipeCategory<DefaultCraftingD
                 drawTexturedRect(startPoint.x, startPoint.y, 0, 0, 116, 54);
             }
         }));
-        List<List<ItemStack>> input = recipeDisplay.getInput();
+        List<List<ItemStack>> input = recipeDisplaySupplier.get().getInput();
         List<ItemSlotWidget> slots = Lists.newArrayList();
         for(int y = 0; y < 3; y++)
             for(int x = 0; x < 3; x++)
                 slots.add(new ItemSlotWidget(startPoint.x + 1 + x * 18, startPoint.y + 1 + y * 18, Lists.newArrayList(), true, true, true));
         for(int i = 0; i < input.size(); i++) {
-            if (recipeDisplay instanceof DefaultShapedDisplay) {
+            if (recipeDisplaySupplier.get() instanceof DefaultShapedDisplay) {
                 if (!input.get(i).isEmpty())
-                    slots.get(getSlotWithSize(recipeDisplay, i)).setItemList(input.get(i));
+                    slots.get(getSlotWithSize(recipeDisplaySupplier.get(), i)).setItemList(input.get(i));
             } else if (!input.get(i).isEmpty())
                 slots.get(i).setItemList(input.get(i));
         }
         widgets.addAll(slots);
-        widgets.add(new ItemSlotWidget(startPoint.x + 95, startPoint.y + 19, recipeDisplay.getOutput(), false, true, true) {
+        widgets.add(new ItemSlotWidget(startPoint.x + 95, startPoint.y + 19, recipeDisplaySupplier.get().getOutput(), false, true, true) {
             @Override
             protected String getItemCountOverlay(ItemStack currentStack) {
                 if (currentStack.getAmount() == 1)

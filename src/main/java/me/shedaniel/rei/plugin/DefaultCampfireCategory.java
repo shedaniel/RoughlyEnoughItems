@@ -17,6 +17,7 @@ import java.awt.*;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class DefaultCampfireCategory implements IRecipeCategory<DefaultCampfireDisplay> {
     
@@ -38,7 +39,7 @@ public class DefaultCampfireCategory implements IRecipeCategory<DefaultCampfireD
     }
     
     @Override
-    public List<IWidget> setupDisplay(DefaultCampfireDisplay recipeDisplay, Rectangle bounds) {
+    public List<IWidget> setupDisplay(Supplier<DefaultCampfireDisplay> recipeDisplaySupplier, Rectangle bounds) {
         Point startPoint = new Point((int) bounds.getCenterX() - 41, (int) bounds.getCenterY() - 27);
         List<IWidget> widgets = new LinkedList<>(Arrays.asList(new RecipeBaseWidget(bounds) {
             @Override
@@ -52,13 +53,13 @@ public class DefaultCampfireCategory implements IRecipeCategory<DefaultCampfireD
                 drawTexturedRect(startPoint.x + 2, startPoint.y + 31 + (14 - height), 82, 77 + (14 - height), 14, height);
                 int width = MathHelper.ceil((System.currentTimeMillis() / 250 % 24d) / 1f);
                 drawTexturedRect(startPoint.x + 24, startPoint.y + 19, 82, 92, width, 17);
-                String text = I18n.translate("category.rei.campfire.time", MathHelper.floor(recipeDisplay.getCookTime() / 20d));
+                String text = I18n.translate("category.rei.campfire.time", MathHelper.floor(recipeDisplaySupplier.get().getCookTime() / 20d));
                 int length = MinecraftClient.getInstance().fontRenderer.getStringWidth(text);
                 MinecraftClient.getInstance().fontRenderer.draw(text, bounds.x + bounds.width - length - 5, startPoint.y + 54 - 8, -1);
             }
         }));
-        widgets.add(new ItemSlotWidget(startPoint.x + 1, startPoint.y + 11, recipeDisplay.getInput().get(0), true, true, true));
-        widgets.add(new ItemSlotWidget(startPoint.x + 61, startPoint.y + 19, recipeDisplay.getOutput(), false, true, true));
+        widgets.add(new ItemSlotWidget(startPoint.x + 1, startPoint.y + 11, recipeDisplaySupplier.get().getInput().get(0), true, true, true));
+        widgets.add(new ItemSlotWidget(startPoint.x + 61, startPoint.y + 19, recipeDisplaySupplier.get().getOutput(), false, true, true));
         return widgets;
     }
     

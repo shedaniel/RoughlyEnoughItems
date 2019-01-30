@@ -3,11 +3,11 @@
   "package": "me.shedaniel.rei.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "MixinContainerGui",
+    "MixinContainerScreen",
     "MixinClientPlayNetworkHandler",
-    "MixinPlayerInventoryGui",
-    "MixinCraftingTableGui",
-    "MixinCreativePlayerInventoryGui",
+    "MixinPlayerInventoryScreen",
+    "MixinCraftingTableScreen",
+    "MixinCreativePlayerInventoryScreen",
     "MixinBrewingRecipeRegistry",
     "MixinRecipeBookGui"
   ],
