@@ -33,27 +33,27 @@ public class DefaultPlugin implements IRecipePlugin {
     
     @Override
     public void registerPluginCategories() {
-        RecipeHelper.registerCategory(new DefaultCraftingCategory());
-        RecipeHelper.registerCategory(new DefaultSmeltingCategory());
-        RecipeHelper.registerCategory(new DefaultBrewingCategory());
+        RecipeHelper.getInstance().registerCategory(new DefaultCraftingCategory());
+        RecipeHelper.getInstance().registerCategory(new DefaultSmeltingCategory());
+        RecipeHelper.getInstance().registerCategory(new DefaultBrewingCategory());
     }
     
     @Override
     public void registerRecipes() {
-        for(IRecipe value : RecipeHelper.getRecipeManager().getRecipes())
+        for(IRecipe value : RecipeHelper.getInstance().getRecipeManager().getRecipes())
             if (value instanceof ShapelessRecipe)
-                RecipeHelper.registerRecipe(CRAFTING, new DefaultShapelessDisplay((ShapelessRecipe) value));
+                RecipeHelper.getInstance().registerRecipe(CRAFTING, new DefaultShapelessDisplay((ShapelessRecipe) value));
             else if (value instanceof ShapedRecipe)
-                RecipeHelper.registerRecipe(CRAFTING, new DefaultShapedDisplay((ShapedRecipe) value));
+                RecipeHelper.getInstance().registerRecipe(CRAFTING, new DefaultShapedDisplay((ShapedRecipe) value));
             else if (value instanceof FurnaceRecipe)
-                RecipeHelper.registerRecipe(SMELTING, new DefaultSmeltingDisplay((FurnaceRecipe) value));
-        BREWING_DISPLAYS.forEach(display -> RecipeHelper.registerRecipe(BREWING, display));
+                RecipeHelper.getInstance().registerRecipe(SMELTING, new DefaultSmeltingDisplay((FurnaceRecipe) value));
+        BREWING_DISPLAYS.forEach(display -> RecipeHelper.getInstance().registerRecipe(BREWING, display));
     }
     
     @Override
     public void registerSpeedCraft() {
-        RecipeHelper.registerSpeedCraftButtonArea(DefaultPlugin.BREWING, null);
-        RecipeHelper.registerSpeedCraftFunctional(DefaultPlugin.CRAFTING, new SpeedCraftFunctional<DefaultCraftingDisplay>() {
+        RecipeHelper.getInstance().registerSpeedCraftButtonArea(DefaultPlugin.BREWING, null);
+        RecipeHelper.getInstance().registerSpeedCraftFunctional(DefaultPlugin.CRAFTING, new SpeedCraftFunctional<DefaultCraftingDisplay>() {
             @Override
             public Class[] getFunctioningFor() {
                 return new Class[]{GuiInventory.class, GuiCrafting.class};
@@ -65,7 +65,8 @@ public class DefaultPlugin implements IRecipePlugin {
                     ((IMixinRecipeBookGui) (((GuiCrafting) gui).func_194310_f())).getGhostRecipe().clear();
                 else if (gui.getClass().isAssignableFrom(GuiInventory.class))
                     ((IMixinRecipeBookGui) (((GuiInventory) gui).func_194310_f())).getGhostRecipe().clear();
-                else return false;
+                else
+                    return false;
                 Minecraft.getInstance().playerController.func_203413_a(Minecraft.getInstance().player.openContainer.windowId, recipe.getRecipe(), GuiScreen.isShiftKeyDown());
                 return true;
             }
@@ -75,7 +76,7 @@ public class DefaultPlugin implements IRecipePlugin {
                 return gui instanceof GuiCrafting || (gui instanceof GuiInventory && recipe.getHeight() < 3 && recipe.getWidth() < 3);
             }
         });
-        RecipeHelper.registerSpeedCraftFunctional(DefaultPlugin.SMELTING, new SpeedCraftFunctional<DefaultSmeltingDisplay>() {
+        RecipeHelper.getInstance().registerSpeedCraftFunctional(DefaultPlugin.SMELTING, new SpeedCraftFunctional<DefaultSmeltingDisplay>() {
             @Override
             public Class[] getFunctioningFor() {
                 return new Class[]{GuiFurnace.class};
@@ -85,7 +86,8 @@ public class DefaultPlugin implements IRecipePlugin {
             public boolean performAutoCraft(Gui gui, DefaultSmeltingDisplay recipe) {
                 if (gui instanceof GuiFurnace)
                     ((IMixinRecipeBookGui) (((GuiFurnace) gui).func_194310_f())).getGhostRecipe().clear();
-                else return false;
+                else
+                    return false;
                 Minecraft.getInstance().playerController.func_203413_a(Minecraft.getInstance().player.openContainer.windowId, recipe.getRecipe(), GuiScreen.isShiftKeyDown());
                 return true;
             }

@@ -1,11 +1,11 @@
 package me.shedaniel.rei.gui;
 
+import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
 import me.shedaniel.rei.client.KeyBindHelper;
 import me.shedaniel.rei.gui.widget.*;
-import me.shedaniel.rei.listeners.IMixinGuiContainer;
 import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
@@ -18,7 +18,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,34 +25,26 @@ import java.util.stream.Collectors;
 
 public class ContainerGuiOverlay extends GuiScreen {
     
+    private static final List<QueuedTooltip> QUEUED_TOOLTIPS = Lists.newArrayList();
     public static String searchTerm = "";
     private static int page = 0;
     private static ItemListOverlay itemListOverlay;
-    private final List<IWidget> widgets;
-    private final List<QueuedTooltip> queuedTooltips;
+    private final List<IWidget> widgets = Lists.newArrayList();
     private Rectangle rectangle;
-    private IMixinGuiContainer containerGui;
     private MainWindow window;
     private ButtonWidget buttonLeft, buttonRight;
     private int lastLeft;
-    
-    public ContainerGuiOverlay(GuiContainer containerGui) {
-        this.queuedTooltips = new ArrayList<>();
-        this.containerGui = (IMixinGuiContainer) containerGui;
-        this.widgets = new ArrayList<>();
-    }
     
     public void onInitialized() {
         //Update Variables
         this.widgets.clear();
         this.window = Minecraft.getInstance().mainWindow;
-        if (Minecraft.getInstance().currentScreen instanceof GuiContainer)
-            this.containerGui = (IMixinGuiContainer) Minecraft.getInstance().currentScreen;
         this.rectangle = calculateBoundary();
-        widgets.add(this.itemListOverlay = new ItemListOverlay(containerGui, page));
         this.lastLeft = getLeft();
         
+        widgets.add(this.itemListOverlay = new ItemListOverlay(page));
         this.itemListOverlay.updateList(getItemListArea(), page, searchTerm);
+        
         widgets.add(buttonLeft = new ButtonWidget(rectangle.x, rectangle.y + 5, 16, 16, "<") {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
@@ -88,7 +79,7 @@ public class ContainerGuiOverlay extends GuiScreen {
         widgets.add(new ButtonWidget(10, 35, 40, 20, I18n.format("text.rei.config")) {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
-                ClientHelper.openConfigWindow(containerGui.getContainerGui());
+                ClientHelper.openConfigWindow(GuiHelper.getLastGuiContainer());
             }
         });
         this.widgets.add(new LabelWidget(rectangle.x + (rectangle.width / 2), rectangle.y + 10, "") {
@@ -118,7 +109,7 @@ public class ContainerGuiOverlay extends GuiScreen {
         this.widgets.add(GuiHelper.searchField);
         GuiHelper.searchField.setText(searchTerm);
         if (RoughlyEnoughItemsCore.getConfigHelper().showCraftableOnlyButton())
-            this.widgets.add(new CraftableToggleButtonWidget(containerGui, getCraftableToggleArea()) {
+            this.widgets.add(new CraftableToggleButtonWidget(getCraftableToggleArea()) {
                 @Override
                 public void onPressed(int button, double mouseX, double mouseY) {
                     RoughlyEnoughItemsCore.getConfigHelper().toggleCraftableOnly();
@@ -126,6 +117,7 @@ public class ContainerGuiOverlay extends GuiScreen {
                 }
             });
         
+        this.itemListOverlay.updateList(getItemListArea(), page, searchTerm);
         this.children.addAll(widgets);
     }
     
@@ -133,11 +125,11 @@ public class ContainerGuiOverlay extends GuiScreen {
         int widthRemoved = RoughlyEnoughItemsCore.getConfigHelper().showCraftableOnlyButton() ? 22 : 0;
         if (RoughlyEnoughItemsCore.getConfigHelper().sideSearchField())
             return new Rectangle(rectangle.x + 2, window.getScaledHeight() - 22, rectangle.width - 6 - widthRemoved, 18);
-        if (Minecraft.getInstance().currentScreen instanceof RecipeViewingWidget) {
-            RecipeViewingWidget widget = (RecipeViewingWidget) Minecraft.getInstance().currentScreen;
+        if (Minecraft.getInstance().currentScreen instanceof RecipeViewingWidgetGui) {
+            RecipeViewingWidgetGui widget = (RecipeViewingWidgetGui) Minecraft.getInstance().currentScreen;
             return new Rectangle(widget.getBounds().x, window.getScaledHeight() - 22, widget.getBounds().width - widthRemoved, 18);
         }
-        return new Rectangle(containerGui.getContainerLeft(), window.getScaledHeight() - 22, containerGui.getContainerWidth() - widthRemoved, 18);
+        return new Rectangle(GuiHelper.getLastMixinGuiContainer().getContainerLeft(), window.getScaledHeight() - 22, GuiHelper.getLastMixinGuiContainer().getContainerWidth() - widthRemoved, 18);
     }
     
     private Rectangle getCraftableToggleArea() {
@@ -171,8 +163,8 @@ public class ContainerGuiOverlay extends GuiScreen {
         RenderHelper.disableStandardItemLighting();
         this.render(mouseX, mouseY, partialTicks);
         RenderHelper.disableStandardItemLighting();
-        queuedTooltips.forEach(queuedTooltip -> containerGui.getContainerGui().drawHoveringText(queuedTooltip.text, queuedTooltip.mouse.x, queuedTooltip.mouse.y));
-        queuedTooltips.clear();
+        QUEUED_TOOLTIPS.stream().filter(queuedTooltip -> queuedTooltip != null).forEach(queuedTooltip -> Minecraft.getInstance().currentScreen.drawHoveringText(queuedTooltip.text, queuedTooltip.mouse.x, queuedTooltip.mouse.y));
+        QUEUED_TOOLTIPS.clear();
         RenderHelper.disableStandardItemLighting();
     }
     
@@ -191,12 +183,8 @@ public class ContainerGuiOverlay extends GuiScreen {
         return lastString.equals(currentString);
     }
     
-    public void setContainerGui(IMixinGuiContainer containerGui) {
-        this.containerGui = containerGui;
-    }
-    
     public void addTooltip(QueuedTooltip queuedTooltip) {
-        queuedTooltips.add(queuedTooltip);
+        QUEUED_TOOLTIPS.add(queuedTooltip);
     }
     
     @Override
@@ -214,10 +202,10 @@ public class ContainerGuiOverlay extends GuiScreen {
     }
     
     private Rectangle calculateBoundary() {
-        int startX = containerGui.getContainerLeft() + containerGui.getContainerWidth() + 10;
+        int startX = GuiHelper.getLastMixinGuiContainer().getContainerLeft() + GuiHelper.getLastMixinGuiContainer().getContainerWidth() + 10;
         int width = window.getScaledWidth() - startX;
-        if (Minecraft.getInstance().currentScreen instanceof RecipeViewingWidget) {
-            RecipeViewingWidget widget = (RecipeViewingWidget) Minecraft.getInstance().currentScreen;
+        if (Minecraft.getInstance().currentScreen instanceof RecipeViewingWidgetGui) {
+            RecipeViewingWidgetGui widget = (RecipeViewingWidgetGui) Minecraft.getInstance().currentScreen;
             startX = widget.getBounds().x + widget.getBounds().width + 10;
             width = window.getScaledWidth() - startX;
         }
@@ -225,11 +213,11 @@ public class ContainerGuiOverlay extends GuiScreen {
     }
     
     private int getLeft() {
-        if (Minecraft.getInstance().currentScreen instanceof RecipeViewingWidget) {
-            RecipeViewingWidget widget = (RecipeViewingWidget) Minecraft.getInstance().currentScreen;
+        if (Minecraft.getInstance().currentScreen instanceof RecipeViewingWidgetGui) {
+            RecipeViewingWidgetGui widget = (RecipeViewingWidgetGui) Minecraft.getInstance().currentScreen;
             return widget.getBounds().x;
         }
-        return containerGui.getContainerLeft();
+        return GuiHelper.getLastMixinGuiContainer().getContainerLeft();
     }
     
     private int getTotalPage() {
@@ -265,8 +253,8 @@ public class ContainerGuiOverlay extends GuiScreen {
                 itemStack = ((ItemSlotWidget) widget).getCurrentStack();
                 break;
             }
-        if (itemStack == null && Minecraft.getInstance().currentScreen instanceof RecipeViewingWidget) {
-            RecipeViewingWidget recipeViewingWidget = (RecipeViewingWidget) Minecraft.getInstance().currentScreen;
+        if (itemStack == null && Minecraft.getInstance().currentScreen instanceof RecipeViewingWidgetGui) {
+            RecipeViewingWidgetGui recipeViewingWidget = (RecipeViewingWidgetGui) Minecraft.getInstance().currentScreen;
             for(IGuiEventListener entry : recipeViewingWidget.getChildren())
                 if (entry instanceof ItemSlotWidget && ((ItemSlotWidget) entry).isHighlighted(point.x, point.y)) {
                     itemStack = ((ItemSlotWidget) entry).getCurrentStack();
@@ -274,13 +262,13 @@ public class ContainerGuiOverlay extends GuiScreen {
                 }
         }
         if (itemStack == null && Minecraft.getInstance().currentScreen instanceof GuiContainer)
-            if (containerGui.getHoveredSlot() != null)
-                itemStack = containerGui.getHoveredSlot().getStack();
+            if (GuiHelper.getLastMixinGuiContainer().getHoveredSlot() != null)
+                itemStack = GuiHelper.getLastMixinGuiContainer().getHoveredSlot().getStack();
         if (itemStack != null && !itemStack.isEmpty()) {
             if (KeyBindHelper.RECIPE.matchesKey(int_1, int_2))
-                return ClientHelper.executeRecipeKeyBind(this, itemStack, containerGui);
+                return ClientHelper.executeRecipeKeyBind(this, itemStack);
             else if (KeyBindHelper.USAGE.matchesKey(int_1, int_2))
-                return ClientHelper.executeUsageKeyBind(this, itemStack, containerGui);
+                return ClientHelper.executeUsageKeyBind(this, itemStack);
         }
         if (KeyBindHelper.HIDE.matchesKey(int_1, int_2)) {
             GuiHelper.toggleOverlayVisible();

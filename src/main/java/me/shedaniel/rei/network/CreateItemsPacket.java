@@ -42,11 +42,7 @@ public class CreateItemsPacket implements Packet<INetHandlerPlayServer> {
         NetHandlerPlayServer server = (NetHandlerPlayServer) iNetHandlerPlayServer;
         EntityPlayerMP player = server.player;
         if (player.inventory.addItemStackToInventory(stack.copy()))
-            player.sendMessage(new TextComponentString(I18n.format("text.rei.cheat_items")
-                    .replaceAll("\\{item_name}", stack.copy().getDisplayName().getFormattedText())
-                    .replaceAll("\\{item_count}", stack.copy().getCount() + "")
-                    .replaceAll("\\{player_name}", player.getScoreboardName())
-            ), ChatType.SYSTEM);
+            player.sendMessage(new TextComponentString(I18n.format("text.rei.cheat_items").replaceAll("\\{item_name}", stack.copy().getDisplayName().getFormattedText()).replaceAll("\\{item_count}", stack.copy().getCount() + "").replaceAll("\\{player_name}", player.getScoreboardName())), ChatType.SYSTEM);
         else
             player.sendMessage(new TextComponentTranslation("text.rei.failed_cheat_items"), ChatType.SYSTEM);
     }

@@ -6,16 +6,17 @@ import me.shedaniel.rei.plugin.DefaultBrewingDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemPotion;
-import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.potion.PotionBrewing;
 import net.minecraft.potion.PotionType;
 import net.minecraft.potion.PotionUtils;
+import net.minecraft.util.IItemProvider;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Mixin(PotionBrewing.class)
@@ -27,16 +28,14 @@ public class MixinPotionBrewing {
     
     @Inject(method = "func_196208_a", at = @At("RETURN"))
     private static void func_196208_a(Item item_1, CallbackInfo ci) {
-        if (item_1 instanceof ItemPotion) {
+        if (item_1 instanceof ItemPotion)
             SELF_POTION_TYPES.add(Ingredient.fromItems(item_1));
-        }
     }
     
     @Inject(method = "func_196207_a", at = @At("RETURN"))
     private static void func_196207_a(Item item_1, Item item_2, Item item_3, CallbackInfo ci) {
-        if (item_1 instanceof ItemPotion && item_3 instanceof ItemPotion) {
+        if (item_1 instanceof ItemPotion && item_3 instanceof ItemPotion)
             SELF_ITEM_RECIPES.add(new BrewingRecipe(item_1, Ingredient.fromItems(item_2), item_3));
-        }
     }
     
     @Inject(method = "addMix", at = @At("RETURN"))
@@ -45,19 +44,15 @@ public class MixinPotionBrewing {
             registerPotionType(potion_1);
         if (!REGISTERED_POTION_TYPES.contains(potion_2))
             registerPotionType(potion_2);
-        SELF_POTION_TYPES.forEach(ingredient -> {
-            for(ItemStack stack : ingredient.getMatchingStacks()) {
-                DefaultPlugin.registerBrewingDisplay(new DefaultBrewingDisplay(PotionUtils.addPotionToItemStack(stack.copy(), potion_1), Ingredient.fromItems(item_1),
-                        PotionUtils.addPotionToItemStack(stack.copy(), potion_2)));
-            }
-        });
+        SELF_POTION_TYPES.stream().map(Ingredient::getMatchingStacks).forEach(itemStacks -> Arrays.stream(itemStacks).forEach(stack -> {
+            DefaultPlugin.registerBrewingDisplay(new DefaultBrewingDisplay(PotionUtils.addPotionToItemStack(stack.copy(), potion_1), Ingredient.fromItems(new IItemProvider[]{item_1}), PotionUtils.addPotionToItemStack(stack.copy(), potion_2)));
+        }));
     }
     
     private static void registerPotionType(PotionType potion) {
         REGISTERED_POTION_TYPES.add(potion);
         SELF_ITEM_RECIPES.forEach(recipe -> {
-            DefaultPlugin.registerBrewingDisplay(new DefaultBrewingDisplay(PotionUtils.addPotionToItemStack(recipe.input.getDefaultInstance(), potion), recipe.ingredient,
-                    PotionUtils.addPotionToItemStack(recipe.output.getDefaultInstance(), potion)));
+            DefaultPlugin.registerBrewingDisplay(new DefaultBrewingDisplay(PotionUtils.addPotionToItemStack(recipe.input.getDefaultInstance(), potion), recipe.ingredient, PotionUtils.addPotionToItemStack(recipe.output.getDefaultInstance(), potion)));
         });
     }
     

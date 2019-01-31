@@ -4,7 +4,6 @@ import me.shedaniel.rei.api.IRecipeCategory;
 import me.shedaniel.rei.gui.widget.IWidget;
 import me.shedaniel.rei.gui.widget.ItemSlotWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
-import me.shedaniel.rei.listeners.IMixinGuiContainer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
@@ -18,6 +17,7 @@ import java.awt.*;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class DefaultSmeltingCategory implements IRecipeCategory<DefaultSmeltingDisplay> {
     
@@ -39,7 +39,7 @@ public class DefaultSmeltingCategory implements IRecipeCategory<DefaultSmeltingD
     }
     
     @Override
-    public List<IWidget> setupDisplay(IMixinGuiContainer containerGui, DefaultSmeltingDisplay recipeDisplay, Rectangle bounds) {
+    public List<IWidget> setupDisplay(Supplier<DefaultSmeltingDisplay> recipeDisplaySupplier, Rectangle bounds) {
         Point startPoint = new Point((int) bounds.getCenterX() - 41, (int) bounds.getCenterY() - 27);
         List<IWidget> widgets = new LinkedList<>(Arrays.asList(new RecipeBaseWidget(bounds) {
             @Override
@@ -55,15 +55,15 @@ public class DefaultSmeltingCategory implements IRecipeCategory<DefaultSmeltingD
                 drawTexturedModalRect(startPoint.x + 24, startPoint.y + 19, 82, 92, width, 17);
             }
         }));
-        List<List<ItemStack>> input = recipeDisplay.getInput();
-        widgets.add(new ItemSlotWidget(startPoint.x + 1, startPoint.y + 1, input.get(0), true, true, containerGui, true));
-        widgets.add(new ItemSlotWidget(startPoint.x + 1, startPoint.y + 37, recipeDisplay.getFuel(), true, true, containerGui, true) {
+        List<List<ItemStack>> input = recipeDisplaySupplier.get().getInput();
+        widgets.add(new ItemSlotWidget(startPoint.x + 1, startPoint.y + 1, input.get(0), true, true, true));
+        widgets.add(new ItemSlotWidget(startPoint.x + 1, startPoint.y + 37, recipeDisplaySupplier.get().getFuel(), true, true, true) {
             @Override
             protected List<String> getExtraToolTips(ItemStack stack) {
                 return Arrays.asList(I18n.format("category.rei.smelting.fuel"));
             }
         });
-        widgets.add(new ItemSlotWidget(startPoint.x + 61, startPoint.y + 19, recipeDisplay.getOutput(), false, true, containerGui, true));
+        widgets.add(new ItemSlotWidget(startPoint.x + 61, startPoint.y + 19, recipeDisplaySupplier.get().getOutput(), false, true, true));
         return widgets;
     }
     

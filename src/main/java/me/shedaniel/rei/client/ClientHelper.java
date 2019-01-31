@@ -2,15 +2,12 @@ package me.shedaniel.rei.client;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import io.netty.buffer.Unpooled;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.IRecipeCategory;
 import me.shedaniel.rei.api.IRecipeDisplay;
 import me.shedaniel.rei.gui.ContainerGuiOverlay;
 import me.shedaniel.rei.gui.widget.ConfigWidget;
-import me.shedaniel.rei.gui.widget.RecipeViewingWidget;
-import me.shedaniel.rei.listeners.ClientLoaded;
-import me.shedaniel.rei.listeners.IMixinGuiContainer;
+import me.shedaniel.rei.gui.widget.RecipeViewingWidgetGui;
 import me.shedaniel.rei.network.CreateItemsPacket;
 import me.shedaniel.rei.network.DeleteItemsPacket;
 import net.minecraft.client.Minecraft;
@@ -32,7 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ClientHelper implements ClientLoaded {
+public class ClientHelper {
     
     private static List<ItemStack> itemList;
     private static boolean cheating = false;
@@ -48,13 +45,11 @@ public class ClientHelper implements ClientLoaded {
             String modid = location.getNamespace();
             if (modid.equalsIgnoreCase("minecraft"))
                 return "Minecraft";
-            return RiftLoader.instance.getMods().stream()
-                    .filter(modInfo -> modInfo.id.equals(modid) || (modInfo.name != null && modInfo.name.equals(modid)))
-                    .findFirst().map(modInfo -> {
-                        if (modInfo.name != null)
-                            return modInfo.name;
-                        return modid;
-                    }).orElse(modid);
+            return RiftLoader.instance.getMods().stream().filter(modInfo -> modInfo.id.equals(modid) || (modInfo.name != null && modInfo.name.equals(modid))).findFirst().map(modInfo -> {
+                if (modInfo.name != null)
+                    return modInfo.name;
+                return modid;
+            }).orElse(modid);
         }
         return "";
     }
@@ -100,27 +95,25 @@ public class ClientHelper implements ClientLoaded {
         } else {
             ResourceLocation location = IRegistry.ITEM.getKey(cheatedStack.getItem());
             String tagMessage = cheatedStack.copy().getTag() != null && !cheatedStack.copy().getTag().isEmpty() ? cheatedStack.copy().getTag().toString() : "";
-            String madeUpCommand = RoughlyEnoughItemsCore.getConfigHelper().getGiveCommandPrefix() + " " + Minecraft.getInstance().player.getScoreboardName() + " " +
-                    location.toString() + tagMessage + (cheatedStack.getCount() != 1 ? " " + cheatedStack.getCount() : "");
+            String madeUpCommand = RoughlyEnoughItemsCore.getConfigHelper().getGiveCommandPrefix() + " " + Minecraft.getInstance().player.getScoreboardName() + " " + location.toString() + tagMessage + (cheatedStack.getCount() != 1 ? " " + cheatedStack.getCount() : "");
             if (madeUpCommand.length() > 256)
-                madeUpCommand = RoughlyEnoughItemsCore.getConfigHelper().getGiveCommandPrefix() + " " + Minecraft.getInstance().player.getScoreboardName() + " " +
-                        location.toString() + (cheatedStack.getCount() != 1 ? " " + cheatedStack.getCount() : "");
+                madeUpCommand = RoughlyEnoughItemsCore.getConfigHelper().getGiveCommandPrefix() + " " + Minecraft.getInstance().player.getScoreboardName() + " " + location.toString() + (cheatedStack.getCount() != 1 ? " " + cheatedStack.getCount() : "");
             Minecraft.getInstance().player.sendChatMessage(madeUpCommand);
             return true;
         }
     }
     
-    public static boolean executeRecipeKeyBind(ContainerGuiOverlay overlay, ItemStack stack, IMixinGuiContainer parent) {
-        Map<IRecipeCategory, List<IRecipeDisplay>> map = RecipeHelper.getRecipesFor(stack);
+    public static boolean executeRecipeKeyBind(ContainerGuiOverlay overlay, ItemStack stack) {
+        Map<IRecipeCategory, List<IRecipeDisplay>> map = RecipeHelper.getInstance().getRecipesFor(stack);
         if (map.keySet().size() > 0)
-            Minecraft.getInstance().displayGuiScreen(new RecipeViewingWidget(Minecraft.getInstance().mainWindow, parent, map));
+            Minecraft.getInstance().displayGuiScreen(new RecipeViewingWidgetGui(Minecraft.getInstance().mainWindow, map));
         return map.keySet().size() > 0;
     }
     
-    public static boolean executeUsageKeyBind(ContainerGuiOverlay overlay, ItemStack stack, IMixinGuiContainer parent) {
-        Map<IRecipeCategory, List<IRecipeDisplay>> map = RecipeHelper.getUsagesFor(stack);
+    public static boolean executeUsageKeyBind(ContainerGuiOverlay overlay, ItemStack stack) {
+        Map<IRecipeCategory, List<IRecipeDisplay>> map = RecipeHelper.getInstance().getUsagesFor(stack);
         if (map.keySet().size() > 0)
-            Minecraft.getInstance().displayGuiScreen(new RecipeViewingWidget(Minecraft.getInstance().mainWindow, parent, map));
+            Minecraft.getInstance().displayGuiScreen(new RecipeViewingWidgetGui(Minecraft.getInstance().mainWindow, map));
         return map.keySet().size() > 0;
     }
     
@@ -129,8 +122,7 @@ public class ClientHelper implements ClientLoaded {
     }
     
     public static List<ItemStack> getInventoryItemsTypes() {
-        List<NonNullList<ItemStack>> field_7543 = ImmutableList.of(Minecraft.getInstance().player.inventory.mainInventory, Minecraft.getInstance().player.inventory.armorInventory
-                , Minecraft.getInstance().player.inventory.offHandInventory);
+        List<NonNullList<ItemStack>> field_7543 = ImmutableList.of(Minecraft.getInstance().player.inventory.mainInventory, Minecraft.getInstance().player.inventory.armorInventory, Minecraft.getInstance().player.inventory.offHandInventory);
         List<ItemStack> inventoryStacks = new ArrayList<>();
         field_7543.forEach(itemStacks -> itemStacks.forEach(itemStack -> {
             if (!itemStack.getItem().equals(Items.AIR))
@@ -139,7 +131,6 @@ public class ClientHelper implements ClientLoaded {
         return inventoryStacks;
     }
     
-    @Override
     public void clientLoaded() {
         IRegistry.ITEM.forEach(item -> {
             if (!item.equals(Items.ENCHANTED_BOOK))

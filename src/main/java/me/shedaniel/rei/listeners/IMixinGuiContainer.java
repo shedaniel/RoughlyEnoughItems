@@ -19,8 +19,6 @@ public interface IMixinGuiContainer {
     
     public Slot getHoveredSlot();
     
-    public GuiContainer getContainerGui();
-    
     public void setOverlay(ContainerGuiOverlay overlay);
     
 }

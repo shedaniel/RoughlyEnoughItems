@@ -4,7 +4,7 @@
   "key.roughlyenoughitems.hide_keybind": "隱藏／顯示 REI",
   "key.roughlyenoughitems.usage_keybind": "顯示用途",
   "text.rei.cheat": "作弊",
-  "text.rei.nocheat": "§4§m作弊",
+  "text.rei.nocheat": "§c§m作弊",
   "category.rei.crafting": "合成",
   "category.rei.smelting": "冶煉",
   "category.rei.smelting.fuel": "§e燃料",
