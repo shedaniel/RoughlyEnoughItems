@@ -8,16 +8,17 @@
   "listeners": [
     {
       "class": "me.shedaniel.rei.REIMixinInit",
-      "side": "client"
-    },
-    {
-      "class": "me.shedaniel.rei.RoughlyEnoughItemsPlugin",
       "side": "client",
-      "priority": -1000
+      "priority": 5
     },
     {
       "class": "me.shedaniel.rei.client.KeyBindHelper",
       "side": "client"
+    },
+    {
+      "class": "me.shedaniel.rei.client.GuiHelper",
+      "side": "client",
+      "priority": -30
     }
   ],
   "url": "https://shedaniel.me",

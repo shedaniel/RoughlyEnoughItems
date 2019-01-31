@@ -16,7 +16,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(GuiInventory.class)
 public abstract class MixinGuiInventory extends InventoryEffectRenderer implements IRecipeShownListener {
     
-    @Shadow @Final private GuiRecipeBook recipeBookGui;
+    @Shadow
+    @Final
+    private GuiRecipeBook recipeBookGui;
     
     public MixinGuiInventory(Container inventorySlotsIn) {
         super(inventorySlotsIn);

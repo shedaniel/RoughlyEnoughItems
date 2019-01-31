@@ -4,7 +4,7 @@
   "key.roughlyenoughitems.hide_keybind": "Hide/Show REI",
   "key.roughlyenoughitems.usage_keybind": "Show Uses",
   "text.rei.cheat": "Cheat",
-  "text.rei.nocheat": "§4§mCheat",
+  "text.rei.nocheat": "§c§mCheat",
   "category.rei.crafting": "Crafting",
   "category.rei.smelting": "Smelting",
   "category.rei.smelting.fuel": "§eFuel",

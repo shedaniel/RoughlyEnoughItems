@@ -3,7 +3,6 @@ package me.shedaniel.rei.gui.widget;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
-import me.shedaniel.rei.listeners.IMixinGuiContainer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.ItemRenderer;
@@ -20,14 +19,13 @@ public abstract class CraftableToggleButtonWidget extends ButtonWidget {
     
     protected static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private ItemRenderer itemRenderer;
-    private IMixinGuiContainer containerGui;
     
-    public CraftableToggleButtonWidget(IMixinGuiContainer containerGui, Rectangle rectangle) {
-        this(containerGui, rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+    public CraftableToggleButtonWidget(Rectangle rectangle) {
+        this(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         this.itemRenderer = Minecraft.getInstance().getItemRenderer();
     }
     
-    public CraftableToggleButtonWidget(IMixinGuiContainer containerGui, int x, int y, int width, int height) {
+    public CraftableToggleButtonWidget(int x, int y, int width, int height) {
         super(x, y, width, height, "");
         this.itemRenderer = Minecraft.getInstance().getItemRenderer();
     }
@@ -51,9 +49,7 @@ public abstract class CraftableToggleButtonWidget extends ButtonWidget {
     }
     
     private void drawTooltip() {
-        GuiHelper.getLastOverlay()
-                .addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.format(RoughlyEnoughItemsCore.getConfigHelper().craftableOnly()
-                        ? "text.rei.showing_craftable" : "text.rei.showing_all"))));
+        GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.format(RoughlyEnoughItemsCore.getConfigHelper().craftableOnly() ? "text.rei.showing_craftable" : "text.rei.showing_all"))));
     }
     
 }

@@ -19,6 +19,7 @@ import java.awt.*;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class DefaultBrewingCategory implements IRecipeCategory<DefaultBrewingDisplay> {
     
@@ -40,7 +41,7 @@ public class DefaultBrewingCategory implements IRecipeCategory<DefaultBrewingDis
     }
     
     @Override
-    public List<IWidget> setupDisplay(IMixinGuiContainer containerGui, DefaultBrewingDisplay recipeDisplay, Rectangle bounds) {
+    public List<IWidget> setupDisplay(Supplier<DefaultBrewingDisplay> recipeDisplaySupplier, Rectangle bounds) {
         Point startPoint = new Point((int) bounds.getCenterX() - 52, (int) bounds.getCenterY() - 29);
         List<IWidget> widgets = new LinkedList<>(Arrays.asList(new RecipeBaseWidget(bounds) {
             @Override
@@ -54,32 +55,32 @@ public class DefaultBrewingCategory implements IRecipeCategory<DefaultBrewingDis
                 drawTexturedModalRect(startPoint.x + 44, startPoint.y + 28, 103, 163, width, 4);
             }
         }));
-        widgets.add(new ItemSlotWidget(startPoint.x + 1, startPoint.y + 1, Arrays.asList(new ItemStack(Items.BLAZE_POWDER)), false, true, containerGui, true));
-        widgets.add(new ItemSlotWidget(startPoint.x + 63, startPoint.y + 1, recipeDisplay.getInput().get(0), false, true, containerGui, true) {
+        widgets.add(new ItemSlotWidget(startPoint.x + 1, startPoint.y + 1, Arrays.asList(new ItemStack(Items.BLAZE_POWDER)), false, true, true));
+        widgets.add(new ItemSlotWidget(startPoint.x + 63, startPoint.y + 1, recipeDisplaySupplier.get().getInput().get(0), false, true, true) {
             @Override
             protected List<String> getExtraToolTips(ItemStack stack) {
                 return Arrays.asList(I18n.format("category.rei.brewing.input"));
             }
         });
-        widgets.add(new ItemSlotWidget(startPoint.x + 40, startPoint.y + 1, recipeDisplay.getInput().get(1), false, true, containerGui, true) {
+        widgets.add(new ItemSlotWidget(startPoint.x + 40, startPoint.y + 1, recipeDisplaySupplier.get().getInput().get(1), false, true, true) {
             @Override
             protected List<String> getExtraToolTips(ItemStack stack) {
                 return Arrays.asList(I18n.format("category.rei.brewing.reactant"));
             }
         });
-        widgets.add(new ItemSlotWidget(startPoint.x + 40, startPoint.y + 35, recipeDisplay.getOutput(0), false, true, containerGui, true) {
+        widgets.add(new ItemSlotWidget(startPoint.x + 40, startPoint.y + 35, recipeDisplaySupplier.get().getOutput(0), false, true, true) {
             @Override
             protected List<String> getExtraToolTips(ItemStack stack) {
                 return Arrays.asList(I18n.format("category.rei.brewing.result"));
             }
         });
-        widgets.add(new ItemSlotWidget(startPoint.x + 63, startPoint.y + 42, recipeDisplay.getOutput(1), false, true, containerGui, true) {
+        widgets.add(new ItemSlotWidget(startPoint.x + 63, startPoint.y + 42, recipeDisplaySupplier.get().getOutput(1), false, true, true) {
             @Override
             protected List<String> getExtraToolTips(ItemStack stack) {
                 return Arrays.asList(I18n.format("category.rei.brewing.result"));
             }
         });
-        widgets.add(new ItemSlotWidget(startPoint.x + 86, startPoint.y + 35, recipeDisplay.getOutput(2), false, true, containerGui, true) {
+        widgets.add(new ItemSlotWidget(startPoint.x + 86, startPoint.y + 35, recipeDisplaySupplier.get().getOutput(2), false, true, true) {
             @Override
             protected List<String> getExtraToolTips(ItemStack stack) {
                 return Arrays.asList(I18n.format("category.rei.brewing.result"));

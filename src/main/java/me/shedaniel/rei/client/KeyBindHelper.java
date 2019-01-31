@@ -5,7 +5,6 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.listeners.IMixinKeyBinding;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
-import net.minecraft.util.ResourceLocation;
 import org.dimdev.rift.listener.client.KeyBindingAdder;
 
 import java.util.Collection;
@@ -13,9 +12,9 @@ import java.util.List;
 
 public class KeyBindHelper implements KeyBindingAdder {
     
-    private static final ResourceLocation RECIPE_KEYBIND = new ResourceLocation("roughlyenoughitems", "recipe_keybind");
-    private static final ResourceLocation USAGE_KEYBIND = new ResourceLocation("roughlyenoughitems", "usage_keybind");
-    private static final ResourceLocation HIDE_KEYBIND = new ResourceLocation("roughlyenoughitems", "hide_keybind");
+    private static final String RECIPE_KEYBIND = "roughlyenoughitems:recipe_keybind";
+    private static final String USAGE_KEYBIND = "roughlyenoughitems:usage_keybind";
+    private static final String HIDE_KEYBIND = "roughlyenoughitems:hide_keybind";
     public static KeyBinding RECIPE, USAGE, HIDE;
     
     @Override
@@ -34,9 +33,9 @@ public class KeyBindHelper implements KeyBindingAdder {
             ((IMixinKeyBinding) keyBinding).addCategory(category);
     }
     
-    private KeyBinding createKeyBinding(ResourceLocation location, InputMappings.Type inputType, int keyCode, String category) {
-        RoughlyEnoughItemsCore.LOGGER.info("Registering: key." + location.toString().replaceAll(":", ".") + " in " + category);
-        return new KeyBinding("key." + location.toString().replaceAll(":", "."), inputType, keyCode, category);
+    private KeyBinding createKeyBinding(String resourceLocation, InputMappings.Type inputType, int keyCode, String category) {
+        RoughlyEnoughItemsCore.LOGGER.info("Registering: key." + resourceLocation.replaceAll(":", ".") + " in " + category);
+        return new KeyBinding("key." + resourceLocation.replaceAll(":", "."), inputType, keyCode, category);
     }
     
 }

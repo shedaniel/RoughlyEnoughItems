@@ -100,8 +100,7 @@ public class ConfigWidget extends GuiScreen {
             @Override
             public void draw(int int_1, int int_2, float float_1) {
                 RenderHelper.disableStandardItemLighting();
-                this.text = I18n.format("text.rei.list_ordering_button", I18n.format(RoughlyEnoughItemsCore.getConfigHelper().getItemListOrdering().getNameTranslationKey()),
-                        I18n.format(RoughlyEnoughItemsCore.getConfigHelper().isAscending() ? "ordering.rei.ascending" : "ordering.rei.descending"));
+                this.text = I18n.format("text.rei.list_ordering_button", I18n.format(RoughlyEnoughItemsCore.getConfigHelper().getItemListOrdering().getNameTranslationKey()), I18n.format(RoughlyEnoughItemsCore.getConfigHelper().isAscending() ? "ordering.rei.ascending" : "ordering.rei.descending"));
                 String t = I18n.format("text.rei.list_ordering") + ": ";
                 drawString(Minecraft.getInstance().fontRenderer, t, parent.width / 2 - 95 - Minecraft.getInstance().fontRenderer.getStringWidth(t), 90 + 6, -1);
                 super.draw(int_1, int_2, float_1);

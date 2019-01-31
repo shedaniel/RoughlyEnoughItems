@@ -11,7 +11,9 @@ import java.util.Map;
 @Mixin(KeyBinding.class)
 public class MixinKeyBinding implements IMixinKeyBinding {
     
-    @Shadow @Final private static Map<String, Integer> CATEGORY_ORDER;
+    @Shadow
+    @Final
+    private static Map<String, Integer> CATEGORY_ORDER;
     
     @Override
     public boolean addCategory(String keyBindingCategory, int id) {

@@ -5,7 +5,6 @@ import com.google.common.collect.Maps;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.RoughlyEnoughItemsPlugin;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.listeners.RecipeSync;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.RecipeManager;
 import net.minecraft.util.ResourceLocation;
@@ -15,22 +14,19 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class RecipeHelper implements RecipeSync {
+public class RecipeHelper {
     
-    private static Map<ResourceLocation, List<IRecipeDisplay>> recipeCategoryListMap;
-    private static List<IRecipeCategory> categories;
-    private static RecipeManager recipeManager;
-    private static Map<ResourceLocation, SpeedCraftAreaSupplier> speedCraftAreaSupplierMap;
-    private static Map<ResourceLocation, List<SpeedCraftFunctional>> speedCraftFunctionalMap;
+    private final Map<ResourceLocation, List<IRecipeDisplay>> recipeCategoryListMap = Maps.newHashMap();
+    private final List<IRecipeCategory> categories = Lists.newArrayList();
+    private RecipeManager recipeManager;
+    private final Map<ResourceLocation, SpeedCraftAreaSupplier> speedCraftAreaSupplierMap = Maps.newHashMap();
+    private final Map<ResourceLocation, List<SpeedCraftFunctional>> speedCraftFunctionalMap = Maps.newHashMap();
     
-    public RecipeHelper() {
-        this.recipeCategoryListMap = Maps.newHashMap();
-        this.categories = Lists.newArrayList();
-        this.speedCraftAreaSupplierMap = Maps.newHashMap();
-        this.speedCraftFunctionalMap = Maps.newHashMap();
+    public static RecipeHelper getInstance() {
+        return RoughlyEnoughItemsCore.getRecipeHelper();
     }
     
-    public static List<ItemStack> findCraftableByItems(List<ItemStack> inventoryItems) {
+    public List<ItemStack> findCraftableByItems(List<ItemStack> inventoryItems) {
         List<ItemStack> craftables = new ArrayList<>();
         for(List<IRecipeDisplay> value : recipeCategoryListMap.values())
             for(IRecipeDisplay recipeDisplay : value) {
@@ -59,47 +55,53 @@ public class RecipeHelper implements RecipeSync {
         return craftables.stream().distinct().collect(Collectors.toList());
     }
     
-    public static void registerCategory(IRecipeCategory category) {
+    public void registerCategory(IRecipeCategory category) {
         categories.add(category);
-        recipeCategoryListMap.put(category.getResourceLocation(), Lists.newArrayList());
+        recipeCategoryListMap.put(category.getResourceLocation(), Lists.newLinkedList());
     }
     
-    public static void registerRecipe(ResourceLocation categoryIdentifier, IRecipeDisplay display) {
+    public void registerRecipe(ResourceLocation categoryIdentifier, IRecipeDisplay display) {
         if (!recipeCategoryListMap.containsKey(categoryIdentifier))
             return;
         recipeCategoryListMap.get(categoryIdentifier).add(display);
     }
     
-    public static Map<IRecipeCategory, List<IRecipeDisplay>> getRecipesFor(ItemStack stack) {
+    public Map<IRecipeCategory, List<IRecipeDisplay>> getRecipesFor(ItemStack stack) {
         Map<ResourceLocation, List<IRecipeDisplay>> categoriesMap = new HashMap<>();
-        categories.forEach(f -> categoriesMap.put(f.getResourceLocation(), new LinkedList<>()));
-        for(List<IRecipeDisplay> value : recipeCategoryListMap.values())
-            for(IRecipeDisplay recipeDisplay : value)
+        categories.forEach(f -> categoriesMap.put(f.getResourceLocation(), Lists.newArrayList()));
+        for(Map.Entry<ResourceLocation, List<IRecipeDisplay>> entry : recipeCategoryListMap.entrySet()) {
+            IRecipeCategory category = getCategory(entry.getKey());
+            for(IRecipeDisplay recipeDisplay : entry.getValue())
                 for(ItemStack outputStack : (List<ItemStack>) recipeDisplay.getOutput())
-                    if (ItemStack.areItemsEqual(stack, outputStack))
+                    if (category.checkTags() ? ItemStack.areItemStacksEqual(stack, outputStack) : ItemStack.areItemsEqual(stack, outputStack))
                         categoriesMap.get(recipeDisplay.getRecipeCategory()).add(recipeDisplay);
-        categoriesMap.keySet().removeIf(f -> categoriesMap.get(f).isEmpty());
-        Map<IRecipeCategory, List<IRecipeDisplay>> recipeCategoryListMap = Maps.newHashMap();
+        }
+        Map<IRecipeCategory, List<IRecipeDisplay>> recipeCategoryListMap = Maps.newLinkedHashMap();
         categories.forEach(category -> {
-            if (categoriesMap.containsKey(category.getResourceLocation()))
+            if (categoriesMap.containsKey(category.getResourceLocation()) && !categoriesMap.get(category.getResourceLocation()).isEmpty())
                 recipeCategoryListMap.put(category, categoriesMap.get(category.getResourceLocation()));
         });
         return recipeCategoryListMap;
     }
     
-    public static RecipeManager getRecipeManager() {
+    private IRecipeCategory getCategory(ResourceLocation resourceLocation) {
+        return categories.stream().filter(category -> category.getResourceLocation().equals(resourceLocation)).findFirst().orElse(null);
+    }
+    
+    public RecipeManager getRecipeManager() {
         return recipeManager;
     }
     
-    public static Map<IRecipeCategory, List<IRecipeDisplay>> getUsagesFor(ItemStack stack) {
+    public Map<IRecipeCategory, List<IRecipeDisplay>> getUsagesFor(ItemStack stack) {
         Map<ResourceLocation, List<IRecipeDisplay>> categoriesMap = new HashMap<>();
-        categories.forEach(f -> categoriesMap.put(f.getResourceLocation(), new LinkedList<>()));
-        for(List<IRecipeDisplay> value : recipeCategoryListMap.values())
-            for(IRecipeDisplay recipeDisplay : value) {
+        categories.forEach(f -> categoriesMap.put(f.getResourceLocation(), Lists.newArrayList()));
+        for(Map.Entry<ResourceLocation, List<IRecipeDisplay>> entry : recipeCategoryListMap.entrySet()) {
+            IRecipeCategory category = getCategory(entry.getKey());
+            for(IRecipeDisplay recipeDisplay : entry.getValue()) {
                 boolean found = false;
                 for(List<ItemStack> input : (List<List<ItemStack>>) recipeDisplay.getInput()) {
                     for(ItemStack itemStack : input) {
-                        if (ItemStack.areItemsEqual(itemStack, stack)) {
+                        if (category.checkTags() ? ItemStack.areItemStacksEqual(itemStack, stack) : ItemStack.areItemsEqual(itemStack, stack)) {
                             categoriesMap.get(recipeDisplay.getRecipeCategory()).add(recipeDisplay);
                             found = true;
                             break;
@@ -109,20 +111,20 @@ public class RecipeHelper implements RecipeSync {
                         break;
                 }
             }
-        categoriesMap.keySet().removeIf(f -> categoriesMap.get(f).isEmpty());
-        Map<IRecipeCategory, List<IRecipeDisplay>> recipeCategoryListMap = Maps.newHashMap();
+        }
+        Map<IRecipeCategory, List<IRecipeDisplay>> recipeCategoryListMap = Maps.newLinkedHashMap();
         categories.forEach(category -> {
-            if (categoriesMap.containsKey(category.getResourceLocation()))
+            if (categoriesMap.containsKey(category.getResourceLocation()) && !categoriesMap.get(category.getResourceLocation()).isEmpty())
                 recipeCategoryListMap.put(category, categoriesMap.get(category.getResourceLocation()));
         });
         return recipeCategoryListMap;
     }
     
-    public static List<IRecipeCategory> getCategories() {
-        return categories;
+    public List<IRecipeCategory> getCategories() {
+        return new LinkedList<>(categories);
     }
     
-    public static SpeedCraftAreaSupplier getSpeedCraftButtonArea(IRecipeCategory category) {
+    public SpeedCraftAreaSupplier getSpeedCraftButtonArea(IRecipeCategory category) {
         if (!speedCraftAreaSupplierMap.containsKey(category.getResourceLocation()))
             return bounds -> {
                 return new Rectangle((int) bounds.getMaxX() - 16, (int) bounds.getMaxY() - 16, 10, 10);
@@ -130,23 +132,22 @@ public class RecipeHelper implements RecipeSync {
         return speedCraftAreaSupplierMap.get(category.getResourceLocation());
     }
     
-    public static void registerSpeedCraftButtonArea(ResourceLocation category, SpeedCraftAreaSupplier rectangle) {
+    public void registerSpeedCraftButtonArea(ResourceLocation category, SpeedCraftAreaSupplier rectangle) {
         speedCraftAreaSupplierMap.put(category, rectangle);
     }
     
-    public static List<SpeedCraftFunctional> getSpeedCraftFunctional(IRecipeCategory category) {
+    public List<SpeedCraftFunctional> getSpeedCraftFunctional(IRecipeCategory category) {
         if (speedCraftFunctionalMap.get(category.getResourceLocation()) == null)
             return Lists.newArrayList();
         return speedCraftFunctionalMap.get(category.getResourceLocation());
     }
     
-    public static void registerSpeedCraftFunctional(ResourceLocation category, SpeedCraftFunctional functional) {
+    public void registerSpeedCraftFunctional(ResourceLocation category, SpeedCraftFunctional functional) {
         List<SpeedCraftFunctional> list = speedCraftFunctionalMap.containsKey(category) ? new LinkedList<>(speedCraftFunctionalMap.get(category)) : Lists.newLinkedList();
         list.add(functional);
         speedCraftFunctionalMap.put(category, list);
     }
     
-    @Override
     public void recipesLoaded(RecipeManager recipeManager) {
         this.recipeManager = recipeManager;
         this.recipeCategoryListMap.clear();
@@ -158,8 +159,8 @@ public class RecipeHelper implements RecipeSync {
             return second.getPriority() - first.getPriority();
         });
         RoughlyEnoughItemsCore.LOGGER.info("Loading %d REI plugins: %s", plugins.size(), String.join(", ", plugins.stream().map(plugin -> {
-            ResourceLocation ResourceLocation = RoughlyEnoughItemsPlugin.getPluginResourceLocation(plugin);
-            return ResourceLocation == null ? "NULL" : ResourceLocation.toString();
+            String resourceLocation = RoughlyEnoughItemsPlugin.getPluginResourceLocation(plugin);
+            return resourceLocation == null ? "NULL" : resourceLocation;
         }).collect(Collectors.toList())));
         Collections.reverse(plugins);
         plugins.forEach(plugin -> {

@@ -33,7 +33,6 @@ public class MixinGuiContainer extends GuiScreen implements IMixinGuiContainer {
     protected int ySize;
     @Shadow
     protected Slot hoveredSlot;
-    private GuiContainer lastGui;
     @Shadow
     private ItemStack draggedStack;
     
@@ -64,8 +63,10 @@ public class MixinGuiContainer extends GuiScreen implements IMixinGuiContainer {
     
     @Inject(method = "initGui()V", at = @At("RETURN"))
     protected void initGui(CallbackInfo info) {
-        GuiHelper.resetOverlay();
-        this.children.add(GuiHelper.getOverlay(lastGui));
+        GuiHelper.setLastGuiContainer((GuiContainer) (Object) this);
+        GuiHelper.setLastMixinGuiContainer((IMixinGuiContainer) this);
+        GuiHelper.setOverlay(new ContainerGuiOverlay());
+        this.children.add(GuiHelper.getLastOverlay());
     }
     
     @Inject(method = "render(IIF)V", at = @At("RETURN"))
@@ -75,9 +76,7 @@ public class MixinGuiContainer extends GuiScreen implements IMixinGuiContainer {
             if (tabGetter.getSelectedTab() != ItemGroup.INVENTORY.getIndex())
                 return;
         }
-        if (Minecraft.getInstance().currentScreen instanceof GuiContainer)
-            this.lastGui = (GuiContainer) Minecraft.getInstance().currentScreen;
-        GuiHelper.getOverlay(lastGui).renderOverlay(int_1, int_2, float_1);
+        GuiHelper.getLastOverlay().renderOverlay(int_1, int_2, float_1);
     }
     
     @Override
@@ -85,18 +84,12 @@ public class MixinGuiContainer extends GuiScreen implements IMixinGuiContainer {
         return this.draggedStack;
     }
     
-    @Override
-    public GuiContainer getContainerGui() {
-        return lastGui;
-    }
-    
     @Inject(method = "keyPressed(III)Z", at = @At("HEAD"), cancellable = true)
     public void keyPressed(int int_1, int int_2, int int_3, CallbackInfoReturnable<Boolean> ci) {
-        for(IGuiEventListener entry : this.getChildren())
-            if (entry.keyPressed(int_1, int_2, int_3)) {
-                ci.cancel();
-                ci.setReturnValue(true);
-            }
+        if (GuiHelper.getLastOverlay().keyPressed(int_1, int_2, int_3)) {
+            ci.cancel();
+            ci.setReturnValue(true);
+        }
     }
     
     @Override
@@ -106,7 +99,7 @@ public class MixinGuiContainer extends GuiScreen implements IMixinGuiContainer {
     
     @Override
     public boolean mouseScrolled(double double_1) {
-        ContainerGuiOverlay overlay = GuiHelper.getOverlay(lastGui);
+        ContainerGuiOverlay overlay = GuiHelper.getLastOverlay();
         if (GuiHelper.isOverlayVisible() && overlay.getRectangle().contains(ClientHelper.getMouseLocation()))
             for(IGuiEventListener entry : this.getChildren())
                 if (entry.mouseScrolled(double_1))

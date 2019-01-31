@@ -22,12 +22,12 @@ public class TabWidget extends Gui implements HighlightableWidget {
     private boolean shown = false, selected = false;
     private ItemStack item;
     private int id;
-    private RecipeViewingWidget recipeViewingWidget;
+    private RecipeViewingWidgetGui recipeViewingWidget;
     private String categoryName;
     private Rectangle bounds;
     private ItemRenderer itemRenderer;
     
-    public TabWidget(int id, RecipeViewingWidget recipeViewingWidget, Rectangle bounds) {
+    public TabWidget(int id, RecipeViewingWidgetGui recipeViewingWidget, Rectangle bounds) {
         this.id = id;
         this.recipeViewingWidget = recipeViewingWidget;
         this.bounds = bounds;
@@ -90,7 +90,7 @@ public class TabWidget extends Gui implements HighlightableWidget {
     }
     
     private void drawTooltip() {
-        GuiHelper.getOverlay(recipeViewingWidget.getParent().getContainerGui()).addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(categoryName)));
+        GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(categoryName)));
     }
     
     @Override
