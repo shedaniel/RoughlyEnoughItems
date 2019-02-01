@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public enum UpdatePriority {
     
-    NONE, LIGHT;
+    NONE, LIGHT, NORMAL, USEFUL, IMPORTANT;
     
     public static UpdatePriority fromString(String string) {
         return Arrays.stream(values()).filter(updatePriority -> updatePriority.name().toLowerCase().equals(string)).findFirst().orElse(NONE);

@@ -14,11 +14,12 @@
     }
   ],
   "changelogs": {
-    "fabric": {
-      "2.2.0.28": {
+    "fabric": [
+      {
+        "version": "2.2.0.28",
         "text": "Added a version checker.",
         "level": "light"
       }
-    }
+    ]
   }
 }

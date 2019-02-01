@@ -76,7 +76,9 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
         configHelper = new ConfigHelper();
         
         ClientTickEvent.CLIENT.register(GuiHelper::onTick);
-    
+        if (getConfigHelper().checkUpdates())
+            ClientTickEvent.CLIENT.register(UpdateChecker::onTick);
+        
         new UpdateChecker().onInitializeClient();
     }
     

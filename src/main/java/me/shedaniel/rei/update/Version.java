@@ -12,7 +12,8 @@ public class Version implements Comparable<Version> {
         this.version = version;
     }
     
-    public final String getString() {
+    @Override
+    public final String toString() {
         return this.version;
     }
     
@@ -20,8 +21,8 @@ public class Version implements Comparable<Version> {
     public int compareTo(Version other) {
         if (other == null)
             return 1;
-        String[] thisParts = this.getString().split("\\.");
-        String[] thatParts = other.getString().split("\\.");
+        String[] thisParts = this.toString().split("\\.");
+        String[] thatParts = other.toString().split("\\.");
         int length = Math.max(thisParts.length, thatParts.length);
         for(int i = 0; i < length; i++) {
             int thisPart = i < thisParts.length ? Integer.parseInt(thisParts[i]) : 0;

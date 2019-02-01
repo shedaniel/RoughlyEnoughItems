@@ -1,17 +1,21 @@
 package me.shedaniel.rei.update;
 
 import com.google.common.collect.Lists;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import com.google.gson.annotations.SerializedName;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.FabricLoader;
 import net.fabricmc.loader.ModContainer;
 import net.minecraft.SharedConstants;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.text.StringTextComponent;
+import net.minecraft.world.World;
 
-import java.util.Collections;
+import java.io.*;
+import java.net.URL;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,22 +23,31 @@ import java.util.stream.Collectors;
 public class UpdateChecker implements ClientModInitializer {
     
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static Version currentVersion = null, latestForGame = null;
+    private static Version currentVersion = new Version("2.0.0"), latestForGame = null;
     private static JsonVersionElement element;
-    private String fakeDownloaded = "{\"latest\":[{\"game\":\"19w04a\",\"mod\":\"2.2.0.48\"},{\"game\":\"19w04b\",\"mod\":\"2.2.0.47\"},{\"game\":\"19w05a\",\"mod\":\"2.2.0.48\"}],\"changelogs\":{\"fabric\":{\"2.2.0.28\":{\"text\":\"Added a currentVersion checker.\",\"level\":\"light\"}}}}";
+    private static World lastWorld = null;
+    private static String VERSION_STRING = "https://raw.githubusercontent.com/shedaniel/RoughlyEnoughItems/1.14-dev/version.json";
     
     public static boolean isOutdated() {
         return latestForGame.compareTo(currentVersion) == 1;
     }
     
     public static UpdatePriority getUpdatePriority(List<Version> versions) {
-        return Collections.max(versions.stream().map(UpdateChecker::getUpdatePriority).collect(Collectors.toList()));
+        UpdatePriority p = UpdatePriority.NONE;
+        List<UpdatePriority> priorities = Arrays.asList(UpdatePriority.values());
+        for(UpdatePriority priority : versions.stream().map(UpdateChecker::getUpdatePriority).collect(Collectors.toList()))
+            if (priority.compareTo(p) > 0)
+                p = priority;
+        return p;
     }
     
     public static UpdatePriority getUpdatePriority(Version version) {
-        JsonObject object = element.getChangelogs().getFabric();
-        if (object.has(version.getString()))
-            return UpdatePriority.fromString(object.get(version.getString()).getAsString());
+        JsonArray array = element.getChangelogs().getFabric();
+        for(JsonElement element : array) {
+            JsonObject jsonObject = element.getAsJsonObject();
+            if (jsonObject.has("version") && jsonObject.get("version").getAsString().equals(version.toString()))
+                return UpdatePriority.fromString(jsonObject.get("level").getAsString());
+        }
         return UpdatePriority.NONE;
     }
     
@@ -42,8 +55,16 @@ public class UpdateChecker implements ClientModInitializer {
         return RoughlyEnoughItemsCore.getConfigHelper().checkUpdates();
     }
     
-    public static String getChangelog(Version version) {
-        return "wip";
+    public static List<String> getChangelog(Version currentVersion) {
+        List<String> changelogs = Lists.newLinkedList();
+        JsonArray array = element.getChangelogs().getFabric();
+        array.forEach(jsonElement -> {
+            JsonObject jsonObject = jsonElement.getAsJsonObject();
+            Version jsonVersion = new Version(jsonObject.get("version").getAsString());
+            if (jsonVersion.compareTo(currentVersion) > 0 && jsonVersion.compareTo(latestForGame) <= 0)
+                changelogs.add(I18n.translate("text.rei.update_changelog_line", jsonObject.get("text").getAsString()));
+        });
+        return changelogs;
     }
     
     public static Version getCurrentVersion() {
@@ -52,6 +73,33 @@ public class UpdateChecker implements ClientModInitializer {
     
     public static Version getLatestForGame() {
         return latestForGame;
+    }
+    
+    public static void onTick(MinecraftClient client) {
+        if (client.world != lastWorld) {
+            lastWorld = client.world;
+            if (lastWorld != null) {
+                if (checkUpdates() && isOutdated()) {
+                    String currentVersionString = getCurrentVersion() == null ? "null" : getCurrentVersion().toString();
+                    List<Version> versions = getVersionsHigherThan(currentVersion);
+                    String t[] = I18n.translate("text.rei.update_outdated", currentVersionString, getLatestForGame(), getUpdatePriority(versions).name().toUpperCase()).split("\n");
+                    for(String s : t)
+                        client.player.addChatMessage(new StringTextComponent(s), false);
+                    getChangelog(currentVersion).forEach(s -> client.player.addChatMessage(new StringTextComponent(s), false));
+                }
+            }
+        }
+    }
+    
+    private static List<Version> getVersionsHigherThan(Version currentVersion) {
+        List<Version> versions = Lists.newLinkedList();
+        JsonArray array = element.getChangelogs().getFabric();
+        array.forEach(jsonElement -> {
+            Version jsonVersion = new Version(jsonElement.getAsJsonObject().get("version").getAsString());
+            if (jsonVersion.compareTo(currentVersion) > 0)
+                versions.add(jsonVersion);
+        });
+        return versions;
     }
     
     @Override
@@ -65,9 +113,19 @@ public class UpdateChecker implements ClientModInitializer {
                 } catch (Exception e) {
                 }
         });
-        element = GSON.fromJson(fakeDownloaded, JsonVersionElement.class);
+        Reader downloadedReader = downloadVersionString();
+        element = GSON.fromJson(downloadedReader, JsonVersionElement.class);
         latestForGame = new Version(parseLatest(element, SharedConstants.getGameVersion().getName()));
-        RoughlyEnoughItemsCore.LOGGER.info("REI: On %s, Current = %s, latest = %s, outdated = %b", SharedConstants.getGameVersion().getName(), (currentVersion == null ? "null" : currentVersion.getString()), latestForGame.getString(), isOutdated());
+    }
+    
+    private Reader downloadVersionString() {
+        try {
+            URL versionUrl = new URL(VERSION_STRING);
+            InputStream stream = versionUrl.openStream();
+            return new InputStreamReader(stream);
+        } catch (IOException e) {
+            return new StringReader("{}");
+        }
     }
     
     private String parseLatest(JsonVersionElement element, String gameVersion) {
@@ -113,14 +171,14 @@ public class UpdateChecker implements ClientModInitializer {
     }
     
     private class ChangelogObject {
-        private JsonObject fabric = new JsonObject();
-        private JsonObject rift = new JsonObject();
+        private JsonArray fabric = new JsonArray();
+        private JsonArray rift = new JsonArray();
         
-        public JsonObject getFabric() {
+        public JsonArray getFabric() {
             return fabric;
         }
         
-        public JsonObject getRift() {
+        public JsonArray getRift() {
             return rift;
         }
     }
