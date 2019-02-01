@@ -12,9 +12,13 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.StringTextComponent;
 import net.minecraft.world.World;
+import org.apache.commons.io.IOUtils;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringBufferInputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,14 +26,14 @@ import java.util.stream.Collectors;
 
 public class UpdateChecker implements ClientModInitializer {
     
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static Version currentVersion = new Version("2.0.0"), latestForGame = null;
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+    private static Version currentVersion = null, latestForGame = null;
     private static JsonVersionElement element;
     private static World lastWorld = null;
-    private static String VERSION_STRING = "https://raw.githubusercontent.com/shedaniel/RoughlyEnoughItems/1.14-dev/version.json";
+    private static String VERSION_STRING = "https://raw.githubusercontent.com/shedaniel/RoughlyEnoughItems/1.14/version.json";
     
     public static boolean isOutdated() {
-        return latestForGame.compareTo(currentVersion) == 1;
+        return latestForGame.compareTo(currentVersion) == 1 && currentVersion != null;
     }
     
     public static UpdatePriority getUpdatePriority(List<Version> versions) {
@@ -113,18 +117,25 @@ public class UpdateChecker implements ClientModInitializer {
                 } catch (Exception e) {
                 }
         });
-        Reader downloadedReader = downloadVersionString();
-        element = GSON.fromJson(downloadedReader, JsonVersionElement.class);
-        latestForGame = new Version(parseLatest(element, SharedConstants.getGameVersion().getName()));
+        InputStream downloadedStream = downloadVersionString();
+        String downloadedString = null;
+        try {
+            downloadedString = IOUtils.toString(downloadedStream, StandardCharsets.UTF_8);
+            element = GSON.fromJson(downloadedString, JsonVersionElement.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (downloadedString != null && !downloadedString.equalsIgnoreCase("{}"))
+            latestForGame = new Version(parseLatest(element, SharedConstants.getGameVersion().getName()));
+        else latestForGame = new Version("0.0.0");
     }
     
-    private Reader downloadVersionString() {
+    private InputStream downloadVersionString() {
         try {
             URL versionUrl = new URL(VERSION_STRING);
-            InputStream stream = versionUrl.openStream();
-            return new InputStreamReader(stream);
+            return versionUrl.openStream();
         } catch (IOException e) {
-            return new StringReader("{}");
+            return new StringBufferInputStream("{}");
         }
     }
     
@@ -138,8 +149,13 @@ public class UpdateChecker implements ClientModInitializer {
     
     private class JsonVersionElement {
         @SerializedName("latest")
-        private List<LatestVersionObject> latestVersions = Lists.newArrayList();
-        private ChangelogObject changelogs = new ChangelogObject();
+        private List<LatestVersionObject> latestVersions;
+        private ChangelogObject changelogs;
+        
+        public JsonVersionElement() {
+            this.latestVersions = Lists.newArrayList();
+            changelogs = new ChangelogObject();
+        }
         
         public List<LatestVersionObject> getLatestVersions() {
             return latestVersions;
