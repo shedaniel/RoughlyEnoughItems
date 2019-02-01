@@ -33,5 +33,7 @@
   "text.rei.enable_craftable_only": "Enable Craftable Only: ",
   "text.rei.showing_craftable": "Showing Craftable",
   "text.rei.showing_all": "Showing All",
-  "text.rei.delete_items": "§cDelete Item"
+  "text.rei.delete_items": "§cDelete Item",
+  "text.rei.update_outdated": "§6REI is outdated!\n§6Current: §a%s §6Latest: §a%s\n§6Update Priority: §a%s",
+  "text.rei.update_changelog_line": "§6- %s"
 }

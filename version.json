@@ -1,0 +1,25 @@
+{
+  "latest": [
+    {
+      "game": "19w04a",
+      "mod": "2.2.0.48"
+    },
+    {
+      "game": "19w04b",
+      "mod": "2.2.0.48"
+    },
+    {
+      "game": "19w05a",
+      "mod": "2.2.0.48"
+    }
+  ],
+  "changelogs": {
+    "fabric": [
+      {
+        "version": "2.2.0.28",
+        "text": "Added a version checker.",
+        "level": "light"
+      }
+    ]
+  }
+}

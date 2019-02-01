@@ -7,6 +7,7 @@ import me.shedaniel.rei.client.ConfigHelper;
 import me.shedaniel.rei.client.GuiHelper;
 import me.shedaniel.rei.client.RecipeHelper;
 import me.shedaniel.rei.plugin.DefaultPlugin;
+import me.shedaniel.rei.update.UpdateChecker;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.api.loader.Loader;
@@ -75,6 +76,10 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
         configHelper = new ConfigHelper();
         
         ClientTickEvent.CLIENT.register(GuiHelper::onTick);
+        if (getConfigHelper().checkUpdates())
+            ClientTickEvent.CLIENT.register(UpdateChecker::onTick);
+        
+        new UpdateChecker().onInitializeClient();
     }
     
     @Override
