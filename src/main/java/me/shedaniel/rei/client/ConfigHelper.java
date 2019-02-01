@@ -103,4 +103,8 @@ public class ConfigHelper {
         config.sideSearchField = sideSearchField;
     }
     
+    public boolean checkUpdates() {
+        return config.checkUpdates;
+    }
+    
 }

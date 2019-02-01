@@ -9,7 +9,8 @@
     "MixinCraftingTableScreen",
     "MixinCreativePlayerInventoryScreen",
     "MixinBrewingRecipeRegistry",
-    "MixinRecipeBookGui"
+    "MixinRecipeBookGui",
+    "update.MixinMinecraftClient"
   ],
   "injectors": {
     "defaultRequire": 1
