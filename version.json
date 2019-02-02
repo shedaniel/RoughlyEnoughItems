@@ -16,7 +16,7 @@
   "changelogs": {
     "fabric": [
       {
-        "version": "2.2.0.28",
+        "version": "2.2.0.48",
         "text": "Added a version checker.",
         "level": "light"
       }
