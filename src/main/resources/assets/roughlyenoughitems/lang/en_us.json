@@ -18,7 +18,8 @@
   "category.rei.brewing.reactant": "§eIngredient",
   "category.rei.brewing.result": "§eResulted Potion",
   "text.rei.config": "Config",
-  "text.rei.centre_searchbox": "Right Search Box: ",
+  "text.rei.side_searchbox": "Side Search Box: ",
+  "text.rei.mirror_rei": "Mirror REI Widgets: ",
   "text.rei.cheat_items": "Given [{item_name}] x{item_count} to {player_name}.",
   "text.rei.failed_cheat_items": "§cFailed to give items.",
   "text.rei.list_ordering": "Item List Ordering",
@@ -30,10 +31,11 @@
   "ordering.rei.item_groups": "Item Groups",
   "text.speed_craft.failed_move_items": "§cCan't move items!",
   "text.speed_craft.move_items": "Move Items",
-  "text.rei.enable_craftable_only": "Enable Craftable Only: ",
+  "text.rei.enable_craftable_only": "Enable Craftable Filter: ",
   "text.rei.showing_craftable": "Showing Craftable",
   "text.rei.showing_all": "Showing All",
   "text.rei.delete_items": "§cDelete Item",
+  "text.rei.check_updates": "Check Updates: ",
   "text.rei.update_outdated": "§6REI is outdated!\n§6Current: §a%s §6Latest: §a%s\n§6Update Priority: §a%s",
   "text.rei.update_changelog_line": "§6- %s"
 }

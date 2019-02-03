@@ -17,7 +17,7 @@
     "fabric": [
       {
         "version": "2.2.0.48",
-        "text": "Added a version checker.",
+        "text": "Added a version checker, an option to mirror the item panel and fixed interacting with REI when hidden.",
         "level": "light"
       }
     ]

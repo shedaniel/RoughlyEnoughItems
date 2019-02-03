@@ -62,7 +62,7 @@ public class ContainerScreenOverlay extends Screen {
             }
         });
         page = MathHelper.clamp(page, 0, getTotalPage());
-        widgets.add(new ButtonWidget(10, 10, 40, 20, "") {
+        widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigHelper().isMirrorItemPanel() ? window.getScaledWidth() - 50 : 10, 10, 40, 20, "") {
             @Override
             public void draw(int int_1, int int_2, float float_1) {
                 this.text = getCheatModeText();
@@ -74,7 +74,7 @@ public class ContainerScreenOverlay extends Screen {
                 ClientHelper.setCheating(!ClientHelper.isCheating());
             }
         });
-        widgets.add(new ButtonWidget(10, 35, 40, 20, I18n.translate("text.rei.config")) {
+        widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigHelper().isMirrorItemPanel() ? window.getScaledWidth() - 50 : 10, 35, 40, 20, I18n.translate("text.rei.config")) {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
                 ClientHelper.openConfigWindow(GuiHelper.getLastContainerScreen());
@@ -200,14 +200,22 @@ public class ContainerScreenOverlay extends Screen {
     }
     
     private Rectangle calculateBoundary() {
-        int startX = GuiHelper.getLastMixinContainerScreen().getContainerLeft() + GuiHelper.getLastMixinContainerScreen().getContainerWidth() + 10;
-        int width = window.getScaledWidth() - startX;
+        if (!RoughlyEnoughItemsCore.getConfigHelper().isMirrorItemPanel()) {
+            int startX = GuiHelper.getLastMixinContainerScreen().getContainerLeft() + GuiHelper.getLastMixinContainerScreen().getContainerWidth() + 10;
+            int width = window.getScaledWidth() - startX;
+            if (MinecraftClient.getInstance().currentScreen instanceof RecipeViewingWidgetScreen) {
+                RecipeViewingWidgetScreen widget = (RecipeViewingWidgetScreen) MinecraftClient.getInstance().currentScreen;
+                startX = widget.getBounds().x + widget.getBounds().width + 10;
+                width = window.getScaledWidth() - startX;
+            }
+            return new Rectangle(startX, 0, width, window.getScaledHeight());
+        }
+        int width = GuiHelper.getLastMixinContainerScreen().getContainerLeft() - 6;
         if (MinecraftClient.getInstance().currentScreen instanceof RecipeViewingWidgetScreen) {
             RecipeViewingWidgetScreen widget = (RecipeViewingWidgetScreen) MinecraftClient.getInstance().currentScreen;
-            startX = widget.getBounds().x + widget.getBounds().width + 10;
-            width = window.getScaledWidth() - startX;
+            width = widget.getBounds().x - 6;
         }
-        return new Rectangle(startX, 0, width, window.getScaledHeight());
+        return new Rectangle(4, 0, width, window.getScaledHeight());
     }
     
     private int getLeft() {
@@ -224,6 +232,8 @@ public class ContainerScreenOverlay extends Screen {
     
     @Override
     public boolean mouseScrolled(double amount) {
+        if (!GuiHelper.isOverlayVisible())
+            return false;
         if (rectangle.contains(ClientHelper.getMouseLocation())) {
             if (amount > 0 && buttonLeft.enabled)
                 buttonLeft.onPressed(0, 0, 0);
@@ -241,6 +251,12 @@ public class ContainerScreenOverlay extends Screen {
     
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
+        if (ClientHelper.HIDE.matchesKey(int_1, int_2)) {
+            GuiHelper.toggleOverlayVisible();
+            return true;
+        }
+        if (!GuiHelper.isOverlayVisible())
+            return false;
         for(GuiEventListener listener : listeners)
             if (listener.keyPressed(int_1, int_2, int_3))
                 return true;
@@ -268,19 +284,24 @@ public class ContainerScreenOverlay extends Screen {
             else if (ClientHelper.USAGE.matchesKey(int_1, int_2))
                 return ClientHelper.executeUsageKeyBind(this, itemStack);
         }
-        if (ClientHelper.HIDE.matchesKey(int_1, int_2)) {
-            GuiHelper.toggleOverlayVisible();
-            return true;
-        }
         return false;
     }
     
     @Override
     public boolean charTyped(char char_1, int int_1) {
+        if (!GuiHelper.isOverlayVisible())
+            return false;
         for(GuiEventListener listener : listeners)
             if (listener.charTyped(char_1, int_1))
                 return true;
         return super.charTyped(char_1, int_1);
+    }
+    
+    @Override
+    public boolean mouseClicked(double double_1, double double_2, int int_1) {
+        if (!GuiHelper.isOverlayVisible())
+            return false;
+        return super.mouseClicked(double_1, double_2, int_1);
     }
     
 }

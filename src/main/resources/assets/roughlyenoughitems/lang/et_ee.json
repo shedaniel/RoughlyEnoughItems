@@ -18,7 +18,6 @@
   "category.rei.brewing.reactant": "§eKoostisosa",
   "category.rei.brewing.result": "§eValmiv võlujook",
   "text.rei.config": "Seadistus",
-  "text.rei.centre_searchbox": "Parempoolne otsingukast: ",
   "text.rei.cheat_items": "{item_count} [{item_name}] antud mängijale {player_name}.",
   "text.rei.failed_cheat_items": "§cEsemete andmine ebaõnnestus.",
   "text.rei.list_ordering": "Esemenimekirja järjestus",
