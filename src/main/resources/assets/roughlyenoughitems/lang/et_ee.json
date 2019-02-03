@@ -18,6 +18,8 @@
   "category.rei.brewing.reactant": "§eKoostisosa",
   "category.rei.brewing.result": "§eValmiv võlujook",
   "text.rei.config": "Seadistus",
+  "text.rei.side_searchbox": "Külgmine otsingukast: ",
+  "text.rei.mirror_rei": "REI vidinate peegeldamine: ",
   "text.rei.cheat_items": "{item_count} [{item_name}] antud mängijale {player_name}.",
   "text.rei.failed_cheat_items": "§cEsemete andmine ebaõnnestus.",
   "text.rei.list_ordering": "Esemenimekirja järjestus",
@@ -29,8 +31,11 @@
   "ordering.rei.item_groups": "Esemegrupid",
   "text.speed_craft.failed_move_items": "§cEsemeid ei saa liigutada!",
   "text.speed_craft.move_items": "Liiguta esemeid",
-  "text.rei.enable_craftable_only": "Luba ainult meisterdatavad: ",
+  "text.rei.enable_craftable_only": "Luba meisterdatavate filter: ",
   "text.rei.showing_craftable": "Kuvab meisterdatavaid",
   "text.rei.showing_all": "Kuvab kõiki",
-  "text.rei.delete_items": "§cKustuta ese"
+  "text.rei.delete_items": "§cKustuta ese",
+  "text.rei.check_updates": "Uuenduste kontrollimine: ",
+  "text.rei.update_outdated": "§6REI on vananenud!\n§6Praegune: §a%s §6Viimatine: §a%s\n§6Uuendamise prioriteet: §a%s",
+  "text.rei.update_changelog_line": "§6- %s"
 }
