@@ -1,7 +1,6 @@
 package me.shedaniel.rei.gui;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.ConfigHelper;
 import me.shedaniel.rei.client.GuiHelper;
@@ -119,7 +118,7 @@ public class ContainerGuiOverlay extends GuiScreen {
             });
         
         this.itemListOverlay.updateList(getItemListArea(), page, searchTerm);
-        this.children.addAll(widgets);
+        this.eventListeners.addAll(widgets);
     }
     
     private Rectangle getTextFieldArea() {
@@ -260,7 +259,7 @@ public class ContainerGuiOverlay extends GuiScreen {
         }
         if (!GuiHelper.isOverlayVisible())
             return false;
-        for(IGuiEventListener listener : children)
+        for(IGuiEventListener listener : eventListeners)
             if (listener.keyPressed(int_1, int_2, int_3))
                 return true;
         Point point = ClientHelper.getMouseLocation();
@@ -294,7 +293,7 @@ public class ContainerGuiOverlay extends GuiScreen {
     public boolean charTyped(char char_1, int int_1) {
         if (!GuiHelper.isOverlayVisible())
             return false;
-        for(IGuiEventListener listener : children)
+        for(IGuiEventListener listener : eventListeners)
             if (listener.charTyped(char_1, int_1))
                 return true;
         return super.charTyped(char_1, int_1);

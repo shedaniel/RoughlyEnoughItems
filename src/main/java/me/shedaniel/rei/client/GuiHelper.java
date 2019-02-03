@@ -55,7 +55,8 @@ public class GuiHelper implements ClientTickable {
     }
     
     @Override
-    public void clientTick(Minecraft client) {
+    public void clientTick() {
+        Minecraft client = Minecraft.getInstance();
         if (client.currentScreen instanceof GuiContainer && lastGuiContainer != client.currentScreen) {
             GuiHelper.lastGuiContainer = (GuiContainer) client.currentScreen;
             GuiHelper.lastMixinGuiContainer = (IMixinGuiContainer) lastGuiContainer;

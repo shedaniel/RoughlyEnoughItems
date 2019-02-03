@@ -19,7 +19,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.IRegistry;
 import org.dimdev.riftloader.RiftLoader;
 
 import java.awt.*;
@@ -39,7 +38,7 @@ public class ClientHelper {
     
     public static String getModFromItemStack(ItemStack stack) {
         if (!stack.isEmpty()) {
-            ResourceLocation location = IRegistry.ITEM.getKey(stack.getItem());
+            ResourceLocation location = Item.REGISTRY.getKey(stack.getItem());
             assert location != null;
             String modid = location.getNamespace();
             if (modid.equalsIgnoreCase("minecraft"))
@@ -92,7 +91,7 @@ public class ClientHelper {
                 return false;
             }
         } else {
-            ResourceLocation location = IRegistry.ITEM.getKey(cheatedStack.getItem());
+            ResourceLocation location = Item.REGISTRY.getKey(cheatedStack.getItem());
             String tagMessage = cheatedStack.copy().getTag() != null && !cheatedStack.copy().getTag().isEmpty() ? cheatedStack.copy().getTag().toString() : "";
             String madeUpCommand = ConfigHelper.getInstance().getGiveCommandPrefix() + " " + Minecraft.getInstance().player.getScoreboardName() + " " + location.toString() + tagMessage + (cheatedStack.getCount() != 1 ? " " + cheatedStack.getCount() : "");
             if (madeUpCommand.length() > 256)
@@ -131,11 +130,11 @@ public class ClientHelper {
     }
     
     public void clientLoaded() {
-        IRegistry.ITEM.forEach(item -> {
+        Item.REGISTRY.forEach(item -> {
             if (!item.equals(Items.ENCHANTED_BOOK))
                 registerItem(item);
         });
-        IRegistry.ENCHANTMENT.forEach(enchantment -> {
+        Enchantment.REGISTRY.forEach(enchantment -> {
             for(int i = enchantment.getMinLevel(); i < enchantment.getMaxLevel(); i++) {
                 Map<Enchantment, Integer> map = new HashMap<>();
                 map.put(enchantment, i);

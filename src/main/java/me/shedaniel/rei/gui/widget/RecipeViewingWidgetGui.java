@@ -10,7 +10,7 @@ import me.shedaniel.rei.client.GuiHelper;
 import me.shedaniel.rei.client.RecipeHelper;
 import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.SimpleSound;
+import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -72,7 +72,7 @@ public class RecipeViewingWidgetGui extends GuiScreen {
             Minecraft.getInstance().displayGuiScreen(GuiHelper.getLastGuiContainer());
             return true;
         }
-        for(IGuiEventListener listener : children)
+        for(IGuiEventListener listener : eventListeners)
             if (listener.keyPressed(int_1, int_2, int_3))
                 return true;
         return super.keyPressed(int_1, int_2, int_3);
@@ -160,7 +160,7 @@ public class RecipeViewingWidgetGui extends GuiScreen {
                     @Override
                     public boolean onMouseClick(int button, double mouseX, double mouseY) {
                         if (getBounds().contains(mouseX, mouseY)) {
-                            Minecraft.getInstance().getSoundHandler().play(SimpleSound.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                            Minecraft.getInstance().getSoundHandler().play(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                             if (getId() + categoryPages * 6 == categories.indexOf(selectedCategory))
                                 return false;
                             selectedCategory = categories.get(getId() + categoryPages * 6);
@@ -195,9 +195,9 @@ public class RecipeViewingWidgetGui extends GuiScreen {
         }
         
         GuiHelper.getLastOverlay().onInitialized();
-        children.addAll(tabs);
-        children.add(GuiHelper.getLastOverlay());
-        children.addAll(widgets);
+        eventListeners.addAll(tabs);
+        eventListeners.add(GuiHelper.getLastOverlay());
+        eventListeners.addAll(widgets);
     }
     
     private int getRecipesPerPage() {
@@ -255,7 +255,7 @@ public class RecipeViewingWidgetGui extends GuiScreen {
     
     @Override
     public boolean charTyped(char char_1, int int_1) {
-        for(IGuiEventListener listener : children)
+        for(IGuiEventListener listener : eventListeners)
             if (listener.charTyped(char_1, int_1))
                 return true;
         return super.charTyped(char_1, int_1);
@@ -263,7 +263,7 @@ public class RecipeViewingWidgetGui extends GuiScreen {
     
     @Override
     public boolean mouseScrolled(double amount) {
-        for(IGuiEventListener listener : children)
+        for(IGuiEventListener listener : eventListeners)
             if (listener.mouseScrolled(amount))
                 return true;
         if (getBounds().contains(ClientHelper.getMouseLocation())) {

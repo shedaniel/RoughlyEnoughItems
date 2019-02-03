@@ -1,7 +1,7 @@
 package me.shedaniel.rei.gui.widget;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.SimpleSound;
+import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
@@ -106,7 +106,7 @@ public abstract class ButtonWidget extends Gui implements IWidget {
     @Override
     public boolean onMouseClick(int button, double mouseX, double mouseY) {
         if (bounds.contains(mouseX, mouseY) && enabled) {
-            Minecraft.getInstance().getSoundHandler().play(SimpleSound.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            Minecraft.getInstance().getSoundHandler().play(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             onPressed(button, mouseX, mouseY);
             return true;
         }

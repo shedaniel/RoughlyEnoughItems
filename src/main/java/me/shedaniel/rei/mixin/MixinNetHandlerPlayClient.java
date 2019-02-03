@@ -4,7 +4,7 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.RoughlyEnoughItemsPlugin;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.item.crafting.RecipeManager;
-import net.minecraft.network.play.server.SPacketUpdateRecipes;
+import net.minecraft.network.play.server.SPacketUpdateRecipesPacket;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -20,7 +20,7 @@ public class MixinNetHandlerPlayClient {
     private RecipeManager recipeManager;
     
     @Inject(method = "handleUpdateRecipes", at = @At("RETURN"))
-    private void onUpdateRecipes(SPacketUpdateRecipes packetIn, CallbackInfo ci) {
+    private void onUpdateRecipes(SPacketUpdateRecipesPacket packetIn, CallbackInfo ci) {
         RoughlyEnoughItemsPlugin.discoverPlugins();
         RoughlyEnoughItemsCore.getRecipeHelper().recipesLoaded(recipeManager);
     }

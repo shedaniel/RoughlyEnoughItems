@@ -27,7 +27,7 @@ public class CreateItemsPacket implements Packet<INetHandlerPlayServer> {
     
     @Override
     public void readPacketData(PacketBuffer packetBuffer) throws IOException {
-        stack = ItemStack.read(packetBuffer.readCompoundTag());
+        stack = ItemStack.loadFromNBT(packetBuffer.readCompoundTag());
     }
     
     @Override

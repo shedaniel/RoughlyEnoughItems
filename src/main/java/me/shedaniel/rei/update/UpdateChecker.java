@@ -21,7 +21,7 @@ public class UpdateChecker implements InitializationListener {
     
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
     private static final Version CURRENT_VERSION = new Version("2.2.0.16");
-    private static final String CURRENT_GAME_VERSION = "1.13.2";
+    private static final String CURRENT_GAME_VERSION = "1.13";
     private static Version latestForGame = null;
     private static JsonVersionElement element;
     private static String VERSION_STRING = "https://raw.githubusercontent.com/shedaniel/RoughlyEnoughItems/1.13.2-rewrite/version.json";

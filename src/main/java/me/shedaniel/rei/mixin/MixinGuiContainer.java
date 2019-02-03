@@ -66,7 +66,7 @@ public class MixinGuiContainer extends GuiScreen implements IMixinGuiContainer {
         GuiHelper.setLastGuiContainer((GuiContainer) (Object) this);
         GuiHelper.setLastMixinGuiContainer((IMixinGuiContainer) this);
         GuiHelper.setOverlay(new ContainerGuiOverlay());
-        this.children.add(GuiHelper.getLastOverlay());
+        this.eventListeners.add(GuiHelper.getLastOverlay());
     }
     
     @Inject(method = "render(IIF)V", at = @At("RETURN"))

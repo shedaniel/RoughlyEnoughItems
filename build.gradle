@@ -1,12 +1,12 @@
 buildscript {
     repositories {
         mavenCentral()
-        maven { url 'https://www.jitpack.io' }
+        maven { url 'https://www.dimdev.org/maven/' }
         maven { url 'https://files.minecraftforge.net/maven' }
         maven { url 'http://repo.spongepowered.org/maven' }
     }
     dependencies {
-        classpath 'com.github.Chocohead:ForgeGradle:jitpack-SNAPSHOT'
+        classpath 'org.dimdev:ForgeGradle:2.3-SNAPSHOT'
         classpath 'org.spongepowered:mixingradle:0.6-SNAPSHOT'
     }
 }
@@ -25,13 +25,12 @@ targetCompatibility = 1.8
 repositories {
     mavenCentral()
     maven { url 'https://www.dimdev.org/maven/' }
-    maven { url 'https://www.jitpack.io' }
     maven { url 'https://repo.spongepowered.org/maven/' }
     maven { url "http://repo.strezz.org/artifactory/list/Strezz-Central" }
 }
 
 dependencies {
-    implementation 'com.github.Chocohead:Rift:jitpack-SNAPSHOT:dev'
+    implementation 'org.dimdev:rift:1.0.4-87:dev'
     implementation 'com.google.code.gson:gson:2.8.5'
 }
 
@@ -48,8 +47,8 @@ mixin {
 }
 
 minecraft {
-    version = '1.13.2'
-    mappings = 'snapshot_20181130'
+    version = '1.13'
+    mappings = 'snapshot_20180908'
     runDir = 'run'
     tweakClass = 'org.dimdev.riftloader.launch.RiftLoaderClientTweaker'
 }
