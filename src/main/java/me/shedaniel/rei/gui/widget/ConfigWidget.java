@@ -54,7 +54,7 @@ public class ConfigWidget extends Screen {
             @Override
             public void draw(int mouseX, int mouseY, float partialTicks) {
                 text = getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().sideSearchField());
-                String t = I18n.translate("text.rei.centre_searchbox");
+                String t = I18n.translate("text.rei.side_searchbox");
                 int width = fontRenderer.getStringWidth(t);
                 fontRenderer.drawWithShadow(t, this.x - width - 10, this.y + (this.height - 8) / 2, -1);
                 super.draw(mouseX, mouseY, partialTicks);
@@ -104,6 +104,48 @@ public class ConfigWidget extends Screen {
                 String t = I18n.translate("text.rei.list_ordering") + ": ";
                 drawString(MinecraftClient.getInstance().fontRenderer, t, parent.width / 2 - 95 - MinecraftClient.getInstance().fontRenderer.getStringWidth(t), 90 + 6, -1);
                 super.draw(int_1, int_2, float_1);
+            }
+        });
+        widgets.add(new ButtonWidget(window.getScaledWidth() / 2 - 20, 120, 40, 20, "") {
+            @Override
+            public void onPressed(int button, double mouseX, double mouseY) {
+                if (button == 0)
+                    RoughlyEnoughItemsCore.getConfigHelper().setMirrorItemPanel(!RoughlyEnoughItemsCore.getConfigHelper().isMirrorItemPanel());
+                try {
+                    RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        
+            @Override
+            public void draw(int mouseX, int mouseY, float partialTicks) {
+                text = getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().isMirrorItemPanel());
+                String t = I18n.translate("text.rei.mirror_rei");
+                int width = fontRenderer.getStringWidth(t);
+                fontRenderer.drawWithShadow(t, this.x - width - 10, this.y + (this.height - 8) / 2, -1);
+                super.draw(mouseX, mouseY, partialTicks);
+            }
+        });
+        widgets.add(new ButtonWidget(window.getScaledWidth() / 2 - 20, 150, 40, 20, "") {
+            @Override
+            public void onPressed(int button, double mouseX, double mouseY) {
+                if (button == 0)
+                    RoughlyEnoughItemsCore.getConfigHelper().setCheckUpdates(!RoughlyEnoughItemsCore.getConfigHelper().checkUpdates());
+                try {
+                    RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        
+            @Override
+            public void draw(int mouseX, int mouseY, float partialTicks) {
+                text = getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().checkUpdates());
+                String t = I18n.translate("text.rei.check_updates");
+                int width = fontRenderer.getStringWidth(t);
+                fontRenderer.drawWithShadow(t, this.x - width - 10, this.y + (this.height - 8) / 2, -1);
+                super.draw(mouseX, mouseY, partialTicks);
             }
         });
     }

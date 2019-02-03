@@ -107,4 +107,16 @@ public class ConfigHelper {
         return config.checkUpdates;
     }
     
+    public void setCheckUpdates(boolean checkUpdates) {
+        config.checkUpdates = checkUpdates;
+    }
+    
+    public boolean isMirrorItemPanel() {
+        return config.mirrorItemPanel;
+    }
+    
+    public void setMirrorItemPanel(boolean mirrorItemPanel) {
+        config.mirrorItemPanel = mirrorItemPanel;
+    }
+    
 }

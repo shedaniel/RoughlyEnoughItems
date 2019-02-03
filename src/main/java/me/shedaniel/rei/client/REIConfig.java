@@ -13,5 +13,6 @@ public class REIConfig {
     public boolean sideSearchField = false;
     public String giveCommandPrefix = "/give";
     public boolean checkUpdates = true;
+    public boolean mirrorItemPanel = false;
     
 }
