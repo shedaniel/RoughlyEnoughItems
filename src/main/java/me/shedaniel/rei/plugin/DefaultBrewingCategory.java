@@ -4,7 +4,6 @@ import me.shedaniel.rei.api.IRecipeCategory;
 import me.shedaniel.rei.gui.widget.IWidget;
 import me.shedaniel.rei.gui.widget.ItemSlotWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
-import me.shedaniel.rei.listeners.IMixinGuiContainer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;

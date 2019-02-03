@@ -2,7 +2,6 @@ package me.shedaniel.rei.client;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.IRecipeCategory;
 import me.shedaniel.rei.api.IRecipeDisplay;
 import me.shedaniel.rei.gui.ContainerGuiOverlay;
@@ -95,9 +94,9 @@ public class ClientHelper {
         } else {
             ResourceLocation location = IRegistry.ITEM.getKey(cheatedStack.getItem());
             String tagMessage = cheatedStack.copy().getTag() != null && !cheatedStack.copy().getTag().isEmpty() ? cheatedStack.copy().getTag().toString() : "";
-            String madeUpCommand = RoughlyEnoughItemsCore.getConfigHelper().getGiveCommandPrefix() + " " + Minecraft.getInstance().player.getScoreboardName() + " " + location.toString() + tagMessage + (cheatedStack.getCount() != 1 ? " " + cheatedStack.getCount() : "");
+            String madeUpCommand = ConfigHelper.getInstance().getGiveCommandPrefix() + " " + Minecraft.getInstance().player.getScoreboardName() + " " + location.toString() + tagMessage + (cheatedStack.getCount() != 1 ? " " + cheatedStack.getCount() : "");
             if (madeUpCommand.length() > 256)
-                madeUpCommand = RoughlyEnoughItemsCore.getConfigHelper().getGiveCommandPrefix() + " " + Minecraft.getInstance().player.getScoreboardName() + " " + location.toString() + (cheatedStack.getCount() != 1 ? " " + cheatedStack.getCount() : "");
+                madeUpCommand = ConfigHelper.getInstance().getGiveCommandPrefix() + " " + Minecraft.getInstance().player.getScoreboardName() + " " + location.toString() + (cheatedStack.getCount() != 1 ? " " + cheatedStack.getCount() : "");
             Minecraft.getInstance().player.sendChatMessage(madeUpCommand);
             return true;
         }

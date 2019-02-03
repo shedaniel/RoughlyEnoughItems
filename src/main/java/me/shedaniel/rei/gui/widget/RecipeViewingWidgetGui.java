@@ -178,7 +178,7 @@ public class RecipeViewingWidgetGui extends GuiScreen {
         SpeedCraftAreaSupplier supplier = RecipeHelper.getInstance().getSpeedCraftButtonArea(selectedCategory);
         final SpeedCraftFunctional functional = getSpeedCraftFunctionalByCategory(GuiHelper.getLastGuiContainer(), selectedCategory);
         if (page * getRecipesPerPage() < categoriesMap.get(selectedCategory).size()) {
-            final Supplier<IRecipeDisplay> topDisplaySupplier =  () -> categoriesMap.get(selectedCategory).get(page * getRecipesPerPage());
+            final Supplier<IRecipeDisplay> topDisplaySupplier = () -> categoriesMap.get(selectedCategory).get(page * getRecipesPerPage());
             final Rectangle topBounds = new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 40, 150, selectedCategory.usesFullPage() ? 140 : 66);
             widgets.addAll(selectedCategory.setupDisplay(topDisplaySupplier, topBounds));
             if (supplier != null)

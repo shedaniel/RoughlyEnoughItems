@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import me.shedaniel.rei.gui.ContainerGuiOverlay;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import me.shedaniel.rei.listeners.IMixinGuiContainer;
+import me.shedaniel.rei.update.UpdateAnnouncer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.item.ItemStack;
@@ -59,6 +60,7 @@ public class GuiHelper implements ClientTickable {
             GuiHelper.lastGuiContainer = (GuiContainer) client.currentScreen;
             GuiHelper.lastMixinGuiContainer = (IMixinGuiContainer) lastGuiContainer;
         }
+        UpdateAnnouncer.clientTick(client);
     }
     
 }

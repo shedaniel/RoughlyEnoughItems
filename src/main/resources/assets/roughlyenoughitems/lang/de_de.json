@@ -18,7 +18,6 @@
   "category.rei.brewing.reactant": "§Zutat",
   "category.rei.brewing.result": "§eEntstehender Trank",
   "text.rei.config": "Einstellung",
-  "text.rei.centre_searchbox": "Rechte Suchbox: ",
   "text.rei.cheat_items": "[{item_name}] x{item_count} {player_name} gegeben.",
   "text.rei.failed_cheat_items": "§cItems geben fehlgeschlagen.",
   "text.rei.list_ordering": "Item Listen Reihenfolge",
