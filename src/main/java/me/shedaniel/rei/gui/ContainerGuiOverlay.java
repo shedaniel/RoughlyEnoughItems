@@ -3,6 +3,7 @@ package me.shedaniel.rei.gui;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.ClientHelper;
+import me.shedaniel.rei.client.ConfigHelper;
 import me.shedaniel.rei.client.GuiHelper;
 import me.shedaniel.rei.client.KeyBindHelper;
 import me.shedaniel.rei.gui.widget.*;
@@ -64,7 +65,7 @@ public class ContainerGuiOverlay extends GuiScreen {
             }
         });
         page = MathHelper.clamp(page, 0, getTotalPage());
-        widgets.add(new ButtonWidget(10, 10, 40, 20, "") {
+        widgets.add(new ButtonWidget(ConfigHelper.getInstance().isMirrorItemPanel() ? window.getScaledWidth() - 50 : 10, 10, 40, 20, "") {
             @Override
             public void draw(int int_1, int int_2, float float_1) {
                 this.text = getCheatModeText();
@@ -76,7 +77,7 @@ public class ContainerGuiOverlay extends GuiScreen {
                 ClientHelper.setCheating(!ClientHelper.isCheating());
             }
         });
-        widgets.add(new ButtonWidget(10, 35, 40, 20, I18n.format("text.rei.config")) {
+        widgets.add(new ButtonWidget(ConfigHelper.getInstance().isMirrorItemPanel() ? window.getScaledWidth() - 50 : 10, 35, 40, 20, I18n.format("text.rei.config")) {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
                 ClientHelper.openConfigWindow(GuiHelper.getLastGuiContainer());
@@ -108,11 +109,11 @@ public class ContainerGuiOverlay extends GuiScreen {
         GuiHelper.searchField.setBounds(getTextFieldArea());
         this.widgets.add(GuiHelper.searchField);
         GuiHelper.searchField.setText(searchTerm);
-        if (RoughlyEnoughItemsCore.getConfigHelper().showCraftableOnlyButton())
+        if (ConfigHelper.getInstance().showCraftableOnlyButton())
             this.widgets.add(new CraftableToggleButtonWidget(getCraftableToggleArea()) {
                 @Override
                 public void onPressed(int button, double mouseX, double mouseY) {
-                    RoughlyEnoughItemsCore.getConfigHelper().toggleCraftableOnly();
+                    ConfigHelper.getInstance().toggleCraftableOnly();
                     itemListOverlay.updateList(page, searchTerm);
                 }
             });
@@ -122,8 +123,8 @@ public class ContainerGuiOverlay extends GuiScreen {
     }
     
     private Rectangle getTextFieldArea() {
-        int widthRemoved = RoughlyEnoughItemsCore.getConfigHelper().showCraftableOnlyButton() ? 22 : 0;
-        if (RoughlyEnoughItemsCore.getConfigHelper().sideSearchField())
+        int widthRemoved = ConfigHelper.getInstance().showCraftableOnlyButton() ? 22 : 0;
+        if (ConfigHelper.getInstance().sideSearchField())
             return new Rectangle(rectangle.x + 2, window.getScaledHeight() - 22, rectangle.width - 6 - widthRemoved, 18);
         if (Minecraft.getInstance().currentScreen instanceof RecipeViewingWidgetGui) {
             RecipeViewingWidgetGui widget = (RecipeViewingWidgetGui) Minecraft.getInstance().currentScreen;
@@ -144,7 +145,7 @@ public class ContainerGuiOverlay extends GuiScreen {
     }
     
     private Rectangle getItemListArea() {
-        return new Rectangle(rectangle.x + 2, rectangle.y + 24, rectangle.width - 4, rectangle.height - (RoughlyEnoughItemsCore.getConfigHelper().sideSearchField() ? 27 + 22 : 27));
+        return new Rectangle(rectangle.x + 2, rectangle.y + 24, rectangle.width - 4, rectangle.height - (ConfigHelper.getInstance().sideSearchField() ? 27 + 22 : 27));
     }
     
     public Rectangle getRectangle() {
@@ -155,7 +156,7 @@ public class ContainerGuiOverlay extends GuiScreen {
         List<ItemStack> currentStacks = ClientHelper.getInventoryItemsTypes();
         if (getLeft() != lastLeft)
             onInitialized();
-        else if (RoughlyEnoughItemsCore.getConfigHelper().craftableOnly() && (!hasSameListContent(new LinkedList<>(GuiHelper.inventoryStacks), currentStacks) || (currentStacks.size() != GuiHelper.inventoryStacks.size()))) {
+        else if (ConfigHelper.getInstance().craftableOnly() && (!hasSameListContent(new LinkedList<>(GuiHelper.inventoryStacks), currentStacks) || (currentStacks.size() != GuiHelper.inventoryStacks.size()))) {
             GuiHelper.inventoryStacks = ClientHelper.getInventoryItemsTypes();
             itemListOverlay.updateList(page, searchTerm);
         }
@@ -202,14 +203,22 @@ public class ContainerGuiOverlay extends GuiScreen {
     }
     
     private Rectangle calculateBoundary() {
-        int startX = GuiHelper.getLastMixinGuiContainer().getContainerLeft() + GuiHelper.getLastMixinGuiContainer().getContainerWidth() + 10;
-        int width = window.getScaledWidth() - startX;
+        if (!ConfigHelper.getInstance().isMirrorItemPanel()) {
+            int startX = GuiHelper.getLastMixinGuiContainer().getContainerLeft() + GuiHelper.getLastMixinGuiContainer().getContainerWidth() + 10;
+            int width = window.getScaledWidth() - startX;
+            if (Minecraft.getInstance().currentScreen instanceof RecipeViewingWidgetGui) {
+                RecipeViewingWidgetGui widget = (RecipeViewingWidgetGui) Minecraft.getInstance().currentScreen;
+                startX = widget.getBounds().x + widget.getBounds().width + 10;
+                width = window.getScaledWidth() - startX;
+            }
+            return new Rectangle(startX, 0, width, window.getScaledHeight());
+        }
+        int width = GuiHelper.getLastMixinGuiContainer().getContainerLeft() - 6;
         if (Minecraft.getInstance().currentScreen instanceof RecipeViewingWidgetGui) {
             RecipeViewingWidgetGui widget = (RecipeViewingWidgetGui) Minecraft.getInstance().currentScreen;
-            startX = widget.getBounds().x + widget.getBounds().width + 10;
-            width = window.getScaledWidth() - startX;
+            width = widget.getBounds().x - 6;
         }
-        return new Rectangle(startX, 0, width, window.getScaledHeight());
+        return new Rectangle(4, 0, width, window.getScaledHeight());
     }
     
     private int getLeft() {
@@ -226,6 +235,8 @@ public class ContainerGuiOverlay extends GuiScreen {
     
     @Override
     public boolean mouseScrolled(double amount) {
+        if (!GuiHelper.isOverlayVisible())
+            return false;
         if (rectangle.contains(ClientHelper.getMouseLocation())) {
             if (amount > 0 && buttonLeft.enabled)
                 buttonLeft.onPressed(0, 0, 0);
@@ -243,6 +254,12 @@ public class ContainerGuiOverlay extends GuiScreen {
     
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
+        if (KeyBindHelper.HIDE.matchesKey(int_1, int_2)) {
+            GuiHelper.toggleOverlayVisible();
+            return true;
+        }
+        if (!GuiHelper.isOverlayVisible())
+            return false;
         for(IGuiEventListener listener : children)
             if (listener.keyPressed(int_1, int_2, int_3))
                 return true;
@@ -270,19 +287,24 @@ public class ContainerGuiOverlay extends GuiScreen {
             else if (KeyBindHelper.USAGE.matchesKey(int_1, int_2))
                 return ClientHelper.executeUsageKeyBind(this, itemStack);
         }
-        if (KeyBindHelper.HIDE.matchesKey(int_1, int_2)) {
-            GuiHelper.toggleOverlayVisible();
-            return true;
-        }
         return false;
     }
     
     @Override
     public boolean charTyped(char char_1, int int_1) {
+        if (!GuiHelper.isOverlayVisible())
+            return false;
         for(IGuiEventListener listener : children)
             if (listener.charTyped(char_1, int_1))
                 return true;
         return super.charTyped(char_1, int_1);
+    }
+    
+    @Override
+    public boolean mouseClicked(double double_1, double double_2, int int_1) {
+        if (!GuiHelper.isOverlayVisible())
+            return false;
+        return super.mouseClicked(double_1, double_2, int_1);
     }
     
 }

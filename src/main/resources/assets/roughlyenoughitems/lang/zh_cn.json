@@ -15,7 +15,8 @@
   "category.rei.brewing.reactant": "§e材料",
   "category.rei.brewing.result": "§e输出药水",
   "text.rei.config": "设置",
-  "text.rei.centre_searchbox": "右置搜索栏: ",
+  "text.rei.side_searchbox": "不置中搜索栏: ",
+  "text.rei.mirror_rei": "右置 REI 小工具: ",
   "text.rei.cheat_items": "已将 {item_count} 个 [{item_name}] 给予 {player_name}",
   "text.rei.failed_cheat_items": "§c不能给予物品.",
   "text.rei.list_ordering": "物品清单排序",
@@ -27,7 +28,11 @@
   "ordering.rei.item_groups": "物品分类",
   "text.speed_craft.failed_move_items": "§c不能移动物品!",
   "text.speed_craft.move_items": "移动物品",
+  "text.rei.enable_craftable_only": "过滤不可合成的物品: ",
   "text.rei.showing_craftable": "显示可合成的物品",
   "text.rei.showing_all": "显示所有物品",
-  "text.rei.delete_items": "§c删除物品"
+  "text.rei.delete_items": "§c删除物品",
+  "text.rei.check_updates": "检查更新: ",
+  "text.rei.update_outdated": "§6REI 需要更新!\n§6当前版本: §a%s §6最新版本: §a%s\n§6重要性: §a%s",
+  "text.rei.update_changelog_line": "§6- %s"
 }

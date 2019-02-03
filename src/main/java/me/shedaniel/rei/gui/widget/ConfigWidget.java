@@ -1,7 +1,7 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.client.ConfigHelper;
 import me.shedaniel.rei.client.REIItemListOrdering;
 import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
@@ -43,9 +43,9 @@ public class ConfigWidget extends GuiScreen {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
                 if (button == 0)
-                    RoughlyEnoughItemsCore.getConfigHelper().setSideSearchField(!RoughlyEnoughItemsCore.getConfigHelper().sideSearchField());
+                    ConfigHelper.getInstance().setSideSearchField(!ConfigHelper.getInstance().sideSearchField());
                 try {
-                    RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
+                    ConfigHelper.getInstance().saveConfig();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -53,8 +53,8 @@ public class ConfigWidget extends GuiScreen {
             
             @Override
             public void draw(int mouseX, int mouseY, float partialTicks) {
-                text = getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().sideSearchField());
-                String t = I18n.format("text.rei.centre_searchbox");
+                text = getTrueFalseText(ConfigHelper.getInstance().sideSearchField());
+                String t = I18n.format("text.rei.side_searchbox");
                 int width = fontRenderer.getStringWidth(t);
                 fontRenderer.drawStringWithShadow(t, this.x - width - 10, this.y + (this.height - 8) / 2, -1);
                 super.draw(mouseX, mouseY, partialTicks);
@@ -64,9 +64,9 @@ public class ConfigWidget extends GuiScreen {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
                 if (button == 0)
-                    RoughlyEnoughItemsCore.getConfigHelper().setShowCraftableOnlyButton(!RoughlyEnoughItemsCore.getConfigHelper().showCraftableOnlyButton());
+                    ConfigHelper.getInstance().setShowCraftableOnlyButton(!ConfigHelper.getInstance().showCraftableOnlyButton());
                 try {
-                    RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
+                    ConfigHelper.getInstance().saveConfig();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -74,7 +74,7 @@ public class ConfigWidget extends GuiScreen {
             
             @Override
             public void draw(int mouseX, int mouseY, float partialTicks) {
-                text = getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().showCraftableOnlyButton());
+                text = getTrueFalseText(ConfigHelper.getInstance().showCraftableOnlyButton());
                 String t = I18n.format("text.rei.enable_craftable_only");
                 int width = fontRenderer.getStringWidth(t);
                 fontRenderer.drawStringWithShadow(t, this.x - width - 10, this.y + (this.height - 8) / 2, -1);
@@ -84,14 +84,14 @@ public class ConfigWidget extends GuiScreen {
         widgets.add(new ButtonWidget(window.getScaledWidth() / 2 - 90, 90, 150, 20, "") {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
-                int index = Arrays.asList(REIItemListOrdering.values()).indexOf(RoughlyEnoughItemsCore.getConfigHelper().getItemListOrdering()) + 1;
+                int index = Arrays.asList(REIItemListOrdering.values()).indexOf(ConfigHelper.getInstance().getItemListOrdering()) + 1;
                 if (index >= REIItemListOrdering.values().length) {
                     index = 0;
-                    RoughlyEnoughItemsCore.getConfigHelper().setAscending(!RoughlyEnoughItemsCore.getConfigHelper().isAscending());
+                    ConfigHelper.getInstance().setAscending(!ConfigHelper.getInstance().isAscending());
                 }
-                RoughlyEnoughItemsCore.getConfigHelper().setItemListOrdering(REIItemListOrdering.values()[index]);
+                ConfigHelper.getInstance().setItemListOrdering(REIItemListOrdering.values()[index]);
                 try {
-                    RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
+                    ConfigHelper.getInstance().saveConfig();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -100,10 +100,52 @@ public class ConfigWidget extends GuiScreen {
             @Override
             public void draw(int int_1, int int_2, float float_1) {
                 RenderHelper.disableStandardItemLighting();
-                this.text = I18n.format("text.rei.list_ordering_button", I18n.format(RoughlyEnoughItemsCore.getConfigHelper().getItemListOrdering().getNameTranslationKey()), I18n.format(RoughlyEnoughItemsCore.getConfigHelper().isAscending() ? "ordering.rei.ascending" : "ordering.rei.descending"));
+                this.text = I18n.format("text.rei.list_ordering_button", I18n.format(ConfigHelper.getInstance().getItemListOrdering().getNameTranslationKey()), I18n.format(ConfigHelper.getInstance().isAscending() ? "ordering.rei.ascending" : "ordering.rei.descending"));
                 String t = I18n.format("text.rei.list_ordering") + ": ";
-                drawString(Minecraft.getInstance().fontRenderer, t, parent.width / 2 - 95 - Minecraft.getInstance().fontRenderer.getStringWidth(t), 90 + 6, -1);
+                fontRenderer.drawStringWithShadow(t, parent.width / 2 - 95 - Minecraft.getInstance().fontRenderer.getStringWidth(t), 90 + 6, -1);
                 super.draw(int_1, int_2, float_1);
+            }
+        });
+        widgets.add(new ButtonWidget(window.getScaledWidth() / 2 - 20, 120, 40, 20, "") {
+            @Override
+            public void onPressed(int button, double mouseX, double mouseY) {
+                if (button == 0)
+                    ConfigHelper.getInstance().setMirrorItemPanel(!ConfigHelper.getInstance().isMirrorItemPanel());
+                try {
+                    ConfigHelper.getInstance().saveConfig();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            
+            @Override
+            public void draw(int mouseX, int mouseY, float partialTicks) {
+                text = getTrueFalseText(ConfigHelper.getInstance().isMirrorItemPanel());
+                String t = I18n.format("text.rei.mirror_rei");
+                int width = fontRenderer.getStringWidth(t);
+                fontRenderer.drawStringWithShadow(t, this.x - width - 10, this.y + (this.height - 8) / 2, -1);
+                super.draw(mouseX, mouseY, partialTicks);
+            }
+        });
+        widgets.add(new ButtonWidget(window.getScaledWidth() / 2 - 20, 150, 40, 20, "") {
+            @Override
+            public void onPressed(int button, double mouseX, double mouseY) {
+                if (button == 0)
+                    ConfigHelper.getInstance().setCheckUpdates(!ConfigHelper.getInstance().checkUpdates());
+                try {
+                    ConfigHelper.getInstance().saveConfig();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            
+            @Override
+            public void draw(int mouseX, int mouseY, float partialTicks) {
+                text = getTrueFalseText(ConfigHelper.getInstance().checkUpdates());
+                String t = I18n.format("text.rei.check_updates");
+                int width = fontRenderer.getStringWidth(t);
+                fontRenderer.drawStringWithShadow(t, this.x - width - 10, this.y + (this.height - 8) / 2, -1);
+                super.draw(mouseX, mouseY, partialTicks);
             }
         });
     }

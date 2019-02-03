@@ -16,9 +16,13 @@
       "side": "client"
     },
     {
-      "class": "me.shedaniel.rei.client.GuiHelper",
+      "class": "me.shedaniel.rei.update.UpdateChecker",
       "side": "client",
-      "priority": -30
+      "priority": -20
+    },
+    {
+      "class": "me.shedaniel.rei.client.GuiHelper",
+      "side": "client"
     }
   ],
   "url": "https://shedaniel.me",

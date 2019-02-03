@@ -12,5 +12,7 @@ public class REIConfig {
     public boolean enableCraftableOnlyButton = true;
     public boolean sideSearchField = false;
     public String giveCommandPrefix = "/give";
+    public boolean checkUpdates = true;
+    public boolean mirrorItemPanel = false;
     
 }

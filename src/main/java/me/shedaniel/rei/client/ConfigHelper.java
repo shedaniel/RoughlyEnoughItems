@@ -13,7 +13,12 @@ public class ConfigHelper {
     
     private final File configFile;
     private REIConfig config;
+    private static ConfigHelper instance = new ConfigHelper();
     private boolean craftableOnly;
+    
+    public static ConfigHelper getInstance() {
+        return instance;
+    }
     
     public ConfigHelper() {
         this.configFile = new File(RiftLoader.instance.configDir, "rei.json");
@@ -103,6 +108,22 @@ public class ConfigHelper {
     
     public void setSideSearchField(boolean sideSearchField) {
         config.sideSearchField = sideSearchField;
+    }
+    
+    public boolean checkUpdates() {
+        return config.checkUpdates;
+    }
+    
+    public void setCheckUpdates(boolean checkUpdates) {
+        config.checkUpdates = checkUpdates;
+    }
+    
+    public boolean isMirrorItemPanel() {
+        return config.mirrorItemPanel;
+    }
+    
+    public void setMirrorItemPanel(boolean mirrorItemPanel) {
+        config.mirrorItemPanel = mirrorItemPanel;
     }
     
 }

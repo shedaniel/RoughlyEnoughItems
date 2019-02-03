@@ -103,7 +103,7 @@ public class ItemListOverlay extends Gui implements IWidget {
         List<ItemStack> os = new LinkedList<>(ol), stacks = Lists.newArrayList(), finalStacks = Lists.newArrayList();
         List<ItemGroup> itemGroups = new LinkedList<>(Arrays.asList(ItemGroup.GROUPS));
         itemGroups.add(null);
-        REIItemListOrdering ordering = RoughlyEnoughItemsCore.getConfigHelper().getItemListOrdering();
+        REIItemListOrdering ordering = ConfigHelper.getInstance().getItemListOrdering();
         if (ordering != REIItemListOrdering.REGISTRY)
             Collections.sort(os, (itemStack, t1) -> {
                 if (ordering.equals(REIItemListOrdering.NAME))
@@ -112,7 +112,7 @@ public class ItemListOverlay extends Gui implements IWidget {
                     return itemGroups.indexOf(itemStack.getItem().getGroup()) - itemGroups.indexOf(t1.getItem().getGroup());
                 return 0;
             });
-        if (!RoughlyEnoughItemsCore.getConfigHelper().isAscending())
+        if (!ConfigHelper.getInstance().isAscending())
             Collections.reverse(os);
         String[] splitSearchTerm = StringUtils.splitByWholeSeparatorPreserveAllTokens(searchTerm, "|");
         Arrays.stream(splitSearchTerm).forEachOrdered(s -> {
@@ -135,14 +135,14 @@ public class ItemListOverlay extends Gui implements IWidget {
         });
         if (splitSearchTerm.length == 0)
             stacks.addAll(os);
-        List<ItemStack> workingItems = RoughlyEnoughItemsCore.getConfigHelper().craftableOnly() && inventoryItems.size() > 0 ? new ArrayList<>() : new LinkedList<>(ol);
-        if (RoughlyEnoughItemsCore.getConfigHelper().craftableOnly()) {
+        List<ItemStack> workingItems = ConfigHelper.getInstance().craftableOnly() && inventoryItems.size() > 0 ? new ArrayList<>() : new LinkedList<>(ol);
+        if (ConfigHelper.getInstance().craftableOnly()) {
             RecipeHelper.getInstance().findCraftableByItems(inventoryItems).forEach(workingItems::add);
             workingItems.addAll(inventoryItems);
         }
         final List<ItemStack> finalWorkingItems = workingItems;
         finalStacks.addAll(stacks.stream().filter(itemStack -> {
-            if (!RoughlyEnoughItemsCore.getConfigHelper().craftableOnly())
+            if (!ConfigHelper.getInstance().craftableOnly())
                 return true;
             for(ItemStack workingItem : finalWorkingItems)
                 if (itemStack.isItemEqual(workingItem))
