@@ -5,12 +5,10 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Drawable;
-import net.minecraft.client.item.TooltipOptions;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.TextComponent;
 import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.StringUtils;
 
@@ -154,9 +152,9 @@ public class ItemListOverlay extends Drawable implements IWidget {
     
     private boolean filterItem(ItemStack itemStack, List<SearchArgument> arguments) {
         String mod = ClientHelper.getModFromItemStack(itemStack);
-        List<String> toolTipsList = getStackTooltip(itemStack);
+        List<String> toolTipsList = MinecraftClient.getInstance().currentScreen.getStackTooltip(itemStack);
         String toolTipsMixed = toolTipsList.stream().skip(1).collect(Collectors.joining()).toLowerCase();
-        String allMixed = Stream.of(itemStack.getDisplayName().getString(), toolTipsMixed).collect(Collectors.joining()).toLowerCase();
+        String allMixed = Stream.of(itemStack.getDisplayName().getFormattedText(), toolTipsMixed).collect(Collectors.joining()).toLowerCase();
         for(SearchArgument searchArgument : arguments.stream().filter(searchArgument -> !searchArgument.isInclude()).collect(Collectors.toList())) {
             if (searchArgument.getArgumentType().equals(SearchArgument.ArgumentType.MOD))
                 if (mod.toLowerCase().contains(searchArgument.getText().toLowerCase()))
@@ -180,11 +178,6 @@ public class ItemListOverlay extends Drawable implements IWidget {
                     return false;
         }
         return true;
-    }
-    
-    private List<String> getStackTooltip(ItemStack itemStack) {
-        MinecraftClient client = MinecraftClient.getInstance();
-        return itemStack.getTooltipText(client.player, client.options.advancedItemTooltips ? TooltipOptions.Instance.ADVANCED : TooltipOptions.Instance.NORMAL).stream().map(TextComponent::getFormattedText).collect(Collectors.toList());
     }
     
     private void calculateListSize(Rectangle rect) {

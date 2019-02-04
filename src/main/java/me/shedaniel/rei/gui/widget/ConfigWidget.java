@@ -117,7 +117,7 @@ public class ConfigWidget extends Screen {
                     e.printStackTrace();
                 }
             }
-        
+            
             @Override
             public void draw(int mouseX, int mouseY, float partialTicks) {
                 text = getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().isMirrorItemPanel());
@@ -138,7 +138,7 @@ public class ConfigWidget extends Screen {
                     e.printStackTrace();
                 }
             }
-        
+            
             @Override
             public void draw(int mouseX, int mouseY, float partialTicks) {
                 text = getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().checkUpdates());

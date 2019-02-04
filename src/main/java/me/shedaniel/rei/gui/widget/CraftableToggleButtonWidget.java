@@ -36,7 +36,7 @@ public abstract class CraftableToggleButtonWidget extends ButtonWidget {
         
         GuiLighting.enableForItems();
         this.itemRenderer.zOffset = 0.0F;
-        this.itemRenderer.renderItemAndGlowInGui(new ItemStack(Blocks.CRAFTING_TABLE), x + 2, y + 2);
+        this.itemRenderer.renderGuiItem(new ItemStack(Blocks.CRAFTING_TABLE), x + 2, y + 2);
         this.itemRenderer.zOffset = 0.0F;
         GuiLighting.disable();
         MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
