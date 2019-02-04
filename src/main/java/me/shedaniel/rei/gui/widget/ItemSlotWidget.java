@@ -65,8 +65,8 @@ public class ItemSlotWidget extends Drawable implements HighlightableWidget {
         GuiLighting.enableForItems();
         ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
         itemRenderer.zOffset = 200.0F;
-        itemRenderer.renderItemAndGlowInGui(itemStack, x, y);
-        itemRenderer.renderItemOverlaysInGUIWithText(MinecraftClient.getInstance().fontRenderer, itemStack, x, y, getItemCountOverlay(itemStack));
+        itemRenderer.renderGuiItem(itemStack, x, y);
+        itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().fontRenderer, itemStack, x, y, getItemCountOverlay(itemStack));
         itemRenderer.zOffset = 0.0F;
         if (isHighlighted(mouseX, mouseY) && showToolTips)
             drawToolTip(itemStack);
@@ -82,8 +82,9 @@ public class ItemSlotWidget extends Drawable implements HighlightableWidget {
         MinecraftClient mc = MinecraftClient.getInstance();
         List<String> toolTip = Lists.newArrayList();
         try {
-            toolTip = GuiHelper.getLastOverlay().getStackTooltip(itemStack).stream().filter(s -> !s.equals(modString)).collect(Collectors.toList());
+            toolTip = MinecraftClient.getInstance().currentScreen.getStackTooltip(itemStack).stream().filter(s -> !s.equals(modString)).collect(Collectors.toList());
         } catch (Exception e) {
+            e.printStackTrace();
             toolTip.add(itemStack.getDisplayName().getFormattedText());
         }
         toolTip.addAll(getExtraToolTips(itemStack));

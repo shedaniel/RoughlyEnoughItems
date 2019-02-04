@@ -127,7 +127,8 @@ public class UpdateChecker implements ClientModInitializer {
         }
         if (downloadedString != null && !downloadedString.equalsIgnoreCase("{}"))
             latestForGame = new Version(parseLatest(element, SharedConstants.getGameVersion().getName()));
-        else latestForGame = new Version("0.0.0");
+        else
+            latestForGame = new Version("0.0.0");
     }
     
     private InputStream downloadVersionString() {

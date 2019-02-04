@@ -1,13 +1,11 @@
 package me.shedaniel.rei.gui.widget;
 
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.IRecipeDisplay;
 import me.shedaniel.rei.api.SpeedCraftFunctional;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.item.ItemStack;
 
 import java.awt.*;
 import java.util.Arrays;

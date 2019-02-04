@@ -10,7 +10,7 @@
     },
     {
       "game": "19w05a",
-      "mod": "2.2.0.48"
+      "mod": "2.2.0.49"
     }
   ],
   "changelogs": {
@@ -19,6 +19,11 @@
         "version": "2.2.0.48",
         "text": "Added a version checker, an option to mirror the item panel and fixed interacting with REI when hidden.",
         "level": "light"
+      },
+      {
+        "version": "2.2.0.49",
+        "text": "Fixed Crashing when rendering tooltips",
+        "level": "normal"
       }
     ]
   }
