@@ -10,9 +10,9 @@ import me.shedaniel.rei.plugin.DefaultPlugin;
 import me.shedaniel.rei.update.UpdateChecker;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.api.loader.Loader;
-import net.fabricmc.fabric.events.client.ClientTickEvent;
-import net.fabricmc.fabric.networking.CustomPayloadPacketRegistry;
+import net.fabricmc.fabric.api.event.client.ClientTickCallback;
+import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
+import net.fabricmc.loader.FabricLoader;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -69,15 +69,15 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
     @Override
     public void onInitializeClient() {
         // If pluginloader is not installed, base functionality should still remain
-        if (!Loader.getInstance().isModLoaded("pluginloader")) {
+        if (!FabricLoader.INSTANCE.getModContainers().stream().map(modContainer -> modContainer.getInfo().getId()).anyMatch(s -> s.equalsIgnoreCase("pluginloader"))) {
             RoughlyEnoughItemsCore.LOGGER.warn("REI: Plugin Loader is not loaded! Please consider installing https://minecraft.curseforge.com/projects/pluginloader for REI plugin compatibility!");
             registerPlugin(new Identifier("roughlyenoughitems", "default_plugin"), new DefaultPlugin());
         }
         configHelper = new ConfigHelper();
         
-        ClientTickEvent.CLIENT.register(GuiHelper::onTick);
+        ClientTickCallback.EVENT.register(GuiHelper::onTick);
         if (getConfigHelper().checkUpdates())
-            ClientTickEvent.CLIENT.register(UpdateChecker::onTick);
+            ClientTickCallback.EVENT.register(UpdateChecker::onTick);
         
         new UpdateChecker().onInitializeClient();
     }
@@ -88,12 +88,12 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
     }
     
     private void registerFabricPackets() {
-        CustomPayloadPacketRegistry.SERVER.register(DELETE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
+        ServerSidePacketRegistry.INSTANCE.register(DELETE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
             ServerPlayerEntity player = (ServerPlayerEntity) packetContext.getPlayer();
             if (!player.inventory.getCursorStack().isEmpty())
                 player.inventory.setCursorStack(ItemStack.EMPTY);
         });
-        CustomPayloadPacketRegistry.SERVER.register(CREATE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
+        ServerSidePacketRegistry.INSTANCE.register(CREATE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
             ServerPlayerEntity player = (ServerPlayerEntity) packetContext.getPlayer();
             ItemStack stack = packetByteBuf.readItemStack();
             if (player.inventory.insertStack(stack.copy()))
