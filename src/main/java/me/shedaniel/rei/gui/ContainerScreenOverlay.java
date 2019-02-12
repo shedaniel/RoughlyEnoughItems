@@ -210,12 +210,7 @@ public class ContainerScreenOverlay extends Screen {
             }
             return new Rectangle(startX, 0, width, window.getScaledHeight());
         }
-        int width = GuiHelper.getLastMixinContainerScreen().getContainerLeft() - 6;
-        if (MinecraftClient.getInstance().currentScreen instanceof RecipeViewingWidgetScreen) {
-            RecipeViewingWidgetScreen widget = (RecipeViewingWidgetScreen) MinecraftClient.getInstance().currentScreen;
-            width = widget.getBounds().x - 6;
-        }
-        return new Rectangle(4, 0, width, window.getScaledHeight());
+        return new Rectangle(4, 0, getLeft() - 6, window.getScaledHeight());
     }
     
     private int getLeft() {
@@ -223,6 +218,8 @@ public class ContainerScreenOverlay extends Screen {
             RecipeViewingWidgetScreen widget = (RecipeViewingWidgetScreen) MinecraftClient.getInstance().currentScreen;
             return widget.getBounds().x;
         }
+        if (MinecraftClient.getInstance().player.getRecipeBook().isGuiOpen())
+            return GuiHelper.getLastMixinContainerScreen().getContainerLeft() - 147 - 30;
         return GuiHelper.getLastMixinContainerScreen().getContainerLeft();
     }
     

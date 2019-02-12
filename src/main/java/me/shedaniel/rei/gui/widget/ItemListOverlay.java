@@ -182,8 +182,8 @@ public class ItemListOverlay extends Drawable implements IWidget {
     
     private void calculateListSize(Rectangle rect) {
         int xOffset = 0, yOffset = 0;
-        this.width = 0;
-        this.height = 0;
+        width = 0;
+        height = 0;
         while (true) {
             xOffset += 18;
             if (height == 0)
