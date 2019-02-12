@@ -14,7 +14,7 @@
     },
     {
       "game": "19w06a",
-      "mod": "2.2.0.50"
+      "mod": "2.2.0.51"
     }
   ],
   "changelogs": {
@@ -33,6 +33,11 @@
         "version": "2.2.0.50",
         "text": "Updated to 19w06a",
         "level": "none"
+      },
+      {
+        "version": "2.2.0.51",
+        "text": "Fixed lots of bugs",
+        "level": "normal"
       }
     ]
   }

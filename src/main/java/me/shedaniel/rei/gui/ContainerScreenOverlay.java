@@ -251,15 +251,15 @@ public class ContainerScreenOverlay extends Screen {
     
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
+        for(GuiEventListener listener : listeners)
+            if (listener.keyPressed(int_1, int_2, int_3))
+                return true;
         if (ClientHelper.HIDE.matchesKey(int_1, int_2)) {
             GuiHelper.toggleOverlayVisible();
             return true;
         }
         if (!GuiHelper.isOverlayVisible())
             return false;
-        for(GuiEventListener listener : listeners)
-            if (listener.keyPressed(int_1, int_2, int_3))
-                return true;
         Point point = ClientHelper.getMouseLocation();
         ItemStack itemStack = null;
         for(IWidget widget : itemListOverlay.getListeners())
