@@ -1,6 +1,7 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
 import net.minecraft.client.MinecraftClient;
@@ -23,7 +24,7 @@ public class ItemSlotWidget extends Drawable implements HighlightableWidget {
     
     private static final Identifier RECIPE_GUI = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private List<ItemStack> itemList = new LinkedList<>();
-    private boolean drawBackground, showToolTips, clickToMoreRecipes;
+    private boolean drawBackground, showToolTips, clickToMoreRecipes, drawHighlightedBackground;
     private int x, y;
     
     public ItemSlotWidget(int x, int y, ItemStack itemStack, boolean drawBackground, boolean showToolTips) {
@@ -37,6 +38,11 @@ public class ItemSlotWidget extends Drawable implements HighlightableWidget {
         this.x = x;
         this.y = y;
         this.clickToMoreRecipes = false;
+        this.drawHighlightedBackground = true;
+    }
+    
+    public void setDrawHighlightedBackground(boolean drawHighlightedBackground) {
+        this.drawHighlightedBackground = drawHighlightedBackground;
     }
     
     public ItemSlotWidget(int x, int y, List<ItemStack> itemList, boolean drawBackground, boolean showToolTips, boolean clickToMoreRecipes) {
@@ -60,15 +66,24 @@ public class ItemSlotWidget extends Drawable implements HighlightableWidget {
             MinecraftClient.getInstance().getTextureManager().bindTexture(RECIPE_GUI);
             drawTexturedRect(this.x - 1, this.y - 1, 0, 222, 18, 18);
         }
-        if (itemStack.isEmpty())
-            return;
-        GuiLighting.enableForItems();
-        ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
-        itemRenderer.zOffset = 200.0F;
-        itemRenderer.renderGuiItem(itemStack, x, y);
-        itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().fontRenderer, itemStack, x, y, getItemCountOverlay(itemStack));
-        itemRenderer.zOffset = 0.0F;
-        if (isHighlighted(mouseX, mouseY) && showToolTips)
+        if (drawHighlightedBackground && isHighlighted(mouseX, mouseY)) {
+            GlStateManager.disableLighting();
+            GlStateManager.disableDepthTest();
+            GlStateManager.colorMask(true, true, true, false);
+            drawGradientRect(x, y, x + 16, y + 16, -2130706433, -2130706433);
+            GlStateManager.colorMask(true, true, true, true);
+            GlStateManager.enableLighting();
+            GlStateManager.enableDepthTest();
+        }
+        if (!itemStack.isEmpty()) {
+            GuiLighting.enableForItems();
+            ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
+            itemRenderer.zOffset = 200.0F;
+            itemRenderer.renderGuiItem(itemStack, x, y);
+            itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().fontRenderer, itemStack, x, y, getItemCountOverlay(itemStack));
+            itemRenderer.zOffset = 0.0F;
+        }
+        if (!itemStack.isEmpty() && isHighlighted(mouseX, mouseY) && showToolTips)
             drawToolTip(itemStack);
     }
     

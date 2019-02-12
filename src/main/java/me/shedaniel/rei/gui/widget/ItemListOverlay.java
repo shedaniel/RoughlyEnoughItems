@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 
 public class ItemListOverlay extends Drawable implements IWidget {
     
-    private List<IWidget> widgets = new ArrayList<>();
+    private List<IWidget> widgets;
     private int width, height, page;
     private Rectangle rectangle, listArea;
     private List<ItemStack> currentDisplayed;
@@ -50,12 +50,13 @@ public class ItemListOverlay extends Drawable implements IWidget {
     
     public void updateList(Rectangle bounds, int page, String searchTerm) {
         this.rectangle = bounds;
+        this.widgets = Lists.newLinkedList();
         if (ClientHelper.getItemList().isEmpty())
             RoughlyEnoughItemsCore.getClientHelper().clientLoaded();
         currentDisplayed = processSearchTerm(searchTerm, ClientHelper.getItemList(), GuiHelper.inventoryStacks);
-        this.widgets.clear();
         this.page = page;
         calculateListSize(rectangle);
+        System.out.println(width + ":" + height);
         double startX = rectangle.getCenterX() - width * 9;
         double startY = rectangle.getCenterY() - height * 9;
         this.listArea = new Rectangle((int) startX, (int) startY, width * 18, height * 18);
@@ -88,7 +89,7 @@ public class ItemListOverlay extends Drawable implements IWidget {
                     return false;
                 }
             };
-            if (this.rectangle.contains(slotWidget.getBounds()))
+            if (true || this.rectangle.contains(slotWidget.getBounds()))
                 widgets.add(slotWidget);
         }
     }
