@@ -11,6 +11,7 @@ import me.shedaniel.rei.gui.widget.ConfigWidget;
 import me.shedaniel.rei.gui.widget.RecipeViewingWidgetScreen;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
+import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.fabricmc.fabric.impl.client.keybinding.KeyBindingRegistryImpl;
 import net.fabricmc.loader.FabricLoader;
 import net.minecraft.client.MinecraftClient;
@@ -22,7 +23,6 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.server.network.packet.CustomPayloadServerPacket;
 import net.minecraft.util.DefaultedList;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.PacketByteBuf;
@@ -90,16 +90,13 @@ public class ClientHelper implements ClientModInitializer {
             MinecraftClient.getInstance().player.inventory.setCursorStack(ItemStack.EMPTY);
             return;
         }
-        PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-        MinecraftClient.getInstance().getNetworkHandler().sendPacket(new CustomPayloadServerPacket(RoughlyEnoughItemsCore.DELETE_ITEMS_PACKET, buf));
+        ClientSidePacketRegistry.INSTANCE.sendToServer(RoughlyEnoughItemsCore.DELETE_ITEMS_PACKET, new PacketByteBuf(Unpooled.buffer()));
     }
     
     public static boolean tryCheatingStack(ItemStack cheatedStack) {
         if (MinecraftClient.getInstance().isInSingleplayer()) {
             try {
-                PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-                buf.writeItemStack(cheatedStack.copy());
-                MinecraftClient.getInstance().getNetworkHandler().sendPacket(new CustomPayloadServerPacket(RoughlyEnoughItemsCore.CREATE_ITEMS_PACKET, buf));
+                ClientSidePacketRegistry.INSTANCE.sendToServer(RoughlyEnoughItemsCore.CREATE_ITEMS_PACKET, new PacketByteBuf(Unpooled.buffer()).writeItemStack(cheatedStack.copy()));
                 return true;
             } catch (Exception e) {
                 return false;
