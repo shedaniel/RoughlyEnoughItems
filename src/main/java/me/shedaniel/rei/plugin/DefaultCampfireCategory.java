@@ -52,7 +52,7 @@ public class DefaultCampfireCategory implements IRecipeCategory<DefaultCampfireD
                 int height = MathHelper.ceil((System.currentTimeMillis() / 250 % 14d) / 1f);
                 drawTexturedRect(startPoint.x + 2, startPoint.y + 31 + (14 - height), 82, 77 + (14 - height), 14, height);
                 int width = MathHelper.ceil((System.currentTimeMillis() / 250 % 24d) / 1f);
-                drawTexturedRect(startPoint.x + 24, startPoint.y + 19, 82, 92, width, 17);
+                drawTexturedRect(startPoint.x + 24, startPoint.y + 18, 82, 91, width, 17);
                 String text = I18n.translate("category.rei.campfire.time", MathHelper.floor(recipeDisplaySupplier.get().getCookTime() / 20d));
                 int length = MinecraftClient.getInstance().fontRenderer.getStringWidth(text);
                 MinecraftClient.getInstance().fontRenderer.draw(text, bounds.x + bounds.width - length - 5, startPoint.y + 54 - 8, -1);

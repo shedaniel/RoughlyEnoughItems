@@ -53,7 +53,7 @@ public class DefaultBlastingCategory implements IRecipeCategory<DefaultBlastingD
                 int height = MathHelper.ceil((System.currentTimeMillis() / 250 % 14d) / 1f);
                 drawTexturedRect(startPoint.x + 2, startPoint.y + 21 + (14 - height), 82, 77 + (14 - height), 14, height);
                 int width = MathHelper.ceil((System.currentTimeMillis() / 250 % 24d) / 1f);
-                drawTexturedRect(startPoint.x + 24, startPoint.y + 19, 82, 92, width, 17);
+                drawTexturedRect(startPoint.x + 24, startPoint.y + 18, 82, 91, width, 17);
             }
         }));
         List<List<ItemStack>> input = recipeDisplay.getInput();
