@@ -14,7 +14,7 @@
     },
     {
       "game": "19w06a",
-      "mod": "2.2.0.51"
+      "mod": "2.3.0.51"
     }
   ],
   "changelogs": {
@@ -35,7 +35,7 @@
         "level": "none"
       },
       {
-        "version": "2.2.0.51",
+        "version": "2.3.0.51",
         "text": "Fixed lots of bugs",
         "level": "normal"
       }
