@@ -2,6 +2,7 @@ package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.client.GuiHelper;
 import me.shedaniel.rei.client.REIItemListOrdering;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.GuiEventListener;
@@ -28,6 +29,7 @@ public class ConfigWidget extends Screen {
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (int_1 == 256 && this.doesEscapeKeyClose()) {
             MinecraftClient.getInstance().openScreen(parent);
+            GuiHelper.getLastOverlay().onInitialized();
             return true;
         } else {
             return super.keyPressed(int_1, int_2, int_3);

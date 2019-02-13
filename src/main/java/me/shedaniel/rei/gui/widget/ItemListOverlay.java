@@ -44,10 +44,6 @@ public class ItemListOverlay extends Drawable implements IWidget {
             GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.translate("text.rei.delete_items"))));
     }
     
-    public void updateList(int page, String searchTerm) {
-        updateList(rectangle, page, searchTerm);
-    }
-    
     public void updateList(Rectangle bounds, int page, String searchTerm) {
         this.rectangle = bounds;
         this.widgets = Lists.newLinkedList();
@@ -56,7 +52,6 @@ public class ItemListOverlay extends Drawable implements IWidget {
         currentDisplayed = processSearchTerm(searchTerm, ClientHelper.getItemList(), GuiHelper.inventoryStacks);
         this.page = page;
         calculateListSize(rectangle);
-        System.out.println(width + ":" + height);
         double startX = rectangle.getCenterX() - width * 9;
         double startY = rectangle.getCenterY() - height * 9;
         this.listArea = new Rectangle((int) startX, (int) startY, width * 18, height * 18);
@@ -201,19 +196,18 @@ public class ItemListOverlay extends Drawable implements IWidget {
     
     @Override
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
-        if (rectangle.contains(double_1, double_2))
+        if (rectangle.contains(double_1, double_2)) {
+            ClientPlayerEntity player = MinecraftClient.getInstance().player;
             if (ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty() && MinecraftClient.getInstance().isInSingleplayer()) {
                 ClientHelper.sendDeletePacket();
                 return true;
             }
-        if (!player.inventory.getCursorStack().isEmpty() && MinecraftClient.getInstance().isInSingleplayer())
-            return false;
-        if (onMouseClick(int_1, double_1, double_2))
-            return true;
-        for(IWidget widget : getListeners())
-            if (widget.mouseClicked(double_1, double_2, int_1))
-                return true;
+            if (!player.inventory.getCursorStack().isEmpty() && MinecraftClient.getInstance().isInSingleplayer())
+                return false;
+            for(IWidget widget : getListeners())
+                if (widget.mouseClicked(double_1, double_2, int_1))
+                    return true;
+        }
         return false;
     }
     

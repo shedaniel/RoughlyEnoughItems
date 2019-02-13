@@ -7,9 +7,7 @@ import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
 import me.shedaniel.rei.gui.widget.*;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.ContainerScreen;
-import net.minecraft.client.gui.GuiEventListener;
-import net.minecraft.client.gui.Screen;
+import net.minecraft.client.gui.*;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.Window;
@@ -22,7 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ContainerScreenOverlay extends Screen {
+public class ContainerScreenOverlay extends DrawableContainer {
     
     private static final List<QueuedTooltip> QUEUED_TOOLTIPS = Lists.newArrayList();
     public static String searchTerm = "";
@@ -101,7 +99,7 @@ public class ContainerScreenOverlay extends Screen {
             };
         GuiHelper.searchField.setChangedListener(s -> {
             searchTerm = s;
-            itemListOverlay.updateList(page, searchTerm);
+            itemListOverlay.updateList(getItemListArea(), page, searchTerm);
         });
         GuiHelper.searchField.setBounds(getTextFieldArea());
         this.widgets.add(GuiHelper.searchField);
@@ -111,12 +109,11 @@ public class ContainerScreenOverlay extends Screen {
                 @Override
                 public void onPressed(int button, double mouseX, double mouseY) {
                     RoughlyEnoughItemsCore.getConfigHelper().toggleCraftableOnly();
-                    itemListOverlay.updateList(page, searchTerm);
+                    itemListOverlay.updateList(getItemListArea(), page, searchTerm);
                 }
             });
         
         this.itemListOverlay.updateList(getItemListArea(), page, searchTerm);
-        this.listeners.addAll(widgets);
     }
     
     private Rectangle getTextFieldArea() {
@@ -127,7 +124,7 @@ public class ContainerScreenOverlay extends Screen {
             RecipeViewingWidgetScreen widget = (RecipeViewingWidgetScreen) MinecraftClient.getInstance().currentScreen;
             return new Rectangle(widget.getBounds().x, window.getScaledHeight() - 22, widget.getBounds().width - widthRemoved, 18);
         }
-        return new Rectangle(GuiHelper.getLastMixinContainerScreen().getContainerLeft(), window.getScaledHeight() - 22, GuiHelper.getLastMixinContainerScreen().getContainerWidth() - widthRemoved, 18);
+        return new Rectangle(GuiHelper.getLastMixinContainerScreen().rei_getContainerLeft(), window.getScaledHeight() - 22, GuiHelper.getLastMixinContainerScreen().rei_getContainerWidth() - widthRemoved, 18);
     }
     
     private Rectangle getCraftableToggleArea() {
@@ -149,13 +146,13 @@ public class ContainerScreenOverlay extends Screen {
         return rectangle;
     }
     
-    public void render(int mouseX, int mouseY, float partialTicks) {
+    public void drawOverlay(int mouseX, int mouseY, float partialTicks) {
         List<ItemStack> currentStacks = ClientHelper.getInventoryItemsTypes();
         if (getLeft() != lastLeft)
             onInitialized();
         else if (RoughlyEnoughItemsCore.getConfigHelper().craftableOnly() && (!hasSameListContent(new LinkedList<>(GuiHelper.inventoryStacks), currentStacks) || (currentStacks.size() != GuiHelper.inventoryStacks.size()))) {
             GuiHelper.inventoryStacks = ClientHelper.getInventoryItemsTypes();
-            itemListOverlay.updateList(page, searchTerm);
+            itemListOverlay.updateList(getItemListArea(), page, searchTerm);
         }
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GuiLighting.disable();
@@ -185,7 +182,6 @@ public class ContainerScreenOverlay extends Screen {
         QUEUED_TOOLTIPS.add(queuedTooltip);
     }
     
-    @Override
     public void draw(int int_1, int int_2, float float_1) {
         if (!GuiHelper.isOverlayVisible())
             return;
@@ -194,14 +190,11 @@ public class ContainerScreenOverlay extends Screen {
             widget.draw(int_1, int_2, float_1);
         });
         GuiLighting.disable();
-        itemListOverlay.draw(int_1, int_2, float_1);
-        GuiLighting.disable();
-        super.draw(int_1, int_2, float_1);
     }
     
     private Rectangle calculateBoundary() {
         if (!RoughlyEnoughItemsCore.getConfigHelper().isMirrorItemPanel()) {
-            int startX = GuiHelper.getLastMixinContainerScreen().getContainerLeft() + GuiHelper.getLastMixinContainerScreen().getContainerWidth() + 10;
+            int startX = GuiHelper.getLastMixinContainerScreen().rei_getContainerLeft() + GuiHelper.getLastMixinContainerScreen().rei_getContainerWidth() + 10;
             int width = window.getScaledWidth() - startX;
             if (MinecraftClient.getInstance().currentScreen instanceof RecipeViewingWidgetScreen) {
                 RecipeViewingWidgetScreen widget = (RecipeViewingWidgetScreen) MinecraftClient.getInstance().currentScreen;
@@ -219,8 +212,8 @@ public class ContainerScreenOverlay extends Screen {
             return widget.getBounds().x;
         }
         if (MinecraftClient.getInstance().player.getRecipeBook().isGuiOpen())
-            return GuiHelper.getLastMixinContainerScreen().getContainerLeft() - 147 - 30;
-        return GuiHelper.getLastMixinContainerScreen().getContainerLeft();
+            return GuiHelper.getLastMixinContainerScreen().rei_getContainerLeft() - 147 - 30;
+        return GuiHelper.getLastMixinContainerScreen().rei_getContainerLeft();
     }
     
     private int getTotalPage() {
@@ -248,7 +241,7 @@ public class ContainerScreenOverlay extends Screen {
     
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
-        for(GuiEventListener listener : listeners)
+        for(GuiEventListener listener : widgets)
             if (listener.keyPressed(int_1, int_2, int_3))
                 return true;
         if (ClientHelper.HIDE.matchesKey(int_1, int_2)) {
@@ -273,8 +266,8 @@ public class ContainerScreenOverlay extends Screen {
                 }
         }
         if (itemStack == null && MinecraftClient.getInstance().currentScreen instanceof ContainerScreen)
-            if (GuiHelper.getLastMixinContainerScreen().getHoveredSlot() != null)
-                itemStack = GuiHelper.getLastMixinContainerScreen().getHoveredSlot().getStack();
+            if (GuiHelper.getLastMixinContainerScreen().rei_getHoveredSlot() != null)
+                itemStack = GuiHelper.getLastMixinContainerScreen().rei_getHoveredSlot().getStack();
         if (itemStack != null && !itemStack.isEmpty()) {
             if (ClientHelper.RECIPE.matchesKey(int_1, int_2))
                 return ClientHelper.executeRecipeKeyBind(this, itemStack);
@@ -288,10 +281,15 @@ public class ContainerScreenOverlay extends Screen {
     public boolean charTyped(char char_1, int int_1) {
         if (!GuiHelper.isOverlayVisible())
             return false;
-        for(GuiEventListener listener : listeners)
+        for(GuiEventListener listener : getEntries())
             if (listener.charTyped(char_1, int_1))
                 return true;
         return super.charTyped(char_1, int_1);
+    }
+    
+    @Override
+    protected List<? extends GuiEventListener> getEntries() {
+        return widgets;
     }
     
     @Override
