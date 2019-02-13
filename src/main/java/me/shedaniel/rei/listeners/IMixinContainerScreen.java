@@ -1,6 +1,5 @@
 package me.shedaniel.rei.listeners;
 
-import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import net.minecraft.container.Slot;
 import net.minecraft.item.ItemStack;
 
