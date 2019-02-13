@@ -21,13 +21,12 @@ public abstract class CraftableToggleButtonWidget extends ButtonWidget {
     private ItemRenderer itemRenderer;
     
     public CraftableToggleButtonWidget(Rectangle rectangle) {
-        this(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+        super(rectangle, "");
         this.itemRenderer = MinecraftClient.getInstance().getItemRenderer();
     }
     
     public CraftableToggleButtonWidget(int x, int y, int width, int height) {
-        super(x, y, width, height, "");
-        this.itemRenderer = MinecraftClient.getInstance().getItemRenderer();
+        this(new Rectangle(x, y, width, height));
     }
     
     @Override
@@ -36,13 +35,13 @@ public abstract class CraftableToggleButtonWidget extends ButtonWidget {
         
         GuiLighting.enableForItems();
         this.itemRenderer.zOffset = 0.0F;
-        this.itemRenderer.renderGuiItem(new ItemStack(Blocks.CRAFTING_TABLE), x + 2, y + 2);
+        this.itemRenderer.renderGuiItem(new ItemStack(Blocks.CRAFTING_TABLE), getBounds().x + 2, getBounds().y + 2);
         this.itemRenderer.zOffset = 0.0F;
         GuiLighting.disable();
         MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.zOffset = 100f;
-        this.drawTexturedRect(x, y, (56 + (RoughlyEnoughItemsCore.getConfigHelper().craftableOnly() ? 0 : 20)), 202, 20, 20);
+        this.drawTexturedRect(getBounds().x, getBounds().y, (56 + (RoughlyEnoughItemsCore.getConfigHelper().craftableOnly() ? 0 : 20)), 202, 20, 20);
         this.zOffset = 0f;
         if (getBounds().contains(mouseX, mouseY))
             drawTooltip();

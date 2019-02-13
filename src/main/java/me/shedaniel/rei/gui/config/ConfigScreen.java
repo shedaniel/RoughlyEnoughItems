@@ -1,30 +1,25 @@
 package me.shedaniel.rei.gui.config;
 
-import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.GuiHelper;
 import me.shedaniel.rei.client.REIItemListOrdering;
-import me.shedaniel.rei.gui.widget.ButtonWidget;
-import me.shedaniel.rei.gui.widget.IWidget;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.GuiEventListener;
 import net.minecraft.client.gui.Screen;
-import net.minecraft.client.render.GuiLighting;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.util.Window;
+import net.minecraft.text.TranslatableTextComponent;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 
 public class ConfigScreen extends Screen {
     
-    private List<IWidget> widgets;
     private Screen parent;
+    private ConfigEntryListWidget entryListWidget;
     
     public ConfigScreen(Screen parent) {
         this.parent = parent;
-        this.widgets = Lists.newArrayList();
     }
     
     @Override
@@ -40,10 +35,9 @@ public class ConfigScreen extends Screen {
     
     @Override
     protected void onInitialized() {
-        super.onInitialized();
-        widgets.clear();
-        Window window = MinecraftClient.getInstance().window;
-        widgets.add(new ButtonWidget(window.getScaledWidth() / 2 - 20, 30, 40, 20, "") {
+        listeners.add(entryListWidget = new ConfigEntryListWidget(client, width, height, 32, height - 32, 24));
+        entryListWidget.configClearEntries();
+        entryListWidget.configAddEntry(new ConfigEntry(new TranslatableTextComponent("text.rei.side_searchbox"), new ConfigEntry.ConfigEntryButtonProvider() {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
                 if (button == 0)
@@ -56,15 +50,11 @@ public class ConfigScreen extends Screen {
             }
             
             @Override
-            public void draw(int mouseX, int mouseY, float partialTicks) {
-                text = getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().sideSearchField());
-                String t = I18n.translate("text.rei.side_searchbox");
-                int width = fontRenderer.getStringWidth(t);
-                fontRenderer.drawWithShadow(t, this.x - width - 10, this.y + (this.height - 8) / 2, -1);
-                super.draw(mouseX, mouseY, partialTicks);
+            public String getText() {
+                return getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().sideSearchField());
             }
-        });
-        widgets.add(new ButtonWidget(window.getScaledWidth() / 2 - 20, 60, 40, 20, "") {
+        }));
+        entryListWidget.configAddEntry(new ConfigEntry(new TranslatableTextComponent("text.rei.enable_craftable_only"), new ConfigEntry.ConfigEntryButtonProvider() {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
                 if (button == 0)
@@ -77,15 +67,11 @@ public class ConfigScreen extends Screen {
             }
             
             @Override
-            public void draw(int mouseX, int mouseY, float partialTicks) {
-                text = getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().showCraftableOnlyButton());
-                String t = I18n.translate("text.rei.enable_craftable_only");
-                int width = fontRenderer.getStringWidth(t);
-                fontRenderer.drawWithShadow(t, this.x - width - 10, this.y + (this.height - 8) / 2, -1);
-                super.draw(mouseX, mouseY, partialTicks);
+            public String getText() {
+                return getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().showCraftableOnlyButton());
             }
-        });
-        widgets.add(new ButtonWidget(window.getScaledWidth() / 2 - 90, 90, 150, 20, "") {
+        }));
+        entryListWidget.configAddEntry(new ConfigEntry(new TranslatableTextComponent("text.rei.list_ordering"), new ConfigEntry.ConfigEntryButtonProvider() {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
                 int index = Arrays.asList(REIItemListOrdering.values()).indexOf(RoughlyEnoughItemsCore.getConfigHelper().getItemListOrdering()) + 1;
@@ -102,15 +88,11 @@ public class ConfigScreen extends Screen {
             }
             
             @Override
-            public void draw(int int_1, int int_2, float float_1) {
-                GuiLighting.disable();
-                this.text = I18n.translate("text.rei.list_ordering_button", I18n.translate(RoughlyEnoughItemsCore.getConfigHelper().getItemListOrdering().getNameTranslationKey()), I18n.translate(RoughlyEnoughItemsCore.getConfigHelper().isAscending() ? "ordering.rei.ascending" : "ordering.rei.descending"));
-                String t = I18n.translate("text.rei.list_ordering") + ": ";
-                drawString(MinecraftClient.getInstance().fontRenderer, t, parent.width / 2 - 95 - MinecraftClient.getInstance().fontRenderer.getStringWidth(t), 90 + 6, -1);
-                super.draw(int_1, int_2, float_1);
+            public String getText() {
+                return I18n.translate("text.rei.list_ordering_button", I18n.translate(RoughlyEnoughItemsCore.getConfigHelper().getItemListOrdering().getNameTranslationKey()), I18n.translate(RoughlyEnoughItemsCore.getConfigHelper().isAscending() ? "ordering.rei.ascending" : "ordering.rei.descending"));
             }
-        });
-        widgets.add(new ButtonWidget(window.getScaledWidth() / 2 - 20, 120, 40, 20, "") {
+        }));
+        entryListWidget.configAddEntry(new ConfigEntry(new TranslatableTextComponent("text.rei.mirror_rei"), new ConfigEntry.ConfigEntryButtonProvider() {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
                 if (button == 0)
@@ -123,15 +105,11 @@ public class ConfigScreen extends Screen {
             }
             
             @Override
-            public void draw(int mouseX, int mouseY, float partialTicks) {
-                text = getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().isMirrorItemPanel());
-                String t = I18n.translate("text.rei.mirror_rei");
-                int width = fontRenderer.getStringWidth(t);
-                fontRenderer.drawWithShadow(t, this.x - width - 10, this.y + (this.height - 8) / 2, -1);
-                super.draw(mouseX, mouseY, partialTicks);
+            public String getText() {
+                return getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().isMirrorItemPanel());
             }
-        });
-        widgets.add(new ButtonWidget(window.getScaledWidth() / 2 - 20, 150, 40, 20, "") {
+        }));
+        entryListWidget.configAddEntry(new ConfigEntry(new TranslatableTextComponent("text.rei.check_updates"), new ConfigEntry.ConfigEntryButtonProvider() {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
                 if (button == 0)
@@ -144,14 +122,23 @@ public class ConfigScreen extends Screen {
             }
             
             @Override
-            public void draw(int mouseX, int mouseY, float partialTicks) {
-                text = getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().checkUpdates());
-                String t = I18n.translate("text.rei.check_updates");
-                int width = fontRenderer.getStringWidth(t);
-                fontRenderer.drawWithShadow(t, this.x - width - 10, this.y + (this.height - 8) / 2, -1);
-                super.draw(mouseX, mouseY, partialTicks);
+            public String getText() {
+                return getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().checkUpdates());
+            }
+        }));
+        addButton(new ButtonWidget(0, width / 2 - 100, height - 26, I18n.translate("gui.done")) {
+            @Override
+            public void onPressed(double double_1, double double_2) {
+                try {
+                    RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                ConfigScreen.this.client.openScreen(parent);
+                GuiHelper.getLastOverlay().onInitialized();
             }
         });
+        super.onInitialized();
     }
     
     private String getTrueFalseText(boolean showCraftableOnlyButton) {
@@ -160,12 +147,10 @@ public class ConfigScreen extends Screen {
     
     @Override
     public void draw(int int_1, int int_2, float float_1) {
-        drawBackground(0);
+        this.drawTextureBackground(0);
+        this.entryListWidget.draw(int_1, int_2, float_1);
+        this.drawStringCentered(this.fontRenderer, I18n.translate("text.rei.config"), this.width / 2, 16, 16777215);
         super.draw(int_1, int_2, float_1);
-        widgets.forEach(widget -> {
-            GuiLighting.disable();
-            widget.draw(int_1, int_2, float_1);
-        });
     }
     
     @Override
@@ -174,8 +159,8 @@ public class ConfigScreen extends Screen {
     }
     
     @Override
-    public List<? extends GuiEventListener> getEntries() {
-        return widgets;
+    public GuiEventListener getFocused() {
+        return entryListWidget;
     }
     
 }
