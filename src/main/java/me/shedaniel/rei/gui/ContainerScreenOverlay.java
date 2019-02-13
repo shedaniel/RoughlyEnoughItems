@@ -5,6 +5,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
+import me.shedaniel.rei.gui.credits.CreditsScreen;
 import me.shedaniel.rei.gui.widget.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ContainerScreen;
@@ -80,7 +81,13 @@ public class ContainerScreenOverlay extends DrawableContainer {
                 ClientHelper.openConfigWindow(GuiHelper.getLastContainerScreen());
             }
         });
-        this.widgets.add(new LabelWidget(rectangle.x + (rectangle.width / 2), rectangle.y + 10, "") {
+        widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigHelper().isMirrorItemPanel() ? window.getScaledWidth() - 50 : 10, window.getScaledHeight() - 30, 40, 20, I18n.translate("text.rei.credits")) {
+            @Override
+            public void onPressed(int button, double mouseX, double mouseY) {
+                MinecraftClient.getInstance().openScreen(new CreditsScreen(GuiHelper.getLastContainerScreen()));
+            }
+        });
+        widgets.add(new LabelWidget(rectangle.x + (rectangle.width / 2), rectangle.y + 10, "") {
             @Override
             public void draw(int mouseX, int mouseY, float partialTicks) {
                 page = MathHelper.clamp(page, 0, getTotalPage());

@@ -26,12 +26,16 @@ public class GuiHelper {
         overlayVisible = !overlayVisible;
     }
     
-    public static ContainerScreenOverlay getLastOverlay() {
-        if (overlay == null) {
+    public static ContainerScreenOverlay getLastOverlay(boolean reset) {
+        if (overlay == null || reset) {
             overlay = new ContainerScreenOverlay();
             overlay.onInitialized();
         }
         return overlay;
+    }
+    
+    public static ContainerScreenOverlay getLastOverlay() {
+        return getLastOverlay(false);
     }
     
     public static void onTick(MinecraftClient client) {

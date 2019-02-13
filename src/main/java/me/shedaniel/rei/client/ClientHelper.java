@@ -7,13 +7,13 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.IRecipeCategory;
 import me.shedaniel.rei.api.IRecipeDisplay;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
-import me.shedaniel.rei.gui.widget.ConfigWidget;
+import me.shedaniel.rei.gui.config.ConfigScreen;
 import me.shedaniel.rei.gui.widget.RecipeViewingWidgetScreen;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.fabricmc.fabric.impl.client.keybinding.KeyBindingRegistryImpl;
-import net.fabricmc.loader.FabricLoader;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.gui.Screen;
@@ -54,7 +54,7 @@ public class ClientHelper implements ClientModInitializer {
             String modid = location.getNamespace();
             if (modid.equalsIgnoreCase("minecraft"))
                 return "Minecraft";
-            return FabricLoader.INSTANCE.getModContainers().stream().map(modContainer -> {
+            return ((net.fabricmc.loader.FabricLoader) FabricLoader.getInstance()).getModContainers().stream().map(modContainer -> {
                 return modContainer.getInfo();
             }).filter(modInfo -> modInfo.getId().equals(modid) || (modInfo.getName() != null && modInfo.getName().equals(modid))).findFirst().map(modInfo -> {
                 if (modInfo.getName() != null)
@@ -127,7 +127,7 @@ public class ClientHelper implements ClientModInitializer {
     }
     
     public static void openConfigWindow(Screen parent) {
-        MinecraftClient.getInstance().openScreen(new ConfigWidget(parent));
+        MinecraftClient.getInstance().openScreen(new ConfigScreen(parent));
     }
     
     public static List<ItemStack> getInventoryItemsTypes() {

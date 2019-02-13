@@ -59,7 +59,7 @@ public class MixinContainerScreen extends Screen implements IMixinContainerScree
     @Inject(method = "onInitialized()V", at = @At("RETURN"))
     protected void onInitialized(CallbackInfo info) {
         GuiHelper.setLastContainerScreen((ContainerScreen) (Object) this);
-        this.listeners.add(GuiHelper.getLastOverlay());
+        this.listeners.add(GuiHelper.getLastOverlay(true));
     }
     
     @Inject(method = "draw(IIF)V", at = @At("RETURN"))

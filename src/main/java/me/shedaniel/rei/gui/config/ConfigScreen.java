@@ -1,9 +1,11 @@
-package me.shedaniel.rei.gui.widget;
+package me.shedaniel.rei.gui.config;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.GuiHelper;
 import me.shedaniel.rei.client.REIItemListOrdering;
+import me.shedaniel.rei.gui.widget.ButtonWidget;
+import me.shedaniel.rei.gui.widget.IWidget;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.GuiEventListener;
 import net.minecraft.client.gui.Screen;
@@ -15,12 +17,12 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-public class ConfigWidget extends Screen {
+public class ConfigScreen extends Screen {
     
     private List<IWidget> widgets;
     private Screen parent;
     
-    public ConfigWidget(Screen parent) {
+    public ConfigScreen(Screen parent) {
         this.parent = parent;
         this.widgets = Lists.newArrayList();
     }
