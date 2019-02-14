@@ -47,7 +47,7 @@ public class ItemListOverlay extends Drawable implements IWidget {
     public void updateList(Rectangle bounds, int page, String searchTerm) {
         this.rectangle = bounds;
         this.widgets = Lists.newLinkedList();
-        currentDisplayed = processSearchTerm(searchTerm, ClientHelper.getInstance().getItemList(), GuiHelper.inventoryStacks);
+        currentDisplayed = processSearchTerm(searchTerm, RoughlyEnoughItemsCore.getItemRegisterer().getItemList(), GuiHelper.inventoryStacks);
         this.page = page;
         calculateListSize(rectangle);
         double startX = rectangle.getCenterX() - width * 9;

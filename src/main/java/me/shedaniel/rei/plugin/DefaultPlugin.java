@@ -1,11 +1,10 @@
 package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Lists;
+import me.shedaniel.rei.api.IItemRegisterer;
 import me.shedaniel.rei.api.IPluginDisabler;
 import me.shedaniel.rei.api.IRecipePlugin;
-import me.shedaniel.rei.api.PluginFunction;
 import me.shedaniel.rei.api.SpeedCraftFunctional;
-import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.RecipeHelper;
 import me.shedaniel.rei.listeners.IMixinRecipeBookGui;
 import net.minecraft.client.MinecraftClient;
@@ -57,11 +56,11 @@ public class DefaultPlugin implements IRecipePlugin {
     }
     
     @Override
-    public void registerItems(ClientHelper clientHelper) {
+    public void registerItems(IItemRegisterer itemRegisterer) {
         Registry.ITEM.stream().forEach(item -> {
-            clientHelper.registerItemStack(item.getDefaultStack());
+            itemRegisterer.registerItemStack(item.getDefaultStack());
             try {
-                clientHelper.registerItemStack(clientHelper.getAllStacksFromItem(item));
+                itemRegisterer.registerItemStack(itemRegisterer.getAllStacksFromItem(item));
             } catch (Exception e) {
             }
         });
@@ -71,7 +70,7 @@ public class DefaultPlugin implements IRecipePlugin {
                 map.put(enchantment, i);
                 ItemStack itemStack = new ItemStack(Items.ENCHANTED_BOOK);
                 EnchantmentHelper.set(map, itemStack);
-                clientHelper.registerItemStack(Items.ENCHANTED_BOOK, itemStack);
+                itemRegisterer.registerItemStack(Items.ENCHANTED_BOOK, itemStack);
             }
         });
     }

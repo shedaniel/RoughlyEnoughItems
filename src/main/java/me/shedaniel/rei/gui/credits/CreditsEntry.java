@@ -1,7 +1,6 @@
 package me.shedaniel.rei.gui.credits;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.widget.EntryListWidget;
 import net.minecraft.text.TextComponent;
 

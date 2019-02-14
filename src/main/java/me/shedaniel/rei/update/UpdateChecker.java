@@ -16,7 +16,6 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringBufferInputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -106,6 +105,7 @@ public class UpdateChecker implements ClientModInitializer {
         return versions;
     }
     
+    @SuppressWarnings("deprecation")
     @Override
     public void onInitializeClient() {
         if (!checkUpdates())
@@ -131,12 +131,13 @@ public class UpdateChecker implements ClientModInitializer {
             latestForGame = new Version("0.0.0");
     }
     
+    @SuppressWarnings("deprecation")
     private InputStream downloadVersionString() {
         try {
             URL versionUrl = new URL(VERSION_STRING);
             return versionUrl.openStream();
         } catch (IOException e) {
-            return new StringBufferInputStream("{}");
+            return new java.io.StringBufferInputStream("{}");
         }
     }
     
