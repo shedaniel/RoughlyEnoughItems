@@ -78,12 +78,13 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
     @SuppressWarnings("deprecation")
     @Override
     public void onInitializeClient() {
+        configHelper = new ConfigHelper();
+        
         // If pluginloader is not installed, base functionality should still remain
         if (!FabricLoader.INSTANCE.getModContainers().stream().map(modContainer -> modContainer.getInfo().getId()).anyMatch(s -> s.equalsIgnoreCase("pluginloader"))) {
             RoughlyEnoughItemsCore.LOGGER.warn("REI: Plugin Loader is not loaded! Please consider installing https://minecraft.curseforge.com/projects/pluginloader for REI plugin compatibility!");
             registerPlugin(new Identifier("roughlyenoughitems", "default_plugin"), new DefaultPlugin());
         }
-        configHelper = new ConfigHelper();
         
         ClientTickCallback.EVENT.register(GuiHelper::onTick);
         if (getConfigHelper().checkUpdates())

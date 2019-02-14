@@ -20,6 +20,7 @@ public class ConfigHelper {
         this.craftableOnly = false;
         try {
             loadConfig();
+            RoughlyEnoughItemsCore.LOGGER.info("REI: Config is loaded.");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -117,6 +118,14 @@ public class ConfigHelper {
     
     public void setMirrorItemPanel(boolean mirrorItemPanel) {
         config.mirrorItemPanel = mirrorItemPanel;
+    }
+    
+    public boolean isLoadingDefaultPlugin() {
+        return config.loadDefaultPlugin;
+    }
+    
+    public void setLoadingDefaultPlugin(boolean loadDefaultPlugin) {
+        config.loadDefaultPlugin = loadDefaultPlugin;
     }
     
 }

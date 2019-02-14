@@ -1,10 +1,8 @@
 package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.rei.api.IItemRegisterer;
-import me.shedaniel.rei.api.IPluginDisabler;
-import me.shedaniel.rei.api.IRecipePlugin;
-import me.shedaniel.rei.api.SpeedCraftFunctional;
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.RecipeHelper;
 import me.shedaniel.rei.listeners.IMixinRecipeBookGui;
 import net.minecraft.client.MinecraftClient;
@@ -51,8 +49,12 @@ public class DefaultPlugin implements IRecipePlugin {
     
     @Override
     public void onFirstLoad(IPluginDisabler pluginDisabler) {
-        // This following line disables the register items for the plugin
-        //pluginDisabler.disablePluginFunction(new Identifier("roughlyenoughitems", "default_plugin"), PluginFunction.REGISTER_ITEMS);
+        if (!RoughlyEnoughItemsCore.getConfigHelper().isLoadingDefaultPlugin()) {
+            pluginDisabler.disablePluginFunction(new Identifier("roughlyenoughitems", "default_plugin"), PluginFunction.REGISTER_ITEMS);
+            pluginDisabler.disablePluginFunction(new Identifier("roughlyenoughitems", "default_plugin"), PluginFunction.REGISTER_CATEGORIES);
+            pluginDisabler.disablePluginFunction(new Identifier("roughlyenoughitems", "default_plugin"), PluginFunction.REGISTER_RECIPE_DISPLAYS);
+            pluginDisabler.disablePluginFunction(new Identifier("roughlyenoughitems", "default_plugin"), PluginFunction.REGISTER_SPEED_CRAFT);
+        }
     }
     
     @Override

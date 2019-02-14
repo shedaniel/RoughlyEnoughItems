@@ -45,7 +45,7 @@ public class ConfigEntry extends EntryListWidget.Entry<ConfigEntry> {
         MinecraftClient.getInstance().fontRenderer.drawWithShadow(nameComponent.getFormattedText(), x + 5, y + 5, -1);
         this.buttonWidget.text = buttonProvider.getText();
         this.buttonWidget.getBounds().setLocation(window.getScaledWidth() - 190, y + 2);
-        this.buttonWidget.draw(mouse.x, mouse.y, delta);
+        buttonProvider.draw(buttonWidget, mouse, delta);
     }
     
     @Override
@@ -60,6 +60,10 @@ public class ConfigEntry extends EntryListWidget.Entry<ConfigEntry> {
         public boolean onPressed(int button, double mouseX, double mouseY);
         
         public String getText();
+        
+        default public void draw(ButtonWidget button, Point mouse, float delta) {
+            button.draw(mouse.x, mouse.y, delta);
+        }
         
     }
     

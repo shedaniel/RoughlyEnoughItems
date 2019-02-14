@@ -7,9 +7,11 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.GuiEventListener;
 import net.minecraft.client.gui.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.TranslatableTextComponent;
 
+import java.awt.*;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -134,6 +136,35 @@ public class ConfigScreen extends Screen {
             @Override
             public String getText() {
                 return getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().checkUpdates());
+            }
+        }));
+        entryListWidget.configAddEntry(new ConfigEntry(new TranslatableTextComponent("text.rei.load_default_plugin"), new ConfigEntry.ConfigEntryButtonProvider() {
+            @Override
+            public boolean onPressed(int button, double mouseX, double mouseY) {
+                if (button == 0)
+                    RoughlyEnoughItemsCore.getConfigHelper().setLoadingDefaultPlugin(!RoughlyEnoughItemsCore.getConfigHelper().isLoadingDefaultPlugin());
+                try {
+                    RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return false;
+                }
+                return true;
+            }
+            
+            @Override
+            public String getText() {
+                return getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().isLoadingDefaultPlugin());
+            }
+            
+            @Override
+            public void draw(me.shedaniel.rei.gui.widget.ButtonWidget button, Point mouse, float delta) {
+                button.draw(mouse.x, mouse.y, delta);
+                if (button.getBounds().contains(mouse)) {
+                    GuiLighting.disable();
+                    drawTooltip(Arrays.asList(I18n.translate("text.rei.load_default_plugin.restart_tooltip").split("\n")), mouse.x, mouse.y);
+                    GuiLighting.disable();
+                }
             }
         }));
         addButton(new ButtonWidget(0, width / 2 - 100, height - 26, I18n.translate("gui.done")) {
