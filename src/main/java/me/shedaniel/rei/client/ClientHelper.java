@@ -18,8 +18,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.gui.Screen;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -29,10 +27,9 @@ import net.minecraft.util.PacketByteBuf;
 import net.minecraft.util.registry.Registry;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ClientHelper implements ClientModInitializer {
     
@@ -40,11 +37,15 @@ public class ClientHelper implements ClientModInitializer {
     private static final Identifier USAGE_KEYBIND = new Identifier("roughlyenoughitems", "usage_keybind");
     private static final Identifier HIDE_KEYBIND = new Identifier("roughlyenoughitems", "hide_keybind");
     public static FabricKeyBinding RECIPE, USAGE, HIDE;
-    private static List<ItemStack> itemList;
     private static boolean cheating;
+    private final List<ItemStack> itemList;
     
     public ClientHelper() {
         this.itemList = Lists.newLinkedList();
+    }
+    
+    public static ClientHelper getInstance() {
+        return RoughlyEnoughItemsCore.getClientHelper();
     }
     
     public static String getModFromItemStack(ItemStack stack) {
@@ -63,10 +64,6 @@ public class ClientHelper implements ClientModInitializer {
             }).orElse(modid);
         }
         return "";
-    }
-    
-    public static List<ItemStack> getItemList() {
-        return itemList;
     }
     
     public static Point getMouseLocation() {
@@ -140,32 +137,49 @@ public class ClientHelper implements ClientModInitializer {
         return inventoryStacks;
     }
     
-    public void clientLoaded() {
-        Registry.ITEM.forEach(item -> {
-            if (!item.equals(Items.ENCHANTED_BOOK))
-                registerItem(item);
-        });
-        Registry.ENCHANTMENT.forEach(enchantment -> {
-            for(int i = enchantment.getMinimumLevel(); i < enchantment.getMaximumLevel(); i++) {
-                Map<Enchantment, Integer> map = new HashMap<>();
-                map.put(enchantment, i);
-                ItemStack itemStack = new ItemStack(Items.ENCHANTED_BOOK);
-                EnchantmentHelper.set(map, itemStack);
-                registerItemStack(itemStack);
-            }
-        });
+    public List<ItemStack> getItemList() {
+        return Collections.unmodifiableList(itemList);
     }
     
-    public void registerItem(Item item) {
-        registerItemStack(item.getDefaultStack());
+    @Deprecated
+    public List<ItemStack> getModifiableItemList() {
+        return itemList;
+    }
+    
+    public ItemStack[] getAllStacksFromItem(Item item) {
+        List<ItemStack> list = Lists.newLinkedList();
+        list.add(item.getDefaultStack());
         DefaultedList<ItemStack> stacks = DefaultedList.create();
         item.addStacksForDisplay(item.getItemGroup(), stacks);
-        stacks.forEach(this::registerItemStack);
+        stacks.forEach(list::add);
+        TreeSet<ItemStack> stackSet = list.stream().collect(Collectors.toCollection(() -> new TreeSet<ItemStack>((p1, p2) -> ItemStack.areEqual(p1, p2) ? 0 : 1)));
+        RoughlyEnoughItemsCore.LOGGER.info("size is " + stackSet.size());
+        return Lists.newArrayList(stackSet).toArray(new ItemStack[0]);
     }
     
-    public void registerItemStack(ItemStack stack) {
-        if (!stack.getItem().equals(Items.AIR) && !alreadyContain(stack))
-            itemList.add(stack);
+    public void registerItemStack(Item afterItem, ItemStack stack) {
+        if (!stack.isEmpty() && !itemList.stream().anyMatch(stack1 -> ItemStack.areEqual(stack, stack1)))
+            if (afterItem == null || afterItem.equals(Items.AIR))
+                itemList.add(stack);
+            else {
+                int last = itemList.size();
+                for(int i = 0; i < itemList.size(); i++)
+                    if (itemList.get(i).getItem().equals(afterItem))
+                        last = i + 1;
+                itemList.add(last, stack);
+            }
+    }
+    
+    public void registerItemStack(Item afterItem, ItemStack... stacks) {
+        for(ItemStack stack : stacks)
+            if (stack != null && !stack.isEmpty())
+                registerItemStack(afterItem, stack);
+    }
+    
+    public void registerItemStack(ItemStack... stacks) {
+        for(ItemStack stack : stacks)
+            if (stack != null && !stack.isEmpty())
+                registerItemStack(null, stack);
     }
     
     private boolean alreadyContain(ItemStack stack) {

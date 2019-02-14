@@ -1,9 +1,12 @@
 package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.api.IPluginDisabler;
 import me.shedaniel.rei.api.IRecipePlugin;
+import me.shedaniel.rei.api.PluginFunction;
 import me.shedaniel.rei.api.SpeedCraftFunctional;
+import me.shedaniel.rei.client.ClientHelper;
+import me.shedaniel.rei.client.RecipeHelper;
 import me.shedaniel.rei.listeners.IMixinRecipeBookGui;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Screen;
@@ -12,6 +15,10 @@ import net.minecraft.client.gui.container.CraftingTableScreen;
 import net.minecraft.client.gui.container.FurnaceScreen;
 import net.minecraft.client.gui.container.SmokerScreen;
 import net.minecraft.client.gui.ingame.PlayerInventoryScreen;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.StonecuttingRecipe;
 import net.minecraft.recipe.cooking.BlastingRecipe;
@@ -21,8 +28,11 @@ import net.minecraft.recipe.cooking.SmokingRecipe;
 import net.minecraft.recipe.crafting.ShapedRecipe;
 import net.minecraft.recipe.crafting.ShapelessRecipe;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DefaultPlugin implements IRecipePlugin {
     
@@ -41,42 +51,68 @@ public class DefaultPlugin implements IRecipePlugin {
     }
     
     @Override
-    public void registerPluginCategories() {
-        RoughlyEnoughItemsCore.getRecipeHelper().registerCategory(new DefaultCraftingCategory());
-        RoughlyEnoughItemsCore.getRecipeHelper().registerCategory(new DefaultSmeltingCategory());
-        RoughlyEnoughItemsCore.getRecipeHelper().registerCategory(new DefaultSmokingCategory());
-        RoughlyEnoughItemsCore.getRecipeHelper().registerCategory(new DefaultBlastingCategory());
-        RoughlyEnoughItemsCore.getRecipeHelper().registerCategory(new DefaultCampfireCategory());
-        RoughlyEnoughItemsCore.getRecipeHelper().registerCategory(new DefaultStoneCuttingCategory());
-        RoughlyEnoughItemsCore.getRecipeHelper().registerCategory(new DefaultBrewingCategory());
+    public void onFirstLoad(IPluginDisabler pluginDisabler) {
+        // This following line disables the register items for the plugin
+        //pluginDisabler.disablePluginFunction(new Identifier("roughlyenoughitems", "default_plugin"), PluginFunction.REGISTER_ITEMS);
     }
     
     @Override
-    public void registerRecipes() {
-        for(Recipe recipe : RoughlyEnoughItemsCore.getRecipeHelper().getRecipeManager().values())
+    public void registerItems(ClientHelper clientHelper) {
+        Registry.ITEM.stream().forEach(item -> {
+            clientHelper.registerItemStack(item.getDefaultStack());
+            try {
+                clientHelper.registerItemStack(clientHelper.getAllStacksFromItem(item));
+            } catch (Exception e) {
+            }
+        });
+        Registry.ENCHANTMENT.forEach(enchantment -> {
+            for(int i = enchantment.getMinimumLevel(); i < enchantment.getMaximumLevel(); i++) {
+                Map<Enchantment, Integer> map = new HashMap<>();
+                map.put(enchantment, i);
+                ItemStack itemStack = new ItemStack(Items.ENCHANTED_BOOK);
+                EnchantmentHelper.set(map, itemStack);
+                clientHelper.registerItemStack(Items.ENCHANTED_BOOK, itemStack);
+            }
+        });
+    }
+    
+    @Override
+    public void registerPluginCategories(RecipeHelper recipeHelper) {
+        recipeHelper.registerCategory(new DefaultCraftingCategory());
+        recipeHelper.registerCategory(new DefaultSmeltingCategory());
+        recipeHelper.registerCategory(new DefaultSmokingCategory());
+        recipeHelper.registerCategory(new DefaultBlastingCategory());
+        recipeHelper.registerCategory(new DefaultCampfireCategory());
+        recipeHelper.registerCategory(new DefaultStoneCuttingCategory());
+        recipeHelper.registerCategory(new DefaultBrewingCategory());
+    }
+    
+    @Override
+    public void registerRecipeDisplays(RecipeHelper recipeHelper) {
+        for(Recipe recipe : recipeHelper.getRecipeManager().values())
             if (recipe instanceof ShapelessRecipe)
-                RoughlyEnoughItemsCore.getRecipeHelper().registerRecipe(CRAFTING, new DefaultShapelessDisplay((ShapelessRecipe) recipe));
+                recipeHelper.registerDisplay(CRAFTING, new DefaultShapelessDisplay((ShapelessRecipe) recipe));
             else if (recipe instanceof ShapedRecipe)
-                RoughlyEnoughItemsCore.getRecipeHelper().registerRecipe(CRAFTING, new DefaultShapedDisplay((ShapedRecipe) recipe));
+                recipeHelper.registerDisplay(CRAFTING, new DefaultShapedDisplay((ShapedRecipe) recipe));
             else if (recipe instanceof SmeltingRecipe)
-                RoughlyEnoughItemsCore.getRecipeHelper().registerRecipe(SMELTING, new DefaultSmeltingDisplay((SmeltingRecipe) recipe));
+                recipeHelper.registerDisplay(SMELTING, new DefaultSmeltingDisplay((SmeltingRecipe) recipe));
             else if (recipe instanceof SmokingRecipe)
-                RoughlyEnoughItemsCore.getRecipeHelper().registerRecipe(SMOKING, new DefaultSmokingDisplay((SmokingRecipe) recipe));
+                recipeHelper.registerDisplay(SMOKING, new DefaultSmokingDisplay((SmokingRecipe) recipe));
             else if (recipe instanceof BlastingRecipe)
-                RoughlyEnoughItemsCore.getRecipeHelper().registerRecipe(BLASTING, new DefaultBlastingDisplay((BlastingRecipe) recipe));
+                recipeHelper.registerDisplay(BLASTING, new DefaultBlastingDisplay((BlastingRecipe) recipe));
             else if (recipe instanceof CampfireCookingRecipe)
-                RoughlyEnoughItemsCore.getRecipeHelper().registerRecipe(CAMPFIRE, new DefaultCampfireDisplay((CampfireCookingRecipe) recipe));
+                recipeHelper.registerDisplay(CAMPFIRE, new DefaultCampfireDisplay((CampfireCookingRecipe) recipe));
             else if (recipe instanceof StonecuttingRecipe)
-                RoughlyEnoughItemsCore.getRecipeHelper().registerRecipe(STONE_CUTTING, new DefaultStoneCuttingDisplay((StonecuttingRecipe) recipe));
-        BREWING_DISPLAYS.stream().forEachOrdered(display -> RoughlyEnoughItemsCore.getRecipeHelper().registerRecipe(BREWING, display));
+                recipeHelper.registerDisplay(STONE_CUTTING, new DefaultStoneCuttingDisplay((StonecuttingRecipe) recipe));
+        BREWING_DISPLAYS.stream().forEachOrdered(display -> recipeHelper.registerDisplay(BREWING, display));
     }
     
     @Override
-    public void registerSpeedCraft() {
-        RoughlyEnoughItemsCore.getRecipeHelper().registerSpeedCraftButtonArea(DefaultPlugin.CAMPFIRE, null);
-        RoughlyEnoughItemsCore.getRecipeHelper().registerSpeedCraftButtonArea(DefaultPlugin.STONE_CUTTING, null);
-        RoughlyEnoughItemsCore.getRecipeHelper().registerSpeedCraftButtonArea(DefaultPlugin.BREWING, null);
-        RoughlyEnoughItemsCore.getRecipeHelper().registerSpeedCraftFunctional(DefaultPlugin.CRAFTING, new SpeedCraftFunctional<DefaultCraftingDisplay>() {
+    public void registerSpeedCraft(RecipeHelper recipeHelper) {
+        recipeHelper.registerSpeedCraftButtonArea(DefaultPlugin.CAMPFIRE, null);
+        recipeHelper.registerSpeedCraftButtonArea(DefaultPlugin.STONE_CUTTING, null);
+        recipeHelper.registerSpeedCraftButtonArea(DefaultPlugin.BREWING, null);
+        recipeHelper.registerSpeedCraftFunctional(DefaultPlugin.CRAFTING, new SpeedCraftFunctional<DefaultCraftingDisplay>() {
             @Override
             public Class[] getFunctioningFor() {
                 return new Class[]{PlayerInventoryScreen.class, CraftingTableScreen.class};
@@ -99,7 +135,7 @@ public class DefaultPlugin implements IRecipePlugin {
                 return screen instanceof CraftingTableScreen || (screen instanceof PlayerInventoryScreen && recipe.getHeight() < 3 && recipe.getWidth() < 3);
             }
         });
-        RoughlyEnoughItemsCore.getRecipeHelper().registerSpeedCraftFunctional(DefaultPlugin.SMELTING, new SpeedCraftFunctional<DefaultSmeltingDisplay>() {
+        recipeHelper.registerSpeedCraftFunctional(DefaultPlugin.SMELTING, new SpeedCraftFunctional<DefaultSmeltingDisplay>() {
             @Override
             public Class[] getFunctioningFor() {
                 return new Class[]{FurnaceScreen.class};
@@ -120,7 +156,7 @@ public class DefaultPlugin implements IRecipePlugin {
                 return screen instanceof FurnaceScreen;
             }
         });
-        RoughlyEnoughItemsCore.getRecipeHelper().registerSpeedCraftFunctional(DefaultPlugin.SMOKING, new SpeedCraftFunctional<DefaultSmokingDisplay>() {
+        recipeHelper.registerSpeedCraftFunctional(DefaultPlugin.SMOKING, new SpeedCraftFunctional<DefaultSmokingDisplay>() {
             @Override
             public Class[] getFunctioningFor() {
                 return new Class[]{SmokerScreen.class};
@@ -141,7 +177,7 @@ public class DefaultPlugin implements IRecipePlugin {
                 return screen instanceof SmokerScreen;
             }
         });
-        RoughlyEnoughItemsCore.getRecipeHelper().registerSpeedCraftFunctional(DefaultPlugin.BLASTING, new SpeedCraftFunctional<DefaultBlastingDisplay>() {
+        recipeHelper.registerSpeedCraftFunctional(DefaultPlugin.BLASTING, new SpeedCraftFunctional<DefaultBlastingDisplay>() {
             @Override
             public Class[] getFunctioningFor() {
                 return new Class[]{BlastFurnaceScreen.class};

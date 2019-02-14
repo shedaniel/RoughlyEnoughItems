@@ -1,12 +1,14 @@
 package me.shedaniel.rei;
 
 import com.google.common.collect.Maps;
+import me.shedaniel.rei.api.IPluginDisabler;
 import me.shedaniel.rei.api.IRecipePlugin;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.ConfigHelper;
 import me.shedaniel.rei.client.GuiHelper;
 import me.shedaniel.rei.client.RecipeHelper;
 import me.shedaniel.rei.plugin.DefaultPlugin;
+import me.shedaniel.rei.plugin.PluginManager;
 import me.shedaniel.rei.update.UpdateChecker;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
@@ -34,6 +36,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
     public static final Identifier CREATE_ITEMS_PACKET = new Identifier("roughlyenoughitems", "create_item");
     private static final RecipeHelper RECIPE_HELPER = new RecipeHelper();
     private static final ClientHelper CLIENT_HELPER = new ClientHelper();
+    private static final PluginManager PLUGIN_MANAGER = new PluginManager();
     private static final Map<Identifier, IRecipePlugin> plugins = Maps.newHashMap();
     private static ConfigHelper configHelper;
     
@@ -49,9 +52,14 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
         return CLIENT_HELPER;
     }
     
+    public static IPluginDisabler getPluginDisabler() {
+        return PLUGIN_MANAGER;
+    }
+    
     public static IRecipePlugin registerPlugin(Identifier identifier, IRecipePlugin plugin) {
         plugins.put(identifier, plugin);
         RoughlyEnoughItemsCore.LOGGER.info("REI: Registered plugin %s from %s", identifier.toString(), plugin.getClass().getSimpleName());
+        plugin.onFirstLoad(getPluginDisabler());
         return plugin;
     }
     
