@@ -59,7 +59,7 @@ public class RecipeHelper {
         recipeCategoryListMap.put(category.getIdentifier(), Lists.newLinkedList());
     }
     
-    public void registerRecipe(Identifier categoryIdentifier, IRecipeDisplay display) {
+    public void registerDisplay(Identifier categoryIdentifier, IRecipeDisplay display) {
         if (!recipeCategoryListMap.containsKey(categoryIdentifier))
             return;
         recipeCategoryListMap.get(categoryIdentifier).add(display);
@@ -147,6 +147,7 @@ public class RecipeHelper {
         speedCraftFunctionalMap.put(category, list);
     }
     
+    @SuppressWarnings("deprecation")
     public void recipesLoaded(RecipeManager recipeManager) {
         this.recipeManager = recipeManager;
         this.recipeCategoryListMap.clear();
@@ -162,10 +163,20 @@ public class RecipeHelper {
             return identifier == null ? "NULL" : identifier.toString();
         }).collect(Collectors.toList())));
         Collections.reverse(plugins);
+        RoughlyEnoughItemsCore.getItemRegisterer().getModifiableItemList().clear();
+        IPluginDisabler pluginDisabler = RoughlyEnoughItemsCore.getPluginDisabler();
         plugins.forEach(plugin -> {
-            plugin.registerPluginCategories();
-            plugin.registerRecipes();
-            plugin.registerSpeedCraft();
+            Identifier identifier = RoughlyEnoughItemsCore.getPluginIdentifier(plugin);
+            if (identifier == null)
+                identifier = new Identifier("null");
+            if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_ITEMS))
+                plugin.registerItems(RoughlyEnoughItemsCore.getItemRegisterer());
+            if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_CATEGORIES))
+                plugin.registerPluginCategories(this);
+            if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_RECIPE_DISPLAYS))
+                plugin.registerRecipeDisplays(this);
+            if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_SPEED_CRAFT))
+                plugin.registerSpeedCraft(this);
         });
         RoughlyEnoughItemsCore.LOGGER.info("Registered REI Categories: " + String.join(", ", categories.stream().map(category -> {
             return category.getCategoryName();

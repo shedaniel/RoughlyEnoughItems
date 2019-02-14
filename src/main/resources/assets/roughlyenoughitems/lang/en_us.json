@@ -11,7 +11,7 @@
   "category.rei.smoking": "Smoking",
   "category.rei.blasting": "Blasting",
   "category.rei.campfire": "Campfire",
-  "category.rei.campfire.time": "§8%d Seconds",
+  "category.rei.campfire.time": "%d Seconds",
   "category.rei.stone_cutting": "Stone Cutting",
   "category.rei.brewing": "Brewing",
   "category.rei.brewing.input": "§eOriginal Potion",
@@ -37,5 +37,10 @@
   "text.rei.delete_items": "§cDelete Item",
   "text.rei.check_updates": "Check Updates: ",
   "text.rei.update_outdated": "§6REI is outdated!\n§6Current: §a%s §6Latest: §a%s\n§6Update Priority: §a%s",
-  "text.rei.update_changelog_line": "§6- %s"
+  "text.rei.update_changelog_line": "§6- %s",
+  "text.rei.load_default_plugin": "Load Default Plugin: ",
+  "text.rei.load_default_plugin.restart_tooltip": "You probably never want to disable this.\nRestart Minecraft to apply this setting.",
+  "text.rei.credits": "Credits",
+  "_comment": "Don't change / translate the credit down below if you are doing it :)",
+  "text.rei.credit.text": "§lRoughly Enough Items\n§7Originally a fork for Almost Enough Items.\n\n§lDevelopers\n  - Originally by ZenDarva\n  - Created by Danielshe\n  - Plugin Support by TehNut\n\n§lLanguage Translation\n  English - Danielshe\n  Simplified Chinese - Danielshe\n  Traditional Chinese - hugoalh & Danielshe\n  French - Yanis48\n  German - MelanX\n  Estonian - Madis0\n  Hebrew - nerdoron\n  LOLCAT - Danielshe\n  Upside Down - Danielshe\n\n§lLicense\n§7Roughly Enough Items is using MIT."
 }

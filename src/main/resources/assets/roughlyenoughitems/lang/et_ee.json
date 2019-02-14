@@ -11,7 +11,7 @@
   "category.rei.smoking": "Suitsutamine",
   "category.rei.blasting": "Kõrgsulatamine",
   "category.rei.campfire": "Lõkketuli",
-  "category.rei.campfire.time": "§8%d sekundit",
+  "category.rei.campfire.time": "%d sekundit",
   "category.rei.stone_cutting": "Kivi lõikamine",
   "category.rei.brewing": "Pruulimine",
   "category.rei.brewing.input": "§eEsialgne võlujook",

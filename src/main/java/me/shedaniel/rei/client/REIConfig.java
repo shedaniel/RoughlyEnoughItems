@@ -14,5 +14,6 @@ public class REIConfig {
     public String giveCommandPrefix = "/give";
     public boolean checkUpdates = true;
     public boolean mirrorItemPanel = false;
+    public boolean loadDefaultPlugin = true;
     
 }

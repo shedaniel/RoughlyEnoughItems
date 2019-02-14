@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 
 public class ItemListOverlay extends Drawable implements IWidget {
     
-    private List<IWidget> widgets = new ArrayList<>();
+    private List<IWidget> widgets;
     private int width, height, page;
     private Rectangle rectangle, listArea;
     private List<ItemStack> currentDisplayed;
@@ -44,16 +44,10 @@ public class ItemListOverlay extends Drawable implements IWidget {
             GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.translate("text.rei.delete_items"))));
     }
     
-    public void updateList(int page, String searchTerm) {
-        updateList(rectangle, page, searchTerm);
-    }
-    
     public void updateList(Rectangle bounds, int page, String searchTerm) {
         this.rectangle = bounds;
-        if (ClientHelper.getItemList().isEmpty())
-            RoughlyEnoughItemsCore.getClientHelper().clientLoaded();
-        currentDisplayed = processSearchTerm(searchTerm, ClientHelper.getItemList(), GuiHelper.inventoryStacks);
-        this.widgets.clear();
+        this.widgets = Lists.newLinkedList();
+        currentDisplayed = processSearchTerm(searchTerm, RoughlyEnoughItemsCore.getItemRegisterer().getItemList(), GuiHelper.inventoryStacks);
         this.page = page;
         calculateListSize(rectangle);
         double startX = rectangle.getCenterX() - width * 9;
@@ -88,7 +82,7 @@ public class ItemListOverlay extends Drawable implements IWidget {
                     return false;
                 }
             };
-            if (this.rectangle.contains(slotWidget.getBounds()))
+            if (true || this.rectangle.contains(slotWidget.getBounds()))
                 widgets.add(slotWidget);
         }
     }
@@ -182,8 +176,8 @@ public class ItemListOverlay extends Drawable implements IWidget {
     
     private void calculateListSize(Rectangle rect) {
         int xOffset = 0, yOffset = 0;
-        this.width = 0;
-        this.height = 0;
+        width = 0;
+        height = 0;
         while (true) {
             xOffset += 18;
             if (height == 0)
@@ -200,19 +194,18 @@ public class ItemListOverlay extends Drawable implements IWidget {
     
     @Override
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
-        if (rectangle.contains(double_1, double_2))
+        if (rectangle.contains(double_1, double_2)) {
+            ClientPlayerEntity player = MinecraftClient.getInstance().player;
             if (ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty() && MinecraftClient.getInstance().isInSingleplayer()) {
                 ClientHelper.sendDeletePacket();
                 return true;
             }
-        if (!player.inventory.getCursorStack().isEmpty() && MinecraftClient.getInstance().isInSingleplayer())
-            return false;
-        if (onMouseClick(int_1, double_1, double_2))
-            return true;
-        for(IWidget widget : getListeners())
-            if (widget.mouseClicked(double_1, double_2, int_1))
-                return true;
+            if (!player.inventory.getCursorStack().isEmpty() && MinecraftClient.getInstance().isInSingleplayer())
+                return false;
+            for(IWidget widget : getListeners())
+                if (widget.mouseClicked(double_1, double_2, int_1))
+                    return true;
+        }
         return false;
     }
     

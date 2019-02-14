@@ -37,36 +37,29 @@ public class MixinContainerScreen extends Screen implements IMixinContainerScree
     private ItemStack field_2782;
     
     @Override
-    public int getContainerLeft() {
+    public int rei_getContainerLeft() {
         return left;
     }
     
     @Override
-    public int getContainerTop() {
+    public int rei_getContainerTop() {
         return top;
     }
     
     @Override
-    public int getContainerWidth() {
+    public int rei_getContainerWidth() {
         return containerWidth;
     }
     
     @Override
-    public int getContainerHeight() {
+    public int rei_getContainerHeight() {
         return containerHeight;
-    }
-    
-    @Override
-    public void setOverlay(ContainerScreenOverlay overlay) {
-        GuiHelper.setOverlay(overlay);
     }
     
     @Inject(method = "onInitialized()V", at = @At("RETURN"))
     protected void onInitialized(CallbackInfo info) {
         GuiHelper.setLastContainerScreen((ContainerScreen) (Object) this);
-        GuiHelper.setLastMixinContainerScreen((IMixinContainerScreen) this);
-        GuiHelper.setOverlay(new ContainerScreenOverlay());
-        this.listeners.add(GuiHelper.getLastOverlay());
+        this.listeners.add(GuiHelper.getLastOverlay(true));
     }
     
     @Inject(method = "draw(IIF)V", at = @At("RETURN"))
@@ -76,16 +69,16 @@ public class MixinContainerScreen extends Screen implements IMixinContainerScree
             if (tabGetter.getSelectedTab() != ItemGroup.INVENTORY.getId())
                 return;
         }
-        GuiHelper.getLastOverlay().render(int_1, int_2, float_1);
+        GuiHelper.getLastOverlay().drawOverlay(int_1, int_2, float_1);
     }
     
     @Override
-    public ItemStack getDraggedStack() {
+    public ItemStack rei_getDraggedStack() {
         return this.field_2782;
     }
     
     @Override
-    public Slot getHoveredSlot() {
+    public Slot rei_getHoveredSlot() {
         return focusedSlot;
     }
     

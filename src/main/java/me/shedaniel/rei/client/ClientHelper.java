@@ -1,26 +1,22 @@
 package me.shedaniel.rei.client;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import io.netty.buffer.Unpooled;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.IRecipeCategory;
 import me.shedaniel.rei.api.IRecipeDisplay;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
-import me.shedaniel.rei.gui.widget.ConfigWidget;
+import me.shedaniel.rei.gui.config.ConfigScreen;
 import me.shedaniel.rei.gui.widget.RecipeViewingWidgetScreen;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.fabricmc.fabric.impl.client.keybinding.KeyBindingRegistryImpl;
-import net.fabricmc.loader.FabricLoader;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.gui.Screen;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.DefaultedList;
@@ -30,7 +26,6 @@ import net.minecraft.util.registry.Registry;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,12 +35,7 @@ public class ClientHelper implements ClientModInitializer {
     private static final Identifier USAGE_KEYBIND = new Identifier("roughlyenoughitems", "usage_keybind");
     private static final Identifier HIDE_KEYBIND = new Identifier("roughlyenoughitems", "hide_keybind");
     public static FabricKeyBinding RECIPE, USAGE, HIDE;
-    private static List<ItemStack> itemList;
     private static boolean cheating;
-    
-    public ClientHelper() {
-        this.itemList = Lists.newLinkedList();
-    }
     
     public static String getModFromItemStack(ItemStack stack) {
         if (!stack.isEmpty()) {
@@ -54,7 +44,7 @@ public class ClientHelper implements ClientModInitializer {
             String modid = location.getNamespace();
             if (modid.equalsIgnoreCase("minecraft"))
                 return "Minecraft";
-            return FabricLoader.INSTANCE.getModContainers().stream().map(modContainer -> {
+            return ((net.fabricmc.loader.FabricLoader) FabricLoader.getInstance()).getModContainers().stream().map(modContainer -> {
                 return modContainer.getInfo();
             }).filter(modInfo -> modInfo.getId().equals(modid) || (modInfo.getName() != null && modInfo.getName().equals(modid))).findFirst().map(modInfo -> {
                 if (modInfo.getName() != null)
@@ -63,10 +53,6 @@ public class ClientHelper implements ClientModInitializer {
             }).orElse(modid);
         }
         return "";
-    }
-    
-    public static List<ItemStack> getItemList() {
-        return itemList;
     }
     
     public static Point getMouseLocation() {
@@ -127,7 +113,7 @@ public class ClientHelper implements ClientModInitializer {
     }
     
     public static void openConfigWindow(Screen parent) {
-        MinecraftClient.getInstance().openScreen(new ConfigWidget(parent));
+        MinecraftClient.getInstance().openScreen(new ConfigScreen(parent));
     }
     
     public static List<ItemStack> getInventoryItemsTypes() {
@@ -138,41 +124,6 @@ public class ClientHelper implements ClientModInitializer {
                 inventoryStacks.add(itemStack);
         }));
         return inventoryStacks;
-    }
-    
-    public void clientLoaded() {
-        Registry.ITEM.forEach(item -> {
-            if (!item.equals(Items.ENCHANTED_BOOK))
-                registerItem(item);
-        });
-        Registry.ENCHANTMENT.forEach(enchantment -> {
-            for(int i = enchantment.getMinimumLevel(); i < enchantment.getMaximumLevel(); i++) {
-                Map<Enchantment, Integer> map = new HashMap<>();
-                map.put(enchantment, i);
-                ItemStack itemStack = new ItemStack(Items.ENCHANTED_BOOK);
-                EnchantmentHelper.set(map, itemStack);
-                registerItemStack(itemStack);
-            }
-        });
-    }
-    
-    public void registerItem(Item item) {
-        registerItemStack(item.getDefaultStack());
-        DefaultedList<ItemStack> stacks = DefaultedList.create();
-        item.addStacksForDisplay(item.getItemGroup(), stacks);
-        stacks.forEach(this::registerItemStack);
-    }
-    
-    public void registerItemStack(ItemStack stack) {
-        if (!stack.getItem().equals(Items.AIR) && !alreadyContain(stack))
-            itemList.add(stack);
-    }
-    
-    private boolean alreadyContain(ItemStack stack) {
-        for(ItemStack itemStack : itemList)
-            if (ItemStack.areEqual(stack, itemStack))
-                return true;
-        return false;
     }
     
     @Override
