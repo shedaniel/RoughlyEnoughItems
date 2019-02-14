@@ -1,12 +1,15 @@
 package me.shedaniel.rei;
 
 import com.google.common.collect.Maps;
+import me.shedaniel.rei.api.IItemRegisterer;
+import me.shedaniel.rei.api.IPluginDisabler;
 import me.shedaniel.rei.api.IRecipePlugin;
-import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.ConfigHelper;
 import me.shedaniel.rei.client.GuiHelper;
+import me.shedaniel.rei.client.ItemListHelper;
 import me.shedaniel.rei.client.RecipeHelper;
 import me.shedaniel.rei.plugin.DefaultPlugin;
+import me.shedaniel.rei.plugin.PluginManager;
 import me.shedaniel.rei.update.UpdateChecker;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
@@ -33,7 +36,8 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
     public static final Identifier DELETE_ITEMS_PACKET = new Identifier("roughlyenoughitems", "delete_item");
     public static final Identifier CREATE_ITEMS_PACKET = new Identifier("roughlyenoughitems", "create_item");
     private static final RecipeHelper RECIPE_HELPER = new RecipeHelper();
-    private static final ClientHelper CLIENT_HELPER = new ClientHelper();
+    private static final PluginManager PLUGIN_MANAGER = new PluginManager();
+    private static final ItemListHelper ITEM_LIST_HELPER = new ItemListHelper();
     private static final Map<Identifier, IRecipePlugin> plugins = Maps.newHashMap();
     private static ConfigHelper configHelper;
     
@@ -45,13 +49,18 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
         return configHelper;
     }
     
-    public static ClientHelper getClientHelper() {
-        return CLIENT_HELPER;
+    public static IItemRegisterer getItemRegisterer() {
+        return ITEM_LIST_HELPER;
+    }
+    
+    public static IPluginDisabler getPluginDisabler() {
+        return PLUGIN_MANAGER;
     }
     
     public static IRecipePlugin registerPlugin(Identifier identifier, IRecipePlugin plugin) {
         plugins.put(identifier, plugin);
         RoughlyEnoughItemsCore.LOGGER.info("REI: Registered plugin %s from %s", identifier.toString(), plugin.getClass().getSimpleName());
+        plugin.onFirstLoad(getPluginDisabler());
         return plugin;
     }
     
@@ -66,14 +75,16 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
         return null;
     }
     
+    @SuppressWarnings("deprecation")
     @Override
     public void onInitializeClient() {
+        configHelper = new ConfigHelper();
+        
         // If pluginloader is not installed, base functionality should still remain
         if (!FabricLoader.INSTANCE.getModContainers().stream().map(modContainer -> modContainer.getInfo().getId()).anyMatch(s -> s.equalsIgnoreCase("pluginloader"))) {
             RoughlyEnoughItemsCore.LOGGER.warn("REI: Plugin Loader is not loaded! Please consider installing https://minecraft.curseforge.com/projects/pluginloader for REI plugin compatibility!");
             registerPlugin(new Identifier("roughlyenoughitems", "default_plugin"), new DefaultPlugin());
         }
-        configHelper = new ConfigHelper();
         
         ClientTickCallback.EVENT.register(GuiHelper::onTick);
         if (getConfigHelper().checkUpdates())

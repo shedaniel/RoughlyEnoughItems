@@ -17,7 +17,6 @@ public class GuiHelper {
     private static boolean overlayVisible = true;
     private static ContainerScreenOverlay overlay;
     private static ContainerScreen lastContainerScreen;
-    private static IMixinContainerScreen lastMixinContainerScreen;
     
     public static boolean isOverlayVisible() {
         return overlayVisible;
@@ -27,19 +26,21 @@ public class GuiHelper {
         overlayVisible = !overlayVisible;
     }
     
-    public static ContainerScreenOverlay getLastOverlay() {
+    public static ContainerScreenOverlay getLastOverlay(boolean reset) {
+        if (overlay == null || reset) {
+            overlay = new ContainerScreenOverlay();
+            overlay.onInitialized();
+        }
         return overlay;
     }
     
-    public static void setOverlay(ContainerScreenOverlay overlay) {
-        GuiHelper.overlay = overlay;
-        overlay.onInitialized();
+    public static ContainerScreenOverlay getLastOverlay() {
+        return getLastOverlay(false);
     }
     
     public static void onTick(MinecraftClient client) {
         if (client.currentScreen instanceof ContainerScreen && lastContainerScreen != client.currentScreen) {
             GuiHelper.lastContainerScreen = (ContainerScreen) client.currentScreen;
-            GuiHelper.lastMixinContainerScreen = (IMixinContainerScreen) lastContainerScreen;
         }
     }
     
@@ -52,11 +53,7 @@ public class GuiHelper {
     }
     
     public static IMixinContainerScreen getLastMixinContainerScreen() {
-        return lastMixinContainerScreen;
-    }
-    
-    public static void setLastMixinContainerScreen(IMixinContainerScreen lastMixinContainerScreen) {
-        GuiHelper.lastMixinContainerScreen = lastMixinContainerScreen;
+        return (IMixinContainerScreen) lastContainerScreen;
     }
     
 }

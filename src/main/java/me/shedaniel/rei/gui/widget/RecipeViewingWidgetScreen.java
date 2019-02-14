@@ -70,6 +70,7 @@ public class RecipeViewingWidgetScreen extends Screen {
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if ((int_1 == 256 || this.client.options.keyInventory.matchesKey(int_1, int_2)) && this.doesEscapeKeyClose()) {
             MinecraftClient.getInstance().openScreen(GuiHelper.getLastContainerScreen());
+            GuiHelper.getLastOverlay().onInitialized();
             return true;
         }
         for(GuiEventListener listener : listeners)
@@ -230,7 +231,7 @@ public class RecipeViewingWidgetScreen extends Screen {
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GuiLighting.disable();
         tabs.stream().filter(TabWidget::isSelected).forEach(tabWidget -> tabWidget.draw(mouseX, mouseY, partialTicks));
-        GuiHelper.getLastOverlay().render(mouseX, mouseY, partialTicks);
+        GuiHelper.getLastOverlay().drawOverlay(mouseX, mouseY, partialTicks);
     }
     
     @Override
