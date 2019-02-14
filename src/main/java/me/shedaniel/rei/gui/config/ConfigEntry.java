@@ -3,8 +3,10 @@ package me.shedaniel.rei.gui.config;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.gui.widget.ButtonWidget;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.audio.PositionedSoundInstance;
 import net.minecraft.client.gui.widget.EntryListWidget;
 import net.minecraft.client.util.Window;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.TextComponent;
 
 import java.awt.*;
@@ -20,9 +22,17 @@ public class ConfigEntry extends EntryListWidget.Entry<ConfigEntry> {
         this.buttonProvider = buttonProvider;
         this.buttonWidget = new ButtonWidget(0, 0, 150, 20, "") {
             @Override
-            public void onPressed(int button, double mouseX, double mouseY) {
-                buttonProvider.onPressed(button, mouseX, mouseY);
+            public boolean onMouseClick(int button, double mouseX, double mouseY) {
+                if (getBounds().contains(mouseX, mouseY) && enabled)
+                    if (buttonProvider.onPressed(button, mouseX, mouseY)) {
+                        MinecraftClient.getInstance().getSoundLoader().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                        return true;
+                    }
+                return false;
             }
+            
+            @Override
+            public void onPressed(int button, double mouseX, double mouseY) {}
         };
     }
     
@@ -47,7 +57,7 @@ public class ConfigEntry extends EntryListWidget.Entry<ConfigEntry> {
     
     interface ConfigEntryButtonProvider {
         
-        public void onPressed(int button, double mouseX, double mouseY);
+        public boolean onPressed(int button, double mouseX, double mouseY);
         
         public String getText();
         

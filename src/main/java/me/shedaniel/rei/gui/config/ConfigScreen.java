@@ -39,14 +39,16 @@ public class ConfigScreen extends Screen {
         entryListWidget.configClearEntries();
         entryListWidget.configAddEntry(new ConfigEntry(new TranslatableTextComponent("text.rei.side_searchbox"), new ConfigEntry.ConfigEntryButtonProvider() {
             @Override
-            public void onPressed(int button, double mouseX, double mouseY) {
+            public boolean onPressed(int button, double mouseX, double mouseY) {
                 if (button == 0)
                     RoughlyEnoughItemsCore.getConfigHelper().setSideSearchField(!RoughlyEnoughItemsCore.getConfigHelper().sideSearchField());
                 try {
                     RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
                 } catch (IOException e) {
                     e.printStackTrace();
+                    return false;
                 }
+                return true;
             }
             
             @Override
@@ -56,14 +58,16 @@ public class ConfigScreen extends Screen {
         }));
         entryListWidget.configAddEntry(new ConfigEntry(new TranslatableTextComponent("text.rei.enable_craftable_only"), new ConfigEntry.ConfigEntryButtonProvider() {
             @Override
-            public void onPressed(int button, double mouseX, double mouseY) {
+            public boolean onPressed(int button, double mouseX, double mouseY) {
                 if (button == 0)
                     RoughlyEnoughItemsCore.getConfigHelper().setShowCraftableOnlyButton(!RoughlyEnoughItemsCore.getConfigHelper().showCraftableOnlyButton());
                 try {
                     RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
                 } catch (IOException e) {
                     e.printStackTrace();
+                    return false;
                 }
+                return true;
             }
             
             @Override
@@ -73,7 +77,7 @@ public class ConfigScreen extends Screen {
         }));
         entryListWidget.configAddEntry(new ConfigEntry(new TranslatableTextComponent("text.rei.list_ordering"), new ConfigEntry.ConfigEntryButtonProvider() {
             @Override
-            public void onPressed(int button, double mouseX, double mouseY) {
+            public boolean onPressed(int button, double mouseX, double mouseY) {
                 int index = Arrays.asList(REIItemListOrdering.values()).indexOf(RoughlyEnoughItemsCore.getConfigHelper().getItemListOrdering()) + 1;
                 if (index >= REIItemListOrdering.values().length) {
                     index = 0;
@@ -84,7 +88,9 @@ public class ConfigScreen extends Screen {
                     RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
                 } catch (IOException e) {
                     e.printStackTrace();
+                    return false;
                 }
+                return true;
             }
             
             @Override
@@ -94,14 +100,16 @@ public class ConfigScreen extends Screen {
         }));
         entryListWidget.configAddEntry(new ConfigEntry(new TranslatableTextComponent("text.rei.mirror_rei"), new ConfigEntry.ConfigEntryButtonProvider() {
             @Override
-            public void onPressed(int button, double mouseX, double mouseY) {
+            public boolean onPressed(int button, double mouseX, double mouseY) {
                 if (button == 0)
                     RoughlyEnoughItemsCore.getConfigHelper().setMirrorItemPanel(!RoughlyEnoughItemsCore.getConfigHelper().isMirrorItemPanel());
                 try {
                     RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
                 } catch (IOException e) {
                     e.printStackTrace();
+                    return false;
                 }
+                return true;
             }
             
             @Override
@@ -111,14 +119,16 @@ public class ConfigScreen extends Screen {
         }));
         entryListWidget.configAddEntry(new ConfigEntry(new TranslatableTextComponent("text.rei.check_updates"), new ConfigEntry.ConfigEntryButtonProvider() {
             @Override
-            public void onPressed(int button, double mouseX, double mouseY) {
+            public boolean onPressed(int button, double mouseX, double mouseY) {
                 if (button == 0)
                     RoughlyEnoughItemsCore.getConfigHelper().setCheckUpdates(!RoughlyEnoughItemsCore.getConfigHelper().checkUpdates());
                 try {
                     RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
                 } catch (IOException e) {
                     e.printStackTrace();
+                    return false;
                 }
+                return true;
             }
             
             @Override
