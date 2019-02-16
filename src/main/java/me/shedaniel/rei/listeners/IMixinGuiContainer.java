@@ -1,23 +1,20 @@
 package me.shedaniel.rei.listeners;
 
-import me.shedaniel.rei.gui.ContainerGuiOverlay;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 
 public interface IMixinGuiContainer {
     
-    public int getContainerLeft();
+    public int rei_getContainerLeft();
     
-    public int getContainerTop();
+    public int rei_getContainerTop();
     
-    public int getContainerWidth();
+    public int rei_etContainerWidth();
     
-    public int getContainerHeight();
+    public int rei_getContainerHeight();
     
-    public ItemStack getDraggedStack();
+    public ItemStack rei_getDraggedStack();
     
-    public Slot getHoveredSlot();
-    
-    public void setOverlay(ContainerGuiOverlay overlay);
+    public Slot rei_getHoveredSlot();
     
 }

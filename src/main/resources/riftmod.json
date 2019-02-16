@@ -7,7 +7,7 @@
   ],
   "listeners": [
     {
-      "class": "me.shedaniel.rei.REIMixinInit",
+      "class": "me.shedaniel.rei.RoughlyEnoughItemsMixin",
       "side": "client",
       "priority": 5
     },
@@ -16,13 +16,13 @@
       "side": "client"
     },
     {
-      "class": "me.shedaniel.rei.update.UpdateChecker",
-      "side": "client",
-      "priority": -20
-    },
-    {
       "class": "me.shedaniel.rei.client.GuiHelper",
       "side": "client"
+    },
+    {
+      "class": "me.shedaniel.rei.RoughlyEnoughItemsInit",
+      "side": "client",
+      "priority": -20
     }
   ],
   "url": "https://shedaniel.me",

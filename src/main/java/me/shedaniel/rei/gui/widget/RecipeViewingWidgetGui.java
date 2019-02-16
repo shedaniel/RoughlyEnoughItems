@@ -19,6 +19,7 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.TextComponentTranslation;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -70,6 +71,7 @@ public class RecipeViewingWidgetGui extends GuiScreen {
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if ((int_1 == 256 || mc.gameSettings.keyBindInventory.matchesKey(int_1, int_2)) && this.allowCloseWithEscape()) {
             Minecraft.getInstance().displayGuiScreen(GuiHelper.getLastGuiContainer());
+            GuiHelper.getLastOverlay().onInitialized();
             return true;
         }
         for(IGuiEventListener listener : children)
@@ -90,7 +92,7 @@ public class RecipeViewingWidgetGui extends GuiScreen {
         this.widgets.clear();
         this.bounds = new Rectangle(window.getScaledWidth() / 2 - guiWidth / 2, window.getScaledHeight() / 2 - guiHeight / 2, guiWidth, guiHeight);
         
-        widgets.add(categoryBack = new ButtonWidget((int) bounds.getX() + 5, (int) bounds.getY() + 5, 12, 12, "<") {
+        widgets.add(categoryBack = new ButtonWidget((int) bounds.getX() + 5, (int) bounds.getY() + 5, 12, 12, new TextComponentTranslation("text.rei.left_arrow")) {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
                 int currentCategoryIndex = categories.indexOf(selectedCategory);
@@ -102,7 +104,7 @@ public class RecipeViewingWidgetGui extends GuiScreen {
                 RecipeViewingWidgetGui.this.initGui();
             }
         });
-        widgets.add(categoryNext = new ButtonWidget((int) bounds.getX() + 159, (int) bounds.getY() + 5, 12, 12, ">") {
+        widgets.add(categoryNext = new ButtonWidget((int) bounds.getX() + 159, (int) bounds.getY() + 5, 12, 12, new TextComponentTranslation("text.rei.right_arrow")) {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
                 int currentCategoryIndex = categories.indexOf(selectedCategory);
@@ -117,7 +119,7 @@ public class RecipeViewingWidgetGui extends GuiScreen {
         categoryBack.enabled = categories.size() > 1;
         categoryNext.enabled = categories.size() > 1;
         
-        widgets.add(recipeBack = new ButtonWidget((int) bounds.getX() + 5, (int) bounds.getY() + 21, 12, 12, "<") {
+        widgets.add(recipeBack = new ButtonWidget((int) bounds.getX() + 5, (int) bounds.getY() + 21, 12, 12, new TextComponentTranslation("text.rei.left_arrow")) {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
                 page--;
@@ -126,7 +128,7 @@ public class RecipeViewingWidgetGui extends GuiScreen {
                 RecipeViewingWidgetGui.this.initGui();
             }
         });
-        widgets.add(recipeNext = new ButtonWidget((int) bounds.getX() + 159, (int) bounds.getY() + 21, 12, 12, ">") {
+        widgets.add(recipeNext = new ButtonWidget((int) bounds.getX() + 159, (int) bounds.getY() + 21, 12, 12, new TextComponentTranslation("text.rei.right_arrow")) {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
                 page++;

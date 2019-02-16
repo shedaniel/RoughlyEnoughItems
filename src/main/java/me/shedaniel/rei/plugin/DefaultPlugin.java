@@ -1,8 +1,8 @@
 package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.rei.api.IRecipePlugin;
-import me.shedaniel.rei.api.SpeedCraftFunctional;
+import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.client.ConfigHelper;
 import me.shedaniel.rei.client.RecipeHelper;
 import me.shedaniel.rei.listeners.IMixinRecipeBookGui;
 import net.minecraft.client.Minecraft;
@@ -11,13 +11,20 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiCrafting;
 import net.minecraft.client.gui.inventory.GuiFurnace;
 import net.minecraft.client.gui.inventory.GuiInventory;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipe;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.ShapedRecipe;
 import net.minecraft.item.crafting.ShapelessRecipe;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.IRegistry;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DefaultPlugin implements IRecipePlugin {
     
@@ -32,28 +39,58 @@ public class DefaultPlugin implements IRecipePlugin {
     }
     
     @Override
-    public void registerPluginCategories() {
-        RecipeHelper.getInstance().registerCategory(new DefaultCraftingCategory());
-        RecipeHelper.getInstance().registerCategory(new DefaultSmeltingCategory());
-        RecipeHelper.getInstance().registerCategory(new DefaultBrewingCategory());
+    public void onFirstLoad(IPluginDisabler pluginDisabler) {
+        if (!ConfigHelper.getInstance().isLoadingDefaultPlugin()) {
+            pluginDisabler.disablePluginFunction(new ResourceLocation("roughlyenoughitems", "default_plugin"), PluginFunction.REGISTER_ITEMS);
+            pluginDisabler.disablePluginFunction(new ResourceLocation("roughlyenoughitems", "default_plugin"), PluginFunction.REGISTER_CATEGORIES);
+            pluginDisabler.disablePluginFunction(new ResourceLocation("roughlyenoughitems", "default_plugin"), PluginFunction.REGISTER_RECIPE_DISPLAYS);
+            pluginDisabler.disablePluginFunction(new ResourceLocation("roughlyenoughitems", "default_plugin"), PluginFunction.REGISTER_SPEED_CRAFT);
+        }
     }
     
     @Override
-    public void registerRecipes() {
-        for(IRecipe value : RecipeHelper.getInstance().getRecipeManager().getRecipes())
+    public void registerItems(IItemRegisterer itemRegisterer) {
+        IRegistry.ITEM.stream().forEach(item -> {
+            itemRegisterer.registerItemStack(item.getDefaultInstance());
+            try {
+                itemRegisterer.registerItemStack(itemRegisterer.getAllStacksFromItem(item));
+            } catch (Exception e) {
+            }
+        });
+        IRegistry.ENCHANTMENT.forEach(enchantment -> {
+            for(int i = enchantment.getMinLevel(); i < enchantment.getMaxLevel(); i++) {
+                Map<Enchantment, Integer> map = new HashMap<>();
+                map.put(enchantment, i);
+                ItemStack itemStack = new ItemStack(Items.ENCHANTED_BOOK);
+                EnchantmentHelper.setEnchantments(map, itemStack);
+                itemRegisterer.registerItemStack(Items.ENCHANTED_BOOK, itemStack);
+            }
+        });
+    }
+    
+    @Override
+    public void registerPluginCategories(RecipeHelper recipeHelper) {
+        recipeHelper.registerCategory(new DefaultCraftingCategory());
+        recipeHelper.registerCategory(new DefaultSmeltingCategory());
+        recipeHelper.registerCategory(new DefaultBrewingCategory());
+    }
+    
+    @Override
+    public void registerRecipeDisplays(RecipeHelper recipeHelper) {
+        for(IRecipe value : recipeHelper.getRecipeManager().getRecipes())
             if (value instanceof ShapelessRecipe)
-                RecipeHelper.getInstance().registerRecipe(CRAFTING, new DefaultShapelessDisplay((ShapelessRecipe) value));
+                recipeHelper.registerDisplay(CRAFTING, new DefaultShapelessDisplay((ShapelessRecipe) value));
             else if (value instanceof ShapedRecipe)
-                RecipeHelper.getInstance().registerRecipe(CRAFTING, new DefaultShapedDisplay((ShapedRecipe) value));
+                recipeHelper.registerDisplay(CRAFTING, new DefaultShapedDisplay((ShapedRecipe) value));
             else if (value instanceof FurnaceRecipe)
-                RecipeHelper.getInstance().registerRecipe(SMELTING, new DefaultSmeltingDisplay((FurnaceRecipe) value));
-        BREWING_DISPLAYS.forEach(display -> RecipeHelper.getInstance().registerRecipe(BREWING, display));
+                recipeHelper.registerDisplay(SMELTING, new DefaultSmeltingDisplay((FurnaceRecipe) value));
+        BREWING_DISPLAYS.forEach(display -> recipeHelper.registerDisplay(BREWING, display));
     }
     
     @Override
-    public void registerSpeedCraft() {
-        RecipeHelper.getInstance().registerSpeedCraftButtonArea(DefaultPlugin.BREWING, null);
-        RecipeHelper.getInstance().registerSpeedCraftFunctional(DefaultPlugin.CRAFTING, new SpeedCraftFunctional<DefaultCraftingDisplay>() {
+    public void registerSpeedCraft(RecipeHelper recipeHelper) {
+        recipeHelper.registerSpeedCraftButtonArea(DefaultPlugin.BREWING, null);
+        recipeHelper.registerSpeedCraftFunctional(DefaultPlugin.CRAFTING, new SpeedCraftFunctional<DefaultCraftingDisplay>() {
             @Override
             public Class[] getFunctioningFor() {
                 return new Class[]{GuiInventory.class, GuiCrafting.class};
@@ -76,7 +113,7 @@ public class DefaultPlugin implements IRecipePlugin {
                 return gui instanceof GuiCrafting || (gui instanceof GuiInventory && recipe.getHeight() < 3 && recipe.getWidth() < 3);
             }
         });
-        RecipeHelper.getInstance().registerSpeedCraftFunctional(DefaultPlugin.SMELTING, new SpeedCraftFunctional<DefaultSmeltingDisplay>() {
+        recipeHelper.registerSpeedCraftFunctional(DefaultPlugin.SMELTING, new SpeedCraftFunctional<DefaultSmeltingDisplay>() {
             @Override
             public Class[] getFunctioningFor() {
                 return new Class[]{GuiFurnace.class};

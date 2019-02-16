@@ -52,7 +52,7 @@ public class DefaultSmeltingCategory implements IRecipeCategory<DefaultSmeltingD
                 int height = MathHelper.ceil((System.currentTimeMillis() / 250 % 14d) / 1f);
                 drawTexturedModalRect(startPoint.x + 2, startPoint.y + 21 + (14 - height), 82, 77 + (14 - height), 14, height);
                 int width = MathHelper.ceil((System.currentTimeMillis() / 250 % 24d) / 1f);
-                drawTexturedModalRect(startPoint.x + 24, startPoint.y + 19, 82, 92, width, 17);
+                drawTexturedModalRect(startPoint.x + 24, startPoint.y + 18, 82, 91, width, 17);
             }
         }));
         List<List<ItemStack>> input = recipeDisplaySupplier.get().getInput();

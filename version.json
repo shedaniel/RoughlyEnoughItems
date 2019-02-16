@@ -6,7 +6,7 @@
     },
     {
       "game": "1.13.2",
-      "mod": "2.2.0.16"
+      "mod": "2.3.0.17"
     }
   ],
   "changelogs": {
@@ -15,6 +15,11 @@
         "version": "2.2.0.16",
         "text": "Added a version checker, an option to mirror the item panel and fixed interacting with REI when hidden.",
         "level": "light"
+      },
+      {
+        "version": "2.3.0.17",
+        "text": "Fixed lots of bugs",
+        "level": "useful"
       }
     ]
   }

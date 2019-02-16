@@ -11,14 +11,10 @@ import java.nio.file.Files;
 
 public class ConfigHelper {
     
+    private static ConfigHelper instance = new ConfigHelper();
     private final File configFile;
     private REIConfig config;
-    private static ConfigHelper instance = new ConfigHelper();
     private boolean craftableOnly;
-    
-    public static ConfigHelper getInstance() {
-        return instance;
-    }
     
     public ConfigHelper() {
         this.configFile = new File(RiftLoader.instance.configDir, "rei.json");
@@ -27,9 +23,14 @@ public class ConfigHelper {
             if (!configFile.getParentFile().exists() || !configFile.getParentFile().isDirectory())
                 configFile.getParentFile().mkdirs();
             loadConfig();
+            RoughlyEnoughItemsCore.LOGGER.info("REI: Config is loaded.");
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    
+    public static ConfigHelper getInstance() {
+        return instance;
     }
     
     public void saveConfig() throws IOException {
@@ -124,6 +125,14 @@ public class ConfigHelper {
     
     public void setMirrorItemPanel(boolean mirrorItemPanel) {
         config.mirrorItemPanel = mirrorItemPanel;
+    }
+    
+    public boolean isLoadingDefaultPlugin() {
+        return config.loadDefaultPlugin;
+    }
+    
+    public void setLoadingDefaultPlugin(boolean loadDefaultPlugin) {
+        config.loadDefaultPlugin = loadDefaultPlugin;
     }
     
 }

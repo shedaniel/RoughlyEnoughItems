@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ITextComponent;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -16,32 +17,30 @@ import java.util.List;
 public abstract class ButtonWidget extends Gui implements IWidget {
     
     protected static final ResourceLocation WIDGET_TEX = new ResourceLocation("textures/gui/widgets.png");
-    public int x;
-    public int y;
     public String text;
     public boolean enabled;
     public boolean visible;
-    protected int width;
-    protected int height;
     protected boolean hovered;
     private boolean pressed;
     private Rectangle bounds;
     
+    public ButtonWidget(Rectangle rectangle, ITextComponent text) {
+        this(rectangle, text.getFormattedText());
+    }
+    
     public ButtonWidget(Rectangle rectangle, String text) {
-        this(rectangle.x, rectangle.y, rectangle.width, rectangle.height, text);
+        this.bounds = rectangle;
+        this.enabled = true;
+        this.visible = true;
+        this.text = text;
     }
     
     public ButtonWidget(int x, int y, int width, int height, String text) {
-        this.width = 200;
-        this.height = 20;
-        this.enabled = true;
-        this.visible = true;
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
-        this.text = text;
-        this.bounds = new Rectangle(x, this.y, this.width, this.height);
+        this(new Rectangle(x, y, width, height), text);
+    }
+    
+    public ButtonWidget(int x, int y, int width, int height, ITextComponent text) {
+        this(new Rectangle(x, y, width, height), text);
     }
     
     public Rectangle getBounds() {
@@ -66,8 +65,8 @@ public abstract class ButtonWidget extends Gui implements IWidget {
     
     @Override
     public void draw(int mouseX, int mouseY, float partialTicks) {
-        
         if (this.visible) {
+            int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;
             Minecraft minecraftClient_1 = Minecraft.getInstance();
             FontRenderer fontRenderer_1 = minecraftClient_1.fontRenderer;
             minecraftClient_1.getTextureManager().bindTexture(WIDGET_TEX);
@@ -78,18 +77,18 @@ public abstract class ButtonWidget extends Gui implements IWidget {
             GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
             GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
             //Four Corners
-            this.drawTexturedModalRect(this.x, this.y, 0, 46 + textureOffset * 20, 4, 4);
-            this.drawTexturedModalRect(this.x + this.width - 4, this.y, 196, 46 + textureOffset * 20, 4, 4);
-            this.drawTexturedModalRect(this.x, this.y + this.height - 4, 0, 62 + textureOffset * 20, 4, 4);
-            this.drawTexturedModalRect(this.x + this.width - 4, this.y + this.height - 4, 196, 62 + textureOffset * 20, 4, 4);
+            this.drawTexturedModalRect(x, y, 0, 46 + textureOffset * 20, 4, 4);
+            this.drawTexturedModalRect(x + width - 4, y, 196, 46 + textureOffset * 20, 4, 4);
+            this.drawTexturedModalRect(x, y + height - 4, 0, 62 + textureOffset * 20, 4, 4);
+            this.drawTexturedModalRect(x + width - 4, y + height - 4, 196, 62 + textureOffset * 20, 4, 4);
             
             //Sides
-            this.drawTexturedModalRect(this.x + 4, this.y, 4, 46 + textureOffset * 20, this.width - 8, 4);
-            this.drawTexturedModalRect(this.x + 4, this.y + this.height - 4, 4, 62 + textureOffset * 20, this.width - 8, 4);
+            this.drawTexturedModalRect(x + 4, y, 4, 46 + textureOffset * 20, width - 8, 4);
+            this.drawTexturedModalRect(x + 4, y + height - 4, 4, 62 + textureOffset * 20, width - 8, 4);
             
-            for(int i = this.y + 4; i < this.y + this.height - 4; i += 4) {
-                this.drawTexturedModalRect(this.x, i, 0, 50 + textureOffset * 20, this.width / 2, MathHelper.clamp(this.y + this.height - 4 - i, 0, 4));
-                this.drawTexturedModalRect(this.x + this.width / 2, i, 200 - this.width / 2, 50 + textureOffset * 20, this.width / 2, MathHelper.clamp(this.y + this.height - 4 - i, 0, 4));
+            for(int i = y + 4; i < y + height - 4; i += 4) {
+                this.drawTexturedModalRect(x, i, 0, 50 + textureOffset * 20, width / 2, MathHelper.clamp(y + height - 4 - i, 0, 4));
+                this.drawTexturedModalRect(x + width / 2, i, 200 - width / 2, 50 + textureOffset * 20, width / 2, MathHelper.clamp(y + height - 4 - i, 0, 4));
             }
             
             int colour = 14737632;
@@ -99,7 +98,7 @@ public abstract class ButtonWidget extends Gui implements IWidget {
                 colour = 16777120;
             }
             
-            this.drawCenteredString(fontRenderer_1, this.text, this.x + this.width / 2, this.y + (this.height - 8) / 2, colour);
+            this.drawCenteredString(fontRenderer_1, this.text, x + width / 2, y + (height - 8) / 2, colour);
         }
     }
     

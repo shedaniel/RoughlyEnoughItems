@@ -19,7 +19,6 @@ public class GuiHelper implements ClientTickable {
     private static boolean overlayVisible = true;
     private static ContainerGuiOverlay overlay;
     private static GuiContainer lastGuiContainer;
-    private static IMixinGuiContainer lastMixinGuiContainer;
     
     public static boolean isOverlayVisible() {
         return overlayVisible;
@@ -29,13 +28,16 @@ public class GuiHelper implements ClientTickable {
         overlayVisible = !overlayVisible;
     }
     
-    public static ContainerGuiOverlay getLastOverlay() {
+    public static ContainerGuiOverlay getLastOverlay(boolean reset) {
+        if (overlay == null || reset) {
+            overlay = new ContainerGuiOverlay();
+            overlay.onInitialized();
+        }
         return overlay;
     }
     
-    public static void setOverlay(ContainerGuiOverlay overlay) {
-        GuiHelper.overlay = overlay;
-        overlay.onInitialized();
+    public static ContainerGuiOverlay getLastOverlay() {
+        return getLastOverlay(false);
     }
     
     public static GuiContainer getLastGuiContainer() {
@@ -47,18 +49,14 @@ public class GuiHelper implements ClientTickable {
     }
     
     public static IMixinGuiContainer getLastMixinGuiContainer() {
-        return lastMixinGuiContainer;
+        return (IMixinGuiContainer) lastGuiContainer;
     }
     
-    public static void setLastMixinGuiContainer(IMixinGuiContainer lastMixinGuiContainer) {
-        GuiHelper.lastMixinGuiContainer = lastMixinGuiContainer;
-    }
     
     @Override
     public void clientTick(Minecraft client) {
         if (client.currentScreen instanceof GuiContainer && lastGuiContainer != client.currentScreen) {
             GuiHelper.lastGuiContainer = (GuiContainer) client.currentScreen;
-            GuiHelper.lastMixinGuiContainer = (IMixinGuiContainer) lastGuiContainer;
         }
         UpdateAnnouncer.clientTick(client);
     }

@@ -5,6 +5,7 @@ import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.init.Items;
@@ -23,7 +24,7 @@ public class ItemSlotWidget extends Gui implements HighlightableWidget {
     
     private static final ResourceLocation RECIPE_GUI = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private List<ItemStack> itemList = new LinkedList<>();
-    private boolean drawBackground, showToolTips, clickToMoreRecipes;
+    private boolean drawBackground, showToolTips, clickToMoreRecipes, drawHighlightedBackground;
     private int x, y;
     
     public ItemSlotWidget(int x, int y, ItemStack itemStack, boolean drawBackground, boolean showToolTips) {
@@ -37,11 +38,16 @@ public class ItemSlotWidget extends Gui implements HighlightableWidget {
         this.x = x;
         this.y = y;
         this.clickToMoreRecipes = false;
+        this.drawHighlightedBackground = true;
     }
     
     public ItemSlotWidget(int x, int y, List<ItemStack> itemList, boolean drawBackground, boolean showToolTips, boolean clickToMoreRecipes) {
         this(x, y, itemList, drawBackground, showToolTips);
         this.clickToMoreRecipes = clickToMoreRecipes;
+    }
+    
+    public void setDrawHighlightedBackground(boolean drawHighlightedBackground) {
+        this.drawHighlightedBackground = drawHighlightedBackground;
     }
     
     public boolean isDrawBackground() {
@@ -60,15 +66,24 @@ public class ItemSlotWidget extends Gui implements HighlightableWidget {
             Minecraft.getInstance().getTextureManager().bindTexture(RECIPE_GUI);
             drawTexturedModalRect(this.x - 1, this.y - 1, 0, 222, 18, 18);
         }
-        if (itemStack.isEmpty())
-            return;
-        RenderHelper.enableGUIStandardItemLighting();
-        ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
-        itemRenderer.zLevel = 200.0F;
-        itemRenderer.renderItemAndEffectIntoGUI(itemStack, x, y);
-        itemRenderer.renderItemOverlayIntoGUI(Minecraft.getInstance().fontRenderer, itemStack, x, y, getItemCountOverlay(itemStack));
-        itemRenderer.zLevel = 0.0F;
-        if (isHighlighted(mouseX, mouseY) && showToolTips)
+        if (drawHighlightedBackground && isHighlighted(mouseX, mouseY)) {
+            GlStateManager.disableLighting();
+            GlStateManager.disableDepthTest();
+            GlStateManager.colorMask(true, true, true, false);
+            drawGradientRect(x, y, x + 16, y + 16, -2130706433, -2130706433);
+            GlStateManager.colorMask(true, true, true, true);
+            GlStateManager.enableLighting();
+            GlStateManager.enableDepthTest();
+        }
+        if (!itemStack.isEmpty()) {
+            RenderHelper.enableGUIStandardItemLighting();
+            ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
+            itemRenderer.zLevel = 200.0F;
+            itemRenderer.renderItemAndEffectIntoGUI(itemStack, x, y);
+            itemRenderer.renderItemOverlayIntoGUI(Minecraft.getInstance().fontRenderer, itemStack, x, y, getItemCountOverlay(itemStack));
+            itemRenderer.zLevel = 0.0F;
+        }
+        if (!itemStack.isEmpty() && isHighlighted(mouseX, mouseY) && showToolTips)
             drawToolTip(itemStack);
     }
     
@@ -82,7 +97,7 @@ public class ItemSlotWidget extends Gui implements HighlightableWidget {
         Minecraft mc = Minecraft.getInstance();
         List<String> toolTip = Lists.newArrayList();
         try {
-            toolTip = GuiHelper.getLastOverlay().getItemToolTip(itemStack).stream().filter(s -> !s.equals(modString)).collect(Collectors.toList());
+            toolTip = Minecraft.getInstance().currentScreen.getItemToolTip(itemStack).stream().filter(s -> !s.equals(modString)).collect(Collectors.toList());
         } catch (Exception e) {
             toolTip.add(itemStack.getDisplayName().getFormattedText());
         }

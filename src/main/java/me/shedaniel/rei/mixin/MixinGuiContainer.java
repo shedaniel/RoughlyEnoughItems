@@ -37,36 +37,29 @@ public class MixinGuiContainer extends GuiScreen implements IMixinGuiContainer {
     private ItemStack draggedStack;
     
     @Override
-    public int getContainerLeft() {
+    public int rei_getContainerLeft() {
         return guiLeft;
     }
     
     @Override
-    public int getContainerTop() {
+    public int rei_getContainerTop() {
         return guiTop;
     }
     
     @Override
-    public int getContainerWidth() {
+    public int rei_etContainerWidth() {
         return xSize;
     }
     
     @Override
-    public int getContainerHeight() {
+    public int rei_getContainerHeight() {
         return ySize;
-    }
-    
-    @Override
-    public void setOverlay(ContainerGuiOverlay overlay) {
-        GuiHelper.setOverlay(overlay);
     }
     
     @Inject(method = "initGui()V", at = @At("RETURN"))
     protected void initGui(CallbackInfo info) {
         GuiHelper.setLastGuiContainer((GuiContainer) (Object) this);
-        GuiHelper.setLastMixinGuiContainer((IMixinGuiContainer) this);
-        GuiHelper.setOverlay(new ContainerGuiOverlay());
-        this.children.add(GuiHelper.getLastOverlay());
+        this.children.add(GuiHelper.getLastOverlay(true));
     }
     
     @Inject(method = "render(IIF)V", at = @At("RETURN"))
@@ -80,7 +73,7 @@ public class MixinGuiContainer extends GuiScreen implements IMixinGuiContainer {
     }
     
     @Override
-    public ItemStack getDraggedStack() {
+    public ItemStack rei_getDraggedStack() {
         return this.draggedStack;
     }
     
@@ -93,7 +86,7 @@ public class MixinGuiContainer extends GuiScreen implements IMixinGuiContainer {
     }
     
     @Override
-    public Slot getHoveredSlot() {
+    public Slot rei_getHoveredSlot() {
         return hoveredSlot;
     }
     

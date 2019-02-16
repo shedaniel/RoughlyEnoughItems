@@ -5,7 +5,6 @@ import com.google.gson.*;
 import com.google.gson.annotations.SerializedName;
 import me.shedaniel.rei.client.ConfigHelper;
 import org.apache.commons.io.IOUtils;
-import org.dimdev.riftloader.listener.InitializationListener;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class UpdateChecker implements InitializationListener {
+public class UpdateChecker {
     
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
     private static final Version CURRENT_VERSION = new Version("2.2.0.16");
@@ -93,8 +92,7 @@ public class UpdateChecker implements InitializationListener {
         return objects.get(objects.size() - 1).getModVersion();
     }
     
-    @Override
-    public void onInitialization() {
+    public static void onInitialization() {
         if (!checkUpdates())
             return;
         InputStream downloadedStream = downloadVersionString();
