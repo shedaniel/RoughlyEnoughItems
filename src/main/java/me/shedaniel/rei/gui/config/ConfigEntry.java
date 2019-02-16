@@ -4,6 +4,7 @@ import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.gui.widget.ButtonWidget;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.audio.PositionedSoundInstance;
+import net.minecraft.client.font.FontRenderer;
 import net.minecraft.client.gui.widget.EntryListWidget;
 import net.minecraft.client.util.Window;
 import net.minecraft.sound.SoundEvents;
@@ -13,6 +14,7 @@ import java.awt.*;
 
 public class ConfigEntry extends EntryListWidget.Entry<ConfigEntry> {
     
+    private static final FontRenderer FONT_RENDERER = MinecraftClient.getInstance().fontRenderer;
     private TextComponent nameComponent;
     private ConfigEntryButtonProvider buttonProvider;
     private ButtonWidget buttonWidget;
@@ -38,13 +40,17 @@ public class ConfigEntry extends EntryListWidget.Entry<ConfigEntry> {
     
     @Override
     public void draw(int entryWidth, int height, int i3, int i4, boolean isSelected, float delta) {
-        int x = getX();
-        int y = getY();
         Window window = MinecraftClient.getInstance().window;
         Point mouse = ClientHelper.getMouseLocation();
-        MinecraftClient.getInstance().fontRenderer.drawWithShadow(nameComponent.getFormattedText(), x + 5, y + 5, -1);
-        this.buttonWidget.text = buttonProvider.getText();
-        this.buttonWidget.getBounds().setLocation(window.getScaledWidth() - 190, y + 2);
+        if (MinecraftClient.getInstance().fontRenderer.isRightToLeft()) {
+            MinecraftClient.getInstance().fontRenderer.drawWithShadow(nameComponent.getFormattedText(), window.getScaledWidth() - FONT_RENDERER.getStringWidth(nameComponent.getFormattedText()) - 40, getY() + 5, 16777215);
+            this.buttonWidget.text = buttonProvider.getText();
+            this.buttonWidget.getBounds().setLocation(10, getY() + 2);
+        } else {
+            MinecraftClient.getInstance().fontRenderer.drawWithShadow(nameComponent.getFormattedText(), 10.0F, getY() + 5, 16777215);
+            this.buttonWidget.text = buttonProvider.getText();
+            this.buttonWidget.getBounds().setLocation(window.getScaledWidth() - 190, getY() + 2);
+        }
         buttonProvider.draw(buttonWidget, mouse, delta);
     }
     
