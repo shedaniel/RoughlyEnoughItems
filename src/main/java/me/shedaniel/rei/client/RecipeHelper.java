@@ -18,9 +18,9 @@ public class RecipeHelper {
     
     private final Map<ResourceLocation, List<IRecipeDisplay>> recipeCategoryListMap = Maps.newHashMap();
     private final List<IRecipeCategory> categories = Lists.newArrayList();
-    private RecipeManager recipeManager;
     private final Map<ResourceLocation, SpeedCraftAreaSupplier> speedCraftAreaSupplierMap = Maps.newHashMap();
     private final Map<ResourceLocation, List<SpeedCraftFunctional>> speedCraftFunctionalMap = Maps.newHashMap();
+    private RecipeManager recipeManager;
     
     public static RecipeHelper getInstance() {
         return RoughlyEnoughItemsCore.getRecipeHelper();
@@ -60,7 +60,7 @@ public class RecipeHelper {
         recipeCategoryListMap.put(category.getResourceLocation(), Lists.newLinkedList());
     }
     
-    public void registerRecipe(ResourceLocation categoryIdentifier, IRecipeDisplay display) {
+    public void registerDisplay(ResourceLocation categoryIdentifier, IRecipeDisplay display) {
         if (!recipeCategoryListMap.containsKey(categoryIdentifier))
             return;
         recipeCategoryListMap.get(categoryIdentifier).add(display);
@@ -148,6 +148,7 @@ public class RecipeHelper {
         speedCraftFunctionalMap.put(category, list);
     }
     
+    @SuppressWarnings("deprecation")
     public void recipesLoaded(RecipeManager recipeManager) {
         this.recipeManager = recipeManager;
         this.recipeCategoryListMap.clear();
@@ -163,10 +164,19 @@ public class RecipeHelper {
             return resourceLocation == null ? "NULL" : resourceLocation;
         }).collect(Collectors.toList())));
         Collections.reverse(plugins);
+        RoughlyEnoughItemsCore.getItemRegisterer().getModifiableItemList().clear();
+        IPluginDisabler pluginDisabler = RoughlyEnoughItemsCore.getPluginDisabler();
         plugins.forEach(plugin -> {
-            plugin.registerPluginCategories();
-            plugin.registerRecipes();
-            plugin.registerSpeedCraft();
+            String location = RoughlyEnoughItemsPlugin.getPluginResourceLocation(plugin);
+            ResourceLocation resourceLocation = new ResourceLocation(location == null ? "null" : location);
+            if (pluginDisabler.isFunctionEnabled(resourceLocation, PluginFunction.REGISTER_ITEMS))
+                plugin.registerItems(RoughlyEnoughItemsCore.getItemRegisterer());
+            if (pluginDisabler.isFunctionEnabled(resourceLocation, PluginFunction.REGISTER_CATEGORIES))
+                plugin.registerPluginCategories(this);
+            if (pluginDisabler.isFunctionEnabled(resourceLocation, PluginFunction.REGISTER_RECIPE_DISPLAYS))
+                plugin.registerRecipeDisplays(this);
+            if (pluginDisabler.isFunctionEnabled(resourceLocation, PluginFunction.REGISTER_SPEED_CRAFT))
+                plugin.registerSpeedCraft(this);
         });
         RoughlyEnoughItemsCore.LOGGER.info("Registered REI Categories: " + String.join(", ", categories.stream().map(category -> {
             return category.getCategoryName();

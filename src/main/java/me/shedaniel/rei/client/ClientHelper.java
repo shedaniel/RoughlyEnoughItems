@@ -1,21 +1,17 @@
 package me.shedaniel.rei.client;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.IRecipeCategory;
 import me.shedaniel.rei.api.IRecipeDisplay;
 import me.shedaniel.rei.gui.ContainerGuiOverlay;
-import me.shedaniel.rei.gui.widget.ConfigWidget;
+import me.shedaniel.rei.gui.config.ConfigGui;
 import me.shedaniel.rei.gui.widget.RecipeViewingWidgetGui;
 import me.shedaniel.rei.network.CreateItemsPacket;
 import me.shedaniel.rei.network.DeleteItemsPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHelper;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.init.Items;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
@@ -24,18 +20,12 @@ import org.dimdev.riftloader.RiftLoader;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class ClientHelper {
     
-    private static List<ItemStack> itemList;
     private static boolean cheating = false;
-    
-    public ClientHelper() {
-        this.itemList = Lists.newLinkedList();
-    }
     
     public static String getModFromItemStack(ItemStack stack) {
         if (!stack.isEmpty()) {
@@ -51,10 +41,6 @@ public class ClientHelper {
             }).orElse(modid);
         }
         return "";
-    }
-    
-    public static List<ItemStack> getItemList() {
-        return itemList;
     }
     
     public static Point getMouseLocation() {
@@ -117,7 +103,7 @@ public class ClientHelper {
     }
     
     public static void openConfigWindow(GuiScreen parent) {
-        Minecraft.getInstance().displayGuiScreen(new ConfigWidget(parent));
+        Minecraft.getInstance().displayGuiScreen(new ConfigGui(parent));
     }
     
     public static List<ItemStack> getInventoryItemsTypes() {
@@ -128,41 +114,6 @@ public class ClientHelper {
                 inventoryStacks.add(itemStack);
         }));
         return inventoryStacks;
-    }
-    
-    public void clientLoaded() {
-        IRegistry.ITEM.forEach(item -> {
-            if (!item.equals(Items.ENCHANTED_BOOK))
-                registerItem(item);
-        });
-        IRegistry.ENCHANTMENT.forEach(enchantment -> {
-            for(int i = enchantment.getMinLevel(); i < enchantment.getMaxLevel(); i++) {
-                Map<Enchantment, Integer> map = new HashMap<>();
-                map.put(enchantment, i);
-                ItemStack itemStack = new ItemStack(Items.ENCHANTED_BOOK);
-                EnchantmentHelper.setEnchantments(map, itemStack);
-                registerItemStack(itemStack);
-            }
-        });
-    }
-    
-    public void registerItem(Item item) {
-        registerItemStack(item.getDefaultInstance());
-        NonNullList<ItemStack> stacks = NonNullList.create();
-        item.fillItemGroup(item.getGroup(), stacks);
-        stacks.forEach(this::registerItemStack);
-    }
-    
-    public void registerItemStack(ItemStack stack) {
-        if (!stack.getItem().equals(Items.AIR) && !alreadyContain(stack))
-            itemList.add(stack);
-    }
-    
-    private boolean alreadyContain(ItemStack stack) {
-        for(ItemStack itemStack : itemList)
-            if (ItemStack.areItemStacksEqual(stack, itemStack))
-                return true;
-        return false;
     }
     
 }

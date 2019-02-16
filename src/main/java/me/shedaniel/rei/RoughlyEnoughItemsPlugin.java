@@ -35,6 +35,7 @@ public class RoughlyEnoughItemsPlugin {
     public static IRecipePlugin registerPlugin(String resourceLocation, IRecipePlugin plugin) {
         plugins.put(resourceLocation, plugin);
         RoughlyEnoughItemsPlugin.LOGGER.info("REI: Registered Plugin from %s by %s.", resourceLocation.toString(), plugin.getClass().getSimpleName());
+        plugin.onFirstLoad(RoughlyEnoughItemsCore.getPluginDisabler());
         return plugin;
     }
     
@@ -77,7 +78,6 @@ public class RoughlyEnoughItemsPlugin {
                 RoughlyEnoughItemsPlugin.LOGGER.error("REI: Failed to load plugin file from %s. (%s)", (Object) modInfo.id, (Object) e.getLocalizedMessage());
             }
         });
-        plugins.values().forEach(IRecipePlugin::onFirstLoad);
         new LinkedList<>(plugins.keySet()).stream().filter(location -> disablingPlugins.contains(location)).forEach(location -> {
             plugins.remove(location);
             LOGGER.info("REI: Disabled REI plugin %s.", location.toString());

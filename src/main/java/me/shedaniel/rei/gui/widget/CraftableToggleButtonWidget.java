@@ -21,13 +21,12 @@ public abstract class CraftableToggleButtonWidget extends ButtonWidget {
     private ItemRenderer itemRenderer;
     
     public CraftableToggleButtonWidget(Rectangle rectangle) {
-        this(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+        super(rectangle, "");
         this.itemRenderer = Minecraft.getInstance().getItemRenderer();
     }
     
     public CraftableToggleButtonWidget(int x, int y, int width, int height) {
-        super(x, y, width, height, "");
-        this.itemRenderer = Minecraft.getInstance().getItemRenderer();
+        this(new Rectangle(x, y, width, height));
     }
     
     @Override
@@ -36,13 +35,13 @@ public abstract class CraftableToggleButtonWidget extends ButtonWidget {
         
         RenderHelper.enableGUIStandardItemLighting();
         this.itemRenderer.zLevel = 0.0F;
-        this.itemRenderer.renderItemAndEffectIntoGUI(new ItemStack(Blocks.CRAFTING_TABLE), x + 2, y + 2);
+        this.itemRenderer.renderItemAndEffectIntoGUI(new ItemStack(Blocks.CRAFTING_TABLE), getBounds().x + 2, getBounds().y + 2);
         this.itemRenderer.zLevel = 0.0F;
         RenderHelper.disableStandardItemLighting();
         Minecraft.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.zLevel = 100f;
-        this.drawTexturedModalRect(x, y, (56 + (ConfigHelper.getInstance().craftableOnly() ? 0 : 20)), 202, 20, 20);
+        this.drawTexturedModalRect(getBounds().x, getBounds().y, (56 + (ConfigHelper.getInstance().craftableOnly() ? 0 : 20)), 202, 20, 20);
         this.zLevel = 0f;
         if (getBounds().contains(mouseX, mouseY))
             drawTooltip();

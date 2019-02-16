@@ -7,11 +7,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.ITextComponent;
 import org.apache.commons.lang3.StringUtils;
 
 import java.awt.*;
@@ -22,7 +20,7 @@ import java.util.stream.Stream;
 
 public class ItemListOverlay extends Gui implements IWidget {
     
-    private List<IWidget> widgets = new ArrayList<>();
+    private List<IWidget> widgets;
     private int width, height, page;
     private Rectangle rectangle, listArea;
     private List<ItemStack> currentDisplayed;
@@ -46,16 +44,10 @@ public class ItemListOverlay extends Gui implements IWidget {
             GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.format("text.rei.delete_items"))));
     }
     
-    public void updateList(int page, String searchTerm) {
-        updateList(rectangle, page, searchTerm);
-    }
-    
     public void updateList(Rectangle bounds, int page, String searchTerm) {
         this.rectangle = bounds;
-        if (ClientHelper.getItemList().isEmpty())
-            RoughlyEnoughItemsCore.getClientHelper().clientLoaded();
-        currentDisplayed = processSearchTerm(searchTerm, ClientHelper.getItemList(), GuiHelper.inventoryStacks);
-        this.widgets.clear();
+        currentDisplayed = processSearchTerm(searchTerm, RoughlyEnoughItemsCore.getItemRegisterer().getItemList(), GuiHelper.inventoryStacks);
+        this.widgets = Lists.newLinkedList();
         this.page = page;
         calculateListSize(rectangle);
         double startX = rectangle.getCenterX() - width * 9;
@@ -90,8 +82,7 @@ public class ItemListOverlay extends Gui implements IWidget {
                     return false;
                 }
             };
-            if (this.rectangle.contains(slotWidget.getBounds()))
-                widgets.add(slotWidget);
+            widgets.add(slotWidget);
         }
     }
     
@@ -154,9 +145,9 @@ public class ItemListOverlay extends Gui implements IWidget {
     
     private boolean filterItem(ItemStack itemStack, List<SearchArgument> arguments) {
         String mod = ClientHelper.getModFromItemStack(itemStack);
-        List<String> toolTipsList = getStackTooltip(itemStack);
+        List<String> toolTipsList = Minecraft.getInstance().currentScreen.getItemToolTip(itemStack);
         String toolTipsMixed = toolTipsList.stream().skip(1).collect(Collectors.joining()).toLowerCase();
-        String allMixed = Stream.of(itemStack.getDisplayName().getString(), toolTipsMixed).collect(Collectors.joining()).toLowerCase();
+        String allMixed = Stream.of(itemStack.getDisplayName().getFormattedText(), toolTipsMixed).collect(Collectors.joining()).toLowerCase();
         for(SearchArgument searchArgument : arguments.stream().filter(searchArgument -> !searchArgument.isInclude()).collect(Collectors.toList())) {
             if (searchArgument.getArgumentType().equals(SearchArgument.ArgumentType.MOD))
                 if (mod.toLowerCase().contains(searchArgument.getText().toLowerCase()))
@@ -182,11 +173,6 @@ public class ItemListOverlay extends Gui implements IWidget {
         return true;
     }
     
-    private List<String> getStackTooltip(ItemStack itemStack) {
-        Minecraft client = Minecraft.getInstance();
-        return itemStack.getTooltip(client.player, client.gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL).stream().map(ITextComponent::getFormattedText).collect(Collectors.toList());
-    }
-    
     private void calculateListSize(Rectangle rect) {
         int xOffset = 0, yOffset = 0;
         this.width = 0;
@@ -207,19 +193,20 @@ public class ItemListOverlay extends Gui implements IWidget {
     
     @Override
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
-        EntityPlayerSP player = Minecraft.getInstance().player;
-        if (rectangle.contains(double_1, double_2))
+        if (rectangle.contains(double_1, double_2)) {
+            EntityPlayerSP player = Minecraft.getInstance().player;
             if (ClientHelper.isCheating() && !player.inventory.getItemStack().isEmpty() && Minecraft.getInstance().isSingleplayer()) {
                 ClientHelper.sendDeletePacket();
                 return true;
             }
-        if (!player.inventory.getItemStack().isEmpty() && Minecraft.getInstance().isSingleplayer())
-            return false;
-        if (onMouseClick(int_1, double_1, double_2))
-            return true;
-        for(IWidget widget : getListeners())
-            if (widget.mouseClicked(double_1, double_2, int_1))
+            if (!player.inventory.getItemStack().isEmpty() && Minecraft.getInstance().isSingleplayer())
+                return false;
+            if (onMouseClick(int_1, double_1, double_2))
                 return true;
+            for(IWidget widget : getListeners())
+                if (widget.mouseClicked(double_1, double_2, int_1))
+                    return true;
+        }
         return false;
     }
     

@@ -1,7 +1,6 @@
 package me.shedaniel.rei.mixin;
 
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.RoughlyEnoughItemsPlugin;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.item.crafting.RecipeManager;
 import net.minecraft.network.play.server.SPacketUpdateRecipes;
@@ -21,7 +20,6 @@ public class MixinNetHandlerPlayClient {
     
     @Inject(method = "handleUpdateRecipes", at = @At("RETURN"))
     private void onUpdateRecipes(SPacketUpdateRecipes packetIn, CallbackInfo ci) {
-        RoughlyEnoughItemsPlugin.discoverPlugins();
         RoughlyEnoughItemsCore.getRecipeHelper().recipesLoaded(recipeManager);
     }
     
