@@ -6,6 +6,7 @@ import net.minecraft.client.audio.PositionedSoundInstance;
 import net.minecraft.client.font.FontRenderer;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.TextComponent;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
@@ -23,6 +24,10 @@ public abstract class ButtonWidget extends Drawable implements IWidget {
     private boolean pressed;
     private Rectangle bounds;
     
+    public ButtonWidget(Rectangle rectangle, TextComponent text) {
+        this(rectangle, text.getFormattedText());
+    }
+    
     public ButtonWidget(Rectangle rectangle, String text) {
         this.bounds = rectangle;
         this.enabled = true;
@@ -31,6 +36,10 @@ public abstract class ButtonWidget extends Drawable implements IWidget {
     }
     
     public ButtonWidget(int x, int y, int width, int height, String text) {
+        this(new Rectangle(x, y, width, height), text);
+    }
+    
+    public ButtonWidget(int x, int y, int width, int height, TextComponent text) {
         this(new Rectangle(x, y, width, height), text);
     }
     

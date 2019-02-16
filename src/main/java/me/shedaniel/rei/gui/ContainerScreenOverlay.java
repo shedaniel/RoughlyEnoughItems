@@ -15,6 +15,7 @@ import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.Window;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.TranslatableTextComponent;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
@@ -44,7 +45,7 @@ public class ContainerScreenOverlay extends DrawableContainer {
         widgets.add(this.itemListOverlay = new ItemListOverlay(page));
         this.itemListOverlay.updateList(getItemListArea(), page, searchTerm);
         
-        widgets.add(buttonLeft = new ButtonWidget(rectangle.x, rectangle.y + 5, 16, 16, "<") {
+        widgets.add(buttonLeft = new ButtonWidget(rectangle.x, rectangle.y + 5, 16, 16, new TranslatableTextComponent("text.rei.left_arrow")) {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
                 page--;
@@ -53,7 +54,7 @@ public class ContainerScreenOverlay extends DrawableContainer {
                 itemListOverlay.updateList(getItemListArea(), page, searchTerm);
             }
         });
-        widgets.add(buttonRight = new ButtonWidget(rectangle.x + rectangle.width - 18, rectangle.y + 5, 16, 16, ">") {
+        widgets.add(buttonRight = new ButtonWidget(rectangle.x + rectangle.width - 18, rectangle.y + 5, 16, 16, new TranslatableTextComponent("text.rei.right_arrow")) {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
                 page++;

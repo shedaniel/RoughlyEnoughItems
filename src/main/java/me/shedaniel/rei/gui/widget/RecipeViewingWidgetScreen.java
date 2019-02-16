@@ -17,6 +17,7 @@ import net.minecraft.client.gui.Screen;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.util.Window;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.TranslatableTextComponent;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
@@ -91,7 +92,7 @@ public class RecipeViewingWidgetScreen extends Screen {
         this.widgets.clear();
         this.bounds = new Rectangle(window.getScaledWidth() / 2 - guiWidth / 2, window.getScaledHeight() / 2 - guiHeight / 2, guiWidth, guiHeight);
         
-        widgets.add(categoryBack = new ButtonWidget((int) bounds.getX() + 5, (int) bounds.getY() + 5, 12, 12, "<") {
+        widgets.add(categoryBack = new ButtonWidget((int) bounds.getX() + 5, (int) bounds.getY() + 5, 12, 12, new TranslatableTextComponent("text.rei.left_arrow")) {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
                 int currentCategoryIndex = categories.indexOf(selectedCategory);
@@ -103,7 +104,7 @@ public class RecipeViewingWidgetScreen extends Screen {
                 RecipeViewingWidgetScreen.this.onInitialized();
             }
         });
-        widgets.add(categoryNext = new ButtonWidget((int) bounds.getX() + 159, (int) bounds.getY() + 5, 12, 12, ">") {
+        widgets.add(categoryNext = new ButtonWidget((int) bounds.getX() + 159, (int) bounds.getY() + 5, 12, 12, new TranslatableTextComponent("text.rei.right_arrow")) {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
                 int currentCategoryIndex = categories.indexOf(selectedCategory);
@@ -118,7 +119,7 @@ public class RecipeViewingWidgetScreen extends Screen {
         categoryBack.enabled = categories.size() > 1;
         categoryNext.enabled = categories.size() > 1;
         
-        widgets.add(recipeBack = new ButtonWidget((int) bounds.getX() + 5, (int) bounds.getY() + 21, 12, 12, "<") {
+        widgets.add(recipeBack = new ButtonWidget((int) bounds.getX() + 5, (int) bounds.getY() + 21, 12, 12, new TranslatableTextComponent("text.rei.left_arrow")) {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
                 page--;
@@ -127,7 +128,7 @@ public class RecipeViewingWidgetScreen extends Screen {
                 RecipeViewingWidgetScreen.this.onInitialized();
             }
         });
-        widgets.add(recipeNext = new ButtonWidget((int) bounds.getX() + 159, (int) bounds.getY() + 21, 12, 12, ">") {
+        widgets.add(recipeNext = new ButtonWidget((int) bounds.getX() + 159, (int) bounds.getY() + 21, 12, 12, new TranslatableTextComponent("text.rei.right_arrow")) {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
                 page++;
