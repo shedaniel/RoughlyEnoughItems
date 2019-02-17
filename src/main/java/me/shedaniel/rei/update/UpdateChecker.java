@@ -5,21 +5,21 @@ import com.google.gson.*;
 import com.google.gson.annotations.SerializedName;
 import me.shedaniel.rei.client.ConfigHelper;
 import org.apache.commons.io.IOUtils;
+import org.dimdev.riftloader.RiftLoader;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringBufferInputStream;
+import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
 public class UpdateChecker {
     
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-    private static final String CURRENT_VERSION_STRING = "@VERSION@";
     private static final String CURRENT_GAME_VERSION = "1.13.2";
     private static Version CURRENT_VERSION;
     private static Version latestForGame = null;
@@ -95,10 +95,11 @@ public class UpdateChecker {
     
     public static void onInitialization() {
         try {
-            CURRENT_VERSION = new Version(CURRENT_VERSION_STRING);
-        } catch (Exception e) {
-            CURRENT_VERSION = new Version("10000.0");
+            RiftLoader.instance.getMods().stream().filter(modInfo -> modInfo.id.equalsIgnoreCase("roughlyenoughitems")).findFirst().ifPresent(modInfo -> CURRENT_VERSION = new Version(getVersionFromSource(modInfo.source)));
+        } catch (Exception e1) {
         }
+        if (CURRENT_VERSION == null)
+            CURRENT_VERSION = new Version("10000.0");
         if (!checkUpdates())
             return;
         InputStream downloadedStream = downloadVersionString();
@@ -113,6 +114,23 @@ public class UpdateChecker {
             latestForGame = new Version(parseLatest(element, CURRENT_GAME_VERSION));
         else
             latestForGame = new Version("0.0.0");
+    }
+    
+    private static String getVersionFromSource(File source) {
+        if (!source.isFile())
+            return null;
+        try (JarFile jar = new JarFile(source)) {
+            JarEntry entry = jar.getJarEntry("riftmod.json");
+            if (entry != null) {
+                InputStream inputStream = jar.getInputStream(entry);
+                JsonElement element = new JsonParser().parse(new InputStreamReader(inputStream));
+                JsonObject object = element.getAsJsonObject();
+                if (object.has("version"))
+                    return object.getAsJsonPrimitive("version").getAsString();
+            }
+        } catch (Exception e) {
+        }
+        return null;
     }
     
     static class JsonVersionElement {
