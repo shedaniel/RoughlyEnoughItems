@@ -52,7 +52,4 @@ minecraft {
     mappings = 'snapshot_20181130'
     runDir = 'run'
     tweakClass = 'org.dimdev.riftloader.launch.RiftLoaderClientTweaker'
-
-    replace "@VERSION@", project.version
-    replaceIn "me/shedaniel/rei/update/UpdateChecker.json"
 }
