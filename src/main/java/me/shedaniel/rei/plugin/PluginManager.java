@@ -3,18 +3,18 @@ package me.shedaniel.rei.plugin;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import me.shedaniel.rei.api.IPluginDisabler;
+import me.shedaniel.rei.api.Identifier;
 import me.shedaniel.rei.api.PluginFunction;
-import net.minecraft.util.ResourceLocation;
 
 import java.util.List;
 import java.util.Map;
 
 public class PluginManager implements IPluginDisabler {
     
-    private static Map<ResourceLocation, List<PluginFunction>> pluginDisabledFunctions = Maps.newHashMap();
+    private static Map<Identifier, List<PluginFunction>> pluginDisabledFunctions = Maps.newHashMap();
     
     @Override
-    public void disablePluginFunction(ResourceLocation plugin, PluginFunction function) {
+    public void disablePluginFunction(Identifier plugin, PluginFunction function) {
         List<PluginFunction> list = Lists.newArrayList();
         if (pluginDisabledFunctions.containsKey(plugin))
             list = pluginDisabledFunctions.get(plugin);
@@ -24,7 +24,7 @@ public class PluginManager implements IPluginDisabler {
     }
     
     @Override
-    public void enablePluginFunction(ResourceLocation plugin, PluginFunction function) {
+    public void enablePluginFunction(Identifier plugin, PluginFunction function) {
         List<PluginFunction> list = Lists.newArrayList();
         if (pluginDisabledFunctions.containsKey(plugin))
             list = pluginDisabledFunctions.get(plugin);
@@ -36,7 +36,7 @@ public class PluginManager implements IPluginDisabler {
     }
     
     @Override
-    public boolean isFunctionEnabled(ResourceLocation plugin, PluginFunction function) {
+    public boolean isFunctionEnabled(Identifier plugin, PluginFunction function) {
         return !pluginDisabledFunctions.containsKey(plugin) || !pluginDisabledFunctions.get(plugin).contains(function);
     }
     

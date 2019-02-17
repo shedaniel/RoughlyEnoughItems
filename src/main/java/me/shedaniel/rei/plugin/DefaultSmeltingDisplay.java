@@ -2,11 +2,11 @@ package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.IRecipeDisplay;
+import me.shedaniel.rei.api.Identifier;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipe;
 import net.minecraft.tileentity.TileEntityFurnace;
-import net.minecraft.util.ResourceLocation;
 
 import java.util.Arrays;
 import java.util.List;
@@ -50,7 +50,7 @@ public class DefaultSmeltingDisplay implements IRecipeDisplay<FurnaceRecipe> {
     }
     
     @Override
-    public ResourceLocation getRecipeCategory() {
+    public Identifier getRecipeCategory() {
         return DefaultPlugin.SMELTING;
     }
     

@@ -8,7 +8,6 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -18,7 +17,7 @@ import java.util.function.Supplier;
 
 public interface IRecipeCategory<T extends IRecipeDisplay> {
     
-    public ResourceLocation getResourceLocation();
+    public Identifier getIdentifier();
     
     public ItemStack getCategoryIcon();
     
