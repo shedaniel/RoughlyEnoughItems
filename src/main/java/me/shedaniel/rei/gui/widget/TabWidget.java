@@ -80,7 +80,7 @@ public class TabWidget extends Drawable implements HighlightableWidget {
             this.itemRenderer.zOffset = 100.0F;
             GuiLighting.enableForItems();
             this.itemRenderer.renderGuiItem(getItemStack(), l, i1);
-            this.itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().fontRenderer, getItemStack(), l, i1);
+            this.itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, getItemStack(), l, i1);
             GlStateManager.disableLighting();
             this.itemRenderer.zOffset = 0.0F;
             this.zOffset = 0.0F;

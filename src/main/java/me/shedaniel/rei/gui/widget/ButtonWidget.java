@@ -3,7 +3,7 @@ package me.shedaniel.rei.gui.widget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.audio.PositionedSoundInstance;
-import net.minecraft.client.font.FontRenderer;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.TextComponent;
@@ -67,9 +67,9 @@ public abstract class ButtonWidget extends Drawable implements IWidget {
     public void draw(int mouseX, int mouseY, float partialTicks) {
         if (this.visible) {
             int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;
-            MinecraftClient minecraftClient_1 = MinecraftClient.getInstance();
-            FontRenderer fontRenderer_1 = minecraftClient_1.fontRenderer;
-            minecraftClient_1.getTextureManager().bindTexture(WIDGET_TEX);
+            MinecraftClient client = MinecraftClient.getInstance();
+            TextRenderer textRenderer = client.textRenderer;
+            client.getTextureManager().bindTexture(WIDGET_TEX);
             GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             this.hovered = bounds.contains(mouseX, mouseY);
             int textureOffset = this.getTextureId(this.hovered);
@@ -98,7 +98,7 @@ public abstract class ButtonWidget extends Drawable implements IWidget {
                 colour = 16777120;
             }
             
-            this.drawStringCentered(fontRenderer_1, this.text, x + width / 2, y + (height - 8) / 2, colour);
+            this.drawStringCentered(textRenderer, this.text, x + width / 2, y + (height - 8) / 2, colour);
         }
     }
     

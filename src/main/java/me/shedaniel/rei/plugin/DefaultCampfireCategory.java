@@ -54,8 +54,8 @@ public class DefaultCampfireCategory implements IRecipeCategory<DefaultCampfireD
                 int width = MathHelper.ceil((System.currentTimeMillis() / 250 % 24d) / 1f);
                 drawTexturedRect(startPoint.x + 24, startPoint.y + 18, 82, 91, width, 17);
                 String text = I18n.translate("category.rei.campfire.time", MathHelper.floor(recipeDisplaySupplier.get().getCookTime() / 20d));
-                int length = MinecraftClient.getInstance().fontRenderer.getStringWidth(text);
-                MinecraftClient.getInstance().fontRenderer.draw(text, bounds.x + bounds.width - length - 5, startPoint.y + 54 - 8, 4210752);
+                int length = MinecraftClient.getInstance().textRenderer.getStringWidth(text);
+                MinecraftClient.getInstance().textRenderer.draw(text, bounds.x + bounds.width - length - 5, startPoint.y + 54 - 8, 4210752);
             }
         }));
         widgets.add(new ItemSlotWidget(startPoint.x + 1, startPoint.y + 11, recipeDisplaySupplier.get().getInput().get(0), true, true, true));

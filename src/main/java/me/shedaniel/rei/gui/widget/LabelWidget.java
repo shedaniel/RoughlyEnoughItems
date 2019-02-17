@@ -25,7 +25,7 @@ public class LabelWidget extends Drawable implements IWidget {
     
     @Override
     public void draw(int mouseX, int mouseY, float partialTicks) {
-        drawStringCentered(MinecraftClient.getInstance().fontRenderer, text, x, y, -1);
+        drawStringCentered(MinecraftClient.getInstance().textRenderer, text, x, y, -1);
     }
     
 }

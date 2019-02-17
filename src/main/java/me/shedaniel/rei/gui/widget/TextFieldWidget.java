@@ -4,7 +4,7 @@ import com.google.common.base.Predicates;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.FontRenderer;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Screen;
 import net.minecraft.client.render.BufferBuilder;
@@ -21,7 +21,7 @@ import java.util.function.Predicate;
 
 public class TextFieldWidget extends Drawable implements IWidget {
     
-    private final FontRenderer fontRenderer;
+    private final TextRenderer textRenderer;
     private int width;
     private int height;
     private int x;
@@ -62,7 +62,7 @@ public class TextFieldWidget extends Drawable implements IWidget {
         this.field_2099 = (string_1, integer_1) -> {
             return string_1;
         };
-        this.fontRenderer = MinecraftClient.getInstance().fontRenderer;
+        this.textRenderer = MinecraftClient.getInstance().textRenderer;
         this.x = x;
         this.y = y;
         this.width = width;
@@ -373,8 +373,8 @@ public class TextFieldWidget extends Drawable implements IWidget {
                     int_2 -= 4;
                 }
                 
-                String string_1 = this.fontRenderer.method_1714(this.text.substring(this.field_2103), this.method_1859());
-                this.method_1883(this.fontRenderer.method_1714(string_1, int_2).length() + this.field_2103);
+                String string_1 = this.textRenderer.trimToWidth(this.text.substring(this.field_2103), this.method_1859());
+                this.method_1883(this.textRenderer.trimToWidth(string_1, int_2).length() + this.field_2103);
                 return true;
             } else {
                 return false;
@@ -392,7 +392,7 @@ public class TextFieldWidget extends Drawable implements IWidget {
             int int_3 = this.editable ? this.field_2100 : this.field_2098;
             int int_4 = this.cursorMax - this.field_2103;
             int int_5 = this.cursorMin - this.field_2103;
-            String string_1 = this.fontRenderer.method_1714(this.text.substring(this.field_2103), this.method_1859());
+            String string_1 = this.textRenderer.trimToWidth(this.text.substring(this.field_2103), this.method_1859());
             boolean boolean_1 = int_4 >= 0 && int_4 <= string_1.length();
             boolean boolean_2 = this.focused && this.focusedTicks / 6 % 2 == 0 && boolean_1;
             int int_6 = this.hasBorder ? this.x + 4 : this.x;
@@ -404,7 +404,7 @@ public class TextFieldWidget extends Drawable implements IWidget {
             
             if (!string_1.isEmpty()) {
                 String string_2 = boolean_1 ? string_1.substring(0, int_4) : string_1;
-                int_8 = this.fontRenderer.drawWithShadow((String) this.field_2099.apply(string_2, this.field_2103), (float) int_6, (float) int_7, int_3);
+                int_8 = this.textRenderer.drawWithShadow((String) this.field_2099.apply(string_2, this.field_2103), (float) int_6, (float) int_7, int_3);
             }
             
             boolean boolean_3 = this.cursorMax < this.text.length() || this.text.length() >= this.getMaxLength();
@@ -417,11 +417,11 @@ public class TextFieldWidget extends Drawable implements IWidget {
             }
             
             if (!string_1.isEmpty() && boolean_1 && int_4 < string_1.length()) {
-                this.fontRenderer.drawWithShadow((String) this.field_2099.apply(string_1.substring(int_4), this.cursorMax), (float) int_8, (float) int_7, int_3);
+                this.textRenderer.drawWithShadow((String) this.field_2099.apply(string_1.substring(int_4), this.cursorMax), (float) int_8, (float) int_7, int_3);
             }
             
             if (!boolean_3 && this.suggestion != null) {
-                this.fontRenderer.drawWithShadow(this.suggestion, (float) (int_9 - 1), (float) int_7, -8355712);
+                this.textRenderer.drawWithShadow(this.suggestion, (float) (int_9 - 1), (float) int_7, -8355712);
             }
             
             int var10002;
@@ -431,19 +431,19 @@ public class TextFieldWidget extends Drawable implements IWidget {
                     int var10001 = int_7 - 1;
                     var10002 = int_9 + 1;
                     var10003 = int_7 + 1;
-                    this.fontRenderer.getClass();
+                    this.textRenderer.getClass();
                     Drawable.drawRect(int_9, var10001, var10002, var10003 + 9, -3092272);
                 } else {
-                    this.fontRenderer.drawWithShadow("_", (float) int_9, (float) int_7, int_3);
+                    this.textRenderer.drawWithShadow("_", (float) int_9, (float) int_7, int_3);
                 }
             }
             
             if (int_5 != int_4) {
-                int int_10 = int_6 + this.fontRenderer.getStringWidth(string_1.substring(0, int_5));
+                int int_10 = int_6 + this.textRenderer.getStringWidth(string_1.substring(0, int_5));
                 var10002 = int_7 - 1;
                 var10003 = int_10 - 1;
                 int var10004 = int_7 + 1;
-                this.fontRenderer.getClass();
+                this.textRenderer.getClass();
                 this.method_1886(int_9, var10002, var10003, var10004 + 9);
             }
             
@@ -555,16 +555,16 @@ public class TextFieldWidget extends Drawable implements IWidget {
     public void method_1884(int int_1) {
         int int_2 = this.text.length();
         this.cursorMin = MathHelper.clamp(int_1, 0, int_2);
-        if (this.fontRenderer != null) {
+        if (this.textRenderer != null) {
             if (this.field_2103 > int_2) {
                 this.field_2103 = int_2;
             }
             
             int int_3 = this.method_1859();
-            String string_1 = this.fontRenderer.method_1714(this.text.substring(this.field_2103), int_3);
+            String string_1 = this.textRenderer.trimToWidth(this.text.substring(this.field_2103), int_3);
             int int_4 = string_1.length() + this.field_2103;
             if (this.cursorMin == this.field_2103) {
-                this.field_2103 -= this.fontRenderer.method_1711(this.text, int_3, true).length();
+                this.field_2103 -= this.textRenderer.trimToWidth(this.text, int_3, true).length();
             }
             
             if (this.cursorMin > int_4) {
@@ -595,7 +595,7 @@ public class TextFieldWidget extends Drawable implements IWidget {
     }
     
     public int method_1889(int int_1) {
-        return int_1 > this.text.length() ? this.x : this.x + this.fontRenderer.getStringWidth(this.text.substring(0, int_1));
+        return int_1 > this.text.length() ? this.x : this.x + this.textRenderer.getStringWidth(this.text.substring(0, int_1));
     }
     
     public void setX(int int_1) {
