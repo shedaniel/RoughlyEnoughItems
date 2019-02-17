@@ -19,8 +19,9 @@ import java.util.stream.Collectors;
 public class UpdateChecker {
     
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-    private static final Version CURRENT_VERSION = new Version("2.2.0.16");
+    private static final String CURRENT_VERSION_STRING = "@VERSION@";
     private static final String CURRENT_GAME_VERSION = "1.13.2";
+    private static Version CURRENT_VERSION;
     private static Version latestForGame = null;
     private static JsonVersionElement element;
     private static String VERSION_STRING = "https://raw.githubusercontent.com/shedaniel/RoughlyEnoughItems/1.13.2-rewrite/version.json";
@@ -93,6 +94,11 @@ public class UpdateChecker {
     }
     
     public static void onInitialization() {
+        try {
+            CURRENT_VERSION = new Version(CURRENT_VERSION_STRING);
+        } catch (Exception e) {
+            CURRENT_VERSION = new Version("10000.0");
+        }
         if (!checkUpdates())
             return;
         InputStream downloadedStream = downloadVersionString();

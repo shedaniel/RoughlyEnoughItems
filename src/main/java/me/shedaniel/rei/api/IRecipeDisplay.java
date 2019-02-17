@@ -3,7 +3,6 @@ package me.shedaniel.rei.api;
 import com.google.common.collect.Lists;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.util.ResourceLocation;
 
 import java.util.List;
 
@@ -19,6 +18,6 @@ public interface IRecipeDisplay<T extends IRecipe> {
         return Lists.newArrayList();
     }
     
-    public ResourceLocation getRecipeCategory();
+    public Identifier getRecipeCategory();
     
 }

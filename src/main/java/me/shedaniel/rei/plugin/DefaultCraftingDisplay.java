@@ -1,13 +1,13 @@
 package me.shedaniel.rei.plugin;
 
 import me.shedaniel.rei.api.IRecipeDisplay;
+import me.shedaniel.rei.api.Identifier;
 import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.util.ResourceLocation;
 
 public interface DefaultCraftingDisplay<T> extends IRecipeDisplay<IRecipe> {
     
     @Override
-    default ResourceLocation getRecipeCategory() {
+    default Identifier getRecipeCategory() {
         return DefaultPlugin.CRAFTING;
     }
     

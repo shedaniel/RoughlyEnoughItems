@@ -1,12 +1,12 @@
 package me.shedaniel.rei.plugin;
 
 import me.shedaniel.rei.api.IRecipeDisplay;
+import me.shedaniel.rei.api.Identifier;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.util.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,7 +39,7 @@ public class DefaultBrewingDisplay implements IRecipeDisplay {
     }
     
     @Override
-    public ResourceLocation getRecipeCategory() {
+    public Identifier getRecipeCategory() {
         return DefaultPlugin.BREWING;
     }
     

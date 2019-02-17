@@ -16,7 +16,7 @@ apply plugin: 'org.spongepowered.mixin'
 apply plugin: 'java'
 
 group 'me.shedaniel'
-version '2.3.0.17'
+version '2.3.0.18'
 archivesBaseName = 'RoughlyEnoughItems'
 
 sourceCompatibility = 1.8
@@ -52,4 +52,7 @@ minecraft {
     mappings = 'snapshot_20181130'
     runDir = 'run'
     tweakClass = 'org.dimdev.riftloader.launch.RiftLoaderClientTweaker'
+
+    replace "@VERSION@", project.version
+    replaceIn "me/shedaniel/rei/update/UpdateChecker.json"
 }

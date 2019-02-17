@@ -19,7 +19,6 @@ import net.minecraft.item.crafting.FurnaceRecipe;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.ShapedRecipe;
 import net.minecraft.item.crafting.ShapelessRecipe;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.IRegistry;
 
 import java.util.HashMap;
@@ -28,9 +27,9 @@ import java.util.Map;
 
 public class DefaultPlugin implements IRecipePlugin {
     
-    static final ResourceLocation CRAFTING = new ResourceLocation("roughlyenoughitems", "plugins/crafting");
-    static final ResourceLocation SMELTING = new ResourceLocation("roughlyenoughitems", "plugins/smelting");
-    static final ResourceLocation BREWING = new ResourceLocation("roughlyenoughitems", "plugins/brewing");
+    static final Identifier CRAFTING = new Identifier("roughlyenoughitems", "plugins/crafting");
+    static final Identifier SMELTING = new Identifier("roughlyenoughitems", "plugins/smelting");
+    static final Identifier BREWING = new Identifier("roughlyenoughitems", "plugins/brewing");
     
     static final List<DefaultBrewingDisplay> BREWING_DISPLAYS = Lists.newArrayList();
     
@@ -41,10 +40,10 @@ public class DefaultPlugin implements IRecipePlugin {
     @Override
     public void onFirstLoad(IPluginDisabler pluginDisabler) {
         if (!ConfigHelper.getInstance().isLoadingDefaultPlugin()) {
-            pluginDisabler.disablePluginFunction(new ResourceLocation("roughlyenoughitems", "default_plugin"), PluginFunction.REGISTER_ITEMS);
-            pluginDisabler.disablePluginFunction(new ResourceLocation("roughlyenoughitems", "default_plugin"), PluginFunction.REGISTER_CATEGORIES);
-            pluginDisabler.disablePluginFunction(new ResourceLocation("roughlyenoughitems", "default_plugin"), PluginFunction.REGISTER_RECIPE_DISPLAYS);
-            pluginDisabler.disablePluginFunction(new ResourceLocation("roughlyenoughitems", "default_plugin"), PluginFunction.REGISTER_SPEED_CRAFT);
+            pluginDisabler.disablePluginFunction(new Identifier("roughlyenoughitems", "default_plugin"), PluginFunction.REGISTER_ITEMS);
+            pluginDisabler.disablePluginFunction(new Identifier("roughlyenoughitems", "default_plugin"), PluginFunction.REGISTER_CATEGORIES);
+            pluginDisabler.disablePluginFunction(new Identifier("roughlyenoughitems", "default_plugin"), PluginFunction.REGISTER_RECIPE_DISPLAYS);
+            pluginDisabler.disablePluginFunction(new Identifier("roughlyenoughitems", "default_plugin"), PluginFunction.REGISTER_SPEED_CRAFT);
         }
     }
     
