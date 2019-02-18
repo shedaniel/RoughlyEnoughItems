@@ -7,7 +7,6 @@ import me.shedaniel.rei.update.UpdateAnnouncer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.List;
@@ -48,7 +47,6 @@ public class GuiHelper {
         GuiHelper.lastGuiContainer = lastGuiContainer;
     }
     
-    @SubscribeEvent
     public static void clientTick(TickEvent.ClientTickEvent event) {
         Minecraft client = Minecraft.getInstance();
         if (client.currentScreen instanceof GuiContainer && lastGuiContainer != client.currentScreen)

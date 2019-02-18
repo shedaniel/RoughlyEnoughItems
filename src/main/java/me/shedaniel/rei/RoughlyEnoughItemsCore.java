@@ -14,14 +14,16 @@ import net.minecraft.item.ItemGroup;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.RecipesUpdatedEvent;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -40,22 +42,19 @@ public class RoughlyEnoughItemsCore {
     private static ConfigHelper configHelper;
     
     public RoughlyEnoughItemsCore() {
+        IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
         DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> {
-            UpdateChecker.onInitialization();
             configHelper = new ConfigHelper();
+            UpdateChecker.onInitialization();
             
-            // Setup keybinds
-            FMLJavaModLoadingContext.get().getModEventBus().addListener(KeyBindHelper::setupKeyBinds);
-            // Setup plugins
-            FMLJavaModLoadingContext.get().getModEventBus().addListener(RoughlyEnoughItemsPlugin::discoverPlugins);
-            // Setup Config Button
-            FMLJavaModLoadingContext.get().getModEventBus().addListener(event -> ModList.get().getModContainerById(MOD_ID).ifPresent(o -> o.registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (minecraft, guiScreen) -> new ConfigGui(guiScreen))));
+            // Setup Mod
+            eventBus.addListener(EventPriority.NORMAL, this::onModClientSetup);
             
             // Register More Events
-            FMLJavaModLoadingContext.get().getModEventBus().addListener(GuiHelper::clientTick);
-            FMLJavaModLoadingContext.get().getModEventBus().addListener(EventPriority.NORMAL, false, RecipesUpdatedEvent.class, recipesUpdatedEvent -> RoughlyEnoughItemsCore.getRecipeHelper().recipesLoaded(Minecraft.getInstance().getConnection().getRecipeManager()));
+            eventBus.addListener(EventPriority.NORMAL, true, TickEvent.ClientTickEvent.class, GuiHelper::clientTick);
+            eventBus.addListener(EventPriority.NORMAL, false, RecipesUpdatedEvent.class, recipesUpdatedEvent -> RoughlyEnoughItemsCore.getRecipeHelper().recipesLoaded(Minecraft.getInstance().getConnection().getRecipeManager()));
             
-            MinecraftForge.EVENT_BUS.register(this);
+            eventBus.register(this);
         });
     }
     
@@ -73,6 +72,13 @@ public class RoughlyEnoughItemsCore {
     
     public static IPluginDisabler getPluginDisabler() {
         return PLUGIN_MANAGER;
+    }
+    
+    public void onModClientSetup(FMLClientSetupEvent event) {
+        KeyBindHelper.setupKeyBinds();
+        RoughlyEnoughItemsPlugin.discoverPlugins();
+        
+        ModList.get().getModContainerById(MOD_ID).ifPresent(o -> o.registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (minecraft, guiScreen) -> new ConfigGui(guiScreen)));
     }
     
     @SubscribeEvent

@@ -41,8 +41,7 @@ public class RoughlyEnoughItemsPlugin {
         return null;
     }
     
-    @SubscribeEvent
-    public static void discoverPlugins(FMLClientSetupEvent event) {
+    public static void discoverPlugins() {
         if (loaded)
             return;
         loaded = true;

@@ -1,30 +1,16 @@
 {
   "latest": [
     {
-      "game": "1.13",
-      "mod": "2.2.0.16"
-    },
-    {
       "game": "1.13.2",
-      "mod": "2.3.0.18"
+      "mod": "2.3.0.0"
     }
   ],
   "changelogs": {
-    "rift": [
+    "forge": [
       {
-        "version": "2.2.0.16",
-        "text": "Added a version checker, an option to mirror the item panel and fixed interacting with REI when hidden.",
-        "level": "light"
-      },
-      {
-        "version": "2.3.0.17",
-        "text": "Fixed lots of bugs",
-        "level": "useful"
-      },
-      {
-        "version": "2.3.0.18",
-        "text": "Fixed Optifine Conflict",
-        "level": "useful"
+        "version": "2.3.0.0",
+        "text": "First Alpha",
+        "level": "none"
       }
     ]
   }

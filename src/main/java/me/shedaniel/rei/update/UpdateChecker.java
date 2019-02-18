@@ -25,7 +25,7 @@ public class UpdateChecker {
     private static Version CURRENT_VERSION;
     private static Version latestForGame = null;
     private static JsonVersionElement element;
-    private static String VERSION_STRING = "https://raw.githubusercontent.com/shedaniel/RoughlyEnoughItems/1.13.2-rewrite/version.json";
+    private static String VERSION_STRING = "https://raw.githubusercontent.com/shedaniel/RoughlyEnoughItems/1.13.2-forge/version.json";
     
     public static boolean isOutdated() {
         return latestForGame.compareTo(CURRENT_VERSION) == 1 && CURRENT_VERSION != null;
@@ -45,7 +45,7 @@ public class UpdateChecker {
     }
     
     public static UpdatePriority getUpdatePriority(Version version) {
-        JsonArray array = element.getChangelogs().getRift();
+        JsonArray array = element.getChangelogs().getForge();
         for(JsonElement element : array) {
             JsonObject jsonObject = element.getAsJsonObject();
             if (jsonObject.has("version") && jsonObject.get("version").getAsString().equals(version.toString()))
@@ -68,7 +68,7 @@ public class UpdateChecker {
     
     static List<Version> getVersionsHigherThan(Version currentVersion) {
         List<Version> versions = Lists.newLinkedList();
-        JsonArray array = element.getChangelogs().getRift();
+        JsonArray array = element.getChangelogs().getForge();
         array.forEach(jsonElement -> {
             Version jsonVersion = new Version(jsonElement.getAsJsonObject().get("version").getAsString());
             if (jsonVersion.compareTo(currentVersion) > 0)
@@ -174,15 +174,11 @@ public class UpdateChecker {
     }
     
     static class ChangelogObject {
-        private JsonArray fabric = new JsonArray();
+        private JsonArray forge = new JsonArray();
         private JsonArray rift = new JsonArray();
         
-        public JsonArray getFabric() {
-            return fabric;
-        }
-        
-        public JsonArray getRift() {
-            return rift;
+        public JsonArray getForge() {
+            return forge;
         }
     }
     
