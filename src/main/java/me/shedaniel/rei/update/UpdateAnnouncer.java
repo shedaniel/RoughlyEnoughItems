@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.List;
 
@@ -16,7 +17,8 @@ public class UpdateAnnouncer {
     
     private static World lastWorld = null;
     
-    public static void clientTick(Minecraft client) {
+    public static void clientTick(TickEvent.ClientTickEvent event) {
+        Minecraft client = Minecraft.getInstance();
         if (client.world != lastWorld) {
             lastWorld = client.world;
             if (lastWorld != null) {
@@ -34,7 +36,7 @@ public class UpdateAnnouncer {
     
     public static List<String> getChangelog(Version currentVersion) {
         List<String> changelogs = Lists.newLinkedList();
-        JsonArray array = getElement().getChangelogs().getRift();
+        JsonArray array = getElement().getChangelogs().getForge();
         array.forEach(jsonElement -> {
             JsonObject jsonObject = jsonElement.getAsJsonObject();
             Version jsonVersion = new Version(jsonObject.get("version").getAsString());

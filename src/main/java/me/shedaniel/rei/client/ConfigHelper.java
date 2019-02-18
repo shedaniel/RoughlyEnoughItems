@@ -22,7 +22,7 @@ public class ConfigHelper {
             if (!configFile.getParentFile().exists() || !configFile.getParentFile().isDirectory())
                 configFile.getParentFile().mkdirs();
             loadConfig();
-            RoughlyEnoughItemsCore.LOGGER.info("REI: Config is loaded.");
+            RoughlyEnoughItemsCore.LOGGER.info("Config is loaded.");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -35,7 +35,7 @@ public class ConfigHelper {
     public void saveConfig() throws IOException {
         configFile.getParentFile().mkdirs();
         if (!configFile.exists() && !configFile.createNewFile()) {
-            RoughlyEnoughItemsCore.LOGGER.error("REI: Failed to save config! Overwriting with default config.");
+            RoughlyEnoughItemsCore.LOGGER.error("Failed to save config! Overwriting with default config.");
             config = new REIConfig();
             return;
         }
@@ -60,7 +60,7 @@ public class ConfigHelper {
             failed = true;
         }
         if (failed || config == null) {
-            RoughlyEnoughItemsCore.LOGGER.error("REI: Failed to load config! Overwriting with default config.");
+            RoughlyEnoughItemsCore.LOGGER.error("Failed to load config! Overwriting with default config.");
             config = new REIConfig();
         }
         saveConfig();

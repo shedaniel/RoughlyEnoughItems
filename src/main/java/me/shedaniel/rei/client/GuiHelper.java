@@ -3,7 +3,6 @@ package me.shedaniel.rei.client;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.gui.ContainerGuiOverlay;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
-import me.shedaniel.rei.update.UpdateAnnouncer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.item.ItemStack;
@@ -51,7 +50,6 @@ public class GuiHelper {
         Minecraft client = Minecraft.getInstance();
         if (client.currentScreen instanceof GuiContainer && lastGuiContainer != client.currentScreen)
             GuiHelper.lastGuiContainer = (GuiContainer) client.currentScreen;
-        UpdateAnnouncer.clientTick(client);
     }
     
 }

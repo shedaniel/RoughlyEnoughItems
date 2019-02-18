@@ -25,7 +25,7 @@ public class RoughlyEnoughItemsPlugin {
     
     public static IRecipePlugin registerPlugin(Identifier identifier, IRecipePlugin plugin) {
         plugins.put(identifier, plugin);
-        RoughlyEnoughItemsPlugin.LOGGER.info("REI: Registered Plugin from %s by %s.", identifier.toString(), plugin.getClass().getSimpleName());
+        RoughlyEnoughItemsPlugin.LOGGER.info("Registered Plugin from %s by %s.", identifier.toString(), plugin.getClass().getSimpleName());
         plugin.onFirstLoad(RoughlyEnoughItemsCore.getPluginDisabler());
         return plugin;
     }
@@ -45,7 +45,7 @@ public class RoughlyEnoughItemsPlugin {
         if (loaded)
             return;
         loaded = true;
-        LOGGER.info("REI: Discovering Plugins.");
+        LOGGER.info("Discovering Plugins.");
         ModList.get().getAllScanData().forEach(scan -> {
             scan.getAnnotations().forEach(a -> {
                 if (a.getAnnotationType().getClassName().equals(REIPlugin.class.getName())) {
@@ -58,13 +58,13 @@ public class RoughlyEnoughItemsPlugin {
                                 registerPlugin(new Identifier(clazz.getAnnotation(REIPlugin.class).identifier()), plugin);
                             }
                         } catch (Exception e) {
-                            LOGGER.error("REI: Can't load REI plugin. %s", a.getMemberName());
+                            LOGGER.error("Can't load REI plugin. %s", a.getMemberName());
                         }
                     }
                 }
             });
         });
-        LOGGER.info("REI: Discovered %d REI Plugins%s", plugins.size(), (plugins.size() > 0 ? ": " + String.join(", ", plugins.keySet().stream().map(Identifier::toString).collect(Collectors.toList())) : "."));
+        LOGGER.info("Discovered %d REI Plugins%s", plugins.size(), (plugins.size() > 0 ? ": " + String.join(", ", plugins.keySet().stream().map(Identifier::toString).collect(Collectors.toList())) : "."));
     }
     
 }
