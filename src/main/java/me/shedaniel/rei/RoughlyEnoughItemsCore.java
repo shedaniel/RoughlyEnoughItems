@@ -6,6 +6,7 @@ import me.shedaniel.rei.client.*;
 import me.shedaniel.rei.gui.ContainerGuiOverlay;
 import me.shedaniel.rei.gui.config.ConfigGui;
 import me.shedaniel.rei.plugin.PluginManager;
+import me.shedaniel.rei.update.UpdateAnnouncer;
 import me.shedaniel.rei.update.UpdateChecker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -17,7 +18,6 @@ import net.minecraftforge.client.event.RecipesUpdatedEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModList;
@@ -52,9 +52,13 @@ public class RoughlyEnoughItemsCore {
             
             // Register More Events
             eventBus.addListener(EventPriority.NORMAL, true, TickEvent.ClientTickEvent.class, GuiHelper::clientTick);
+            eventBus.addListener(EventPriority.NORMAL, false, TickEvent.ClientTickEvent.class, UpdateAnnouncer::clientTick);
             eventBus.addListener(EventPriority.NORMAL, false, RecipesUpdatedEvent.class, recipesUpdatedEvent -> RoughlyEnoughItemsCore.getRecipeHelper().recipesLoaded(Minecraft.getInstance().getConnection().getRecipeManager()));
             
-            eventBus.register(this);
+            eventBus.addListener(EventPriority.NORMAL, false, GuiScreenEvent.InitGuiEvent.Post.class, this::onGuiInit);
+            eventBus.addListener(EventPriority.NORMAL, false, GuiScreenEvent.DrawScreenEvent.Post.class, this::onGuiRender);
+            eventBus.addListener(EventPriority.LOWEST, false, GuiScreenEvent.KeyboardKeyPressedEvent.Pre.class, this::onGuiKeyPressed);
+            eventBus.addListener(EventPriority.LOWEST, false, GuiScreenEvent.MouseScrollEvent.Pre.class, this::onMouseScrolled);
         });
     }
     
@@ -78,11 +82,10 @@ public class RoughlyEnoughItemsCore {
         KeyBindHelper.setupKeyBinds();
         RoughlyEnoughItemsPlugin.discoverPlugins();
         
-        ModList.get().getModContainerById(MOD_ID).ifPresent(o -> o.registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (minecraft, guiScreen) -> new ConfigGui(guiScreen)));
+        ModList.get().getModContainerById(MOD_ID).ifPresent(o -> o.registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (client, parent) -> new ConfigGui(parent)));
     }
     
-    @SubscribeEvent
-    public void onGuiInit(GuiScreenEvent.InitGuiEvent event) {
+    public void onGuiInit(GuiScreenEvent.InitGuiEvent.Post event) {
         if (event.getGui() instanceof GuiContainer) {
             GuiContainer container = (GuiContainer) event.getGui();
             GuiHelper.setLastGuiContainer(container);
@@ -90,8 +93,7 @@ public class RoughlyEnoughItemsCore {
         }
     }
     
-    @SubscribeEvent
-    public void onGuiRender(GuiScreenEvent.DrawScreenEvent event) {
+    public void onGuiRender(GuiScreenEvent.DrawScreenEvent.Post event) {
         if (event.getGui() instanceof GuiContainer) {
             GuiContainer container = (GuiContainer) event.getGui();
             if (container instanceof GuiContainerCreative)
@@ -101,16 +103,14 @@ public class RoughlyEnoughItemsCore {
         }
     }
     
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public void onGuiKeyPressed(GuiScreenEvent.KeyboardKeyPressedEvent event) {
+    public void onGuiKeyPressed(GuiScreenEvent.KeyboardKeyPressedEvent.Pre event) {
         if (event.getGui() instanceof GuiContainer && GuiHelper.getLastOverlay().keyPressed(event.getKeyCode(), event.getScanCode(), event.getModifiers())) {
             event.setCanceled(true);
             event.setResult(Event.Result.ALLOW);
         }
     }
     
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public void onMouseScrolled(GuiScreenEvent.MouseScrollEvent event) {
+    public void onMouseScrolled(GuiScreenEvent.MouseScrollEvent.Pre event) {
         if (event.getGui() instanceof GuiContainer) {
             ContainerGuiOverlay overlay = GuiHelper.getLastOverlay();
             if (GuiHelper.isOverlayVisible() && overlay.getRectangle().contains(ClientHelper.getMouseLocation()))
