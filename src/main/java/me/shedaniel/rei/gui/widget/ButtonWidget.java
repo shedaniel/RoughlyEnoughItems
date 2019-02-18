@@ -105,7 +105,7 @@ public abstract class ButtonWidget extends Gui implements IWidget {
     @Override
     public boolean onMouseClick(int button, double mouseX, double mouseY) {
         if (bounds.contains(mouseX, mouseY) && enabled) {
-            Minecraft.getInstance().getSoundHandler().play(SimpleSound.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            Minecraft.getInstance().getSoundHandler().play(SimpleSound.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             onPressed(button, mouseX, mouseY);
             return true;
         }

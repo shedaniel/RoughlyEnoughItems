@@ -3,16 +3,16 @@ package me.shedaniel.rei.client;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.gui.ContainerGuiOverlay;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
-import me.shedaniel.rei.listeners.IMixinGuiContainer;
 import me.shedaniel.rei.update.UpdateAnnouncer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.item.ItemStack;
-import org.dimdev.rift.listener.client.ClientTickable;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.List;
 
-public class GuiHelper implements ClientTickable {
+public class GuiHelper {
     
     public static TextFieldWidget searchField;
     public static List<ItemStack> inventoryStacks = Lists.newArrayList();
@@ -48,16 +48,11 @@ public class GuiHelper implements ClientTickable {
         GuiHelper.lastGuiContainer = lastGuiContainer;
     }
     
-    public static IMixinGuiContainer getLastMixinGuiContainer() {
-        return (IMixinGuiContainer) lastGuiContainer;
-    }
-    
-    
-    @Override
-    public void clientTick(Minecraft client) {
-        if (client.currentScreen instanceof GuiContainer && lastGuiContainer != client.currentScreen) {
+    @SubscribeEvent
+    public static void clientTick(TickEvent.ClientTickEvent event) {
+        Minecraft client = Minecraft.getInstance();
+        if (client.currentScreen instanceof GuiContainer && lastGuiContainer != client.currentScreen)
             GuiHelper.lastGuiContainer = (GuiContainer) client.currentScreen;
-        }
         UpdateAnnouncer.clientTick(client);
     }
     

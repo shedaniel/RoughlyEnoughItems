@@ -28,7 +28,7 @@ public class ConfigEntry extends GuiListExtended.IGuiListEntry<ConfigEntry> {
             public boolean onMouseClick(int button, double mouseX, double mouseY) {
                 if (getBounds().contains(mouseX, mouseY) && enabled)
                     if (buttonProvider.onPressed(button, mouseX, mouseY)) {
-                        Minecraft.getInstance().getSoundHandler().play(SimpleSound.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                        Minecraft.getInstance().getSoundHandler().play(SimpleSound.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                         return true;
                     }
                 return false;

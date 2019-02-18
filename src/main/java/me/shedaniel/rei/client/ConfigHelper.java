@@ -1,7 +1,7 @@
 package me.shedaniel.rei.client;
 
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import org.dimdev.riftloader.RiftLoader;
+import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -11,13 +11,12 @@ import java.nio.file.Files;
 
 public class ConfigHelper {
     
-    private static ConfigHelper instance = new ConfigHelper();
     private final File configFile;
     private REIConfig config;
     private boolean craftableOnly;
     
     public ConfigHelper() {
-        this.configFile = new File(RiftLoader.instance.configDir, "rei.json");
+        this.configFile = new File(FMLPaths.CONFIGDIR.get().toFile(), "rei.json");
         this.craftableOnly = false;
         try {
             if (!configFile.getParentFile().exists() || !configFile.getParentFile().isDirectory())
@@ -30,7 +29,7 @@ public class ConfigHelper {
     }
     
     public static ConfigHelper getInstance() {
-        return instance;
+        return RoughlyEnoughItemsCore.getConfigHelper();
     }
     
     public void saveConfig() throws IOException {

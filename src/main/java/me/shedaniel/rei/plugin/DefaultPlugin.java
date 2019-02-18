@@ -1,10 +1,9 @@
 package me.shedaniel.rei.plugin;
 
-import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.ConfigHelper;
 import me.shedaniel.rei.client.RecipeHelper;
-import me.shedaniel.rei.listeners.IMixinRecipeBookGui;
+import me.shedaniel.rei.utils.GhostRecipeUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
@@ -22,20 +21,14 @@ import net.minecraft.item.crafting.ShapelessRecipe;
 import net.minecraft.util.registry.IRegistry;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
+@REIPlugin(identifier = "roughlyenoughitems:default_plugin")
 public class DefaultPlugin implements IRecipePlugin {
     
     static final Identifier CRAFTING = new Identifier("roughlyenoughitems", "plugins/crafting");
     static final Identifier SMELTING = new Identifier("roughlyenoughitems", "plugins/smelting");
     static final Identifier BREWING = new Identifier("roughlyenoughitems", "plugins/brewing");
-    
-    static final List<DefaultBrewingDisplay> BREWING_DISPLAYS = Lists.newArrayList();
-    
-    public static void registerBrewingDisplay(DefaultBrewingDisplay display) {
-        BREWING_DISPLAYS.add(display);
-    }
     
     @Override
     public void onFirstLoad(IPluginDisabler pluginDisabler) {
@@ -49,14 +42,14 @@ public class DefaultPlugin implements IRecipePlugin {
     
     @Override
     public void registerItems(IItemRegisterer itemRegisterer) {
-        IRegistry.ITEM.stream().forEach(item -> {
+        IRegistry.field_212630_s.stream().forEach(item -> {
             itemRegisterer.registerItemStack(item.getDefaultInstance());
             try {
                 itemRegisterer.registerItemStack(itemRegisterer.getAllStacksFromItem(item));
             } catch (Exception e) {
             }
         });
-        IRegistry.ENCHANTMENT.forEach(enchantment -> {
+        IRegistry.field_212628_q.forEach(enchantment -> {
             for(int i = enchantment.getMinLevel(); i < enchantment.getMaxLevel(); i++) {
                 Map<Enchantment, Integer> map = new HashMap<>();
                 map.put(enchantment, i);
@@ -74,6 +67,7 @@ public class DefaultPlugin implements IRecipePlugin {
         recipeHelper.registerCategory(new DefaultBrewingCategory());
     }
     
+    // TODO Register Potion
     @Override
     public void registerRecipeDisplays(RecipeHelper recipeHelper) {
         for(IRecipe value : recipeHelper.getRecipeManager().getRecipes())
@@ -83,7 +77,6 @@ public class DefaultPlugin implements IRecipePlugin {
                 recipeHelper.registerDisplay(CRAFTING, new DefaultShapedDisplay((ShapedRecipe) value));
             else if (value instanceof FurnaceRecipe)
                 recipeHelper.registerDisplay(SMELTING, new DefaultSmeltingDisplay((FurnaceRecipe) value));
-        BREWING_DISPLAYS.forEach(display -> recipeHelper.registerDisplay(BREWING, display));
     }
     
     @Override
@@ -98,9 +91,9 @@ public class DefaultPlugin implements IRecipePlugin {
             @Override
             public boolean performAutoCraft(Gui gui, DefaultCraftingDisplay recipe) {
                 if (gui.getClass().isAssignableFrom(GuiCrafting.class))
-                    ((IMixinRecipeBookGui) (((GuiCrafting) gui).func_194310_f())).getGhostRecipe().clear();
+                    GhostRecipeUtil.fromGuiCrafting((GuiCrafting) gui).clear();
                 else if (gui.getClass().isAssignableFrom(GuiInventory.class))
-                    ((IMixinRecipeBookGui) (((GuiInventory) gui).func_194310_f())).getGhostRecipe().clear();
+                    GhostRecipeUtil.fromGuiInventory((GuiInventory) gui).clear();
                 else
                     return false;
                 Minecraft.getInstance().playerController.func_203413_a(Minecraft.getInstance().player.openContainer.windowId, recipe.getRecipe(), GuiScreen.isShiftKeyDown());
@@ -121,7 +114,7 @@ public class DefaultPlugin implements IRecipePlugin {
             @Override
             public boolean performAutoCraft(Gui gui, DefaultSmeltingDisplay recipe) {
                 if (gui instanceof GuiFurnace)
-                    ((IMixinRecipeBookGui) (((GuiFurnace) gui).func_194310_f())).getGhostRecipe().clear();
+                    GhostRecipeUtil.fromGuiRecipeBook(((GuiFurnace) gui).func_194310_f()).clear();
                 else
                     return false;
                 Minecraft.getInstance().playerController.func_203413_a(Minecraft.getInstance().player.openContainer.windowId, recipe.getRecipe(), GuiScreen.isShiftKeyDown());

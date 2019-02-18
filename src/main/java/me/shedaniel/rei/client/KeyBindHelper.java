@@ -1,41 +1,26 @@
 package me.shedaniel.rei.client;
 
-import com.google.common.collect.Lists;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.listeners.IMixinKeyBinding;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
-import org.dimdev.rift.listener.client.KeyBindingAdder;
+import net.minecraftforge.client.settings.KeyConflictContext;
+import net.minecraftforge.client.settings.KeyModifier;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
-import java.util.Collection;
-import java.util.List;
-
-public class KeyBindHelper implements KeyBindingAdder {
+public class KeyBindHelper {
     
-    private static final String RECIPE_KEYBIND = "roughlyenoughitems:recipe_keybind";
-    private static final String USAGE_KEYBIND = "roughlyenoughitems:usage_keybind";
-    private static final String HIDE_KEYBIND = "roughlyenoughitems:hide_keybind";
+    private static final String RECIPE_KEYBIND = "key.roughlyenoughitems.recipe_keybind";
+    private static final String USAGE_KEYBIND = "key.roughlyenoughitems.usage_keybind";
+    private static final String HIDE_KEYBIND = "key.roughlyenoughitems.hide_keybind";
     public static KeyBinding RECIPE, USAGE, HIDE;
     
-    @Override
-    public Collection<? extends KeyBinding> getKeyBindings() {
+    @SubscribeEvent
+    public static void setupKeyBinds(FMLClientSetupEvent event) {
         String category = "key.rei.category";
-        List<KeyBinding> keyBindings = Lists.newArrayList();
-        keyBindings.add(RECIPE = createKeyBinding(RECIPE_KEYBIND, InputMappings.Type.KEYSYM, 82, category));
-        keyBindings.add(USAGE = createKeyBinding(USAGE_KEYBIND, InputMappings.Type.KEYSYM, 85, category));
-        keyBindings.add(HIDE = createKeyBinding(HIDE_KEYBIND, InputMappings.Type.KEYSYM, 79, category));
-        addCategoryIfMissing(RECIPE, category);
-        return keyBindings;
-    }
-    
-    private void addCategoryIfMissing(KeyBinding keyBinding, String category) {
-        if (!((IMixinKeyBinding) keyBinding).hasCategory(category))
-            ((IMixinKeyBinding) keyBinding).addCategory(category);
-    }
-    
-    private KeyBinding createKeyBinding(String resourceLocation, InputMappings.Type inputType, int keyCode, String category) {
-        RoughlyEnoughItemsCore.LOGGER.info("Registering: key." + resourceLocation.replaceAll(":", ".") + " in " + category);
-        return new KeyBinding("key." + resourceLocation.replaceAll(":", "."), inputType, keyCode, category);
+        ClientRegistry.registerKeyBinding(RECIPE = new KeyBinding(RECIPE_KEYBIND, KeyConflictContext.IN_GAME, KeyModifier.NONE, InputMappings.Type.KEYSYM.getOrMakeInput(82), category));
+        ClientRegistry.registerKeyBinding(USAGE = new KeyBinding(USAGE_KEYBIND, KeyConflictContext.IN_GAME, KeyModifier.NONE, InputMappings.Type.KEYSYM.getOrMakeInput(85), category));
+        ClientRegistry.registerKeyBinding(HIDE = new KeyBinding(HIDE_KEYBIND, KeyConflictContext.IN_GAME, KeyModifier.NONE, InputMappings.Type.KEYSYM.getOrMakeInput(79), category));
     }
     
 }

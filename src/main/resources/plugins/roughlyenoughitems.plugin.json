@@ -1,6 +1,0 @@
-[
-  {
-    "id": "default_plugin",
-    "initializer": "me.shedaniel.rei.plugin.DefaultPlugin"
-  }
-]

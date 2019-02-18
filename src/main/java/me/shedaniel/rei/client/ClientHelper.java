@@ -16,7 +16,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.IRegistry;
-import org.dimdev.riftloader.RiftLoader;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -29,16 +30,12 @@ public class ClientHelper {
     
     public static String getModFromItemStack(ItemStack stack) {
         if (!stack.isEmpty()) {
-            ResourceLocation location = IRegistry.ITEM.getKey(stack.getItem());
+            ResourceLocation location = IRegistry.field_212630_s.getKey(stack.getItem());
             assert location != null;
             String modid = location.getNamespace();
             if (modid.equalsIgnoreCase("minecraft"))
                 return "Minecraft";
-            return RiftLoader.instance.getMods().stream().filter(modInfo -> modInfo.id.equals(modid) || (modInfo.name != null && modInfo.name.equals(modid))).findFirst().map(modInfo -> {
-                if (modInfo.name != null)
-                    return modInfo.name;
-                return modid;
-            }).orElse(modid);
+            return ModList.get().getMods().stream().filter(modInfo -> modInfo.getModId().equalsIgnoreCase(modid)).map(ModInfo::getDisplayName).findAny().orElse(modid);
         }
         return "";
     }
@@ -78,7 +75,7 @@ public class ClientHelper {
                 return false;
             }
         } else {
-            ResourceLocation location = IRegistry.ITEM.getKey(cheatedStack.getItem());
+            ResourceLocation location = IRegistry.field_212630_s.getKey(cheatedStack.getItem());
             String tagMessage = cheatedStack.copy().getTag() != null && !cheatedStack.copy().getTag().isEmpty() ? cheatedStack.copy().getTag().toString() : "";
             String madeUpCommand = ConfigHelper.getInstance().getGiveCommandPrefix() + " " + Minecraft.getInstance().player.getScoreboardName() + " " + location.toString() + tagMessage + (cheatedStack.getCount() != 1 ? " " + cheatedStack.getCount() : "");
             if (madeUpCommand.length() > 256)
