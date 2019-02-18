@@ -8,14 +8,14 @@ import me.shedaniel.rei.client.ConfigHelper;
 import net.minecraftforge.fml.ModList;
 import org.apache.commons.io.IOUtils;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringBufferInputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
 public class UpdateChecker {
@@ -96,7 +96,7 @@ public class UpdateChecker {
     
     public static void onInitialization() {
         try {
-            ModList.get().getMods().stream().filter(modInfo -> modInfo.getModId().equalsIgnoreCase(RoughlyEnoughItemsCore.MOD_ID)).findAny().ifPresent(modInfo -> CURRENT_VERSION = new Version(modInfo.getVersion().toString()));
+            ModList.get().getMods().stream().filter(modInfo -> modInfo.getModId().equalsIgnoreCase(RoughlyEnoughItemsCore.MOD_ID)).findAny().ifPresent(modInfo -> CURRENT_VERSION = new Version(modInfo.getVersion().toString().split("\\+")[0]));
         } catch (Exception e1) {
         }
         if (CURRENT_VERSION == null)
@@ -115,23 +115,6 @@ public class UpdateChecker {
             latestForGame = new Version(parseLatest(element, CURRENT_GAME_VERSION));
         else
             latestForGame = new Version("0.0.0");
-    }
-    
-    private static String getVersionFromSource(File source) {
-        if (!source.isFile())
-            return null;
-        try (JarFile jar = new JarFile(source)) {
-            JarEntry entry = jar.getJarEntry("riftmod.json");
-            if (entry != null) {
-                InputStream inputStream = jar.getInputStream(entry);
-                JsonElement element = new JsonParser().parse(new InputStreamReader(inputStream));
-                JsonObject object = element.getAsJsonObject();
-                if (object.has("version"))
-                    return object.getAsJsonPrimitive("version").getAsString();
-            }
-        } catch (Exception e) {
-        }
-        return null;
     }
     
     static class JsonVersionElement {
