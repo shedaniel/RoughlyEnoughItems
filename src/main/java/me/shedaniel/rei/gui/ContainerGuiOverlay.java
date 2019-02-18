@@ -136,7 +136,7 @@ public class ContainerGuiOverlay extends GuiEventHandler {
             RecipeViewingWidgetGui widget = (RecipeViewingWidgetGui) Minecraft.getInstance().currentScreen;
             return new Rectangle(widget.getBounds().x, window.getScaledHeight() - 22, widget.getBounds().width - widthRemoved, 18);
         }
-        return new Rectangle(GuiHelper.getLastMixinGuiContainer().rei_getContainerLeft(), window.getScaledHeight() - 22, GuiHelper.getLastMixinGuiContainer().rei_etContainerWidth() - widthRemoved, 18);
+        return new Rectangle(GuiHelper.getLastGuiContainer().getGuiLeft(), window.getScaledHeight() - 22, GuiHelper.getLastGuiContainer().getXSize() - widthRemoved, 18);
     }
     
     private Rectangle getCraftableToggleArea() {
@@ -206,7 +206,7 @@ public class ContainerGuiOverlay extends GuiEventHandler {
     
     private Rectangle calculateBoundary() {
         if (!ConfigHelper.getInstance().isMirrorItemPanel()) {
-            int startX = GuiHelper.getLastMixinGuiContainer().rei_getContainerLeft() + GuiHelper.getLastMixinGuiContainer().rei_etContainerWidth() + 10;
+            int startX = GuiHelper.getLastGuiContainer().getGuiLeft() + GuiHelper.getLastGuiContainer().getXSize() + 10;
             int width = window.getScaledWidth() - startX;
             if (Minecraft.getInstance().currentScreen instanceof RecipeViewingWidgetGui) {
                 RecipeViewingWidgetGui widget = (RecipeViewingWidgetGui) Minecraft.getInstance().currentScreen;
@@ -224,8 +224,8 @@ public class ContainerGuiOverlay extends GuiEventHandler {
             return widget.getBounds().x;
         }
         if (Minecraft.getInstance().player.getRecipeBook().isGuiOpen())
-            return GuiHelper.getLastMixinGuiContainer().rei_getContainerLeft() - 147 - 30;
-        return GuiHelper.getLastMixinGuiContainer().rei_getContainerLeft();
+            return GuiHelper.getLastGuiContainer().getGuiLeft() - 147 - 30;
+        return GuiHelper.getLastGuiContainer().getGuiLeft();
     }
     
     private int getTotalPage() {
@@ -278,8 +278,8 @@ public class ContainerGuiOverlay extends GuiEventHandler {
                 }
         }
         if (itemStack == null && Minecraft.getInstance().currentScreen instanceof GuiContainer)
-            if (GuiHelper.getLastMixinGuiContainer().rei_getHoveredSlot() != null)
-                itemStack = GuiHelper.getLastMixinGuiContainer().rei_getHoveredSlot().getStack();
+            if (GuiHelper.getLastGuiContainer().getSlotUnderMouse() != null)
+                itemStack = GuiHelper.getLastGuiContainer().getSlotUnderMouse().getStack();
         if (itemStack != null && !itemStack.isEmpty()) {
             if (KeyBindHelper.RECIPE.matchesKey(int_1, int_2))
                 return ClientHelper.executeRecipeKeyBind(this, itemStack);

@@ -1,27 +1,20 @@
 package me.shedaniel.rei;
 
 import com.google.common.collect.Maps;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import me.shedaniel.rei.api.IRecipePlugin;
 import me.shedaniel.rei.api.Identifier;
+import me.shedaniel.rei.api.REIPlugin;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.dimdev.riftloader.ModInfo;
-import org.dimdev.riftloader.RiftLoader;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.jar.JarFile;
 import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
 
 public class RoughlyEnoughItemsPlugin {
     
@@ -48,46 +41,31 @@ public class RoughlyEnoughItemsPlugin {
         return null;
     }
     
-    public static void discoverPlugins() {
+    @SubscribeEvent
+    public static void discoverPlugins(FMLClientSetupEvent event) {
         if (loaded)
             return;
         loaded = true;
         LOGGER.info("REI: Discovering Plugins.");
-        Collection<ModInfo> modInfoCollection = RiftLoader.instance.getMods();
-        modInfoCollection.forEach(modInfo -> {
-            try {
-                if (modInfo.source.isDirectory()) {
-                    File pluginFile = new File(modInfo.source, "plugins/roughlyenoughitems.plugin.json");
-                    if (pluginFile.exists())
-                        loadPluginInfo(modInfo, new FileReader(pluginFile));
-                } else {
-                    JarFile jarFile = new JarFile(modInfo.source);
-                    ZipEntry entry = jarFile.getEntry("plugins/roughlyenoughitems.plugin.json");
-                    if (entry != null)
-                        loadPluginInfo(modInfo, new InputStreamReader(jarFile.getInputStream(entry)));
+        ModList.get().getAllScanData().forEach(scan -> {
+            scan.getAnnotations().forEach(a -> {
+                if (a.getAnnotationType().getClassName().equals(REIPlugin.class.getName())) {
+                    String required = (String) a.getAnnotationData().getOrDefault("value", "");
+                    if (required.isEmpty() || ModList.get().isLoaded(required)) {
+                        try {
+                            Class<?> clazz = Class.forName(a.getMemberName());
+                            if (IRecipePlugin.class.isAssignableFrom(clazz)) {
+                                IRecipePlugin plugin = (IRecipePlugin) clazz.newInstance();
+                                registerPlugin(new Identifier(clazz.getAnnotation(REIPlugin.class).identifier()), plugin);
+                            }
+                        } catch (Exception e) {
+                            LOGGER.error("REI: Can't load REI plugin. %s", a.getMemberName());
+                        }
+                    }
                 }
-            } catch (Exception e) {
-                RoughlyEnoughItemsPlugin.LOGGER.error("REI: Failed to load plugin file from %s. (%s)", (Object) modInfo.id, (Object) e.getLocalizedMessage());
-            }
+            });
         });
         LOGGER.info("REI: Discovered %d REI Plugins%s", plugins.size(), (plugins.size() > 0 ? ": " + String.join(", ", plugins.keySet().stream().map(Identifier::toString).collect(Collectors.toList())) : "."));
-    }
-    
-    private static void loadPluginInfo(ModInfo modInfo, Reader reader) throws Exception {
-        JsonElement infoElement = parser.parse(reader);
-        if (infoElement.isJsonArray())
-            for(JsonElement jsonElement : infoElement.getAsJsonArray())
-                parseAndRegisterPlugin(modInfo.id, jsonElement.getAsJsonObject());
-        else
-            parseAndRegisterPlugin(modInfo.id, infoElement.getAsJsonObject());
-        reader.close();
-    }
-    
-    private static void parseAndRegisterPlugin(String modId, JsonObject jsonObject) throws Exception {
-        Identifier location = new Identifier(modId, jsonObject.getAsJsonPrimitive("id").getAsString());
-        Class<?> aClass = Class.forName(jsonObject.getAsJsonPrimitive("initializer").getAsString());
-        IRecipePlugin plugin = IRecipePlugin.class.cast(aClass.newInstance());
-        registerPlugin(location, plugin);
     }
     
 }

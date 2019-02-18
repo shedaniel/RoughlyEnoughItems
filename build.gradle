@@ -1,55 +1,59 @@
 buildscript {
     repositories {
+        maven { url = 'https://files.minecraftforge.net/maven' }
+        jcenter()
         mavenCentral()
-        maven { url 'https://www.jitpack.io' }
-        maven { url 'https://files.minecraftforge.net/maven' }
-        maven { url 'http://repo.spongepowered.org/maven' }
     }
     dependencies {
-        classpath 'com.github.Chocohead:ForgeGradle:jitpack-SNAPSHOT'
-        classpath 'org.spongepowered:mixingradle:0.6-SNAPSHOT'
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
     }
 }
-
-apply plugin: 'net.minecraftforge.gradle.tweaker-client'
-apply plugin: 'org.spongepowered.mixin'
-apply plugin: 'java'
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'eclipse'
 
 group 'me.shedaniel'
-version '2.3.0.18'
+version '2.3.0.0+alpha'
 archivesBaseName = 'RoughlyEnoughItems'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
 
-repositories {
-    mavenCentral()
-    maven { url 'https://www.dimdev.org/maven/' }
-    maven { url 'https://www.jitpack.io' }
-    maven { url 'https://repo.spongepowered.org/maven/' }
-    maven { url "http://repo.strezz.org/artifactory/list/Strezz-Central" }
+minecraft {
+    mappings channel: 'snapshot', version: '20180921-1.13'
+
+    runs {
+        client = {
+            // recommended logging data for a userdev environment
+            properties 'forge.logging.markers': 'SCAN,REGISTRIES,REGISTRYDUMP'
+            // recommended logging level for the console
+            properties 'forge.logging.console.level': 'debug'
+            workingDirectory project.file('run').canonicalPath
+            source sourceSets.main
+        }
+        server = {
+            // recommended logging data for a userdev environment
+            properties 'forge.logging.markers': 'SCAN,REGISTRIES,REGISTRYDUMP'
+            // recommended logging level for the console
+            properties 'forge.logging.console.level': 'debug'
+            workingDirectory project.file('run').canonicalPath
+            source sourceSets.main
+        }
+    }
 }
 
 dependencies {
-    implementation 'com.github.Chocohead:Rift:jitpack-SNAPSHOT:dev'
+    minecraft 'net.minecraftforge:forge:1.13.2-25.0.26'
+
     implementation 'com.google.code.gson:gson:2.8.5'
 }
 
-processResources {
-    filesMatching('riftmod.json') {
-        expand 'version': project.version
+jar {
+    manifest {
+        attributes(["Specification-Title"     : "examplemod",
+                    "Specification-Vendor"    : "examplemodsareus",
+                    "Specification-Version"   : "24.0", // We are version 1 of the modlauncher specification
+                    "Implementation-Title"    : project.name,
+                    "Implementation-Version"  : "${version}",
+                    "Implementation-Vendor"   : "examplemodsareus",
+                    "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")],)
     }
-    inputs.property "version", project.version
-}
-
-mixin {
-    defaultObfuscationEnv notch
-    add sourceSets.main, 'mixins.roughlyenoughitems.refmap.json'
-}
-
-minecraft {
-    version = '1.13.2'
-    mappings = 'snapshot_20181130'
-    runDir = 'run'
-    tweakClass = 'org.dimdev.riftloader.launch.RiftLoaderClientTweaker'
 }

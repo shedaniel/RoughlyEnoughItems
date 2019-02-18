@@ -162,7 +162,7 @@ public class RecipeViewingWidgetGui extends GuiScreen {
                     @Override
                     public boolean onMouseClick(int button, double mouseX, double mouseY) {
                         if (getBounds().contains(mouseX, mouseY)) {
-                            Minecraft.getInstance().getSoundHandler().play(SimpleSound.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                            Minecraft.getInstance().getSoundHandler().play(SimpleSound.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                             if (getId() + categoryPages * 6 == categories.indexOf(selectedCategory))
                                 return false;
                             selectedCategory = categories.get(getId() + categoryPages * 6);

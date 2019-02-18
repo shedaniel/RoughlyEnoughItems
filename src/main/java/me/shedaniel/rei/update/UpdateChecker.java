@@ -3,9 +3,10 @@ package me.shedaniel.rei.update;
 import com.google.common.collect.Lists;
 import com.google.gson.*;
 import com.google.gson.annotations.SerializedName;
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.ConfigHelper;
+import net.minecraftforge.fml.ModList;
 import org.apache.commons.io.IOUtils;
-import org.dimdev.riftloader.RiftLoader;
 
 import java.io.*;
 import java.net.URL;
@@ -95,7 +96,7 @@ public class UpdateChecker {
     
     public static void onInitialization() {
         try {
-            RiftLoader.instance.getMods().stream().filter(modInfo -> modInfo.id.equalsIgnoreCase("roughlyenoughitems")).findFirst().ifPresent(modInfo -> CURRENT_VERSION = new Version(getVersionFromSource(modInfo.source)));
+            ModList.get().getMods().stream().filter(modInfo -> modInfo.getModId().equalsIgnoreCase(RoughlyEnoughItemsCore.MOD_ID)).findAny().ifPresent(modInfo -> CURRENT_VERSION = new Version(modInfo.getVersion().toString()));
         } catch (Exception e1) {
         }
         if (CURRENT_VERSION == null)
