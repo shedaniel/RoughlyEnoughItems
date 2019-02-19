@@ -96,7 +96,7 @@ public class UpdateChecker {
     
     public static void onInitialization() {
         try {
-            ModList.get().getMods().stream().filter(modInfo -> modInfo.getModId().equalsIgnoreCase(RoughlyEnoughItemsCore.MOD_ID)).findAny().ifPresent(modInfo -> CURRENT_VERSION = new Version(modInfo.getVersion().toString().split("\\+")[0]));
+            ModList.get().getMods().stream().filter(modInfo -> modInfo.getModId().equalsIgnoreCase(RoughlyEnoughItemsCore.MOD_ID)).findAny().ifPresent(modInfo -> CURRENT_VERSION = new Version(modInfo.getVersion().toString()));
         } catch (Exception e1) {
         }
         if (CURRENT_VERSION == null)

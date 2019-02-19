@@ -11,9 +11,9 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 
-group 'me.shedaniel'
-version '2.3.0.0+alpha'
-archivesBaseName = 'RoughlyEnoughItems'
+group project.mod_group
+version = project.mod_version
+archivesBaseName = project.mod_name
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
 
@@ -46,14 +46,7 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.5'
 }
 
-jar {
-    manifest {
-        attributes(["Specification-Title"     : "examplemod",
-                    "Specification-Vendor"    : "examplemodsareus",
-                    "Specification-Version"   : "24.0", // We are version 1 of the modlauncher specification
-                    "Implementation-Title"    : project.name,
-                    "Implementation-Version"  : "${version}",
-                    "Implementation-Vendor"   : "examplemodsareus",
-                    "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")],)
-    }
+configurations {
+    jar.archiveName = 'RoughlyEnoughItems-' + version + '+alpha.jar'
 }
+
