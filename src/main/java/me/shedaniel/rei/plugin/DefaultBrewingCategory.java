@@ -89,4 +89,9 @@ public class DefaultBrewingCategory implements IRecipeCategory<DefaultBrewingDis
         return widgets;
     }
     
+    @Override
+    public boolean checkTags() {
+        return true;
+    }
+    
 }

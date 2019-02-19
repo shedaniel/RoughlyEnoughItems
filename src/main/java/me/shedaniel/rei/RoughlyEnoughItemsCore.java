@@ -39,7 +39,7 @@ public class RoughlyEnoughItemsCore {
     
     public static final String MOD_ID = "roughlyenoughitems";
     
-    public static final Logger LOGGER = LogManager.getFormatterLogger("REI");
+    public static final Logger LOGGER = LogManager.getFormatterLogger("roughlyenoughitems");
     private static final RecipeHelper RECIPE_HELPER = new RecipeHelper();
     private static final ItemListHelper ITEM_LIST_HELPER = new ItemListHelper();
     private static final PluginManager PLUGIN_MANAGER = new PluginManager();
