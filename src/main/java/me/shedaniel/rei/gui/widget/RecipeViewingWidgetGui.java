@@ -3,8 +3,8 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.IRecipeCategory;
 import me.shedaniel.rei.api.IRecipeDisplay;
-import me.shedaniel.rei.api.SpeedCraftAreaSupplier;
-import me.shedaniel.rei.api.SpeedCraftFunctional;
+import me.shedaniel.rei.api.ISpeedCraftAreaSupplier;
+import me.shedaniel.rei.api.ISpeedCraftFunctional;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
 import me.shedaniel.rei.client.RecipeHelper;
@@ -59,8 +59,8 @@ public class RecipeViewingWidgetGui extends GuiScreen {
         this.tabs = new ArrayList<>();
     }
     
-    public static SpeedCraftFunctional getSpeedCraftFunctionalByCategory(GuiContainer guiContainer, IRecipeCategory category) {
-        for(SpeedCraftFunctional functional : RecipeHelper.getInstance().getSpeedCraftFunctional(category))
+    public static ISpeedCraftFunctional getSpeedCraftFunctionalByCategory(GuiContainer guiContainer, IRecipeCategory category) {
+        for(ISpeedCraftFunctional functional : RecipeHelper.getInstance().getSpeedCraftFunctional(category))
             for(Class aClass : functional.getFunctioningFor())
                 if (guiContainer.getClass().isAssignableFrom(aClass))
                     return functional;
@@ -177,8 +177,8 @@ public class RecipeViewingWidgetGui extends GuiScreen {
             }
         }
         
-        SpeedCraftAreaSupplier supplier = RecipeHelper.getInstance().getSpeedCraftButtonArea(selectedCategory);
-        final SpeedCraftFunctional functional = getSpeedCraftFunctionalByCategory(GuiHelper.getLastGuiContainer(), selectedCategory);
+        ISpeedCraftAreaSupplier supplier = RecipeHelper.getInstance().getSpeedCraftButtonArea(selectedCategory);
+        final ISpeedCraftFunctional functional = getSpeedCraftFunctionalByCategory(GuiHelper.getLastGuiContainer(), selectedCategory);
         if (page * getRecipesPerPage() < categoriesMap.get(selectedCategory).size()) {
             final Supplier<IRecipeDisplay> topDisplaySupplier = () -> categoriesMap.get(selectedCategory).get(page * getRecipesPerPage());
             final Rectangle topBounds = new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 40, 150, selectedCategory.usesFullPage() ? 140 : 66);

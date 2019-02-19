@@ -149,4 +149,9 @@ public class RoughlyEnoughItemsCore {
         }
     }
     
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void onGuiShift(GuiScreenEvent.PotionShiftEvent event) {
+        event.setCanceled(true);
+    }
+    
 }

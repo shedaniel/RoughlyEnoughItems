@@ -2,7 +2,7 @@ package me.shedaniel.rei.api;
 
 import java.awt.*;
 
-public interface SpeedCraftAreaSupplier {
+public interface ISpeedCraftAreaSupplier {
     
     public Rectangle get(Rectangle bounds);
     

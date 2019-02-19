@@ -2,7 +2,7 @@ package me.shedaniel.rei.api;
 
 import net.minecraft.client.gui.Gui;
 
-public interface SpeedCraftFunctional<T extends IRecipeDisplay> {
+public interface ISpeedCraftFunctional<T extends IRecipeDisplay> {
     
     public Class[] getFunctioningFor();
     

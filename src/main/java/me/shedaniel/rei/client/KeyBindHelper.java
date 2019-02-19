@@ -15,9 +15,9 @@ public class KeyBindHelper {
     
     public static void setupKeyBinds() {
         String category = "key.rei.category";
-        ClientRegistry.registerKeyBinding(RECIPE = new KeyBinding(RECIPE_KEYBIND, KeyConflictContext.IN_GAME, KeyModifier.NONE, InputMappings.Type.KEYSYM.getOrMakeInput(82), category));
-        ClientRegistry.registerKeyBinding(USAGE = new KeyBinding(USAGE_KEYBIND, KeyConflictContext.IN_GAME, KeyModifier.NONE, InputMappings.Type.KEYSYM.getOrMakeInput(85), category));
-        ClientRegistry.registerKeyBinding(HIDE = new KeyBinding(HIDE_KEYBIND, KeyConflictContext.IN_GAME, KeyModifier.NONE, InputMappings.Type.KEYSYM.getOrMakeInput(79), category));
+        ClientRegistry.registerKeyBinding(RECIPE = new KeyBinding(RECIPE_KEYBIND, KeyConflictContext.GUI, KeyModifier.NONE, InputMappings.Type.KEYSYM.getOrMakeInput(82), category));
+        ClientRegistry.registerKeyBinding(USAGE = new KeyBinding(USAGE_KEYBIND, KeyConflictContext.GUI, KeyModifier.NONE, InputMappings.Type.KEYSYM.getOrMakeInput(85), category));
+        ClientRegistry.registerKeyBinding(HIDE = new KeyBinding(HIDE_KEYBIND, KeyConflictContext.GUI, KeyModifier.NONE, InputMappings.Type.KEYSYM.getOrMakeInput(79), category));
     }
     
 }

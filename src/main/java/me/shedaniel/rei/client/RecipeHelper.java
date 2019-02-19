@@ -17,8 +17,8 @@ public class RecipeHelper {
     
     private final Map<Identifier, List<IRecipeDisplay>> recipeCategoryListMap = Maps.newHashMap();
     private final List<IRecipeCategory> categories = Lists.newArrayList();
-    private final Map<Identifier, SpeedCraftAreaSupplier> speedCraftAreaSupplierMap = Maps.newHashMap();
-    private final Map<Identifier, List<SpeedCraftFunctional>> speedCraftFunctionalMap = Maps.newHashMap();
+    private final Map<Identifier, ISpeedCraftAreaSupplier> speedCraftAreaSupplierMap = Maps.newHashMap();
+    private final Map<Identifier, List<ISpeedCraftFunctional>> speedCraftFunctionalMap = Maps.newHashMap();
     private RecipeManager recipeManager;
     
     public static RecipeHelper getInstance() {
@@ -123,7 +123,7 @@ public class RecipeHelper {
         return new LinkedList<>(categories);
     }
     
-    public SpeedCraftAreaSupplier getSpeedCraftButtonArea(IRecipeCategory category) {
+    public ISpeedCraftAreaSupplier getSpeedCraftButtonArea(IRecipeCategory category) {
         if (!speedCraftAreaSupplierMap.containsKey(category.getIdentifier()))
             return bounds -> {
                 return new Rectangle((int) bounds.getMaxX() - 16, (int) bounds.getMaxY() - 16, 10, 10);
@@ -131,18 +131,18 @@ public class RecipeHelper {
         return speedCraftAreaSupplierMap.get(category.getIdentifier());
     }
     
-    public void registerSpeedCraftButtonArea(Identifier category, SpeedCraftAreaSupplier rectangle) {
+    public void registerSpeedCraftButtonArea(Identifier category, ISpeedCraftAreaSupplier rectangle) {
         speedCraftAreaSupplierMap.put(category, rectangle);
     }
     
-    public List<SpeedCraftFunctional> getSpeedCraftFunctional(IRecipeCategory category) {
+    public List<ISpeedCraftFunctional> getSpeedCraftFunctional(IRecipeCategory category) {
         if (speedCraftFunctionalMap.get(category.getIdentifier()) == null)
             return Lists.newArrayList();
         return speedCraftFunctionalMap.get(category.getIdentifier());
     }
     
-    public void registerSpeedCraftFunctional(Identifier category, SpeedCraftFunctional functional) {
-        List<SpeedCraftFunctional> list = speedCraftFunctionalMap.containsKey(category) ? new LinkedList<>(speedCraftFunctionalMap.get(category)) : Lists.newLinkedList();
+    public void registerSpeedCraftFunctional(Identifier category, ISpeedCraftFunctional functional) {
+        List<ISpeedCraftFunctional> list = speedCraftFunctionalMap.containsKey(category) ? new LinkedList<>(speedCraftFunctionalMap.get(category)) : Lists.newLinkedList();
         list.add(functional);
         speedCraftFunctionalMap.put(category, list);
     }
