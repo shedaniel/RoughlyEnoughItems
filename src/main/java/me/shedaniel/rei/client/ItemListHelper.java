@@ -9,6 +9,7 @@ import net.minecraft.util.NonNullList;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -28,12 +29,23 @@ public class ItemListHelper implements IItemRegisterer {
     }
     
     @Override
-    public ItemStack[] getAllStacksFromItem(Item item) {
-        NonNullList<ItemStack> list = NonNullList.create();
-        list.add(item.getDefaultInstance());
-        item.fillItemGroup(item.getGroup(), list);
-        TreeSet<ItemStack> stackSet = list.stream().collect(Collectors.toCollection(() -> new TreeSet<ItemStack>((p1, p2) -> ItemStack.areItemStacksEqual(p1, p2) ? 0 : 1)));
-        return Lists.newArrayList(stackSet).toArray(new ItemStack[0]);
+    public Optional<NonNullList<ItemStack>> getAlterativeStacks(Item item) {
+        try {
+            NonNullList<ItemStack> list = NonNullList.create();
+            list.add(item.getDefaultInstance());
+            item.fillItemGroup(item.getGroup(), list);
+            TreeSet<ItemStack> stackSet = list.stream().collect(Collectors.toCollection(() -> new TreeSet<ItemStack>((p1, p2) -> ItemStack.areItemStacksEqual(p1, p2) ? 0 : 1)));
+            if (!list.isEmpty())
+                Optional.of(list);
+        } catch (Exception e) {
+        }
+        try {
+            NonNullList<ItemStack> list = NonNullList.create();
+            list.add(item.getDefaultInstance());
+            return Optional.of(list);
+        } catch (Exception e) {
+        }
+        return Optional.empty();
     }
     
     @Override

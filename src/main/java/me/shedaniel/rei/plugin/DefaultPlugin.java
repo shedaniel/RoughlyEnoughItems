@@ -3,7 +3,6 @@ package me.shedaniel.rei.plugin;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.ConfigHelper;
 import me.shedaniel.rei.client.RecipeHelper;
-import me.shedaniel.rei.utils.GhostRecipeUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
@@ -13,17 +12,20 @@ import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.init.Items;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipe;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.ShapedRecipe;
 import net.minecraft.item.crafting.ShapelessRecipe;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.registry.IRegistry;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
-@REIPlugin(identifier = "roughlyenoughitems:default_plugin")
+@IREIPlugin(identifier = "roughlyenoughitems:default_plugin")
 public class DefaultPlugin implements IRecipePlugin {
     
     static final Identifier CRAFTING = new Identifier("roughlyenoughitems", "plugins/crafting");
@@ -42,20 +44,26 @@ public class DefaultPlugin implements IRecipePlugin {
     
     @Override
     public void registerItems(IItemRegisterer itemRegisterer) {
-        IRegistry.field_212630_s.stream().forEach(item -> {
-            itemRegisterer.registerItemStack(item.getDefaultInstance());
-            try {
-                itemRegisterer.registerItemStack(itemRegisterer.getAllStacksFromItem(item));
-            } catch (Exception e) {
+        IRegistry.field_212630_s.forEach(o -> {
+            if (o instanceof Item) {
+                Item item = (Item) o;
+                Optional<NonNullList<ItemStack>> optionalStacks = itemRegisterer.getAlterativeStacks(item);
+                if (optionalStacks.isPresent())
+                    itemRegisterer.registerItemStack(optionalStacks.get().toArray(new ItemStack[0]));
+                else
+                    itemRegisterer.registerItemStack(item.getDefaultInstance());
             }
         });
-        IRegistry.field_212628_q.forEach(enchantment -> {
-            for(int i = enchantment.getMinLevel(); i < enchantment.getMaxLevel(); i++) {
-                Map<Enchantment, Integer> map = new HashMap<>();
-                map.put(enchantment, i);
-                ItemStack itemStack = new ItemStack(Items.ENCHANTED_BOOK);
-                EnchantmentHelper.setEnchantments(map, itemStack);
-                itemRegisterer.registerItemStack(Items.ENCHANTED_BOOK, itemStack);
+        IRegistry.field_212628_q.forEach(o -> {
+            if (o instanceof Enchantment) {
+                Enchantment ench = (Enchantment) o;
+                for(int i = ench.getMinLevel(); i < ench.getMaxLevel(); i++) {
+                    Map<Enchantment, Integer> map = new HashMap<>();
+                    map.put(ench, i);
+                    ItemStack itemStack = new ItemStack(Items.ENCHANTED_BOOK);
+                    EnchantmentHelper.setEnchantments(map, itemStack);
+                    itemRegisterer.registerItemStack(Items.ENCHANTED_BOOK, itemStack);
+                }
             }
         });
     }
@@ -82,7 +90,7 @@ public class DefaultPlugin implements IRecipePlugin {
     @Override
     public void registerSpeedCraft(RecipeHelper recipeHelper) {
         recipeHelper.registerSpeedCraftButtonArea(DefaultPlugin.BREWING, null);
-        recipeHelper.registerSpeedCraftFunctional(DefaultPlugin.CRAFTING, new SpeedCraftFunctional<DefaultCraftingDisplay>() {
+        recipeHelper.registerSpeedCraftFunctional(DefaultPlugin.CRAFTING, new ISpeedCraftFunctional<DefaultCraftingDisplay>() {
             @Override
             public Class[] getFunctioningFor() {
                 return new Class[]{GuiInventory.class, GuiCrafting.class};
@@ -91,9 +99,9 @@ public class DefaultPlugin implements IRecipePlugin {
             @Override
             public boolean performAutoCraft(Gui gui, DefaultCraftingDisplay recipe) {
                 if (gui.getClass().isAssignableFrom(GuiCrafting.class))
-                    GhostRecipeUtil.fromGuiCrafting((GuiCrafting) gui).clear();
+                    ((GuiCrafting) gui).func_194310_f().ghostRecipe.clear();
                 else if (gui.getClass().isAssignableFrom(GuiInventory.class))
-                    GhostRecipeUtil.fromGuiInventory((GuiInventory) gui).clear();
+                    ((GuiInventory) gui).func_194310_f().ghostRecipe.clear();
                 else
                     return false;
                 Minecraft.getInstance().playerController.func_203413_a(Minecraft.getInstance().player.openContainer.windowId, recipe.getRecipe(), GuiScreen.isShiftKeyDown());
@@ -105,7 +113,7 @@ public class DefaultPlugin implements IRecipePlugin {
                 return gui instanceof GuiCrafting || (gui instanceof GuiInventory && recipe.getHeight() < 3 && recipe.getWidth() < 3);
             }
         });
-        recipeHelper.registerSpeedCraftFunctional(DefaultPlugin.SMELTING, new SpeedCraftFunctional<DefaultSmeltingDisplay>() {
+        recipeHelper.registerSpeedCraftFunctional(DefaultPlugin.SMELTING, new ISpeedCraftFunctional<DefaultSmeltingDisplay>() {
             @Override
             public Class[] getFunctioningFor() {
                 return new Class[]{GuiFurnace.class};
@@ -114,7 +122,7 @@ public class DefaultPlugin implements IRecipePlugin {
             @Override
             public boolean performAutoCraft(Gui gui, DefaultSmeltingDisplay recipe) {
                 if (gui instanceof GuiFurnace)
-                    GhostRecipeUtil.fromGuiRecipeBook(((GuiFurnace) gui).func_194310_f()).clear();
+                    ((GuiFurnace) gui).func_194310_f().ghostRecipe.clear();
                 else
                     return false;
                 Minecraft.getInstance().playerController.func_203413_a(Minecraft.getInstance().player.openContainer.windowId, recipe.getRecipe(), GuiScreen.isShiftKeyDown());

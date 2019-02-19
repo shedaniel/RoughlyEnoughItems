@@ -2,8 +2,10 @@ package me.shedaniel.rei.api;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface IItemRegisterer {
     
@@ -12,7 +14,7 @@ public interface IItemRegisterer {
     @Deprecated
     public List<ItemStack> getModifiableItemList();
     
-    public ItemStack[] getAllStacksFromItem(Item item);
+    public Optional<NonNullList<ItemStack>> getAlterativeStacks(Item item);
     
     public void registerItemStack(Item afterItem, ItemStack stack);
     

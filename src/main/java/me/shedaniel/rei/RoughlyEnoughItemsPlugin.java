@@ -4,10 +4,8 @@ import com.google.common.collect.Maps;
 import com.google.gson.JsonParser;
 import me.shedaniel.rei.api.IRecipePlugin;
 import me.shedaniel.rei.api.Identifier;
-import me.shedaniel.rei.api.REIPlugin;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import me.shedaniel.rei.api.IREIPlugin;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -48,14 +46,14 @@ public class RoughlyEnoughItemsPlugin {
         LOGGER.info("Discovering Plugins.");
         ModList.get().getAllScanData().forEach(scan -> {
             scan.getAnnotations().forEach(a -> {
-                if (a.getAnnotationType().getClassName().equals(REIPlugin.class.getName())) {
+                if (a.getAnnotationType().getClassName().equals(IREIPlugin.class.getName())) {
                     String required = (String) a.getAnnotationData().getOrDefault("value", "");
                     if (required.isEmpty() || ModList.get().isLoaded(required)) {
                         try {
                             Class<?> clazz = Class.forName(a.getMemberName());
                             if (IRecipePlugin.class.isAssignableFrom(clazz)) {
                                 IRecipePlugin plugin = (IRecipePlugin) clazz.newInstance();
-                                registerPlugin(new Identifier(clazz.getAnnotation(REIPlugin.class).identifier()), plugin);
+                                registerPlugin(new Identifier(clazz.getAnnotation(IREIPlugin.class).identifier()), plugin);
                             }
                         } catch (Exception e) {
                             LOGGER.error("Can't load REI plugin. %s", a.getMemberName());

@@ -1,7 +1,7 @@
 package me.shedaniel.rei.gui.widget;
 
 import me.shedaniel.rei.api.IRecipeDisplay;
-import me.shedaniel.rei.api.SpeedCraftFunctional;
+import me.shedaniel.rei.api.ISpeedCraftFunctional;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
 import net.minecraft.client.Minecraft;
@@ -14,9 +14,9 @@ import java.util.function.Supplier;
 public class SpeedCraftingButtonWidget extends ButtonWidget {
     
     private final Supplier<IRecipeDisplay> displaySupplier;
-    private final SpeedCraftFunctional functional;
+    private final ISpeedCraftFunctional functional;
     
-    public SpeedCraftingButtonWidget(Rectangle rectangle, String text, SpeedCraftFunctional functional, Supplier<IRecipeDisplay> displaySupplier) {
+    public SpeedCraftingButtonWidget(Rectangle rectangle, String text, ISpeedCraftFunctional functional, Supplier<IRecipeDisplay> displaySupplier) {
         super(rectangle, text);
         this.displaySupplier = displaySupplier;
         this.functional = functional;
