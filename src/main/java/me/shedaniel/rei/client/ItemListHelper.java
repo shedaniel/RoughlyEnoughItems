@@ -35,6 +35,8 @@ public class ItemListHelper implements IItemRegisterer {
             list.add(item.getDefaultInstance());
             item.fillItemGroup(item.getGroup(), list);
             TreeSet<ItemStack> stackSet = list.stream().collect(Collectors.toCollection(() -> new TreeSet<ItemStack>((p1, p2) -> ItemStack.areItemStacksEqual(p1, p2) ? 0 : 1)));
+            list = NonNullList.create();
+            stackSet.forEach(list::add);
             if (!list.isEmpty())
                 Optional.of(list);
         } catch (Exception e) {

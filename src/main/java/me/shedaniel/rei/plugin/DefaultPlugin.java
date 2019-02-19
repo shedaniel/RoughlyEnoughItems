@@ -1,8 +1,10 @@
 package me.shedaniel.rei.plugin;
 
+import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.ConfigHelper;
 import me.shedaniel.rei.client.RecipeHelper;
+import me.shedaniel.rei.utils.PotionRecipeUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
@@ -14,16 +16,15 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.FurnaceRecipe;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.ShapedRecipe;
-import net.minecraft.item.crafting.ShapelessRecipe;
+import net.minecraft.item.crafting.*;
+import net.minecraft.potion.PotionBrewing;
+import net.minecraft.potion.PotionType;
+import net.minecraft.potion.PotionUtils;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.registry.IRegistry;
+import net.minecraftforge.registries.IRegistryDelegate;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @IREIPlugin(identifier = "roughlyenoughitems:default_plugin")
 public class DefaultPlugin implements IRecipePlugin {
@@ -45,13 +46,17 @@ public class DefaultPlugin implements IRecipePlugin {
     @Override
     public void registerItems(IItemRegisterer itemRegisterer) {
         IRegistry.field_212630_s.forEach(o -> {
-            if (o instanceof Item) {
-                Item item = (Item) o;
-                Optional<NonNullList<ItemStack>> optionalStacks = itemRegisterer.getAlterativeStacks(item);
-                if (optionalStacks.isPresent())
-                    itemRegisterer.registerItemStack(optionalStacks.get().toArray(new ItemStack[0]));
-                else
-                    itemRegisterer.registerItemStack(item.getDefaultInstance());
+            try {
+                if (o instanceof Item) {
+                    Item item = (Item) o;
+                    Optional<NonNullList<ItemStack>> optionalStacks = itemRegisterer.getAlterativeStacks(item);
+                    if (optionalStacks.isPresent())
+                        itemRegisterer.registerItemStack(optionalStacks.get().toArray(new ItemStack[0]));
+                    else
+                        itemRegisterer.registerItemStack(item.getDefaultInstance());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
         IRegistry.field_212628_q.forEach(o -> {
@@ -85,6 +90,41 @@ public class DefaultPlugin implements IRecipePlugin {
                 recipeHelper.registerDisplay(CRAFTING, new DefaultShapedDisplay((ShapedRecipe) value));
             else if (value instanceof FurnaceRecipe)
                 recipeHelper.registerDisplay(SMELTING, new DefaultSmeltingDisplay((FurnaceRecipe) value));
+        List<PotionType> registeredPotionTypes = Lists.newArrayList();
+        List<BrewingRecipe> potionItemConversions = Lists.newArrayList();
+        ((List) PotionBrewing.POTION_ITEM_CONVERSIONS).forEach(o -> {
+            try {
+                IRegistryDelegate<Item> input = PotionRecipeUtils.getInputFromMixPredicate(o, IRegistryDelegate.class);
+                IRegistryDelegate<Item> output = PotionRecipeUtils.getOutputFromMixPredicate(o, IRegistryDelegate.class);
+                Ingredient reagent = PotionRecipeUtils.getReagentFromMixPredicate(o);
+                potionItemConversions.add(new BrewingRecipe(input.get(), reagent, output.get()));
+            } catch (Throwable throwable) {
+                throwable.printStackTrace();
+            }
+        });
+        ((List) PotionBrewing.POTION_TYPE_CONVERSIONS).forEach(o -> {
+            try {
+                IRegistryDelegate<PotionType> input = PotionRecipeUtils.getInputFromMixPredicate(o, IRegistryDelegate.class);
+                IRegistryDelegate<PotionType> output = PotionRecipeUtils.getOutputFromMixPredicate(o, IRegistryDelegate.class);
+                Ingredient reagent = PotionRecipeUtils.getReagentFromMixPredicate(o);
+                if (!registeredPotionTypes.contains(input.get()))
+                    registerPotionType(recipeHelper, registeredPotionTypes, potionItemConversions, input.get());
+                if (!registeredPotionTypes.contains(output.get()))
+                    registerPotionType(recipeHelper, registeredPotionTypes, potionItemConversions, output.get());
+                PotionBrewing.POTION_ITEMS.stream().map(Ingredient::getMatchingStacks).forEach(itemStacks -> Arrays.stream(itemStacks).forEach(stack -> {
+                    recipeHelper.registerDisplay(BREWING, new DefaultBrewingDisplay(PotionUtils.addPotionToItemStack(stack.copy(), input.get()), reagent, PotionUtils.addPotionToItemStack(stack.copy(), output.get())));
+                }));
+            } catch (Throwable throwable) {
+                throwable.printStackTrace();
+            }
+        });
+    }
+    
+    private void registerPotionType(RecipeHelper recipeHelper, List<PotionType> list, List<BrewingRecipe> potionItemConversions, PotionType potion) {
+        list.add(potion);
+        potionItemConversions.forEach(recipe -> {
+            recipeHelper.registerDisplay(BREWING, new DefaultBrewingDisplay(PotionUtils.addPotionToItemStack(recipe.input.getDefaultInstance(), potion), recipe.ingredient, PotionUtils.addPotionToItemStack(recipe.output.getDefaultInstance(), potion)));
+        });
     }
     
     @Override

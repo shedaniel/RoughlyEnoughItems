@@ -2,7 +2,7 @@
   "latest": [
     {
       "game": "1.13.2",
-      "mod": "2.3.0.0"
+      "mod": "2.3.0.1"
     }
   ],
   "changelogs": {
@@ -10,6 +10,11 @@
       {
         "version": "2.3.0.0",
         "text": "First Alpha",
+        "level": "none"
+      },
+      {
+        "version": "2.3.0.1",
+        "text": "Added Potion Recipes",
         "level": "none"
       }
     ]
