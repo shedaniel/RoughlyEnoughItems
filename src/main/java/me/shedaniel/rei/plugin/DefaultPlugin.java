@@ -61,10 +61,10 @@ public class DefaultPlugin implements IRecipePlugin {
         });
         IRegistry.field_212628_q.forEach(o -> {
             if (o instanceof Enchantment) {
-                Enchantment ench = (Enchantment) o;
-                for(int i = ench.getMinLevel(); i < ench.getMaxLevel(); i++) {
+                Enchantment enchantment = (Enchantment) o;
+                for(int i = enchantment.getMinLevel(); i < enchantment.getMaxLevel(); i++) {
                     Map<Enchantment, Integer> map = new HashMap<>();
-                    map.put(ench, i);
+                    map.put(enchantment, i);
                     ItemStack itemStack = new ItemStack(Items.ENCHANTED_BOOK);
                     EnchantmentHelper.setEnchantments(map, itemStack);
                     itemRegisterer.registerItemStack(Items.ENCHANTED_BOOK, itemStack);
@@ -80,7 +80,6 @@ public class DefaultPlugin implements IRecipePlugin {
         recipeHelper.registerCategory(new DefaultBrewingCategory());
     }
     
-    // TODO Register Potion
     @Override
     public void registerRecipeDisplays(RecipeHelper recipeHelper) {
         for(IRecipe value : recipeHelper.getRecipeManager().getRecipes())

@@ -16,6 +16,11 @@
         "version": "2.3.0.1",
         "text": "Added Potion Recipes",
         "level": "none"
+      },
+      {
+        "version": "2.3.0.2",
+        "text": "Completed French Translation",
+        "level": "none"
       }
     ]
   }
