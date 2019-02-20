@@ -48,9 +48,6 @@ public class RoughlyEnoughItemsCore {
     public RoughlyEnoughItemsCore() {
         final IEventBus eventBus = MinecraftForge.EVENT_BUS;
         DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> {
-            configHelper = new ConfigHelper();
-            UpdateChecker.onInitialization();
-            
             // Setup Mod
             FMLJavaModLoadingContext.get().getModEventBus().addListener(EventPriority.NORMAL, this::onModClientSetup);
             
@@ -78,6 +75,8 @@ public class RoughlyEnoughItemsCore {
     }
     
     public void onModClientSetup(FMLClientSetupEvent event) {
+        configHelper = new ConfigHelper();
+        UpdateChecker.onInitialization();
         KeyBindHelper.setupKeyBinds();
         RoughlyEnoughItemsPlugin.discoverPlugins();
         

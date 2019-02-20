@@ -49,6 +49,5 @@ dependencies {
 }
 
 configurations {
-    jar.archiveName = 'RoughlyEnoughItems-' + version + '+alpha.jar'
+    jar.archiveName = 'RoughlyEnoughItems-' + version + '+beta.jar'
 }
-
