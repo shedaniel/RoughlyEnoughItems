@@ -182,4 +182,15 @@ public class RecipeHelper {
         }).collect(Collectors.toList())));
     }
     
+    public Map<IRecipeCategory, List<IRecipeDisplay>> getAllRecipes() {
+        Map<IRecipeCategory, List<IRecipeDisplay>> map = Maps.newLinkedHashMap();
+        Map<Identifier, List<IRecipeDisplay>> tempMap = Maps.newLinkedHashMap();
+        recipeCategoryListMap.forEach((identifier, recipeDisplays) -> tempMap.put(identifier, new LinkedList<>(recipeDisplays)));
+        categories.forEach(category -> {
+            if (tempMap.containsKey(category.getIdentifier()))
+                map.put(category, tempMap.get(category.getIdentifier()));
+        });
+        return map;
+    }
+    
 }

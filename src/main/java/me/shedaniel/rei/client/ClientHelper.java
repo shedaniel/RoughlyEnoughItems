@@ -103,6 +103,13 @@ public class ClientHelper {
         Minecraft.getInstance().displayGuiScreen(new ConfigGui(parent));
     }
     
+    public static boolean executeViewAllRecipesKeyBind(ContainerGuiOverlay overlay) {
+        Map<IRecipeCategory, List<IRecipeDisplay>> map = RecipeHelper.getInstance().getAllRecipes();
+        if (map.keySet().size() > 0)
+            Minecraft.getInstance().displayGuiScreen(new RecipeViewingWidgetGui(Minecraft.getInstance().mainWindow, map));
+        return map.keySet().size() > 0;
+    }
+    
     public static List<ItemStack> getInventoryItemsTypes() {
         List<NonNullList<ItemStack>> field_7543 = ImmutableList.of(Minecraft.getInstance().player.inventory.mainInventory, Minecraft.getInstance().player.inventory.armorInventory, Minecraft.getInstance().player.inventory.offHandInventory);
         List<ItemStack> inventoryStacks = new ArrayList<>();

@@ -21,6 +21,11 @@
         "version": "2.3.0.2",
         "text": "Completed French Translation",
         "level": "none"
+      },
+      {
+        "version": "2.3.0.3",
+        "text": "Added Clickable Category Label",
+        "level": "none"
       }
     ]
   }
