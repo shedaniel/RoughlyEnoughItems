@@ -16,6 +16,7 @@ import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
@@ -23,6 +24,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -140,11 +142,19 @@ public class RecipeViewingWidgetGui extends GuiScreen {
         recipeBack.enabled = categoriesMap.get(selectedCategory).size() > getRecipesPerPage();
         recipeNext.enabled = categoriesMap.get(selectedCategory).size() > getRecipesPerPage();
         
-        widgets.add(new LabelWidget((int) bounds.getCenterX(), (int) bounds.getY() + 7, "") {
+        widgets.add(new ClickableLabelWidget((int) bounds.getCenterX(), (int) bounds.getY() + 7, "") {
             @Override
             public void draw(int mouseX, int mouseY, float partialTicks) {
                 this.text = selectedCategory.getCategoryName();
                 super.draw(mouseX, mouseY, partialTicks);
+                if (isHighlighted(mouseX, mouseY))
+                    GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(new Point(mouseX, mouseY), Arrays.asList(I18n.format("text.rei.view_all_categories").split("\n"))));
+            }
+            
+            @Override
+            public void onLabelClicked() {
+                Minecraft.getInstance().getSoundHandler().play(SimpleSound.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                ClientHelper.executeViewAllRecipesKeyBind(GuiHelper.getLastOverlay());
             }
         });
         widgets.add(new LabelWidget((int) bounds.getCenterX(), (int) bounds.getY() + 23, "") {

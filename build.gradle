@@ -43,11 +43,25 @@ minecraft {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.13.2-25.0.26'
-
+    minecraft 'net.minecraftforge:forge:1.13.2-25.0.44'
     implementation 'com.google.code.gson:gson:2.8.5'
+}
+
+task deobfJar(type: Jar) {
+    from sourceSets.main.output
+    classifier = 'deobf'
+}
+
+task srcJar(type: Jar, dependsOn: classes) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
 }
 
 configurations {
     jar.archiveName = 'RoughlyEnoughItems-' + version + '+beta.jar'
+}
+
+artifacts {
+    archives deobfJar
+    archives srcJar
 }
