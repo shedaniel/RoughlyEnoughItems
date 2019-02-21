@@ -35,10 +35,10 @@
   "text.rei.showing_all": "Zeige alle",
   "text.rei.delete_items": "§cLösche Item",
   "text.rei.check_updates": "Überprüfe Updates: ",
-  "text.rei.update_outdated": "§6REI ist veraltet!\\n§6Aktuell: §a%s §6Letzte: §a%s\\n§6Update Priorität: §a%s",
+  "text.rei.update_outdated": "§6REI ist veraltet!\n§6Aktuell: §a%s §6Letzte: §a%s\n§6Update Priorität: §a%s",
   "text.rei.update_changelog_line": "§6- %s",
   "text.rei.load_default_plugin": "Lade Standard-Plugin: ",
-  "text.rei.load_default_plugin.restart_tooltip": "Du möchtest das wahrscheinlich niemals deaktivieren.\\nStarte Minecraft erneut, um die Einstellungen zu übernehmen."
+  "text.rei.load_default_plugin.restart_tooltip": "Du möchtest das wahrscheinlich niemals deaktivieren.\nStarte Minecraft erneut, um die Einstellungen zu übernehmen."
 
 
 

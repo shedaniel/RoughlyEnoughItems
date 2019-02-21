@@ -15,7 +15,7 @@ public class CreditsEntryListWidget extends EntryListWidget<CreditsEntry> {
     }
     
     private CreditsEntry getEntry(int int_1) {
-        return this.getEntries().get(int_1);
+        return this.method_1968().get(int_1); //getEntries
     }
     
     public void creditsAddEntry(CreditsEntry entry) {

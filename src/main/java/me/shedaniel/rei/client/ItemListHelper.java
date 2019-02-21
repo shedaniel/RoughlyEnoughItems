@@ -31,7 +31,7 @@ public class ItemListHelper implements IItemRegisterer {
     public ItemStack[] getAllStacksFromItem(Item item) {
         DefaultedList<ItemStack> list = DefaultedList.create();
         list.add(item.getDefaultStack());
-        item.addStacksForDisplay(item.getItemGroup(), list);
+        item.appendItemsForGroup(item.getItemGroup(), list);
         TreeSet<ItemStack> stackSet = list.stream().collect(Collectors.toCollection(() -> new TreeSet<ItemStack>((p1, p2) -> ItemStack.areEqual(p1, p2) ? 0 : 1)));
         return Lists.newArrayList(stackSet).toArray(new ItemStack[0]);
     }

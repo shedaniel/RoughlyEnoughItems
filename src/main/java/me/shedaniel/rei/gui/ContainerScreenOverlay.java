@@ -195,6 +195,8 @@ public class ContainerScreenOverlay extends DrawableContainer {
     public void draw(int int_1, int int_2, float float_1) {
         if (!GuiHelper.isOverlayVisible())
             return;
+        buttonLeft.enabled = itemListOverlay.getWidgets().size() > 0;
+        buttonRight.enabled = itemListOverlay.getWidgets().size() > 0;
         widgets.forEach(widget -> {
             GuiLighting.disable();
             widget.draw(int_1, int_2, float_1);
@@ -269,7 +271,7 @@ public class ContainerScreenOverlay extends DrawableContainer {
             }
         if (itemStack == null && MinecraftClient.getInstance().currentScreen instanceof RecipeViewingWidgetScreen) {
             RecipeViewingWidgetScreen recipeViewingWidget = (RecipeViewingWidgetScreen) MinecraftClient.getInstance().currentScreen;
-            for(GuiEventListener entry : recipeViewingWidget.getEntries())
+            for(GuiEventListener entry : recipeViewingWidget.method_1968())
                 if (entry instanceof ItemSlotWidget && ((HighlightableWidget) entry).isHighlighted(point.x, point.y)) {
                     itemStack = ((ItemSlotWidget) entry).getCurrentStack();
                     break;
@@ -291,14 +293,14 @@ public class ContainerScreenOverlay extends DrawableContainer {
     public boolean charTyped(char char_1, int int_1) {
         if (!GuiHelper.isOverlayVisible())
             return false;
-        for(GuiEventListener listener : getEntries())
+        for(GuiEventListener listener : method_1968())
             if (listener.charTyped(char_1, int_1))
                 return true;
         return super.charTyped(char_1, int_1);
     }
     
     @Override
-    protected List<? extends GuiEventListener> getEntries() {
+    public List<? extends GuiEventListener> method_1968() {
         return widgets;
     }
     

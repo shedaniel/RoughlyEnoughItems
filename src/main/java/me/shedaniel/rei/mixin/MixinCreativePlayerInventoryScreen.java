@@ -28,7 +28,7 @@ public abstract class MixinCreativePlayerInventoryScreen extends AbstractPlayerI
     protected abstract boolean doRenderScrollBar();
     
     @Override
-    public int getSelectedTab() {
+    public int rei_getSelectedTab() {
         return selectedTab;
     }
     
@@ -43,7 +43,7 @@ public abstract class MixinCreativePlayerInventoryScreen extends AbstractPlayerI
     
     @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
     public void keyPressed(int int_1, int int_2, int int_3, CallbackInfoReturnable<Boolean> ci) {
-        if (selectedTab == ItemGroup.INVENTORY.getId())
+        if (selectedTab == ItemGroup.INVENTORY.getIndex())
             if (super.keyPressed(int_1, int_2, int_3)) {
                 ci.setReturnValue(true);
                 ci.cancel();
@@ -52,7 +52,7 @@ public abstract class MixinCreativePlayerInventoryScreen extends AbstractPlayerI
     
     @Inject(method = "charTyped", at = @At("HEAD"), cancellable = true)
     public void charTyped(char char_1, int int_1, CallbackInfoReturnable<Boolean> ci) {
-        if (!this.field_2888 && selectedTab == ItemGroup.INVENTORY.getId())
+        if (!this.field_2888 && selectedTab == ItemGroup.INVENTORY.getIndex())
             if (super.charTyped(char_1, int_1)) {
                 ci.setReturnValue(true);
                 ci.cancel();

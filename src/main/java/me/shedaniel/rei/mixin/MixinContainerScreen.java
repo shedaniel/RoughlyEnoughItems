@@ -7,7 +7,6 @@ import me.shedaniel.rei.listeners.IMixinContainerScreen;
 import me.shedaniel.rei.listeners.IMixinTabGetter;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ContainerScreen;
-import net.minecraft.client.gui.GuiEventListener;
 import net.minecraft.client.gui.Screen;
 import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
 import net.minecraft.container.Slot;
@@ -62,11 +61,11 @@ public class MixinContainerScreen extends Screen implements IMixinContainerScree
         this.listeners.add(GuiHelper.getLastOverlay(true));
     }
     
-    @Inject(method = "draw(IIF)V", at = @At("RETURN"))
+    @Inject(method = "method_18326(IIF)V", at = @At("RETURN"))
     public void draw(int int_1, int int_2, float float_1, CallbackInfo info) {
         if (MinecraftClient.getInstance().currentScreen instanceof CreativePlayerInventoryScreen) {
             IMixinTabGetter tabGetter = (IMixinTabGetter) MinecraftClient.getInstance().currentScreen;
-            if (tabGetter.getSelectedTab() != ItemGroup.INVENTORY.getId())
+            if (tabGetter.rei_getSelectedTab() != ItemGroup.INVENTORY.getIndex())
                 return;
         }
         GuiHelper.getLastOverlay().drawOverlay(int_1, int_2, float_1);
@@ -86,9 +85,8 @@ public class MixinContainerScreen extends Screen implements IMixinContainerScree
     public boolean mouseScrolled(double double_1) {
         ContainerScreenOverlay overlay = GuiHelper.getLastOverlay();
         if (GuiHelper.isOverlayVisible() && overlay.getRectangle().contains(ClientHelper.getMouseLocation()))
-            for(GuiEventListener entry : this.getEntries())
-                if (entry.mouseScrolled(double_1))
-                    return true;
+            if (overlay.mouseScrolled(double_1))
+                return true;
         return super.mouseScrolled(double_1);
     }
     

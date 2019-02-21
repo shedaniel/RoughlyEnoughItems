@@ -122,9 +122,9 @@ public class DefaultPlugin implements IRecipePlugin {
             @Override
             public boolean performAutoCraft(Screen screen, DefaultCraftingDisplay recipe) {
                 if (screen.getClass().isAssignableFrom(CraftingTableScreen.class))
-                    ((IMixinRecipeBookGui) (((CraftingTableScreen) screen).getRecipeBookGui())).getGhostSlots().reset();
+                    ((IMixinRecipeBookGui) (((CraftingTableScreen) screen).getRecipeBookGui())).rei_getGhostSlots().reset();
                 else if (screen.getClass().isAssignableFrom(PlayerInventoryScreen.class))
-                    ((IMixinRecipeBookGui) (((PlayerInventoryScreen) screen).getRecipeBookGui())).getGhostSlots().reset();
+                    ((IMixinRecipeBookGui) (((PlayerInventoryScreen) screen).getRecipeBookGui())).rei_getGhostSlots().reset();
                 else
                     return false;
                 MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, recipe.getRecipe(), Screen.isShiftPressed());
@@ -145,7 +145,7 @@ public class DefaultPlugin implements IRecipePlugin {
             @Override
             public boolean performAutoCraft(Screen screen, DefaultSmeltingDisplay recipe) {
                 if (screen instanceof FurnaceScreen)
-                    ((IMixinRecipeBookGui) (((FurnaceScreen) screen).getRecipeBookGui())).getGhostSlots().reset();
+                    ((IMixinRecipeBookGui) (((FurnaceScreen) screen).getRecipeBookGui())).rei_getGhostSlots().reset();
                 else
                     return false;
                 MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, recipe.getRecipe(), Screen.isShiftPressed());
@@ -166,7 +166,7 @@ public class DefaultPlugin implements IRecipePlugin {
             @Override
             public boolean performAutoCraft(Screen screen, DefaultSmokingDisplay recipe) {
                 if (screen instanceof SmokerScreen)
-                    ((IMixinRecipeBookGui) (((SmokerScreen) screen).getRecipeBookGui())).getGhostSlots().reset();
+                    ((IMixinRecipeBookGui) (((SmokerScreen) screen).getRecipeBookGui())).rei_getGhostSlots().reset();
                 else
                     return false;
                 MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, recipe.getRecipe(), Screen.isShiftPressed());
@@ -192,7 +192,7 @@ public class DefaultPlugin implements IRecipePlugin {
             @Override
             public boolean performAutoCraft(Screen screen, DefaultBlastingDisplay recipe) {
                 if (screen instanceof BlastFurnaceScreen)
-                    ((IMixinRecipeBookGui) (((BlastFurnaceScreen) screen).getRecipeBookGui())).getGhostSlots().reset();
+                    ((IMixinRecipeBookGui) (((BlastFurnaceScreen) screen).getRecipeBookGui())).rei_getGhostSlots().reset();
                 else
                     return false;
                 MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, recipe.getRecipe(), Screen.isShiftPressed());

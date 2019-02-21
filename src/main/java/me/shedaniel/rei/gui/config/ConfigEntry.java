@@ -43,9 +43,9 @@ public class ConfigEntry extends EntryListWidget.Entry<ConfigEntry> {
         if (MinecraftClient.getInstance().textRenderer.isRightToLeft()) {
             MinecraftClient.getInstance().textRenderer.drawWithShadow(nameComponent.getFormattedText(), window.getScaledWidth() - MinecraftClient.getInstance().textRenderer.getStringWidth(nameComponent.getFormattedText()) - 40, getY() + 5, 16777215);
             this.buttonWidget.text = buttonProvider.getText();
-            this.buttonWidget.getBounds().setLocation(10, getY() + 2);
+            this.buttonWidget.getBounds().setLocation(getX(), getY() + 2);
         } else {
-            MinecraftClient.getInstance().textRenderer.drawWithShadow(nameComponent.getFormattedText(), 10.0F, getY() + 5, 16777215);
+            MinecraftClient.getInstance().textRenderer.drawWithShadow(nameComponent.getFormattedText(), getX(), getY() + 5, 16777215);
             this.buttonWidget.text = buttonProvider.getText();
             this.buttonWidget.getBounds().setLocation(window.getScaledWidth() - 190, getY() + 2);
         }

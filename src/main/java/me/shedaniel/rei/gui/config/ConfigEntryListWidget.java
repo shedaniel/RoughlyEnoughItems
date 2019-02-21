@@ -15,7 +15,7 @@ public class ConfigEntryListWidget extends EntryListWidget<ConfigEntry> {
     }
     
     private ConfigEntry getEntry(int int_1) {
-        return this.getEntries().get(int_1);
+        return this.method_1968().get(int_1); //getEntries
     }
     
     public void configAddEntry(ConfigEntry entry) {

@@ -44,6 +44,10 @@ public class ItemListOverlay extends Drawable implements IWidget {
             GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.translate("text.rei.delete_items"))));
     }
     
+    public List<IWidget> getWidgets() {
+        return widgets;
+    }
+    
     public void updateList(Rectangle bounds, int page, String searchTerm) {
         this.rectangle = bounds;
         this.widgets = Lists.newLinkedList();
