@@ -34,7 +34,7 @@ public abstract class MixinPlayerInventoryScreen extends AbstractPlayerInventory
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
     public void mouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> ci) {
         if (recipeBook.mouseClicked(mouseX, mouseY, button)) {
-            focusOn(recipeBook);
+            method_1967(recipeBook);
             ci.setReturnValue(true);
             ci.cancel();
         }

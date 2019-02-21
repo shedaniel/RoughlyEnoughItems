@@ -218,13 +218,13 @@ public class RecipeViewingWidgetScreen extends Screen {
     }
     
     @Override
-    public void draw(int mouseX, int mouseY, float partialTicks) {
+    public void method_18326(int mouseX, int mouseY, float partialTicks) {
         drawBackground();
         tabs.stream().filter(tabWidget -> {
             return !tabWidget.isSelected();
         }).forEach(tabWidget -> tabWidget.draw(mouseX, mouseY, partialTicks));
         GuiLighting.disable();
-        super.draw(mouseX, mouseY, partialTicks);
+        super.method_18326(mouseX, mouseY, partialTicks);
         widgets.forEach(widget -> {
             GuiLighting.disable();
             widget.draw(mouseX, mouseY, partialTicks);
@@ -286,11 +286,11 @@ public class RecipeViewingWidgetScreen extends Screen {
     
     @Override
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
-        for(GuiEventListener entry : getEntries())
+        for(GuiEventListener entry : method_1968()) //getEntries
             if (entry.mouseClicked(double_1, double_2, int_1)) {
-                focusOn(entry);
+                method_1967(entry); //focusOn
                 if (int_1 == 0)
-                    setActive(true);
+                    method_1966(true); //setActive
                 return true;
             }
         return false;

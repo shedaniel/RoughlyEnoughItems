@@ -34,7 +34,7 @@ public class CreditsScreen extends Screen {
         for(String line : I18n.translate("text.rei.credit.text").split("\n"))
             entryListWidget.creditsAddEntry(new CreditsEntry(new StringTextComponent(line)));
         entryListWidget.creditsAddEntry(new CreditsEntry(new StringTextComponent("")));
-        addButton(new ButtonWidget(0, width / 2 - 100, height - 26, I18n.translate("gui.done")) {
+        addButton(new ButtonWidget(width / 2 - 100, height - 26, I18n.translate("gui.done")) {
             @Override
             public void onPressed(double double_1, double double_2) {
                 CreditsScreen.this.client.openScreen(parent);
@@ -44,11 +44,12 @@ public class CreditsScreen extends Screen {
     }
     
     @Override
-    public void draw(int int_1, int int_2, float float_1) {
+    public void method_18326(int int_1, int int_2, float float_1) {
+        //draw
         this.drawTextureBackground(0);
-        this.entryListWidget.draw(int_1, int_2, float_1);
+        this.entryListWidget.method_18326(int_1, int_2, float_1);
         this.drawStringCentered(this.fontRenderer, I18n.translate("text.rei.credits"), this.width / 2, 16, 16777215);
-        super.draw(int_1, int_2, float_1);
+        super.method_18326(int_1, int_2, float_1);
     }
     
     @Override

@@ -15,7 +15,7 @@ public class MixinRecipeBookGui implements IMixinRecipeBookGui {
     protected RecipeBookGhostSlots ghostSlots;
     
     @Override
-    public RecipeBookGhostSlots getGhostSlots() {
+    public RecipeBookGhostSlots rei_getGhostSlots() {
         return ghostSlots;
     }
     
