@@ -6,10 +6,11 @@ import net.minecraft.recipe.Recipe;
 import net.minecraft.util.Identifier;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface IRecipeDisplay<T extends Recipe> {
     
-    public abstract T getRecipe();
+    public abstract Optional<T> getRecipe();
     
     public List<List<ItemStack>> getInput();
     

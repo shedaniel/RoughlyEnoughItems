@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.IRecipeDisplay;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Ingredient;
-import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.cooking.CampfireCookingRecipe;
 import net.minecraft.util.DefaultedList;
 import net.minecraft.util.Identifier;
@@ -12,14 +11,17 @@ import net.minecraft.util.Identifier;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
-public class DefaultCampfireDisplay implements IRecipeDisplay {
+public class DefaultCampfireDisplay implements IRecipeDisplay<CampfireCookingRecipe> {
     
     private List<ItemStack> inputs, output;
     private int cookTime;
+    private CampfireCookingRecipe display;
     
     public DefaultCampfireDisplay(CampfireCookingRecipe recipe) {
         this(recipe.getPreviewInputs(), recipe.getOutput(), recipe.getCookTime());
+        this.display = recipe;
     }
     
     public DefaultCampfireDisplay(DefaultedList<Ingredient> ingredients, ItemStack output, int cookTime) {
@@ -34,8 +36,8 @@ public class DefaultCampfireDisplay implements IRecipeDisplay {
     }
     
     @Override
-    public Recipe getRecipe() {
-        return null;
+    public Optional<CampfireCookingRecipe> getRecipe() {
+        return Optional.ofNullable(display);
     }
     
     @Override

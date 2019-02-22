@@ -1,21 +1,24 @@
 package me.shedaniel.rei.gui.widget;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Drawable;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawableHelper;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class LabelWidget extends Drawable implements IWidget {
+public class LabelWidget extends DrawableHelper implements IWidget {
     
     public int x;
     public int y;
     public String text;
+    protected TextRenderer textRenderer;
     
     public LabelWidget(int x, int y, String text) {
         this.x = x;
         this.y = y;
         this.text = text;
+        this.textRenderer = MinecraftClient.getInstance().textRenderer;
     }
     
     @Override
@@ -25,7 +28,7 @@ public class LabelWidget extends Drawable implements IWidget {
     
     @Override
     public void draw(int mouseX, int mouseY, float partialTicks) {
-        drawStringCentered(MinecraftClient.getInstance().textRenderer, text, x, y, -1);
+        drawStringCentered(textRenderer, text, x, y, -1);
     }
     
 }

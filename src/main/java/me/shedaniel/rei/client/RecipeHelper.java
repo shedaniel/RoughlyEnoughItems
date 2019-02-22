@@ -11,20 +11,19 @@ import net.minecraft.util.Identifier;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-public class RecipeHelper {
+public class RecipeHelper implements IRecipeHelper {
     
+    private final AtomicInteger recipeCount = new AtomicInteger();
     private final Map<Identifier, List<IRecipeDisplay>> recipeCategoryListMap = Maps.newHashMap();
     private final List<IRecipeCategory> categories = Lists.newArrayList();
     private final Map<Identifier, SpeedCraftAreaSupplier> speedCraftAreaSupplierMap = Maps.newHashMap();
     private final Map<Identifier, List<SpeedCraftFunctional>> speedCraftFunctionalMap = Maps.newHashMap();
     private RecipeManager recipeManager;
     
-    public static RecipeHelper getInstance() {
-        return RoughlyEnoughItemsCore.getRecipeHelper();
-    }
-    
+    @Override
     public List<ItemStack> findCraftableByItems(List<ItemStack> inventoryItems) {
         List<ItemStack> craftables = new ArrayList<>();
         for(List<IRecipeDisplay> value : recipeCategoryListMap.values())
@@ -54,17 +53,21 @@ public class RecipeHelper {
         return craftables.stream().distinct().collect(Collectors.toList());
     }
     
+    @Override
     public void registerCategory(IRecipeCategory category) {
         categories.add(category);
         recipeCategoryListMap.put(category.getIdentifier(), Lists.newLinkedList());
     }
     
+    @Override
     public void registerDisplay(Identifier categoryIdentifier, IRecipeDisplay display) {
         if (!recipeCategoryListMap.containsKey(categoryIdentifier))
             return;
+        recipeCount.incrementAndGet();
         recipeCategoryListMap.get(categoryIdentifier).add(display);
     }
     
+    @Override
     public Map<IRecipeCategory, List<IRecipeDisplay>> getRecipesFor(ItemStack stack) {
         Map<Identifier, List<IRecipeDisplay>> categoriesMap = new HashMap<>();
         categories.forEach(f -> categoriesMap.put(f.getIdentifier(), Lists.newArrayList()));
@@ -87,10 +90,12 @@ public class RecipeHelper {
         return categories.stream().filter(category -> category.getIdentifier().equals(identifier)).findFirst().orElse(null);
     }
     
+    @Override
     public RecipeManager getRecipeManager() {
         return recipeManager;
     }
     
+    @Override
     public Map<IRecipeCategory, List<IRecipeDisplay>> getUsagesFor(ItemStack stack) {
         Map<Identifier, List<IRecipeDisplay>> categoriesMap = new HashMap<>();
         categories.forEach(f -> categoriesMap.put(f.getIdentifier(), Lists.newArrayList()));
@@ -119,10 +124,12 @@ public class RecipeHelper {
         return recipeCategoryListMap;
     }
     
-    public List<IRecipeCategory> getCategories() {
+    @Override
+    public List<IRecipeCategory> getAllCategories() {
         return new LinkedList<>(categories);
     }
     
+    @Override
     public SpeedCraftAreaSupplier getSpeedCraftButtonArea(IRecipeCategory category) {
         if (!speedCraftAreaSupplierMap.containsKey(category.getIdentifier()))
             return bounds -> {
@@ -131,16 +138,19 @@ public class RecipeHelper {
         return speedCraftAreaSupplierMap.get(category.getIdentifier());
     }
     
+    @Override
     public void registerSpeedCraftButtonArea(Identifier category, SpeedCraftAreaSupplier rectangle) {
         speedCraftAreaSupplierMap.put(category, rectangle);
     }
     
+    @Override
     public List<SpeedCraftFunctional> getSpeedCraftFunctional(IRecipeCategory category) {
         if (speedCraftFunctionalMap.get(category.getIdentifier()) == null)
             return Lists.newArrayList();
         return speedCraftFunctionalMap.get(category.getIdentifier());
     }
     
+    @Override
     public void registerSpeedCraftFunctional(Identifier category, SpeedCraftFunctional functional) {
         List<SpeedCraftFunctional> list = speedCraftFunctionalMap.containsKey(category) ? new LinkedList<>(speedCraftFunctionalMap.get(category)) : Lists.newLinkedList();
         list.add(functional);
@@ -149,6 +159,7 @@ public class RecipeHelper {
     
     @SuppressWarnings("deprecation")
     public void recipesLoaded(RecipeManager recipeManager) {
+        this.recipeCount.set(0);
         this.recipeManager = recipeManager;
         this.recipeCategoryListMap.clear();
         this.categories.clear();
@@ -159,16 +170,13 @@ public class RecipeHelper {
             return second.getPriority() - first.getPriority();
         });
         RoughlyEnoughItemsCore.LOGGER.info("Loading %d REI plugins: %s", plugins.size(), String.join(", ", plugins.stream().map(plugin -> {
-            Identifier identifier = RoughlyEnoughItemsCore.getPluginIdentifier(plugin);
-            return identifier == null ? "NULL" : identifier.toString();
+            return RoughlyEnoughItemsCore.getPluginIdentifier(plugin).map(Identifier::toString).orElseGet(() -> "null");
         }).collect(Collectors.toList())));
         Collections.reverse(plugins);
         RoughlyEnoughItemsCore.getItemRegisterer().getModifiableItemList().clear();
         IPluginDisabler pluginDisabler = RoughlyEnoughItemsCore.getPluginDisabler();
         plugins.forEach(plugin -> {
-            Identifier identifier = RoughlyEnoughItemsCore.getPluginIdentifier(plugin);
-            if (identifier == null)
-                identifier = new Identifier("null");
+            Identifier identifier = RoughlyEnoughItemsCore.getPluginIdentifier(plugin).orElseGet(() -> new Identifier("null"));
             if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_ITEMS))
                 plugin.registerItems(RoughlyEnoughItemsCore.getItemRegisterer());
             if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_CATEGORIES))
@@ -178,9 +186,25 @@ public class RecipeHelper {
             if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_SPEED_CRAFT))
                 plugin.registerSpeedCraft(this);
         });
-        RoughlyEnoughItemsCore.LOGGER.info("Registered REI Categories: " + String.join(", ", categories.stream().map(category -> {
-            return category.getCategoryName();
-        }).collect(Collectors.toList())));
+        RoughlyEnoughItemsCore.LOGGER.info("Registered REI Categories: " + String.join(", ", categories.stream().map(IRecipeCategory::getCategoryName).collect(Collectors.toList())));
+        RoughlyEnoughItemsCore.LOGGER.info("Registered %d recipes for REI.", recipeCount.get());
+    }
+    
+    @Override
+    public int getRecipeCount() {
+        return recipeCount.get();
+    }
+    
+    @Override
+    public Map<IRecipeCategory, List<IRecipeDisplay>> getAllRecipes() {
+        Map<IRecipeCategory, List<IRecipeDisplay>> map = Maps.newLinkedHashMap();
+        Map<Identifier, List<IRecipeDisplay>> tempMap = Maps.newLinkedHashMap();
+        recipeCategoryListMap.forEach((identifier, recipeDisplays) -> tempMap.put(identifier, new LinkedList<>(recipeDisplays)));
+        categories.forEach(category -> {
+            if (tempMap.containsKey(category.getIdentifier()))
+                map.put(category, tempMap.get(category.getIdentifier()));
+        });
+        return map;
     }
     
 }

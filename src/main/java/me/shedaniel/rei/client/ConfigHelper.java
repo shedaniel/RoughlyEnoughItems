@@ -61,72 +61,16 @@ public class ConfigHelper {
         saveConfig();
     }
     
-    public REIItemListOrdering getItemListOrdering() {
-        return config.itemListOrdering;
-    }
-    
-    public void setItemListOrdering(REIItemListOrdering ordering) {
-        config.itemListOrdering = ordering;
-    }
-    
-    public boolean isAscending() {
-        return config.isAscending;
-    }
-    
-    public void setAscending(boolean ascending) {
-        config.isAscending = ascending;
+    public REIConfig getConfig() {
+        return config;
     }
     
     public boolean craftableOnly() {
-        return craftableOnly && config.enableCraftableOnlyButton;
+        return craftableOnly;
     }
     
     public void toggleCraftableOnly() {
         craftableOnly = !craftableOnly;
-    }
-    
-    public boolean showCraftableOnlyButton() {
-        return config.enableCraftableOnlyButton;
-    }
-    
-    public void setShowCraftableOnlyButton(boolean enableCraftableOnlyButton) {
-        config.enableCraftableOnlyButton = enableCraftableOnlyButton;
-    }
-    
-    public String getGiveCommandPrefix() {
-        return config.giveCommandPrefix;
-    }
-    
-    public boolean sideSearchField() {
-        return config.sideSearchField;
-    }
-    
-    public void setSideSearchField(boolean sideSearchField) {
-        config.sideSearchField = sideSearchField;
-    }
-    
-    public boolean checkUpdates() {
-        return config.checkUpdates;
-    }
-    
-    public void setCheckUpdates(boolean checkUpdates) {
-        config.checkUpdates = checkUpdates;
-    }
-    
-    public boolean isMirrorItemPanel() {
-        return config.mirrorItemPanel;
-    }
-    
-    public void setMirrorItemPanel(boolean mirrorItemPanel) {
-        config.mirrorItemPanel = mirrorItemPanel;
-    }
-    
-    public boolean isLoadingDefaultPlugin() {
-        return config.loadDefaultPlugin;
-    }
-    
-    public void setLoadingDefaultPlugin(boolean loadDefaultPlugin) {
-        config.loadDefaultPlugin = loadDefaultPlugin;
     }
     
 }

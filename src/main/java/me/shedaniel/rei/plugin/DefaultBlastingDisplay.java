@@ -10,6 +10,7 @@ import net.minecraft.util.Identifier;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class DefaultBlastingDisplay implements IRecipeDisplay<BlastingRecipe> {
@@ -31,8 +32,8 @@ public class DefaultBlastingDisplay implements IRecipeDisplay<BlastingRecipe> {
     }
     
     @Override
-    public BlastingRecipe getRecipe() {
-        return display;
+    public Optional<BlastingRecipe> getRecipe() {
+        return Optional.ofNullable(display);
     }
     
     @Override

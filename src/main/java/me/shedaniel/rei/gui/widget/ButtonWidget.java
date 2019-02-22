@@ -4,7 +4,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.audio.PositionedSoundInstance;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.Drawable;
+import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.TextComponent;
 import net.minecraft.util.Identifier;
@@ -14,7 +14,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class ButtonWidget extends Drawable implements IWidget {
+public abstract class ButtonWidget extends DrawableHelper implements HighlightableWidget {
     
     protected static final Identifier WIDGET_TEX = new Identifier("textures/gui/widgets.png");
     public String text;

@@ -8,23 +8,26 @@ import me.shedaniel.rei.client.GuiHelper;
 import me.shedaniel.rei.gui.credits.CreditsScreen;
 import me.shedaniel.rei.gui.widget.*;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.audio.PositionedSoundInstance;
 import net.minecraft.client.gui.ContainerScreen;
-import net.minecraft.client.gui.DrawableContainer;
-import net.minecraft.client.gui.GuiEventListener;
+import net.minecraft.client.gui.InputListener;
+import net.minecraft.client.gui.ScreenComponent;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.Window;
 import net.minecraft.item.ItemStack;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.TranslatableTextComponent;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ContainerScreenOverlay extends DrawableContainer {
+public class ContainerScreenOverlay extends ScreenComponent {
     
     private static final List<QueuedTooltip> QUEUED_TOOLTIPS = Lists.newArrayList();
     public static String searchTerm = "";
@@ -64,7 +67,7 @@ public class ContainerScreenOverlay extends DrawableContainer {
             }
         });
         page = MathHelper.clamp(page, 0, getTotalPage());
-        widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigHelper().isMirrorItemPanel() ? window.getScaledWidth() - 50 : 10, 10, 40, 20, "") {
+        widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigHelper().getConfig().mirrorItemPanel ? window.getScaledWidth() - 50 : 10, 10, 40, 20, "") {
             @Override
             public void draw(int int_1, int int_2, float float_1) {
                 this.text = getCheatModeText();
@@ -76,24 +79,33 @@ public class ContainerScreenOverlay extends DrawableContainer {
                 ClientHelper.setCheating(!ClientHelper.isCheating());
             }
         });
-        widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigHelper().isMirrorItemPanel() ? window.getScaledWidth() - 50 : 10, 35, 40, 20, I18n.translate("text.rei.config")) {
+        widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigHelper().getConfig().mirrorItemPanel ? window.getScaledWidth() - 50 : 10, 35, 40, 20, I18n.translate("text.rei.config")) {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
                 ClientHelper.openConfigWindow(GuiHelper.getLastContainerScreen());
             }
         });
-        widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigHelper().isMirrorItemPanel() ? window.getScaledWidth() - 50 : 10, window.getScaledHeight() - 30, 40, 20, I18n.translate("text.rei.credits")) {
+        widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigHelper().getConfig().mirrorItemPanel ? window.getScaledWidth() - 50 : 10, window.getScaledHeight() - 30, 40, 20, I18n.translate("text.rei.credits")) {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
                 MinecraftClient.getInstance().openScreen(new CreditsScreen(GuiHelper.getLastContainerScreen()));
             }
         });
-        widgets.add(new LabelWidget(rectangle.x + (rectangle.width / 2), rectangle.y + 10, "") {
+        widgets.add(new ClickableLabelWidget(rectangle.x + (rectangle.width / 2), rectangle.y + 10, "") {
             @Override
             public void draw(int mouseX, int mouseY, float partialTicks) {
                 page = MathHelper.clamp(page, 0, getTotalPage());
                 this.text = String.format("%s/%s", page + 1, getTotalPage() + 1);
                 super.draw(mouseX, mouseY, partialTicks);
+                if (isHighlighted(mouseX, mouseY))
+                    GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(new Point(mouseX, mouseY), Arrays.asList(I18n.translate("text.rei.go_back_first_page").split("\n"))));
+            }
+            
+            @Override
+            public void onLabelClicked() {
+                MinecraftClient.getInstance().getSoundLoader().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                page = 0;
+                itemListOverlay.updateList(getItemListArea(), page, searchTerm);
             }
         });
         if (GuiHelper.searchField == null)
@@ -111,10 +123,10 @@ public class ContainerScreenOverlay extends DrawableContainer {
             searchTerm = s;
             itemListOverlay.updateList(getItemListArea(), page, searchTerm);
         });
-        GuiHelper.searchField.setBounds(getTextFieldArea());
+        GuiHelper.searchField.getBounds().setBounds(getTextFieldArea());
         this.widgets.add(GuiHelper.searchField);
         GuiHelper.searchField.setText(searchTerm);
-        if (RoughlyEnoughItemsCore.getConfigHelper().showCraftableOnlyButton())
+        if (RoughlyEnoughItemsCore.getConfigHelper().getConfig().enableCraftableOnlyButton)
             this.widgets.add(new CraftableToggleButtonWidget(getCraftableToggleArea()) {
                 @Override
                 public void onPressed(int button, double mouseX, double mouseY) {
@@ -127,8 +139,8 @@ public class ContainerScreenOverlay extends DrawableContainer {
     }
     
     private Rectangle getTextFieldArea() {
-        int widthRemoved = RoughlyEnoughItemsCore.getConfigHelper().showCraftableOnlyButton() ? 22 : 0;
-        if (RoughlyEnoughItemsCore.getConfigHelper().sideSearchField())
+        int widthRemoved = RoughlyEnoughItemsCore.getConfigHelper().getConfig().enableCraftableOnlyButton ? 22 : 0;
+        if (RoughlyEnoughItemsCore.getConfigHelper().getConfig().sideSearchField)
             return new Rectangle(rectangle.x + 2, window.getScaledHeight() - 22, rectangle.width - 6 - widthRemoved, 18);
         if (MinecraftClient.getInstance().currentScreen instanceof RecipeViewingWidgetScreen) {
             RecipeViewingWidgetScreen widget = (RecipeViewingWidgetScreen) MinecraftClient.getInstance().currentScreen;
@@ -149,7 +161,7 @@ public class ContainerScreenOverlay extends DrawableContainer {
     }
     
     private Rectangle getItemListArea() {
-        return new Rectangle(rectangle.x + 2, rectangle.y + 24, rectangle.width - 4, rectangle.height - (RoughlyEnoughItemsCore.getConfigHelper().sideSearchField() ? 27 + 22 : 27));
+        return new Rectangle(rectangle.x + 2, rectangle.y + 24, rectangle.width - 4, rectangle.height - (RoughlyEnoughItemsCore.getConfigHelper().getConfig().sideSearchField ? 27 + 22 : 27));
     }
     
     public Rectangle getRectangle() {
@@ -205,7 +217,7 @@ public class ContainerScreenOverlay extends DrawableContainer {
     }
     
     private Rectangle calculateBoundary() {
-        if (!RoughlyEnoughItemsCore.getConfigHelper().isMirrorItemPanel()) {
+        if (!RoughlyEnoughItemsCore.getConfigHelper().getConfig().mirrorItemPanel) {
             int startX = GuiHelper.getLastMixinContainerScreen().rei_getContainerLeft() + GuiHelper.getLastMixinContainerScreen().rei_getContainerWidth() + 10;
             int width = window.getScaledWidth() - startX;
             if (MinecraftClient.getInstance().currentScreen instanceof RecipeViewingWidgetScreen) {
@@ -253,7 +265,7 @@ public class ContainerScreenOverlay extends DrawableContainer {
     
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
-        for(GuiEventListener listener : widgets)
+        for(InputListener listener : widgets)
             if (listener.keyPressed(int_1, int_2, int_3))
                 return true;
         if (ClientHelper.HIDE.matchesKey(int_1, int_2)) {
@@ -271,9 +283,9 @@ public class ContainerScreenOverlay extends DrawableContainer {
             }
         if (itemStack == null && MinecraftClient.getInstance().currentScreen instanceof RecipeViewingWidgetScreen) {
             RecipeViewingWidgetScreen recipeViewingWidget = (RecipeViewingWidgetScreen) MinecraftClient.getInstance().currentScreen;
-            for(GuiEventListener entry : recipeViewingWidget.method_1968())
-                if (entry instanceof ItemSlotWidget && ((HighlightableWidget) entry).isHighlighted(point.x, point.y)) {
-                    itemStack = ((ItemSlotWidget) entry).getCurrentStack();
+            for(InputListener listener : recipeViewingWidget.getInputListeners())
+                if (listener instanceof ItemSlotWidget && ((HighlightableWidget) listener).isHighlighted(point.x, point.y)) {
+                    itemStack = ((ItemSlotWidget) listener).getCurrentStack();
                     break;
                 }
         }
@@ -293,14 +305,14 @@ public class ContainerScreenOverlay extends DrawableContainer {
     public boolean charTyped(char char_1, int int_1) {
         if (!GuiHelper.isOverlayVisible())
             return false;
-        for(GuiEventListener listener : method_1968())
+        for(InputListener listener : getInputListeners())
             if (listener.charTyped(char_1, int_1))
                 return true;
         return super.charTyped(char_1, int_1);
     }
     
     @Override
-    public List<? extends GuiEventListener> method_1968() {
+    public List<? extends InputListener> getInputListeners() {
         return widgets;
     }
     

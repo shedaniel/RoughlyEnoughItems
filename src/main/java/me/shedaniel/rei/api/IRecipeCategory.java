@@ -5,7 +5,7 @@ import me.shedaniel.rei.gui.widget.IWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.RecipeViewingWidgetScreen;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Drawable;
+import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
@@ -36,7 +36,7 @@ public interface IRecipeCategory<T extends IRecipeDisplay> {
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GuiLighting.disable();
         MinecraftClient.getInstance().getTextureManager().bindTexture(RecipeViewingWidgetScreen.CHEST_GUI_TEXTURE);
-        new Drawable() {
+        new DrawableHelper() {
         
         }.drawTexturedRect((int) bounds.getX(), (int) bounds.getY(), 0, 0, (int) bounds.getWidth(), (int) bounds.getHeight());
     }

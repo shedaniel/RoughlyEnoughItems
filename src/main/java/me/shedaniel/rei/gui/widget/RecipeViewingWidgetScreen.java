@@ -2,19 +2,16 @@ package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
-import me.shedaniel.rei.api.IRecipeCategory;
-import me.shedaniel.rei.api.IRecipeDisplay;
-import me.shedaniel.rei.api.SpeedCraftAreaSupplier;
-import me.shedaniel.rei.api.SpeedCraftFunctional;
+import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
-import me.shedaniel.rei.client.RecipeHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.audio.PositionedSoundInstance;
 import net.minecraft.client.gui.ContainerScreen;
-import net.minecraft.client.gui.GuiEventListener;
+import net.minecraft.client.gui.InputListener;
 import net.minecraft.client.gui.Screen;
 import net.minecraft.client.render.GuiLighting;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.Window;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.TranslatableTextComponent;
@@ -23,6 +20,7 @@ import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -51,7 +49,7 @@ public class RecipeViewingWidgetScreen extends Screen {
         this.bounds = new Rectangle(window.getScaledWidth() / 2 - guiWidth / 2, window.getScaledHeight() / 2 - guiHeight / 2, guiWidth, guiHeight);
         this.categoriesMap = categoriesMap;
         this.categories = Lists.newArrayList();
-        RecipeHelper.getInstance().getCategories().forEach(category -> {
+        IRecipeHelper.getInstance().getAllCategories().forEach(category -> {
             if (categoriesMap.containsKey(category))
                 categories.add(category);
         });
@@ -60,7 +58,7 @@ public class RecipeViewingWidgetScreen extends Screen {
     }
     
     public static SpeedCraftFunctional getSpeedCraftFunctionalByCategory(ContainerScreen containerScreen, IRecipeCategory category) {
-        for(SpeedCraftFunctional functional : RecipeHelper.getInstance().getSpeedCraftFunctional(category))
+        for(SpeedCraftFunctional functional : IRecipeHelper.getInstance().getSpeedCraftFunctional(category))
             for(Class aClass : functional.getFunctioningFor())
                 if (containerScreen.getClass().isAssignableFrom(aClass))
                     return functional;
@@ -74,7 +72,7 @@ public class RecipeViewingWidgetScreen extends Screen {
             GuiHelper.getLastOverlay().onInitialized();
             return true;
         }
-        for(GuiEventListener listener : listeners)
+        for(InputListener listener : listeners)
             if (listener.keyPressed(int_1, int_2, int_3))
                 return true;
         return super.keyPressed(int_1, int_2, int_3);
@@ -140,18 +138,35 @@ public class RecipeViewingWidgetScreen extends Screen {
         recipeBack.enabled = categoriesMap.get(selectedCategory).size() > getRecipesPerPage();
         recipeNext.enabled = categoriesMap.get(selectedCategory).size() > getRecipesPerPage();
         
-        widgets.add(new LabelWidget((int) bounds.getCenterX(), (int) bounds.getY() + 7, "") {
+        widgets.add(new ClickableLabelWidget((int) bounds.getCenterX(), (int) bounds.getY() + 7, "") {
             @Override
             public void draw(int mouseX, int mouseY, float partialTicks) {
                 this.text = selectedCategory.getCategoryName();
                 super.draw(mouseX, mouseY, partialTicks);
+                if (isHighlighted(mouseX, mouseY))
+                    GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(new Point(mouseX, mouseY), Arrays.asList(I18n.translate("text.rei.view_all_categories").split("\n"))));
+            }
+            
+            @Override
+            public void onLabelClicked() {
+                MinecraftClient.getInstance().getSoundLoader().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                ClientHelper.executeViewAllRecipesKeyBind(GuiHelper.getLastOverlay());
             }
         });
-        widgets.add(new LabelWidget((int) bounds.getCenterX(), (int) bounds.getY() + 23, "") {
+        widgets.add(new ClickableLabelWidget((int) bounds.getCenterX(), (int) bounds.getY() + 23, "") {
             @Override
             public void draw(int mouseX, int mouseY, float partialTicks) {
                 this.text = String.format("%d/%d", page + 1, getTotalPages(selectedCategory));
                 super.draw(mouseX, mouseY, partialTicks);
+                if (isHighlighted(mouseX, mouseY))
+                    GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(new Point(mouseX, mouseY), Arrays.asList(I18n.translate("text.rei.go_back_first_page").split("\n"))));
+            }
+            
+            @Override
+            public void onLabelClicked() {
+                MinecraftClient.getInstance().getSoundLoader().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                page = 0;
+                RecipeViewingWidgetScreen.this.onInitialized();
             }
         });
         for(int i = 0; i < 6; i++) {
@@ -176,7 +191,7 @@ public class RecipeViewingWidgetScreen extends Screen {
                 tab.setItem(categories.get(j).getCategoryIcon(), categories.get(j).getCategoryName(), tab.getId() + categoryPages * 6 == categories.indexOf(selectedCategory));
             }
         }
-        SpeedCraftAreaSupplier supplier = RecipeHelper.getInstance().getSpeedCraftButtonArea(selectedCategory);
+        SpeedCraftAreaSupplier supplier = IRecipeHelper.getInstance().getSpeedCraftButtonArea(selectedCategory);
         final SpeedCraftFunctional functional = getSpeedCraftFunctionalByCategory(GuiHelper.getLastContainerScreen(), selectedCategory);
         if (page * getRecipesPerPage() < categoriesMap.get(selectedCategory).size()) {
             final Supplier<IRecipeDisplay> topDisplaySupplier = () -> {
@@ -218,13 +233,13 @@ public class RecipeViewingWidgetScreen extends Screen {
     }
     
     @Override
-    public void method_18326(int mouseX, int mouseY, float partialTicks) {
+    public void draw(int mouseX, int mouseY, float partialTicks) {
         drawBackground();
         tabs.stream().filter(tabWidget -> {
             return !tabWidget.isSelected();
         }).forEach(tabWidget -> tabWidget.draw(mouseX, mouseY, partialTicks));
         GuiLighting.disable();
-        super.method_18326(mouseX, mouseY, partialTicks);
+        super.draw(mouseX, mouseY, partialTicks);
         widgets.forEach(widget -> {
             GuiLighting.disable();
             widget.draw(mouseX, mouseY, partialTicks);
@@ -258,7 +273,7 @@ public class RecipeViewingWidgetScreen extends Screen {
     
     @Override
     public boolean charTyped(char char_1, int int_1) {
-        for(GuiEventListener listener : listeners)
+        for(InputListener listener : listeners)
             if (listener.charTyped(char_1, int_1))
                 return true;
         return super.charTyped(char_1, int_1);
@@ -266,7 +281,7 @@ public class RecipeViewingWidgetScreen extends Screen {
     
     @Override
     public boolean mouseScrolled(double amount) {
-        for(GuiEventListener listener : listeners)
+        for(InputListener listener : listeners)
             if (listener.mouseScrolled(amount))
                 return true;
         if (getBounds().contains(ClientHelper.getMouseLocation())) {
@@ -286,9 +301,9 @@ public class RecipeViewingWidgetScreen extends Screen {
     
     @Override
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
-        for(GuiEventListener entry : method_1968()) //getEntries
+        for(InputListener entry : getInputListeners())
             if (entry.mouseClicked(double_1, double_2, int_1)) {
-                method_1967(entry); //focusOn
+                focusOn(entry);
                 if (int_1 == 0)
                     method_1966(true); //setActive
                 return true;
