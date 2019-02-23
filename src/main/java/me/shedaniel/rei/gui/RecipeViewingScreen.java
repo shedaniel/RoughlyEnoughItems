@@ -93,8 +93,8 @@ public class RecipeViewingScreen extends Screen {
         this.widgets.clear();
         this.largestWidth = window.getScaledWidth() - 100;
         this.largestHeight = window.getScaledHeight() - 40;
-        this.guiWidth = MathHelper.clamp(getCurrentDisplayed().stream().map(display -> selectedCategory.getDisplaySettings().getDisplayWidth(selectedCategory, display)).max(Integer::compareTo).orElse(150) + 30, 0, largestWidth);
-        this.guiHeight = MathHelper.floor(MathHelper.clamp((selectedCategory.getDisplaySettings().getDisplayHeight(selectedCategory) + 7) * (getRecipesPerPage() + 1) + 40f, 186f, (float) largestHeight));
+        this.guiWidth = MathHelper.clamp(getCurrentDisplayed().stream().map(display -> selectedCategory.getDisplayWidth(display)).max(Integer::compareTo).orElse(150) + 30, 0, largestWidth);
+        this.guiHeight = MathHelper.floor(MathHelper.clamp((selectedCategory.getDisplayHeight() + 7) * (getRecipesPerPage() + 1) + 40f, 186f, (float) largestHeight));
         this.bounds = new Rectangle(window.getScaledWidth() / 2 - guiWidth / 2, window.getScaledHeight() / 2 - guiHeight / 2, guiWidth, guiHeight);
         this.page = MathHelper.clamp(page, 0, getTotalPages(selectedCategory) - 1);
         
@@ -201,14 +201,14 @@ public class RecipeViewingScreen extends Screen {
         }
         SpeedCraftAreaSupplier supplier = IRecipeHelper.getInstance().getSpeedCraftButtonArea(selectedCategory);
         final SpeedCraftFunctional functional = getSpeedCraftFunctionalByCategory(GuiHelper.getLastContainerScreen(), selectedCategory);
-        int recipeHeight = selectedCategory.getDisplaySettings().getDisplayHeight(selectedCategory);
+        int recipeHeight = selectedCategory.getDisplayHeight();
         List<IRecipeDisplay> currentDisplayed = getCurrentDisplayed();
         for(int i = 0; i < currentDisplayed.size(); i++) {
             int finalI = i;
             final Supplier<IRecipeDisplay> displaySupplier = () -> {
                 return currentDisplayed.get(finalI);
             };
-            int displayWidth = selectedCategory.getDisplaySettings().getDisplayWidth(selectedCategory, displaySupplier.get());
+            int displayWidth = selectedCategory.getDisplayWidth(displaySupplier.get());
             final Rectangle displayBounds = new Rectangle((int) getBounds().getCenterX() - displayWidth / 2, getBounds().y + 40 + recipeHeight * i + 7 * i, displayWidth, recipeHeight);
             widgets.addAll(selectedCategory.setupDisplay(displaySupplier, displayBounds));
             if (supplier != null)
@@ -243,8 +243,8 @@ public class RecipeViewingScreen extends Screen {
     }
     
     private int getRecipesPerPage() {
-        int height = selectedCategory.getDisplaySettings().getDisplayHeight(selectedCategory);
-        return MathHelper.clamp(MathHelper.floor(((float) largestHeight - 40f) / ((float) height + 7f)) - 1, 0, RoughlyEnoughItemsCore.getConfigHelper().getConfig().maxRecipePerPage - 1);
+        int height = selectedCategory.getDisplayHeight();
+        return MathHelper.clamp(MathHelper.floor(((float) largestHeight - 40f) / ((float) height + 7f)) - 1, 0, Math.min(RoughlyEnoughItemsCore.getConfigHelper().getConfig().maxRecipePerPage - 1, selectedCategory.getMaximumRecipePerPage() - 1));
     }
     
     @Override

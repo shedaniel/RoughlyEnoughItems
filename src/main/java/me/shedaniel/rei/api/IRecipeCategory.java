@@ -42,7 +42,24 @@ public interface IRecipeCategory<T extends IRecipeDisplay> {
             public int getDisplayWidth(IRecipeCategory category, T display) {
                 return 150;
             }
+            
+            @Override
+            public int getMaximumRecipePerPage(IRecipeCategory category) {
+                return 99;
+            }
         };
+    }
+    
+    default public int getDisplayHeight() {
+        return getDisplaySettings().getDisplayHeight(this);
+    }
+    
+    default public int getDisplayWidth(T display) {
+        return getDisplaySettings().getDisplayWidth(this, display);
+    }
+    
+    default public int getMaximumRecipePerPage() {
+        return getDisplaySettings().getMaximumRecipePerPage(this);
     }
     
     default public boolean checkTags() {

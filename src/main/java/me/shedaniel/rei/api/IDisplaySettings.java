@@ -6,4 +6,6 @@ public interface IDisplaySettings<T extends IRecipeDisplay> {
     
     public int getDisplayWidth(IRecipeCategory category, T display);
     
+    public int getMaximumRecipePerPage(IRecipeCategory category);
+    
 }
