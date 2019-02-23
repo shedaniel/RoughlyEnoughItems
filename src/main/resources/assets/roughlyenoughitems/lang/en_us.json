@@ -53,6 +53,7 @@
   "text.rei.config.advanced": "Advanced",
   "text.rei.choose_page": "Choose Page",
   "text.rei.config.disable_credits_button": "Disable Credits Button:",
+  "text.rei.config.max_recipes_per_page": "Maximum Recipes Each Page:",
 
   "_comment": "Don't change / translate the credit down below if you are doing it :)",
   "text.rei.credit.text": "§lRoughly Enough Items\n§7Originally a fork for Almost Enough Items.\n\n§lDevelopers\n  - Originally by ZenDarva\n  - Created by Danielshe\n  - Plugin Support by TehNut\n\n§lLanguage Translation\n  English - Danielshe\n  Simplified Chinese - Danielshe\n  Traditional Chinese - hugoalh & Danielshe\n  French - Yanis48\n  German - MelanX\n  Estonian - Madis0\n  Hebrew - nerdoron\n  LOLCAT - Danielshe\n  Upside Down - Danielshe\n\n§lLicense\n§7Roughly Enough Items is using MIT."

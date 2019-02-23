@@ -2,6 +2,7 @@ package me.shedaniel.rei.gui;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
@@ -31,9 +32,10 @@ public class RecipeViewingScreen extends Screen {
     public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     public static final Color SUB_COLOR = new Color(159, 159, 159);
     private static final Identifier CREATIVE_INVENTORY_TABS = new Identifier("textures/gui/container/creative_inventory/tabs.png");
-    public final int guiWidth = 176;
-    public final int guiHeight = 186;
+    public int guiWidth;
+    public int guiHeight;
     public int page, categoryPages;
+    public int largestWidth, largestHeight;
     private List<IWidget> widgets;
     private List<TabWidget> tabs;
     private Window window;
@@ -47,7 +49,7 @@ public class RecipeViewingScreen extends Screen {
         this.categoryPages = 0;
         this.window = window;
         this.widgets = Lists.newArrayList();
-        this.bounds = new Rectangle(window.getScaledWidth() / 2 - guiWidth / 2, window.getScaledHeight() / 2 - guiHeight / 2, guiWidth, guiHeight);
+        this.bounds = new Rectangle(window.getScaledWidth() / 2 - guiWidth / 2, window.getScaledHeight() / 2 - guiHeight / 2, 176, 186);
         this.categoriesMap = categoriesMap;
         this.categories = Lists.newArrayList();
         IRecipeHelper.getInstance().getAllCategories().forEach(category -> {
@@ -89,7 +91,12 @@ public class RecipeViewingScreen extends Screen {
         super.onInitialized();
         this.tabs.clear();
         this.widgets.clear();
+        this.largestWidth = window.getScaledWidth() - 100;
+        this.largestHeight = window.getScaledHeight() - 40;
+        this.guiWidth = MathHelper.clamp(getCurrentDisplayed().stream().map(display -> selectedCategory.getDisplaySettings().getDisplayWidth(selectedCategory, display)).max(Integer::compareTo).orElse(150) + 30, 0, largestWidth);
+        this.guiHeight = MathHelper.floor(MathHelper.clamp((selectedCategory.getDisplaySettings().getDisplayHeight(selectedCategory) + 7) * (getRecipesPerPage() + 1) + 40f, 186f, (float) largestHeight));
         this.bounds = new Rectangle(window.getScaledWidth() / 2 - guiWidth / 2, window.getScaledHeight() / 2 - guiHeight / 2, guiWidth, guiHeight);
+        this.page = MathHelper.clamp(page, 0, getTotalPages(selectedCategory) - 1);
         
         widgets.add(categoryBack = new ButtonWidget((int) bounds.getX() + 5, (int) bounds.getY() + 5, 12, 12, new TranslatableTextComponent("text.rei.left_arrow")) {
             @Override
@@ -103,7 +110,7 @@ public class RecipeViewingScreen extends Screen {
                 RecipeViewingScreen.this.onInitialized();
             }
         });
-        widgets.add(categoryNext = new ButtonWidget((int) bounds.getX() + 159, (int) bounds.getY() + 5, 12, 12, new TranslatableTextComponent("text.rei.right_arrow")) {
+        widgets.add(categoryNext = new ButtonWidget((int) bounds.getMaxX() - 17, (int) bounds.getY() + 5, 12, 12, new TranslatableTextComponent("text.rei.right_arrow")) {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
                 int currentCategoryIndex = categories.indexOf(selectedCategory);
@@ -127,7 +134,7 @@ public class RecipeViewingScreen extends Screen {
                 RecipeViewingScreen.this.onInitialized();
             }
         });
-        widgets.add(recipeNext = new ButtonWidget((int) bounds.getX() + 159, (int) bounds.getY() + 21, 12, 12, new TranslatableTextComponent("text.rei.right_arrow")) {
+        widgets.add(recipeNext = new ButtonWidget((int) bounds.getMaxX() - 17, (int) bounds.getY() + 21, 12, 12, new TranslatableTextComponent("text.rei.right_arrow")) {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
                 page++;
@@ -160,12 +167,13 @@ public class RecipeViewingScreen extends Screen {
                 this.text = String.format("%d/%d", page + 1, getTotalPages(selectedCategory));
                 super.draw(mouseX, mouseY, partialTicks);
                 if (isHighlighted(mouseX, mouseY))
-                    GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(new Point(mouseX, mouseY), Arrays.asList(I18n.translate("text.rei.choose_page").split("\n"))));
+                    GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(new Point(mouseX, mouseY), Arrays.asList(I18n.translate("text.rei.go_back_first_page").split("\n"))));
             }
             
             @Override
             public void onLabelClicked() {
-                //RecipeViewingScreen.this.choosePageActivated = true;
+                MinecraftClient.getInstance().getSoundLoader().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                page = 0;
                 RecipeViewingScreen.this.onInitialized();
             }
         });
@@ -193,29 +201,33 @@ public class RecipeViewingScreen extends Screen {
         }
         SpeedCraftAreaSupplier supplier = IRecipeHelper.getInstance().getSpeedCraftButtonArea(selectedCategory);
         final SpeedCraftFunctional functional = getSpeedCraftFunctionalByCategory(GuiHelper.getLastContainerScreen(), selectedCategory);
-        if (page * getRecipesPerPage() < categoriesMap.get(selectedCategory).size()) {
-            final Supplier<IRecipeDisplay> topDisplaySupplier = () -> {
-                return categoriesMap.get(selectedCategory).get(page * getRecipesPerPage());
+        int recipeHeight = selectedCategory.getDisplaySettings().getDisplayHeight(selectedCategory);
+        List<IRecipeDisplay> currentDisplayed = getCurrentDisplayed();
+        for(int i = 0; i < currentDisplayed.size(); i++) {
+            int finalI = i;
+            final Supplier<IRecipeDisplay> displaySupplier = () -> {
+                return currentDisplayed.get(finalI);
             };
-            final Rectangle topBounds = new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 40, 150, selectedCategory.usesFullPage() ? 140 : 66);
-            widgets.addAll(selectedCategory.setupDisplay(topDisplaySupplier, topBounds));
+            int displayWidth = selectedCategory.getDisplaySettings().getDisplayWidth(selectedCategory, displaySupplier.get());
+            final Rectangle displayBounds = new Rectangle((int) getBounds().getCenterX() - displayWidth / 2, getBounds().y + 40 + recipeHeight * i + 7 * i, displayWidth, recipeHeight);
+            widgets.addAll(selectedCategory.setupDisplay(displaySupplier, displayBounds));
             if (supplier != null)
-                widgets.add(new SpeedCraftingButtonWidget(supplier.get(topBounds), supplier.getButtonText(), functional, topDisplaySupplier));
-            if (!selectedCategory.usesFullPage() && page * getRecipesPerPage() + 1 < categoriesMap.get(selectedCategory).size()) {
-                final Supplier<IRecipeDisplay> middleDisplaySupplier = () -> {
-                    return categoriesMap.get(selectedCategory).get(page * getRecipesPerPage() + 1);
-                };
-                final Rectangle middleBounds = new Rectangle((int) getBounds().getCenterX() - 75, getBounds().y + 113, 150, 66);
-                widgets.addAll(selectedCategory.setupDisplay(middleDisplaySupplier, middleBounds));
-                if (supplier != null)
-                    widgets.add(new SpeedCraftingButtonWidget(supplier.get(middleBounds), supplier.getButtonText(), functional, middleDisplaySupplier));
-            }
+                widgets.add(new SpeedCraftingButtonWidget(supplier.get(displayBounds), supplier.getButtonText(), functional, displaySupplier));
         }
         
         GuiHelper.getLastOverlay().onInitialized();
         listeners.addAll(tabs);
         listeners.add(GuiHelper.getLastOverlay());
         listeners.addAll(widgets);
+    }
+    
+    public List<IRecipeDisplay> getCurrentDisplayed() {
+        List<IRecipeDisplay> list = Lists.newArrayList();
+        int recipesPerPage = getRecipesPerPage();
+        for(int i = 0; i <= recipesPerPage; i++)
+            if (recipesPerPage > 0 && page * (recipesPerPage + 1) + i < categoriesMap.get(selectedCategory).size())
+                list.add(categoriesMap.get(selectedCategory).get(page * (recipesPerPage + 1) + i));
+        return list;
     }
     
     public IRecipeCategory getSelectedCategory() {
@@ -231,9 +243,8 @@ public class RecipeViewingScreen extends Screen {
     }
     
     private int getRecipesPerPage() {
-        if (selectedCategory.usesFullPage())
-            return 1;
-        return 2;
+        int height = selectedCategory.getDisplaySettings().getDisplayHeight(selectedCategory);
+        return MathHelper.clamp(MathHelper.floor(((float) largestHeight - 40f) / ((float) height + 7f)) - 1, 0, RoughlyEnoughItemsCore.getConfigHelper().getConfig().maxRecipePerPage - 1);
     }
     
     @Override
@@ -262,7 +273,7 @@ public class RecipeViewingScreen extends Screen {
     }
     
     public int getTotalPages(IRecipeCategory category) {
-        return MathHelper.ceil(categoriesMap.get(category).size() / (double) getRecipesPerPage());
+        return MathHelper.ceil(categoriesMap.get(category).size() / (double) (getRecipesPerPage() + 1));
     }
     
     public Rectangle getBounds() {

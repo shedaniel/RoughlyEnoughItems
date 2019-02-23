@@ -77,7 +77,7 @@ public class ConfigScreen extends Screen {
                 }
                 return true;
             }
-        
+            
             @Override
             public String getText() {
                 return I18n.translate("text.rei.config.list_ordering_button", I18n.translate(RoughlyEnoughItemsCore.getConfigHelper().getConfig().itemListOrdering.getNameTranslationKey()), I18n.translate(RoughlyEnoughItemsCore.getConfigHelper().getConfig().isAscending ? "ordering.rei.ascending" : "ordering.rei.descending"));
@@ -96,7 +96,7 @@ public class ConfigScreen extends Screen {
                 }
                 return true;
             }
-        
+            
             @Override
             public String getText() {
                 return getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().getConfig().mirrorItemPanel);
@@ -135,12 +135,12 @@ public class ConfigScreen extends Screen {
                 }
                 return true;
             }
-        
+            
             @Override
             public String getText() {
                 return getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().getConfig().loadDefaultPlugin);
             }
-        
+            
             @Override
             public void draw(me.shedaniel.rei.gui.widget.ButtonWidget button, Point mouse, float delta) {
                 button.draw(mouse.x, mouse.y, delta);
@@ -164,7 +164,7 @@ public class ConfigScreen extends Screen {
                 }
                 return true;
             }
-        
+            
             @Override
             public String getText() {
                 return getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().getConfig().disableCreditsButton);
@@ -216,6 +216,51 @@ public class ConfigScreen extends Screen {
                     drawTooltip(Arrays.asList(I18n.translate("text.rei.give_command.tooltip").split("\n")), mouse.x, mouse.y);
                     GuiLighting.disable();
                 }
+            }
+        }));
+        entryListWidget.configAddEntry(new ConfigEntry.TextFieldConfigEntry(new TranslatableTextComponent("text.rei.config.max_recipes_per_page"), new ConfigEntry.TextFieldConfigEntry.ConfigEntryTextFieldProvider() {
+            @Override
+            public void onInitWidget(TextFieldWidget widget) {
+                widget.setMaxLength(2);
+                widget.setText(RoughlyEnoughItemsCore.getConfigHelper().getConfig().maxRecipePerPage + "");
+                widget.stripInvaild = s -> {
+                    StringBuilder stringBuilder_1 = new StringBuilder();
+                    char[] var2 = s.toCharArray();
+                    int var3 = var2.length;
+                    
+                    for(int var4 = 0; var4 < var3; ++var4) {
+                        char char_1 = var2[var4];
+                        if (Character.isDigit(char_1))
+                            stringBuilder_1.append(char_1);
+                    }
+                    
+                    return stringBuilder_1.toString();
+                };
+            }
+            
+            @Override
+            public void onUpdateText(TextFieldWidget button, String text) {
+                if (isInvaildNumber(text))
+                    try {
+                        RoughlyEnoughItemsCore.getConfigHelper().getConfig().maxRecipePerPage = Integer.valueOf(text);
+                        RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
+                    } catch (Exception e) {
+                    }
+            }
+            
+            @Override
+            public void draw(TextFieldWidget widget, Point mouse, float delta) {
+                widget.setEditableColor(isInvaildNumber(widget.getText()) ? -1 : Color.RED.getRGB());
+                widget.draw(mouse.x, mouse.y, delta);
+            }
+            
+            private boolean isInvaildNumber(String text) {
+                try {
+                    int page = Integer.valueOf(text);
+                    return page >= 2 && page <= 99;
+                } catch (Exception e) {
+                }
+                return false;
             }
         }));
         addButton(new ButtonWidget(width / 2 - 100, height - 26, I18n.translate("gui.done")) {

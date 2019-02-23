@@ -16,5 +16,6 @@ public class REIConfig {
     public boolean mirrorItemPanel = false;
     public boolean loadDefaultPlugin = true;
     public boolean disableCreditsButton = false;
+    public int maxRecipePerPage = 3;
     
 }

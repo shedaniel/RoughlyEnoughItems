@@ -21,10 +21,6 @@ public interface IRecipeCategory<T extends IRecipeDisplay> {
     
     public String getCategoryName();
     
-    default public boolean usesFullPage() {
-        return false;
-    }
-    
     default public List<IWidget> setupDisplay(Supplier<T> recipeDisplaySupplier, Rectangle bounds) {
         return Arrays.asList(new RecipeBaseWidget(bounds));
     }
@@ -33,6 +29,20 @@ public interface IRecipeCategory<T extends IRecipeDisplay> {
         new RecipeBaseWidget(bounds).draw(mouseX, mouseY, delta);
         DrawableHelper.drawRect(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, RecipeViewingScreen.SUB_COLOR.getRGB());
         DrawableHelper.drawRect(bounds.x + 17, bounds.y + 21, bounds.x + bounds.width - 17, bounds.y + 33, RecipeViewingScreen.SUB_COLOR.getRGB());
+    }
+    
+    default public IDisplaySettings getDisplaySettings() {
+        return new IDisplaySettings<T>() {
+            @Override
+            public int getDisplayHeight(IRecipeCategory category) {
+                return 66;
+            }
+            
+            @Override
+            public int getDisplayWidth(IRecipeCategory category, T display) {
+                return 150;
+            }
+        };
     }
     
     default public boolean checkTags() {

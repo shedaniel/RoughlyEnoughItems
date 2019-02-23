@@ -22,27 +22,27 @@ import java.util.function.Predicate;
 
 public class TextFieldWidget extends DrawableHelper implements HighlightableWidget {
     
-    private final TextRenderer textRenderer;
+    protected final TextRenderer textRenderer;
     public Function<String, String> stripInvaild;
     private Rectangle bounds;
     private String text;
     private int maxLength;
-    private int focusedTicks;
+    protected int focusedTicks;
     private boolean hasBorder;
     private boolean field_2096;
     private boolean focused;
-    private boolean editable;
+    protected boolean editable;
     private boolean field_17037;
-    private int field_2103;
-    private int cursorMax;
-    private int cursorMin;
-    private int field_2100;
-    private int field_2098;
+    protected int field_2103;
+    protected int cursorMax;
+    protected int cursorMin;
+    protected int editableColor;
+    protected int notEditableColor;
     private boolean visible;
     private String suggestion;
     private Consumer<String> changedListener;
     private Predicate<String> textPredicate;
-    private BiFunction<String, Integer, String> renderTextProvider;
+    protected BiFunction<String, Integer, String> renderTextProvider;
     
     public TextFieldWidget(Rectangle rectangle) {
         this.text = "";
@@ -50,8 +50,8 @@ public class TextFieldWidget extends DrawableHelper implements HighlightableWidg
         this.hasBorder = true;
         this.field_2096 = true;
         this.editable = true;
-        this.field_2100 = 14737632;
-        this.field_2098 = 7368816;
+        this.editableColor = 14737632;
+        this.notEditableColor = 7368816;
         this.visible = true;
         this.textPredicate = Predicates.alwaysTrue();
         this.renderTextProvider = (string_1, integer_1) -> {
@@ -64,6 +64,10 @@ public class TextFieldWidget extends DrawableHelper implements HighlightableWidg
     
     public TextFieldWidget(int x, int y, int width, int height) {
         this(new Rectangle(x, y, width, height));
+    }
+    
+    public String getSuggestion() {
+        return suggestion;
     }
     
     @Override
@@ -364,7 +368,7 @@ public class TextFieldWidget extends DrawableHelper implements HighlightableWidg
                     int_2 -= 4;
                 }
                 
-                String string_1 = this.textRenderer.trimToWidth(this.text.substring(this.field_2103), this.method_1859());
+                String string_1 = this.textRenderer.trimToWidth(this.text.substring(this.field_2103), this.getWidth());
                 this.method_1883(this.textRenderer.trimToWidth(string_1, int_2).length() + this.field_2103);
                 return true;
             } else {
@@ -380,10 +384,10 @@ public class TextFieldWidget extends DrawableHelper implements HighlightableWidg
                 drawRect(this.bounds.x, this.bounds.y, this.bounds.x + this.bounds.width, this.bounds.y + this.bounds.height, -16777216);
             }
             
-            int int_3 = this.editable ? this.field_2100 : this.field_2098;
+            int color = this.editable ? this.editableColor : this.notEditableColor;
             int int_4 = this.cursorMax - this.field_2103;
             int int_5 = this.cursorMin - this.field_2103;
-            String string_1 = this.textRenderer.trimToWidth(this.text.substring(this.field_2103), this.method_1859());
+            String string_1 = this.textRenderer.trimToWidth(this.text.substring(this.field_2103), this.getWidth());
             boolean boolean_1 = int_4 >= 0 && int_4 <= string_1.length();
             boolean boolean_2 = this.focused && this.focusedTicks / 6 % 2 == 0 && boolean_1;
             int int_6 = this.hasBorder ? this.bounds.x + 4 : this.bounds.x;
@@ -395,7 +399,7 @@ public class TextFieldWidget extends DrawableHelper implements HighlightableWidg
             
             if (!string_1.isEmpty()) {
                 String string_2 = boolean_1 ? string_1.substring(0, int_4) : string_1;
-                int_8 = this.textRenderer.drawWithShadow((String) this.renderTextProvider.apply(string_2, this.field_2103), (float) int_6, (float) int_7, int_3);
+                int_8 = this.textRenderer.drawWithShadow((String) this.renderTextProvider.apply(string_2, this.field_2103), (float) int_6, (float) int_7, color);
             }
             
             boolean boolean_3 = this.cursorMax < this.text.length() || this.text.length() >= this.getMaxLength();
@@ -408,11 +412,11 @@ public class TextFieldWidget extends DrawableHelper implements HighlightableWidg
             }
             
             if (!string_1.isEmpty() && boolean_1 && int_4 < string_1.length()) {
-                this.textRenderer.drawWithShadow((String) this.renderTextProvider.apply(string_1.substring(int_4), this.cursorMax), (float) int_8, (float) int_7, int_3);
+                this.textRenderer.drawWithShadow((String) this.renderTextProvider.apply(string_1.substring(int_4), this.cursorMax), (float) int_8, (float) int_7, color);
             }
             
             if (!boolean_3 && text.isEmpty() && this.suggestion != null) {
-                this.textRenderer.drawWithShadow(this.textRenderer.trimToWidth(this.suggestion, this.method_1859()), (float) int_6, (float) int_7, -8355712);
+                this.textRenderer.drawWithShadow(this.textRenderer.trimToWidth(this.suggestion, this.getWidth()), (float) int_6, (float) int_7, -8355712);
             }
             
             int var10002;
@@ -425,7 +429,7 @@ public class TextFieldWidget extends DrawableHelper implements HighlightableWidg
                     this.textRenderer.getClass();
                     DrawableHelper.drawRect(int_9, var10001, var10002, var10003 + 9, -3092272);
                 } else {
-                    this.textRenderer.drawWithShadow("_", (float) int_9, (float) int_7, int_3);
+                    this.textRenderer.drawWithShadow("_", (float) int_9, (float) int_7, color);
                 }
             }
             
@@ -441,7 +445,7 @@ public class TextFieldWidget extends DrawableHelper implements HighlightableWidg
         }
     }
     
-    private void method_1886(int int_1, int int_2, int int_3, int int_4) {
+    protected void method_1886(int int_1, int int_2, int int_3, int int_4) {
         int int_6;
         if (int_1 < int_3) {
             int_6 = int_1;
@@ -507,12 +511,12 @@ public class TextFieldWidget extends DrawableHelper implements HighlightableWidg
         this.hasBorder = boolean_1;
     }
     
-    public void method_1868(int int_1) {
-        this.field_2100 = int_1;
+    public void setEditableColor(int int_1) {
+        this.editableColor = int_1;
     }
     
-    public void method_1860(int int_1) {
-        this.field_2098 = int_1;
+    public void setNotEditableColor(int int_1) {
+        this.notEditableColor = int_1;
     }
     
     public void setHasFocus(boolean boolean_1) {
@@ -539,7 +543,7 @@ public class TextFieldWidget extends DrawableHelper implements HighlightableWidg
         this.editable = boolean_1;
     }
     
-    public int method_1859() {
+    public int getWidth() {
         return this.hasBorder() ? this.bounds.width - 8 : this.bounds.width;
     }
     
@@ -551,7 +555,7 @@ public class TextFieldWidget extends DrawableHelper implements HighlightableWidg
                 this.field_2103 = int_2;
             }
             
-            int int_3 = this.method_1859();
+            int int_3 = this.getWidth();
             String string_1 = this.textRenderer.trimToWidth(this.text.substring(this.field_2103), int_3);
             int int_4 = string_1.length() + this.field_2103;
             if (this.cursorMin == this.field_2103) {
