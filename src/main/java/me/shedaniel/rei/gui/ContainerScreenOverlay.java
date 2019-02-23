@@ -85,12 +85,13 @@ public class ContainerScreenOverlay extends ScreenComponent {
                 ClientHelper.openConfigWindow(GuiHelper.getLastContainerScreen());
             }
         });
-        widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigHelper().getConfig().mirrorItemPanel ? window.getScaledWidth() - 50 : 10, window.getScaledHeight() - 30, 40, 20, I18n.translate("text.rei.credits")) {
-            @Override
-            public void onPressed(int button, double mouseX, double mouseY) {
-                MinecraftClient.getInstance().openScreen(new CreditsScreen(GuiHelper.getLastContainerScreen()));
-            }
-        });
+        if (!RoughlyEnoughItemsCore.getConfigHelper().getConfig().disableCreditsButton)
+            widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigHelper().getConfig().mirrorItemPanel ? window.getScaledWidth() - 50 : 10, window.getScaledHeight() - 30, 40, 20, I18n.translate("text.rei.credits")) {
+                @Override
+                public void onPressed(int button, double mouseX, double mouseY) {
+                    MinecraftClient.getInstance().openScreen(new CreditsScreen(GuiHelper.getLastContainerScreen()));
+                }
+            });
         widgets.add(new ClickableLabelWidget(rectangle.x + (rectangle.width / 2), rectangle.y + 10, "") {
             @Override
             public void draw(int mouseX, int mouseY, float partialTicks) {

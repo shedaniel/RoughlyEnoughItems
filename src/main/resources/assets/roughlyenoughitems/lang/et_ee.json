@@ -31,7 +31,7 @@
   "ordering.rei.item_groups": "Esemegrupid",
   "text.speed_craft.failed_move_items": "§cEsemeid ei saa liigutada!",
   "text.speed_craft.move_items": "Liiguta esemeid",
-  "text.rei.enable_craftable_only": "Luba meisterdatavate filter: ",
+  "text.rei.config.enable_craftable_only": "Luba meisterdatavate filter: ",
   "text.rei.showing_craftable": "Kuvab meisterdatavaid",
   "text.rei.showing_all": "Kuvab kõiki",
   "text.rei.delete_items": "§cKustuta ese",

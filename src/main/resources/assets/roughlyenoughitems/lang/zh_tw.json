@@ -31,7 +31,7 @@
   "ordering.rei.item_groups": "物品分類",
   "text.speed_craft.failed_move_items": "§c不能移動物品!",
   "text.speed_craft.move_items": "移動物品",
-  "text.rei.enable_craftable_only": "過濾不可合成的物品: ",
+  "text.rei.config.enable_craftable_only": "過濾不可合成的物品: ",
   "text.rei.showing_craftable": "顯示可合成的物品",
   "text.rei.showing_all": "顯示所有物品",
   "text.rei.delete_items": "§c刪除物品",

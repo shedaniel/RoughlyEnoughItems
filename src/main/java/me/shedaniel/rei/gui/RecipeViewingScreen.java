@@ -71,6 +71,11 @@ public class RecipeViewingScreen extends Screen {
     
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
+        if (int_1 == 256 && choosePageActivated && this.doesEscapeKeyClose()) {
+            choosePageActivated = false;
+            onInitialized();
+            return true;
+        }
         if ((int_1 == 256 || this.client.options.keyInventory.matchesKey(int_1, int_2)) && this.doesEscapeKeyClose()) {
             MinecraftClient.getInstance().openScreen(GuiHelper.getLastContainerScreen());
             GuiHelper.getLastOverlay().onInitialized();

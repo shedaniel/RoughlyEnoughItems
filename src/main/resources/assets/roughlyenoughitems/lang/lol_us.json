@@ -31,7 +31,7 @@
   "ordering.rei.item_groups": "Itmz groupz",
   "text.speed_craft.failed_move_items": "§cKan'z m0v itemz!",
   "text.speed_craft.move_items": "M0v Itemz",
-  "text.rei.enable_craftable_only": "Enabel craftabel fit3r: ",
+  "text.rei.config.enable_craftable_only": "Enabel craftabel fit3r: ",
   "text.rei.showing_craftable": "Sowin Craftabel",
   "text.rei.showing_all": "Sowin all",
   "text.rei.delete_items": "§cDel Itm",

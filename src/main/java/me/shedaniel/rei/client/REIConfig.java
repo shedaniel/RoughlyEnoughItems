@@ -15,6 +15,6 @@ public class REIConfig {
     public boolean checkUpdates = true;
     public boolean mirrorItemPanel = false;
     public boolean loadDefaultPlugin = true;
-    public boolean disableCreditsButton = true;
+    public boolean disableCreditsButton = false;
     
 }

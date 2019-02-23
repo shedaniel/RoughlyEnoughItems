@@ -103,7 +103,7 @@ public class ConfigScreen extends Screen {
             }
         }));
         entryListWidget.configAddEntry(new ConfigEntry.CategoryTitleConfigEntry(new TranslatableTextComponent("text.rei.config.modules")));
-        entryListWidget.configAddEntry(new ConfigEntry.ButtonConfigEntry(new TranslatableTextComponent("text.rei.enable_craftable_only"), new ConfigEntry.ButtonConfigEntry.ConfigEntryButtonProvider() {
+        entryListWidget.configAddEntry(new ConfigEntry.ButtonConfigEntry(new TranslatableTextComponent("text.rei.config.enable_craftable_only"), new ConfigEntry.ButtonConfigEntry.ConfigEntryButtonProvider() {
             @Override
             public boolean onPressed(int button, double mouseX, double mouseY) {
                 if (button == 0)
@@ -122,7 +122,7 @@ public class ConfigScreen extends Screen {
                 return getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().getConfig().enableCraftableOnlyButton);
             }
         }));
-        entryListWidget.configAddEntry(new ConfigEntry.ButtonConfigEntry(new TranslatableTextComponent("text.rei.load_default_plugin"), new ConfigEntry.ButtonConfigEntry.ConfigEntryButtonProvider() {
+        entryListWidget.configAddEntry(new ConfigEntry.ButtonConfigEntry(new TranslatableTextComponent("text.rei.config.load_default_plugin"), new ConfigEntry.ButtonConfigEntry.ConfigEntryButtonProvider() {
             @Override
             public boolean onPressed(int button, double mouseX, double mouseY) {
                 if (button == 0)
@@ -146,9 +146,28 @@ public class ConfigScreen extends Screen {
                 button.draw(mouse.x, mouse.y, delta);
                 if (button.isHighlighted(mouse)) {
                     GuiLighting.disable();
-                    drawTooltip(Arrays.asList(I18n.translate("text.rei.load_default_plugin.restart_tooltip").split("\n")), mouse.x, mouse.y);
+                    drawTooltip(Arrays.asList(I18n.translate("text.rei.config.load_default_plugin.restart_tooltip").split("\n")), mouse.x, mouse.y);
                     GuiLighting.disable();
                 }
+            }
+        }));
+        entryListWidget.configAddEntry(new ConfigEntry.ButtonConfigEntry(new TranslatableTextComponent("text.rei.config.disable_credits_button"), new ConfigEntry.ButtonConfigEntry.ConfigEntryButtonProvider() {
+            @Override
+            public boolean onPressed(int button, double mouseX, double mouseY) {
+                if (button == 0)
+                    RoughlyEnoughItemsCore.getConfigHelper().getConfig().disableCreditsButton = !RoughlyEnoughItemsCore.getConfigHelper().getConfig().disableCreditsButton;
+                try {
+                    RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return false;
+                }
+                return true;
+            }
+        
+            @Override
+            public String getText() {
+                return getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().getConfig().disableCreditsButton);
             }
         }));
         entryListWidget.configAddEntry(new ConfigEntry.CategoryTitleConfigEntry(new TranslatableTextComponent("text.rei.config.advanced")));
