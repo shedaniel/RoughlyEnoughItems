@@ -17,11 +17,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class TextFieldWidget extends DrawableHelper implements HighlightableWidget {
     
     private final TextRenderer textRenderer;
+    public Function<String, String> stripInvaild;
     private Rectangle bounds;
     private String text;
     private int maxLength;
@@ -57,6 +59,7 @@ public class TextFieldWidget extends DrawableHelper implements HighlightableWidg
         };
         this.textRenderer = MinecraftClient.getInstance().textRenderer;
         this.bounds = rectangle;
+        this.stripInvaild = s -> SharedConstants.stripInvalidChars(s);
     }
     
     public TextFieldWidget(int x, int y, int width, int height) {
@@ -109,7 +112,7 @@ public class TextFieldWidget extends DrawableHelper implements HighlightableWidg
     
     public void addText(String string_1) {
         String string_2 = "";
-        String string_3 = SharedConstants.stripInvalidChars(string_1);
+        String string_3 = stripInvaild.apply(string_1);
         int int_1 = this.cursorMax < this.cursorMin ? this.cursorMax : this.cursorMin;
         int int_2 = this.cursorMax < this.cursorMin ? this.cursorMin : this.cursorMax;
         int int_3 = this.maxLength - this.text.length() - (int_1 - int_2);

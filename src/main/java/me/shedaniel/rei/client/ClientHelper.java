@@ -8,7 +8,7 @@ import me.shedaniel.rei.api.IRecipeDisplay;
 import me.shedaniel.rei.api.IRecipeHelper;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.config.ConfigScreen;
-import me.shedaniel.rei.gui.widget.RecipeViewingWidgetScreen;
+import me.shedaniel.rei.gui.RecipeViewingScreen;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
@@ -103,14 +103,14 @@ public class ClientHelper implements ClientModInitializer {
     public static boolean executeRecipeKeyBind(ContainerScreenOverlay overlay, ItemStack stack) {
         Map<IRecipeCategory, List<IRecipeDisplay>> map = IRecipeHelper.getInstance().getRecipesFor(stack);
         if (map.keySet().size() > 0)
-            MinecraftClient.getInstance().openScreen(new RecipeViewingWidgetScreen(MinecraftClient.getInstance().window, map));
+            MinecraftClient.getInstance().openScreen(new RecipeViewingScreen(MinecraftClient.getInstance().window, map));
         return map.keySet().size() > 0;
     }
     
     public static boolean executeUsageKeyBind(ContainerScreenOverlay overlay, ItemStack stack) {
         Map<IRecipeCategory, List<IRecipeDisplay>> map = IRecipeHelper.getInstance().getUsagesFor(stack);
         if (map.keySet().size() > 0)
-            MinecraftClient.getInstance().openScreen(new RecipeViewingWidgetScreen(MinecraftClient.getInstance().window, map));
+            MinecraftClient.getInstance().openScreen(new RecipeViewingScreen(MinecraftClient.getInstance().window, map));
         return map.keySet().size() > 0;
     }
     
@@ -131,7 +131,7 @@ public class ClientHelper implements ClientModInitializer {
     public static boolean executeViewAllRecipesKeyBind(ContainerScreenOverlay lastOverlay) {
         Map<IRecipeCategory, List<IRecipeDisplay>> map = IRecipeHelper.getInstance().getAllRecipes();
         if (map.keySet().size() > 0)
-            MinecraftClient.getInstance().openScreen(new RecipeViewingWidgetScreen(MinecraftClient.getInstance().window, map));
+            MinecraftClient.getInstance().openScreen(new RecipeViewingScreen(MinecraftClient.getInstance().window, map));
         return map.keySet().size() > 0;
     }
     

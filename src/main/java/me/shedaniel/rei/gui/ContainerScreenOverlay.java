@@ -142,8 +142,8 @@ public class ContainerScreenOverlay extends ScreenComponent {
         int widthRemoved = RoughlyEnoughItemsCore.getConfigHelper().getConfig().enableCraftableOnlyButton ? 22 : 0;
         if (RoughlyEnoughItemsCore.getConfigHelper().getConfig().sideSearchField)
             return new Rectangle(rectangle.x + 2, window.getScaledHeight() - 22, rectangle.width - 6 - widthRemoved, 18);
-        if (MinecraftClient.getInstance().currentScreen instanceof RecipeViewingWidgetScreen) {
-            RecipeViewingWidgetScreen widget = (RecipeViewingWidgetScreen) MinecraftClient.getInstance().currentScreen;
+        if (MinecraftClient.getInstance().currentScreen instanceof RecipeViewingScreen) {
+            RecipeViewingScreen widget = (RecipeViewingScreen) MinecraftClient.getInstance().currentScreen;
             return new Rectangle(widget.getBounds().x, window.getScaledHeight() - 22, widget.getBounds().width - widthRemoved, 18);
         }
         return new Rectangle(GuiHelper.getLastMixinContainerScreen().rei_getContainerLeft(), window.getScaledHeight() - 22, GuiHelper.getLastMixinContainerScreen().rei_getContainerWidth() - widthRemoved, 18);
@@ -220,8 +220,8 @@ public class ContainerScreenOverlay extends ScreenComponent {
         if (!RoughlyEnoughItemsCore.getConfigHelper().getConfig().mirrorItemPanel) {
             int startX = GuiHelper.getLastMixinContainerScreen().rei_getContainerLeft() + GuiHelper.getLastMixinContainerScreen().rei_getContainerWidth() + 10;
             int width = window.getScaledWidth() - startX;
-            if (MinecraftClient.getInstance().currentScreen instanceof RecipeViewingWidgetScreen) {
-                RecipeViewingWidgetScreen widget = (RecipeViewingWidgetScreen) MinecraftClient.getInstance().currentScreen;
+            if (MinecraftClient.getInstance().currentScreen instanceof RecipeViewingScreen) {
+                RecipeViewingScreen widget = (RecipeViewingScreen) MinecraftClient.getInstance().currentScreen;
                 startX = widget.getBounds().x + widget.getBounds().width + 10;
                 width = window.getScaledWidth() - startX;
             }
@@ -231,8 +231,8 @@ public class ContainerScreenOverlay extends ScreenComponent {
     }
     
     private int getLeft() {
-        if (MinecraftClient.getInstance().currentScreen instanceof RecipeViewingWidgetScreen) {
-            RecipeViewingWidgetScreen widget = (RecipeViewingWidgetScreen) MinecraftClient.getInstance().currentScreen;
+        if (MinecraftClient.getInstance().currentScreen instanceof RecipeViewingScreen) {
+            RecipeViewingScreen widget = (RecipeViewingScreen) MinecraftClient.getInstance().currentScreen;
             return widget.getBounds().x;
         }
         if (MinecraftClient.getInstance().player.getRecipeBook().isGuiOpen())
@@ -281,8 +281,8 @@ public class ContainerScreenOverlay extends ScreenComponent {
                 itemStack = ((ItemSlotWidget) widget).getCurrentStack();
                 break;
             }
-        if (itemStack == null && MinecraftClient.getInstance().currentScreen instanceof RecipeViewingWidgetScreen) {
-            RecipeViewingWidgetScreen recipeViewingWidget = (RecipeViewingWidgetScreen) MinecraftClient.getInstance().currentScreen;
+        if (itemStack == null && MinecraftClient.getInstance().currentScreen instanceof RecipeViewingScreen) {
+            RecipeViewingScreen recipeViewingWidget = (RecipeViewingScreen) MinecraftClient.getInstance().currentScreen;
             for(InputListener listener : recipeViewingWidget.getInputListeners())
                 if (listener instanceof ItemSlotWidget && ((HighlightableWidget) listener).isHighlighted(point.x, point.y)) {
                     itemStack = ((ItemSlotWidget) listener).getCurrentStack();

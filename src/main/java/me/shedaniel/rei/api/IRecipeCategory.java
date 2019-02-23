@@ -1,12 +1,9 @@
 package me.shedaniel.rei.api;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.widget.IWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
-import me.shedaniel.rei.gui.widget.RecipeViewingWidgetScreen;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.render.GuiLighting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
@@ -32,13 +29,10 @@ public interface IRecipeCategory<T extends IRecipeDisplay> {
         return Arrays.asList(new RecipeBaseWidget(bounds));
     }
     
-    default public void drawCategoryBackground(Rectangle bounds) {
-        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        GuiLighting.disable();
-        MinecraftClient.getInstance().getTextureManager().bindTexture(RecipeViewingWidgetScreen.CHEST_GUI_TEXTURE);
-        new DrawableHelper() {
-        
-        }.drawTexturedRect((int) bounds.getX(), (int) bounds.getY(), 0, 0, (int) bounds.getWidth(), (int) bounds.getHeight());
+    default public void drawCategoryBackground(Rectangle bounds, int mouseX, int mouseY, float delta) {
+        new RecipeBaseWidget(bounds).draw(mouseX, mouseY, delta);
+        DrawableHelper.drawRect(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, RecipeViewingScreen.SUB_COLOR.getRGB());
+        DrawableHelper.drawRect(bounds.x + 17, bounds.y + 21, bounds.x + bounds.width - 17, bounds.y + 33, RecipeViewingScreen.SUB_COLOR.getRGB());
     }
     
     default public boolean checkTags() {

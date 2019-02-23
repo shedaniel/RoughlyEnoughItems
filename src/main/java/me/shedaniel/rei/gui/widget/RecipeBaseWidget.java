@@ -11,7 +11,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RecipeBaseWidget extends DrawableHelper implements IWidget {
+public class RecipeBaseWidget extends DrawableHelper implements HighlightableWidget {
     
     private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     
@@ -19,6 +19,11 @@ public class RecipeBaseWidget extends DrawableHelper implements IWidget {
     
     public RecipeBaseWidget(Rectangle bounds) {
         this.bounds = bounds;
+    }
+    
+    @Override
+    public Rectangle getBounds() {
+        return bounds;
     }
     
     @Override

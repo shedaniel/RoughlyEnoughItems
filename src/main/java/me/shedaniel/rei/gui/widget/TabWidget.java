@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
+import me.shedaniel.rei.gui.RecipeViewingScreen;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.render.GuiLighting;
@@ -22,12 +23,12 @@ public class TabWidget extends DrawableHelper implements HighlightableWidget {
     private boolean shown = false, selected = false;
     private ItemStack item;
     private int id;
-    private RecipeViewingWidgetScreen recipeViewingWidget;
+    private RecipeViewingScreen recipeViewingWidget;
     private String categoryName;
     private Rectangle bounds;
     private ItemRenderer itemRenderer;
     
-    public TabWidget(int id, RecipeViewingWidgetScreen recipeViewingWidget, Rectangle bounds) {
+    public TabWidget(int id, RecipeViewingScreen recipeViewingWidget, Rectangle bounds) {
         this.id = id;
         this.recipeViewingWidget = recipeViewingWidget;
         this.bounds = bounds;
