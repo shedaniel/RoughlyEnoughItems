@@ -185,6 +185,25 @@ public class ConfigScreen extends Screen {
                 return getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().getConfig().disableCreditsButton);
             }
         }));
+        entryListWidget.configAddEntry(new ConfigEntry.ButtonConfigEntry(new TranslatableTextComponent("text.rei.config.enable_util_buttons"), new ConfigEntry.ButtonConfigEntry.ConfigEntryButtonProvider() {
+            @Override
+            public boolean onPressed(int button, double mouseX, double mouseY) {
+                if (button == 0)
+                    RoughlyEnoughItemsCore.getConfigHelper().getConfig().showUtilsButtons = !RoughlyEnoughItemsCore.getConfigHelper().getConfig().showUtilsButtons;
+                try {
+                    RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return false;
+                }
+                return true;
+            }
+            
+            @Override
+            public String getText() {
+                return getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().getConfig().showUtilsButtons);
+            }
+        }));
         entryListWidget.configAddEntry(new ConfigEntry.CategoryTitleConfigEntry(new TranslatableTextComponent("text.rei.config.advanced")));
         entryListWidget.configAddEntry(new ConfigEntry.ButtonConfigEntry(new TranslatableTextComponent("text.rei.check_updates"), new ConfigEntry.ButtonConfigEntry.ConfigEntryButtonProvider() {
             @Override
@@ -230,6 +249,24 @@ public class ConfigScreen extends Screen {
                     GuiLighting.disable();
                     drawTooltip(Arrays.asList(I18n.translate("text.rei.give_command.tooltip").split("\n")), mouse.x, mouse.y);
                     GuiLighting.disable();
+                }
+            }
+        }));
+        entryListWidget.configAddEntry(new ConfigEntry.TextFieldConfigEntry(new TranslatableTextComponent("text.rei.gamemode_command"), new ConfigEntry.TextFieldConfigEntry.ConfigEntryTextFieldProvider() {
+            @Override
+            public void onInitWidget(TextFieldWidget widget) {
+                widget.setMaxLength(99999);
+                widget.setText(RoughlyEnoughItemsCore.getConfigHelper().getConfig().gamemodeCommand);
+                widget.setSuggestion(I18n.translate("text.rei.give_command.suggestion"));
+            }
+            
+            @Override
+            public void onUpdateText(TextFieldWidget button, String text) {
+                RoughlyEnoughItemsCore.getConfigHelper().getConfig().gamemodeCommand = text;
+                try {
+                    RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
         }));

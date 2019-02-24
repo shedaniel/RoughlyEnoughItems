@@ -9,7 +9,7 @@ archivesBaseName = "RoughlyEnoughItems"
 version = "2.3.1.53"
 
 def minecraftVersion = "19w08b"
-def yarnVersion = "19w08b.5"
+def yarnVersion = "19w08b.6"
 def fabricVersion = "0.2.3.104"
 def pluginLoaderVersion = "1.14-1.0.6-8"
 

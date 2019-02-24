@@ -5,6 +5,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
+import me.shedaniel.rei.client.Weather;
 import me.shedaniel.rei.gui.credits.CreditsScreen;
 import me.shedaniel.rei.gui.widget.*;
 import net.minecraft.client.MinecraftClient;
@@ -16,11 +17,14 @@ import net.minecraft.client.gui.ScreenComponent;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.Window;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.ItemStack;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.TranslatableTextComponent;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.GameMode;
+import net.minecraft.world.World;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -107,6 +111,43 @@ public class ContainerScreenOverlay extends ScreenComponent {
                     MinecraftClient.getInstance().openScreen(new CreditsScreen(GuiHelper.getLastContainerScreen()));
                 }
             });
+        if (RoughlyEnoughItemsCore.getConfigHelper().getConfig().showUtilsButtons) {
+            widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigHelper().getConfig().mirrorItemPanel ? window.getScaledWidth() - 55 : 35, 10, 20, 20, "") {
+                @Override
+                public void onPressed(int button, double mouseX, double mouseY) {
+                    MinecraftClient.getInstance().player.sendChatMessage(RoughlyEnoughItemsCore.getConfigHelper().getConfig().gamemodeCommand.replaceAll("\\{gamemode}", getNextGameMode().getName()));
+                }
+                
+                @Override
+                public void draw(int mouseX, int mouseY, float partialTicks) {
+                    text = getGameModeShortText(getCurrentGameMode());
+                    super.draw(mouseX, mouseY, partialTicks);
+                    if (isHighlighted(mouseX, mouseY)) {
+                        List<String> list = Arrays.asList(I18n.translate("text.rei.gamemode_button.tooltip", getGameModeText(getNextGameMode())).split("\n"));
+                        addTooltip(new QueuedTooltip(new Point(mouseX, mouseY), list));
+                    }
+                }
+            });
+            widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigHelper().getConfig().mirrorItemPanel ? window.getScaledWidth() - 80 : 60, 10, 20, 20, "") {
+                @Override
+                public void onPressed(int button, double mouseX, double mouseY) {
+                    MinecraftClient.getInstance().player.sendChatMessage(RoughlyEnoughItemsCore.getConfigHelper().getConfig().weatherCommand.replaceAll("\\{weather}", getNextWeather().getName().toLowerCase()));
+                }
+                
+                @Override
+                public void draw(int mouseX, int mouseY, float partialTicks) {
+                    super.draw(mouseX, mouseY, partialTicks);
+                    GuiLighting.disable();
+                    MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
+                    GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+                    drawTexturedRect(getBounds().x + 3, getBounds().y + 3, getCurrentWeather().getId() * 14, 14, 14, 14);
+                    if (isHighlighted(mouseX, mouseY)) {
+                        List<String> list = Arrays.asList(I18n.translate("text.rei.weather_button.tooltip", getNextWeather().getName()).split("\n"));
+                        addTooltip(new QueuedTooltip(new Point(mouseX, mouseY), list));
+                    }
+                }
+            });
+        }
         widgets.add(new ClickableLabelWidget(rectangle.x + (rectangle.width / 2), rectangle.y + 10, "") {
             @Override
             public void draw(int mouseX, int mouseY, float partialTicks) {
@@ -152,6 +193,71 @@ public class ContainerScreenOverlay extends ScreenComponent {
             });
         
         this.itemListOverlay.updateList(getItemListArea(), page, searchTerm);
+    }
+    
+    private Weather getNextWeather() {
+        try {
+            Weather current = getCurrentWeather();
+            int next = current.getId() + 1;
+            if (next >= 3)
+                next = 0;
+            return Weather.byId(next);
+        } catch (Exception e) {
+            return Weather.CLEAR;
+        }
+    }
+    
+    private Weather getCurrentWeather() {
+        ClientWorld world = MinecraftClient.getInstance().world;
+        if (world.isThundering())
+            return Weather.THUNDER;
+        if (world.getLevelProperties().isRaining())
+            return Weather.RAIN;
+        return Weather.CLEAR;
+    }
+    
+    private String getGameModeShortText(GameMode gameMode) {
+        switch (gameMode) {
+            case CREATIVE:
+                return "C";
+            case SURVIVAL:
+                return "S";
+            case ADVENTURE:
+                return "A";
+            case SPECTATOR:
+                return "SP";
+        }
+        return gameMode.name();
+    }
+    
+    private String getGameModeText(GameMode gameMode) {
+        switch (gameMode) {
+            case CREATIVE:
+                return "Creative";
+            case SURVIVAL:
+                return "Survival";
+            case ADVENTURE:
+                return "Adventure";
+            case SPECTATOR:
+                return "Spectator";
+        }
+        return gameMode.name();
+    }
+    
+    private GameMode getNextGameMode() {
+        try {
+            GameMode current = getCurrentGameMode();
+            int next = current.getId() + 1;
+            if (next >= 3)
+                next = 0;
+            return GameMode.byId(next);
+        } catch (Exception e) {
+            return GameMode.INVALID;
+        }
+    }
+    
+    private GameMode getCurrentGameMode() {
+        return MinecraftClient.getInstance().getNetworkHandler().method_2871(MinecraftClient.getInstance().player.getGameProfile().getId()).getGameMode();
     }
     
     private Rectangle getTextFieldArea() {
