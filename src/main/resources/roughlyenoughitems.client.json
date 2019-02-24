@@ -1,6 +1,7 @@
 {
   "required": true,
   "package": "me.shedaniel.rei.mixin",
+  "minVersion": "0.7.11",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "MixinContainerScreen",
@@ -9,7 +10,8 @@
     "MixinCraftingTableScreen",
     "MixinCreativePlayerInventoryScreen",
     "MixinBrewingRecipeRegistry",
-    "MixinRecipeBookGui"
+    "MixinRecipeBookGui",
+    "MixinTextureManager"
   ],
   "injectors": {
     "defaultRequire": 1
