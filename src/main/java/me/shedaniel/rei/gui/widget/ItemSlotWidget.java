@@ -67,15 +67,15 @@ public class ItemSlotWidget extends Gui implements HighlightableWidget {
             drawTexturedModalRect(this.x - 1, this.y - 1, 0, 222, 18, 18);
         }
         if (drawHighlightedBackground && isHighlighted(mouseX, mouseY)) {
-            zLevel = 200.0F;
             GlStateManager.disableLighting();
             GlStateManager.disableDepthTest();
             GlStateManager.colorMask(true, true, true, false);
+            GlStateManager.translatef(0, 0, 300);
             drawGradientRect(x, y, x + 16, y + 16, -2130706433, -2130706433);
+            GlStateManager.translatef(0, 0, -300);
             GlStateManager.colorMask(true, true, true, true);
             GlStateManager.enableLighting();
             GlStateManager.enableDepthTest();
-            zLevel = 0.0F;
         }
         if (!itemStack.isEmpty()) {
             RenderHelper.enableGUIStandardItemLighting();
