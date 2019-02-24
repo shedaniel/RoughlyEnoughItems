@@ -2,7 +2,7 @@
   "latest": [
     {
       "game": "1.13.2",
-      "mod": "2.3.0.1"
+      "mod": "2.3.0.4"
     }
   ],
   "changelogs": {
@@ -25,6 +25,11 @@
       {
         "version": "2.3.0.3",
         "text": "Added Clickable Category Label",
+        "level": "none"
+      },
+      {
+        "version": "2.3.0.4",
+        "text": "Fix Server Crash, Potion Recipes not working, and clickable labels oversize",
         "level": "none"
       }
     ]
