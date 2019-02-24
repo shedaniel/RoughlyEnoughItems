@@ -22,7 +22,7 @@
   "text.rei.config_tooltip": "Open Config Screen\n§7Shift-Click to toggle cheat mode",
   "text.rei.config.side_search_box": "Side Search Box: ",
   "text.rei.config.mirror_rei": "Mirror REI Widgets: ",
-  "text.rei.cheat_items": "Given [{item_name}] x{item_count} to {player_name}.",
+  "text.rei.cheat_items": "Gave [{item_name}] x{item_count} to {player_name}.",
   "text.rei.failed_cheat_items": "§cFailed to give items.",
   "text.rei.config.list_ordering": "Item List Ordering:",
   "text.rei.config.list_ordering_button": "%s [%s]",

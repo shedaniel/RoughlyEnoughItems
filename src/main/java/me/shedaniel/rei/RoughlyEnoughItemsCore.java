@@ -20,7 +20,6 @@ import net.fabricmc.loader.FabricLoader;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sortme.ChatMessageType;
 import net.minecraft.text.StringTextComponent;
 import net.minecraft.text.TranslatableTextComponent;
 import net.minecraft.util.Identifier;
@@ -110,9 +109,9 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
             ServerPlayerEntity player = (ServerPlayerEntity) packetContext.getPlayer();
             ItemStack stack = packetByteBuf.readItemStack();
             if (player.inventory.insertStack(stack.copy()))
-                player.sendChatMessage(new StringTextComponent(I18n.translate("text.rei.cheat_items").replaceAll("\\{item_name}", stack.copy().getDisplayName().getFormattedText()).replaceAll("\\{item_count}", stack.copy().getAmount() + "").replaceAll("\\{player_name}", player.getEntityName())), ChatMessageType.SYSTEM);
+                player.addChatMessage(new StringTextComponent(I18n.translate("text.rei.cheat_items").replaceAll("\\{item_name}", stack.copy().getDisplayName().getFormattedText()).replaceAll("\\{item_count}", stack.copy().getAmount() + "").replaceAll("\\{player_name}", player.getEntityName())), false);
             else
-                player.sendChatMessage(new TranslatableTextComponent("text.rei.failed_cheat_items"), ChatMessageType.SYSTEM);
+                player.addChatMessage(new TranslatableTextComponent("text.rei.failed_cheat_items"), false);
         });
     }
     

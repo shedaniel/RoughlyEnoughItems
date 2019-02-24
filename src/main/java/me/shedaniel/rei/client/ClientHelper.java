@@ -7,8 +7,8 @@ import me.shedaniel.rei.api.IRecipeCategory;
 import me.shedaniel.rei.api.IRecipeDisplay;
 import me.shedaniel.rei.api.IRecipeHelper;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
-import me.shedaniel.rei.gui.config.ConfigScreen;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
+import me.shedaniel.rei.gui.config.ConfigScreen;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
@@ -17,9 +17,11 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.gui.Screen;
+import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.text.TranslatableTextComponent;
 import net.minecraft.util.DefaultedList;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.PacketByteBuf;
@@ -73,7 +75,7 @@ public class ClientHelper implements ClientModInitializer {
     }
     
     public static void sendDeletePacket() {
-        if (MinecraftClient.getInstance().interactionManager.hasCreativeInventory()) {
+        if (GuiHelper.getLastContainerScreen() instanceof CreativePlayerInventoryScreen) {
             MinecraftClient.getInstance().player.inventory.setCursorStack(ItemStack.EMPTY);
             return;
         }
@@ -81,7 +83,7 @@ public class ClientHelper implements ClientModInitializer {
     }
     
     public static boolean tryCheatingStack(ItemStack cheatedStack) {
-        if (false && MinecraftClient.getInstance().isInSingleplayer()) {
+        if (MinecraftClient.getInstance().isInSingleplayer()) {
             try {
                 ClientSidePacketRegistry.INSTANCE.sendToServer(RoughlyEnoughItemsCore.CREATE_ITEMS_PACKET, new PacketByteBuf(Unpooled.buffer()).writeItemStack(cheatedStack.copy()));
                 return true;
@@ -93,8 +95,11 @@ public class ClientHelper implements ClientModInitializer {
             String tagMessage = cheatedStack.copy().getTag() != null && !cheatedStack.copy().getTag().isEmpty() ? cheatedStack.copy().getTag().asString() : "";
             String og = cheatedStack.getAmount() != 1 ? RoughlyEnoughItemsCore.getConfigHelper().getConfig().giveCommand.replaceAll(" \\{count}", "").replaceAll("\\{count}", "") : RoughlyEnoughItemsCore.getConfigHelper().getConfig().giveCommand;
             String madeUpCommand = og.replaceAll("\\{player_name}", MinecraftClient.getInstance().player.getEntityName()).replaceAll("\\{item_identifier}", identifier.toString()).replaceAll("\\{nbt}", tagMessage).replaceAll("\\{count}", String.valueOf(cheatedStack.getAmount()));
-            if (madeUpCommand.length() > 256)
+            if (madeUpCommand.length() > 256) {
                 madeUpCommand = og.replaceAll("\\{player_name}", MinecraftClient.getInstance().player.getEntityName()).replaceAll("\\{item_identifier}", identifier.toString()).replaceAll("\\{nbt}", "").replaceAll("\\{count}", String.valueOf(cheatedStack.getAmount()));
+                MinecraftClient.getInstance().player.addChatMessage(new TranslatableTextComponent("text.rei.too_long_nbt"), false);
+            }
+            System.out.println(madeUpCommand);
             MinecraftClient.getInstance().player.sendChatMessage(madeUpCommand);
             return true;
         }
