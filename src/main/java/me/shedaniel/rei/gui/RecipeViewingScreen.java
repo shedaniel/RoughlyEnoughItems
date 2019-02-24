@@ -21,10 +21,8 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Supplier;
 
 public class RecipeViewingScreen extends Screen {
@@ -199,7 +197,7 @@ public class RecipeViewingScreen extends Screen {
                 tab.setItem(categories.get(j).getCategoryIcon(), categories.get(j).getCategoryName(), tab.getId() + categoryPages * 6 == categories.indexOf(selectedCategory));
             }
         }
-        SpeedCraftAreaSupplier supplier = IRecipeHelper.getInstance().getSpeedCraftButtonArea(selectedCategory);
+        Optional<SpeedCraftAreaSupplier> supplier = IRecipeHelper.getInstance().getSpeedCraftButtonArea(selectedCategory);
         final SpeedCraftFunctional functional = getSpeedCraftFunctionalByCategory(GuiHelper.getLastContainerScreen(), selectedCategory);
         int recipeHeight = selectedCategory.getDisplayHeight();
         List<IRecipeDisplay> currentDisplayed = getCurrentDisplayed();
@@ -211,8 +209,8 @@ public class RecipeViewingScreen extends Screen {
             int displayWidth = selectedCategory.getDisplayWidth(displaySupplier.get());
             final Rectangle displayBounds = new Rectangle((int) getBounds().getCenterX() - displayWidth / 2, getBounds().y + 40 + recipeHeight * i + 7 * i, displayWidth, recipeHeight);
             widgets.addAll(selectedCategory.setupDisplay(displaySupplier, displayBounds));
-            if (supplier != null)
-                widgets.add(new SpeedCraftingButtonWidget(supplier.get(displayBounds), supplier.getButtonText(), functional, displaySupplier));
+            if (supplier.isPresent())
+                widgets.add(new SpeedCraftingButtonWidget(supplier.get().get(displayBounds), supplier.get().getButtonText(), functional, displaySupplier));
         }
         
         GuiHelper.getLastOverlay().onInitialized();

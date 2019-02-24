@@ -1,6 +1,7 @@
 package me.shedaniel.rei.gui.config;
 
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
 import me.shedaniel.rei.client.REIItemListOrdering;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
@@ -40,6 +41,20 @@ public class ConfigScreen extends Screen {
     protected void onInitialized() {
         listeners.add(entryListWidget = new ConfigEntryListWidget(client, width, height, 32, height - 32, 24));
         entryListWidget.configClearEntries();
+        entryListWidget.configAddEntry(new ConfigEntry.CategoryTitleConfigEntry(new TranslatableTextComponent("text.rei.config.general")));
+        entryListWidget.configAddEntry(new ConfigEntry.ButtonConfigEntry(new TranslatableTextComponent("text.rei.config.cheating"), new ConfigEntry.ButtonConfigEntry.ConfigEntryButtonProvider() {
+            @Override
+            public boolean onPressed(int button, double mouseX, double mouseY) {
+                if (button == 0)
+                    ClientHelper.setCheating(!ClientHelper.isCheating());
+                return true;
+            }
+            
+            @Override
+            public String getText() {
+                return getTrueFalseText(ClientHelper.isCheating());
+            }
+        }));
         entryListWidget.configAddEntry(new ConfigEntry.CategoryTitleConfigEntry(new TranslatableTextComponent("text.rei.config.appearance")));
         entryListWidget.configAddEntry(new ConfigEntry.ButtonConfigEntry(new TranslatableTextComponent("text.rei.config.side_search_box"), new ConfigEntry.ButtonConfigEntry.ConfigEntryButtonProvider() {
             @Override

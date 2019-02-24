@@ -7,6 +7,7 @@ import net.minecraft.util.Identifier;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public interface IRecipeHelper {
     
@@ -30,7 +31,7 @@ public interface IRecipeHelper {
     
     public Map<IRecipeCategory, List<IRecipeDisplay>> getUsagesFor(ItemStack stack);
     
-    public SpeedCraftAreaSupplier getSpeedCraftButtonArea(IRecipeCategory category);
+    public Optional<SpeedCraftAreaSupplier> getSpeedCraftButtonArea(IRecipeCategory category);
     
     public void registerSpeedCraftButtonArea(Identifier category, SpeedCraftAreaSupplier rectangle);
     

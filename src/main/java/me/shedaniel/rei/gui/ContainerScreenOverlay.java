@@ -11,6 +11,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.audio.PositionedSoundInstance;
 import net.minecraft.client.gui.ContainerScreen;
 import net.minecraft.client.gui.InputListener;
+import net.minecraft.client.gui.Screen;
 import net.minecraft.client.gui.ScreenComponent;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
@@ -18,6 +19,7 @@ import net.minecraft.client.util.Window;
 import net.minecraft.item.ItemStack;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.TranslatableTextComponent;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
@@ -29,6 +31,7 @@ import java.util.stream.Collectors;
 
 public class ContainerScreenOverlay extends ScreenComponent {
     
+    private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private static final List<QueuedTooltip> QUEUED_TOOLTIPS = Lists.newArrayList();
     public static String searchTerm = "";
     private static int page = 0;
@@ -67,22 +70,34 @@ public class ContainerScreenOverlay extends ScreenComponent {
             }
         });
         page = MathHelper.clamp(page, 0, getTotalPage());
-        widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigHelper().getConfig().mirrorItemPanel ? window.getScaledWidth() - 50 : 10, 10, 40, 20, "") {
+        widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigHelper().getConfig().mirrorItemPanel ? window.getScaledWidth() - 30 : 10, 10, 20, 20, "") {
             @Override
-            public void draw(int int_1, int int_2, float float_1) {
-                this.text = getCheatModeText();
-                super.draw(int_1, int_2, float_1);
+            public void onPressed(int button, double mouseX, double mouseY) {
+                if (Screen.isShiftPressed()) {
+                    ClientHelper.setCheating(!ClientHelper.isCheating());
+                    return;
+                }
+                ClientHelper.openConfigWindow(GuiHelper.getLastContainerScreen());
             }
             
             @Override
-            public void onPressed(int button, double mouseX, double mouseY) {
-                ClientHelper.setCheating(!ClientHelper.isCheating());
-            }
-        });
-        widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigHelper().getConfig().mirrorItemPanel ? window.getScaledWidth() - 50 : 10, 35, 40, 20, I18n.translate("text.rei.config")) {
-            @Override
-            public void onPressed(int button, double mouseX, double mouseY) {
-                ClientHelper.openConfigWindow(GuiHelper.getLastContainerScreen());
+            public void draw(int mouseX, int mouseY, float partialTicks) {
+                super.draw(mouseX, mouseY, partialTicks);
+                GuiLighting.disable();
+                if (ClientHelper.isCheating())
+                    drawRect(getBounds().x, getBounds().y, getBounds().x + 20, getBounds().y + 20, new Color(255, 0, 0, 42).getRGB());
+                MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
+                GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+                drawTexturedRect(getBounds().x + 3, getBounds().y + 3, 0, 0, 14, 14);
+                if (isHighlighted(mouseX, mouseY)) {
+                    List<String> list = new LinkedList<>(Arrays.asList(I18n.translate("text.rei.config_tooltip").split("\n")));
+                    list.add(" ");
+                    if (!ClientHelper.isCheating())
+                        list.add("§c§m" + I18n.translate("text.rei.cheating"));
+                    else
+                        list.add("§a" + I18n.translate("text.rei.cheating"));
+                    addTooltip(new QueuedTooltip(new Point(mouseX, mouseY), list));
+                }
             }
         });
         if (!RoughlyEnoughItemsCore.getConfigHelper().getConfig().disableCreditsButton)

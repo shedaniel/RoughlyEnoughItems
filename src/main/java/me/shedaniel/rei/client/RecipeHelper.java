@@ -130,12 +130,10 @@ public class RecipeHelper implements IRecipeHelper {
     }
     
     @Override
-    public SpeedCraftAreaSupplier getSpeedCraftButtonArea(IRecipeCategory category) {
+    public Optional<SpeedCraftAreaSupplier> getSpeedCraftButtonArea(IRecipeCategory category) {
         if (!speedCraftAreaSupplierMap.containsKey(category.getIdentifier()))
-            return bounds -> {
-                return new Rectangle((int) bounds.getMaxX() - 16, (int) bounds.getMaxY() - 16, 10, 10);
-            };
-        return speedCraftAreaSupplierMap.get(category.getIdentifier());
+            return Optional.of(bounds -> new Rectangle((int) bounds.getMaxX() - 16, (int) bounds.getMaxY() - 16, 10, 10));
+        return Optional.ofNullable(speedCraftAreaSupplierMap.get(category.getIdentifier()));
     }
     
     @Override
