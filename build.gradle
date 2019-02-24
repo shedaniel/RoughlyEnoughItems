@@ -20,8 +20,6 @@ sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = co
 minecraft {
     mappings channel: 'snapshot', version: '20180921-1.13'
 
-    accessTransformer = file('src/main/resources/META-INF/roughlyenoughitems_at.cfg')
-
     runs {
         client = {
             // recommended logging data for a userdev environment

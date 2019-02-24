@@ -17,7 +17,6 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.*;
-import net.minecraft.potion.PotionBrewing;
 import net.minecraft.potion.PotionType;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.util.NonNullList;
@@ -25,6 +24,8 @@ import net.minecraft.util.registry.IRegistry;
 import net.minecraftforge.registries.IRegistryDelegate;
 
 import java.util.*;
+
+import static me.shedaniel.rei.utils.RecipeBookUtils.getGhostRecipe;
 
 @IREIPlugin(identifier = "roughlyenoughitems:default_plugin")
 public class DefaultPlugin implements IRecipePlugin {
@@ -91,7 +92,8 @@ public class DefaultPlugin implements IRecipePlugin {
                 recipeHelper.registerDisplay(SMELTING, new DefaultSmeltingDisplay((FurnaceRecipe) value));
         List<PotionType> registeredPotionTypes = Lists.newArrayList();
         List<BrewingRecipe> potionItemConversions = Lists.newArrayList();
-        ((List) PotionBrewing.POTION_ITEM_CONVERSIONS).forEach(o -> {
+        List<Ingredient> potionItems = PotionRecipeUtils.getPotionItems();
+        PotionRecipeUtils.getPotionItemConversions().forEach(o -> {
             try {
                 IRegistryDelegate<Item> input = PotionRecipeUtils.getInputFromMixPredicate(o, IRegistryDelegate.class);
                 IRegistryDelegate<Item> output = PotionRecipeUtils.getOutputFromMixPredicate(o, IRegistryDelegate.class);
@@ -101,7 +103,7 @@ public class DefaultPlugin implements IRecipePlugin {
                 throwable.printStackTrace();
             }
         });
-        ((List) PotionBrewing.POTION_TYPE_CONVERSIONS).forEach(o -> {
+        PotionRecipeUtils.getPotionTypeConversions().forEach(o -> {
             try {
                 IRegistryDelegate<PotionType> input = PotionRecipeUtils.getInputFromMixPredicate(o, IRegistryDelegate.class);
                 IRegistryDelegate<PotionType> output = PotionRecipeUtils.getOutputFromMixPredicate(o, IRegistryDelegate.class);
@@ -110,7 +112,7 @@ public class DefaultPlugin implements IRecipePlugin {
                     registerPotionType(recipeHelper, registeredPotionTypes, potionItemConversions, input.get());
                 if (!registeredPotionTypes.contains(output.get()))
                     registerPotionType(recipeHelper, registeredPotionTypes, potionItemConversions, output.get());
-                PotionBrewing.POTION_ITEMS.stream().map(Ingredient::getMatchingStacks).forEach(itemStacks -> Arrays.stream(itemStacks).forEach(stack -> {
+                potionItems.stream().map(Ingredient::getMatchingStacks).forEach(itemStacks -> Arrays.stream(itemStacks).forEach(stack -> {
                     recipeHelper.registerDisplay(BREWING, new DefaultBrewingDisplay(PotionUtils.addPotionToItemStack(stack.copy(), input.get()), reagent, PotionUtils.addPotionToItemStack(stack.copy(), output.get())));
                 }));
             } catch (Throwable throwable) {
@@ -137,14 +139,18 @@ public class DefaultPlugin implements IRecipePlugin {
             
             @Override
             public boolean performAutoCraft(Gui gui, DefaultCraftingDisplay recipe) {
-                if (gui.getClass().isAssignableFrom(GuiCrafting.class))
-                    ((GuiCrafting) gui).func_194310_f().ghostRecipe.clear();
-                else if (gui.getClass().isAssignableFrom(GuiInventory.class))
-                    ((GuiInventory) gui).func_194310_f().ghostRecipe.clear();
-                else
+                try {
+                    if (gui.getClass().isAssignableFrom(GuiCrafting.class))
+                        getGhostRecipe(((GuiCrafting) gui).func_194310_f()).clear();
+                    else if (gui.getClass().isAssignableFrom(GuiInventory.class))
+                        getGhostRecipe(((GuiInventory) gui).func_194310_f()).clear();
+                    else
+                        return false;
+                    Minecraft.getInstance().playerController.func_203413_a(Minecraft.getInstance().player.openContainer.windowId, recipe.getRecipe(), GuiScreen.isShiftKeyDown());
+                    return true;
+                } catch (Throwable e) {
                     return false;
-                Minecraft.getInstance().playerController.func_203413_a(Minecraft.getInstance().player.openContainer.windowId, recipe.getRecipe(), GuiScreen.isShiftKeyDown());
-                return true;
+                }
             }
             
             @Override
@@ -160,12 +166,16 @@ public class DefaultPlugin implements IRecipePlugin {
             
             @Override
             public boolean performAutoCraft(Gui gui, DefaultSmeltingDisplay recipe) {
-                if (gui instanceof GuiFurnace)
-                    ((GuiFurnace) gui).func_194310_f().ghostRecipe.clear();
-                else
+                try {
+                    if (gui instanceof GuiFurnace)
+                        getGhostRecipe(((GuiFurnace) gui).func_194310_f()).clear();
+                    else
+                        return false;
+                    Minecraft.getInstance().playerController.func_203413_a(Minecraft.getInstance().player.openContainer.windowId, recipe.getRecipe(), GuiScreen.isShiftKeyDown());
+                    return true;
+                } catch (Throwable e) {
                     return false;
-                Minecraft.getInstance().playerController.func_203413_a(Minecraft.getInstance().player.openContainer.windowId, recipe.getRecipe(), GuiScreen.isShiftKeyDown());
-                return true;
+                }
             }
             
             @Override

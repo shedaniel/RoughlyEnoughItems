@@ -11,7 +11,7 @@ public abstract class ClickableLabelWidget extends LabelWidget implements Highli
     @Override
     public Rectangle getBounds() {
         int width = fontRenderer.getStringWidth(text);
-        return new Rectangle(x - 7, y - 5, width, 14);
+        return new Rectangle(x - width / 2 - 1, y - 5, width + 2, 14);
     }
     
     @Override
