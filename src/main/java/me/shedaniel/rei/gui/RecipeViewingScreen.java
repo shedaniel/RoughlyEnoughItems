@@ -34,6 +34,8 @@ public class RecipeViewingScreen extends Screen {
     public int guiHeight;
     public int page, categoryPages;
     public int largestWidth, largestHeight;
+    public boolean choosePageActivated;
+    public RecipeChoosePageWidget recipeChoosePageWidget;
     private List<IWidget> widgets;
     private List<TabWidget> tabs;
     private Window window;
@@ -56,6 +58,7 @@ public class RecipeViewingScreen extends Screen {
         });
         this.selectedCategory = categories.get(0);
         this.tabs = new ArrayList<>();
+        this.choosePageActivated = false;
     }
     
     public static SpeedCraftFunctional getSpeedCraftFunctionalByCategory(ContainerScreen containerScreen, IRecipeCategory category) {
@@ -72,6 +75,11 @@ public class RecipeViewingScreen extends Screen {
             MinecraftClient.getInstance().openScreen(GuiHelper.getLastContainerScreen());
             GuiHelper.getLastOverlay().onInitialized();
             return true;
+        }
+        if (choosePageActivated) {
+            if (recipeChoosePageWidget.keyPressed(int_1, int_2, int_3))
+                return true;
+            return false;
         }
         for(InputListener listener : listeners)
             if (listener.keyPressed(int_1, int_2, int_3))
@@ -165,13 +173,13 @@ public class RecipeViewingScreen extends Screen {
                 this.text = String.format("%d/%d", page + 1, getTotalPages(selectedCategory));
                 super.draw(mouseX, mouseY, partialTicks);
                 if (isHighlighted(mouseX, mouseY))
-                    GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(new Point(mouseX, mouseY), Arrays.asList(I18n.translate("text.rei.go_back_first_page").split("\n"))));
+                    GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(new Point(mouseX, mouseY), Arrays.asList(I18n.translate("text.rei.choose_page").split("\n"))));
             }
             
             @Override
             public void onLabelClicked() {
                 MinecraftClient.getInstance().getSoundLoader().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-                page = 0;
+                RecipeViewingScreen.this.choosePageActivated = true;
                 RecipeViewingScreen.this.onInitialized();
             }
         });
@@ -212,7 +220,11 @@ public class RecipeViewingScreen extends Screen {
             if (supplier.isPresent())
                 widgets.add(new SpeedCraftingButtonWidget(supplier.get().get(displayBounds), supplier.get().getButtonText(), functional, displaySupplier));
         }
-        
+        if (choosePageActivated)
+            recipeChoosePageWidget = new RecipeChoosePageWidget(this, page, getTotalPages(selectedCategory));
+        else
+            recipeChoosePageWidget = null;
+    
         GuiHelper.getLastOverlay().onInitialized();
         listeners.addAll(tabs);
         listeners.add(GuiHelper.getLastOverlay());
@@ -268,6 +280,12 @@ public class RecipeViewingScreen extends Screen {
         GuiLighting.disable();
         tabs.stream().filter(TabWidget::isSelected).forEach(tabWidget -> tabWidget.draw(mouseX, mouseY, delta));
         GuiHelper.getLastOverlay().drawOverlay(mouseX, mouseY, delta);
+        if (choosePageActivated) {
+            zOffset = 500.0f;
+            this.drawGradientRect(0, 0, this.width, this.height, -1072689136, -804253680);
+            zOffset = 0.0f;
+            recipeChoosePageWidget.draw(mouseX, mouseY, delta);
+        }
     }
     
     public int getTotalPages(IRecipeCategory category) {
@@ -280,10 +298,35 @@ public class RecipeViewingScreen extends Screen {
     
     @Override
     public boolean charTyped(char char_1, int int_1) {
+        if (choosePageActivated) {
+            if (recipeChoosePageWidget.charTyped(char_1, int_1))
+                return true;
+            return false;
+        }
         for(InputListener listener : listeners)
             if (listener.charTyped(char_1, int_1))
                 return true;
         return super.charTyped(char_1, int_1);
+    }
+    
+    @Override
+    public boolean mouseDragged(double double_1, double double_2, int int_1, double double_3, double double_4) {
+        if (choosePageActivated) {
+            if (recipeChoosePageWidget.mouseDragged(double_1, double_2, int_1, double_3, double_4))
+                return true;
+            return false;
+        }
+        return super.mouseDragged(double_1, double_2, int_1, double_3, double_4);
+    }
+    
+    @Override
+    public boolean mouseReleased(double double_1, double double_2, int int_1) {
+        if (choosePageActivated) {
+            if (recipeChoosePageWidget.mouseReleased(double_1, double_2, int_1))
+                return true;
+            return false;
+        }
+        return super.mouseReleased(double_1, double_2, int_1);
     }
     
     @Override
@@ -308,6 +351,16 @@ public class RecipeViewingScreen extends Screen {
     
     @Override
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
+        if (choosePageActivated)
+            if (recipeChoosePageWidget.isHighlighted(double_1, double_2)) {
+                if (recipeChoosePageWidget.mouseClicked(double_1, double_2, int_1))
+                    return true;
+                return false;
+            } else {
+                choosePageActivated = false;
+                onInitialized();
+                return false;
+            }
         for(InputListener entry : getInputListeners())
             if (entry.mouseClicked(double_1, double_2, int_1)) {
                 focusOn(entry);
@@ -316,6 +369,13 @@ public class RecipeViewingScreen extends Screen {
                 return true;
             }
         return false;
+    }
+    
+    @Override
+    public InputListener getFocused() {
+        if (choosePageActivated)
+            return recipeChoosePageWidget;
+        return super.getFocused();
     }
     
 }

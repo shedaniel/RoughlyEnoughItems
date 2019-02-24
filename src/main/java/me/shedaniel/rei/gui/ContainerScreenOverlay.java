@@ -196,7 +196,9 @@ public class ContainerScreenOverlay extends ScreenComponent {
         GuiLighting.disable();
         this.draw(mouseX, mouseY, partialTicks);
         GuiLighting.disable();
-        QUEUED_TOOLTIPS.stream().filter(queuedTooltip -> queuedTooltip != null).forEach(queuedTooltip -> MinecraftClient.getInstance().currentScreen.drawTooltip(queuedTooltip.text, queuedTooltip.mouse.x, queuedTooltip.mouse.y));
+        Screen currentScreen = MinecraftClient.getInstance().currentScreen;
+        if (!(currentScreen instanceof RecipeViewingScreen) || !((RecipeViewingScreen) currentScreen).choosePageActivated)
+            QUEUED_TOOLTIPS.stream().filter(queuedTooltip -> queuedTooltip != null).forEach(queuedTooltip -> MinecraftClient.getInstance().currentScreen.drawTooltip(queuedTooltip.text, queuedTooltip.mouse.x, queuedTooltip.mouse.y));
         QUEUED_TOOLTIPS.clear();
         GuiLighting.disable();
     }

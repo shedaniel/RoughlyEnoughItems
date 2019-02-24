@@ -144,7 +144,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (int_1 == 335 || int_1 == 257) {
             recipeViewingScreen.page = MathHelper.clamp(getIntFromString(textFieldWidget.getText()).orElse(0) - 1, 0, recipeViewingScreen.getTotalPages(recipeViewingScreen.getSelectedCategory()) - 1);
-            //recipeViewingScreen.choosePageActivated = false;
+            recipeViewingScreen.choosePageActivated = false;
             recipeViewingScreen.onInitialized();
             return true;
         }
