@@ -2,7 +2,7 @@
   "latest": [
     {
       "game": "1.13.2",
-      "mod": "2.3.0.4"
+      "mod": "2.3.1.5"
     }
   ],
   "changelogs": {
@@ -31,6 +31,11 @@
         "version": "2.3.0.4",
         "text": "Fix Server Crash, Potion Recipes not working, and clickable labels oversize",
         "level": "none"
+      },
+      {
+        "version": "2.3.1.5",
+        "text": "7 New features + Several Bug Fixes",
+        "level": "useful"
       }
     ]
   }
