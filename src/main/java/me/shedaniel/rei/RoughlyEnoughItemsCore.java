@@ -3,6 +3,7 @@ package me.shedaniel.rei;
 import com.google.common.collect.Maps;
 import me.shedaniel.rei.api.IItemRegisterer;
 import me.shedaniel.rei.api.IPluginDisabler;
+import me.shedaniel.rei.api.IRecipeHelper;
 import me.shedaniel.rei.api.IRecipePlugin;
 import me.shedaniel.rei.client.ConfigHelper;
 import me.shedaniel.rei.client.GuiHelper;
@@ -19,7 +20,6 @@ import net.fabricmc.loader.FabricLoader;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sortme.ChatMessageType;
 import net.minecraft.text.StringTextComponent;
 import net.minecraft.text.TranslatableTextComponent;
 import net.minecraft.util.Identifier;
@@ -29,6 +29,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitializer {
     
@@ -41,7 +42,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
     private static final Map<Identifier, IRecipePlugin> plugins = Maps.newHashMap();
     private static ConfigHelper configHelper;
     
-    public static RecipeHelper getRecipeHelper() {
+    public static IRecipeHelper getRecipeHelper() {
         return RECIPE_HELPER;
     }
     
@@ -68,11 +69,11 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
         return new LinkedList<>(plugins.values());
     }
     
-    public static Identifier getPluginIdentifier(IRecipePlugin plugin) {
+    public static Optional<Identifier> getPluginIdentifier(IRecipePlugin plugin) {
         for(Identifier identifier : plugins.keySet())
-            if (plugins.get(identifier).equals(plugin))
-                return identifier;
-        return null;
+            if (identifier != null && plugins.get(identifier).equals(plugin))
+                return Optional.of(identifier);
+        return Optional.empty();
     }
     
     @SuppressWarnings("deprecation")
@@ -87,7 +88,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
         }
         
         ClientTickCallback.EVENT.register(GuiHelper::onTick);
-        if (getConfigHelper().checkUpdates())
+        if (getConfigHelper().getConfig().checkUpdates)
             ClientTickCallback.EVENT.register(UpdateChecker::onTick);
         
         new UpdateChecker().onInitializeClient();
@@ -108,9 +109,9 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
             ServerPlayerEntity player = (ServerPlayerEntity) packetContext.getPlayer();
             ItemStack stack = packetByteBuf.readItemStack();
             if (player.inventory.insertStack(stack.copy()))
-                player.sendChatMessage(new StringTextComponent(I18n.translate("text.rei.cheat_items").replaceAll("\\{item_name}", stack.copy().getDisplayName().getFormattedText()).replaceAll("\\{item_count}", stack.copy().getAmount() + "").replaceAll("\\{player_name}", player.getEntityName())), ChatMessageType.SYSTEM);
+                player.addChatMessage(new StringTextComponent(I18n.translate("text.rei.cheat_items").replaceAll("\\{item_name}", stack.copy().getDisplayName().getFormattedText()).replaceAll("\\{item_count}", stack.copy().getAmount() + "").replaceAll("\\{player_name}", player.getEntityName())), false);
             else
-                player.sendChatMessage(new TranslatableTextComponent("text.rei.failed_cheat_items"), ChatMessageType.SYSTEM);
+                player.addChatMessage(new TranslatableTextComponent("text.rei.failed_cheat_items"), false);
         });
     }
     

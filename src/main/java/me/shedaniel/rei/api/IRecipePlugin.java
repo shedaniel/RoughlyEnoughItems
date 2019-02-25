@@ -8,11 +8,11 @@ public interface IRecipePlugin {
     
     public void registerItems(IItemRegisterer itemRegisterer);
     
-    public void registerPluginCategories(RecipeHelper recipeHelper);
+    public void registerPluginCategories(IRecipeHelper recipeHelper);
     
-    public void registerRecipeDisplays(RecipeHelper recipeHelper);
+    public void registerRecipeDisplays(IRecipeHelper recipeHelper);
     
-    public void registerSpeedCraft(RecipeHelper recipeHelper);
+    public void registerSpeedCraft(IRecipeHelper recipeHelper);
     
     default public int getPriority() {
         return 0;

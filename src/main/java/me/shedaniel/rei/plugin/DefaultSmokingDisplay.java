@@ -5,11 +5,13 @@ import me.shedaniel.rei.api.IRecipeDisplay;
 import net.minecraft.block.entity.FurnaceBlockEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.recipe.cooking.SmeltingRecipe;
 import net.minecraft.recipe.cooking.SmokingRecipe;
 import net.minecraft.util.Identifier;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class DefaultSmokingDisplay implements IRecipeDisplay<SmokingRecipe> {
@@ -31,8 +33,8 @@ public class DefaultSmokingDisplay implements IRecipeDisplay<SmokingRecipe> {
     }
     
     @Override
-    public SmokingRecipe getRecipe() {
-        return display;
+    public Optional<SmokingRecipe> getRecipe() {
+        return Optional.ofNullable(display);
     }
     
     @Override

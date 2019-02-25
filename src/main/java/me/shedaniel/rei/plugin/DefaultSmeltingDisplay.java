@@ -10,6 +10,7 @@ import net.minecraft.util.Identifier;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class DefaultSmeltingDisplay implements IRecipeDisplay<SmeltingRecipe> {
@@ -31,8 +32,8 @@ public class DefaultSmeltingDisplay implements IRecipeDisplay<SmeltingRecipe> {
     }
     
     @Override
-    public SmeltingRecipe getRecipe() {
-        return display;
+    public Optional<SmeltingRecipe> getRecipe() {
+        return Optional.ofNullable(display);
     }
     
     @Override

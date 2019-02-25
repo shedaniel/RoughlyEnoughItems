@@ -5,7 +5,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Drawable;
+import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.item.ItemStack;
@@ -20,7 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ItemSlotWidget extends Drawable implements HighlightableWidget {
+public class ItemSlotWidget extends DrawableHelper implements HighlightableWidget {
     
     private static final Identifier RECIPE_GUI = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private List<ItemStack> itemList = new LinkedList<>();
@@ -41,13 +41,13 @@ public class ItemSlotWidget extends Drawable implements HighlightableWidget {
         this.drawHighlightedBackground = true;
     }
     
-    public void setDrawHighlightedBackground(boolean drawHighlightedBackground) {
-        this.drawHighlightedBackground = drawHighlightedBackground;
-    }
-    
     public ItemSlotWidget(int x, int y, List<ItemStack> itemList, boolean drawBackground, boolean showToolTips, boolean clickToMoreRecipes) {
         this(x, y, itemList, drawBackground, showToolTips);
         this.clickToMoreRecipes = clickToMoreRecipes;
+    }
+    
+    public void setDrawHighlightedBackground(boolean drawHighlightedBackground) {
+        this.drawHighlightedBackground = drawHighlightedBackground;
     }
     
     public boolean isDrawBackground() {

@@ -61,7 +61,7 @@ public class MixinContainerScreen extends Screen implements IMixinContainerScree
         this.listeners.add(GuiHelper.getLastOverlay(true));
     }
     
-    @Inject(method = "method_18326(IIF)V", at = @At("RETURN"))
+    @Inject(method = "draw(IIF)V", at = @At("RETURN"))
     public void draw(int int_1, int int_2, float float_1, CallbackInfo info) {
         if (MinecraftClient.getInstance().currentScreen instanceof CreativePlayerInventoryScreen) {
             IMixinTabGetter tabGetter = (IMixinTabGetter) MinecraftClient.getInstance().currentScreen;

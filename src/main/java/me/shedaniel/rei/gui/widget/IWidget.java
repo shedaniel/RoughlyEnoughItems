@@ -1,14 +1,13 @@
 package me.shedaniel.rei.gui.widget;
 
-import net.minecraft.client.gui.GuiEventListener;
+import net.minecraft.client.gui.Drawable;
+import net.minecraft.client.gui.InputListener;
 
 import java.util.List;
 
-public interface IWidget extends GuiEventListener {
+public interface IWidget extends InputListener, Drawable {
     
     public List<IWidget> getListeners();
-    
-    public void draw(int mouseX, int mouseY, float partialTicks);
     
     @Override
     default boolean mouseClicked(double double_1, double double_2, int int_1) {

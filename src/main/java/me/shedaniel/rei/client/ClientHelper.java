@@ -5,9 +5,10 @@ import io.netty.buffer.Unpooled;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.IRecipeCategory;
 import me.shedaniel.rei.api.IRecipeDisplay;
+import me.shedaniel.rei.api.IRecipeHelper;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
+import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.config.ConfigScreen;
-import me.shedaniel.rei.gui.widget.RecipeViewingWidgetScreen;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
@@ -16,9 +17,11 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.gui.Screen;
+import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.text.TranslatableTextComponent;
 import net.minecraft.util.DefaultedList;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.PacketByteBuf;
@@ -72,7 +75,7 @@ public class ClientHelper implements ClientModInitializer {
     }
     
     public static void sendDeletePacket() {
-        if (MinecraftClient.getInstance().interactionManager.hasCreativeInventory()) {
+        if (GuiHelper.getLastContainerScreen() instanceof CreativePlayerInventoryScreen) {
             MinecraftClient.getInstance().player.inventory.setCursorStack(ItemStack.EMPTY);
             return;
         }
@@ -88,27 +91,31 @@ public class ClientHelper implements ClientModInitializer {
                 return false;
             }
         } else {
-            Identifier location = Registry.ITEM.getId(cheatedStack.getItem());
+            Identifier identifier = Registry.ITEM.getId(cheatedStack.getItem());
             String tagMessage = cheatedStack.copy().getTag() != null && !cheatedStack.copy().getTag().isEmpty() ? cheatedStack.copy().getTag().asString() : "";
-            String madeUpCommand = RoughlyEnoughItemsCore.getConfigHelper().getGiveCommandPrefix() + " " + MinecraftClient.getInstance().player.getEntityName() + " " + location.toString() + tagMessage + (cheatedStack.getAmount() != 1 ? " " + cheatedStack.getAmount() : "");
-            if (madeUpCommand.length() > 256)
-                madeUpCommand = RoughlyEnoughItemsCore.getConfigHelper().getGiveCommandPrefix() + " " + MinecraftClient.getInstance().player.getEntityName() + " " + location.toString() + (cheatedStack.getAmount() != 1 ? " " + cheatedStack.getAmount() : "");
+            String og = cheatedStack.getAmount() != 1 ? RoughlyEnoughItemsCore.getConfigHelper().getConfig().giveCommand.replaceAll(" \\{count}", "").replaceAll("\\{count}", "") : RoughlyEnoughItemsCore.getConfigHelper().getConfig().giveCommand;
+            String madeUpCommand = og.replaceAll("\\{player_name}", MinecraftClient.getInstance().player.getEntityName()).replaceAll("\\{item_identifier}", identifier.toString()).replaceAll("\\{nbt}", tagMessage).replaceAll("\\{count}", String.valueOf(cheatedStack.getAmount()));
+            if (madeUpCommand.length() > 256) {
+                madeUpCommand = og.replaceAll("\\{player_name}", MinecraftClient.getInstance().player.getEntityName()).replaceAll("\\{item_identifier}", identifier.toString()).replaceAll("\\{nbt}", "").replaceAll("\\{count}", String.valueOf(cheatedStack.getAmount()));
+                MinecraftClient.getInstance().player.addChatMessage(new TranslatableTextComponent("text.rei.too_long_nbt"), false);
+            }
+            System.out.println(madeUpCommand);
             MinecraftClient.getInstance().player.sendChatMessage(madeUpCommand);
             return true;
         }
     }
     
     public static boolean executeRecipeKeyBind(ContainerScreenOverlay overlay, ItemStack stack) {
-        Map<IRecipeCategory, List<IRecipeDisplay>> map = RecipeHelper.getInstance().getRecipesFor(stack);
+        Map<IRecipeCategory, List<IRecipeDisplay>> map = IRecipeHelper.getInstance().getRecipesFor(stack);
         if (map.keySet().size() > 0)
-            MinecraftClient.getInstance().openScreen(new RecipeViewingWidgetScreen(MinecraftClient.getInstance().window, map));
+            MinecraftClient.getInstance().openScreen(new RecipeViewingScreen(MinecraftClient.getInstance().window, map));
         return map.keySet().size() > 0;
     }
     
     public static boolean executeUsageKeyBind(ContainerScreenOverlay overlay, ItemStack stack) {
-        Map<IRecipeCategory, List<IRecipeDisplay>> map = RecipeHelper.getInstance().getUsagesFor(stack);
+        Map<IRecipeCategory, List<IRecipeDisplay>> map = IRecipeHelper.getInstance().getUsagesFor(stack);
         if (map.keySet().size() > 0)
-            MinecraftClient.getInstance().openScreen(new RecipeViewingWidgetScreen(MinecraftClient.getInstance().window, map));
+            MinecraftClient.getInstance().openScreen(new RecipeViewingScreen(MinecraftClient.getInstance().window, map));
         return map.keySet().size() > 0;
     }
     
@@ -124,6 +131,13 @@ public class ClientHelper implements ClientModInitializer {
                 inventoryStacks.add(itemStack);
         }));
         return inventoryStacks;
+    }
+    
+    public static boolean executeViewAllRecipesKeyBind(ContainerScreenOverlay lastOverlay) {
+        Map<IRecipeCategory, List<IRecipeDisplay>> map = IRecipeHelper.getInstance().getAllRecipes();
+        if (map.keySet().size() > 0)
+            MinecraftClient.getInstance().openScreen(new RecipeViewingScreen(MinecraftClient.getInstance().window, map));
+        return map.keySet().size() > 0;
     }
     
     @Override

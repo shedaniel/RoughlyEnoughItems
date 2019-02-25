@@ -6,6 +6,7 @@ import net.minecraft.recipe.crafting.ShapelessRecipe;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public class DefaultShapelessDisplay implements DefaultCraftingDisplay {
     
@@ -23,8 +24,8 @@ public class DefaultShapelessDisplay implements DefaultCraftingDisplay {
     }
     
     @Override
-    public ShapelessRecipe getRecipe() {
-        return display;
+    public Optional<ShapelessRecipe> getRecipe() {
+        return Optional.ofNullable(display);
     }
     
     @Override
