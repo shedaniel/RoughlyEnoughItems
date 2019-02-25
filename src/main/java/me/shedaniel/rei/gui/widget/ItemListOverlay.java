@@ -2,6 +2,7 @@ package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.client.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -94,7 +95,7 @@ public class ItemListOverlay extends Gui implements IWidget {
         List<ItemStack> os = new LinkedList<>(ol), stacks = Lists.newArrayList(), finalStacks = Lists.newArrayList();
         List<ItemGroup> itemGroups = new LinkedList<>(Arrays.asList(ItemGroup.GROUPS));
         itemGroups.add(null);
-        REIItemListOrdering ordering = ConfigHelper.getInstance().getItemListOrdering();
+        REIItemListOrdering ordering = ConfigHelper.getInstance().getConfig().itemListOrdering;
         if (ordering != REIItemListOrdering.REGISTRY)
             Collections.sort(os, (itemStack, t1) -> {
                 if (ordering.equals(REIItemListOrdering.NAME))
@@ -103,7 +104,7 @@ public class ItemListOverlay extends Gui implements IWidget {
                     return itemGroups.indexOf(itemStack.getItem().getGroup()) - itemGroups.indexOf(t1.getItem().getGroup());
                 return 0;
             });
-        if (!ConfigHelper.getInstance().isAscending())
+        if (!ConfigHelper.getInstance().getConfig().isAscending)
             Collections.reverse(os);
         String[] splitSearchTerm = StringUtils.splitByWholeSeparatorPreserveAllTokens(searchTerm, "|");
         Arrays.stream(splitSearchTerm).forEachOrdered(s -> {

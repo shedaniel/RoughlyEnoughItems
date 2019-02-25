@@ -3,6 +3,7 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
+import me.shedaniel.rei.gui.RecipeViewingGui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
@@ -22,12 +23,12 @@ public class TabWidget extends Gui implements HighlightableWidget {
     private boolean shown = false, selected = false;
     private ItemStack item;
     private int id;
-    private RecipeViewingWidgetGui recipeViewingWidget;
+    private RecipeViewingGui recipeViewingWidget;
     private String categoryName;
     private Rectangle bounds;
     private ItemRenderer itemRenderer;
     
-    public TabWidget(int id, RecipeViewingWidgetGui recipeViewingWidget, Rectangle bounds) {
+    public TabWidget(int id, RecipeViewingGui recipeViewingWidget, Rectangle bounds) {
         this.id = id;
         this.recipeViewingWidget = recipeViewingWidget;
         this.bounds = bounds;

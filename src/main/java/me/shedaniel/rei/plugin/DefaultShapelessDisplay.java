@@ -2,10 +2,12 @@ package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Lists;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.ShapelessRecipe;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public class DefaultShapelessDisplay implements DefaultCraftingDisplay {
     
@@ -23,8 +25,8 @@ public class DefaultShapelessDisplay implements DefaultCraftingDisplay {
     }
     
     @Override
-    public ShapelessRecipe getRecipe() {
-        return display;
+    public Optional<IRecipe> getRecipe() {
+        return Optional.ofNullable(display);
     }
     
     @Override

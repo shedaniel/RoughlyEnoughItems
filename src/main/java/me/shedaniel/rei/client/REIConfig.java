@@ -11,9 +11,14 @@ public class REIConfig {
     public boolean isAscending = true;
     public boolean enableCraftableOnlyButton = true;
     public boolean sideSearchField = false;
-    public String giveCommandPrefix = "/give";
+    public String giveCommand = "/give {player_name} {item_identifier}{nbt} {count}";
+    public String gamemodeCommand = "/gamemode {gamemode}";
+    public String weatherCommand = "/weather {weather}";
     public boolean checkUpdates = true;
     public boolean mirrorItemPanel = false;
     public boolean loadDefaultPlugin = true;
+    public boolean disableCreditsButton = false;
+    public int maxRecipePerPage = 3;
+    public boolean showUtilsButtons = false;
     
 }

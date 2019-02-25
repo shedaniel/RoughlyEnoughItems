@@ -1,6 +1,6 @@
 package me.shedaniel.rei.api;
 
-public interface IPluginDisabler {
+public interface PluginDisabler {
     
     default public void disablePluginFunctions(Identifier plugin, PluginFunction... functions) {
         for(PluginFunction function : functions)

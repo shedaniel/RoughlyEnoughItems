@@ -14,7 +14,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class ButtonWidget extends Gui implements IWidget {
+public abstract class ButtonWidget extends Gui implements HighlightableWidget {
     
     protected static final ResourceLocation WIDGET_TEX = new ResourceLocation("textures/gui/widgets.png");
     public String text;
@@ -43,6 +43,7 @@ public abstract class ButtonWidget extends Gui implements IWidget {
         this(new Rectangle(x, y, width, height), text);
     }
     
+    @Override
     public Rectangle getBounds() {
         return bounds;
     }
