@@ -21,7 +21,7 @@ public class CreditsGui extends GuiScreen {
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (int_1 == 256 && this.allowCloseWithEscape()) {
             this.mc.displayGuiScreen(parent);
-            GuiHelper.getLastOverlay().onInitialized();
+            GuiHelper.getLastOverlay().init();
             return true;
         }
         return super.keyPressed(int_1, int_2, int_3);
@@ -38,7 +38,7 @@ public class CreditsGui extends GuiScreen {
             @Override
             public void onClick(double double_1, double double_2) {
                 CreditsGui.this.mc.displayGuiScreen(parent);
-                GuiHelper.getLastOverlay().onInitialized();
+                GuiHelper.getLastOverlay().init();
             }
         });
     }

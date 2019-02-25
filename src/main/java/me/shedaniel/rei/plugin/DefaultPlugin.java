@@ -1,9 +1,9 @@
 package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Lists;
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.ConfigHelper;
-import me.shedaniel.rei.client.RecipeHelper;
 import me.shedaniel.rei.utils.PotionRecipeUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -20,7 +20,7 @@ import net.minecraft.item.crafting.*;
 import net.minecraft.potion.PotionType;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.util.NonNullList;
-import net.minecraft.util.registry.IRegistry;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IRegistryDelegate;
 
 import java.util.*;
@@ -30,37 +30,44 @@ import static me.shedaniel.rei.utils.RecipeBookUtils.getGhostRecipe;
 @IREIPlugin(identifier = "roughlyenoughitems:default_plugin")
 public class DefaultPlugin implements IRecipePlugin {
     
-    static final Identifier CRAFTING = new Identifier("roughlyenoughitems", "plugins/crafting");
-    static final Identifier SMELTING = new Identifier("roughlyenoughitems", "plugins/smelting");
-    static final Identifier BREWING = new Identifier("roughlyenoughitems", "plugins/brewing");
+    public static final Identifier CRAFTING = new Identifier("roughlyenoughitems", "plugins/crafting");
+    public static final Identifier SMELTING = new Identifier("roughlyenoughitems", "plugins/smelting");
+    public static final Identifier BREWING = new Identifier("roughlyenoughitems", "plugins/brewing");
+    public static final Identifier PLUGIN = new Identifier("roughlyenoughitems", "default_plugin");
     
     @Override
-    public void onFirstLoad(IPluginDisabler pluginDisabler) {
-        if (!ConfigHelper.getInstance().isLoadingDefaultPlugin()) {
-            pluginDisabler.disablePluginFunction(new Identifier("roughlyenoughitems", "default_plugin"), PluginFunction.REGISTER_ITEMS);
-            pluginDisabler.disablePluginFunction(new Identifier("roughlyenoughitems", "default_plugin"), PluginFunction.REGISTER_CATEGORIES);
-            pluginDisabler.disablePluginFunction(new Identifier("roughlyenoughitems", "default_plugin"), PluginFunction.REGISTER_RECIPE_DISPLAYS);
-            pluginDisabler.disablePluginFunction(new Identifier("roughlyenoughitems", "default_plugin"), PluginFunction.REGISTER_SPEED_CRAFT);
+    public void onFirstLoad(PluginDisabler pluginDisabler) {
+        if (!ConfigHelper.getInstance().getConfig().loadDefaultPlugin) {
+            pluginDisabler.disablePluginFunction(PLUGIN, PluginFunction.REGISTER_ITEMS);
+            pluginDisabler.disablePluginFunction(PLUGIN, PluginFunction.REGISTER_CATEGORIES);
+            pluginDisabler.disablePluginFunction(PLUGIN, PluginFunction.REGISTER_RECIPE_DISPLAYS);
+            pluginDisabler.disablePluginFunction(PLUGIN, PluginFunction.REGISTER_SPEED_CRAFT);
         }
     }
     
     @Override
     public void registerItems(IItemRegisterer itemRegisterer) {
-        IRegistry.field_212630_s.forEach(o -> {
+        ForgeRegistries.ITEMS.forEach(o -> {
             try {
                 if (o instanceof Item) {
                     Item item = (Item) o;
-                    Optional<NonNullList<ItemStack>> optionalStacks = itemRegisterer.getAlterativeStacks(item);
-                    if (optionalStacks.isPresent())
-                        itemRegisterer.registerItemStack(optionalStacks.get().toArray(new ItemStack[0]));
-                    else
+                    if (item.equals(Items.ENCHANTED_BOOK)) {
                         itemRegisterer.registerItemStack(item.getDefaultInstance());
+                    } else {
+                        Optional<NonNullList<ItemStack>> optionalStacks = itemRegisterer.getAlterativeStacks(item);
+                        if (optionalStacks.isPresent() && optionalStacks.get().size() > 1)
+                            RoughlyEnoughItemsCore.LOGGER.info("More than 1: %s, %d", ForgeRegistries.ITEMS.getKey(item).toString(), optionalStacks.get().size());
+                        if (optionalStacks.isPresent())
+                            itemRegisterer.registerItemStack(optionalStacks.get().toArray(new ItemStack[0]));
+                        else
+                            itemRegisterer.registerItemStack(item.getDefaultInstance());
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
-        IRegistry.field_212628_q.forEach(o -> {
+        ForgeRegistries.ENCHANTMENTS.forEach(o -> {
             if (o instanceof Enchantment) {
                 Enchantment enchantment = (Enchantment) o;
                 for(int i = enchantment.getMinLevel(); i < enchantment.getMaxLevel(); i++) {
@@ -119,6 +126,20 @@ public class DefaultPlugin implements IRecipePlugin {
                 throwable.printStackTrace();
             }
         });
+        List<ItemStack> arrowStack = Arrays.asList(Items.ARROW.getDefaultInstance());
+        RoughlyEnoughItemsCore.getItemRegisterer().getItemList().stream().filter(stack -> stack.getItem().equals(Items.LINGERING_POTION)).forEach(stack -> {
+            List<List<ItemStack>> input = new ArrayList<>();
+            for(int i = 0; i < 4; i++)
+                input.add(arrowStack);
+            input.add(Arrays.asList(stack));
+            for(int i = 0; i < 4; i++)
+                input.add(arrowStack);
+            ItemStack outputStack = new ItemStack(Items.TIPPED_ARROW, 8);
+            PotionUtils.addPotionToItemStack(outputStack, PotionUtils.getPotionFromItem(stack));
+            PotionUtils.appendEffects(outputStack, PotionUtils.getFullEffectsFromItem(stack));
+            List<ItemStack> output = Lists.newArrayList(outputStack);
+            recipeHelper.registerDisplay(CRAFTING, new DefaultCustomDisplay(input, output));
+        });
     }
     
     private void registerPotionType(RecipeHelper recipeHelper, List<PotionType> list, List<BrewingRecipe> potionItemConversions, PotionType potion) {
@@ -131,7 +152,7 @@ public class DefaultPlugin implements IRecipePlugin {
     @Override
     public void registerSpeedCraft(RecipeHelper recipeHelper) {
         recipeHelper.registerSpeedCraftButtonArea(DefaultPlugin.BREWING, null);
-        recipeHelper.registerSpeedCraftFunctional(DefaultPlugin.CRAFTING, new ISpeedCraftFunctional<DefaultCraftingDisplay>() {
+        recipeHelper.registerSpeedCraftFunctional(DefaultPlugin.CRAFTING, new SpeedCraftFunctional<DefaultCraftingDisplay>() {
             @Override
             public Class[] getFunctioningFor() {
                 return new Class[]{GuiInventory.class, GuiCrafting.class};
@@ -139,6 +160,8 @@ public class DefaultPlugin implements IRecipePlugin {
             
             @Override
             public boolean performAutoCraft(Gui gui, DefaultCraftingDisplay recipe) {
+                if (!recipe.getRecipe().isPresent())
+                    return false;
                 try {
                     if (gui.getClass().isAssignableFrom(GuiCrafting.class))
                         getGhostRecipe(((GuiCrafting) gui).func_194310_f()).clear();
@@ -146,7 +169,7 @@ public class DefaultPlugin implements IRecipePlugin {
                         getGhostRecipe(((GuiInventory) gui).func_194310_f()).clear();
                     else
                         return false;
-                    Minecraft.getInstance().playerController.func_203413_a(Minecraft.getInstance().player.openContainer.windowId, recipe.getRecipe(), GuiScreen.isShiftKeyDown());
+                    Minecraft.getInstance().playerController.func_203413_a(Minecraft.getInstance().player.openContainer.windowId, (IRecipe) recipe.getRecipe().get(), GuiScreen.isShiftKeyDown());
                     return true;
                 } catch (Throwable e) {
                     return false;
@@ -158,7 +181,7 @@ public class DefaultPlugin implements IRecipePlugin {
                 return gui instanceof GuiCrafting || (gui instanceof GuiInventory && recipe.getHeight() < 3 && recipe.getWidth() < 3);
             }
         });
-        recipeHelper.registerSpeedCraftFunctional(DefaultPlugin.SMELTING, new ISpeedCraftFunctional<DefaultSmeltingDisplay>() {
+        recipeHelper.registerSpeedCraftFunctional(DefaultPlugin.SMELTING, new SpeedCraftFunctional<DefaultSmeltingDisplay>() {
             @Override
             public Class[] getFunctioningFor() {
                 return new Class[]{GuiFurnace.class};
@@ -166,12 +189,14 @@ public class DefaultPlugin implements IRecipePlugin {
             
             @Override
             public boolean performAutoCraft(Gui gui, DefaultSmeltingDisplay recipe) {
+                if (!recipe.getRecipe().isPresent())
+                    return false;
                 try {
                     if (gui instanceof GuiFurnace)
                         getGhostRecipe(((GuiFurnace) gui).func_194310_f()).clear();
                     else
                         return false;
-                    Minecraft.getInstance().playerController.func_203413_a(Minecraft.getInstance().player.openContainer.windowId, recipe.getRecipe(), GuiScreen.isShiftKeyDown());
+                    Minecraft.getInstance().playerController.func_203413_a(Minecraft.getInstance().player.openContainer.windowId, recipe.getRecipe().get(), GuiScreen.isShiftKeyDown());
                     return true;
                 } catch (Throwable e) {
                     return false;

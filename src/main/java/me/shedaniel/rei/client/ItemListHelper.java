@@ -6,6 +6,7 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Collections;
 import java.util.List;
@@ -38,8 +39,9 @@ public class ItemListHelper implements IItemRegisterer {
             list = NonNullList.create();
             stackSet.forEach(list::add);
             if (!list.isEmpty())
-                Optional.of(list);
+               return Optional.of(list);
         } catch (Exception e) {
+            e.printStackTrace();
         }
         try {
             NonNullList<ItemStack> list = NonNullList.create();

@@ -56,7 +56,7 @@ task srcJar(type: Jar, dependsOn: classes) {
 }
 
 configurations {
-    jar.archiveName = 'RoughlyEnoughItems-' + version + '+beta.jar'
+    jar.archiveName = 'RoughlyEnoughItems-' + version + '.jar'
 }
 
 artifacts {

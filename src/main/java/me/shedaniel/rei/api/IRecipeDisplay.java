@@ -5,10 +5,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface IRecipeDisplay<T extends IRecipe> {
     
-    public abstract T getRecipe();
+    public abstract Optional<T> getRecipe();
     
     public List<List<ItemStack>> getInput();
     

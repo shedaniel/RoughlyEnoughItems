@@ -11,6 +11,7 @@ import net.minecraft.item.crafting.Ingredient;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public class DefaultBrewingDisplay implements IRecipeDisplay {
     
@@ -24,8 +25,8 @@ public class DefaultBrewingDisplay implements IRecipeDisplay {
     }
     
     @Override
-    public IRecipe getRecipe() {
-        return null;
+    public Optional<IRecipe> getRecipe() {
+        return Optional.empty();
     }
     
     @Override

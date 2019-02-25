@@ -26,16 +26,16 @@ public class GuiHelper {
         overlayVisible = !overlayVisible;
     }
     
-    public static ContainerGuiOverlay getLastOverlay(boolean reset) {
+    public static ContainerGuiOverlay getLastOverlay(boolean reset, boolean setPage) {
         if (overlay == null || reset) {
             overlay = new ContainerGuiOverlay();
-            overlay.onInitialized();
+            overlay.init(setPage);
         }
         return overlay;
     }
     
     public static ContainerGuiOverlay getLastOverlay() {
-        return getLastOverlay(false);
+        return getLastOverlay(false, false);
     }
     
     public static GuiContainer getLastGuiContainer() {

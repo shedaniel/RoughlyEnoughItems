@@ -2,9 +2,9 @@ package me.shedaniel.rei;
 
 import com.google.common.collect.Maps;
 import com.google.gson.JsonParser;
+import me.shedaniel.rei.api.IREIPlugin;
 import me.shedaniel.rei.api.IRecipePlugin;
 import me.shedaniel.rei.api.Identifier;
-import me.shedaniel.rei.api.IREIPlugin;
 import net.minecraftforge.fml.ModList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,6 +12,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class RoughlyEnoughItemsPlugin {
@@ -32,11 +33,11 @@ public class RoughlyEnoughItemsPlugin {
         return new LinkedList<>(plugins.values());
     }
     
-    public static Identifier getIdentifier(IRecipePlugin plugin) {
+    public static Optional<Identifier> getPluginIdentifier(IRecipePlugin plugin) {
         for(Identifier identifier : plugins.keySet())
-            if (plugins.get(identifier).equals(plugin))
-                return identifier;
-        return null;
+            if (identifier != null && plugins.get(identifier).equals(plugin))
+                return Optional.of(identifier);
+        return Optional.empty();
     }
     
     public static void discoverPlugins() {

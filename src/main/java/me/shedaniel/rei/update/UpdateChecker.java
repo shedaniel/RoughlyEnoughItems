@@ -55,7 +55,7 @@ public class UpdateChecker {
     }
     
     public static boolean checkUpdates() {
-        return ConfigHelper.getInstance().checkUpdates();
+        return ConfigHelper.getInstance().getConfig().checkUpdates;
     }
     
     public static Version getCurrentVersion() {

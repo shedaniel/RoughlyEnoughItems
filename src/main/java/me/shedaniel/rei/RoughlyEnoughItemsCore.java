@@ -1,11 +1,12 @@
 package me.shedaniel.rei;
 
 import me.shedaniel.rei.api.IItemRegisterer;
-import me.shedaniel.rei.api.IPluginDisabler;
+import me.shedaniel.rei.api.PluginDisabler;
+import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.client.ConfigHelper;
 import me.shedaniel.rei.client.ItemListHelper;
-import me.shedaniel.rei.client.RecipeHelper;
-import me.shedaniel.rei.plugin.PluginManager;
+import me.shedaniel.rei.client.RecipeHelperImpl;
+import me.shedaniel.rei.plugin.PluginDisablerImpl;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
@@ -21,9 +22,9 @@ public class RoughlyEnoughItemsCore {
     public static final String MOD_ID = "roughlyenoughitems";
     
     public static final Logger LOGGER = LogManager.getFormatterLogger("roughlyenoughitems");
-    private static final RecipeHelper RECIPE_HELPER = new RecipeHelper();
+    private static final RecipeHelperImpl RECIPE_HELPER = new RecipeHelperImpl();
     private static final ItemListHelper ITEM_LIST_HELPER = new ItemListHelper();
-    private static final PluginManager PLUGIN_MANAGER = new PluginManager();
+    private static final PluginDisablerImpl PLUGIN_MANAGER = new PluginDisablerImpl();
     static ConfigHelper configHelper;
     
     public RoughlyEnoughItemsCore() {
@@ -50,7 +51,7 @@ public class RoughlyEnoughItemsCore {
         return ITEM_LIST_HELPER;
     }
     
-    public static IPluginDisabler getPluginDisabler() {
+    public static PluginDisabler getPluginDisabler() {
         return PLUGIN_MANAGER;
     }
     

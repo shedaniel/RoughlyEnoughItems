@@ -10,10 +10,7 @@ package me.shedaniel.rei;
 //
 //}
 
-import me.shedaniel.rei.client.ClientHelper;
-import me.shedaniel.rei.client.ConfigHelper;
-import me.shedaniel.rei.client.GuiHelper;
-import me.shedaniel.rei.client.KeyBindHelper;
+import me.shedaniel.rei.client.*;
 import me.shedaniel.rei.gui.ContainerGuiOverlay;
 import me.shedaniel.rei.gui.config.ConfigGui;
 import me.shedaniel.rei.update.UpdateAnnouncer;
@@ -34,7 +31,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 import java.util.List;
 
@@ -42,14 +38,14 @@ public class RoughlyEnoughItemsClient {
     
     public static void setup() {
         final IEventBus eventBus = MinecraftForge.EVENT_BUS;
-    
+        
         RoughlyEnoughItemsCore.configHelper = new ConfigHelper();
         UpdateChecker.onInitialization();
         KeyBindHelper.setupKeyBinds();
         RoughlyEnoughItemsPlugin.discoverPlugins();
-    
+        
         ModList.get().getModContainerById(RoughlyEnoughItemsCore.MOD_ID).ifPresent(c -> c.registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (client, parent) -> new ConfigGui(parent)));
-    
+        
         // Register More Events
         eventBus.addListener(EventPriority.NORMAL, true, TickEvent.ClientTickEvent.class, GuiHelper::clientTick);
         eventBus.addListener(EventPriority.NORMAL, false, TickEvent.ClientTickEvent.class, UpdateAnnouncer::clientTick);
@@ -58,7 +54,7 @@ public class RoughlyEnoughItemsClient {
     
     @SubscribeEvent
     public static void onRecipesUpdated(RecipesUpdatedEvent event) {
-        RoughlyEnoughItemsCore.getRecipeHelper().recipesLoaded(Minecraft.getInstance().getConnection().getRecipeManager());
+        ((RecipeHelperImpl) RoughlyEnoughItemsCore.getRecipeHelper()).recipesLoaded(Minecraft.getInstance().getConnection().getRecipeManager());
     }
     
     @SubscribeEvent
@@ -66,11 +62,11 @@ public class RoughlyEnoughItemsClient {
         if (event.getGui() instanceof GuiContainer) {
             GuiContainer container = (GuiContainer) event.getGui();
             GuiHelper.setLastGuiContainer(container);
-            ((List) container.getChildren()).add(GuiHelper.getLastOverlay(true));
+            ((List) container.getChildren()).add(GuiHelper.getLastOverlay(true, false));
         }
     }
     
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onGuiDraw(GuiScreenEvent.DrawScreenEvent.Post event) {
         if (event.getGui() instanceof GuiContainer) {
             GuiContainer container = (GuiContainer) event.getGui();

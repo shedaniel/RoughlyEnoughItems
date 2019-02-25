@@ -10,6 +10,7 @@ import net.minecraft.tileentity.TileEntityFurnace;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class DefaultSmeltingDisplay implements IRecipeDisplay<FurnaceRecipe> {
@@ -31,8 +32,8 @@ public class DefaultSmeltingDisplay implements IRecipeDisplay<FurnaceRecipe> {
     }
     
     @Override
-    public FurnaceRecipe getRecipe() {
-        return display;
+    public Optional<FurnaceRecipe> getRecipe() {
+        return Optional.ofNullable(display);
     }
     
     @Override

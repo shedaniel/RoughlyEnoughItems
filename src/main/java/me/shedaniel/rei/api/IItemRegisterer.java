@@ -31,7 +31,7 @@ public interface IItemRegisterer {
     }
     
     default boolean alreadyContain(ItemStack stack) {
-        return getItemList().stream().anyMatch(stack1 -> ItemStack.areItemStacksEqual(stack, stack1));
+        return false && getItemList().stream().anyMatch(stack1 -> ItemStack.areItemStacksEqual(stack, stack1));
     }
     
 }
