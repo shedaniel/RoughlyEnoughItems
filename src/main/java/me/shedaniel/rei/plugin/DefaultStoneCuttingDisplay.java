@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.IRecipeDisplay;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Ingredient;
-import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.StonecuttingRecipe;
 import net.minecraft.util.DefaultedList;
 import net.minecraft.util.Identifier;
@@ -12,13 +11,16 @@ import net.minecraft.util.Identifier;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
-public class DefaultStoneCuttingDisplay implements IRecipeDisplay {
+public class DefaultStoneCuttingDisplay implements IRecipeDisplay<StonecuttingRecipe> {
     
     private List<ItemStack> inputs, output;
+    private StonecuttingRecipe display;
     
     public DefaultStoneCuttingDisplay(StonecuttingRecipe recipe) {
         this(recipe.getPreviewInputs(), recipe.getOutput());
+        this.display = recipe;
     }
     
     public DefaultStoneCuttingDisplay(DefaultedList<Ingredient> ingredients, ItemStack output) {
@@ -28,8 +30,8 @@ public class DefaultStoneCuttingDisplay implements IRecipeDisplay {
     }
     
     @Override
-    public Recipe getRecipe() {
-        return null;
+    public Optional<StonecuttingRecipe> getRecipe() {
+        return Optional.ofNullable(display);
     }
     
     @Override

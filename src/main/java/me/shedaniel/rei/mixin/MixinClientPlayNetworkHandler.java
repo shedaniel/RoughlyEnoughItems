@@ -1,6 +1,7 @@
 package me.shedaniel.rei.mixin;
 
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.client.RecipeHelper;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.packet.SynchronizeRecipesS2CPacket;
 import org.spongepowered.asm.mixin.Mixin;
@@ -13,7 +14,7 @@ public class MixinClientPlayNetworkHandler {
     
     @Inject(method = "onSynchronizeRecipes", at = @At("RETURN"))
     private void onUpdateRecipes(SynchronizeRecipesS2CPacket packetIn, CallbackInfo ci) {
-        RoughlyEnoughItemsCore.getRecipeHelper().recipesLoaded(((ClientPlayNetworkHandler) ((Object) this)).getRecipeManager());
+        ((RecipeHelper) RoughlyEnoughItemsCore.getRecipeHelper()).recipesLoaded(((ClientPlayNetworkHandler) ((Object) this)).getRecipeManager());
     }
     
 }

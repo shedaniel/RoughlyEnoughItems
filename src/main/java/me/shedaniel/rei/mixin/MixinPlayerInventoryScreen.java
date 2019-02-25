@@ -1,6 +1,6 @@
 package me.shedaniel.rei.mixin;
 
-import net.minecraft.client.gui.GuiEventListener;
+import net.minecraft.client.gui.InputListener;
 import net.minecraft.client.gui.ingame.AbstractPlayerInventoryScreen;
 import net.minecraft.client.gui.ingame.PlayerInventoryScreen;
 import net.minecraft.client.gui.ingame.RecipeBookProvider;
@@ -27,14 +27,14 @@ public abstract class MixinPlayerInventoryScreen extends AbstractPlayerInventory
     }
     
     @Override
-    public GuiEventListener getFocused() {
+    public InputListener getFocused() {
         return super.getFocused();
     }
     
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
     public void mouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> ci) {
         if (recipeBook.mouseClicked(mouseX, mouseY, button)) {
-            method_1967(recipeBook);
+            focusOn(recipeBook);
             ci.setReturnValue(true);
             ci.cancel();
         }

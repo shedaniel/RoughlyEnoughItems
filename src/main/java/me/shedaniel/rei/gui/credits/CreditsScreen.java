@@ -2,7 +2,7 @@ package me.shedaniel.rei.gui.credits;
 
 import me.shedaniel.rei.client.GuiHelper;
 import net.minecraft.client.gui.ContainerScreen;
-import net.minecraft.client.gui.GuiEventListener;
+import net.minecraft.client.gui.InputListener;
 import net.minecraft.client.gui.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
@@ -44,12 +44,12 @@ public class CreditsScreen extends Screen {
     }
     
     @Override
-    public void method_18326(int int_1, int int_2, float float_1) {
+    public void draw(int int_1, int int_2, float float_1) {
         //draw
         this.drawTextureBackground(0);
-        this.entryListWidget.method_18326(int_1, int_2, float_1);
+        this.entryListWidget.draw(int_1, int_2, float_1);
         this.drawStringCentered(this.fontRenderer, I18n.translate("text.rei.credits"), this.width / 2, 16, 16777215);
-        super.method_18326(int_1, int_2, float_1);
+        super.draw(int_1, int_2, float_1);
     }
     
     @Override
@@ -58,7 +58,7 @@ public class CreditsScreen extends Screen {
     }
     
     @Override
-    public GuiEventListener getFocused() {
+    public InputListener getFocused() {
         return entryListWidget;
     }
     

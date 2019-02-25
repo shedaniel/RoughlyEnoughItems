@@ -55,7 +55,7 @@ public class UpdateChecker implements ClientModInitializer {
     }
     
     public static boolean checkUpdates() {
-        return RoughlyEnoughItemsCore.getConfigHelper().checkUpdates();
+        return RoughlyEnoughItemsCore.getConfigHelper().getConfig().checkUpdates;
     }
     
     public static List<String> getChangelog(Version currentVersion) {

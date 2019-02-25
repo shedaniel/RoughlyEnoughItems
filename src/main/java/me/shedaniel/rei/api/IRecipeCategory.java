@@ -1,12 +1,9 @@
 package me.shedaniel.rei.api;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.widget.IWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
-import me.shedaniel.rei.gui.widget.RecipeViewingWidgetScreen;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Drawable;
-import net.minecraft.client.render.GuiLighting;
+import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
@@ -24,21 +21,45 @@ public interface IRecipeCategory<T extends IRecipeDisplay> {
     
     public String getCategoryName();
     
-    default public boolean usesFullPage() {
-        return false;
-    }
-    
     default public List<IWidget> setupDisplay(Supplier<T> recipeDisplaySupplier, Rectangle bounds) {
         return Arrays.asList(new RecipeBaseWidget(bounds));
     }
     
-    default public void drawCategoryBackground(Rectangle bounds) {
-        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        GuiLighting.disable();
-        MinecraftClient.getInstance().getTextureManager().bindTexture(RecipeViewingWidgetScreen.CHEST_GUI_TEXTURE);
-        new Drawable() {
-        
-        }.drawTexturedRect((int) bounds.getX(), (int) bounds.getY(), 0, 0, (int) bounds.getWidth(), (int) bounds.getHeight());
+    default public void drawCategoryBackground(Rectangle bounds, int mouseX, int mouseY, float delta) {
+        new RecipeBaseWidget(bounds).draw(mouseX, mouseY, delta);
+        DrawableHelper.drawRect(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, RecipeViewingScreen.SUB_COLOR.getRGB());
+        DrawableHelper.drawRect(bounds.x + 17, bounds.y + 21, bounds.x + bounds.width - 17, bounds.y + 33, RecipeViewingScreen.SUB_COLOR.getRGB());
+    }
+    
+    default public IDisplaySettings getDisplaySettings() {
+        return new IDisplaySettings<T>() {
+            @Override
+            public int getDisplayHeight(IRecipeCategory category) {
+                return 66;
+            }
+            
+            @Override
+            public int getDisplayWidth(IRecipeCategory category, T display) {
+                return 150;
+            }
+            
+            @Override
+            public int getMaximumRecipePerPage(IRecipeCategory category) {
+                return 99;
+            }
+        };
+    }
+    
+    default public int getDisplayHeight() {
+        return getDisplaySettings().getDisplayHeight(this);
+    }
+    
+    default public int getDisplayWidth(T display) {
+        return getDisplaySettings().getDisplayWidth(this, display);
+    }
+    
+    default public int getMaximumRecipePerPage() {
+        return getDisplaySettings().getMaximumRecipePerPage(this);
     }
     
     default public boolean checkTags() {
