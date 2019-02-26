@@ -61,6 +61,9 @@ public class RoughlyEnoughItemsClient {
     public static void onGuiInit(GuiScreenEvent.InitGuiEvent.Post event) {
         if (event.getGui() instanceof GuiContainer) {
             GuiContainer container = (GuiContainer) event.getGui();
+            if (container instanceof GuiContainerCreative)
+                if (((GuiContainerCreative) container).getSelectedTabIndex() != ItemGroup.INVENTORY.getIndex())
+                    return;
             GuiHelper.setLastGuiContainer(container);
             ((List) container.getChildren()).add(GuiHelper.getLastOverlay(true, false));
         }
@@ -79,6 +82,9 @@ public class RoughlyEnoughItemsClient {
     
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onGuiKeyPressed(GuiScreenEvent.KeyboardKeyPressedEvent.Pre event) {
+        if (event.getGui() instanceof GuiContainerCreative)
+            if (((GuiContainerCreative) event.getGui()).getSelectedTabIndex() != ItemGroup.INVENTORY.getIndex())
+                return;
         if (event.getGui() instanceof GuiContainer && GuiHelper.getLastOverlay().keyPressed(event.getKeyCode(), event.getScanCode(), event.getModifiers())) {
             event.setCanceled(true);
             event.setResult(Event.Result.ALLOW);
@@ -87,6 +93,9 @@ public class RoughlyEnoughItemsClient {
     
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onMouseScrolled(GuiScreenEvent.MouseScrollEvent.Pre event) {
+        if (event.getGui() instanceof GuiContainerCreative)
+            if (((GuiContainerCreative) event.getGui()).getSelectedTabIndex() != ItemGroup.INVENTORY.getIndex())
+                return;
         if (event.getGui() instanceof GuiContainer) {
             ContainerGuiOverlay overlay = GuiHelper.getLastOverlay();
             if (GuiHelper.isOverlayVisible() && overlay.getRectangle().contains(ClientHelper.getMouseLocation()))
@@ -100,6 +109,8 @@ public class RoughlyEnoughItemsClient {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onCharTyped(GuiScreenEvent.KeyboardCharTypedEvent.Pre event) {
         if (event.getGui() instanceof GuiContainerCreative) {
+            if (((GuiContainerCreative) event.getGui()).getSelectedTabIndex() != ItemGroup.INVENTORY.getIndex())
+                return;
             GuiContainerCreative containerCreative = (GuiContainerCreative) event.getGui();
             ContainerGuiOverlay overlay = GuiHelper.getLastOverlay();
             if (GuiHelper.isOverlayVisible() && containerCreative.getSelectedTabIndex() == ItemGroup.INVENTORY.getIndex())

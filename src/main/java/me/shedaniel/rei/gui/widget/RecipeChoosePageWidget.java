@@ -1,6 +1,9 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.api.RelativePoint;
+import me.shedaniel.rei.client.ConfigHelper;
 import me.shedaniel.rei.gui.RecipeViewingGui;
 import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
@@ -10,6 +13,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,10 +29,17 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     private ButtonWidget btnDone;
     
     public RecipeChoosePageWidget(RecipeViewingGui recipeViewingScreen, int currentPage, int maxPage) {
+        super(getPointFromConfig());
         this.recipeViewingScreen = recipeViewingScreen;
         this.currentPage = currentPage;
         this.maxPage = maxPage;
         initWidgets(getMidPoint());
+    }
+    
+    private static Point getPointFromConfig() {
+        MainWindow window = Minecraft.getInstance().mainWindow;
+        RelativePoint point = RoughlyEnoughItemsCore.getConfigHelper().getConfig().choosePageDialogPoint;
+        return new Point((int) point.getX(window.getScaledWidth()), (int) point.getY(window.getScaledHeight()));
     }
     
     @Override
@@ -160,6 +171,18 @@ public class RecipeChoosePageWidget extends DraggableWidget {
         } catch (Exception e) {
         }
         return Optional.empty();
+    }
+    
+    @Override
+    public void onMouseReleaseMidPoint(Point midPoint) {
+        ConfigHelper configHelper = RoughlyEnoughItemsCore.getConfigHelper();
+        MainWindow window = Minecraft.getInstance().mainWindow;
+        configHelper.getConfig().choosePageDialogPoint = new RelativePoint(midPoint.getX() / window.getScaledWidth(), midPoint.getY() / window.getScaledHeight());
+        try {
+            configHelper.saveConfig();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     
 }

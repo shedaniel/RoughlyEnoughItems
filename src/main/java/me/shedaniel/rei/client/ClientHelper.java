@@ -6,8 +6,8 @@ import me.shedaniel.rei.api.IRecipeCategory;
 import me.shedaniel.rei.api.IRecipeDisplay;
 import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.gui.ContainerGuiOverlay;
-import me.shedaniel.rei.gui.config.ConfigGui;
 import me.shedaniel.rei.gui.RecipeViewingGui;
+import me.shedaniel.rei.gui.config.ConfigGui;
 import me.shedaniel.rei.network.CreateItemsPacket;
 import me.shedaniel.rei.network.DeleteItemsPacket;
 import net.minecraft.client.Minecraft;
@@ -24,13 +24,12 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 
 import java.awt.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class ClientHelper {
-    
-    private static boolean cheating = false;
     
     public static String getModFromItemStack(ItemStack stack) {
         if (!stack.isEmpty()) {
@@ -53,11 +52,16 @@ public class ClientHelper {
     }
     
     public static boolean isCheating() {
-        return cheating;
+        return RoughlyEnoughItemsCore.getConfigHelper().getConfig().cheating;
     }
     
     public static void setCheating(boolean cheating) {
-        ClientHelper.cheating = cheating;
+        RoughlyEnoughItemsCore.getConfigHelper().getConfig().cheating = cheating;
+        try {
+            RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     
     public static void sendDeletePacket() {
