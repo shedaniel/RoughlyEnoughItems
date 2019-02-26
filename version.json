@@ -36,6 +36,11 @@
         "version": "2.3.1.5",
         "text": "7 New features + Several Bug Fixes",
         "level": "useful"
+      },
+      {
+        "version": "2.3.1.6",
+        "text": "REI will now remember cheating mode, and dialog location + fix creative tab bug",
+        "level": "none"
       }
     ]
   }

@@ -2,11 +2,13 @@ package me.shedaniel.rei.client;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import me.shedaniel.rei.api.RelativePoint;
 
 public class REIConfig {
     
     public static Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     
+    public boolean cheating = false;
     public REIItemListOrdering itemListOrdering = REIItemListOrdering.REGISTRY;
     public boolean isAscending = true;
     public boolean enableCraftableOnlyButton = true;
@@ -20,5 +22,6 @@ public class REIConfig {
     public boolean disableCreditsButton = false;
     public int maxRecipePerPage = 3;
     public boolean showUtilsButtons = false;
+    public RelativePoint choosePageDialogPoint = new RelativePoint(.5, .5);
     
 }
