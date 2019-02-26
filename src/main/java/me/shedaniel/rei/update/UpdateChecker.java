@@ -85,7 +85,7 @@ public class UpdateChecker implements ClientModInitializer {
                 if (checkUpdates() && isOutdated()) {
                     String currentVersionString = getCurrentVersion() == null ? "null" : getCurrentVersion().toString();
                     List<Version> versions = getVersionsHigherThan(currentVersion);
-                    String t[] = I18n.translate("text.rei.update_outdated", currentVersionString, getLatestForGame(), getUpdatePriority(versions).name().toUpperCase()).split("\n");
+                    String t[] = I18n.translate("text.rei.update_outdated", currentVersionString, latestForGame, getUpdatePriority(versions).name().toUpperCase()).split("\n");
                     for(String s : t)
                         client.player.addChatMessage(new StringTextComponent(s), false);
                     getChangelog(currentVersion).forEach(s -> client.player.addChatMessage(new StringTextComponent(s), false));
@@ -142,11 +142,11 @@ public class UpdateChecker implements ClientModInitializer {
     }
     
     private String parseLatest(JsonVersionElement element, String gameVersion) {
-        List<LatestVersionObject> objects = new LinkedList<>(element.getLatestVersions());
+        LinkedList<LatestVersionObject> objects = new LinkedList<>(element.getLatestVersions());
         for(int i = objects.size() - 1; i >= 0; i--)
             if (objects.get(i).getGameVersion().equals(gameVersion))
                 return objects.get(i).getModVersion();
-        return objects.get(objects.size() - 1).getModVersion();
+        return objects.getLast().getModVersion();
     }
     
     private class JsonVersionElement {
