@@ -12,9 +12,12 @@ public abstract class DraggableWidget implements HighlightableWidget {
     private Point midPoint, startPoint;
     private int relateX, relateY;
     
+    public DraggableWidget(Point startingPoint) {
+        initWidgets(midPoint = startingPoint);
+    }
+    
     public DraggableWidget() {
-        Window window = MinecraftClient.getInstance().window;
-        initWidgets(midPoint = new Point(window.getScaledWidth() / 2, window.getScaledHeight() / 2));
+        this(new Point(MinecraftClient.getInstance().window.getScaledWidth() / 2, MinecraftClient.getInstance().window.getScaledHeight() / 2));
     }
     
     protected abstract void initWidgets(Point midPoint);
@@ -60,6 +63,7 @@ public abstract class DraggableWidget implements HighlightableWidget {
         if (int_1 == 0)
             if (dragged) {
                 dragged = false;
+                onMouseReleaseMidPoint(getMidPoint());
                 return true;
             }
         for(IWidget widget : getListeners())
@@ -67,5 +71,7 @@ public abstract class DraggableWidget implements HighlightableWidget {
                 return true;
         return false;
     }
+    
+    public void onMouseReleaseMidPoint(Point midPoint) {}
     
 }

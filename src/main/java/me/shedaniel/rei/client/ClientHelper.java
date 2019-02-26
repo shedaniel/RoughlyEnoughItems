@@ -5,7 +5,7 @@ import io.netty.buffer.Unpooled;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.IRecipeCategory;
 import me.shedaniel.rei.api.IRecipeDisplay;
-import me.shedaniel.rei.api.IRecipeHelper;
+import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.config.ConfigScreen;
@@ -28,6 +28,7 @@ import net.minecraft.util.PacketByteBuf;
 import net.minecraft.util.registry.Registry;
 
 import java.awt.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +39,6 @@ public class ClientHelper implements ClientModInitializer {
     private static final Identifier USAGE_KEYBIND = new Identifier("roughlyenoughitems", "usage_keybind");
     private static final Identifier HIDE_KEYBIND = new Identifier("roughlyenoughitems", "hide_keybind");
     public static FabricKeyBinding RECIPE, USAGE, HIDE;
-    private static boolean cheating;
     
     public static String getModFromItemStack(ItemStack stack) {
         if (!stack.isEmpty()) {
@@ -67,11 +67,16 @@ public class ClientHelper implements ClientModInitializer {
     }
     
     public static boolean isCheating() {
-        return cheating;
+        return RoughlyEnoughItemsCore.getConfigHelper().getConfig().cheating;
     }
     
     public static void setCheating(boolean cheating) {
-        ClientHelper.cheating = cheating;
+        RoughlyEnoughItemsCore.getConfigHelper().getConfig().cheating = cheating;
+        try {
+            RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     
     public static void sendDeletePacket() {
@@ -106,14 +111,14 @@ public class ClientHelper implements ClientModInitializer {
     }
     
     public static boolean executeRecipeKeyBind(ContainerScreenOverlay overlay, ItemStack stack) {
-        Map<IRecipeCategory, List<IRecipeDisplay>> map = IRecipeHelper.getInstance().getRecipesFor(stack);
+        Map<IRecipeCategory, List<IRecipeDisplay>> map = RecipeHelper.getInstance().getRecipesFor(stack);
         if (map.keySet().size() > 0)
             MinecraftClient.getInstance().openScreen(new RecipeViewingScreen(MinecraftClient.getInstance().window, map));
         return map.keySet().size() > 0;
     }
     
     public static boolean executeUsageKeyBind(ContainerScreenOverlay overlay, ItemStack stack) {
-        Map<IRecipeCategory, List<IRecipeDisplay>> map = IRecipeHelper.getInstance().getUsagesFor(stack);
+        Map<IRecipeCategory, List<IRecipeDisplay>> map = RecipeHelper.getInstance().getUsagesFor(stack);
         if (map.keySet().size() > 0)
             MinecraftClient.getInstance().openScreen(new RecipeViewingScreen(MinecraftClient.getInstance().window, map));
         return map.keySet().size() > 0;
@@ -134,7 +139,7 @@ public class ClientHelper implements ClientModInitializer {
     }
     
     public static boolean executeViewAllRecipesKeyBind(ContainerScreenOverlay lastOverlay) {
-        Map<IRecipeCategory, List<IRecipeDisplay>> map = IRecipeHelper.getInstance().getAllRecipes();
+        Map<IRecipeCategory, List<IRecipeDisplay>> map = RecipeHelper.getInstance().getAllRecipes();
         if (map.keySet().size() > 0)
             MinecraftClient.getInstance().openScreen(new RecipeViewingScreen(MinecraftClient.getInstance().window, map));
         return map.keySet().size() > 0;
@@ -142,7 +147,6 @@ public class ClientHelper implements ClientModInitializer {
     
     @Override
     public void onInitializeClient() {
-        this.cheating = false;
         registerFabricKeyBinds();
     }
     

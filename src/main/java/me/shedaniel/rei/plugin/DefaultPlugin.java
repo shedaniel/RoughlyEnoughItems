@@ -3,7 +3,6 @@ package me.shedaniel.rei.plugin;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.client.RecipeHelper;
 import me.shedaniel.rei.listeners.IMixinRecipeBookGui;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Screen;
@@ -48,7 +47,7 @@ public class DefaultPlugin implements IRecipePlugin {
     }
     
     @Override
-    public void onFirstLoad(IPluginDisabler pluginDisabler) {
+    public void onFirstLoad(PluginDisabler pluginDisabler) {
         if (!RoughlyEnoughItemsCore.getConfigHelper().getConfig().loadDefaultPlugin) {
             pluginDisabler.disablePluginFunction(PLUGIN, PluginFunction.REGISTER_ITEMS);
             pluginDisabler.disablePluginFunction(PLUGIN, PluginFunction.REGISTER_CATEGORIES);
@@ -58,7 +57,7 @@ public class DefaultPlugin implements IRecipePlugin {
     }
     
     @Override
-    public void registerItems(IItemRegisterer itemRegisterer) {
+    public void registerItems(ItemRegisterer itemRegisterer) {
         Registry.ITEM.stream().forEach(item -> {
             itemRegisterer.registerItemStack(item.getDefaultStack());
             try {
@@ -78,7 +77,7 @@ public class DefaultPlugin implements IRecipePlugin {
     }
     
     @Override
-    public void registerPluginCategories(IRecipeHelper recipeHelper) {
+    public void registerPluginCategories(RecipeHelper recipeHelper) {
         recipeHelper.registerCategory(new DefaultCraftingCategory());
         recipeHelper.registerCategory(new DefaultSmeltingCategory());
         recipeHelper.registerCategory(new DefaultSmokingCategory());
@@ -89,7 +88,7 @@ public class DefaultPlugin implements IRecipePlugin {
     }
     
     @Override
-    public void registerRecipeDisplays(IRecipeHelper recipeHelper) {
+    public void registerRecipeDisplays(RecipeHelper recipeHelper) {
         for(Recipe recipe : recipeHelper.getRecipeManager().values())
             if (recipe instanceof ShapelessRecipe)
                 recipeHelper.registerDisplay(CRAFTING, new DefaultShapelessDisplay((ShapelessRecipe) recipe));
@@ -123,7 +122,7 @@ public class DefaultPlugin implements IRecipePlugin {
     }
     
     @Override
-    public void registerSpeedCraft(IRecipeHelper recipeHelper) {
+    public void registerSpeedCraft(RecipeHelper recipeHelper) {
         recipeHelper.registerSpeedCraftButtonArea(DefaultPlugin.CAMPFIRE, null);
         recipeHelper.registerSpeedCraftButtonArea(DefaultPlugin.STONE_CUTTING, null);
         recipeHelper.registerSpeedCraftButtonArea(DefaultPlugin.BREWING, null);

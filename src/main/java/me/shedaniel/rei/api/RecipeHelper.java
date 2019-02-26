@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public interface IRecipeHelper {
+public interface RecipeHelper {
     
-    public static IRecipeHelper getInstance() {
+    public static RecipeHelper getInstance() {
         return RoughlyEnoughItemsCore.getRecipeHelper();
     }
     

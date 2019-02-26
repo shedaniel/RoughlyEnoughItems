@@ -2,6 +2,10 @@ package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.api.RelativePoint;
+import me.shedaniel.rei.client.ClientHelper;
+import me.shedaniel.rei.client.ConfigHelper;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GuiLighting;
@@ -10,6 +14,7 @@ import net.minecraft.client.util.Window;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,10 +30,17 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     private ButtonWidget btnDone;
     
     public RecipeChoosePageWidget(RecipeViewingScreen recipeViewingScreen, int currentPage, int maxPage) {
+        super(getPointFromConfig());
         this.recipeViewingScreen = recipeViewingScreen;
         this.currentPage = currentPage;
         this.maxPage = maxPage;
         initWidgets(getMidPoint());
+    }
+    
+    private static Point getPointFromConfig() {
+        Window window = MinecraftClient.getInstance().window;
+        RelativePoint point = RoughlyEnoughItemsCore.getConfigHelper().getConfig().choosePageDialogPoint;
+        return new Point((int) point.getX(window.getScaledWidth()), (int) point.getY(window.getScaledHeight()));
     }
     
     @Override
@@ -105,7 +117,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
             @Override
             public void onPressed(int button, double mouseX, double mouseY) {
                 recipeViewingScreen.page = MathHelper.clamp(getIntFromString(textFieldWidget.getText()).orElse(0) - 1, 0, recipeViewingScreen.getTotalPages(recipeViewingScreen.getSelectedCategory()) - 1);
-                //recipeViewingScreen.choosePageActivated = false;
+                recipeViewingScreen.choosePageActivated = false;
                 recipeViewingScreen.onInitialized();
             }
         });
@@ -160,6 +172,18 @@ public class RecipeChoosePageWidget extends DraggableWidget {
         } catch (Exception e) {
         }
         return Optional.empty();
+    }
+    
+    @Override
+    public void onMouseReleaseMidPoint(Point midPoint) {
+        ConfigHelper configHelper = RoughlyEnoughItemsCore.getConfigHelper();
+        Window window = MinecraftClient.getInstance().window;
+        configHelper.getConfig().choosePageDialogPoint = new RelativePoint(midPoint.getX() / window.getScaledWidth(), midPoint.getY() / window.getScaledHeight());
+        try {
+            configHelper.saveConfig();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     
 }

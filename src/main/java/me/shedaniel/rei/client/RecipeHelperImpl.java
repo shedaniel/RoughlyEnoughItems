@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-public class RecipeHelper implements IRecipeHelper {
+public class RecipeHelperImpl implements RecipeHelper {
     
     private final AtomicInteger recipeCount = new AtomicInteger();
     private final Map<Identifier, List<IRecipeDisplay>> recipeCategoryListMap = Maps.newHashMap();
@@ -172,7 +172,7 @@ public class RecipeHelper implements IRecipeHelper {
         }).collect(Collectors.toList())));
         Collections.reverse(plugins);
         RoughlyEnoughItemsCore.getItemRegisterer().getModifiableItemList().clear();
-        IPluginDisabler pluginDisabler = RoughlyEnoughItemsCore.getPluginDisabler();
+        PluginDisabler pluginDisabler = RoughlyEnoughItemsCore.getPluginDisabler();
         plugins.forEach(plugin -> {
             Identifier identifier = RoughlyEnoughItemsCore.getPluginIdentifier(plugin).orElseGet(() -> new Identifier("null"));
             if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_ITEMS))

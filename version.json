@@ -23,6 +23,10 @@
     {
       "game": "19w08a",
       "mod": "2.3.0.52"
+    },
+    {
+      "game": "19w09a",
+      "mod": "2.3.1.53"
     }
   ],
   "changelogs": {
@@ -51,6 +55,11 @@
         "version": "2.3.0.52",
         "text": "Updated to 19w08a",
         "level": "none"
+      },
+      {
+        "version": "2.3.1.53",
+        "text": "7 New features + Several Bug Fixes",
+        "level": "useful"
       }
     ]
   }
