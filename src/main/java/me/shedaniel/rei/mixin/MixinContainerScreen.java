@@ -57,6 +57,11 @@ public class MixinContainerScreen extends Screen implements IMixinContainerScree
     
     @Inject(method = "onInitialized()V", at = @At("RETURN"))
     protected void onInitialized(CallbackInfo info) {
+        if (MinecraftClient.getInstance().currentScreen instanceof CreativePlayerInventoryScreen) {
+            IMixinTabGetter tabGetter = (IMixinTabGetter) MinecraftClient.getInstance().currentScreen;
+            if (tabGetter.rei_getSelectedTab() != ItemGroup.INVENTORY.getIndex())
+                return;
+        }
         GuiHelper.setLastContainerScreen((ContainerScreen) (Object) this);
         this.listeners.add(GuiHelper.getLastOverlay(true));
     }
@@ -83,6 +88,11 @@ public class MixinContainerScreen extends Screen implements IMixinContainerScree
     
     @Override
     public boolean mouseScrolled(double double_1) {
+        if (MinecraftClient.getInstance().currentScreen instanceof CreativePlayerInventoryScreen) {
+            IMixinTabGetter tabGetter = (IMixinTabGetter) MinecraftClient.getInstance().currentScreen;
+            if (tabGetter.rei_getSelectedTab() != ItemGroup.INVENTORY.getIndex())
+                return super.mouseScrolled(double_1);
+        }
         ContainerScreenOverlay overlay = GuiHelper.getLastOverlay();
         if (GuiHelper.isOverlayVisible() && overlay.getRectangle().contains(ClientHelper.getMouseLocation()))
             if (overlay.mouseScrolled(double_1))
@@ -92,6 +102,11 @@ public class MixinContainerScreen extends Screen implements IMixinContainerScree
     
     @Inject(method = "keyPressed(III)Z", at = @At("HEAD"), cancellable = true)
     public void keyPressed(int int_1, int int_2, int int_3, CallbackInfoReturnable<Boolean> ci) {
+        if (MinecraftClient.getInstance().currentScreen instanceof CreativePlayerInventoryScreen) {
+            IMixinTabGetter tabGetter = (IMixinTabGetter) MinecraftClient.getInstance().currentScreen;
+            if (tabGetter.rei_getSelectedTab() != ItemGroup.INVENTORY.getIndex())
+                return;
+        }
         if (GuiHelper.getLastOverlay().keyPressed(int_1, int_2, int_3)) {
             ci.setReturnValue(true);
             ci.cancel();
