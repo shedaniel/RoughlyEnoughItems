@@ -52,7 +52,7 @@ public class RecipeViewingScreen extends Screen {
         this.bounds = new Rectangle(window.getScaledWidth() / 2 - guiWidth / 2, window.getScaledHeight() / 2 - guiHeight / 2, 176, 186);
         this.categoriesMap = categoriesMap;
         this.categories = Lists.newArrayList();
-        IRecipeHelper.getInstance().getAllCategories().forEach(category -> {
+        RecipeHelper.getInstance().getAllCategories().forEach(category -> {
             if (categoriesMap.containsKey(category))
                 categories.add(category);
         });
@@ -62,7 +62,7 @@ public class RecipeViewingScreen extends Screen {
     }
     
     public static SpeedCraftFunctional getSpeedCraftFunctionalByCategory(ContainerScreen containerScreen, IRecipeCategory category) {
-        for(SpeedCraftFunctional functional : IRecipeHelper.getInstance().getSpeedCraftFunctional(category))
+        for(SpeedCraftFunctional functional : RecipeHelper.getInstance().getSpeedCraftFunctional(category))
             for(Class aClass : functional.getFunctioningFor())
                 if (containerScreen.getClass().isAssignableFrom(aClass))
                     return functional;
@@ -205,7 +205,7 @@ public class RecipeViewingScreen extends Screen {
                 tab.setItem(categories.get(j).getCategoryIcon(), categories.get(j).getCategoryName(), tab.getId() + categoryPages * 6 == categories.indexOf(selectedCategory));
             }
         }
-        Optional<SpeedCraftAreaSupplier> supplier = IRecipeHelper.getInstance().getSpeedCraftButtonArea(selectedCategory);
+        Optional<SpeedCraftAreaSupplier> supplier = RecipeHelper.getInstance().getSpeedCraftButtonArea(selectedCategory);
         final SpeedCraftFunctional functional = getSpeedCraftFunctionalByCategory(GuiHelper.getLastContainerScreen(), selectedCategory);
         int recipeHeight = selectedCategory.getDisplayHeight();
         List<IRecipeDisplay> currentDisplayed = getCurrentDisplayed();

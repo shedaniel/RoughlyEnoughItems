@@ -1,16 +1,12 @@
 package me.shedaniel.rei;
 
 import com.google.common.collect.Maps;
-import me.shedaniel.rei.api.IItemRegisterer;
-import me.shedaniel.rei.api.IPluginDisabler;
-import me.shedaniel.rei.api.IRecipeHelper;
+import me.shedaniel.rei.api.ItemRegisterer;
 import me.shedaniel.rei.api.IRecipePlugin;
-import me.shedaniel.rei.client.ConfigHelper;
-import me.shedaniel.rei.client.GuiHelper;
-import me.shedaniel.rei.client.ItemListHelper;
-import me.shedaniel.rei.client.RecipeHelper;
+import me.shedaniel.rei.api.PluginDisabler;
+import me.shedaniel.rei.api.RecipeHelper;
+import me.shedaniel.rei.client.*;
 import me.shedaniel.rei.plugin.DefaultPlugin;
-import me.shedaniel.rei.plugin.PluginManager;
 import me.shedaniel.rei.update.UpdateChecker;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
@@ -36,13 +32,13 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
     public static final Logger LOGGER = LogManager.getFormatterLogger("REI");
     public static final Identifier DELETE_ITEMS_PACKET = new Identifier("roughlyenoughitems", "delete_item");
     public static final Identifier CREATE_ITEMS_PACKET = new Identifier("roughlyenoughitems", "create_item");
-    private static final RecipeHelper RECIPE_HELPER = new RecipeHelper();
-    private static final PluginManager PLUGIN_MANAGER = new PluginManager();
-    private static final ItemListHelper ITEM_LIST_HELPER = new ItemListHelper();
+    private static final RecipeHelperImpl RECIPE_HELPER = new RecipeHelperImpl();
+    private static final PluginDisablerImpl PLUGIN_DISABLER = new PluginDisablerImpl();
+    private static final ItemRegistererImpl ITEM_REGISTERER = new ItemRegistererImpl();
     private static final Map<Identifier, IRecipePlugin> plugins = Maps.newHashMap();
     private static ConfigHelper configHelper;
     
-    public static IRecipeHelper getRecipeHelper() {
+    public static RecipeHelper getRecipeHelper() {
         return RECIPE_HELPER;
     }
     
@@ -50,12 +46,12 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
         return configHelper;
     }
     
-    public static IItemRegisterer getItemRegisterer() {
-        return ITEM_LIST_HELPER;
+    public static ItemRegisterer getItemRegisterer() {
+        return ITEM_REGISTERER;
     }
     
-    public static IPluginDisabler getPluginDisabler() {
-        return PLUGIN_MANAGER;
+    public static PluginDisabler getPluginDisabler() {
+        return PLUGIN_DISABLER;
     }
     
     public static IRecipePlugin registerPlugin(Identifier identifier, IRecipePlugin plugin) {

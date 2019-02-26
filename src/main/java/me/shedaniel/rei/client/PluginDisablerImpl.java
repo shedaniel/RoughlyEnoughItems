@@ -1,15 +1,15 @@
-package me.shedaniel.rei.plugin;
+package me.shedaniel.rei.client;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import me.shedaniel.rei.api.IPluginDisabler;
+import me.shedaniel.rei.api.PluginDisabler;
 import me.shedaniel.rei.api.PluginFunction;
 import net.minecraft.util.Identifier;
 
 import java.util.List;
 import java.util.Map;
 
-public class PluginManager implements IPluginDisabler {
+public class PluginDisablerImpl implements PluginDisabler {
     
     private static Map<Identifier, List<PluginFunction>> pluginDisabledFunctions = Maps.newHashMap();
     

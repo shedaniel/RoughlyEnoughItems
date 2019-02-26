@@ -2,7 +2,7 @@ package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.IRecipeHelper;
+import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
 import me.shedaniel.rei.client.REIItemListOrdering;
@@ -137,7 +137,7 @@ public class ItemListOverlay extends DrawableHelper implements IWidget {
             stacks.addAll(os);
         List<ItemStack> workingItems = RoughlyEnoughItemsCore.getConfigHelper().craftableOnly() && inventoryItems.size() > 0 ? new ArrayList<>() : new LinkedList<>(ol);
         if (RoughlyEnoughItemsCore.getConfigHelper().craftableOnly()) {
-            IRecipeHelper.getInstance().findCraftableByItems(inventoryItems).forEach(workingItems::add);
+            RecipeHelper.getInstance().findCraftableByItems(inventoryItems).forEach(workingItems::add);
             workingItems.addAll(inventoryItems);
         }
         final List<ItemStack> finalWorkingItems = workingItems;
