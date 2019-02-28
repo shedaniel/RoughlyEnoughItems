@@ -2,10 +2,10 @@ package me.shedaniel.rei.api;
 
 public interface IDisplaySettings<T extends IRecipeDisplay> {
     
-    public int getDisplayHeight(IRecipeCategory category);
+    int getDisplayHeight(IRecipeCategory category);
     
-    public int getDisplayWidth(IRecipeCategory category, T display);
+    int getDisplayWidth(IRecipeCategory category, T display);
     
-    public int getMaximumRecipePerPage(IRecipeCategory category);
+    int getMaximumRecipePerPage(IRecipeCategory category);
     
 }

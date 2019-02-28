@@ -10,16 +10,16 @@ import java.util.Optional;
 
 public interface IRecipeDisplay<T extends Recipe> {
     
-    public abstract Optional<T> getRecipe();
-    
-    public List<List<ItemStack>> getInput();
-    
-    public List<ItemStack> getOutput();
-    
-    default public List<List<ItemStack>> getRequiredItems() {
+    Optional<T> getRecipe();
+
+    List<List<ItemStack>> getInput();
+
+    List<ItemStack> getOutput();
+
+    default List<List<ItemStack>> getRequiredItems() {
         return Lists.newArrayList();
     }
-    
-    public Identifier getRecipeCategory();
-    
+
+    Identifier getRecipeCategory();
+
 }

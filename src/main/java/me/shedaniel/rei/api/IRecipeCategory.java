@@ -9,29 +9,30 @@ import net.minecraft.util.Identifier;
 
 import java.awt.*;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
 
 public interface IRecipeCategory<T extends IRecipeDisplay> {
     
-    public Identifier getIdentifier();
+    Identifier getIdentifier();
     
-    public ItemStack getCategoryIcon();
+    ItemStack getCategoryIcon();
     
-    public String getCategoryName();
+    String getCategoryName();
     
-    default public List<IWidget> setupDisplay(Supplier<T> recipeDisplaySupplier, Rectangle bounds) {
-        return Arrays.asList(new RecipeBaseWidget(bounds));
+    default List<IWidget> setupDisplay(Supplier<T> recipeDisplaySupplier, Rectangle bounds) {
+        return Collections.singletonList(new RecipeBaseWidget(bounds));
     }
     
-    default public void drawCategoryBackground(Rectangle bounds, int mouseX, int mouseY, float delta) {
+    default void drawCategoryBackground(Rectangle bounds, int mouseX, int mouseY, float delta) {
         new RecipeBaseWidget(bounds).draw(mouseX, mouseY, delta);
         DrawableHelper.drawRect(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, RecipeViewingScreen.SUB_COLOR.getRGB());
         DrawableHelper.drawRect(bounds.x + 17, bounds.y + 21, bounds.x + bounds.width - 17, bounds.y + 33, RecipeViewingScreen.SUB_COLOR.getRGB());
     }
     
-    default public IDisplaySettings getDisplaySettings() {
+    default IDisplaySettings getDisplaySettings() {
         return new IDisplaySettings<T>() {
             @Override
             public int getDisplayHeight(IRecipeCategory category) {
@@ -50,19 +51,19 @@ public interface IRecipeCategory<T extends IRecipeDisplay> {
         };
     }
     
-    default public int getDisplayHeight() {
+    default int getDisplayHeight() {
         return getDisplaySettings().getDisplayHeight(this);
     }
     
-    default public int getDisplayWidth(T display) {
+    default int getDisplayWidth(T display) {
         return getDisplaySettings().getDisplayWidth(this, display);
     }
     
-    default public int getMaximumRecipePerPage() {
+    default int getMaximumRecipePerPage() {
         return getDisplaySettings().getMaximumRecipePerPage(this);
     }
     
-    default public boolean checkTags() {
+    default boolean checkTags() {
         return false;
     }
     

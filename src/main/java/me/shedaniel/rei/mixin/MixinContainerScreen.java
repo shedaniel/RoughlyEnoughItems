@@ -47,12 +47,12 @@ public class MixinContainerScreen extends Screen implements IMixinContainerScree
     
     @Override
     public int rei_getContainerWidth() {
-        return containerWidth;
+        return width;
     }
     
     @Override
     public int rei_getContainerHeight() {
-        return containerHeight;
+        return height;
     }
     
     @Inject(method = "onInitialized()V", at = @At("RETURN"))

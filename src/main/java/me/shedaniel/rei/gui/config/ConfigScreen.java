@@ -39,7 +39,7 @@ public class ConfigScreen extends Screen {
     
     @Override
     protected void onInitialized() {
-        listeners.add(entryListWidget = new ConfigEntryListWidget(client, width, height, 32, height - 32, 24));
+        listeners.add(entryListWidget = new ConfigEntryListWidget(client, screenWidth, screenHeight, 32, screenHeight - 32, 24));
         entryListWidget.configClearEntries();
         entryListWidget.configAddEntry(new ConfigEntry.CategoryTitleConfigEntry(new TranslatableTextComponent("text.rei.config.general")));
         entryListWidget.configAddEntry(new ConfigEntry.ButtonConfigEntry(new TranslatableTextComponent("text.rei.config.cheating"), new ConfigEntry.ButtonConfigEntry.ConfigEntryButtonProvider() {
@@ -315,7 +315,7 @@ public class ConfigScreen extends Screen {
                 return false;
             }
         }));
-        addButton(new ButtonWidget(width / 2 - 100, height - 26, I18n.translate("gui.done")) {
+        addButton(new ButtonWidget(screenWidth / 2 - 100, screenHeight - 26, I18n.translate("gui.done")) {
             @Override
             public void onPressed(double double_1, double double_2) {
                 try {
@@ -338,7 +338,7 @@ public class ConfigScreen extends Screen {
     public void draw(int int_1, int int_2, float float_1) {
         this.drawTextureBackground(0);
         this.entryListWidget.draw(int_1, int_2, float_1);
-        this.drawStringCentered(this.fontRenderer, I18n.translate("text.rei.config"), this.width / 2, 16, 16777215);
+        this.drawStringCentered(this.fontRenderer, I18n.translate("text.rei.config"), this.screenWidth / 2, 16, 16777215);
         super.draw(int_1, int_2, float_1);
     }
     
