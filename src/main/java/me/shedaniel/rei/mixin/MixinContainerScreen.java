@@ -27,9 +27,9 @@ public class MixinContainerScreen extends Screen implements IMixinContainerScree
     @Shadow
     protected int top;
     @Shadow
-    protected int containerWidth;
+    protected int width;
     @Shadow
-    protected int containerHeight;
+    protected int height;
     @Shadow
     protected Slot focusedSlot;
     @Shadow
