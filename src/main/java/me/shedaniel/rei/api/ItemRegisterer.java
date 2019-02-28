@@ -7,22 +7,22 @@ import java.util.List;
 
 public interface ItemRegisterer {
     
-    public List<ItemStack> getItemList();
+    List<ItemStack> getItemList();
     
     @Deprecated
-    public List<ItemStack> getModifiableItemList();
+    List<ItemStack> getModifiableItemList();
     
-    public ItemStack[] getAllStacksFromItem(Item item);
+    ItemStack[] getAllStacksFromItem(Item item);
     
-    public void registerItemStack(Item afterItem, ItemStack stack);
+    void registerItemStack(Item afterItem, ItemStack stack);
     
-    default public void registerItemStack(Item afterItem, ItemStack... stacks) {
+    default void registerItemStack(Item afterItem, ItemStack... stacks) {
         for(ItemStack stack : stacks)
             if (stack != null && !stack.isEmpty())
                 registerItemStack(afterItem, stack);
     }
     
-    default public void registerItemStack(ItemStack... stacks) {
+    default void registerItemStack(ItemStack... stacks) {
         for(ItemStack stack : stacks)
             if (stack != null && !stack.isEmpty())
                 registerItemStack(null, stack);

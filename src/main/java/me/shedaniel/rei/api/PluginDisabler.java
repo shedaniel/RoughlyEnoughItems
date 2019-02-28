@@ -4,20 +4,20 @@ import net.minecraft.util.Identifier;
 
 public interface PluginDisabler {
     
-    default public void disablePluginFunctions(Identifier plugin, PluginFunction... functions) {
+    default void disablePluginFunctions(Identifier plugin, PluginFunction... functions) {
         for(PluginFunction function : functions)
             disablePluginFunction(plugin, function);
     }
     
-    default public void enablePluginFunctions(Identifier plugin, PluginFunction... functions) {
+    default void enablePluginFunctions(Identifier plugin, PluginFunction... functions) {
         for(PluginFunction function : functions)
             enablePluginFunction(plugin, function);
     }
     
-    public void disablePluginFunction(Identifier plugin, PluginFunction function);
+    void disablePluginFunction(Identifier plugin, PluginFunction function);
     
-    public void enablePluginFunction(Identifier plugin, PluginFunction function);
+    void enablePluginFunction(Identifier plugin, PluginFunction function);
     
-    public boolean isFunctionEnabled(Identifier plugin, PluginFunction function);
+    boolean isFunctionEnabled(Identifier plugin, PluginFunction function);
     
 }

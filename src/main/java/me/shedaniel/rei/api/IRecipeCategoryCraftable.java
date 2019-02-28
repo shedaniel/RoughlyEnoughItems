@@ -9,10 +9,10 @@ import java.util.List;
 
 public interface IRecipeCategoryCraftable<T extends IRecipeDisplay> {
     
-    public boolean canAutoCraftHere(Class<? extends Screen> screenClasses, T recipe);
+    boolean canAutoCraftHere(Class<? extends Screen> screenClasses, T recipe);
     
-    public boolean performAutoCraft(Screen gui, T recipe);
+    boolean performAutoCraft(Screen gui, T recipe);
     
-    public void registerAutoCraftButton(List<IWidget> widgets, Rectangle rectangle, IMixinContainerScreen parentScreen, T recipe);
+    void registerAutoCraftButton(List<IWidget> widgets, Rectangle rectangle, IMixinContainerScreen parentScreen, T recipe);
     
 }
