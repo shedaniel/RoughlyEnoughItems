@@ -113,8 +113,9 @@ public class UpdateChecker implements ClientModInitializer {
         FabricLoader.INSTANCE.getMods().stream().map(ModContainer::getInfo).forEach(modInfo -> {
             if (modInfo.getId().equals("roughlyenoughitems"))
                 try {
-                    currentVersion = new Version(modInfo.getVersionString());
+                    currentVersion = new Version(modInfo.getDescription().substring(53));
                 } catch (Exception e) {
+                    RoughlyEnoughItemsCore.LOGGER.warn("Can't load REI version, report if this is not in development environment!");
                 }
         });
         InputStream downloadedStream = downloadVersionString();

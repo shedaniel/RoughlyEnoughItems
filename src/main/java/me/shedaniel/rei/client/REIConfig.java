@@ -21,7 +21,6 @@ public class REIConfig {
     public boolean loadDefaultPlugin = true;
     public boolean disableCreditsButton = false;
     public int maxRecipePerPage = 3;
-    public boolean fixRamUsage = false;
     public boolean showUtilsButtons = false;
     public RelativePoint choosePageDialogPoint = new RelativePoint(.5, .5);
     

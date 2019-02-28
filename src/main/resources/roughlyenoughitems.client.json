@@ -10,8 +10,7 @@
     "MixinCraftingTableScreen",
     "MixinCreativePlayerInventoryScreen",
     "MixinBrewingRecipeRegistry",
-    "MixinRecipeBookGui",
-    "MixinTextureManager"
+    "MixinRecipeBookGui"
   ],
   "injectors": {
     "defaultRequire": 1
