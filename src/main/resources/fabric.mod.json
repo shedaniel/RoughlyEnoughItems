@@ -1,7 +1,7 @@
 {
   "id": "roughlyenoughitems",
   "name": "RoughlyEnoughItems",
-  "description": "To allow players to view items and recipes.",
+  "description": "To allow players to view items and recipes. Version: ${version}",
   "version": "2.3.1",
   "side": "client",
   "authors": [
@@ -12,7 +12,7 @@
     "me.shedaniel.rei.client.ClientHelper"
   ],
   "requires": {
-    "fabric": "0.2.2"
+    "fabric": "0.2.3"
   },
   "recommended": {
     "pluginloader": "1.0.6"
