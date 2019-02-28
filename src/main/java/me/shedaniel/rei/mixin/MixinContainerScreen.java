@@ -27,9 +27,9 @@ public class MixinContainerScreen extends Screen implements IMixinContainerScree
     @Shadow
     protected int top;
     @Shadow
-    protected int containerWidth;
+    protected int width;
     @Shadow
-    protected int containerHeight;
+    protected int height;
     @Shadow
     protected Slot focusedSlot;
     @Shadow
@@ -47,12 +47,12 @@ public class MixinContainerScreen extends Screen implements IMixinContainerScree
     
     @Override
     public int rei_getContainerWidth() {
-        return containerWidth;
+        return width;
     }
     
     @Override
     public int rei_getContainerHeight() {
-        return containerHeight;
+        return height;
     }
     
     @Inject(method = "onInitialized()V", at = @At("RETURN"))

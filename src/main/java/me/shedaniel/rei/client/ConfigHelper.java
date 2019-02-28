@@ -1,7 +1,7 @@
 package me.shedaniel.rei.client;
 
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import net.fabricmc.loader.FabricLoader;
+import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -17,7 +17,7 @@ public class ConfigHelper {
     
     @SuppressWarnings("deprecated")
     public ConfigHelper() {
-        this.configFile = new File(FabricLoader.INSTANCE.getConfigDirectory(), "rei.json");
+        this.configFile = new File(FabricLoader.getInstance().getConfigDirectory(), "rei.json");
         this.craftableOnly = false;
         try {
             loadConfig();

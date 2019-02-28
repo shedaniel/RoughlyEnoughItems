@@ -259,7 +259,7 @@ public class RecipeViewingScreen extends Screen {
     
     @Override
     public void draw(int mouseX, int mouseY, float delta) {
-        this.drawGradientRect(0, 0, this.width, this.height, -1072689136, -804253680);
+        this.drawGradientRect(0, 0, this.screenWidth, this.screenHeight, -1072689136, -804253680);
         if (selectedCategory != null)
             selectedCategory.drawCategoryBackground(bounds, mouseX, mouseY, delta);
         else {
@@ -282,7 +282,7 @@ public class RecipeViewingScreen extends Screen {
         GuiHelper.getLastOverlay().drawOverlay(mouseX, mouseY, delta);
         if (choosePageActivated) {
             zOffset = 500.0f;
-            this.drawGradientRect(0, 0, this.width, this.height, -1072689136, -804253680);
+            this.drawGradientRect(0, 0, this.screenWidth, this.screenHeight, -1072689136, -804253680);
             zOffset = 0.0f;
             recipeChoosePageWidget.draw(mouseX, mouseY, delta);
         }
