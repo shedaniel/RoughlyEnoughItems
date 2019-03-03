@@ -41,7 +41,7 @@ minecraft {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.13.2-25.0.44'
+    minecraft 'net.minecraftforge:forge:1.13.2-25.0.69'
     implementation 'com.google.code.gson:gson:2.8.5'
 }
 

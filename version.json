@@ -2,7 +2,7 @@
   "latest": [
     {
       "game": "1.13.2",
-      "mod": "2.3.1.5"
+      "mod": "2.3.1.7"
     }
   ],
   "changelogs": {
@@ -40,6 +40,11 @@
       {
         "version": "2.3.1.6",
         "text": "REI will now remember cheating mode, and dialog location + fix creative tab bug",
+        "level": "none"
+      },
+      {
+        "version": "2.3.1.7",
+        "text": "Fix creative gui bugs",
         "level": "none"
       }
     ]
