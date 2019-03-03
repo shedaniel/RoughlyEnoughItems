@@ -81,6 +81,18 @@ public class RoughlyEnoughItemsClient {
     }
     
     @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onGuiMouseClicked(GuiScreenEvent.MouseClickedEvent.Pre event) {
+        if (event.getGui() instanceof GuiContainerCreative) {
+            if (((GuiContainerCreative) event.getGui()).getSelectedTabIndex() != ItemGroup.INVENTORY.getIndex())
+                return;
+            if (GuiHelper.getLastOverlay().mouseClicked(event.getMouseX(), event.getMouseY(), event.getButton())) {
+                event.setCanceled(true);
+                event.setResult(Event.Result.ALLOW);
+            }
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onGuiKeyPressed(GuiScreenEvent.KeyboardKeyPressedEvent.Pre event) {
         if (event.getGui() instanceof GuiContainerCreative)
             if (((GuiContainerCreative) event.getGui()).getSelectedTabIndex() != ItemGroup.INVENTORY.getIndex())
