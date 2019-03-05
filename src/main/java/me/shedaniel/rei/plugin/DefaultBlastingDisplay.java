@@ -1,7 +1,7 @@
 package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.rei.api.IRecipeDisplay;
+import me.shedaniel.rei.api.RecipeDisplay;
 import net.minecraft.block.entity.FurnaceBlockEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class DefaultBlastingDisplay implements IRecipeDisplay<BlastingRecipe> {
+public class DefaultBlastingDisplay implements RecipeDisplay<BlastingRecipe> {
     
     private BlastingRecipe display;
     private List<List<ItemStack>> input;

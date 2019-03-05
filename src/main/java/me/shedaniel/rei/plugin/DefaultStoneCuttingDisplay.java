@@ -1,7 +1,7 @@
 package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.rei.api.IRecipeDisplay;
+import me.shedaniel.rei.api.RecipeDisplay;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.StonecuttingRecipe;
@@ -13,7 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class DefaultStoneCuttingDisplay implements IRecipeDisplay<StonecuttingRecipe> {
+public class DefaultStoneCuttingDisplay implements RecipeDisplay<StonecuttingRecipe> {
     
     private List<ItemStack> inputs, output;
     private StonecuttingRecipe display;

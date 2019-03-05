@@ -19,26 +19,26 @@ public interface RecipeHelper {
     
     List<ItemStack> findCraftableByItems(List<ItemStack> inventoryItems);
     
-    void registerCategory(IRecipeCategory category);
+    void registerCategory(RecipeCategory category);
     
-    void registerDisplay(Identifier categoryIdentifier, IRecipeDisplay display);
+    void registerDisplay(Identifier categoryIdentifier, RecipeDisplay display);
     
-    Map<IRecipeCategory, List<IRecipeDisplay>> getRecipesFor(ItemStack stack);
+    Map<RecipeCategory, List<RecipeDisplay>> getRecipesFor(ItemStack stack);
     
     RecipeManager getRecipeManager();
     
-    List<IRecipeCategory> getAllCategories();
+    List<RecipeCategory> getAllCategories();
     
-    Map<IRecipeCategory, List<IRecipeDisplay>> getUsagesFor(ItemStack stack);
+    Map<RecipeCategory, List<RecipeDisplay>> getUsagesFor(ItemStack stack);
     
-    Optional<SpeedCraftAreaSupplier> getSpeedCraftButtonArea(IRecipeCategory category);
+    Optional<ButtonAreaSupplier> getSpeedCraftButtonArea(RecipeCategory category);
     
-    void registerSpeedCraftButtonArea(Identifier category, SpeedCraftAreaSupplier rectangle);
+    void registerSpeedCraftButtonArea(Identifier category, ButtonAreaSupplier rectangle);
     
-    List<SpeedCraftFunctional> getSpeedCraftFunctional(IRecipeCategory category);
+    List<SpeedCraftFunctional> getSpeedCraftFunctional(RecipeCategory category);
     
     void registerSpeedCraftFunctional(Identifier category, SpeedCraftFunctional functional);
     
-    Map<IRecipeCategory, List<IRecipeDisplay>> getAllRecipes();
+    Map<RecipeCategory, List<RecipeDisplay>> getAllRecipes();
     
 }

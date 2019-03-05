@@ -40,12 +40,12 @@ public class RecipeViewingScreen extends Screen {
     private List<TabWidget> tabs;
     private Window window;
     private Rectangle bounds;
-    private Map<IRecipeCategory, List<IRecipeDisplay>> categoriesMap;
-    private List<IRecipeCategory> categories;
-    private IRecipeCategory selectedCategory;
+    private Map<RecipeCategory, List<RecipeDisplay>> categoriesMap;
+    private List<RecipeCategory> categories;
+    private RecipeCategory selectedCategory;
     private ButtonWidget recipeBack, recipeNext, categoryBack, categoryNext;
     
-    public RecipeViewingScreen(Window window, Map<IRecipeCategory, List<IRecipeDisplay>> categoriesMap) {
+    public RecipeViewingScreen(Window window, Map<RecipeCategory, List<RecipeDisplay>> categoriesMap) {
         this.categoryPages = 0;
         this.window = window;
         this.widgets = Lists.newArrayList();
@@ -61,7 +61,7 @@ public class RecipeViewingScreen extends Screen {
         this.choosePageActivated = false;
     }
     
-    public static SpeedCraftFunctional getSpeedCraftFunctionalByCategory(ContainerScreen containerScreen, IRecipeCategory category) {
+    public static SpeedCraftFunctional getSpeedCraftFunctionalByCategory(ContainerScreen containerScreen, RecipeCategory category) {
         for(SpeedCraftFunctional functional : RecipeHelper.getInstance().getSpeedCraftFunctional(category))
             for(Class aClass : functional.getFunctioningFor())
                 if (containerScreen.getClass().isAssignableFrom(aClass))
@@ -100,7 +100,7 @@ public class RecipeViewingScreen extends Screen {
         this.largestWidth = window.getScaledWidth() - 100;
         this.largestHeight = window.getScaledHeight() - 40;
         this.guiWidth = MathHelper.clamp(getCurrentDisplayed().stream().map(display -> selectedCategory.getDisplayWidth(display)).max(Integer::compareTo).orElse(150) + 30, 0, largestWidth);
-        this.guiHeight = MathHelper.floor(MathHelper.clamp((selectedCategory.getDisplayHeight() + 7) * (getRecipesPerPage() + 1) + 40f, 186f, (float) largestHeight));
+        this.guiHeight = MathHelper.floor(MathHelper.clamp((selectedCategory.getDisplayHeight() + 7d) * (getRecipesPerPage() + 1d) + 40d, 186d, (double) largestHeight));
         this.bounds = new Rectangle(window.getScaledWidth() / 2 - guiWidth / 2, window.getScaledHeight() / 2 - guiHeight / 2, guiWidth, guiHeight);
         this.page = MathHelper.clamp(page, 0, getTotalPages(selectedCategory) - 1);
         
@@ -205,13 +205,13 @@ public class RecipeViewingScreen extends Screen {
                 tab.setItem(categories.get(j).getCategoryIcon(), categories.get(j).getCategoryName(), tab.getId() + categoryPages * 6 == categories.indexOf(selectedCategory));
             }
         }
-        Optional<SpeedCraftAreaSupplier> supplier = RecipeHelper.getInstance().getSpeedCraftButtonArea(selectedCategory);
+        Optional<ButtonAreaSupplier> supplier = RecipeHelper.getInstance().getSpeedCraftButtonArea(selectedCategory);
         final SpeedCraftFunctional functional = getSpeedCraftFunctionalByCategory(GuiHelper.getLastContainerScreen(), selectedCategory);
         int recipeHeight = selectedCategory.getDisplayHeight();
-        List<IRecipeDisplay> currentDisplayed = getCurrentDisplayed();
+        List<RecipeDisplay> currentDisplayed = getCurrentDisplayed();
         for(int i = 0; i < currentDisplayed.size(); i++) {
             int finalI = i;
-            final Supplier<IRecipeDisplay> displaySupplier = () -> {
+            final Supplier<RecipeDisplay> displaySupplier = () -> {
                 return currentDisplayed.get(finalI);
             };
             int displayWidth = selectedCategory.getDisplayWidth(displaySupplier.get());
@@ -224,23 +224,23 @@ public class RecipeViewingScreen extends Screen {
             recipeChoosePageWidget = new RecipeChoosePageWidget(this, page, getTotalPages(selectedCategory));
         else
             recipeChoosePageWidget = null;
-    
+        
         GuiHelper.getLastOverlay().onInitialized();
         listeners.addAll(tabs);
         listeners.add(GuiHelper.getLastOverlay());
         listeners.addAll(widgets);
     }
     
-    public List<IRecipeDisplay> getCurrentDisplayed() {
-        List<IRecipeDisplay> list = Lists.newArrayList();
+    public List<RecipeDisplay> getCurrentDisplayed() {
+        List<RecipeDisplay> list = Lists.newArrayList();
         int recipesPerPage = getRecipesPerPage();
         for(int i = 0; i <= recipesPerPage; i++)
-            if (recipesPerPage > 0 && page * (recipesPerPage + 1) + i < categoriesMap.get(selectedCategory).size())
+            if (page * (recipesPerPage + 1) + i < categoriesMap.get(selectedCategory).size())
                 list.add(categoriesMap.get(selectedCategory).get(page * (recipesPerPage + 1) + i));
         return list;
     }
     
-    public IRecipeCategory getSelectedCategory() {
+    public RecipeCategory getSelectedCategory() {
         return selectedCategory;
     }
     
@@ -253,8 +253,15 @@ public class RecipeViewingScreen extends Screen {
     }
     
     private int getRecipesPerPage() {
+        if (selectedCategory.getDisplaySettings().getFixedRecipesPerPage() > 0)
+            return selectedCategory.getDisplaySettings().getFixedRecipesPerPage() - 1;
         int height = selectedCategory.getDisplayHeight();
-        return MathHelper.clamp(MathHelper.floor(((float) largestHeight - 40f) / ((float) height + 7f)) - 1, 0, Math.min(RoughlyEnoughItemsCore.getConfigHelper().getConfig().maxRecipePerPage - 1, selectedCategory.getMaximumRecipePerPage() - 1));
+        return MathHelper.clamp(MathHelper.floor(((double) largestHeight - 40d) / ((double) height + 7d)) - 1, 0, Math.min(RoughlyEnoughItemsCore.getConfigHelper().getConfig().maxRecipePerPage - 1, selectedCategory.getMaximumRecipePerPage() - 1));
+    }
+    
+    private int getRecipesPerPageByHeight() {
+        int height = selectedCategory.getDisplayHeight();
+        return MathHelper.clamp(MathHelper.floor(((double) guiHeight - 40d) / ((double) height + 7d)) - 1, 0, Math.min(RoughlyEnoughItemsCore.getConfigHelper().getConfig().maxRecipePerPage - 1, selectedCategory.getMaximumRecipePerPage() - 1));
     }
     
     @Override
@@ -288,7 +295,7 @@ public class RecipeViewingScreen extends Screen {
         }
     }
     
-    public int getTotalPages(IRecipeCategory category) {
+    public int getTotalPages(RecipeCategory category) {
         return MathHelper.ceil(categoriesMap.get(category).size() / (double) (getRecipesPerPage() + 1));
     }
     

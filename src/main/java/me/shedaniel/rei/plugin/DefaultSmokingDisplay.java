@@ -1,11 +1,10 @@
 package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.rei.api.IRecipeDisplay;
+import me.shedaniel.rei.api.RecipeDisplay;
 import net.minecraft.block.entity.FurnaceBlockEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.cooking.SmeltingRecipe;
 import net.minecraft.recipe.cooking.SmokingRecipe;
 import net.minecraft.util.Identifier;
 
@@ -14,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class DefaultSmokingDisplay implements IRecipeDisplay<SmokingRecipe> {
+public class DefaultSmokingDisplay implements RecipeDisplay<SmokingRecipe> {
     
     private SmokingRecipe display;
     private List<List<ItemStack>> input;

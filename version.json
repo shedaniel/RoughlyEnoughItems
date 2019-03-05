@@ -30,7 +30,7 @@
     },
     {
       "game": "19w09a",
-      "mod": "2.3.1.53"
+      "mod": "2.3.2.54"
     },
     {
       "game": "none",
@@ -67,6 +67,11 @@
       {
         "version": "2.3.1.53",
         "text": "7 New features + Several Bug Fixes",
+        "level": "useful"
+      },
+      {
+        "version": "2.3.2.54",
+        "text": "Fixed Creative Screen + full page recipes",
         "level": "useful"
       }
     ]

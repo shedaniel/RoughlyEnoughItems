@@ -29,7 +29,7 @@ import net.minecraft.util.registry.Registry;
 
 import java.util.*;
 
-public class DefaultPlugin implements IRecipePlugin {
+public class DefaultPlugin implements REIPlugin {
     
     public static final Identifier CRAFTING = new Identifier("roughlyenoughitems", "plugins/crafting");
     public static final Identifier SMELTING = new Identifier("roughlyenoughitems", "plugins/smelting");
@@ -57,11 +57,11 @@ public class DefaultPlugin implements IRecipePlugin {
     }
     
     @Override
-    public void registerItems(ItemRegisterer itemRegisterer) {
+    public void registerItems(ItemRegistry itemRegistry) {
         Registry.ITEM.stream().forEach(item -> {
-            itemRegisterer.registerItemStack(item.getDefaultStack());
+            itemRegistry.registerItemStack(item.getDefaultStack());
             try {
-                itemRegisterer.registerItemStack(itemRegisterer.getAllStacksFromItem(item));
+                itemRegistry.registerItemStack(itemRegistry.getAllStacksFromItem(item));
             } catch (Exception e) {
             }
         });
@@ -71,7 +71,7 @@ public class DefaultPlugin implements IRecipePlugin {
                 map.put(enchantment, i);
                 ItemStack itemStack = new ItemStack(Items.ENCHANTED_BOOK);
                 EnchantmentHelper.set(map, itemStack);
-                itemRegisterer.registerItemStack(Items.ENCHANTED_BOOK, itemStack);
+                itemRegistry.registerItemStack(Items.ENCHANTED_BOOK, itemStack);
             }
         });
     }
