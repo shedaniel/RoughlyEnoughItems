@@ -8,18 +8,18 @@ import net.minecraft.util.Identifier;
 import java.util.List;
 import java.util.Optional;
 
-public interface IRecipeDisplay<T extends Recipe> {
+public interface RecipeDisplay<T extends Recipe> {
     
     Optional<T> getRecipe();
-
+    
     List<List<ItemStack>> getInput();
-
+    
     List<ItemStack> getOutput();
-
+    
     default List<List<ItemStack>> getRequiredItems() {
         return Lists.newArrayList();
     }
-
+    
     Identifier getRecipeCategory();
-
+    
 }

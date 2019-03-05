@@ -1,6 +1,6 @@
 package me.shedaniel.rei.plugin;
 
-import me.shedaniel.rei.api.IRecipeDisplay;
+import me.shedaniel.rei.api.RecipeDisplay;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public class DefaultBrewingDisplay implements IRecipeDisplay {
+public class DefaultBrewingDisplay implements RecipeDisplay {
     
     private ItemStack input, output;
     private Ingredient reactant;

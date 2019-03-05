@@ -24,7 +24,6 @@ import net.minecraft.text.TranslatableTextComponent;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameMode;
-import net.minecraft.world.World;
 
 import java.awt.*;
 import java.util.Arrays;

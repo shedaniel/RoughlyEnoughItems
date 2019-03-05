@@ -8,13 +8,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
 import java.awt.*;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
 
-public interface IRecipeCategory<T extends IRecipeDisplay> {
+public interface RecipeCategory<T extends RecipeDisplay> {
     
     Identifier getIdentifier();
     
@@ -32,20 +31,20 @@ public interface IRecipeCategory<T extends IRecipeDisplay> {
         DrawableHelper.drawRect(bounds.x + 17, bounds.y + 21, bounds.x + bounds.width - 17, bounds.y + 33, RecipeViewingScreen.SUB_COLOR.getRGB());
     }
     
-    default IDisplaySettings getDisplaySettings() {
-        return new IDisplaySettings<T>() {
+    default DisplaySettings getDisplaySettings() {
+        return new DisplaySettings<T>() {
             @Override
-            public int getDisplayHeight(IRecipeCategory category) {
+            public int getDisplayHeight(RecipeCategory category) {
                 return 66;
             }
             
             @Override
-            public int getDisplayWidth(IRecipeCategory category, T display) {
+            public int getDisplayWidth(RecipeCategory category, T display) {
                 return 150;
             }
             
             @Override
-            public int getMaximumRecipePerPage(IRecipeCategory category) {
+            public int getMaximumRecipePerPage(RecipeCategory category) {
                 return 99;
             }
         };

@@ -1,9 +1,9 @@
 package me.shedaniel.rei;
 
 import com.google.common.collect.Maps;
-import me.shedaniel.rei.api.ItemRegisterer;
-import me.shedaniel.rei.api.IRecipePlugin;
+import me.shedaniel.rei.api.ItemRegistry;
 import me.shedaniel.rei.api.PluginDisabler;
+import me.shedaniel.rei.api.REIPlugin;
 import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.client.*;
 import me.shedaniel.rei.plugin.DefaultPlugin;
@@ -32,10 +32,10 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
     public static final Logger LOGGER = LogManager.getFormatterLogger("REI");
     public static final Identifier DELETE_ITEMS_PACKET = new Identifier("roughlyenoughitems", "delete_item");
     public static final Identifier CREATE_ITEMS_PACKET = new Identifier("roughlyenoughitems", "create_item");
-    private static final RecipeHelperImpl RECIPE_HELPER = new RecipeHelperImpl();
-    private static final PluginDisablerImpl PLUGIN_DISABLER = new PluginDisablerImpl();
-    private static final ItemRegistererImpl ITEM_REGISTERER = new ItemRegistererImpl();
-    private static final Map<Identifier, IRecipePlugin> plugins = Maps.newHashMap();
+    private static final RecipeHelper RECIPE_HELPER = new RecipeHelperImpl();
+    private static final PluginDisabler PLUGIN_DISABLER = new PluginDisablerImpl();
+    private static final ItemRegistry ITEM_REGISTRY = new ItemRegistryImpl();
+    private static final Map<Identifier, REIPlugin> plugins = Maps.newHashMap();
     private static ConfigHelper configHelper;
     
     public static RecipeHelper getRecipeHelper() {
@@ -46,26 +46,26 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
         return configHelper;
     }
     
-    public static ItemRegisterer getItemRegisterer() {
-        return ITEM_REGISTERER;
+    public static ItemRegistry getItemRegisterer() {
+        return ITEM_REGISTRY;
     }
     
     public static PluginDisabler getPluginDisabler() {
         return PLUGIN_DISABLER;
     }
     
-    public static IRecipePlugin registerPlugin(Identifier identifier, IRecipePlugin plugin) {
+    public static REIPlugin registerPlugin(Identifier identifier, REIPlugin plugin) {
         plugins.put(identifier, plugin);
         RoughlyEnoughItemsCore.LOGGER.info("REI: Registered plugin %s from %s", identifier.toString(), plugin.getClass().getSimpleName());
         plugin.onFirstLoad(getPluginDisabler());
         return plugin;
     }
     
-    public static List<IRecipePlugin> getPlugins() {
+    public static List<REIPlugin> getPlugins() {
         return new LinkedList<>(plugins.values());
     }
     
-    public static Optional<Identifier> getPluginIdentifier(IRecipePlugin plugin) {
+    public static Optional<Identifier> getPluginIdentifier(REIPlugin plugin) {
         for(Identifier identifier : plugins.keySet())
             if (identifier != null && plugins.get(identifier).equals(plugin))
                 return Optional.of(identifier);

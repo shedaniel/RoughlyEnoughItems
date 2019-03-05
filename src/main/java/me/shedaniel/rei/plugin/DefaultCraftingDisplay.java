@@ -1,10 +1,10 @@
 package me.shedaniel.rei.plugin;
 
-import me.shedaniel.rei.api.IRecipeDisplay;
+import me.shedaniel.rei.api.RecipeDisplay;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.util.Identifier;
 
-public interface DefaultCraftingDisplay<T> extends IRecipeDisplay<Recipe> {
+public interface DefaultCraftingDisplay<T> extends RecipeDisplay<Recipe> {
     
     @Override
     default Identifier getRecipeCategory() {

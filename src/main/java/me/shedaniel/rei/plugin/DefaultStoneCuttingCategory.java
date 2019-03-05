@@ -1,7 +1,7 @@
 package me.shedaniel.rei.plugin;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import me.shedaniel.rei.api.IRecipeCategory;
+import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.gui.widget.IWidget;
 import me.shedaniel.rei.gui.widget.ItemSlotWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
@@ -18,7 +18,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class DefaultStoneCuttingCategory implements IRecipeCategory<DefaultStoneCuttingDisplay> {
+public class DefaultStoneCuttingCategory implements RecipeCategory<DefaultStoneCuttingDisplay> {
     
     private static final Identifier DISPLAY_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/display.png");
     

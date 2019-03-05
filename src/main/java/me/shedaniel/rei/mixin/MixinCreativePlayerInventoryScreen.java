@@ -1,5 +1,6 @@
 package me.shedaniel.rei.mixin;
 
+import me.shedaniel.rei.client.GuiHelper;
 import me.shedaniel.rei.listeners.IMixinTabGetter;
 import net.minecraft.client.gui.ingame.AbstractPlayerInventoryScreen;
 import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
@@ -57,6 +58,14 @@ public abstract class MixinCreativePlayerInventoryScreen extends AbstractPlayerI
                 ci.setReturnValue(true);
                 ci.cancel();
             }
+    }
+    
+    @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
+    public void mouseClicked(double i, double j, int k, CallbackInfoReturnable<Boolean> ci) {
+        if (GuiHelper.getLastOverlay().mouseClicked(i, j, k)) {
+            ci.setReturnValue(true);
+            ci.cancel();
+        }
     }
     
 }

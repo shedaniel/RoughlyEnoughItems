@@ -1,10 +1,10 @@
 package me.shedaniel.rei.api;
 
-public interface IRecipePlugin {
+public interface REIPlugin {
     
     default void onFirstLoad(PluginDisabler pluginDisabler) {}
     
-    void registerItems(ItemRegisterer itemRegisterer);
+    void registerItems(ItemRegistry itemRegistry);
     
     void registerPluginCategories(RecipeHelper recipeHelper);
     
