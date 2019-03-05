@@ -30,7 +30,7 @@
     },
     {
       "game": "19w09a",
-      "mod": "2.3.2.54"
+      "mod": "2.3.2.55"
     },
     {
       "game": "none",
@@ -53,7 +53,6 @@
         "version": "2.2.0.50",
         "text": "Updated to 19w06a",
         "level": "none"
-      },
       {
         "version": "2.3.0.51",
         "text": "Fixed lots of bugs",
@@ -73,6 +72,11 @@
         "version": "2.3.2.54",
         "text": "Fixed Creative Screen + full page recipes",
         "level": "useful"
+      },
+      {
+        "version": "2.3.2.55",
+        "text": "Fixed Crash",
+        "level": "none"
       }
     ]
   }
