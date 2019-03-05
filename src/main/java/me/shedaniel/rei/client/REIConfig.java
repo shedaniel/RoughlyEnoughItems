@@ -16,7 +16,6 @@ public class REIConfig {
     public String giveCommand = "/give {player_name} {item_identifier}{nbt} {count}";
     public String gamemodeCommand = "/gamemode {gamemode}";
     public String weatherCommand = "/weather {weather}";
-    public boolean checkUpdates = true;
     public boolean mirrorItemPanel = false;
     public boolean loadDefaultPlugin = true;
     public boolean disableCreditsButton = false;

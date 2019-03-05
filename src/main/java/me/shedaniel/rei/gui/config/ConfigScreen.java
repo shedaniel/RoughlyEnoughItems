@@ -205,25 +205,6 @@ public class ConfigScreen extends Screen {
             }
         }));
         entryListWidget.configAddEntry(new ConfigEntry.CategoryTitleConfigEntry(new TranslatableTextComponent("text.rei.config.advanced")));
-        entryListWidget.configAddEntry(new ConfigEntry.ButtonConfigEntry(new TranslatableTextComponent("text.rei.check_updates"), new ConfigEntry.ButtonConfigEntry.ConfigEntryButtonProvider() {
-            @Override
-            public boolean onPressed(int button, double mouseX, double mouseY) {
-                if (button == 0)
-                    RoughlyEnoughItemsCore.getConfigHelper().getConfig().checkUpdates = !RoughlyEnoughItemsCore.getConfigHelper().getConfig().checkUpdates;
-                try {
-                    RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return false;
-                }
-                return true;
-            }
-            
-            @Override
-            public String getText() {
-                return getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().getConfig().checkUpdates);
-            }
-        }));
         entryListWidget.configAddEntry(new ConfigEntry.TextFieldConfigEntry(new TranslatableTextComponent("text.rei.give_command"), new ConfigEntry.TextFieldConfigEntry.ConfigEntryTextFieldProvider() {
             @Override
             public void onInitWidget(TextFieldWidget widget) {
