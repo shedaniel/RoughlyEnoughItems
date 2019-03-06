@@ -14,6 +14,8 @@ import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.fabricmc.fabric.impl.client.keybinding.KeyBindingRegistryImpl;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
+import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.gui.Screen;
@@ -47,13 +49,8 @@ public class ClientHelper implements ClientModInitializer {
             String modid = location.getNamespace();
             if (modid.equalsIgnoreCase("minecraft"))
                 return "Minecraft";
-            return ((net.fabricmc.loader.FabricLoader) FabricLoader.getInstance()).getModContainers().stream().map(modContainer -> {
-                return modContainer.getInfo();
-            }).filter(modInfo -> modInfo.getId().equals(modid) || (modInfo.getName() != null && modInfo.getName().equals(modid))).findFirst().map(modInfo -> {
-                if (modInfo.getName() != null)
-                    return modInfo.getName();
-                return modid;
-            }).orElse(modid);
+            //            return FabricLoader.getInstance().getAllMods().stream().map(ModContainer::getMetadata).filter(metadata -> metadata.getId().equals(modid)).findFirst().map(ModMetadata::getName).orElse(modid);
+            return FabricLoader.getInstance().getModContainer(modid).map(ModContainer::getMetadata).map(ModMetadata::getName).orElse(modid);
         }
         return "";
     }

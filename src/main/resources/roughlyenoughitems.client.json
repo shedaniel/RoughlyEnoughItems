@@ -10,7 +10,8 @@
     "MixinCraftingTableScreen",
     "MixinCreativePlayerInventoryScreen",
     "MixinBrewingRecipeRegistry",
-    "MixinRecipeBookGui"
+    "MixinTabGetter",
+    "GhostSlotsHook"
   ],
   "injectors": {
     "defaultRequire": 1

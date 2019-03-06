@@ -1,10 +1,10 @@
 package me.shedaniel.rei.mixin;
 
+import me.shedaniel.rei.api.TabGetter;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
-import me.shedaniel.rei.listeners.IMixinContainerScreen;
-import me.shedaniel.rei.listeners.IMixinTabGetter;
+import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ContainerScreen;
 import net.minecraft.client.gui.Screen;
@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ContainerScreen.class)
-public class MixinContainerScreen extends Screen implements IMixinContainerScreen {
+public class MixinContainerScreen extends Screen implements ContainerScreenHooks {
     
     @Shadow
     protected int left;
@@ -32,8 +32,6 @@ public class MixinContainerScreen extends Screen implements IMixinContainerScree
     protected int height;
     @Shadow
     protected Slot focusedSlot;
-    @Shadow
-    private ItemStack field_2782;
     
     @Override
     public int rei_getContainerLeft() {
@@ -58,7 +56,7 @@ public class MixinContainerScreen extends Screen implements IMixinContainerScree
     @Inject(method = "onInitialized()V", at = @At("RETURN"))
     protected void onInitialized(CallbackInfo info) {
         if (MinecraftClient.getInstance().currentScreen instanceof CreativePlayerInventoryScreen) {
-            IMixinTabGetter tabGetter = (IMixinTabGetter) MinecraftClient.getInstance().currentScreen;
+            TabGetter tabGetter = (TabGetter) MinecraftClient.getInstance().currentScreen;
             if (tabGetter.rei_getSelectedTab() != ItemGroup.INVENTORY.getIndex())
                 return;
         }
@@ -69,16 +67,11 @@ public class MixinContainerScreen extends Screen implements IMixinContainerScree
     @Inject(method = "draw(IIF)V", at = @At("RETURN"))
     public void draw(int int_1, int int_2, float float_1, CallbackInfo info) {
         if (MinecraftClient.getInstance().currentScreen instanceof CreativePlayerInventoryScreen) {
-            IMixinTabGetter tabGetter = (IMixinTabGetter) MinecraftClient.getInstance().currentScreen;
+            TabGetter tabGetter = (TabGetter) MinecraftClient.getInstance().currentScreen;
             if (tabGetter.rei_getSelectedTab() != ItemGroup.INVENTORY.getIndex())
                 return;
         }
         GuiHelper.getLastOverlay().drawOverlay(int_1, int_2, float_1);
-    }
-    
-    @Override
-    public ItemStack rei_getDraggedStack() {
-        return this.field_2782;
     }
     
     @Override
@@ -89,7 +82,7 @@ public class MixinContainerScreen extends Screen implements IMixinContainerScree
     @Override
     public boolean mouseScrolled(double double_1) {
         if (MinecraftClient.getInstance().currentScreen instanceof CreativePlayerInventoryScreen) {
-            IMixinTabGetter tabGetter = (IMixinTabGetter) MinecraftClient.getInstance().currentScreen;
+            TabGetter tabGetter = (TabGetter) MinecraftClient.getInstance().currentScreen;
             if (tabGetter.rei_getSelectedTab() != ItemGroup.INVENTORY.getIndex())
                 return super.mouseScrolled(double_1);
         }
@@ -103,7 +96,7 @@ public class MixinContainerScreen extends Screen implements IMixinContainerScree
     @Inject(method = "keyPressed(III)Z", at = @At("HEAD"), cancellable = true)
     public void keyPressed(int int_1, int int_2, int int_3, CallbackInfoReturnable<Boolean> ci) {
         if (MinecraftClient.getInstance().currentScreen instanceof CreativePlayerInventoryScreen) {
-            IMixinTabGetter tabGetter = (IMixinTabGetter) MinecraftClient.getInstance().currentScreen;
+            TabGetter tabGetter = (TabGetter) MinecraftClient.getInstance().currentScreen;
             if (tabGetter.rei_getSelectedTab() != ItemGroup.INVENTORY.getIndex())
                 return;
         }

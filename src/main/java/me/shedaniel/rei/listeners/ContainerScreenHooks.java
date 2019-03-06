@@ -3,7 +3,7 @@ package me.shedaniel.rei.listeners;
 import net.minecraft.container.Slot;
 import net.minecraft.item.ItemStack;
 
-public interface IMixinContainerScreen {
+public interface ContainerScreenHooks {
     
     public int rei_getContainerLeft();
     
@@ -12,8 +12,6 @@ public interface IMixinContainerScreen {
     public int rei_getContainerWidth();
     
     public int rei_getContainerHeight();
-    
-    public ItemStack rei_getDraggedStack();
     
     public Slot rei_getHoveredSlot();
     

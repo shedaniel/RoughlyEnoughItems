@@ -238,12 +238,28 @@ public class ConfigScreen extends Screen {
             public void onInitWidget(TextFieldWidget widget) {
                 widget.setMaxLength(99999);
                 widget.setText(RoughlyEnoughItemsCore.getConfigHelper().getConfig().gamemodeCommand);
-                widget.setSuggestion(I18n.translate("text.rei.give_command.suggestion"));
             }
             
             @Override
             public void onUpdateText(TextFieldWidget button, String text) {
                 RoughlyEnoughItemsCore.getConfigHelper().getConfig().gamemodeCommand = text;
+                try {
+                    RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }));
+        entryListWidget.configAddEntry(new ConfigEntry.TextFieldConfigEntry(new TranslatableTextComponent("text.rei.weather_command"), new ConfigEntry.TextFieldConfigEntry.ConfigEntryTextFieldProvider() {
+            @Override
+            public void onInitWidget(TextFieldWidget widget) {
+                widget.setMaxLength(99999);
+                widget.setText(RoughlyEnoughItemsCore.getConfigHelper().getConfig().weatherCommand);
+            }
+        
+            @Override
+            public void onUpdateText(TextFieldWidget button, String text) {
+                RoughlyEnoughItemsCore.getConfigHelper().getConfig().weatherCommand = text;
                 try {
                     RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
                 } catch (IOException e) {

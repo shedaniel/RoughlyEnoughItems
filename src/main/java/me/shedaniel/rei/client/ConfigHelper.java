@@ -15,7 +15,6 @@ public class ConfigHelper {
     private REIConfig config;
     private boolean craftableOnly;
     
-    @SuppressWarnings("deprecated")
     public ConfigHelper() {
         this.configFile = new File(FabricLoader.getInstance().getConfigDirectory(), "rei.json");
         this.craftableOnly = false;

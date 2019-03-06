@@ -6,11 +6,12 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 archivesBaseName = "RoughlyEnoughItems"
-version = "2.3.2.56"
+version = "2.3.3.57"
 
 def minecraftVersion = "19w09a"
-def yarnVersion = "19w09a.1"
-def fabricVersion = "0.2.3.107"
+def yarnVersion = "19w09a.4"
+def fabricVersion = "0.2.3.108"
+def fabricLoaderVersion = "0.3.7.109"
 def pluginLoaderVersion = "1.14-1.0.6-8"
 
 minecraft {
@@ -30,7 +31,7 @@ repositories {
 dependencies {
     minecraft "com.mojang:minecraft:${minecraftVersion}"
     mappings "net.fabricmc:yarn:${yarnVersion}"
-    modCompile "net.fabricmc:fabric-loader:0.3.7.109"
+    modCompile "net.fabricmc:fabric-loader:${fabricLoaderVersion}"
 
     // Fabric API. This is technically optional, but you probably want it anyway.
     modCompile "net.fabricmc:fabric:${fabricVersion}"

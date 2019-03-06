@@ -3,7 +3,7 @@ package me.shedaniel.rei.client;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
-import me.shedaniel.rei.listeners.IMixinContainerScreen;
+import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ContainerScreen;
 import net.minecraft.item.ItemStack;
@@ -52,8 +52,8 @@ public class GuiHelper {
         GuiHelper.lastContainerScreen = lastContainerScreen;
     }
     
-    public static IMixinContainerScreen getLastMixinContainerScreen() {
-        return (IMixinContainerScreen) lastContainerScreen;
+    public static ContainerScreenHooks getLastContainerScreenHooks() {
+        return (ContainerScreenHooks) lastContainerScreen;
     }
     
 }
