@@ -21,8 +21,10 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public class RecipeViewingScreen extends Screen {
@@ -71,6 +73,11 @@ public class RecipeViewingScreen extends Screen {
     
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
+        if (int_1 == 256 && choosePageActivated) {
+            choosePageActivated = false;
+            onInitialized();
+            return true;
+        }
         if ((int_1 == 256 || this.client.options.keyInventory.matchesKey(int_1, int_2)) && this.doesEscapeKeyClose()) {
             MinecraftClient.getInstance().openScreen(GuiHelper.getLastContainerScreen());
             GuiHelper.getLastOverlay().onInitialized();
@@ -158,7 +165,7 @@ public class RecipeViewingScreen extends Screen {
                 this.text = selectedCategory.getCategoryName();
                 super.draw(mouseX, mouseY, partialTicks);
                 if (isHighlighted(mouseX, mouseY))
-                    GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(new Point(mouseX, mouseY), Arrays.asList(I18n.translate("text.rei.view_all_categories").split("\n"))));
+                    GuiHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.view_all_categories").split("\n")));
             }
             
             @Override
@@ -173,7 +180,7 @@ public class RecipeViewingScreen extends Screen {
                 this.text = String.format("%d/%d", page + 1, getTotalPages(selectedCategory));
                 super.draw(mouseX, mouseY, partialTicks);
                 if (isHighlighted(mouseX, mouseY))
-                    GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(new Point(mouseX, mouseY), Arrays.asList(I18n.translate("text.rei.choose_page").split("\n"))));
+                    GuiHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.choose_page").split("\n")));
             }
             
             @Override

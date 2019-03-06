@@ -11,7 +11,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.client.ClientTickCallback;
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
-import net.fabricmc.loader.FabricLoader;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -77,7 +77,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
         configHelper = new ConfigHelper();
         
         // If pluginloader is not installed, base functionality should still remain
-        if (!FabricLoader.INSTANCE.getModContainers().stream().map(modContainer -> modContainer.getInfo().getId()).anyMatch(s -> s.equalsIgnoreCase("pluginloader"))) {
+        if (!FabricLoader.getInstance().isModLoaded("pluginloader")) {
             RoughlyEnoughItemsCore.LOGGER.warn("REI: Plugin Loader is not loaded! Please consider installing https://minecraft.curseforge.com/projects/pluginloader for REI plugin compatibility!");
             registerPlugin(new Identifier("roughlyenoughitems", "default_plugin"), new DefaultPlugin());
         }
