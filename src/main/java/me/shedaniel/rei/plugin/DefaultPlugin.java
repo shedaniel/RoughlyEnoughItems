@@ -48,7 +48,7 @@ public class DefaultPlugin implements REIPlugin {
     
     @Override
     public void onFirstLoad(PluginDisabler pluginDisabler) {
-        if (!RoughlyEnoughItemsCore.getConfigHelper().getConfig().loadDefaultPlugin) {
+        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().loadDefaultPlugin) {
             pluginDisabler.disablePluginFunction(PLUGIN, PluginFunction.REGISTER_ITEMS);
             pluginDisabler.disablePluginFunction(PLUGIN, PluginFunction.REGISTER_CATEGORIES);
             pluginDisabler.disablePluginFunction(PLUGIN, PluginFunction.REGISTER_RECIPE_DISPLAYS);

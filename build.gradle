@@ -1,20 +1,24 @@
+import net.fabricmc.loom.task.RemapJar
+
 plugins {
     id 'fabric-loom' version '0.2.0-SNAPSHOT'
+    id "com.github.johnrengelman.shadow" version "4.0.3"
 }
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
+group = "me.shedaniel"
 archivesBaseName = "RoughlyEnoughItems"
-version = "2.3.3.57"
-
-def minecraftVersion = "19w09a"
-def yarnVersion = "19w09a.4"
-def fabricVersion = "0.2.3.108"
-def fabricLoaderVersion = "0.3.7.109"
-def pluginLoaderVersion = "1.14-1.0.6-8"
+version = project.modVersion
 
 minecraft {
+}
+
+repositories {
+    maven { url "https://tehnut.info/maven/" }
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+    maven { url "https://maven.jamieswhiteshirt.com/libs-release/" }
 }
 
 processResources {
@@ -24,17 +28,29 @@ processResources {
     inputs.property "version", project.version
 }
 
-repositories {
-    maven { url "https://tehnut.info/maven/" }
+configurations {
+    contained {
+        transitive = false
+    }
 }
 
+shadowJar {
+    configurations = [project.configurations.contained]
+}
+
+task remapShadowJar(type: RemapJar) {
+    jar = shadowJar.archivePath
+}
+tasks.remapShadowJar.dependsOn tasks.shadowJar
+
 dependencies {
-    minecraft "com.mojang:minecraft:${minecraftVersion}"
-    mappings "net.fabricmc:yarn:${yarnVersion}"
-    modCompile "net.fabricmc:fabric-loader:${fabricLoaderVersion}"
+    minecraft "com.mojang:minecraft:${project.minecraftVersion}"
+    mappings "net.fabricmc:yarn:${project.yarnVersion}"
+    modCompile "net.fabricmc:fabric-loader:${project.fabricLoaderVersion}"
+    modCompile "com.jamieswhiteshirt:developer-mode:${project.developerModeVersion}"
+    modCompile "info.tehnut.pluginloader:plugin-loader:${project.pluginLoaderVersion}"
+    modCompile "net.fabricmc:fabric:${project.fabricVersion}"
 
-    // Fabric API. This is technically optional, but you probably want it anyway.
-    modCompile "net.fabricmc:fabric:${fabricVersion}"
-
-    modCompile "info.tehnut.pluginloader:plugin-loader:${pluginLoaderVersion}"
+    compile "blue.endless:jankson:${project.janksonVersion}"
+    contained "blue.endless:jankson:${project.janksonVersion}"
 }

@@ -3,8 +3,8 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.api.RelativePoint;
-import me.shedaniel.rei.client.ConfigHelper;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GuiLighting;
@@ -38,7 +38,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     
     private static Point getPointFromConfig() {
         Window window = MinecraftClient.getInstance().window;
-        RelativePoint point = RoughlyEnoughItemsCore.getConfigHelper().getConfig().choosePageDialogPoint;
+        RelativePoint point = RoughlyEnoughItemsCore.getConfigManager().getConfig().choosePageDialogPoint;
         return new Point((int) point.getX(window.getScaledWidth()), (int) point.getY(window.getScaledHeight()));
     }
     
@@ -175,11 +175,11 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     
     @Override
     public void onMouseReleaseMidPoint(Point midPoint) {
-        ConfigHelper configHelper = RoughlyEnoughItemsCore.getConfigHelper();
+        ConfigManager configManager = RoughlyEnoughItemsCore.getConfigManager();
         Window window = MinecraftClient.getInstance().window;
-        configHelper.getConfig().choosePageDialogPoint = new RelativePoint(midPoint.getX() / window.getScaledWidth(), midPoint.getY() / window.getScaledHeight());
+        configManager.getConfig().choosePageDialogPoint = new RelativePoint(midPoint.getX() / window.getScaledWidth(), midPoint.getY() / window.getScaledHeight());
         try {
-            configHelper.saveConfig();
+            configManager.saveConfig();
         } catch (IOException e) {
             e.printStackTrace();
         }
