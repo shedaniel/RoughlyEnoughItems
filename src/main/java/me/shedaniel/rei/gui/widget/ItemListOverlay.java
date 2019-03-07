@@ -5,7 +5,7 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
-import me.shedaniel.rei.client.REIItemListOrdering;
+import me.shedaniel.rei.client.ItemListOrdering;
 import me.shedaniel.rei.client.SearchArgument;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
@@ -103,16 +103,16 @@ public class ItemListOverlay extends DrawableHelper implements IWidget {
         List<ItemStack> os = new LinkedList<>(ol), stacks = Lists.newArrayList(), finalStacks = Lists.newArrayList();
         List<ItemGroup> itemGroups = new LinkedList<>(Arrays.asList(ItemGroup.GROUPS));
         itemGroups.add(null);
-        REIItemListOrdering ordering = RoughlyEnoughItemsCore.getConfigHelper().getConfig().itemListOrdering;
-        if (ordering != REIItemListOrdering.REGISTRY)
+        ItemListOrdering ordering = RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering;
+        if (ordering != ItemListOrdering.registry)
             Collections.sort(os, (itemStack, t1) -> {
-                if (ordering.equals(REIItemListOrdering.NAME))
+                if (ordering.equals(ItemListOrdering.name))
                     return itemStack.getDisplayName().getFormattedText().compareToIgnoreCase(t1.getDisplayName().getFormattedText());
-                if (ordering.equals(REIItemListOrdering.ITEM_GROUPS))
+                if (ordering.equals(ItemListOrdering.item_groups))
                     return itemGroups.indexOf(itemStack.getItem().getItemGroup()) - itemGroups.indexOf(t1.getItem().getItemGroup());
                 return 0;
             });
-        if (!RoughlyEnoughItemsCore.getConfigHelper().getConfig().isAscending)
+        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isAscending)
             Collections.reverse(os);
         String[] splitSearchTerm = StringUtils.splitByWholeSeparatorPreserveAllTokens(searchTerm, "|");
         Arrays.stream(splitSearchTerm).forEachOrdered(s -> {
@@ -135,14 +135,14 @@ public class ItemListOverlay extends DrawableHelper implements IWidget {
         });
         if (splitSearchTerm.length == 0)
             stacks.addAll(os);
-        List<ItemStack> workingItems = RoughlyEnoughItemsCore.getConfigHelper().craftableOnly() && inventoryItems.size() > 0 ? new ArrayList<>() : new LinkedList<>(ol);
-        if (RoughlyEnoughItemsCore.getConfigHelper().craftableOnly()) {
+        List<ItemStack> workingItems = RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() && inventoryItems.size() > 0 ? new ArrayList<>() : new LinkedList<>(ol);
+        if (RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled()) {
             RecipeHelper.getInstance().findCraftableByItems(inventoryItems).forEach(workingItems::add);
             workingItems.addAll(inventoryItems);
         }
         final List<ItemStack> finalWorkingItems = workingItems;
         finalStacks.addAll(stacks.stream().filter(itemStack -> {
-            if (!RoughlyEnoughItemsCore.getConfigHelper().craftableOnly())
+            if (!RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled())
                 return true;
             for(ItemStack workingItem : finalWorkingItems)
                 if (itemStack.isEqualIgnoreTags(workingItem))

@@ -35,14 +35,14 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
     private static final PluginDisabler PLUGIN_DISABLER = new PluginDisablerImpl();
     private static final ItemRegistry ITEM_REGISTRY = new ItemRegistryImpl();
     private static final Map<Identifier, REIPlugin> plugins = Maps.newHashMap();
-    private static ConfigHelper configHelper;
+    private static ConfigManager configManager;
     
     public static RecipeHelper getRecipeHelper() {
         return RECIPE_HELPER;
     }
     
-    public static ConfigHelper getConfigHelper() {
-        return configHelper;
+    public static me.shedaniel.rei.api.ConfigManager getConfigManager() {
+        return configManager;
     }
     
     public static ItemRegistry getItemRegisterer() {
@@ -74,7 +74,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
     @SuppressWarnings("deprecation")
     @Override
     public void onInitializeClient() {
-        configHelper = new ConfigHelper();
+        configManager = new ConfigManager();
         
         // If pluginloader is not installed, base functionality should still remain
         if (!FabricLoader.getInstance().isModLoaded("pluginloader")) {
