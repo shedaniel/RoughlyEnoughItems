@@ -53,6 +53,7 @@
   "text.rei.config.appearance": "Appearance",
   "text.rei.config.modules": "Modules",
   "text.rei.config.advanced": "Advanced",
+  "text.rei.config.disable_recipe_book": "Disable Recipe Book:",
   "text.rei.choose_page": "Choose Page",
   "text.rei.config.disable_credits_button": "Disable Credits Button:",
   "text.rei.config.max_recipes_per_page": "Maximum Recipes Each Page:",

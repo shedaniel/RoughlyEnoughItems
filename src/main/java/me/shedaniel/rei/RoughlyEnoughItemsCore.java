@@ -81,8 +81,6 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
             RoughlyEnoughItemsCore.LOGGER.warn("REI: Plugin Loader is not loaded! Please consider installing https://minecraft.curseforge.com/projects/pluginloader for REI plugin compatibility!");
             registerPlugin(new Identifier("roughlyenoughitems", "default_plugin"), new DefaultPlugin());
         }
-        
-        ClientTickCallback.EVENT.register(GuiHelper::onTick);
     }
     
     @Override

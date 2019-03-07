@@ -43,6 +43,9 @@ public class ConfigObject {
     @Comment("Toggle utils buttons")
     public boolean showUtilsButtons = false;
     
+    @Comment("Disable Recipe Book")
+    public boolean disableRecipeBook = false;
+    
     @Comment("The location of choose page dialog")
     public RelativePoint choosePageDialogPoint = new RelativePoint(.5, .5);
     

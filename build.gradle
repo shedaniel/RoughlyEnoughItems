@@ -3,6 +3,7 @@ import net.fabricmc.loom.task.RemapJar
 plugins {
     id 'fabric-loom' version '0.2.0-SNAPSHOT'
     id "com.github.johnrengelman.shadow" version "4.0.3"
+    id "com.matthewprenger.cursegradle" version "1.1.2"
 }
 
 sourceCompatibility = 1.8
@@ -53,4 +54,34 @@ dependencies {
 
     compile "blue.endless:jankson:${project.janksonVersion}"
     contained "blue.endless:jankson:${project.janksonVersion}"
+}
+
+curseforge {
+    if (project.hasProperty("curseForgeApiKey")) {
+        apiKey = project.properties.curseForgeApiKey
+    }
+    project {
+        id = "310111"
+        changelogType = "markdown"
+        changelog = file("CHANGELOG.md")
+        releaseType = "release"
+        addGameVersion "1.14-Snapshot"
+        mainArtifact(remapShadowJar.jar) {
+            displayName = "[Fabric $project.minecraftVersion] v$project.version"
+            relations {
+                requiredDependency "fabric"
+                optionalDependency "pluginloader"
+                tool "rei-addons"
+            }
+        }
+    }
+    options {
+        forgeGradleIntegration = false
+    }
+}
+
+afterEvaluate {
+    // CurseGradle generates tasks in afterEvaluate for each project
+    // There isn't really any other way to make it depend on a task unless it is an AbstractArchiveTask
+    tasks.curseforge310111.dependsOn remapShadowJar
 }

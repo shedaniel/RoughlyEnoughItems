@@ -207,6 +207,25 @@ public class ConfigScreen extends Screen {
                 return getTrueFalseText(RoughlyEnoughItemsCore.getConfigManager().getConfig().showUtilsButtons);
             }
         }));
+        entryListWidget.configAddEntry(new ConfigEntry.ButtonConfigEntry(new TranslatableTextComponent("text.rei.config.disable_recipe_book"), new ConfigEntry.ButtonConfigEntry.ConfigEntryButtonProvider() {
+            @Override
+            public boolean onPressed(int button, double mouseX, double mouseY) {
+                if (button == 0)
+                    RoughlyEnoughItemsCore.getConfigManager().getConfig().disableRecipeBook = !RoughlyEnoughItemsCore.getConfigManager().getConfig().disableRecipeBook;
+                try {
+                    RoughlyEnoughItemsCore.getConfigManager().saveConfig();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return false;
+                }
+                return true;
+            }
+        
+            @Override
+            public String getText() {
+                return getTrueFalseText(RoughlyEnoughItemsCore.getConfigManager().getConfig().disableRecipeBook);
+            }
+        }));
         entryListWidget.configAddEntry(new ConfigEntry.CategoryTitleConfigEntry(new TranslatableTextComponent("text.rei.config.advanced")));
         entryListWidget.configAddEntry(new ConfigEntry.TextFieldConfigEntry(new TranslatableTextComponent("text.rei.give_command"), new ConfigEntry.TextFieldConfigEntry.ConfigEntryTextFieldProvider() {
             @Override
