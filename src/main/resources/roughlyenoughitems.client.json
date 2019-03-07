@@ -4,6 +4,7 @@
   "minVersion": "0.7.11",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "MixinScreen",
     "MixinContainerScreen",
     "MixinClientPlayNetworkHandler",
     "MixinPlayerInventoryScreen",
