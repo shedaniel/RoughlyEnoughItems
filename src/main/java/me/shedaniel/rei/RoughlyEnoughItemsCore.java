@@ -72,7 +72,6 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
         return Optional.empty();
     }
     
-    @SuppressWarnings("deprecation")
     @Override
     public void onInitializeClient() {
         configManager = new ConfigManager();
