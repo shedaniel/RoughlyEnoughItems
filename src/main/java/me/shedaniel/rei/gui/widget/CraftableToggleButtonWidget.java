@@ -1,7 +1,6 @@
 package me.shedaniel.rei.gui.widget;
 
-import me.shedaniel.rei.client.ClientHelper;
-import me.shedaniel.rei.client.ConfigHelper;
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.GuiHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -13,7 +12,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 
 import java.awt.*;
-import java.util.Arrays;
 
 public abstract class CraftableToggleButtonWidget extends ButtonWidget {
     
@@ -41,14 +39,14 @@ public abstract class CraftableToggleButtonWidget extends ButtonWidget {
         Minecraft.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.zLevel = 100f;
-        this.drawTexturedModalRect(getBounds().x, getBounds().y, (56 + (ConfigHelper.getInstance().craftableOnly() ? 0 : 20)), 202, 20, 20);
+        this.drawTexturedModalRect(getBounds().x, getBounds().y, (56 + (RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() ? 0 : 20)), 202, 20, 20);
         this.zLevel = 0f;
         if (getBounds().contains(mouseX, mouseY))
             drawTooltip();
     }
     
     private void drawTooltip() {
-        GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.format(ConfigHelper.getInstance().craftableOnly() ? "text.rei.showing_craftable" : "text.rei.showing_all"))));
+        GuiHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.format(RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() ? "text.rei.showing_craftable" : "text.rei.showing_all")));
     }
     
 }

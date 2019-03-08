@@ -2,10 +2,9 @@ package me.shedaniel.rei.client;
 
 import com.google.common.collect.ImmutableList;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.IRecipeCategory;
-import me.shedaniel.rei.api.IRecipeDisplay;
+import me.shedaniel.rei.api.RecipeCategory;
+import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.api.RecipeHelper;
-import me.shedaniel.rei.gui.ContainerGuiOverlay;
 import me.shedaniel.rei.gui.RecipeViewingGui;
 import me.shedaniel.rei.gui.config.ConfigGui;
 import me.shedaniel.rei.network.CreateItemsPacket;
@@ -22,6 +21,7 @@ import net.minecraft.util.registry.IRegistry;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.awt.*;
 import java.io.IOException;
@@ -33,7 +33,7 @@ public class ClientHelper {
     
     public static String getModFromItemStack(ItemStack stack) {
         if (!stack.isEmpty()) {
-            ResourceLocation location = IRegistry.field_212630_s.getKey(stack.getItem());
+            ResourceLocation location = ForgeRegistries.ITEMS.getKey(stack.getItem());
             assert location != null;
             String modid = location.getNamespace();
             if (modid.equalsIgnoreCase("minecraft"))
@@ -52,13 +52,13 @@ public class ClientHelper {
     }
     
     public static boolean isCheating() {
-        return RoughlyEnoughItemsCore.getConfigHelper().getConfig().cheating;
+        return RoughlyEnoughItemsCore.getConfigManager().getConfig().cheating;
     }
     
     public static void setCheating(boolean cheating) {
-        RoughlyEnoughItemsCore.getConfigHelper().getConfig().cheating = cheating;
+        RoughlyEnoughItemsCore.getConfigManager().getConfig().cheating = cheating;
         try {
-            RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
+            RoughlyEnoughItemsCore.getConfigManager().saveConfig();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -85,7 +85,7 @@ public class ClientHelper {
         } else {
             ResourceLocation location = IRegistry.field_212630_s.getKey(cheatedStack.getItem());
             String tagMessage = cheatedStack.copy().getTag() != null && !cheatedStack.copy().getTag().isEmpty() ? cheatedStack.copy().getTag().toString() : "";
-            String og = cheatedStack.getCount() != 1 ? RoughlyEnoughItemsCore.getConfigHelper().getConfig().giveCommand.replaceAll(" \\{count}", "").replaceAll("\\{count}", "") : RoughlyEnoughItemsCore.getConfigHelper().getConfig().giveCommand;
+            String og = cheatedStack.getCount() != 1 ? RoughlyEnoughItemsCore.getConfigManager().getConfig().giveCommand.replaceAll(" \\{count}", "").replaceAll("\\{count}", "") : RoughlyEnoughItemsCore.getConfigManager().getConfig().giveCommand;
             String madeUpCommand = og.replaceAll("\\{player_name}", Minecraft.getInstance().player.getScoreboardName()).replaceAll("\\{item_identifier}", location.toString()).replaceAll("\\{nbt}", tagMessage).replaceAll("\\{count}", String.valueOf(cheatedStack.getCount()));
             if (madeUpCommand.length() > 256) {
                 madeUpCommand = og.replaceAll("\\{player_name}", Minecraft.getInstance().player.getScoreboardName()).replaceAll("\\{item_identifier}", location.toString()).replaceAll("\\{nbt}", "").replaceAll("\\{count}", String.valueOf(cheatedStack.getCount()));
@@ -97,15 +97,15 @@ public class ClientHelper {
         }
     }
     
-    public static boolean executeRecipeKeyBind(ContainerGuiOverlay overlay, ItemStack stack) {
-        Map<IRecipeCategory, List<IRecipeDisplay>> map = RecipeHelper.getInstance().getRecipesFor(stack);
+    public static boolean executeRecipeKeyBind(ItemStack stack) {
+        Map<RecipeCategory, List<RecipeDisplay>> map = RecipeHelper.getInstance().getRecipesFor(stack);
         if (map.keySet().size() > 0)
             Minecraft.getInstance().displayGuiScreen(new RecipeViewingGui(Minecraft.getInstance().mainWindow, map));
         return map.keySet().size() > 0;
     }
     
-    public static boolean executeUsageKeyBind(ContainerGuiOverlay overlay, ItemStack stack) {
-        Map<IRecipeCategory, List<IRecipeDisplay>> map = RecipeHelper.getInstance().getUsagesFor(stack);
+    public static boolean executeUsageKeyBind(ItemStack stack) {
+        Map<RecipeCategory, List<RecipeDisplay>> map = RecipeHelper.getInstance().getUsagesFor(stack);
         if (map.keySet().size() > 0)
             Minecraft.getInstance().displayGuiScreen(new RecipeViewingGui(Minecraft.getInstance().mainWindow, map));
         return map.keySet().size() > 0;
@@ -115,8 +115,8 @@ public class ClientHelper {
         Minecraft.getInstance().displayGuiScreen(new ConfigGui(parent));
     }
     
-    public static boolean executeViewAllRecipesKeyBind(ContainerGuiOverlay overlay) {
-        Map<IRecipeCategory, List<IRecipeDisplay>> map = RecipeHelper.getInstance().getAllRecipes();
+    public static boolean executeViewAllRecipesKeyBind() {
+        Map<RecipeCategory, List<RecipeDisplay>> map = RecipeHelper.getInstance().getAllRecipes();
         if (map.keySet().size() > 0)
             Minecraft.getInstance().displayGuiScreen(new RecipeViewingGui(Minecraft.getInstance().mainWindow, map));
         return map.keySet().size() > 0;

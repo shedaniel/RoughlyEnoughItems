@@ -1,9 +1,11 @@
 package me.shedaniel.rei.gui.config;
 
+import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
-import me.shedaniel.rei.client.REIItemListOrdering;
+import me.shedaniel.rei.client.ItemListOrdering;
+import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
@@ -16,13 +18,16 @@ import net.minecraft.util.text.TextComponentTranslation;
 import java.awt.*;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
 public class ConfigGui extends GuiScreen {
     
+    private final List<QueuedTooltip> tooltipList;
     private GuiScreen parent;
     private ConfigEntryListWidget entryListWidget;
     
     public ConfigGui(GuiScreen parent) {
+        this.tooltipList = Lists.newArrayList();
         this.parent = parent;
     }
     
@@ -60,9 +65,9 @@ public class ConfigGui extends GuiScreen {
             @Override
             public boolean onPressed(int button, double mouseX, double mouseY) {
                 if (button == 0)
-                    RoughlyEnoughItemsCore.getConfigHelper().getConfig().sideSearchField = !RoughlyEnoughItemsCore.getConfigHelper().getConfig().sideSearchField;
+                    RoughlyEnoughItemsCore.getConfigManager().getConfig().sideSearchField = !RoughlyEnoughItemsCore.getConfigManager().getConfig().sideSearchField;
                 try {
-                    RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
+                    RoughlyEnoughItemsCore.getConfigManager().saveConfig();
                 } catch (IOException e) {
                     e.printStackTrace();
                     return false;
@@ -72,20 +77,20 @@ public class ConfigGui extends GuiScreen {
             
             @Override
             public String getText() {
-                return getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().getConfig().sideSearchField);
+                return getTrueFalseText(RoughlyEnoughItemsCore.getConfigManager().getConfig().sideSearchField);
             }
         }));
         entryListWidget.configAddEntry(new ConfigEntry.ButtonConfigEntry(new TextComponentTranslation("text.rei.config.list_ordering"), new ConfigEntry.ButtonConfigEntry.ConfigEntryButtonProvider() {
             @Override
             public boolean onPressed(int button, double mouseX, double mouseY) {
-                int index = Arrays.asList(REIItemListOrdering.values()).indexOf(RoughlyEnoughItemsCore.getConfigHelper().getConfig().itemListOrdering) + 1;
-                if (index >= REIItemListOrdering.values().length) {
+                int index = Arrays.asList(ItemListOrdering.values()).indexOf(RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering) + 1;
+                if (index >= ItemListOrdering.values().length) {
                     index = 0;
-                    RoughlyEnoughItemsCore.getConfigHelper().getConfig().isAscending = !RoughlyEnoughItemsCore.getConfigHelper().getConfig().isAscending;
+                    RoughlyEnoughItemsCore.getConfigManager().getConfig().isAscending = !RoughlyEnoughItemsCore.getConfigManager().getConfig().isAscending;
                 }
-                RoughlyEnoughItemsCore.getConfigHelper().getConfig().itemListOrdering = REIItemListOrdering.values()[index];
+                RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering = ItemListOrdering.values()[index];
                 try {
-                    RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
+                    RoughlyEnoughItemsCore.getConfigManager().saveConfig();
                 } catch (IOException e) {
                     e.printStackTrace();
                     return false;
@@ -95,16 +100,16 @@ public class ConfigGui extends GuiScreen {
             
             @Override
             public String getText() {
-                return I18n.format("text.rei.config.list_ordering_button", I18n.format(RoughlyEnoughItemsCore.getConfigHelper().getConfig().itemListOrdering.getNameTranslationKey()), I18n.format(RoughlyEnoughItemsCore.getConfigHelper().getConfig().isAscending ? "ordering.rei.ascending" : "ordering.rei.descending"));
+                return I18n.format("text.rei.config.list_ordering_button", I18n.format(RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering.getNameTranslationKey()), I18n.format(RoughlyEnoughItemsCore.getConfigManager().getConfig().isAscending ? "ordering.rei.ascending" : "ordering.rei.descending"));
             }
         }));
         entryListWidget.configAddEntry(new ConfigEntry.ButtonConfigEntry(new TextComponentTranslation("text.rei.config.mirror_rei"), new ConfigEntry.ButtonConfigEntry.ConfigEntryButtonProvider() {
             @Override
             public boolean onPressed(int button, double mouseX, double mouseY) {
                 if (button == 0)
-                    RoughlyEnoughItemsCore.getConfigHelper().getConfig().mirrorItemPanel = !RoughlyEnoughItemsCore.getConfigHelper().getConfig().mirrorItemPanel;
+                    RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel = !RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel;
                 try {
-                    RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
+                    RoughlyEnoughItemsCore.getConfigManager().saveConfig();
                 } catch (IOException e) {
                     e.printStackTrace();
                     return false;
@@ -114,7 +119,7 @@ public class ConfigGui extends GuiScreen {
             
             @Override
             public String getText() {
-                return getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().getConfig().mirrorItemPanel);
+                return getTrueFalseText(RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel);
             }
         }));
         entryListWidget.configAddEntry(new ConfigEntry.CategoryTitleConfigEntry(new TextComponentTranslation("text.rei.config.modules")));
@@ -122,9 +127,9 @@ public class ConfigGui extends GuiScreen {
             @Override
             public boolean onPressed(int button, double mouseX, double mouseY) {
                 if (button == 0)
-                    RoughlyEnoughItemsCore.getConfigHelper().getConfig().enableCraftableOnlyButton = !RoughlyEnoughItemsCore.getConfigHelper().getConfig().enableCraftableOnlyButton;
+                    RoughlyEnoughItemsCore.getConfigManager().getConfig().enableCraftableOnlyButton = !RoughlyEnoughItemsCore.getConfigManager().getConfig().enableCraftableOnlyButton;
                 try {
-                    RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
+                    RoughlyEnoughItemsCore.getConfigManager().saveConfig();
                 } catch (IOException e) {
                     e.printStackTrace();
                     return false;
@@ -134,16 +139,16 @@ public class ConfigGui extends GuiScreen {
             
             @Override
             public String getText() {
-                return getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().getConfig().enableCraftableOnlyButton);
+                return getTrueFalseText(RoughlyEnoughItemsCore.getConfigManager().getConfig().enableCraftableOnlyButton);
             }
         }));
         entryListWidget.configAddEntry(new ConfigEntry.ButtonConfigEntry(new TextComponentTranslation("text.rei.config.load_default_plugin"), new ConfigEntry.ButtonConfigEntry.ConfigEntryButtonProvider() {
             @Override
             public boolean onPressed(int button, double mouseX, double mouseY) {
                 if (button == 0)
-                    RoughlyEnoughItemsCore.getConfigHelper().getConfig().loadDefaultPlugin = !RoughlyEnoughItemsCore.getConfigHelper().getConfig().loadDefaultPlugin;
+                    RoughlyEnoughItemsCore.getConfigManager().getConfig().loadDefaultPlugin = !RoughlyEnoughItemsCore.getConfigManager().getConfig().loadDefaultPlugin;
                 try {
-                    RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
+                    RoughlyEnoughItemsCore.getConfigManager().saveConfig();
                 } catch (IOException e) {
                     e.printStackTrace();
                     return false;
@@ -153,7 +158,7 @@ public class ConfigGui extends GuiScreen {
             
             @Override
             public String getText() {
-                return getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().getConfig().loadDefaultPlugin);
+                return getTrueFalseText(RoughlyEnoughItemsCore.getConfigManager().getConfig().loadDefaultPlugin);
             }
             
             @Override
@@ -161,7 +166,7 @@ public class ConfigGui extends GuiScreen {
                 button.draw(mouse.x, mouse.y, delta);
                 if (button.isHighlighted(mouse)) {
                     RenderHelper.disableStandardItemLighting();
-                    drawHoveringText(Arrays.asList(I18n.format("text.rei.config.load_default_plugin.restart_tooltip").split("\n")), mouse.x, mouse.y);
+                    tooltipList.add(QueuedTooltip.create(I18n.format("text.rei.config.load_default_plugin.restart_tooltip").split("\n")));
                     RenderHelper.disableStandardItemLighting();
                 }
             }
@@ -170,9 +175,9 @@ public class ConfigGui extends GuiScreen {
             @Override
             public boolean onPressed(int button, double mouseX, double mouseY) {
                 if (button == 0)
-                    RoughlyEnoughItemsCore.getConfigHelper().getConfig().disableCreditsButton = !RoughlyEnoughItemsCore.getConfigHelper().getConfig().disableCreditsButton;
+                    RoughlyEnoughItemsCore.getConfigManager().getConfig().disableCreditsButton = !RoughlyEnoughItemsCore.getConfigManager().getConfig().disableCreditsButton;
                 try {
-                    RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
+                    RoughlyEnoughItemsCore.getConfigManager().saveConfig();
                 } catch (IOException e) {
                     e.printStackTrace();
                     return false;
@@ -182,16 +187,16 @@ public class ConfigGui extends GuiScreen {
             
             @Override
             public String getText() {
-                return getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().getConfig().disableCreditsButton);
+                return getTrueFalseText(RoughlyEnoughItemsCore.getConfigManager().getConfig().disableCreditsButton);
             }
         }));
         entryListWidget.configAddEntry(new ConfigEntry.ButtonConfigEntry(new TextComponentTranslation("text.rei.config.enable_util_buttons"), new ConfigEntry.ButtonConfigEntry.ConfigEntryButtonProvider() {
             @Override
             public boolean onPressed(int button, double mouseX, double mouseY) {
                 if (button == 0)
-                    RoughlyEnoughItemsCore.getConfigHelper().getConfig().showUtilsButtons = !RoughlyEnoughItemsCore.getConfigHelper().getConfig().showUtilsButtons;
+                    RoughlyEnoughItemsCore.getConfigManager().getConfig().showUtilsButtons = !RoughlyEnoughItemsCore.getConfigManager().getConfig().showUtilsButtons;
                 try {
-                    RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
+                    RoughlyEnoughItemsCore.getConfigManager().saveConfig();
                 } catch (IOException e) {
                     e.printStackTrace();
                     return false;
@@ -201,42 +206,23 @@ public class ConfigGui extends GuiScreen {
             
             @Override
             public String getText() {
-                return getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().getConfig().showUtilsButtons);
+                return getTrueFalseText(RoughlyEnoughItemsCore.getConfigManager().getConfig().showUtilsButtons);
             }
         }));
         entryListWidget.configAddEntry(new ConfigEntry.CategoryTitleConfigEntry(new TextComponentTranslation("text.rei.config.advanced")));
-        entryListWidget.configAddEntry(new ConfigEntry.ButtonConfigEntry(new TextComponentTranslation("text.rei.check_updates"), new ConfigEntry.ButtonConfigEntry.ConfigEntryButtonProvider() {
-            @Override
-            public boolean onPressed(int button, double mouseX, double mouseY) {
-                if (button == 0)
-                    RoughlyEnoughItemsCore.getConfigHelper().getConfig().checkUpdates = !RoughlyEnoughItemsCore.getConfigHelper().getConfig().checkUpdates;
-                try {
-                    RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return false;
-                }
-                return true;
-            }
-            
-            @Override
-            public String getText() {
-                return getTrueFalseText(RoughlyEnoughItemsCore.getConfigHelper().getConfig().checkUpdates);
-            }
-        }));
         entryListWidget.configAddEntry(new ConfigEntry.TextFieldConfigEntry(new TextComponentTranslation("text.rei.give_command"), new ConfigEntry.TextFieldConfigEntry.ConfigEntryTextFieldProvider() {
             @Override
             public void onInitWidget(TextFieldWidget widget) {
                 widget.setMaxLength(99999);
-                widget.setText(RoughlyEnoughItemsCore.getConfigHelper().getConfig().giveCommand);
+                widget.setText(RoughlyEnoughItemsCore.getConfigManager().getConfig().giveCommand);
                 widget.setSuggestion(I18n.format("text.rei.give_command.suggestion"));
             }
             
             @Override
             public void onUpdateText(TextFieldWidget button, String text) {
-                RoughlyEnoughItemsCore.getConfigHelper().getConfig().giveCommand = text;
+                RoughlyEnoughItemsCore.getConfigManager().getConfig().giveCommand = text;
                 try {
-                    RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
+                    RoughlyEnoughItemsCore.getConfigManager().saveConfig();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -247,7 +233,7 @@ public class ConfigGui extends GuiScreen {
                 widget.draw(mouse.x, mouse.y, delta);
                 if (widget.isHighlighted(mouse)) {
                     RenderHelper.disableStandardItemLighting();
-                    drawHoveringText(Arrays.asList(I18n.format("text.rei.give_command.tooltip").split("\n")), mouse.x, mouse.y);
+                    tooltipList.add(QueuedTooltip.create(I18n.format("text.rei.give_command.tooltip").split("\n")));
                     RenderHelper.disableStandardItemLighting();
                 }
             }
@@ -256,15 +242,33 @@ public class ConfigGui extends GuiScreen {
             @Override
             public void onInitWidget(TextFieldWidget widget) {
                 widget.setMaxLength(99999);
-                widget.setText(RoughlyEnoughItemsCore.getConfigHelper().getConfig().gamemodeCommand);
+                widget.setText(RoughlyEnoughItemsCore.getConfigManager().getConfig().gamemodeCommand);
                 widget.setSuggestion(I18n.format("text.rei.give_command.suggestion"));
             }
             
             @Override
             public void onUpdateText(TextFieldWidget button, String text) {
-                RoughlyEnoughItemsCore.getConfigHelper().getConfig().gamemodeCommand = text;
+                RoughlyEnoughItemsCore.getConfigManager().getConfig().gamemodeCommand = text;
                 try {
-                    RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
+                    RoughlyEnoughItemsCore.getConfigManager().saveConfig();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }));
+        entryListWidget.configAddEntry(new ConfigEntry.TextFieldConfigEntry(new TextComponentTranslation("text.rei.weather_command"), new ConfigEntry.TextFieldConfigEntry.ConfigEntryTextFieldProvider() {
+            @Override
+            public void onInitWidget(TextFieldWidget widget) {
+                widget.setMaxLength(99999);
+                widget.setText(RoughlyEnoughItemsCore.getConfigManager().getConfig().weatherCommand);
+                widget.setSuggestion(I18n.format("text.rei.give_command.suggestion"));
+            }
+            
+            @Override
+            public void onUpdateText(TextFieldWidget button, String text) {
+                RoughlyEnoughItemsCore.getConfigManager().getConfig().weatherCommand = text;
+                try {
+                    RoughlyEnoughItemsCore.getConfigManager().saveConfig();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -274,7 +278,7 @@ public class ConfigGui extends GuiScreen {
             @Override
             public void onInitWidget(TextFieldWidget widget) {
                 widget.setMaxLength(2);
-                widget.setText(RoughlyEnoughItemsCore.getConfigHelper().getConfig().maxRecipePerPage + "");
+                widget.setText(RoughlyEnoughItemsCore.getConfigManager().getConfig().maxRecipePerPage + "");
                 widget.stripInvaild = s -> {
                     StringBuilder stringBuilder_1 = new StringBuilder();
                     char[] var2 = s.toCharArray();
@@ -294,8 +298,8 @@ public class ConfigGui extends GuiScreen {
             public void onUpdateText(TextFieldWidget button, String text) {
                 if (isInvaildNumber(text))
                     try {
-                        RoughlyEnoughItemsCore.getConfigHelper().getConfig().maxRecipePerPage = Integer.valueOf(text);
-                        RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
+                        RoughlyEnoughItemsCore.getConfigManager().getConfig().maxRecipePerPage = Integer.valueOf(text);
+                        RoughlyEnoughItemsCore.getConfigManager().saveConfig();
                     } catch (Exception e) {
                     }
             }
@@ -319,7 +323,7 @@ public class ConfigGui extends GuiScreen {
             @Override
             public void onClick(double double_1, double double_2) {
                 try {
-                    RoughlyEnoughItemsCore.getConfigHelper().saveConfig();
+                    RoughlyEnoughItemsCore.getConfigManager().saveConfig();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -340,6 +344,10 @@ public class ConfigGui extends GuiScreen {
         this.entryListWidget.drawScreen(int_1, int_2, float_1);
         this.drawCenteredString(this.fontRenderer, I18n.format("text.rei.config"), this.width / 2, 16, 16777215);
         super.render(int_1, int_2, float_1);
+        RenderHelper.disableStandardItemLighting();
+        tooltipList.forEach(queuedTooltip -> drawHoveringText(queuedTooltip.getText(), queuedTooltip.getLocation().x, queuedTooltip.getLocation().y));
+        tooltipList.clear();
+        RenderHelper.disableStandardItemLighting();
     }
     
     @Override

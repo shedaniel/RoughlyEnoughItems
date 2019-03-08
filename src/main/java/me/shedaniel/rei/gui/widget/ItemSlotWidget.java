@@ -3,6 +3,7 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.GuiHelper;
+import me.shedaniel.rei.client.KeyBindHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
@@ -15,10 +16,9 @@ import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ItemSlotWidget extends Gui implements HighlightableWidget {
     
@@ -28,7 +28,7 @@ public class ItemSlotWidget extends Gui implements HighlightableWidget {
     private int x, y;
     
     public ItemSlotWidget(int x, int y, ItemStack itemStack, boolean drawBackground, boolean showToolTips) {
-        this(x, y, Arrays.asList(itemStack), drawBackground, showToolTips);
+        this(x, y, Collections.singletonList(itemStack), drawBackground, showToolTips);
     }
     
     public ItemSlotWidget(int x, int y, List<ItemStack> itemList, boolean drawBackground, boolean showToolTips) {
@@ -97,13 +97,11 @@ public class ItemSlotWidget extends Gui implements HighlightableWidget {
     protected List<String> getTooltip(ItemStack itemStack) {
         final String modString = "§9§o" + ClientHelper.getModFromItemStack(itemStack);
         Minecraft mc = Minecraft.getInstance();
-        List<String> toolTip = Lists.newArrayList();
-        try {
-            toolTip = Minecraft.getInstance().currentScreen.getItemToolTip(itemStack).stream().filter(s -> !s.equals(modString)).collect(Collectors.toList());
-        } catch (Exception e) {
-            toolTip.add(itemStack.getDisplayName().getFormattedText());
-        }
+        List<String> toolTip = Lists.newArrayList(ItemListOverlay.tryGetItemStackToolTip(itemStack));
         toolTip.addAll(getExtraToolTips(itemStack));
+        for(String s : Lists.newArrayList(toolTip))
+            if (s.equalsIgnoreCase(modString))
+                toolTip.remove(s);
         toolTip.add(modString);
         return toolTip;
     }
@@ -135,12 +133,23 @@ public class ItemSlotWidget extends Gui implements HighlightableWidget {
     public boolean onMouseClick(int button, double mouseX, double mouseY) {
         if (!clickToMoreRecipes)
             return false;
-        if (getBounds().contains(mouseX, mouseY)) {
+        if (getBounds().contains(mouseX, mouseY))
             if (button == 0)
-                return ClientHelper.executeRecipeKeyBind(GuiHelper.getLastOverlay(), getCurrentStack().copy());
+                return ClientHelper.executeRecipeKeyBind(getCurrentStack().copy());
             else if (button == 1)
-                return ClientHelper.executeUsageKeyBind(GuiHelper.getLastOverlay(), getCurrentStack().copy());
-        }
+                return ClientHelper.executeUsageKeyBind(getCurrentStack().copy());
+        return false;
+    }
+    
+    @Override
+    public boolean keyPressed(int int_1, int int_2, int int_3) {
+        if (!clickToMoreRecipes)
+            return false;
+        if (getBounds().contains(ClientHelper.getMouseLocation()))
+            if (KeyBindHelper.RECIPE.matchesKey(int_1, int_2))
+                return ClientHelper.executeRecipeKeyBind(getCurrentStack().copy());
+            else if (KeyBindHelper.USAGE.matchesKey(int_1, int_2))
+                return ClientHelper.executeUsageKeyBind(getCurrentStack());
         return false;
     }
     

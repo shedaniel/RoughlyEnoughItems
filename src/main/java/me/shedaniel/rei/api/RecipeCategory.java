@@ -1,10 +1,11 @@
 package me.shedaniel.rei.api;
 
+import me.shedaniel.rei.gui.RecipeViewingGui;
 import me.shedaniel.rei.gui.widget.IWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
-import me.shedaniel.rei.gui.RecipeViewingGui;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -12,56 +13,56 @@ import java.util.List;
 import java.util.function.Supplier;
 
 
-public interface IRecipeCategory<T extends IRecipeDisplay> {
+public interface RecipeCategory<T extends RecipeDisplay> {
     
-    public Identifier getIdentifier();
+    ResourceLocation getLocation();
     
-    public ItemStack getCategoryIcon();
+    ItemStack getCategoryIcon();
     
-    public String getCategoryName();
+    String getCategoryName();
     
-    default public List<IWidget> setupDisplay(Supplier<T> recipeDisplaySupplier, Rectangle bounds) {
+    default List<IWidget> setupDisplay(Supplier<T> recipeDisplaySupplier, Rectangle bounds) {
         return Arrays.asList(new RecipeBaseWidget(bounds));
     }
     
-    default public void drawCategoryBackground(Rectangle bounds, int mouseX, int mouseY, float delta) {
+    default void drawCategoryBackground(Rectangle bounds, int mouseX, int mouseY, float delta) {
         new RecipeBaseWidget(bounds).draw(mouseX, mouseY, delta);
         Gui.drawRect(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, RecipeViewingGui.SUB_COLOR.getRGB());
         Gui.drawRect(bounds.x + 17, bounds.y + 21, bounds.x + bounds.width - 17, bounds.y + 33, RecipeViewingGui.SUB_COLOR.getRGB());
     }
     
-    default public IDisplaySettings getDisplaySettings() {
-        return new IDisplaySettings<T>() {
+    default DisplaySettings getDisplaySettings() {
+        return new DisplaySettings<T>() {
             @Override
-            public int getDisplayHeight(IRecipeCategory category) {
+            public int getDisplayHeight(RecipeCategory category) {
                 return 66;
             }
             
             @Override
-            public int getDisplayWidth(IRecipeCategory category, T display) {
+            public int getDisplayWidth(RecipeCategory category, T display) {
                 return 150;
             }
             
             @Override
-            public int getMaximumRecipePerPage(IRecipeCategory category) {
+            public int getMaximumRecipePerPage(RecipeCategory category) {
                 return 99;
             }
         };
     }
     
-    default public int getDisplayHeight() {
+    default int getDisplayHeight() {
         return getDisplaySettings().getDisplayHeight(this);
     }
     
-    default public int getDisplayWidth(T display) {
+    default int getDisplayWidth(T display) {
         return getDisplaySettings().getDisplayWidth(this, display);
     }
     
-    default public int getMaximumRecipePerPage() {
+    default int getMaximumRecipePerPage() {
         return getDisplaySettings().getMaximumRecipePerPage(this);
     }
     
-    default public boolean checkTags() {
+    default boolean checkTags() {
         return false;
     }
     

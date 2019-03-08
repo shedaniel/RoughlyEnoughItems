@@ -1,8 +1,7 @@
 package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.rei.api.IRecipeCategory;
-import me.shedaniel.rei.api.Identifier;
+import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.gui.widget.IWidget;
 import me.shedaniel.rei.gui.widget.ItemSlotWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
@@ -20,12 +19,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class DefaultCraftingCategory implements IRecipeCategory<DefaultCraftingDisplay> {
+public class DefaultCraftingCategory implements RecipeCategory<DefaultCraftingDisplay> {
     
     private static final ResourceLocation DISPLAY_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/display.png");
     
     @Override
-    public Identifier getIdentifier() {
+    public ResourceLocation getLocation() {
         return DefaultPlugin.CRAFTING;
     }
     

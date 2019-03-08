@@ -2,9 +2,9 @@ package me.shedaniel.rei.api;
 
 import java.awt.*;
 
-public interface SpeedCraftAreaSupplier {
+public interface ButtonAreaSupplier {
     
-    public Rectangle get(Rectangle bounds);
+    Rectangle get(Rectangle bounds);
     
     default String getButtonText() {
         return "+";

@@ -3,14 +3,19 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.RecipeHelper;
-import me.shedaniel.rei.client.*;
+import me.shedaniel.rei.client.ClientHelper;
+import me.shedaniel.rei.client.GuiHelper;
+import me.shedaniel.rei.client.ItemListOrdering;
+import me.shedaniel.rei.client.SearchArgument;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.StringUtils;
 
 import java.awt.*;
@@ -21,6 +26,7 @@ import java.util.stream.Stream;
 
 public class ItemListOverlay extends Gui implements IWidget {
     
+    private static List<Item> searchBlacklisted = Lists.newArrayList();
     private List<IWidget> widgets;
     private int width, height, page;
     private Rectangle rectangle, listArea;
@@ -31,6 +37,33 @@ public class ItemListOverlay extends Gui implements IWidget {
         this.width = 0;
         this.height = 0;
         this.page = page;
+    }
+    
+    public static List<String> tryGetItemStackToolTip(ItemStack itemStack) {
+        if (!searchBlacklisted.contains(itemStack.getItem()))
+            try {
+                return Minecraft.getInstance().currentScreen.getItemToolTip(itemStack);
+            } catch (Throwable e) {
+                e.printStackTrace();
+                searchBlacklisted.add(itemStack.getItem());
+            }
+        return Collections.singletonList(tryGetItemStackName(itemStack));
+    }
+    
+    public static String tryGetItemStackName(ItemStack stack) {
+        if (!searchBlacklisted.contains(stack.getItem()))
+            try {
+                return stack.getDisplayName().getFormattedText();
+            } catch (Throwable e) {
+                e.printStackTrace();
+                searchBlacklisted.add(stack.getItem());
+            }
+        try {
+            return I18n.format("item." + ForgeRegistries.ITEMS.getKey(stack.getItem()).toString().replace(":", "."));
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+        return "ERROR";
     }
     
     public int getTotalSlotsPerPage() {
@@ -47,7 +80,7 @@ public class ItemListOverlay extends Gui implements IWidget {
     
     public void updateList(Rectangle bounds, int page, String searchTerm) {
         this.rectangle = bounds;
-        currentDisplayed = processSearchTerm(searchTerm, RoughlyEnoughItemsCore.getItemRegisterer().getItemList(), GuiHelper.inventoryStacks);
+        currentDisplayed = processSearchTerm(searchTerm, RoughlyEnoughItemsCore.getItemRegistry().getItemList(), GuiHelper.inventoryStacks);
         this.widgets = Lists.newLinkedList();
         this.page = page;
         calculateListSize(rectangle);
@@ -58,7 +91,7 @@ public class ItemListOverlay extends Gui implements IWidget {
             int j = i + page * getTotalSlotsPerPage();
             if (j >= currentDisplayed.size())
                 break;
-            ItemSlotWidget slotWidget = new ItemSlotWidget((int) (startX + (i % width) * 18), (int) (startY + MathHelper.floor(i / width) * 18), currentDisplayed.get(j), false, true) {
+            ItemSlotWidget slotWidget = new ItemSlotWidget((int) (startX + (i % width) * 18), (int) (startY + MathHelper.floor(i / width) * 18), Collections.singletonList(currentDisplayed.get(j)), false, true, true) {
                 @Override
                 protected void drawToolTip(ItemStack itemStack) {
                     EntityPlayerSP player = Minecraft.getInstance().player;
@@ -76,15 +109,23 @@ public class ItemListOverlay extends Gui implements IWidget {
                                 return ClientHelper.tryCheatingStack(cheatedStack);
                             }
                         } else if (button == 0)
-                            return ClientHelper.executeRecipeKeyBind(GuiHelper.getLastOverlay(), getCurrentStack().copy());
+                            return ClientHelper.executeRecipeKeyBind(getCurrentStack().copy());
                         else if (button == 1)
-                            return ClientHelper.executeUsageKeyBind(GuiHelper.getLastOverlay(), getCurrentStack().copy());
+                            return ClientHelper.executeUsageKeyBind(getCurrentStack().copy());
                     }
                     return false;
                 }
             };
             widgets.add(slotWidget);
         }
+    }
+    
+    @Override
+    public boolean keyPressed(int int_1, int int_2, int int_3) {
+        for(IWidget widget : widgets)
+            if (widget.keyPressed(int_1, int_2, int_3))
+                return true;
+        return false;
     }
     
     public List<ItemStack> getCurrentDisplayed() {
@@ -95,16 +136,16 @@ public class ItemListOverlay extends Gui implements IWidget {
         List<ItemStack> os = new LinkedList<>(ol), stacks = Lists.newArrayList(), finalStacks = Lists.newArrayList();
         List<ItemGroup> itemGroups = new LinkedList<>(Arrays.asList(ItemGroup.GROUPS));
         itemGroups.add(null);
-        REIItemListOrdering ordering = ConfigHelper.getInstance().getConfig().itemListOrdering;
-        if (ordering != REIItemListOrdering.REGISTRY)
+        ItemListOrdering ordering = RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering;
+        if (ordering != ItemListOrdering.registry)
             Collections.sort(os, (itemStack, t1) -> {
-                if (ordering.equals(REIItemListOrdering.NAME))
-                    return itemStack.getDisplayName().getFormattedText().compareToIgnoreCase(t1.getDisplayName().getFormattedText());
-                if (ordering.equals(REIItemListOrdering.ITEM_GROUPS))
+                if (ordering.equals(ItemListOrdering.name))
+                    return tryGetItemStackName(itemStack).compareToIgnoreCase(tryGetItemStackName(t1));
+                if (ordering.equals(ItemListOrdering.item_groups))
                     return itemGroups.indexOf(itemStack.getItem().getGroup()) - itemGroups.indexOf(t1.getItem().getGroup());
                 return 0;
             });
-        if (!ConfigHelper.getInstance().getConfig().isAscending)
+        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isAscending)
             Collections.reverse(os);
         String[] splitSearchTerm = StringUtils.splitByWholeSeparatorPreserveAllTokens(searchTerm, "|");
         Arrays.stream(splitSearchTerm).forEachOrdered(s -> {
@@ -127,14 +168,14 @@ public class ItemListOverlay extends Gui implements IWidget {
         });
         if (splitSearchTerm.length == 0)
             stacks.addAll(os);
-        List<ItemStack> workingItems = ConfigHelper.getInstance().craftableOnly() && inventoryItems.size() > 0 ? new ArrayList<>() : new LinkedList<>(ol);
-        if (ConfigHelper.getInstance().craftableOnly()) {
+        List<ItemStack> workingItems = RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() && inventoryItems.size() > 0 ? new ArrayList<>() : new LinkedList<>(ol);
+        if (RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled()) {
             RecipeHelper.getInstance().findCraftableByItems(inventoryItems).forEach(workingItems::add);
             workingItems.addAll(inventoryItems);
         }
         final List<ItemStack> finalWorkingItems = workingItems;
         finalStacks.addAll(stacks.stream().filter(itemStack -> {
-            if (!ConfigHelper.getInstance().craftableOnly())
+            if (!RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled())
                 return true;
             for(ItemStack workingItem : finalWorkingItems)
                 if (itemStack.isItemEqual(workingItem))
@@ -146,9 +187,9 @@ public class ItemListOverlay extends Gui implements IWidget {
     
     private boolean filterItem(ItemStack itemStack, List<SearchArgument> arguments) {
         String mod = ClientHelper.getModFromItemStack(itemStack);
-        List<String> toolTipsList = Minecraft.getInstance().currentScreen.getItemToolTip(itemStack);
+        List<String> toolTipsList = tryGetItemStackToolTip(itemStack);
         String toolTipsMixed = toolTipsList.stream().skip(1).collect(Collectors.joining()).toLowerCase();
-        String allMixed = Stream.of(itemStack.getDisplayName().getFormattedText(), toolTipsMixed).collect(Collectors.joining()).toLowerCase();
+        String allMixed = Stream.of(tryGetItemStackName(itemStack), toolTipsMixed).collect(Collectors.joining()).toLowerCase();
         for(SearchArgument searchArgument : arguments.stream().filter(searchArgument -> !searchArgument.isInclude()).collect(Collectors.toList())) {
             if (searchArgument.getArgumentType().equals(SearchArgument.ArgumentType.MOD))
                 if (mod.toLowerCase().contains(searchArgument.getText().toLowerCase()))

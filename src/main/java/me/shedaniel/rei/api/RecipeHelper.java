@@ -3,6 +3,7 @@ package me.shedaniel.rei.api;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.RecipeManager;
+import net.minecraft.util.ResourceLocation;
 
 import java.util.List;
 import java.util.Map;
@@ -10,34 +11,34 @@ import java.util.Optional;
 
 public interface RecipeHelper {
     
-    public static RecipeHelper getInstance() {
+    static RecipeHelper getInstance() {
         return RoughlyEnoughItemsCore.getRecipeHelper();
     }
     
-    public int getRecipeCount();
+    int getRecipeCount();
     
-    public List<ItemStack> findCraftableByItems(List<ItemStack> inventoryItems);
+    List<ItemStack> findCraftableByItems(List<ItemStack> inventoryItems);
     
-    public void registerCategory(IRecipeCategory category);
+    void registerCategory(RecipeCategory category);
     
-    public void registerDisplay(Identifier categoryIdentifier, IRecipeDisplay display);
+    void registerDisplay(ResourceLocation category, RecipeDisplay display);
     
-    public Map<IRecipeCategory, List<IRecipeDisplay>> getRecipesFor(ItemStack stack);
+    Map<RecipeCategory, List<RecipeDisplay>> getRecipesFor(ItemStack stack);
     
-    public RecipeManager getRecipeManager();
+    RecipeManager getRecipeManager();
     
-    public List<IRecipeCategory> getAllCategories();
+    List<RecipeCategory> getAllCategories();
     
-    public Map<IRecipeCategory, List<IRecipeDisplay>> getUsagesFor(ItemStack stack);
+    Map<RecipeCategory, List<RecipeDisplay>> getUsagesFor(ItemStack stack);
     
-    public Optional<SpeedCraftAreaSupplier> getSpeedCraftButtonArea(IRecipeCategory category);
+    Optional<ButtonAreaSupplier> getSpeedCraftButtonArea(RecipeCategory category);
     
-    public void registerSpeedCraftButtonArea(Identifier category, SpeedCraftAreaSupplier rectangle);
+    void registerSpeedCraftButtonArea(ResourceLocation category, ButtonAreaSupplier rectangle);
     
-    public List<SpeedCraftFunctional> getSpeedCraftFunctional(IRecipeCategory category);
+    List<SpeedCraftFunctional> getSpeedCraftFunctional(RecipeCategory category);
     
-    public void registerSpeedCraftFunctional(Identifier category, SpeedCraftFunctional functional);
+    void registerSpeedCraftFunctional(ResourceLocation category, SpeedCraftFunctional functional);
     
-    Map<IRecipeCategory, List<IRecipeDisplay>> getAllRecipes();
+    Map<RecipeCategory, List<RecipeDisplay>> getAllRecipes();
     
 }

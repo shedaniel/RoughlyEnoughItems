@@ -1,10 +1,10 @@
 package me.shedaniel.rei;
 
-import me.shedaniel.rei.api.IItemRegisterer;
+import me.shedaniel.rei.api.ItemRegistry;
 import me.shedaniel.rei.api.PluginDisabler;
 import me.shedaniel.rei.api.RecipeHelper;
-import me.shedaniel.rei.client.ConfigHelper;
-import me.shedaniel.rei.client.ItemListHelper;
+import me.shedaniel.rei.client.ConfigManager;
+import me.shedaniel.rei.client.ItemRegistryImpl;
 import me.shedaniel.rei.client.RecipeHelperImpl;
 import me.shedaniel.rei.plugin.PluginDisablerImpl;
 import net.minecraftforge.api.distmarker.Dist;
@@ -22,10 +22,10 @@ public class RoughlyEnoughItemsCore {
     public static final String MOD_ID = "roughlyenoughitems";
     
     public static final Logger LOGGER = LogManager.getFormatterLogger("roughlyenoughitems");
-    private static final RecipeHelperImpl RECIPE_HELPER = new RecipeHelperImpl();
-    private static final ItemListHelper ITEM_LIST_HELPER = new ItemListHelper();
-    private static final PluginDisablerImpl PLUGIN_MANAGER = new PluginDisablerImpl();
-    static ConfigHelper configHelper;
+    private static final RecipeHelper RECIPE_HELPER = new RecipeHelperImpl();
+    private static final ItemRegistry ITEM_REGISTRY = new ItemRegistryImpl();
+    private static final PluginDisabler PLUGIN_DISABLER = new PluginDisablerImpl();
+    static ConfigManager configManager;
     
     public RoughlyEnoughItemsCore() {
         DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> {
@@ -39,20 +39,20 @@ public class RoughlyEnoughItemsCore {
         });
     }
     
-    public static ConfigHelper getConfigHelper() {
-        return configHelper;
+    public static ConfigManager getConfigManager() {
+        return configManager;
     }
     
     public static RecipeHelper getRecipeHelper() {
         return RECIPE_HELPER;
     }
     
-    public static IItemRegisterer getItemRegisterer() {
-        return ITEM_LIST_HELPER;
+    public static ItemRegistry getItemRegistry() {
+        return ITEM_REGISTRY;
     }
     
     public static PluginDisabler getPluginDisabler() {
-        return PLUGIN_MANAGER;
+        return PLUGIN_DISABLER;
     }
     
 }

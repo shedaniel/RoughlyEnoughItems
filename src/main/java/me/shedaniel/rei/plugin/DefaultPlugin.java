@@ -3,7 +3,6 @@ package me.shedaniel.rei.plugin;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.client.ConfigHelper;
 import me.shedaniel.rei.utils.PotionRecipeUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -20,6 +19,7 @@ import net.minecraft.item.crafting.*;
 import net.minecraft.potion.PotionType;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IRegistryDelegate;
 
@@ -28,16 +28,16 @@ import java.util.*;
 import static me.shedaniel.rei.utils.RecipeBookUtils.getGhostRecipe;
 
 @IREIPlugin(identifier = "roughlyenoughitems:default_plugin")
-public class DefaultPlugin implements IRecipePlugin {
+public class DefaultPlugin implements REIPlugin {
     
-    public static final Identifier CRAFTING = new Identifier("roughlyenoughitems", "plugins/crafting");
-    public static final Identifier SMELTING = new Identifier("roughlyenoughitems", "plugins/smelting");
-    public static final Identifier BREWING = new Identifier("roughlyenoughitems", "plugins/brewing");
-    public static final Identifier PLUGIN = new Identifier("roughlyenoughitems", "default_plugin");
+    public static final ResourceLocation CRAFTING = new ResourceLocation("roughlyenoughitems", "plugins/crafting");
+    public static final ResourceLocation SMELTING = new ResourceLocation("roughlyenoughitems", "plugins/smelting");
+    public static final ResourceLocation BREWING = new ResourceLocation("roughlyenoughitems", "plugins/brewing");
+    public static final ResourceLocation PLUGIN = new ResourceLocation("roughlyenoughitems", "default_plugin");
     
     @Override
     public void onFirstLoad(PluginDisabler pluginDisabler) {
-        if (!ConfigHelper.getInstance().getConfig().loadDefaultPlugin) {
+        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().loadDefaultPlugin) {
             pluginDisabler.disablePluginFunction(PLUGIN, PluginFunction.REGISTER_ITEMS);
             pluginDisabler.disablePluginFunction(PLUGIN, PluginFunction.REGISTER_CATEGORIES);
             pluginDisabler.disablePluginFunction(PLUGIN, PluginFunction.REGISTER_RECIPE_DISPLAYS);
@@ -46,7 +46,7 @@ public class DefaultPlugin implements IRecipePlugin {
     }
     
     @Override
-    public void registerItems(IItemRegisterer itemRegisterer) {
+    public void registerItems(ItemRegistry itemRegisterer) {
         ForgeRegistries.ITEMS.forEach(o -> {
             try {
                 if (o instanceof Item) {
@@ -55,8 +55,6 @@ public class DefaultPlugin implements IRecipePlugin {
                         itemRegisterer.registerItemStack(item.getDefaultInstance());
                     } else {
                         Optional<NonNullList<ItemStack>> optionalStacks = itemRegisterer.getAlterativeStacks(item);
-                        if (optionalStacks.isPresent() && optionalStacks.get().size() > 1)
-                            RoughlyEnoughItemsCore.LOGGER.info("More than 1: %s, %d", ForgeRegistries.ITEMS.getKey(item).toString(), optionalStacks.get().size());
                         if (optionalStacks.isPresent())
                             itemRegisterer.registerItemStack(optionalStacks.get().toArray(new ItemStack[0]));
                         else
@@ -127,7 +125,7 @@ public class DefaultPlugin implements IRecipePlugin {
             }
         });
         List<ItemStack> arrowStack = Arrays.asList(Items.ARROW.getDefaultInstance());
-        RoughlyEnoughItemsCore.getItemRegisterer().getItemList().stream().filter(stack -> stack.getItem().equals(Items.LINGERING_POTION)).forEach(stack -> {
+        RoughlyEnoughItemsCore.getItemRegistry().getItemList().stream().filter(stack -> stack.getItem().equals(Items.LINGERING_POTION)).forEach(stack -> {
             List<List<ItemStack>> input = new ArrayList<>();
             for(int i = 0; i < 4; i++)
                 input.add(arrowStack);

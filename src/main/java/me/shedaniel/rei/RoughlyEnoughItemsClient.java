@@ -13,8 +13,6 @@ package me.shedaniel.rei;
 import me.shedaniel.rei.client.*;
 import me.shedaniel.rei.gui.ContainerGuiOverlay;
 import me.shedaniel.rei.gui.config.ConfigGui;
-import me.shedaniel.rei.update.UpdateAnnouncer;
-import me.shedaniel.rei.update.UpdateChecker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.gui.inventory.GuiContainerCreative;
@@ -39,8 +37,7 @@ public class RoughlyEnoughItemsClient {
     public static void setup() {
         final IEventBus eventBus = MinecraftForge.EVENT_BUS;
         
-        RoughlyEnoughItemsCore.configHelper = new ConfigHelper();
-        UpdateChecker.onInitialization();
+        RoughlyEnoughItemsCore.configManager = new ConfigManager();
         KeyBindHelper.setupKeyBinds();
         RoughlyEnoughItemsPlugin.discoverPlugins();
         
@@ -48,7 +45,6 @@ public class RoughlyEnoughItemsClient {
         
         // Register More Events
         eventBus.addListener(EventPriority.NORMAL, true, TickEvent.ClientTickEvent.class, GuiHelper::clientTick);
-        eventBus.addListener(EventPriority.NORMAL, false, TickEvent.ClientTickEvent.class, UpdateAnnouncer::clientTick);
         eventBus.register(RoughlyEnoughItemsClient.class);
     }
     

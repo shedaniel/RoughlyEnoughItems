@@ -7,7 +7,7 @@ import net.minecraft.util.NonNullList;
 import java.util.List;
 import java.util.Optional;
 
-public interface IItemRegisterer {
+public interface ItemRegistry {
     
     public List<ItemStack> getItemList();
     
