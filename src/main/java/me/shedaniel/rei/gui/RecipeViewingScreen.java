@@ -5,7 +5,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.ClientHelper;
-import me.shedaniel.rei.client.GuiHelper;
+import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.widget.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.audio.PositionedSoundInstance;
@@ -79,8 +79,8 @@ public class RecipeViewingScreen extends Screen {
             return true;
         }
         if ((int_1 == 256 || this.client.options.keyInventory.matchesKey(int_1, int_2)) && this.doesEscapeKeyClose()) {
-            MinecraftClient.getInstance().openScreen(GuiHelper.getLastContainerScreen());
-            GuiHelper.getLastOverlay().onInitialized();
+            MinecraftClient.getInstance().openScreen(ScreenHelper.getLastContainerScreen());
+            ScreenHelper.getLastOverlay().onInitialized();
             return true;
         }
         if (choosePageActivated) {
@@ -103,7 +103,7 @@ public class RecipeViewingScreen extends Screen {
     public void onInitialized() {
         super.onInitialized();
         this.tabs.clear();
-        this.widgets.clear();
+        this.widgets = Lists.newLinkedList();
         this.largestWidth = window.getScaledWidth() - 100;
         this.largestHeight = window.getScaledHeight() - 40;
         this.guiWidth = MathHelper.clamp(getCurrentDisplayed().stream().map(display -> selectedCategory.getDisplayWidth(display)).max(Integer::compareTo).orElse(150) + 30, 0, largestWidth);
@@ -120,6 +120,7 @@ public class RecipeViewingScreen extends Screen {
                     currentCategoryIndex = categories.size() - 1;
                 selectedCategory = categories.get(currentCategoryIndex);
                 categoryPages = MathHelper.floor(currentCategoryIndex / 6d);
+                page = 0;
                 RecipeViewingScreen.this.onInitialized();
             }
         });
@@ -132,6 +133,7 @@ public class RecipeViewingScreen extends Screen {
                     currentCategoryIndex = 0;
                 selectedCategory = categories.get(currentCategoryIndex);
                 categoryPages = MathHelper.floor(currentCategoryIndex / 6d);
+                page = 0;
                 RecipeViewingScreen.this.onInitialized();
             }
         });
@@ -165,13 +167,13 @@ public class RecipeViewingScreen extends Screen {
                 this.text = selectedCategory.getCategoryName();
                 super.draw(mouseX, mouseY, partialTicks);
                 if (isHighlighted(mouseX, mouseY))
-                    GuiHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.view_all_categories").split("\n")));
+                    ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.view_all_categories").split("\n")));
             }
             
             @Override
             public void onLabelClicked() {
                 MinecraftClient.getInstance().getSoundLoader().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-                ClientHelper.executeViewAllRecipesKeyBind(GuiHelper.getLastOverlay());
+                ClientHelper.executeViewAllRecipesKeyBind();
             }
         });
         widgets.add(new ClickableLabelWidget((int) bounds.getCenterX(), (int) bounds.getY() + 23, "") {
@@ -180,7 +182,7 @@ public class RecipeViewingScreen extends Screen {
                 this.text = String.format("%d/%d", page + 1, getTotalPages(selectedCategory));
                 super.draw(mouseX, mouseY, partialTicks);
                 if (isHighlighted(mouseX, mouseY))
-                    GuiHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.choose_page").split("\n")));
+                    ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.choose_page").split("\n")));
             }
             
             @Override
@@ -213,14 +215,12 @@ public class RecipeViewingScreen extends Screen {
             }
         }
         Optional<ButtonAreaSupplier> supplier = RecipeHelper.getInstance().getSpeedCraftButtonArea(selectedCategory);
-        final SpeedCraftFunctional functional = getSpeedCraftFunctionalByCategory(GuiHelper.getLastContainerScreen(), selectedCategory);
+        final SpeedCraftFunctional functional = getSpeedCraftFunctionalByCategory(ScreenHelper.getLastContainerScreen(), selectedCategory);
         int recipeHeight = selectedCategory.getDisplayHeight();
         List<RecipeDisplay> currentDisplayed = getCurrentDisplayed();
         for(int i = 0; i < currentDisplayed.size(); i++) {
             int finalI = i;
-            final Supplier<RecipeDisplay> displaySupplier = () -> {
-                return currentDisplayed.get(finalI);
-            };
+            final Supplier<RecipeDisplay> displaySupplier = () -> currentDisplayed.get(finalI);
             int displayWidth = selectedCategory.getDisplayWidth(displaySupplier.get());
             final Rectangle displayBounds = new Rectangle((int) getBounds().getCenterX() - displayWidth / 2, getBounds().y + 40 + recipeHeight * i + 7 * i, displayWidth, recipeHeight);
             widgets.addAll(selectedCategory.setupDisplay(displaySupplier, displayBounds));
@@ -232,10 +232,14 @@ public class RecipeViewingScreen extends Screen {
         else
             recipeChoosePageWidget = null;
         
-        GuiHelper.getLastOverlay().onInitialized();
+        ScreenHelper.getLastOverlay().onInitialized();
         listeners.addAll(tabs);
-        listeners.add(GuiHelper.getLastOverlay());
+        listeners.add(ScreenHelper.getLastOverlay());
         listeners.addAll(widgets);
+    }
+    
+    public List<IWidget> getWidgets() {
+        return widgets;
     }
     
     public List<RecipeDisplay> getCurrentDisplayed() {
@@ -293,7 +297,7 @@ public class RecipeViewingScreen extends Screen {
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GuiLighting.disable();
         tabs.stream().filter(TabWidget::isSelected).forEach(tabWidget -> tabWidget.draw(mouseX, mouseY, delta));
-        GuiHelper.getLastOverlay().drawOverlay(mouseX, mouseY, delta);
+        ScreenHelper.getLastOverlay().drawOverlay(mouseX, mouseY, delta);
         if (choosePageActivated) {
             zOffset = 500.0f;
             this.drawGradientRect(0, 0, this.screenWidth, this.screenHeight, -1072689136, -804253680);

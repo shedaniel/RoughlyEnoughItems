@@ -4,16 +4,18 @@ import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.client.ClientHelper;
-import me.shedaniel.rei.client.GuiHelper;
 import me.shedaniel.rei.client.ItemListOrdering;
+import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.client.SearchArgument;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.registry.Registry;
 import org.apache.commons.lang3.StringUtils;
 
 import java.awt.*;
@@ -24,6 +26,7 @@ import java.util.stream.Stream;
 
 public class ItemListOverlay extends DrawableHelper implements IWidget {
     
+    private static List<Item> searchBlacklisted = Lists.newArrayList();
     private List<IWidget> widgets;
     private int width, height, page;
     private Rectangle rectangle, listArea;
@@ -36,6 +39,33 @@ public class ItemListOverlay extends DrawableHelper implements IWidget {
         this.page = page;
     }
     
+    public static List<String> tryGetItemStackToolTip(ItemStack itemStack) {
+        if (!searchBlacklisted.contains(itemStack.getItem()))
+            try {
+                return MinecraftClient.getInstance().currentScreen.getStackTooltip(itemStack);
+            } catch (Throwable e) {
+                e.printStackTrace();
+                searchBlacklisted.add(itemStack.getItem());
+            }
+        return Collections.singletonList(tryGetItemStackName(itemStack));
+    }
+    
+    public static String tryGetItemStackName(ItemStack stack) {
+        if (!searchBlacklisted.contains(stack.getItem()))
+            try {
+                return stack.getDisplayName().getFormattedText();
+            } catch (Throwable e) {
+                e.printStackTrace();
+                searchBlacklisted.add(stack.getItem());
+            }
+        try {
+            return I18n.translate("item." + Registry.ITEM.getId(stack.getItem()).toString().replace(":", "."));
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+        return "ERROR";
+    }
+    
     public int getTotalSlotsPerPage() {
         return width * height;
     }
@@ -45,7 +75,7 @@ public class ItemListOverlay extends DrawableHelper implements IWidget {
         widgets.forEach(widget -> widget.draw(int_1, int_2, float_1));
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
         if (rectangle.contains(ClientHelper.getMouseLocation()) && ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty() && MinecraftClient.getInstance().isInSingleplayer())
-            GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.translate("text.rei.delete_items"))));
+            ScreenHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.translate("text.rei.delete_items"))));
     }
     
     public List<IWidget> getWidgets() {
@@ -55,7 +85,7 @@ public class ItemListOverlay extends DrawableHelper implements IWidget {
     public void updateList(Rectangle bounds, int page, String searchTerm) {
         this.rectangle = bounds;
         this.widgets = Lists.newLinkedList();
-        currentDisplayed = processSearchTerm(searchTerm, RoughlyEnoughItemsCore.getItemRegisterer().getItemList(), GuiHelper.inventoryStacks);
+        currentDisplayed = processSearchTerm(searchTerm, RoughlyEnoughItemsCore.getItemRegisterer().getItemList(), ScreenHelper.inventoryStacks);
         this.page = page;
         calculateListSize(rectangle);
         double startX = rectangle.getCenterX() - width * 9;
@@ -83,9 +113,9 @@ public class ItemListOverlay extends DrawableHelper implements IWidget {
                                 return ClientHelper.tryCheatingStack(cheatedStack);
                             }
                         } else if (button == 0)
-                            return ClientHelper.executeRecipeKeyBind(GuiHelper.getLastOverlay(), getCurrentStack().copy());
+                            return ClientHelper.executeRecipeKeyBind(getCurrentStack().copy());
                         else if (button == 1)
-                            return ClientHelper.executeUsageKeyBind(GuiHelper.getLastOverlay(), getCurrentStack().copy());
+                            return ClientHelper.executeUsageKeyBind(getCurrentStack().copy());
                     }
                     return false;
                 }
@@ -107,7 +137,7 @@ public class ItemListOverlay extends DrawableHelper implements IWidget {
         if (ordering != ItemListOrdering.registry)
             Collections.sort(os, (itemStack, t1) -> {
                 if (ordering.equals(ItemListOrdering.name))
-                    return itemStack.getDisplayName().getFormattedText().compareToIgnoreCase(t1.getDisplayName().getFormattedText());
+                    return tryGetItemStackName(itemStack).compareToIgnoreCase(tryGetItemStackName(t1));
                 if (ordering.equals(ItemListOrdering.item_groups))
                     return itemGroups.indexOf(itemStack.getItem().getItemGroup()) - itemGroups.indexOf(t1.getItem().getItemGroup());
                 return 0;
@@ -154,9 +184,9 @@ public class ItemListOverlay extends DrawableHelper implements IWidget {
     
     private boolean filterItem(ItemStack itemStack, List<SearchArgument> arguments) {
         String mod = ClientHelper.getModFromItemStack(itemStack);
-        List<String> toolTipsList = MinecraftClient.getInstance().currentScreen.getStackTooltip(itemStack);
+        List<String> toolTipsList = tryGetItemStackToolTip(itemStack);
         String toolTipsMixed = toolTipsList.stream().skip(1).collect(Collectors.joining()).toLowerCase();
-        String allMixed = Stream.of(itemStack.getDisplayName().getFormattedText(), toolTipsMixed).collect(Collectors.joining()).toLowerCase();
+        String allMixed = Stream.of(tryGetItemStackName(itemStack), toolTipsMixed).collect(Collectors.joining()).toLowerCase();
         for(SearchArgument searchArgument : arguments.stream().filter(searchArgument -> !searchArgument.isInclude()).collect(Collectors.toList())) {
             if (searchArgument.getArgumentType().equals(SearchArgument.ArgumentType.MOD))
                 if (mod.toLowerCase().contains(searchArgument.getText().toLowerCase()))

@@ -1,7 +1,7 @@
 package me.shedaniel.rei.mixin;
 
 import me.shedaniel.rei.client.ClientHelper;
-import me.shedaniel.rei.client.GuiHelper;
+import me.shedaniel.rei.client.ScreenHelper;
 import net.minecraft.client.gui.ingame.AbstractPlayerInventoryScreen;
 import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
 import net.minecraft.entity.player.PlayerInventory;
@@ -31,7 +31,7 @@ public abstract class MixinCreativePlayerInventoryScreen extends AbstractPlayerI
     @Inject(method = "mouseScrolled", at = @At("HEAD"), cancellable = true)
     public void mouseScrolled(double amount, CallbackInfoReturnable<Boolean> ci) {
         if (!doRenderScrollBar() && selectedTab == ItemGroup.INVENTORY.getIndex())
-            if (GuiHelper.isOverlayVisible() && GuiHelper.getLastOverlay().getRectangle().contains(ClientHelper.getMouseLocation()) && GuiHelper.getLastOverlay().mouseScrolled(amount)) {
+            if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().getRectangle().contains(ClientHelper.getMouseLocation()) && ScreenHelper.getLastOverlay().mouseScrolled(amount)) {
                 ci.setReturnValue(true);
                 ci.cancel();
             }
@@ -40,7 +40,7 @@ public abstract class MixinCreativePlayerInventoryScreen extends AbstractPlayerI
     @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
     public void keyPressed(int int_1, int int_2, int int_3, CallbackInfoReturnable<Boolean> ci) {
         if (selectedTab == ItemGroup.INVENTORY.getIndex())
-            if (GuiHelper.getLastOverlay().keyPressed(int_1, int_2, int_3)) {
+            if (ScreenHelper.getLastOverlay().keyPressed(int_1, int_2, int_3)) {
                 ci.setReturnValue(true);
                 ci.cancel();
             }
@@ -49,7 +49,7 @@ public abstract class MixinCreativePlayerInventoryScreen extends AbstractPlayerI
     @Inject(method = "charTyped", at = @At("HEAD"), cancellable = true)
     public void charTyped(char char_1, int int_1, CallbackInfoReturnable<Boolean> ci) {
         if (!this.field_2888 && selectedTab == ItemGroup.INVENTORY.getIndex())
-            if (GuiHelper.isOverlayVisible() && GuiHelper.getLastOverlay().charTyped(char_1, int_1)) {
+            if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().charTyped(char_1, int_1)) {
                 ci.setReturnValue(true);
                 ci.cancel();
             }
@@ -58,7 +58,7 @@ public abstract class MixinCreativePlayerInventoryScreen extends AbstractPlayerI
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
     public void mouseClicked(double i, double j, int k, CallbackInfoReturnable<Boolean> ci) {
         if (selectedTab == ItemGroup.INVENTORY.getIndex())
-            if (GuiHelper.isOverlayVisible() && GuiHelper.getLastOverlay().mouseClicked(i, j, k)) {
+            if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().mouseClicked(i, j, k)) {
                 ci.setReturnValue(true);
                 ci.cancel();
             }

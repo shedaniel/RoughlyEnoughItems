@@ -77,7 +77,7 @@ public class ClientHelper implements ClientModInitializer {
     }
     
     public static void sendDeletePacket() {
-        if (GuiHelper.getLastContainerScreen() instanceof CreativePlayerInventoryScreen) {
+        if (ScreenHelper.getLastContainerScreen() instanceof CreativePlayerInventoryScreen) {
             MinecraftClient.getInstance().player.inventory.setCursorStack(ItemStack.EMPTY);
             return;
         }
@@ -107,14 +107,14 @@ public class ClientHelper implements ClientModInitializer {
         }
     }
     
-    public static boolean executeRecipeKeyBind(ContainerScreenOverlay overlay, ItemStack stack) {
+    public static boolean executeRecipeKeyBind(ItemStack stack) {
         Map<RecipeCategory, List<RecipeDisplay>> map = RecipeHelper.getInstance().getRecipesFor(stack);
         if (map.keySet().size() > 0)
             MinecraftClient.getInstance().openScreen(new RecipeViewingScreen(MinecraftClient.getInstance().window, map));
         return map.keySet().size() > 0;
     }
     
-    public static boolean executeUsageKeyBind(ContainerScreenOverlay overlay, ItemStack stack) {
+    public static boolean executeUsageKeyBind(ItemStack stack) {
         Map<RecipeCategory, List<RecipeDisplay>> map = RecipeHelper.getInstance().getUsagesFor(stack);
         if (map.keySet().size() > 0)
             MinecraftClient.getInstance().openScreen(new RecipeViewingScreen(MinecraftClient.getInstance().window, map));
@@ -135,7 +135,7 @@ public class ClientHelper implements ClientModInitializer {
         return inventoryStacks;
     }
     
-    public static boolean executeViewAllRecipesKeyBind(ContainerScreenOverlay lastOverlay) {
+    public static boolean executeViewAllRecipesKeyBind() {
         Map<RecipeCategory, List<RecipeDisplay>> map = RecipeHelper.getInstance().getAllRecipes();
         if (map.keySet().size() > 0)
             MinecraftClient.getInstance().openScreen(new RecipeViewingScreen(MinecraftClient.getInstance().window, map));

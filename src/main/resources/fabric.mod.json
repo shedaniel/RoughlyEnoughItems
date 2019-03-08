@@ -9,7 +9,8 @@
   ],
   "initializers": [
     "me.shedaniel.rei.RoughlyEnoughItemsCore",
-    "me.shedaniel.rei.client.ClientHelper"
+    "me.shedaniel.rei.client.ClientHelper",
+    "me.shedaniel.rei.client.ScreenHelper"
   ],
   "requires": {
     "fabric": "0.2.3"

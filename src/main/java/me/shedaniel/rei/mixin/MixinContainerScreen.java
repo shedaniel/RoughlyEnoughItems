@@ -1,16 +1,14 @@
 package me.shedaniel.rei.mixin;
 
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.TabGetter;
 import me.shedaniel.rei.client.ClientHelper;
-import me.shedaniel.rei.client.GuiHelper;
+import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ContainerScreen;
 import net.minecraft.client.gui.Screen;
 import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.container.Slot;
 import net.minecraft.item.ItemGroup;
 import org.spongepowered.asm.mixin.Mixin;
@@ -61,8 +59,8 @@ public class MixinContainerScreen extends Screen implements ContainerScreenHooks
             if (tabGetter.rei_getSelectedTab() != ItemGroup.INVENTORY.getIndex())
                 return;
         }
-        GuiHelper.setLastContainerScreen((ContainerScreen) (Object) this);
-        this.listeners.add(GuiHelper.getLastOverlay(true));
+        ScreenHelper.setLastContainerScreen((ContainerScreen) (Object) this);
+        this.listeners.add(ScreenHelper.getLastOverlay(true));
     }
     
     @Inject(method = "draw(IIF)V", at = @At("RETURN"))
@@ -72,7 +70,7 @@ public class MixinContainerScreen extends Screen implements ContainerScreenHooks
             if (tabGetter.rei_getSelectedTab() != ItemGroup.INVENTORY.getIndex())
                 return;
         }
-        GuiHelper.getLastOverlay().drawOverlay(int_1, int_2, float_1);
+        ScreenHelper.getLastOverlay().drawOverlay(int_1, int_2, float_1);
     }
     
     @Override
@@ -87,8 +85,8 @@ public class MixinContainerScreen extends Screen implements ContainerScreenHooks
             if (tabGetter.rei_getSelectedTab() != ItemGroup.INVENTORY.getIndex())
                 return super.mouseScrolled(double_1);
         }
-        ContainerScreenOverlay overlay = GuiHelper.getLastOverlay();
-        if (GuiHelper.isOverlayVisible() && overlay.getRectangle().contains(ClientHelper.getMouseLocation()))
+        ContainerScreenOverlay overlay = ScreenHelper.getLastOverlay();
+        if (ScreenHelper.isOverlayVisible() && overlay.getRectangle().contains(ClientHelper.getMouseLocation()))
             if (overlay.mouseScrolled(double_1))
                 return true;
         return super.mouseScrolled(double_1);
@@ -101,7 +99,7 @@ public class MixinContainerScreen extends Screen implements ContainerScreenHooks
             if (tabGetter.rei_getSelectedTab() != ItemGroup.INVENTORY.getIndex())
                 return;
         }
-        if (GuiHelper.getLastOverlay().keyPressed(int_1, int_2, int_3)) {
+        if (ScreenHelper.getLastOverlay().keyPressed(int_1, int_2, int_3)) {
             ci.setReturnValue(true);
             ci.cancel();
         }
