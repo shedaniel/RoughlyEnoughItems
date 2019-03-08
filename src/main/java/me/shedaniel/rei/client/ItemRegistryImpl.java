@@ -1,12 +1,11 @@
 package me.shedaniel.rei.client;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.rei.api.IItemRegisterer;
+import me.shedaniel.rei.api.ItemRegistry;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Collections;
 import java.util.List;
@@ -14,7 +13,7 @@ import java.util.Optional;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-public class ItemListHelper implements IItemRegisterer {
+public class ItemRegistryImpl implements ItemRegistry {
     
     private final List<ItemStack> itemList = Lists.newLinkedList();
     

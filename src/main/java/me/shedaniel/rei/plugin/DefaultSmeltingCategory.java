@@ -1,7 +1,6 @@
 package me.shedaniel.rei.plugin;
 
-import me.shedaniel.rei.api.IRecipeCategory;
-import me.shedaniel.rei.api.Identifier;
+import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.gui.widget.IWidget;
 import me.shedaniel.rei.gui.widget.ItemSlotWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
@@ -20,12 +19,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class DefaultSmeltingCategory implements IRecipeCategory<DefaultSmeltingDisplay> {
+public class DefaultSmeltingCategory implements RecipeCategory<DefaultSmeltingDisplay> {
     
     private static final ResourceLocation DISPLAY_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/display.png");
     
     @Override
-    public Identifier getIdentifier() {
+    public ResourceLocation getLocation() {
         return DefaultPlugin.SMELTING;
     }
     

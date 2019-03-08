@@ -1,21 +1,23 @@
 package me.shedaniel.rei.api;
 
+import net.minecraft.util.ResourceLocation;
+
 public interface PluginDisabler {
     
-    default public void disablePluginFunctions(Identifier plugin, PluginFunction... functions) {
+    default void disablePluginFunctions(ResourceLocation plugin, PluginFunction... functions) {
         for(PluginFunction function : functions)
             disablePluginFunction(plugin, function);
     }
     
-    default public void enablePluginFunctions(Identifier plugin, PluginFunction... functions) {
+    default void enablePluginFunctions(ResourceLocation plugin, PluginFunction... functions) {
         for(PluginFunction function : functions)
             enablePluginFunction(plugin, function);
     }
     
-    public void disablePluginFunction(Identifier plugin, PluginFunction function);
+    void disablePluginFunction(ResourceLocation plugin, PluginFunction function);
     
-    public void enablePluginFunction(Identifier plugin, PluginFunction function);
+    void enablePluginFunction(ResourceLocation plugin, PluginFunction function);
     
-    public boolean isFunctionEnabled(Identifier plugin, PluginFunction function);
+    boolean isFunctionEnabled(ResourceLocation plugin, PluginFunction function);
     
 }

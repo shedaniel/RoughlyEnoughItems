@@ -5,9 +5,14 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.0.104', changing: true
     }
 }
+
+plugins {
+    id 'java'
+}
+
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 
@@ -18,7 +23,7 @@ archivesBaseName = project.mod_name
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
 
 minecraft {
-    mappings channel: 'snapshot', version: '20180921-1.13'
+    mappings channel: project.mcp_channel.toString(), version: project.mcp_version.toString()
 
     runs {
         client = {
@@ -40,26 +45,63 @@ minecraft {
     }
 }
 
-dependencies {
-    minecraft 'net.minecraftforge:forge:1.13.2-25.0.69'
-    implementation 'com.google.code.gson:gson:2.8.5'
-}
-
-task deobfJar(type: Jar) {
-    from sourceSets.main.output
-    classifier = 'deobf'
-}
-
-task srcJar(type: Jar, dependsOn: classes) {
-    from sourceSets.main.allSource
-    classifier = 'sources'
+repositories {
+    mavenLocal()
+    jcenter()
 }
 
 configurations {
     jar.archiveName = 'RoughlyEnoughItems-' + version + '.jar'
+    // Dependencies to pack into the jar
+    extraLibs
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${project.forge_version}"
+    extraLibs "blue.endless:jankson:${project.jankson_version}"
+
+    configurations.implementation.extendsFrom(configurations.extraLibs)
+}
+
+jar {
+    manifest {
+        attributes(["Specification-Title"     : project.mod_id,
+                    "Specification-Vendor"    : "Danielshe",
+                    "Specification-Version"   : "25.0",
+                    "Implementation-Title"    : project.name,
+                    "Implementation-Version"  : project.mod_version,
+                    "Implementation-Vendor"   : "Danielshe",
+                    "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")],)
+    }
+    from {
+        configurations.extraLibs.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+task deobfJar(type: Jar) {
+    classifier = 'deobf'
+    from sourceSets.main.output
+    manifest {
+        attributes(["Specification-Title"     : project.mod_id,
+                    "Specification-Vendor"    : "Danielshe",
+                    "Specification-Version"   : "25.0",
+                    "Implementation-Title"    : project.name,
+                    "Implementation-Version"  : project.mod_version,
+                    "Implementation-Vendor"   : "Danielshe",
+                    "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")],)
+    }
+    from {
+        configurations.extraLibs.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+task srcJar(type: Jar, dependsOn: classes) {
+    from sourceSets.main.allJava
+    classifier = 'sources'
 }
 
 artifacts {
     archives deobfJar
     archives srcJar
 }
+
