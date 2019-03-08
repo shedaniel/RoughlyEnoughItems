@@ -32,18 +32,18 @@ public class RecipeViewingScreen extends Screen {
     public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     public static final Color SUB_COLOR = new Color(159, 159, 159);
     private static final Identifier CREATIVE_INVENTORY_TABS = new Identifier("textures/gui/container/creative_inventory/tabs.png");
+    private final List<IWidget> widgets;
+    private final List<TabWidget> tabs;
+    private final Map<RecipeCategory, List<RecipeDisplay>> categoriesMap;
+    private final List<RecipeCategory> categories;
     public int guiWidth;
     public int guiHeight;
     public int page, categoryPages;
     public int largestWidth, largestHeight;
     public boolean choosePageActivated;
     public RecipeChoosePageWidget recipeChoosePageWidget;
-    private List<IWidget> widgets;
-    private List<TabWidget> tabs;
     private Window window;
     private Rectangle bounds;
-    private Map<RecipeCategory, List<RecipeDisplay>> categoriesMap;
-    private List<RecipeCategory> categories;
     private RecipeCategory selectedCategory;
     private ButtonWidget recipeBack, recipeNext, categoryBack, categoryNext;
     
@@ -102,8 +102,9 @@ public class RecipeViewingScreen extends Screen {
     @Override
     public void onInitialized() {
         super.onInitialized();
+        this.listeners.clear();
         this.tabs.clear();
-        this.widgets = Lists.newLinkedList();
+        this.widgets.clear();
         this.largestWidth = window.getScaledWidth() - 100;
         this.largestHeight = window.getScaledHeight() - 40;
         this.guiWidth = MathHelper.clamp(getCurrentDisplayed().stream().map(display -> selectedCategory.getDisplayWidth(display)).max(Integer::compareTo).orElse(150) + 30, 0, largestWidth);
@@ -232,9 +233,8 @@ public class RecipeViewingScreen extends Screen {
         else
             recipeChoosePageWidget = null;
         
-        ScreenHelper.getLastOverlay().onInitialized();
         listeners.addAll(tabs);
-        listeners.add(ScreenHelper.getLastOverlay());
+        listeners.add(ScreenHelper.getLastOverlay(true));
         listeners.addAll(widgets);
     }
     

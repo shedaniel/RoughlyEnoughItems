@@ -6,7 +6,6 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.api.RecipeHelper;
-import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.config.ConfigScreen;
 import net.fabricmc.api.ClientModInitializer;

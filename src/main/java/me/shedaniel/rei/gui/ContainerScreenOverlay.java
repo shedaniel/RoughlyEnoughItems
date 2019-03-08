@@ -395,21 +395,8 @@ public class ContainerScreenOverlay extends ScreenComponent {
             return false;
         Point point = ClientHelper.getMouseLocation();
         ItemStack itemStack = null;
-        for(IWidget widget : itemListOverlay.getListeners())
-            if (widget instanceof ItemSlotWidget && ((ItemSlotWidget) widget).isHighlighted(point.x, point.y)) {
-                itemStack = ((ItemSlotWidget) widget).getCurrentStack();
-                break;
-            }
-        if (itemStack == null && MinecraftClient.getInstance().currentScreen instanceof RecipeViewingScreen) {
-            RecipeViewingScreen recipeViewingWidget = (RecipeViewingScreen) MinecraftClient.getInstance().currentScreen;
-            for(IWidget widget : recipeViewingWidget.getWidgets())
-                if (widget instanceof ItemSlotWidget && ((HighlightableWidget) widget).isHighlighted(point.x, point.y)) {
-                    itemStack = ((ItemSlotWidget) widget).getCurrentStack();
-                    break;
-                }
-        }
-        if (itemStack == null && MinecraftClient.getInstance().currentScreen instanceof ContainerScreen)
-            if (ScreenHelper.getLastContainerScreenHooks().rei_getHoveredSlot() != null)
+        if (MinecraftClient.getInstance().currentScreen instanceof ContainerScreen)
+            if (ScreenHelper.getLastContainerScreenHooks().rei_getHoveredSlot() != null && !ScreenHelper.getLastContainerScreenHooks().rei_getHoveredSlot().getStack().isEmpty())
                 itemStack = ScreenHelper.getLastContainerScreenHooks().rei_getHoveredSlot().getStack();
         if (itemStack != null && !itemStack.isEmpty()) {
             if (ClientHelper.RECIPE.matchesKey(int_1, int_2))

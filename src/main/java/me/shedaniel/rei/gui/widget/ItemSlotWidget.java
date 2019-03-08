@@ -130,13 +130,23 @@ public class ItemSlotWidget extends DrawableHelper implements HighlightableWidge
     public boolean onMouseClick(int button, double mouseX, double mouseY) {
         if (!clickToMoreRecipes)
             return false;
-        if (getBounds().contains(mouseX, mouseY)) {
-            System.out.println(ItemListOverlay.tryGetItemStackName(getCurrentStack()));
+        if (getBounds().contains(mouseX, mouseY))
             if (button == 0)
                 return ClientHelper.executeRecipeKeyBind(getCurrentStack().copy());
             else if (button == 1)
                 return ClientHelper.executeUsageKeyBind(getCurrentStack().copy());
-        }
+        return false;
+    }
+    
+    @Override
+    public boolean keyPressed(int int_1, int int_2, int int_3) {
+        if (!clickToMoreRecipes)
+            return false;
+        if (getBounds().contains(ClientHelper.getMouseLocation()))
+            if (ClientHelper.RECIPE.matchesKey(int_1, int_2))
+                return ClientHelper.executeRecipeKeyBind(getCurrentStack().copy());
+            else if (ClientHelper.USAGE.matchesKey(int_1, int_2))
+                return ClientHelper.executeUsageKeyBind(getCurrentStack());
         return false;
     }
     
