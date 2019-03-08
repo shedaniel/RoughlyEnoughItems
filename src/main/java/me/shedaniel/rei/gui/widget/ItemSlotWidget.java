@@ -3,7 +3,7 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.client.ClientHelper;
-import me.shedaniel.rei.client.GuiHelper;
+import me.shedaniel.rei.client.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.render.GuiLighting;
@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ItemSlotWidget extends DrawableHelper implements HighlightableWidget {
     
@@ -89,20 +88,17 @@ public class ItemSlotWidget extends DrawableHelper implements HighlightableWidge
     
     protected void drawToolTip(ItemStack itemStack) {
         List<String> toolTip = getTooltip(itemStack);
-        GuiHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), toolTip));
+        ScreenHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), toolTip));
     }
     
     protected List<String> getTooltip(ItemStack itemStack) {
         final String modString = "§9§o" + ClientHelper.getModFromItemStack(itemStack);
         MinecraftClient mc = MinecraftClient.getInstance();
-        List<String> toolTip = Lists.newArrayList();
-        try {
-            toolTip = MinecraftClient.getInstance().currentScreen.getStackTooltip(itemStack).stream().filter(s -> !s.equals(modString)).collect(Collectors.toList());
-        } catch (Exception e) {
-            e.printStackTrace();
-            toolTip.add(itemStack.getDisplayName().getFormattedText());
-        }
+        List<String> toolTip = Lists.newArrayList(ItemListOverlay.tryGetItemStackToolTip(itemStack));
         toolTip.addAll(getExtraToolTips(itemStack));
+        for(String s : Lists.newArrayList(toolTip))
+            if (s.equalsIgnoreCase(modString))
+                toolTip.remove(s);
         toolTip.add(modString);
         return toolTip;
     }
@@ -135,10 +131,11 @@ public class ItemSlotWidget extends DrawableHelper implements HighlightableWidge
         if (!clickToMoreRecipes)
             return false;
         if (getBounds().contains(mouseX, mouseY)) {
+            System.out.println(ItemListOverlay.tryGetItemStackName(getCurrentStack()));
             if (button == 0)
-                return ClientHelper.executeRecipeKeyBind(GuiHelper.getLastOverlay(), getCurrentStack().copy());
+                return ClientHelper.executeRecipeKeyBind(getCurrentStack().copy());
             else if (button == 1)
-                return ClientHelper.executeUsageKeyBind(GuiHelper.getLastOverlay(), getCurrentStack().copy());
+                return ClientHelper.executeUsageKeyBind(getCurrentStack().copy());
         }
         return false;
     }

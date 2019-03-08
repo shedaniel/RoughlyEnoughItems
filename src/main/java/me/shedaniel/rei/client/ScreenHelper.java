@@ -5,6 +5,8 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.event.client.ClientTickCallback;
 import net.minecraft.client.gui.ContainerScreen;
 import net.minecraft.client.gui.InputListener;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -13,7 +15,7 @@ import net.minecraft.item.ItemStack;
 
 import java.util.List;
 
-public class GuiHelper {
+public class ScreenHelper implements ClientModInitializer {
     
     public static TextFieldWidget searchField;
     public static List<ItemStack> inventoryStacks = Lists.newArrayList();
@@ -56,11 +58,19 @@ public class GuiHelper {
     }
     
     public static void setLastContainerScreen(ContainerScreen lastContainerScreen) {
-        GuiHelper.lastContainerScreen = lastContainerScreen;
+        ScreenHelper.lastContainerScreen = lastContainerScreen;
     }
     
     public static ContainerScreenHooks getLastContainerScreenHooks() {
         return (ContainerScreenHooks) lastContainerScreen;
+    }
+    
+    @Override
+    public void onInitializeClient() {
+        ClientTickCallback.EVENT.register(client -> {
+            if (lastContainerScreen != client.currentScreen && client.currentScreen instanceof ContainerScreen)
+                lastContainerScreen = (ContainerScreen) client.currentScreen;
+        });
     }
     
 }

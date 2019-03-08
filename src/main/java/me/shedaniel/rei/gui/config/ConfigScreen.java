@@ -3,7 +3,7 @@ package me.shedaniel.rei.gui.config;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.ClientHelper;
-import me.shedaniel.rei.client.GuiHelper;
+import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.client.ItemListOrdering;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
@@ -35,7 +35,7 @@ public class ConfigScreen extends Screen {
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (int_1 == 256 && this.doesEscapeKeyClose()) {
             MinecraftClient.getInstance().openScreen(parent);
-            GuiHelper.getLastOverlay().onInitialized();
+            ScreenHelper.getLastOverlay().onInitialized();
             return true;
         } else {
             return super.keyPressed(int_1, int_2, int_3);
@@ -340,7 +340,7 @@ public class ConfigScreen extends Screen {
                     e.printStackTrace();
                 }
                 ConfigScreen.this.client.openScreen(parent);
-                GuiHelper.getLastOverlay().onInitialized();
+                ScreenHelper.getLastOverlay().onInitialized();
             }
         });
         super.onInitialized();

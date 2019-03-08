@@ -1,6 +1,6 @@
 package me.shedaniel.rei.gui.credits;
 
-import me.shedaniel.rei.client.GuiHelper;
+import me.shedaniel.rei.client.ScreenHelper;
 import net.minecraft.client.gui.ContainerScreen;
 import net.minecraft.client.gui.InputListener;
 import net.minecraft.client.gui.Screen;
@@ -21,7 +21,7 @@ public class CreditsScreen extends Screen {
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (int_1 == 256 && this.doesEscapeKeyClose()) {
             this.client.openScreen(parent);
-            GuiHelper.getLastOverlay().onInitialized();
+            ScreenHelper.getLastOverlay().onInitialized();
             return true;
         }
         return super.keyPressed(int_1, int_2, int_3);
@@ -38,7 +38,7 @@ public class CreditsScreen extends Screen {
             @Override
             public void onPressed(double double_1, double double_2) {
                 CreditsScreen.this.client.openScreen(parent);
-                GuiHelper.getLastOverlay().onInitialized();
+                ScreenHelper.getLastOverlay().onInitialized();
             }
         });
     }

@@ -6,6 +6,7 @@ import me.shedaniel.rei.api.PluginDisabler;
 import me.shedaniel.rei.api.REIPlugin;
 import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.client.*;
+import me.shedaniel.rei.gui.widget.ItemListOverlay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
@@ -98,7 +99,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
             ServerPlayerEntity player = (ServerPlayerEntity) packetContext.getPlayer();
             ItemStack stack = packetByteBuf.readItemStack();
             if (player.inventory.insertStack(stack.copy()))
-                player.addChatMessage(new StringTextComponent(I18n.translate("text.rei.cheat_items").replaceAll("\\{item_name}", stack.copy().getDisplayName().getFormattedText()).replaceAll("\\{item_count}", stack.copy().getAmount() + "").replaceAll("\\{player_name}", player.getEntityName())), false);
+                player.addChatMessage(new StringTextComponent(I18n.translate("text.rei.cheat_items").replaceAll("\\{item_name}", ItemListOverlay.tryGetItemStackName(stack.copy())).replaceAll("\\{item_count}", stack.copy().getAmount() + "").replaceAll("\\{player_name}", player.getEntityName())), false);
             else
                 player.addChatMessage(new TranslatableTextComponent("text.rei.failed_cheat_items"), false);
         });

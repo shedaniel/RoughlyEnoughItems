@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.ClientHelper;
-import me.shedaniel.rei.client.GuiHelper;
+import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.client.Weather;
 import me.shedaniel.rei.gui.credits.CreditsScreen;
 import me.shedaniel.rei.gui.widget.*;
@@ -80,7 +80,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
                     ClientHelper.setCheating(!ClientHelper.isCheating());
                     return;
                 }
-                ClientHelper.openConfigWindow(GuiHelper.getLastContainerScreen());
+                ClientHelper.openConfigWindow(ScreenHelper.getLastContainerScreen());
             }
             
             @Override
@@ -107,7 +107,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
             widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? window.getScaledWidth() - 50 : 10, window.getScaledHeight() - 30, 40, 20, I18n.translate("text.rei.credits")) {
                 @Override
                 public void onPressed(int button, double mouseX, double mouseY) {
-                    MinecraftClient.getInstance().openScreen(new CreditsScreen(GuiHelper.getLastContainerScreen()));
+                    MinecraftClient.getInstance().openScreen(new CreditsScreen(ScreenHelper.getLastContainerScreen()));
                 }
             });
         if (RoughlyEnoughItemsCore.getConfigManager().getConfig().showUtilsButtons) {
@@ -160,8 +160,8 @@ public class ContainerScreenOverlay extends ScreenComponent {
                 itemListOverlay.updateList(getItemListArea(), page, searchTerm);
             }
         });
-        if (GuiHelper.searchField == null)
-            GuiHelper.searchField = new TextFieldWidget(0, 0, 0, 0) {
+        if (ScreenHelper.searchField == null)
+            ScreenHelper.searchField = new TextFieldWidget(0, 0, 0, 0) {
                 @Override
                 public boolean mouseClicked(double double_1, double double_2, int int_1) {
                     if (isVisible() && getBounds().contains(double_1, double_2) && int_1 == 1) {
@@ -171,13 +171,13 @@ public class ContainerScreenOverlay extends ScreenComponent {
                     return super.mouseClicked(double_1, double_2, int_1);
                 }
             };
-        GuiHelper.searchField.setChangedListener(s -> {
+        ScreenHelper.searchField.setChangedListener(s -> {
             searchTerm = s;
             itemListOverlay.updateList(getItemListArea(), page, searchTerm);
         });
-        GuiHelper.searchField.getBounds().setBounds(getTextFieldArea());
-        this.widgets.add(GuiHelper.searchField);
-        GuiHelper.searchField.setText(searchTerm);
+        ScreenHelper.searchField.getBounds().setBounds(getTextFieldArea());
+        this.widgets.add(ScreenHelper.searchField);
+        ScreenHelper.searchField.setText(searchTerm);
         if (RoughlyEnoughItemsCore.getConfigManager().getConfig().enableCraftableOnlyButton)
             this.widgets.add(new CraftableToggleButtonWidget(getCraftableToggleArea()) {
                 @Override
@@ -263,7 +263,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
             RecipeViewingScreen widget = (RecipeViewingScreen) MinecraftClient.getInstance().currentScreen;
             return new Rectangle(widget.getBounds().x, window.getScaledHeight() - 22, widget.getBounds().width - widthRemoved, 18);
         }
-        return new Rectangle(GuiHelper.getLastContainerScreenHooks().rei_getContainerLeft(), window.getScaledHeight() - 22, GuiHelper.getLastContainerScreenHooks().rei_getContainerWidth() - widthRemoved, 18);
+        return new Rectangle(ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft(), window.getScaledHeight() - 22, ScreenHelper.getLastContainerScreenHooks().rei_getContainerWidth() - widthRemoved, 18);
     }
     
     private Rectangle getCraftableToggleArea() {
@@ -289,8 +289,8 @@ public class ContainerScreenOverlay extends ScreenComponent {
         List<ItemStack> currentStacks = ClientHelper.getInventoryItemsTypes();
         if (getLeft() != lastLeft)
             onInitialized();
-        else if (RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() && (!hasSameListContent(new LinkedList<>(GuiHelper.inventoryStacks), currentStacks) || (currentStacks.size() != GuiHelper.inventoryStacks.size()))) {
-            GuiHelper.inventoryStacks = ClientHelper.getInventoryItemsTypes();
+        else if (RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() && (!hasSameListContent(new LinkedList<>(ScreenHelper.inventoryStacks), currentStacks) || (currentStacks.size() != ScreenHelper.inventoryStacks.size()))) {
+            ScreenHelper.inventoryStacks = ClientHelper.getInventoryItemsTypes();
             itemListOverlay.updateList(getItemListArea(), page, searchTerm);
         }
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
@@ -306,15 +306,15 @@ public class ContainerScreenOverlay extends ScreenComponent {
     
     private boolean hasSameListContent(List<ItemStack> list1, List<ItemStack> list2) {
         Collections.sort(list1, (itemStack, t1) -> {
-            return itemStack.getDisplayName().getFormattedText().compareToIgnoreCase(t1.getDisplayName().getFormattedText());
+            return ItemListOverlay.tryGetItemStackName(itemStack).compareToIgnoreCase(ItemListOverlay.tryGetItemStackName(t1));
         });
         Collections.sort(list2, (itemStack, t1) -> {
-            return itemStack.getDisplayName().getFormattedText().compareToIgnoreCase(t1.getDisplayName().getFormattedText());
+            return ItemListOverlay.tryGetItemStackName(itemStack).compareToIgnoreCase(ItemListOverlay.tryGetItemStackName(t1));
         });
         String lastString = String.join("", list1.stream().map(itemStack -> {
-            return itemStack.getDisplayName().getFormattedText();
+            return ItemListOverlay.tryGetItemStackName(itemStack);
         }).collect(Collectors.toList())), currentString = String.join("", list2.stream().map(itemStack -> {
-            return itemStack.getDisplayName().getFormattedText();
+            return ItemListOverlay.tryGetItemStackName(itemStack);
         }).collect(Collectors.toList()));
         return lastString.equals(currentString);
     }
@@ -324,7 +324,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
     }
     
     public void draw(int int_1, int int_2, float float_1) {
-        if (!GuiHelper.isOverlayVisible())
+        if (!ScreenHelper.isOverlayVisible())
             return;
         buttonLeft.enabled = itemListOverlay.getWidgets().size() > 0;
         buttonRight.enabled = itemListOverlay.getWidgets().size() > 0;
@@ -337,7 +337,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
     
     private Rectangle calculateBoundary() {
         if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel) {
-            int startX = GuiHelper.getLastContainerScreenHooks().rei_getContainerLeft() + GuiHelper.getLastContainerScreenHooks().rei_getContainerWidth() + 10;
+            int startX = ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() + ScreenHelper.getLastContainerScreenHooks().rei_getContainerWidth() + 10;
             int width = window.getScaledWidth() - startX;
             if (MinecraftClient.getInstance().currentScreen instanceof RecipeViewingScreen) {
                 RecipeViewingScreen widget = (RecipeViewingScreen) MinecraftClient.getInstance().currentScreen;
@@ -355,8 +355,8 @@ public class ContainerScreenOverlay extends ScreenComponent {
             return widget.getBounds().x;
         }
         if (MinecraftClient.getInstance().player.getRecipeBook().isGuiOpen())
-            return GuiHelper.getLastContainerScreenHooks().rei_getContainerLeft() - 147 - 30;
-        return GuiHelper.getLastContainerScreenHooks().rei_getContainerLeft();
+            return ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() - 147 - 30;
+        return ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft();
     }
     
     private int getTotalPage() {
@@ -365,7 +365,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
     
     @Override
     public boolean mouseScrolled(double amount) {
-        if (!GuiHelper.isOverlayVisible())
+        if (!ScreenHelper.isOverlayVisible())
             return false;
         if (rectangle.contains(ClientHelper.getMouseLocation())) {
             if (amount > 0 && buttonLeft.enabled)
@@ -388,10 +388,10 @@ public class ContainerScreenOverlay extends ScreenComponent {
             if (listener.keyPressed(int_1, int_2, int_3))
                 return true;
         if (ClientHelper.HIDE.matchesKey(int_1, int_2)) {
-            GuiHelper.toggleOverlayVisible();
+            ScreenHelper.toggleOverlayVisible();
             return true;
         }
-        if (!GuiHelper.isOverlayVisible())
+        if (!ScreenHelper.isOverlayVisible())
             return false;
         Point point = ClientHelper.getMouseLocation();
         ItemStack itemStack = null;
@@ -402,27 +402,27 @@ public class ContainerScreenOverlay extends ScreenComponent {
             }
         if (itemStack == null && MinecraftClient.getInstance().currentScreen instanceof RecipeViewingScreen) {
             RecipeViewingScreen recipeViewingWidget = (RecipeViewingScreen) MinecraftClient.getInstance().currentScreen;
-            for(InputListener listener : recipeViewingWidget.getInputListeners())
-                if (listener instanceof ItemSlotWidget && ((HighlightableWidget) listener).isHighlighted(point.x, point.y)) {
-                    itemStack = ((ItemSlotWidget) listener).getCurrentStack();
+            for(IWidget widget : recipeViewingWidget.getWidgets())
+                if (widget instanceof ItemSlotWidget && ((HighlightableWidget) widget).isHighlighted(point.x, point.y)) {
+                    itemStack = ((ItemSlotWidget) widget).getCurrentStack();
                     break;
                 }
         }
         if (itemStack == null && MinecraftClient.getInstance().currentScreen instanceof ContainerScreen)
-            if (GuiHelper.getLastContainerScreenHooks().rei_getHoveredSlot() != null)
-                itemStack = GuiHelper.getLastContainerScreenHooks().rei_getHoveredSlot().getStack();
+            if (ScreenHelper.getLastContainerScreenHooks().rei_getHoveredSlot() != null)
+                itemStack = ScreenHelper.getLastContainerScreenHooks().rei_getHoveredSlot().getStack();
         if (itemStack != null && !itemStack.isEmpty()) {
             if (ClientHelper.RECIPE.matchesKey(int_1, int_2))
-                return ClientHelper.executeRecipeKeyBind(this, itemStack);
+                return ClientHelper.executeRecipeKeyBind(itemStack);
             else if (ClientHelper.USAGE.matchesKey(int_1, int_2))
-                return ClientHelper.executeUsageKeyBind(this, itemStack);
+                return ClientHelper.executeUsageKeyBind(itemStack);
         }
         return false;
     }
     
     @Override
     public boolean charTyped(char char_1, int int_1) {
-        if (!GuiHelper.isOverlayVisible())
+        if (!ScreenHelper.isOverlayVisible())
             return false;
         for(InputListener listener : getInputListeners())
             if (listener.charTyped(char_1, int_1))
@@ -437,7 +437,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
     
     @Override
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
-        if (!GuiHelper.isOverlayVisible())
+        if (!ScreenHelper.isOverlayVisible())
             return false;
         return super.mouseClicked(double_1, double_2, int_1);
     }
