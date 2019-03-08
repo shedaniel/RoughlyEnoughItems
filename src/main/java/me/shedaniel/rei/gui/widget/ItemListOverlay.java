@@ -95,7 +95,7 @@ public class ItemListOverlay extends DrawableHelper implements IWidget {
             int j = i + page * getTotalSlotsPerPage();
             if (j >= currentDisplayed.size())
                 break;
-            ItemSlotWidget slotWidget = new ItemSlotWidget((int) (startX + (i % width) * 18), (int) (startY + MathHelper.floor(i / width) * 18), currentDisplayed.get(j), false, true) {
+            ItemSlotWidget slotWidget = new ItemSlotWidget((int) (startX + (i % width) * 18), (int) (startY + MathHelper.floor(i / width) * 18), Collections.singletonList(currentDisplayed.get(j)), false, true, true) {
                 @Override
                 protected void drawToolTip(ItemStack itemStack) {
                     ClientPlayerEntity player = MinecraftClient.getInstance().player;
@@ -123,6 +123,14 @@ public class ItemListOverlay extends DrawableHelper implements IWidget {
             if (true || this.rectangle.contains(slotWidget.getBounds()))
                 widgets.add(slotWidget);
         }
+    }
+    
+    @Override
+    public boolean keyPressed(int int_1, int int_2, int int_3) {
+        for(IWidget widget : widgets)
+            if (widget.keyPressed(int_1, int_2, int_3))
+                return true;
+        return false;
     }
     
     public List<ItemStack> getCurrentDisplayed() {
