@@ -384,9 +384,10 @@ public class ContainerScreenOverlay extends ScreenComponent {
     
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
-        for(InputListener listener : widgets)
-            if (listener.keyPressed(int_1, int_2, int_3))
-                return true;
+        if (ScreenHelper.isOverlayVisible())
+            for(InputListener listener : widgets)
+                if (listener.keyPressed(int_1, int_2, int_3))
+                    return true;
         if (ClientHelper.HIDE.matchesKey(int_1, int_2)) {
             ScreenHelper.toggleOverlayVisible();
             return true;

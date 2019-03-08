@@ -14,9 +14,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.List;
 
 public class ItemSlotWidget extends DrawableHelper implements HighlightableWidget {
@@ -27,7 +25,7 @@ public class ItemSlotWidget extends DrawableHelper implements HighlightableWidge
     private int x, y;
     
     public ItemSlotWidget(int x, int y, ItemStack itemStack, boolean drawBackground, boolean showToolTips) {
-        this(x, y, Arrays.asList(itemStack), drawBackground, showToolTips);
+        this(x, y, Collections.singletonList(itemStack), drawBackground, showToolTips);
     }
     
     public ItemSlotWidget(int x, int y, List<ItemStack> itemList, boolean drawBackground, boolean showToolTips) {
