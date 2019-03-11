@@ -120,8 +120,12 @@ public class ClientHelper implements ClientModInitializer {
         return map.keySet().size() > 0;
     }
     
+    public static void openConfigWindow(Screen parent, boolean initOverlay) {
+        MinecraftClient.getInstance().openScreen(new ConfigScreen(parent, initOverlay));
+    }
+    
     public static void openConfigWindow(Screen parent) {
-        MinecraftClient.getInstance().openScreen(new ConfigScreen(parent));
+        openConfigWindow(parent, true);
     }
     
     public static List<ItemStack> getInventoryItemsTypes() {

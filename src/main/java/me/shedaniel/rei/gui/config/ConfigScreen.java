@@ -3,8 +3,8 @@ package me.shedaniel.rei.gui.config;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.ClientHelper;
-import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.client.ItemListOrdering;
+import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import net.minecraft.client.MinecraftClient;
@@ -24,10 +24,12 @@ public class ConfigScreen extends Screen {
     
     private final List<QueuedTooltip> tooltipList;
     private Screen parent;
+    private boolean initOverlay;
     private ConfigEntryListWidget entryListWidget;
     
-    public ConfigScreen(Screen parent) {
+    public ConfigScreen(Screen parent, boolean initOverlay) {
         this.parent = parent;
+        this.initOverlay = initOverlay;
         this.tooltipList = Lists.newArrayList();
     }
     
@@ -35,7 +37,8 @@ public class ConfigScreen extends Screen {
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (int_1 == 256 && this.doesEscapeKeyClose()) {
             MinecraftClient.getInstance().openScreen(parent);
-            ScreenHelper.getLastOverlay().onInitialized();
+            if (initOverlay)
+                ScreenHelper.getLastOverlay().onInitialized();
             return true;
         } else {
             return super.keyPressed(int_1, int_2, int_3);
@@ -220,7 +223,7 @@ public class ConfigScreen extends Screen {
                 }
                 return true;
             }
-        
+            
             @Override
             public String getText() {
                 return getTrueFalseText(RoughlyEnoughItemsCore.getConfigManager().getConfig().disableRecipeBook);
@@ -340,7 +343,8 @@ public class ConfigScreen extends Screen {
                     e.printStackTrace();
                 }
                 ConfigScreen.this.client.openScreen(parent);
-                ScreenHelper.getLastOverlay().onInitialized();
+                if (initOverlay)
+                    ScreenHelper.getLastOverlay().onInitialized();
             }
         });
         super.onInitialized();

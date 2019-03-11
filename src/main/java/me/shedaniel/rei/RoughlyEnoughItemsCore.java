@@ -5,12 +5,14 @@ import me.shedaniel.rei.api.ItemRegistry;
 import me.shedaniel.rei.api.PluginDisabler;
 import me.shedaniel.rei.api.REIPlugin;
 import me.shedaniel.rei.api.RecipeHelper;
-import me.shedaniel.rei.client.*;
+import me.shedaniel.rei.client.ConfigManager;
+import me.shedaniel.rei.client.ItemRegistryImpl;
+import me.shedaniel.rei.client.PluginDisablerImpl;
+import me.shedaniel.rei.client.RecipeHelperImpl;
 import me.shedaniel.rei.gui.widget.ItemListOverlay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.event.client.ClientTickCallback;
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.resource.language.I18n;
@@ -22,6 +24,7 @@ import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -80,6 +83,14 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
         if (!FabricLoader.getInstance().isModLoaded("pluginloader")) {
             RoughlyEnoughItemsCore.LOGGER.warn("REI: Plugin Loader is not loaded! Please consider installing https://minecraft.curseforge.com/projects/pluginloader for REI plugin compatibility!");
             registerPlugin(new Identifier("roughlyenoughitems", "default_plugin"), new DefaultPlugin());
+        }
+        
+        if (FabricLoader.getInstance().isModLoaded("cloth")) {
+            try {
+                Class.forName("me.shedaniel.rei.cloth.ClothRegistry").getDeclaredMethod("register").invoke(null);
+            } catch (IllegalAccessException | InvocationTargetException | ClassNotFoundException | NoSuchMethodException e) {
+                e.printStackTrace();
+            }
         }
     }
     
