@@ -11,7 +11,7 @@ targetCompatibility = 1.8
 
 group = "me.shedaniel"
 archivesBaseName = "RoughlyEnoughItems"
-version = project.modVersion
+version = project.mod_version
 
 minecraft {
 }
@@ -20,6 +20,7 @@ repositories {
     maven { url "https://tehnut.info/maven/" }
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
     maven { url "https://maven.jamieswhiteshirt.com/libs-release/" }
+    maven { url "https://minecraft.curseforge.com/api/maven"}
 }
 
 processResources {
@@ -45,15 +46,16 @@ task remapShadowJar(type: RemapJar) {
 tasks.remapShadowJar.dependsOn tasks.shadowJar
 
 dependencies {
-    minecraft "com.mojang:minecraft:${project.minecraftVersion}"
-    mappings "net.fabricmc:yarn:${project.yarnVersion}"
-    modCompile "net.fabricmc:fabric-loader:${project.fabricLoaderVersion}"
-    modCompile "com.jamieswhiteshirt:developer-mode:${project.developerModeVersion}"
-    modCompile "info.tehnut.pluginloader:plugin-loader:${project.pluginLoaderVersion}"
-    modCompile "net.fabricmc:fabric:${project.fabricVersion}"
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_version}"
+    modCompile "net.fabricmc:fabric-loader:${project.fabricloader_version}"
+    modCompile "com.jamieswhiteshirt:developer-mode:${project.developermode_version}"
+    modCompile "info.tehnut.pluginloader:plugin-loader:${project.pluginloader_version}"
+    modCompile "net.fabricmc:fabric:${project.fabric_version}"
+    modCompile "cloth:Cloth:${cloth_version}"
 
-    compile "blue.endless:jankson:${project.janksonVersion}"
-    contained "blue.endless:jankson:${project.janksonVersion}"
+    compile "blue.endless:jankson:${project.jankson_version}"
+    contained "blue.endless:jankson:${project.jankson_version}"
 }
 
 curseforge {
@@ -67,7 +69,7 @@ curseforge {
         releaseType = "release"
         addGameVersion "1.14-Snapshot"
         mainArtifact(remapShadowJar.jar) {
-            displayName = "[Fabric $project.minecraftVersion] v$project.version"
+            displayName = "[Fabric $project.minecraft_version] v$project.version"
             relations {
                 requiredDependency "fabric"
                 optionalDependency "pluginloader"
