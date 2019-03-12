@@ -1,4 +1,9 @@
-# v2.4.0
+# v2.4.0.63
+- First implementation of [Cloth](https://minecraft.curseforge.com/projects/cloth), [Cloth](https://minecraft.curseforge.com/projects/cloth) is still not required for REI to boot but it will be a must have dependency when 19w11a comes.
+- Used [Cloth](https://minecraft.curseforge.com/projects/cloth) for hooking up [Mod Menu](https://minecraft.curseforge.com/projects/modmenu/) config. Example: [https://streamable.com/ivbsj](https://streamable.com/ivbsj)
+- Changed config `true / false` to `Yes / No`
+
+# v2.4.0.61
 - Config with comments
 - Fix creative inventory even more
 - No longer uses Fabric internals

@@ -351,7 +351,7 @@ public class ConfigScreen extends Screen {
     }
     
     private String getTrueFalseText(boolean showCraftableOnlyButton) {
-        return String.format("%s%b", showCraftableOnlyButton ? "§a" : "§c", showCraftableOnlyButton);
+        return String.format("%s%s", showCraftableOnlyButton ? "§a" : "§c", showCraftableOnlyButton ? I18n.translate("text.rei.enabled") : I18n.translate("text.rei.disabled"));
     }
     
     @Override
