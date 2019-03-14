@@ -8,6 +8,7 @@
     "MixinPlayerInventoryScreen",
     "MixinCraftingTableScreen",
     "MixinCreativePlayerInventoryScreen",
+    "MixinBrewingRecipeRegistry",
     "MixinTabGetter",
     "GhostSlotsHook"
   ],

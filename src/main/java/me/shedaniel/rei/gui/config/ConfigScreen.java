@@ -7,10 +7,10 @@ import me.shedaniel.rei.client.ItemListOrdering;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
+import net.minecraft.class_4185;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.InputListener;
 import net.minecraft.client.gui.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.TranslatableTextComponent;
@@ -334,9 +334,9 @@ public class ConfigScreen extends Screen {
                 return false;
             }
         }));
-        addButton(new ButtonWidget(screenWidth / 2 - 100, screenHeight - 26, I18n.translate("gui.done")) {
+        addButton(new class_4185(screenWidth / 2 - 100, screenHeight - 26, I18n.translate("gui.done")) {
             @Override
-            public void onPressed(double double_1, double double_2) {
+            public void method_1826() {
                 try {
                     RoughlyEnoughItemsCore.getConfigManager().saveConfig();
                 } catch (IOException e) {
@@ -372,7 +372,7 @@ public class ConfigScreen extends Screen {
     }
     
     @Override
-    public InputListener getFocused() {
+    public InputListener method_19357() {
         return entryListWidget;
     }
     

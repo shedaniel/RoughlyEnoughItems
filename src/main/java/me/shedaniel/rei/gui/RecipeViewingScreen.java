@@ -348,9 +348,9 @@ public class RecipeViewingScreen extends Screen {
     }
     
     @Override
-    public boolean mouseScrolled(double amount) {
+    public boolean mouseScrolled(double i, double j, double amount) {
         for(InputListener listener : listeners)
-            if (listener.mouseScrolled(amount))
+            if (listener.mouseScrolled(i, j, amount))
                 return true;
         if (getBounds().contains(ClientHelper.getMouseLocation())) {
             if (amount > 0 && recipeBack.enabled)
@@ -364,7 +364,7 @@ public class RecipeViewingScreen extends Screen {
             else if (amount < 0 && categoryNext.enabled)
                 categoryNext.onPressed(0, 0, 0);
         }
-        return super.mouseScrolled(amount);
+        return super.mouseScrolled(i, j, amount);
     }
     
     @Override
@@ -389,11 +389,11 @@ public class RecipeViewingScreen extends Screen {
         return false;
     }
     
-    @Override
-    public InputListener getFocused() {
+    @Override //getFocused
+    public InputListener method_19357() {
         if (choosePageActivated)
             return recipeChoosePageWidget;
-        return super.getFocused();
+        return super.method_19357();
     }
     
 }
