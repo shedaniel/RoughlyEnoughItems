@@ -16,6 +16,7 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.potion.PotionUtil;
+import net.minecraft.recipe.REIBrewingRecipeRegistry;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.StonecuttingRecipe;
 import net.minecraft.recipe.cooking.BlastingRecipe;
@@ -39,12 +40,6 @@ public class DefaultPlugin implements REIPlugin {
     public static final Identifier STONE_CUTTING = new Identifier("roughlyenoughitems", "plugins/stone_cutting");
     public static final Identifier BREWING = new Identifier("roughlyenoughitems", "plugins/brewing");
     public static final Identifier PLUGIN = new Identifier("roughlyenoughitems", "default_plugin");
-    
-    private static final List<DefaultBrewingDisplay> BREWING_DISPLAYS = Lists.newArrayList();
-    
-    public static void registerBrewingDisplay(DefaultBrewingDisplay display) {
-        BREWING_DISPLAYS.add(display);
-    }
     
     @Override
     public void onFirstLoad(PluginDisabler pluginDisabler) {
@@ -104,7 +99,7 @@ public class DefaultPlugin implements REIPlugin {
                 recipeHelper.registerDisplay(CAMPFIRE, new DefaultCampfireDisplay((CampfireCookingRecipe) recipe));
             else if (recipe instanceof StonecuttingRecipe)
                 recipeHelper.registerDisplay(STONE_CUTTING, new DefaultStoneCuttingDisplay((StonecuttingRecipe) recipe));
-        BREWING_DISPLAYS.stream().forEachOrdered(display -> recipeHelper.registerDisplay(BREWING, display));
+        REIBrewingRecipeRegistry.registerDisplays(recipeHelper);
         List<ItemStack> arrowStack = Arrays.asList(Items.ARROW.getDefaultStack());
         RoughlyEnoughItemsCore.getItemRegisterer().getItemList().stream().filter(stack -> stack.getItem().equals(Items.LINGERING_POTION)).forEach(stack -> {
             List<List<ItemStack>> input = new ArrayList<>();

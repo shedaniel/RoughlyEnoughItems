@@ -52,7 +52,7 @@ dependencies {
     modCompile "com.jamieswhiteshirt:developer-mode:${project.developermode_version}"
     modCompile "info.tehnut.pluginloader:plugin-loader:${project.pluginloader_version}"
     modCompile "net.fabricmc:fabric:${project.fabric_version}"
-    modCompile "cloth:Cloth:${cloth_version}"
+    modCompile "utils:Cloth:${cloth_version}"
 
     compile "blue.endless:jankson:${project.jankson_version}"
     contained "blue.endless:jankson:${project.jankson_version}"

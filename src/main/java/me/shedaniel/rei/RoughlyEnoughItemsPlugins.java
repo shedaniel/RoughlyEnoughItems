@@ -20,7 +20,7 @@ public class RoughlyEnoughItemsPlugins implements LoaderCreator {
                 REIPlugin plugin = (REIPlugin) container.getOwner().getAdapter().createInstance(aClass, instantiationOptions);
                 RoughlyEnoughItemsCore.registerPlugin(id, plugin);
             } catch (LanguageAdapterException e) {
-                RoughlyEnoughItemsCore.LOGGER.error("REI: Error loading plugin %s", id, e);
+                RoughlyEnoughItemsCore.LOGGER.error("[REI] Error loading plugin %s", id, e);
             }
         }).build();
     }

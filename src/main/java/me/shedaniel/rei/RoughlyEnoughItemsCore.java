@@ -32,7 +32,7 @@ import java.util.Optional;
 
 public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitializer {
     
-    public static final Logger LOGGER = LogManager.getFormatterLogger("REI");
+    public static final Logger LOGGER;
     public static final Identifier DELETE_ITEMS_PACKET = new Identifier("roughlyenoughitems", "delete_item");
     public static final Identifier CREATE_ITEMS_PACKET = new Identifier("roughlyenoughitems", "create_item");
     private static final RecipeHelper RECIPE_HELPER = new RecipeHelperImpl();
@@ -40,6 +40,10 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
     private static final ItemRegistry ITEM_REGISTRY = new ItemRegistryImpl();
     private static final Map<Identifier, REIPlugin> plugins = Maps.newHashMap();
     private static ConfigManager configManager;
+    
+    static {
+        LOGGER = LogManager.getFormatterLogger("REI");
+    }
     
     public static RecipeHelper getRecipeHelper() {
         return RECIPE_HELPER;
@@ -59,7 +63,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
     
     public static REIPlugin registerPlugin(Identifier identifier, REIPlugin plugin) {
         plugins.put(identifier, plugin);
-        RoughlyEnoughItemsCore.LOGGER.info("REI: Registered plugin %s from %s", identifier.toString(), plugin.getClass().getSimpleName());
+        RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered plugin %s from %s", identifier.toString(), plugin.getClass().getSimpleName());
         plugin.onFirstLoad(getPluginDisabler());
         return plugin;
     }
@@ -81,16 +85,19 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
         
         // If pluginloader is not installed, base functionality should still remain
         if (!FabricLoader.getInstance().isModLoaded("pluginloader")) {
-            RoughlyEnoughItemsCore.LOGGER.warn("REI: Plugin Loader is not loaded! Please consider installing https://minecraft.curseforge.com/projects/pluginloader for REI plugin compatibility!");
+            RoughlyEnoughItemsCore.LOGGER.warn("[REI] Plugin Loader is not loaded! Please consider installing https://minecraft.curseforge.com/projects/pluginloader for REI plugin compatibility!");
             registerPlugin(new Identifier("roughlyenoughitems", "default_plugin"), new DefaultPlugin());
         }
         
         if (FabricLoader.getInstance().isModLoaded("cloth")) {
             try {
-                Class.forName("me.shedaniel.rei.cloth.ClothRegistry").getDeclaredMethod("register").invoke(null);
+                Class.forName("me.shedaniel.rei.utils.ClothRegistry").getDeclaredMethod("register").invoke(null);
             } catch (IllegalAccessException | InvocationTargetException | ClassNotFoundException | NoSuchMethodException e) {
                 e.printStackTrace();
             }
+        } else {
+            RoughlyEnoughItemsCore.LOGGER.fatal("[REI] Cloth NOT found! It is a dependency of REI: https://minecraft.curseforge.com/projects/utils");
+            System.exit(0);
         }
     }
     
