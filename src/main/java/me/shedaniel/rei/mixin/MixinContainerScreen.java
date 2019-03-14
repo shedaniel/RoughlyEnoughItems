@@ -57,17 +57,17 @@ public class MixinContainerScreen extends Screen implements ContainerScreenHooks
     }
     
     @Override
-    public boolean mouseScrolled(double double_1) {
+    public boolean mouseScrolled(double i, double j, double double_1) {
         if (MinecraftClient.getInstance().currentScreen instanceof CreativePlayerInventoryScreen) {
             TabGetter tabGetter = (TabGetter) MinecraftClient.getInstance().currentScreen;
             if (tabGetter.rei_getSelectedTab() != ItemGroup.INVENTORY.getIndex())
-                return super.mouseScrolled(double_1);
+                return super.mouseScrolled(i, j, double_1);
         }
         ContainerScreenOverlay overlay = ScreenHelper.getLastOverlay();
         if (ScreenHelper.isOverlayVisible() && overlay.getRectangle().contains(ClientHelper.getMouseLocation()))
-            if (overlay.mouseScrolled(double_1))
+            if (overlay.mouseScrolled(i, j, double_1))
                 return true;
-        return super.mouseScrolled(double_1);
+        return super.mouseScrolled(i, j, double_1);
     }
     
     @Inject(method = "keyPressed(III)Z", at = @At("HEAD"), cancellable = true)

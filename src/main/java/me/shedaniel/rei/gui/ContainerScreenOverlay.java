@@ -364,7 +364,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
     }
     
     @Override
-    public boolean mouseScrolled(double amount) {
+    public boolean mouseScrolled(double i, double j, double amount) {
         if (!ScreenHelper.isOverlayVisible())
             return false;
         if (rectangle.contains(ClientHelper.getMouseLocation())) {
@@ -377,7 +377,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
             return true;
         }
         for(IWidget widget : widgets)
-            if (widget.mouseScrolled(amount))
+            if (widget.mouseScrolled(i, j, amount))
                 return true;
         return false;
     }

@@ -1,10 +1,10 @@
 package me.shedaniel.rei.gui.credits;
 
 import me.shedaniel.rei.client.ScreenHelper;
+import net.minecraft.class_4185;
 import net.minecraft.client.gui.ContainerScreen;
 import net.minecraft.client.gui.InputListener;
 import net.minecraft.client.gui.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.StringTextComponent;
 
@@ -34,9 +34,9 @@ public class CreditsScreen extends Screen {
         for(String line : I18n.translate("text.rei.credit.text").split("\n"))
             entryListWidget.creditsAddEntry(new CreditsEntry(new StringTextComponent(line)));
         entryListWidget.creditsAddEntry(new CreditsEntry(new StringTextComponent("")));
-        addButton(new ButtonWidget(screenWidth / 2 - 100, screenHeight - 26, I18n.translate("gui.done")) {
+        addButton(new class_4185(screenWidth / 2 - 100, screenHeight - 26, I18n.translate("gui.done")) {
             @Override
-            public void onPressed(double double_1, double double_2) {
+            public void method_1826() {
                 CreditsScreen.this.client.openScreen(parent);
                 ScreenHelper.getLastOverlay().onInitialized();
             }
@@ -58,7 +58,7 @@ public class CreditsScreen extends Screen {
     }
     
     @Override
-    public InputListener getFocused() {
+    public InputListener method_19357() {
         return entryListWidget;
     }
     

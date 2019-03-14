@@ -26,8 +26,8 @@ public abstract class MixinCraftingTableScreen extends ContainerScreen {
     }
     
     @Override
-    public InputListener getFocused() {
-        return super.getFocused();
+    public InputListener method_19357() {
+        return super.method_19357();
     }
     
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)

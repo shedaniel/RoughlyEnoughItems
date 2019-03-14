@@ -28,11 +28,11 @@ public interface IWidget extends InputListener, Drawable {
     }
     
     @Override
-    default boolean mouseScrolled(double amount) {
+    default boolean mouseScrolled(double i, double j, double amount) {
         if (onMouseScrolled(amount))
             return true;
         for(IWidget widget : getListeners())
-            if (widget.mouseScrolled(amount))
+            if (widget.mouseScrolled(i, j, amount))
                 return true;
         return false;
     }

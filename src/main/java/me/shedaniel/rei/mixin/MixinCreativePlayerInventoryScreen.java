@@ -29,9 +29,9 @@ public abstract class MixinCreativePlayerInventoryScreen extends AbstractPlayerI
     protected abstract boolean doRenderScrollBar();
     
     @Inject(method = "mouseScrolled", at = @At("HEAD"), cancellable = true)
-    public void mouseScrolled(double amount, CallbackInfoReturnable<Boolean> ci) {
+    public void mouseScrolled(double i, double j, double amount, CallbackInfoReturnable<Boolean> ci) {
         if (!doRenderScrollBar() && selectedTab == ItemGroup.INVENTORY.getIndex())
-            if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().getRectangle().contains(ClientHelper.getMouseLocation()) && ScreenHelper.getLastOverlay().mouseScrolled(amount)) {
+            if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().getRectangle().contains(ClientHelper.getMouseLocation()) && ScreenHelper.getLastOverlay().mouseScrolled(i, j, amount)) {
                 ci.setReturnValue(true);
                 ci.cancel();
             }

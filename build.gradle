@@ -20,7 +20,7 @@ repositories {
     maven { url "https://tehnut.info/maven/" }
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
     maven { url "https://maven.jamieswhiteshirt.com/libs-release/" }
-    maven { url "https://minecraft.curseforge.com/api/maven"}
+    maven { url "https://minecraft.curseforge.com/api/maven" }
 }
 
 processResources {
@@ -49,10 +49,10 @@ dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_version}"
     modCompile "net.fabricmc:fabric-loader:${project.fabricloader_version}"
-    modCompile "com.jamieswhiteshirt:developer-mode:${project.developermode_version}"
+//    modCompile "com.jamieswhiteshirt:developer-mode:${project.developermode_version}"
     modCompile "info.tehnut.pluginloader:plugin-loader:${project.pluginloader_version}"
     modCompile "net.fabricmc:fabric:${project.fabric_version}"
-    modCompile "utils:Cloth:${cloth_version}"
+    modCompile "cloth:Cloth:${cloth_version}"
 
     compile "blue.endless:jankson:${project.jankson_version}"
     contained "blue.endless:jankson:${project.jankson_version}"
