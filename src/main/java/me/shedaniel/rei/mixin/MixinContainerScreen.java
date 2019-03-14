@@ -15,7 +15,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ContainerScreen.class)
@@ -50,27 +49,6 @@ public class MixinContainerScreen extends Screen implements ContainerScreenHooks
     @Override
     public int rei_getContainerHeight() {
         return height;
-    }
-    
-    @Inject(method = "onInitialized()V", at = @At("RETURN"))
-    protected void onInitialized(CallbackInfo info) {
-        if (MinecraftClient.getInstance().currentScreen instanceof CreativePlayerInventoryScreen) {
-            TabGetter tabGetter = (TabGetter) MinecraftClient.getInstance().currentScreen;
-            if (tabGetter.rei_getSelectedTab() != ItemGroup.INVENTORY.getIndex())
-                return;
-        }
-        ScreenHelper.setLastContainerScreen((ContainerScreen) (Object) this);
-        this.listeners.add(ScreenHelper.getLastOverlay(true));
-    }
-    
-    @Inject(method = "draw(IIF)V", at = @At("RETURN"))
-    public void draw(int int_1, int int_2, float float_1, CallbackInfo info) {
-        if (MinecraftClient.getInstance().currentScreen instanceof CreativePlayerInventoryScreen) {
-            TabGetter tabGetter = (TabGetter) MinecraftClient.getInstance().currentScreen;
-            if (tabGetter.rei_getSelectedTab() != ItemGroup.INVENTORY.getIndex())
-                return;
-        }
-        ScreenHelper.getLastOverlay().drawOverlay(int_1, int_2, float_1);
     }
     
     @Override

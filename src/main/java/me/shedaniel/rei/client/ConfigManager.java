@@ -17,17 +17,18 @@ public class ConfigManager implements me.shedaniel.rei.api.ConfigManager {
     
     private static final Gson GSON = new GsonBuilder().create();
     private static final Jankson JANKSON = Jankson.builder().build();
-    private final File configFile, oldConfigFile;
+    private final File configFile, veryOldConfigFile, oldConfigFile;
     private ConfigObject config;
     private boolean craftableOnly;
     
     public ConfigManager() {
-        this.oldConfigFile = new File(FabricLoader.getInstance().getConfigDirectory(), "rei.json");
-        this.configFile = new File(FabricLoader.getInstance().getConfigDirectory(), "roughlyenoughitems/config.json");
+        this.veryOldConfigFile = new File(FabricLoader.getInstance().getConfigDirectory(), "rei.json");
+        this.oldConfigFile = new File(FabricLoader.getInstance().getConfigDirectory(), "roughlyenoughitems/config.json");
+        this.configFile = new File(FabricLoader.getInstance().getConfigDirectory(), "roughlyenoughitems/config.json5");
         this.craftableOnly = false;
         try {
             loadConfig();
-            RoughlyEnoughItemsCore.LOGGER.info("REI: Config is loaded.");
+            RoughlyEnoughItemsCore.LOGGER.info("[REI] Config is loaded.");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -37,7 +38,7 @@ public class ConfigManager implements me.shedaniel.rei.api.ConfigManager {
     public void saveConfig() throws IOException {
         configFile.getParentFile().mkdirs();
         if (!configFile.exists() && !configFile.createNewFile()) {
-            RoughlyEnoughItemsCore.LOGGER.error("REI: Failed to save config! Overwriting with default config.");
+            RoughlyEnoughItemsCore.LOGGER.error("[REI] Failed to save config! Overwriting with default config.");
             config = new ConfigObject();
             return;
         }
@@ -52,7 +53,7 @@ public class ConfigManager implements me.shedaniel.rei.api.ConfigManager {
             out.close();
         } catch (Exception e) {
             e.printStackTrace();
-            RoughlyEnoughItemsCore.LOGGER.error("REI: Failed to save config! Overwriting with default config.");
+            RoughlyEnoughItemsCore.LOGGER.error("[REI] Failed to save config! Overwriting with default config.");
             config = new ConfigObject();
             return;
         }
@@ -61,17 +62,26 @@ public class ConfigManager implements me.shedaniel.rei.api.ConfigManager {
     @Override
     public void loadConfig() throws IOException {
         configFile.getParentFile().mkdirs();
+        if (!configFile.exists() && veryOldConfigFile.exists()) {
+            RoughlyEnoughItemsCore.LOGGER.info("[REI] Detected old config file, trying to move it.");
+            try {
+                Files.move(veryOldConfigFile.toPath(), configFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            } catch (Exception e) {
+                e.printStackTrace();
+                RoughlyEnoughItemsCore.LOGGER.error("[REI] Failed to move config file.");
+            }
+        }
         if (!configFile.exists() && oldConfigFile.exists()) {
-            RoughlyEnoughItemsCore.LOGGER.info("REI: Detected old config file, trying to move it.");
+            RoughlyEnoughItemsCore.LOGGER.info("[REI] Detected old config file, trying to move it.");
             try {
                 Files.move(oldConfigFile.toPath(), configFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             } catch (Exception e) {
                 e.printStackTrace();
-                RoughlyEnoughItemsCore.LOGGER.error("REI: Failed to move config file.");
+                RoughlyEnoughItemsCore.LOGGER.error("[REI] Failed to move config file.");
             }
         }
         if (!configFile.exists() || !configFile.canRead()) {
-            RoughlyEnoughItemsCore.LOGGER.warn("REI: Config not found! Creating one.");
+            RoughlyEnoughItemsCore.LOGGER.warn("[REI] Config not found! Creating one.");
             config = new ConfigObject();
             saveConfig();
             return;
@@ -80,14 +90,14 @@ public class ConfigManager implements me.shedaniel.rei.api.ConfigManager {
         try {
             JsonObject configJson = JANKSON.load(configFile);
             String regularized = configJson.toJson(false, false, 0);
-    
+            
             config = GSON.fromJson(regularized, ConfigObject.class);
         } catch (Exception e) {
             e.printStackTrace();
             failed = true;
         }
         if (failed || config == null) {
-            RoughlyEnoughItemsCore.LOGGER.error("REI: Failed to load config! Overwriting with default config.");
+            RoughlyEnoughItemsCore.LOGGER.error("[REI] Failed to load config! Overwriting with default config.");
             config = new ConfigObject();
         }
         saveConfig();
