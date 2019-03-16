@@ -2,13 +2,10 @@ package me.shedaniel.rei.utils;
 
 import me.shedaniel.cloth.api.EventPriority;
 import me.shedaniel.cloth.hooks.ClothHooks;
-import me.shedaniel.cloth.hooks.ClothModMenuHooks;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.TabGetter;
-import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.RecipeHelperImpl;
 import me.shedaniel.rei.client.ScreenHelper;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ContainerScreen;
 import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
 import net.minecraft.client.gui.widget.RecipeBookButtonWidget;
@@ -17,14 +14,6 @@ import net.minecraft.item.ItemGroup;
 public class ClothRegistry {
     
     public static void register() {
-        Runnable configRunnable = () -> ClientHelper.openConfigWindow(MinecraftClient.getInstance().currentScreen, false);
-        ClothModMenuHooks.CONFIG_BUTTON_EVENT.registerListener(event -> {
-            if (event.getModContainer() != null && event.getModContainer().getMetadata().getId().equalsIgnoreCase("roughlyenoughitems")) {
-                event.setEnabled(true);
-                event.setClickedRunnable(configRunnable);
-                event.setCancelled(true);
-            }
-        }, EventPriority.LOWEST);
         ClothHooks.CLIENT_SYNC_RECIPES.registerListener(event -> {
             ((RecipeHelperImpl) RoughlyEnoughItemsCore.getRecipeHelper()).recipesLoaded(event.getManager());
         });

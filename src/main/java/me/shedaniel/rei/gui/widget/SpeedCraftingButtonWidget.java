@@ -23,7 +23,7 @@ public class SpeedCraftingButtonWidget extends ButtonWidget {
     }
     
     @Override
-    public void onPressed(int button, double mouseX, double mouseY) {
+    public void onPressed() {
         MinecraftClient.getInstance().openScreen(ScreenHelper.getLastContainerScreen());
         ScreenHelper.getLastOverlay().onInitialized();
         functional.performAutoCraft(ScreenHelper.getLastContainerScreen(), displaySupplier.get());

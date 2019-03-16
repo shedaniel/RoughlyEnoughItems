@@ -39,7 +39,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
     public static String searchTerm = "";
     private static int page = 0;
     private static ItemListOverlay itemListOverlay;
-    private final List<IWidget> widgets = Lists.newArrayList();
+    private final List<Widget> widgets = Lists.newArrayList();
     private Rectangle rectangle;
     private Window window;
     private ButtonWidget buttonLeft, buttonRight;
@@ -56,7 +56,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
         
         widgets.add(buttonLeft = new ButtonWidget(rectangle.x, rectangle.y + 5, 16, 16, new TranslatableTextComponent("text.rei.left_arrow")) {
             @Override
-            public void onPressed(int button, double mouseX, double mouseY) {
+            public void onPressed() {
                 page--;
                 if (page < 0)
                     page = getTotalPage();
@@ -65,7 +65,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
         });
         widgets.add(buttonRight = new ButtonWidget(rectangle.x + rectangle.width - 18, rectangle.y + 5, 16, 16, new TranslatableTextComponent("text.rei.right_arrow")) {
             @Override
-            public void onPressed(int button, double mouseX, double mouseY) {
+            public void onPressed() {
                 page++;
                 if (page > getTotalPage())
                     page = 0;
@@ -75,7 +75,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
         page = MathHelper.clamp(page, 0, getTotalPage());
         widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? window.getScaledWidth() - 30 : 10, 10, 20, 20, "") {
             @Override
-            public void onPressed(int button, double mouseX, double mouseY) {
+            public void onPressed() {
                 if (Screen.isShiftPressed()) {
                     ClientHelper.setCheating(!ClientHelper.isCheating());
                     return;
@@ -106,14 +106,14 @@ public class ContainerScreenOverlay extends ScreenComponent {
         if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().disableCreditsButton)
             widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? window.getScaledWidth() - 50 : 10, window.getScaledHeight() - 30, 40, 20, I18n.translate("text.rei.credits")) {
                 @Override
-                public void onPressed(int button, double mouseX, double mouseY) {
+                public void onPressed() {
                     MinecraftClient.getInstance().openScreen(new CreditsScreen(ScreenHelper.getLastContainerScreen()));
                 }
             });
         if (RoughlyEnoughItemsCore.getConfigManager().getConfig().showUtilsButtons) {
             widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? window.getScaledWidth() - 55 : 35, 10, 20, 20, "") {
                 @Override
-                public void onPressed(int button, double mouseX, double mouseY) {
+                public void onPressed() {
                     MinecraftClient.getInstance().player.sendChatMessage(RoughlyEnoughItemsCore.getConfigManager().getConfig().gamemodeCommand.replaceAll("\\{gamemode}", getNextGameMode().getName()));
                 }
                 
@@ -127,7 +127,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
             });
             widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? window.getScaledWidth() - 80 : 60, 10, 20, 20, "") {
                 @Override
-                public void onPressed(int button, double mouseX, double mouseY) {
+                public void onPressed() {
                     MinecraftClient.getInstance().player.sendChatMessage(RoughlyEnoughItemsCore.getConfigManager().getConfig().weatherCommand.replaceAll("\\{weather}", getNextWeather().getName().toLowerCase()));
                 }
                 
@@ -181,7 +181,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
         if (RoughlyEnoughItemsCore.getConfigManager().getConfig().enableCraftableOnlyButton)
             this.widgets.add(new CraftableToggleButtonWidget(getCraftableToggleArea()) {
                 @Override
-                public void onPressed(int button, double mouseX, double mouseY) {
+                public void onPressed() {
                     RoughlyEnoughItemsCore.getConfigManager().toggleCraftableOnly();
                     itemListOverlay.updateList(getItemListArea(), page, searchTerm);
                 }
@@ -369,14 +369,14 @@ public class ContainerScreenOverlay extends ScreenComponent {
             return false;
         if (rectangle.contains(ClientHelper.getMouseLocation())) {
             if (amount > 0 && buttonLeft.enabled)
-                buttonLeft.onPressed(0, 0, 0);
+                buttonLeft.onPressed();
             else if (amount < 0 && buttonRight.enabled)
-                buttonRight.onPressed(0, 0, 0);
+                buttonRight.onPressed();
             else
                 return false;
             return true;
         }
-        for(IWidget widget : widgets)
+        for(Widget widget : widgets)
             if (widget.mouseScrolled(i, j, amount))
                 return true;
         return false;

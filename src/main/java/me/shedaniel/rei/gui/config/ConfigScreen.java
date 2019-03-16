@@ -7,10 +7,9 @@ import me.shedaniel.rei.client.ItemListOrdering;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
-import net.minecraft.class_4185;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.InputListener;
 import net.minecraft.client.gui.Screen;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.TranslatableTextComponent;
@@ -35,14 +34,13 @@ public class ConfigScreen extends Screen {
     
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
-        if (int_1 == 256 && this.doesEscapeKeyClose()) {
+        if (int_1 == 256) {
             MinecraftClient.getInstance().openScreen(parent);
             if (initOverlay)
                 ScreenHelper.getLastOverlay().onInitialized();
             return true;
-        } else {
-            return super.keyPressed(int_1, int_2, int_3);
         }
+        return super.keyPressed(int_1, int_2, int_3);
     }
     
     @Override
@@ -52,10 +50,8 @@ public class ConfigScreen extends Screen {
         entryListWidget.configAddEntry(new ConfigEntry.CategoryTitleConfigEntry(new TranslatableTextComponent("text.rei.config.general")));
         entryListWidget.configAddEntry(new ConfigEntry.ButtonConfigEntry(new TranslatableTextComponent("text.rei.config.cheating"), new ConfigEntry.ButtonConfigEntry.ConfigEntryButtonProvider() {
             @Override
-            public boolean onPressed(int button, double mouseX, double mouseY) {
-                if (button == 0)
-                    ClientHelper.setCheating(!ClientHelper.isCheating());
-                return true;
+            public void onPressed() {
+                ClientHelper.setCheating(!ClientHelper.isCheating());
             }
             
             @Override
@@ -66,16 +62,13 @@ public class ConfigScreen extends Screen {
         entryListWidget.configAddEntry(new ConfigEntry.CategoryTitleConfigEntry(new TranslatableTextComponent("text.rei.config.appearance")));
         entryListWidget.configAddEntry(new ConfigEntry.ButtonConfigEntry(new TranslatableTextComponent("text.rei.config.side_search_box"), new ConfigEntry.ButtonConfigEntry.ConfigEntryButtonProvider() {
             @Override
-            public boolean onPressed(int button, double mouseX, double mouseY) {
-                if (button == 0)
-                    RoughlyEnoughItemsCore.getConfigManager().getConfig().sideSearchField = !RoughlyEnoughItemsCore.getConfigManager().getConfig().sideSearchField;
+            public void onPressed() {
+                RoughlyEnoughItemsCore.getConfigManager().getConfig().sideSearchField = !RoughlyEnoughItemsCore.getConfigManager().getConfig().sideSearchField;
                 try {
                     RoughlyEnoughItemsCore.getConfigManager().saveConfig();
                 } catch (IOException e) {
                     e.printStackTrace();
-                    return false;
                 }
-                return true;
             }
             
             @Override
@@ -85,7 +78,7 @@ public class ConfigScreen extends Screen {
         }));
         entryListWidget.configAddEntry(new ConfigEntry.ButtonConfigEntry(new TranslatableTextComponent("text.rei.config.list_ordering"), new ConfigEntry.ButtonConfigEntry.ConfigEntryButtonProvider() {
             @Override
-            public boolean onPressed(int button, double mouseX, double mouseY) {
+            public void onPressed() {
                 int index = Arrays.asList(ItemListOrdering.values()).indexOf(RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering) + 1;
                 if (index >= ItemListOrdering.values().length) {
                     index = 0;
@@ -96,9 +89,7 @@ public class ConfigScreen extends Screen {
                     RoughlyEnoughItemsCore.getConfigManager().saveConfig();
                 } catch (IOException e) {
                     e.printStackTrace();
-                    return false;
                 }
-                return true;
             }
             
             @Override
@@ -108,16 +99,13 @@ public class ConfigScreen extends Screen {
         }));
         entryListWidget.configAddEntry(new ConfigEntry.ButtonConfigEntry(new TranslatableTextComponent("text.rei.config.mirror_rei"), new ConfigEntry.ButtonConfigEntry.ConfigEntryButtonProvider() {
             @Override
-            public boolean onPressed(int button, double mouseX, double mouseY) {
-                if (button == 0)
-                    RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel = !RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel;
+            public void onPressed() {
+                RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel = !RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel;
                 try {
                     RoughlyEnoughItemsCore.getConfigManager().saveConfig();
                 } catch (IOException e) {
                     e.printStackTrace();
-                    return false;
                 }
-                return true;
             }
             
             @Override
@@ -128,16 +116,13 @@ public class ConfigScreen extends Screen {
         entryListWidget.configAddEntry(new ConfigEntry.CategoryTitleConfigEntry(new TranslatableTextComponent("text.rei.config.modules")));
         entryListWidget.configAddEntry(new ConfigEntry.ButtonConfigEntry(new TranslatableTextComponent("text.rei.config.enable_craftable_only"), new ConfigEntry.ButtonConfigEntry.ConfigEntryButtonProvider() {
             @Override
-            public boolean onPressed(int button, double mouseX, double mouseY) {
-                if (button == 0)
-                    RoughlyEnoughItemsCore.getConfigManager().getConfig().enableCraftableOnlyButton = !RoughlyEnoughItemsCore.getConfigManager().getConfig().enableCraftableOnlyButton;
+            public void onPressed() {
+                RoughlyEnoughItemsCore.getConfigManager().getConfig().enableCraftableOnlyButton = !RoughlyEnoughItemsCore.getConfigManager().getConfig().enableCraftableOnlyButton;
                 try {
                     RoughlyEnoughItemsCore.getConfigManager().saveConfig();
                 } catch (IOException e) {
                     e.printStackTrace();
-                    return false;
                 }
-                return true;
             }
             
             @Override
@@ -147,16 +132,13 @@ public class ConfigScreen extends Screen {
         }));
         entryListWidget.configAddEntry(new ConfigEntry.ButtonConfigEntry(new TranslatableTextComponent("text.rei.config.load_default_plugin"), new ConfigEntry.ButtonConfigEntry.ConfigEntryButtonProvider() {
             @Override
-            public boolean onPressed(int button, double mouseX, double mouseY) {
-                if (button == 0)
-                    RoughlyEnoughItemsCore.getConfigManager().getConfig().loadDefaultPlugin = !RoughlyEnoughItemsCore.getConfigManager().getConfig().loadDefaultPlugin;
+            public void onPressed() {
+                RoughlyEnoughItemsCore.getConfigManager().getConfig().loadDefaultPlugin = !RoughlyEnoughItemsCore.getConfigManager().getConfig().loadDefaultPlugin;
                 try {
                     RoughlyEnoughItemsCore.getConfigManager().saveConfig();
                 } catch (IOException e) {
                     e.printStackTrace();
-                    return false;
                 }
-                return true;
             }
             
             @Override
@@ -174,16 +156,13 @@ public class ConfigScreen extends Screen {
         }));
         entryListWidget.configAddEntry(new ConfigEntry.ButtonConfigEntry(new TranslatableTextComponent("text.rei.config.disable_credits_button"), new ConfigEntry.ButtonConfigEntry.ConfigEntryButtonProvider() {
             @Override
-            public boolean onPressed(int button, double mouseX, double mouseY) {
-                if (button == 0)
-                    RoughlyEnoughItemsCore.getConfigManager().getConfig().disableCreditsButton = !RoughlyEnoughItemsCore.getConfigManager().getConfig().disableCreditsButton;
+            public void onPressed() {
+                RoughlyEnoughItemsCore.getConfigManager().getConfig().disableCreditsButton = !RoughlyEnoughItemsCore.getConfigManager().getConfig().disableCreditsButton;
                 try {
                     RoughlyEnoughItemsCore.getConfigManager().saveConfig();
                 } catch (IOException e) {
                     e.printStackTrace();
-                    return false;
                 }
-                return true;
             }
             
             @Override
@@ -193,16 +172,13 @@ public class ConfigScreen extends Screen {
         }));
         entryListWidget.configAddEntry(new ConfigEntry.ButtonConfigEntry(new TranslatableTextComponent("text.rei.config.enable_util_buttons"), new ConfigEntry.ButtonConfigEntry.ConfigEntryButtonProvider() {
             @Override
-            public boolean onPressed(int button, double mouseX, double mouseY) {
-                if (button == 0)
-                    RoughlyEnoughItemsCore.getConfigManager().getConfig().showUtilsButtons = !RoughlyEnoughItemsCore.getConfigManager().getConfig().showUtilsButtons;
+            public void onPressed() {
+                RoughlyEnoughItemsCore.getConfigManager().getConfig().showUtilsButtons = !RoughlyEnoughItemsCore.getConfigManager().getConfig().showUtilsButtons;
                 try {
                     RoughlyEnoughItemsCore.getConfigManager().saveConfig();
                 } catch (IOException e) {
                     e.printStackTrace();
-                    return false;
                 }
-                return true;
             }
             
             @Override
@@ -212,16 +188,13 @@ public class ConfigScreen extends Screen {
         }));
         entryListWidget.configAddEntry(new ConfigEntry.ButtonConfigEntry(new TranslatableTextComponent("text.rei.config.disable_recipe_book"), new ConfigEntry.ButtonConfigEntry.ConfigEntryButtonProvider() {
             @Override
-            public boolean onPressed(int button, double mouseX, double mouseY) {
-                if (button == 0)
-                    RoughlyEnoughItemsCore.getConfigManager().getConfig().disableRecipeBook = !RoughlyEnoughItemsCore.getConfigManager().getConfig().disableRecipeBook;
+            public void onPressed() {
+                RoughlyEnoughItemsCore.getConfigManager().getConfig().disableRecipeBook = !RoughlyEnoughItemsCore.getConfigManager().getConfig().disableRecipeBook;
                 try {
                     RoughlyEnoughItemsCore.getConfigManager().saveConfig();
                 } catch (IOException e) {
                     e.printStackTrace();
-                    return false;
                 }
-                return true;
             }
             
             @Override
@@ -334,9 +307,9 @@ public class ConfigScreen extends Screen {
                 return false;
             }
         }));
-        addButton(new class_4185(screenWidth / 2 - 100, screenHeight - 26, I18n.translate("gui.done")) {
+        addButton(new ButtonWidget(screenWidth / 2 - 100, screenHeight - 26, I18n.translate("gui.done")) {
             @Override
-            public void method_1826() {
+            public void onPressed() {
                 try {
                     RoughlyEnoughItemsCore.getConfigManager().saveConfig();
                 } catch (IOException e) {
@@ -355,6 +328,13 @@ public class ConfigScreen extends Screen {
     }
     
     @Override
+    public boolean mouseScrolled(double double_1, double double_2, double double_3) {
+        if (entryListWidget.mouseScrolled(double_1, double_2, double_3))
+            return true;
+        return super.mouseScrolled(double_1, double_2, double_3);
+    }
+    
+    @Override
     public void draw(int int_1, int int_2, float float_1) {
         this.drawTextureBackground(0);
         this.entryListWidget.draw(int_1, int_2, float_1);
@@ -364,16 +344,6 @@ public class ConfigScreen extends Screen {
         tooltipList.forEach(queuedTooltip -> drawTooltip(queuedTooltip.getText(), queuedTooltip.getLocation().x, queuedTooltip.getLocation().y));
         tooltipList.clear();
         GuiLighting.disable();
-    }
-    
-    @Override
-    public boolean isPauseScreen() {
-        return false;
-    }
-    
-    @Override
-    public InputListener method_19357() {
-        return entryListWidget;
     }
     
 }

@@ -32,7 +32,7 @@ public class RecipeViewingScreen extends Screen {
     public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     public static final Color SUB_COLOR = new Color(159, 159, 159);
     private static final Identifier CREATIVE_INVENTORY_TABS = new Identifier("textures/gui/container/creative_inventory/tabs.png");
-    private final List<IWidget> widgets;
+    private final List<Widget> widgets;
     private final List<TabWidget> tabs;
     private final Map<RecipeCategory, List<RecipeDisplay>> categoriesMap;
     private final List<RecipeCategory> categories;
@@ -83,14 +83,18 @@ public class RecipeViewingScreen extends Screen {
             ScreenHelper.getLastOverlay().onInitialized();
             return true;
         }
+        if (int_1 == 258) {
+            if (isShiftPressed())
+                this.method_19354();
+            else
+                this.focusNext();
+            return true;
+        }
         if (choosePageActivated) {
             if (recipeChoosePageWidget.keyPressed(int_1, int_2, int_3))
                 return true;
             return false;
         }
-        for(InputListener listener : listeners)
-            if (listener.keyPressed(int_1, int_2, int_3))
-                return true;
         return super.keyPressed(int_1, int_2, int_3);
     }
     
@@ -114,7 +118,7 @@ public class RecipeViewingScreen extends Screen {
         
         widgets.add(categoryBack = new ButtonWidget((int) bounds.getX() + 5, (int) bounds.getY() + 5, 12, 12, new TranslatableTextComponent("text.rei.left_arrow")) {
             @Override
-            public void onPressed(int button, double mouseX, double mouseY) {
+            public void onPressed() {
                 int currentCategoryIndex = categories.indexOf(selectedCategory);
                 currentCategoryIndex--;
                 if (currentCategoryIndex < 0)
@@ -125,9 +129,26 @@ public class RecipeViewingScreen extends Screen {
                 RecipeViewingScreen.this.onInitialized();
             }
         });
+        widgets.add(new ClickableLabelWidget((int) bounds.getCenterX(), (int) bounds.getY() + 7, "") {
+            @Override
+            public void draw(int mouseX, int mouseY, float partialTicks) {
+                this.text = selectedCategory.getCategoryName();
+                super.draw(mouseX, mouseY, partialTicks);
+                if (isHighlighted(mouseX, mouseY))
+                    ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.view_all_categories").split("\n")));
+                else if (focused)
+                    ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(new Point(x, y), I18n.translate("text.rei.view_all_categories").split("\n")));
+            }
+            
+            @Override
+            public void onLabelClicked() {
+                MinecraftClient.getInstance().getSoundLoader().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                ClientHelper.executeViewAllRecipesKeyBind();
+            }
+        });
         widgets.add(categoryNext = new ButtonWidget((int) bounds.getMaxX() - 17, (int) bounds.getY() + 5, 12, 12, new TranslatableTextComponent("text.rei.right_arrow")) {
             @Override
-            public void onPressed(int button, double mouseX, double mouseY) {
+            public void onPressed() {
                 int currentCategoryIndex = categories.indexOf(selectedCategory);
                 currentCategoryIndex++;
                 if (currentCategoryIndex >= categories.size())
@@ -143,38 +164,11 @@ public class RecipeViewingScreen extends Screen {
         
         widgets.add(recipeBack = new ButtonWidget((int) bounds.getX() + 5, (int) bounds.getY() + 21, 12, 12, new TranslatableTextComponent("text.rei.left_arrow")) {
             @Override
-            public void onPressed(int button, double mouseX, double mouseY) {
+            public void onPressed() {
                 page--;
                 if (page < 0)
                     page = getTotalPages(selectedCategory) - 1;
                 RecipeViewingScreen.this.onInitialized();
-            }
-        });
-        widgets.add(recipeNext = new ButtonWidget((int) bounds.getMaxX() - 17, (int) bounds.getY() + 21, 12, 12, new TranslatableTextComponent("text.rei.right_arrow")) {
-            @Override
-            public void onPressed(int button, double mouseX, double mouseY) {
-                page++;
-                if (page >= getTotalPages(selectedCategory))
-                    page = 0;
-                RecipeViewingScreen.this.onInitialized();
-            }
-        });
-        recipeBack.enabled = categoriesMap.get(selectedCategory).size() > getRecipesPerPage();
-        recipeNext.enabled = categoriesMap.get(selectedCategory).size() > getRecipesPerPage();
-        
-        widgets.add(new ClickableLabelWidget((int) bounds.getCenterX(), (int) bounds.getY() + 7, "") {
-            @Override
-            public void draw(int mouseX, int mouseY, float partialTicks) {
-                this.text = selectedCategory.getCategoryName();
-                super.draw(mouseX, mouseY, partialTicks);
-                if (isHighlighted(mouseX, mouseY))
-                    ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.view_all_categories").split("\n")));
-            }
-            
-            @Override
-            public void onLabelClicked() {
-                MinecraftClient.getInstance().getSoundLoader().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-                ClientHelper.executeViewAllRecipesKeyBind();
             }
         });
         widgets.add(new ClickableLabelWidget((int) bounds.getCenterX(), (int) bounds.getY() + 23, "") {
@@ -184,6 +178,8 @@ public class RecipeViewingScreen extends Screen {
                 super.draw(mouseX, mouseY, partialTicks);
                 if (isHighlighted(mouseX, mouseY))
                     ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.choose_page").split("\n")));
+                else if (focused)
+                    ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(new Point(x, y), I18n.translate("text.rei.choose_page").split("\n")));
             }
             
             @Override
@@ -193,13 +189,25 @@ public class RecipeViewingScreen extends Screen {
                 RecipeViewingScreen.this.onInitialized();
             }
         });
+        widgets.add(recipeNext = new ButtonWidget((int) bounds.getMaxX() - 17, (int) bounds.getY() + 21, 12, 12, new TranslatableTextComponent("text.rei.right_arrow")) {
+            @Override
+            public void onPressed() {
+                page++;
+                if (page >= getTotalPages(selectedCategory))
+                    page = 0;
+                RecipeViewingScreen.this.onInitialized();
+            }
+        });
+        recipeBack.enabled = categoriesMap.get(selectedCategory).size() > getRecipesPerPage();
+        recipeNext.enabled = categoriesMap.get(selectedCategory).size() > getRecipesPerPage();
+        
         for(int i = 0; i < 6; i++) {
             int j = i + categoryPages * 6;
             if (categories.size() > j) {
                 TabWidget tab;
                 tabs.add(tab = new TabWidget(i, this, new Rectangle(bounds.x + 4 + 28 * i, bounds.y - 28, 28, 28)) {
                     @Override
-                    public boolean onMouseClick(int button, double mouseX, double mouseY) {
+                    public boolean mouseClicked(double mouseX, double mouseY, int button) {
                         if (getBounds().contains(mouseX, mouseY)) {
                             MinecraftClient.getInstance().getSoundLoader().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                             if (getId() + categoryPages * 6 == categories.indexOf(selectedCategory))
@@ -238,7 +246,7 @@ public class RecipeViewingScreen extends Screen {
         listeners.addAll(widgets);
     }
     
-    public List<IWidget> getWidgets() {
+    public List<Widget> getWidgets() {
         return widgets;
     }
     
@@ -354,15 +362,15 @@ public class RecipeViewingScreen extends Screen {
                 return true;
         if (getBounds().contains(ClientHelper.getMouseLocation())) {
             if (amount > 0 && recipeBack.enabled)
-                recipeBack.onPressed(0, 0, 0);
+                recipeBack.onPressed();
             else if (amount < 0 && recipeNext.enabled)
-                recipeNext.onPressed(0, 0, 0);
+                recipeNext.onPressed();
         }
         if ((new Rectangle(bounds.x, bounds.y - 28, bounds.width, 28)).contains(ClientHelper.getMouseLocation())) {
             if (amount > 0 && categoryBack.enabled)
-                categoryBack.onPressed(0, 0, 0);
+                categoryBack.onPressed();
             else if (amount < 0 && categoryNext.enabled)
-                categoryNext.onPressed(0, 0, 0);
+                categoryNext.onPressed();
         }
         return super.mouseScrolled(i, j, amount);
     }
@@ -383,17 +391,17 @@ public class RecipeViewingScreen extends Screen {
             if (entry.mouseClicked(double_1, double_2, int_1)) {
                 focusOn(entry);
                 if (int_1 == 0)
-                    method_1966(true); //setActive
+                    setActive(true);
                 return true;
             }
         return false;
     }
     
-    @Override //getFocused
-    public InputListener method_19357() {
+    @Override
+    public InputListener getFocused() {
         if (choosePageActivated)
             return recipeChoosePageWidget;
-        return super.method_19357();
+        return super.getFocused();
     }
     
 }

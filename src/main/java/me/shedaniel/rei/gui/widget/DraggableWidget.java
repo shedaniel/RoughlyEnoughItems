@@ -2,11 +2,12 @@ package me.shedaniel.rei.gui.widget;
 
 import me.shedaniel.rei.client.ClientHelper;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.InputListener;
 import net.minecraft.client.util.Window;
 
 import java.awt.*;
 
-public abstract class DraggableWidget implements HighlightableWidget {
+public abstract class DraggableWidget extends HighlightableWidget {
     
     protected boolean dragged = false;
     private Point midPoint, startPoint;
@@ -50,8 +51,8 @@ public abstract class DraggableWidget implements HighlightableWidget {
             }
             return true;
         }
-        for(IWidget widget : getListeners())
-            if (widget.mouseDragged(double_1, double_2, int_1, double_3, double_4))
+        for(InputListener listener : getInputListeners())
+            if (listener.mouseDragged(double_1, double_2, int_1, double_3, double_4))
                 return true;
         return false;
     }
@@ -66,8 +67,8 @@ public abstract class DraggableWidget implements HighlightableWidget {
                 onMouseReleaseMidPoint(getMidPoint());
                 return true;
             }
-        for(IWidget widget : getListeners())
-            if (widget.mouseReleased(double_1, double_2, int_1))
+        for(InputListener listener : getInputListeners())
+            if (listener.mouseReleased(double_1, double_2, int_1))
                 return true;
         return false;
     }

@@ -3,7 +3,7 @@ package me.shedaniel.rei.plugin;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.api.RecipeCategory;
-import me.shedaniel.rei.gui.widget.IWidget;
+import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.gui.widget.ItemSlotWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import net.minecraft.block.Blocks;
@@ -39,9 +39,9 @@ public class DefaultCraftingCategory implements RecipeCategory<DefaultCraftingDi
     }
     
     @Override
-    public List<IWidget> setupDisplay(Supplier<DefaultCraftingDisplay> recipeDisplaySupplier, Rectangle bounds) {
+    public List<Widget> setupDisplay(Supplier<DefaultCraftingDisplay> recipeDisplaySupplier, Rectangle bounds) {
         Point startPoint = new Point((int) bounds.getCenterX() - 58, (int) bounds.getCenterY() - 27);
-        List<IWidget> widgets = new LinkedList<>(Arrays.asList(new RecipeBaseWidget(bounds) {
+        List<Widget> widgets = new LinkedList<>(Arrays.asList(new RecipeBaseWidget(bounds) {
             @Override
             public void draw(int mouseX, int mouseY, float partialTicks) {
                 super.draw(mouseX, mouseY, partialTicks);
