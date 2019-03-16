@@ -1,12 +1,10 @@
 package me.shedaniel.rei.gui.widget;
 
-import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.item.ItemStack;
@@ -14,9 +12,10 @@ import net.minecraft.util.Identifier;
 
 import java.awt.*;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-public class TabWidget extends DrawableHelper implements HighlightableWidget {
+public class TabWidget extends HighlightableWidget {
     
     private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     
@@ -64,8 +63,8 @@ public class TabWidget extends DrawableHelper implements HighlightableWidget {
     }
     
     @Override
-    public List<IWidget> getListeners() {
-        return Lists.newArrayList();
+    public List<Widget> getInputListeners() {
+        return Collections.emptyList();
     }
     
     @Override

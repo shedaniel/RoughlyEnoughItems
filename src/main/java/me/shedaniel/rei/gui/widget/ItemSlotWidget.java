@@ -5,7 +5,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.InputListener;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.item.ItemStack;
@@ -14,10 +14,11 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
-public class ItemSlotWidget extends DrawableHelper implements HighlightableWidget {
+public class ItemSlotWidget extends HighlightableWidget {
     
     private static final Identifier RECIPE_GUI = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private List<ItemStack> itemList = new LinkedList<>();
@@ -43,17 +44,17 @@ public class ItemSlotWidget extends DrawableHelper implements HighlightableWidge
         this.clickToMoreRecipes = clickToMoreRecipes;
     }
     
+    @Override
+    public List<? extends InputListener> getInputListeners() {
+        return Collections.emptyList();
+    }
+    
     public void setDrawHighlightedBackground(boolean drawHighlightedBackground) {
         this.drawHighlightedBackground = drawHighlightedBackground;
     }
     
     public boolean isDrawBackground() {
         return drawBackground;
-    }
-    
-    @Override
-    public List<IWidget> getListeners() {
-        return new ArrayList<>();
     }
     
     @Override
@@ -125,7 +126,7 @@ public class ItemSlotWidget extends DrawableHelper implements HighlightableWidge
     }
     
     @Override
-    public boolean onMouseClick(int button, double mouseX, double mouseY) {
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (!clickToMoreRecipes)
             return false;
         if (getBounds().contains(mouseX, mouseY))

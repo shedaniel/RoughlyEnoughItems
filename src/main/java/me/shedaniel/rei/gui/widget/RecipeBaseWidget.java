@@ -8,10 +8,10 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-public class RecipeBaseWidget extends DrawableHelper implements HighlightableWidget {
+public class RecipeBaseWidget extends HighlightableWidget {
     
     private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private static final Color INNER_COLOR = new Color(198, 198, 198);
@@ -28,8 +28,8 @@ public class RecipeBaseWidget extends DrawableHelper implements HighlightableWid
     }
     
     @Override
-    public List<IWidget> getListeners() {
-        return new ArrayList<>();
+    public List<Widget> getInputListeners() {
+        return Collections.emptyList();
     }
     
     @Override

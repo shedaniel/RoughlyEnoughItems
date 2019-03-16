@@ -1,7 +1,7 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.gui.RecipeViewingScreen;
-import me.shedaniel.rei.gui.widget.IWidget;
+import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.item.ItemStack;
@@ -21,7 +21,7 @@ public interface RecipeCategory<T extends RecipeDisplay> {
     
     String getCategoryName();
     
-    default List<IWidget> setupDisplay(Supplier<T> recipeDisplaySupplier, Rectangle bounds) {
+    default List<Widget> setupDisplay(Supplier<T> recipeDisplaySupplier, Rectangle bounds) {
         return Collections.singletonList(new RecipeBaseWidget(bounds));
     }
     

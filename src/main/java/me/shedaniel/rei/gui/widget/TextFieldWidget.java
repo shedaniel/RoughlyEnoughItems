@@ -13,36 +13,36 @@ import net.minecraft.client.render.VertexFormats;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class TextFieldWidget extends DrawableHelper implements HighlightableWidget {
+public class TextFieldWidget extends HighlightableWidget {
     
     protected final TextRenderer textRenderer;
     public Function<String, String> stripInvaild;
-    private Rectangle bounds;
-    private String text;
-    private int maxLength;
     protected int focusedTicks;
-    private boolean hasBorder;
-    private boolean field_2096;
-    private boolean focused;
     protected boolean editable;
-    private boolean field_17037;
     protected int field_2103;
     protected int cursorMax;
     protected int cursorMin;
     protected int editableColor;
     protected int notEditableColor;
+    protected BiFunction<String, Integer, String> renderTextProvider;
+    private Rectangle bounds;
+    private String text;
+    private int maxLength;
+    private boolean hasBorder;
+    private boolean field_2096;
+    private boolean focused;
+    private boolean field_17037;
     private boolean visible;
     private String suggestion;
     private Consumer<String> changedListener;
     private Predicate<String> textPredicate;
-    protected BiFunction<String, Integer, String> renderTextProvider;
     
     public TextFieldWidget(Rectangle rectangle) {
         this.text = "";
@@ -68,6 +68,10 @@ public class TextFieldWidget extends DrawableHelper implements HighlightableWidg
     
     public String getSuggestion() {
         return suggestion;
+    }
+    
+    public void setSuggestion(String string_1) {
+        this.suggestion = string_1;
     }
     
     @Override
@@ -349,8 +353,8 @@ public class TextFieldWidget extends DrawableHelper implements HighlightableWidg
     }
     
     @Override
-    public List<IWidget> getListeners() {
-        return new ArrayList<>();
+    public List<Widget> getInputListeners() {
+        return Collections.emptyList();
     }
     
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
@@ -583,10 +587,6 @@ public class TextFieldWidget extends DrawableHelper implements HighlightableWidg
     
     public void setVisible(boolean boolean_1) {
         this.visible = boolean_1;
-    }
-    
-    public void setSuggestion(String string_1) {
-        this.suggestion = string_1;
     }
     
     public int method_1889(int int_1) {

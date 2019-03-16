@@ -8,7 +8,6 @@ import me.shedaniel.rei.client.ItemListOrdering;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.client.SearchArgument;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.Item;
@@ -24,10 +23,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ItemListOverlay extends DrawableHelper implements IWidget {
+public class ItemListOverlay extends Widget {
     
     private static List<Item> searchBlacklisted = Lists.newArrayList();
-    private List<IWidget> widgets;
+    private List<Widget> widgets;
     private int width, height, page;
     private Rectangle rectangle, listArea;
     private List<ItemStack> currentDisplayed;
@@ -78,7 +77,7 @@ public class ItemListOverlay extends DrawableHelper implements IWidget {
             ScreenHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.translate("text.rei.delete_items"))));
     }
     
-    public List<IWidget> getWidgets() {
+    public List<Widget> getWidgets() {
         return widgets;
     }
     
@@ -104,7 +103,7 @@ public class ItemListOverlay extends DrawableHelper implements IWidget {
                 }
                 
                 @Override
-                public boolean onMouseClick(int button, double mouseX, double mouseY) {
+                public boolean mouseClicked(double mouseX, double mouseY, int button) {
                     if (isHighlighted(mouseX, mouseY)) {
                         if (ClientHelper.isCheating()) {
                             if (getCurrentStack() != null && !getCurrentStack().isEmpty()) {
@@ -127,7 +126,7 @@ public class ItemListOverlay extends DrawableHelper implements IWidget {
     
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
-        for(IWidget widget : widgets)
+        for(Widget widget : widgets)
             if (widget.keyPressed(int_1, int_2, int_3))
                 return true;
         return false;
@@ -248,7 +247,7 @@ public class ItemListOverlay extends DrawableHelper implements IWidget {
             }
             if (!player.inventory.getCursorStack().isEmpty() && MinecraftClient.getInstance().isInSingleplayer())
                 return false;
-            for(IWidget widget : getListeners())
+            for(Widget widget : getInputListeners())
                 if (widget.mouseClicked(double_1, double_2, int_1))
                     return true;
         }
@@ -256,7 +255,7 @@ public class ItemListOverlay extends DrawableHelper implements IWidget {
     }
     
     @Override
-    public List<IWidget> getListeners() {
+    public List<Widget> getInputListeners() {
         return widgets;
     }
     

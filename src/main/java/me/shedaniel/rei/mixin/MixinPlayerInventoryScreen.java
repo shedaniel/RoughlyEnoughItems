@@ -27,8 +27,8 @@ public abstract class MixinPlayerInventoryScreen extends AbstractPlayerInventory
     }
     
     @Override
-    public InputListener method_19357() {
-        return super.method_19357();
+    public InputListener getFocused() {
+        return super.getFocused();
     }
     
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)

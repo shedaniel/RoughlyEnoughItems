@@ -4,24 +4,22 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.audio.PositionedSoundInstance;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.InputListener;
+import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.TextComponent;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-public abstract class ButtonWidget extends DrawableHelper implements HighlightableWidget {
+public abstract class ButtonWidget extends HighlightableWidget {
     
-    protected static final Identifier WIDGET_TEX = new Identifier("textures/gui/widgets.png");
     public String text;
     public boolean enabled;
     public boolean visible;
-    protected boolean hovered;
-    private boolean pressed;
+    private boolean focused;
     private Rectangle bounds;
     
     public ButtonWidget(Rectangle rectangle, TextComponent text) {
@@ -59,20 +57,14 @@ public abstract class ButtonWidget extends DrawableHelper implements Highlightab
     }
     
     @Override
-    public List<IWidget> getListeners() {
-        return new ArrayList<>();
-    }
-    
-    @Override
     public void draw(int mouseX, int mouseY, float partialTicks) {
         if (this.visible) {
             int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;
             MinecraftClient client = MinecraftClient.getInstance();
             TextRenderer textRenderer = client.textRenderer;
-            client.getTextureManager().bindTexture(WIDGET_TEX);
+            client.getTextureManager().bindTexture(AbstractButtonWidget.WIDGET_TEX);
             GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-            this.hovered = bounds.contains(mouseX, mouseY);
-            int textureOffset = this.getTextureId(this.hovered);
+            int textureOffset = this.getTextureId(isHovered(mouseX, mouseY));
             GlStateManager.enableBlend();
             GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
             GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
@@ -94,7 +86,7 @@ public abstract class ButtonWidget extends DrawableHelper implements Highlightab
             int colour = 14737632;
             if (!this.enabled) {
                 colour = 10526880;
-            } else if (this.hovered) {
+            } else if (isHovered(mouseX, mouseY)) {
                 colour = 16777120;
             }
             
@@ -102,16 +94,49 @@ public abstract class ButtonWidget extends DrawableHelper implements Highlightab
         }
     }
     
+    public boolean isHovered(int mouseX, int mouseY) {
+        return bounds.contains(mouseX, mouseY) || focused;
+    }
+    
     @Override
-    public boolean onMouseClick(int button, double mouseX, double mouseY) {
-        if (bounds.contains(mouseX, mouseY) && enabled) {
+    public boolean hasFocus() {
+        return visible && enabled;
+    }
+    
+    @Override
+    public void setHasFocus(boolean boolean_1) {
+        focused = boolean_1;
+    }
+    
+    @Override
+    public List<? extends InputListener> getInputListeners() {
+        return Collections.emptyList();
+    }
+    
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (bounds.contains(mouseX, mouseY) && enabled && button == 0) {
             MinecraftClient.getInstance().getSoundLoader().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-            onPressed(button, mouseX, mouseY);
+            onPressed();
             return true;
         }
         return false;
     }
     
-    public abstract void onPressed(int button, double mouseX, double mouseY);
+    @Override
+    public boolean keyPressed(int int_1, int int_2, int int_3) {
+        if (this.enabled && this.visible) {
+            if (int_1 != 257 && int_1 != 32 && int_1 != 335) {
+                return false;
+            } else {
+                MinecraftClient.getInstance().getSoundLoader().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                this.onPressed();
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public abstract void onPressed();
     
 }

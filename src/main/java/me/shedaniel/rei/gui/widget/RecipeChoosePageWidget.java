@@ -14,6 +14,7 @@ import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,7 +23,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     private int currentPage;
     private int maxPage;
     private Rectangle bounds, grabBounds, dragBounds;
-    private List<IWidget> widgets;
+    private List<Widget> widgets;
     private RecipeViewingScreen recipeViewingScreen;
     private TextFieldWidget textFieldWidget;
     private RecipeBaseWidget base1, base2;
@@ -81,10 +82,10 @@ public class RecipeChoosePageWidget extends DraggableWidget {
         this.widgets = Lists.newArrayList();
         this.widgets.add(base1 = new RecipeBaseWidget(new Rectangle(bounds.x + bounds.width - 50, bounds.y + bounds.height - 6, 50, 36)));
         this.widgets.add(base2 = new RecipeBaseWidget(bounds));
-        this.widgets.add(new IWidget() {
+        this.widgets.add(new Widget() {
             @Override
-            public List<IWidget> getListeners() {
-                return Lists.newArrayList();
+            public List<Widget> getInputListeners() {
+                return Collections.emptyList();
             }
             
             @Override
@@ -114,7 +115,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
         textFieldWidget.setText(String.valueOf(currentPage + 1));
         widgets.add(btnDone = new ButtonWidget(bounds.x + bounds.width - 45, bounds.y + bounds.height + 3, 40, 20, I18n.translate("gui.done")) {
             @Override
-            public void onPressed(int button, double mouseX, double mouseY) {
+            public void onPressed() {
                 recipeViewingScreen.page = MathHelper.clamp(getIntFromString(textFieldWidget.getText()).orElse(0) - 1, 0, recipeViewingScreen.getTotalPages(recipeViewingScreen.getSelectedCategory()) - 1);
                 recipeViewingScreen.choosePageActivated = false;
                 recipeViewingScreen.onInitialized();
@@ -129,7 +130,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     }
     
     @Override
-    public List<IWidget> getListeners() {
+    public List<Widget> getInputListeners() {
         return widgets;
     }
     
@@ -145,7 +146,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     
     @Override
     public boolean charTyped(char char_1, int int_1) {
-        for(IWidget widget : widgets)
+        for(Widget widget : widgets)
             if (widget.charTyped(char_1, int_1))
                 return true;
         return false;
@@ -159,7 +160,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
             recipeViewingScreen.onInitialized();
             return true;
         }
-        for(IWidget widget : widgets)
+        for(Widget widget : widgets)
             if (widget.keyPressed(int_1, int_2, int_3))
                 return true;
         return false;
