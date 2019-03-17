@@ -96,7 +96,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
                 e.printStackTrace();
             }
         } else {
-            RoughlyEnoughItemsCore.LOGGER.fatal("[REI] Cloth NOT found! It is a dependency of REI: https://minecraft.curseforge.com/projects/utils");
+            RoughlyEnoughItemsCore.LOGGER.fatal("[REI] Cloth NOT found! It is a dependency of REI: https://minecraft.curseforge.com/projects/cloth");
             System.exit(0);
         }
     }

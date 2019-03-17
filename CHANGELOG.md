@@ -1,3 +1,5 @@
+# v2.4.2.68
+- Fixed [Cloth](https://minecraft.curseforge.com/projects/cloth) missing message
 # v2.4.2.67
 - Fixed pages being weird
 - Added Portuguese
