@@ -1,4 +1,6 @@
-# v2.4.1.66
+# v2.4.2.67
+- Fixed pages being weird
+# v2.4.2.66
 - Removed Mod Menu hooks, will hook into Mod Menu itself in the future
 - Improved gui widgets
 # v2.4.1.65
