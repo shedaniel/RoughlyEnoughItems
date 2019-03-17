@@ -31,16 +31,16 @@ public class ScreenHelper implements ClientModInitializer {
         overlayVisible = !overlayVisible;
     }
     
-    public static ContainerScreenOverlay getLastOverlay(boolean reset) {
+    public static ContainerScreenOverlay getLastOverlay(boolean reset, boolean setPage) {
         if (overlay == null || reset) {
             overlay = new ContainerScreenOverlay();
-            overlay.onInitialized();
+            overlay.onInitialized(setPage);
         }
         return overlay;
     }
     
     public static ContainerScreenOverlay getLastOverlay() {
-        return getLastOverlay(false);
+        return getLastOverlay(false, false);
     }
     
     public static void disableRecipeBook(ContainerScreen lastContainerScreen, List<InputListener> listeners, List<ButtonWidget> buttonWidgets) {

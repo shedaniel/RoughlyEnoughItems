@@ -46,6 +46,10 @@ public class ContainerScreenOverlay extends ScreenComponent {
     private int lastLeft;
     
     public void onInitialized() {
+        onInitialized(false);
+    }
+    
+    public void onInitialized(boolean setPage) {
         //Update Variables
         this.widgets.clear();
         this.window = MinecraftClient.getInstance().window;
@@ -72,7 +76,8 @@ public class ContainerScreenOverlay extends ScreenComponent {
                 itemListOverlay.updateList(getItemListArea(), page, searchTerm);
             }
         });
-        page = MathHelper.clamp(page, 0, getTotalPage());
+        if (setPage)
+            page = MathHelper.clamp(page, 0, getTotalPage());
         widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? window.getScaledWidth() - 30 : 10, 10, 20, 20, "") {
             @Override
             public void onPressed() {
@@ -288,7 +293,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
     public void drawOverlay(int mouseX, int mouseY, float partialTicks) {
         List<ItemStack> currentStacks = ClientHelper.getInventoryItemsTypes();
         if (getLeft() != lastLeft)
-            onInitialized();
+            onInitialized(true);
         else if (RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() && (!hasSameListContent(new LinkedList<>(ScreenHelper.inventoryStacks), currentStacks) || (currentStacks.size() != ScreenHelper.inventoryStacks.size()))) {
             ScreenHelper.inventoryStacks = ClientHelper.getInventoryItemsTypes();
             itemListOverlay.updateList(getItemListArea(), page, searchTerm);

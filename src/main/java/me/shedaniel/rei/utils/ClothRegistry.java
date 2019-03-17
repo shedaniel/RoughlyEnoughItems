@@ -29,7 +29,7 @@ public class ClothRegistry {
                         return;
                 }
                 ScreenHelper.setLastContainerScreen((ContainerScreen) post.getScreen());
-                post.getInputListeners().add(ScreenHelper.getLastOverlay(true));
+                post.getInputListeners().add(ScreenHelper.getLastOverlay(true, false));
             }
         }, EventPriority.LOWEST);
         ClothHooks.CLIENT_POST_DRAW_SCREEN.registerListener(post -> {

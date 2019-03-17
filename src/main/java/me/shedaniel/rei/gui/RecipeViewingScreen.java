@@ -242,7 +242,7 @@ public class RecipeViewingScreen extends Screen {
             recipeChoosePageWidget = null;
         
         listeners.addAll(tabs);
-        listeners.add(ScreenHelper.getLastOverlay(true));
+        listeners.add(ScreenHelper.getLastOverlay(true, false));
         listeners.addAll(widgets);
     }
     
