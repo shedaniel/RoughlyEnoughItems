@@ -1,12 +1,11 @@
 package me.shedaniel.rei.mixin;
 
-import net.minecraft.client.gui.ContainerScreen;
-import net.minecraft.client.gui.InputListener;
-import net.minecraft.client.gui.container.CraftingTableScreen;
-import net.minecraft.client.gui.recipebook.RecipeBookGui;
-import net.minecraft.container.Container;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.text.TextComponent;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.gui.inventory.GuiCrafting;
+import net.minecraft.client.gui.recipebook.GuiRecipeBook;
+import net.minecraft.client.gui.recipebook.IRecipeShownListener;
+import net.minecraft.inventory.Container;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -14,19 +13,19 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(CraftingTableScreen.class)
-public abstract class MixinCraftingTableScreen extends ContainerScreen {
+@Mixin(GuiCrafting.class)
+public abstract class MixinCraftingTableScreen extends GuiContainer implements IRecipeShownListener {
     
     @Shadow
     @Final
-    private RecipeBookGui recipeBookGui;
+    private GuiRecipeBook recipeBookGui;
     
-    public MixinCraftingTableScreen(Container container_1, PlayerInventory playerInventory_1, TextComponent textComponent_1) {
-        super(container_1, playerInventory_1, textComponent_1);
+    public MixinCraftingTableScreen(Container inventorySlotsIn) {
+        super(inventorySlotsIn);
     }
     
     @Override
-    public InputListener getFocused() {
+    public IGuiEventListener getFocused() {
         return super.getFocused();
     }
     

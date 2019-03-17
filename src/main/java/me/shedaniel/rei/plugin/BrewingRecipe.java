@@ -1,7 +1,7 @@
 package me.shedaniel.rei.plugin;
 
 import net.minecraft.item.Item;
-import net.minecraft.recipe.Ingredient;
+import net.minecraft.item.crafting.Ingredient;
 
 public class BrewingRecipe {
     

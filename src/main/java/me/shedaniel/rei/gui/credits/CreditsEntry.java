@@ -1,22 +1,22 @@
 package me.shedaniel.rei.gui.credits;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.widget.EntryListWidget;
-import net.minecraft.text.TextComponent;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiListExtended;
+import net.minecraft.util.text.ITextComponent;
 
-public class CreditsEntry extends EntryListWidget.Entry<CreditsEntry> {
+public class CreditsEntry extends GuiListExtended.IGuiListEntry<CreditsEntry> {
     
-    private TextComponent textComponent;
+    private ITextComponent textComponent;
     
-    public CreditsEntry(TextComponent textComponent) {
+    public CreditsEntry(ITextComponent textComponent) {
         this.textComponent = textComponent;
     }
     
     @Override
-    public void draw(int entryWidth, int height, int i3, int i4, boolean isSelected, float delta) {
+    public void drawEntry(int entryWidth, int height, int i3, int i4, boolean isSelected, float delta) {
         int x = getX();
         int y = getY();
-        MinecraftClient.getInstance().textRenderer.drawWithShadow(textComponent.getFormattedText(), x + 5, y + 5, -1);
+        Minecraft.getInstance().fontRenderer.drawStringWithShadow(textComponent.getFormattedText(), x + 5, y + 5, -1);
     }
     
 }

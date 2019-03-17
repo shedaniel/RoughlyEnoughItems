@@ -1,15 +1,15 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.google.common.base.Predicates;
-import com.mojang.blaze3d.platform.GlStateManager;
-import net.minecraft.SharedConstants;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.gui.Screen;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.SharedConstants;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
@@ -20,29 +20,29 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class TextFieldWidget extends DrawableHelper implements HighlightableWidget {
+public class TextFieldWidget extends Gui implements HighlightableWidget {
     
-    protected final TextRenderer textRenderer;
+    protected final FontRenderer fontRenderer;
     public Function<String, String> stripInvaild;
-    private Rectangle bounds;
-    private String text;
-    private int maxLength;
     protected int focusedTicks;
-    private boolean hasBorder;
-    private boolean field_2096;
-    private boolean focused;
     protected boolean editable;
-    private boolean field_17037;
     protected int field_2103;
     protected int cursorMax;
     protected int cursorMin;
     protected int editableColor;
     protected int notEditableColor;
+    protected BiFunction<String, Integer, String> renderTextProvider;
+    private Rectangle bounds;
+    private String text;
+    private int maxLength;
+    private boolean hasBorder;
+    private boolean field_2096;
+    private boolean focused;
+    private boolean field_17037;
     private boolean visible;
     private String suggestion;
     private Consumer<String> changedListener;
     private Predicate<String> textPredicate;
-    protected BiFunction<String, Integer, String> renderTextProvider;
     
     public TextFieldWidget(Rectangle rectangle) {
         this.text = "";
@@ -57,9 +57,9 @@ public class TextFieldWidget extends DrawableHelper implements HighlightableWidg
         this.renderTextProvider = (string_1, integer_1) -> {
             return string_1;
         };
-        this.textRenderer = MinecraftClient.getInstance().textRenderer;
+        this.fontRenderer = Minecraft.getInstance().fontRenderer;
         this.bounds = rectangle;
-        this.stripInvaild = s -> SharedConstants.stripInvalidChars(s);
+        this.stripInvaild = s -> SharedConstants.filterAllowedCharacters(s);
     }
     
     public TextFieldWidget(int x, int y, int width, int height) {
@@ -68,6 +68,10 @@ public class TextFieldWidget extends DrawableHelper implements HighlightableWidg
     
     public String getSuggestion() {
         return suggestion;
+    }
+    
+    public void setSuggestion(String string_1) {
+        this.suggestion = string_1;
     }
     
     @Override
@@ -153,7 +157,7 @@ public class TextFieldWidget extends DrawableHelper implements HighlightableWidg
     }
     
     private void method_16873(int int_1) {
-        if (Screen.isControlPressed()) {
+        if (GuiScreen.isCtrlKeyDown()) {
             this.method_1877(int_1);
         } else {
             this.method_1878(int_1);
@@ -261,22 +265,22 @@ public class TextFieldWidget extends DrawableHelper implements HighlightableWidg
     
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (this.isVisible() && this.isFocused()) {
-            this.field_17037 = Screen.isShiftPressed();
-            if (Screen.isSelectAllShortcutPressed(int_1)) {
+            this.field_17037 = GuiScreen.isShiftKeyDown();
+            if (GuiScreen.isKeyComboCtrlA(int_1)) {
                 this.method_1872();
                 this.method_1884(0);
                 return true;
-            } else if (Screen.isCopyShortcutPressed(int_1)) {
-                MinecraftClient.getInstance().keyboard.setClipboard(this.getSelectedText());
+            } else if (GuiScreen.isKeyComboCtrlC(int_1)) {
+                Minecraft.getInstance().keyboardListener.setClipboardString(this.getSelectedText());
                 return true;
-            } else if (Screen.isPasteShortcutPressed(int_1)) {
+            } else if (GuiScreen.isKeyComboCtrlV(int_1)) {
                 if (this.editable) {
-                    this.addText(MinecraftClient.getInstance().keyboard.getClipboard());
+                    this.addText(Minecraft.getInstance().keyboardListener.getClipboardString());
                 }
                 
                 return true;
-            } else if (Screen.isCutShortcutPressed(int_1)) {
-                MinecraftClient.getInstance().keyboard.setClipboard(this.getSelectedText());
+            } else if (GuiScreen.isKeyComboCtrlX(int_1)) {
+                Minecraft.getInstance().keyboardListener.setClipboardString(this.getSelectedText());
                 if (this.editable) {
                     this.addText("");
                 }
@@ -304,7 +308,7 @@ public class TextFieldWidget extends DrawableHelper implements HighlightableWidg
                         
                         return true;
                     case 262:
-                        if (Screen.isControlPressed()) {
+                        if (GuiScreen.isCtrlKeyDown()) {
                             this.method_1883(this.method_1853(1));
                         } else {
                             this.moveCursor(1);
@@ -312,7 +316,7 @@ public class TextFieldWidget extends DrawableHelper implements HighlightableWidg
                         
                         return true;
                     case 263:
-                        if (Screen.isControlPressed()) {
+                        if (GuiScreen.isCtrlKeyDown()) {
                             this.method_1883(this.method_1853(-1));
                         } else {
                             this.moveCursor(-1);
@@ -334,7 +338,7 @@ public class TextFieldWidget extends DrawableHelper implements HighlightableWidg
     
     public boolean charTyped(char char_1, int int_1) {
         if (this.isVisible() && this.isFocused()) {
-            if (SharedConstants.isValidChar(char_1)) {
+            if (SharedConstants.isAllowedCharacter(char_1)) {
                 if (this.editable) {
                     this.addText(Character.toString(char_1));
                 }
@@ -368,8 +372,8 @@ public class TextFieldWidget extends DrawableHelper implements HighlightableWidg
                     int_2 -= 4;
                 }
                 
-                String string_1 = this.textRenderer.trimToWidth(this.text.substring(this.field_2103), this.getWidth());
-                this.method_1883(this.textRenderer.trimToWidth(string_1, int_2).length() + this.field_2103);
+                String string_1 = this.fontRenderer.trimStringToWidth(this.text.substring(this.field_2103), this.getWidth());
+                this.method_1883(this.fontRenderer.trimStringToWidth(string_1, int_2).length() + this.field_2103);
                 return true;
             } else {
                 return false;
@@ -387,7 +391,7 @@ public class TextFieldWidget extends DrawableHelper implements HighlightableWidg
             int color = this.editable ? this.editableColor : this.notEditableColor;
             int int_4 = this.cursorMax - this.field_2103;
             int int_5 = this.cursorMin - this.field_2103;
-            String string_1 = this.textRenderer.trimToWidth(this.text.substring(this.field_2103), this.getWidth());
+            String string_1 = this.fontRenderer.trimStringToWidth(this.text.substring(this.field_2103), this.getWidth());
             boolean boolean_1 = int_4 >= 0 && int_4 <= string_1.length();
             boolean boolean_2 = this.focused && this.focusedTicks / 6 % 2 == 0 && boolean_1;
             int int_6 = this.hasBorder ? this.bounds.x + 4 : this.bounds.x;
@@ -399,7 +403,7 @@ public class TextFieldWidget extends DrawableHelper implements HighlightableWidg
             
             if (!string_1.isEmpty()) {
                 String string_2 = boolean_1 ? string_1.substring(0, int_4) : string_1;
-                int_8 = this.textRenderer.drawWithShadow((String) this.renderTextProvider.apply(string_2, this.field_2103), (float) int_6, (float) int_7, color);
+                int_8 = this.fontRenderer.drawStringWithShadow((String) this.renderTextProvider.apply(string_2, this.field_2103), (float) int_6, (float) int_7, color);
             }
             
             boolean boolean_3 = this.cursorMax < this.text.length() || this.text.length() >= this.getMaxLength();
@@ -412,11 +416,11 @@ public class TextFieldWidget extends DrawableHelper implements HighlightableWidg
             }
             
             if (!string_1.isEmpty() && boolean_1 && int_4 < string_1.length()) {
-                this.textRenderer.drawWithShadow((String) this.renderTextProvider.apply(string_1.substring(int_4), this.cursorMax), (float) int_8, (float) int_7, color);
+                this.fontRenderer.drawStringWithShadow((String) this.renderTextProvider.apply(string_1.substring(int_4), this.cursorMax), (float) int_8, (float) int_7, color);
             }
             
             if (!boolean_3 && text.isEmpty() && this.suggestion != null) {
-                this.textRenderer.drawWithShadow(this.textRenderer.trimToWidth(this.suggestion, this.getWidth()), (float) int_6, (float) int_7, -8355712);
+                this.fontRenderer.drawStringWithShadow(this.fontRenderer.trimStringToWidth(this.suggestion, this.getWidth()), (float) int_6, (float) int_7, -8355712);
             }
             
             int var10002;
@@ -426,19 +430,19 @@ public class TextFieldWidget extends DrawableHelper implements HighlightableWidg
                     int var10001 = int_7 - 1;
                     var10002 = int_9 + 1;
                     var10003 = int_7 + 1;
-                    this.textRenderer.getClass();
-                    DrawableHelper.drawRect(int_9, var10001, var10002, var10003 + 9, -3092272);
+                    this.fontRenderer.getClass();
+                    drawRect(int_9, var10001, var10002, var10003 + 9, -3092272);
                 } else {
-                    this.textRenderer.drawWithShadow("_", (float) int_9, (float) int_7, color);
+                    this.fontRenderer.drawStringWithShadow("_", (float) int_9, (float) int_7, color);
                 }
             }
             
             if (int_5 != int_4) {
-                int int_10 = int_6 + this.textRenderer.getStringWidth(string_1.substring(0, int_5));
+                int int_10 = int_6 + this.fontRenderer.getStringWidth(string_1.substring(0, int_5));
                 var10002 = int_7 - 1;
                 var10003 = int_10 - 1;
                 int var10004 = int_7 + 1;
-                this.textRenderer.getClass();
+                this.fontRenderer.getClass();
                 this.method_1886(int_9, var10002, var10003, var10004 + 9);
             }
             
@@ -468,19 +472,19 @@ public class TextFieldWidget extends DrawableHelper implements HighlightableWidg
         }
         
         Tessellator tessellator_1 = Tessellator.getInstance();
-        BufferBuilder bufferBuilder_1 = tessellator_1.getBufferBuilder();
+        BufferBuilder bufferBuilder_1 = tessellator_1.getBuffer();
         GlStateManager.color4f(0.0F, 0.0F, 255.0F, 255.0F);
-        GlStateManager.disableTexture();
-        GlStateManager.enableColorLogicOp();
+        GlStateManager.disableTexture2D();
+        GlStateManager.enableColorLogic();
         GlStateManager.logicOp(GlStateManager.LogicOp.OR_REVERSE);
-        bufferBuilder_1.begin(7, VertexFormats.POSITION);
-        bufferBuilder_1.vertex((double) int_1, (double) int_4, 0.0D).next();
-        bufferBuilder_1.vertex((double) int_3, (double) int_4, 0.0D).next();
-        bufferBuilder_1.vertex((double) int_3, (double) int_2, 0.0D).next();
-        bufferBuilder_1.vertex((double) int_1, (double) int_2, 0.0D).next();
+        bufferBuilder_1.begin(7, DefaultVertexFormats.POSITION);
+        bufferBuilder_1.pos((double) int_1, (double) int_4, 0.0D).endVertex();
+        bufferBuilder_1.pos((double) int_3, (double) int_4, 0.0D).endVertex();
+        bufferBuilder_1.pos((double) int_3, (double) int_2, 0.0D).endVertex();
+        bufferBuilder_1.pos((double) int_1, (double) int_2, 0.0D).endVertex();
         tessellator_1.draw();
-        GlStateManager.disableColorLogicOp();
-        GlStateManager.enableTexture();
+        GlStateManager.disableColorLogic();
+        GlStateManager.enableTexture2D();
     }
     
     public int getMaxLength() {
@@ -550,16 +554,16 @@ public class TextFieldWidget extends DrawableHelper implements HighlightableWidg
     public void method_1884(int int_1) {
         int int_2 = this.text.length();
         this.cursorMin = MathHelper.clamp(int_1, 0, int_2);
-        if (this.textRenderer != null) {
+        if (this.fontRenderer != null) {
             if (this.field_2103 > int_2) {
                 this.field_2103 = int_2;
             }
             
             int int_3 = this.getWidth();
-            String string_1 = this.textRenderer.trimToWidth(this.text.substring(this.field_2103), int_3);
+            String string_1 = this.fontRenderer.trimStringToWidth(this.text.substring(this.field_2103), int_3);
             int int_4 = string_1.length() + this.field_2103;
             if (this.cursorMin == this.field_2103) {
-                this.field_2103 -= this.textRenderer.trimToWidth(this.text, int_3, true).length();
+                this.field_2103 -= this.fontRenderer.trimStringToWidth(this.text, int_3, true).length();
             }
             
             if (this.cursorMin > int_4) {
@@ -585,12 +589,8 @@ public class TextFieldWidget extends DrawableHelper implements HighlightableWidg
         this.visible = boolean_1;
     }
     
-    public void setSuggestion(String string_1) {
-        this.suggestion = string_1;
-    }
-    
     public int method_1889(int int_1) {
-        return int_1 > this.text.length() ? this.bounds.x : this.bounds.x + this.textRenderer.getStringWidth(this.text.substring(0, int_1));
+        return int_1 > this.text.length() ? this.bounds.x : this.bounds.x + this.fontRenderer.getStringWidth(this.text.substring(0, int_1));
     }
     
 }

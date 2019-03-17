@@ -1,7 +1,5 @@
 package me.shedaniel.rei.api;
 
-import net.minecraft.util.Identifier;
-
 public interface PluginDisabler {
     
     default void disablePluginFunctions(Identifier plugin, PluginFunction... functions) {

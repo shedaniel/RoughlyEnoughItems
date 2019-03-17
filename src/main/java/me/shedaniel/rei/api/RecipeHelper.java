@@ -2,8 +2,7 @@ package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.RecipeManager;
-import net.minecraft.util.Identifier;
+import net.minecraft.item.crafting.RecipeManager;
 
 import java.util.List;
 import java.util.Map;

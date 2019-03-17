@@ -1,10 +1,19 @@
-import net.fabricmc.loom.task.RemapJar
-
-plugins {
-    id 'fabric-loom' version '0.2.0-SNAPSHOT'
-    id "com.github.johnrengelman.shadow" version "4.0.3"
-    id "com.matthewprenger.cursegradle" version "1.1.2"
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url 'https://www.jitpack.io' }
+        maven { url 'https://files.minecraftforge.net/maven' }
+        maven { url 'http://repo.spongepowered.org/maven' }
+    }
+    dependencies {
+        classpath 'com.github.Chocohead:ForgeGradle:jitpack-SNAPSHOT'
+        classpath 'org.spongepowered:mixingradle:0.6-SNAPSHOT'
+    }
 }
+
+apply plugin: 'net.minecraftforge.gradle.tweaker-client'
+apply plugin: 'org.spongepowered.mixin'
+apply plugin: 'java'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -14,76 +23,49 @@ archivesBaseName = "RoughlyEnoughItems"
 version = project.mod_version
 
 minecraft {
+    version = '1.13.2'
+    mappings = 'snapshot_20181130'
+    runDir = 'run'
+    tweakClass = 'org.dimdev.riftloader.launch.RiftLoaderClientTweaker'
+}
+
+mixin {
+    defaultObfuscationEnv notch
+    add sourceSets.main, 'mixins.roughlyenoughitems.refmap.json'
 }
 
 repositories {
-    maven { url "https://tehnut.info/maven/" }
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
-    maven { url "https://maven.jamieswhiteshirt.com/libs-release/" }
-    maven { url "https://minecraft.curseforge.com/api/maven"}
+    mavenCentral()
+    maven { url 'https://www.dimdev.org/maven/' }
+    maven { url 'https://www.jitpack.io' }
+    maven { url 'https://repo.spongepowered.org/maven/' }
+    maven { url "http://repo.strezz.org/artifactory/list/Strezz-Central" }
+}
+
+
+configurations {
+    jar.archiveName = 'RoughlyEnoughItems-' + version + '.jar'
+    // Dependencies to pack into the jar
+    extraLibs
 }
 
 processResources {
-    filesMatching('fabric.mod.json') {
+    filesMatching('riftmod.json') {
         expand 'version': project.version
     }
     inputs.property "version", project.version
 }
 
-configurations {
-    contained {
-        transitive = false
-    }
-}
-
-shadowJar {
-    configurations = [project.configurations.contained]
-}
-
-task remapShadowJar(type: RemapJar) {
-    jar = shadowJar.archivePath
-}
-tasks.remapShadowJar.dependsOn tasks.shadowJar
-
 dependencies {
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.yarn_version}"
-    modCompile "net.fabricmc:fabric-loader:${project.fabricloader_version}"
-    modCompile "com.jamieswhiteshirt:developer-mode:${project.developermode_version}"
-    modCompile "info.tehnut.pluginloader:plugin-loader:${project.pluginloader_version}"
-    modCompile "net.fabricmc:fabric:${project.fabric_version}"
-    modCompile "cloth:Cloth:${cloth_version}"
+    implementation 'com.github.Chocohead:Rift:jitpack-SNAPSHOT:dev'
+    implementation 'com.github.shedaniel:Rift-ModList:43d459d86f0cdbc0797c38dfc0059bda9d0db059'
 
-    compile "blue.endless:jankson:${project.jankson_version}"
-    contained "blue.endless:jankson:${project.jankson_version}"
+    extraLibs "blue.endless:jankson:${project.jankson_version}"
+    configurations.implementation.extendsFrom(configurations.extraLibs)
 }
 
-curseforge {
-    if (project.hasProperty("curseForgeApiKey")) {
-        apiKey = project.properties.curseForgeApiKey
+jar {
+    from {
+        configurations.extraLibs.collect { it.isDirectory() ? it : zipTree(it) }
     }
-    project {
-        id = "310111"
-        changelogType = "markdown"
-        changelog = file("CHANGELOG.md")
-        releaseType = "release"
-        addGameVersion "1.14-Snapshot"
-        mainArtifact(remapShadowJar.jar) {
-            displayName = "[Fabric $project.minecraft_version] v$project.version"
-            relations {
-                requiredDependency "fabric"
-                optionalDependency "pluginloader"
-                tool "rei-addons"
-            }
-        }
-    }
-    options {
-        forgeGradleIntegration = false
-    }
-}
-
-afterEvaluate {
-    // CurseGradle generates tasks in afterEvaluate for each project
-    // There isn't really any other way to make it depend on a task unless it is an AbstractArchiveTask
-    tasks.curseforge310111.dependsOn remapShadowJar
 }

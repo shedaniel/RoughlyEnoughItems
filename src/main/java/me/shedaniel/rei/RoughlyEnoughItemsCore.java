@@ -1,28 +1,16 @@
 package me.shedaniel.rei;
 
 import com.google.common.collect.Maps;
-import me.shedaniel.rei.api.ItemRegistry;
-import me.shedaniel.rei.api.PluginDisabler;
-import me.shedaniel.rei.api.REIPlugin;
-import me.shedaniel.rei.api.RecipeHelper;
+import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.ConfigManager;
 import me.shedaniel.rei.client.ItemRegistryImpl;
 import me.shedaniel.rei.client.PluginDisablerImpl;
 import me.shedaniel.rei.client.RecipeHelperImpl;
-import me.shedaniel.rei.gui.widget.ItemListOverlay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.StringTextComponent;
-import net.minecraft.text.TranslatableTextComponent;
-import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.dimdev.riftloader.RiftLoader;
+import org.dimdev.riftloader.listener.InitializationListener;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.LinkedList;
@@ -30,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitializer {
+public class RoughlyEnoughItemsCore implements InitializationListener {
     
     public static final Logger LOGGER = LogManager.getFormatterLogger("REI");
     public static final Identifier DELETE_ITEMS_PACKET = new Identifier("roughlyenoughitems", "delete_item");
@@ -59,7 +47,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
     
     public static REIPlugin registerPlugin(Identifier identifier, REIPlugin plugin) {
         plugins.put(identifier, plugin);
-        RoughlyEnoughItemsCore.LOGGER.info("REI: Registered plugin %s from %s", identifier.toString(), plugin.getClass().getSimpleName());
+        RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered plugin %s from %s", identifier.toString(), plugin.getClass().getSimpleName());
         plugin.onFirstLoad(getPluginDisabler());
         return plugin;
     }
@@ -76,43 +64,20 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
     }
     
     @Override
-    public void onInitializeClient() {
+    public void onInitialization() {
         configManager = new ConfigManager();
         
-        // If pluginloader is not installed, base functionality should still remain
-        if (!FabricLoader.getInstance().isModLoaded("pluginloader")) {
-            RoughlyEnoughItemsCore.LOGGER.warn("REI: Plugin Loader is not loaded! Please consider installing https://minecraft.curseforge.com/projects/pluginloader for REI plugin compatibility!");
-            registerPlugin(new Identifier("roughlyenoughitems", "default_plugin"), new DefaultPlugin());
-        }
+        // TODO: Load 3rd party mods
+        RoughlyEnoughItemsCore.LOGGER.warn("[REI] REI Addons need to be registered themselves! An automatic way might come in the future.");
+        registerPlugin(new Identifier("roughlyenoughitems", "default_plugin"), new DefaultPlugin());
         
-        if (FabricLoader.getInstance().isModLoaded("cloth")) {
+        if (RiftLoader.instance.getMods().stream().map(modInfo -> modInfo.id).anyMatch(s -> s.equalsIgnoreCase("riftmodlist"))) {
             try {
-                Class.forName("me.shedaniel.rei.cloth.ClothRegistry").getDeclaredMethod("register").invoke(null);
-            } catch (IllegalAccessException | InvocationTargetException | ClassNotFoundException | NoSuchMethodException e) {
+                Class.forName("me.shedaniel.rei.utils.RiftModListRegistry").getDeclaredMethod("register").invoke(null);
+            } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
                 e.printStackTrace();
             }
         }
-    }
-    
-    @Override
-    public void onInitialize() {
-        registerFabricPackets();
-    }
-    
-    private void registerFabricPackets() {
-        ServerSidePacketRegistry.INSTANCE.register(DELETE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
-            ServerPlayerEntity player = (ServerPlayerEntity) packetContext.getPlayer();
-            if (!player.inventory.getCursorStack().isEmpty())
-                player.inventory.setCursorStack(ItemStack.EMPTY);
-        });
-        ServerSidePacketRegistry.INSTANCE.register(CREATE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
-            ServerPlayerEntity player = (ServerPlayerEntity) packetContext.getPlayer();
-            ItemStack stack = packetByteBuf.readItemStack();
-            if (player.inventory.insertStack(stack.copy()))
-                player.addChatMessage(new StringTextComponent(I18n.translate("text.rei.cheat_items").replaceAll("\\{item_name}", ItemListOverlay.tryGetItemStackName(stack.copy())).replaceAll("\\{item_count}", stack.copy().getAmount() + "").replaceAll("\\{player_name}", player.getEntityName())), false);
-            else
-                player.addChatMessage(new TranslatableTextComponent("text.rei.failed_cheat_items"), false);
-        });
     }
     
 }

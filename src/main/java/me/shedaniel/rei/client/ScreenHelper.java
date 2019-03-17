@@ -1,27 +1,23 @@
 package me.shedaniel.rei.client;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.event.client.ClientTickCallback;
-import net.minecraft.client.gui.ContainerScreen;
-import net.minecraft.client.gui.InputListener;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.RecipeBookButtonWidget;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.item.ItemStack;
+import org.dimdev.rift.listener.client.ClientTickable;
 
 import java.util.List;
 
-public class ScreenHelper implements ClientModInitializer {
+public class ScreenHelper implements ClientTickable {
     
     public static TextFieldWidget searchField;
     public static List<ItemStack> inventoryStacks = Lists.newArrayList();
     private static boolean overlayVisible = true;
     private static ContainerScreenOverlay overlay;
-    private static ContainerScreen lastContainerScreen;
+    private static GuiContainer lastContainerScreen;
     
     public static boolean isOverlayVisible() {
         return overlayVisible;
@@ -43,21 +39,11 @@ public class ScreenHelper implements ClientModInitializer {
         return getLastOverlay(false);
     }
     
-    public static void disableRecipeBook(ContainerScreen lastContainerScreen, List<InputListener> listeners, List<ButtonWidget> buttonWidgets) {
-        RoughlyEnoughItemsCore.LOGGER.info("%d %d", listeners.size(), buttonWidgets.size());
-        for(InputListener listener : listeners)
-            if (listener instanceof RecipeBookButtonWidget)
-                listeners.remove(listener);
-        for(ButtonWidget buttonWidget : buttonWidgets)
-            if (buttonWidget instanceof RecipeBookButtonWidget)
-                buttonWidgets.remove(buttonWidget);
-    }
-    
-    public static ContainerScreen getLastContainerScreen() {
+    public static GuiContainer getLastContainerScreen() {
         return lastContainerScreen;
     }
     
-    public static void setLastContainerScreen(ContainerScreen lastContainerScreen) {
+    public static void setLastContainerScreen(GuiContainer lastContainerScreen) {
         ScreenHelper.lastContainerScreen = lastContainerScreen;
     }
     
@@ -66,11 +52,9 @@ public class ScreenHelper implements ClientModInitializer {
     }
     
     @Override
-    public void onInitializeClient() {
-        ClientTickCallback.EVENT.register(client -> {
-            if (lastContainerScreen != client.currentScreen && client.currentScreen instanceof ContainerScreen)
-                lastContainerScreen = (ContainerScreen) client.currentScreen;
-        });
+    public void clientTick(Minecraft client) {
+        if (lastContainerScreen != client.currentScreen && client.currentScreen instanceof GuiContainer)
+            lastContainerScreen = (GuiContainer) client.currentScreen;
     }
     
 }

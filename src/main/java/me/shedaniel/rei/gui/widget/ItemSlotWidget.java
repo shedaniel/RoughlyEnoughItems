@@ -1,25 +1,26 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.ScreenHelper;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.render.GuiLighting;
-import net.minecraft.client.render.item.ItemRenderer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.ItemRenderer;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.Identifier;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
-public class ItemSlotWidget extends DrawableHelper implements HighlightableWidget {
+public class ItemSlotWidget extends Gui implements HighlightableWidget {
     
-    private static final Identifier RECIPE_GUI = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
+    private static final ResourceLocation RECIPE_GUI = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private List<ItemStack> itemList = new LinkedList<>();
     private boolean drawBackground, showToolTips, clickToMoreRecipes, drawHighlightedBackground;
     private int x, y;
@@ -60,8 +61,8 @@ public class ItemSlotWidget extends DrawableHelper implements HighlightableWidge
     public void draw(int mouseX, int mouseY, float partialTicks) {
         final ItemStack itemStack = getCurrentStack();
         if (drawBackground) {
-            MinecraftClient.getInstance().getTextureManager().bindTexture(RECIPE_GUI);
-            drawTexturedRect(this.x - 1, this.y - 1, 0, 222, 18, 18);
+            Minecraft.getInstance().getTextureManager().bindTexture(RECIPE_GUI);
+            drawTexturedModalRect(this.x - 1, this.y - 1, 0, 222, 18, 18);
         }
         if (drawHighlightedBackground && isHighlighted(mouseX, mouseY)) {
             GlStateManager.disableLighting();
@@ -73,12 +74,12 @@ public class ItemSlotWidget extends DrawableHelper implements HighlightableWidge
             GlStateManager.enableDepthTest();
         }
         if (!itemStack.isEmpty()) {
-            GuiLighting.enableForItems();
-            ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
-            itemRenderer.zOffset = 200.0F;
-            itemRenderer.renderGuiItem(itemStack, x, y);
-            itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, itemStack, x, y, getItemCountOverlay(itemStack));
-            itemRenderer.zOffset = 0.0F;
+            RenderHelper.enableGUIStandardItemLighting();
+            ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
+            itemRenderer.zLevel = 200.0F;
+            itemRenderer.renderItemAndEffectIntoGUI(itemStack, x, y);
+            itemRenderer.renderItemOverlayIntoGUI(Minecraft.getInstance().fontRenderer, itemStack, x, y, getItemCountOverlay(itemStack));
+            itemRenderer.zLevel = 0.0F;
         }
         if (!itemStack.isEmpty() && isHighlighted(mouseX, mouseY) && showToolTips)
             drawToolTip(itemStack);
@@ -91,7 +92,6 @@ public class ItemSlotWidget extends DrawableHelper implements HighlightableWidge
     
     protected List<String> getTooltip(ItemStack itemStack) {
         final String modString = "§9§o" + ClientHelper.getModFromItemStack(itemStack);
-        MinecraftClient mc = MinecraftClient.getInstance();
         List<String> toolTip = Lists.newArrayList(ItemListOverlay.tryGetItemStackToolTip(itemStack));
         toolTip.addAll(getExtraToolTips(itemStack));
         for(String s : Lists.newArrayList(toolTip))
@@ -111,7 +111,7 @@ public class ItemSlotWidget extends DrawableHelper implements HighlightableWidge
     
     public ItemStack getCurrentStack() {
         if (itemList.size() == 0)
-            return new ItemStack(Items.AIR);
+            return ItemStack.EMPTY;
         return itemList.get(MathHelper.floor((System.currentTimeMillis() / 500 % (double) itemList.size()) / 1f));
     }
     

@@ -3,9 +3,8 @@ package me.shedaniel.rei.api;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.widget.IWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
-import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
 
 import java.awt.*;
 import java.util.Collections;
@@ -27,8 +26,8 @@ public interface RecipeCategory<T extends RecipeDisplay> {
     
     default void drawCategoryBackground(Rectangle bounds, int mouseX, int mouseY, float delta) {
         new RecipeBaseWidget(bounds).draw(mouseX, mouseY, delta);
-        DrawableHelper.drawRect(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, RecipeViewingScreen.SUB_COLOR.getRGB());
-        DrawableHelper.drawRect(bounds.x + 17, bounds.y + 21, bounds.x + bounds.width - 17, bounds.y + 33, RecipeViewingScreen.SUB_COLOR.getRGB());
+        Gui.drawRect(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, RecipeViewingScreen.SUB_COLOR.getRGB());
+        Gui.drawRect(bounds.x + 17, bounds.y + 21, bounds.x + bounds.width - 17, bounds.y + 33, RecipeViewingScreen.SUB_COLOR.getRGB());
     }
     
     default DisplaySettings getDisplaySettings() {

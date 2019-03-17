@@ -2,13 +2,12 @@ package me.shedaniel.rei.api;
 
 import com.google.common.collect.Lists;
 import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.util.Identifier;
+import net.minecraft.item.crafting.IRecipe;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface RecipeDisplay<T extends Recipe> {
+public interface RecipeDisplay<T extends IRecipe> {
     
     Optional<T> getRecipe();
     

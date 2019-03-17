@@ -5,8 +5,7 @@ import com.google.common.collect.Maps;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.RecipeManager;
-import net.minecraft.util.Identifier;
+import net.minecraft.item.crafting.RecipeManager;
 
 import java.awt.*;
 import java.util.*;
@@ -38,7 +37,7 @@ public class RecipeHelperImpl implements RecipeHelper {
                     boolean slotDone = false;
                     for(ItemStack possibleType : inventoryItems) {
                         for(ItemStack slotPossible : slot)
-                            if (ItemStack.areEqualIgnoreTags(slotPossible, possibleType)) {
+                            if (ItemStack.areItemsEqual(slotPossible, possibleType)) {
                                 slotsCraftable++;
                                 slotDone = true;
                                 break;
@@ -75,7 +74,7 @@ public class RecipeHelperImpl implements RecipeHelper {
             RecipeCategory category = getCategory(entry.getKey());
             for(RecipeDisplay recipeDisplay : entry.getValue())
                 for(ItemStack outputStack : (List<ItemStack>) recipeDisplay.getOutput())
-                    if (category.checkTags() ? ItemStack.areEqual(stack, outputStack) : ItemStack.areEqualIgnoreTags(stack, outputStack))
+                    if (category.checkTags() ? ItemStack.areItemStacksEqual(stack, outputStack) : ItemStack.areItemsEqual(stack, outputStack))
                         categoriesMap.get(recipeDisplay.getRecipeCategory()).add(recipeDisplay);
         }
         Map<RecipeCategory, List<RecipeDisplay>> recipeCategoryListMap = Maps.newLinkedHashMap();
@@ -105,7 +104,7 @@ public class RecipeHelperImpl implements RecipeHelper {
                 boolean found = false;
                 for(List<ItemStack> input : (List<List<ItemStack>>) recipeDisplay.getInput()) {
                     for(ItemStack itemStack : input) {
-                        if (category.checkTags() ? ItemStack.areEqual(itemStack, stack) : ItemStack.areEqualIgnoreTags(itemStack, stack)) {
+                        if (category.checkTags() ? ItemStack.areItemStacksEqual(itemStack, stack) : ItemStack.areItemsEqual(itemStack, stack)) {
                             categoriesMap.get(recipeDisplay.getRecipeCategory()).add(recipeDisplay);
                             found = true;
                             break;

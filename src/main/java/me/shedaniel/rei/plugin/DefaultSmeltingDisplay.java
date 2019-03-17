@@ -1,38 +1,38 @@
 package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Lists;
+import me.shedaniel.rei.api.Identifier;
 import me.shedaniel.rei.api.RecipeDisplay;
-import net.minecraft.block.entity.FurnaceBlockEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.cooking.SmeltingRecipe;
-import net.minecraft.util.Identifier;
+import net.minecraft.item.crafting.FurnaceRecipe;
+import net.minecraft.tileentity.TileEntityFurnace;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class DefaultSmeltingDisplay implements RecipeDisplay<SmeltingRecipe> {
+public class DefaultSmeltingDisplay implements RecipeDisplay<FurnaceRecipe> {
     
-    private SmeltingRecipe display;
+    private FurnaceRecipe display;
     private List<List<ItemStack>> input;
     private List<ItemStack> output;
     
-    public DefaultSmeltingDisplay(SmeltingRecipe recipe) {
+    public DefaultSmeltingDisplay(FurnaceRecipe recipe) {
         this.display = recipe;
         List<ItemStack> fuel = Lists.newArrayList();
         this.input = Lists.newArrayList();
-        fuel.addAll(FurnaceBlockEntity.createFuelTimeMap().keySet().stream().map(Item::getDefaultStack).collect(Collectors.toList()));
-        recipe.getPreviewInputs().forEach(ingredient -> {
-            input.add(Arrays.asList(ingredient.getStackArray()));
+        fuel.addAll(TileEntityFurnace.getBurnTimes().keySet().stream().map(Item::getDefaultInstance).collect(Collectors.toList()));
+        recipe.getIngredients().forEach(ingredient -> {
+            input.add(Arrays.asList(ingredient.getMatchingStacks()));
         });
         input.add(fuel);
-        this.output = Arrays.asList(recipe.getOutput());
+        this.output = Arrays.asList(recipe.getRecipeOutput());
     }
     
     @Override
-    public Optional<SmeltingRecipe> getRecipe() {
+    public Optional<FurnaceRecipe> getRecipe() {
         return Optional.ofNullable(display);
     }
     

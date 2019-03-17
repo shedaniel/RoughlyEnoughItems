@@ -1,22 +1,22 @@
 package me.shedaniel.rei.gui.widget;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.audio.PositionedSoundInstance;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.TextComponent;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.SimpleSound;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.init.SoundEvents;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ITextComponent;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class ButtonWidget extends DrawableHelper implements HighlightableWidget {
+public abstract class ButtonWidget extends Gui implements HighlightableWidget {
     
-    protected static final Identifier WIDGET_TEX = new Identifier("textures/gui/widgets.png");
+    protected static final ResourceLocation WIDGET_TEX = new ResourceLocation("textures/gui/widgets.png");
     public String text;
     public boolean enabled;
     public boolean visible;
@@ -24,7 +24,7 @@ public abstract class ButtonWidget extends DrawableHelper implements Highlightab
     private boolean pressed;
     private Rectangle bounds;
     
-    public ButtonWidget(Rectangle rectangle, TextComponent text) {
+    public ButtonWidget(Rectangle rectangle, ITextComponent text) {
         this(rectangle, text.getFormattedText());
     }
     
@@ -39,7 +39,7 @@ public abstract class ButtonWidget extends DrawableHelper implements Highlightab
         this(new Rectangle(x, y, width, height), text);
     }
     
-    public ButtonWidget(int x, int y, int width, int height, TextComponent text) {
+    public ButtonWidget(int x, int y, int width, int height, ITextComponent text) {
         this(new Rectangle(x, y, width, height), text);
     }
     
@@ -67,8 +67,8 @@ public abstract class ButtonWidget extends DrawableHelper implements Highlightab
     public void draw(int mouseX, int mouseY, float partialTicks) {
         if (this.visible) {
             int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;
-            MinecraftClient client = MinecraftClient.getInstance();
-            TextRenderer textRenderer = client.textRenderer;
+            Minecraft client = Minecraft.getInstance();
+            FontRenderer textRenderer = client.fontRenderer;
             client.getTextureManager().bindTexture(WIDGET_TEX);
             GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             this.hovered = bounds.contains(mouseX, mouseY);
@@ -77,18 +77,18 @@ public abstract class ButtonWidget extends DrawableHelper implements Highlightab
             GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
             GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
             //Four Corners
-            this.drawTexturedRect(x, y, 0, 46 + textureOffset * 20, 4, 4);
-            this.drawTexturedRect(x + width - 4, y, 196, 46 + textureOffset * 20, 4, 4);
-            this.drawTexturedRect(x, y + height - 4, 0, 62 + textureOffset * 20, 4, 4);
-            this.drawTexturedRect(x + width - 4, y + height - 4, 196, 62 + textureOffset * 20, 4, 4);
+            this.drawTexturedModalRect(x, y, 0, 46 + textureOffset * 20, 4, 4);
+            this.drawTexturedModalRect(x + width - 4, y, 196, 46 + textureOffset * 20, 4, 4);
+            this.drawTexturedModalRect(x, y + height - 4, 0, 62 + textureOffset * 20, 4, 4);
+            this.drawTexturedModalRect(x + width - 4, y + height - 4, 196, 62 + textureOffset * 20, 4, 4);
             
             //Sides
-            this.drawTexturedRect(x + 4, y, 4, 46 + textureOffset * 20, width - 8, 4);
-            this.drawTexturedRect(x + 4, y + height - 4, 4, 62 + textureOffset * 20, width - 8, 4);
+            this.drawTexturedModalRect(x + 4, y, 4, 46 + textureOffset * 20, width - 8, 4);
+            this.drawTexturedModalRect(x + 4, y + height - 4, 4, 62 + textureOffset * 20, width - 8, 4);
             
             for(int i = y + 4; i < y + height - 4; i += 4) {
-                this.drawTexturedRect(x, i, 0, 50 + textureOffset * 20, width / 2, MathHelper.clamp(y + height - 4 - i, 0, 4));
-                this.drawTexturedRect(x + width / 2, i, 200 - width / 2, 50 + textureOffset * 20, width / 2, MathHelper.clamp(y + height - 4 - i, 0, 4));
+                this.drawTexturedModalRect(x, i, 0, 50 + textureOffset * 20, width / 2, MathHelper.clamp(y + height - 4 - i, 0, 4));
+                this.drawTexturedModalRect(x + width / 2, i, 200 - width / 2, 50 + textureOffset * 20, width / 2, MathHelper.clamp(y + height - 4 - i, 0, 4));
             }
             
             int colour = 14737632;
@@ -98,14 +98,14 @@ public abstract class ButtonWidget extends DrawableHelper implements Highlightab
                 colour = 16777120;
             }
             
-            this.drawStringCentered(textRenderer, this.text, x + width / 2, y + (height - 8) / 2, colour);
+            this.drawCenteredString(textRenderer, this.text, x + width / 2, y + (height - 8) / 2, colour);
         }
     }
     
     @Override
     public boolean onMouseClick(int button, double mouseX, double mouseY) {
         if (bounds.contains(mouseX, mouseY) && enabled) {
-            MinecraftClient.getInstance().getSoundLoader().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            Minecraft.getInstance().getSoundHandler().play(SimpleSound.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             onPressed(button, mouseX, mouseY);
             return true;
         }

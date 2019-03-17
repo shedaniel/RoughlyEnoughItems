@@ -1,8 +1,8 @@
 package me.shedaniel.rei.gui.widget;
 
 import me.shedaniel.rei.client.ClientHelper;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.util.Window;
+import net.minecraft.client.MainWindow;
+import net.minecraft.client.Minecraft;
 
 import java.awt.*;
 
@@ -17,7 +17,7 @@ public abstract class DraggableWidget implements HighlightableWidget {
     }
     
     public DraggableWidget() {
-        this(new Point(MinecraftClient.getInstance().window.getScaledWidth() / 2, MinecraftClient.getInstance().window.getScaledHeight() / 2));
+        this(new Point(Minecraft.getInstance().mainWindow.getScaledWidth() / 2, Minecraft.getInstance().mainWindow.getScaledHeight() / 2));
     }
     
     protected abstract void initWidgets(Point midPoint);
@@ -44,7 +44,7 @@ public abstract class DraggableWidget implements HighlightableWidget {
                     dragged = true;
                 }
             } else {
-                Window window = MinecraftClient.getInstance().window;
+                MainWindow window = Minecraft.getInstance().mainWindow;
                 midPoint = processMidPoint(midPoint, mouse, startPoint, window, relateX, relateY);
                 updateWidgets(midPoint);
             }
@@ -56,7 +56,7 @@ public abstract class DraggableWidget implements HighlightableWidget {
         return false;
     }
     
-    public abstract Point processMidPoint(Point midPoint, Point mouse, Point startPoint, Window window, int relateX, int relateY);
+    public abstract Point processMidPoint(Point midPoint, Point mouse, Point startPoint, MainWindow window, int relateX, int relateY);
     
     @Override
     public boolean mouseReleased(double double_1, double double_2, int int_1) {

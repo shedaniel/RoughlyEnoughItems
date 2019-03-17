@@ -2,10 +2,10 @@ package me.shedaniel.rei.client;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.ItemRegistry;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.DefaultedList;
+import net.minecraft.util.NonNullList;
 
 import java.util.Collections;
 import java.util.List;
@@ -29,10 +29,10 @@ public class ItemRegistryImpl implements ItemRegistry {
     
     @Override
     public ItemStack[] getAllStacksFromItem(Item item) {
-        DefaultedList<ItemStack> list = DefaultedList.create();
-        list.add(item.getDefaultStack());
-        item.appendItemsForGroup(item.getItemGroup(), list);
-        TreeSet<ItemStack> stackSet = list.stream().collect(Collectors.toCollection(() -> new TreeSet<ItemStack>((p1, p2) -> ItemStack.areEqual(p1, p2) ? 0 : 1)));
+        NonNullList<ItemStack> list = NonNullList.create();
+        list.add(item.getDefaultInstance());
+        item.fillItemGroup(item.getGroup(), list);
+        TreeSet<ItemStack> stackSet = list.stream().collect(Collectors.toCollection(() -> new TreeSet<ItemStack>((p1, p2) -> ItemStack.areItemStacksEqual(p1, p2) ? 0 : 1)));
         return Lists.newArrayList(stackSet).toArray(new ItemStack[0]);
     }
     

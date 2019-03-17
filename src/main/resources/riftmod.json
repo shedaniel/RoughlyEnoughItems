@@ -3,22 +3,14 @@
   "name": "RoughlyEnoughItems",
   "description": "To allow players to view items and recipes. Version: ${version}",
   "version": "2.4",
-  "side": "client",
   "authors": [
     "Danielshe"
   ],
-  "initializers": [
+  "listeners": [
+    "me.shedaniel.rei.MixinStart",
     "me.shedaniel.rei.RoughlyEnoughItemsCore",
-    "me.shedaniel.rei.client.ClientHelper",
+    "me.shedaniel.rei.client.KeyBindingRegistry",
     "me.shedaniel.rei.client.ScreenHelper"
   ],
-  "requires": {
-    "fabric": "0.2.3"
-  },
-  "recommended": {
-    "pluginloader": "1.0.6"
-  },
-  "mixins": {
-    "client": "roughlyenoughitems.client.json"
-  }
+  "url": "https://shedaniel.me"
 }

@@ -1,13 +1,11 @@
 package me.shedaniel.rei.mixin;
 
-import net.minecraft.client.gui.InputListener;
-import net.minecraft.client.gui.ingame.AbstractPlayerInventoryScreen;
-import net.minecraft.client.gui.ingame.PlayerInventoryScreen;
-import net.minecraft.client.gui.ingame.RecipeBookProvider;
-import net.minecraft.client.gui.recipebook.RecipeBookGui;
-import net.minecraft.container.PlayerContainer;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.text.TextComponent;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.gui.inventory.GuiInventory;
+import net.minecraft.client.gui.recipebook.GuiRecipeBook;
+import net.minecraft.client.gui.recipebook.IRecipeShownListener;
+import net.minecraft.client.renderer.InventoryEffectRenderer;
+import net.minecraft.inventory.Container;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -15,26 +13,26 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(PlayerInventoryScreen.class)
-public abstract class MixinPlayerInventoryScreen extends AbstractPlayerInventoryScreen<PlayerContainer> implements RecipeBookProvider {
+@Mixin(GuiInventory.class)
+public abstract class MixinPlayerInventoryScreen extends InventoryEffectRenderer implements IRecipeShownListener {
     
     @Shadow
     @Final
-    private RecipeBookGui recipeBook;
+    private GuiRecipeBook recipeBookGui;
     
-    public MixinPlayerInventoryScreen(PlayerContainer container_1, PlayerInventory playerInventory_1, TextComponent textComponent_1) {
-        super(container_1, playerInventory_1, textComponent_1);
+    public MixinPlayerInventoryScreen(Container inventorySlotsIn) {
+        super(inventorySlotsIn);
     }
     
     @Override
-    public InputListener getFocused() {
+    public IGuiEventListener getFocused() {
         return super.getFocused();
     }
     
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
     public void mouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> ci) {
-        if (recipeBook.mouseClicked(mouseX, mouseY, button)) {
-            focusOn(recipeBook);
+        if (recipeBookGui.mouseClicked(mouseX, mouseY, button)) {
+            focusOn(recipeBookGui);
             ci.setReturnValue(true);
             ci.cancel();
         }

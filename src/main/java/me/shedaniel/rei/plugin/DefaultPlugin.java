@@ -4,28 +4,21 @@ import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.mixin.GhostSlotsHook;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Screen;
-import net.minecraft.client.gui.container.BlastFurnaceScreen;
-import net.minecraft.client.gui.container.CraftingTableScreen;
-import net.minecraft.client.gui.container.FurnaceScreen;
-import net.minecraft.client.gui.container.SmokerScreen;
-import net.minecraft.client.gui.ingame.PlayerInventoryScreen;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.inventory.GuiCrafting;
+import net.minecraft.client.gui.inventory.GuiFurnace;
+import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.potion.PotionUtil;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.StonecuttingRecipe;
-import net.minecraft.recipe.cooking.BlastingRecipe;
-import net.minecraft.recipe.cooking.CampfireCookingRecipe;
-import net.minecraft.recipe.cooking.SmeltingRecipe;
-import net.minecraft.recipe.cooking.SmokingRecipe;
-import net.minecraft.recipe.crafting.ShapedRecipe;
-import net.minecraft.recipe.crafting.ShapelessRecipe;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.item.crafting.FurnaceRecipe;
+import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.item.crafting.ShapedRecipe;
+import net.minecraft.item.crafting.ShapelessRecipe;
+import net.minecraft.potion.PotionUtils;
+import net.minecraft.util.registry.IRegistry;
 
 import java.util.*;
 
@@ -33,10 +26,6 @@ public class DefaultPlugin implements REIPlugin {
     
     public static final Identifier CRAFTING = new Identifier("roughlyenoughitems", "plugins/crafting");
     public static final Identifier SMELTING = new Identifier("roughlyenoughitems", "plugins/smelting");
-    public static final Identifier SMOKING = new Identifier("roughlyenoughitems", "plugins/smoking");
-    public static final Identifier BLASTING = new Identifier("roughlyenoughitems", "plugins/blasting");
-    public static final Identifier CAMPFIRE = new Identifier("roughlyenoughitems", "plugins/campfire");
-    public static final Identifier STONE_CUTTING = new Identifier("roughlyenoughitems", "plugins/stone_cutting");
     public static final Identifier BREWING = new Identifier("roughlyenoughitems", "plugins/brewing");
     public static final Identifier PLUGIN = new Identifier("roughlyenoughitems", "default_plugin");
     
@@ -58,19 +47,19 @@ public class DefaultPlugin implements REIPlugin {
     
     @Override
     public void registerItems(ItemRegistry itemRegistry) {
-        Registry.ITEM.stream().forEach(item -> {
-            itemRegistry.registerItemStack(item.getDefaultStack());
+        IRegistry.ITEM.stream().forEach(item -> {
+            itemRegistry.registerItemStack(item.getDefaultInstance());
             try {
                 itemRegistry.registerItemStack(itemRegistry.getAllStacksFromItem(item));
             } catch (Exception e) {
             }
         });
-        Registry.ENCHANTMENT.forEach(enchantment -> {
-            for(int i = enchantment.getMinimumLevel(); i < enchantment.getMaximumLevel(); i++) {
+        IRegistry.ENCHANTMENT.forEach(enchantment -> {
+            for(int i = enchantment.getMinLevel(); i < enchantment.getMaxLevel(); i++) {
                 Map<Enchantment, Integer> map = new HashMap<>();
                 map.put(enchantment, i);
                 ItemStack itemStack = new ItemStack(Items.ENCHANTED_BOOK);
-                EnchantmentHelper.set(map, itemStack);
+                EnchantmentHelper.setEnchantments(map, itemStack);
                 itemRegistry.registerItemStack(Items.ENCHANTED_BOOK, itemStack);
             }
         });
@@ -80,32 +69,20 @@ public class DefaultPlugin implements REIPlugin {
     public void registerPluginCategories(RecipeHelper recipeHelper) {
         recipeHelper.registerCategory(new DefaultCraftingCategory());
         recipeHelper.registerCategory(new DefaultSmeltingCategory());
-        recipeHelper.registerCategory(new DefaultSmokingCategory());
-        recipeHelper.registerCategory(new DefaultBlastingCategory());
-        recipeHelper.registerCategory(new DefaultCampfireCategory());
-        recipeHelper.registerCategory(new DefaultStoneCuttingCategory());
         recipeHelper.registerCategory(new DefaultBrewingCategory());
     }
     
     @Override
     public void registerRecipeDisplays(RecipeHelper recipeHelper) {
-        for(Recipe recipe : recipeHelper.getRecipeManager().values())
+        for(IRecipe recipe : recipeHelper.getRecipeManager().getRecipes())
             if (recipe instanceof ShapelessRecipe)
                 recipeHelper.registerDisplay(CRAFTING, new DefaultShapelessDisplay((ShapelessRecipe) recipe));
             else if (recipe instanceof ShapedRecipe)
                 recipeHelper.registerDisplay(CRAFTING, new DefaultShapedDisplay((ShapedRecipe) recipe));
-            else if (recipe instanceof SmeltingRecipe)
-                recipeHelper.registerDisplay(SMELTING, new DefaultSmeltingDisplay((SmeltingRecipe) recipe));
-            else if (recipe instanceof SmokingRecipe)
-                recipeHelper.registerDisplay(SMOKING, new DefaultSmokingDisplay((SmokingRecipe) recipe));
-            else if (recipe instanceof BlastingRecipe)
-                recipeHelper.registerDisplay(BLASTING, new DefaultBlastingDisplay((BlastingRecipe) recipe));
-            else if (recipe instanceof CampfireCookingRecipe)
-                recipeHelper.registerDisplay(CAMPFIRE, new DefaultCampfireDisplay((CampfireCookingRecipe) recipe));
-            else if (recipe instanceof StonecuttingRecipe)
-                recipeHelper.registerDisplay(STONE_CUTTING, new DefaultStoneCuttingDisplay((StonecuttingRecipe) recipe));
+            else if (recipe instanceof FurnaceRecipe)
+                recipeHelper.registerDisplay(SMELTING, new DefaultSmeltingDisplay((FurnaceRecipe) recipe));
         BREWING_DISPLAYS.stream().forEachOrdered(display -> recipeHelper.registerDisplay(BREWING, display));
-        List<ItemStack> arrowStack = Arrays.asList(Items.ARROW.getDefaultStack());
+        List<ItemStack> arrowStack = Arrays.asList(Items.ARROW.getDefaultInstance());
         RoughlyEnoughItemsCore.getItemRegisterer().getItemList().stream().filter(stack -> stack.getItem().equals(Items.LINGERING_POTION)).forEach(stack -> {
             List<List<ItemStack>> input = new ArrayList<>();
             for(int i = 0; i < 4; i++)
@@ -114,8 +91,8 @@ public class DefaultPlugin implements REIPlugin {
             for(int i = 0; i < 4; i++)
                 input.add(arrowStack);
             ItemStack outputStack = new ItemStack(Items.TIPPED_ARROW, 8);
-            PotionUtil.setPotion(outputStack, PotionUtil.getPotion(stack));
-            PotionUtil.setCustomPotionEffects(outputStack, PotionUtil.getCustomPotionEffects(stack));
+            PotionUtils.addPotionToItemStack(outputStack, PotionUtils.getPotionFromItem(stack));
+            PotionUtils.appendEffects(outputStack, PotionUtils.getFullEffectsFromItem(stack));
             List<ItemStack> output = Lists.newArrayList(outputStack);
             recipeHelper.registerDisplay(CRAFTING, new DefaultCustomDisplay(input, output));
         });
@@ -123,101 +100,53 @@ public class DefaultPlugin implements REIPlugin {
     
     @Override
     public void registerSpeedCraft(RecipeHelper recipeHelper) {
-        recipeHelper.registerSpeedCraftButtonArea(DefaultPlugin.CAMPFIRE, null);
-        recipeHelper.registerSpeedCraftButtonArea(DefaultPlugin.STONE_CUTTING, null);
         recipeHelper.registerSpeedCraftButtonArea(DefaultPlugin.BREWING, null);
         recipeHelper.registerSpeedCraftFunctional(DefaultPlugin.CRAFTING, new SpeedCraftFunctional<DefaultCraftingDisplay>() {
             @Override
             public Class[] getFunctioningFor() {
-                return new Class[]{PlayerInventoryScreen.class, CraftingTableScreen.class};
+                return new Class[]{GuiInventory.class, GuiCrafting.class};
             }
             
             @Override
-            public boolean performAutoCraft(Screen screen, DefaultCraftingDisplay recipe) {
+            public boolean performAutoCraft(GuiScreen screen, DefaultCraftingDisplay recipe) {
                 if (!recipe.getRecipe().isPresent())
                     return false;
-                if (screen.getClass().isAssignableFrom(CraftingTableScreen.class))
-                    ((GhostSlotsHook) (((CraftingTableScreen) screen).getRecipeBookGui())).rei_getGhostSlots().reset();
-                else if (screen.getClass().isAssignableFrom(PlayerInventoryScreen.class))
-                    ((GhostSlotsHook) (((PlayerInventoryScreen) screen).getRecipeBookGui())).rei_getGhostSlots().reset();
+                if (screen.getClass().isAssignableFrom(GuiCrafting.class))
+                    ((GhostSlotsHook) (((GuiCrafting) screen).func_194310_f())).rei_getGhostRecipe().clear();
+                else if (screen.getClass().isAssignableFrom(GuiInventory.class))
+                    ((GhostSlotsHook) (((GuiInventory) screen).func_194310_f())).rei_getGhostRecipe().clear();
                 else
                     return false;
-                MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, (Recipe) recipe.getRecipe().get(), Screen.isShiftPressed());
+                Minecraft.getInstance().playerController.func_203413_a(Minecraft.getInstance().player.openContainer.windowId, (IRecipe) recipe.getRecipe().get(), GuiScreen.isShiftKeyDown());
                 return true;
             }
             
             @Override
-            public boolean acceptRecipe(Screen screen, DefaultCraftingDisplay recipe) {
-                return screen instanceof CraftingTableScreen || (screen instanceof PlayerInventoryScreen && recipe.getHeight() < 3 && recipe.getWidth() < 3);
+            public boolean acceptRecipe(GuiScreen screen, DefaultCraftingDisplay recipe) {
+                return screen instanceof GuiCrafting || (screen instanceof GuiInventory && recipe.getHeight() < 3 && recipe.getWidth() < 3);
             }
         });
         recipeHelper.registerSpeedCraftFunctional(DefaultPlugin.SMELTING, new SpeedCraftFunctional<DefaultSmeltingDisplay>() {
             @Override
             public Class[] getFunctioningFor() {
-                return new Class[]{FurnaceScreen.class};
+                return new Class[]{GuiFurnace.class};
             }
             
             @Override
-            public boolean performAutoCraft(Screen screen, DefaultSmeltingDisplay recipe) {
+            public boolean performAutoCraft(GuiScreen screen, DefaultSmeltingDisplay recipe) {
                 if (!recipe.getRecipe().isPresent())
                     return false;
-                if (screen instanceof FurnaceScreen)
-                    ((GhostSlotsHook) (((FurnaceScreen) screen).getRecipeBookGui())).rei_getGhostSlots().reset();
+                if (screen instanceof GuiFurnace)
+                    ((GhostSlotsHook) (((GuiFurnace) screen).func_194310_f())).rei_getGhostRecipe().clear();
                 else
                     return false;
-                MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, (Recipe) recipe.getRecipe().get(), Screen.isShiftPressed());
+                Minecraft.getInstance().playerController.func_203413_a(Minecraft.getInstance().player.openContainer.windowId, recipe.getRecipe().get(), GuiScreen.isShiftKeyDown());
                 return true;
             }
             
             @Override
-            public boolean acceptRecipe(Screen screen, DefaultSmeltingDisplay recipe) {
-                return screen instanceof FurnaceScreen;
-            }
-        });
-        recipeHelper.registerSpeedCraftFunctional(DefaultPlugin.SMOKING, new SpeedCraftFunctional<DefaultSmokingDisplay>() {
-            @Override
-            public Class[] getFunctioningFor() {
-                return new Class[]{SmokerScreen.class};
-            }
-            
-            @Override
-            public boolean performAutoCraft(Screen screen, DefaultSmokingDisplay recipe) {
-                if (!recipe.getRecipe().isPresent())
-                    return false;
-                if (screen instanceof SmokerScreen)
-                    ((GhostSlotsHook) (((SmokerScreen) screen).getRecipeBookGui())).rei_getGhostSlots().reset();
-                else
-                    return false;
-                MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, (Recipe) recipe.getRecipe().get(), Screen.isShiftPressed());
-                return true;
-            }
-            
-            @Override
-            public boolean acceptRecipe(Screen screen, DefaultSmokingDisplay recipe) {
-                return screen instanceof SmokerScreen;
-            }
-        });
-        recipeHelper.registerSpeedCraftFunctional(DefaultPlugin.BLASTING, new SpeedCraftFunctional<DefaultBlastingDisplay>() {
-            @Override
-            public Class[] getFunctioningFor() {
-                return new Class[]{BlastFurnaceScreen.class};
-            }
-            
-            @Override
-            public boolean acceptRecipe(Screen screen, DefaultBlastingDisplay recipe) {
-                return screen instanceof BlastFurnaceScreen;
-            }
-            
-            @Override
-            public boolean performAutoCraft(Screen screen, DefaultBlastingDisplay recipe) {
-                if (!recipe.getRecipe().isPresent())
-                    return false;
-                if (screen instanceof BlastFurnaceScreen)
-                    ((GhostSlotsHook) (((BlastFurnaceScreen) screen).getRecipeBookGui())).rei_getGhostSlots().reset();
-                else
-                    return false;
-                MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, (Recipe) recipe.getRecipe().get(), Screen.isShiftPressed());
-                return true;
+            public boolean acceptRecipe(GuiScreen screen, DefaultSmeltingDisplay recipe) {
+                return screen instanceof GuiFurnace;
             }
         });
     }

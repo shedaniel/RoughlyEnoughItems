@@ -1,24 +1,24 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.render.GuiLighting;
-import net.minecraft.client.render.item.ItemRenderer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.ItemRenderer;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.util.ResourceLocation;
 
 import java.awt.*;
 import java.util.Arrays;
 import java.util.List;
 
-public class TabWidget extends DrawableHelper implements HighlightableWidget {
+public class TabWidget extends Gui implements HighlightableWidget {
     
-    private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
+    private static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
     
     private boolean shown = false, selected = false;
     private ItemStack item;
@@ -32,7 +32,7 @@ public class TabWidget extends DrawableHelper implements HighlightableWidget {
         this.id = id;
         this.recipeViewingWidget = recipeViewingWidget;
         this.bounds = bounds;
-        this.itemRenderer = MinecraftClient.getInstance().getItemRenderer();
+        this.itemRenderer = Minecraft.getInstance().getItemRenderer();
     }
     
     public void setItem(ItemStack item, String categoryName, boolean selected) {
@@ -74,17 +74,17 @@ public class TabWidget extends DrawableHelper implements HighlightableWidget {
             int l = (int) this.bounds.getCenterX() - 8, i1 = (int) this.bounds.getCenterY() - 6;
             
             GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-            GuiLighting.disable();
-            MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
-            this.drawTexturedRect(bounds.x, bounds.y + 2, selected ? 28 : 0, 192, 28, (selected ? 30 : 27));
-            this.zOffset = 100.0F;
-            this.itemRenderer.zOffset = 100.0F;
-            GuiLighting.enableForItems();
-            this.itemRenderer.renderGuiItem(getItemStack(), l, i1);
-            this.itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, getItemStack(), l, i1);
+            RenderHelper.disableStandardItemLighting();
+            Minecraft.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
+            this.drawTexturedModalRect(bounds.x, bounds.y + 2, selected ? 28 : 0, 192, 28, (selected ? 30 : 27));
+            this.zLevel = 100.0F;
+            this.itemRenderer.zLevel = 100.0F;
+            RenderHelper.enableGUIStandardItemLighting();
+            this.itemRenderer.renderItemAndEffectIntoGUI(getItemStack(), l, i1);
+            this.itemRenderer.renderItemOverlays(Minecraft.getInstance().fontRenderer, getItemStack(), l, i1);
             GlStateManager.disableLighting();
-            this.itemRenderer.zOffset = 0.0F;
-            this.zOffset = 0.0F;
+            this.itemRenderer.zLevel = 0.0F;
+            this.zLevel = 0.0F;
             if (isHighlighted(mouseX, mouseY))
                 drawTooltip();
         }

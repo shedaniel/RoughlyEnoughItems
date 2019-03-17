@@ -3,25 +3,25 @@ package me.shedaniel.rei.gui.config;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.gui.widget.ButtonWidget;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.audio.PositionedSoundInstance;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.widget.EntryListWidget;
-import net.minecraft.client.util.Window;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Style;
-import net.minecraft.text.TextComponent;
+import net.minecraft.client.MainWindow;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.SimpleSound;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.GuiListExtended;
+import net.minecraft.init.SoundEvents;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextFormatting;
 
 import java.awt.*;
 
-public abstract class ConfigEntry extends EntryListWidget.Entry<ConfigEntry> {
+public abstract class ConfigEntry extends GuiListExtended.IGuiListEntry<ConfigEntry> {
     
     public static class ButtonConfigEntry extends ConfigEntry {
-        private TextComponent nameComponent;
+        private ITextComponent nameComponent;
         private ConfigEntryButtonProvider buttonProvider;
         private ButtonWidget buttonWidget;
         
-        public ButtonConfigEntry(TextComponent nameComponent, ConfigEntryButtonProvider buttonProvider) {
+        public ButtonConfigEntry(ITextComponent nameComponent, ConfigEntryButtonProvider buttonProvider) {
             this.nameComponent = nameComponent;
             this.buttonProvider = buttonProvider;
             this.buttonWidget = new ButtonWidget(0, 0, 150, 20, "") {
@@ -29,7 +29,7 @@ public abstract class ConfigEntry extends EntryListWidget.Entry<ConfigEntry> {
                 public boolean onMouseClick(int button, double mouseX, double mouseY) {
                     if (getBounds().contains(mouseX, mouseY) && enabled)
                         if (buttonProvider.onPressed(button, mouseX, mouseY)) {
-                            MinecraftClient.getInstance().getSoundLoader().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                            Minecraft.getInstance().getSoundHandler().play(SimpleSound.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                             return true;
                         }
                     return false;
@@ -41,15 +41,15 @@ public abstract class ConfigEntry extends EntryListWidget.Entry<ConfigEntry> {
         }
         
         @Override
-        public void draw(int entryWidth, int height, int i3, int i4, boolean isSelected, float delta) {
-            Window window = MinecraftClient.getInstance().window;
+        public void drawEntry(int entryWidth, int height, int i3, int i4, boolean isSelected, float delta) {
+            MainWindow window = Minecraft.getInstance().mainWindow;
             Point mouse = ClientHelper.getMouseLocation();
-            if (MinecraftClient.getInstance().textRenderer.isRightToLeft()) {
-                MinecraftClient.getInstance().textRenderer.drawWithShadow(nameComponent.getFormattedText(), window.getScaledWidth() - MinecraftClient.getInstance().textRenderer.getStringWidth(nameComponent.getFormattedText()) - 40, getY() + 5, 16777215);
+            if (Minecraft.getInstance().fontRenderer.getBidiFlag()) {
+                Minecraft.getInstance().fontRenderer.drawStringWithShadow(nameComponent.getFormattedText(), window.getScaledWidth() - Minecraft.getInstance().fontRenderer.getStringWidth(nameComponent.getFormattedText()) - 40, getY() + 5, 16777215);
                 this.buttonWidget.text = buttonProvider.getText();
                 this.buttonWidget.getBounds().setLocation(getX(), getY() + 2);
             } else {
-                MinecraftClient.getInstance().textRenderer.drawWithShadow(nameComponent.getFormattedText(), getX(), getY() + 5, 16777215);
+                Minecraft.getInstance().fontRenderer.drawStringWithShadow(nameComponent.getFormattedText(), getX(), getY() + 5, 16777215);
                 this.buttonWidget.text = buttonProvider.getText();
                 this.buttonWidget.getBounds().setLocation(window.getScaledWidth() - 190, getY() + 2);
             }
@@ -77,26 +77,26 @@ public abstract class ConfigEntry extends EntryListWidget.Entry<ConfigEntry> {
     }
     
     public static class CategoryTitleConfigEntry extends ConfigEntry {
-        private TextComponent textComponent;
+        private ITextComponent textComponent;
         
-        public CategoryTitleConfigEntry(TextComponent nameComponent) {
-            this.textComponent = nameComponent.setStyle(new Style().setBold(true));
+        public CategoryTitleConfigEntry(ITextComponent nameComponent) {
+            this.textComponent = nameComponent.applyTextStyle(TextFormatting.BOLD);
         }
         
         @Override
-        public void draw(int i, int i1, int i2, int i3, boolean b, float v) {
-            Window window = MinecraftClient.getInstance().window;
-            TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
-            textRenderer.draw(textComponent.getFormattedText(), (window.getScaledWidth() - textRenderer.getStringWidth(textComponent.getFormattedText())) / 2, getY() + 10, -1);
+        public void drawEntry(int i, int i1, int i2, int i3, boolean b, float v) {
+            MainWindow window = Minecraft.getInstance().mainWindow;
+            FontRenderer fontRenderer = Minecraft.getInstance().fontRenderer;
+            fontRenderer.drawString(textComponent.getFormattedText(), (window.getScaledWidth() - fontRenderer.getStringWidth(textComponent.getFormattedText())) / 2, getY() + 10, -1);
         }
     }
     
     public static class TextFieldConfigEntry extends ConfigEntry {
-        private TextComponent nameComponent;
+        private ITextComponent nameComponent;
         private ConfigEntryTextFieldProvider textFieldProvider;
         private TextFieldWidget textFieldWidget;
         
-        public TextFieldConfigEntry(TextComponent nameComponent, ConfigEntryTextFieldProvider textFieldProvider) {
+        public TextFieldConfigEntry(ITextComponent nameComponent, ConfigEntryTextFieldProvider textFieldProvider) {
             this.nameComponent = nameComponent;
             this.textFieldProvider = textFieldProvider;
             this.textFieldWidget = new TextFieldWidget(0, 0, 148, 18);
@@ -105,14 +105,14 @@ public abstract class ConfigEntry extends EntryListWidget.Entry<ConfigEntry> {
         }
         
         @Override
-        public void draw(int entryWidth, int height, int i3, int i4, boolean isSelected, float delta) {
-            Window window = MinecraftClient.getInstance().window;
+        public void drawEntry(int entryWidth, int height, int i3, int i4, boolean isSelected, float delta) {
+            MainWindow window = Minecraft.getInstance().mainWindow;
             Point mouse = ClientHelper.getMouseLocation();
-            if (MinecraftClient.getInstance().textRenderer.isRightToLeft()) {
-                MinecraftClient.getInstance().textRenderer.drawWithShadow(nameComponent.getFormattedText(), window.getScaledWidth() - MinecraftClient.getInstance().textRenderer.getStringWidth(nameComponent.getFormattedText()) - 40, getY() + 5, 16777215);
+            if (Minecraft.getInstance().fontRenderer.getBidiFlag()) {
+                Minecraft.getInstance().fontRenderer.drawStringWithShadow(nameComponent.getFormattedText(), window.getScaledWidth() - Minecraft.getInstance().fontRenderer.getStringWidth(nameComponent.getFormattedText()) - 40, getY() + 5, 16777215);
                 this.textFieldWidget.getBounds().setLocation(getX() + 1, getY() + 2);
             } else {
-                MinecraftClient.getInstance().textRenderer.drawWithShadow(nameComponent.getFormattedText(), getX(), getY() + 5, 16777215);
+                Minecraft.getInstance().fontRenderer.drawStringWithShadow(nameComponent.getFormattedText(), getX(), getY() + 5, 16777215);
                 this.textFieldWidget.getBounds().setLocation(window.getScaledWidth() - 190 + 1, getY() + 2);
             }
             textFieldProvider.draw(textFieldWidget, mouse, delta);

@@ -2,7 +2,7 @@ package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Lists;
 import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.crafting.ShapelessRecipe;
+import net.minecraft.item.crafting.ShapelessRecipe;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,10 +17,10 @@ public class DefaultShapelessDisplay implements DefaultCraftingDisplay {
     public DefaultShapelessDisplay(ShapelessRecipe recipe) {
         this.display = recipe;
         this.input = Lists.newArrayList();
-        recipe.getPreviewInputs().forEach(ingredient -> {
-            input.add(Arrays.asList(ingredient.getStackArray()));
+        recipe.getIngredients().forEach(ingredient -> {
+            input.add(Arrays.asList(ingredient.getMatchingStacks()));
         });
-        this.output = Arrays.asList(recipe.getOutput());
+        this.output = Arrays.asList(recipe.getRecipeOutput());
     }
     
     @Override
@@ -45,14 +45,14 @@ public class DefaultShapelessDisplay implements DefaultCraftingDisplay {
     
     @Override
     public int getWidth() {
-        if (display.getPreviewInputs().size() > 4)
+        if (display.getIngredients().size() > 4)
             return 3;
         return 2;
     }
     
     @Override
     public int getHeight() {
-        if (display.getPreviewInputs().size() > 4)
+        if (display.getIngredients().size() > 4)
             return 3;
         return 2;
     }

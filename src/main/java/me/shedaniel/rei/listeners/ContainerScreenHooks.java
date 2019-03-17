@@ -1,6 +1,6 @@
 package me.shedaniel.rei.listeners;
 
-import net.minecraft.container.Slot;
+import net.minecraft.inventory.Slot;
 
 public interface ContainerScreenHooks {
     

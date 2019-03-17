@@ -2,35 +2,34 @@ package me.shedaniel.rei.mixin;
 
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.ScreenHelper;
-import net.minecraft.client.gui.ingame.AbstractPlayerInventoryScreen;
-import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
-import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.client.gui.inventory.GuiContainerCreative;
+import net.minecraft.client.renderer.InventoryEffectRenderer;
+import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemGroup;
-import net.minecraft.text.TextComponent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(CreativePlayerInventoryScreen.class)
-public abstract class MixinCreativePlayerInventoryScreen extends AbstractPlayerInventoryScreen<CreativePlayerInventoryScreen.CreativeContainer> {
+@Mixin(GuiContainerCreative.class)
+public abstract class MixinCreativePlayerInventoryScreen extends InventoryEffectRenderer {
     
     @Shadow
-    private static int selectedTab;
+    private static int selectedTabIndex;
     @Shadow
-    private boolean field_2888;
+    private boolean field_195377_F;
     
-    public MixinCreativePlayerInventoryScreen(CreativePlayerInventoryScreen.CreativeContainer container_1, PlayerInventory playerInventory_1, TextComponent textComponent_1) {
-        super(container_1, playerInventory_1, textComponent_1);
+    public MixinCreativePlayerInventoryScreen(Container inventorySlotsIn) {
+        super(inventorySlotsIn);
     }
     
     @Shadow
-    protected abstract boolean doRenderScrollBar();
+    protected abstract boolean needsScrollBars();
     
     @Inject(method = "mouseScrolled", at = @At("HEAD"), cancellable = true)
     public void mouseScrolled(double amount, CallbackInfoReturnable<Boolean> ci) {
-        if (!doRenderScrollBar() && selectedTab == ItemGroup.INVENTORY.getIndex())
+        if (!needsScrollBars() && selectedTabIndex == ItemGroup.INVENTORY.getIndex())
             if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().getRectangle().contains(ClientHelper.getMouseLocation()) && ScreenHelper.getLastOverlay().mouseScrolled(amount)) {
                 ci.setReturnValue(true);
                 ci.cancel();
@@ -39,7 +38,7 @@ public abstract class MixinCreativePlayerInventoryScreen extends AbstractPlayerI
     
     @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
     public void keyPressed(int int_1, int int_2, int int_3, CallbackInfoReturnable<Boolean> ci) {
-        if (selectedTab == ItemGroup.INVENTORY.getIndex())
+        if (selectedTabIndex == ItemGroup.INVENTORY.getIndex())
             if (ScreenHelper.getLastOverlay().keyPressed(int_1, int_2, int_3)) {
                 ci.setReturnValue(true);
                 ci.cancel();
@@ -48,7 +47,7 @@ public abstract class MixinCreativePlayerInventoryScreen extends AbstractPlayerI
     
     @Inject(method = "charTyped", at = @At("HEAD"), cancellable = true)
     public void charTyped(char char_1, int int_1, CallbackInfoReturnable<Boolean> ci) {
-        if (!this.field_2888 && selectedTab == ItemGroup.INVENTORY.getIndex())
+        if (!this.field_195377_F && selectedTabIndex == ItemGroup.INVENTORY.getIndex())
             if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().charTyped(char_1, int_1)) {
                 ci.setReturnValue(true);
                 ci.cancel();
@@ -57,7 +56,7 @@ public abstract class MixinCreativePlayerInventoryScreen extends AbstractPlayerI
     
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
     public void mouseClicked(double i, double j, int k, CallbackInfoReturnable<Boolean> ci) {
-        if (selectedTab == ItemGroup.INVENTORY.getIndex())
+        if (selectedTabIndex == ItemGroup.INVENTORY.getIndex())
             if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().mouseClicked(i, j, k)) {
                 ci.setReturnValue(true);
                 ci.cancel();

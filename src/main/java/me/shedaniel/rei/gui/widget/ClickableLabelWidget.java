@@ -10,7 +10,7 @@ public abstract class ClickableLabelWidget extends LabelWidget implements Highli
     
     @Override
     public Rectangle getBounds() {
-        int width = textRenderer.getStringWidth(text);
+        int width = fontRenderer.getStringWidth(text);
         return new Rectangle(x - width / 2 - 1, y - 5, width + 2, 14);
     }
     
@@ -19,7 +19,7 @@ public abstract class ClickableLabelWidget extends LabelWidget implements Highli
         int colour = -1;
         if (isHighlighted(mouseX, mouseY))
             colour = 16777120;
-        drawStringCentered(textRenderer, (isHighlighted(mouseX, mouseY) ? "§n" : "") + text, x, y, colour);
+        drawCenteredString(fontRenderer, (isHighlighted(mouseX, mouseY) ? "§n" : "") + text, x, y, colour);
     }
     
     @Override

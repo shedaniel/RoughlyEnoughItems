@@ -2,7 +2,7 @@ package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Lists;
 import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.Recipe;
+import net.minecraft.item.crafting.IRecipe;
 
 import java.util.Collections;
 import java.util.List;
@@ -12,10 +12,10 @@ public class DefaultCustomDisplay implements DefaultCraftingDisplay {
     
     private List<List<ItemStack>> input;
     private List<ItemStack> output;
-    private Recipe possibleRecipe;
+    private IRecipe possibleRecipe;
     private int width, height;
     
-    public DefaultCustomDisplay(List<List<ItemStack>> input, List<ItemStack> output, Recipe possibleRecipe) {
+    public DefaultCustomDisplay(List<List<ItemStack>> input, List<ItemStack> output, IRecipe possibleRecipe) {
         this.input = input;
         this.output = output;
         this.possibleRecipe = possibleRecipe;
@@ -38,7 +38,7 @@ public class DefaultCustomDisplay implements DefaultCraftingDisplay {
     }
     
     @Override
-    public Optional<Recipe> getRecipe() {
+    public Optional<IRecipe> getRecipe() {
         return Optional.ofNullable(possibleRecipe);
     }
     

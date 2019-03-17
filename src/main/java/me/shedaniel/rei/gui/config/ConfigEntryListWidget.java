@@ -1,13 +1,13 @@
 package me.shedaniel.rei.gui.config;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.widget.EntryListWidget;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiListExtended;
 
-public class ConfigEntryListWidget extends EntryListWidget<ConfigEntry> {
+public class ConfigEntryListWidget extends GuiListExtended<ConfigEntry> {
     
-    public ConfigEntryListWidget(MinecraftClient client, int width, int height, int startY, int endY, int entryHeight) {
+    public ConfigEntryListWidget(Minecraft client, int width, int height, int startY, int endY, int entryHeight) {
         super(client, width, height, startY, endY, entryHeight);
-        method_1943(false); //toggleShowSelection
+        setShowSelectionBox(false); //toggleShowSelection
     }
     
     public void configClearEntries() {
@@ -15,7 +15,7 @@ public class ConfigEntryListWidget extends EntryListWidget<ConfigEntry> {
     }
     
     private ConfigEntry getEntry(int int_1) {
-        return this.getInputListeners().get(int_1);
+        return this.getChildren().get(int_1);
     }
     
     public void configAddEntry(ConfigEntry entry) {
@@ -23,12 +23,12 @@ public class ConfigEntryListWidget extends EntryListWidget<ConfigEntry> {
     }
     
     @Override
-    public int getEntryWidth() {
+    public int getListWidth() {
         return width - 80;
     }
     
     @Override
-    protected int getScrollbarPosition() {
+    protected int getScrollBarX() {
         return width - 40;
     }
     

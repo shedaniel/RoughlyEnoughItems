@@ -1,7 +1,0 @@
-{
-  "id": "roughlyenoughitems",
-  "initializer": "me.shedaniel.rei.RoughlyEnoughItemsPlugins",
-  "data": {
-    "side": "CLIENT"
-  }
-}

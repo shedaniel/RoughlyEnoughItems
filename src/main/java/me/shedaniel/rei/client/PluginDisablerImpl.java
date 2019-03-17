@@ -2,9 +2,9 @@ package me.shedaniel.rei.client;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import me.shedaniel.rei.api.Identifier;
 import me.shedaniel.rei.api.PluginDisabler;
 import me.shedaniel.rei.api.PluginFunction;
-import net.minecraft.util.Identifier;
 
 import java.util.List;
 import java.util.Map;

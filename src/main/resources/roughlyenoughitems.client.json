@@ -1,7 +1,8 @@
 {
   "required": true,
   "package": "me.shedaniel.rei.mixin",
-  "minVersion": "0.7.11",
+  "refmap": "mixins.roughlyenoughitems.refmap.json",
+  "minVersion": "0.7.7",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "MixinScreen",
@@ -12,9 +13,7 @@
     "MixinCreativePlayerInventoryScreen",
     "MixinBrewingRecipeRegistry",
     "MixinTabGetter",
-    "GhostSlotsHook"
-  ],
-  "injectors": {
-    "defaultRequire": 1
-  }
+    "GhostSlotsHook",
+    "MixinKeyBinding"
+  ]
 }

@@ -7,15 +7,15 @@ import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.ItemListOrdering;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.client.SearchArgument;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.IRegistry;
 import org.apache.commons.lang3.StringUtils;
 
 import java.awt.*;
@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ItemListOverlay extends DrawableHelper implements IWidget {
+public class ItemListOverlay extends Gui implements IWidget {
     
     private static List<Item> searchBlacklisted = Lists.newArrayList();
     private List<IWidget> widgets;
@@ -42,7 +42,7 @@ public class ItemListOverlay extends DrawableHelper implements IWidget {
     public static List<String> tryGetItemStackToolTip(ItemStack itemStack) {
         if (!searchBlacklisted.contains(itemStack.getItem()))
             try {
-                return MinecraftClient.getInstance().currentScreen.getStackTooltip(itemStack);
+                return Minecraft.getInstance().currentScreen.getItemToolTip(itemStack);
             } catch (Throwable e) {
                 e.printStackTrace();
                 searchBlacklisted.add(itemStack.getItem());
@@ -59,7 +59,7 @@ public class ItemListOverlay extends DrawableHelper implements IWidget {
                 searchBlacklisted.add(stack.getItem());
             }
         try {
-            return I18n.translate("item." + Registry.ITEM.getId(stack.getItem()).toString().replace(":", "."));
+            return I18n.format("item." + IRegistry.ITEM.getKey(stack.getItem()).toString().replace(":", "."));
         } catch (Throwable e) {
             e.printStackTrace();
         }
@@ -73,9 +73,9 @@ public class ItemListOverlay extends DrawableHelper implements IWidget {
     @Override
     public void draw(int int_1, int int_2, float float_1) {
         widgets.forEach(widget -> widget.draw(int_1, int_2, float_1));
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
-        if (rectangle.contains(ClientHelper.getMouseLocation()) && ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty() && MinecraftClient.getInstance().isInSingleplayer())
-            ScreenHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.translate("text.rei.delete_items"))));
+        EntityPlayerSP player = Minecraft.getInstance().player;
+        if (rectangle.contains(ClientHelper.getMouseLocation()) && ClientHelper.isCheating() && !player.inventory.getItemStack().isEmpty() && Minecraft.getInstance().isSingleplayer())
+            ScreenHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.format("text.rei.delete_items"))));
     }
     
     public List<IWidget> getWidgets() {
@@ -98,8 +98,8 @@ public class ItemListOverlay extends DrawableHelper implements IWidget {
             ItemSlotWidget slotWidget = new ItemSlotWidget((int) (startX + (i % width) * 18), (int) (startY + MathHelper.floor(i / width) * 18), Collections.singletonList(currentDisplayed.get(j)), false, true, true) {
                 @Override
                 protected void drawToolTip(ItemStack itemStack) {
-                    ClientPlayerEntity player = MinecraftClient.getInstance().player;
-                    if (!ClientHelper.isCheating() || player.inventory.getCursorStack().isEmpty())
+                    EntityPlayerSP player = Minecraft.getInstance().player;
+                    if (!ClientHelper.isCheating() || player.inventory.getItemStack().isEmpty())
                         super.drawToolTip(itemStack);
                 }
                 
@@ -109,7 +109,7 @@ public class ItemListOverlay extends DrawableHelper implements IWidget {
                         if (ClientHelper.isCheating()) {
                             if (getCurrentStack() != null && !getCurrentStack().isEmpty()) {
                                 ItemStack cheatedStack = getCurrentStack().copy();
-                                cheatedStack.setAmount(button == 0 ? 1 : button == 1 ? cheatedStack.getMaxAmount() : cheatedStack.getAmount());
+                                cheatedStack.setCount(button == 0 ? 1 : button == 1 ? cheatedStack.getMaxStackSize() : cheatedStack.getCount());
                                 return ClientHelper.tryCheatingStack(cheatedStack);
                             }
                         } else if (button == 0)
@@ -147,7 +147,7 @@ public class ItemListOverlay extends DrawableHelper implements IWidget {
                 if (ordering.equals(ItemListOrdering.name))
                     return tryGetItemStackName(itemStack).compareToIgnoreCase(tryGetItemStackName(t1));
                 if (ordering.equals(ItemListOrdering.item_groups))
-                    return itemGroups.indexOf(itemStack.getItem().getItemGroup()) - itemGroups.indexOf(t1.getItem().getItemGroup());
+                    return itemGroups.indexOf(itemStack.getItem().getGroup()) - itemGroups.indexOf(t1.getItem().getGroup());
                 return 0;
             });
         if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isAscending)
@@ -183,7 +183,7 @@ public class ItemListOverlay extends DrawableHelper implements IWidget {
             if (!RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled())
                 return true;
             for(ItemStack workingItem : finalWorkingItems)
-                if (itemStack.isEqualIgnoreTags(workingItem))
+                if (itemStack.isItemEqual(workingItem))
                     return true;
             return false;
         }).distinct().collect(Collectors.toList()));
@@ -241,12 +241,12 @@ public class ItemListOverlay extends DrawableHelper implements IWidget {
     @Override
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
         if (rectangle.contains(double_1, double_2)) {
-            ClientPlayerEntity player = MinecraftClient.getInstance().player;
-            if (ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty() && MinecraftClient.getInstance().isInSingleplayer()) {
+            EntityPlayerSP player = Minecraft.getInstance().player;
+            if (ClientHelper.isCheating() && !player.inventory.getItemStack().isEmpty() && Minecraft.getInstance().isSingleplayer()) {
                 ClientHelper.sendDeletePacket();
                 return true;
             }
-            if (!player.inventory.getCursorStack().isEmpty() && MinecraftClient.getInstance().isInSingleplayer())
+            if (!player.inventory.getItemStack().isEmpty() && Minecraft.getInstance().isSingleplayer())
                 return false;
             for(IWidget widget : getListeners())
                 if (widget.mouseClicked(double_1, double_2, int_1))
