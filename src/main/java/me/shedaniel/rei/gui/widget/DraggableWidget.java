@@ -1,6 +1,6 @@
 package me.shedaniel.rei.gui.widget;
 
-import me.shedaniel.rei.client.ClientHelper;
+import me.shedaniel.cloth.ClothInitializer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.InputListener;
 import net.minecraft.client.util.Window;
@@ -35,7 +35,7 @@ public abstract class DraggableWidget extends HighlightableWidget {
     
     @Override
     public boolean mouseDragged(double double_1, double double_2, int int_1, double double_3, double double_4) {
-        Point mouse = ClientHelper.getMouseLocation();
+        Point mouse = ClothInitializer.clientUtils.getMouseLocation();
         if (int_1 == 0) {
             if (!dragged) {
                 if (getGrabBounds().contains(mouse)) {

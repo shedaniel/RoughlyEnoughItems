@@ -2,6 +2,7 @@ package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
+import me.shedaniel.cloth.ClothInitializer;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
@@ -87,7 +88,7 @@ public class ItemSlotWidget extends HighlightableWidget {
     
     protected void drawToolTip(ItemStack itemStack) {
         List<String> toolTip = getTooltip(itemStack);
-        ScreenHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), toolTip));
+        ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(toolTip));
     }
     
     protected List<String> getTooltip(ItemStack itemStack) {
@@ -141,7 +142,7 @@ public class ItemSlotWidget extends HighlightableWidget {
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (!clickToMoreRecipes)
             return false;
-        if (getBounds().contains(ClientHelper.getMouseLocation()))
+        if (getBounds().contains(ClothInitializer.clientUtils.getMouseLocation()))
             if (ClientHelper.RECIPE.matchesKey(int_1, int_2))
                 return ClientHelper.executeRecipeKeyBind(getCurrentStack().copy());
             else if (ClientHelper.USAGE.matchesKey(int_1, int_2))

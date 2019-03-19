@@ -1,6 +1,7 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import me.shedaniel.rei.client.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.audio.PositionedSoundInstance;
 import net.minecraft.client.font.TextRenderer;
@@ -13,6 +14,7 @@ import net.minecraft.util.math.MathHelper;
 import java.awt.*;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public abstract class ButtonWidget extends HighlightableWidget {
     
@@ -91,6 +93,12 @@ public abstract class ButtonWidget extends HighlightableWidget {
             }
             
             this.drawStringCentered(textRenderer, this.text, x + width / 2, y + (height - 8) / 2, colour);
+            
+            if (getTooltips().isPresent())
+                if (isHighlighted(mouseX, mouseY))
+                    ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltips().get().split("\n")));
+                else if (focused)
+                    ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(new Point(x + width / 2, y + height / 2), getTooltips().get().split("\n")));
         }
     }
     
@@ -138,5 +146,9 @@ public abstract class ButtonWidget extends HighlightableWidget {
     }
     
     public abstract void onPressed();
+    
+    public Optional<String> getTooltips() {
+        return Optional.empty();
+    }
     
 }

@@ -34,9 +34,6 @@ public class ConfigObject {
     @Comment("To disable REI's defualt plugin, don't change this unless you understand what you are doing")
     public boolean loadDefaultPlugin = true;
     
-    @Comment("Toggle the credits button")
-    public boolean disableCreditsButton = false;
-    
     @Comment("Maximum recipes viewed at one time.")
     public int maxRecipePerPage = 3;
     

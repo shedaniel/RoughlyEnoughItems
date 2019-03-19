@@ -16,7 +16,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.Mouse;
 import net.minecraft.client.gui.Screen;
 import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
 import net.minecraft.client.util.InputUtil;
@@ -28,7 +27,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.PacketByteBuf;
 import net.minecraft.util.registry.Registry;
 
-import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,14 +50,6 @@ public class ClientHelper implements ClientModInitializer {
             return FabricLoader.getInstance().getModContainer(modid).map(ModContainer::getMetadata).map(ModMetadata::getName).orElse(modid);
         }
         return "";
-    }
-    
-    public static Point getMouseLocation() {
-        MinecraftClient client = MinecraftClient.getInstance();
-        Mouse mouse = client.mouse;
-        double double_1 = mouse.getX() * (double) client.window.getScaledWidth() / (double) client.window.getWidth();
-        double double_2 = mouse.getY() * (double) client.window.getScaledHeight() / (double) client.window.getHeight();
-        return new Point((int) double_1, (int) double_2);
     }
     
     public static boolean isCheating() {

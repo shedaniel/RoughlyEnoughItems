@@ -54,7 +54,6 @@
   "text.rei.config.modules": "組件",
   "text.rei.config.advanced": "高級",
   "text.rei.choose_page": "選擇頁面",
-  "text.rei.config.disable_credits_button": "禁用感謝按鈕:",
   "text.rei.config.max_recipes_per_page": "每頁最多配方:",
   "text.rei.config.enable_util_buttons": "啟用實用按鈕:",
   "text.rei.gamemode_button.tooltip": "切換遊戲模式\n§7切換至 %s 模式。",

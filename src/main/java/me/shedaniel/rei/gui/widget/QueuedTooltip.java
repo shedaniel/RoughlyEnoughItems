@@ -2,7 +2,7 @@ package me.shedaniel.rei.gui.widget;
 
 
 import com.google.common.collect.Lists;
-import me.shedaniel.rei.client.ClientHelper;
+import me.shedaniel.cloth.ClothInitializer;
 
 import java.awt.*;
 import java.util.LinkedList;
@@ -13,7 +13,7 @@ public class QueuedTooltip {
     private Point location;
     private List<String> text;
     
-    protected QueuedTooltip(Point location, List<String> text) {
+    private QueuedTooltip(Point location, List<String> text) {
         this.location = location;
         this.text = new LinkedList<>(text);
     }
@@ -27,11 +27,11 @@ public class QueuedTooltip {
     }
     
     public static QueuedTooltip create(List<String> text) {
-        return QueuedTooltip.create(ClientHelper.getMouseLocation(), text);
+        return QueuedTooltip.create(ClothInitializer.clientUtils.getMouseLocation(), text);
     }
     
     public static QueuedTooltip create(String... text) {
-        return QueuedTooltip.create(ClientHelper.getMouseLocation(), text);
+        return QueuedTooltip.create(ClothInitializer.clientUtils.getMouseLocation(), text);
     }
     
     public Point getLocation() {

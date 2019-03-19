@@ -2,6 +2,7 @@ package me.shedaniel.rei.gui;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
+import me.shedaniel.cloth.ClothInitializer;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.ClientHelper;
@@ -128,6 +129,11 @@ public class RecipeViewingScreen extends Screen {
                 page = 0;
                 RecipeViewingScreen.this.onInitialized();
             }
+            
+            @Override
+            public Optional<String> getTooltips() {
+                return Optional.ofNullable(I18n.translate("text.rei.previous_category"));
+            }
         });
         widgets.add(new ClickableLabelWidget((int) bounds.getCenterX(), (int) bounds.getY() + 7, "") {
             @Override
@@ -158,6 +164,11 @@ public class RecipeViewingScreen extends Screen {
                 page = 0;
                 RecipeViewingScreen.this.onInitialized();
             }
+            
+            @Override
+            public Optional<String> getTooltips() {
+                return Optional.ofNullable(I18n.translate("text.rei.next_category"));
+            }
         });
         categoryBack.enabled = categories.size() > 1;
         categoryNext.enabled = categories.size() > 1;
@@ -169,6 +180,11 @@ public class RecipeViewingScreen extends Screen {
                 if (page < 0)
                     page = getTotalPages(selectedCategory) - 1;
                 RecipeViewingScreen.this.onInitialized();
+            }
+            
+            @Override
+            public Optional<String> getTooltips() {
+                return Optional.ofNullable(I18n.translate("text.rei.previous_page"));
             }
         });
         widgets.add(new ClickableLabelWidget((int) bounds.getCenterX(), (int) bounds.getY() + 23, "") {
@@ -197,9 +213,15 @@ public class RecipeViewingScreen extends Screen {
                     page = 0;
                 RecipeViewingScreen.this.onInitialized();
             }
+            
+            @Override
+            public Optional<String> getTooltips() {
+                return Optional.ofNullable(I18n.translate("text.rei.next_page"));
+            }
         });
-        recipeBack.enabled = categoriesMap.get(selectedCategory).size() > getRecipesPerPage();
-        recipeNext.enabled = categoriesMap.get(selectedCategory).size() > getRecipesPerPage();
+        int recipesPerPageByHeight = getRecipesPerPageByHeight();
+        recipeBack.enabled = categoriesMap.get(selectedCategory).size() > recipesPerPageByHeight;
+        recipeNext.enabled = categoriesMap.get(selectedCategory).size() > recipesPerPageByHeight;
         
         for(int i = 0; i < 6; i++) {
             int j = i + categoryPages * 6;
@@ -360,13 +382,13 @@ public class RecipeViewingScreen extends Screen {
         for(InputListener listener : listeners)
             if (listener.mouseScrolled(i, j, amount))
                 return true;
-        if (getBounds().contains(ClientHelper.getMouseLocation())) {
+        if (getBounds().contains(ClothInitializer.clientUtils.getMouseLocation())) {
             if (amount > 0 && recipeBack.enabled)
                 recipeBack.onPressed();
             else if (amount < 0 && recipeNext.enabled)
                 recipeNext.onPressed();
         }
-        if ((new Rectangle(bounds.x, bounds.y - 28, bounds.width, 28)).contains(ClientHelper.getMouseLocation())) {
+        if ((new Rectangle(bounds.x, bounds.y - 28, bounds.width, 28)).contains(ClothInitializer.clientUtils.getMouseLocation())) {
             if (amount > 0 && categoryBack.enabled)
                 categoryBack.onPressed();
             else if (amount < 0 && categoryNext.enabled)

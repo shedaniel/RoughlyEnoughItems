@@ -2,13 +2,12 @@ package me.shedaniel.rei.gui.widget;
 
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.api.SpeedCraftFunctional;
-import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.resource.language.I18n;
 
 import java.awt.*;
-import java.util.Arrays;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public class SpeedCraftingButtonWidget extends ButtonWidget {
@@ -33,11 +32,13 @@ public class SpeedCraftingButtonWidget extends ButtonWidget {
     public void draw(int mouseX, int mouseY, float partialTicks) {
         this.enabled = functional != null && functional.acceptRecipe(ScreenHelper.getLastContainerScreen(), displaySupplier.get());
         super.draw(mouseX, mouseY, partialTicks);
-        if (getBounds().contains(mouseX, mouseY))
-            if (enabled)
-                ScreenHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.translate("text.speed_craft.move_items"))));
-            else
-                ScreenHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.translate("text.speed_craft.failed_move_items"))));
     }
     
+    @Override
+    public Optional<String> getTooltips() {
+        if (enabled)
+            return Optional.ofNullable(I18n.translate("text.speed_craft.move_items"));
+        else
+            return Optional.ofNullable(I18n.translate("text.speed_craft.failed_move_items"));
+    }
 }
