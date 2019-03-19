@@ -1,6 +1,7 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
+import me.shedaniel.cloth.ClothInitializer;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.client.ClientHelper;
@@ -73,8 +74,8 @@ public class ItemListOverlay extends Widget {
     public void draw(int int_1, int int_2, float float_1) {
         widgets.forEach(widget -> widget.draw(int_1, int_2, float_1));
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
-        if (rectangle.contains(ClientHelper.getMouseLocation()) && ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty() && MinecraftClient.getInstance().isInSingleplayer())
-            ScreenHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.translate("text.rei.delete_items"))));
+        if (rectangle.contains(ClothInitializer.clientUtils.getMouseLocation()) && ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty() && MinecraftClient.getInstance().isInSingleplayer())
+            ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.delete_items")));
     }
     
     public List<Widget> getWidgets() {
@@ -130,6 +131,10 @@ public class ItemListOverlay extends Widget {
             if (widget.keyPressed(int_1, int_2, int_3))
                 return true;
         return false;
+    }
+    
+    public Rectangle getListArea() {
+        return listArea;
     }
     
     public List<ItemStack> getCurrentDisplayed() {

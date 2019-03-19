@@ -5,6 +5,7 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.ItemListOrdering;
 import me.shedaniel.rei.client.ScreenHelper;
+import me.shedaniel.rei.gui.credits.CreditsScreen;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import net.minecraft.client.MinecraftClient;
@@ -152,22 +153,6 @@ public class ConfigScreen extends Screen {
                 if (button.isHighlighted(mouse))
                     tooltipList.add(QueuedTooltip.create(I18n.translate("text.rei.config.load_default_plugin.restart_tooltip").split("\n")));
                 
-            }
-        }));
-        entryListWidget.configAddEntry(new ConfigEntry.ButtonConfigEntry(new TranslatableTextComponent("text.rei.config.disable_credits_button"), new ConfigEntry.ButtonConfigEntry.ConfigEntryButtonProvider() {
-            @Override
-            public void onPressed() {
-                RoughlyEnoughItemsCore.getConfigManager().getConfig().disableCreditsButton = !RoughlyEnoughItemsCore.getConfigManager().getConfig().disableCreditsButton;
-                try {
-                    RoughlyEnoughItemsCore.getConfigManager().saveConfig();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            
-            @Override
-            public String getText() {
-                return getTrueFalseText(RoughlyEnoughItemsCore.getConfigManager().getConfig().disableCreditsButton);
             }
         }));
         entryListWidget.configAddEntry(new ConfigEntry.ButtonConfigEntry(new TranslatableTextComponent("text.rei.config.enable_util_buttons"), new ConfigEntry.ButtonConfigEntry.ConfigEntryButtonProvider() {
@@ -318,6 +303,12 @@ public class ConfigScreen extends Screen {
                 ConfigScreen.this.client.openScreen(parent);
                 if (initOverlay)
                     ScreenHelper.getLastOverlay().onInitialized();
+            }
+        });
+        addButton(new ButtonWidget(RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? screenWidth - 55 : 10, screenHeight - 26, 45, 20, I18n.translate("text.rei.credits")) {
+            @Override
+            public void onPressed() {
+                MinecraftClient.getInstance().openScreen(new CreditsScreen(ConfigScreen.this));
             }
         });
         super.onInitialized();

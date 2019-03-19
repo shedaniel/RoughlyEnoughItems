@@ -36,7 +36,5 @@
   "text.rei.showing_all": "Sowin all",
   "text.rei.delete_items": "§cDel Itm",
   "text.rei.check_updates": "Chck Updatez: ",
-  "text.rei.update_outdated": "§6REI's 0utbat3d!\n§6Kurrant: §a%s §6Ratast: §a%s\n§6Upbate phrioriy: §a%s",
-  "text.rei.update_changelog_line": "§6- %s",
   "text.rei.credits": "Creditz"
 }

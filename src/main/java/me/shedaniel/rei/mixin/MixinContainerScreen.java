@@ -1,9 +1,7 @@
 package me.shedaniel.rei.mixin;
 
 import me.shedaniel.rei.api.TabGetter;
-import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.ScreenHelper;
-import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ContainerScreen;
@@ -54,20 +52,6 @@ public class MixinContainerScreen extends Screen implements ContainerScreenHooks
     @Override
     public Slot rei_getHoveredSlot() {
         return focusedSlot;
-    }
-    
-    @Override
-    public boolean mouseScrolled(double i, double j, double double_1) {
-        if (MinecraftClient.getInstance().currentScreen instanceof CreativePlayerInventoryScreen) {
-            TabGetter tabGetter = (TabGetter) MinecraftClient.getInstance().currentScreen;
-            if (tabGetter.rei_getSelectedTab() != ItemGroup.INVENTORY.getIndex())
-                return super.mouseScrolled(i, j, double_1);
-        }
-        ContainerScreenOverlay overlay = ScreenHelper.getLastOverlay();
-        if (ScreenHelper.isOverlayVisible() && overlay.getRectangle().contains(ClientHelper.getMouseLocation()))
-            if (overlay.mouseScrolled(i, j, double_1))
-                return true;
-        return super.mouseScrolled(i, j, double_1);
     }
     
     @Inject(method = "keyPressed(III)Z", at = @At("HEAD"), cancellable = true)

@@ -1,6 +1,6 @@
 package me.shedaniel.rei.gui.config;
 
-import me.shedaniel.rei.client.ClientHelper;
+import me.shedaniel.cloth.ClothInitializer;
 import me.shedaniel.rei.gui.widget.ButtonWidget;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import net.minecraft.client.MinecraftClient;
@@ -33,7 +33,7 @@ public abstract class ConfigEntry extends EntryListWidget.Entry<ConfigEntry> {
         @Override
         public void draw(int entryWidth, int height, int i3, int i4, boolean isSelected, float delta) {
             Window window = MinecraftClient.getInstance().window;
-            Point mouse = ClientHelper.getMouseLocation();
+            Point mouse = ClothInitializer.clientUtils.getMouseLocation();
             if (MinecraftClient.getInstance().textRenderer.isRightToLeft()) {
                 MinecraftClient.getInstance().textRenderer.drawWithShadow(nameComponent.getFormattedText(), window.getScaledWidth() - MinecraftClient.getInstance().textRenderer.getStringWidth(nameComponent.getFormattedText()) - 40, getY() + 5, 16777215);
                 this.buttonWidget.text = buttonProvider.getText();
@@ -97,7 +97,7 @@ public abstract class ConfigEntry extends EntryListWidget.Entry<ConfigEntry> {
         @Override
         public void draw(int entryWidth, int height, int i3, int i4, boolean isSelected, float delta) {
             Window window = MinecraftClient.getInstance().window;
-            Point mouse = ClientHelper.getMouseLocation();
+            Point mouse = ClothInitializer.clientUtils.getMouseLocation();
             if (MinecraftClient.getInstance().textRenderer.isRightToLeft()) {
                 MinecraftClient.getInstance().textRenderer.drawWithShadow(nameComponent.getFormattedText(), window.getScaledWidth() - MinecraftClient.getInstance().textRenderer.getStringWidth(nameComponent.getFormattedText()) - 40, getY() + 5, 16777215);
                 this.textFieldWidget.getBounds().setLocation(getX() + 1, getY() + 2);

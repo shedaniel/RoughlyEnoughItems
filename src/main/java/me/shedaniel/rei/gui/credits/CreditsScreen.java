@@ -2,7 +2,6 @@ package me.shedaniel.rei.gui.credits;
 
 import me.shedaniel.rei.client.ScreenHelper;
 import net.minecraft.client.gui.ContainerScreen;
-import net.minecraft.client.gui.InputListener;
 import net.minecraft.client.gui.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
@@ -10,10 +9,10 @@ import net.minecraft.text.StringTextComponent;
 
 public class CreditsScreen extends Screen {
     
-    private ContainerScreen parent;
+    private Screen parent;
     private CreditsEntryListWidget entryListWidget;
     
-    public CreditsScreen(ContainerScreen parent) {
+    public CreditsScreen(Screen parent) {
         this.parent = parent;
     }
     
@@ -21,7 +20,8 @@ public class CreditsScreen extends Screen {
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (int_1 == 256 && this.doesEscapeKeyClose()) {
             this.client.openScreen(parent);
-            ScreenHelper.getLastOverlay().onInitialized();
+            if (parent instanceof ContainerScreen)
+                ScreenHelper.getLastOverlay().onInitialized();
             return true;
         }
         return super.keyPressed(int_1, int_2, int_3);

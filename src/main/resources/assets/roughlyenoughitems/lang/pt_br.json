@@ -55,14 +55,10 @@
   "text.rei.config.advanced": "Avançado",
   "text.rei.config.disable_recipe_book": "Desativar livro de receitas:",
   "text.rei.choose_page": "Selecionar página",
-  "text.rei.config.disable_credits_button": "Desabilitar botão de créditos:",
   "text.rei.config.max_recipes_per_page": "Quantidade máxima de receitas por página:",
   "text.rei.config.enable_util_buttons": "Habilitar botões de utilitários:",
   "text.rei.gamemode_button.tooltip": "Modo de Jogo Alterado\n§7Alterado para modo %s.",
   "text.rei.weather_button.tooltip": "Clima Alterado\n§7Alterado para %s.",
   "text.rei.enabled": "Sim",
-  "text.rei.disabled": "Não",
-
-  "_comment": "Don't change / translate the credit down below if you are doing it :)",
-  "text.rei.credit.text": "§lRoughly Enough Items\n§7Originalmente uma implementação para o MOD Almost Enough Items.\n\n§lDesenvolvedores\n  - Originalmente por ZenDarva\n  - Criado por Danielshe\n  - Plugin suporte por TehNut\n\n§lTraduções\n  English - Danielshe\n  Português do Brasil - ThiagoROX\n  Simplified Chinese - Danielshe\n  Traditional Chinese - hugoalh & Danielshe\n  French - Yanis48\n  German - MelanX\n  Estonian - Madis0\n  Hebrew - nerdoron\n  LOLCAT - Danielshe\n  Upside Down - Danielshe\n\n§lLicensa\n§7Roughly Enough Items utiliza licença MIT."
+  "text.rei.disabled": "Não"
 }

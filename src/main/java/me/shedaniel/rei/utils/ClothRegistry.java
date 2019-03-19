@@ -1,11 +1,13 @@
 package me.shedaniel.rei.utils;
 
+import me.shedaniel.cloth.ClothInitializer;
 import me.shedaniel.cloth.api.EventPriority;
 import me.shedaniel.cloth.hooks.ClothHooks;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.TabGetter;
 import me.shedaniel.rei.client.RecipeHelperImpl;
 import me.shedaniel.rei.client.ScreenHelper;
+import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import net.minecraft.client.gui.ContainerScreen;
 import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
 import net.minecraft.client.gui.widget.RecipeBookButtonWidget;
@@ -40,6 +42,14 @@ public class ClothRegistry {
                         return;
                 }
                 ScreenHelper.getLastOverlay().drawOverlay(post.getMouseX(), post.getMouseY(), post.getDelta());
+            }
+        }, EventPriority.LOWEST);
+        ClothHooks.CLIENT_SCREEN_MOUSE_SCROLLED.registerListener(event -> {
+            if (event.getScreen() instanceof ContainerScreen && !(event.getScreen() instanceof CreativePlayerInventoryScreen)) {
+                ContainerScreenOverlay overlay = ScreenHelper.getLastOverlay();
+                if (ScreenHelper.isOverlayVisible() && ContainerScreenOverlay.getItemListOverlay().getListArea().contains(ClothInitializer.clientUtils.getMouseLocation()))
+                    if (overlay.mouseScrolled(event.getMouseX(), event.getMouseY(), event.getAmount()))
+                        event.setCancelled(true);
             }
         }, EventPriority.LOWEST);
     }

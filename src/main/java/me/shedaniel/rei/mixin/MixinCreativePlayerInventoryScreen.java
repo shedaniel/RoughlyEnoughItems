@@ -1,6 +1,6 @@
 package me.shedaniel.rei.mixin;
 
-import me.shedaniel.rei.client.ClientHelper;
+import me.shedaniel.cloth.ClothInitializer;
 import me.shedaniel.rei.client.ScreenHelper;
 import net.minecraft.client.gui.ingame.AbstractPlayerInventoryScreen;
 import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
@@ -31,7 +31,7 @@ public abstract class MixinCreativePlayerInventoryScreen extends AbstractPlayerI
     @Inject(method = "mouseScrolled", at = @At("HEAD"), cancellable = true)
     public void mouseScrolled(double i, double j, double amount, CallbackInfoReturnable<Boolean> ci) {
         if (!doRenderScrollBar() && selectedTab == ItemGroup.INVENTORY.getIndex())
-            if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().getRectangle().contains(ClientHelper.getMouseLocation()) && ScreenHelper.getLastOverlay().mouseScrolled(i, j, amount)) {
+            if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().getRectangle().contains(ClothInitializer.clientUtils.getMouseLocation()) && ScreenHelper.getLastOverlay().mouseScrolled(i, j, amount)) {
                 ci.setReturnValue(true);
                 ci.cancel();
             }
