@@ -30,7 +30,7 @@ public abstract class MixinCraftingTableScreen extends ContainerScreen {
         return super.getFocused();
     }
     
-    @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true, remap = false)
     public void mouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> ci) {
         if (recipeBookGui.mouseClicked(mouseX, mouseY, button)) {
             focusOn(recipeBookGui);

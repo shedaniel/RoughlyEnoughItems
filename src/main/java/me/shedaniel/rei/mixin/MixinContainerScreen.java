@@ -54,7 +54,7 @@ public class MixinContainerScreen extends Screen implements ContainerScreenHooks
         return focusedSlot;
     }
     
-    @Inject(method = "keyPressed(III)Z", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "keyPressed(III)Z", at = @At("HEAD"), cancellable = true, remap = false)
     public void keyPressed(int int_1, int int_2, int int_3, CallbackInfoReturnable<Boolean> ci) {
         if (MinecraftClient.getInstance().currentScreen instanceof CreativePlayerInventoryScreen) {
             TabGetter tabGetter = (TabGetter) MinecraftClient.getInstance().currentScreen;
