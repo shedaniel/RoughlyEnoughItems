@@ -1,3 +1,14 @@
+# v2.5.0.70
+- Removed mouseScrolled Override in mixins
+- Added spectator mode in gamemode switcher
+- Gamemodes & Weather are now translatable: [#47](https://github.com/shedaniel/RoughlyEnoughItems/issues/47)
+- Fixed Search Field
+- Fixed Button Focus
+- Added Button Tooltips
+- Removed credits button (it will be back)
+- Removed disabling credits option
+- Update to 19w12a
+- New config screen from [Cloth](https://minecraft.curseforge.com/projects/cloth)
 # v2.4.2.68
 - Fixed [Cloth](https://minecraft.curseforge.com/projects/cloth) missing message
 # v2.4.2.67

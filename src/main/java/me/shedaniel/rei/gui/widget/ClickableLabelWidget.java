@@ -4,15 +4,15 @@ import java.awt.*;
 
 public abstract class ClickableLabelWidget extends LabelWidget {
     
-    private static final int hoveredColor = (new Color(102, 255, 204)).getRGB();
-    protected boolean focused;
+    public static final int hoveredColor = (new Color(102, 255, 204)).getRGB();
+    public boolean focused;
     
     public ClickableLabelWidget(int x, int y, String text) {
         super(x, y, text);
     }
     
     @Override
-    public void draw(int mouseX, int mouseY, float partialTicks) {
+    public void render(int mouseX, int mouseY, float partialTicks) {
         int colour = -1;
         if (isHovered(mouseX, mouseY))
             colour = hoveredColor;
@@ -39,7 +39,7 @@ public abstract class ClickableLabelWidget extends LabelWidget {
     }
     
     @Override
-    public boolean hasFocus() {
+    public boolean isPartOfFocusCycle() {
         return true;
     }
     
@@ -48,7 +48,7 @@ public abstract class ClickableLabelWidget extends LabelWidget {
     }
     
     @Override
-    public void setHasFocus(boolean boolean_1) {
+    public void onFocusChanged(boolean boolean_1) {
         focused = boolean_1;
     }
     

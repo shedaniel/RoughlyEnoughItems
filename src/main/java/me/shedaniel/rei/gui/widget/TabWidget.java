@@ -15,14 +15,14 @@ import java.util.List;
 
 public class TabWidget extends HighlightableWidget {
     
-    private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
+    public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     
-    private boolean shown = false, selected = false;
-    private ItemStack item;
-    private int id;
-    private RecipeViewingScreen recipeViewingWidget;
-    private String categoryName;
-    private Rectangle bounds;
+    public boolean shown = false, selected = false;
+    public ItemStack item;
+    public int id;
+    public RecipeViewingScreen recipeViewingWidget;
+    public String categoryName;
+    public Rectangle bounds;
     private ItemRenderer itemRenderer;
     
     public TabWidget(int id, RecipeViewingScreen recipeViewingWidget, Rectangle bounds) {
@@ -66,7 +66,7 @@ public class TabWidget extends HighlightableWidget {
     }
     
     @Override
-    public void draw(int mouseX, int mouseY, float partialTicks) {
+    public void render(int mouseX, int mouseY, float partialTicks) {
         if (shown) {
             int l = (int) this.bounds.getCenterX() - 8, i1 = (int) this.bounds.getCenterY() - 6;
             

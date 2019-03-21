@@ -29,9 +29,9 @@ public class SpeedCraftingButtonWidget extends ButtonWidget {
     }
     
     @Override
-    public void draw(int mouseX, int mouseY, float partialTicks) {
+    public void render(int mouseX, int mouseY, float partialTicks) {
         this.enabled = functional != null && functional.acceptRecipe(ScreenHelper.getLastContainerScreen(), displaySupplier.get());
-        super.draw(mouseX, mouseY, partialTicks);
+        super.render(mouseX, mouseY, partialTicks);
     }
     
     @Override

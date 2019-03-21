@@ -51,11 +51,11 @@ public class CreditsScreen extends Screen {
     }
     
     @Override
-    public void draw(int int_1, int int_2, float float_1) {
+    public void render(int int_1, int int_2, float float_1) {
         this.drawTextureBackground(0);
-        this.entryListWidget.draw(int_1, int_2, float_1);
+        this.entryListWidget.render(int_1, int_2, float_1);
         this.drawStringCentered(this.fontRenderer, I18n.translate("text.rei.credits"), this.screenWidth / 2, 16, 16777215);
-        super.draw(int_1, int_2, float_1);
+        super.render(int_1, int_2, float_1);
     }
     
 }

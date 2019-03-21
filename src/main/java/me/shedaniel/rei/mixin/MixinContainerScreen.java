@@ -67,4 +67,15 @@ public class MixinContainerScreen extends Screen implements ContainerScreenHooks
         }
     }
     
+    // TODO: Make this use an event when Cloth mixin issues are fixed
+    @Override
+    public boolean charTyped(char char_1, int int_1) {
+        if (!(MinecraftClient.getInstance().currentScreen instanceof CreativePlayerInventoryScreen)) {
+            if (ScreenHelper.getLastOverlay().charTyped(char_1, int_1)) {
+                return true;
+            }
+        }
+        return super.charTyped(char_1, int_1);
+    }
+    
 }

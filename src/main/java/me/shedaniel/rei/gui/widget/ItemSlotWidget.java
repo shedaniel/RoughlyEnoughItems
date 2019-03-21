@@ -2,7 +2,7 @@ package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
-import me.shedaniel.cloth.ClothInitializer;
+import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
@@ -59,7 +59,7 @@ public class ItemSlotWidget extends HighlightableWidget {
     }
     
     @Override
-    public void draw(int mouseX, int mouseY, float partialTicks) {
+    public void render(int mouseX, int mouseY, float delta) {
         final ItemStack itemStack = getCurrentStack();
         if (drawBackground) {
             MinecraftClient.getInstance().getTextureManager().bindTexture(RECIPE_GUI);
@@ -83,12 +83,11 @@ public class ItemSlotWidget extends HighlightableWidget {
             itemRenderer.zOffset = 0.0F;
         }
         if (!itemStack.isEmpty() && isHighlighted(mouseX, mouseY) && showToolTips)
-            drawToolTip(itemStack);
+            drawToolTip(itemStack, delta);
     }
     
-    protected void drawToolTip(ItemStack itemStack) {
-        List<String> toolTip = getTooltip(itemStack);
-        ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(toolTip));
+    protected void drawToolTip(ItemStack itemStack, float delta) {
+        ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltip(itemStack)));
     }
     
     protected List<String> getTooltip(ItemStack itemStack) {
@@ -142,7 +141,7 @@ public class ItemSlotWidget extends HighlightableWidget {
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (!clickToMoreRecipes)
             return false;
-        if (getBounds().contains(ClothInitializer.clientUtils.getMouseLocation()))
+        if (getBounds().contains(ClientUtils.getMouseLocation()))
             if (ClientHelper.RECIPE.matchesKey(int_1, int_2))
                 return ClientHelper.executeRecipeKeyBind(getCurrentStack().copy());
             else if (ClientHelper.USAGE.matchesKey(int_1, int_2))

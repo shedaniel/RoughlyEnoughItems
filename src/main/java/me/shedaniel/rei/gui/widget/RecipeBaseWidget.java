@@ -32,8 +32,12 @@ public class RecipeBaseWidget extends HighlightableWidget {
         return Collections.emptyList();
     }
     
+    public void render() {
+        render(0, 0, 0);
+    }
+    
     @Override
-    public void draw(int mouseX, int mouseY, float delta) {
+    public void render(int mouseX, int mouseY, float delta) {
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GuiLighting.disable();
         MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);

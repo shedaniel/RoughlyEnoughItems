@@ -72,6 +72,8 @@
   "text.rei.next_category": "Next Category",
   "text.rei.previous_page": "Previous Page",
   "text.rei.next_page": "Next Page",
+  "text.rei.config.prefer_visible_recipes": "Prefer Visible Recipes",
+  "text.rei.config.title": "Roughly Enough Items Config",
   "_comment": "Don't change / translate the credit down below if you are doing it :)",
   "text.rei.credit.text": "§lRoughly Enough Items\n§7Originally a fork for Almost Enough Items.\n\n§lDevelopers\n  - Originally by ZenDarva\n  - Created by Danielshe\n  - Plugin Support by TehNut\n\n§lLanguage Translation\n  English - Danielshe\n  Simplified Chinese - Danielshe\n  Traditional Chinese - hugoalh & Danielshe\n  French - Yanis48\n  German - MelanX\n  Estonian - Madis0\n  Portuguese - thiagokenis\n  LOLCAT - Danielshe\n  Upside Down - Danielshe\n\n§lLicense\n§7Roughly Enough Items is using MIT."
 }

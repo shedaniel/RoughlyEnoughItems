@@ -1,5 +1,6 @@
 package me.shedaniel.rei.api;
 
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.Widget;
@@ -26,7 +27,7 @@ public interface RecipeCategory<T extends RecipeDisplay> {
     }
     
     default void drawCategoryBackground(Rectangle bounds, int mouseX, int mouseY, float delta) {
-        new RecipeBaseWidget(bounds).draw(mouseX, mouseY, delta);
+        new RecipeBaseWidget(bounds).render();
         DrawableHelper.drawRect(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, RecipeViewingScreen.SUB_COLOR.getRGB());
         DrawableHelper.drawRect(bounds.x + 17, bounds.y + 21, bounds.x + bounds.width - 17, bounds.y + 33, RecipeViewingScreen.SUB_COLOR.getRGB());
     }
@@ -48,6 +49,14 @@ public interface RecipeCategory<T extends RecipeDisplay> {
                 return 99;
             }
         };
+    }
+    
+    default boolean canDisplay(RecipeDisplay display) {
+        if (getDisplaySettings().canDisplay(display) == DisplaySettings.VisableType.ALWAYS)
+            return true;
+        if (getDisplaySettings().canDisplay(display) == DisplaySettings.VisableType.NEVER)
+            return false;
+        return RoughlyEnoughItemsCore.getConfigManager().getConfig().preferVisibleRecipes;
     }
     
     default int getDisplayHeight() {

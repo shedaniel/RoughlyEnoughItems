@@ -15,6 +15,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -25,6 +26,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -98,6 +100,16 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
         } else {
             RoughlyEnoughItemsCore.LOGGER.fatal("[REI] Cloth NOT found! It is a dependency of REI: https://minecraft.curseforge.com/projects/cloth");
             System.exit(0);
+        }
+        
+        if (!FabricLoader.getInstance().isModLoaded("modmenu")) {
+            try {
+                Class<?> modMenuApi_ = Class.forName("io.github.prospector.modmenu.api.ModMenuApi");
+                Method addConfigOverride_ = modMenuApi_.getMethod("addConfigOverride", String.class, Runnable.class);
+                addConfigOverride_.invoke(null, "roughlyenoughitems", (Runnable) () -> getConfigManager().openConfigScreen(MinecraftClient.getInstance().currentScreen));
+            } catch (Exception e) {
+                RoughlyEnoughItemsCore.LOGGER.error("Error enabling the Mod Menu config button for Hwyla", e);
+            }
         }
     }
     

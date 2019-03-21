@@ -34,7 +34,7 @@ public class LabelWidget extends HighlightableWidget {
     }
     
     @Override
-    public void draw(int mouseX, int mouseY, float partialTicks) {
+    public void render(int mouseX, int mouseY, float partialTicks) {
         drawStringCentered(textRenderer, text, x, y, -1);
     }
     

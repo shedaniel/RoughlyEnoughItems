@@ -2,7 +2,7 @@ package me.shedaniel.rei.gui;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
-import me.shedaniel.cloth.ClothInitializer;
+import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.ClientHelper;
@@ -86,7 +86,7 @@ public class RecipeViewingScreen extends Screen {
         }
         if (int_1 == 258) {
             if (isShiftPressed())
-                this.method_19354();
+                this.focusPrevious();
             else
                 this.focusNext();
             return true;
@@ -137,9 +137,9 @@ public class RecipeViewingScreen extends Screen {
         });
         widgets.add(new ClickableLabelWidget((int) bounds.getCenterX(), (int) bounds.getY() + 7, "") {
             @Override
-            public void draw(int mouseX, int mouseY, float partialTicks) {
+            public void render(int mouseX, int mouseY, float partialTicks) {
                 this.text = selectedCategory.getCategoryName();
-                super.draw(mouseX, mouseY, partialTicks);
+                super.render(mouseX, mouseY, partialTicks);
                 if (isHighlighted(mouseX, mouseY))
                     ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.view_all_categories").split("\n")));
                 else if (focused)
@@ -189,9 +189,9 @@ public class RecipeViewingScreen extends Screen {
         });
         widgets.add(new ClickableLabelWidget((int) bounds.getCenterX(), (int) bounds.getY() + 23, "") {
             @Override
-            public void draw(int mouseX, int mouseY, float partialTicks) {
+            public void render(int mouseX, int mouseY, float partialTicks) {
                 this.text = String.format("%d/%d", page + 1, getTotalPages(selectedCategory));
-                super.draw(mouseX, mouseY, partialTicks);
+                super.render(mouseX, mouseY, partialTicks);
                 if (isHighlighted(mouseX, mouseY))
                     ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.choose_page").split("\n")));
                 else if (focused)
@@ -306,33 +306,33 @@ public class RecipeViewingScreen extends Screen {
     }
     
     @Override
-    public void draw(int mouseX, int mouseY, float delta) {
+    public void render(int mouseX, int mouseY, float delta) {
         this.drawGradientRect(0, 0, this.screenWidth, this.screenHeight, -1072689136, -804253680);
         if (selectedCategory != null)
             selectedCategory.drawCategoryBackground(bounds, mouseX, mouseY, delta);
         else {
-            new RecipeBaseWidget(bounds).draw(mouseX, mouseY, delta);
+            new RecipeBaseWidget(bounds).render();
             drawRect(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, SUB_COLOR.getRGB());
             drawRect(bounds.x + 17, bounds.y + 21, bounds.x + bounds.width - 17, bounds.y + 33, SUB_COLOR.getRGB());
         }
         tabs.stream().filter(tabWidget -> {
             return !tabWidget.isSelected();
-        }).forEach(tabWidget -> tabWidget.draw(mouseX, mouseY, delta));
+        }).forEach(tabWidget -> tabWidget.render(mouseX, mouseY, delta));
         GuiLighting.disable();
-        super.draw(mouseX, mouseY, delta);
+        super.render(mouseX, mouseY, delta);
         widgets.forEach(widget -> {
             GuiLighting.disable();
-            widget.draw(mouseX, mouseY, delta);
+            widget.render(mouseX, mouseY, delta);
         });
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GuiLighting.disable();
-        tabs.stream().filter(TabWidget::isSelected).forEach(tabWidget -> tabWidget.draw(mouseX, mouseY, delta));
+        tabs.stream().filter(TabWidget::isSelected).forEach(tabWidget -> tabWidget.render(mouseX, mouseY, delta));
         ScreenHelper.getLastOverlay().drawOverlay(mouseX, mouseY, delta);
         if (choosePageActivated) {
             zOffset = 500.0f;
             this.drawGradientRect(0, 0, this.screenWidth, this.screenHeight, -1072689136, -804253680);
             zOffset = 0.0f;
-            recipeChoosePageWidget.draw(mouseX, mouseY, delta);
+            recipeChoosePageWidget.render(mouseX, mouseY, delta);
         }
     }
     
@@ -382,13 +382,13 @@ public class RecipeViewingScreen extends Screen {
         for(InputListener listener : listeners)
             if (listener.mouseScrolled(i, j, amount))
                 return true;
-        if (getBounds().contains(ClothInitializer.clientUtils.getMouseLocation())) {
+        if (getBounds().contains(ClientUtils.getMouseLocation())) {
             if (amount > 0 && recipeBack.enabled)
                 recipeBack.onPressed();
             else if (amount < 0 && recipeNext.enabled)
                 recipeNext.onPressed();
         }
-        if ((new Rectangle(bounds.x, bounds.y - 28, bounds.width, 28)).contains(ClothInitializer.clientUtils.getMouseLocation())) {
+        if ((new Rectangle(bounds.x, bounds.y - 28, bounds.width, 28)).contains(ClientUtils.getMouseLocation())) {
             if (amount > 0 && categoryBack.enabled)
                 categoryBack.onPressed();
             else if (amount < 0 && categoryNext.enabled)

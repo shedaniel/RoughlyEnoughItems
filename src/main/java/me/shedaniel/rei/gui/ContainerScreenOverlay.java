@@ -2,7 +2,7 @@ package me.shedaniel.rei.gui;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
-import me.shedaniel.cloth.ClothInitializer;
+import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.ScreenHelper;
@@ -77,7 +77,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
             }
             
             @Override
-            public void setHasFocus(boolean boolean_1) {
+            public void onFocusChanged(boolean boolean_1) {
             }
         });
         widgets.add(buttonRight = new ButtonWidget(rectangle.x + rectangle.width - 18, rectangle.y + 5, 16, 16, new TranslatableTextComponent("text.rei.right_arrow")) {
@@ -95,7 +95,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
             }
             
             @Override
-            public void setHasFocus(boolean boolean_1) {
+            public void onFocusChanged(boolean boolean_1) {
             }
         });
         if (setPage)
@@ -107,12 +107,12 @@ public class ContainerScreenOverlay extends ScreenComponent {
                     ClientHelper.setCheating(!ClientHelper.isCheating());
                     return;
                 }
-                ClientHelper.openConfigWindow(ScreenHelper.getLastContainerScreen());
+                RoughlyEnoughItemsCore.getConfigManager().openConfigScreen(ScreenHelper.getLastContainerScreen());
             }
             
             @Override
-            public void draw(int mouseX, int mouseY, float partialTicks) {
-                super.draw(mouseX, mouseY, partialTicks);
+            public void render(int mouseX, int mouseY, float partialTicks) {
+                super.render(mouseX, mouseY, partialTicks);
                 GuiLighting.disable();
                 if (ClientHelper.isCheating())
                     drawRect(getBounds().x, getBounds().y, getBounds().x + 20, getBounds().y + 20, new Color(255, 0, 0, 42).getRGB());
@@ -133,7 +133,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
             }
             
             @Override
-            public void setHasFocus(boolean boolean_1) {
+            public void onFocusChanged(boolean boolean_1) {
             }
         });
         if (RoughlyEnoughItemsCore.getConfigManager().getConfig().showUtilsButtons) {
@@ -144,9 +144,9 @@ public class ContainerScreenOverlay extends ScreenComponent {
                 }
                 
                 @Override
-                public void draw(int mouseX, int mouseY, float partialTicks) {
+                public void render(int mouseX, int mouseY, float partialTicks) {
                     text = getGameModeShortText(getCurrentGameMode());
-                    super.draw(mouseX, mouseY, partialTicks);
+                    super.render(mouseX, mouseY, partialTicks);
                 }
                 
                 @Override
@@ -155,7 +155,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
                 }
                 
                 @Override
-                public void setHasFocus(boolean boolean_1) {
+                public void onFocusChanged(boolean boolean_1) {
                 }
             });
             widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? window.getScaledWidth() - 80 : 60, 10, 20, 20, "") {
@@ -165,8 +165,8 @@ public class ContainerScreenOverlay extends ScreenComponent {
                 }
                 
                 @Override
-                public void draw(int mouseX, int mouseY, float partialTicks) {
-                    super.draw(mouseX, mouseY, partialTicks);
+                public void render(int mouseX, int mouseY, float partialTicks) {
+                    super.render(mouseX, mouseY, partialTicks);
                     GuiLighting.disable();
                     MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
                     GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
@@ -179,16 +179,16 @@ public class ContainerScreenOverlay extends ScreenComponent {
                 }
                 
                 @Override
-                public void setHasFocus(boolean boolean_1) {
+                public void onFocusChanged(boolean boolean_1) {
                 }
             });
         }
         widgets.add(new ClickableLabelWidget(rectangle.x + (rectangle.width / 2), rectangle.y + 10, "") {
             @Override
-            public void draw(int mouseX, int mouseY, float partialTicks) {
+            public void render(int mouseX, int mouseY, float partialTicks) {
                 page = MathHelper.clamp(page, 0, getTotalPage());
                 this.text = String.format("%s/%s", page + 1, getTotalPage() + 1);
-                super.draw(mouseX, mouseY, partialTicks);
+                super.render(mouseX, mouseY, partialTicks);
                 if (isHighlighted(mouseX, mouseY))
                     addTooltip(QueuedTooltip.create(I18n.translate("text.rei.go_back_first_page").split("\n")));
                 else if (focused)
@@ -203,7 +203,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
             }
             
             @Override
-            public void setHasFocus(boolean boolean_1) {
+            public void onFocusChanged(boolean boolean_1) {
             }
         });
         if (ScreenHelper.searchField == null)
@@ -325,7 +325,11 @@ public class ContainerScreenOverlay extends ScreenComponent {
         GuiLighting.disable();
         Screen currentScreen = MinecraftClient.getInstance().currentScreen;
         if (!(currentScreen instanceof RecipeViewingScreen) || !((RecipeViewingScreen) currentScreen).choosePageActivated)
-            QUEUED_TOOLTIPS.stream().filter(queuedTooltip -> queuedTooltip != null).forEach(queuedTooltip -> MinecraftClient.getInstance().currentScreen.drawTooltip(queuedTooltip.getText(), queuedTooltip.getLocation().x, queuedTooltip.getLocation().y));
+            QUEUED_TOOLTIPS.stream().filter(queuedTooltip -> queuedTooltip != null).forEach(queuedTooltip -> {
+                GlStateManager.translatef(0, 0, 600);
+                MinecraftClient.getInstance().currentScreen.drawTooltip(queuedTooltip.getText(), queuedTooltip.getLocation().x, queuedTooltip.getLocation().y);
+                GlStateManager.translatef(0, 0, -600);
+            });
         QUEUED_TOOLTIPS.clear();
         GuiLighting.disable();
     }
@@ -356,7 +360,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
         buttonRight.enabled = itemListOverlay.getWidgets().size() > 0;
         widgets.forEach(widget -> {
             GuiLighting.disable();
-            widget.draw(int_1, int_2, float_1);
+            widget.render(int_1, int_2, float_1);
         });
         GuiLighting.disable();
     }
@@ -393,7 +397,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
     public boolean mouseScrolled(double i, double j, double amount) {
         if (!ScreenHelper.isOverlayVisible())
             return false;
-        if (rectangle.contains(ClothInitializer.clientUtils.getMouseLocation())) {
+        if (rectangle.contains(ClientUtils.getMouseLocation())) {
             if (amount > 0 && buttonLeft.enabled)
                 buttonLeft.onPressed();
             else if (amount < 0 && buttonRight.enabled)
@@ -420,7 +424,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
         }
         if (!ScreenHelper.isOverlayVisible())
             return false;
-        Point point = ClothInitializer.clientUtils.getMouseLocation();
+        Point point = ClientUtils.getMouseLocation();
         ItemStack itemStack = null;
         if (MinecraftClient.getInstance().currentScreen instanceof ContainerScreen)
             if (ScreenHelper.getLastContainerScreenHooks().rei_getHoveredSlot() != null && !ScreenHelper.getLastContainerScreenHooks().rei_getHoveredSlot().getStack().isEmpty())

@@ -15,7 +15,7 @@ import java.awt.*;
 
 public abstract class CraftableToggleButtonWidget extends ButtonWidget {
     
-    protected static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
+    public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private ItemRenderer itemRenderer;
     
     public CraftableToggleButtonWidget(Rectangle rectangle) {
@@ -28,9 +28,9 @@ public abstract class CraftableToggleButtonWidget extends ButtonWidget {
     }
     
     @Override
-    public void draw(int mouseX, int mouseY, float partialTicks) {
+    public void render(int mouseX, int mouseY, float partialTicks) {
         GuiLighting.disable();
-        super.draw(mouseX, mouseY, partialTicks);
+        super.render(mouseX, mouseY, partialTicks);
         
         GuiLighting.enableForItems();
         this.itemRenderer.zOffset = 0.0F;

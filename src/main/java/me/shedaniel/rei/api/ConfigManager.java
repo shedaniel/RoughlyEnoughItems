@@ -1,6 +1,7 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.client.ConfigObject;
+import net.minecraft.client.gui.Screen;
 
 import java.io.IOException;
 
@@ -15,5 +16,7 @@ public interface ConfigManager {
     boolean isCraftableOnlyEnabled();
     
     void toggleCraftableOnly();
+    
+    void openConfigScreen(Screen parent);
     
 }

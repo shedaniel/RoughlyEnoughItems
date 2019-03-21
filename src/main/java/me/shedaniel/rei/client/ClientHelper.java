@@ -7,7 +7,6 @@ import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
-import me.shedaniel.rei.gui.config.ConfigScreen;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
@@ -16,7 +15,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Screen;
 import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.item.ItemStack;
@@ -108,14 +106,6 @@ public class ClientHelper implements ClientModInitializer {
         if (map.keySet().size() > 0)
             MinecraftClient.getInstance().openScreen(new RecipeViewingScreen(MinecraftClient.getInstance().window, map));
         return map.keySet().size() > 0;
-    }
-    
-    public static void openConfigWindow(Screen parent, boolean initOverlay) {
-        MinecraftClient.getInstance().openScreen(new ConfigScreen(parent, initOverlay));
-    }
-    
-    public static void openConfigWindow(Screen parent) {
-        openConfigWindow(parent, true);
     }
     
     public static List<ItemStack> getInventoryItemsTypes() {
