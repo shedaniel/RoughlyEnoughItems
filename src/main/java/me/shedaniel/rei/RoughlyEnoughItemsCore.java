@@ -102,13 +102,13 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
             System.exit(0);
         }
         
-        if (!FabricLoader.getInstance().isModLoaded("modmenu")) {
+        if (FabricLoader.getInstance().isModLoaded("modmenu")) {
             try {
-                Class<?> modMenuApi_ = Class.forName("io.github.prospector.modmenu.api.ModMenuApi");
-                Method addConfigOverride_ = modMenuApi_.getMethod("addConfigOverride", String.class, Runnable.class);
-                addConfigOverride_.invoke(null, "roughlyenoughitems", (Runnable) () -> getConfigManager().openConfigScreen(MinecraftClient.getInstance().currentScreen));
+                Class<?> clazz = Class.forName("io.github.prospector.modmenu.api.ModMenuApi");
+                Method method = clazz.getMethod("addConfigOverride", String.class, Runnable.class);
+                method.invoke(null, "roughlyenoughitems", (Runnable) () -> getConfigManager().openConfigScreen(MinecraftClient.getInstance().currentScreen));
             } catch (Exception e) {
-                RoughlyEnoughItemsCore.LOGGER.error("Error enabling the Mod Menu config button for Hwyla", e);
+                RoughlyEnoughItemsCore.LOGGER.error("[REI] Failed to add config override for ModMenu!", e);
             }
         }
     }

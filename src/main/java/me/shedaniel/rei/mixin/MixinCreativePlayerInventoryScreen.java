@@ -28,7 +28,7 @@ public abstract class MixinCreativePlayerInventoryScreen extends AbstractPlayerI
     @Shadow
     protected abstract boolean doRenderScrollBar();
     
-    @Inject(method = "mouseScrolled", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "mouseScrolled", at = @At("HEAD"), cancellable = true, remap = false)
     public void mouseScrolled(double i, double j, double amount, CallbackInfoReturnable<Boolean> ci) {
         if (!doRenderScrollBar() && selectedTab == ItemGroup.INVENTORY.getIndex())
             if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().getRectangle().contains(ClientUtils.getMouseLocation()) && ScreenHelper.getLastOverlay().mouseScrolled(i, j, amount)) {
@@ -37,7 +37,7 @@ public abstract class MixinCreativePlayerInventoryScreen extends AbstractPlayerI
             }
     }
     
-    @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true, remap = false)
     public void keyPressed(int int_1, int int_2, int int_3, CallbackInfoReturnable<Boolean> ci) {
         if (selectedTab == ItemGroup.INVENTORY.getIndex())
             if (ScreenHelper.getLastOverlay().keyPressed(int_1, int_2, int_3)) {
@@ -46,7 +46,7 @@ public abstract class MixinCreativePlayerInventoryScreen extends AbstractPlayerI
             }
     }
     
-    @Inject(method = "charTyped", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "charTyped", at = @At("HEAD"), cancellable = true, remap = false)
     public void charTyped(char char_1, int int_1, CallbackInfoReturnable<Boolean> ci) {
         if (!this.field_2888 && selectedTab == ItemGroup.INVENTORY.getIndex())
             if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().charTyped(char_1, int_1)) {
@@ -55,7 +55,7 @@ public abstract class MixinCreativePlayerInventoryScreen extends AbstractPlayerI
             }
     }
     
-    @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true, remap = false)
     public void mouseClicked(double i, double j, int k, CallbackInfoReturnable<Boolean> ci) {
         if (selectedTab == ItemGroup.INVENTORY.getIndex())
             if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().mouseClicked(i, j, k)) {

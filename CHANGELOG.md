@@ -1,4 +1,4 @@
-# v2.5.0.70
+# v2.5.0.71
 - Removed mouseScrolled Override in mixins
 - Added spectator mode in gamemode switcher
 - Gamemodes & Weather are now translatable: [#47](https://github.com/shedaniel/RoughlyEnoughItems/issues/47)
