@@ -43,8 +43,8 @@ public class DefaultCraftingCategory implements RecipeCategory<DefaultCraftingDi
         Point startPoint = new Point((int) bounds.getCenterX() - 58, (int) bounds.getCenterY() - 27);
         List<Widget> widgets = new LinkedList<>(Arrays.asList(new RecipeBaseWidget(bounds) {
             @Override
-            public void draw(int mouseX, int mouseY, float partialTicks) {
-                super.draw(mouseX, mouseY, partialTicks);
+            public void render(int mouseX, int mouseY, float partialTicks) {
+                super.render(mouseX, mouseY, partialTicks);
                 GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                 GuiLighting.disable();
                 MinecraftClient.getInstance().getTextureManager().bindTexture(DISPLAY_TEXTURE);

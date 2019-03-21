@@ -89,7 +89,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
             }
             
             @Override
-            public void draw(int i, int i1, float v) {
+            public void render(int i, int i1, float v) {
                 MinecraftClient.getInstance().textRenderer.draw(I18n.translate("text.rei.choose_page"), bounds.x + 5, bounds.y + 5, 4210752);
                 String endString = String.format(" /%d", maxPage);
                 int width = MinecraftClient.getInstance().textRenderer.getStringWidth(endString);
@@ -135,12 +135,12 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     }
     
     @Override
-    public void draw(int i, int i1, float v) {
+    public void render(int i, int i1, float v) {
         widgets.forEach(widget -> {
             GuiLighting.disable();
-            GlStateManager.translatef(0, 0, 600);
-            widget.draw(i, i1, v);
-            GlStateManager.translatef(0, 0, -600);
+            GlStateManager.translatef(0, 0, 800);
+            widget.render(i, i1, v);
+            GlStateManager.translatef(0, 0, -800);
         });
     }
     

@@ -31,7 +31,7 @@ public class ConfigObject {
     @Comment("True: item panel on the left, false: on the right")
     public boolean mirrorItemPanel = false;
     
-    @Comment("To disable REI's defualt plugin, don't change this unless you understand what you are doing")
+    @Comment("To disable REI's default plugin, don't change this unless you understand what you are doing")
     public boolean loadDefaultPlugin = true;
     
     @Comment("Maximum recipes viewed at one time.")
@@ -42,6 +42,8 @@ public class ConfigObject {
     
     @Comment("Disable Recipe Book")
     public boolean disableRecipeBook = false;
+    
+    public boolean preferVisibleRecipes = false;
     
     @Comment("The location of choose page dialog")
     public RelativePoint choosePageDialogPoint = new RelativePoint(.5, .5);

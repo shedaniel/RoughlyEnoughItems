@@ -7,7 +7,7 @@ public class CreditsEntryListWidget extends EntryListWidget<CreditsEntry> {
     
     public CreditsEntryListWidget(MinecraftClient client, int width, int height, int startY, int endY, int entryHeight) {
         super(client, width, height, startY, endY, entryHeight);
-        method_1943(false); //toggleShowSelection
+        setRenderSelection(false); //toggleShowSelection
     }
     
     public void creditsClearEntries() {

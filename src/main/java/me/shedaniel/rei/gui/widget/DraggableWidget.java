@@ -1,6 +1,6 @@
 package me.shedaniel.rei.gui.widget;
 
-import me.shedaniel.cloth.ClothInitializer;
+import me.shedaniel.cloth.api.ClientUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.InputListener;
 import net.minecraft.client.util.Window;
@@ -9,7 +9,7 @@ import java.awt.*;
 
 public abstract class DraggableWidget extends HighlightableWidget {
     
-    protected boolean dragged = false;
+    public boolean dragged = false;
     private Point midPoint, startPoint;
     private int relateX, relateY;
     
@@ -35,7 +35,7 @@ public abstract class DraggableWidget extends HighlightableWidget {
     
     @Override
     public boolean mouseDragged(double double_1, double double_2, int int_1, double double_3, double double_4) {
-        Point mouse = ClothInitializer.clientUtils.getMouseLocation();
+        Point mouse = ClientUtils.getMouseLocation();
         if (int_1 == 0) {
             if (!dragged) {
                 if (getGrabBounds().contains(mouse)) {

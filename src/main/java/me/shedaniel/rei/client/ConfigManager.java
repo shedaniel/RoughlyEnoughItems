@@ -4,8 +4,18 @@ import blue.endless.jankson.Jankson;
 import blue.endless.jankson.JsonObject;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import javafx.util.Pair;
+import me.shedaniel.cloth.api.ConfigScreenBuilder;
+import me.shedaniel.cloth.gui.ClothConfigScreen;
+import me.shedaniel.cloth.gui.entries.BooleanListEntry;
+import me.shedaniel.cloth.gui.entries.IntegerListEntry;
+import me.shedaniel.cloth.gui.entries.StringListEntry;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.gui.config.ItemListOrderingEntry;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Screen;
+import net.minecraft.client.resource.language.I18n;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -116,6 +126,34 @@ public class ConfigManager implements me.shedaniel.rei.api.ConfigManager {
     @Override
     public void toggleCraftableOnly() {
         craftableOnly = !craftableOnly;
+    }
+    
+    @Override
+    public void openConfigScreen(Screen parent) {
+        ClothConfigScreen.Builder builder = new ClothConfigScreen.Builder(parent, I18n.translate("text.rei.config.title"), null);
+        builder.addCategory(I18n.translate("text.rei.config.general")).addOption(new BooleanListEntry("text.rei.config.cheating", config.cheating, bool -> config.cheating = bool));
+        ConfigScreenBuilder.CategoryBuilder appearance = builder.addCategory(I18n.translate("text.rei.config.appearance"));
+        appearance.addOption(new BooleanListEntry("text.rei.config.side_search_box", config.sideSearchField, bool -> config.sideSearchField = bool));
+        appearance.addOption(new ItemListOrderingEntry("text.rei.config.list_ordering", new Pair<>(config.itemListOrdering, config.isAscending)));
+        appearance.addOption(new BooleanListEntry("text.rei.config.mirror_rei", config.mirrorItemPanel, bool -> config.mirrorItemPanel = bool));
+        appearance.addOption(new IntegerListEntry("text.rei.config.max_recipes_per_page", config.maxRecipePerPage, i -> config.maxRecipePerPage = i).setMinimum(2).setMaximum(99));
+        ConfigScreenBuilder.CategoryBuilder modules = builder.addCategory(I18n.translate("text.rei.config.modules"));
+        modules.addOption(new BooleanListEntry("text.rei.config.enable_craftable_only", config.enableCraftableOnlyButton, bool -> config.enableCraftableOnlyButton = bool));
+        modules.addOption(new BooleanListEntry("text.rei.config.enable_util_buttons", config.showUtilsButtons, bool -> config.showUtilsButtons = bool));
+        modules.addOption(new BooleanListEntry("text.rei.config.disable_recipe_book", config.disableRecipeBook, bool -> config.disableRecipeBook = bool));
+        ConfigScreenBuilder.CategoryBuilder advanced = builder.addCategory(I18n.translate("text.rei.config.advanced"));
+        advanced.addOption(new StringListEntry("text.rei.give_command", config.giveCommand, s -> config.giveCommand = s));
+        advanced.addOption(new StringListEntry("text.rei.gamemode_command", config.gamemodeCommand, s -> config.gamemodeCommand = s));
+        advanced.addOption(new StringListEntry("text.rei.weather_command", config.weatherCommand, s -> config.weatherCommand = s));
+        advanced.addOption(new BooleanListEntry("text.rei.config.prefer_visible_recipes", config.preferVisibleRecipes, bool -> config.preferVisibleRecipes = bool));
+        builder.setOnSave(savedConfig -> {
+            try {
+                ConfigManager.this.saveConfig();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        MinecraftClient.getInstance().openScreen(builder.build());
     }
     
 }

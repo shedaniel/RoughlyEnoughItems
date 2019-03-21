@@ -81,7 +81,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         Map<RecipeCategory, List<RecipeDisplay>> recipeCategoryListMap = Maps.newLinkedHashMap();
         categories.forEach(category -> {
             if (categoriesMap.containsKey(category.getIdentifier()) && !categoriesMap.get(category.getIdentifier()).isEmpty())
-                recipeCategoryListMap.put(category, categoriesMap.get(category.getIdentifier()));
+                recipeCategoryListMap.put(category, categoriesMap.get(category.getIdentifier()).stream().filter(display -> category.canDisplay(display)).collect(Collectors.toList()));
         });
         return recipeCategoryListMap;
     }
@@ -119,7 +119,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         Map<RecipeCategory, List<RecipeDisplay>> recipeCategoryListMap = Maps.newLinkedHashMap();
         categories.forEach(category -> {
             if (categoriesMap.containsKey(category.getIdentifier()) && !categoriesMap.get(category.getIdentifier()).isEmpty())
-                recipeCategoryListMap.put(category, categoriesMap.get(category.getIdentifier()));
+                recipeCategoryListMap.put(category, categoriesMap.get(category.getIdentifier()).stream().filter(display -> category.canDisplay(display)).collect(Collectors.toList()));
         });
         return recipeCategoryListMap;
     }
@@ -200,7 +200,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         recipeCategoryListMap.forEach((identifier, recipeDisplays) -> tempMap.put(identifier, new LinkedList<>(recipeDisplays)));
         categories.forEach(category -> {
             if (tempMap.containsKey(category.getIdentifier()))
-                map.put(category, tempMap.get(category.getIdentifier()));
+                map.put(category, tempMap.get(category.getIdentifier()).stream().filter(display -> category.canDisplay(display)).collect(Collectors.toList()));
         });
         return map;
     }

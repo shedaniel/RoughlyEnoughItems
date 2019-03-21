@@ -27,3 +27,5 @@ Thumbs.db
 .DS_Store
 
 secret\.properties
+
+local\.properties

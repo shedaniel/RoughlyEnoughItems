@@ -336,6 +336,7 @@ public class TextFieldWidget extends HighlightableWidget {
         }
     }
     
+    @Override
     public boolean charTyped(char char_1, int int_1) {
         if (this.isVisible() && this.isFocused()) {
             if (SharedConstants.isValidChar(char_1)) {
@@ -381,7 +382,7 @@ public class TextFieldWidget extends HighlightableWidget {
         }
     }
     
-    public void draw(int int_1, int int_2, float float_1) {
+    public void render(int int_1, int int_2, float float_1) {
         if (this.isVisible()) {
             if (this.hasBorder()) {
                 drawRect(this.bounds.x - 1, this.bounds.y - 1, this.bounds.x + this.bounds.width + 1, this.bounds.y + this.bounds.height + 1, -6250336);
@@ -523,11 +524,12 @@ public class TextFieldWidget extends HighlightableWidget {
         this.notEditableColor = int_1;
     }
     
-    public void setHasFocus(boolean boolean_1) {
+    public void onFocusChanged(boolean boolean_1) {
         this.setFocused(boolean_1);
     }
     
-    public boolean hasFocus() {
+    @Override
+    public boolean isPartOfFocusCycle() {
         return true;
     }
     

@@ -1,7 +1,7 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.cloth.ClothInitializer;
+import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.client.ClientHelper;
@@ -71,10 +71,10 @@ public class ItemListOverlay extends Widget {
     }
     
     @Override
-    public void draw(int int_1, int int_2, float float_1) {
-        widgets.forEach(widget -> widget.draw(int_1, int_2, float_1));
+    public void render(int int_1, int int_2, float float_1) {
+        widgets.forEach(widget -> widget.render(int_1, int_2, float_1));
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
-        if (rectangle.contains(ClothInitializer.clientUtils.getMouseLocation()) && ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty() && MinecraftClient.getInstance().isInSingleplayer())
+        if (rectangle.contains(ClientUtils.getMouseLocation()) && ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty() && MinecraftClient.getInstance().isInSingleplayer())
             ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.delete_items")));
     }
     
@@ -97,10 +97,10 @@ public class ItemListOverlay extends Widget {
                 break;
             ItemSlotWidget slotWidget = new ItemSlotWidget((int) (startX + (i % width) * 18), (int) (startY + MathHelper.floor(i / width) * 18), Collections.singletonList(currentDisplayed.get(j)), false, true, true) {
                 @Override
-                protected void drawToolTip(ItemStack itemStack) {
+                protected void drawToolTip(ItemStack itemStack, float delta) {
                     ClientPlayerEntity player = MinecraftClient.getInstance().player;
                     if (!ClientHelper.isCheating() || player.inventory.getCursorStack().isEmpty())
-                        super.drawToolTip(itemStack);
+                        super.drawToolTip(itemStack, delta);
                 }
                 
                 @Override

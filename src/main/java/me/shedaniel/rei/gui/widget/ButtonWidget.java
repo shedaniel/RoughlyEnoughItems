@@ -21,7 +21,7 @@ public abstract class ButtonWidget extends HighlightableWidget {
     public String text;
     public boolean enabled;
     public boolean visible;
-    private boolean focused;
+    public boolean focused;
     private Rectangle bounds;
     
     public ButtonWidget(Rectangle rectangle, TextComponent text) {
@@ -59,12 +59,12 @@ public abstract class ButtonWidget extends HighlightableWidget {
     }
     
     @Override
-    public void draw(int mouseX, int mouseY, float partialTicks) {
+    public void render(int mouseX, int mouseY, float partialTicks) {
         if (this.visible) {
             int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;
             MinecraftClient client = MinecraftClient.getInstance();
             TextRenderer textRenderer = client.textRenderer;
-            client.getTextureManager().bindTexture(AbstractButtonWidget.WIDGET_TEX);
+            client.getTextureManager().bindTexture(AbstractButtonWidget.WIDGETS_LOCATION);
             GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             int textureOffset = this.getTextureId(isHovered(mouseX, mouseY));
             GlStateManager.enableBlend();
@@ -107,12 +107,12 @@ public abstract class ButtonWidget extends HighlightableWidget {
     }
     
     @Override
-    public boolean hasFocus() {
+    public boolean isPartOfFocusCycle() {
         return visible && enabled;
     }
     
     @Override
-    public void setHasFocus(boolean boolean_1) {
+    public void onFocusChanged(boolean boolean_1) {
         focused = boolean_1;
     }
     

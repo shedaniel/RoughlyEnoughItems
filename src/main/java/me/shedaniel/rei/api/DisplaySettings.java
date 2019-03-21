@@ -12,4 +12,12 @@ public interface DisplaySettings<T extends RecipeDisplay> {
         return -1;
     }
     
+    default VisableType canDisplay(T display) {
+        return VisableType.ALWAYS;
+    }
+    
+    public static enum VisableType {
+        ALWAYS, PASS, NEVER;
+    }
+    
 }
