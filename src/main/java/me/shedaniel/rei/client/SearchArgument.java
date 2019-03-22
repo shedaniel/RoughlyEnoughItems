@@ -5,6 +5,7 @@ public class SearchArgument {
     private ArgumentType argumentType;
     private String text;
     private boolean include;
+    
     public SearchArgument(ArgumentType argumentType, String text, boolean include) {
         this.argumentType = argumentType;
         this.text = text;
