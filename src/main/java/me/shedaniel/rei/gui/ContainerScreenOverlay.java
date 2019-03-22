@@ -197,7 +197,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
             
             @Override
             public void onLabelClicked() {
-                MinecraftClient.getInstance().getSoundLoader().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 page = 0;
                 itemListOverlay.updateList(getItemListArea(), page, searchTerm);
             }

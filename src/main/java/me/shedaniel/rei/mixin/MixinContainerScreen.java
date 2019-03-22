@@ -9,6 +9,7 @@ import net.minecraft.client.gui.Screen;
 import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
 import net.minecraft.container.Slot;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.text.TextComponent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -28,6 +29,10 @@ public class MixinContainerScreen extends Screen implements ContainerScreenHooks
     protected int height;
     @Shadow
     protected Slot focusedSlot;
+    
+    protected MixinContainerScreen(TextComponent textComponent_1) {
+        super(textComponent_1);
+    }
     
     @Override
     public int rei_getContainerLeft() {

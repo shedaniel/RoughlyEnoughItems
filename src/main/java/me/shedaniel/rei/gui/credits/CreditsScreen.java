@@ -1,18 +1,20 @@
 package me.shedaniel.rei.gui.credits;
 
 import me.shedaniel.rei.client.ScreenHelper;
+import me.shedaniel.rei.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.ContainerScreen;
 import net.minecraft.client.gui.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.StringTextComponent;
 
 public class CreditsScreen extends Screen {
     
     private Screen parent;
+    private ButtonWidget buttonDone;
     private CreditsEntryListWidget entryListWidget;
     
     public CreditsScreen(Screen parent) {
+        super(new StringTextComponent(""));
         this.parent = parent;
     }
     
@@ -34,7 +36,7 @@ public class CreditsScreen extends Screen {
         for(String line : I18n.translate("text.rei.credit.text").split("\n"))
             entryListWidget.creditsAddEntry(new CreditsEntry(new StringTextComponent(line)));
         entryListWidget.creditsAddEntry(new CreditsEntry(new StringTextComponent("")));
-        addButton(new ButtonWidget(screenWidth / 2 - 100, screenHeight - 26, I18n.translate("gui.done")) {
+        listeners.add(buttonDone = new ButtonWidget(screenWidth / 2 - 100, screenHeight - 26, 200, 20, I18n.translate("gui.done")) {
             @Override
             public void onPressed() {
                 CreditsScreen.this.client.openScreen(parent);

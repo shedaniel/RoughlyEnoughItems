@@ -17,6 +17,7 @@ import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.Window;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.StringTextComponent;
 import net.minecraft.text.TranslatableTextComponent;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
@@ -49,6 +50,7 @@ public class RecipeViewingScreen extends Screen {
     private ButtonWidget recipeBack, recipeNext, categoryBack, categoryNext;
     
     public RecipeViewingScreen(Window window, Map<RecipeCategory, List<RecipeDisplay>> categoriesMap) {
+        super(new StringTextComponent(""));
         this.categoryPages = 0;
         this.window = window;
         this.widgets = Lists.newArrayList();
@@ -148,7 +150,7 @@ public class RecipeViewingScreen extends Screen {
             
             @Override
             public void onLabelClicked() {
-                MinecraftClient.getInstance().getSoundLoader().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 ClientHelper.executeViewAllRecipesKeyBind();
             }
         });
@@ -200,7 +202,7 @@ public class RecipeViewingScreen extends Screen {
             
             @Override
             public void onLabelClicked() {
-                MinecraftClient.getInstance().getSoundLoader().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 RecipeViewingScreen.this.choosePageActivated = true;
                 RecipeViewingScreen.this.onInitialized();
             }
@@ -231,7 +233,7 @@ public class RecipeViewingScreen extends Screen {
                     @Override
                     public boolean mouseClicked(double mouseX, double mouseY, int button) {
                         if (getBounds().contains(mouseX, mouseY)) {
-                            MinecraftClient.getInstance().getSoundLoader().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                            MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                             if (getId() + categoryPages * 6 == categories.indexOf(selectedCategory))
                                 return false;
                             selectedCategory = categories.get(getId() + categoryPages * 6);
