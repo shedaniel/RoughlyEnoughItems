@@ -124,7 +124,7 @@ public abstract class ButtonWidget extends HighlightableWidget {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (bounds.contains(mouseX, mouseY) && enabled && button == 0) {
-            MinecraftClient.getInstance().getSoundLoader().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             onPressed();
             return true;
         }
@@ -137,7 +137,7 @@ public abstract class ButtonWidget extends HighlightableWidget {
             if (int_1 != 257 && int_1 != 32 && int_1 != 335) {
                 return false;
             } else {
-                MinecraftClient.getInstance().getSoundLoader().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 this.onPressed();
                 return true;
             }

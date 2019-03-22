@@ -1,3 +1,5 @@
+# v2.5.0.72
+- Updated to 19w12b
 # v2.5.0.71
 - Removed mouseScrolled Override in mixins
 - Added spectator mode in gamemode switcher

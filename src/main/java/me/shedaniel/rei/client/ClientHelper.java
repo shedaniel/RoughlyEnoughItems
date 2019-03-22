@@ -112,7 +112,7 @@ public class ClientHelper implements ClientModInitializer {
         List<DefaultedList<ItemStack>> field_7543 = ImmutableList.of(MinecraftClient.getInstance().player.inventory.main, MinecraftClient.getInstance().player.inventory.armor, MinecraftClient.getInstance().player.inventory.offHand);
         List<ItemStack> inventoryStacks = new ArrayList<>();
         field_7543.forEach(itemStacks -> itemStacks.forEach(itemStack -> {
-            if (!itemStack.getItem().equals(Items.AIR))
+            if (!itemStack.isEmpty())
                 inventoryStacks.add(itemStack);
         }));
         return inventoryStacks;
