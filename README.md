@@ -4,13 +4,14 @@ Roughly Enough Items is a mod to view Items and Recipes for Minecraft 1.13 - 1.1
 ### Downloads
 [Detailed Downloads](https://gist.github.com/shedaniel/fc0742cf96dd4c4cf5d9653ba42ca2d0#roughly-enough-items)
 
+### Dependencies
 1.13's version requires [Rift](https://minecraft.curseforge.com/projects/rift).  
 1.13.2's version requires [Chocohead's Rift Fork](https://github.com/Chocohead/Rift) or [Forge 1.13.2](https://files.minecraftforge.net/maven/net/minecraftforge/forge/index_1.13.2.html).  
 1.14's version requires [Fabric Mod Loader](https://fabricmc.net/), [Cloth API](https://minecraft.curseforge.com/projects/cloth) and [Fabric API](https://minecraft.curseforge.com/projects/fabric). (Optional: [Plugin Loader](https://minecraft.curseforge.com/projects/pluginloader) for loading REI plugins)
 
 ![](https://cdn.discordapp.com/attachments/472670263234920449/536198766118830081/unknown.png)
 
-This mod is completely client side. There is **impossible** to install this mod on a server.  
+This mod is completely client side. It is **impossible** to install this mod on a server.  
 However 1 feature will be disabled:
 - Item Deletion
 
