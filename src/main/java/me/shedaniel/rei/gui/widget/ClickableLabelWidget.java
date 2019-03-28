@@ -16,7 +16,7 @@ public abstract class ClickableLabelWidget extends LabelWidget {
         int colour = -1;
         if (isHovered(mouseX, mouseY))
             colour = hoveredColor;
-        drawStringCentered(textRenderer, (isHovered(mouseX, mouseY) ? "§n" : "") + text, x, y, colour);
+        drawCenteredString(textRenderer, (isHovered(mouseX, mouseY) ? "§n" : "") + text, x, y, colour);
     }
     
     @Override
@@ -48,8 +48,9 @@ public abstract class ClickableLabelWidget extends LabelWidget {
     }
     
     @Override
-    public void onFocusChanged(boolean boolean_1) {
-        focused = boolean_1;
+    public void onFocusChanged(boolean boolean_1, boolean boolean_2) {
+        if (boolean_2)
+            focused = boolean_1;
     }
     
     public abstract void onLabelClicked();

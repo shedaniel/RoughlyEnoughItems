@@ -61,7 +61,7 @@ public class TabWidget extends HighlightableWidget {
     }
     
     @Override
-    public List<Widget> getInputListeners() {
+    public List<Widget> children() {
         return Collections.emptyList();
     }
     
@@ -73,15 +73,15 @@ public class TabWidget extends HighlightableWidget {
             GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             GuiLighting.disable();
             MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
-            this.drawTexturedRect(bounds.x, bounds.y + 2, selected ? 28 : 0, 192, 28, (selected ? 30 : 27));
-            this.zOffset = 100.0F;
+            this.blit(bounds.x, bounds.y + 2, selected ? 28 : 0, 192, 28, (selected ? 30 : 27));
+            this.blitOffset = 100.0F;
             this.itemRenderer.zOffset = 100.0F;
             GuiLighting.enableForItems();
             this.itemRenderer.renderGuiItem(getItemStack(), l, i1);
             this.itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, getItemStack(), l, i1);
             GlStateManager.disableLighting();
             this.itemRenderer.zOffset = 0.0F;
-            this.zOffset = 0.0F;
+            this.blitOffset = 0.0F;
             if (isHighlighted(mouseX, mouseY))
                 drawTooltip();
         }

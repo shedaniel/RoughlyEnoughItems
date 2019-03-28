@@ -42,7 +42,7 @@ public class ItemListOverlay extends Widget {
     public static List<String> tryGetItemStackToolTip(ItemStack itemStack) {
         if (!searchBlacklisted.contains(itemStack.getItem()))
             try {
-                return MinecraftClient.getInstance().currentScreen.getStackTooltip(itemStack);
+                return MinecraftClient.getInstance().currentScreen.getTooltipFromItem(itemStack);
             } catch (Throwable e) {
                 e.printStackTrace();
                 searchBlacklisted.add(itemStack.getItem());
@@ -252,7 +252,7 @@ public class ItemListOverlay extends Widget {
             }
             if (!player.inventory.getCursorStack().isEmpty() && MinecraftClient.getInstance().isInSingleplayer())
                 return false;
-            for(Widget widget : getInputListeners())
+            for(Widget widget : children())
                 if (widget.mouseClicked(double_1, double_2, int_1))
                     return true;
         }
@@ -260,7 +260,7 @@ public class ItemListOverlay extends Widget {
     }
     
     @Override
-    public List<Widget> getInputListeners() {
+    public List<Widget> children() {
         return widgets;
     }
     

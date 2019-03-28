@@ -13,9 +13,7 @@ public class CreditsEntry extends EntryListWidget.Entry<CreditsEntry> {
     }
     
     @Override
-    public void draw(int entryWidth, int height, int i3, int i4, boolean isSelected, float delta) {
-        int x = getX();
-        int y = getY();
+    public void draw(int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
         MinecraftClient.getInstance().textRenderer.drawWithShadow(textComponent.getFormattedText(), x + 5, y + 5, -1);
     }
     

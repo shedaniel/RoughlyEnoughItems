@@ -77,7 +77,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
             }
             
             @Override
-            public void onFocusChanged(boolean boolean_1) {
+            public void onFocusChanged(boolean boolean_1, boolean boolean_2) {
             }
         });
         widgets.add(buttonRight = new ButtonWidget(rectangle.x + rectangle.width - 18, rectangle.y + 5, 16, 16, new TranslatableTextComponent("text.rei.right_arrow")) {
@@ -95,7 +95,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
             }
             
             @Override
-            public void onFocusChanged(boolean boolean_1) {
+            public void onFocusChanged(boolean boolean_1, boolean boolean_2) {
             }
         });
         if (setPage)
@@ -103,7 +103,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
         widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? window.getScaledWidth() - 30 : 10, 10, 20, 20, "") {
             @Override
             public void onPressed() {
-                if (Screen.isShiftPressed()) {
+                if (Screen.hasShiftDown()) {
                     ClientHelper.setCheating(!ClientHelper.isCheating());
                     return;
                 }
@@ -115,10 +115,10 @@ public class ContainerScreenOverlay extends ScreenComponent {
                 super.render(mouseX, mouseY, partialTicks);
                 GuiLighting.disable();
                 if (ClientHelper.isCheating())
-                    drawRect(getBounds().x, getBounds().y, getBounds().x + 20, getBounds().y + 20, new Color(255, 0, 0, 42).getRGB());
+                    fill(getBounds().x, getBounds().y, getBounds().x + 20, getBounds().y + 20, new Color(255, 0, 0, 42).getRGB());
                 MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
                 GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-                drawTexturedRect(getBounds().x + 3, getBounds().y + 3, 0, 0, 14, 14);
+                blit(getBounds().x + 3, getBounds().y + 3, 0, 0, 14, 14);
             }
             
             @Override
@@ -133,7 +133,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
             }
             
             @Override
-            public void onFocusChanged(boolean boolean_1) {
+            public void onFocusChanged(boolean boolean_1, boolean boolean_2) {
             }
         });
         if (RoughlyEnoughItemsCore.getConfigManager().getConfig().showUtilsButtons) {
@@ -155,7 +155,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
                 }
                 
                 @Override
-                public void onFocusChanged(boolean boolean_1) {
+                public void onFocusChanged(boolean boolean_1, boolean boolean_2) {
                 }
             });
             widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? window.getScaledWidth() - 80 : 60, 10, 20, 20, "") {
@@ -170,7 +170,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
                     GuiLighting.disable();
                     MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
                     GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-                    drawTexturedRect(getBounds().x + 3, getBounds().y + 3, getCurrentWeather().getId() * 14, 14, 14, 14);
+                    blit(getBounds().x + 3, getBounds().y + 3, getCurrentWeather().getId() * 14, 14, 14, 14);
                 }
                 
                 @Override
@@ -179,7 +179,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
                 }
                 
                 @Override
-                public void onFocusChanged(boolean boolean_1) {
+                public void onFocusChanged(boolean boolean_1, boolean boolean_2) {
                 }
             });
         }
@@ -203,7 +203,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
             }
             
             @Override
-            public void onFocusChanged(boolean boolean_1) {
+            public void onFocusChanged(boolean boolean_1, boolean boolean_2) {
             }
         });
         if (ScreenHelper.searchField == null)
@@ -327,7 +327,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
         if (!(currentScreen instanceof RecipeViewingScreen) || !((RecipeViewingScreen) currentScreen).choosePageActivated)
             QUEUED_TOOLTIPS.stream().filter(queuedTooltip -> queuedTooltip != null).forEach(queuedTooltip -> {
                 GlStateManager.translatef(0, 0, 600);
-                MinecraftClient.getInstance().currentScreen.drawTooltip(queuedTooltip.getText(), queuedTooltip.getLocation().x, queuedTooltip.getLocation().y);
+                MinecraftClient.getInstance().currentScreen.renderTooltip(queuedTooltip.getText(), queuedTooltip.getLocation().x, queuedTooltip.getLocation().y);
                 GlStateManager.translatef(0, 0, -600);
             });
         QUEUED_TOOLTIPS.clear();
@@ -442,14 +442,14 @@ public class ContainerScreenOverlay extends ScreenComponent {
     public boolean charTyped(char char_1, int int_1) {
         if (!ScreenHelper.isOverlayVisible())
             return false;
-        for(InputListener listener : getInputListeners())
+        for(InputListener listener : children())
             if (listener.charTyped(char_1, int_1))
                 return true;
         return super.charTyped(char_1, int_1);
     }
     
     @Override
-    public List<? extends InputListener> getInputListeners() {
+    public List<? extends InputListener> children() {
         return widgets;
     }
     

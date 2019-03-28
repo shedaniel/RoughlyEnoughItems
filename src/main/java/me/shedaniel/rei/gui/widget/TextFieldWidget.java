@@ -5,7 +5,6 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.Screen;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
@@ -157,7 +156,7 @@ public class TextFieldWidget extends HighlightableWidget {
     }
     
     private void method_16873(int int_1) {
-        if (Screen.isControlPressed()) {
+        if (Screen.hasControlDown()) {
             this.method_1877(int_1);
         } else {
             this.method_1878(int_1);
@@ -265,21 +264,21 @@ public class TextFieldWidget extends HighlightableWidget {
     
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (this.isVisible() && this.isFocused()) {
-            this.field_17037 = Screen.isShiftPressed();
-            if (Screen.isSelectAllShortcutPressed(int_1)) {
+            this.field_17037 = Screen.hasShiftDown();
+            if (Screen.isSelectAll(int_1)) {
                 this.method_1872();
                 this.method_1884(0);
                 return true;
-            } else if (Screen.isCopyShortcutPressed(int_1)) {
+            } else if (Screen.isCopy(int_1)) {
                 MinecraftClient.getInstance().keyboard.setClipboard(this.getSelectedText());
                 return true;
-            } else if (Screen.isPasteShortcutPressed(int_1)) {
+            } else if (Screen.isPaste(int_1)) {
                 if (this.editable) {
                     this.addText(MinecraftClient.getInstance().keyboard.getClipboard());
                 }
                 
                 return true;
-            } else if (Screen.isCutShortcutPressed(int_1)) {
+            } else if (Screen.isCut(int_1)) {
                 MinecraftClient.getInstance().keyboard.setClipboard(this.getSelectedText());
                 if (this.editable) {
                     this.addText("");
@@ -308,7 +307,7 @@ public class TextFieldWidget extends HighlightableWidget {
                         
                         return true;
                     case 262:
-                        if (Screen.isControlPressed()) {
+                        if (Screen.hasControlDown()) {
                             this.method_1883(this.method_1853(1));
                         } else {
                             this.moveCursor(1);
@@ -316,7 +315,7 @@ public class TextFieldWidget extends HighlightableWidget {
                         
                         return true;
                     case 263:
-                        if (Screen.isControlPressed()) {
+                        if (Screen.hasControlDown()) {
                             this.method_1883(this.method_1853(-1));
                         } else {
                             this.moveCursor(-1);
@@ -354,7 +353,7 @@ public class TextFieldWidget extends HighlightableWidget {
     }
     
     @Override
-    public List<Widget> getInputListeners() {
+    public List<Widget> children() {
         return Collections.emptyList();
     }
     
@@ -385,8 +384,8 @@ public class TextFieldWidget extends HighlightableWidget {
     public void render(int int_1, int int_2, float float_1) {
         if (this.isVisible()) {
             if (this.hasBorder()) {
-                drawRect(this.bounds.x - 1, this.bounds.y - 1, this.bounds.x + this.bounds.width + 1, this.bounds.y + this.bounds.height + 1, -6250336);
-                drawRect(this.bounds.x, this.bounds.y, this.bounds.x + this.bounds.width, this.bounds.y + this.bounds.height, -16777216);
+                fill(this.bounds.x - 1, this.bounds.y - 1, this.bounds.x + this.bounds.width + 1, this.bounds.y + this.bounds.height + 1, -6250336);
+                fill(this.bounds.x, this.bounds.y, this.bounds.x + this.bounds.width, this.bounds.y + this.bounds.height, -16777216);
             }
             
             int color = this.editable ? this.editableColor : this.notEditableColor;
@@ -432,7 +431,7 @@ public class TextFieldWidget extends HighlightableWidget {
                     var10002 = int_9 + 1;
                     var10003 = int_7 + 1;
                     this.textRenderer.getClass();
-                    DrawableHelper.drawRect(int_9, var10001, var10002, var10003 + 9, -3092272);
+                    fill(int_9, var10001, var10002, var10003 + 9, -3092272);
                 } else {
                     this.textRenderer.drawWithShadow("_", (float) int_9, (float) int_7, color);
                 }

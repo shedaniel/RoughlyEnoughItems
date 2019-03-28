@@ -7,7 +7,7 @@ public class CreditsEntryListWidget extends EntryListWidget<CreditsEntry> {
     
     public CreditsEntryListWidget(MinecraftClient client, int width, int height, int startY, int endY, int entryHeight) {
         super(client, width, height, startY, endY, entryHeight);
-        setRenderSelection(false); //toggleShowSelection
+        field_19091 = false; // showSelection
     }
     
     public void creditsClearEntries() {
@@ -15,7 +15,7 @@ public class CreditsEntryListWidget extends EntryListWidget<CreditsEntry> {
     }
     
     private CreditsEntry getEntry(int int_1) {
-        return this.getInputListeners().get(int_1);
+        return this.children().get(int_1);
     }
     
     public void creditsAddEntry(CreditsEntry entry) {
@@ -23,13 +23,15 @@ public class CreditsEntryListWidget extends EntryListWidget<CreditsEntry> {
     }
     
     @Override
-    public int getEntryWidth() {
-        return width - 80;
+    // getRowWidth
+    public int method_20053() {
+        return field_19083 - 80; // width
     }
     
     @Override
-    protected int getScrollbarPosition() {
-        return width - 40;
+    // getScrollbarPosition
+    protected int method_20078() {
+        return field_19083 - 40; // width
     }
     
 }

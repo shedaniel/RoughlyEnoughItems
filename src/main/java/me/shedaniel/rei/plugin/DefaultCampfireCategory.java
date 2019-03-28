@@ -48,11 +48,11 @@ public class DefaultCampfireCategory implements RecipeCategory<DefaultCampfireDi
                 GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                 GuiLighting.disable();
                 MinecraftClient.getInstance().getTextureManager().bindTexture(DISPLAY_TEXTURE);
-                drawTexturedRect(startPoint.x, startPoint.y, 0, 167, 82, 54);
+                blit(startPoint.x, startPoint.y, 0, 167, 82, 54);
                 int height = MathHelper.ceil((System.currentTimeMillis() / 250 % 14d) / 1f);
-                drawTexturedRect(startPoint.x + 2, startPoint.y + 31 + (14 - height), 82, 77 + (14 - height), 14, height);
+                blit(startPoint.x + 2, startPoint.y + 31 + (14 - height), 82, 77 + (14 - height), 14, height);
                 int width = MathHelper.ceil((System.currentTimeMillis() / 250 % 24d) / 1f);
-                drawTexturedRect(startPoint.x + 24, startPoint.y + 18, 82, 91, width, 17);
+                blit(startPoint.x + 24, startPoint.y + 18, 82, 91, width, 17);
                 String text = I18n.translate("category.rei.campfire.time", MathHelper.floor(recipeDisplaySupplier.get().getCookTime() / 20d));
                 int length = MinecraftClient.getInstance().textRenderer.getStringWidth(text);
                 MinecraftClient.getInstance().textRenderer.draw(text, bounds.x + bounds.width - length - 5, startPoint.y + 54 - 8, 4210752);

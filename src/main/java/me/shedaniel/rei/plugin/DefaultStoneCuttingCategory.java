@@ -47,7 +47,7 @@ public class DefaultStoneCuttingCategory implements RecipeCategory<DefaultStoneC
                 GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                 GuiLighting.disable();
                 MinecraftClient.getInstance().getTextureManager().bindTexture(DISPLAY_TEXTURE);
-                drawTexturedRect(startPoint.x, startPoint.y, 0, 221, 82, 26);
+                blit(startPoint.x, startPoint.y, 0, 221, 82, 26);
             }
         }));
         widgets.add(new ItemSlotWidget(startPoint.x + 4, startPoint.y + 5, recipeDisplaySupplier.get().getInput().get(0), true, true, true));

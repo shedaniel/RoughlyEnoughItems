@@ -48,7 +48,7 @@ public class DefaultCraftingCategory implements RecipeCategory<DefaultCraftingDi
                 GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                 GuiLighting.disable();
                 MinecraftClient.getInstance().getTextureManager().bindTexture(DISPLAY_TEXTURE);
-                drawTexturedRect(startPoint.x, startPoint.y, 0, 0, 116, 54);
+                blit(startPoint.x, startPoint.y, 0, 0, 116, 54);
             }
         }));
         List<List<ItemStack>> input = recipeDisplaySupplier.get().getInput();

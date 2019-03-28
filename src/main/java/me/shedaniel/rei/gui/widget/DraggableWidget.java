@@ -51,7 +51,7 @@ public abstract class DraggableWidget extends HighlightableWidget {
             }
             return true;
         }
-        for(InputListener listener : getInputListeners())
+        for(InputListener listener : children())
             if (listener.mouseDragged(double_1, double_2, int_1, double_3, double_4))
                 return true;
         return false;
@@ -67,7 +67,7 @@ public abstract class DraggableWidget extends HighlightableWidget {
                 onMouseReleaseMidPoint(getMidPoint());
                 return true;
             }
-        for(InputListener listener : getInputListeners())
+        for(InputListener listener : children())
             if (listener.mouseReleased(double_1, double_2, int_1))
                 return true;
         return false;

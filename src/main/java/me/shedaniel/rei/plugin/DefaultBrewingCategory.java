@@ -50,9 +50,9 @@ public class DefaultBrewingCategory implements RecipeCategory<DefaultBrewingDisp
                 GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                 GuiLighting.disable();
                 MinecraftClient.getInstance().getTextureManager().bindTexture(DISPLAY_TEXTURE);
-                drawTexturedRect(startPoint.x, startPoint.y, 0, 108, 103, 59);
+                blit(startPoint.x, startPoint.y, 0, 108, 103, 59);
                 int width = MathHelper.ceil((System.currentTimeMillis() / 250 % 18d) / 1f);
-                drawTexturedRect(startPoint.x + 44, startPoint.y + 28, 103, 163, width, 4);
+                blit(startPoint.x + 44, startPoint.y + 28, 103, 163, width, 4);
             }
         }));
         widgets.add(new ItemSlotWidget(startPoint.x + 1, startPoint.y + 1, Arrays.asList(new ItemStack(Items.BLAZE_POWDER)), false, true, true));

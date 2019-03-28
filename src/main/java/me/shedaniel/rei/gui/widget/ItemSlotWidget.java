@@ -46,7 +46,7 @@ public class ItemSlotWidget extends HighlightableWidget {
     }
     
     @Override
-    public List<? extends InputListener> getInputListeners() {
+    public List<? extends InputListener> children() {
         return Collections.emptyList();
     }
     
@@ -63,13 +63,13 @@ public class ItemSlotWidget extends HighlightableWidget {
         final ItemStack itemStack = getCurrentStack();
         if (drawBackground) {
             MinecraftClient.getInstance().getTextureManager().bindTexture(RECIPE_GUI);
-            drawTexturedRect(this.x - 1, this.y - 1, 0, 222, 18, 18);
+            blit(this.x - 1, this.y - 1, 0, 222, 18, 18);
         }
         if (drawHighlightedBackground && isHighlighted(mouseX, mouseY)) {
             GlStateManager.disableLighting();
             GlStateManager.disableDepthTest();
             GlStateManager.colorMask(true, true, true, false);
-            drawGradientRect(x, y, x + 16, y + 16, -2130706433, -2130706433);
+            fill(x, y, x + 16, y + 16, -2130706433);
             GlStateManager.colorMask(true, true, true, true);
             GlStateManager.enableLighting();
             GlStateManager.enableDepthTest();
@@ -131,9 +131,9 @@ public class ItemSlotWidget extends HighlightableWidget {
             return false;
         if (getBounds().contains(mouseX, mouseY))
             if (button == 0)
-                return ClientHelper.executeRecipeKeyBind(getCurrentStack().copy());
+                return ClientHelper.executeRecipeKeyBind(getCurrentStack());
             else if (button == 1)
-                return ClientHelper.executeUsageKeyBind(getCurrentStack().copy());
+                return ClientHelper.executeUsageKeyBind(getCurrentStack());
         return false;
     }
     
@@ -143,7 +143,7 @@ public class ItemSlotWidget extends HighlightableWidget {
             return false;
         if (getBounds().contains(ClientUtils.getMouseLocation()))
             if (ClientHelper.RECIPE.matchesKey(int_1, int_2))
-                return ClientHelper.executeRecipeKeyBind(getCurrentStack().copy());
+                return ClientHelper.executeRecipeKeyBind(getCurrentStack());
             else if (ClientHelper.USAGE.matchesKey(int_1, int_2))
                 return ClientHelper.executeUsageKeyBind(getCurrentStack());
         return false;
