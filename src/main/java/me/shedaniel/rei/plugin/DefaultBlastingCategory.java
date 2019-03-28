@@ -49,11 +49,11 @@ public class DefaultBlastingCategory implements RecipeCategory<DefaultBlastingDi
                 GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                 GuiLighting.disable();
                 MinecraftClient.getInstance().getTextureManager().bindTexture(DISPLAY_TEXTURE);
-                drawTexturedRect(startPoint.x, startPoint.y, 0, 54, 82, 54);
+                blit(startPoint.x, startPoint.y, 0, 54, 82, 54);
                 int height = MathHelper.ceil((System.currentTimeMillis() / 250 % 14d) / 1f);
-                drawTexturedRect(startPoint.x + 2, startPoint.y + 21 + (14 - height), 82, 77 + (14 - height), 14, height);
+                blit(startPoint.x + 2, startPoint.y + 21 + (14 - height), 82, 77 + (14 - height), 14, height);
                 int width = MathHelper.ceil((System.currentTimeMillis() / 250 % 24d) / 1f);
-                drawTexturedRect(startPoint.x + 24, startPoint.y + 18, 82, 91, width, 17);
+                blit(startPoint.x + 24, startPoint.y + 18, 82, 91, width, 17);
             }
         }));
         List<List<ItemStack>> input = recipeDisplay.getInput();

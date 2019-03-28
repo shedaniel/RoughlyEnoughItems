@@ -24,9 +24,9 @@ public class MixinContainerScreen extends Screen implements ContainerScreenHooks
     @Shadow
     protected int top;
     @Shadow
-    protected int width;
+    protected int containerWidth;
     @Shadow
-    protected int height;
+    protected int containerHeight;
     @Shadow
     protected Slot focusedSlot;
     
@@ -46,12 +46,12 @@ public class MixinContainerScreen extends Screen implements ContainerScreenHooks
     
     @Override
     public int rei_getContainerWidth() {
-        return width;
+        return containerWidth;
     }
     
     @Override
     public int rei_getContainerHeight() {
-        return height;
+        return containerHeight;
     }
     
     @Override
@@ -75,11 +75,9 @@ public class MixinContainerScreen extends Screen implements ContainerScreenHooks
     // TODO: Make this use an event when Cloth mixin issues are fixed
     @Override
     public boolean charTyped(char char_1, int int_1) {
-        if (!(MinecraftClient.getInstance().currentScreen instanceof CreativePlayerInventoryScreen)) {
-            if (ScreenHelper.getLastOverlay().charTyped(char_1, int_1)) {
+        if (!(MinecraftClient.getInstance().currentScreen instanceof CreativePlayerInventoryScreen))
+            if (ScreenHelper.getLastOverlay().charTyped(char_1, int_1))
                 return true;
-            }
-        }
         return super.charTyped(char_1, int_1);
     }
     

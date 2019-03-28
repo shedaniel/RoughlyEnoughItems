@@ -29,13 +29,13 @@ public class LabelWidget extends HighlightableWidget {
     }
     
     @Override
-    public List<? extends InputListener> getInputListeners() {
+    public List<? extends InputListener> children() {
         return Collections.emptyList();
     }
     
     @Override
     public void render(int mouseX, int mouseY, float partialTicks) {
-        drawStringCentered(textRenderer, text, x, y, -1);
+        drawCenteredString(textRenderer, text, x, y, -1);
     }
     
 }

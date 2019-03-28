@@ -71,18 +71,18 @@ public abstract class ButtonWidget extends HighlightableWidget {
             GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
             GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
             //Four Corners
-            this.drawTexturedRect(x, y, 0, 46 + textureOffset * 20, 4, 4);
-            this.drawTexturedRect(x + width - 4, y, 196, 46 + textureOffset * 20, 4, 4);
-            this.drawTexturedRect(x, y + height - 4, 0, 62 + textureOffset * 20, 4, 4);
-            this.drawTexturedRect(x + width - 4, y + height - 4, 196, 62 + textureOffset * 20, 4, 4);
+            this.blit(x, y, 0, 46 + textureOffset * 20, 4, 4);
+            this.blit(x + width - 4, y, 196, 46 + textureOffset * 20, 4, 4);
+            this.blit(x, y + height - 4, 0, 62 + textureOffset * 20, 4, 4);
+            this.blit(x + width - 4, y + height - 4, 196, 62 + textureOffset * 20, 4, 4);
             
             //Sides
-            this.drawTexturedRect(x + 4, y, 4, 46 + textureOffset * 20, width - 8, 4);
-            this.drawTexturedRect(x + 4, y + height - 4, 4, 62 + textureOffset * 20, width - 8, 4);
+            this.blit(x + 4, y, 4, 46 + textureOffset * 20, width - 8, 4);
+            this.blit(x + 4, y + height - 4, 4, 62 + textureOffset * 20, width - 8, 4);
             
             for(int i = y + 4; i < y + height - 4; i += 4) {
-                this.drawTexturedRect(x, i, 0, 50 + textureOffset * 20, width / 2, MathHelper.clamp(y + height - 4 - i, 0, 4));
-                this.drawTexturedRect(x + width / 2, i, 200 - width / 2, 50 + textureOffset * 20, width / 2, MathHelper.clamp(y + height - 4 - i, 0, 4));
+                this.blit(x, i, 0, 50 + textureOffset * 20, width / 2, MathHelper.clamp(y + height - 4 - i, 0, 4));
+                this.blit(x + width / 2, i, 200 - width / 2, 50 + textureOffset * 20, width / 2, MathHelper.clamp(y + height - 4 - i, 0, 4));
             }
             
             int colour = 14737632;
@@ -92,7 +92,7 @@ public abstract class ButtonWidget extends HighlightableWidget {
                 colour = 16777120;
             }
             
-            this.drawStringCentered(textRenderer, this.text, x + width / 2, y + (height - 8) / 2, colour);
+            this.drawCenteredString(textRenderer, this.text, x + width / 2, y + (height - 8) / 2, colour);
             
             if (getTooltips().isPresent())
                 if (isHighlighted(mouseX, mouseY))
@@ -112,12 +112,13 @@ public abstract class ButtonWidget extends HighlightableWidget {
     }
     
     @Override
-    public void onFocusChanged(boolean boolean_1) {
-        focused = boolean_1;
+    public void onFocusChanged(boolean boolean_1, boolean boolean_2) {
+        if (boolean_2)
+            focused = boolean_1;
     }
     
     @Override
-    public List<? extends InputListener> getInputListeners() {
+    public List<? extends InputListener> children() {
         return Collections.emptyList();
     }
     

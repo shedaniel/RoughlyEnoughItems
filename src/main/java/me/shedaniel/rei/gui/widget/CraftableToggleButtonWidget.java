@@ -39,9 +39,9 @@ public abstract class CraftableToggleButtonWidget extends ButtonWidget {
         GuiLighting.disable();
         MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        this.zOffset = 100f;
-        this.drawTexturedRect(getBounds().x, getBounds().y, (56 + (RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() ? 0 : 20)), 202, 20, 20);
-        this.zOffset = 0f;
+        this.blitOffset = 100f;
+        this.blit(getBounds().x, getBounds().y, (56 + (RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() ? 0 : 20)), 202, 20, 20);
+        this.blitOffset = 0f;
         if (getBounds().contains(mouseX, mouseY))
             ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate(RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() ? "text.rei.showing_craftable" : "text.rei.showing_all")));
     }

@@ -84,7 +84,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
         this.widgets.add(base2 = new RecipeBaseWidget(bounds));
         this.widgets.add(new Widget() {
             @Override
-            public List<Widget> getInputListeners() {
+            public List<Widget> children() {
                 return Collections.emptyList();
             }
             
@@ -118,7 +118,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
             public void onPressed() {
                 recipeViewingScreen.page = MathHelper.clamp(getIntFromString(textFieldWidget.getText()).orElse(0) - 1, 0, recipeViewingScreen.getTotalPages(recipeViewingScreen.getSelectedCategory()) - 1);
                 recipeViewingScreen.choosePageActivated = false;
-                recipeViewingScreen.onInitialized();
+                recipeViewingScreen.init();
             }
         });
         textFieldWidget.setFocused(true);
@@ -130,7 +130,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     }
     
     @Override
-    public List<Widget> getInputListeners() {
+    public List<Widget> children() {
         return widgets;
     }
     
@@ -157,7 +157,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
         if (int_1 == 335 || int_1 == 257) {
             recipeViewingScreen.page = MathHelper.clamp(getIntFromString(textFieldWidget.getText()).orElse(0) - 1, 0, recipeViewingScreen.getTotalPages(recipeViewingScreen.getSelectedCategory()) - 1);
             recipeViewingScreen.choosePageActivated = false;
-            recipeViewingScreen.onInitialized();
+            recipeViewingScreen.init();
             return true;
         }
         for(Widget widget : widgets)

@@ -78,19 +78,18 @@ public class RecipeViewingScreen extends Screen {
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (int_1 == 256 && choosePageActivated) {
             choosePageActivated = false;
-            onInitialized();
+            init();
             return true;
         }
-        if ((int_1 == 256 || this.client.options.keyInventory.matchesKey(int_1, int_2)) && this.doesEscapeKeyClose()) {
+        if ((int_1 == 256 || this.minecraft.options.keyInventory.matchesKey(int_1, int_2)) && this.shouldCloseOnEsc()) {
             MinecraftClient.getInstance().openScreen(ScreenHelper.getLastContainerScreen());
             ScreenHelper.getLastOverlay().onInitialized();
             return true;
         }
         if (int_1 == 258) {
-            if (isShiftPressed())
-                this.focusPrevious();
-            else
-                this.focusNext();
+            boolean boolean_1 = !hasShiftDown();
+            if (!this.method_20087(boolean_1))
+                this.method_20087(boolean_1);
             return true;
         }
         if (choosePageActivated) {
@@ -98,6 +97,9 @@ public class RecipeViewingScreen extends Screen {
                 return true;
             return false;
         }
+        for(Widget widget : widgets)
+            if (widget.keyPressed(int_1, int_2, int_3))
+                return true;
         return super.keyPressed(int_1, int_2, int_3);
     }
     
@@ -107,9 +109,9 @@ public class RecipeViewingScreen extends Screen {
     }
     
     @Override
-    public void onInitialized() {
-        super.onInitialized();
-        this.listeners.clear();
+    public void init() {
+        super.init();
+        this.children.clear();
         this.tabs.clear();
         this.widgets.clear();
         this.largestWidth = window.getScaledWidth() - 100;
@@ -129,7 +131,7 @@ public class RecipeViewingScreen extends Screen {
                 selectedCategory = categories.get(currentCategoryIndex);
                 categoryPages = MathHelper.floor(currentCategoryIndex / 6d);
                 page = 0;
-                RecipeViewingScreen.this.onInitialized();
+                RecipeViewingScreen.this.init();
             }
             
             @Override
@@ -164,7 +166,7 @@ public class RecipeViewingScreen extends Screen {
                 selectedCategory = categories.get(currentCategoryIndex);
                 categoryPages = MathHelper.floor(currentCategoryIndex / 6d);
                 page = 0;
-                RecipeViewingScreen.this.onInitialized();
+                RecipeViewingScreen.this.init();
             }
             
             @Override
@@ -181,7 +183,7 @@ public class RecipeViewingScreen extends Screen {
                 page--;
                 if (page < 0)
                     page = getTotalPages(selectedCategory) - 1;
-                RecipeViewingScreen.this.onInitialized();
+                RecipeViewingScreen.this.init();
             }
             
             @Override
@@ -204,7 +206,7 @@ public class RecipeViewingScreen extends Screen {
             public void onLabelClicked() {
                 MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 RecipeViewingScreen.this.choosePageActivated = true;
-                RecipeViewingScreen.this.onInitialized();
+                RecipeViewingScreen.this.init();
             }
         });
         widgets.add(recipeNext = new ButtonWidget((int) bounds.getMaxX() - 17, (int) bounds.getY() + 21, 12, 12, new TranslatableTextComponent("text.rei.right_arrow")) {
@@ -213,7 +215,7 @@ public class RecipeViewingScreen extends Screen {
                 page++;
                 if (page >= getTotalPages(selectedCategory))
                     page = 0;
-                RecipeViewingScreen.this.onInitialized();
+                RecipeViewingScreen.this.init();
             }
             
             @Override
@@ -238,7 +240,7 @@ public class RecipeViewingScreen extends Screen {
                                 return false;
                             selectedCategory = categories.get(getId() + categoryPages * 6);
                             page = 0;
-                            RecipeViewingScreen.this.onInitialized();
+                            RecipeViewingScreen.this.init();
                             return true;
                         }
                         return false;
@@ -265,9 +267,9 @@ public class RecipeViewingScreen extends Screen {
         else
             recipeChoosePageWidget = null;
         
-        listeners.addAll(tabs);
-        listeners.add(ScreenHelper.getLastOverlay(true, false));
-        listeners.addAll(widgets);
+        children.addAll(tabs);
+        children.add(ScreenHelper.getLastOverlay(true, false));
+        children.addAll(widgets);
     }
     
     public List<Widget> getWidgets() {
@@ -309,13 +311,13 @@ public class RecipeViewingScreen extends Screen {
     
     @Override
     public void render(int mouseX, int mouseY, float delta) {
-        this.drawGradientRect(0, 0, this.screenWidth, this.screenHeight, -1072689136, -804253680);
+        this.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
         if (selectedCategory != null)
             selectedCategory.drawCategoryBackground(bounds, mouseX, mouseY, delta);
         else {
             new RecipeBaseWidget(bounds).render();
-            drawRect(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, SUB_COLOR.getRGB());
-            drawRect(bounds.x + 17, bounds.y + 21, bounds.x + bounds.width - 17, bounds.y + 33, SUB_COLOR.getRGB());
+            fill(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, SUB_COLOR.getRGB());
+            fill(bounds.x + 17, bounds.y + 21, bounds.x + bounds.width - 17, bounds.y + 33, SUB_COLOR.getRGB());
         }
         tabs.stream().filter(tabWidget -> {
             return !tabWidget.isSelected();
@@ -331,9 +333,9 @@ public class RecipeViewingScreen extends Screen {
         tabs.stream().filter(TabWidget::isSelected).forEach(tabWidget -> tabWidget.render(mouseX, mouseY, delta));
         ScreenHelper.getLastOverlay().drawOverlay(mouseX, mouseY, delta);
         if (choosePageActivated) {
-            zOffset = 500.0f;
-            this.drawGradientRect(0, 0, this.screenWidth, this.screenHeight, -1072689136, -804253680);
-            zOffset = 0.0f;
+            blitOffset = 500.0f;
+            this.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
+            blitOffset = 0.0f;
             recipeChoosePageWidget.render(mouseX, mouseY, delta);
         }
     }
@@ -353,7 +355,7 @@ public class RecipeViewingScreen extends Screen {
                 return true;
             return false;
         }
-        for(InputListener listener : listeners)
+        for(InputListener listener : children())
             if (listener.charTyped(char_1, int_1))
                 return true;
         return super.charTyped(char_1, int_1);
@@ -381,7 +383,7 @@ public class RecipeViewingScreen extends Screen {
     
     @Override
     public boolean mouseScrolled(double i, double j, double amount) {
-        for(InputListener listener : listeners)
+        for(InputListener listener : children())
             if (listener.mouseScrolled(i, j, amount))
                 return true;
         if (getBounds().contains(ClientUtils.getMouseLocation())) {
@@ -408,14 +410,14 @@ public class RecipeViewingScreen extends Screen {
                 return false;
             } else {
                 choosePageActivated = false;
-                onInitialized();
+                init();
                 return false;
             }
-        for(InputListener entry : getInputListeners())
+        for(InputListener entry : children())
             if (entry.mouseClicked(double_1, double_2, int_1)) {
-                focusOn(entry);
+                method_20084(entry);
                 if (int_1 == 0)
-                    setActive(true);
+                    setDragging(true);
                 return true;
             }
         return false;

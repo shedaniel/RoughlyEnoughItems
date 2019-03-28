@@ -1,3 +1,5 @@
+# v2.5.1.74
+- Updated to 19w13a
 # v2.5.0.73
 - Made REI crash better (lmao wut)
 # v2.5.0.72
