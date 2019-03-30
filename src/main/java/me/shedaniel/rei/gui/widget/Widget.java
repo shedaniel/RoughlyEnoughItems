@@ -1,8 +1,11 @@
 package me.shedaniel.rei.gui.widget;
 
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.AbstractParentElement;
 import net.minecraft.client.gui.Drawable;
-import net.minecraft.client.gui.ScreenComponent;
 
-public abstract class Widget extends ScreenComponent implements Drawable {
-
+public abstract class Widget extends AbstractParentElement implements Drawable {
+    
+    protected final MinecraftClient minecraft = MinecraftClient.getInstance();
+    
 }

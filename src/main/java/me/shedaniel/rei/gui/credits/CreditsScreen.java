@@ -34,8 +34,8 @@ public class CreditsScreen extends Screen {
         children.add(entryListWidget = new CreditsEntryListWidget(minecraft, width, height, 32, height - 32, 12));
         entryListWidget.creditsClearEntries();
         for(String line : I18n.translate("text.rei.credit.text").split("\n"))
-            entryListWidget.creditsAddEntry(new CreditsEntry(new StringTextComponent(line)));
-        entryListWidget.creditsAddEntry(new CreditsEntry(new StringTextComponent("")));
+            entryListWidget.creditsAddEntry(new CreditsItem(new StringTextComponent(line)));
+        entryListWidget.creditsAddEntry(new CreditsItem(new StringTextComponent("")));
         children.add(buttonDone = new ButtonWidget(width / 2 - 100, height - 26, 200, 20, I18n.translate("gui.done")) {
             @Override
             public void onPressed() {

@@ -59,7 +59,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     }
     
     @Override
-    public boolean isHighlighted(int mouseX, int mouseY) {
+    public boolean isHighlighted(double mouseX, double mouseY) {
         return getBounds().contains(mouseX, mouseY) || new Rectangle(bounds.x + bounds.width - 50, bounds.y + bounds.height - 3, 50, 36).contains(mouseX, mouseY);
     }
     
@@ -90,14 +90,14 @@ public class RecipeChoosePageWidget extends DraggableWidget {
             
             @Override
             public void render(int i, int i1, float v) {
-                MinecraftClient.getInstance().textRenderer.draw(I18n.translate("text.rei.choose_page"), bounds.x + 5, bounds.y + 5, 4210752);
+                minecraft.textRenderer.draw(I18n.translate("text.rei.choose_page"), bounds.x + 5, bounds.y + 5, 4210752);
                 String endString = String.format(" /%d", maxPage);
-                int width = MinecraftClient.getInstance().textRenderer.getStringWidth(endString);
-                MinecraftClient.getInstance().textRenderer.draw(endString, bounds.x + bounds.width - 5 - width, bounds.y + 22, 4210752);
+                int width = minecraft.textRenderer.getStringWidth(endString);
+                minecraft.textRenderer.draw(endString, bounds.x + bounds.width - 5 - width, bounds.y + 22, 4210752);
             }
         });
         String endString = String.format(" /%d", maxPage);
-        int width = MinecraftClient.getInstance().textRenderer.getStringWidth(endString);
+        int width = minecraft.textRenderer.getStringWidth(endString);
         this.widgets.add(textFieldWidget = new TextFieldWidget(bounds.x + 7, bounds.y + 16, bounds.width - width - 12, 18));
         textFieldWidget.stripInvaild = s -> {
             StringBuilder stringBuilder_1 = new StringBuilder();
@@ -177,7 +177,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     @Override
     public void onMouseReleaseMidPoint(Point midPoint) {
         ConfigManager configManager = RoughlyEnoughItemsCore.getConfigManager();
-        Window window = MinecraftClient.getInstance().window;
+        Window window = minecraft.window;
         configManager.getConfig().choosePageDialogPoint = new RelativePoint(midPoint.getX() / window.getScaledWidth(), midPoint.getY() / window.getScaledHeight());
         try {
             configManager.saveConfig();

@@ -2,7 +2,6 @@ package me.shedaniel.rei.gui.widget;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.client.ScreenHelper;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GuiLighting;
@@ -12,6 +11,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
 import java.awt.*;
+import java.util.Optional;
 
 public abstract class CraftableToggleButtonWidget extends ButtonWidget {
     
@@ -20,7 +20,7 @@ public abstract class CraftableToggleButtonWidget extends ButtonWidget {
     
     public CraftableToggleButtonWidget(Rectangle rectangle) {
         super(rectangle, "");
-        this.itemRenderer = MinecraftClient.getInstance().getItemRenderer();
+        this.itemRenderer = minecraft.getItemRenderer();
     }
     
     public CraftableToggleButtonWidget(int x, int y, int width, int height) {
@@ -42,8 +42,15 @@ public abstract class CraftableToggleButtonWidget extends ButtonWidget {
         this.blitOffset = 100f;
         this.blit(getBounds().x, getBounds().y, (56 + (RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() ? 0 : 20)), 202, 20, 20);
         this.blitOffset = 0f;
-        if (getBounds().contains(mouseX, mouseY))
-            ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate(RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() ? "text.rei.showing_craftable" : "text.rei.showing_all")));
     }
     
+    @Override
+    public boolean isPartOfFocusCycle() {
+        return false;
+    }
+    
+    @Override
+    public Optional<String> getTooltips() {
+        return Optional.ofNullable(I18n.translate(RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() ? "text.rei.showing_craftable" : "text.rei.showing_all"));
+    }
 }

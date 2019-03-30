@@ -1,7 +1,6 @@
 package me.shedaniel.rei.mixin;
 
 import net.minecraft.client.gui.ContainerScreen;
-import net.minecraft.client.gui.InputListener;
 import net.minecraft.client.gui.container.CraftingTableScreen;
 import net.minecraft.client.gui.recipebook.RecipeBookGui;
 import net.minecraft.container.Container;
@@ -25,12 +24,7 @@ public abstract class MixinCraftingTableScreen extends ContainerScreen {
         super(container_1, playerInventory_1, textComponent_1);
     }
     
-    @Override
-    public InputListener getFocused() {
-        return super.getFocused();
-    }
-    
-    @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true, remap = false)
+    @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
     public void mouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> ci) {
         if (recipeBookGui.mouseClicked(mouseX, mouseY, button)) {
             method_20084(recipeBookGui);

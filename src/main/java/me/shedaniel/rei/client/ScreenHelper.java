@@ -1,7 +1,6 @@
 package me.shedaniel.rei.client;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
@@ -9,9 +8,6 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.event.client.ClientTickCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ContainerScreen;
-import net.minecraft.client.gui.InputListener;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.RecipeBookButtonWidget;
 import net.minecraft.client.util.Window;
 import net.minecraft.item.ItemStack;
 import org.apache.logging.log4j.util.TriConsumer;
@@ -45,16 +41,6 @@ public class ScreenHelper implements ClientModInitializer {
     
     public static ContainerScreenOverlay getLastOverlay() {
         return getLastOverlay(false, false);
-    }
-    
-    public static void disableRecipeBook(ContainerScreen lastContainerScreen, List<InputListener> listeners, List<ButtonWidget> buttonWidgets) {
-        RoughlyEnoughItemsCore.LOGGER.info("%d %d", listeners.size(), buttonWidgets.size());
-        for(InputListener listener : listeners)
-            if (listener instanceof RecipeBookButtonWidget)
-                listeners.remove(listener);
-        for(ButtonWidget buttonWidget : buttonWidgets)
-            if (buttonWidget instanceof RecipeBookButtonWidget)
-                buttonWidgets.remove(buttonWidget);
     }
     
     public static ContainerScreen getLastContainerScreen() {

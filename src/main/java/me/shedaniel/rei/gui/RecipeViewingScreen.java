@@ -11,7 +11,7 @@ import me.shedaniel.rei.gui.widget.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.audio.PositionedSoundInstance;
 import net.minecraft.client.gui.ContainerScreen;
-import net.minecraft.client.gui.InputListener;
+import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.Screen;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
@@ -144,10 +144,11 @@ public class RecipeViewingScreen extends Screen {
             public void render(int mouseX, int mouseY, float partialTicks) {
                 this.text = selectedCategory.getCategoryName();
                 super.render(mouseX, mouseY, partialTicks);
-                if (isHighlighted(mouseX, mouseY))
-                    ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.view_all_categories").split("\n")));
-                else if (focused)
-                    ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(new Point(x, y), I18n.translate("text.rei.view_all_categories").split("\n")));
+            }
+            
+            @Override
+            public Optional<String> getTooltips() {
+                return Optional.ofNullable(I18n.translate("text.rei.view_all_categories"));
             }
             
             @Override
@@ -196,10 +197,11 @@ public class RecipeViewingScreen extends Screen {
             public void render(int mouseX, int mouseY, float partialTicks) {
                 this.text = String.format("%d/%d", page + 1, getTotalPages(selectedCategory));
                 super.render(mouseX, mouseY, partialTicks);
-                if (isHighlighted(mouseX, mouseY))
-                    ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.choose_page").split("\n")));
-                else if (focused)
-                    ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(new Point(x, y), I18n.translate("text.rei.choose_page").split("\n")));
+            }
+            
+            @Override
+            public Optional<String> getTooltips() {
+                return Optional.ofNullable(I18n.translate("text.rei.choose_page"));
             }
             
             @Override
@@ -331,7 +333,7 @@ public class RecipeViewingScreen extends Screen {
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GuiLighting.disable();
         tabs.stream().filter(TabWidget::isSelected).forEach(tabWidget -> tabWidget.render(mouseX, mouseY, delta));
-        ScreenHelper.getLastOverlay().drawOverlay(mouseX, mouseY, delta);
+        ScreenHelper.getLastOverlay().render(mouseX, mouseY, delta);
         if (choosePageActivated) {
             blitOffset = 500.0f;
             this.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
@@ -355,7 +357,7 @@ public class RecipeViewingScreen extends Screen {
                 return true;
             return false;
         }
-        for(InputListener listener : children())
+        for(Element listener : children())
             if (listener.charTyped(char_1, int_1))
                 return true;
         return super.charTyped(char_1, int_1);
@@ -383,7 +385,7 @@ public class RecipeViewingScreen extends Screen {
     
     @Override
     public boolean mouseScrolled(double i, double j, double amount) {
-        for(InputListener listener : children())
+        for(Element listener : children())
             if (listener.mouseScrolled(i, j, amount))
                 return true;
         if (getBounds().contains(ClientUtils.getMouseLocation())) {
@@ -413,7 +415,7 @@ public class RecipeViewingScreen extends Screen {
                 init();
                 return false;
             }
-        for(InputListener entry : children())
+        for(Element entry : children())
             if (entry.mouseClicked(double_1, double_2, int_1)) {
                 method_20084(entry);
                 if (int_1 == 0)
@@ -424,7 +426,7 @@ public class RecipeViewingScreen extends Screen {
     }
     
     @Override
-    public InputListener getFocused() {
+    public Element getFocused() {
         if (choosePageActivated)
             return recipeChoosePageWidget;
         return super.getFocused();

@@ -3,7 +3,6 @@ package me.shedaniel.rei.gui.widget;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.api.SpeedCraftFunctional;
 import me.shedaniel.rei.client.ScreenHelper;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.resource.language.I18n;
 
 import java.awt.*;
@@ -23,7 +22,7 @@ public class SpeedCraftingButtonWidget extends ButtonWidget {
     
     @Override
     public void onPressed() {
-        MinecraftClient.getInstance().openScreen(ScreenHelper.getLastContainerScreen());
+        minecraft.openScreen(ScreenHelper.getLastContainerScreen());
         ScreenHelper.getLastOverlay().onInitialized();
         functional.performAutoCraft(ScreenHelper.getLastContainerScreen(), displaySupplier.get());
     }

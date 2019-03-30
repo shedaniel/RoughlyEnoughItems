@@ -3,7 +3,6 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.base.Predicates;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.SharedConstants;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.Screen;
 import net.minecraft.client.render.BufferBuilder;
@@ -56,7 +55,7 @@ public class TextFieldWidget extends HighlightableWidget {
         this.renderTextProvider = (string_1, integer_1) -> {
             return string_1;
         };
-        this.textRenderer = MinecraftClient.getInstance().textRenderer;
+        this.textRenderer = minecraft.textRenderer;
         this.bounds = rectangle;
         this.stripInvaild = s -> SharedConstants.stripInvalidChars(s);
     }
@@ -270,16 +269,16 @@ public class TextFieldWidget extends HighlightableWidget {
                 this.method_1884(0);
                 return true;
             } else if (Screen.isCopy(int_1)) {
-                MinecraftClient.getInstance().keyboard.setClipboard(this.getSelectedText());
+                minecraft.keyboard.setClipboard(this.getSelectedText());
                 return true;
             } else if (Screen.isPaste(int_1)) {
                 if (this.editable) {
-                    this.addText(MinecraftClient.getInstance().keyboard.getClipboard());
+                    this.addText(minecraft.keyboard.getClipboard());
                 }
                 
                 return true;
             } else if (Screen.isCut(int_1)) {
-                MinecraftClient.getInstance().keyboard.setClipboard(this.getSelectedText());
+                minecraft.keyboard.setClipboard(this.getSelectedText());
                 if (this.editable) {
                     this.addText("");
                 }
