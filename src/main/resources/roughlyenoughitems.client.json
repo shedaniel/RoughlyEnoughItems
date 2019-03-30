@@ -9,7 +9,6 @@
     "MixinCraftingTableScreen",
     "MixinCreativePlayerInventoryScreen",
     "MixinBrewingRecipeRegistry",
-    "MixinTabGetter",
     "MixinRecipeBookGui"
   ],
   "injectors": {

@@ -5,8 +5,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.ScreenHelper;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.InputListener;
+import net.minecraft.client.gui.Element;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.item.ItemStack;
@@ -46,7 +45,7 @@ public class ItemSlotWidget extends HighlightableWidget {
     }
     
     @Override
-    public List<? extends InputListener> children() {
+    public List<? extends Element> children() {
         return Collections.emptyList();
     }
     
@@ -62,7 +61,7 @@ public class ItemSlotWidget extends HighlightableWidget {
     public void render(int mouseX, int mouseY, float delta) {
         final ItemStack itemStack = getCurrentStack();
         if (drawBackground) {
-            MinecraftClient.getInstance().getTextureManager().bindTexture(RECIPE_GUI);
+            minecraft.getTextureManager().bindTexture(RECIPE_GUI);
             blit(this.x - 1, this.y - 1, 0, 222, 18, 18);
         }
         if (drawHighlightedBackground && isHighlighted(mouseX, mouseY)) {
@@ -76,10 +75,10 @@ public class ItemSlotWidget extends HighlightableWidget {
         }
         if (!itemStack.isEmpty()) {
             GuiLighting.enableForItems();
-            ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
+            ItemRenderer itemRenderer = minecraft.getItemRenderer();
             itemRenderer.zOffset = 200.0F;
             itemRenderer.renderGuiItem(itemStack, x, y);
-            itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, itemStack, x, y, getItemCountOverlay(itemStack));
+            itemRenderer.renderGuiItemOverlay(minecraft.textRenderer, itemStack, x, y, getItemCountOverlay(itemStack));
             itemRenderer.zOffset = 0.0F;
         }
         if (!itemStack.isEmpty() && isHighlighted(mouseX, mouseY) && showToolTips)
@@ -92,7 +91,6 @@ public class ItemSlotWidget extends HighlightableWidget {
     
     protected List<String> getTooltip(ItemStack itemStack) {
         final String modString = "§9§o" + ClientHelper.getModFromItemStack(itemStack);
-        MinecraftClient mc = MinecraftClient.getInstance();
         List<String> toolTip = Lists.newArrayList(ItemListOverlay.tryGetItemStackToolTip(itemStack));
         toolTip.addAll(getExtraToolTips(itemStack));
         for(String s : Lists.newArrayList(toolTip))

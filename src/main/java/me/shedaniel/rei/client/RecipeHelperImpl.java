@@ -167,7 +167,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         plugins.sort((first, second) -> {
             return second.getPriority() - first.getPriority();
         });
-        RoughlyEnoughItemsCore.LOGGER.info("Loading %d REI plugins: %s", plugins.size(), String.join(", ", plugins.stream().map(plugin -> {
+        RoughlyEnoughItemsCore.LOGGER.info("[REI] Loading %d plugins: %s", plugins.size(), String.join(", ", plugins.stream().map(plugin -> {
             return RoughlyEnoughItemsCore.getPluginIdentifier(plugin).map(Identifier::toString).orElseGet(() -> "null");
         }).collect(Collectors.toList())));
         Collections.reverse(plugins);
@@ -184,8 +184,8 @@ public class RecipeHelperImpl implements RecipeHelper {
             if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_SPEED_CRAFT))
                 plugin.registerSpeedCraft(this);
         });
-        RoughlyEnoughItemsCore.LOGGER.info("Registered REI Categories: " + String.join(", ", categories.stream().map(RecipeCategory::getCategoryName).collect(Collectors.toList())));
-        RoughlyEnoughItemsCore.LOGGER.info("Registered %d recipes for REI.", recipeCount.get());
+        RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered Categories: " + String.join(", ", categories.stream().map(RecipeCategory::getCategoryName).collect(Collectors.toList())));
+        RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered %d recipes.", recipeCount.get());
     }
     
     @Override

@@ -1,6 +1,9 @@
 package me.shedaniel.rei.gui.widget;
 
+import me.shedaniel.rei.client.ScreenHelper;
+
 import java.awt.*;
+import java.util.Optional;
 
 public abstract class ClickableLabelWidget extends LabelWidget {
     
@@ -17,6 +20,11 @@ public abstract class ClickableLabelWidget extends LabelWidget {
         if (isHovered(mouseX, mouseY))
             colour = hoveredColor;
         drawCenteredString(textRenderer, (isHovered(mouseX, mouseY) ? "§n" : "") + text, x, y, colour);
+        if (getTooltips().isPresent())
+            if (!focused && isHighlighted(mouseX, mouseY))
+                ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltips().get().split("\n")));
+            else if (focused)
+                ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(new Point(x, y), getTooltips().get().split("\n")));
     }
     
     @Override
@@ -26,6 +34,10 @@ public abstract class ClickableLabelWidget extends LabelWidget {
             return true;
         }
         return false;
+    }
+    
+    public Optional<String> getTooltips() {
+        return Optional.empty();
     }
     
     @Override
@@ -49,8 +61,7 @@ public abstract class ClickableLabelWidget extends LabelWidget {
     
     @Override
     public void onFocusChanged(boolean boolean_1, boolean boolean_2) {
-        if (boolean_2)
-            focused = boolean_1;
+        focused = boolean_2;
     }
     
     public abstract void onLabelClicked();

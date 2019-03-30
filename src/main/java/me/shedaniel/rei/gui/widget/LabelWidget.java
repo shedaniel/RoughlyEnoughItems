@@ -1,8 +1,7 @@
 package me.shedaniel.rei.gui.widget;
 
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.InputListener;
+import net.minecraft.client.gui.Element;
 
 import java.awt.*;
 import java.util.Collections;
@@ -19,7 +18,7 @@ public class LabelWidget extends HighlightableWidget {
         this.x = x;
         this.y = y;
         this.text = text;
-        this.textRenderer = MinecraftClient.getInstance().textRenderer;
+        this.textRenderer = minecraft.textRenderer;
     }
     
     @Override
@@ -29,7 +28,7 @@ public class LabelWidget extends HighlightableWidget {
     }
     
     @Override
-    public List<? extends InputListener> children() {
+    public List<? extends Element> children() {
         return Collections.emptyList();
     }
     

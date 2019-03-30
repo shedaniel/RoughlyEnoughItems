@@ -9,11 +9,11 @@ import me.shedaniel.cloth.gui.entries.IntegerListEntry;
 import me.shedaniel.cloth.gui.entries.StringListEntry;
 import me.shedaniel.cloth.hooks.ClothClientHooks;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.TabGetter;
 import me.shedaniel.rei.client.RecipeHelperImpl;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.config.ItemListOrderingEntry;
+import me.shedaniel.rei.listeners.CreativePlayerInventoryScreenHooks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ContainerScreen;
 import net.minecraft.client.gui.Screen;
@@ -39,8 +39,8 @@ public class ClothRegistry {
         ClothClientHooks.SCREEN_INIT_POST.register((minecraftClient, screen, screenHooks) -> {
             if (screen instanceof ContainerScreen) {
                 if (screen instanceof CreativePlayerInventoryScreen) {
-                    TabGetter tabGetter = (TabGetter) screen;
-                    if (tabGetter.rei_getSelectedTab() != ItemGroup.INVENTORY.getIndex())
+                    CreativePlayerInventoryScreenHooks creativePlayerInventoryScreenHooks = (CreativePlayerInventoryScreenHooks) screen;
+                    if (creativePlayerInventoryScreenHooks.rei_getSelectedTab() != ItemGroup.INVENTORY.getIndex())
                         return;
                 }
                 ScreenHelper.setLastContainerScreen((ContainerScreen) screen);
@@ -50,20 +50,37 @@ public class ClothRegistry {
         ClothClientHooks.SCREEN_RENDER_POST.register((minecraftClient, screen, i, i1, v) -> {
             if (screen instanceof ContainerScreen) {
                 if (screen instanceof CreativePlayerInventoryScreen) {
-                    TabGetter tabGetter = (TabGetter) screen;
-                    if (tabGetter.rei_getSelectedTab() != ItemGroup.INVENTORY.getIndex())
+                    CreativePlayerInventoryScreenHooks creativePlayerInventoryScreenHooks = (CreativePlayerInventoryScreenHooks) screen;
+                    if (creativePlayerInventoryScreenHooks.rei_getSelectedTab() != ItemGroup.INVENTORY.getIndex())
                         return;
                 }
-                ScreenHelper.getLastOverlay().drawOverlay(i, i1, v);
+                ScreenHelper.getLastOverlay().render(i, i1, v);
             }
         });
         ClothClientHooks.SCREEN_MOUSE_SCROLLED.register((minecraftClient, screen, v, v1, v2) -> {
-            if (screen instanceof ContainerScreen && !(screen instanceof CreativePlayerInventoryScreen)) {
-                ContainerScreenOverlay overlay = ScreenHelper.getLastOverlay();
-                if (ScreenHelper.isOverlayVisible() && ContainerScreenOverlay.getItemListOverlay().getListArea().contains(ClientUtils.getMouseLocation()))
-                    if (overlay.mouseScrolled(v, v1, v2))
+            if (screen instanceof ContainerScreen)
+                if (screen instanceof CreativePlayerInventoryScreen) {
+                    if (((CreativePlayerInventoryScreenHooks) screen).rei_doRenderScrollBar())
+                        return ActionResult.PASS;
+                    if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().getRectangle().contains(ClientUtils.getMouseLocation()) && ScreenHelper.getLastOverlay().mouseScrolled(v, v1, v2))
                         return ActionResult.SUCCESS;
-            }
+                } else {
+                    ContainerScreenOverlay overlay = ScreenHelper.getLastOverlay();
+                    if (ScreenHelper.isOverlayVisible() && ContainerScreenOverlay.getItemListOverlay().getListArea().contains(ClientUtils.getMouseLocation()))
+                        if (overlay.mouseScrolled(v, v1, v2))
+                            return ActionResult.SUCCESS;
+                }
+            return ActionResult.PASS;
+        });
+        ClothClientHooks.SCREEN_CHAR_TYPED.register((minecraftClient, screen, character, keyCode) -> {
+            if (screen instanceof ContainerScreen)
+                if (screen instanceof CreativePlayerInventoryScreen) {
+                    if (((CreativePlayerInventoryScreenHooks) screen).rei_getField2888() || ((CreativePlayerInventoryScreenHooks) screen).rei_getSelectedTab() != ItemGroup.INVENTORY.getIndex())
+                        return ActionResult.PASS;
+                    if (ScreenHelper.getLastOverlay().charTyped(character, keyCode))
+                        return ActionResult.SUCCESS;
+                } else if (ScreenHelper.getLastOverlay().charTyped(character, keyCode))
+                    return ActionResult.SUCCESS;
             return ActionResult.PASS;
         });
     }

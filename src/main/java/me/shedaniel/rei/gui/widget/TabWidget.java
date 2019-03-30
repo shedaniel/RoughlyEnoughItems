@@ -3,7 +3,6 @@ package me.shedaniel.rei.gui.widget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.item.ItemStack;
@@ -29,7 +28,7 @@ public class TabWidget extends HighlightableWidget {
         this.id = id;
         this.recipeViewingWidget = recipeViewingWidget;
         this.bounds = bounds;
-        this.itemRenderer = MinecraftClient.getInstance().getItemRenderer();
+        this.itemRenderer = minecraft.getItemRenderer();
     }
     
     public void setItem(ItemStack item, String categoryName, boolean selected) {
@@ -72,13 +71,13 @@ public class TabWidget extends HighlightableWidget {
             
             GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             GuiLighting.disable();
-            MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
+            minecraft.getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
             this.blit(bounds.x, bounds.y + 2, selected ? 28 : 0, 192, 28, (selected ? 30 : 27));
             this.blitOffset = 100.0F;
             this.itemRenderer.zOffset = 100.0F;
             GuiLighting.enableForItems();
             this.itemRenderer.renderGuiItem(getItemStack(), l, i1);
-            this.itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, getItemStack(), l, i1);
+            this.itemRenderer.renderGuiItemOverlay(minecraft.textRenderer, getItemStack(), l, i1);
             GlStateManager.disableLighting();
             this.itemRenderer.zOffset = 0.0F;
             this.blitOffset = 0.0F;

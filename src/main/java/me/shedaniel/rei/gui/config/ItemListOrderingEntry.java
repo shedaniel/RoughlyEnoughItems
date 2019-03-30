@@ -7,7 +7,7 @@ import me.shedaniel.cloth.gui.ClothConfigScreen.ListWidget;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.ItemListOrdering;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.InputListener;
+import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.Window;
@@ -21,7 +21,7 @@ public class ItemListOrderingEntry extends ListEntry {
     private AtomicReference<Pair<ItemListOrdering, Boolean>> value;
     private ButtonWidget buttonWidget;
     private ButtonWidget resetButton;
-    private List<InputListener> widgets;
+    private List<Element> widgets;
     
     public ItemListOrderingEntry(String fieldName, Pair<ItemListOrdering, Boolean> val) {
         super(fieldName);
@@ -53,7 +53,7 @@ public class ItemListOrderingEntry extends ListEntry {
     }
     
     @Override
-    public void draw(int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+    public void render(int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
         Window window = MinecraftClient.getInstance().window;
         this.resetButton.active = this.getDefaultValue().isPresent() && (((Pair<ItemListOrdering, Boolean>) this.getDefaultValue().get()).getKey() != this.value.get().getKey() || ((Pair<ItemListOrdering, Boolean>) this.getDefaultValue().get()).getValue().booleanValue() != this.value.get().getValue().booleanValue());
         this.resetButton.y = y;
@@ -79,7 +79,7 @@ public class ItemListOrderingEntry extends ListEntry {
     }
     
     @Override
-    public List<? extends InputListener> children() {
+    public List<? extends Element> children() {
         return widgets;
     }
     
@@ -90,11 +90,11 @@ public class ItemListOrderingEntry extends ListEntry {
     public void setDragging(boolean b) {
     }
     
-    public InputListener getFocused() {
+    public Element getFocused() {
         return null;
     }
     
-    public void setFocused(InputListener inputListener) {
+    public void setFocused(Element inputListener) {
     }
     
     public boolean mouseClicked(double double_1, double double_2, int int_1) {

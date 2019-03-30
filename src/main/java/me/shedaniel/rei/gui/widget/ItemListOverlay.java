@@ -73,13 +73,9 @@ public class ItemListOverlay extends Widget {
     @Override
     public void render(int int_1, int int_2, float float_1) {
         widgets.forEach(widget -> widget.render(int_1, int_2, float_1));
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
-        if (rectangle.contains(ClientUtils.getMouseLocation()) && ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty() && MinecraftClient.getInstance().isInSingleplayer())
+        ClientPlayerEntity player = minecraft.player;
+        if (rectangle.contains(ClientUtils.getMouseLocation()) && ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty() && minecraft.isInSingleplayer())
             ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.delete_items")));
-    }
-    
-    public List<Widget> getWidgets() {
-        return widgets;
     }
     
     public void updateList(Rectangle bounds, int page, String searchTerm) {
@@ -98,7 +94,7 @@ public class ItemListOverlay extends Widget {
             ItemSlotWidget slotWidget = new ItemSlotWidget((int) (startX + (i % width) * 18), (int) (startY + MathHelper.floor(i / width) * 18), Collections.singletonList(currentDisplayed.get(j)), false, true, true) {
                 @Override
                 protected void drawToolTip(ItemStack itemStack, float delta) {
-                    ClientPlayerEntity player = MinecraftClient.getInstance().player;
+                    ClientPlayerEntity player = minecraft.player;
                     if (!ClientHelper.isCheating() || player.inventory.getCursorStack().isEmpty())
                         super.drawToolTip(itemStack, delta);
                 }
@@ -245,12 +241,12 @@ public class ItemListOverlay extends Widget {
     @Override
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
         if (rectangle.contains(double_1, double_2)) {
-            ClientPlayerEntity player = MinecraftClient.getInstance().player;
-            if (ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty() && MinecraftClient.getInstance().isInSingleplayer()) {
+            ClientPlayerEntity player = minecraft.player;
+            if (ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty() && minecraft.isInSingleplayer()) {
                 ClientHelper.sendDeletePacket();
                 return true;
             }
-            if (!player.inventory.getCursorStack().isEmpty() && MinecraftClient.getInstance().isInSingleplayer())
+            if (!player.inventory.getCursorStack().isEmpty() && minecraft.isInSingleplayer())
                 return false;
             for(Widget widget : children())
                 if (widget.mouseClicked(double_1, double_2, int_1))

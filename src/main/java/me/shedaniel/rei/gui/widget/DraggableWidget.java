@@ -2,7 +2,7 @@ package me.shedaniel.rei.gui.widget;
 
 import me.shedaniel.cloth.api.ClientUtils;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.InputListener;
+import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.Window;
 
 import java.awt.*;
@@ -51,7 +51,7 @@ public abstract class DraggableWidget extends HighlightableWidget {
             }
             return true;
         }
-        for(InputListener listener : children())
+        for(Element listener : children())
             if (listener.mouseDragged(double_1, double_2, int_1, double_3, double_4))
                 return true;
         return false;
@@ -67,7 +67,7 @@ public abstract class DraggableWidget extends HighlightableWidget {
                 onMouseReleaseMidPoint(getMidPoint());
                 return true;
             }
-        for(InputListener listener : children())
+        for(Element listener : children())
             if (listener.mouseReleased(double_1, double_2, int_1))
                 return true;
         return false;

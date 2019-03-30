@@ -10,10 +10,7 @@ import me.shedaniel.rei.client.Weather;
 import me.shedaniel.rei.gui.widget.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.audio.PositionedSoundInstance;
-import net.minecraft.client.gui.ContainerScreen;
-import net.minecraft.client.gui.InputListener;
-import net.minecraft.client.gui.Screen;
-import net.minecraft.client.gui.ScreenComponent;
+import net.minecraft.client.gui.*;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.Window;
@@ -32,7 +29,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class ContainerScreenOverlay extends ScreenComponent {
+public class ContainerScreenOverlay extends AbstractParentElement implements Drawable {
     
     private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private static final List<QueuedTooltip> QUEUED_TOOLTIPS = Lists.newArrayList();
@@ -189,10 +186,11 @@ public class ContainerScreenOverlay extends ScreenComponent {
                 page = MathHelper.clamp(page, 0, getTotalPage());
                 this.text = String.format("%s/%s", page + 1, getTotalPage() + 1);
                 super.render(mouseX, mouseY, partialTicks);
-                if (isHighlighted(mouseX, mouseY))
-                    addTooltip(QueuedTooltip.create(I18n.translate("text.rei.go_back_first_page").split("\n")));
-                else if (focused)
-                    ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(new Point(x, y), I18n.translate("text.rei.go_back_first_page").split("\n")));
+            }
+            
+            @Override
+            public Optional<String> getTooltips() {
+                return Optional.ofNullable(I18n.translate("text.rei.go_back_first_page"));
             }
             
             @Override
@@ -311,7 +309,8 @@ public class ContainerScreenOverlay extends ScreenComponent {
         return rectangle;
     }
     
-    public void drawOverlay(int mouseX, int mouseY, float partialTicks) {
+    @Override
+    public void render(int mouseX, int mouseY, float partialTicks) {
         List<ItemStack> currentStacks = ClientHelper.getInventoryItemsTypes();
         if (getLeft() != lastLeft)
             onInitialized(true);
@@ -321,7 +320,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
         }
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GuiLighting.disable();
-        this.draw(mouseX, mouseY, partialTicks);
+        this.renderWidgets(mouseX, mouseY, partialTicks);
         GuiLighting.disable();
         Screen currentScreen = MinecraftClient.getInstance().currentScreen;
         if (!(currentScreen instanceof RecipeViewingScreen) || !((RecipeViewingScreen) currentScreen).choosePageActivated)
@@ -353,11 +352,11 @@ public class ContainerScreenOverlay extends ScreenComponent {
         QUEUED_TOOLTIPS.add(queuedTooltip);
     }
     
-    public void draw(int int_1, int int_2, float float_1) {
+    public void renderWidgets(int int_1, int int_2, float float_1) {
         if (!ScreenHelper.isOverlayVisible())
             return;
-        buttonLeft.enabled = itemListOverlay.getWidgets().size() > 0;
-        buttonRight.enabled = itemListOverlay.getWidgets().size() > 0;
+        buttonLeft.enabled = itemListOverlay.children().size() > 0;
+        buttonRight.enabled = itemListOverlay.children().size() > 0;
         widgets.forEach(widget -> {
             GuiLighting.disable();
             widget.render(int_1, int_2, float_1);
@@ -415,7 +414,7 @@ public class ContainerScreenOverlay extends ScreenComponent {
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (ScreenHelper.isOverlayVisible())
-            for(InputListener listener : widgets)
+            for(Element listener : widgets)
                 if (listener.keyPressed(int_1, int_2, int_3))
                     return true;
         if (ClientHelper.HIDE.matchesKey(int_1, int_2)) {
@@ -442,14 +441,14 @@ public class ContainerScreenOverlay extends ScreenComponent {
     public boolean charTyped(char char_1, int int_1) {
         if (!ScreenHelper.isOverlayVisible())
             return false;
-        for(InputListener listener : children())
+        for(Element listener : children())
             if (listener.charTyped(char_1, int_1))
                 return true;
         return super.charTyped(char_1, int_1);
     }
     
     @Override
-    public List<? extends InputListener> children() {
+    public List<? extends Element> children() {
         return widgets;
     }
     
@@ -457,7 +456,15 @@ public class ContainerScreenOverlay extends ScreenComponent {
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
         if (!ScreenHelper.isOverlayVisible())
             return false;
-        return super.mouseClicked(double_1, double_2, int_1);
+        for(Element element : this.children()) {
+            if (element.mouseClicked(double_1, double_2, int_1)) {
+                this.method_20084(element);
+                if (int_1 == 0)
+                    this.setDragging(true);
+                return true;
+            }
+        }
+        return false;
     }
     
 }
