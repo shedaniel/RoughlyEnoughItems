@@ -83,7 +83,7 @@ public class RecipeViewingScreen extends Screen {
         }
         if ((int_1 == 256 || this.minecraft.options.keyInventory.matchesKey(int_1, int_2)) && this.shouldCloseOnEsc()) {
             MinecraftClient.getInstance().openScreen(ScreenHelper.getLastContainerScreen());
-            ScreenHelper.getLastOverlay().onInitialized();
+            ScreenHelper.getLastOverlay().init();
             return true;
         }
         if (int_1 == 258) {

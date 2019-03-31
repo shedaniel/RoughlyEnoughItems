@@ -4,13 +4,16 @@ public interface REIPlugin {
     
     default void onFirstLoad(PluginDisabler pluginDisabler) {}
     
-    void registerItems(ItemRegistry itemRegistry);
+    default void registerItems(ItemRegistry itemRegistry) {}
     
-    void registerPluginCategories(RecipeHelper recipeHelper);
+    default void registerPluginCategories(RecipeHelper recipeHelper) {}
     
-    void registerRecipeDisplays(RecipeHelper recipeHelper);
+    default void registerRecipeDisplays(RecipeHelper recipeHelper) {}
     
-    void registerSpeedCraft(RecipeHelper recipeHelper);
+    @Deprecated
+    default void registerSpeedCraft(RecipeHelper recipeHelper) {}
+    
+    default void registerOthers(RecipeHelper recipeHelper) {}
     
     default int getPriority() {
         return 0;

@@ -80,10 +80,10 @@ public class ItemListOverlay extends Widget {
     
     public void updateList(Rectangle bounds, int page, String searchTerm) {
         this.rectangle = bounds;
-        this.widgets = Lists.newLinkedList();
-        currentDisplayed = processSearchTerm(searchTerm, RoughlyEnoughItemsCore.getItemRegisterer().getItemList(), ScreenHelper.inventoryStacks);
         this.page = page;
+        this.widgets = Lists.newLinkedList();
         calculateListSize(rectangle);
+        currentDisplayed = processSearchTerm(searchTerm, RoughlyEnoughItemsCore.getItemRegisterer().getItemList(), ScreenHelper.inventoryStacks);
         double startX = rectangle.getCenterX() - width * 9;
         double startY = rectangle.getCenterY() - height * 9;
         this.listArea = new Rectangle((int) startX, (int) startY, width * 18, height * 18);
@@ -91,7 +91,7 @@ public class ItemListOverlay extends Widget {
             int j = i + page * getTotalSlotsPerPage();
             if (j >= currentDisplayed.size())
                 break;
-            ItemSlotWidget slotWidget = new ItemSlotWidget((int) (startX + (i % width) * 18), (int) (startY + MathHelper.floor(i / width) * 18), Collections.singletonList(currentDisplayed.get(j)), false, true, true) {
+            widgets.add(new ItemSlotWidget((int) (startX + (i % width) * 18), (int) (startY + MathHelper.floor(i / width) * 18), Collections.singletonList(currentDisplayed.get(j)), false, true, true) {
                 @Override
                 protected void drawToolTip(ItemStack itemStack, float delta) {
                     ClientPlayerEntity player = minecraft.player;
@@ -115,9 +115,7 @@ public class ItemListOverlay extends Widget {
                     }
                     return false;
                 }
-            };
-            if (true || this.rectangle.contains(slotWidget.getBounds()))
-                widgets.add(slotWidget);
+            });
         }
     }
     
@@ -220,7 +218,7 @@ public class ItemListOverlay extends Widget {
         return true;
     }
     
-    private void calculateListSize(Rectangle rect) {
+    public void calculateListSize(Rectangle rect) {
         int xOffset = 0, yOffset = 0;
         width = 0;
         height = 0;

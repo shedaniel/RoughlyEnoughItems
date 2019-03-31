@@ -51,14 +51,6 @@ public interface RecipeCategory<T extends RecipeDisplay> {
         };
     }
     
-    default boolean canDisplay(RecipeDisplay display) {
-        if (getDisplaySettings().canDisplay(display) == DisplaySettings.VisableType.ALWAYS)
-            return true;
-        if (getDisplaySettings().canDisplay(display) == DisplaySettings.VisableType.NEVER)
-            return false;
-        return RoughlyEnoughItemsCore.getConfigManager().getConfig().preferVisibleRecipes;
-    }
-    
     default int getDisplayHeight() {
         return getDisplaySettings().getDisplayHeight(this);
     }
