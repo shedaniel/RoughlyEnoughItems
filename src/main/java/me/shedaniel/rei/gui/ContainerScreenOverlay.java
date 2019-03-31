@@ -36,7 +36,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
     public static String searchTerm = "";
     private static int page = 0;
     private static ItemListOverlay itemListOverlay;
-    private final List<Widget> widgets = Lists.newArrayList();
+    private final List<Widget> widgets = Lists.newLinkedList();
     private Rectangle rectangle;
     private Window window;
     private ButtonWidget buttonLeft, buttonRight;
@@ -46,18 +46,18 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
         return itemListOverlay;
     }
     
-    public void onInitialized() {
-        onInitialized(false);
+    public void init() {
+        init(false);
     }
     
-    public void onInitialized(boolean setPage) {
+    public void init(boolean setPage) {
         //Update Variables
-        this.widgets.clear();
+        this.children().clear();
         this.window = MinecraftClient.getInstance().window;
         this.rectangle = calculateBoundary();
         this.lastLeft = getLeft();
         widgets.add(this.itemListOverlay = new ItemListOverlay(page));
-        this.itemListOverlay.updateList(getItemListArea(), page, searchTerm);
+        itemListOverlay.updateList(getItemListArea(), page, searchTerm);
         
         widgets.add(buttonLeft = new ButtonWidget(rectangle.x, rectangle.y + 5, 16, 16, new TranslatableTextComponent("text.rei.left_arrow")) {
             @Override
@@ -313,7 +313,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
     public void render(int mouseX, int mouseY, float partialTicks) {
         List<ItemStack> currentStacks = ClientHelper.getInventoryItemsTypes();
         if (getLeft() != lastLeft)
-            onInitialized(true);
+            init(true);
         else if (RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() && (!hasSameListContent(new LinkedList<>(ScreenHelper.inventoryStacks), currentStacks) || (currentStacks.size() != ScreenHelper.inventoryStacks.size()))) {
             ScreenHelper.inventoryStacks = ClientHelper.getInventoryItemsTypes();
             itemListOverlay.updateList(getItemListArea(), page, searchTerm);
@@ -441,10 +441,10 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
     public boolean charTyped(char char_1, int int_1) {
         if (!ScreenHelper.isOverlayVisible())
             return false;
-        for(Element listener : children())
+        for(Element listener : widgets)
             if (listener.charTyped(char_1, int_1))
                 return true;
-        return super.charTyped(char_1, int_1);
+        return false;
     }
     
     @Override
@@ -456,7 +456,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
         if (!ScreenHelper.isOverlayVisible())
             return false;
-        for(Element element : this.children()) {
+        for(Element element : widgets) {
             if (element.mouseClicked(double_1, double_2, int_1)) {
                 this.method_20084(element);
                 if (int_1 == 0)

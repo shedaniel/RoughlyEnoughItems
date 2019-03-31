@@ -23,7 +23,7 @@ public class CreditsScreen extends Screen {
         if (int_1 == 256 && this.shouldCloseOnEsc()) {
             this.minecraft.openScreen(parent);
             if (parent instanceof ContainerScreen)
-                ScreenHelper.getLastOverlay().onInitialized();
+                ScreenHelper.getLastOverlay().init();
             return true;
         }
         return super.keyPressed(int_1, int_2, int_3);
@@ -40,7 +40,7 @@ public class CreditsScreen extends Screen {
             @Override
             public void onPressed() {
                 CreditsScreen.this.minecraft.openScreen(parent);
-                ScreenHelper.getLastOverlay().onInitialized();
+                ScreenHelper.getLastOverlay().init();
             }
         });
     }

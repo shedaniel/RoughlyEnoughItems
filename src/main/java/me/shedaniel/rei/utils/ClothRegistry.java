@@ -1,5 +1,6 @@
 package me.shedaniel.rei.utils;
 
+import com.google.common.collect.Lists;
 import javafx.util.Pair;
 import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.cloth.api.ConfigScreenBuilder;
@@ -16,8 +17,10 @@ import me.shedaniel.rei.gui.config.ItemListOrderingEntry;
 import me.shedaniel.rei.listeners.CreativePlayerInventoryScreenHooks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ContainerScreen;
+import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.Screen;
 import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
+import net.minecraft.client.gui.ingame.PlayerInventoryScreen;
 import net.minecraft.client.gui.widget.RecipeBookButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.ItemGroup;
@@ -38,13 +41,21 @@ public class ClothRegistry {
         });
         ClothClientHooks.SCREEN_INIT_POST.register((minecraftClient, screen, screenHooks) -> {
             if (screen instanceof ContainerScreen) {
-                if (screen instanceof CreativePlayerInventoryScreen) {
-                    CreativePlayerInventoryScreenHooks creativePlayerInventoryScreenHooks = (CreativePlayerInventoryScreenHooks) screen;
-                    if (creativePlayerInventoryScreenHooks.rei_getSelectedTab() != ItemGroup.INVENTORY.getIndex())
+                if (screen instanceof CreativePlayerInventoryScreen)
+                    if (((CreativePlayerInventoryScreenHooks) screen).rei_getSelectedTab() != ItemGroup.INVENTORY.getIndex())
                         return;
-                }
+                if (screen instanceof PlayerInventoryScreen && minecraftClient.interactionManager.hasCreativeInventory())
+                    return;
                 ScreenHelper.setLastContainerScreen((ContainerScreen) screen);
-                screenHooks.cloth_getInputListeners().add(ScreenHelper.getLastOverlay(true, false));
+                boolean alreadyAdded = false;
+                for(Element element : Lists.newArrayList(screenHooks.cloth_getInputListeners()))
+                    if (ContainerScreenOverlay.class.isAssignableFrom(element.getClass()))
+                        if (alreadyAdded)
+                            screenHooks.cloth_getInputListeners().remove(element);
+                        else
+                            alreadyAdded = true;
+                if (!alreadyAdded)
+                    screenHooks.cloth_getInputListeners().add(ScreenHelper.getLastOverlay(true, false));
             }
         });
         ClothClientHooks.SCREEN_RENDER_POST.register((minecraftClient, screen, i, i1, v) -> {
@@ -86,7 +97,7 @@ public class ClothRegistry {
     }
     
     public static void openConfigScreen(Screen parent) {
-        ClothConfigScreen.Builder builder = new ClothConfigScreen.Builder(parent, I18n.translate("text.rei.config.title"), null);
+        ConfigScreenBuilder builder = new ClothConfigScreen.Builder(parent, I18n.translate("text.rei.config.title"), null);
         builder.addCategory("text.rei.config.general").addOption(new BooleanListEntry("text.rei.config.cheating", RoughlyEnoughItemsCore.getConfigManager().getConfig().cheating, "text.cloth.reset_value", () -> false, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().cheating = bool));
         ConfigScreenBuilder.CategoryBuilder appearance = builder.addCategory("text.rei.config.appearance");
         appearance.addOption(new BooleanListEntry("text.rei.config.side_search_box", RoughlyEnoughItemsCore.getConfigManager().getConfig().sideSearchField, "text.cloth.reset_value", () -> false, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().sideSearchField = bool));
@@ -102,6 +113,7 @@ public class ClothRegistry {
         advanced.addOption(new StringListEntry("text.rei.gamemode_command", RoughlyEnoughItemsCore.getConfigManager().getConfig().gamemodeCommand, "text.cloth.reset_value", () -> "/gamemode {gamemode}", s -> RoughlyEnoughItemsCore.getConfigManager().getConfig().gamemodeCommand = s));
         advanced.addOption(new StringListEntry("text.rei.weather_command", RoughlyEnoughItemsCore.getConfigManager().getConfig().weatherCommand, "text.cloth.reset_value", () -> "/weather {weather}", s -> RoughlyEnoughItemsCore.getConfigManager().getConfig().weatherCommand = s));
         advanced.addOption(new BooleanListEntry("text.rei.config.prefer_visible_recipes", RoughlyEnoughItemsCore.getConfigManager().getConfig().preferVisibleRecipes, "text.cloth.reset_value", () -> false, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().preferVisibleRecipes = bool));
+        advanced.addOption(new BooleanListEntry("text.rei.config.enable_legacy_speedcraft_support", RoughlyEnoughItemsCore.getConfigManager().getConfig().enableLegacySpeedCraftSupport, "text.cloth.reset_value", () -> false, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().enableLegacySpeedCraftSupport = bool));
         builder.setOnSave(savedConfig -> {
             try {
                 RoughlyEnoughItemsCore.getConfigManager().saveConfig();

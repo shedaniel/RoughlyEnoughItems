@@ -34,7 +34,7 @@ public class ScreenHelper implements ClientModInitializer {
     public static ContainerScreenOverlay getLastOverlay(boolean reset, boolean setPage) {
         if (overlay == null || reset) {
             overlay = new ContainerScreenOverlay();
-            overlay.onInitialized(setPage);
+            overlay.init(setPage);
         }
         return overlay;
     }

@@ -122,10 +122,22 @@ public class DefaultPlugin implements REIPlugin {
     }
     
     @Override
-    public void registerSpeedCraft(RecipeHelper recipeHelper) {
-        recipeHelper.registerSpeedCraftButtonArea(DefaultPlugin.CAMPFIRE, null);
-        recipeHelper.registerSpeedCraftButtonArea(DefaultPlugin.STONE_CUTTING, null);
-        recipeHelper.registerSpeedCraftButtonArea(DefaultPlugin.BREWING, null);
+    public void registerOthers(RecipeHelper recipeHelper) {
+        recipeHelper.registerRecipeVisibilityHandler(new DisplayVisibilityHandler() {
+            @Override
+            public DisplayVisibility handleDisplay(RecipeCategory category, RecipeDisplay display) {
+                return DisplayVisibility.ALWAYS_VISIBLE;
+            }
+            
+            @Override
+            public float getPriority() {
+                return -1f;
+            }
+        });
+        recipeHelper.registerDefaultSpeedCraftButtonArea(DefaultPlugin.CRAFTING);
+        recipeHelper.registerDefaultSpeedCraftButtonArea(DefaultPlugin.SMELTING);
+        recipeHelper.registerDefaultSpeedCraftButtonArea(DefaultPlugin.SMOKING);
+        recipeHelper.registerDefaultSpeedCraftButtonArea(DefaultPlugin.BLASTING);
         recipeHelper.registerSpeedCraftFunctional(DefaultPlugin.CRAFTING, new SpeedCraftFunctional<DefaultCraftingDisplay>() {
             @Override
             public Class[] getFunctioningFor() {

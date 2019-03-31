@@ -35,10 +35,20 @@ public interface RecipeHelper {
     
     void registerSpeedCraftButtonArea(Identifier category, ButtonAreaSupplier rectangle);
     
+    void registerDefaultSpeedCraftButtonArea(Identifier category);
+    
     List<SpeedCraftFunctional> getSpeedCraftFunctional(RecipeCategory category);
     
     void registerSpeedCraftFunctional(Identifier category, SpeedCraftFunctional functional);
     
     Map<RecipeCategory, List<RecipeDisplay>> getAllRecipes();
+    
+    void registerRecipeVisibilityHandler(DisplayVisibilityHandler visibilityHandler);
+    
+    void unregisterRecipeVisibilityHandler(DisplayVisibilityHandler visibilityHandler);
+    
+    List<DisplayVisibilityHandler> getDisplayVisibilityHandlers();
+    
+    boolean isDisplayVisible(RecipeDisplay display, boolean respectConfig);
     
 }

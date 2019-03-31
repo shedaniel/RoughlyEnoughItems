@@ -13,10 +13,10 @@
     "me.shedaniel.rei.client.ScreenHelper"
   ],
   "requires": {
-    "fabric": "0.2.3"
+    "fabric": "^0.2.3"
   },
   "recommended": {
-    "pluginloader": "1.0.6"
+    "pluginloader": "^1.0.6"
   },
   "mixins": {
     "client": "roughlyenoughitems.client.json"
