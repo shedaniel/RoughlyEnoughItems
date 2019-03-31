@@ -1,3 +1,5 @@
+## v2.6.0.77
+- fish
 ## v2.6.0.76
 - New DisplayVisibilityHandler
 - Fixed [#49](https://github.com/shedaniel/RoughlyEnoughItems/issues/49): REI Overlay added twice

@@ -48,6 +48,8 @@ public class ConfigObject {
     @Comment("Enable support for old REI plugins which uses registerSpeedCraft")
     public boolean enableLegacySpeedCraftSupport = false;
     
+    public boolean fish = true;
+    
     @Comment("The location of choose page dialog")
     public RelativePoint choosePageDialogPoint = new RelativePoint(.5, .5);
     

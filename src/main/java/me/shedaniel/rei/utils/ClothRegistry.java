@@ -99,6 +99,7 @@ public class ClothRegistry {
     public static void openConfigScreen(Screen parent) {
         ConfigScreenBuilder builder = new ClothConfigScreen.Builder(parent, I18n.translate("text.rei.config.title"), null);
         builder.addCategory("text.rei.config.general").addOption(new BooleanListEntry("text.rei.config.cheating", RoughlyEnoughItemsCore.getConfigManager().getConfig().cheating, "text.cloth.reset_value", () -> false, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().cheating = bool));
+        builder.getCategory("text.rei.config.general").addOption(new BooleanListEntry("fish is good", RoughlyEnoughItemsCore.getConfigManager().getConfig().fish, "text.cloth.reset_value", () -> true, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().fish = bool));
         ConfigScreenBuilder.CategoryBuilder appearance = builder.addCategory("text.rei.config.appearance");
         appearance.addOption(new BooleanListEntry("text.rei.config.side_search_box", RoughlyEnoughItemsCore.getConfigManager().getConfig().sideSearchField, "text.cloth.reset_value", () -> false, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().sideSearchField = bool));
         appearance.addOption(new ItemListOrderingEntry("text.rei.config.list_ordering", new Pair<>(RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering, RoughlyEnoughItemsCore.getConfigManager().getConfig().isAscending)));

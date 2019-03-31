@@ -3,6 +3,7 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.cloth.api.ClientUtils;
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.ScreenHelper;
 import net.minecraft.client.gui.Element;
@@ -15,11 +16,13 @@ import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 public class ItemSlotWidget extends HighlightableWidget {
     
+    private static final Date DATE = new Date();
     private static final Identifier RECIPE_GUI = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private List<ItemStack> itemList = new LinkedList<>();
     private boolean drawBackground, showToolTips, clickToMoreRecipes, drawHighlightedBackground;
@@ -59,7 +62,7 @@ public class ItemSlotWidget extends HighlightableWidget {
     
     @Override
     public void render(int mouseX, int mouseY, float delta) {
-        final ItemStack itemStack = getCurrentStack();
+        ItemStack itemStack = getCurrentStack().copy();
         if (drawBackground) {
             minecraft.getTextureManager().bindTexture(RECIPE_GUI);
             blit(this.x - 1, this.y - 1, 0, 222, 18, 18);
@@ -74,6 +77,8 @@ public class ItemSlotWidget extends HighlightableWidget {
             GlStateManager.enableDepthTest();
         }
         if (!itemStack.isEmpty()) {
+            if (!isHighlighted(mouseX, mouseY) && DATE.getMonth() == 3 && DATE.getDay() == 1 && RoughlyEnoughItemsCore.getConfigManager().getConfig().fish)
+                itemStack = Items.TROPICAL_FISH.getDefaultStack();
             GuiLighting.enableForItems();
             ItemRenderer itemRenderer = minecraft.getItemRenderer();
             itemRenderer.zOffset = 200.0F;
