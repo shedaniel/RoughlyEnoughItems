@@ -1,5 +1,10 @@
+## v2.6.0.78
+- Added config to force enable april fools
+- Fix crash related to `getTotalPage()`
+- Fix depth on overlay
+- Less mixins
 ## v2.6.0.77
-- fish
+- fish (April Fools [Download](https://minecraft.curseforge.com/projects/roughly-enough-items/files/2693786))
 ## v2.6.0.76
 - New DisplayVisibilityHandler
 - Fixed [#49](https://github.com/shedaniel/RoughlyEnoughItems/issues/49): REI Overlay added twice

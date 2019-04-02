@@ -65,7 +65,7 @@ public class TabWidget extends HighlightableWidget {
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float partialTicks) {
+    public void render(int mouseX, int mouseY, float delta) {
         if (shown) {
             int l = (int) this.bounds.getCenterX() - 8, i1 = (int) this.bounds.getCenterY() - 6;
             

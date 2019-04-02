@@ -43,19 +43,12 @@ public abstract class MixinCreativePlayerInventoryScreen extends AbstractPlayerI
         return field_2888;
     }
     
+    // Inject to fix pressing T to switch tab
+    // TODO: Make into Cloth events
     @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
     public void keyPressed(int int_1, int int_2, int int_3, CallbackInfoReturnable<Boolean> ci) {
         if (selectedTab == ItemGroup.INVENTORY.getIndex())
             if (ScreenHelper.getLastOverlay().keyPressed(int_1, int_2, int_3)) {
-                ci.setReturnValue(true);
-                ci.cancel();
-            }
-    }
-    
-    @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
-    public void mouseClicked(double i, double j, int k, CallbackInfoReturnable<Boolean> ci) {
-        if (selectedTab == ItemGroup.INVENTORY.getIndex())
-            if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().mouseClicked(i, j, k)) {
                 ci.setReturnValue(true);
                 ci.cancel();
             }

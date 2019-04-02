@@ -1,8 +1,8 @@
 package me.shedaniel.rei.mixin;
 
-import me.shedaniel.rei.listeners.CreativePlayerInventoryScreenHooks;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
+import me.shedaniel.rei.listeners.CreativePlayerInventoryScreenHooks;
 import net.minecraft.client.gui.ContainerScreen;
 import net.minecraft.client.gui.Screen;
 import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
@@ -58,6 +58,7 @@ public class MixinContainerScreen extends Screen implements ContainerScreenHooks
         return focusedSlot;
     }
     
+    // TODO: Make into Cloth events
     @Inject(method = "keyPressed(III)Z", at = @At("HEAD"), cancellable = true)
     public void keyPressed(int int_1, int int_2, int int_3, CallbackInfoReturnable<Boolean> ci) {
         if (minecraft.currentScreen instanceof CreativePlayerInventoryScreen) {

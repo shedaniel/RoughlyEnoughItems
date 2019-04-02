@@ -28,18 +28,18 @@ public abstract class CraftableToggleButtonWidget extends ButtonWidget {
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float partialTicks) {
+    public void render(int mouseX, int mouseY, float delta) {
         GuiLighting.disable();
-        super.render(mouseX, mouseY, partialTicks);
+        super.render(mouseX, mouseY, delta);
         
         GuiLighting.enableForItems();
-        this.itemRenderer.zOffset = 0.0F;
+        this.itemRenderer.zOffset = this.blitOffset;
         this.itemRenderer.renderGuiItem(new ItemStack(Blocks.CRAFTING_TABLE), getBounds().x + 2, getBounds().y + 2);
         this.itemRenderer.zOffset = 0.0F;
         GuiLighting.disable();
         MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        this.blitOffset = 100f;
+        this.blitOffset += 100f;
         this.blit(getBounds().x, getBounds().y, (56 + (RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() ? 0 : 20)), 202, 20, 20);
         this.blitOffset = 0f;
     }

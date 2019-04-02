@@ -10,6 +10,7 @@ import me.shedaniel.rei.client.Weather;
 import me.shedaniel.rei.gui.widget.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.audio.PositionedSoundInstance;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.*;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
@@ -23,10 +24,8 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameMode;
 
 import java.awt.*;
-import java.util.Collections;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ContainerScreenOverlay extends AbstractParentElement implements Drawable {
@@ -108,8 +107,8 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             }
             
             @Override
-            public void render(int mouseX, int mouseY, float partialTicks) {
-                super.render(mouseX, mouseY, partialTicks);
+            public void render(int mouseX, int mouseY, float delta) {
+                super.render(mouseX, mouseY, delta);
                 GuiLighting.disable();
                 if (ClientHelper.isCheating())
                     fill(getBounds().x, getBounds().y, getBounds().x + 20, getBounds().y + 20, new Color(255, 0, 0, 42).getRGB());
@@ -141,9 +140,9 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
                 }
                 
                 @Override
-                public void render(int mouseX, int mouseY, float partialTicks) {
+                public void render(int mouseX, int mouseY, float delta) {
                     text = getGameModeShortText(getCurrentGameMode());
-                    super.render(mouseX, mouseY, partialTicks);
+                    super.render(mouseX, mouseY, delta);
                 }
                 
                 @Override
@@ -162,8 +161,8 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
                 }
                 
                 @Override
-                public void render(int mouseX, int mouseY, float partialTicks) {
-                    super.render(mouseX, mouseY, partialTicks);
+                public void render(int mouseX, int mouseY, float delta) {
+                    super.render(mouseX, mouseY, delta);
                     GuiLighting.disable();
                     MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
                     GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
@@ -182,10 +181,10 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
         }
         widgets.add(new ClickableLabelWidget(rectangle.x + (rectangle.width / 2), rectangle.y + 10, "") {
             @Override
-            public void render(int mouseX, int mouseY, float partialTicks) {
+            public void render(int mouseX, int mouseY, float delta) {
                 page = MathHelper.clamp(page, 0, getTotalPage());
                 this.text = String.format("%s/%s", page + 1, getTotalPage() + 1);
-                super.render(mouseX, mouseY, partialTicks);
+                super.render(mouseX, mouseY, delta);
             }
             
             @Override
@@ -205,16 +204,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             }
         });
         if (ScreenHelper.searchField == null)
-            ScreenHelper.searchField = new TextFieldWidget(0, 0, 0, 0) {
-                @Override
-                public boolean mouseClicked(double double_1, double double_2, int int_1) {
-                    if (isVisible() && getBounds().contains(double_1, double_2) && int_1 == 1) {
-                        setText("");
-                        return true;
-                    }
-                    return super.mouseClicked(double_1, double_2, int_1);
-                }
-            };
+            ScreenHelper.searchField = new SearchFieldWidget(0, 0, 0, 0);
         ScreenHelper.searchField.setChangedListener(s -> {
             searchTerm = s;
             itemListOverlay.updateList(getItemListArea(), page, searchTerm);
@@ -228,6 +218,12 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
                 public void onPressed() {
                     RoughlyEnoughItemsCore.getConfigManager().toggleCraftableOnly();
                     itemListOverlay.updateList(getItemListArea(), page, searchTerm);
+                }
+                
+                @Override
+                public void render(int mouseX, int mouseY, float delta) {
+                    blitOffset = 600f;
+                    super.render(mouseX, mouseY, delta);
                 }
             });
         
@@ -310,7 +306,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float partialTicks) {
+    public void render(int mouseX, int mouseY, float delta) {
         List<ItemStack> currentStacks = ClientHelper.getInventoryItemsTypes();
         if (getLeft() != lastLeft)
             init(true);
@@ -320,17 +316,66 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
         }
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GuiLighting.disable();
-        this.renderWidgets(mouseX, mouseY, partialTicks);
-        GuiLighting.disable();
+        this.renderWidgets(mouseX, mouseY, delta);
+    }
+    
+    public void lateRender(int mouseX, int mouseY, float delta) {
+        ScreenHelper.searchField.laterRender(mouseX, mouseY, delta);
         Screen currentScreen = MinecraftClient.getInstance().currentScreen;
         if (!(currentScreen instanceof RecipeViewingScreen) || !((RecipeViewingScreen) currentScreen).choosePageActivated)
-            QUEUED_TOOLTIPS.stream().filter(queuedTooltip -> queuedTooltip != null).forEach(queuedTooltip -> {
-                GlStateManager.translatef(0, 0, 600);
-                MinecraftClient.getInstance().currentScreen.renderTooltip(queuedTooltip.getText(), queuedTooltip.getLocation().x, queuedTooltip.getLocation().y);
-                GlStateManager.translatef(0, 0, -600);
-            });
+            QUEUED_TOOLTIPS.stream().filter(queuedTooltip -> queuedTooltip != null).forEach(queuedTooltip -> renderTooltip(queuedTooltip.getText(), queuedTooltip.getLocation().x, queuedTooltip.getLocation().y));
         QUEUED_TOOLTIPS.clear();
-        GuiLighting.disable();
+    }
+    
+    public void renderTooltip(List<String> list_1, int int_1, int int_2) {
+        TextRenderer font = MinecraftClient.getInstance().textRenderer;
+        Window window = MinecraftClient.getInstance().window;
+        if (!list_1.isEmpty()) {
+            GlStateManager.disableRescaleNormal();
+            GuiLighting.disable();
+            GlStateManager.disableLighting();
+            int int_3 = 0;
+            Iterator var5 = list_1.iterator();
+            while (var5.hasNext()) {
+                String string_1 = (String) var5.next();
+                int int_4 = font.getStringWidth(string_1);
+                if (int_4 > int_3)
+                    int_3 = int_4;
+            }
+            int int_5 = int_1 + 12;
+            int int_6 = int_2 - 12;
+            int int_8 = 8;
+            if (list_1.size() > 1)
+                int_8 += 2 + (list_1.size() - 1) * 10;
+            if (int_5 + int_3 > window.getScaledWidth())
+                int_5 -= 28 + int_3;
+            if (int_6 + int_8 + 6 > window.getScaledHeight())
+                int_6 = window.getScaledHeight() - int_8 - 6;
+            
+            this.blitOffset = 1000f;
+            this.fillGradient(int_5 - 3, int_6 - 4, int_5 + int_3 + 3, int_6 - 3, -267386864, -267386864);
+            this.fillGradient(int_5 - 3, int_6 + int_8 + 3, int_5 + int_3 + 3, int_6 + int_8 + 4, -267386864, -267386864);
+            this.fillGradient(int_5 - 3, int_6 - 3, int_5 + int_3 + 3, int_6 + int_8 + 3, -267386864, -267386864);
+            this.fillGradient(int_5 - 4, int_6 - 3, int_5 - 3, int_6 + int_8 + 3, -267386864, -267386864);
+            this.fillGradient(int_5 + int_3 + 3, int_6 - 3, int_5 + int_3 + 4, int_6 + int_8 + 3, -267386864, -267386864);
+            this.fillGradient(int_5 - 3, int_6 - 3 + 1, int_5 - 3 + 1, int_6 + int_8 + 3 - 1, 1347420415, 1344798847);
+            this.fillGradient(int_5 + int_3 + 2, int_6 - 3 + 1, int_5 + int_3 + 3, int_6 + int_8 + 3 - 1, 1347420415, 1344798847);
+            this.fillGradient(int_5 - 3, int_6 - 3, int_5 + int_3 + 3, int_6 - 3 + 1, 1347420415, 1347420415);
+            this.fillGradient(int_5 - 3, int_6 + int_8 + 2, int_5 + int_3 + 3, int_6 + int_8 + 3, 1344798847, 1344798847);
+            
+            for(int int_12 = 0; int_12 < list_1.size(); ++int_12) {
+                GlStateManager.disableDepthTest();
+                font.drawWithShadow(list_1.get(int_12), (float) int_5, (float) int_6, -1);
+                GlStateManager.enableDepthTest();
+                if (int_12 == 0)
+                    int_6 += 2;
+                int_6 += 10;
+            }
+            this.blitOffset = 0.0F;
+            GlStateManager.enableLighting();
+            GuiLighting.enable();
+            GlStateManager.enableRescaleNormal();
+        }
     }
     
     private boolean hasSameListContent(List<ItemStack> list1, List<ItemStack> list2) {
@@ -389,7 +434,9 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
     }
     
     private int getTotalPage() {
-        return MathHelper.ceil(itemListOverlay.getCurrentDisplayed().size() / itemListOverlay.getTotalSlotsPerPage());
+        if (itemListOverlay.getTotalSlotsPerPage() > 0)
+            return MathHelper.ceil(itemListOverlay.getCurrentDisplayed().size() / itemListOverlay.getTotalSlotsPerPage());
+        return 0;
     }
     
     @Override
@@ -465,6 +512,32 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             }
         }
         return false;
+    }
+    
+    public static class SearchFieldWidget extends TextFieldWidget {
+        public SearchFieldWidget(int x, int y, int width, int height) {
+            super(x, y, width, height);
+        }
+        
+        public void laterRender(int int_1, int int_2, float float_1) {
+            GuiLighting.disable();
+            GlStateManager.disableDepthTest();
+            super.render(int_1, int_2, float_1);
+            GlStateManager.enableDepthTest();
+        }
+        
+        @Override
+        public boolean mouseClicked(double double_1, double double_2, int int_1) {
+            if (isVisible() && getBounds().contains(double_1, double_2) && int_1 == 1) {
+                setText("");
+                return true;
+            }
+            return super.mouseClicked(double_1, double_2, int_1);
+        }
+        
+        @Override
+        public void render(int int_1, int int_2, float float_1) {
+        }
     }
     
 }

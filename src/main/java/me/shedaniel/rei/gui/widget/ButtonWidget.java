@@ -56,7 +56,7 @@ public abstract class ButtonWidget extends HighlightableWidget {
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float partialTicks) {
+    public void render(int mouseX, int mouseY, float delta) {
         int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;
         TextRenderer textRenderer = minecraft.textRenderer;
         minecraft.getTextureManager().bindTexture(AbstractButtonWidget.WIDGETS_LOCATION);

@@ -5,11 +5,10 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "MixinContainerScreen",
-    "MixinPlayerInventoryScreen",
-    "MixinCraftingTableScreen",
     "MixinCreativePlayerInventoryScreen",
     "MixinBrewingRecipeRegistry",
-    "MixinRecipeBookGui"
+    "MixinRecipeBookGui",
+    "MixinGameRenderer"
   ],
   "injectors": {
     "defaultRequire": 1
