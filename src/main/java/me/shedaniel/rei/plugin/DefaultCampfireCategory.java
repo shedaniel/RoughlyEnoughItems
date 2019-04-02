@@ -43,8 +43,8 @@ public class DefaultCampfireCategory implements RecipeCategory<DefaultCampfireDi
         Point startPoint = new Point((int) bounds.getCenterX() - 41, (int) bounds.getCenterY() - 27);
         List<Widget> widgets = new LinkedList<>(Arrays.asList(new RecipeBaseWidget(bounds) {
             @Override
-            public void render(int mouseX, int mouseY, float partialTicks) {
-                super.render(mouseX, mouseY, partialTicks);
+            public void render(int mouseX, int mouseY, float delta) {
+                super.render(mouseX, mouseY, delta);
                 GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                 GuiLighting.disable();
                 MinecraftClient.getInstance().getTextureManager().bindTexture(DISPLAY_TEXTURE);

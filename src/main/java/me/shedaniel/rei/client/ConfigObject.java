@@ -48,7 +48,8 @@ public class ConfigObject {
     @Comment("Enable support for old REI plugins which uses registerSpeedCraft")
     public boolean enableLegacySpeedCraftSupport = false;
     
-    public boolean fish = true;
+    @Comment("Force enable 2019 REI April Fools' joke")
+    public boolean aprilFoolsFish2019 = false;
     
     @Comment("The location of choose page dialog")
     public RelativePoint choosePageDialogPoint = new RelativePoint(.5, .5);

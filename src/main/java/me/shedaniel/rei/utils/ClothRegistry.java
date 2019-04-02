@@ -68,6 +68,13 @@ public class ClothRegistry {
                 ScreenHelper.getLastOverlay().render(i, i1, v);
             }
         });
+        ClothClientHooks.SCREEN_MOUSE_CLICKED.register((minecraftClient, screen, v, v1, i) -> {
+            if (screen instanceof CreativePlayerInventoryScreen)
+                if (((CreativePlayerInventoryScreenHooks) screen).rei_getSelectedTab() == ItemGroup.INVENTORY.getIndex())
+                    if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().mouseClicked(v, v1, i))
+                        return ActionResult.SUCCESS;
+            return ActionResult.PASS;
+        });
         ClothClientHooks.SCREEN_MOUSE_SCROLLED.register((minecraftClient, screen, v, v1, v2) -> {
             if (screen instanceof ContainerScreen)
                 if (screen instanceof CreativePlayerInventoryScreen) {
@@ -99,7 +106,6 @@ public class ClothRegistry {
     public static void openConfigScreen(Screen parent) {
         ConfigScreenBuilder builder = new ClothConfigScreen.Builder(parent, I18n.translate("text.rei.config.title"), null);
         builder.addCategory("text.rei.config.general").addOption(new BooleanListEntry("text.rei.config.cheating", RoughlyEnoughItemsCore.getConfigManager().getConfig().cheating, "text.cloth.reset_value", () -> false, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().cheating = bool));
-        builder.getCategory("text.rei.config.general").addOption(new BooleanListEntry("fish is good", RoughlyEnoughItemsCore.getConfigManager().getConfig().fish, "text.cloth.reset_value", () -> true, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().fish = bool));
         ConfigScreenBuilder.CategoryBuilder appearance = builder.addCategory("text.rei.config.appearance");
         appearance.addOption(new BooleanListEntry("text.rei.config.side_search_box", RoughlyEnoughItemsCore.getConfigManager().getConfig().sideSearchField, "text.cloth.reset_value", () -> false, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().sideSearchField = bool));
         appearance.addOption(new ItemListOrderingEntry("text.rei.config.list_ordering", new Pair<>(RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering, RoughlyEnoughItemsCore.getConfigManager().getConfig().isAscending)));
@@ -115,6 +121,8 @@ public class ClothRegistry {
         advanced.addOption(new StringListEntry("text.rei.weather_command", RoughlyEnoughItemsCore.getConfigManager().getConfig().weatherCommand, "text.cloth.reset_value", () -> "/weather {weather}", s -> RoughlyEnoughItemsCore.getConfigManager().getConfig().weatherCommand = s));
         advanced.addOption(new BooleanListEntry("text.rei.config.prefer_visible_recipes", RoughlyEnoughItemsCore.getConfigManager().getConfig().preferVisibleRecipes, "text.cloth.reset_value", () -> false, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().preferVisibleRecipes = bool));
         advanced.addOption(new BooleanListEntry("text.rei.config.enable_legacy_speedcraft_support", RoughlyEnoughItemsCore.getConfigManager().getConfig().enableLegacySpeedCraftSupport, "text.cloth.reset_value", () -> false, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().enableLegacySpeedCraftSupport = bool));
+        ConfigScreenBuilder.CategoryBuilder aprilFools = builder.addCategory("text.rei.config.april_fools");
+        aprilFools.addOption(new BooleanListEntry("text.rei.config.april_fools.2019", RoughlyEnoughItemsCore.getConfigManager().getConfig().aprilFoolsFish2019, "text.cloth.reset_value", () -> false, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().aprilFoolsFish2019 = bool));
         builder.setOnSave(savedConfig -> {
             try {
                 RoughlyEnoughItemsCore.getConfigManager().saveConfig();

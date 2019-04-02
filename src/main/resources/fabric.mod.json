@@ -2,7 +2,7 @@
   "id": "roughlyenoughitems",
   "name": "RoughlyEnoughItems",
   "description": "To allow players to view items and recipes. Version: ${version}",
-  "version": "2.5.1",
+  "version": "2.6",
   "side": "client",
   "authors": [
     "Danielshe"

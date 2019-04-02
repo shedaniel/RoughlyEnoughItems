@@ -1,6 +1,5 @@
 package me.shedaniel.rei.api;
 
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.Widget;

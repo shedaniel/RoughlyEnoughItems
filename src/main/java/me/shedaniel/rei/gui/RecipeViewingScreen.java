@@ -141,9 +141,9 @@ public class RecipeViewingScreen extends Screen {
         });
         widgets.add(new ClickableLabelWidget((int) bounds.getCenterX(), (int) bounds.getY() + 7, "") {
             @Override
-            public void render(int mouseX, int mouseY, float partialTicks) {
+            public void render(int mouseX, int mouseY, float delta) {
                 this.text = selectedCategory.getCategoryName();
-                super.render(mouseX, mouseY, partialTicks);
+                super.render(mouseX, mouseY, delta);
             }
             
             @Override
@@ -194,9 +194,9 @@ public class RecipeViewingScreen extends Screen {
         });
         widgets.add(new ClickableLabelWidget((int) bounds.getCenterX(), (int) bounds.getY() + 23, "") {
             @Override
-            public void render(int mouseX, int mouseY, float partialTicks) {
+            public void render(int mouseX, int mouseY, float delta) {
                 this.text = String.format("%d/%d", page + 1, getTotalPages(selectedCategory));
-                super.render(mouseX, mouseY, partialTicks);
+                super.render(mouseX, mouseY, delta);
             }
             
             @Override
@@ -334,6 +334,7 @@ public class RecipeViewingScreen extends Screen {
         GuiLighting.disable();
         tabs.stream().filter(TabWidget::isSelected).forEach(tabWidget -> tabWidget.render(mouseX, mouseY, delta));
         ScreenHelper.getLastOverlay().render(mouseX, mouseY, delta);
+        ScreenHelper.getLastOverlay().lateRender(mouseX, mouseY, delta);
         if (choosePageActivated) {
             blitOffset = 500.0f;
             this.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);

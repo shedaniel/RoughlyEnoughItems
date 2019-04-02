@@ -15,7 +15,7 @@ public abstract class ClickableLabelWidget extends LabelWidget {
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float partialTicks) {
+    public void render(int mouseX, int mouseY, float delta) {
         int colour = -1;
         if (isHovered(mouseX, mouseY))
             colour = hoveredColor;

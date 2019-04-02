@@ -2,7 +2,6 @@ package me.shedaniel.rei.client;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
-import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.event.client.ClientTickCallback;
@@ -17,7 +16,7 @@ import java.util.List;
 
 public class ScreenHelper implements ClientModInitializer {
     
-    public static TextFieldWidget searchField;
+    public static ContainerScreenOverlay.SearchFieldWidget searchField;
     public static List<ItemStack> inventoryStacks = Lists.newArrayList();
     private static boolean overlayVisible = true;
     private static ContainerScreenOverlay overlay;
