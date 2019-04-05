@@ -336,9 +336,9 @@ public class RecipeViewingScreen extends Screen {
         ScreenHelper.getLastOverlay().render(mouseX, mouseY, delta);
         ScreenHelper.getLastOverlay().lateRender(mouseX, mouseY, delta);
         if (choosePageActivated) {
-            blitOffset = 500.0f;
+            blitOffset = 500;
             this.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
-            blitOffset = 0.0f;
+            blitOffset = 0;
             recipeChoosePageWidget.render(mouseX, mouseY, delta);
         }
     }

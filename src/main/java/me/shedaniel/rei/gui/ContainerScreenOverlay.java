@@ -222,7 +222,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
                 
                 @Override
                 public void render(int mouseX, int mouseY, float delta) {
-                    blitOffset = 600f;
+                    blitOffset = 600;
                     super.render(mouseX, mouseY, delta);
                 }
             });
@@ -272,7 +272,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
     }
     
     private GameMode getCurrentGameMode() {
-        return MinecraftClient.getInstance().getNetworkHandler().method_2871(MinecraftClient.getInstance().player.getGameProfile().getId()).getGameMode();
+        return MinecraftClient.getInstance().getNetworkHandler().getScoreboardEntry(MinecraftClient.getInstance().player.getGameProfile().getId()).getGameMode();
     }
     
     private Rectangle getTextFieldArea() {
@@ -352,7 +352,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             if (int_6 + int_8 + 6 > window.getScaledHeight())
                 int_6 = window.getScaledHeight() - int_8 - 6;
             
-            this.blitOffset = 1000f;
+            this.blitOffset = 1000;
             this.fillGradient(int_5 - 3, int_6 - 4, int_5 + int_3 + 3, int_6 - 3, -267386864, -267386864);
             this.fillGradient(int_5 - 3, int_6 + int_8 + 3, int_5 + int_3 + 3, int_6 + int_8 + 4, -267386864, -267386864);
             this.fillGradient(int_5 - 3, int_6 - 3, int_5 + int_3 + 3, int_6 + int_8 + 3, -267386864, -267386864);
@@ -371,7 +371,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
                     int_6 += 2;
                 int_6 += 10;
             }
-            this.blitOffset = 0.0F;
+            this.blitOffset = 0;
             GlStateManager.enableLighting();
             GuiLighting.enable();
             GlStateManager.enableRescaleNormal();

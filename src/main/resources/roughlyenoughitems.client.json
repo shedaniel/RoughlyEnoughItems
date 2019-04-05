@@ -7,8 +7,7 @@
     "MixinContainerScreen",
     "MixinCreativePlayerInventoryScreen",
     "MixinBrewingRecipeRegistry",
-    "MixinRecipeBookGui",
-    "MixinGameRenderer"
+    "MixinRecipeBookGui"
   ],
   "injectors": {
     "defaultRequire": 1

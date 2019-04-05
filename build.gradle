@@ -8,7 +8,6 @@ plugins {
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-group = "me.shedaniel"
 archivesBaseName = "RoughlyEnoughItems"
 version = project.mod_version
 
@@ -30,13 +29,14 @@ processResources {
 }
 
 configurations {
-    contained {
+    included {
         transitive = false
     }
 }
 
 shadowJar {
-    configurations = [project.configurations.contained]
+    classifier = null
+    configurations = [project.configurations.included]
 }
 
 task remapShadowJar(type: RemapJar) {
@@ -53,5 +53,5 @@ dependencies {
     modCompile "cloth:Cloth:${cloth_version}"
 
     compile "blue.endless:jankson:${project.jankson_version}"
-    contained "blue.endless:jankson:${project.jankson_version}"
+    included "blue.endless:jankson:${project.jankson_version}"
 }
