@@ -22,7 +22,6 @@ import net.minecraft.client.gui.Screen;
 import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
 import net.minecraft.client.gui.ingame.PlayerInventoryScreen;
 import net.minecraft.client.gui.widget.RecipeBookButtonWidget;
-import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.util.ActionResult;
 
@@ -101,10 +100,31 @@ public class ClothRegistry {
                     return ActionResult.SUCCESS;
             return ActionResult.PASS;
         });
+        ClothClientHooks.SCREEN_LATE_RENDER.register((minecraftClient, screen, i, i1, v) -> {
+            if (screen instanceof CreativePlayerInventoryScreen)
+                if (((CreativePlayerInventoryScreenHooks) screen).rei_getSelectedTab() != ItemGroup.INVENTORY.getIndex())
+                    return;
+            if (screen instanceof ContainerScreen)
+                ScreenHelper.getLastOverlay().lateRender(i, i1, v);
+        });
+        ClothClientHooks.SCREEN_KEY_PRESSED.register((minecraftClient, screen, i, i1, i2) -> {
+            if (screen instanceof CreativePlayerInventoryScreen)
+                if (((CreativePlayerInventoryScreenHooks) screen).rei_getSelectedTab() != ItemGroup.INVENTORY.getIndex())
+                    return ActionResult.PASS;
+            if (ScreenHelper.getLastOverlay().keyPressed(i, i1, i2))
+                return ActionResult.SUCCESS;
+            return ActionResult.PASS;
+        });
     }
     
     public static void openConfigScreen(Screen parent) {
-        ConfigScreenBuilder builder = new ClothConfigScreen.Builder(parent, I18n.translate("text.rei.config.title"), null);
+        ConfigScreenBuilder builder = new ClothConfigScreen.Builder(parent, "text.rei.config.title", savedConfig -> {
+            try {
+                RoughlyEnoughItemsCore.getConfigManager().saveConfig();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
         builder.addCategory("text.rei.config.general").addOption(new BooleanListEntry("text.rei.config.cheating", RoughlyEnoughItemsCore.getConfigManager().getConfig().cheating, "text.cloth.reset_value", () -> false, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().cheating = bool));
         ConfigScreenBuilder.CategoryBuilder appearance = builder.addCategory("text.rei.config.appearance");
         appearance.addOption(new BooleanListEntry("text.rei.config.side_search_box", RoughlyEnoughItemsCore.getConfigManager().getConfig().sideSearchField, "text.cloth.reset_value", () -> false, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().sideSearchField = bool));
@@ -123,13 +143,6 @@ public class ClothRegistry {
         advanced.addOption(new BooleanListEntry("text.rei.config.enable_legacy_speedcraft_support", RoughlyEnoughItemsCore.getConfigManager().getConfig().enableLegacySpeedCraftSupport, "text.cloth.reset_value", () -> false, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().enableLegacySpeedCraftSupport = bool));
         ConfigScreenBuilder.CategoryBuilder aprilFools = builder.addCategory("text.rei.config.april_fools");
         aprilFools.addOption(new BooleanListEntry("text.rei.config.april_fools.2019", RoughlyEnoughItemsCore.getConfigManager().getConfig().aprilFoolsFish2019, "text.cloth.reset_value", () -> false, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().aprilFoolsFish2019 = bool));
-        builder.setOnSave(savedConfig -> {
-            try {
-                RoughlyEnoughItemsCore.getConfigManager().saveConfig();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
         MinecraftClient.getInstance().openScreen(builder.build());
     }
     

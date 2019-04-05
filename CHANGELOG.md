@@ -1,3 +1,6 @@
+## v2.6.1.79
+- 75% less mixins
+- Updated to 19w14a
 ## v2.6.0.78
 - Added config to force enable april fools
 - Fix crash related to `getTotalPage()`

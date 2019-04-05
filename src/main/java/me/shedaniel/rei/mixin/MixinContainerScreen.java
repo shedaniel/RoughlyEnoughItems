@@ -1,22 +1,13 @@
 package me.shedaniel.rei.mixin;
 
-import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
-import me.shedaniel.rei.listeners.CreativePlayerInventoryScreenHooks;
 import net.minecraft.client.gui.ContainerScreen;
-import net.minecraft.client.gui.Screen;
-import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
 import net.minecraft.container.Slot;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.text.TextComponent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ContainerScreen.class)
-public class MixinContainerScreen extends Screen implements ContainerScreenHooks {
+public class MixinContainerScreen implements ContainerScreenHooks {
     
     @Shadow
     protected int left;
@@ -28,10 +19,6 @@ public class MixinContainerScreen extends Screen implements ContainerScreenHooks
     protected int containerHeight;
     @Shadow
     protected Slot focusedSlot;
-    
-    protected MixinContainerScreen(TextComponent textComponent_1) {
-        super(textComponent_1);
-    }
     
     @Override
     public int rei_getContainerLeft() {
@@ -56,20 +43,6 @@ public class MixinContainerScreen extends Screen implements ContainerScreenHooks
     @Override
     public Slot rei_getHoveredSlot() {
         return focusedSlot;
-    }
-    
-    // TODO: Make into Cloth events
-    @Inject(method = "keyPressed(III)Z", at = @At("HEAD"), cancellable = true)
-    public void keyPressed(int int_1, int int_2, int int_3, CallbackInfoReturnable<Boolean> ci) {
-        if (minecraft.currentScreen instanceof CreativePlayerInventoryScreen) {
-            CreativePlayerInventoryScreenHooks creativePlayerInventoryScreenHooks = (CreativePlayerInventoryScreenHooks) minecraft.currentScreen;
-            if (creativePlayerInventoryScreenHooks.rei_getSelectedTab() != ItemGroup.INVENTORY.getIndex())
-                return;
-        }
-        if (ScreenHelper.getLastOverlay().keyPressed(int_1, int_2, int_3)) {
-            ci.setReturnValue(true);
-            ci.cancel();
-        }
     }
     
 }

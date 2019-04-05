@@ -73,14 +73,14 @@ public class TabWidget extends HighlightableWidget {
             GuiLighting.disable();
             minecraft.getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
             this.blit(bounds.x, bounds.y + 2, selected ? 28 : 0, 192, 28, (selected ? 30 : 27));
-            this.blitOffset = 100.0F;
+            this.blitOffset = 100;
             this.itemRenderer.zOffset = 100.0F;
             GuiLighting.enableForItems();
             this.itemRenderer.renderGuiItem(getItemStack(), l, i1);
             this.itemRenderer.renderGuiItemOverlay(minecraft.textRenderer, getItemStack(), l, i1);
             GlStateManager.disableLighting();
             this.itemRenderer.zOffset = 0.0F;
-            this.blitOffset = 0.0F;
+            this.blitOffset = 0;
             if (isHighlighted(mouseX, mouseY))
                 drawTooltip();
         }
