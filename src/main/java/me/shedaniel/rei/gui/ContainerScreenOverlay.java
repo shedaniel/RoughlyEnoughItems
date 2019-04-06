@@ -73,7 +73,8 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             }
             
             @Override
-            public void onFocusChanged(boolean boolean_1, boolean boolean_2) {
+            public boolean changeFocus(boolean boolean_1) {
+                return false;
             }
         });
         widgets.add(buttonRight = new ButtonWidget(rectangle.x + rectangle.width - 18, rectangle.y + 5, 16, 16, new TranslatableTextComponent("text.rei.right_arrow")) {
@@ -91,7 +92,8 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             }
             
             @Override
-            public void onFocusChanged(boolean boolean_1, boolean boolean_2) {
+            public boolean changeFocus(boolean boolean_1) {
+                return false;
             }
         });
         if (setPage)
@@ -129,7 +131,8 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             }
             
             @Override
-            public void onFocusChanged(boolean boolean_1, boolean boolean_2) {
+            public boolean changeFocus(boolean boolean_1) {
+                return false;
             }
         });
         if (RoughlyEnoughItemsCore.getConfigManager().getConfig().showUtilsButtons) {
@@ -151,7 +154,8 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
                 }
                 
                 @Override
-                public void onFocusChanged(boolean boolean_1, boolean boolean_2) {
+                public boolean changeFocus(boolean boolean_1) {
+                    return false;
                 }
             });
             widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? window.getScaledWidth() - 80 : 60, 10, 20, 20, "") {
@@ -175,7 +179,8 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
                 }
                 
                 @Override
-                public void onFocusChanged(boolean boolean_1, boolean boolean_2) {
+                public boolean changeFocus(boolean boolean_1) {
+                    return false;
                 }
             });
         }
@@ -200,7 +205,8 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             }
             
             @Override
-            public void onFocusChanged(boolean boolean_1, boolean boolean_2) {
+            public boolean changeFocus(boolean boolean_1) {
+                return false;
             }
         });
         if (ScreenHelper.searchField == null)
@@ -410,17 +416,22 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
     }
     
     private Rectangle calculateBoundary() {
-        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel) {
-            int startX = ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() + ScreenHelper.getLastContainerScreenHooks().rei_getContainerWidth() + 10;
-            int width = window.getScaledWidth() - startX;
-            if (MinecraftClient.getInstance().currentScreen instanceof RecipeViewingScreen) {
-                RecipeViewingScreen widget = (RecipeViewingScreen) MinecraftClient.getInstance().currentScreen;
-                startX = widget.getBounds().x + widget.getBounds().width + 10;
-                width = window.getScaledWidth() - startX;
+        try {
+            if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel) {
+                int startX = ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() + ScreenHelper.getLastContainerScreenHooks().rei_getContainerWidth() + 10;
+                int width = window.getScaledWidth() - startX;
+                if (MinecraftClient.getInstance().currentScreen instanceof RecipeViewingScreen) {
+                    RecipeViewingScreen widget = (RecipeViewingScreen) MinecraftClient.getInstance().currentScreen;
+                    startX = widget.getBounds().x + widget.getBounds().width + 10;
+                    width = window.getScaledWidth() - startX;
+                }
+                return new Rectangle(startX, 0, width, window.getScaledHeight());
             }
-            return new Rectangle(startX, 0, width, window.getScaledHeight());
+            return new Rectangle(4, 0, getLeft() - 6, window.getScaledHeight());
+        } catch (Exception e) {
+            RoughlyEnoughItemsCore.LOGGER.error("[REI] Error calculating boundary, report the issue!", e);
+            return new Rectangle();
         }
-        return new Rectangle(4, 0, getLeft() - 6, window.getScaledHeight());
     }
     
     private int getLeft() {
@@ -505,7 +516,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             return false;
         for(Element element : widgets) {
             if (element.mouseClicked(double_1, double_2, int_1)) {
-                this.method_20084(element);
+                this.setFocused(element);
                 if (int_1 == 0)
                     this.setDragging(true);
                 return true;

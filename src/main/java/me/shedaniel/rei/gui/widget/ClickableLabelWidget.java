@@ -51,17 +51,13 @@ public abstract class ClickableLabelWidget extends LabelWidget {
     }
     
     @Override
-    public boolean isPartOfFocusCycle() {
+    public boolean changeFocus(boolean boolean_1) {
+        this.focused = !this.focused;
         return true;
     }
     
     public boolean isHovered(int mouseX, int mouseY) {
         return isHighlighted(mouseX, mouseY) || focused;
-    }
-    
-    @Override
-    public void onFocusChanged(boolean boolean_1, boolean boolean_2) {
-        focused = boolean_2;
     }
     
     public abstract void onLabelClicked();

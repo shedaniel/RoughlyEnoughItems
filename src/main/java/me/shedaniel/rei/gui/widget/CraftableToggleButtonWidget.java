@@ -45,7 +45,7 @@ public abstract class CraftableToggleButtonWidget extends ButtonWidget {
     }
     
     @Override
-    public boolean isPartOfFocusCycle() {
+    public boolean changeFocus(boolean boolean_1) {
         return false;
     }
     

@@ -88,15 +88,12 @@ public class RecipeViewingScreen extends Screen {
         }
         if (int_1 == 258) {
             boolean boolean_1 = !hasShiftDown();
-            if (!this.method_20087(boolean_1))
-                this.method_20087(boolean_1);
+            if (!this.changeFocus(boolean_1))
+                this.changeFocus(boolean_1);
             return true;
         }
-        if (choosePageActivated) {
-            if (recipeChoosePageWidget.keyPressed(int_1, int_2, int_3))
-                return true;
-            return false;
-        }
+        if (choosePageActivated)
+            return recipeChoosePageWidget.keyPressed(int_1, int_2, int_3);
         for(Widget widget : widgets)
             if (widget.keyPressed(int_1, int_2, int_3))
                 return true;
@@ -418,7 +415,7 @@ public class RecipeViewingScreen extends Screen {
             }
         for(Element entry : children())
             if (entry.mouseClicked(double_1, double_2, int_1)) {
-                method_20084(entry);
+                setFocused(entry);
                 if (int_1 == 0)
                     setDragging(true);
                 return true;

@@ -3,7 +3,6 @@ package me.shedaniel.rei.gui.config;
 import com.google.common.collect.Lists;
 import javafx.util.Pair;
 import me.shedaniel.cloth.gui.ClothConfigScreen.ListEntry;
-import me.shedaniel.cloth.gui.ClothConfigScreen.ListWidget;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.ItemListOrdering;
 import net.minecraft.client.MinecraftClient;
@@ -34,11 +33,11 @@ public class ItemListOrderingEntry extends ListEntry {
                 currentAscending = !currentAscending;
             }
             ItemListOrderingEntry.this.value.set(new Pair<>(ItemListOrdering.values()[index], currentAscending));
-            ((ListWidget) ItemListOrderingEntry.this.parent).getScreen().setEdited(true);
+            getScreen().setEdited(true);
         });
         this.resetButton = new ButtonWidget(0, 0, MinecraftClient.getInstance().textRenderer.getStringWidth(I18n.translate("text.cloth.reset_value")) + 6, 20, I18n.translate("text.cloth.reset_value"), (widget) -> {
             this.value.set((Pair) getDefaultValue().get());
-            ((ListWidget) this.parent).getScreen().setEdited(true);
+            getScreen().setEdited(true);
         });
         this.widgets = Lists.newArrayList(this.buttonWidget, this.resetButton);
     }
@@ -81,26 +80,6 @@ public class ItemListOrderingEntry extends ListEntry {
     @Override
     public List<? extends Element> children() {
         return widgets;
-    }
-    
-    public boolean isDragging() {
-        return this.buttonWidget.isHovered() || this.resetButton.isHovered();
-    }
-    
-    public void setDragging(boolean b) {
-    }
-    
-    public Element getFocused() {
-        return null;
-    }
-    
-    public void setFocused(Element inputListener) {
-    }
-    
-    public boolean mouseClicked(double double_1, double double_2, int int_1) {
-        if (this.buttonWidget.mouseClicked(double_1, double_2, int_1))
-            return true;
-        return this.resetButton.mouseClicked(double_1, double_2, int_1);
     }
     
     @Override

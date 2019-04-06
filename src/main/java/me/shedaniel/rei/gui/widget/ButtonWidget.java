@@ -101,13 +101,11 @@ public abstract class ButtonWidget extends HighlightableWidget {
     }
     
     @Override
-    public boolean isPartOfFocusCycle() {
-        return enabled;
-    }
-    
-    @Override
-    public void onFocusChanged(boolean boolean_1, boolean boolean_2) {
-        focused = boolean_2;
+    public boolean changeFocus(boolean boolean_1) {
+        if (!enabled)
+            return false;
+        this.focused = !this.focused;
+        return true;
     }
     
     @Override

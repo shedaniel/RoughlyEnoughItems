@@ -181,7 +181,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         this.speedCraftAreaSupplierMap.clear();
         this.speedCraftFunctionalMap.clear();
         this.displayVisibilityHandlers.clear();
-        
+        long startTime = System.currentTimeMillis();
         List<REIPlugin> plugins = new LinkedList<>(RoughlyEnoughItemsCore.getPlugins());
         plugins.sort((first, second) -> {
             return second.getPriority() - first.getPriority();
@@ -217,8 +217,8 @@ public class RecipeHelperImpl implements RecipeHelper {
                     return -1f;
                 }
             });
-        RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered Categories: " + String.join(", ", categories.stream().map(RecipeCategory::getCategoryName).collect(Collectors.toList())));
-        RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered %d recipes.", recipeCount.get());
+        long usedTime = System.currentTimeMillis() - startTime;
+        RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered %d recipes, %d categories (%s) in %d ms.", recipeCount.get(), categories.size(), String.join(", ", categories.stream().map(RecipeCategory::getCategoryName).collect(Collectors.toList())), usedTime);
     }
     
     @Override
