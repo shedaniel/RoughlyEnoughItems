@@ -520,13 +520,12 @@ public class TextFieldWidget extends HighlightableWidget {
         this.notEditableColor = int_1;
     }
     
-    public void onFocusChanged(boolean boolean_1) {
-        this.setFocused(boolean_1);
-    }
-    
-    @Override
-    public boolean isPartOfFocusCycle() {
-        return true;
+    public boolean changeFocus(boolean boolean_1) {
+        if (this.visible && this.editable) {
+            this.setFocused(!this.focused);
+            return this.focused;
+        }
+        return false;
     }
     
     public boolean isFocused() {
@@ -534,10 +533,8 @@ public class TextFieldWidget extends HighlightableWidget {
     }
     
     public void setFocused(boolean boolean_1) {
-        if (boolean_1 && !this.focused) {
+        if (boolean_1 && !this.focused)
             this.focusedTicks = 0;
-        }
-        
         this.focused = boolean_1;
     }
     
