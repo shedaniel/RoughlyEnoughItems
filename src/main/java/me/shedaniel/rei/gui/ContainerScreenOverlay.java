@@ -429,7 +429,8 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             }
             return new Rectangle(4, 0, getLeft() - 6, window.getScaledHeight());
         } catch (Exception e) {
-            RoughlyEnoughItemsCore.LOGGER.error("[REI] Error calculating boundary, report the issue!", e);
+            RoughlyEnoughItemsCore.LOGGER.info("[REI] Error calculating boundary, report the issue!");
+            e.printStackTrace();
             return new Rectangle();
         }
     }

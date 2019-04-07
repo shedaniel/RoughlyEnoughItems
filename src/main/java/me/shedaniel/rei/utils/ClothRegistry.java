@@ -15,6 +15,7 @@ import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.config.ItemListOrderingEntry;
 import me.shedaniel.rei.listeners.CreativePlayerInventoryScreenHooks;
+import net.fabricmc.fabric.api.event.client.ClientTickCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ContainerScreen;
 import net.minecraft.client.gui.Element;
@@ -45,7 +46,6 @@ public class ClothRegistry {
                         return;
                 if (screen instanceof PlayerInventoryScreen && minecraftClient.interactionManager.hasCreativeInventory())
                     return;
-                ScreenHelper.setLastContainerScreen((ContainerScreen) screen);
                 boolean alreadyAdded = false;
                 for(Element element : Lists.newArrayList(screenHooks.cloth_getInputListeners()))
                     if (ContainerScreenOverlay.class.isAssignableFrom(element.getClass()))
@@ -101,6 +101,8 @@ public class ClothRegistry {
             return ActionResult.PASS;
         });
         ClothClientHooks.SCREEN_LATE_RENDER.register((minecraftClient, screen, i, i1, v) -> {
+            if (!ScreenHelper.isOverlayVisible())
+                return;
             if (screen instanceof CreativePlayerInventoryScreen)
                 if (((CreativePlayerInventoryScreenHooks) screen).rei_getSelectedTab() != ItemGroup.INVENTORY.getIndex())
                     return;
@@ -111,9 +113,16 @@ public class ClothRegistry {
             if (screen instanceof CreativePlayerInventoryScreen)
                 if (((CreativePlayerInventoryScreenHooks) screen).rei_getSelectedTab() != ItemGroup.INVENTORY.getIndex())
                     return ActionResult.PASS;
-            if (ScreenHelper.getLastOverlay().keyPressed(i, i1, i2))
-                return ActionResult.SUCCESS;
+            if (screen instanceof ContainerScreen)
+                if (ScreenHelper.getLastOverlay().keyPressed(i, i1, i2))
+                    return ActionResult.SUCCESS;
             return ActionResult.PASS;
+        });
+        ClientTickCallback.EVENT.register(client -> {
+            if (client.currentScreen instanceof ContainerScreen) {
+                if (ScreenHelper.getLastContainerScreen() == null || !ScreenHelper.getLastContainerScreen().equals(client.currentScreen))
+                    ScreenHelper.setLastContainerScreen((ContainerScreen) client.currentScreen);
+            }
         });
     }
     

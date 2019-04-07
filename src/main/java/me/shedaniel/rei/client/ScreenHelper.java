@@ -20,7 +20,7 @@ public class ScreenHelper implements ClientModInitializer {
     public static List<ItemStack> inventoryStacks = Lists.newArrayList();
     private static boolean overlayVisible = true;
     private static ContainerScreenOverlay overlay;
-    private static ContainerScreen lastContainerScreen;
+    private static ContainerScreen lastContainerScreen = null;
     
     public static boolean isOverlayVisible() {
         return overlayVisible;
