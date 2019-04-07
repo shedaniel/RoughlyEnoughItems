@@ -1,4 +1,6 @@
-## v2.5.2.80
+## v2.6.2.81
+- Fix [#53](https://github.com/shedaniel/RoughlyEnoughItems/issues/53): Crash on keyPressed
+## v2.6.2.80
 - Updated to 19w14b
 ## v2.6.1.79
 - 75% less mixins
