@@ -1,7 +1,7 @@
 import net.fabricmc.loom.task.RemapJar
 
 plugins {
-    id 'fabric-loom' version '0.2.0-SNAPSHOT'
+    id 'fabric-loom' version '0.2.1-SNAPSHOT'
     id "com.github.johnrengelman.shadow" version "4.0.3"
 }
 
@@ -17,7 +17,6 @@ minecraft {
 repositories {
     maven { url "https://tehnut.info/maven/" }
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
-    maven { url "https://maven.jamieswhiteshirt.com/libs-release/" }
     maven { url "https://minecraft.curseforge.com/api/maven" }
 }
 
@@ -35,6 +34,7 @@ configurations {
 }
 
 shadowJar {
+    version = project.mod_version.replaceAll('\\+build.', '.')
     classifier = null
     configurations = [project.configurations.included]
 }
@@ -48,10 +48,15 @@ dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_version}"
     modCompile "net.fabricmc:fabric-loader:${project.fabricloader_version}"
-    modCompile "info.tehnut.pluginloader:plugin-loader:${project.pluginloader_version}"
     modCompile "net.fabricmc:fabric:${project.fabric_version}"
+    include "net.fabricmc:fabric:${project.fabric_version}"
     modCompile "cloth:Cloth:${cloth_version}"
+    include "cloth:Cloth:${cloth_version}"
+    modCompile "cloth-config:ClothConfig:${cloth_config_version}"
+    include "cloth-config:ClothConfig:${cloth_config_version}"
 
     compile "blue.endless:jankson:${project.jankson_version}"
     included "blue.endless:jankson:${project.jankson_version}"
+
+    modCompile "io.github.prospector.modmenu:ModMenu:${modmenu_version}"
 }

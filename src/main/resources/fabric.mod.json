@@ -1,24 +1,48 @@
 {
+  "schemaVersion": 1,
   "id": "roughlyenoughitems",
   "name": "RoughlyEnoughItems",
   "description": "To allow players to view items and recipes. Version: ${version}",
-  "version": "2.6",
-  "side": "client",
+  "version": "${version}",
   "authors": [
     "Danielshe"
   ],
-  "initializers": [
-    "me.shedaniel.rei.RoughlyEnoughItemsCore",
-    "me.shedaniel.rei.client.ClientHelper",
-    "me.shedaniel.rei.client.ScreenHelper"
-  ],
+  "contact": {
+    "homepage": "https://minecraft.curseforge.com/projects/roughly-enough-items",
+    "sources": "https://github.com/shedaniel/RoughlyEnoughItems",
+    "issues": "https://github.com/shedaniel/RoughlyEnoughItems/issues"
+  },
+  "license": "MIT",
+  "icon": "pack.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "me.shedaniel.rei.RoughlyEnoughItemsCore",
+      "me.shedaniel.rei.client.ClientHelper",
+      "me.shedaniel.rei.client.ScreenHelper"
+    ],
+    "main": [
+      "me.shedaniel.rei.RoughlyEnoughItemsNetwork"
+    ]
+  },
   "requires": {
-    "fabric": "^0.2.3"
+    "fabricloader": ">=0.4.0",
+    "fabric": "^0.2.6",
+    "cloth": "*"
   },
-  "recommended": {
-    "pluginloader": "^1.0.6"
+  "recommends": {
+    "cloth-config": ">=0.1.0"
   },
-  "mixins": {
-    "client": "roughlyenoughitems.client.json"
+  "mixins": [
+    "roughlyenoughitems.mixins.json"
+  ],
+  "custom": {
+    "modmenu:clientsideOnly": true,
+    "roughlyenoughitems:plugins": [
+      {
+        "id": "default_plugin",
+        "class": "me.shedaniel.rei.plugin.DefaultPlugin"
+      }
+    ]
   }
 }

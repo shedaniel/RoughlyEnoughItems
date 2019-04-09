@@ -3,6 +3,7 @@ package me.shedaniel.rei.client;
 import com.google.common.collect.ImmutableList;
 import io.netty.buffer.Unpooled;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.api.RecipeHelper;
@@ -43,7 +44,6 @@ public class ClientHelper implements ClientModInitializer {
             String modid = location.getNamespace();
             if (modid.equalsIgnoreCase("minecraft"))
                 return "Minecraft";
-            //            return FabricLoader.getInstance().getAllMods().stream().map(ModContainer::getMetadata).filter(metadata -> metadata.getId().equals(modid)).findFirst().map(ModMetadata::getName).orElse(modid);
             return FabricLoader.getInstance().getModContainer(modid).map(ModContainer::getMetadata).map(ModMetadata::getName).orElse(modid);
         }
         return "";
@@ -67,13 +67,13 @@ public class ClientHelper implements ClientModInitializer {
             MinecraftClient.getInstance().player.inventory.setCursorStack(ItemStack.EMPTY);
             return;
         }
-        ClientSidePacketRegistry.INSTANCE.sendToServer(RoughlyEnoughItemsCore.DELETE_ITEMS_PACKET, new PacketByteBuf(Unpooled.buffer()));
+        ClientSidePacketRegistry.INSTANCE.sendToServer(RoughlyEnoughItemsNetwork.DELETE_ITEMS_PACKET, new PacketByteBuf(Unpooled.buffer()));
     }
     
     public static boolean tryCheatingStack(ItemStack cheatedStack) {
         if (MinecraftClient.getInstance().isInSingleplayer()) {
             try {
-                ClientSidePacketRegistry.INSTANCE.sendToServer(RoughlyEnoughItemsCore.CREATE_ITEMS_PACKET, new PacketByteBuf(Unpooled.buffer()).writeItemStack(cheatedStack.copy()));
+                ClientSidePacketRegistry.INSTANCE.sendToServer(RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET, new PacketByteBuf(Unpooled.buffer()).writeItemStack(cheatedStack.copy()));
                 return true;
             } catch (Exception e) {
                 return false;
@@ -87,7 +87,6 @@ public class ClientHelper implements ClientModInitializer {
                 madeUpCommand = og.replaceAll("\\{player_name}", MinecraftClient.getInstance().player.getEntityName()).replaceAll("\\{item_identifier}", identifier.toString()).replaceAll("\\{nbt}", "").replaceAll("\\{count}", String.valueOf(cheatedStack.getAmount()));
                 MinecraftClient.getInstance().player.addChatMessage(new TranslatableTextComponent("text.rei.too_long_nbt"), false);
             }
-            System.out.println(madeUpCommand);
             MinecraftClient.getInstance().player.sendChatMessage(madeUpCommand);
             return true;
         }

@@ -1,42 +1,43 @@
 package me.shedaniel.rei;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import me.shedaniel.cloth.api.ClientUtils;
+import me.shedaniel.cloth.hooks.ClothClientHooks;
 import me.shedaniel.rei.api.ItemRegistry;
 import me.shedaniel.rei.api.PluginDisabler;
 import me.shedaniel.rei.api.REIPlugin;
 import me.shedaniel.rei.api.RecipeHelper;
-import me.shedaniel.rei.client.ConfigManager;
-import me.shedaniel.rei.client.ItemRegistryImpl;
-import me.shedaniel.rei.client.PluginDisablerImpl;
-import me.shedaniel.rei.client.RecipeHelperImpl;
-import me.shedaniel.rei.gui.widget.ItemListOverlay;
-import me.shedaniel.rei.plugin.DefaultPlugin;
+import me.shedaniel.rei.client.*;
+import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
+import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.StringTextComponent;
-import net.minecraft.text.TranslatableTextComponent;
+import net.minecraft.client.gui.ContainerScreen;
+import net.minecraft.client.gui.Element;
+import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
+import net.minecraft.client.gui.ingame.PlayerInventoryScreen;
+import net.minecraft.client.gui.widget.RecipeBookButtonWidget;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitializer {
+public class RoughlyEnoughItemsCore implements ClientModInitializer {
     
     public static final Logger LOGGER;
-    public static final Identifier DELETE_ITEMS_PACKET = new Identifier("roughlyenoughitems", "delete_item");
-    public static final Identifier CREATE_ITEMS_PACKET = new Identifier("roughlyenoughitems", "create_item");
     private static final RecipeHelper RECIPE_HELPER = new RecipeHelperImpl();
     private static final PluginDisabler PLUGIN_DISABLER = new PluginDisablerImpl();
     private static final ItemRegistry ITEM_REGISTRY = new ItemRegistryImpl();
@@ -85,22 +86,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
     public void onInitializeClient() {
         configManager = new ConfigManager();
         
-        // If pluginloader is not installed, base functionality should still remain
-        if (!FabricLoader.getInstance().isModLoaded("pluginloader")) {
-            RoughlyEnoughItemsCore.LOGGER.warn("[REI] Plugin Loader is not loaded! Please consider installing https://minecraft.curseforge.com/projects/pluginloader for REI plugin compatibility!");
-            registerPlugin(new Identifier("roughlyenoughitems", "default_plugin"), new DefaultPlugin());
-        }
-        
-        if (FabricLoader.getInstance().isModLoaded("cloth")) {
-            try {
-                Class.forName("me.shedaniel.rei.utils.ClothRegistry").getDeclaredMethod("register").invoke(null);
-            } catch (IllegalAccessException | InvocationTargetException | ClassNotFoundException | NoSuchMethodException e) {
-                e.printStackTrace();
-            }
-        } else {
-            RoughlyEnoughItemsCore.LOGGER.fatal("[REI] Cloth NOT found! It is a dependency of REI: https://minecraft.curseforge.com/projects/cloth");
-            System.exit(0);
-        }
+        registerClothEvents();
         
         if (FabricLoader.getInstance().isModLoaded("modmenu")) {
             try {
@@ -111,26 +97,115 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer, ModInitiali
                 RoughlyEnoughItemsCore.LOGGER.error("[REI] Failed to add config override for ModMenu!", e);
             }
         }
+        
+        discoverPlugins();
     }
     
-    @Override
-    public void onInitialize() {
-        registerFabricPackets();
+    private void discoverPlugins() {
+        List<Pair<Identifier, String>> list = Lists.newArrayList();
+        for(ModMetadata metadata : FabricLoader.getInstance().getAllMods().stream().map(ModContainer::getMetadata).filter(metadata -> metadata.containsCustomElement("roughlyenoughitems:plugins")).collect(Collectors.toList())) {
+            try {
+                JsonElement pluginsElement = metadata.getCustomElement("roughlyenoughitems:plugins");
+                if (pluginsElement.isJsonArray()) {
+                    for(JsonElement element : pluginsElement.getAsJsonArray())
+                        if (element.isJsonObject())
+                            loadPluginFromJsonObject(list, metadata, element.getAsJsonObject());
+                        else
+                            throw new IllegalStateException("Custom Element in an array is not an object.");
+                } else if (pluginsElement.isJsonObject()) {
+                    loadPluginFromJsonObject(list, metadata, pluginsElement.getAsJsonObject());
+                } else
+                    throw new IllegalStateException("Custom Element not an array or an object.");
+            } catch (Exception e) {
+                e.printStackTrace();
+                RoughlyEnoughItemsCore.LOGGER.error("[REI] Can't load REI plugins from %s: %s", metadata.getId(), e.getLocalizedMessage());
+            }
+        }
+        for(Pair<Identifier, String> pair : list) {
+            String s = pair.getRight();
+            try {
+                Class<?> aClass = Class.forName(s);
+                if (!REIPlugin.class.isAssignableFrom(aClass)) {
+                    RoughlyEnoughItemsCore.LOGGER.error("[REI] Plugin class from %s is not implementing REIPlugin!", s);
+                    break;
+                }
+                REIPlugin o = REIPlugin.class.cast(aClass.newInstance());
+                registerPlugin(pair.getLeft(), o);
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+                RoughlyEnoughItemsCore.LOGGER.error("[REI] Can't load REI plugin class from %s!", s);
+            } catch (ClassCastException e) {
+                RoughlyEnoughItemsCore.LOGGER.error("[REI] Failed to cast plugin class from %s to REIPlugin!", s);
+            }
+        }
     }
     
-    private void registerFabricPackets() {
-        ServerSidePacketRegistry.INSTANCE.register(DELETE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
-            ServerPlayerEntity player = (ServerPlayerEntity) packetContext.getPlayer();
-            if (!player.inventory.getCursorStack().isEmpty())
-                player.inventory.setCursorStack(ItemStack.EMPTY);
+    private void loadPluginFromJsonObject(List<Pair<Identifier, String>> list, ModMetadata modMetadata, JsonObject object) {
+        String namespace = modMetadata.getId();
+        if (object.has("namespace"))
+            namespace = object.get("namespace").getAsString();
+        String id = object.get("id").getAsString();
+        String className = object.get("class").getAsString();
+        list.add(new Pair<>(new Identifier(namespace, id), className));
+    }
+    
+    private void registerClothEvents() {
+        ClothClientHooks.SYNC_RECIPES.register((minecraftClient, recipeManager, synchronizeRecipesS2CPacket) -> {
+            ((RecipeHelperImpl) RoughlyEnoughItemsCore.getRecipeHelper()).recipesLoaded(recipeManager);
         });
-        ServerSidePacketRegistry.INSTANCE.register(CREATE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
-            ServerPlayerEntity player = (ServerPlayerEntity) packetContext.getPlayer();
-            ItemStack stack = packetByteBuf.readItemStack();
-            if (player.inventory.insertStack(stack.copy()))
-                player.addChatMessage(new StringTextComponent(I18n.translate("text.rei.cheat_items").replaceAll("\\{item_name}", ItemListOverlay.tryGetItemStackName(stack.copy())).replaceAll("\\{item_count}", stack.copy().getAmount() + "").replaceAll("\\{player_name}", player.getEntityName())), false);
-            else
-                player.addChatMessage(new TranslatableTextComponent("text.rei.failed_cheat_items"), false);
+        ClothClientHooks.SCREEN_ADD_BUTTON.register((minecraftClient, screen, abstractButtonWidget) -> {
+            if (RoughlyEnoughItemsCore.getConfigManager().getConfig().disableRecipeBook && screen instanceof ContainerScreen && abstractButtonWidget instanceof RecipeBookButtonWidget)
+                return ActionResult.FAIL;
+            return ActionResult.PASS;
+        });
+        ClothClientHooks.SCREEN_INIT_POST.register((minecraftClient, screen, screenHooks) -> {
+            if (screen instanceof ContainerScreen) {
+                if (screen instanceof PlayerInventoryScreen && minecraftClient.interactionManager.hasCreativeInventory())
+                    return;
+                ScreenHelper.setLastContainerScreen((ContainerScreen) screen);
+                boolean alreadyAdded = false;
+                for(Element element : Lists.newArrayList(screenHooks.cloth_getInputListeners()))
+                    if (ContainerScreenOverlay.class.isAssignableFrom(element.getClass()))
+                        if (alreadyAdded)
+                            screenHooks.cloth_getInputListeners().remove(element);
+                        else
+                            alreadyAdded = true;
+                if (!alreadyAdded)
+                    screenHooks.cloth_getInputListeners().add(ScreenHelper.getLastOverlay(true, false));
+            }
+        });
+        ClothClientHooks.SCREEN_RENDER_POST.register((minecraftClient, screen, i, i1, v) -> {
+            if (screen instanceof ContainerScreen)
+                ScreenHelper.getLastOverlay().render(i, i1, v);
+        });
+        ClothClientHooks.SCREEN_MOUSE_CLICKED.register((minecraftClient, screen, v, v1, i) -> {
+            if (screen instanceof CreativePlayerInventoryScreen)
+                if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().mouseClicked(v, v1, i))
+                    return ActionResult.SUCCESS;
+            return ActionResult.PASS;
+        });
+        ClothClientHooks.SCREEN_MOUSE_SCROLLED.register((minecraftClient, screen, v, v1, v2) -> {
+            if (screen instanceof ContainerScreen)
+                if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().getRectangle().contains(ClientUtils.getMouseLocation()) && ScreenHelper.getLastOverlay().mouseScrolled(v, v1, v2))
+                    return ActionResult.SUCCESS;
+            return ActionResult.PASS;
+        });
+        ClothClientHooks.SCREEN_CHAR_TYPED.register((minecraftClient, screen, character, keyCode) -> {
+            if (screen instanceof ContainerScreen)
+                if (ScreenHelper.getLastOverlay().charTyped(character, keyCode))
+                    return ActionResult.SUCCESS;
+            return ActionResult.PASS;
+        });
+        ClothClientHooks.SCREEN_LATE_RENDER.register((minecraftClient, screen, i, i1, v) -> {
+            if (!ScreenHelper.isOverlayVisible())
+                return;
+            if (screen instanceof ContainerScreen)
+                ScreenHelper.getLastOverlay().lateRender(i, i1, v);
+        });
+        ClothClientHooks.SCREEN_KEY_PRESSED.register((minecraftClient, screen, i, i1, i2) -> {
+            if (screen instanceof ContainerScreen)
+                if (ScreenHelper.getLastOverlay().keyPressed(i, i1, i2))
+                    return ActionResult.SUCCESS;
+            return ActionResult.PASS;
         });
     }
     

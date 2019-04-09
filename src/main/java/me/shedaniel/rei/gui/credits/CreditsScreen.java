@@ -40,7 +40,8 @@ public class CreditsScreen extends Screen {
             @Override
             public void onPressed() {
                 CreditsScreen.this.minecraft.openScreen(parent);
-                ScreenHelper.getLastOverlay().init();
+                if (parent instanceof ContainerScreen)
+                    ScreenHelper.getLastOverlay().init();
             }
         });
     }
