@@ -1,7 +1,6 @@
 package me.shedaniel.rei.gui.config;
 
 import com.google.common.collect.Lists;
-import javafx.util.Pair;
 import me.shedaniel.cloth.gui.ClothConfigScreen.ListEntry;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.ItemListOrdering;
@@ -10,6 +9,7 @@ import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.Window;
+import net.minecraft.util.Pair;
 
 import java.util.Arrays;
 import java.util.List;
@@ -26,8 +26,8 @@ public class ItemListOrderingEntry extends ListEntry {
         super(fieldName);
         this.value = new AtomicReference(val);
         this.buttonWidget = new ButtonWidget(0, 0, 150, 20, "", widget -> {
-            int index = Arrays.asList(ItemListOrdering.values()).indexOf(value.get().getKey()) + 1;
-            boolean currentAscending = value.get().getValue();
+            int index = Arrays.asList(ItemListOrdering.values()).indexOf(value.get().getLeft()) + 1;
+            boolean currentAscending = value.get().getRight();
             if (index >= ItemListOrdering.values().length) {
                 index = 0;
                 currentAscending = !currentAscending;
@@ -54,10 +54,10 @@ public class ItemListOrderingEntry extends ListEntry {
     @Override
     public void render(int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
         Window window = MinecraftClient.getInstance().window;
-        this.resetButton.active = this.getDefaultValue().isPresent() && (((Pair<ItemListOrdering, Boolean>) this.getDefaultValue().get()).getKey() != this.value.get().getKey() || ((Pair<ItemListOrdering, Boolean>) this.getDefaultValue().get()).getValue().booleanValue() != this.value.get().getValue().booleanValue());
+        this.resetButton.active = this.getDefaultValue().isPresent() && (((Pair<ItemListOrdering, Boolean>) this.getDefaultValue().get()).getLeft() != this.value.get().getLeft() || ((Pair<ItemListOrdering, Boolean>) this.getDefaultValue().get()).getRight().booleanValue() != this.value.get().getRight().booleanValue());
         this.resetButton.y = y;
         this.buttonWidget.y = y;
-        this.buttonWidget.setMessage(I18n.translate("text.rei.config.list_ordering_button", I18n.translate(value.get().getKey().getNameTranslationKey()), I18n.translate(value.get().getValue() ? "ordering.rei.ascending" : "ordering.rei.descending")));
+        this.buttonWidget.setMessage(I18n.translate("text.rei.config.list_ordering_button", I18n.translate(value.get().getLeft().getNameTranslationKey()), I18n.translate(value.get().getRight() ? "ordering.rei.ascending" : "ordering.rei.descending")));
         if (MinecraftClient.getInstance().textRenderer.isRightToLeft()) {
             MinecraftClient.getInstance().textRenderer.drawWithShadow(I18n.translate(this.getFieldName(), new Object[0]), (float) (window.getScaledWidth() - x - MinecraftClient.getInstance().textRenderer.getStringWidth(I18n.translate(this.getFieldName(), new Object[0]))), (float) (y + 5), 16777215);
             this.resetButton.x = x;
@@ -84,7 +84,7 @@ public class ItemListOrderingEntry extends ListEntry {
     
     @Override
     public void save() {
-        RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering = value.get().getKey();
-        RoughlyEnoughItemsCore.getConfigManager().getConfig().isAscending = value.get().getValue();
+        RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering = value.get().getLeft();
+        RoughlyEnoughItemsCore.getConfigManager().getConfig().isAscending = value.get().getRight();
     }
 }
