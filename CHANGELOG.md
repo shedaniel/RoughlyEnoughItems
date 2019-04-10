@@ -1,6 +1,8 @@
-## v2.7.0.82
-- Updated to Fabric 0.4.0
-- Now bundle with Fabric API, Cloth Events API, Cloth Config API
+## v2.7.1.84
+- Bundled with updated APIs. Fixed crash.
+## v2.7.0.83
+- Updated to Fabric Loader 0.4.0
+- Now bundled with Fabric API, Cloth Events API, Cloth Config API
 ## v2.6.2.81
 - Fix [#53](https://github.com/shedaniel/RoughlyEnoughItems/issues/53): Crash on keyPressed
 ## v2.6.2.80
