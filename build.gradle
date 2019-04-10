@@ -11,6 +11,8 @@ targetCompatibility = 1.8
 archivesBaseName = "RoughlyEnoughItems"
 version = project.mod_version
 
+def includeDep = true
+
 minecraft {
 }
 
@@ -35,7 +37,7 @@ configurations {
 
 shadowJar {
     version = project.mod_version.replaceAll('\\+build.', '.')
-    classifier = null
+    classifier = includeDep ? null : "bare"
     configurations = [project.configurations.included]
 }
 
@@ -49,11 +51,13 @@ dependencies {
     mappings "net.fabricmc:yarn:${project.yarn_version}"
     modCompile "net.fabricmc:fabric-loader:${project.fabricloader_version}"
     modCompile "net.fabricmc:fabric:${project.fabric_version}"
-    include "net.fabricmc:fabric:${project.fabric_version}"
-    modCompile "cloth:Cloth:${cloth_version}"
-    include "cloth:Cloth:${cloth_version}"
+    modCompile "cloth:ClothEvents:${cloth_events_version}"
     modCompile "cloth-config:ClothConfig:${cloth_config_version}"
-    include "cloth-config:ClothConfig:${cloth_config_version}"
+    if (includeDep) {
+        include "net.fabricmc:fabric:${project.fabric_version}"
+        include "cloth:ClothEvents:${cloth_events_version}"
+        include "cloth-config:ClothConfig:${cloth_config_version}"
+    }
 
     compile "blue.endless:jankson:${project.jankson_version}"
     included "blue.endless:jankson:${project.jankson_version}"
