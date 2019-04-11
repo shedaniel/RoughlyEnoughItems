@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.api.DisplayHelper;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.client.Weather;
@@ -53,10 +54,11 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
         //Update Variables
         this.children().clear();
         this.window = MinecraftClient.getInstance().window;
-        this.rectangle = calculateBoundary();
+        DisplayHelper.DisplayBoundsHandler boundsHandler = RoughlyEnoughItemsCore.getDisplayHelper().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
+        this.rectangle = RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? boundsHandler.getLeftBounds(MinecraftClient.getInstance().currentScreen) : boundsHandler.getRightBounds(MinecraftClient.getInstance().currentScreen);
         this.lastLeft = getLeft();
         widgets.add(this.itemListOverlay = new ItemListOverlay(page));
-        itemListOverlay.updateList(getItemListArea(), page, searchTerm);
+        itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm);
         
         widgets.add(buttonLeft = new ButtonWidget(rectangle.x, rectangle.y + 5, 16, 16, new TranslatableTextComponent("text.rei.left_arrow")) {
             @Override
@@ -64,7 +66,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
                 page--;
                 if (page < 0)
                     page = getTotalPage();
-                itemListOverlay.updateList(getItemListArea(), page, searchTerm);
+                itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm);
             }
             
             @Override
@@ -83,7 +85,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
                 page++;
                 if (page > getTotalPage())
                     page = 0;
-                itemListOverlay.updateList(getItemListArea(), page, searchTerm);
+                itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm);
             }
             
             @Override
@@ -201,7 +203,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             public void onLabelClicked() {
                 MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 page = 0;
-                itemListOverlay.updateList(getItemListArea(), page, searchTerm);
+                itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm);
             }
             
             @Override
@@ -213,7 +215,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             ScreenHelper.searchField = new SearchFieldWidget(0, 0, 0, 0);
         ScreenHelper.searchField.setChangedListener(s -> {
             searchTerm = s;
-            itemListOverlay.updateList(getItemListArea(), page, searchTerm);
+            itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm);
         });
         ScreenHelper.searchField.getBounds().setBounds(getTextFieldArea());
         this.widgets.add(ScreenHelper.searchField);
@@ -223,7 +225,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
                 @Override
                 public void onPressed() {
                     RoughlyEnoughItemsCore.getConfigManager().toggleCraftableOnly();
-                    itemListOverlay.updateList(getItemListArea(), page, searchTerm);
+                    itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm);
                 }
                 
                 @Override
@@ -233,7 +235,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
                 }
             });
         
-        this.itemListOverlay.updateList(getItemListArea(), page, searchTerm);
+        this.itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm);
     }
     
     private Weather getNextWeather() {
@@ -303,10 +305,6 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
         return I18n.translate(String.format("%s%s", "text.rei.", ClientHelper.isCheating() ? "cheat" : "nocheat"));
     }
     
-    private Rectangle getItemListArea() {
-        return new Rectangle(rectangle.x + 2, rectangle.y + 24, rectangle.width - 4, rectangle.height - (RoughlyEnoughItemsCore.getConfigManager().getConfig().sideSearchField ? 27 + 22 : 27));
-    }
-    
     public Rectangle getRectangle() {
         return rectangle;
     }
@@ -318,7 +316,8 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             init(true);
         else if (RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() && (!hasSameListContent(new LinkedList<>(ScreenHelper.inventoryStacks), currentStacks) || (currentStacks.size() != ScreenHelper.inventoryStacks.size()))) {
             ScreenHelper.inventoryStacks = ClientHelper.getInventoryItemsTypes();
-            itemListOverlay.updateList(getItemListArea(), page, searchTerm);
+            DisplayHelper.DisplayBoundsHandler boundsHandler = RoughlyEnoughItemsCore.getDisplayHelper().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
+            itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm);
         }
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GuiLighting.disable();
@@ -413,26 +412,6 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             widget.render(int_1, int_2, float_1);
         });
         GuiLighting.disable();
-    }
-    
-    private Rectangle calculateBoundary() {
-        try {
-            if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel) {
-                int startX = ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() + ScreenHelper.getLastContainerScreenHooks().rei_getContainerWidth() + 10;
-                int width = window.getScaledWidth() - startX;
-                if (MinecraftClient.getInstance().currentScreen instanceof RecipeViewingScreen) {
-                    RecipeViewingScreen widget = (RecipeViewingScreen) MinecraftClient.getInstance().currentScreen;
-                    startX = widget.getBounds().x + widget.getBounds().width + 10;
-                    width = window.getScaledWidth() - startX;
-                }
-                return new Rectangle(startX, 0, width, window.getScaledHeight());
-            }
-            return new Rectangle(4, 0, getLeft() - 6, window.getScaledHeight());
-        } catch (Exception e) {
-            RoughlyEnoughItemsCore.LOGGER.info("[REI] Error calculating boundary, report the issue!");
-            e.printStackTrace();
-            return new Rectangle();
-        }
     }
     
     private int getLeft() {

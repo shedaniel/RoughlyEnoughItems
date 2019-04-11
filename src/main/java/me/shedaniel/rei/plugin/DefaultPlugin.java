@@ -3,13 +3,17 @@ package me.shedaniel.rei.plugin;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.client.ScreenHelper;
+import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.listeners.GhostSlotsHooks;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.ContainerScreen;
 import net.minecraft.client.gui.Screen;
 import net.minecraft.client.gui.container.BlastFurnaceScreen;
 import net.minecraft.client.gui.container.CraftingTableScreen;
 import net.minecraft.client.gui.container.FurnaceScreen;
 import net.minecraft.client.gui.container.SmokerScreen;
+import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
 import net.minecraft.client.gui.ingame.PlayerInventoryScreen;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -27,7 +31,9 @@ import net.minecraft.recipe.crafting.ShapelessRecipe;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 public class DefaultPlugin implements REIPlugin {
     
@@ -52,7 +58,7 @@ public class DefaultPlugin implements REIPlugin {
             pluginDisabler.disablePluginFunction(PLUGIN, PluginFunction.REGISTER_ITEMS);
             pluginDisabler.disablePluginFunction(PLUGIN, PluginFunction.REGISTER_CATEGORIES);
             pluginDisabler.disablePluginFunction(PLUGIN, PluginFunction.REGISTER_RECIPE_DISPLAYS);
-            pluginDisabler.disablePluginFunction(PLUGIN, PluginFunction.REGISTER_SPEED_CRAFT);
+            pluginDisabler.disablePluginFunction(PLUGIN, PluginFunction.REGISTER_OTHERS);
         }
     }
     
@@ -118,6 +124,83 @@ public class DefaultPlugin implements REIPlugin {
             PotionUtil.setCustomPotionEffects(outputStack, PotionUtil.getCustomPotionEffects(stack));
             List<ItemStack> output = Lists.newArrayList(outputStack);
             recipeHelper.registerDisplay(CRAFTING, new DefaultCustomDisplay(input, output));
+        });
+    }
+    
+    @Override
+    public void registerBounds(DisplayHelper displayHelper) {
+        displayHelper.registerBoundsHandler(new DisplayHelper.DisplayBoundsHandler() {
+            @Override
+            public Class getBaseSupportedClass() {
+                return ContainerScreen.class;
+            }
+            
+            @Override
+            public Rectangle getLeftBounds(Object screen) {
+                if (MinecraftClient.getInstance().player.getRecipeBook().isGuiOpen())
+                    return new Rectangle(2, 0, ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() - 4 - 147 - 30, MinecraftClient.getInstance().window.getScaledHeight());
+                return new Rectangle(2, 0, ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() - 4, MinecraftClient.getInstance().window.getScaledHeight());
+            }
+            
+            @Override
+            public Rectangle getRightBounds(Object screen) {
+                int startX = ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() + ScreenHelper.getLastContainerScreenHooks().rei_getContainerWidth() + 2;
+                return new Rectangle(startX, 0, MinecraftClient.getInstance().window.getScaledWidth() - startX - 2, MinecraftClient.getInstance().window.getScaledHeight());
+            }
+            
+            @Override
+            public float getPriority() {
+                return -1.0f;
+            }
+        });
+        displayHelper.registerBoundsHandler(new DisplayHelper.DisplayBoundsHandler() {
+            @Override
+            public Class getBaseSupportedClass() {
+                return RecipeViewingScreen.class;
+            }
+            
+            @Override
+            public Rectangle getLeftBounds(Object screen) {
+                return new Rectangle(2, 0, ((RecipeViewingScreen) screen).getBounds().x - 4, MinecraftClient.getInstance().window.getScaledHeight());
+            }
+            
+            @Override
+            public Rectangle getRightBounds(Object screen) {
+                int startX = ((RecipeViewingScreen) screen).getBounds().x + ((RecipeViewingScreen) screen).getBounds().width + 2;
+                return new Rectangle(startX, 0, MinecraftClient.getInstance().window.getScaledWidth() - startX - 2, MinecraftClient.getInstance().window.getScaledHeight());
+            }
+            
+            @Override
+            public float getPriority() {
+                return -1.0f;
+            }
+        });
+        displayHelper.registerBoundsHandler(new DisplayHelper.DisplayBoundsHandler() {
+            @Override
+            public Class getBaseSupportedClass() {
+                return CreativePlayerInventoryScreen.class;
+            }
+            
+            @Override
+            public Rectangle getLeftBounds(Object screen) {
+                return new Rectangle(2, 0, ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() - 2, MinecraftClient.getInstance().window.getScaledHeight());
+            }
+            
+            @Override
+            public Rectangle getRightBounds(Object screen) {
+                int startX = ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() + ScreenHelper.getLastContainerScreenHooks().rei_getContainerWidth();
+                return new Rectangle(startX, 0, MinecraftClient.getInstance().window.getScaledWidth() - startX - 2, MinecraftClient.getInstance().window.getScaledHeight());
+            }
+            
+            @Override
+            public Rectangle getItemListArea(Rectangle rectangle) {
+                return new Rectangle(rectangle.x + 1, rectangle.y + 24, rectangle.width - 2, rectangle.height - (RoughlyEnoughItemsCore.getConfigManager().getConfig().sideSearchField ? 27 + 22 : 27));
+            }
+            
+            @Override
+            public float getPriority() {
+                return -0.9f;
+            }
         });
     }
     

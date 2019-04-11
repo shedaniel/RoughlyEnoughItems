@@ -6,11 +6,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.cloth.hooks.ClothClientHooks;
-import me.shedaniel.rei.api.ItemRegistry;
-import me.shedaniel.rei.api.PluginDisabler;
-import me.shedaniel.rei.api.REIPlugin;
-import me.shedaniel.rei.api.RecipeHelper;
+import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.*;
+import me.shedaniel.rei.client.ConfigManager;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
@@ -41,6 +39,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     private static final RecipeHelper RECIPE_HELPER = new RecipeHelperImpl();
     private static final PluginDisabler PLUGIN_DISABLER = new PluginDisablerImpl();
     private static final ItemRegistry ITEM_REGISTRY = new ItemRegistryImpl();
+    private static final DisplayHelper DISPLAY_HELPER = new DisplayHelperImpl();
     private static final Map<Identifier, REIPlugin> plugins = Maps.newHashMap();
     private static ConfigManager configManager;
     
@@ -62,6 +61,10 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     
     public static PluginDisabler getPluginDisabler() {
         return PLUGIN_DISABLER;
+    }
+    
+    public static DisplayHelper getDisplayHelper() {
+        return DISPLAY_HELPER;
     }
     
     public static REIPlugin registerPlugin(Identifier identifier, REIPlugin plugin) {

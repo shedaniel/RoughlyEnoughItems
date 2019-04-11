@@ -23,6 +23,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     }).reversed();
     private final AtomicInteger recipeCount = new AtomicInteger();
     private final Map<Identifier, List<RecipeDisplay>> recipeCategoryListMap = Maps.newHashMap();
+    private final Map<Identifier, DisplaySettings> categoryDisplaySettingsMap = Maps.newHashMap();
     private final List<RecipeCategory> categories = Lists.newArrayList();
     private final Map<Identifier, ButtonAreaSupplier> speedCraftAreaSupplierMap = Maps.newHashMap();
     private final Map<Identifier, List<SpeedCraftFunctional>> speedCraftFunctionalMap = Maps.newHashMap();
@@ -62,6 +63,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     @Override
     public void registerCategory(RecipeCategory category) {
         categories.add(category);
+        categoryDisplaySettingsMap.put(category.getIdentifier(), category.getDisplaySettings());
         recipeCategoryListMap.put(category.getIdentifier(), Lists.newLinkedList());
     }
     
@@ -180,7 +182,9 @@ public class RecipeHelperImpl implements RecipeHelper {
         this.categories.clear();
         this.speedCraftAreaSupplierMap.clear();
         this.speedCraftFunctionalMap.clear();
+        this.categoryDisplaySettingsMap.clear();
         this.displayVisibilityHandlers.clear();
+        ((DisplayHelperImpl) RoughlyEnoughItemsCore.getDisplayHelper()).resetCache();
         long startTime = System.currentTimeMillis();
         List<REIPlugin> plugins = new LinkedList<>(RoughlyEnoughItemsCore.getPlugins());
         plugins.sort((first, second) -> {
@@ -202,6 +206,8 @@ public class RecipeHelperImpl implements RecipeHelper {
                 plugin.registerRecipeDisplays(this);
             if (RoughlyEnoughItemsCore.getConfigManager().getConfig().enableLegacySpeedCraftSupport && pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_SPEED_CRAFT))
                 plugin.registerSpeedCraft(this);
+            if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_BOUNDS))
+                plugin.registerBounds(RoughlyEnoughItemsCore.getDisplayHelper());
             if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_OTHERS))
                 plugin.registerOthers(this);
         });
@@ -270,6 +276,11 @@ public class RecipeHelperImpl implements RecipeHelper {
             }
         }
         return true;
+    }
+    
+    @Override
+    public Optional<DisplaySettings> getCachedCategorySettings(Identifier category) {
+        return categoryDisplaySettingsMap.entrySet().stream().filter(entry -> entry.getKey().equals(category)).map(Map.Entry::getValue).findAny();
     }
     
 }

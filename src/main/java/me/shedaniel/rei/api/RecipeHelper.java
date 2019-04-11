@@ -51,4 +51,6 @@ public interface RecipeHelper {
     
     boolean isDisplayVisible(RecipeDisplay display, boolean respectConfig);
     
+    Optional<DisplaySettings> getCachedCategorySettings(Identifier category);
+    
 }
