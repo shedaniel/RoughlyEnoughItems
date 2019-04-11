@@ -51,15 +51,15 @@ public interface RecipeCategory<T extends RecipeDisplay> {
     }
     
     default int getDisplayHeight() {
-        return getDisplaySettings().getDisplayHeight(this);
+        return RecipeHelper.getInstance().getCachedCategorySettings(getIdentifier()).map(settings -> settings.getDisplayHeight(this)).orElse(0);
     }
     
     default int getDisplayWidth(T display) {
-        return getDisplaySettings().getDisplayWidth(this, display);
+        return RecipeHelper.getInstance().getCachedCategorySettings(getIdentifier()).map(settings -> settings.getDisplayWidth(this, display)).orElse(0);
     }
     
     default int getMaximumRecipePerPage() {
-        return getDisplaySettings().getMaximumRecipePerPage(this);
+        return RecipeHelper.getInstance().getCachedCategorySettings(getIdentifier()).map(settings -> settings.getMaximumRecipePerPage(this)).orElse(0);
     }
     
     default boolean checkTags() {

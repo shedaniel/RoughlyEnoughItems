@@ -13,6 +13,8 @@ public interface REIPlugin {
     @Deprecated
     default void registerSpeedCraft(RecipeHelper recipeHelper) {}
     
+    default void registerBounds(DisplayHelper displayHelper) {}
+    
     default void registerOthers(RecipeHelper recipeHelper) {}
     
     default int getPriority() {

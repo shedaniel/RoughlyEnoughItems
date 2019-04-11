@@ -3,6 +3,7 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.collect.Lists;
 import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.api.DisplayHelper;
 import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.ItemListOrdering;
@@ -78,8 +79,8 @@ public class ItemListOverlay extends Widget {
             ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.delete_items")));
     }
     
-    public void updateList(Rectangle bounds, int page, String searchTerm) {
-        this.rectangle = bounds;
+    public void updateList(DisplayHelper.DisplayBoundsHandler boundsHandler, Rectangle rectangle, int page, String searchTerm) {
+        this.rectangle = rectangle;
         this.page = page;
         this.widgets = Lists.newLinkedList();
         calculateListSize(rectangle);
