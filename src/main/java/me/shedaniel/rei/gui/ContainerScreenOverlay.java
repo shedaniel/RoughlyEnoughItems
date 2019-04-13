@@ -57,7 +57,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
         DisplayHelper.DisplayBoundsHandler boundsHandler = RoughlyEnoughItemsCore.getDisplayHelper().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
         this.rectangle = RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? boundsHandler.getLeftBounds(MinecraftClient.getInstance().currentScreen) : boundsHandler.getRightBounds(MinecraftClient.getInstance().currentScreen);
         this.lastLeft = getLeft();
-        widgets.add(this.itemListOverlay = new ItemListOverlay(page));
+        widgets.add(itemListOverlay = new ItemListOverlay(page));
         itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm);
         
         widgets.add(buttonLeft = new ButtonWidget(rectangle.x, rectangle.y + 5, 16, 16, new TranslatableTextComponent("text.rei.left_arrow")) {
@@ -98,8 +98,10 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
                 return false;
             }
         });
+
         if (setPage)
             page = MathHelper.clamp(page, 0, getTotalPage());
+
         widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? window.getScaledWidth() - 30 : 10, 10, 20, 20, "") {
             @Override
             public void onPressed() {
@@ -328,7 +330,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
         ScreenHelper.searchField.laterRender(mouseX, mouseY, delta);
         Screen currentScreen = MinecraftClient.getInstance().currentScreen;
         if (!(currentScreen instanceof RecipeViewingScreen) || !((RecipeViewingScreen) currentScreen).choosePageActivated)
-            QUEUED_TOOLTIPS.stream().filter(queuedTooltip -> queuedTooltip != null).forEach(queuedTooltip -> renderTooltip(queuedTooltip.getText(), queuedTooltip.getLocation().x, queuedTooltip.getLocation().y));
+            QUEUED_TOOLTIPS.stream().filter(Objects::nonNull).forEach(queuedTooltip -> renderTooltip(queuedTooltip.getText(), queuedTooltip.getLocation().x, queuedTooltip.getLocation().y));
         QUEUED_TOOLTIPS.clear();
     }
     
@@ -340,9 +342,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             GuiLighting.disable();
             GlStateManager.disableLighting();
             int int_3 = 0;
-            Iterator var5 = list_1.iterator();
-            while (var5.hasNext()) {
-                String string_1 = (String) var5.next();
+            for (String string_1 : list_1) {
                 int int_4 = font.getStringWidth(string_1);
                 if (int_4 > int_3)
                     int_3 = int_4;
@@ -384,17 +384,20 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
     }
     
     private boolean hasSameListContent(List<ItemStack> list1, List<ItemStack> list2) {
-        Collections.sort(list1, (itemStack, t1) -> {
-            return ItemListOverlay.tryGetItemStackName(itemStack).compareToIgnoreCase(ItemListOverlay.tryGetItemStackName(t1));
-        });
-        Collections.sort(list2, (itemStack, t1) -> {
-            return ItemListOverlay.tryGetItemStackName(itemStack).compareToIgnoreCase(ItemListOverlay.tryGetItemStackName(t1));
-        });
-        String lastString = String.join("", list1.stream().map(itemStack -> {
-            return ItemListOverlay.tryGetItemStackName(itemStack);
-        }).collect(Collectors.toList())), currentString = String.join("", list2.stream().map(itemStack -> {
-            return ItemListOverlay.tryGetItemStackName(itemStack);
-        }).collect(Collectors.toList()));
+        list1.sort((itemStack, t1) ->
+            ItemListOverlay.tryGetItemStackName(itemStack).compareToIgnoreCase(ItemListOverlay.tryGetItemStackName(t1))
+        );
+
+        list2.sort((itemStack, t1) ->
+            ItemListOverlay.tryGetItemStackName(itemStack).compareToIgnoreCase(ItemListOverlay.tryGetItemStackName(t1))
+        );
+
+        String lastString = list1.stream().map(
+            ItemListOverlay::tryGetItemStackName
+        ).collect(Collectors.joining("")), currentString = list2.stream().map(
+            ItemListOverlay::tryGetItemStackName
+        ).collect(Collectors.joining(""));
+
         return lastString.equals(currentString);
     }
     
@@ -461,7 +464,6 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
         }
         if (!ScreenHelper.isOverlayVisible())
             return false;
-        Point point = ClientUtils.getMouseLocation();
         ItemStack itemStack = null;
         if (MinecraftClient.getInstance().currentScreen instanceof ContainerScreen)
             if (ScreenHelper.getLastContainerScreenHooks().rei_getHoveredSlot() != null && !ScreenHelper.getLastContainerScreenHooks().rei_getHoveredSlot().getStack().isEmpty())

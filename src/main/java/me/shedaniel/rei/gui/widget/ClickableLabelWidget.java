@@ -9,7 +9,7 @@ public abstract class ClickableLabelWidget extends LabelWidget {
     
     public static final int hoveredColor = (new Color(102, 255, 204)).getRGB();
     public boolean focused;
-    
+
     public ClickableLabelWidget(int x, int y, String text) {
         super(x, y, text);
     }
