@@ -6,10 +6,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.cloth.hooks.ClothClientHooks;
+import me.shedaniel.cloth.hooks.ScreenHooks;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.client.*;
 import me.shedaniel.rei.client.ConfigManager;
+import me.shedaniel.rei.client.*;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
+import me.shedaniel.rei.listeners.CreativePlayerInventoryScreenHooks;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
@@ -20,6 +22,8 @@ import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
 import net.minecraft.client.gui.ingame.PlayerInventoryScreen;
 import net.minecraft.client.gui.widget.RecipeBookButtonWidget;
+import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
@@ -182,8 +186,12 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         });
         ClothClientHooks.SCREEN_MOUSE_CLICKED.register((minecraftClient, screen, v, v1, i) -> {
             if (screen instanceof CreativePlayerInventoryScreen)
-                if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().mouseClicked(v, v1, i))
+                if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().mouseClicked(v, v1, i)) {
+                    screen.setFocused(ScreenHelper.getLastOverlay());
+                    if (i == 0)
+                        screen.setDragging(true);
                     return ActionResult.SUCCESS;
+                }
             return ActionResult.PASS;
         });
         ClothClientHooks.SCREEN_MOUSE_SCROLLED.register((minecraftClient, screen, v, v1, v2) -> {
@@ -205,6 +213,11 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                 ScreenHelper.getLastOverlay().lateRender(i, i1, v);
         });
         ClothClientHooks.SCREEN_KEY_PRESSED.register((minecraftClient, screen, i, i1, i2) -> {
+            if (screen instanceof CreativePlayerInventoryScreen && screen.getFocused() != null && screen.getFocused() instanceof TextFieldWidget && ((CreativePlayerInventoryScreenHooks) screen).rei_getSelectedTab() == ItemGroup.SEARCH.getIndex())
+                for(Element element : ((ScreenHooks) screen).cloth_getInputListeners())
+                    if (element instanceof TextFieldWidget)
+                        if (screen.getFocused() == element && ((TextFieldWidget) element).isFocused())
+                            return ActionResult.PASS;
             if (screen instanceof ContainerScreen)
                 if (ScreenHelper.getLastOverlay().keyPressed(i, i1, i2))
                     return ActionResult.SUCCESS;

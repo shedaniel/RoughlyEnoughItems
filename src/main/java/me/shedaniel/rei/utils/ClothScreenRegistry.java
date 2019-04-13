@@ -22,7 +22,6 @@ import java.util.Map;
 public class ClothScreenRegistry {
     
     public static void openConfigScreen(Screen parent) {
-        //        ConfigScreenBuilder builder = ConfigScreenBuilder.create(parent, "text.rei.config.title", savedConfig -> {
         ConfigScreenBuilder builder = new ClothConfigScreen.Builder(parent, "text.rei.config.title", savedConfig -> {
             try {
                 RoughlyEnoughItemsCore.getConfigManager().saveConfig();
@@ -41,8 +40,10 @@ public class ClothScreenRegistry {
                     
                     @Override
                     protected void init() {
-                        addButton(new ButtonWidget(6, 6, 60, 20, I18n.translate("text.rei.credits"), widget -> MinecraftClient.getInstance().openScreen(new CreditsScreen(MinecraftClient.getInstance().currentScreen))));
                         super.init();
+                        ButtonWidget w;
+                        buttons.add(0, w = new ButtonWidget(6, 6, 60, 20, I18n.translate("text.rei.credits"), widget -> MinecraftClient.getInstance().openScreen(new CreditsScreen(MinecraftClient.getInstance().currentScreen))));
+                        children.add(0, w);
                     }
                 };
             }
