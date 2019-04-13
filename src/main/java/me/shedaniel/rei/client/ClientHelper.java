@@ -40,7 +40,6 @@ public class ClientHelper implements ClientModInitializer {
     public static String getModFromItemStack(ItemStack stack) {
         if (!stack.isEmpty()) {
             Identifier location = Registry.ITEM.getId(stack.getItem());
-            assert location != null;
             String modid = location.getNamespace();
             if (modid.equalsIgnoreCase("minecraft"))
                 return "Minecraft";

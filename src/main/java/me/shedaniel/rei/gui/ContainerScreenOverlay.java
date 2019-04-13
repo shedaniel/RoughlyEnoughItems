@@ -13,6 +13,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.audio.PositionedSoundInstance;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.*;
+import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.Window;
@@ -444,12 +445,15 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
     }
     
     @Override
-    public boolean keyPressed(int int_1, int int_2, int int_3) {
+    public boolean keyPressed(int keyCode, int int_2, int int_3) {
         if (ScreenHelper.isOverlayVisible())
             for(Element listener : widgets)
-                if (listener.keyPressed(int_1, int_2, int_3))
+                if (listener.keyPressed(keyCode, int_2, int_3))
                     return true;
-        if (ClientHelper.HIDE.matchesKey(int_1, int_2)) {
+
+
+
+        if (ClientHelper.HIDE.matchesKey(keyCode, int_2)) {
             ScreenHelper.toggleOverlayVisible();
             return true;
         }
@@ -460,9 +464,9 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             if (ScreenHelper.getLastContainerScreenHooks().rei_getHoveredSlot() != null && !ScreenHelper.getLastContainerScreenHooks().rei_getHoveredSlot().getStack().isEmpty())
                 itemStack = ScreenHelper.getLastContainerScreenHooks().rei_getHoveredSlot().getStack();
         if (itemStack != null && !itemStack.isEmpty()) {
-            if (ClientHelper.RECIPE.matchesKey(int_1, int_2))
+            if (ClientHelper.RECIPE.matchesKey(keyCode, int_2))
                 return ClientHelper.executeRecipeKeyBind(itemStack);
-            else if (ClientHelper.USAGE.matchesKey(int_1, int_2))
+            else if (ClientHelper.USAGE.matchesKey(keyCode, int_2))
                 return ClientHelper.executeUsageKeyBind(itemStack);
         }
         return false;
