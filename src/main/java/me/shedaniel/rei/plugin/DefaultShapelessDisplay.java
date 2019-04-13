@@ -4,9 +4,10 @@ import com.google.common.collect.Lists;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.crafting.ShapelessRecipe;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class DefaultShapelessDisplay implements DefaultCraftingDisplay {
     
@@ -16,11 +17,8 @@ public class DefaultShapelessDisplay implements DefaultCraftingDisplay {
     
     public DefaultShapelessDisplay(ShapelessRecipe recipe) {
         this.display = recipe;
-        this.input = Lists.newArrayList();
-        recipe.getPreviewInputs().forEach(ingredient -> {
-            input.add(Arrays.asList(ingredient.getStackArray()));
-        });
-        this.output = Arrays.asList(recipe.getOutput());
+        this.input = Lists.newArrayList(recipe.getPreviewInputs().stream().map(i -> Lists.newArrayList(i.getStackArray())).collect(Collectors.toList()));
+        this.output = Collections.singletonList(recipe.getOutput());
     }
     
     @Override

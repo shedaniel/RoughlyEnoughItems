@@ -1,15 +1,15 @@
 package me.shedaniel.rei.plugin;
 
+import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.RecipeDisplay;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,12 +31,12 @@ public class DefaultBrewingDisplay implements RecipeDisplay {
     
     @Override
     public List<List<ItemStack>> getInput() {
-        return Arrays.asList(Arrays.asList(input), Arrays.asList(reactant.getStackArray()));
+        return Lists.newArrayList(Collections.singletonList(input), Lists.newArrayList(reactant.getStackArray()));
     }
     
     @Override
     public List<ItemStack> getOutput() {
-        return Arrays.asList(output);
+        return Collections.singletonList(output);
     }
     
     @Override
@@ -55,6 +55,6 @@ public class DefaultBrewingDisplay implements RecipeDisplay {
     
     @Override
     public List<List<ItemStack>> getRequiredItems() {
-        return Arrays.asList(Arrays.asList(new ItemStack(Items.AIR)));
+        return Collections.singletonList(Collections.singletonList(ItemStack.EMPTY));
     }
 }

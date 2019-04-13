@@ -19,7 +19,7 @@ public abstract class ClickableLabelWidget extends LabelWidget {
         int colour = -1;
         if (isHovered(mouseX, mouseY))
             colour = hoveredColor;
-        drawCenteredString(textRenderer, (isHovered(mouseX, mouseY) ? "§n" : "") + text, x, y, colour);
+        drawCenteredString(font, (isHovered(mouseX, mouseY) ? "§n" : "") + text, x, y, colour);
         if (getTooltips().isPresent())
             if (!focused && isHighlighted(mouseX, mouseY))
                 ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltips().get().split("\n")));

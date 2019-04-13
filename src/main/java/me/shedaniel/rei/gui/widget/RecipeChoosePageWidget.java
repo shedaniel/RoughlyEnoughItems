@@ -26,7 +26,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     private List<Widget> widgets;
     private RecipeViewingScreen recipeViewingScreen;
     private TextFieldWidget textFieldWidget;
-    private RecipeBaseWidget base1, base2;
+    private CategoryBaseWidget base1, base2;
     private ButtonWidget btnDone;
     
     public RecipeChoosePageWidget(RecipeViewingScreen recipeViewingScreen, int currentPage, int maxPage) {
@@ -80,8 +80,8 @@ public class RecipeChoosePageWidget extends DraggableWidget {
         this.grabBounds = new Rectangle(midPoint.x - 50, midPoint.y - 20, 100, 16);
         this.dragBounds = new Rectangle(midPoint.x - 50, midPoint.y - 20, 100, 70);
         this.widgets = Lists.newArrayList();
-        this.widgets.add(base1 = new RecipeBaseWidget(new Rectangle(bounds.x + bounds.width - 50, bounds.y + bounds.height - 6, 50, 36)));
-        this.widgets.add(base2 = new RecipeBaseWidget(bounds));
+        this.widgets.add(base1 = new CategoryBaseWidget(new Rectangle(bounds.x + bounds.width - 50, bounds.y + bounds.height - 6, 50, 36)));
+        this.widgets.add(base2 = new CategoryBaseWidget(bounds));
         this.widgets.add(new Widget() {
             @Override
             public List<Widget> children() {
@@ -90,14 +90,14 @@ public class RecipeChoosePageWidget extends DraggableWidget {
             
             @Override
             public void render(int i, int i1, float v) {
-                minecraft.textRenderer.draw(I18n.translate("text.rei.choose_page"), bounds.x + 5, bounds.y + 5, 4210752);
+                font.draw(I18n.translate("text.rei.choose_page"), bounds.x + 5, bounds.y + 5, 4210752);
                 String endString = String.format(" /%d", maxPage);
-                int width = minecraft.textRenderer.getStringWidth(endString);
-                minecraft.textRenderer.draw(endString, bounds.x + bounds.width - 5 - width, bounds.y + 22, 4210752);
+                int width = font.getStringWidth(endString);
+                font.draw(endString, bounds.x + bounds.width - 5 - width, bounds.y + 22, 4210752);
             }
         });
         String endString = String.format(" /%d", maxPage);
-        int width = minecraft.textRenderer.getStringWidth(endString);
+        int width = font.getStringWidth(endString);
         this.widgets.add(textFieldWidget = new TextFieldWidget(bounds.x + 7, bounds.y + 16, bounds.width - width - 12, 18));
         textFieldWidget.stripInvaild = s -> {
             StringBuilder stringBuilder_1 = new StringBuilder();

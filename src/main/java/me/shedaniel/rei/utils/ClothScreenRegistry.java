@@ -1,32 +1,59 @@
 package me.shedaniel.rei.utils;
 
 import me.shedaniel.cloth.api.ConfigScreenBuilder;
+import me.shedaniel.cloth.gui.ClothConfigScreen;
 import me.shedaniel.cloth.gui.entries.BooleanListEntry;
+import me.shedaniel.cloth.gui.entries.EnumListEntry;
 import me.shedaniel.cloth.gui.entries.IntegerSliderEntry;
 import me.shedaniel.cloth.gui.entries.StringListEntry;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.gui.config.ItemListOrderingEntry;
+import me.shedaniel.rei.gui.config.ItemListOrderingConfig;
+import me.shedaniel.rei.gui.credits.CreditsScreen;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Screen;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.util.Pair;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 public class ClothScreenRegistry {
     
     public static void openConfigScreen(Screen parent) {
-        ConfigScreenBuilder builder = ConfigScreenBuilder.create(parent, "text.rei.config.title", savedConfig -> {
+        //        ConfigScreenBuilder builder = ConfigScreenBuilder.create(parent, "text.rei.config.title", savedConfig -> {
+        ConfigScreenBuilder builder = new ClothConfigScreen.Builder(parent, "text.rei.config.title", savedConfig -> {
             try {
                 RoughlyEnoughItemsCore.getConfigManager().saveConfig();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        });
+        }) {
+            @Override
+            public ClothConfigScreen build() {
+                return new ClothConfigScreen(this.getParentScreen(), this.getTitle(), this.getDataMap(), this.doesConfirmSave(), this.shouldProcessErrors()) {
+                    public void onSave(Map<String, List<Pair<String, Object>>> o) {
+                        if (getOnSave() != null) {
+                            getOnSave().accept(new SelfSavedConfig(o));
+                        }
+                    }
+                    
+                    @Override
+                    protected void init() {
+                        addButton(new ButtonWidget(6, 6, 60, 20, I18n.translate("text.rei.credits"), widget -> MinecraftClient.getInstance().openScreen(new CreditsScreen(MinecraftClient.getInstance().currentScreen))));
+                        super.init();
+                    }
+                };
+            }
+        };
         builder.addCategory("text.rei.config.general").addOption(new BooleanListEntry("text.rei.config.cheating", RoughlyEnoughItemsCore.getConfigManager().getConfig().cheating, "text.cloth-config.reset_value", () -> false, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().cheating = bool));
         ConfigScreenBuilder.CategoryBuilder appearance = builder.addCategory("text.rei.config.appearance");
         appearance.addOption(new BooleanListEntry("text.rei.config.side_search_box", RoughlyEnoughItemsCore.getConfigManager().getConfig().sideSearchField, "text.cloth-config.reset_value", () -> false, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().sideSearchField = bool));
-        appearance.addOption(new ItemListOrderingEntry("text.rei.config.list_ordering", new Pair<>(RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering, RoughlyEnoughItemsCore.getConfigManager().getConfig().isAscending)));
+        appearance.addOption(new EnumListEntry<ItemListOrderingConfig>("text.rei.config.list_ordering", ItemListOrderingConfig.class, ItemListOrderingConfig.from(RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering, RoughlyEnoughItemsCore.getConfigManager().getConfig().isAscending), "text.cloth-config.reset_value", () -> ItemListOrderingConfig.REGISTRY_ASCENDING, config -> {
+            RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering = config.getOrdering();
+            RoughlyEnoughItemsCore.getConfigManager().getConfig().isAscending = config.isAscending();
+        }));
         appearance.addOption(new BooleanListEntry("text.rei.config.item_list_position", RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel, "text.cloth-config.reset_value", () -> false, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel = bool) {
             @Override
             public String getYesNoText(boolean bool) {
@@ -47,6 +74,12 @@ public class ClothScreenRegistry {
         ConfigScreenBuilder.CategoryBuilder aprilFools = builder.addCategory("text.rei.config.april_fools");
         aprilFools.addOption(new BooleanListEntry("text.rei.config.april_fools.2019", RoughlyEnoughItemsCore.getConfigManager().getConfig().aprilFoolsFish2019, "text.cloth-config.reset_value", () -> false, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().aprilFoolsFish2019 = bool));
         MinecraftClient.getInstance().openScreen(builder.build());
+    }
+    
+    private static class SelfSavedConfig extends ClothConfigScreen.Builder.SavedConfig {
+        protected SelfSavedConfig(Map<String, List<Pair<String, Object>>> map) {
+            super(map);
+        }
     }
     
 }

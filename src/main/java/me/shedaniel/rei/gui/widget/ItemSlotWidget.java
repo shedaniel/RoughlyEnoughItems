@@ -69,7 +69,7 @@ public class ItemSlotWidget extends HighlightableWidget {
             GlStateManager.disableLighting();
             GlStateManager.disableDepthTest();
             GlStateManager.colorMask(true, true, true, false);
-            fill(x, y, x + 16, y + 16, -2130706433);
+            fillGradient(x, y, x + 16, y + 16, -2130706433, -2130706433);
             GlStateManager.colorMask(true, true, true, true);
             GlStateManager.enableLighting();
             GlStateManager.enableDepthTest();
@@ -81,7 +81,7 @@ public class ItemSlotWidget extends HighlightableWidget {
             ItemRenderer itemRenderer = minecraft.getItemRenderer();
             itemRenderer.zOffset = 200.0F;
             itemRenderer.renderGuiItem(itemStack, x, y);
-            itemRenderer.renderGuiItemOverlay(minecraft.textRenderer, itemStack, x, y, getItemCountOverlay(itemStack));
+            itemRenderer.renderGuiItemOverlay(font, itemStack, x, y, getItemCountOverlay(itemStack));
             itemRenderer.zOffset = 0.0F;
         }
         if (!itemStack.isEmpty() && isHighlighted(mouseX, mouseY) && showToolTips)

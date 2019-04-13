@@ -1,3 +1,11 @@
+## v2.7.3.86
+- Fixed [#56](https://github.com/shedaniel/RoughlyEnoughItems/issues/56): Even tho I don't know how I fixed it
+- Added: Credits button in Config Screen
+- Fixed: Odd pixel with the recipe screen
+- Fixed: Pressing R not working on the side panel while viewing recipes
+- Modified: Right-clicking the search field now focus it
+- Fixed: Craftable Only button having a weird tint when something else is focused
+- Added: Recipes now sort base on their identifiers
 ## v2.7.2.85
 - Bundled with updated APIs for 1.14-pre1
 - New DisplayHelper for better bounds calculation
