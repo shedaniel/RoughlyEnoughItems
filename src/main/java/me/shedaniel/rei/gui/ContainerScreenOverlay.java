@@ -25,8 +25,10 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameMode;
 
 import java.awt.*;
-import java.util.*;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ContainerScreenOverlay extends AbstractParentElement implements Drawable {
@@ -98,10 +100,10 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
                 return false;
             }
         });
-
+        
         if (setPage)
             page = MathHelper.clamp(page, 0, getTotalPage());
-
+        
         widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? window.getScaledWidth() - 30 : 10, 10, 20, 20, "") {
             @Override
             public void onPressed() {
@@ -188,7 +190,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
                 }
             });
         }
-        widgets.add(new ClickableLabelWidget(rectangle.x + (rectangle.width / 2), rectangle.y + 10, "") {
+        widgets.add(new ClickableLabelWidget(rectangle.x + (rectangle.width / 2), rectangle.y + 10, "", getTotalPage() > 0) {
             @Override
             public void render(int mouseX, int mouseY, float delta) {
                 page = MathHelper.clamp(page, 0, getTotalPage());
@@ -213,6 +215,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
                 return false;
             }
         });
+        buttonLeft.enabled = buttonRight.enabled = getTotalPage() > 0;
         if (ScreenHelper.searchField == null)
             ScreenHelper.searchField = new SearchFieldWidget(0, 0, 0, 0);
         ScreenHelper.searchField.setChangedListener(s -> {
@@ -342,7 +345,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             GuiLighting.disable();
             GlStateManager.disableLighting();
             int int_3 = 0;
-            for (String string_1 : list_1) {
+            for(String string_1 : list_1) {
                 int int_4 = font.getStringWidth(string_1);
                 if (int_4 > int_3)
                     int_3 = int_4;
@@ -384,21 +387,10 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
     }
     
     private boolean hasSameListContent(List<ItemStack> list1, List<ItemStack> list2) {
-        list1.sort((itemStack, t1) ->
-            ItemListOverlay.tryGetItemStackName(itemStack).compareToIgnoreCase(ItemListOverlay.tryGetItemStackName(t1))
-        );
-
-        list2.sort((itemStack, t1) ->
-            ItemListOverlay.tryGetItemStackName(itemStack).compareToIgnoreCase(ItemListOverlay.tryGetItemStackName(t1))
-        );
-
-        String lastString = list1.stream().map(
-            ItemListOverlay::tryGetItemStackName
-        ).collect(Collectors.joining("")), currentString = list2.stream().map(
-            ItemListOverlay::tryGetItemStackName
-        ).collect(Collectors.joining(""));
-
-        return lastString.equals(currentString);
+        list1.sort((itemStack, t1) -> ItemListOverlay.tryGetItemStackName(itemStack).compareToIgnoreCase(ItemListOverlay.tryGetItemStackName(t1)));
+        list2.sort((itemStack, t1) -> ItemListOverlay.tryGetItemStackName(itemStack).compareToIgnoreCase(ItemListOverlay.tryGetItemStackName(t1)));
+        
+        return list1.stream().map(ItemListOverlay::tryGetItemStackName).collect(Collectors.joining("")).equals(list2.stream().map(ItemListOverlay::tryGetItemStackName).collect(Collectors.joining("")));
     }
     
     public void addTooltip(QueuedTooltip queuedTooltip) {
@@ -408,8 +400,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
     public void renderWidgets(int int_1, int int_2, float float_1) {
         if (!ScreenHelper.isOverlayVisible())
             return;
-        buttonLeft.enabled = itemListOverlay.children().size() > 0;
-        buttonRight.enabled = itemListOverlay.children().size() > 0;
+        buttonLeft.enabled = buttonRight.enabled = getTotalPage() > 0;
         widgets.forEach(widget -> {
             GuiLighting.disable();
             widget.render(int_1, int_2, float_1);
@@ -496,14 +487,13 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
         if (!ScreenHelper.isOverlayVisible())
             return false;
-        for(Element element : widgets) {
+        for(Element element : widgets)
             if (element.mouseClicked(double_1, double_2, int_1)) {
                 this.setFocused(element);
                 if (int_1 == 0)
                     this.setDragging(true);
                 return true;
             }
-        }
         return false;
     }
     

@@ -1,7 +1,11 @@
 View full changelog [here](https://github.com/shedaniel/RoughlyEnoughItems/blob/1.14/CHANGELOG.md).
+## v2.7.4.88
+- Fixed: Item List Overlay buttons still enabled when there is only 1 page
+- Fixed [#58](https://github.com/shedaniel/RoughlyEnoughItems/issues/58): Keybinds (e.g. O, R, U) working even creative search field is focused
+- Fixed [#59](https://github.com/shedaniel/RoughlyEnoughItems/issues/59): Wrong page calculation (Thanks geniiii)
 ## v2.7.3.87
 - Fixed: Credits button not working
-- Fixed: Keybinds (e.g. O, R, U) working even creative search field is focused
+- ~~Fixed: Keybinds (e.g. O, R, U) working even creative search field is focused~~
 ## v2.7.3.86
 - Fixed [#56](https://github.com/shedaniel/RoughlyEnoughItems/issues/56): Even tho I don't know how I fixed it
 - Added: Credits button in Config Screen

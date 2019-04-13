@@ -9,18 +9,24 @@ public abstract class ClickableLabelWidget extends LabelWidget {
     
     public static final int hoveredColor = (new Color(102, 255, 204)).getRGB();
     public boolean focused;
-
-    public ClickableLabelWidget(int x, int y, String text) {
+    public boolean clickable;
+    
+    public ClickableLabelWidget(int x, int y, String text, boolean clickable) {
         super(x, y, text);
+        this.clickable = clickable;
+    }
+    
+    public ClickableLabelWidget(int x, int y, String text) {
+        this(x, y, text, true);
     }
     
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         int colour = -1;
-        if (isHovered(mouseX, mouseY))
+        if (clickable && isHovered(mouseX, mouseY))
             colour = hoveredColor;
         drawCenteredString(font, (isHovered(mouseX, mouseY) ? "§n" : "") + text, x, y, colour);
-        if (getTooltips().isPresent())
+        if (clickable && getTooltips().isPresent())
             if (!focused && isHighlighted(mouseX, mouseY))
                 ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltips().get().split("\n")));
             else if (focused)
@@ -29,7 +35,7 @@ public abstract class ClickableLabelWidget extends LabelWidget {
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 0 && isHighlighted(mouseX, mouseY)) {
+        if (button == 0 && clickable && isHighlighted(mouseX, mouseY)) {
             onLabelClicked();
             return true;
         }
@@ -42,22 +48,24 @@ public abstract class ClickableLabelWidget extends LabelWidget {
     
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
-        if (int_1 != 257 && int_1 != 32 && int_1 != 335) {
+        if (!clickable)
             return false;
-        } else {
-            this.onLabelClicked();
-            return true;
-        }
+        if (int_1 != 257 && int_1 != 32 && int_1 != 335)
+            return false;
+        this.onLabelClicked();
+        return true;
     }
     
     @Override
     public boolean changeFocus(boolean boolean_1) {
+        if (!clickable)
+            return false;
         this.focused = !this.focused;
         return true;
     }
     
     public boolean isHovered(int mouseX, int mouseY) {
-        return isHighlighted(mouseX, mouseY) || focused;
+        return clickable && (isHighlighted(mouseX, mouseY) || focused);
     }
     
     public abstract void onLabelClicked();
