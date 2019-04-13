@@ -51,7 +51,7 @@ public class ClothScreenRegistry {
         builder.addCategory("text.rei.config.general").addOption(new BooleanListEntry("text.rei.config.cheating", RoughlyEnoughItemsCore.getConfigManager().getConfig().cheating, "text.cloth-config.reset_value", () -> false, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().cheating = bool));
         ConfigScreenBuilder.CategoryBuilder appearance = builder.addCategory("text.rei.config.appearance");
         appearance.addOption(new BooleanListEntry("text.rei.config.side_search_box", RoughlyEnoughItemsCore.getConfigManager().getConfig().sideSearchField, "text.cloth-config.reset_value", () -> false, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().sideSearchField = bool));
-        appearance.addOption(new EnumListEntry<ItemListOrderingConfig>("text.rei.config.list_ordering", ItemListOrderingConfig.class, ItemListOrderingConfig.from(RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering, RoughlyEnoughItemsCore.getConfigManager().getConfig().isAscending), "text.cloth-config.reset_value", () -> ItemListOrderingConfig.REGISTRY_ASCENDING, config -> {
+        appearance.addOption(new EnumListEntry<>("text.rei.config.list_ordering", ItemListOrderingConfig.class, ItemListOrderingConfig.from(RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering, RoughlyEnoughItemsCore.getConfigManager().getConfig().isAscending), "text.cloth-config.reset_value", () -> ItemListOrderingConfig.REGISTRY_ASCENDING, config -> {
             RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering = config.getOrdering();
             RoughlyEnoughItemsCore.getConfigManager().getConfig().isAscending = config.isAscending();
         }));
