@@ -1,3 +1,6 @@
+## v2.7.3.87
+- Fixed: Credits button not working
+- Fixed: Keybinds (e.g. O, R, U) working even creative search field is focused
 ## v2.7.3.86
 - Fixed [#56](https://github.com/shedaniel/RoughlyEnoughItems/issues/56): Even tho I don't know how I fixed it
 - Added: Credits button in Config Screen
