@@ -223,9 +223,8 @@ public class RecipeViewingScreen extends Screen {
             }
         });
         int recipesPerPageByHeight = getRecipesPerPageByHeight();
-        recipeBack.enabled = categoriesMap.get(selectedCategory).size() > recipesPerPageByHeight;
-        recipeNext.enabled = categoriesMap.get(selectedCategory).size() > recipesPerPageByHeight;
-        
+        recipeBack.enabled = recipeNext.enabled = categoriesMap.get(selectedCategory).size() > recipesPerPageByHeight;
+
         for(int i = 0; i < 6; i++) {
             int j = i + categoryPages * 6;
             if (categories.size() > j) {
@@ -305,7 +304,7 @@ public class RecipeViewingScreen extends Screen {
     
     private int getRecipesPerPageByHeight() {
         int height = selectedCategory.getDisplayHeight();
-        return MathHelper.clamp(MathHelper.floor(((double) guiHeight - 40d) / ((double) height + 7d)) - 1, 0, Math.min(RoughlyEnoughItemsCore.getConfigManager().getConfig().maxRecipePerPage - 1, selectedCategory.getMaximumRecipePerPage() - 1));
+        return MathHelper.clamp(MathHelper.floor(((double) guiHeight - 40d) / ((double) height + 7d)), 0, Math.min(RoughlyEnoughItemsCore.getConfigManager().getConfig().maxRecipePerPage - 1, selectedCategory.getMaximumRecipePerPage() - 1));
     }
     
     @Override
@@ -318,9 +317,9 @@ public class RecipeViewingScreen extends Screen {
             fill(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, SUB_COLOR.getRGB());
             fill(bounds.x + 17, bounds.y + 21, bounds.x + bounds.width - 17, bounds.y + 33, SUB_COLOR.getRGB());
         }
-        tabs.stream().filter(tabWidget -> {
-            return !tabWidget.isSelected();
-        }).forEach(tabWidget -> tabWidget.render(mouseX, mouseY, delta));
+        tabs.stream().filter(tabWidget ->
+            !tabWidget.isSelected()
+        ).forEach(tabWidget -> tabWidget.render(mouseX, mouseY, delta));
         GuiLighting.disable();
         super.render(mouseX, mouseY, delta);
         widgets.forEach(widget -> {
@@ -351,9 +350,7 @@ public class RecipeViewingScreen extends Screen {
     @Override
     public boolean charTyped(char char_1, int int_1) {
         if (choosePageActivated) {
-            if (recipeChoosePageWidget.charTyped(char_1, int_1))
-                return true;
-            return false;
+            return recipeChoosePageWidget.charTyped(char_1, int_1);
         }
         for(Element listener : children())
             if (listener.charTyped(char_1, int_1))
@@ -364,9 +361,7 @@ public class RecipeViewingScreen extends Screen {
     @Override
     public boolean mouseDragged(double double_1, double double_2, int int_1, double double_3, double double_4) {
         if (choosePageActivated) {
-            if (recipeChoosePageWidget.mouseDragged(double_1, double_2, int_1, double_3, double_4))
-                return true;
-            return false;
+            return recipeChoosePageWidget.mouseDragged(double_1, double_2, int_1, double_3, double_4);
         }
         return super.mouseDragged(double_1, double_2, int_1, double_3, double_4);
     }
@@ -374,9 +369,7 @@ public class RecipeViewingScreen extends Screen {
     @Override
     public boolean mouseReleased(double double_1, double double_2, int int_1) {
         if (choosePageActivated) {
-            if (recipeChoosePageWidget.mouseReleased(double_1, double_2, int_1))
-                return true;
-            return false;
+            return recipeChoosePageWidget.mouseReleased(double_1, double_2, int_1);
         }
         return super.mouseReleased(double_1, double_2, int_1);
     }
@@ -405,9 +398,7 @@ public class RecipeViewingScreen extends Screen {
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
         if (choosePageActivated)
             if (recipeChoosePageWidget.isHighlighted(double_1, double_2)) {
-                if (recipeChoosePageWidget.mouseClicked(double_1, double_2, int_1))
-                    return true;
-                return false;
+                return recipeChoosePageWidget.mouseClicked(double_1, double_2, int_1);
             } else {
                 choosePageActivated = false;
                 init();
