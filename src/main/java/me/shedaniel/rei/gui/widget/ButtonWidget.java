@@ -3,7 +3,6 @@ package me.shedaniel.rei.gui.widget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.client.ScreenHelper;
 import net.minecraft.client.audio.PositionedSoundInstance;
-import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.sound.SoundEvents;
@@ -58,7 +57,6 @@ public abstract class ButtonWidget extends HighlightableWidget {
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;
-        TextRenderer textRenderer = minecraft.textRenderer;
         minecraft.getTextureManager().bindTexture(AbstractButtonWidget.WIDGETS_LOCATION);
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         int textureOffset = this.getTextureId(isHovered(mouseX, mouseY));
@@ -87,7 +85,7 @@ public abstract class ButtonWidget extends HighlightableWidget {
             colour = 16777120;
         }
         
-        this.drawCenteredString(textRenderer, this.text, x + width / 2, y + (height - 8) / 2, colour);
+        this.drawCenteredString(font, text, x + width / 2, y + (height - 8) / 2, colour);
         
         if (getTooltips().isPresent())
             if (!focused && isHighlighted(mouseX, mouseY))

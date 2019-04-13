@@ -45,7 +45,7 @@ public abstract class DraggableWidget extends HighlightableWidget {
                     dragged = true;
                 }
             } else {
-                Window window = MinecraftClient.getInstance().window;
+                Window window = minecraft.window;
                 midPoint = processMidPoint(midPoint, mouse, startPoint, window, relateX, relateY);
                 updateWidgets(midPoint);
             }

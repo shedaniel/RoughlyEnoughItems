@@ -95,7 +95,14 @@ public class DefaultPlugin implements REIPlugin {
     
     @Override
     public void registerRecipeDisplays(RecipeHelper recipeHelper) {
-        for(Recipe recipe : recipeHelper.getRecipeManager().values())
+        List<Recipe> values = Lists.newLinkedList(recipeHelper.getRecipeManager().values());
+        values.sort((o1, o2) -> {
+            int int_1 = o1.getId().getNamespace().compareTo(o2.getId().getNamespace());
+            if (int_1 == 0)
+                int_1 = o1.getId().getPath().compareTo(o2.getId().getPath());
+            return int_1;
+        });
+        for(Recipe recipe : values)
             if (recipe instanceof ShapelessRecipe)
                 recipeHelper.registerDisplay(CRAFTING, new DefaultShapelessDisplay((ShapelessRecipe) recipe));
             else if (recipe instanceof ShapedRecipe)
@@ -111,18 +118,18 @@ public class DefaultPlugin implements REIPlugin {
             else if (recipe instanceof StonecuttingRecipe)
                 recipeHelper.registerDisplay(STONE_CUTTING, new DefaultStoneCuttingDisplay((StonecuttingRecipe) recipe));
         BREWING_DISPLAYS.stream().forEachOrdered(display -> recipeHelper.registerDisplay(BREWING, display));
-        List<ItemStack> arrowStack = Arrays.asList(Items.ARROW.getDefaultStack());
+        List<ItemStack> arrowStack = Collections.singletonList(Items.ARROW.getDefaultStack());
         RoughlyEnoughItemsCore.getItemRegisterer().getItemList().stream().filter(stack -> stack.getItem().equals(Items.LINGERING_POTION)).forEach(stack -> {
             List<List<ItemStack>> input = new ArrayList<>();
             for(int i = 0; i < 4; i++)
                 input.add(arrowStack);
-            input.add(Arrays.asList(stack));
+            input.add(Collections.singletonList(stack));
             for(int i = 0; i < 4; i++)
                 input.add(arrowStack);
             ItemStack outputStack = new ItemStack(Items.TIPPED_ARROW, 8);
             PotionUtil.setPotion(outputStack, PotionUtil.getPotion(stack));
             PotionUtil.setCustomPotionEffects(outputStack, PotionUtil.getCustomPotionEffects(stack));
-            List<ItemStack> output = Lists.newArrayList(outputStack);
+            List<ItemStack> output = Collections.singletonList(outputStack);
             recipeHelper.registerDisplay(CRAFTING, new DefaultCustomDisplay(input, output));
         });
     }

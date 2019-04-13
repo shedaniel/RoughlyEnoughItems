@@ -1,6 +1,7 @@
 package me.shedaniel.rei.gui.credits;
 
 import me.shedaniel.rei.client.ScreenHelper;
+import me.shedaniel.rei.gui.credits.CreditsEntryListWidget.CreditsItem;
 import me.shedaniel.rei.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.ContainerScreen;
 import net.minecraft.client.gui.Screen;
@@ -48,7 +49,7 @@ public class CreditsScreen extends Screen {
     
     @Override
     public boolean mouseScrolled(double double_1, double double_2, double double_3) {
-        if (entryListWidget.mouseScrolled(double_1, double_2, double_3))
+        if (entryListWidget.mouseScrolled(double_1, double_2, double_3 * 3))
             return true;
         return super.mouseScrolled(double_1, double_2, double_3);
     }
@@ -59,6 +60,7 @@ public class CreditsScreen extends Screen {
         this.entryListWidget.render(int_1, int_2, float_1);
         this.drawCenteredString(this.font, I18n.translate("text.rei.credits"), this.width / 2, 16, 16777215);
         super.render(int_1, int_2, float_1);
+        buttonDone.render(int_1, int_2, float_1);
     }
     
 }

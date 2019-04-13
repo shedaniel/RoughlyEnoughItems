@@ -5,9 +5,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.crafting.ShapedRecipe;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class DefaultShapedDisplay implements DefaultCraftingDisplay<ShapedRecipe> {
     
@@ -17,11 +18,8 @@ public class DefaultShapedDisplay implements DefaultCraftingDisplay<ShapedRecipe
     
     public DefaultShapedDisplay(ShapedRecipe recipe) {
         this.display = recipe;
-        this.input = Lists.newArrayList();
-        recipe.getPreviewInputs().forEach(ingredient -> {
-            input.add(Arrays.asList(ingredient.getStackArray()));
-        });
-        this.output = Arrays.asList(recipe.getOutput());
+        this.input = Lists.newArrayList(recipe.getPreviewInputs().stream().map(i -> Lists.newArrayList(i.getStackArray())).collect(Collectors.toList()));
+        this.output = Collections.singletonList(recipe.getOutput());
     }
     
     @Override

@@ -8,7 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.cooking.SmeltingRecipe;
 import net.minecraft.util.Identifier;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -21,14 +21,9 @@ public class DefaultSmeltingDisplay implements RecipeDisplay<SmeltingRecipe> {
     
     public DefaultSmeltingDisplay(SmeltingRecipe recipe) {
         this.display = recipe;
-        List<ItemStack> fuel = Lists.newArrayList();
-        this.input = Lists.newArrayList();
-        fuel.addAll(FurnaceBlockEntity.createFuelTimeMap().keySet().stream().map(Item::getDefaultStack).collect(Collectors.toList()));
-        recipe.getPreviewInputs().forEach(ingredient -> {
-            input.add(Arrays.asList(ingredient.getStackArray()));
-        });
-        input.add(fuel);
-        this.output = Arrays.asList(recipe.getOutput());
+        this.input = Lists.newArrayList(recipe.getPreviewInputs().stream().map(i -> Lists.newArrayList(i.getStackArray())).collect(Collectors.toList()));
+        input.add(FurnaceBlockEntity.createFuelTimeMap().keySet().stream().map(Item::getDefaultStack).collect(Collectors.toList()));
+        this.output = Collections.singletonList(recipe.getOutput());
     }
     
     @Override

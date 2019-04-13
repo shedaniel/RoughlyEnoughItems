@@ -3,7 +3,6 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.base.Predicates;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.SharedConstants;
-import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.Screen;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
@@ -20,7 +19,6 @@ import java.util.function.Predicate;
 
 public class TextFieldWidget extends HighlightableWidget {
     
-    protected final TextRenderer font;
     public Function<String, String> stripInvaild;
     protected int focusedTicks;
     protected boolean editable;
@@ -55,7 +53,6 @@ public class TextFieldWidget extends HighlightableWidget {
         this.renderTextProvider = (string_1, integer_1) -> {
             return string_1;
         };
-        this.font = minecraft.textRenderer;
         this.bounds = rectangle;
         this.stripInvaild = s -> SharedConstants.stripInvalidChars(s);
     }

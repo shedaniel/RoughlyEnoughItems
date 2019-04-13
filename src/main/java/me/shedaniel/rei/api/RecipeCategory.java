@@ -1,6 +1,7 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.gui.RecipeViewingScreen;
+import me.shedaniel.rei.gui.widget.CategoryBaseWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.Widget;
 import net.minecraft.client.gui.DrawableHelper;
@@ -26,7 +27,7 @@ public interface RecipeCategory<T extends RecipeDisplay> {
     }
     
     default void drawCategoryBackground(Rectangle bounds, int mouseX, int mouseY, float delta) {
-        new RecipeBaseWidget(bounds).render();
+        new CategoryBaseWidget(bounds).render();
         DrawableHelper.fill(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, RecipeViewingScreen.SUB_COLOR.getRGB());
         DrawableHelper.fill(bounds.x + 17, bounds.y + 21, bounds.x + bounds.width - 17, bounds.y + 33, RecipeViewingScreen.SUB_COLOR.getRGB());
     }

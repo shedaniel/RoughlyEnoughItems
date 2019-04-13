@@ -8,7 +8,6 @@ import net.minecraft.recipe.cooking.CampfireCookingRecipe;
 import net.minecraft.util.DefaultedList;
 import net.minecraft.util.Identifier;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -26,8 +25,8 @@ public class DefaultCampfireDisplay implements RecipeDisplay<CampfireCookingReci
     
     public DefaultCampfireDisplay(DefaultedList<Ingredient> ingredients, ItemStack output, int cookTime) {
         this.inputs = Lists.newArrayList();
-        ingredients.stream().map(ingredient -> ingredient.getStackArray()).forEach(itemStacks -> Collections.addAll(inputs, itemStacks));
-        this.output = Arrays.asList(output);
+        ingredients.stream().map(ingredient -> Lists.newArrayList(ingredient.getStackArray())).forEach(inputs::addAll);
+        this.output = Collections.singletonList(output);
         this.cookTime = cookTime;
     }
     
@@ -42,7 +41,7 @@ public class DefaultCampfireDisplay implements RecipeDisplay<CampfireCookingReci
     
     @Override
     public List<List<ItemStack>> getInput() {
-        return Arrays.asList(inputs);
+        return Collections.singletonList(inputs);
     }
     
     @Override

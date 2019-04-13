@@ -8,10 +8,10 @@ import net.minecraft.recipe.StonecuttingRecipe;
 import net.minecraft.util.DefaultedList;
 import net.minecraft.util.Identifier;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class DefaultStoneCuttingDisplay implements RecipeDisplay<StonecuttingRecipe> {
     
@@ -25,8 +25,8 @@ public class DefaultStoneCuttingDisplay implements RecipeDisplay<StonecuttingRec
     
     public DefaultStoneCuttingDisplay(DefaultedList<Ingredient> ingredients, ItemStack output) {
         this.inputs = Lists.newArrayList();
-        ingredients.stream().map(ingredient -> ingredient.getStackArray()).forEach(itemStacks -> Collections.addAll(inputs, itemStacks));
-        this.output = Arrays.asList(output);
+        ingredients.stream().map(i -> Lists.newArrayList(i.getStackArray())).collect(Collectors.toList()).forEach(inputs::addAll);
+        this.output = Collections.singletonList(output);
     }
     
     @Override
@@ -36,7 +36,7 @@ public class DefaultStoneCuttingDisplay implements RecipeDisplay<StonecuttingRec
     
     @Override
     public List<List<ItemStack>> getInput() {
-        return Arrays.asList(inputs);
+        return Collections.singletonList(inputs);
     }
     
     @Override

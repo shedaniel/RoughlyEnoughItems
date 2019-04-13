@@ -94,8 +94,8 @@ public class RecipeViewingScreen extends Screen {
         }
         if (choosePageActivated)
             return recipeChoosePageWidget.keyPressed(int_1, int_2, int_3);
-        for(Widget widget : widgets)
-            if (widget.keyPressed(int_1, int_2, int_3))
+        for(Element element : children())
+            if (element.keyPressed(int_1, int_2, int_3))
                 return true;
         return super.keyPressed(int_1, int_2, int_3);
     }
@@ -314,7 +314,7 @@ public class RecipeViewingScreen extends Screen {
         if (selectedCategory != null)
             selectedCategory.drawCategoryBackground(bounds, mouseX, mouseY, delta);
         else {
-            new RecipeBaseWidget(bounds).render();
+            new CategoryBaseWidget(bounds).render();
             fill(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, SUB_COLOR.getRGB());
             fill(bounds.x + 17, bounds.y + 21, bounds.x + bounds.width - 17, bounds.y + 33, SUB_COLOR.getRGB());
         }

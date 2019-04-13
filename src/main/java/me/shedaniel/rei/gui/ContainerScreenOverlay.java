@@ -519,10 +519,8 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
         
         @Override
         public boolean mouseClicked(double double_1, double double_2, int int_1) {
-            if (isVisible() && getBounds().contains(double_1, double_2) && int_1 == 1) {
+            if (isVisible() && getBounds().contains(double_1, double_2) && int_1 == 1)
                 setText("");
-                return true;
-            }
             return super.mouseClicked(double_1, double_2, int_1);
         }
         

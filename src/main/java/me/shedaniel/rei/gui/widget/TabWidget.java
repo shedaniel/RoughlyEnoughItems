@@ -68,7 +68,6 @@ public class TabWidget extends HighlightableWidget {
     public void render(int mouseX, int mouseY, float delta) {
         if (shown) {
             int l = (int) this.bounds.getCenterX() - 8, i1 = (int) this.bounds.getCenterY() - 6;
-            
             GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             GuiLighting.disable();
             minecraft.getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
