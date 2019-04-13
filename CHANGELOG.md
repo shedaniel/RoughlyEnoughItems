@@ -1,3 +1,4 @@
+View full changelog [here](https://github.com/shedaniel/RoughlyEnoughItems/blob/1.14/CHANGELOG.md).
 ## v2.7.3.87
 - Fixed: Credits button not working
 - Fixed: Keybinds (e.g. O, R, U) working even creative search field is focused
