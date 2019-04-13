@@ -25,7 +25,6 @@ import net.minecraft.client.gui.container.FurnaceScreen;
 import net.minecraft.client.gui.container.SmokerScreen;
 import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
 import net.minecraft.client.gui.ingame.PlayerInventoryScreen;
-import net.minecraft.client.gui.recipebook.RecipeBookGui;
 import net.minecraft.client.gui.widget.RecipeBookButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.item.ItemGroup;
@@ -35,7 +34,6 @@ import net.minecraft.util.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.swing.*;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
