@@ -189,7 +189,7 @@ public class RecipeViewingScreen extends Screen {
                 return Optional.ofNullable(I18n.translate("text.rei.previous_page"));
             }
         });
-        widgets.add(new ClickableLabelWidget((int) bounds.getCenterX(), (int) bounds.getY() + 23, "") {
+        widgets.add(new ClickableLabelWidget((int) bounds.getCenterX(), (int) bounds.getY() + 23, "", categoriesMap.get(selectedCategory).size() > getRecipesPerPageByHeight()) {
             @Override
             public void render(int mouseX, int mouseY, float delta) {
                 this.text = String.format("%d/%d", page + 1, getTotalPages(selectedCategory));
@@ -222,9 +222,7 @@ public class RecipeViewingScreen extends Screen {
                 return Optional.ofNullable(I18n.translate("text.rei.next_page"));
             }
         });
-        int recipesPerPageByHeight = getRecipesPerPageByHeight();
-        recipeBack.enabled = recipeNext.enabled = categoriesMap.get(selectedCategory).size() > recipesPerPageByHeight;
-
+        recipeBack.enabled = recipeNext.enabled = categoriesMap.get(selectedCategory).size() > getRecipesPerPageByHeight();
         for(int i = 0; i < 6; i++) {
             int j = i + categoryPages * 6;
             if (categories.size() > j) {
@@ -317,9 +315,7 @@ public class RecipeViewingScreen extends Screen {
             fill(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, SUB_COLOR.getRGB());
             fill(bounds.x + 17, bounds.y + 21, bounds.x + bounds.width - 17, bounds.y + 33, SUB_COLOR.getRGB());
         }
-        tabs.stream().filter(tabWidget ->
-            !tabWidget.isSelected()
-        ).forEach(tabWidget -> tabWidget.render(mouseX, mouseY, delta));
+        tabs.stream().filter(tabWidget -> !tabWidget.isSelected()).forEach(tabWidget -> tabWidget.render(mouseX, mouseY, delta));
         GuiLighting.disable();
         super.render(mouseX, mouseY, delta);
         widgets.forEach(widget -> {

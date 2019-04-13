@@ -6,7 +6,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.cloth.hooks.ClothClientHooks;
-import me.shedaniel.cloth.hooks.ScreenHooks;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.ConfigManager;
 import me.shedaniel.rei.client.*;
@@ -213,11 +212,9 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                 ScreenHelper.getLastOverlay().lateRender(i, i1, v);
         });
         ClothClientHooks.SCREEN_KEY_PRESSED.register((minecraftClient, screen, i, i1, i2) -> {
-            if (screen instanceof CreativePlayerInventoryScreen && screen.getFocused() != null && screen.getFocused() instanceof TextFieldWidget && ((CreativePlayerInventoryScreenHooks) screen).rei_getSelectedTab() == ItemGroup.SEARCH.getIndex())
-                for(Element element : ((ScreenHooks) screen).cloth_getInputListeners())
-                    if (element instanceof TextFieldWidget)
-                        if (screen.getFocused() == element && ((TextFieldWidget) element).isFocused())
-                            return ActionResult.PASS;
+            if (screen instanceof CreativePlayerInventoryScreen && ((CreativePlayerInventoryScreenHooks) screen).rei_getSelectedTab() == ItemGroup.SEARCH.getIndex())
+                if (screen.getFocused() != null && screen.getFocused() instanceof TextFieldWidget && ((TextFieldWidget) screen.getFocused()).isFocused())
+                    return ActionResult.PASS;
             if (screen instanceof ContainerScreen)
                 if (ScreenHelper.getLastOverlay().keyPressed(i, i1, i2))
                     return ActionResult.SUCCESS;
