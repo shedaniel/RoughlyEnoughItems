@@ -5,7 +5,7 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
-import me.shedaniel.rei.listeners.GhostSlotsHooks;
+import me.shedaniel.rei.listeners.RecipeBookGuiHooks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ContainerScreen;
 import net.minecraft.client.gui.Screen;
@@ -239,9 +239,9 @@ public class DefaultPlugin implements REIPlugin {
                 if (!recipe.getRecipe().isPresent())
                     return false;
                 if (screen.getClass().isAssignableFrom(CraftingTableScreen.class))
-                    ((GhostSlotsHooks) (((CraftingTableScreen) screen).getRecipeBookGui())).rei_getGhostSlots().reset();
+                    ((RecipeBookGuiHooks) (((CraftingTableScreen) screen).getRecipeBookGui())).rei_getGhostSlots().reset();
                 else if (screen.getClass().isAssignableFrom(PlayerInventoryScreen.class))
-                    ((GhostSlotsHooks) (((PlayerInventoryScreen) screen).getRecipeBookGui())).rei_getGhostSlots().reset();
+                    ((RecipeBookGuiHooks) (((PlayerInventoryScreen) screen).getRecipeBookGui())).rei_getGhostSlots().reset();
                 else
                     return false;
                 MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, (Recipe) recipe.getRecipe().get(), Screen.hasShiftDown());
@@ -264,7 +264,7 @@ public class DefaultPlugin implements REIPlugin {
                 if (!recipe.getRecipe().isPresent())
                     return false;
                 if (screen instanceof FurnaceScreen)
-                    ((GhostSlotsHooks) (((FurnaceScreen) screen).getRecipeBookGui())).rei_getGhostSlots().reset();
+                    ((RecipeBookGuiHooks) (((FurnaceScreen) screen).getRecipeBookGui())).rei_getGhostSlots().reset();
                 else
                     return false;
                 MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, (Recipe) recipe.getRecipe().get(), Screen.hasShiftDown());
@@ -287,7 +287,7 @@ public class DefaultPlugin implements REIPlugin {
                 if (!recipe.getRecipe().isPresent())
                     return false;
                 if (screen instanceof SmokerScreen)
-                    ((GhostSlotsHooks) (((SmokerScreen) screen).getRecipeBookGui())).rei_getGhostSlots().reset();
+                    ((RecipeBookGuiHooks) (((SmokerScreen) screen).getRecipeBookGui())).rei_getGhostSlots().reset();
                 else
                     return false;
                 MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, (Recipe) recipe.getRecipe().get(), Screen.hasShiftDown());
@@ -315,7 +315,7 @@ public class DefaultPlugin implements REIPlugin {
                 if (!recipe.getRecipe().isPresent())
                     return false;
                 if (screen instanceof BlastFurnaceScreen)
-                    ((GhostSlotsHooks) (((BlastFurnaceScreen) screen).getRecipeBookGui())).rei_getGhostSlots().reset();
+                    ((RecipeBookGuiHooks) (((BlastFurnaceScreen) screen).getRecipeBookGui())).rei_getGhostSlots().reset();
                 else
                     return false;
                 MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, (Recipe) recipe.getRecipe().get(), Screen.hasShiftDown());

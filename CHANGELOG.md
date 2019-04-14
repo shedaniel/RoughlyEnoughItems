@@ -1,7 +1,9 @@
 View full changelog [here](https://github.com/shedaniel/RoughlyEnoughItems/blob/1.14/CHANGELOG.md).
+## v2.7.5.89
+- Fixed: Keybinds (e.g. O, R, U) working even if recipe book search field is focused
 ## v2.7.4.88
 - Fixed: Item List Overlay buttons still enabled when there is only 1 page
-- Fixed [#58](https://github.com/shedaniel/RoughlyEnoughItems/issues/58): Keybinds (e.g. O, R, U) working even creative search field is focused
+- Fixed [#58](https://github.com/shedaniel/RoughlyEnoughItems/issues/58): Keybinds (e.g. O, R, U) working even if creative search field is focused
 - Fixed [#59](https://github.com/shedaniel/RoughlyEnoughItems/issues/59): Wrong page calculation (Thanks geniiii)
 ## v2.7.3.87
 - Fixed: Credits button not working
