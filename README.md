@@ -28,6 +28,7 @@ One feature will be limited:
 - LOLCATS
 - Upside Down English
 - Brazilian Portuguese
+- Bulgarian
 
 ### License
 Roughly Enough Items was a fork of Almost Enough Items by ZenDarva until v2.0 rewrite. This fork is permitted under the MIT license.  

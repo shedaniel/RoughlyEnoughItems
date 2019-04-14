@@ -11,6 +11,7 @@ import me.shedaniel.rei.client.ConfigManager;
 import me.shedaniel.rei.client.*;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.listeners.CreativePlayerInventoryScreenHooks;
+import me.shedaniel.rei.listeners.RecipeBookGuiHooks;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
@@ -20,6 +21,7 @@ import net.minecraft.client.gui.ContainerScreen;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
 import net.minecraft.client.gui.ingame.PlayerInventoryScreen;
+import net.minecraft.client.gui.recipebook.RecipeBookGui;
 import net.minecraft.client.gui.widget.RecipeBookButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.item.ItemGroup;
@@ -213,8 +215,14 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         });
         ClothClientHooks.SCREEN_KEY_PRESSED.register((minecraftClient, screen, i, i1, i2) -> {
             if (screen instanceof CreativePlayerInventoryScreen && ((CreativePlayerInventoryScreenHooks) screen).rei_getSelectedTab() == ItemGroup.SEARCH.getIndex())
-                if (screen.getFocused() != null && screen.getFocused() instanceof TextFieldWidget && ((TextFieldWidget) screen.getFocused()).isFocused())
+                if (screen.getFocused() != null && screen.getFocused() instanceof TextFieldWidget)
                     return ActionResult.PASS;
+            if (screen instanceof ContainerScreen && !(screen instanceof CreativePlayerInventoryScreen))
+                if (screen.getFocused() != null && screen.getFocused() instanceof RecipeBookGui) {
+                    RecipeBookGuiHooks gui = (RecipeBookGuiHooks) screen.getFocused();
+                    if (gui.rei_getSearchField() != null && gui.rei_getSearchField().isFocused())
+                        return ActionResult.PASS;
+                }
             if (screen instanceof ContainerScreen)
                 if (ScreenHelper.getLastOverlay().keyPressed(i, i1, i2))
                     return ActionResult.SUCCESS;
