@@ -79,6 +79,9 @@
   "text.rei.config.enable_legacy_speedcraft_support": "Enable Legacy Plugin Support: ",
   "text.rei.config.april_fools": "April Fools",
   "text.rei.config.april_fools.2019": "Force 2019 REI April Fools' joke: ",
+  "text.rei.config.item_cheating_mode": "Item Cheating Amount:",
+  "text.rei.config.item_cheating_mode.rei_like": "Normal",
+  "text.rei.config.item_cheating_mode.jei_like": "Reversed",
   "text.rei.no_config_api": "Cloth Config API does not exist!\nPlease install it in order to show an in-game config screen!",
   "_comment": "Don't change / translate the credit down below if you are doing it :)",
   "text.rei.credit.text": "§lRoughly Enough Items\n§7Originally a fork for Almost Enough Items.\n\n§lDevelopers\n  - Originally by ZenDarva\n  - Created by Danielshe\n  - Plugin Support by TehNut\n\n§lLanguage Translation\n  English - Danielshe\n  Simplified Chinese - Danielshe\n  Traditional Chinese - hugoalh & Danielshe\n  French - Yanis48\n  German - MelanX\n  Estonian - Madis0\n  Portuguese - thiagokenis\n  LOLCAT - Danielshe\n  Upside Down - Danielshe\n  Brazilian Portuguese\n  Bulgarian - geniiii\n\n§lLicense\n§7Roughly Enough Items is using MIT."

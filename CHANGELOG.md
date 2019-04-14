@@ -1,4 +1,7 @@
 View full changelog [here](https://github.com/shedaniel/RoughlyEnoughItems/blob/1.14/CHANGELOG.md).
+## v2.7.6.90
+- Fixed [#63](https://github.com/shedaniel/RoughlyEnoughItems/issues/63): Pressing Space in the search bar opens the Config GUI
+- Added [#64](https://github.com/shedaniel/RoughlyEnoughItems/issues/64): Option to flip give amount
 ## v2.7.5.89
 - Fixed: Keybinds (e.g. O, R, U) working even if recipe book search field is focused
 ## v2.7.4.88

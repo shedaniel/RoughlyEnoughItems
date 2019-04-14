@@ -123,7 +123,7 @@ public abstract class ButtonWidget extends HighlightableWidget {
     
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
-        if (this.enabled) {
+        if (this.enabled && focused) {
             if (int_1 != 257 && int_1 != 32 && int_1 != 335) {
                 return false;
             } else {

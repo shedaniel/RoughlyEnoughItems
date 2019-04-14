@@ -7,6 +7,7 @@ import me.shedaniel.cloth.gui.entries.EnumListEntry;
 import me.shedaniel.cloth.gui.entries.IntegerSliderEntry;
 import me.shedaniel.cloth.gui.entries.StringListEntry;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.api.ItemCheatingMode;
 import me.shedaniel.rei.gui.config.ItemListOrderingConfig;
 import me.shedaniel.rei.gui.credits.CreditsScreen;
 import net.minecraft.client.MinecraftClient;
@@ -62,6 +63,9 @@ public class ClothScreenRegistry {
             }
         });
         appearance.addOption(new IntegerSliderEntry("text.rei.config.max_recipes_per_page", 2, 99, RoughlyEnoughItemsCore.getConfigManager().getConfig().maxRecipePerPage, "text.cloth-config.reset_value", () -> 3, i -> RoughlyEnoughItemsCore.getConfigManager().getConfig().maxRecipePerPage = i));
+        appearance.addOption(new EnumListEntry<>("text.rei.config.item_cheating_mode", ItemCheatingMode.class, RoughlyEnoughItemsCore.getConfigManager().getConfig().itemCheatingMode, "text.cloth-config.reset_value", () -> ItemCheatingMode.REI_LIKE, i -> RoughlyEnoughItemsCore.getConfigManager().getConfig().itemCheatingMode = i, anEnum -> {
+            return I18n.translate("text.rei.config.item_cheating_mode." + anEnum.name().toLowerCase());
+        }));
         ConfigScreenBuilder.CategoryBuilder modules = builder.addCategory("text.rei.config.modules");
         modules.addOption(new BooleanListEntry("text.rei.config.enable_craftable_only", RoughlyEnoughItemsCore.getConfigManager().getConfig().enableCraftableOnlyButton, "text.cloth-config.reset_value", () -> true, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().enableCraftableOnlyButton = bool));
         modules.addOption(new BooleanListEntry("text.rei.config.enable_util_buttons", RoughlyEnoughItemsCore.getConfigManager().getConfig().showUtilsButtons, "text.cloth-config.reset_value", () -> false, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().showUtilsButtons = bool));

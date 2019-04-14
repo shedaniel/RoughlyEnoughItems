@@ -11,7 +11,7 @@ targetCompatibility = 1.8
 archivesBaseName = "RoughlyEnoughItems"
 version = project.mod_version
 
-def includeDep = false
+def includeDep = true
 
 minecraft {
 }
