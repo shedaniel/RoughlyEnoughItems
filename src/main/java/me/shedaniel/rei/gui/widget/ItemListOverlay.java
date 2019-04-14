@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.DisplayHelper;
+import me.shedaniel.rei.api.ItemCheatingMode;
 import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.ItemListOrdering;
@@ -106,7 +107,12 @@ public class ItemListOverlay extends Widget {
                         if (ClientHelper.isCheating()) {
                             if (getCurrentStack() != null && !getCurrentStack().isEmpty()) {
                                 ItemStack cheatedStack = getCurrentStack().copy();
-                                cheatedStack.setAmount(button == 0 ? 1 : button == 1 ? cheatedStack.getMaxAmount() : cheatedStack.getAmount());
+                                if (RoughlyEnoughItemsCore.getConfigManager().getConfig().itemCheatingMode == ItemCheatingMode.REI_LIKE)
+                                    cheatedStack.setAmount(button != 1 ? 1 : cheatedStack.getMaxAmount());
+                                else if (RoughlyEnoughItemsCore.getConfigManager().getConfig().itemCheatingMode == ItemCheatingMode.JEI_LIKE)
+                                    cheatedStack.setAmount(button != 0 ? 1 : cheatedStack.getMaxAmount());
+                                else
+                                    cheatedStack.setAmount(1);
                                 return ClientHelper.tryCheatingStack(cheatedStack);
                             }
                         } else if (button == 0)

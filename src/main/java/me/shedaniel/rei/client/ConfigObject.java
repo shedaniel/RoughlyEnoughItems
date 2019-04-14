@@ -1,6 +1,7 @@
 package me.shedaniel.rei.client;
 
 import blue.endless.jankson.Comment;
+import me.shedaniel.rei.api.ItemCheatingMode;
 import me.shedaniel.rei.api.RelativePoint;
 
 public class ConfigObject {
@@ -50,6 +51,8 @@ public class ConfigObject {
     
     @Comment("Force enable 2019 REI April Fools' joke")
     public boolean aprilFoolsFish2019 = false;
+    
+    public ItemCheatingMode itemCheatingMode = ItemCheatingMode.REI_LIKE;
     
     @Comment("The location of choose page dialog")
     public RelativePoint choosePageDialogPoint = new RelativePoint(.5, .5);

@@ -48,7 +48,7 @@ public abstract class ClickableLabelWidget extends LabelWidget {
     
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
-        if (!clickable)
+        if (!clickable || !focused)
             return false;
         if (int_1 != 257 && int_1 != 32 && int_1 != 335)
             return false;
