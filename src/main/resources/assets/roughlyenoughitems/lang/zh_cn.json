@@ -60,7 +60,7 @@
   "text.rei.config.max_recipes_per_page": "每页最多配方:",
   "text.rei.config.enable_util_buttons": "启用实用按钮:",
   "text.rei.gamemode_button.tooltip": "切换游戏模式\n§7切换至 %s 模式。",
-  "text.rei.weather_button.tooltip": "切换天气\n§7切换至 %s。"
+  "text.rei.weather_button.tooltip": "切换天气\n§7切换至 %s。",
   "text.rei.enabled": "是",
   "text.rei.disabled": "否",
   "text.rei.short_gamemode.survival": "S",
@@ -75,14 +75,12 @@
   "text.rei.previous_page": "上一页",
   "text.rei.next_page": "下一页",
   "text.rei.config.prefer_visible_recipes": "偏爱可见合成: ",
-  "text.rei.config.title": "Roughly Enough Items 设置",
+  "text.rei.config.title": "Roughly Enough Items 配置",
   "text.rei.config.enable_legacy_speedcraft_support": "启用旧版插件支持: ",
   "text.rei.config.april_fools": "愚人节",
-  "text.rei.config.april_fools.2019": "强制为2019 REI愚人节的玩笑: ",
-  "text.rei.config.item_cheating_mode": "物品作弊数量:",
+  "text.rei.config.april_fools.2019": "强制启用REI 2019 愚人节的玩笑: ",
+  "text.rei.config.item_cheating_mode": "物品作弊数量模式:",
   "text.rei.config.item_cheating_mode.rei_like": "标准",
   "text.rei.config.item_cheating_mode.jei_like": "反转",
   "text.rei.no_config_api": "Cloth Config API 不存在!\n请安装它以显示游戏中的配置界面!",
-  "_comment": "Don't change / translate the credit down below if you are doing it :)",
-  "text.rei.credit.text": "§lRoughly Enough Items\n§7Originally a fork for Almost Enough Items.\n\n§lDevelopers\n  - Originally by ZenDarva\n  - Created by Danielshe\n  - Plugin Support by TehNut\n\n§lLanguage Translation\n  English - Danielshe\n  Simplified Chinese - Danielshe\n  Traditional Chinese - hugoalh & Danielshe\n  French - Yanis48\n  German - MelanX\n  Estonian - Madis0\n  Portuguese - thiagokenis\n  LOLCAT - Danielshe\n  Upside Down - Danielshe\n  Brazilian Portuguese\n  Bulgarian - geniiii\n\n§lLicense\n§7Roughly Enough Items is using MIT."
 }
