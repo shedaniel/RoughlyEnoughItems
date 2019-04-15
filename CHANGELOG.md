@@ -1,4 +1,6 @@
 View full changelog [here](https://github.com/shedaniel/RoughlyEnoughItems/blob/1.14/CHANGELOG.md).
+## v2.7.7.91
+- Updated Chinese Localisation
 ## v2.7.6.90
 - Fixed [#63](https://github.com/shedaniel/RoughlyEnoughItems/issues/63): Pressing Space in the search bar opens the Config GUI
 - Added [#64](https://github.com/shedaniel/RoughlyEnoughItems/issues/64): Option to flip give amount
