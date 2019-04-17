@@ -54,7 +54,9 @@ public class ConfigObject {
     
     public ItemCheatingMode itemCheatingMode = ItemCheatingMode.REI_LIKE;
     
-    @Comment("The location of choose page dialog")
+    public boolean lightGrayRecipeBorder = false;
+    
+    @Comment("The location of choose page dialog, will automatically be set to your last location so there is no need to change this.")
     public RelativePoint choosePageDialogPoint = new RelativePoint(.5, .5);
     
 }

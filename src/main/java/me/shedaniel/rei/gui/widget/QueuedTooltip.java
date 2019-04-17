@@ -38,6 +38,14 @@ public class QueuedTooltip {
         return location;
     }
     
+    public int getX() {
+        return getLocation().x;
+    }
+    
+    public int getY() {
+        return getLocation().y;
+    }
+    
     public List<String> getText() {
         return text;
     }

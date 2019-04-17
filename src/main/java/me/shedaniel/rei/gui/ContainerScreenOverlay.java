@@ -285,7 +285,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
     }
     
     private GameMode getCurrentGameMode() {
-        return MinecraftClient.getInstance().getNetworkHandler().getScoreboardEntry(MinecraftClient.getInstance().player.getGameProfile().getId()).getGameMode();
+        return MinecraftClient.getInstance().getNetworkHandler().getPlayerListEntry(MinecraftClient.getInstance().player.getGameProfile().getId()).getGameMode();
     }
     
     private Rectangle getTextFieldArea() {
@@ -333,7 +333,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
         ScreenHelper.searchField.laterRender(mouseX, mouseY, delta);
         Screen currentScreen = MinecraftClient.getInstance().currentScreen;
         if (!(currentScreen instanceof RecipeViewingScreen) || !((RecipeViewingScreen) currentScreen).choosePageActivated)
-            QUEUED_TOOLTIPS.stream().filter(Objects::nonNull).forEach(queuedTooltip -> renderTooltip(queuedTooltip.getText(), queuedTooltip.getLocation().x, queuedTooltip.getLocation().y));
+            QUEUED_TOOLTIPS.stream().filter(Objects::nonNull).forEach(queuedTooltip -> renderTooltip(queuedTooltip.getText(), queuedTooltip.getX(), queuedTooltip.getY()));
         QUEUED_TOOLTIPS.clear();
     }
     
