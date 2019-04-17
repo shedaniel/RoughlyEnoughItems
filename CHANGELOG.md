@@ -1,6 +1,10 @@
 View full changelog [here](https://github.com/shedaniel/RoughlyEnoughItems/blob/1.14/CHANGELOG.md).
+## v2.7.8.92
+- Modified: Bundled with updated API for pre3
+- Added: Option for Light Gray Recipe Border (I guess JEI like? I am going to get killed by mezz)
+- Modified: Rearranged Config Screen 
 ## v2.7.7.91
-- Updated Chinese Localisation
+- Updated: Chinese Localisation
 ## v2.7.6.90
 - Fixed [#63](https://github.com/shedaniel/RoughlyEnoughItems/issues/63): Pressing Space in the search bar opens the Config GUI
 - Added [#64](https://github.com/shedaniel/RoughlyEnoughItems/issues/64): Option to flip give amount
@@ -66,7 +70,7 @@ View full changelog [here](https://github.com/shedaniel/RoughlyEnoughItems/blob/
 - Update to 19w12a
 - New config screen from [Cloth](https://minecraft.curseforge.com/projects/cloth)
 ## v2.4.2.68
-- Fixed [Cloth](https://minecraft.curseforge.com/projects/cloth) missing message
+- Fixed [Cloth](https://minecraft.curseforge.com/projects/cloth) missing text
 ## v2.4.2.67
 - Fixed pages being weird
 - Added Portuguese

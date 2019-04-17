@@ -9,7 +9,6 @@ public interface ItemRegistry {
     
     List<ItemStack> getItemList();
     
-    @Deprecated
     List<ItemStack> getModifiableItemList();
     
     ItemStack[] getAllStacksFromItem(Item item);

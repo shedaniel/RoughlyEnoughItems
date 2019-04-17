@@ -33,7 +33,7 @@ public class CreditsEntryListWidget extends AlwaysSelectedItemListWidget<Credits
         return width - 40;
     }
     
-    public static class CreditsItem extends AlwaysSelectedItemListWidget.class_4281<CreditsItem> {
+    public static class CreditsItem extends AlwaysSelectedItemListWidget.Item<CreditsItem> {
         private String text;
         
         public CreditsItem(TextComponent textComponent) {

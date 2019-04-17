@@ -21,7 +21,6 @@ public class ItemRegistryImpl implements ItemRegistry {
         return Collections.unmodifiableList(itemList);
     }
     
-    @Deprecated
     @Override
     public List<ItemStack> getModifiableItemList() {
         return itemList;
