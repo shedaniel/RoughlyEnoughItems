@@ -27,8 +27,7 @@ public abstract class CraftableToggleButtonWidget extends ButtonWidget {
         this(new Rectangle(x, y, width, height));
     }
     
-    @Override
-    public void render(int mouseX, int mouseY, float delta) {
+    public void lateRender(int mouseX, int mouseY, float delta) {
         GuiLighting.disable();
         super.render(mouseX, mouseY, delta);
         
@@ -40,9 +39,13 @@ public abstract class CraftableToggleButtonWidget extends ButtonWidget {
         MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         int color = RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() ? 939579655 : 956235776;
-        this.blitOffset += 100f;
+        this.blitOffset += 10f;
         this.fillGradient(getBounds().x, getBounds().y, getBounds().x + getBounds().width, getBounds().y + getBounds().height, color, color);
         this.blitOffset = 0;
+    }
+    
+    @Override
+    public void render(int mouseX, int mouseY, float delta) {
     }
     
     @Override

@@ -60,5 +60,5 @@
   "text.rei.gamemode_button.tooltip": "Vaheta mängurežiimi\n§7Lülita %s-režiimile.",
   "text.rei.weather_button.tooltip": "Vaheta ilma\n§7Lülita ilmale %s.",
   "text.rei.enabled": "Jah",
-  "text.rei.disabled": "Ei",
+  "text.rei.disabled": "Ei"
 }
