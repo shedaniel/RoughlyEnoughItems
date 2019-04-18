@@ -65,7 +65,8 @@ public class ItemSlotWidget extends HighlightableWidget {
             minecraft.getTextureManager().bindTexture(RECIPE_GUI);
             blit(this.x - 1, this.y - 1, 0, 222, 18, 18);
         }
-        if (drawHighlightedBackground && isHighlighted(mouseX, mouseY)) {
+        boolean highlighted = isHighlighted(mouseX, mouseY);
+        if (drawHighlightedBackground && highlighted) {
             GlStateManager.disableLighting();
             GlStateManager.disableDepthTest();
             GlStateManager.colorMask(true, true, true, false);
@@ -75,7 +76,7 @@ public class ItemSlotWidget extends HighlightableWidget {
             GlStateManager.enableDepthTest();
         }
         if (!itemStack.isEmpty()) {
-            if (RoughlyEnoughItemsCore.getConfigManager().getConfig().aprilFoolsFish2019 && !isHighlighted(mouseX, mouseY))
+            if (RoughlyEnoughItemsCore.getConfigManager().getConfig().aprilFoolsFish2019 && !highlighted)
                 itemStack = Items.TROPICAL_FISH.getDefaultStack();
             GuiLighting.enableForItems();
             ItemRenderer itemRenderer = minecraft.getItemRenderer();
@@ -84,27 +85,31 @@ public class ItemSlotWidget extends HighlightableWidget {
             itemRenderer.renderGuiItemOverlay(font, itemStack, x, y, getItemCountOverlay(itemStack));
             itemRenderer.zOffset = 0.0F;
         }
-        if (!itemStack.isEmpty() && isHighlighted(mouseX, mouseY) && showToolTips)
-            drawToolTip(itemStack, delta);
+        if (!itemStack.isEmpty() && highlighted && showToolTips)
+            queueTooltip(itemStack, delta);
     }
     
-    protected void drawToolTip(ItemStack itemStack, float delta) {
+    protected void queueTooltip(ItemStack itemStack, float delta) {
         ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltip(itemStack)));
     }
     
     protected List<String> getTooltip(ItemStack itemStack) {
-        final String modString = "§9§o" + ClientHelper.getModFromItemStack(itemStack);
+        final String modString = ClientHelper.getFormattedModFromItem(itemStack.getItem());
         List<String> toolTip = Lists.newArrayList(ItemListOverlay.tryGetItemStackToolTip(itemStack));
         toolTip.addAll(getExtraToolTips(itemStack));
+        boolean alreadyHasMod = false;
         for(String s : Lists.newArrayList(toolTip))
-            if (s.equalsIgnoreCase(modString))
-                toolTip.remove(s);
-        toolTip.add(modString);
+            if (s.equalsIgnoreCase(modString)) {
+                alreadyHasMod = true;
+                break;
+            }
+        if (!alreadyHasMod)
+            toolTip.add(modString);
         return toolTip;
     }
     
     protected List<String> getExtraToolTips(ItemStack stack) {
-        return Lists.newArrayList();
+        return Collections.emptyList();
     }
     
     protected String getItemCountOverlay(ItemStack currentStack) {

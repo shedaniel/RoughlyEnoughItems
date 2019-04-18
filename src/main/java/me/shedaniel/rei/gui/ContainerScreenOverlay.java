@@ -337,48 +337,49 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             toggleButtonWidget.lateRender(mouseX, mouseY, delta);
         Screen currentScreen = MinecraftClient.getInstance().currentScreen;
         if (!(currentScreen instanceof RecipeViewingScreen) || !((RecipeViewingScreen) currentScreen).choosePageActivated)
-            QUEUED_TOOLTIPS.stream().filter(Objects::nonNull).forEach(queuedTooltip -> renderTooltip(queuedTooltip.getText(), queuedTooltip.getX(), queuedTooltip.getY()));
+            QUEUED_TOOLTIPS.stream().filter(Objects::nonNull).forEach(this::renderTooltip);
         QUEUED_TOOLTIPS.clear();
     }
     
-    public void renderTooltip(List<String> list_1, int int_1, int int_2) {
+    public void renderTooltip(QueuedTooltip tooltip) {
+        renderTooltip(tooltip.getText(), tooltip.getX(), tooltip.getY());
+    }
+    
+    public void renderTooltip(List<String> lines, int mouseX, int mouseY) {
         TextRenderer font = MinecraftClient.getInstance().textRenderer;
-        if (!list_1.isEmpty()) {
+        if (!lines.isEmpty()) {
             GlStateManager.disableRescaleNormal();
             GuiLighting.disable();
             GlStateManager.disableLighting();
-            int int_3 = 0;
-            for(String string_1 : list_1)
-                if (font.getStringWidth(string_1) > int_3)
-                    int_3 = font.getStringWidth(string_1);
-            int int_5 = int_1 + 12;
-            int int_6 = int_2 - 12;
-            int int_8 = 8;
-            if (list_1.size() > 1)
-                int_8 += 2 + (list_1.size() - 1) * 10;
-            if (int_5 + int_3 > window.getScaledWidth())
-                int_5 -= 28 + int_3;
-            if (int_6 + int_8 + 6 > window.getScaledHeight())
-                int_6 = window.getScaledHeight() - int_8 - 6;
+            int width = 0;
+            for(String line : lines)
+                if (font.getStringWidth(line) > width)
+                    width = font.getStringWidth(line);
+            int height = lines.size() <= 1 ? 8 : lines.size() * 10;
+            int x = Math.max(mouseX + 12, 6);
+            int y = Math.min(mouseY - 12, window.getScaledHeight() - height - 6);
+            if (x + width > window.getScaledWidth())
+                x -= 24 + width;
+            if (y < 6)
+                y += 24;
             
             this.blitOffset = 1000;
-            this.fillGradient(int_5 - 3, int_6 - 4, int_5 + int_3 + 3, int_6 - 3, -267386864, -267386864);
-            this.fillGradient(int_5 - 3, int_6 + int_8 + 3, int_5 + int_3 + 3, int_6 + int_8 + 4, -267386864, -267386864);
-            this.fillGradient(int_5 - 3, int_6 - 3, int_5 + int_3 + 3, int_6 + int_8 + 3, -267386864, -267386864);
-            this.fillGradient(int_5 - 4, int_6 - 3, int_5 - 3, int_6 + int_8 + 3, -267386864, -267386864);
-            this.fillGradient(int_5 + int_3 + 3, int_6 - 3, int_5 + int_3 + 4, int_6 + int_8 + 3, -267386864, -267386864);
-            this.fillGradient(int_5 - 3, int_6 - 3 + 1, int_5 - 3 + 1, int_6 + int_8 + 3 - 1, 1347420415, 1344798847);
-            this.fillGradient(int_5 + int_3 + 2, int_6 - 3 + 1, int_5 + int_3 + 3, int_6 + int_8 + 3 - 1, 1347420415, 1344798847);
-            this.fillGradient(int_5 - 3, int_6 - 3, int_5 + int_3 + 3, int_6 - 3 + 1, 1347420415, 1347420415);
-            this.fillGradient(int_5 - 3, int_6 + int_8 + 2, int_5 + int_3 + 3, int_6 + int_8 + 3, 1344798847, 1344798847);
+            this.fillGradient(x - 3, y - 4, x + width + 3, y - 3, -267386864, -267386864);
+            this.fillGradient(x - 3, y + height + 3, x + width + 3, y + height + 4, -267386864, -267386864);
+            this.fillGradient(x - 3, y - 3, x + width + 3, y + height + 3, -267386864, -267386864);
+            this.fillGradient(x - 4, y - 3, x - 3, y + height + 3, -267386864, -267386864);
+            this.fillGradient(x + width + 3, y - 3, x + width + 4, y + height + 3, -267386864, -267386864);
+            this.fillGradient(x - 3, y - 3 + 1, x - 3 + 1, y + height + 3 - 1, 1347420415, 1344798847);
+            this.fillGradient(x + width + 2, y - 3 + 1, x + width + 3, y + height + 3 - 1, 1347420415, 1344798847);
+            this.fillGradient(x - 3, y - 3, x + width + 3, y - 3 + 1, 1347420415, 1347420415);
+            this.fillGradient(x - 3, y + height + 2, x + width + 3, y + height + 3, 1344798847, 1344798847);
             
-            for(int int_12 = 0; int_12 < list_1.size(); ++int_12) {
+            int currentY = y;
+            for(int lineIndex = 0; lineIndex < lines.size(); lineIndex++) {
                 GlStateManager.disableDepthTest();
-                font.drawWithShadow(list_1.get(int_12), (float) int_5, (float) int_6, -1);
+                font.drawWithShadow(lines.get(lineIndex), x, currentY, -1);
                 GlStateManager.enableDepthTest();
-                if (int_12 == 0)
-                    int_6 += 2;
-                int_6 += 10;
+                currentY += lineIndex == 0 ? 12 : 10;
             }
             this.blitOffset = 0;
             GlStateManager.enableLighting();
@@ -420,9 +421,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
     }
     
     private int getTotalPage() {
-        if (itemListOverlay.getTotalSlotsPerPage() > 0)
-            return MathHelper.ceil(itemListOverlay.getCurrentDisplayed().size() / itemListOverlay.getTotalSlotsPerPage());
-        return 0;
+        return itemListOverlay.getTotalPage();
     }
     
     @Override

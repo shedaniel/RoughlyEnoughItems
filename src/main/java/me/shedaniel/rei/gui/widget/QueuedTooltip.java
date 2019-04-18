@@ -5,7 +5,7 @@ import com.google.common.collect.Lists;
 import me.shedaniel.cloth.api.ClientUtils;
 
 import java.awt.*;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
 
 public class QueuedTooltip {
@@ -15,7 +15,7 @@ public class QueuedTooltip {
     
     private QueuedTooltip(Point location, List<String> text) {
         this.location = location;
-        this.text = new LinkedList<>(text);
+        this.text = Collections.unmodifiableList(text);
     }
     
     public static QueuedTooltip create(Point location, List<String> text) {

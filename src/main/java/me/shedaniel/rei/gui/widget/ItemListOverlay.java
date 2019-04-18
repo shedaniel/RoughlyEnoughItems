@@ -12,10 +12,12 @@ import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.client.SearchArgument;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 import org.apache.commons.lang3.StringUtils;
@@ -24,7 +26,6 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ItemListOverlay extends Widget {
     
@@ -68,12 +69,13 @@ public class ItemListOverlay extends Widget {
         return "ERROR";
     }
     
-    public int getTotalSlotsPerPage() {
+    public int getFullTotalSlotsPerPage() {
         return width * height;
     }
     
     @Override
     public void render(int int_1, int int_2, float float_1) {
+        GuiLighting.disable();
         widgets.forEach(widget -> widget.render(int_1, int_2, float_1));
         ClientPlayerEntity player = minecraft.player;
         if (rectangle.contains(ClientUtils.getMouseLocation()) && ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty() && minecraft.isInSingleplayer())
@@ -86,19 +88,24 @@ public class ItemListOverlay extends Widget {
         this.widgets = Lists.newLinkedList();
         calculateListSize(rectangle);
         currentDisplayed = processSearchTerm(searchTerm, RoughlyEnoughItemsCore.getItemRegisterer().getItemList(), ScreenHelper.inventoryStacks);
-        double startX = rectangle.getCenterX() - width * 9;
-        double startY = rectangle.getCenterY() - height * 9;
+        int startX = (int) rectangle.getCenterX() - width * 9;
+        int startY = (int) rectangle.getCenterY() - height * 9;
         this.listArea = new Rectangle((int) startX, (int) startY, width * 18, height * 18);
-        for(int i = 0; i < getTotalSlotsPerPage(); i++) {
-            int j = i + page * getTotalSlotsPerPage();
+        int fitSlotsPerPage = getTotalFitSlotsPerPage(listArea.x, listArea.y, listArea);
+        int j = page * fitSlotsPerPage;
+        for(int i = 0; i < getFullTotalSlotsPerPage(); i++) {
             if (j >= currentDisplayed.size())
                 break;
-            widgets.add(new ItemSlotWidget((int) (startX + (i % width) * 18), (int) (startY + MathHelper.floor(i / width) * 18), Collections.singletonList(currentDisplayed.get(j)), false, true, true) {
+            int x = startX + (i % width) * 18, y = startY + MathHelper.floor(i / width) * 18;
+            if (!canBeFit(x, y, listArea))
+                continue;
+            j++;
+            widgets.add(new ItemSlotWidget(x, y, Collections.singletonList(currentDisplayed.get(j)), false, true, true) {
                 @Override
-                protected void drawToolTip(ItemStack itemStack, float delta) {
+                protected void queueTooltip(ItemStack itemStack, float delta) {
                     ClientPlayerEntity player = minecraft.player;
                     if (!ClientHelper.isCheating() || player.inventory.getCursorStack().isEmpty())
-                        super.drawToolTip(itemStack, delta);
+                        super.queueTooltip(itemStack, delta);
                 }
                 
                 @Override
@@ -124,6 +131,34 @@ public class ItemListOverlay extends Widget {
                 }
             });
         }
+    }
+    
+    public int getTotalPage() {
+        int fitSlotsPerPage = getTotalFitSlotsPerPage(listArea.x, listArea.y, listArea);
+        if (fitSlotsPerPage > 0)
+            return MathHelper.ceil(getCurrentDisplayed().size() / fitSlotsPerPage);
+        return 0;
+    }
+    
+    public int getTotalFitSlotsPerPage(int startX, int startY, Rectangle listArea) {
+        int slots = 0;
+        for(int i = 0; i < getFullTotalSlotsPerPage(); i++)
+            if (canBeFit(startX + (i % width) * 18, startY + MathHelper.floor(i / width) * 18, listArea))
+                slots++;
+        return slots;
+    }
+    
+    public boolean canBeFit(int left, int top, Rectangle listArea) {
+        List<DisplayHelper.DisplayBoundsHandler> sortedBoundsHandlers = RoughlyEnoughItemsCore.getDisplayHelper().getSortedBoundsHandlers(minecraft.currentScreen.getClass());
+        ActionResult result = ActionResult.SUCCESS;
+        for(DisplayHelper.DisplayBoundsHandler sortedBoundsHandler : sortedBoundsHandlers) {
+            ActionResult fit = sortedBoundsHandler.canItemSlotWidgetFit(!RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel, left, top, minecraft.currentScreen, listArea);
+            if (fit != ActionResult.PASS) {
+                result = fit;
+                break;
+            }
+        }
+        return result == ActionResult.SUCCESS;
     }
     
     @Override
@@ -196,10 +231,10 @@ public class ItemListOverlay extends Widget {
     }
     
     private boolean filterItem(ItemStack itemStack, List<SearchArgument> arguments) {
-        String mod = ClientHelper.getModFromItemStack(itemStack);
+        String mod = ClientHelper.getModFromItem(itemStack.getItem());
         List<String> toolTipsList = tryGetItemStackToolTip(itemStack);
         String toolTipsMixed = toolTipsList.stream().skip(1).collect(Collectors.joining()).toLowerCase();
-        String allMixed = Stream.of(tryGetItemStackName(itemStack), toolTipsMixed).collect(Collectors.joining()).toLowerCase();
+        String allMixed = toolTipsList.stream().collect(Collectors.joining()).toLowerCase();
         for(SearchArgument searchArgument : arguments.stream().filter(searchArgument -> !searchArgument.isInclude()).collect(Collectors.toList())) {
             if (searchArgument.getArgumentType().equals(SearchArgument.ArgumentType.MOD))
                 if (mod.toLowerCase().contains(searchArgument.getText().toLowerCase()))
