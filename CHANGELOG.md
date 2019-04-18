@@ -1,4 +1,8 @@
 View full changelog [here](https://github.com/shedaniel/RoughlyEnoughItems/blob/1.14/CHANGELOG.md).
+## v2.7.9.94
+- Added: Support for `c` namespace ([Cotton](https://github.com/CottonMC/cotton) Common Resources)
+- Added: Warping around the recipe book: ![image](https://media.discordapp.net/attachments/530305137382653952/568432084419608576/unknown.png?width=967&height=517) 
+- Fixed [#66](https://github.com/shedaniel/RoughlyEnoughItems/issues/66): Tooltips can be out of bounds
 ## v2.7.8.93
 - Fixed: Some localisations having broken json
 - Fixed: Depth of Craftable Toggle Button

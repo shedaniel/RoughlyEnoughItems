@@ -1,7 +1,6 @@
 package me.shedaniel.rei.utils;
 
 import me.shedaniel.cloth.api.ConfigScreenBuilder;
-import me.shedaniel.cloth.gui.ClothConfigScreen;
 import me.shedaniel.cloth.gui.entries.BooleanListEntry;
 import me.shedaniel.cloth.gui.entries.EnumListEntry;
 import me.shedaniel.cloth.gui.entries.IntegerSliderEntry;
@@ -15,11 +14,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.util.Pair;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 
 public class ClothScreenRegistry {
     
@@ -67,12 +63,6 @@ public class ClothScreenRegistry {
             ((ScreenHooks) screen).cloth_getButtonWidgets().add(0, w);
             ((ScreenHooks) screen).cloth_getChildren().add(0, w);
         }));
-    }
-    
-    private static class SelfSavedConfig extends ClothConfigScreen.Builder.SavedConfig {
-        protected SelfSavedConfig(Map<String, List<Pair<String, Object>>> map) {
-            super(map);
-        }
     }
     
 }

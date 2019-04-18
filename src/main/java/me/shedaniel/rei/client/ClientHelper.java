@@ -1,6 +1,7 @@
 package me.shedaniel.rei.client;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 import io.netty.buffer.Unpooled;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
@@ -18,7 +19,9 @@ import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.text.TranslatableTextComponent;
 import net.minecraft.util.DefaultedList;
 import net.minecraft.util.Identifier;
@@ -29,24 +32,44 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class ClientHelper implements ClientModInitializer {
     
     private static final Identifier RECIPE_KEYBIND = new Identifier("roughlyenoughitems", "recipe_keybind");
     private static final Identifier USAGE_KEYBIND = new Identifier("roughlyenoughitems", "usage_keybind");
     private static final Identifier HIDE_KEYBIND = new Identifier("roughlyenoughitems", "hide_keybind");
+    private static final Map<String, String> MOD_NAME_CACHE = Maps.newHashMap();
     public static FabricKeyBinding RECIPE, USAGE, HIDE;
     
-    public static String getModFromItemStack(ItemStack stack) {
-        if (!stack.isEmpty()) {
-            Identifier location = Registry.ITEM.getId(stack.getItem());
-            assert location != null;
-            String modid = location.getNamespace();
-            if (modid.equalsIgnoreCase("minecraft"))
-                return "Minecraft";
-            return FabricLoader.getInstance().getModContainer(modid).map(ModContainer::getMetadata).map(ModMetadata::getName).orElse(modid);
-        }
-        return "";
+    static {
+        MOD_NAME_CACHE.put("minecraft", "Minecraft");
+        MOD_NAME_CACHE.put("c", "Common");
+    }
+    
+    public static String getFormattedModFromItem(Item item) {
+        String mod = getModFromItem(item);
+        if (mod.equalsIgnoreCase(""))
+            return "";
+        return "§9§o" + mod;
+    }
+    
+    public static String getModFromItem(Item item) {
+        if (item.equals(Items.AIR))
+            return "";
+        return getModFromIdentifier(Registry.ITEM.getId(item));
+    }
+    
+    public static String getModFromIdentifier(Identifier identifier) {
+        if (identifier == null)
+            return "";
+        Optional<String> any = Optional.ofNullable(MOD_NAME_CACHE.getOrDefault(identifier.getNamespace(), null));
+        if (any.isPresent())
+            return any.get();
+        String modid = identifier.getNamespace();
+        String s = FabricLoader.getInstance().getModContainer(modid).map(ModContainer::getMetadata).map(ModMetadata::getName).orElse(modid);
+        MOD_NAME_CACHE.put(modid, s);
+        return s;
     }
     
     public static boolean isCheating() {
