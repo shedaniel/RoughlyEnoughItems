@@ -82,5 +82,5 @@
   "text.rei.config.item_cheating_mode": "物品作弊数量模式:",
   "text.rei.config.item_cheating_mode.rei_like": "标准",
   "text.rei.config.item_cheating_mode.jei_like": "反转",
-  "text.rei.no_config_api": "Cloth Config API 不存在!\n请安装它以显示游戏中的配置界面!",
+  "text.rei.no_config_api": "Cloth Config API 不存在!\n请安装它以显示游戏中的配置界面!"
 }

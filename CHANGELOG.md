@@ -1,4 +1,7 @@
 View full changelog [here](https://github.com/shedaniel/RoughlyEnoughItems/blob/1.14/CHANGELOG.md).
+## v2.7.8.93
+- Fixed: Some localisations having broken json
+- Fixed: Depth of Craftable Toggle Button
 ## v2.7.8.92
 - Modified: Bundled with updated API for pre3
 - Added: Option for Light Gray Recipe Border (I guess JEI like? I am going to get killed by mezz)

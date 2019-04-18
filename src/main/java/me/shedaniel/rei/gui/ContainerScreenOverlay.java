@@ -41,6 +41,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
     private final List<Widget> widgets = Lists.newLinkedList();
     private Rectangle rectangle;
     private Window window;
+    private CraftableToggleButtonWidget toggleButtonWidget;
     private ButtonWidget buttonLeft, buttonRight;
     private int lastLeft;
     
@@ -226,7 +227,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
         this.widgets.add(ScreenHelper.searchField);
         ScreenHelper.searchField.setText(searchTerm);
         if (RoughlyEnoughItemsCore.getConfigManager().getConfig().enableCraftableOnlyButton)
-            this.widgets.add(new CraftableToggleButtonWidget(getCraftableToggleArea()) {
+            this.widgets.add(toggleButtonWidget = new CraftableToggleButtonWidget(getCraftableToggleArea()) {
                 @Override
                 public void onPressed() {
                     RoughlyEnoughItemsCore.getConfigManager().toggleCraftableOnly();
@@ -234,12 +235,13 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
                 }
                 
                 @Override
-                public void render(int mouseX, int mouseY, float delta) {
-                    blitOffset = 600;
-                    super.render(mouseX, mouseY, delta);
+                public void lateRender(int mouseX, int mouseY, float delta) {
+                    blitOffset = 300;
+                    super.lateRender(mouseX, mouseY, delta);
                 }
             });
-        
+        else
+            toggleButtonWidget = null;
         this.itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm);
     }
     
@@ -331,6 +333,8 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
     
     public void lateRender(int mouseX, int mouseY, float delta) {
         ScreenHelper.searchField.laterRender(mouseX, mouseY, delta);
+        if (toggleButtonWidget != null)
+            toggleButtonWidget.lateRender(mouseX, mouseY, delta);
         Screen currentScreen = MinecraftClient.getInstance().currentScreen;
         if (!(currentScreen instanceof RecipeViewingScreen) || !((RecipeViewingScreen) currentScreen).choosePageActivated)
             QUEUED_TOOLTIPS.stream().filter(Objects::nonNull).forEach(queuedTooltip -> renderTooltip(queuedTooltip.getText(), queuedTooltip.getX(), queuedTooltip.getY()));
@@ -339,17 +343,14 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
     
     public void renderTooltip(List<String> list_1, int int_1, int int_2) {
         TextRenderer font = MinecraftClient.getInstance().textRenderer;
-        Window window = MinecraftClient.getInstance().window;
         if (!list_1.isEmpty()) {
             GlStateManager.disableRescaleNormal();
             GuiLighting.disable();
             GlStateManager.disableLighting();
             int int_3 = 0;
-            for(String string_1 : list_1) {
-                int int_4 = font.getStringWidth(string_1);
-                if (int_4 > int_3)
-                    int_3 = int_4;
-            }
+            for(String string_1 : list_1)
+                if (font.getStringWidth(string_1) > int_3)
+                    int_3 = font.getStringWidth(string_1);
             int int_5 = int_1 + 12;
             int int_6 = int_2 - 12;
             int int_8 = 8;
