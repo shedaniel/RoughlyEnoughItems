@@ -95,10 +95,10 @@ public class ItemSlotWidget extends HighlightableWidget {
     
     protected List<String> getTooltip(ItemStack itemStack) {
         final String modString = ClientHelper.getFormattedModFromItem(itemStack.getItem());
-        List<String> toolTip = Lists.newArrayList(ItemListOverlay.tryGetItemStackToolTip(itemStack));
+        List<String> toolTip = Lists.newArrayList(ItemListOverlay.tryGetItemStackToolTip(itemStack, true));
         toolTip.addAll(getExtraToolTips(itemStack));
         boolean alreadyHasMod = false;
-        for(String s : Lists.newArrayList(toolTip))
+        for(String s : toolTip)
             if (s.equalsIgnoreCase(modString)) {
                 alreadyHasMod = true;
                 break;

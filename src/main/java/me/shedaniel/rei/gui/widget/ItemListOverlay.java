@@ -11,19 +11,23 @@ import me.shedaniel.rei.client.ItemListOrdering;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.client.SearchArgument;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.item.TooltipContext;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.TextComponent;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 import org.apache.commons.lang3.StringUtils;
 
 import java.awt.*;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,10 +46,10 @@ public class ItemListOverlay extends Widget {
         this.page = page;
     }
     
-    public static List<String> tryGetItemStackToolTip(ItemStack itemStack) {
+    public static List<String> tryGetItemStackToolTip(ItemStack itemStack, boolean careAboutAdvanced) {
         if (!searchBlacklisted.contains(itemStack.getItem()))
             try {
-                return MinecraftClient.getInstance().currentScreen.getTooltipFromItem(itemStack);
+                return itemStack.getTooltipText(MinecraftClient.getInstance().player, MinecraftClient.getInstance().options.advancedItemTooltips && careAboutAdvanced ? TooltipContext.Default.ADVANCED : TooltipContext.Default.NORMAL).stream().map(TextComponent::getFormattedText).collect(Collectors.toList());
             } catch (Throwable e) {
                 e.printStackTrace();
                 searchBlacklisted.add(itemStack.getItem());
@@ -95,12 +99,12 @@ public class ItemListOverlay extends Widget {
         int j = page * fitSlotsPerPage;
         for(int i = 0; i < getFullTotalSlotsPerPage(); i++) {
             j++;
-            if (j >= currentDisplayed.size())
+            if (j > currentDisplayed.size())
                 break;
             int x = startX + (i % width) * 18, y = startY + MathHelper.floor(i / width) * 18;
             if (!canBeFit(x, y, listArea))
                 continue;
-            widgets.add(new ItemSlotWidget(x, y, Collections.singletonList(currentDisplayed.get(j)), false, true, true) {
+            widgets.add(new ItemSlotWidget(x, y, Collections.singletonList(currentDisplayed.get(j - 1)), false, true, true) {
                 @Override
                 protected void queueTooltip(ItemStack itemStack, float delta) {
                     ClientPlayerEntity player = minecraft.player;
@@ -179,7 +183,7 @@ public class ItemListOverlay extends Widget {
     
     private List<ItemStack> processSearchTerm(String searchTerm, List<ItemStack> ol, List<ItemStack> inventoryItems) {
         List<ItemStack> os = new LinkedList<>(ol), stacks = Lists.newArrayList(), finalStacks = Lists.newArrayList();
-        List<ItemGroup> itemGroups = new LinkedList<>(Arrays.asList(ItemGroup.GROUPS));
+        List<ItemGroup> itemGroups = Lists.newArrayList(ItemGroup.GROUPS);
         itemGroups.add(null);
         ItemListOrdering ordering = RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering;
         if (ordering != ItemListOrdering.registry)
@@ -194,67 +198,57 @@ public class ItemListOverlay extends Widget {
             Collections.reverse(os);
         String[] splitSearchTerm = StringUtils.splitByWholeSeparatorPreserveAllTokens(searchTerm, "|");
         Arrays.stream(splitSearchTerm).forEachOrdered(s -> {
-            List<SearchArgument> arguments = Lists.newArrayList();
-            Arrays.stream(StringUtils.split(s)).forEachOrdered(s1 -> {
+            String[] split = StringUtils.split(s);
+            SearchArgument[] arguments = new SearchArgument[split.length];
+            for(int i = 0; i < split.length; i++) {
+                String s1 = split[i];
                 if (s1.startsWith("@-") || s1.startsWith("-@"))
-                    arguments.add(new SearchArgument(SearchArgument.ArgumentType.MOD, s1.substring(2), false));
+                    arguments[i] = new SearchArgument(SearchArgument.ArgumentType.MOD, s1.substring(2), false);
                 else if (s1.startsWith("@"))
-                    arguments.add(new SearchArgument(SearchArgument.ArgumentType.MOD, s1.substring(1), true));
+                    arguments[i] = new SearchArgument(SearchArgument.ArgumentType.MOD, s1.substring(1), true);
                 else if (s1.startsWith("#-") || s1.startsWith("-#"))
-                    arguments.add(new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, s1.substring(2), false));
+                    arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, s1.substring(2), false);
                 else if (s1.startsWith("#"))
-                    arguments.add(new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, s1.substring(1), true));
+                    arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, s1.substring(1), true);
                 else if (s1.startsWith("-"))
-                    arguments.add(new SearchArgument(SearchArgument.ArgumentType.TEXT, s1.substring(1), false));
+                    arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TEXT, s1.substring(1), false);
                 else
-                    arguments.add(new SearchArgument(SearchArgument.ArgumentType.TEXT, s1, true));
-            });
-            os.stream().filter(itemStack -> arguments.isEmpty() || filterItem(itemStack, arguments)).forEachOrdered(stacks::add);
+                    arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TEXT, s1, true);
+            }
+            os.stream().filter(itemStack -> filterItem(itemStack, arguments)).forEachOrdered(stacks::add);
         });
         if (splitSearchTerm.length == 0)
             stacks.addAll(os);
-        List<ItemStack> workingItems = RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() && inventoryItems.size() > 0 ? new ArrayList<>() : new LinkedList<>(ol);
+        List<ItemStack> workingItems = RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() && inventoryItems.size() > 0 ? Lists.newArrayList() : Collections.unmodifiableList(ol);
         if (RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled()) {
             RecipeHelper.getInstance().findCraftableByItems(inventoryItems).forEach(workingItems::add);
             workingItems.addAll(inventoryItems);
         }
-        final List<ItemStack> finalWorkingItems = workingItems;
-        finalStacks.addAll(stacks.stream().filter(itemStack -> {
-            if (!RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled())
-                return true;
-            for(ItemStack workingItem : finalWorkingItems)
-                if (itemStack.isEqualIgnoreTags(workingItem))
-                    return true;
-            return false;
-        }).distinct().collect(Collectors.toList()));
+        if (!RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled())
+            finalStacks.addAll(stacks.stream().distinct().collect(Collectors.toList()));
+        else
+            finalStacks.addAll(stacks.stream().filter(itemStack -> {
+                for(ItemStack workingItem : workingItems)
+                    if (itemStack.isEqualIgnoreTags(workingItem))
+                        return true;
+                return false;
+            }).distinct().collect(Collectors.toList()));
         return finalStacks;
     }
     
-    private boolean filterItem(ItemStack itemStack, List<SearchArgument> arguments) {
-        String mod = ClientHelper.getModFromItem(itemStack.getItem());
-        List<String> toolTipsList = tryGetItemStackToolTip(itemStack);
-        String toolTipsMixed = toolTipsList.stream().skip(1).collect(Collectors.joining()).toLowerCase();
-        String allMixed = toolTipsList.stream().collect(Collectors.joining()).toLowerCase();
-        for(SearchArgument searchArgument : arguments.stream().filter(searchArgument -> !searchArgument.isInclude()).collect(Collectors.toList())) {
-            if (searchArgument.getArgumentType().equals(SearchArgument.ArgumentType.MOD))
-                if (mod.toLowerCase().contains(searchArgument.getText().toLowerCase()))
+    private boolean filterItem(ItemStack itemStack, SearchArgument... arguments) {
+        String mod = ClientHelper.getModFromItem(itemStack.getItem()).toLowerCase();
+        String tooltips = tryGetItemStackToolTip(itemStack, false).stream().skip(1).collect(Collectors.joining("")).replaceAll(" ", "").toLowerCase();
+        String name = tryGetItemStackName(itemStack).replaceAll(" ", "").toLowerCase();
+        for(SearchArgument argument : arguments) {
+            if (argument.getArgumentType().equals(SearchArgument.ArgumentType.MOD))
+                if (SearchArgument.getFunction(!argument.isInclude()).apply(mod.indexOf(argument.getText().toLowerCase())))
                     return false;
-            if (searchArgument.getArgumentType().equals(SearchArgument.ArgumentType.TOOLTIP))
-                if (toolTipsMixed.contains(searchArgument.getText().toLowerCase()))
+            if (argument.getArgumentType().equals(SearchArgument.ArgumentType.TOOLTIP))
+                if (SearchArgument.getFunction(!argument.isInclude()).apply(tooltips.indexOf(argument.getText().toLowerCase())))
                     return false;
-            if (searchArgument.getArgumentType().equals(SearchArgument.ArgumentType.TEXT))
-                if (allMixed.contains(searchArgument.getText().toLowerCase()))
-                    return false;
-        }
-        for(SearchArgument searchArgument : arguments.stream().filter(SearchArgument::isInclude).collect(Collectors.toList())) {
-            if (searchArgument.getArgumentType().equals(SearchArgument.ArgumentType.MOD))
-                if (!mod.toLowerCase().contains(searchArgument.getText().toLowerCase()))
-                    return false;
-            if (searchArgument.getArgumentType().equals(SearchArgument.ArgumentType.TOOLTIP))
-                if (!toolTipsMixed.contains(searchArgument.getText().toLowerCase()))
-                    return false;
-            if (searchArgument.getArgumentType().equals(SearchArgument.ArgumentType.TEXT))
-                if (!allMixed.contains(searchArgument.getText().toLowerCase()))
+            if (argument.getArgumentType().equals(SearchArgument.ArgumentType.TEXT))
+                if (SearchArgument.getFunction(!argument.isInclude()).apply(name.indexOf(argument.getText().toLowerCase())))
                     return false;
         }
         return true;
