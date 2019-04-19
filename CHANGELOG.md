@@ -1,4 +1,6 @@
 View full changelog [here](https://github.com/shedaniel/RoughlyEnoughItems/blob/1.14/CHANGELOG.md).
+## v2.7.10.95
+- Fixed [#67](https://github.com/shedaniel/RoughlyEnoughItems/issues/67): Item Panel Crashes
 ## v2.7.9.94
 - Added: Support for `c` namespace ([Cotton](https://github.com/CottonMC/cotton) Common Resources)
 - Added: Warping around the recipe book: ![image](https://media.discordapp.net/attachments/530305137382653952/568432084419608576/unknown.png?width=967&height=517) 
