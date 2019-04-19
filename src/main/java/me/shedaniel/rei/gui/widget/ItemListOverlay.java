@@ -94,12 +94,12 @@ public class ItemListOverlay extends Widget {
         int fitSlotsPerPage = getTotalFitSlotsPerPage(listArea.x, listArea.y, listArea);
         int j = page * fitSlotsPerPage;
         for(int i = 0; i < getFullTotalSlotsPerPage(); i++) {
+            j++;
             if (j >= currentDisplayed.size())
                 break;
             int x = startX + (i % width) * 18, y = startY + MathHelper.floor(i / width) * 18;
             if (!canBeFit(x, y, listArea))
                 continue;
-            j++;
             widgets.add(new ItemSlotWidget(x, y, Collections.singletonList(currentDisplayed.get(j)), false, true, true) {
                 @Override
                 protected void queueTooltip(ItemStack itemStack, float delta) {
