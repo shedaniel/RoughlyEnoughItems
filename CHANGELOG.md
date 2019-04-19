@@ -1,4 +1,6 @@
 View full changelog [here](https://github.com/shedaniel/RoughlyEnoughItems/blob/1.14/CHANGELOG.md).
+## v2.7.10.96
+- Fixed [#69](https://github.com/shedaniel/RoughlyEnoughItems/issues/67): Weird Search Field
 ## v2.7.10.95
 - Fixed [#67](https://github.com/shedaniel/RoughlyEnoughItems/issues/67): Item Panel Crashes
 ## v2.7.9.94
