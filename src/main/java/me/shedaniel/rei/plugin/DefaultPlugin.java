@@ -36,7 +36,7 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
-public class DefaultPlugin implements REIPlugin {
+public class DefaultPlugin implements REIPluginEntry {
     
     public static final Identifier CRAFTING = new Identifier("roughlyenoughitems", "plugins/crafting");
     public static final Identifier SMELTING = new Identifier("roughlyenoughitems", "plugins/smelting");
@@ -51,6 +51,11 @@ public class DefaultPlugin implements REIPlugin {
     
     public static void registerBrewingDisplay(DefaultBrewingDisplay display) {
         BREWING_DISPLAYS.add(display);
+    }
+    
+    @Override
+    public Identifier getPluginIdentifier() {
+        return PLUGIN;
     }
     
     @Override

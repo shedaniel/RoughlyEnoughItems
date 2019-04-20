@@ -186,26 +186,22 @@ public class RecipeHelperImpl implements RecipeHelper {
         this.displayVisibilityHandlers.clear();
         ((DisplayHelperImpl) RoughlyEnoughItemsCore.getDisplayHelper()).resetCache();
         long startTime = System.currentTimeMillis();
-        List<REIPlugin> plugins = new LinkedList<>(RoughlyEnoughItemsCore.getPlugins());
+        List<REIPluginEntry> plugins = new LinkedList<>(RoughlyEnoughItemsCore.getPlugins());
         plugins.sort((first, second) -> {
             return second.getPriority() - first.getPriority();
         });
-        RoughlyEnoughItemsCore.LOGGER.info("[REI] Loading %d plugins: %s", plugins.size(), String.join(", ", plugins.stream().map(plugin -> {
-            return RoughlyEnoughItemsCore.getPluginIdentifier(plugin).map(Identifier::toString).orElseGet(() -> "null");
-        }).collect(Collectors.toList())));
+        RoughlyEnoughItemsCore.LOGGER.info("[REI] Loading %d plugins: %s", plugins.size(), plugins.stream().map(REIPluginEntry::getPluginIdentifier).map(Identifier::toString).collect(Collectors.joining(", ")));
         Collections.reverse(plugins);
         RoughlyEnoughItemsCore.getItemRegisterer().getModifiableItemList().clear();
         PluginDisabler pluginDisabler = RoughlyEnoughItemsCore.getPluginDisabler();
         plugins.forEach(plugin -> {
-            Identifier identifier = RoughlyEnoughItemsCore.getPluginIdentifier(plugin).orElseGet(() -> new Identifier("null"));
+            Identifier identifier = plugin.getPluginIdentifier();
             if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_ITEMS))
                 plugin.registerItems(RoughlyEnoughItemsCore.getItemRegisterer());
             if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_CATEGORIES))
                 plugin.registerPluginCategories(this);
             if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_RECIPE_DISPLAYS))
                 plugin.registerRecipeDisplays(this);
-            if (RoughlyEnoughItemsCore.getConfigManager().getConfig().enableLegacySpeedCraftSupport && pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_SPEED_CRAFT))
-                plugin.registerSpeedCraft(this);
             if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_BOUNDS))
                 plugin.registerBounds(RoughlyEnoughItemsCore.getDisplayHelper());
             if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_OTHERS))

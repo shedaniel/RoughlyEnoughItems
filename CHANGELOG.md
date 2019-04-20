@@ -1,6 +1,10 @@
 View full changelog [here](https://github.com/shedaniel/RoughlyEnoughItems/blob/1.14/CHANGELOG.md).
+## v2.7.11.97
+- Fixed [#72](https://github.com/shedaniel/RoughlyEnoughItems/issues/72): Crash on clicking craftable items filter
+- New: Load REI Plugins via entry points, old way works too but support will be dropped
+- Removed: 'Enable Legacy Plugin Support' Option
 ## v2.7.10.96
-- Fixed [#69](https://github.com/shedaniel/RoughlyEnoughItems/issues/67): Weird Search Field
+- Fixed [#69](https://github.com/shedaniel/RoughlyEnoughItems/issues/69): Weird Search Field
 ## v2.7.10.95
 - Fixed [#67](https://github.com/shedaniel/RoughlyEnoughItems/issues/67): Item Panel Crashes
 ## v2.7.9.94

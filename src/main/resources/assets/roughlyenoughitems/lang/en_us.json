@@ -84,7 +84,8 @@
   "text.rei.config.item_cheating_mode.rei_like": "Normal",
   "text.rei.config.item_cheating_mode.jei_like": "Reversed",
   "text.rei.config.light_gray_recipe_border": "Light Gray Recipe Border:",
-  "text.rei.no_config_api": "Cloth Config API does not exist!\nPlease install it in order to show an in-game config screen!",
+  "text.rei.config_api_failed": "You arrived here either if Cloth Config API failed or you don't have it installed!\nUpdate / Install the API and report to the bug tracker.",
+  "text.rei.back": "Back",
   "_comment": "Don't change / translate the credit down below if you are doing it :)",
   "text.rei.credit.text": "§lRoughly Enough Items\n§7Originally a fork for Almost Enough Items.\n\n§lDevelopers\n  - Originally by ZenDarva\n  - Created by Danielshe\n  - Plugin Support by TehNut\n\n§lLanguage Translation\n  English - Danielshe\n  Simplified Chinese - Danielshe\n  Traditional Chinese - hugoalh, gxy17886 & Danielshe\n  French - Yanis48\n  German - MelanX\n  Estonian - Madis0\n  Portuguese - thiagokenis\n  LOLCAT - Danielshe\n  Upside Down - Danielshe\n  Brazilian Portuguese - thiagokenis\n  Bulgarian - geniiii\n\n§lLicense\n§7Roughly Enough Items is using MIT."
 }
