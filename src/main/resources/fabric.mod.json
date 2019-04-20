@@ -23,6 +23,12 @@
     ],
     "main": [
       "me.shedaniel.rei.RoughlyEnoughItemsNetwork"
+    ],
+    "modmenu": [
+      "me.shedaniel.rei.REIModMenuEntryPoint"
+    ],
+    "rei_plugins": [
+      "me.shedaniel.rei.plugin.DefaultPlugin"
     ]
   },
   "requires": {
@@ -37,12 +43,6 @@
     "roughlyenoughitems.mixins.json"
   ],
   "custom": {
-    "modmenu:clientsideOnly": true,
-    "roughlyenoughitems:plugins": [
-      {
-        "id": "default_plugin",
-        "class": "me.shedaniel.rei.plugin.DefaultPlugin"
-      }
-    ]
+    "modmenu:clientsideOnly": true
   }
 }

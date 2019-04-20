@@ -7,7 +7,6 @@ import com.google.gson.JsonObject;
 import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.cloth.hooks.ClothClientHooks;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.client.ConfigManager;
 import me.shedaniel.rei.client.*;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.listeners.CreativePlayerInventoryScreenHooks;
@@ -16,7 +15,6 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ContainerScreen;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
@@ -31,7 +29,6 @@ import net.minecraft.util.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -45,8 +42,9 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     private static final PluginDisabler PLUGIN_DISABLER = new PluginDisablerImpl();
     private static final ItemRegistry ITEM_REGISTRY = new ItemRegistryImpl();
     private static final DisplayHelper DISPLAY_HELPER = new DisplayHelperImpl();
-    private static final Map<Identifier, REIPlugin> plugins = Maps.newHashMap();
-    private static ConfigManager configManager;
+    private static final Map<Identifier, REIPluginEntry> plugins = Maps.newHashMap();
+    public static boolean reiIsOnServer = false;
+    private static ConfigManagerImpl configManager;
     
     static {
         LOGGER = LogManager.getFormatterLogger("REI");
@@ -72,18 +70,18 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         return DISPLAY_HELPER;
     }
     
-    public static REIPlugin registerPlugin(Identifier identifier, REIPlugin plugin) {
+    public static REIPluginEntry registerPlugin(Identifier identifier, REIPluginEntry plugin) {
         plugins.put(identifier, plugin);
         RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered plugin %s from %s", identifier.toString(), plugin.getClass().getSimpleName());
         plugin.onFirstLoad(getPluginDisabler());
         return plugin;
     }
     
-    public static List<REIPlugin> getPlugins() {
+    public static List<REIPluginEntry> getPlugins() {
         return new LinkedList<>(plugins.values());
     }
     
-    public static Optional<Identifier> getPluginIdentifier(REIPlugin plugin) {
+    public static Optional<Identifier> getPluginIdentifier(REIPluginEntry plugin) {
         for(Identifier identifier : plugins.keySet())
             if (identifier != null && plugins.get(identifier).equals(plugin))
                 return Optional.of(identifier);
@@ -92,26 +90,30 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     
     @Override
     public void onInitializeClient() {
-        configManager = new ConfigManager();
+        configManager = new ConfigManagerImpl();
         
         registerClothEvents();
-        
-        if (FabricLoader.getInstance().isModLoaded("modmenu")) {
-            try {
-                Class<?> clazz = Class.forName("io.github.prospector.modmenu.api.ModMenuApi");
-                Method method = clazz.getMethod("addConfigOverride", String.class, Runnable.class);
-                method.invoke(null, "roughlyenoughitems", (Runnable) () -> getConfigManager().openConfigScreen(MinecraftClient.getInstance().currentScreen));
-            } catch (Exception e) {
-                RoughlyEnoughItemsCore.LOGGER.error("[REI] Failed to add config override for ModMenu!", e);
-            }
-        }
-        
-        discoverPlugins();
+        discoverOldPlugins();
+        discoverPluginEntries();
     }
     
-    private void discoverPlugins() {
+    private void discoverPluginEntries() {
+        for(REIPluginEntry reiPlugin : FabricLoader.getInstance().getEntrypoints("rei_plugins", REIPluginEntry.class)) {
+            try {
+                if (reiPlugin instanceof REIPlugin)
+                    throw new IllegalStateException("REI Plugins on Entry Points should not implement REIPlugin");
+                registerPlugin(reiPlugin.getPluginIdentifier(), reiPlugin);
+            } catch (Exception e) {
+                e.printStackTrace();
+                RoughlyEnoughItemsCore.LOGGER.error("[REI] Can't load REI plugins from %s: %s", reiPlugin.getClass(), e.getLocalizedMessage());
+            }
+        }
+    }
+    
+    private void discoverOldPlugins() {
         List<Pair<Identifier, String>> list = Lists.newArrayList();
         for(ModMetadata metadata : FabricLoader.getInstance().getAllMods().stream().map(ModContainer::getMetadata).filter(metadata -> metadata.containsCustomElement("roughlyenoughitems:plugins")).collect(Collectors.toList())) {
+            RoughlyEnoughItemsCore.LOGGER.warn("[REI] %s(%s) is still using the old way to register its plugin! Support will be dropped in the future!", metadata.getName(), metadata.getId());
             try {
                 JsonElement pluginsElement = metadata.getCustomElement("roughlyenoughitems:plugins");
                 if (pluginsElement.isJsonArray()) {

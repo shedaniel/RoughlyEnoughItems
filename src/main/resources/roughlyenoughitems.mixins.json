@@ -3,12 +3,16 @@
   "package": "me.shedaniel.rei.mixin",
   "minVersion": "0.7.11",
   "compatibilityLevel": "JAVA_8",
-  "mixins": [],
+  "mixins": [
+    "MixinPlayerManager"
+  ],
   "client": [
     "MixinContainerScreen",
     "MixinBrewingRecipeRegistry",
     "MixinRecipeBookGui",
-    "MixinCreativePlayerInventoryScreen"
+    "MixinCreativePlayerInventoryScreen",
+    "MixinClientPlayNetworkHandler",
+    "MixinClientConnection"
   ],
   "injectors": {
     "defaultRequire": 1

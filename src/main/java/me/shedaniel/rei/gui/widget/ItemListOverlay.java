@@ -219,7 +219,7 @@ public class ItemListOverlay extends Widget {
         });
         if (splitSearchTerm.length == 0)
             stacks.addAll(os);
-        List<ItemStack> workingItems = RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() && inventoryItems.size() > 0 ? Lists.newArrayList() : Collections.unmodifiableList(ol);
+        List<ItemStack> workingItems = RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() && inventoryItems.size() > 0 ? Lists.newArrayList() : Lists.newArrayList(ol);
         if (RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled()) {
             RecipeHelper.getInstance().findCraftableByItems(inventoryItems).forEach(workingItems::add);
             workingItems.addAll(inventoryItems);

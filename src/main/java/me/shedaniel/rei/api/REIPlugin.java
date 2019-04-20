@@ -1,24 +1,11 @@
 package me.shedaniel.rei.api;
 
-public interface REIPlugin {
-    
-    default void onFirstLoad(PluginDisabler pluginDisabler) {}
-    
-    default void registerItems(ItemRegistry itemRegistry) {}
-    
-    default void registerPluginCategories(RecipeHelper recipeHelper) {}
-    
-    default void registerRecipeDisplays(RecipeHelper recipeHelper) {}
-    
-    @Deprecated
-    default void registerSpeedCraft(RecipeHelper recipeHelper) {}
-    
-    default void registerBounds(DisplayHelper displayHelper) {}
-    
-    default void registerOthers(RecipeHelper recipeHelper) {}
-    
-    default int getPriority() {
-        return 0;
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import net.minecraft.util.Identifier;
+
+public interface REIPlugin extends REIPluginEntry {
+    @Override
+    default Identifier getPluginIdentifier() {
+        return RoughlyEnoughItemsCore.getPluginIdentifier(this).orElse(Identifier.create("null"));
     }
-    
 }

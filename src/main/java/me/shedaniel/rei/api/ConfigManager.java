@@ -19,4 +19,6 @@ public interface ConfigManager {
     
     void openConfigScreen(Screen parent);
     
+    Screen getConfigScreen(Screen parent);
+    
 }

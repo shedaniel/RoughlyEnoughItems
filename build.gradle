@@ -63,4 +63,5 @@ dependencies {
     included "blue.endless:jankson:${project.jankson_version}"
 
     modCompile "io.github.prospector.modmenu:ModMenu:${modmenu_version}"
+    compile "org.lwjgl:lwjgl-jemalloc:3.2.1"
 }
