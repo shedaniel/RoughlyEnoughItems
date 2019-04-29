@@ -11,12 +11,7 @@ Roughly Enough Items is a mod to view Items and Recipes for Minecraft 1.13 - 1.1
 
 ![](https://cdn.discordapp.com/attachments/472670263234920449/536198766118830081/unknown.png)
 
-This mod is completely client side. It is **impossible** to install this mod on a server.  
-However 1 feature will be disabled:
-- Item Deletion
-
-One feature will be limited:
-- Item Cheating (nbts are limited to 256 char = no long nbts)
+This mod is client sided and server sided.
 
 ### Currently Supported Languages:
 - English

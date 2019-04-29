@@ -82,7 +82,7 @@ public class ItemListOverlay extends Widget {
         GuiLighting.disable();
         widgets.forEach(widget -> widget.render(int_1, int_2, float_1));
         ClientPlayerEntity player = minecraft.player;
-        if (rectangle.contains(ClientUtils.getMouseLocation()) && ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty() && minecraft.isInSingleplayer())
+        if (rectangle.contains(ClientUtils.getMouseLocation()) && ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
             ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.delete_items")));
     }
     
@@ -276,11 +276,11 @@ public class ItemListOverlay extends Widget {
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
         if (rectangle.contains(double_1, double_2)) {
             ClientPlayerEntity player = minecraft.player;
-            if (ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty() && minecraft.isInSingleplayer()) {
+            if (ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets()) {
                 ClientHelper.sendDeletePacket();
                 return true;
             }
-            if (!player.inventory.getCursorStack().isEmpty() && minecraft.isInSingleplayer())
+            if (!player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
                 return false;
             for(Widget widget : children())
                 if (widget.mouseClicked(double_1, double_2, int_1))

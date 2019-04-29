@@ -119,8 +119,12 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             public void render(int mouseX, int mouseY, float delta) {
                 super.render(mouseX, mouseY, delta);
                 GuiLighting.disable();
-                if (ClientHelper.isCheating())
-                    fill(getBounds().x, getBounds().y, getBounds().x + 20, getBounds().y + 20, new Color(255, 0, 0, 42).getRGB());
+                if (ClientHelper.isCheating() && RoughlyEnoughItemsCore.hasOperatorPermission()) {
+                    if (RoughlyEnoughItemsCore.hasPermissionToUsePackets())
+                        fill(getBounds().x, getBounds().y, getBounds().x + 20, getBounds().y + 20, 721354752);
+                    else
+                        fill(getBounds().x, getBounds().y, getBounds().x + 20, getBounds().y + 20, 1476440063);
+                }
                 MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
                 GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                 blit(getBounds().x + 3, getBounds().y + 3, 0, 0, 14, 14);
@@ -131,9 +135,13 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
                 String tooltips = I18n.translate("text.rei.config_tooltip");
                 tooltips += "\n  ";
                 if (!ClientHelper.isCheating())
-                    tooltips += "\n§c§m" + I18n.translate("text.rei.cheating");
+                    tooltips += "\n" + I18n.translate("text.rei.cheating_disabled");
+                else if (!RoughlyEnoughItemsCore.hasOperatorPermission())
+                    tooltips += "\n" + I18n.translate("text.rei.cheating_enabled_no_perms");
+                else if (RoughlyEnoughItemsCore.hasPermissionToUsePackets())
+                    tooltips += "\n" + I18n.translate("text.rei.cheating_enabled");
                 else
-                    tooltips += "\n§a" + I18n.translate("text.rei.cheating");
+                    tooltips += "\n" + I18n.translate("text.rei.cheating_limited_enabled");
                 return Optional.ofNullable(tooltips);
             }
             

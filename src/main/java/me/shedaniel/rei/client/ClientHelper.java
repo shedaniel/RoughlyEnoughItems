@@ -94,7 +94,7 @@ public class ClientHelper implements ClientModInitializer {
     }
     
     public static boolean tryCheatingStack(ItemStack cheatedStack) {
-        if (MinecraftClient.getInstance().isInSingleplayer()) {
+        if (RoughlyEnoughItemsCore.hasPermissionToUsePackets()) {
             try {
                 ClientSidePacketRegistry.INSTANCE.sendToServer(RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET, new PacketByteBuf(Unpooled.buffer()).writeItemStack(cheatedStack.copy()));
                 return true;

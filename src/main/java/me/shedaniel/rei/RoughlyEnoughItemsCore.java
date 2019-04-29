@@ -12,9 +12,11 @@ import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.listeners.CreativePlayerInventoryScreenHooks;
 import me.shedaniel.rei.listeners.RecipeBookGuiHooks;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ContainerScreen;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
@@ -43,7 +45,6 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     private static final ItemRegistry ITEM_REGISTRY = new ItemRegistryImpl();
     private static final DisplayHelper DISPLAY_HELPER = new DisplayHelperImpl();
     private static final Map<Identifier, REIPluginEntry> plugins = Maps.newHashMap();
-    public static boolean reiIsOnServer = false;
     private static ConfigManagerImpl configManager;
     
     static {
@@ -86,6 +87,18 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             if (identifier != null && plugins.get(identifier).equals(plugin))
                 return Optional.of(identifier);
         return Optional.empty();
+    }
+    
+    public static boolean hasPermissionToUsePackets() {
+        return hasOperatorPermission() && canUsePackets();
+    }
+    
+    public static boolean hasOperatorPermission() {
+        return MinecraftClient.getInstance().getNetworkHandler().getCommandSource().hasPermissionLevel(1);
+    }
+    
+    public static boolean canUsePackets() {
+        return ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET) && ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.DELETE_ITEMS_PACKET);
     }
     
     @Override

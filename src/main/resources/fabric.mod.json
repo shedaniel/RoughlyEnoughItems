@@ -14,7 +14,6 @@
   },
   "license": "MIT",
   "icon": "pack.png",
-  "environment": "client",
   "entrypoints": {
     "client": [
       "me.shedaniel.rei.RoughlyEnoughItemsCore",
