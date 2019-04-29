@@ -94,7 +94,7 @@ public class ClientHelper implements ClientModInitializer {
     }
     
     public static boolean tryCheatingStack(ItemStack cheatedStack) {
-        if (RoughlyEnoughItemsCore.hasPermissionToUsePackets()) {
+        if (RoughlyEnoughItemsCore.canUsePackets()) {
             try {
                 ClientSidePacketRegistry.INSTANCE.sendToServer(RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET, new PacketByteBuf(Unpooled.buffer()).writeItemStack(cheatedStack.copy()));
                 return true;
