@@ -32,14 +32,9 @@
   },
   "requires": {
     "fabricloader": ">=0.4.0",
-    "fabric-keybindings": ">=0.1.0",
-    "fabric-lib": ">=0.1.0",
-    "fabric-networking": ">=0.1.0",
-    "fabric-events-lifecycle": ">=0.1.0",
     "cloth": "*"
   },
   "recommends": {
-    "fabric-resource-loader": ">=0.1.0",
     "cloth-config": ">=0.1.0"
   },
   "mixins": [

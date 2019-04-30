@@ -34,10 +34,10 @@ import java.util.stream.Collectors;
 public class ItemListOverlay extends Widget {
     
     private static List<Item> searchBlacklisted = Lists.newArrayList();
+    private final List<ItemStack> currentDisplayed;
     private List<Widget> widgets;
     private int width, height, page;
     private Rectangle rectangle, listArea;
-    private List<ItemStack> currentDisplayed;
     
     public ItemListOverlay(int page) {
         this.currentDisplayed = Lists.newArrayList();
@@ -86,12 +86,15 @@ public class ItemListOverlay extends Widget {
             ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.delete_items")));
     }
     
-    public void updateList(DisplayHelper.DisplayBoundsHandler boundsHandler, Rectangle rectangle, int page, String searchTerm) {
+    public void updateList(DisplayHelper.DisplayBoundsHandler boundsHandler, Rectangle rectangle, int page, String searchTerm, boolean processSearchTerm) {
         this.rectangle = rectangle;
         this.page = page;
         this.widgets = Lists.newLinkedList();
         calculateListSize(rectangle);
-        currentDisplayed = processSearchTerm(searchTerm, RoughlyEnoughItemsCore.getItemRegisterer().getItemList(), ScreenHelper.inventoryStacks);
+        if (currentDisplayed.isEmpty() || processSearchTerm) {
+            currentDisplayed.clear();
+            currentDisplayed.addAll(processSearchTerm(searchTerm, RoughlyEnoughItemsCore.getItemRegisterer().getItemList(), ScreenHelper.inventoryStacks));
+        }
         int startX = (int) rectangle.getCenterX() - width * 9;
         int startY = (int) rectangle.getCenterY() - height * 9;
         this.listArea = new Rectangle((int) startX, (int) startY, width * 18, height * 18);
@@ -182,7 +185,7 @@ public class ItemListOverlay extends Widget {
     }
     
     private List<ItemStack> processSearchTerm(String searchTerm, List<ItemStack> ol, List<ItemStack> inventoryItems) {
-        List<ItemStack> os = new LinkedList<>(ol), stacks = Lists.newArrayList(), finalStacks = Lists.newArrayList();
+        List<ItemStack> os = Lists.newArrayList(ol), stacks = Lists.newArrayList(), finalStacks = Lists.newArrayList();
         List<ItemGroup> itemGroups = Lists.newArrayList(ItemGroup.GROUPS);
         itemGroups.add(null);
         ItemListOrdering ordering = RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering;
