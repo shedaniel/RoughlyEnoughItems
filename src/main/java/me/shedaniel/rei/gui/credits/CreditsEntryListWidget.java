@@ -1,30 +1,29 @@
 package me.shedaniel.rei.gui.credits;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.menu.AlwaysSelectedItemListWidget;
+import net.minecraft.client.gui.menu.AlwaysSelectedEntryListWidget;
 import net.minecraft.text.TextComponent;
 
-public class CreditsEntryListWidget extends AlwaysSelectedItemListWidget<CreditsEntryListWidget.CreditsItem> {
+public class CreditsEntryListWidget extends AlwaysSelectedEntryListWidget<CreditsEntryListWidget.CreditsItem> {
     
     public CreditsEntryListWidget(MinecraftClient client, int width, int height, int startY, int endY, int entryHeight) {
         super(client, width, height, startY, endY, entryHeight);
-        visible = false; // showSelection
     }
     
     public void creditsClearEntries() {
-        clearItems();
+        clearEntries();
     }
     
-    private CreditsItem getEntry(int int_1) {
+    private CreditsItem rei_getEntry(int int_1) {
         return this.children().get(int_1);
     }
     
     public void creditsAddEntry(CreditsItem entry) {
-        addItem(entry);
+        addEntry(entry);
     }
     
     @Override
-    public int getItemWidth() {
+    public int getRowWidth() {
         return width - 80;
     }
     
@@ -33,7 +32,7 @@ public class CreditsEntryListWidget extends AlwaysSelectedItemListWidget<Credits
         return width - 40;
     }
     
-    public static class CreditsItem extends AlwaysSelectedItemListWidget.Item<CreditsItem> {
+    public static class CreditsItem extends AlwaysSelectedEntryListWidget.Entry<CreditsItem> {
         private String text;
         
         public CreditsItem(TextComponent textComponent) {

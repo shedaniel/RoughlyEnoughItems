@@ -61,7 +61,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
         this.rectangle = RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? boundsHandler.getLeftBounds(MinecraftClient.getInstance().currentScreen) : boundsHandler.getRightBounds(MinecraftClient.getInstance().currentScreen);
         this.lastLeft = getLeft();
         widgets.add(itemListOverlay = new ItemListOverlay(page));
-        itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm);
+        itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, false);
         
         widgets.add(buttonLeft = new ButtonWidget(rectangle.x, rectangle.y + 5, 16, 16, new TranslatableTextComponent("text.rei.left_arrow")) {
             @Override
@@ -69,7 +69,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
                 page--;
                 if (page < 0)
                     page = getTotalPage();
-                itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm);
+                itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, false);
             }
             
             @Override
@@ -88,7 +88,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
                 page++;
                 if (page > getTotalPage())
                     page = 0;
-                itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm);
+                itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, false);
             }
             
             @Override
@@ -119,8 +119,12 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             public void render(int mouseX, int mouseY, float delta) {
                 super.render(mouseX, mouseY, delta);
                 GuiLighting.disable();
-                if (ClientHelper.isCheating())
-                    fill(getBounds().x, getBounds().y, getBounds().x + 20, getBounds().y + 20, new Color(255, 0, 0, 42).getRGB());
+                if (ClientHelper.isCheating() && RoughlyEnoughItemsCore.hasOperatorPermission()) {
+                    if (RoughlyEnoughItemsCore.hasPermissionToUsePackets())
+                        fill(getBounds().x, getBounds().y, getBounds().x + 20, getBounds().y + 20, 721354752);
+                    else
+                        fill(getBounds().x, getBounds().y, getBounds().x + 20, getBounds().y + 20, 1476440063);
+                }
                 MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
                 GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                 blit(getBounds().x + 3, getBounds().y + 3, 0, 0, 14, 14);
@@ -131,9 +135,13 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
                 String tooltips = I18n.translate("text.rei.config_tooltip");
                 tooltips += "\n  ";
                 if (!ClientHelper.isCheating())
-                    tooltips += "\n§c§m" + I18n.translate("text.rei.cheating");
+                    tooltips += "\n" + I18n.translate("text.rei.cheating_disabled");
+                else if (!RoughlyEnoughItemsCore.hasOperatorPermission())
+                    tooltips += "\n" + I18n.translate("text.rei.cheating_enabled_no_perms");
+                else if (RoughlyEnoughItemsCore.hasPermissionToUsePackets())
+                    tooltips += "\n" + I18n.translate("text.rei.cheating_enabled");
                 else
-                    tooltips += "\n§a" + I18n.translate("text.rei.cheating");
+                    tooltips += "\n" + I18n.translate("text.rei.cheating_limited_enabled");
                 return Optional.ofNullable(tooltips);
             }
             
@@ -208,7 +216,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             public void onLabelClicked() {
                 MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 page = 0;
-                itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm);
+                itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, false);
             }
             
             @Override
@@ -219,19 +227,19 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
         buttonLeft.enabled = buttonRight.enabled = getTotalPage() > 0;
         if (ScreenHelper.searchField == null)
             ScreenHelper.searchField = new SearchFieldWidget(0, 0, 0, 0);
-        ScreenHelper.searchField.setChangedListener(s -> {
-            searchTerm = s;
-            itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm);
-        });
         ScreenHelper.searchField.getBounds().setBounds(getTextFieldArea());
         this.widgets.add(ScreenHelper.searchField);
         ScreenHelper.searchField.setText(searchTerm);
+        ScreenHelper.searchField.setChangedListener(s -> {
+            searchTerm = s;
+            itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, true);
+        });
         if (RoughlyEnoughItemsCore.getConfigManager().getConfig().enableCraftableOnlyButton)
             this.widgets.add(toggleButtonWidget = new CraftableToggleButtonWidget(getCraftableToggleArea()) {
                 @Override
                 public void onPressed() {
                     RoughlyEnoughItemsCore.getConfigManager().toggleCraftableOnly();
-                    itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm);
+                    itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, true);
                 }
                 
                 @Override
@@ -242,7 +250,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             });
         else
             toggleButtonWidget = null;
-        this.itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm);
+        this.itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, false);
     }
     
     private Weather getNextWeather() {
@@ -324,7 +332,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
         else if (RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() && (!hasSameListContent(new LinkedList<>(ScreenHelper.inventoryStacks), currentStacks) || (currentStacks.size() != ScreenHelper.inventoryStacks.size()))) {
             ScreenHelper.inventoryStacks = ClientHelper.getInventoryItemsTypes();
             DisplayHelper.DisplayBoundsHandler boundsHandler = RoughlyEnoughItemsCore.getDisplayHelper().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
-            itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm);
+            itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, true);
         }
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GuiLighting.disable();
