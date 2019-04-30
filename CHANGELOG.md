@@ -1,4 +1,8 @@
 View full changelog [here](https://github.com/shedaniel/RoughlyEnoughItems/blob/1.14/CHANGELOG.md).
+## v2.8.0+build.100
+- Fixed [#76](https://github.com/shedaniel/RoughlyEnoughItems/issues/76): Laggy Changing Pages
+- New: Better Server Support (You can now drop REI into server mods)
+- New: Better Cheat Mode Button
 ## v2.7.11.97
 - Fixed [#72](https://github.com/shedaniel/RoughlyEnoughItems/issues/72): Crash on clicking craftable items filter
 - New: Load REI Plugins via entry points, old way works too but support will be dropped

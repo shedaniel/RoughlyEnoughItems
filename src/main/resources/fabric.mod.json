@@ -14,7 +14,6 @@
   },
   "license": "MIT",
   "icon": "pack.png",
-  "environment": "client",
   "entrypoints": {
     "client": [
       "me.shedaniel.rei.RoughlyEnoughItemsCore",
@@ -33,7 +32,6 @@
   },
   "requires": {
     "fabricloader": ">=0.4.0",
-    "fabric": "^0.2.6",
     "cloth": "*"
   },
   "recommends": {

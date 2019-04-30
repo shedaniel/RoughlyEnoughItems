@@ -34,10 +34,10 @@ import java.util.stream.Collectors;
 public class ItemListOverlay extends Widget {
     
     private static List<Item> searchBlacklisted = Lists.newArrayList();
+    private final List<ItemStack> currentDisplayed;
     private List<Widget> widgets;
     private int width, height, page;
     private Rectangle rectangle, listArea;
-    private List<ItemStack> currentDisplayed;
     
     public ItemListOverlay(int page) {
         this.currentDisplayed = Lists.newArrayList();
@@ -82,16 +82,19 @@ public class ItemListOverlay extends Widget {
         GuiLighting.disable();
         widgets.forEach(widget -> widget.render(int_1, int_2, float_1));
         ClientPlayerEntity player = minecraft.player;
-        if (rectangle.contains(ClientUtils.getMouseLocation()) && ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty() && minecraft.isInSingleplayer())
+        if (rectangle.contains(ClientUtils.getMouseLocation()) && ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
             ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.delete_items")));
     }
     
-    public void updateList(DisplayHelper.DisplayBoundsHandler boundsHandler, Rectangle rectangle, int page, String searchTerm) {
+    public void updateList(DisplayHelper.DisplayBoundsHandler boundsHandler, Rectangle rectangle, int page, String searchTerm, boolean processSearchTerm) {
         this.rectangle = rectangle;
         this.page = page;
         this.widgets = Lists.newLinkedList();
         calculateListSize(rectangle);
-        currentDisplayed = processSearchTerm(searchTerm, RoughlyEnoughItemsCore.getItemRegisterer().getItemList(), ScreenHelper.inventoryStacks);
+        if (currentDisplayed.isEmpty() || processSearchTerm) {
+            currentDisplayed.clear();
+            currentDisplayed.addAll(processSearchTerm(searchTerm, RoughlyEnoughItemsCore.getItemRegisterer().getItemList(), ScreenHelper.inventoryStacks));
+        }
         int startX = (int) rectangle.getCenterX() - width * 9;
         int startY = (int) rectangle.getCenterY() - height * 9;
         this.listArea = new Rectangle((int) startX, (int) startY, width * 18, height * 18);
@@ -182,7 +185,7 @@ public class ItemListOverlay extends Widget {
     }
     
     private List<ItemStack> processSearchTerm(String searchTerm, List<ItemStack> ol, List<ItemStack> inventoryItems) {
-        List<ItemStack> os = new LinkedList<>(ol), stacks = Lists.newArrayList(), finalStacks = Lists.newArrayList();
+        List<ItemStack> os = Lists.newArrayList(ol), stacks = Lists.newArrayList(), finalStacks = Lists.newArrayList();
         List<ItemGroup> itemGroups = Lists.newArrayList(ItemGroup.GROUPS);
         itemGroups.add(null);
         ItemListOrdering ordering = RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering;
@@ -276,11 +279,11 @@ public class ItemListOverlay extends Widget {
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
         if (rectangle.contains(double_1, double_2)) {
             ClientPlayerEntity player = minecraft.player;
-            if (ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty() && minecraft.isInSingleplayer()) {
+            if (ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets()) {
                 ClientHelper.sendDeletePacket();
                 return true;
             }
-            if (!player.inventory.getCursorStack().isEmpty() && minecraft.isInSingleplayer())
+            if (!player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
                 return false;
             for(Widget widget : children())
                 if (widget.mouseClicked(double_1, double_2, int_1))
