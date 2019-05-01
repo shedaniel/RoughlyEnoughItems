@@ -5,6 +5,7 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
+import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import me.shedaniel.rei.listeners.RecipeBookGuiHooks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.ContainerScreen;
@@ -15,6 +16,8 @@ import net.minecraft.client.gui.container.FurnaceScreen;
 import net.minecraft.client.gui.container.SmokerScreen;
 import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
 import net.minecraft.client.gui.ingame.PlayerInventoryScreen;
+import net.minecraft.client.gui.ingame.RecipeBookProvider;
+import net.minecraft.client.gui.recipebook.RecipeBookGui;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.item.ItemStack;
@@ -28,7 +31,6 @@ import net.minecraft.recipe.cooking.SmeltingRecipe;
 import net.minecraft.recipe.cooking.SmokingRecipe;
 import net.minecraft.recipe.crafting.ShapedRecipe;
 import net.minecraft.recipe.crafting.ShapelessRecipe;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
@@ -142,6 +144,17 @@ public class DefaultPlugin implements REIPluginEntry {
     
     @Override
     public void registerBounds(DisplayHelper displayHelper) {
+        displayHelper.getBaseBoundsHandler().registerExclusionZones(ContainerScreen.class, isOnRightSide -> {
+            if (isOnRightSide || !MinecraftClient.getInstance().player.getRecipeBook().isGuiOpen() || !(MinecraftClient.getInstance().currentScreen instanceof RecipeBookProvider))
+                return Collections.emptyList();
+            ContainerScreenHooks screenHooks = ScreenHelper.getLastContainerScreenHooks();
+            List l = Lists.newArrayList(new Rectangle(screenHooks.rei_getContainerLeft() - 4 - 145, screenHooks.rei_getContainerTop(), 4 + 145 + 30, screenHooks.rei_getContainerHeight()));
+            RecipeBookGui recipeBookGui = ((RecipeBookProvider) MinecraftClient.getInstance().currentScreen).getRecipeBookGui();
+            int size = ((RecipeBookGuiHooks) recipeBookGui).rei_getTabButtons().size();
+            if (size > 0)
+                l.add(new Rectangle(screenHooks.rei_getContainerLeft() - 4 - 145 - 30, screenHooks.rei_getContainerTop(), 30, (size - 1) * 27));
+            return l;
+        });
         displayHelper.registerBoundsHandler(new DisplayHelper.DisplayBoundsHandler<ContainerScreen>() {
             @Override
             public Class getBaseSupportedClass() {
@@ -157,15 +170,6 @@ public class DefaultPlugin implements REIPluginEntry {
             public Rectangle getRightBounds(ContainerScreen screen) {
                 int startX = ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() + ScreenHelper.getLastContainerScreenHooks().rei_getContainerWidth() + 2;
                 return new Rectangle(startX, 0, MinecraftClient.getInstance().window.getScaledWidth() - startX - 2, MinecraftClient.getInstance().window.getScaledHeight());
-            }
-            
-            @Override
-            public ActionResult canItemSlotWidgetFit(boolean isOnRightSide, int left, int top, ContainerScreen screen, Rectangle fullBounds) {
-                if (!isOnRightSide)
-                    if (MinecraftClient.getInstance().player.getRecipeBook().isGuiOpen() && left + 18 > ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() - 4 - 145 - 30)
-                        if (top + 18 >= ScreenHelper.getLastContainerScreenHooks().rei_getContainerTop() && top <= ScreenHelper.getLastContainerScreenHooks().rei_getContainerTop() + ScreenHelper.getLastContainerScreenHooks().rei_getContainerHeight())
-                            return ActionResult.FAIL;
-                return ActionResult.PASS;
             }
             
             @Override

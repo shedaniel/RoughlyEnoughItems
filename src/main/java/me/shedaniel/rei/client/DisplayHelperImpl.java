@@ -2,6 +2,7 @@ package me.shedaniel.rei.client;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import me.shedaniel.rei.api.BaseBoundsHandler;
 import me.shedaniel.rei.api.DisplayHelper;
 
 import java.awt.*;
@@ -33,9 +34,15 @@ public class DisplayHelperImpl implements DisplayHelper {
         public Rectangle getRightBounds(Object screen) {
             return new Rectangle();
         }
+        
+        @Override
+        public float getPriority() {
+            return -10f;
+        }
     };
     private List<DisplayBoundsHandler> screenDisplayBoundsHandlerMap = Lists.newArrayList();
     private Map<Class, DisplayBoundsHandler> handlerCache = Maps.newHashMap();
+    private BaseBoundsHandler baseBoundsHandler;
     
     @Override
     public List<DisplayBoundsHandler> getSortedBoundsHandlers(Class screenClass) {
@@ -57,6 +64,15 @@ public class DisplayHelperImpl implements DisplayHelper {
     @Override
     public void registerBoundsHandler(DisplayBoundsHandler handler) {
         screenDisplayBoundsHandlerMap.add(handler);
+    }
+    
+    @Override
+    public BaseBoundsHandler getBaseBoundsHandler() {
+        return baseBoundsHandler;
+    }
+    
+    public void setBaseBoundsHandler(BaseBoundsHandler baseBoundsHandler) {
+        this.baseBoundsHandler = baseBoundsHandler;
     }
     
     public void resetCache() {

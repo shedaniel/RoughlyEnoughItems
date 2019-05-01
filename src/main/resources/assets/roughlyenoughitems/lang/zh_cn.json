@@ -7,10 +7,10 @@
   "text.rei.config.action": "功能",
   "text.rei.config.cheating": "作弊:",
   "text.rei.cheating": "作弊",
-  "text.rei.cheating_disabled": "§7禁用作弊",
-  "text.rei.cheating_enabled": "§c启用作弊",
-  "text.rei.cheating_limited_enabled": "§b启用作弊(使用命令)",
-  "text.rei.cheating_enabled_no_perms": "§7启用§c作弊§7(无权限)",
+  "text.rei.cheating_disabled": "§7作弊已禁用",
+  "text.rei.cheating_enabled": "§c作弊已启用",
+  "text.rei.cheating_limited_enabled": "§b作弊已启用(使用命令)",
+  "text.rei.cheating_enabled_no_perms": "§7作弊已§c启用§7(无权限)",
   "text.rei.no_permission_cheat": "作弊给予物品需要OP权限",
   "category.rei.crafting": "合成",
   "category.rei.smelting": "冶炼",
@@ -90,7 +90,5 @@
   "text.rei.config.item_cheating_mode.jei_like": "反转",
   "text.rei.config.light_gray_recipe_border": "浅灰色配方边框:",
   "text.rei.config_api_failed": "如果Cloth Config API装载失败了或你没有安装它，你就会到达这个界面!\n升级/安装API或向bug跟踪器报告.",
-  "text.rei.back": "返回",
-  "_comment": "Don't change / translate the credit down below if you are doing it :)",
-  "text.rei.credit.text": "§lRoughly Enough Items\n§7Originally a fork for Almost Enough Items.\n\n§lDevelopers\n  - Originally by ZenDarva\n  - Created by Danielshe\n  - Plugin Support by TehNut\n\n§lLanguage Translation\n  English - Danielshe\n  Simplified Chinese - Danielshe\n  Traditional Chinese - hugoalh, gxy17886 & Danielshe\n  French - Yanis48\n  German - MelanX\n  Estonian - Madis0\n  Portuguese - thiagokenis\n  LOLCAT - Danielshe\n  Upside Down - Danielshe\n  Brazilian Portuguese - thiagokenis\n  Bulgarian - geniiii\n\n§lLicense\n§7Roughly Enough Items is using MIT."
+  "text.rei.back": "返回"
 }
