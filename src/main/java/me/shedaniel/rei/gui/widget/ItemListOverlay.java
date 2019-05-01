@@ -27,7 +27,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.awt.*;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -98,45 +97,49 @@ public class ItemListOverlay extends Widget {
         int startX = (int) rectangle.getCenterX() - width * 9;
         int startY = (int) rectangle.getCenterY() - height * 9;
         this.listArea = new Rectangle((int) startX, (int) startY, width * 18, height * 18);
-        int fitSlotsPerPage = getTotalFitSlotsPerPage(listArea.x, listArea.y, listArea);
+        int fitSlotsPerPage = getTotalFitSlotsPerPage(startX, startY, listArea);
         int j = page * fitSlotsPerPage;
-        for(int i = 0; i < getFullTotalSlotsPerPage(); i++) {
-            j++;
+        for(int yy = 0; yy < height; yy++) {
+            for(int xx = 0; xx < width; xx++) {
+                int x = startX + xx * 18, y = startY + yy * 18;
+                if (!canBeFit(x, y, listArea))
+                    continue;
+                j++;
+                if (j > currentDisplayed.size())
+                    break;
+                widgets.add(new ItemSlotWidget(x, y, Collections.singletonList(currentDisplayed.get(j - 1)), false, true, true) {
+                    @Override
+                    protected void queueTooltip(ItemStack itemStack, float delta) {
+                        ClientPlayerEntity player = minecraft.player;
+                        if (!ClientHelper.isCheating() || player.inventory.getCursorStack().isEmpty())
+                            super.queueTooltip(itemStack, delta);
+                    }
+                    
+                    @Override
+                    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+                        if (isHighlighted(mouseX, mouseY)) {
+                            if (ClientHelper.isCheating()) {
+                                if (getCurrentStack() != null && !getCurrentStack().isEmpty()) {
+                                    ItemStack cheatedStack = getCurrentStack().copy();
+                                    if (RoughlyEnoughItemsCore.getConfigManager().getConfig().itemCheatingMode == ItemCheatingMode.REI_LIKE)
+                                        cheatedStack.setAmount(button != 1 ? 1 : cheatedStack.getMaxAmount());
+                                    else if (RoughlyEnoughItemsCore.getConfigManager().getConfig().itemCheatingMode == ItemCheatingMode.JEI_LIKE)
+                                        cheatedStack.setAmount(button != 0 ? 1 : cheatedStack.getMaxAmount());
+                                    else
+                                        cheatedStack.setAmount(1);
+                                    return ClientHelper.tryCheatingStack(cheatedStack);
+                                }
+                            } else if (button == 0)
+                                return ClientHelper.executeRecipeKeyBind(getCurrentStack().copy());
+                            else if (button == 1)
+                                return ClientHelper.executeUsageKeyBind(getCurrentStack().copy());
+                        }
+                        return false;
+                    }
+                });
+            }
             if (j > currentDisplayed.size())
                 break;
-            int x = startX + (i % width) * 18, y = startY + MathHelper.floor(i / width) * 18;
-            if (!canBeFit(x, y, listArea))
-                continue;
-            widgets.add(new ItemSlotWidget(x, y, Collections.singletonList(currentDisplayed.get(j - 1)), false, true, true) {
-                @Override
-                protected void queueTooltip(ItemStack itemStack, float delta) {
-                    ClientPlayerEntity player = minecraft.player;
-                    if (!ClientHelper.isCheating() || player.inventory.getCursorStack().isEmpty())
-                        super.queueTooltip(itemStack, delta);
-                }
-                
-                @Override
-                public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                    if (isHighlighted(mouseX, mouseY)) {
-                        if (ClientHelper.isCheating()) {
-                            if (getCurrentStack() != null && !getCurrentStack().isEmpty()) {
-                                ItemStack cheatedStack = getCurrentStack().copy();
-                                if (RoughlyEnoughItemsCore.getConfigManager().getConfig().itemCheatingMode == ItemCheatingMode.REI_LIKE)
-                                    cheatedStack.setAmount(button != 1 ? 1 : cheatedStack.getMaxAmount());
-                                else if (RoughlyEnoughItemsCore.getConfigManager().getConfig().itemCheatingMode == ItemCheatingMode.JEI_LIKE)
-                                    cheatedStack.setAmount(button != 0 ? 1 : cheatedStack.getMaxAmount());
-                                else
-                                    cheatedStack.setAmount(1);
-                                return ClientHelper.tryCheatingStack(cheatedStack);
-                            }
-                        } else if (button == 0)
-                            return ClientHelper.executeRecipeKeyBind(getCurrentStack().copy());
-                        else if (button == 1)
-                            return ClientHelper.executeUsageKeyBind(getCurrentStack().copy());
-                    }
-                    return false;
-                }
-            });
         }
     }
     
@@ -149,9 +152,10 @@ public class ItemListOverlay extends Widget {
     
     public int getTotalFitSlotsPerPage(int startX, int startY, Rectangle listArea) {
         int slots = 0;
-        for(int i = 0; i < getFullTotalSlotsPerPage(); i++)
-            if (canBeFit(startX + (i % width) * 18, startY + MathHelper.floor(i / width) * 18, listArea))
-                slots++;
+        for(int x = 0; x < width; x++)
+            for(int y = 0; y < height; y++)
+                if (canBeFit(startX + x * 18, startY + y * 18, listArea))
+                    slots++;
         return slots;
     }
     
