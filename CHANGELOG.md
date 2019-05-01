@@ -1,4 +1,8 @@
 View full changelog [here](https://github.com/shedaniel/RoughlyEnoughItems/blob/1.14/CHANGELOG.md).
+## v2.8.1+build.101
+- Updated [#77](https://github.com/shedaniel/RoughlyEnoughItems/pull/77): Updated Simplified Chinese by XuyuEre
+- Updated: Updated Traditional Chinese by XuyuEre & Danielshe
+- New: Better Exclusion Zone Handling
 ## v2.8.0+build.100
 - Fixed [#76](https://github.com/shedaniel/RoughlyEnoughItems/issues/76): Laggy Changing Pages
 - New: Better Server Support (You can now drop REI into server mods)

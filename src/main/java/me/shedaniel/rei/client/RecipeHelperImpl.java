@@ -185,6 +185,9 @@ public class RecipeHelperImpl implements RecipeHelper {
         this.categoryDisplaySettingsMap.clear();
         this.displayVisibilityHandlers.clear();
         ((DisplayHelperImpl) RoughlyEnoughItemsCore.getDisplayHelper()).resetCache();
+        BaseBoundsHandler baseBoundsHandler = new BaseBoundsHandlerImpl();
+        RoughlyEnoughItemsCore.getDisplayHelper().registerBoundsHandler(baseBoundsHandler);
+        ((DisplayHelperImpl) RoughlyEnoughItemsCore.getDisplayHelper()).setBaseBoundsHandler(baseBoundsHandler);
         long startTime = System.currentTimeMillis();
         List<REIPluginEntry> plugins = new LinkedList<>(RoughlyEnoughItemsCore.getPlugins());
         plugins.sort((first, second) -> {
@@ -196,16 +199,20 @@ public class RecipeHelperImpl implements RecipeHelper {
         PluginDisabler pluginDisabler = RoughlyEnoughItemsCore.getPluginDisabler();
         plugins.forEach(plugin -> {
             Identifier identifier = plugin.getPluginIdentifier();
-            if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_ITEMS))
-                plugin.registerItems(RoughlyEnoughItemsCore.getItemRegisterer());
-            if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_CATEGORIES))
-                plugin.registerPluginCategories(this);
-            if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_RECIPE_DISPLAYS))
-                plugin.registerRecipeDisplays(this);
-            if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_BOUNDS))
-                plugin.registerBounds(RoughlyEnoughItemsCore.getDisplayHelper());
-            if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_OTHERS))
-                plugin.registerOthers(this);
+            try {
+                if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_ITEMS))
+                    plugin.registerItems(RoughlyEnoughItemsCore.getItemRegisterer());
+                if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_CATEGORIES))
+                    plugin.registerPluginCategories(this);
+                if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_RECIPE_DISPLAYS))
+                    plugin.registerRecipeDisplays(this);
+                if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_BOUNDS))
+                    plugin.registerBounds(RoughlyEnoughItemsCore.getDisplayHelper());
+                if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_OTHERS))
+                    plugin.registerOthers(this);
+            } catch (Exception e) {
+                RoughlyEnoughItemsCore.LOGGER.error("[REI] %s plugin failed to load: %s", identifier.toString(), e.getLocalizedMessage());
+            }
         });
         if (getDisplayVisibilityHandlers().size() == 0)
             registerRecipeVisibilityHandler(new DisplayVisibilityHandler() {

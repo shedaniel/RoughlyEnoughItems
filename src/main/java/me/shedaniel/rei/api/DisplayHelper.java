@@ -16,6 +16,8 @@ public interface DisplayHelper {
     
     void registerBoundsHandler(DisplayBoundsHandler handler);
     
+    BaseBoundsHandler getBaseBoundsHandler();
+    
     public static interface DisplayBoundsHandler<T> {
         Class getBaseSupportedClass();
         
@@ -29,6 +31,10 @@ public interface DisplayHelper {
         
         default Rectangle getItemListArea(Rectangle rectangle) {
             return new Rectangle(rectangle.x + 2, rectangle.y + 24, rectangle.width - 4, rectangle.height - (RoughlyEnoughItemsCore.getConfigManager().getConfig().sideSearchField ? 27 + 22 : 27));
+        }
+        
+        default boolean shouldRecalculateArea(boolean isOnRightSide, Rectangle rectangle) {
+            return false;
         }
         
         default float getPriority() {
