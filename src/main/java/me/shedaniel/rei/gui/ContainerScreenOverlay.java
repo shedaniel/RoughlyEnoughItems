@@ -327,7 +327,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         List<ItemStack> currentStacks = ClientHelper.getInventoryItemsTypes();
-        if (getLeft() != lastLeft)
+        if (RoughlyEnoughItemsCore.getDisplayHelper().getBaseBoundsHandler() != null && RoughlyEnoughItemsCore.getDisplayHelper().getBaseBoundsHandler().shouldRecalculateArea(!RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel, rectangle))
             init(true);
         else if (RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() && (!hasSameListContent(new LinkedList<>(ScreenHelper.inventoryStacks), currentStacks) || (currentStacks.size() != ScreenHelper.inventoryStacks.size()))) {
             ScreenHelper.inventoryStacks = ClientHelper.getInventoryItemsTypes();
