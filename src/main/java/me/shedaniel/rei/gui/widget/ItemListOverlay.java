@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 
 public class ItemListOverlay extends Widget {
     
+    private static final String SPACE = " ", EMPTY = "";
     private static List<Item> searchBlacklisted = Lists.newArrayList();
     private final List<ItemStack> currentDisplayed;
     private List<Widget> widgets;
@@ -226,7 +227,7 @@ public class ItemListOverlay extends Widget {
         });
         if (splitSearchTerm.length == 0)
             stacks.addAll(os);
-        List<ItemStack> workingItems = RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() && inventoryItems.size() > 0 ? Lists.newArrayList() : Lists.newArrayList(ol);
+        List<ItemStack> workingItems = RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() && !stacks.isEmpty() && !inventoryItems.isEmpty() ? Lists.newArrayList() : Lists.newArrayList(ol);
         if (RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled()) {
             RecipeHelper.getInstance().findCraftableByItems(inventoryItems).forEach(workingItems::add);
             workingItems.addAll(inventoryItems);
@@ -244,18 +245,20 @@ public class ItemListOverlay extends Widget {
     }
     
     private boolean filterItem(ItemStack itemStack, SearchArgument... arguments) {
+        if (arguments.length == 0)
+            return true;
         String mod = ClientHelper.getModFromItem(itemStack.getItem()).toLowerCase();
-        String tooltips = tryGetItemStackToolTip(itemStack, false).stream().skip(1).collect(Collectors.joining("")).replaceAll(" ", "").toLowerCase();
-        String name = tryGetItemStackName(itemStack).replaceAll(" ", "").toLowerCase();
+        String tooltips = tryGetItemStackToolTip(itemStack, false).stream().skip(1).collect(Collectors.joining("")).replace(SPACE, EMPTY).toLowerCase();
+        String name = tryGetItemStackName(itemStack).replace(SPACE, EMPTY).toLowerCase();
         for(SearchArgument argument : arguments) {
             if (argument.getArgumentType().equals(SearchArgument.ArgumentType.MOD))
-                if (SearchArgument.getFunction(!argument.isInclude()).apply(mod.indexOf(argument.getText().toLowerCase())))
+                if (SearchArgument.getFunction(!argument.isInclude()).apply(mod.indexOf(argument.getText())))
                     return false;
             if (argument.getArgumentType().equals(SearchArgument.ArgumentType.TOOLTIP))
-                if (SearchArgument.getFunction(!argument.isInclude()).apply(tooltips.indexOf(argument.getText().toLowerCase())))
+                if (SearchArgument.getFunction(!argument.isInclude()).apply(tooltips.indexOf(argument.getText())))
                     return false;
             if (argument.getArgumentType().equals(SearchArgument.ArgumentType.TEXT))
-                if (SearchArgument.getFunction(!argument.isInclude()).apply(name.indexOf(argument.getText().toLowerCase())))
+                if (SearchArgument.getFunction(!argument.isInclude()).apply(name.indexOf(argument.getText())))
                     return false;
         }
         return true;

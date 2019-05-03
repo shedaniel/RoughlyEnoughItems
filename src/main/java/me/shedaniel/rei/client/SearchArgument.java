@@ -1,18 +1,24 @@
 package me.shedaniel.rei.client;
 
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 public class SearchArgument {
     
     public static final Function<Integer, Boolean> INCLUDE = integer -> integer > -1;
-    public static final Function<Integer, Boolean> NOT_INCLUDE = integer -> !INCLUDE.apply(integer);
+    public static final Function<Integer, Boolean> NOT_INCLUDE = integer -> integer <= -1;
     private ArgumentType argumentType;
     private String text;
     private boolean include;
+    private Pattern pattern;
     
     public SearchArgument(ArgumentType argumentType, String text, boolean include) {
+        this(argumentType, text, include, true);
+    }
+    
+    public SearchArgument(ArgumentType argumentType, String text, boolean include, boolean autoLowerCase) {
         this.argumentType = argumentType;
-        this.text = text;
+        this.text = autoLowerCase ? text.toLowerCase() : text;
         this.include = include;
     }
     

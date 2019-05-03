@@ -1,7 +1,9 @@
 package me.shedaniel.rei.client;
 
 import com.google.common.collect.Lists;
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.BaseBoundsHandler;
+import me.shedaniel.rei.api.DisplayHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Screen;
 import net.minecraft.util.ActionResult;
@@ -52,10 +54,12 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
     @Override
     public boolean shouldRecalculateArea(boolean isOnRightSide, Rectangle rectangle) {
         if (lastArea == null) {
-            lastArea = getStringFromAreas(rectangle, getCurrentExclusionZones(MinecraftClient.getInstance().currentScreen.getClass(), isOnRightSide));
+            DisplayHelper.DisplayBoundsHandler handler = RoughlyEnoughItemsCore.getDisplayHelper().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
+            lastArea = getStringFromAreas(isOnRightSide ? handler.getRightBounds(MinecraftClient.getInstance().currentScreen) : handler.getLeftBounds(MinecraftClient.getInstance().currentScreen), getCurrentExclusionZones(MinecraftClient.getInstance().currentScreen.getClass(), isOnRightSide));
             return false;
         }
-        String fromAreas = getStringFromAreas(rectangle, getCurrentExclusionZones(MinecraftClient.getInstance().currentScreen.getClass(), isOnRightSide));
+        DisplayHelper.DisplayBoundsHandler handler = RoughlyEnoughItemsCore.getDisplayHelper().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
+        String fromAreas = getStringFromAreas(isOnRightSide ? handler.getRightBounds(MinecraftClient.getInstance().currentScreen) : handler.getLeftBounds(MinecraftClient.getInstance().currentScreen), getCurrentExclusionZones(MinecraftClient.getInstance().currentScreen.getClass(), isOnRightSide));
         if (lastArea.contentEquals(fromAreas))
             return false;
         lastArea = fromAreas;
