@@ -377,12 +377,16 @@ public class TextFieldWidget extends HighlightableWidget {
         }
     }
     
+    public void renderBorder() {
+        if (this.hasBorder()) {
+            fill(this.bounds.x - 1, this.bounds.y - 1, this.bounds.x + this.bounds.width + 1, this.bounds.y + this.bounds.height + 1, -6250336);
+            fill(this.bounds.x, this.bounds.y, this.bounds.x + this.bounds.width, this.bounds.y + this.bounds.height, -16777216);
+        }
+    }
+    
     public void render(int int_1, int int_2, float float_1) {
         if (this.isVisible()) {
-            if (this.hasBorder()) {
-                fill(this.bounds.x - 1, this.bounds.y - 1, this.bounds.x + this.bounds.width + 1, this.bounds.y + this.bounds.height + 1, -6250336);
-                fill(this.bounds.x, this.bounds.y, this.bounds.x + this.bounds.width, this.bounds.y + this.bounds.height, -16777216);
-            }
+            renderBorder();
             
             int color = this.editable ? this.editableColor : this.notEditableColor;
             int int_4 = this.cursorMax - this.field_2103;

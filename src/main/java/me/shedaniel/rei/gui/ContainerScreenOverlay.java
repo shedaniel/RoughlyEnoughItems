@@ -17,6 +17,7 @@ import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.TranslatableTextComponent;
@@ -334,6 +335,15 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             DisplayHelper.DisplayBoundsHandler boundsHandler = RoughlyEnoughItemsCore.getDisplayHelper().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
             itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, true);
         }
+        if (SearchFieldWidget.isSearching) {
+            GuiLighting.disable();
+            blitOffset = 400;
+            int left = ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft(), top = ScreenHelper.getLastContainerScreenHooks().rei_getContainerTop();
+            for(Slot slot : ScreenHelper.getLastContainerScreen().getContainer().slotList)
+                if (!slot.hasStack() || !itemListOverlay.getCurrentDisplayed().stream().anyMatch(stack -> stack.isEqualIgnoreTags(slot.getStack())))
+                    fillGradient(left + slot.xPosition, top + slot.yPosition, left + slot.xPosition + 16, top + slot.yPosition + 16, -601874400, -601874400);
+            blitOffset = 0;
+        }
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GuiLighting.disable();
         this.renderWidgets(mouseX, mouseY, delta);
@@ -503,30 +513,6 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
                 return true;
             }
         return false;
-    }
-    
-    public static class SearchFieldWidget extends TextFieldWidget {
-        public SearchFieldWidget(int x, int y, int width, int height) {
-            super(x, y, width, height);
-        }
-        
-        public void laterRender(int int_1, int int_2, float float_1) {
-            GuiLighting.disable();
-            GlStateManager.disableDepthTest();
-            super.render(int_1, int_2, float_1);
-            GlStateManager.enableDepthTest();
-        }
-        
-        @Override
-        public boolean mouseClicked(double double_1, double double_2, int int_1) {
-            if (isVisible() && getBounds().contains(double_1, double_2) && int_1 == 1)
-                setText("");
-            return super.mouseClicked(double_1, double_2, int_1);
-        }
-        
-        @Override
-        public void render(int int_1, int int_2, float float_1) {
-        }
     }
     
 }

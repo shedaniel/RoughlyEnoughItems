@@ -1,4 +1,9 @@
 View full changelog [here](https://github.com/shedaniel/RoughlyEnoughItems/blob/1.14/CHANGELOG.md).
+## v2.8.1+build.102
+- Fixed: Server incorrect permission check
+- Fixed: Base Bounds not correctly resizing
+- Improved: Search Field
+- Added: Right Click for Item Searching ![image](https://cdn.discordapp.com/attachments/530305137382653952/573838234333741064/unknown.png)
 ## v2.8.1+build.101
 - Updated [#77](https://github.com/shedaniel/RoughlyEnoughItems/pull/77): Updated Simplified Chinese by XuyuEre
 - Updated: Updated Traditional Chinese by XuyuEre & Danielshe

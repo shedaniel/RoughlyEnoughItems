@@ -20,16 +20,20 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
     public void onInitialize() {
         ServerSidePacketRegistry.INSTANCE.register(DELETE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
             ServerPlayerEntity player = (ServerPlayerEntity) packetContext.getPlayer();
+            if (player.getServer().getPermissionLevel(player.getGameProfile()) < player.getServer().getOpPermissionLevel()) {
+                player.addChatMessage(new TranslatableTextComponent("text.rei.no_permission_cheat").applyFormat(TextFormat.RED), false);
+                return;
+            }
             if (!player.inventory.getCursorStack().isEmpty())
                 player.inventory.setCursorStack(ItemStack.EMPTY);
         });
         ServerSidePacketRegistry.INSTANCE.register(CREATE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
             ServerPlayerEntity player = (ServerPlayerEntity) packetContext.getPlayer();
-            ItemStack stack = packetByteBuf.readItemStack();
-            if (!player.getServer().getCommandSource().hasPermissionLevel(1)) {
+            if (player.getServer().getPermissionLevel(player.getGameProfile()) < player.getServer().getOpPermissionLevel()) {
                 player.addChatMessage(new TranslatableTextComponent("text.rei.no_permission_cheat").applyFormat(TextFormat.RED), false);
                 return;
             }
+            ItemStack stack = packetByteBuf.readItemStack();
             if (player.inventory.insertStack(stack.copy()))
                 player.addChatMessage(new StringTextComponent(I18n.translate("text.rei.cheat_items").replaceAll("\\{item_name}", ItemListOverlay.tryGetItemStackName(stack.copy())).replaceAll("\\{item_count}", stack.copy().getAmount() + "").replaceAll("\\{player_name}", player.getEntityName())), false);
             else
