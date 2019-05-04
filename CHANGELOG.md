@@ -1,4 +1,8 @@
 View full changelog [here](https://github.com/shedaniel/RoughlyEnoughItems/blob/1.14/CHANGELOG.md).
+## v2.8.1+build.103
+- Fixed: Item Searching Layering
+- Added: Some tooltips in the config
+- Fixed [#58](https://github.com/shedaniel/RoughlyEnoughItems/issues/58): Keybinds (e.g. O, R, U) working even creative search field is focused
 ## v2.8.1+build.102
 - Fixed: Server incorrect permission check
 - Fixed: Base Bounds not correctly resizing

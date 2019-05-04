@@ -27,7 +27,7 @@
   "text.rei.config": "Config",
   "text.rei.config_tooltip": "Open Config Screen\n§7Shift-Click to toggle cheat mode",
   "text.rei.config.side_search_box": "Side Search Box: ",
-  "text.rei.config.item_list_position": "REI Item List Position: ",
+  "text.rei.config.item_list_position": "Item List Position: ",
   "text.rei.config.item_list_position.left": "Left",
   "text.rei.config.item_list_position.right": "Right",
   "text.rei.cheat_items": "Gave [{item_name}§f] x{item_count} to {player_name}.",
@@ -91,6 +91,15 @@
   "text.rei.config.light_gray_recipe_border": "Light Gray Recipe Border:",
   "text.rei.config_api_failed": "You arrived here either if Cloth Config API failed or you don't have it installed!\nUpdate / Install the API and report to the bug tracker.",
   "text.rei.back": "Back",
+
+  "_comment": "Config Tooltips",
+  "tooltip.rei.config.side_search_box": "Declares the location of the search field:\nYes: Left / Right\nNo: Center\n \nDefaulted: No",
+  "tooltip.rei.config.list_ordering": "Declares the ordering of the side item list:\nYes: Left / Right\nNo: Center\n \nDefaulted: %s",
+  "tooltip.rei.config.item_list_position": "Declares the position of the side item list:\nValues: Left / Right\n \nDefaulted: Right",
+  "tooltip.rei.config.max_recipes_per_page": "Declares the maximum possible displayed recipes:\nValues: 2 - 99\n \nDefaulted: 3",
+  "tooltip.rei.config.light_gray_recipe_border": "Declares the appearance of the recipe border:\nYes: Light Gray\nNo: Hard Black\n \nDefaulted: No",
+  "tooltip.rei.config.april_fools.2019": "Forcefully enables the 2019 april fools joke:\nValues: Yes / No\n \nDefaulted: No",
+
   "_comment": "Don't change / translate the credit down below if you are doing it :)",
   "text.rei.credit.text": "§lRoughly Enough Items\n§7Originally a fork for Almost Enough Items.\n\n§lDevelopers\n  - Originally by ZenDarva\n  - Created by Danielshe\n  - Plugin Support by TehNut\n\n§lLanguage Translation\n  English - Danielshe\n  Simplified Chinese - XuyuEre & Danielshe\n  Traditional Chinese - hugoalh, gxy17886 & Danielshe\n  French - Yanis48\n  German - MelanX\n  Estonian - Madis0\n  Portuguese - thiagokenis\n  LOLCAT - Danielshe\n  Upside Down - Danielshe\n  Brazilian Portuguese - thiagokenis\n  Bulgarian - geniiii\n\n§lLicense\n§7Roughly Enough Items is using MIT."
 }

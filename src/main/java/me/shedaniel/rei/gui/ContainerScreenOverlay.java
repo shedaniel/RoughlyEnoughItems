@@ -337,7 +337,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
         }
         if (SearchFieldWidget.isSearching) {
             GuiLighting.disable();
-            blitOffset = 400;
+            blitOffset = 200;
             int left = ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft(), top = ScreenHelper.getLastContainerScreenHooks().rei_getContainerTop();
             for(Slot slot : ScreenHelper.getLastContainerScreen().getContainer().slotList)
                 if (!slot.hasStack() || !itemListOverlay.getCurrentDisplayed().stream().anyMatch(stack -> stack.isEqualIgnoreTags(slot.getStack())))
