@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import net.minecraft.item.ItemStack;
+import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.util.Identifier;
 
@@ -16,11 +17,20 @@ import java.util.stream.Collectors;
 
 public class RecipeHelperImpl implements RecipeHelper {
     
-    private static final Comparator VISIBILITY_HANDLER_COMPARATOR = Comparator.comparingDouble(value -> {
-        if (value instanceof DisplayVisibilityHandler)
-            return (double) ((DisplayVisibilityHandler) value).getPriority();
-        return -Double.MAX_VALUE;
-    }).reversed();
+    private static final Comparator<DisplayVisibilityHandler> VISIBILITY_HANDLER_COMPARATOR;
+    private static final Comparator<Recipe> RECIPE_COMPARATOR = (o1, o2) -> {
+        int int_1 = o1.getId().getNamespace().compareTo(o2.getId().getNamespace());
+        if (int_1 == 0)
+            int_1 = o1.getId().getPath().compareTo(o2.getId().getPath());
+        return int_1;
+    };
+    
+    static {
+        Comparator<DisplayVisibilityHandler> comparator = Comparator.comparingDouble(DisplayVisibilityHandler::getPriority);
+        VISIBILITY_HANDLER_COMPARATOR = comparator.reversed();
+    }
+    
+    private final List<Recipe> sortedRecipes = new ArrayList<>();
     private final AtomicInteger recipeCount = new AtomicInteger();
     private final Map<Identifier, List<RecipeDisplay>> recipeCategoryListMap = Maps.newHashMap();
     private final Map<Identifier, DisplaySettings> categoryDisplaySettingsMap = Maps.newHashMap();
@@ -184,6 +194,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         this.speedCraftFunctionalMap.clear();
         this.categoryDisplaySettingsMap.clear();
         this.displayVisibilityHandlers.clear();
+        this.sortedRecipes.clear();
         ((DisplayHelperImpl) RoughlyEnoughItemsCore.getDisplayHelper()).resetCache();
         BaseBoundsHandler baseBoundsHandler = new BaseBoundsHandlerImpl();
         RoughlyEnoughItemsCore.getDisplayHelper().registerBoundsHandler(baseBoundsHandler);
@@ -214,7 +225,7 @@ public class RecipeHelperImpl implements RecipeHelper {
                 RoughlyEnoughItemsCore.LOGGER.error("[REI] %s plugin failed to load: %s", identifier.toString(), e.getLocalizedMessage());
             }
         });
-        if (getDisplayVisibilityHandlers().size() == 0)
+        if (getDisplayVisibilityHandlers().isEmpty())
             registerRecipeVisibilityHandler(new DisplayVisibilityHandler() {
                 @Override
                 public DisplayVisibility handleDisplay(RecipeCategory category, RecipeDisplay display) {
@@ -227,12 +238,19 @@ public class RecipeHelperImpl implements RecipeHelper {
                 }
             });
         long usedTime = System.currentTimeMillis() - startTime;
-        RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered %d recipes, %d categories (%s) in %d ms.", recipeCount.get(), categories.size(), String.join(", ", categories.stream().map(RecipeCategory::getCategoryName).collect(Collectors.toList())), usedTime);
+        RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered %d recipes displays, %d bounds handler, %d visibility " + "handlers and %d categories (%s) in %d ms.", recipeCount.get(), RoughlyEnoughItemsCore.getDisplayHelper().getAllBoundsHandlers().size(), getDisplayVisibilityHandlers().size(), categories.size(), String.join(", ", categories.stream().map(RecipeCategory::getCategoryName).collect(Collectors.toList())), usedTime);
     }
     
     @Override
     public int getRecipeCount() {
         return recipeCount.get();
+    }
+    
+    @Override
+    public List<Recipe> getVanillaSortedRecipes() {
+        if (sortedRecipes.isEmpty())
+            sortedRecipes.addAll(getRecipeManager().values().stream().sorted(RECIPE_COMPARATOR).collect(Collectors.toSet()));
+        return sortedRecipes;
     }
     
     @Override
@@ -244,7 +262,7 @@ public class RecipeHelperImpl implements RecipeHelper {
             if (tempMap.containsKey(category.getIdentifier()))
                 map.put(category, tempMap.get(category.getIdentifier()).stream().filter(display -> isDisplayVisible(display, true)).collect(Collectors.toList()));
         });
-        for(RecipeCategory category : Lists.newArrayList(map.keySet()))
+        for(RecipeCategory category : map.keySet())
             if (map.get(category).isEmpty())
                 map.remove(category);
         return map;
@@ -268,8 +286,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     @Override
     public boolean isDisplayVisible(RecipeDisplay display, boolean respectConfig) {
         RecipeCategory category = getCategory(display.getRecipeCategory());
-        List<DisplayVisibilityHandler> list = Lists.newArrayList(getDisplayVisibilityHandlers());
-        list.sort((o1, o2) -> VISIBILITY_HANDLER_COMPARATOR.compare(o1, o2));
+        List<DisplayVisibilityHandler> list = getDisplayVisibilityHandlers().stream().sorted(VISIBILITY_HANDLER_COMPARATOR).collect(Collectors.toList());
         for(DisplayVisibilityHandler displayVisibilityHandler : list) {
             DisplayVisibility visibility = displayVisibilityHandler.handleDisplay(category, display);
             if (visibility != DisplayVisibility.PASS) {

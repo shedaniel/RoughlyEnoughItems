@@ -16,6 +16,7 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Optional;
 
 public class ClothScreenRegistry {
@@ -62,7 +63,7 @@ public class ClothScreenRegistry {
         appearance.addOption(new BooleanListEntry("text.rei.config.prefer_visible_recipes", RoughlyEnoughItemsCore.getConfigManager().getConfig().preferVisibleRecipes, RESET, () -> false, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().preferVisibleRecipes = bool, () -> getConfigTooltip("prefer_visible_recipes")));
         ConfigScreenBuilder.CategoryBuilder action = builder.addCategory("text.rei.config.action");
         action.addOption(new EnumListEntry<>("text.rei.config.item_cheating_mode", ItemCheatingMode.class, RoughlyEnoughItemsCore.getConfigManager().getConfig().itemCheatingMode, RESET, () -> ItemCheatingMode.REI_LIKE, i -> RoughlyEnoughItemsCore.getConfigManager().getConfig().itemCheatingMode = i, e -> {
-            return I18n.translate("text.rei.config.item_cheating_mode." + e.name().toLowerCase());
+            return I18n.translate("text.rei.config.item_cheating_mode." + e.name().toLowerCase(Locale.ROOT));
         }, () -> getConfigTooltip("item_cheating_mode")));
         action.addOption(new StringListEntry("text.rei.give_command", RoughlyEnoughItemsCore.getConfigManager().getConfig().giveCommand, RESET, () -> "/give {player_name} {item_identifier}{nbt} {count}", s -> RoughlyEnoughItemsCore.getConfigManager().getConfig().giveCommand = s, () -> getConfigTooltip("give_command")));
         action.addOption(new StringListEntry("text.rei.gamemode_command", RoughlyEnoughItemsCore.getConfigManager().getConfig().gamemodeCommand, RESET, () -> "/gamemode {gamemode}", s -> RoughlyEnoughItemsCore.getConfigManager().getConfig().gamemodeCommand = s, () -> getConfigTooltip("gamemode_command")));

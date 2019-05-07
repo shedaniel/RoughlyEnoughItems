@@ -12,6 +12,8 @@ public interface DisplayHelper {
     
     List<DisplayBoundsHandler> getSortedBoundsHandlers(Class screenClass);
     
+    List<DisplayBoundsHandler> getAllBoundsHandlers();
+    
     DisplayBoundsHandler getResponsibleBoundsHandler(Class screenClass);
     
     void registerBoundsHandler(DisplayBoundsHandler handler);
@@ -19,6 +21,8 @@ public interface DisplayHelper {
     BaseBoundsHandler getBaseBoundsHandler();
     
     public static interface DisplayBoundsHandler<T> {
+        public static final Rectangle EMPTY = new Rectangle();
+        
         Class getBaseSupportedClass();
         
         Rectangle getLeftBounds(T screen);
@@ -26,6 +30,10 @@ public interface DisplayHelper {
         Rectangle getRightBounds(T screen);
         
         default ActionResult canItemSlotWidgetFit(boolean isOnRightSide, int left, int top, T screen, Rectangle fullBounds) {
+            return PASS;
+        }
+        
+        default ActionResult isInZone(boolean isOnRightSide, double mouseX, double mouseY) {
             return PASS;
         }
         

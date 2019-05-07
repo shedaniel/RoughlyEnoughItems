@@ -3,10 +3,10 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.collect.Lists;
 import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.DisplayHelper;
 import me.shedaniel.rei.api.ItemCheatingMode;
 import me.shedaniel.rei.api.RecipeHelper;
-import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.ItemListOrdering;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.client.SearchArgument;
@@ -28,6 +28,7 @@ import java.awt.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 public class ItemListOverlay extends Widget {
@@ -82,7 +83,7 @@ public class ItemListOverlay extends Widget {
         GuiLighting.disable();
         widgets.forEach(widget -> widget.render(int_1, int_2, float_1));
         ClientPlayerEntity player = minecraft.player;
-        if (rectangle.contains(ClientUtils.getMouseLocation()) && ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
+        if (rectangle.contains(ClientUtils.getMouseLocation()) && ClientHelper.getInstance().isCheating() && !player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
             ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.delete_items")));
     }
     
@@ -112,14 +113,14 @@ public class ItemListOverlay extends Widget {
                     @Override
                     protected void queueTooltip(ItemStack itemStack, float delta) {
                         ClientPlayerEntity player = minecraft.player;
-                        if (!ClientHelper.isCheating() || player.inventory.getCursorStack().isEmpty())
+                        if (!ClientHelper.getInstance().isCheating() || player.inventory.getCursorStack().isEmpty())
                             super.queueTooltip(itemStack, delta);
                     }
                     
                     @Override
                     public boolean mouseClicked(double mouseX, double mouseY, int button) {
                         if (isHighlighted(mouseX, mouseY)) {
-                            if (ClientHelper.isCheating()) {
+                            if (ClientHelper.getInstance().isCheating()) {
                                 if (getCurrentStack() != null && !getCurrentStack().isEmpty()) {
                                     ItemStack cheatedStack = getCurrentStack().copy();
                                     if (RoughlyEnoughItemsCore.getConfigManager().getConfig().itemCheatingMode == ItemCheatingMode.REI_LIKE)
@@ -128,12 +129,12 @@ public class ItemListOverlay extends Widget {
                                         cheatedStack.setAmount(button != 0 ? 1 : cheatedStack.getMaxAmount());
                                     else
                                         cheatedStack.setAmount(1);
-                                    return ClientHelper.tryCheatingStack(cheatedStack);
+                                    return ClientHelper.getInstance().tryCheatingStack(cheatedStack);
                                 }
                             } else if (button == 0)
-                                return ClientHelper.executeRecipeKeyBind(getCurrentStack().copy());
+                                return ClientHelper.getInstance().executeRecipeKeyBind(getCurrentStack().copy());
                             else if (button == 1)
-                                return ClientHelper.executeUsageKeyBind(getCurrentStack().copy());
+                                return ClientHelper.getInstance().executeUsageKeyBind(getCurrentStack().copy());
                         }
                         return false;
                     }
@@ -161,16 +162,12 @@ public class ItemListOverlay extends Widget {
     }
     
     public boolean canBeFit(int left, int top, Rectangle listArea) {
-        List<DisplayHelper.DisplayBoundsHandler> sortedBoundsHandlers = RoughlyEnoughItemsCore.getDisplayHelper().getSortedBoundsHandlers(minecraft.currentScreen.getClass());
-        ActionResult result = ActionResult.SUCCESS;
-        for(DisplayHelper.DisplayBoundsHandler sortedBoundsHandler : sortedBoundsHandlers) {
+        for(DisplayHelper.DisplayBoundsHandler sortedBoundsHandler : RoughlyEnoughItemsCore.getDisplayHelper().getSortedBoundsHandlers(minecraft.currentScreen.getClass())) {
             ActionResult fit = sortedBoundsHandler.canItemSlotWidgetFit(!RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel, left, top, minecraft.currentScreen, listArea);
-            if (fit != ActionResult.PASS) {
-                result = fit;
-                break;
-            }
+            if (fit != ActionResult.PASS)
+                return fit == ActionResult.SUCCESS;
         }
-        return result == ActionResult.SUCCESS;
+        return true;
     }
     
     @Override
@@ -247,9 +244,9 @@ public class ItemListOverlay extends Widget {
     private boolean filterItem(ItemStack itemStack, SearchArgument... arguments) {
         if (arguments.length == 0)
             return true;
-        String mod = ClientHelper.getModFromItem(itemStack.getItem()).toLowerCase();
-        String tooltips = tryGetItemStackToolTip(itemStack, false).stream().skip(1).collect(Collectors.joining("")).replace(SPACE, EMPTY).toLowerCase();
-        String name = tryGetItemStackName(itemStack).replace(SPACE, EMPTY).toLowerCase();
+        String mod = ClientHelper.getInstance().getModFromItem(itemStack.getItem()).toLowerCase(Locale.ROOT);
+        String tooltips = tryGetItemStackToolTip(itemStack, false).stream().skip(1).collect(Collectors.joining("")).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT);
+        String name = tryGetItemStackName(itemStack).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT);
         for(SearchArgument argument : arguments) {
             if (argument.getArgumentType().equals(SearchArgument.ArgumentType.MOD))
                 if (SearchArgument.getFunction(!argument.isInclude()).apply(mod.indexOf(argument.getText())))
@@ -286,8 +283,8 @@ public class ItemListOverlay extends Widget {
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
         if (rectangle.contains(double_1, double_2)) {
             ClientPlayerEntity player = minecraft.player;
-            if (ClientHelper.isCheating() && !player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets()) {
-                ClientHelper.sendDeletePacket();
+            if (ClientHelper.getInstance().isCheating() && !player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets()) {
+                ClientHelper.getInstance().sendDeletePacket();
                 return true;
             }
             if (!player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())

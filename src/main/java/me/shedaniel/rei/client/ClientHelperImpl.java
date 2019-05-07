@@ -5,11 +5,11 @@ import com.google.common.collect.Maps;
 import io.netty.buffer.Unpooled;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
+import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
-import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.fabricmc.fabric.impl.client.keybinding.KeyBindingRegistryImpl;
@@ -34,49 +34,75 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class ClientHelper implements ClientModInitializer {
+public class ClientHelperImpl implements ClientHelper {
     
-    private static final Identifier RECIPE_KEYBIND = new Identifier("roughlyenoughitems", "recipe_keybind");
-    private static final Identifier USAGE_KEYBIND = new Identifier("roughlyenoughitems", "usage_keybind");
-    private static final Identifier HIDE_KEYBIND = new Identifier("roughlyenoughitems", "hide_keybind");
-    private static final Map<String, String> MOD_NAME_CACHE = Maps.newHashMap();
-    public static FabricKeyBinding RECIPE, USAGE, HIDE;
+    public static ClientHelperImpl instance;
+    private final Identifier recipeKeybind = new Identifier("roughlyenoughitems", "recipe_keybind");
+    private final Identifier usageKeybind = new Identifier("roughlyenoughitems", "usage_keybind");
+    private final Identifier hideKeybind = new Identifier("roughlyenoughitems", "hide_keybind");
+    private final Identifier previousPageKeybind = new Identifier("roughlyenoughitems", "previous_page");
+    private final Identifier nextPageKeybind = new Identifier("roughlyenoughitems", "next_page");
+    private final Map<String, String> modNameCache = Maps.newHashMap();
+    public FabricKeyBinding recipe, usage, hide, previousPage, nextPage;
     
-    static {
-        MOD_NAME_CACHE.put("minecraft", "Minecraft");
-        MOD_NAME_CACHE.put("c", "Common");
-    }
-    
-    public static String getFormattedModFromItem(Item item) {
+    @Override
+    public String getFormattedModFromItem(Item item) {
         String mod = getModFromItem(item);
         if (mod.equalsIgnoreCase(""))
             return "";
         return "§9§o" + mod;
     }
     
-    public static String getModFromItem(Item item) {
+    @Override
+    public FabricKeyBinding getRecipeKeyBinding() {
+        return recipe;
+    }
+    
+    @Override
+    public FabricKeyBinding getUsageKeyBinding() {
+        return usage;
+    }
+    
+    @Override
+    public FabricKeyBinding getHideKeyBinding() {
+        return hide;
+    }
+    
+    @Override
+    public FabricKeyBinding getPreviousPageKeyBinding() {
+        return previousPage;
+    }
+    
+    @Override
+    public FabricKeyBinding getNextPageKeyBinding() {
+        return nextPage;
+    }
+    
+    public String getModFromItem(Item item) {
         if (item.equals(Items.AIR))
             return "";
         return getModFromIdentifier(Registry.ITEM.getId(item));
     }
     
-    public static String getModFromIdentifier(Identifier identifier) {
+    public String getModFromIdentifier(Identifier identifier) {
         if (identifier == null)
             return "";
-        Optional<String> any = Optional.ofNullable(MOD_NAME_CACHE.getOrDefault(identifier.getNamespace(), null));
+        Optional<String> any = Optional.ofNullable(modNameCache.getOrDefault(identifier.getNamespace(), null));
         if (any.isPresent())
             return any.get();
         String modid = identifier.getNamespace();
         String s = FabricLoader.getInstance().getModContainer(modid).map(ModContainer::getMetadata).map(ModMetadata::getName).orElse(modid);
-        MOD_NAME_CACHE.put(modid, s);
+        modNameCache.put(modid, s);
         return s;
     }
     
-    public static boolean isCheating() {
+    @Override
+    public boolean isCheating() {
         return RoughlyEnoughItemsCore.getConfigManager().getConfig().cheating;
     }
     
-    public static void setCheating(boolean cheating) {
+    @Override
+    public void setCheating(boolean cheating) {
         RoughlyEnoughItemsCore.getConfigManager().getConfig().cheating = cheating;
         try {
             RoughlyEnoughItemsCore.getConfigManager().saveConfig();
@@ -85,7 +111,8 @@ public class ClientHelper implements ClientModInitializer {
         }
     }
     
-    public static void sendDeletePacket() {
+    @Override
+    public void sendDeletePacket() {
         if (ScreenHelper.getLastContainerScreen() instanceof CreativePlayerInventoryScreen) {
             MinecraftClient.getInstance().player.inventory.setCursorStack(ItemStack.EMPTY);
             return;
@@ -93,7 +120,8 @@ public class ClientHelper implements ClientModInitializer {
         ClientSidePacketRegistry.INSTANCE.sendToServer(RoughlyEnoughItemsNetwork.DELETE_ITEMS_PACKET, new PacketByteBuf(Unpooled.buffer()));
     }
     
-    public static boolean tryCheatingStack(ItemStack cheatedStack) {
+    @Override
+    public boolean tryCheatingStack(ItemStack cheatedStack) {
         if (RoughlyEnoughItemsCore.canUsePackets()) {
             try {
                 ClientSidePacketRegistry.INSTANCE.sendToServer(RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET, new PacketByteBuf(Unpooled.buffer()).writeItemStack(cheatedStack.copy()));
@@ -108,28 +136,31 @@ public class ClientHelper implements ClientModInitializer {
             String madeUpCommand = og.replaceAll("\\{player_name}", MinecraftClient.getInstance().player.getEntityName()).replaceAll("\\{item_identifier}", identifier.toString()).replaceAll("\\{nbt}", tagMessage).replaceAll("\\{count}", String.valueOf(cheatedStack.getAmount()));
             if (madeUpCommand.length() > 256) {
                 madeUpCommand = og.replaceAll("\\{player_name}", MinecraftClient.getInstance().player.getEntityName()).replaceAll("\\{item_identifier}", identifier.toString()).replaceAll("\\{nbt}", "").replaceAll("\\{count}", String.valueOf(cheatedStack.getAmount()));
-                MinecraftClient.getInstance().player.addChatMessage(new TranslatableTextComponent("text.rei.too_long_nbt"), false);
+                MinecraftClient.getInstance().player.addChatMessage(new TranslatableTextComponent("text.rei" + ".too_long_nbt"), false);
             }
             MinecraftClient.getInstance().player.sendChatMessage(madeUpCommand);
             return true;
         }
     }
     
-    public static boolean executeRecipeKeyBind(ItemStack stack) {
+    @Override
+    public boolean executeRecipeKeyBind(ItemStack stack) {
         Map<RecipeCategory, List<RecipeDisplay>> map = RecipeHelper.getInstance().getRecipesFor(stack);
         if (map.keySet().size() > 0)
             MinecraftClient.getInstance().openScreen(new RecipeViewingScreen(MinecraftClient.getInstance().window, map));
         return map.keySet().size() > 0;
     }
     
-    public static boolean executeUsageKeyBind(ItemStack stack) {
+    @Override
+    public boolean executeUsageKeyBind(ItemStack stack) {
         Map<RecipeCategory, List<RecipeDisplay>> map = RecipeHelper.getInstance().getUsagesFor(stack);
         if (map.keySet().size() > 0)
             MinecraftClient.getInstance().openScreen(new RecipeViewingScreen(MinecraftClient.getInstance().window, map));
         return map.keySet().size() > 0;
     }
     
-    public static List<ItemStack> getInventoryItemsTypes() {
+    @Override
+    public List<ItemStack> getInventoryItemsTypes() {
         List<DefaultedList<ItemStack>> field_7543 = ImmutableList.of(MinecraftClient.getInstance().player.inventory.main, MinecraftClient.getInstance().player.inventory.armor, MinecraftClient.getInstance().player.inventory.offHand);
         List<ItemStack> inventoryStacks = new ArrayList<>();
         field_7543.forEach(itemStacks -> itemStacks.forEach(itemStack -> {
@@ -139,7 +170,8 @@ public class ClientHelper implements ClientModInitializer {
         return inventoryStacks;
     }
     
-    public static boolean executeViewAllRecipesKeyBind() {
+    @Override
+    public boolean executeViewAllRecipesKeyBind() {
         Map<RecipeCategory, List<RecipeDisplay>> map = RecipeHelper.getInstance().getAllRecipes();
         if (map.keySet().size() > 0)
             MinecraftClient.getInstance().openScreen(new RecipeViewingScreen(MinecraftClient.getInstance().window, map));
@@ -148,15 +180,21 @@ public class ClientHelper implements ClientModInitializer {
     
     @Override
     public void onInitializeClient() {
+        ClientHelperImpl.instance = (ClientHelperImpl) this;
         registerFabricKeyBinds();
+        modNameCache.put("minecraft", "Minecraft");
+        modNameCache.put("c", "Common");
     }
     
-    private void registerFabricKeyBinds() {
+    @Override
+    public void registerFabricKeyBinds() {
         String category = "key.rei.category";
         KeyBindingRegistryImpl.INSTANCE.addCategory(category);
-        KeyBindingRegistryImpl.INSTANCE.register(RECIPE = FabricKeyBinding.Builder.create(RECIPE_KEYBIND, InputUtil.Type.KEYSYM, 82, category).build());
-        KeyBindingRegistryImpl.INSTANCE.register(USAGE = FabricKeyBinding.Builder.create(USAGE_KEYBIND, InputUtil.Type.KEYSYM, 85, category).build());
-        KeyBindingRegistryImpl.INSTANCE.register(HIDE = FabricKeyBinding.Builder.create(HIDE_KEYBIND, InputUtil.Type.KEYSYM, 79, category).build());
+        KeyBindingRegistryImpl.INSTANCE.register(recipe = FabricKeyBinding.Builder.create(recipeKeybind, InputUtil.Type.KEYSYM, 82, category).build());
+        KeyBindingRegistryImpl.INSTANCE.register(usage = FabricKeyBinding.Builder.create(usageKeybind, InputUtil.Type.KEYSYM, 85, category).build());
+        KeyBindingRegistryImpl.INSTANCE.register(hide = FabricKeyBinding.Builder.create(hideKeybind, InputUtil.Type.KEYSYM, 79, category).build());
+        KeyBindingRegistryImpl.INSTANCE.register(previousPage = FabricKeyBinding.Builder.create(previousPageKeybind, InputUtil.Type.KEYSYM, -1, category).build());
+        KeyBindingRegistryImpl.INSTANCE.register(nextPage = FabricKeyBinding.Builder.create(nextPageKeybind, InputUtil.Type.KEYSYM, -1, category).build());
     }
     
 }
