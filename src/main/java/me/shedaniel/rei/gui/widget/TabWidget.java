@@ -3,7 +3,7 @@ package me.shedaniel.rei.gui.widget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.RecipeCategory;
-import me.shedaniel.rei.api.Renderable;
+import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import net.minecraft.client.render.GuiLighting;
@@ -18,7 +18,7 @@ public class TabWidget extends HighlightableWidget {
     public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     
     public boolean shown = false, selected = false;
-    public Renderable renderable;
+    public Renderer renderer;
     public int id;
     public RecipeViewingScreen recipeViewingWidget;
     public String categoryName;
@@ -31,13 +31,13 @@ public class TabWidget extends HighlightableWidget {
         this.bounds = bounds;
     }
     
-    public void setRenderable(RecipeCategory category, Renderable renderable, String categoryName, boolean selected) {
+    public void setRenderer(RecipeCategory category, Renderer renderable, String categoryName, boolean selected) {
         if (renderable == null) {
             shown = false;
-            this.renderable = null;
+            this.renderer = null;
         } else {
             shown = true;
-            this.renderable = renderable;
+            this.renderer = renderable;
         }
         this.category = category;
         this.selected = selected;
@@ -56,8 +56,8 @@ public class TabWidget extends HighlightableWidget {
         return shown;
     }
     
-    public Renderable getRenderable() {
-        return renderable;
+    public Renderer getRenderer() {
+        return renderer;
     }
     
     @Override
@@ -72,7 +72,8 @@ public class TabWidget extends HighlightableWidget {
             GuiLighting.disable();
             minecraft.getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
             this.blit(bounds.x, bounds.y + 2, selected ? 28 : 0, 192, 28, (selected ? 30 : 27));
-            renderable.render((int) bounds.getCenterX(), (int) bounds.getCenterY(), mouseX, mouseY, delta);
+            renderer.setBlitOffset(100);
+            renderer.render((int) bounds.getCenterX(), (int) bounds.getCenterY(), mouseX, mouseY, delta);
             if (isHighlighted(mouseX, mouseY))
                 drawTooltip();
         }

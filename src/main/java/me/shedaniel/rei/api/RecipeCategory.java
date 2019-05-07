@@ -20,7 +20,7 @@ public interface RecipeCategory<T extends RecipeDisplay> {
     
     ItemStack getCategoryIcon();
     
-    default Renderable getIcon() {
+    default Renderer getIcon() {
         return Renderable.fromItemStackSupplier(this::getCategoryIcon);
     }
     

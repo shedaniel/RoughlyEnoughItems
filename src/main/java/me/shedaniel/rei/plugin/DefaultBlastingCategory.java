@@ -2,7 +2,7 @@ package me.shedaniel.rei.plugin;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.api.RecipeCategory;
-import me.shedaniel.rei.gui.widget.ItemSlotWidget;
+import me.shedaniel.rei.gui.widget.SlotWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.Widget;
 import net.minecraft.block.Blocks;
@@ -57,14 +57,14 @@ public class DefaultBlastingCategory implements RecipeCategory<DefaultBlastingDi
             }
         }));
         List<List<ItemStack>> input = recipeDisplay.getInput();
-        widgets.add(new ItemSlotWidget(startPoint.x + 1, startPoint.y + 1, input.get(0), true, true, true));
-        widgets.add(new ItemSlotWidget(startPoint.x + 1, startPoint.y + 37, recipeDisplay.getFuel(), true, true, true) {
+        widgets.add(new SlotWidget(startPoint.x + 1, startPoint.y + 1, input.get(0), true, true, true));
+        widgets.add(new SlotWidget(startPoint.x + 1, startPoint.y + 37, recipeDisplay.getFuel(), true, true, true) {
             @Override
             protected List<String> getExtraToolTips(ItemStack stack) {
                 return Arrays.asList(I18n.translate("category.rei.smelting.fuel"));
             }
         });
-        widgets.add(new ItemSlotWidget(startPoint.x + 61, startPoint.y + 19, recipeDisplay.getOutput(), false, true, true));
+        widgets.add(new SlotWidget(startPoint.x + 61, startPoint.y + 19, recipeDisplay.getOutput(), false, true, true));
         return widgets;
     }
     
