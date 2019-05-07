@@ -208,7 +208,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         });
         ClothClientHooks.SCREEN_MOUSE_SCROLLED.register((minecraftClient, screen, v, v1, v2) -> {
             if (screen instanceof ContainerScreen)
-                if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().getRectangle().contains(ClientUtils.getMouseLocation()) && ScreenHelper.getLastOverlay().mouseScrolled(v, v1, v2))
+                if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().isInside(ClientUtils.getMouseLocation()) && ScreenHelper.getLastOverlay().mouseScrolled(v, v1, v2))
                     return ActionResult.SUCCESS;
             return ActionResult.PASS;
         });

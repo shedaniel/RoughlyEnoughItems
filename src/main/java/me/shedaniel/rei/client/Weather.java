@@ -1,7 +1,9 @@
 package me.shedaniel.rei.client;
 
 public enum Weather {
-    CLEAR(0, "text.rei.weather.clear"), RAIN(1, "text.rei.weather.rain"), THUNDER(2, "text.rei.weather.thunder");
+    CLEAR(0, "text.rei.weather.clear"),
+    RAIN(1, "text.rei.weather.rain"),
+    THUNDER(2, "text.rei.weather.thunder");
     
     private final int id;
     private final String translateKey;

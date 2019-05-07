@@ -1,4 +1,8 @@
 View full changelog [here](https://github.com/shedaniel/RoughlyEnoughItems/blob/1.14/CHANGELOG.md).
+## v2.8.2+build.104
+- Fixed [#81](https://github.com/shedaniel/RoughlyEnoughItems/issues/81): Scrolling unaffected by exclusion zones.
+- Added [#82](https://github.com/shedaniel/RoughlyEnoughItems/issues/82): Close search after pressing "Enter"
+- Added [#83](https://github.com/shedaniel/RoughlyEnoughItems/issues/83): 2 More keybinds
 ## v2.8.1+build.103
 - Fixed: Item Searching Layering
 - Added: Some tooltips in the config

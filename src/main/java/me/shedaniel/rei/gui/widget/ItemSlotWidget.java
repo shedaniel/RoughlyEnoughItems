@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.client.ClientHelper;
+import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.client.ScreenHelper;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.render.GuiLighting;
@@ -94,7 +94,7 @@ public class ItemSlotWidget extends HighlightableWidget {
     }
     
     protected List<String> getTooltip(ItemStack itemStack) {
-        final String modString = ClientHelper.getFormattedModFromItem(itemStack.getItem());
+        final String modString = ClientHelper.getInstance().getFormattedModFromItem(itemStack.getItem());
         List<String> toolTip = Lists.newArrayList(ItemListOverlay.tryGetItemStackToolTip(itemStack, true));
         toolTip.addAll(getExtraToolTips(itemStack));
         boolean alreadyHasMod = false;
@@ -137,9 +137,9 @@ public class ItemSlotWidget extends HighlightableWidget {
             return false;
         if (getBounds().contains(mouseX, mouseY))
             if (button == 0)
-                return ClientHelper.executeRecipeKeyBind(getCurrentStack());
+                return ClientHelper.getInstance().executeRecipeKeyBind(getCurrentStack());
             else if (button == 1)
-                return ClientHelper.executeUsageKeyBind(getCurrentStack());
+                return ClientHelper.getInstance().executeUsageKeyBind(getCurrentStack());
         return false;
     }
     
@@ -148,10 +148,10 @@ public class ItemSlotWidget extends HighlightableWidget {
         if (!clickToMoreRecipes)
             return false;
         if (getBounds().contains(ClientUtils.getMouseLocation()))
-            if (ClientHelper.RECIPE.matchesKey(int_1, int_2))
-                return ClientHelper.executeRecipeKeyBind(getCurrentStack());
-            else if (ClientHelper.USAGE.matchesKey(int_1, int_2))
-                return ClientHelper.executeUsageKeyBind(getCurrentStack());
+            if (ClientHelper.getInstance().getRecipeKeyBinding().matchesKey(int_1, int_2))
+                return ClientHelper.getInstance().executeRecipeKeyBind(getCurrentStack());
+            else if (ClientHelper.getInstance().getUsageKeyBinding().matchesKey(int_1, int_2))
+                return ClientHelper.getInstance().executeUsageKeyBind(getCurrentStack());
         return false;
     }
     

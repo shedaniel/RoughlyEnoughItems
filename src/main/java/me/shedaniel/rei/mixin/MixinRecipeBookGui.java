@@ -14,16 +14,11 @@ import java.util.List;
 @Mixin(RecipeBookGui.class)
 public class MixinRecipeBookGui implements RecipeBookGuiHooks {
     
-    @Shadow
-    @Final
-    protected RecipeBookGhostSlots ghostSlots;
+    @Shadow @Final protected RecipeBookGhostSlots ghostSlots;
     
-    @Shadow
-    private TextFieldWidget searchField;
+    @Shadow private TextFieldWidget searchField;
     
-    @Shadow
-    @Final
-    private List<GroupButtonWidget> tabButtons;
+    @Shadow @Final private List<GroupButtonWidget> tabButtons;
     
     public RecipeBookGhostSlots rei_getGhostSlots() {
         return ghostSlots;

@@ -1,6 +1,5 @@
 package me.shedaniel.rei.gui.widget;
 
-import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.Element;
 
 import java.awt.*;

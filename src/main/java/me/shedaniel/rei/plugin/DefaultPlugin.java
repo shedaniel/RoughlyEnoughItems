@@ -104,14 +104,7 @@ public class DefaultPlugin implements REIPluginEntry {
     
     @Override
     public void registerRecipeDisplays(RecipeHelper recipeHelper) {
-        List<Recipe> values = Lists.newLinkedList(recipeHelper.getRecipeManager().values());
-        values.sort((o1, o2) -> {
-            int int_1 = o1.getId().getNamespace().compareTo(o2.getId().getNamespace());
-            if (int_1 == 0)
-                int_1 = o1.getId().getPath().compareTo(o2.getId().getPath());
-            return int_1;
-        });
-        for(Recipe recipe : values)
+        for(Recipe recipe : recipeHelper.getVanillaSortedRecipes())
             if (recipe instanceof ShapelessRecipe)
                 recipeHelper.registerDisplay(CRAFTING, new DefaultShapelessDisplay((ShapelessRecipe) recipe));
             else if (recipe instanceof ShapedRecipe)
