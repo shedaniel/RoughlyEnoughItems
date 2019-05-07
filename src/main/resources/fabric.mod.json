@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "roughlyenoughitems",
-  "name": "RoughlyEnoughItems",
+  "name": "Roughly Enough Items",
   "description": "To allow players to view items and recipes. Version: ${version}",
   "version": "${version}",
   "authors": [

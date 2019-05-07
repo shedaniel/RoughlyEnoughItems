@@ -1,11 +1,12 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import me.shedaniel.rei.api.ClientHelper;
+import me.shedaniel.rei.api.RecipeCategory;
+import me.shedaniel.rei.api.Renderable;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import net.minecraft.client.render.GuiLighting;
-import net.minecraft.client.render.item.ItemRenderer;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
 import java.awt.*;
@@ -17,28 +18,28 @@ public class TabWidget extends HighlightableWidget {
     public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     
     public boolean shown = false, selected = false;
-    public ItemStack item;
+    public Renderable renderable;
     public int id;
     public RecipeViewingScreen recipeViewingWidget;
     public String categoryName;
     public Rectangle bounds;
-    private ItemRenderer itemRenderer;
+    public RecipeCategory category;
     
     public TabWidget(int id, RecipeViewingScreen recipeViewingWidget, Rectangle bounds) {
         this.id = id;
         this.recipeViewingWidget = recipeViewingWidget;
         this.bounds = bounds;
-        this.itemRenderer = minecraft.getItemRenderer();
     }
     
-    public void setItem(ItemStack item, String categoryName, boolean selected) {
-        if (item == null) {
+    public void setRenderable(RecipeCategory category, Renderable renderable, String categoryName, boolean selected) {
+        if (renderable == null) {
             shown = false;
-            this.item = null;
+            this.renderable = null;
         } else {
             shown = true;
-            this.item = item;
+            this.renderable = renderable;
         }
+        this.category = category;
         this.selected = selected;
         this.categoryName = categoryName;
     }
@@ -55,8 +56,8 @@ public class TabWidget extends HighlightableWidget {
         return shown;
     }
     
-    public ItemStack getItemStack() {
-        return item;
+    public Renderable getRenderable() {
+        return renderable;
     }
     
     @Override
@@ -67,26 +68,21 @@ public class TabWidget extends HighlightableWidget {
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         if (shown) {
-            int l = (int) this.bounds.getCenterX() - 8, i1 = (int) this.bounds.getCenterY() - 6;
             GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             GuiLighting.disable();
             minecraft.getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
             this.blit(bounds.x, bounds.y + 2, selected ? 28 : 0, 192, 28, (selected ? 30 : 27));
-            this.blitOffset = 100;
-            this.itemRenderer.zOffset = 100.0F;
-            GuiLighting.enableForItems();
-            this.itemRenderer.renderGuiItem(getItemStack(), l, i1);
-            this.itemRenderer.renderGuiItemOverlay(minecraft.textRenderer, getItemStack(), l, i1);
-            GlStateManager.disableLighting();
-            this.itemRenderer.zOffset = 0.0F;
-            this.blitOffset = 0;
+            renderable.render((int) bounds.getCenterX(), (int) bounds.getCenterY(), mouseX, mouseY, delta);
             if (isHighlighted(mouseX, mouseY))
                 drawTooltip();
         }
     }
     
     private void drawTooltip() {
-        ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(categoryName));
+        if (this.minecraft.options.advancedItemTooltips)
+            ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(categoryName, "§8" + category.getIdentifier().toString(), ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())));
+        else
+            ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(categoryName, ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())));
     }
     
     @Override
