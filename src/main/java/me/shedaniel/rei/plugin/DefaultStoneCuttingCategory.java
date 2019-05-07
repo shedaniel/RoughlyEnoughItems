@@ -3,7 +3,7 @@ package me.shedaniel.rei.plugin;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.api.DisplaySettings;
 import me.shedaniel.rei.api.RecipeCategory;
-import me.shedaniel.rei.gui.widget.ItemSlotWidget;
+import me.shedaniel.rei.gui.widget.SlotWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.Widget;
 import net.minecraft.block.Blocks;
@@ -51,8 +51,8 @@ public class DefaultStoneCuttingCategory implements RecipeCategory<DefaultStoneC
                 blit(startPoint.x, startPoint.y, 0, 221, 82, 26);
             }
         }));
-        widgets.add(new ItemSlotWidget(startPoint.x + 4, startPoint.y + 5, recipeDisplaySupplier.get().getInput().get(0), true, true, true));
-        widgets.add(new ItemSlotWidget(startPoint.x + 61, startPoint.y + 5, recipeDisplaySupplier.get().getOutput(), false, true, true));
+        widgets.add(new SlotWidget(startPoint.x + 4, startPoint.y + 5, recipeDisplaySupplier.get().getInput().get(0), true, true, true));
+        widgets.add(new SlotWidget(startPoint.x + 61, startPoint.y + 5, recipeDisplaySupplier.get().getOutput(), false, true, true));
         return widgets;
     }
     

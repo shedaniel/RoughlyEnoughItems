@@ -249,7 +249,7 @@ public class RecipeViewingScreen extends Screen {
                         return false;
                     }
                 });
-                tab.setRenderable(categories.get(j), categories.get(j).getIcon(), categories.get(j).getCategoryName(), tab.getId() + categoryPages * 6 == categories.indexOf(selectedCategory));
+                tab.setRenderer(categories.get(j), categories.get(j).getIcon(), categories.get(j).getCategoryName(), tab.getId() + categoryPages * 6 == categories.indexOf(selectedCategory));
             }
         }
         Optional<ButtonAreaSupplier> supplier = RecipeHelper.getInstance().getSpeedCraftButtonArea(selectedCategory);

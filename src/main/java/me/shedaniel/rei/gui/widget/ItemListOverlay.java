@@ -109,7 +109,7 @@ public class ItemListOverlay extends Widget {
                 j++;
                 if (j > currentDisplayed.size())
                     break;
-                widgets.add(new ItemSlotWidget(x, y, Collections.singletonList(currentDisplayed.get(j - 1)), false, true, true) {
+                widgets.add(new SlotWidget(x, y, Collections.singletonList(currentDisplayed.get(j - 1)), false, true, true) {
                     @Override
                     protected void queueTooltip(ItemStack itemStack, float delta) {
                         ClientPlayerEntity player = minecraft.player;
@@ -119,10 +119,10 @@ public class ItemListOverlay extends Widget {
                     
                     @Override
                     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                        if (isHighlighted(mouseX, mouseY)) {
+                        if (isCurrentRendererItem() && isHighlighted(mouseX, mouseY)) {
                             if (ClientHelper.getInstance().isCheating()) {
-                                if (getCurrentStack() != null && !getCurrentStack().isEmpty()) {
-                                    ItemStack cheatedStack = getCurrentStack().copy();
+                                if (getCurrentItemStack() != null && !getCurrentItemStack().isEmpty()) {
+                                    ItemStack cheatedStack = getCurrentItemStack().copy();
                                     if (RoughlyEnoughItemsCore.getConfigManager().getConfig().itemCheatingMode == ItemCheatingMode.REI_LIKE)
                                         cheatedStack.setAmount(button != 1 ? 1 : cheatedStack.getMaxAmount());
                                     else if (RoughlyEnoughItemsCore.getConfigManager().getConfig().itemCheatingMode == ItemCheatingMode.JEI_LIKE)
@@ -132,9 +132,9 @@ public class ItemListOverlay extends Widget {
                                     return ClientHelper.getInstance().tryCheatingStack(cheatedStack);
                                 }
                             } else if (button == 0)
-                                return ClientHelper.getInstance().executeRecipeKeyBind(getCurrentStack().copy());
+                                return ClientHelper.getInstance().executeRecipeKeyBind(getCurrentItemStack().copy());
                             else if (button == 1)
-                                return ClientHelper.getInstance().executeUsageKeyBind(getCurrentStack().copy());
+                                return ClientHelper.getInstance().executeUsageKeyBind(getCurrentItemStack().copy());
                         }
                         return false;
                     }
