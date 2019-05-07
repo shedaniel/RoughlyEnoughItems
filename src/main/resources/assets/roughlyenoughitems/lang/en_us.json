@@ -3,6 +3,8 @@
   "key.roughlyenoughitems.recipe_keybind": "Show Recipe",
   "key.roughlyenoughitems.hide_keybind": "Hide/Show REI",
   "key.roughlyenoughitems.usage_keybind": "Show Uses",
+  "key.roughlyenoughitems.next_page": "Next Page",
+  "key.roughlyenoughitems.previous_page": "Previous Page",
   "text.rei.config.general": "General",
   "text.rei.config.action": "Action",
   "text.rei.config.cheating": "Cheating:",

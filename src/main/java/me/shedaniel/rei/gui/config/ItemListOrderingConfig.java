@@ -4,7 +4,12 @@ import me.shedaniel.rei.client.ItemListOrdering;
 import net.minecraft.client.resource.language.I18n;
 
 public enum ItemListOrderingConfig {
-    REGISTRY_ASCENDING(ItemListOrdering.registry, true), NAME_ASCENDING(ItemListOrdering.name, true), GROUPS_ASCENDING(ItemListOrdering.item_groups, true), REGISTRY_DESCENDING(ItemListOrdering.registry, false), NAME_DESCENDING(ItemListOrdering.name, false), GROUPS_DESCENDING(ItemListOrdering.item_groups, false);
+    REGISTRY_ASCENDING(ItemListOrdering.registry, true),
+    NAME_ASCENDING(ItemListOrdering.name, true),
+    GROUPS_ASCENDING(ItemListOrdering.item_groups, true),
+    REGISTRY_DESCENDING(ItemListOrdering.registry, false),
+    NAME_DESCENDING(ItemListOrdering.name, false),
+    GROUPS_DESCENDING(ItemListOrdering.item_groups, false);
     
     private ItemListOrdering ordering;
     private boolean isAscending;

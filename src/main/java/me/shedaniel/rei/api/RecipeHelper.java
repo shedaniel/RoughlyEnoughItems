@@ -2,6 +2,7 @@ package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import net.minecraft.item.ItemStack;
+import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.util.Identifier;
 
@@ -16,6 +17,8 @@ public interface RecipeHelper {
     }
     
     int getRecipeCount();
+    
+    List<Recipe> getVanillaSortedRecipes();
     
     List<ItemStack> findCraftableByItems(List<ItemStack> inventoryItems);
     

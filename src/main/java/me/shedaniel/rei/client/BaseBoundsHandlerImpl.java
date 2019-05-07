@@ -38,12 +38,12 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
     
     @Override
     public Rectangle getLeftBounds(Screen screen) {
-        return new Rectangle();
+        return DisplayHelper.DisplayBoundsHandler.EMPTY;
     }
     
     @Override
     public Rectangle getRightBounds(Screen screen) {
-        return new Rectangle();
+        return DisplayHelper.DisplayBoundsHandler.EMPTY;
     }
     
     @Override
@@ -52,18 +52,31 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
     }
     
     @Override
+    public ActionResult isInZone(boolean isOnRightSide, double mouseX, double mouseY) {
+        for(Rectangle zone : getCurrentExclusionZones(MinecraftClient.getInstance().currentScreen.getClass(), isOnRightSide))
+            if (zone.contains(mouseX, mouseY))
+                return ActionResult.FAIL;
+        return ActionResult.PASS;
+    }
+    
+    @Override
     public boolean shouldRecalculateArea(boolean isOnRightSide, Rectangle rectangle) {
         if (lastArea == null) {
-            DisplayHelper.DisplayBoundsHandler handler = RoughlyEnoughItemsCore.getDisplayHelper().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
-            lastArea = getStringFromAreas(isOnRightSide ? handler.getRightBounds(MinecraftClient.getInstance().currentScreen) : handler.getLeftBounds(MinecraftClient.getInstance().currentScreen), getCurrentExclusionZones(MinecraftClient.getInstance().currentScreen.getClass(), isOnRightSide));
+            lastArea = getStringFromCurrent(isOnRightSide);
             return false;
         }
-        DisplayHelper.DisplayBoundsHandler handler = RoughlyEnoughItemsCore.getDisplayHelper().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
-        String fromAreas = getStringFromAreas(isOnRightSide ? handler.getRightBounds(MinecraftClient.getInstance().currentScreen) : handler.getLeftBounds(MinecraftClient.getInstance().currentScreen), getCurrentExclusionZones(MinecraftClient.getInstance().currentScreen.getClass(), isOnRightSide));
-        if (lastArea.contentEquals(fromAreas))
+        if (lastArea.contentEquals(getStringFromCurrent(isOnRightSide)))
             return false;
-        lastArea = fromAreas;
+        lastArea = getStringFromCurrent(isOnRightSide);
         return true;
+    }
+    
+    private DisplayHelper.DisplayBoundsHandler getHandler() {
+        return RoughlyEnoughItemsCore.getDisplayHelper().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
+    }
+    
+    private String getStringFromCurrent(boolean isOnRightSide) {
+        return getStringFromAreas(isOnRightSide ? getHandler().getRightBounds(MinecraftClient.getInstance().currentScreen) : getHandler().getLeftBounds(MinecraftClient.getInstance().currentScreen), getCurrentExclusionZones(MinecraftClient.getInstance().currentScreen.getClass(), isOnRightSide));
     }
     
     @Override
