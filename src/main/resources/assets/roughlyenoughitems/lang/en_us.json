@@ -93,6 +93,7 @@
   "text.rei.config.light_gray_recipe_border": "Light Gray Recipe Border:",
   "text.rei.config_api_failed": "You arrived here either if Cloth Config API failed or you don't have it installed!\nUpdate / Install the API and report to the bug tracker.",
   "text.rei.back": "Back",
+  "text.rei.config.recipe_screen_type": "Screen Type",
 
   "_comment": "Config Tooltips",
   "tooltip.rei.config.side_search_box": "Declares the location of the search field:\nYes: Left / Right\nNo: Center\n \nDefaulted: No",

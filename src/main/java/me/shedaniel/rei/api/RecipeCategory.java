@@ -20,6 +20,10 @@ public interface RecipeCategory<T extends RecipeDisplay> {
     
     ItemStack getCategoryIcon();
     
+    default Renderable getIcon() {
+        return Renderable.fromItemStackSupplier(this::getCategoryIcon);
+    }
+    
     String getCategoryName();
     
     default List<Widget> setupDisplay(Supplier<T> recipeDisplaySupplier, Rectangle bounds) {
