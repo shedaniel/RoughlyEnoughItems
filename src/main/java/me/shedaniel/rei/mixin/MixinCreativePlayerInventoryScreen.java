@@ -7,8 +7,7 @@ import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(CreativePlayerInventoryScreen.class)
 public class MixinCreativePlayerInventoryScreen implements CreativePlayerInventoryScreenHooks {
-    @Shadow
-    private static int selectedTab;
+    @Shadow private static int selectedTab;
     
     @Override
     public int rei_getSelectedTab() {

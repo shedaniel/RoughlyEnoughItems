@@ -5,7 +5,6 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.client.ClientHelper;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.widget.*;
 import net.minecraft.client.MinecraftClient;
@@ -31,9 +30,9 @@ import java.util.function.Supplier;
 
 public class RecipeViewingScreen extends Screen {
     
-    public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
+    public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui" + "/recipecontainer.png");
     public static final Color SUB_COLOR = new Color(159, 159, 159);
-    private static final Identifier CREATIVE_INVENTORY_TABS = new Identifier("textures/gui/container/creative_inventory/tabs.png");
+    private static final Identifier CREATIVE_INVENTORY_TABS = new Identifier("textures/gui/container" + "/creative_inventory/tabs.png");
     private final List<Widget> widgets;
     private final List<TabWidget> tabs;
     private final Map<RecipeCategory, List<RecipeDisplay>> categoriesMap;
@@ -94,6 +93,15 @@ public class RecipeViewingScreen extends Screen {
         }
         if (choosePageActivated)
             return recipeChoosePageWidget.keyPressed(int_1, int_2, int_3);
+        else if (ClientHelper.getInstance().getNextPageKeyBinding().matchesKey(int_1, int_2)) {
+            if (recipeNext.enabled)
+                recipeNext.onPressed();
+            return recipeNext.enabled;
+        } else if (ClientHelper.getInstance().getPreviousPageKeyBinding().matchesKey(int_1, int_2)) {
+            if (recipeBack.enabled)
+                recipeBack.onPressed();
+            return recipeBack.enabled;
+        }
         for(Element element : children())
             if (element.keyPressed(int_1, int_2, int_3))
                 return true;
@@ -151,7 +159,7 @@ public class RecipeViewingScreen extends Screen {
             @Override
             public void onLabelClicked() {
                 MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-                ClientHelper.executeViewAllRecipesKeyBind();
+                ClientHelper.getInstance().executeViewAllRecipesKeyBind();
             }
         });
         widgets.add(categoryNext = new ButtonWidget((int) bounds.getMaxX() - 17, (int) bounds.getY() + 5, 12, 12, new TranslatableTextComponent("text.rei.right_arrow")) {

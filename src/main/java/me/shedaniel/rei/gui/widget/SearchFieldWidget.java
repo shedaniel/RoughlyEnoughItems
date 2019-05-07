@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.audio.PositionedSoundInstance;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.sound.SoundEvents;
+import org.lwjgl.glfw.GLFW;
 
 public class SearchFieldWidget extends TextFieldWidget {
     
@@ -48,6 +49,16 @@ public class SearchFieldWidget extends TextFieldWidget {
                 minecraft.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             }
         return super.mouseClicked(double_1, double_2, int_1);
+    }
+    
+    @Override
+    public boolean keyPressed(int int_1, int int_2, int int_3) {
+        if (this.isVisible() && this.isFocused())
+            if (int_1 == GLFW.GLFW_KEY_ENTER || int_1 == GLFW.GLFW_KEY_KP_ENTER) {
+                setFocused(false);
+                return true;
+            }
+        return super.keyPressed(int_1, int_2, int_3);
     }
     
     @Override

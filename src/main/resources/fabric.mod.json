@@ -17,7 +17,7 @@
   "entrypoints": {
     "client": [
       "me.shedaniel.rei.RoughlyEnoughItemsCore",
-      "me.shedaniel.rei.client.ClientHelper",
+      "me.shedaniel.rei.client.ClientHelperImpl",
       "me.shedaniel.rei.client.ScreenHelper"
     ],
     "main": [

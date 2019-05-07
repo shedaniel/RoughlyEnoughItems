@@ -9,16 +9,11 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(ContainerScreen.class)
 public class MixinContainerScreen implements ContainerScreenHooks {
     
-    @Shadow
-    protected int left;
-    @Shadow
-    protected int top;
-    @Shadow
-    protected int containerWidth;
-    @Shadow
-    protected int containerHeight;
-    @Shadow
-    protected Slot focusedSlot;
+    @Shadow protected int left;
+    @Shadow protected int top;
+    @Shadow protected int containerWidth;
+    @Shadow protected int containerHeight;
+    @Shadow protected Slot focusedSlot;
     
     @Override
     public int rei_getContainerLeft() {
