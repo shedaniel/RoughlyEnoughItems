@@ -176,7 +176,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? window.getScaledWidth() - 80 : 60, 10, 20, 20, "") {
                 @Override
                 public void onPressed() {
-                    MinecraftClient.getInstance().player.sendChatMessage(RoughlyEnoughItemsCore.getConfigManager().getConfig().weatherCommand.replaceAll("\\{weather}", getNextWeather().name().toLowerCase(Locale.ROOT)));
+                    MinecraftClient.getInstance().player.sendChatMessage(RoughlyEnoughItemsCore.getConfigManager().getConfig().weatherCommand.replaceAll("\\{weather}", getNextWeather().name().toLowerCase()));
                 }
                 
                 @Override
