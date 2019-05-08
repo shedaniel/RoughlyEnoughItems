@@ -28,7 +28,6 @@ import java.awt.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Collectors;
 
 public class ItemListOverlay extends Widget {
@@ -244,9 +243,9 @@ public class ItemListOverlay extends Widget {
     private boolean filterItem(ItemStack itemStack, SearchArgument... arguments) {
         if (arguments.length == 0)
             return true;
-        String mod = ClientHelper.getInstance().getModFromItem(itemStack.getItem()).toLowerCase(Locale.ROOT);
-        String tooltips = tryGetItemStackToolTip(itemStack, false).stream().skip(1).collect(Collectors.joining("")).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT);
-        String name = tryGetItemStackName(itemStack).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT);
+        String mod = ClientHelper.getInstance().getModFromItem(itemStack.getItem()).toLowerCase();
+        String tooltips = tryGetItemStackToolTip(itemStack, false).stream().skip(1).collect(Collectors.joining("")).replace(SPACE, EMPTY).toLowerCase();
+        String name = tryGetItemStackName(itemStack).replace(SPACE, EMPTY).toLowerCase();
         for(SearchArgument argument : arguments) {
             if (argument.getArgumentType().equals(SearchArgument.ArgumentType.MOD))
                 if (SearchArgument.getFunction(!argument.isInclude()).apply(mod.indexOf(argument.getText())))
