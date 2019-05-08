@@ -1,6 +1,5 @@
 package me.shedaniel.rei.client;
 
-import java.util.Locale;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
@@ -19,7 +18,7 @@ public class SearchArgument {
     
     public SearchArgument(ArgumentType argumentType, String text, boolean include, boolean autoLowerCase) {
         this.argumentType = argumentType;
-        this.text = autoLowerCase ? text.toLowerCase(Locale.ROOT) : text;
+        this.text = autoLowerCase ? text.toLowerCase() : text;
         this.include = include;
     }
     
