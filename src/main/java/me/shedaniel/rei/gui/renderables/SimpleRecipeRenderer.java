@@ -54,27 +54,18 @@ public class SimpleRecipeRenderer extends RecipeRenderer {
             itemStackRenderer.render(xx + 8, yy + 6, mouseX, mouseY, delta);
             xx += 18;
             j++;
-            if (j >= getItemsPerLine()) {
+            if (j >= getItemsPerLine() - 3) {
                 yy += 18;
                 xx = x + 5;
                 j = 0;
             }
         }
-        if (itemsPerLine - j + 1 < 3) {
-            j = 0;
-            xx = x + 5;
-            yy += 18;
-        }
+        xx = x + 5 + 18 * (getItemsPerLine() - 3);
+        yy = y + getHeight() / 2 - 8;
         GuiLighting.disable();
         MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
         blit(xx, yy, 0, 28, 36, 18);
         xx += 36;
-        j += 2;
-        if (j >= getItemsPerLine()) {
-            yy += 18;
-            xx = x + 5;
-            j = 0;
-        }
         outputRenderer.setBlitOffset(getBlitOffset() + 50);
         outputRenderer.drawTooltip = MinecraftClient.getInstance().currentScreen instanceof VillagerRecipeViewingScreen;
         outputRenderer.render(xx + 8, yy + 6, mouseX, mouseY, delta);
@@ -82,19 +73,11 @@ public class SimpleRecipeRenderer extends RecipeRenderer {
     
     @Override
     public int getHeight() {
-        return 10 + getEntriesHeight() * 18;
+        return 10 + getItemsHeight() * 18;
     }
     
     public int getItemsHeight() {
-        return MathHelper.ceil(((float) inputRenderer.size()) / getItemsPerLine());
-    }
-    
-    public int getEntriesHeight() {
-        int itemsPerLine = getItemsPerLine();
-        if (itemsPerLine - (inputRenderer.size() - MathHelper.floor(((float) inputRenderer.size()) / itemsPerLine)) < 3)
-            return getItemsHeight() + 1;
-        else
-            return getItemsHeight();
+        return MathHelper.ceil(((float) inputRenderer.size()) / (getItemsPerLine() - 3));
     }
     
     public int getItemsPerLine() {
