@@ -9,6 +9,7 @@ import me.shedaniel.cloth.hooks.ClothClientHooks;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.*;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
+import me.shedaniel.rei.listeners.RecipeBookGuiHooks;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.fabricmc.loader.api.FabricLoader;
@@ -19,6 +20,7 @@ import net.minecraft.client.gui.ContainerScreen;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
 import net.minecraft.client.gui.ingame.PlayerInventoryScreen;
+import net.minecraft.client.gui.recipebook.RecipeBookGui;
 import net.minecraft.client.gui.widget.RecipeBookButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.util.ActionResult;
@@ -34,7 +36,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class RoughlyEnoughItemsCore implements ClientModInitializer {
-    
+
     public static final Logger LOGGER;
     private static final RecipeHelper RECIPE_HELPER = new RecipeHelperImpl();
     private static final PluginDisabler PLUGIN_DISABLER = new PluginDisablerImpl();
@@ -42,70 +44,70 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     private static final DisplayHelper DISPLAY_HELPER = new DisplayHelperImpl();
     private static final Map<Identifier, REIPluginEntry> plugins = Maps.newHashMap();
     private static ConfigManagerImpl configManager;
-    
+
     static {
         LOGGER = LogManager.getFormatterLogger("REI");
     }
-    
+
     public static RecipeHelper getRecipeHelper() {
         return RECIPE_HELPER;
     }
-    
+
     public static me.shedaniel.rei.api.ConfigManager getConfigManager() {
         return configManager;
     }
-    
+
     public static ItemRegistry getItemRegisterer() {
         return ITEM_REGISTRY;
     }
-    
+
     public static PluginDisabler getPluginDisabler() {
         return PLUGIN_DISABLER;
     }
-    
+
     public static DisplayHelper getDisplayHelper() {
         return DISPLAY_HELPER;
     }
-    
+
     public static REIPluginEntry registerPlugin(Identifier identifier, REIPluginEntry plugin) {
         plugins.put(identifier, plugin);
         RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered plugin %s from %s", identifier.toString(), plugin.getClass().getSimpleName());
         plugin.onFirstLoad(getPluginDisabler());
         return plugin;
     }
-    
+
     public static List<REIPluginEntry> getPlugins() {
         return new LinkedList<>(plugins.values());
     }
-    
+
     public static Optional<Identifier> getPluginIdentifier(REIPluginEntry plugin) {
         for(Identifier identifier : plugins.keySet())
             if (identifier != null && plugins.get(identifier).equals(plugin))
                 return Optional.of(identifier);
         return Optional.empty();
     }
-    
+
     public static boolean hasPermissionToUsePackets() {
         return hasOperatorPermission() && canUsePackets();
     }
-    
+
     public static boolean hasOperatorPermission() {
         return MinecraftClient.getInstance().getNetworkHandler().getCommandSource().hasPermissionLevel(1);
     }
-    
+
     public static boolean canUsePackets() {
         return ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET) && ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.DELETE_ITEMS_PACKET);
     }
-    
+
     @Override
     public void onInitializeClient() {
         configManager = new ConfigManagerImpl();
-        
+
         registerClothEvents();
         discoverOldPlugins();
         discoverPluginEntries();
     }
-    
+
     private void discoverPluginEntries() {
         for(REIPluginEntry reiPlugin : FabricLoader.getInstance().getEntrypoints("rei_plugins", REIPluginEntry.class)) {
             try {
@@ -118,7 +120,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             }
         }
     }
-    
+
     private void discoverOldPlugins() {
         List<Pair<Identifier, String>> list = Lists.newArrayList();
         for(ModMetadata metadata : FabricLoader.getInstance().getAllMods().stream().map(ModContainer::getMetadata).filter(metadata -> metadata.containsCustomElement("roughlyenoughitems:plugins")).collect(Collectors.toList())) {
@@ -157,7 +159,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             }
         }
     }
-    
+
     private void loadPluginFromJsonObject(List<Pair<Identifier, String>> list, ModMetadata modMetadata, JsonObject object) {
         String namespace = modMetadata.getId();
         if (object.has("namespace"))
@@ -166,7 +168,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         String className = object.get("class").getAsString();
         list.add(new Pair<>(new Identifier(namespace, id), className));
     }
-    
+
     private void registerClothEvents() {
         ClothClientHooks.SYNC_RECIPES.register((minecraftClient, recipeManager, synchronizeRecipesS2CPacket) -> {
             ((RecipeHelperImpl) RoughlyEnoughItemsCore.getRecipeHelper()).recipesLoaded(recipeManager);
@@ -225,7 +227,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                 ScreenHelper.getLastOverlay().lateRender(i, i1, v);
         });
         ClothClientHooks.SCREEN_KEY_PRESSED.register((minecraftClient, screen, i, i1, i2) -> {
-            if (screen.getFocused() != null && screen.getFocused() instanceof TextFieldWidget)
+	        if (screen.getFocused() != null && screen.getFocused() instanceof TextFieldWidget || (screen.getFocused() instanceof RecipeBookGui && ((RecipeBookGuiHooks)screen.getFocused()).rei_getSearchField().isFocused()))
                 return ActionResult.PASS;
             if (screen instanceof ContainerScreen)
                 if (ScreenHelper.getLastOverlay().keyPressed(i, i1, i2))
@@ -233,5 +235,5 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             return ActionResult.PASS;
         });
     }
-    
+
 }
