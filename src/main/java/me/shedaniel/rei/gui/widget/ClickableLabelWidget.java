@@ -22,15 +22,23 @@ public abstract class ClickableLabelWidget extends LabelWidget {
     
     @Override
     public void render(int mouseX, int mouseY, float delta) {
-        int colour = -1;
+        int colour = getDefaultColor();
         if (clickable && isHovered(mouseX, mouseY))
-            colour = hoveredColor;
+            colour = getHoveredColor();
         drawCenteredString(font, (isHovered(mouseX, mouseY) ? "§n" : "") + text, x, y, colour);
         if (clickable && getTooltips().isPresent())
             if (!focused && isHighlighted(mouseX, mouseY))
                 ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltips().get().split("\n")));
             else if (focused)
                 ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(new Point(x, y), getTooltips().get().split("\n")));
+    }
+    
+    public int getDefaultColor() {
+        return -1;
+    }
+    
+    public int getHoveredColor() {
+        return hoveredColor;
     }
     
     @Override

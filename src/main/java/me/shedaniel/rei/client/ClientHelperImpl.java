@@ -9,7 +9,9 @@ import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.api.RecipeHelper;
+import me.shedaniel.rei.gui.PreRecipeViewingScreen;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
+import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
 import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.fabricmc.fabric.impl.client.keybinding.KeyBindingRegistryImpl;
@@ -54,6 +56,14 @@ public class ClientHelperImpl implements ClientHelper {
     }
     
     @Override
+    public String getFormattedModFromIdentifier(Identifier identifier) {
+        String mod = getModFromIdentifier(identifier);
+        if (mod.equalsIgnoreCase(""))
+            return "";
+        return "§9§o" + mod;
+    }
+    
+    @Override
     public FabricKeyBinding getRecipeKeyBinding() {
         return recipe;
     }
@@ -78,12 +88,14 @@ public class ClientHelperImpl implements ClientHelper {
         return nextPage;
     }
     
+    @Override
     public String getModFromItem(Item item) {
         if (item.equals(Items.AIR))
             return "";
         return getModFromIdentifier(Registry.ITEM.getId(item));
     }
     
+    @Override
     public String getModFromIdentifier(Identifier identifier) {
         if (identifier == null)
             return "";
@@ -147,7 +159,7 @@ public class ClientHelperImpl implements ClientHelper {
     public boolean executeRecipeKeyBind(ItemStack stack) {
         Map<RecipeCategory, List<RecipeDisplay>> map = RecipeHelper.getInstance().getRecipesFor(stack);
         if (map.keySet().size() > 0)
-            MinecraftClient.getInstance().openScreen(new RecipeViewingScreen(MinecraftClient.getInstance().window, map));
+            openRecipeViewingScreen(map);
         return map.keySet().size() > 0;
     }
     
@@ -155,7 +167,7 @@ public class ClientHelperImpl implements ClientHelper {
     public boolean executeUsageKeyBind(ItemStack stack) {
         Map<RecipeCategory, List<RecipeDisplay>> map = RecipeHelper.getInstance().getUsagesFor(stack);
         if (map.keySet().size() > 0)
-            MinecraftClient.getInstance().openScreen(new RecipeViewingScreen(MinecraftClient.getInstance().window, map));
+            openRecipeViewingScreen(map);
         return map.keySet().size() > 0;
     }
     
@@ -174,8 +186,18 @@ public class ClientHelperImpl implements ClientHelper {
     public boolean executeViewAllRecipesKeyBind() {
         Map<RecipeCategory, List<RecipeDisplay>> map = RecipeHelper.getInstance().getAllRecipes();
         if (map.keySet().size() > 0)
-            MinecraftClient.getInstance().openScreen(new RecipeViewingScreen(MinecraftClient.getInstance().window, map));
+            openRecipeViewingScreen(map);
         return map.keySet().size() > 0;
+    }
+    
+    @Override
+    public void openRecipeViewingScreen(Map<RecipeCategory, List<RecipeDisplay>> map) {
+        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().screenType == RecipeScreenType.VILLAGER)
+            MinecraftClient.getInstance().openScreen(new VillagerRecipeViewingScreen(map));
+        else if (RoughlyEnoughItemsCore.getConfigManager().getConfig().screenType == RecipeScreenType.UNSET)
+            MinecraftClient.getInstance().openScreen(new PreRecipeViewingScreen(map));
+        else
+            MinecraftClient.getInstance().openScreen(new RecipeViewingScreen(map));
     }
     
     @Override

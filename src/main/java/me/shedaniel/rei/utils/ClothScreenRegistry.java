@@ -8,6 +8,7 @@ import me.shedaniel.cloth.gui.entries.StringListEntry;
 import me.shedaniel.cloth.hooks.ScreenHooks;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ItemCheatingMode;
+import me.shedaniel.rei.client.RecipeScreenType;
 import me.shedaniel.rei.gui.config.ItemListOrderingConfig;
 import me.shedaniel.rei.gui.credits.CreditsScreen;
 import net.minecraft.client.MinecraftClient;
@@ -46,6 +47,7 @@ public class ClothScreenRegistry {
             }
         });
         ConfigScreenBuilder.CategoryBuilder appearance = builder.addCategory("text.rei.config.appearance");
+        appearance.addOption(new EnumListEntry<>("text.rei.config.recipe_screen_type", RecipeScreenType.class, RoughlyEnoughItemsCore.getConfigManager().getConfig().screenType, RESET, () -> RecipeScreenType.UNSET, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().screenType = bool, EnumListEntry.DEFAULT_NAME_PROVIDER, () -> getConfigTooltip("recipe_screen_type")));
         appearance.addOption(new BooleanListEntry("text.rei.config.side_search_box", RoughlyEnoughItemsCore.getConfigManager().getConfig().sideSearchField, RESET, () -> false, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().sideSearchField = bool, () -> getConfigTooltip("side_search_box")));
         appearance.addOption(new EnumListEntry<>("text.rei.config.list_ordering", ItemListOrderingConfig.class, ItemListOrderingConfig.from(RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering, RoughlyEnoughItemsCore.getConfigManager().getConfig().isAscending), RESET, () -> ItemListOrderingConfig.REGISTRY_ASCENDING, config -> {
             RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering = config.getOrdering();

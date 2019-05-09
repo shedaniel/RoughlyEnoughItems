@@ -43,16 +43,15 @@ public class RecipeViewingScreen extends Screen {
     public int largestWidth, largestHeight;
     public boolean choosePageActivated;
     public RecipeChoosePageWidget recipeChoosePageWidget;
-    private Window window;
     private Rectangle bounds;
     private RecipeCategory selectedCategory;
     private ButtonWidget recipeBack, recipeNext, categoryBack, categoryNext;
     
-    public RecipeViewingScreen(Window window, Map<RecipeCategory, List<RecipeDisplay>> categoriesMap) {
+    public RecipeViewingScreen(Map<RecipeCategory, List<RecipeDisplay>> categoriesMap) {
         super(new StringTextComponent(""));
         this.categoryPages = 0;
-        this.window = window;
         this.widgets = Lists.newArrayList();
+        Window window = MinecraftClient.getInstance().window;
         this.bounds = new Rectangle(window.getScaledWidth() / 2 - guiWidth / 2, window.getScaledHeight() / 2 - guiHeight / 2, 176, 186);
         this.categoriesMap = categoriesMap;
         this.categories = Lists.newArrayList();
@@ -119,11 +118,11 @@ public class RecipeViewingScreen extends Screen {
         this.children.clear();
         this.tabs.clear();
         this.widgets.clear();
-        this.largestWidth = window.getScaledWidth() - 100;
-        this.largestHeight = window.getScaledHeight() - 40;
+        this.largestWidth = width - 100;
+        this.largestHeight = height - 40;
         this.guiWidth = MathHelper.clamp(getCurrentDisplayed().stream().map(display -> selectedCategory.getDisplayWidth(display)).max(Integer::compareTo).orElse(150) + 30, 0, largestWidth);
         this.guiHeight = MathHelper.floor(MathHelper.clamp((selectedCategory.getDisplayHeight() + 7d) * (getRecipesPerPage() + 1d) + 40d, 186d, (double) largestHeight));
-        this.bounds = new Rectangle(window.getScaledWidth() / 2 - guiWidth / 2, window.getScaledHeight() / 2 - guiHeight / 2, guiWidth, guiHeight);
+        this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - guiHeight / 2, guiWidth, guiHeight);
         this.page = MathHelper.clamp(page, 0, getTotalPages(selectedCategory) - 1);
         
         widgets.add(categoryBack = new ButtonWidget((int) bounds.getX() + 5, (int) bounds.getY() + 5, 12, 12, new TranslatableTextComponent("text.rei.left_arrow")) {
@@ -235,7 +234,7 @@ public class RecipeViewingScreen extends Screen {
             int j = i + categoryPages * 6;
             if (categories.size() > j) {
                 TabWidget tab;
-                tabs.add(tab = new TabWidget(i, this, new Rectangle(bounds.x + 4 + 28 * i, bounds.y - 28, 28, 28)) {
+                tabs.add(tab = new TabWidget(i, new Rectangle(bounds.x + 4 + 28 * i, bounds.y - 28, 28, 28)) {
                     @Override
                     public boolean mouseClicked(double mouseX, double mouseY, int button) {
                         if (getBounds().contains(mouseX, mouseY)) {
@@ -250,7 +249,7 @@ public class RecipeViewingScreen extends Screen {
                         return false;
                     }
                 });
-                tab.setItem(categories.get(j).getCategoryIcon(), categories.get(j).getCategoryName(), tab.getId() + categoryPages * 6 == categories.indexOf(selectedCategory));
+                tab.setRenderer(categories.get(j), categories.get(j).getIcon(), categories.get(j).getCategoryName(), tab.getId() + categoryPages * 6 == categories.indexOf(selectedCategory));
             }
         }
         Optional<ButtonAreaSupplier> supplier = RecipeHelper.getInstance().getSpeedCraftButtonArea(selectedCategory);
