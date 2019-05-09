@@ -192,6 +192,8 @@ public class VillagerRecipeViewingScreen extends Screen {
             GuiLighting.disable();
             widget.render(mouseX, mouseY, delta);
         });
+        GuiLighting.disable();
+        ScreenHelper.getLastOverlay().render(mouseX, mouseY, delta);
         GL11.glPushMatrix();
         Scissors.begin();
         Scissors.scissor(0, scrollListBounds.y + 1, width, scrollListBounds.height - 2);

@@ -9,6 +9,7 @@ import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.api.RecipeHelper;
+import me.shedaniel.rei.gui.PreRecipeViewingScreen;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
 import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
@@ -189,9 +190,12 @@ public class ClientHelperImpl implements ClientHelper {
         return map.keySet().size() > 0;
     }
     
+    @Override
     public void openRecipeViewingScreen(Map<RecipeCategory, List<RecipeDisplay>> map) {
         if (RoughlyEnoughItemsCore.getConfigManager().getConfig().screenType == RecipeScreenType.VILLAGER)
             MinecraftClient.getInstance().openScreen(new VillagerRecipeViewingScreen(map));
+        else if (RoughlyEnoughItemsCore.getConfigManager().getConfig().screenType == RecipeScreenType.UNSET)
+            MinecraftClient.getInstance().openScreen(new PreRecipeViewingScreen(map));
         else
             MinecraftClient.getInstance().openScreen(new RecipeViewingScreen(map));
     }

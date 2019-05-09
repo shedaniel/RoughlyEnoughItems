@@ -8,6 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
 import java.util.List;
+import java.util.Map;
 
 public interface ClientHelper extends ClientModInitializer {
     static ClientHelper getInstance() {
@@ -19,6 +20,8 @@ public interface ClientHelper extends ClientModInitializer {
     void setCheating(boolean cheating);
     
     List<ItemStack> getInventoryItemsTypes();
+    
+    void openRecipeViewingScreen(Map<RecipeCategory, List<RecipeDisplay>> map);
     
     void registerFabricKeyBinds();
     

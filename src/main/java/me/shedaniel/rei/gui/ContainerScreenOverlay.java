@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 
 public class ContainerScreenOverlay extends AbstractParentElement implements Drawable {
     
-    private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui" + "/recipecontainer.png");
+    private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private static final List<QueuedTooltip> QUEUED_TOOLTIPS = Lists.newArrayList();
     public static String searchTerm = "";
     private static int page = 0;
