@@ -2,7 +2,7 @@ package me.shedaniel.rei.plugin;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.api.RecipeCategory;
-import me.shedaniel.rei.gui.widget.ItemSlotWidget;
+import me.shedaniel.rei.gui.widget.SlotWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.Widget;
 import net.minecraft.block.Blocks;
@@ -55,32 +55,32 @@ public class DefaultBrewingCategory implements RecipeCategory<DefaultBrewingDisp
                 blit(startPoint.x + 44, startPoint.y + 28, 103, 163, width, 4);
             }
         }));
-        widgets.add(new ItemSlotWidget(startPoint.x + 1, startPoint.y + 1, Arrays.asList(new ItemStack(Items.BLAZE_POWDER)), false, true, true));
-        widgets.add(new ItemSlotWidget(startPoint.x + 63, startPoint.y + 1, recipeDisplay.getInput().get(0), false, true, true) {
+        widgets.add(new SlotWidget(startPoint.x + 1, startPoint.y + 1, Arrays.asList(new ItemStack(Items.BLAZE_POWDER)), false, true, true));
+        widgets.add(new SlotWidget(startPoint.x + 63, startPoint.y + 1, recipeDisplay.getInput().get(0), false, true, true) {
             @Override
             protected List<String> getExtraToolTips(ItemStack stack) {
                 return Arrays.asList(I18n.translate("category.rei.brewing.input"));
             }
         });
-        widgets.add(new ItemSlotWidget(startPoint.x + 40, startPoint.y + 1, recipeDisplay.getInput().get(1), false, true, true) {
+        widgets.add(new SlotWidget(startPoint.x + 40, startPoint.y + 1, recipeDisplay.getInput().get(1), false, true, true) {
             @Override
             protected List<String> getExtraToolTips(ItemStack stack) {
                 return Arrays.asList(I18n.translate("category.rei.brewing.reactant"));
             }
         });
-        widgets.add(new ItemSlotWidget(startPoint.x + 40, startPoint.y + 35, recipeDisplay.getOutput(0), false, true, true) {
+        widgets.add(new SlotWidget(startPoint.x + 40, startPoint.y + 35, recipeDisplay.getOutput(0), false, true, true) {
             @Override
             protected List<String> getExtraToolTips(ItemStack stack) {
                 return Arrays.asList(I18n.translate("category.rei.brewing.result"));
             }
         });
-        widgets.add(new ItemSlotWidget(startPoint.x + 63, startPoint.y + 42, recipeDisplay.getOutput(1), false, true, true) {
+        widgets.add(new SlotWidget(startPoint.x + 63, startPoint.y + 42, recipeDisplay.getOutput(1), false, true, true) {
             @Override
             protected List<String> getExtraToolTips(ItemStack stack) {
                 return Arrays.asList(I18n.translate("category.rei.brewing.result"));
             }
         });
-        widgets.add(new ItemSlotWidget(startPoint.x + 86, startPoint.y + 35, recipeDisplay.getOutput(2), false, true, true) {
+        widgets.add(new SlotWidget(startPoint.x + 86, startPoint.y + 35, recipeDisplay.getOutput(2), false, true, true) {
             @Override
             protected List<String> getExtraToolTips(ItemStack stack) {
                 return Arrays.asList(I18n.translate("category.rei.brewing.result"));

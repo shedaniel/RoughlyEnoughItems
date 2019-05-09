@@ -5,8 +5,10 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Identifier;
 
 import java.util.List;
+import java.util.Map;
 
 public interface ClientHelper extends ClientModInitializer {
     static ClientHelper getInstance() {
@@ -18,6 +20,8 @@ public interface ClientHelper extends ClientModInitializer {
     void setCheating(boolean cheating);
     
     List<ItemStack> getInventoryItemsTypes();
+    
+    void openRecipeViewingScreen(Map<RecipeCategory, List<RecipeDisplay>> map);
     
     void registerFabricKeyBinds();
     
@@ -32,6 +36,10 @@ public interface ClientHelper extends ClientModInitializer {
     void sendDeletePacket();
     
     String getFormattedModFromItem(Item item);
+    
+    String getFormattedModFromIdentifier(Identifier identifier);
+    
+    String getModFromIdentifier(Identifier identifier);
     
     FabricKeyBinding getRecipeKeyBinding();
     

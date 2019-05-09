@@ -1,6 +1,7 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.gui.RecipeViewingScreen;
+import me.shedaniel.rei.gui.renderables.RecipeRenderer;
 import me.shedaniel.rei.gui.widget.CategoryBaseWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.Widget;
@@ -20,7 +21,15 @@ public interface RecipeCategory<T extends RecipeDisplay> {
     
     ItemStack getCategoryIcon();
     
+    default Renderer getIcon() {
+        return Renderable.fromItemStackSupplier(this::getCategoryIcon);
+    }
+    
     String getCategoryName();
+    
+    default RecipeRenderer getSimpleRenderer(T recipe) {
+        return Renderable.fromRecipe(recipe::getInput, recipe::getOutput);
+    }
     
     default List<Widget> setupDisplay(Supplier<T> recipeDisplaySupplier, Rectangle bounds) {
         return Collections.singletonList(new RecipeBaseWidget(bounds));

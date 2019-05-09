@@ -2,15 +2,20 @@ package me.shedaniel.rei.gui.widget;
 
 import java.awt.*;
 
-public class CategoryBaseWidget extends RecipeBaseWidget {
+public class SlotBaseWidget extends RecipeBaseWidget {
     
-    public CategoryBaseWidget(Rectangle bounds) {
+    public SlotBaseWidget(Rectangle bounds) {
         super(bounds);
     }
     
     @Override
+    public int getInnerColor() {
+        return -7631989;
+    }
+    
+    @Override
     protected int getTextureOffset() {
-        return 66;
+        return -66;
     }
     
     @Override

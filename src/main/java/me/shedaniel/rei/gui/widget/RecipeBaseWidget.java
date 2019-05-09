@@ -2,6 +2,7 @@ package me.shedaniel.rei.gui.widget;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.client.RecipeScreenType;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.util.Identifier;
 
@@ -12,7 +13,6 @@ import java.util.List;
 public class RecipeBaseWidget extends HighlightableWidget {
     
     private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
-    private static final Color INNER_COLOR = new Color(198, 198, 198);
     
     private Rectangle bounds;
     
@@ -38,6 +38,8 @@ public class RecipeBaseWidget extends HighlightableWidget {
     
     @Override
     public void render(int mouseX, int mouseY, float delta) {
+        if (!isRendering())
+            return;
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GuiLighting.disable();
         minecraft.getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
@@ -61,7 +63,15 @@ public class RecipeBaseWidget extends HighlightableWidget {
             this.blit(x, y + yy, 106, 128 + textureOffset, 4, thisHeight);
             this.blit(x + width - 4, y + yy, 252, 128 + textureOffset, 4, thisHeight);
         }
-        fillGradient(x + 4, y + 4, x + width - 4, y + height - 4, INNER_COLOR.getRGB(), INNER_COLOR.getRGB());
+        fillGradient(x + 4, y + 4, x + width - 4, y + height - 4, getInnerColor(), getInnerColor());
+    }
+    
+    protected boolean isRendering() {
+        return RoughlyEnoughItemsCore.getConfigManager().getConfig().screenType != RecipeScreenType.VILLAGER;
+    }
+    
+    protected int getInnerColor() {
+        return -3750202;
     }
     
     protected int getTextureOffset() {

@@ -5,6 +5,7 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
+import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import me.shedaniel.rei.listeners.RecipeBookGuiHooks;
 import net.minecraft.client.MinecraftClient;
@@ -41,13 +42,13 @@ import java.util.List;
 
 public class DefaultPlugin implements REIPluginEntry {
     
-    public static final Identifier CRAFTING = new Identifier("roughlyenoughitems", "plugins/crafting");
-    public static final Identifier SMELTING = new Identifier("roughlyenoughitems", "plugins/smelting");
-    public static final Identifier SMOKING = new Identifier("roughlyenoughitems", "plugins/smoking");
-    public static final Identifier BLASTING = new Identifier("roughlyenoughitems", "plugins/blasting");
-    public static final Identifier CAMPFIRE = new Identifier("roughlyenoughitems", "plugins/campfire");
-    public static final Identifier STONE_CUTTING = new Identifier("roughlyenoughitems", "plugins/stone_cutting");
-    public static final Identifier BREWING = new Identifier("roughlyenoughitems", "plugins/brewing");
+    public static final Identifier CRAFTING = new Identifier("minecraft", "plugins/crafting");
+    public static final Identifier SMELTING = new Identifier("minecraft", "plugins/smelting");
+    public static final Identifier SMOKING = new Identifier("minecraft", "plugins/smoking");
+    public static final Identifier BLASTING = new Identifier("minecraft", "plugins/blasting");
+    public static final Identifier CAMPFIRE = new Identifier("minecraft", "plugins/campfire");
+    public static final Identifier STONE_CUTTING = new Identifier("minecraft", "plugins/stone_cutting");
+    public static final Identifier BREWING = new Identifier("minecraft", "plugins/brewing");
     public static final Identifier PLUGIN = new Identifier("roughlyenoughitems", "default_plugin");
     
     private static final List<DefaultBrewingDisplay> BREWING_DISPLAYS = Lists.newArrayList();
@@ -81,7 +82,7 @@ public class DefaultPlugin implements REIPluginEntry {
             }
         });
         Registry.ENCHANTMENT.forEach(enchantment -> {
-            for(int i = enchantment.getMinimumLevel(); i < enchantment.getMaximumLevel(); i++) {
+            for(int i = enchantment.getMinimumLevel(); i <= enchantment.getMaximumLevel(); i++) {
                 Map<Enchantment, Integer> map = new HashMap<>();
                 map.put(enchantment, i);
                 ItemStack itemStack = new ItemStack(Items.ENCHANTED_BOOK);
@@ -184,6 +185,28 @@ public class DefaultPlugin implements REIPluginEntry {
             @Override
             public Rectangle getRightBounds(RecipeViewingScreen screen) {
                 int startX = ((RecipeViewingScreen) screen).getBounds().x + ((RecipeViewingScreen) screen).getBounds().width + 2;
+                return new Rectangle(startX, 0, MinecraftClient.getInstance().window.getScaledWidth() - startX - 2, MinecraftClient.getInstance().window.getScaledHeight());
+            }
+            
+            @Override
+            public float getPriority() {
+                return -1.0f;
+            }
+        });
+        displayHelper.registerBoundsHandler(new DisplayHelper.DisplayBoundsHandler<VillagerRecipeViewingScreen>() {
+            @Override
+            public Class getBaseSupportedClass() {
+                return VillagerRecipeViewingScreen.class;
+            }
+            
+            @Override
+            public Rectangle getLeftBounds(VillagerRecipeViewingScreen screen) {
+                return new Rectangle(2, 0, ((VillagerRecipeViewingScreen) screen).bounds.x - 4, MinecraftClient.getInstance().window.getScaledHeight());
+            }
+            
+            @Override
+            public Rectangle getRightBounds(VillagerRecipeViewingScreen screen) {
+                int startX = ((VillagerRecipeViewingScreen) screen).bounds.x + ((VillagerRecipeViewingScreen) screen).bounds.width + 2;
                 return new Rectangle(startX, 0, MinecraftClient.getInstance().window.getScaledWidth() - startX - 2, MinecraftClient.getInstance().window.getScaledHeight());
             }
             

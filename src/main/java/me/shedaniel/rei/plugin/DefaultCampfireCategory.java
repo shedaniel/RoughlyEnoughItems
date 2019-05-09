@@ -2,7 +2,7 @@ package me.shedaniel.rei.plugin;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.api.RecipeCategory;
-import me.shedaniel.rei.gui.widget.ItemSlotWidget;
+import me.shedaniel.rei.gui.widget.SlotWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.Widget;
 import net.minecraft.block.Blocks;
@@ -58,8 +58,8 @@ public class DefaultCampfireCategory implements RecipeCategory<DefaultCampfireDi
                 MinecraftClient.getInstance().textRenderer.draw(text, bounds.x + bounds.width - length - 5, startPoint.y + 54 - 8, 4210752);
             }
         }));
-        widgets.add(new ItemSlotWidget(startPoint.x + 1, startPoint.y + 11, recipeDisplaySupplier.get().getInput().get(0), true, true, true));
-        widgets.add(new ItemSlotWidget(startPoint.x + 61, startPoint.y + 19, recipeDisplaySupplier.get().getOutput(), false, true, true));
+        widgets.add(new SlotWidget(startPoint.x + 1, startPoint.y + 11, recipeDisplaySupplier.get().getInput().get(0), true, true, true));
+        widgets.add(new SlotWidget(startPoint.x + 61, startPoint.y + 19, recipeDisplaySupplier.get().getOutput(), false, true, true));
         return widgets;
     }
     

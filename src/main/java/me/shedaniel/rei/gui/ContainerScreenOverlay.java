@@ -27,13 +27,15 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameMode;
 
 import java.awt.*;
-import java.util.*;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ContainerScreenOverlay extends AbstractParentElement implements Drawable {
     
-    private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui" + "/recipecontainer.png");
+    private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private static final List<QueuedTooltip> QUEUED_TOOLTIPS = Lists.newArrayList();
     public static String searchTerm = "";
     private static int page = 0;
@@ -43,7 +45,6 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
     private Window window;
     private CraftableToggleButtonWidget toggleButtonWidget;
     private ButtonWidget buttonLeft, buttonRight;
-    private int lastLeft;
     
     public static ItemListOverlay getItemListOverlay() {
         return itemListOverlay;
@@ -59,7 +60,6 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
         this.window = MinecraftClient.getInstance().window;
         DisplayHelper.DisplayBoundsHandler boundsHandler = RoughlyEnoughItemsCore.getDisplayHelper().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
         this.rectangle = RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? boundsHandler.getLeftBounds(MinecraftClient.getInstance().currentScreen) : boundsHandler.getRightBounds(MinecraftClient.getInstance().currentScreen);
-        this.lastLeft = getLeft();
         widgets.add(itemListOverlay = new ItemListOverlay(page));
         itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, false);
         
@@ -306,6 +306,10 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             RecipeViewingScreen widget = (RecipeViewingScreen) MinecraftClient.getInstance().currentScreen;
             return new Rectangle(widget.getBounds().x, window.getScaledHeight() - 22, widget.getBounds().width - widthRemoved, 18);
         }
+        if (MinecraftClient.getInstance().currentScreen instanceof VillagerRecipeViewingScreen) {
+            VillagerRecipeViewingScreen widget = (VillagerRecipeViewingScreen) MinecraftClient.getInstance().currentScreen;
+            return new Rectangle(widget.bounds.x, window.getScaledHeight() - 22, widget.bounds.width - widthRemoved, 18);
+        }
         return new Rectangle(ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft(), window.getScaledHeight() - 22, ScreenHelper.getLastContainerScreenHooks().rei_getContainerWidth() - widthRemoved, 18);
     }
     
@@ -425,16 +429,6 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             widget.render(int_1, int_2, float_1);
         });
         GuiLighting.disable();
-    }
-    
-    private int getLeft() {
-        if (MinecraftClient.getInstance().currentScreen instanceof RecipeViewingScreen) {
-            RecipeViewingScreen widget = (RecipeViewingScreen) MinecraftClient.getInstance().currentScreen;
-            return widget.getBounds().x;
-        }
-        if (MinecraftClient.getInstance().player.getRecipeBook().isGuiOpen())
-            return ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() - 147 - 30;
-        return ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft();
     }
     
     private int getTotalPage() {
