@@ -74,8 +74,8 @@ public abstract class ButtonWidget extends HighlightableWidget {
         this.blit(x + 4, y + height - 4, 4, 62 + textureOffset * 20, width - 8, 4);
         
         for(int i = y + 4; i < y + height - 4; i += 4) {
-            this.blit(x, i, 0, 50 + textureOffset * 20, width / 2, MathHelper.clamp(y + height - 4 - i, 0, 4));
-            this.blit(x + width / 2, i, 200 - width / 2, 50 + textureOffset * 20, width / 2, MathHelper.clamp(y + height - 4 - i, 0, 4));
+            this.blit(x, i, 0, 50 + textureOffset * 20, MathHelper.ceil(width / 2f), MathHelper.clamp(y + height - 4 - i, 0, 4));
+            this.blit(x + MathHelper.ceil(width / 2f), i, 200 - MathHelper.floor(width / 2f), 50 + textureOffset * 20, MathHelper.floor(width / 2f), MathHelper.clamp(y + height - 4 - i, 0, 4));
         }
         
         int colour = 14737632;

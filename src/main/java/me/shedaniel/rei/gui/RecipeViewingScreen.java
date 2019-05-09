@@ -234,7 +234,7 @@ public class RecipeViewingScreen extends Screen {
             int j = i + categoryPages * 6;
             if (categories.size() > j) {
                 TabWidget tab;
-                tabs.add(tab = new TabWidget(i, this, new Rectangle(bounds.x + 4 + 28 * i, bounds.y - 28, 28, 28)) {
+                tabs.add(tab = new TabWidget(i, new Rectangle(bounds.x + 4 + 28 * i, bounds.y - 28, 28, 28)) {
                     @Override
                     public boolean mouseClicked(double mouseX, double mouseY, int button) {
                         if (getBounds().contains(mouseX, mouseY)) {

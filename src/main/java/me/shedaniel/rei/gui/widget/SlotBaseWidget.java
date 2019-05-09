@@ -18,4 +18,9 @@ public class SlotBaseWidget extends RecipeBaseWidget {
         return -66;
     }
     
+    @Override
+    protected boolean isRendering() {
+        return true;
+    }
+    
 }

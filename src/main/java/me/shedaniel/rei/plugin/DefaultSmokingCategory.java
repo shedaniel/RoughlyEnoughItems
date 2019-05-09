@@ -2,6 +2,8 @@ package me.shedaniel.rei.plugin;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.api.RecipeCategory;
+import me.shedaniel.rei.api.Renderable;
+import me.shedaniel.rei.gui.renderables.RecipeRenderer;
 import me.shedaniel.rei.gui.widget.SlotWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.Widget;
@@ -36,6 +38,11 @@ public class DefaultSmokingCategory implements RecipeCategory<DefaultSmokingDisp
     @Override
     public String getCategoryName() {
         return I18n.translate("category.rei.smoking");
+    }
+    
+    @Override
+    public RecipeRenderer getSimpleRenderer(DefaultSmokingDisplay recipe) {
+        return Renderable.fromRecipe(() -> Arrays.asList(recipe.getInput().get(0)), recipe::getOutput);
     }
     
     @Override

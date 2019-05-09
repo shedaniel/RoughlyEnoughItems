@@ -13,4 +13,9 @@ public class CategoryBaseWidget extends RecipeBaseWidget {
         return 66;
     }
     
+    @Override
+    protected boolean isRendering() {
+        return true;
+    }
+    
 }

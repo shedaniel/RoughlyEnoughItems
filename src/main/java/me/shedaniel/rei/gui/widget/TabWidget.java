@@ -20,14 +20,12 @@ public class TabWidget extends HighlightableWidget {
     public boolean shown = false, selected = false;
     public Renderer renderer;
     public int id;
-    public RecipeViewingScreen recipeViewingWidget;
     public String categoryName;
     public Rectangle bounds;
     public RecipeCategory category;
     
-    public TabWidget(int id, RecipeViewingScreen recipeViewingWidget, Rectangle bounds) {
+    public TabWidget(int id, Rectangle bounds) {
         this.id = id;
-        this.recipeViewingWidget = recipeViewingWidget;
         this.bounds = bounds;
     }
     

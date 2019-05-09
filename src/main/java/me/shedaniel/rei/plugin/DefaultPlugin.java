@@ -82,7 +82,7 @@ public class DefaultPlugin implements REIPluginEntry {
             }
         });
         Registry.ENCHANTMENT.forEach(enchantment -> {
-            for(int i = enchantment.getMinimumLevel(); i < enchantment.getMaximumLevel(); i++) {
+            for(int i = enchantment.getMinimumLevel(); i <= enchantment.getMaximumLevel(); i++) {
                 Map<Enchantment, Integer> map = new HashMap<>();
                 map.put(enchantment, i);
                 ItemStack itemStack = new ItemStack(Items.ENCHANTED_BOOK);
