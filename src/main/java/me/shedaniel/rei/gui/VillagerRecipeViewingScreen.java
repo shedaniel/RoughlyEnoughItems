@@ -88,7 +88,7 @@ public class VillagerRecipeViewingScreen extends Screen {
         Optional<ButtonAreaSupplier> supplier = RecipeHelper.getInstance().getSpeedCraftButtonArea(category);
         final SpeedCraftFunctional functional = getSpeedCraftFunctionalByCategory(ScreenHelper.getLastContainerScreen(), category);
         if (supplier.isPresent())
-            widgets.add(new SpeedCraftingButtonWidget(supplier.get().get(recipeBounds), supplier.get().getButtonText(), functional, () -> display));
+            this.widgets.add(new SpeedCraftingButtonWidget(supplier.get().get(recipeBounds), supplier.get().getButtonText(), functional, () -> display));
         
         int index = 0;
         for(RecipeDisplay recipeDisplay : categoryMap.get(category)) {
