@@ -21,6 +21,7 @@ import net.minecraft.text.TranslatableTextComponent;
 import net.minecraft.util.Identifier;
 
 import java.awt.*;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +48,11 @@ public class PreRecipeViewingScreen extends Screen {
             @Override
             public void onPressed() {
                 RoughlyEnoughItemsCore.getConfigManager().getConfig().screenType = original ? RecipeScreenType.ORIGINAL : RecipeScreenType.VILLAGER;
+                try {
+                    RoughlyEnoughItemsCore.getConfigManager().saveConfig();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 ClientHelper.getInstance().openRecipeViewingScreen(map);
             }
         });
