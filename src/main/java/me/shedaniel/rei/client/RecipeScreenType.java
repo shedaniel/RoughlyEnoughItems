@@ -11,6 +11,6 @@ public enum RecipeScreenType {
     
     @Override
     public String toString() {
-        return I18n.translate("text.rei.config.recipe_screen_type." + name().toLowerCase(Locale.ROOT));
+        return I18n.translate("text.rei.config.recipe_screen_type." + name().toLowerCase());
     }
 }
