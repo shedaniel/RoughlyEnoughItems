@@ -1,3 +1,8 @@
+/*
+ * Roughly Enough Items by Danielshe.
+ * Licensed under the MIT License.
+ */
+
 package me.shedaniel.rei.gui.credits;
 
 import net.minecraft.client.MinecraftClient;
