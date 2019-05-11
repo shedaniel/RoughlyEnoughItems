@@ -3,6 +3,11 @@ package me.shedaniel.rei.api;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import net.minecraft.util.Identifier;
 
+/**
+ * Get base class of a REI plugin.
+ * This class has been replaced by {@link REIPluginEntry}
+ */
+@Deprecated
 public interface REIPlugin extends REIPluginEntry {
     @Override
     default Identifier getPluginIdentifier() {
