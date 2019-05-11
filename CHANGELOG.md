@@ -2,6 +2,8 @@ View full changelog [here](https://github.com/shedaniel/RoughlyEnoughItems/blob/
 ## v2.9-beta+build.107 (BETA)
 - Fixed: Crashing when clicking tabs
 - Added: Buttons to switch category page
+- Fixed: NullPointerException by geniii
+- Fixed [#58](https://github.com/shedaniel/RoughlyEnoughItems/issues/58): Keybinds (e.g. O, R, U) working even a search field is focused
 ## v2.9-beta+build.106 (BETA)
 - Using: [HammerLib](https://minecraft.curseforge.com/projects/hammer-lib) as a simple opengl scissors api
 - New: Mod Name of category new shows in category tooltips
