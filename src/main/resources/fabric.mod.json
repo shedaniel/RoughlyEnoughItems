@@ -38,7 +38,8 @@
     "cloth-config": ">=0.1.0"
   },
   "mixins": [
-    "roughlyenoughitems.mixins.json"
+    "mixin.roughlyenoughitems.mixins.json",
+    "listeners.roughlyenoughitems.mixins.json"
   ],
   "custom": {
     "modmenu:clientsideOnly": true

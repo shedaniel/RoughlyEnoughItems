@@ -1,4 +1,7 @@
 View full changelog [here](https://github.com/shedaniel/RoughlyEnoughItems/blob/1.14/CHANGELOG.md).
+## v2.9-beta+build.107 (BETA)
+- Fixed: Crashing when clicking tabs
+- Added: Buttons to switch category page
 ## v2.9-beta+build.106 (BETA)
 - Using: [HammerLib](https://minecraft.curseforge.com/projects/hammer-lib) as a simple opengl scissors api
 - New: Mod Name of category new shows in category tooltips
@@ -9,6 +12,7 @@ View full changelog [here](https://github.com/shedaniel/RoughlyEnoughItems/blob/
 - Fixed: Button Width Rendering issues when the width is an odd number
 - Changed: Mod Name changed from `RoughlyEnoughItems` to `Roughly Enough Items`
 - Changed: Lots of internal refractors
+- Fixed: Enchanting books not showing its maximum level
 ## v2.8.2+build.104
 - Fixed [#81](https://github.com/shedaniel/RoughlyEnoughItems/issues/81): Scrolling unaffected by exclusion zones.
 - Added [#82](https://github.com/shedaniel/RoughlyEnoughItems/issues/82): Close search after pressing "Enter"

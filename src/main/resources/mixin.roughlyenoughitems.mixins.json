@@ -5,10 +5,7 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [],
   "client": [
-    "MixinContainerScreen",
-    "MixinBrewingRecipeRegistry",
-    "MixinRecipeBookGui",
-    "MixinCreativePlayerInventoryScreen"
+    "MixinBrewingRecipeRegistry"
   ],
   "injectors": {
     "defaultRequire": 1
