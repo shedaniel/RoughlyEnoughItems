@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "package": "me.shedaniel.rei.listeners",
+  "minVersion": "0.7.11",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [],
+  "client": [
+    "ContainerScreenHooks",
+    "CreativePlayerInventoryScreenHooks",
+    "RecipeBookGuiHooks"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
