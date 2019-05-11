@@ -27,14 +27,32 @@ import org.apache.commons.lang3.StringUtils;
 import java.awt.*;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class ItemListOverlay extends Widget {
     
     private static final String SPACE = " ", EMPTY = "";
+    private static final Comparator<ItemStack> ASCENDING_COMPARATOR;
+    private static final Comparator<ItemStack> DECENDING_COMPARATOR;
     private static List<Item> searchBlacklisted = Lists.newArrayList();
+    
+    static {
+        ASCENDING_COMPARATOR = (itemStack, t1) -> {
+            if (RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering.equals(ItemListOrdering.name))
+                return tryGetItemStackName(itemStack).compareToIgnoreCase(tryGetItemStackName(t1));
+            if (RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering.equals(ItemListOrdering.item_groups)) {
+                List<ItemGroup> itemGroups = Arrays.asList(ItemGroup.GROUPS);
+                return itemGroups.indexOf(itemStack.getItem().getItemGroup()) - itemGroups.indexOf(t1.getItem().getItemGroup());
+            }
+            return 0;
+        };
+        DECENDING_COMPARATOR = ASCENDING_COMPARATOR.reversed();
+    }
+    
     private final List<ItemStack> currentDisplayed;
+    private final List<SearchArgument[]> lastSearchArgument;
     private List<Widget> widgets;
     private int width, height, page;
     private Rectangle rectangle, listArea;
@@ -44,6 +62,7 @@ public class ItemListOverlay extends Widget {
         this.width = 0;
         this.height = 0;
         this.page = page;
+        this.lastSearchArgument = Lists.newArrayList();
     }
     
     public static List<String> tryGetItemStackToolTip(ItemStack itemStack, boolean careAboutAdvanced) {
@@ -186,20 +205,13 @@ public class ItemListOverlay extends Widget {
     }
     
     private List<ItemStack> processSearchTerm(String searchTerm, List<ItemStack> ol, List<ItemStack> inventoryItems) {
-        List<ItemStack> os = Lists.newArrayList(ol), stacks = Lists.newArrayList(), finalStacks = Lists.newArrayList();
-        List<ItemGroup> itemGroups = Lists.newArrayList(ItemGroup.GROUPS);
-        itemGroups.add(null);
-        ItemListOrdering ordering = RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering;
-        if (ordering != ItemListOrdering.registry)
-            Collections.sort(os, (itemStack, t1) -> {
-                if (ordering.equals(ItemListOrdering.name))
-                    return tryGetItemStackName(itemStack).compareToIgnoreCase(tryGetItemStackName(t1));
-                if (ordering.equals(ItemListOrdering.item_groups))
-                    return itemGroups.indexOf(itemStack.getItem().getItemGroup()) - itemGroups.indexOf(t1.getItem().getItemGroup());
-                return 0;
-            });
-        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isAscending)
-            Collections.reverse(os);
+        lastSearchArgument.clear();
+        List<ItemStack> os = Lists.newArrayList(ol), stacks = Lists.newArrayList();
+        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering != ItemListOrdering.registry)
+            if (RoughlyEnoughItemsCore.getConfigManager().getConfig().isAscending)
+                os.sort(ASCENDING_COMPARATOR);
+            else
+                os.sort(DECENDING_COMPARATOR);
         String[] splitSearchTerm = StringUtils.splitByWholeSeparatorPreserveAllTokens(searchTerm, "|");
         Arrays.stream(splitSearchTerm).forEachOrdered(s -> {
             String[] split = StringUtils.split(s);
@@ -219,25 +231,56 @@ public class ItemListOverlay extends Widget {
                 else
                     arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TEXT, s1, true);
             }
-            os.stream().filter(itemStack -> filterItem(itemStack, arguments)).forEachOrdered(stacks::add);
+            if (arguments.length > 0)
+                lastSearchArgument.add(arguments);
+            else lastSearchArgument.add(new SearchArgument[]{SearchArgument.ALWAYS});
         });
-        if (splitSearchTerm.length == 0)
-            stacks.addAll(os);
+        os.stream().filter(itemStack -> filterItem(itemStack, lastSearchArgument)).forEachOrdered(stacks::add);
         List<ItemStack> workingItems = RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() && !stacks.isEmpty() && !inventoryItems.isEmpty() ? Lists.newArrayList() : Lists.newArrayList(ol);
         if (RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled()) {
             RecipeHelper.getInstance().findCraftableByItems(inventoryItems).forEach(workingItems::add);
             workingItems.addAll(inventoryItems);
         }
         if (!RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled())
-            finalStacks.addAll(stacks.stream().distinct().collect(Collectors.toList()));
-        else
-            finalStacks.addAll(stacks.stream().filter(itemStack -> {
-                for(ItemStack workingItem : workingItems)
-                    if (itemStack.isEqualIgnoreTags(workingItem))
-                        return true;
-                return false;
-            }).distinct().collect(Collectors.toList()));
-        return finalStacks;
+            return stacks;
+        return stacks.stream().filter(itemStack -> workingItems.stream().anyMatch(stack -> stack.isEqualIgnoreTags(itemStack))).collect(Collectors.toList());
+    }
+    
+    public List<SearchArgument[]> getLastSearchArgument() {
+        return lastSearchArgument;
+    }
+    
+    public boolean filterItem(ItemStack itemStack, List<SearchArgument[]> arguments) {
+        if (arguments.isEmpty())
+            return true;
+        String mod = ClientHelper.getInstance().getModFromItem(itemStack.getItem()).toLowerCase();
+        String tooltips = tryGetItemStackToolTip(itemStack, false).stream().skip(1).collect(Collectors.joining("")).replace(SPACE, EMPTY).toLowerCase();
+        String name = tryGetItemStackName(itemStack).replace(SPACE, EMPTY).toLowerCase();
+        for(SearchArgument[] arguments1 : arguments) {
+            boolean b = true;
+            for(SearchArgument argument : arguments1) {
+                if (argument.getArgumentType().equals(SearchArgument.ArgumentType.ALWAYS))
+                    return true;
+                if (argument.getArgumentType().equals(SearchArgument.ArgumentType.MOD))
+                    if (SearchArgument.getFunction(!argument.isInclude()).apply(mod.indexOf(argument.getText()))) {
+                        b = false;
+                        break;
+                    }
+                if (argument.getArgumentType().equals(SearchArgument.ArgumentType.TOOLTIP))
+                    if (SearchArgument.getFunction(!argument.isInclude()).apply(tooltips.indexOf(argument.getText()))) {
+                        b = false;
+                        break;
+                    }
+                if (argument.getArgumentType().equals(SearchArgument.ArgumentType.TEXT))
+                    if (SearchArgument.getFunction(!argument.isInclude()).apply(name.indexOf(argument.getText()))) {
+                        b = false;
+                        break;
+                    }
+            }
+            if (b)
+                return true;
+        }
+        return false;
     }
     
     private boolean filterItem(ItemStack itemStack, SearchArgument... arguments) {
