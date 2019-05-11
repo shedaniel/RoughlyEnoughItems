@@ -102,6 +102,12 @@ public class VillagerRecipeViewingScreen extends Screen {
                     selectedRecipeIndex = finalIndex;
                     VillagerRecipeViewingScreen.this.init();
                 }
+                
+                @Override
+                protected int getTextureId(boolean boolean_1) {
+                    enabled = selectedRecipeIndex != finalIndex;
+                    return super.getTextureId(boolean_1);
+                }
             });
             index++;
         }
