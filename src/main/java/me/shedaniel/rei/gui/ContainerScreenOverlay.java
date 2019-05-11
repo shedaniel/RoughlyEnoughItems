@@ -9,6 +9,7 @@ import me.shedaniel.rei.api.DisplayHelper;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.client.Weather;
 import me.shedaniel.rei.gui.widget.*;
+import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.audio.PositionedSoundInstance;
 import net.minecraft.client.font.TextRenderer;
@@ -338,12 +339,13 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             DisplayHelper.DisplayBoundsHandler boundsHandler = RoughlyEnoughItemsCore.getDisplayHelper().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
             itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, true);
         }
-        if (SearchFieldWidget.isSearching) {
+        if (MinecraftClient.getInstance().currentScreen instanceof ContainerScreen && SearchFieldWidget.isSearching) {
             GuiLighting.disable();
             blitOffset = 200;
-            int left = ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft(), top = ScreenHelper.getLastContainerScreenHooks().rei_getContainerTop();
-            for(Slot slot : ScreenHelper.getLastContainerScreen().getContainer().slotList)
-                if (!slot.hasStack() || !itemListOverlay.getCurrentDisplayed().stream().anyMatch(stack -> stack.isEqualIgnoreTags(slot.getStack())))
+            ContainerScreenHooks hooks = (ContainerScreenHooks) MinecraftClient.getInstance().currentScreen;
+            int left = hooks.rei_getContainerLeft(), top = hooks.rei_getContainerTop();
+            for(Slot slot : ((ContainerScreen) MinecraftClient.getInstance().currentScreen).getContainer().slotList)
+                if (!slot.hasStack() || !itemListOverlay.filterItem(slot.getStack(), itemListOverlay.getLastSearchArgument()))
                     fillGradient(left + slot.xPosition, top + slot.yPosition, left + slot.xPosition + 16, top + slot.yPosition + 16, -601874400, -601874400);
             blitOffset = 0;
         }

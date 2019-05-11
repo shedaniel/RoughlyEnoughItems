@@ -1,4 +1,6 @@
 View full changelog [here](https://github.com/shedaniel/RoughlyEnoughItems/blob/1.14/CHANGELOG.md).
+## v2.9-beta+build.108 (BETA)
+- Fixed [#88](https://github.com/shedaniel/RoughlyEnoughItems/issues/88): Stupid Item Search
 ## v2.9-beta+build.107 (BETA)
 - Fixed: Crashing when clicking tabs
 - Added: Buttons to switch category page
