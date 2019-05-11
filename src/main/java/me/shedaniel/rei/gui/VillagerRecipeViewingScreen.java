@@ -16,6 +16,7 @@ import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.StringTextComponent;
+import net.minecraft.text.TranslatableTextComponent;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
@@ -32,6 +33,7 @@ import static me.shedaniel.rei.gui.RecipeViewingScreen.getSpeedCraftFunctionalBy
 
 public class VillagerRecipeViewingScreen extends Screen {
     
+    private static final int TABS_PER_PAGE = 8;
     private final Map<RecipeCategory, List<RecipeDisplay>> categoryMap;
     private final List<RecipeCategory> categories;
     private final List<Widget> widgets;
@@ -42,7 +44,6 @@ public class VillagerRecipeViewingScreen extends Screen {
     private int selectedCategoryIndex, selectedRecipeIndex;
     private double scroll;
     private int tabsPage;
-    private static final int TABS_PER_PAGE = 9;
     
     public VillagerRecipeViewingScreen(Map<RecipeCategory, List<RecipeDisplay>> map) {
         super(new StringTextComponent(""));
@@ -117,6 +118,7 @@ public class VillagerRecipeViewingScreen extends Screen {
                                 return false;
                             selectedCategoryIndex = getId() + tabsPage * TABS_PER_PAGE;
                             scroll = 0;
+                            selectedRecipeIndex = 0;
                             VillagerRecipeViewingScreen.this.init();
                             return true;
                         }
@@ -126,6 +128,26 @@ public class VillagerRecipeViewingScreen extends Screen {
                 tab.setRenderer(categories.get(j), categories.get(j).getIcon(), categories.get(j).getCategoryName(), tab.getId() + tabsPage * TABS_PER_PAGE == selectedCategoryIndex);
             }
         }
+        ButtonWidget w, w2;
+        this.widgets.add(w = new ButtonWidget(bounds.x + 2, bounds.y - 16, 10, 10, new TranslatableTextComponent("text.rei.left_arrow")) {
+            @Override
+            public void onPressed() {
+                tabsPage--;
+                if (tabsPage < 0)
+                    tabsPage = MathHelper.ceil(categories.size() / (float) TABS_PER_PAGE) - 1;
+                VillagerRecipeViewingScreen.this.init();
+            }
+        });
+        this.widgets.add(w2 = new ButtonWidget(bounds.x + bounds.width - 12, bounds.y - 16, 10, 10, new TranslatableTextComponent("text.rei.right_arrow")) {
+            @Override
+            public void onPressed() {
+                tabsPage++;
+                if (tabsPage > MathHelper.ceil(categories.size() / (float) TABS_PER_PAGE) - 1)
+                    tabsPage = 0;
+                VillagerRecipeViewingScreen.this.init();
+            }
+        });
+        w.enabled = w2.enabled = categories.size() > TABS_PER_PAGE;
         
         this.widgets.add(new ClickableLabelWidget(bounds.x + 4 + scrollListBounds.width / 2, bounds.y + 6, categories.get(selectedCategoryIndex).getCategoryName()) {
             @Override
@@ -142,22 +164,14 @@ public class VillagerRecipeViewingScreen extends Screen {
             @Override
             public void render(int mouseX, int mouseY, float delta) {
                 GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-                int colour = getDefaultColor();
-                if (clickable && isHovered(mouseX, mouseY))
-                    colour = getHoveredColor();
-                font.draw((isHovered(mouseX, mouseY) ? "§n" : "") + text, x - font.getStringWidth(text) / 2, y, colour);
+                font.draw((isHovered(mouseX, mouseY) ? "§n" : "") + text, x - font.getStringWidth(text) / 2, y, getDefaultColor());
                 if (clickable && getTooltips().isPresent())
                     if (!focused && isHighlighted(mouseX, mouseY))
                         ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltips().get().split("\n")));
                     else if (focused)
                         ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(new Point(x, y), getTooltips().get().split("\n")));
             }
-    
-            @Override
-            public int getHoveredColor() {
-                return -1;
-            }
-    
+            
             @Override
             public int getDefaultColor() {
                 return 4210752;
