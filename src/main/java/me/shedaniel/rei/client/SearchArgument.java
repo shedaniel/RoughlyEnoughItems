@@ -11,6 +11,7 @@ public class SearchArgument {
     private String text;
     private boolean include;
     private Pattern pattern;
+    public static final SearchArgument ALWAYS = new SearchArgument(ArgumentType.ALWAYS, "", true);
     
     public SearchArgument(ArgumentType argumentType, String text, boolean include) {
         this(argumentType, text, include, true);
@@ -46,7 +47,8 @@ public class SearchArgument {
     public enum ArgumentType {
         TEXT,
         MOD,
-        TOOLTIP
+        TOOLTIP,
+        ALWAYS
     }
     
 }
