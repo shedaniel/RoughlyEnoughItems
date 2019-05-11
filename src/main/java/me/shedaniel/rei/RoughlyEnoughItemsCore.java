@@ -227,7 +227,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                 ScreenHelper.getLastOverlay().lateRender(i, i1, v);
         });
         ClothClientHooks.SCREEN_KEY_PRESSED.register((minecraftClient, screen, i, i1, i2) -> {
-            if (screen.getFocused() != null && screen.getFocused() instanceof TextFieldWidget || (screen.getFocused() instanceof RecipeBookGui && ((RecipeBookGuiHooks)screen.getFocused()).rei_getSearchField().isFocused()))
+            if (screen.getFocused() != null && screen.getFocused() instanceof TextFieldWidget || (screen.getFocused() instanceof RecipeBookGui && ((RecipeBookGuiHooks)screen.getFocused()).rei_getSearchField() != null && ((RecipeBookGuiHooks)screen.getFocused()).rei_getSearchField().isFocused()))
                 return ActionResult.PASS;
             if (screen instanceof ContainerScreen)
                 if (ScreenHelper.getLastOverlay().keyPressed(i, i1, i2))
