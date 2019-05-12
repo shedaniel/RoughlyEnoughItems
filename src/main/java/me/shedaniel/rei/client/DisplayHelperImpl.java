@@ -23,7 +23,7 @@ public class DisplayHelperImpl implements DisplayHelper {
     private static final DisplayBoundsHandler EMPTY = new DisplayBoundsHandler() {
         @Override
         public Class getBaseSupportedClass() {
-            return Object.class;
+            return null;
         }
         
         @Override

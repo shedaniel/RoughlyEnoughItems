@@ -1,4 +1,7 @@
 View full changelog [here](https://github.com/shedaniel/RoughlyEnoughItems/blob/1.14/CHANGELOG.md).
+## v2.9-beta+build.109 (BETA)
+- Fixed [#92](https://github.com/shedaniel/RoughlyEnoughItems/issues/92): Make REI Buttons use an extra sheet
+- Adds: Support for `{item_name}` in cheating items for getting the path of the item identifier
 ## v2.9-beta+build.108 (BETA)
 - Fixed [#88](https://github.com/shedaniel/RoughlyEnoughItems/issues/88): Stupid Item Search
 ## v2.9-beta+build.107 (BETA)
