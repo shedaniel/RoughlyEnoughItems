@@ -43,7 +43,7 @@ public interface REIPluginEntry {
     /**
      * Not called anymore!
      *
-     * @param recipeHelper
+     * @param recipeHelper the helper class
      * @see REIPluginEntry#registerOthers(RecipeHelper)
      */
     @Deprecated

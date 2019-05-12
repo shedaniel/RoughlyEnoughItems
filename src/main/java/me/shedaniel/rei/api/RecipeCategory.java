@@ -117,9 +117,9 @@ public interface RecipeCategory<T extends RecipeDisplay> {
     
     /**
      * Gets the recipe display height
+     * Please do not override this, use {@link RecipeCategory#getDisplaySettings()} instead
      *
      * @return the recipe display height
-     * @apiNote Please do not override this, use {@link RecipeCategory#getDisplaySettings()} instead
      */
     default int getDisplayHeight() {
         return RecipeHelper.getInstance().getCachedCategorySettings(getIdentifier()).map(settings -> settings.getDisplayHeight(this)).orElse(0);
@@ -127,20 +127,20 @@ public interface RecipeCategory<T extends RecipeDisplay> {
     
     /**
      * Gets the recipe display width
+     * Please do not override this, use {@link RecipeCategory#getDisplaySettings()} instead
      *
      * @param display the recipe display
      * @return the recipe display width
-     * @apiNote Please do not override this, use {@link RecipeCategory#getDisplaySettings()} instead
      */
     default int getDisplayWidth(T display) {
         return RecipeHelper.getInstance().getCachedCategorySettings(getIdentifier()).map(settings -> settings.getDisplayWidth(this, display)).orElse(0);
     }
     
     /**
-     * Gets the maximum recipe per page
+     * Gets the maximum recipe per page.
+     * Please do not override this, use {@link RecipeCategory#getDisplaySettings()} instead
      *
      * @return the maximum amount of recipes for page
-     * @apiNote Please do not override this, use {@link RecipeCategory#getDisplaySettings()} instead
      */
     default int getMaximumRecipePerPage() {
         return RecipeHelper.getInstance().getCachedCategorySettings(getIdentifier()).map(settings -> settings.getMaximumRecipePerPage(this)).orElse(0);
