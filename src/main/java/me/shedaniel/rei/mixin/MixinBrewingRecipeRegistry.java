@@ -10,7 +10,7 @@ import me.shedaniel.rei.plugin.BrewingRecipe;
 import me.shedaniel.rei.plugin.DefaultBrewingDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemProvider;
+import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.PotionItem;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionUtil;
@@ -34,13 +34,13 @@ public class MixinBrewingRecipeRegistry {
     @Inject(method = "registerPotionType", at = @At("RETURN"))
     private static void method_8080(Item item_1, CallbackInfo ci) {
         if (item_1 instanceof PotionItem)
-            SELF_POTION_TYPES.add(Ingredient.ofItems(new ItemProvider[]{item_1}));
+            SELF_POTION_TYPES.add(Ingredient.ofItems(new ItemConvertible[]{item_1}));
     }
     
     @Inject(method = "registerItemRecipe", at = @At("RETURN"))
     private static void method_8071(Item item_1, Item item_2, Item item_3, CallbackInfo ci) {
         if (item_1 instanceof PotionItem && item_3 instanceof PotionItem)
-            SELF_ITEM_RECIPES.add(new BrewingRecipe(item_1, Ingredient.ofItems(new ItemProvider[]{item_2}), item_3));
+            SELF_ITEM_RECIPES.add(new BrewingRecipe(item_1, Ingredient.ofItems(new ItemConvertible[]{item_2}), item_3));
     }
     
     @Inject(method = "registerPotionRecipe", at = @At("RETURN"))
@@ -50,7 +50,7 @@ public class MixinBrewingRecipeRegistry {
         if (!REGISTERED_POTION_TYPES.contains(potion_2))
             rei_registerPotionType(potion_2);
         SELF_POTION_TYPES.stream().map(Ingredient::getStackArray).forEach(itemStacks -> Arrays.stream(itemStacks).forEach(stack -> {
-            DefaultPlugin.registerBrewingDisplay(new DefaultBrewingDisplay(PotionUtil.setPotion(stack.copy(), potion_1), Ingredient.ofItems(new ItemProvider[]{item_1}), PotionUtil.setPotion(stack.copy(), potion_2)));
+            DefaultPlugin.registerBrewingDisplay(new DefaultBrewingDisplay(PotionUtil.setPotion(stack.copy(), potion_1), Ingredient.ofItems(new ItemConvertible[]{item_1}), PotionUtil.setPotion(stack.copy(), potion_2)));
         }));
     }
     

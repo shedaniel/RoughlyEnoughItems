@@ -7,7 +7,7 @@ package me.shedaniel.rei.gui.credits;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.menu.AlwaysSelectedEntryListWidget;
-import net.minecraft.text.TextComponent;
+import net.minecraft.network.chat.Component;
 
 public class CreditsEntryListWidget extends AlwaysSelectedEntryListWidget<CreditsEntryListWidget.CreditsItem> {
     
@@ -40,7 +40,7 @@ public class CreditsEntryListWidget extends AlwaysSelectedEntryListWidget<Credit
     public static class CreditsItem extends AlwaysSelectedEntryListWidget.Entry<CreditsItem> {
         private String text;
         
-        public CreditsItem(TextComponent textComponent) {
+        public CreditsItem(Component textComponent) {
             this(textComponent.getFormattedText());
         }
         

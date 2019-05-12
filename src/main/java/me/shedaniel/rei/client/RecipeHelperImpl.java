@@ -250,7 +250,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     }
     
     @Override
-    public List<Recipe> getVanillaSortedRecipes() {
+    public List<Recipe> getAllSortedRecipes() {
         return getRecipeManager().values().stream().sorted(RECIPE_COMPARATOR).collect(Collectors.toList());
     }
     

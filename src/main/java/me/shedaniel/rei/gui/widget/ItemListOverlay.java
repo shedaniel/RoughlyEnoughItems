@@ -23,7 +23,7 @@ import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
@@ -73,7 +73,7 @@ public class ItemListOverlay extends Widget {
     public static List<String> tryGetItemStackToolTip(ItemStack itemStack, boolean careAboutAdvanced) {
         if (!searchBlacklisted.contains(itemStack.getItem()))
             try {
-                return itemStack.getTooltipText(MinecraftClient.getInstance().player, MinecraftClient.getInstance().options.advancedItemTooltips && careAboutAdvanced ? TooltipContext.Default.ADVANCED : TooltipContext.Default.NORMAL).stream().map(TextComponent::getFormattedText).collect(Collectors.toList());
+                return itemStack.getTooltipText(MinecraftClient.getInstance().player, MinecraftClient.getInstance().options.advancedItemTooltips && careAboutAdvanced ? TooltipContext.Default.ADVANCED : TooltipContext.Default.NORMAL).stream().map(Component::getFormattedText).collect(Collectors.toList());
             } catch (Throwable e) {
                 e.printStackTrace();
                 searchBlacklisted.add(itemStack.getItem());
@@ -238,7 +238,8 @@ public class ItemListOverlay extends Widget {
             }
             if (arguments.length > 0)
                 lastSearchArgument.add(arguments);
-            else lastSearchArgument.add(new SearchArgument[]{SearchArgument.ALWAYS});
+            else
+                lastSearchArgument.add(new SearchArgument[]{SearchArgument.ALWAYS});
         });
         os.stream().filter(itemStack -> filterItem(itemStack, lastSearchArgument)).forEachOrdered(stacks::add);
         List<ItemStack> workingItems = RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() && !stacks.isEmpty() && !inventoryItems.isEmpty() ? Lists.newArrayList() : Lists.newArrayList(ol);

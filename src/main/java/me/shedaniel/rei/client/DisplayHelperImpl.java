@@ -28,12 +28,12 @@ public class DisplayHelperImpl implements DisplayHelper {
         
         @Override
         public Rectangle getLeftBounds(Object screen) {
-            return DisplayBoundsHandler.EMPTY;
+            return new Rectangle();
         }
         
         @Override
         public Rectangle getRightBounds(Object screen) {
-            return DisplayBoundsHandler.EMPTY;
+            return new Rectangle();
         }
         
         @Override
