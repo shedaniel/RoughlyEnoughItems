@@ -27,6 +27,12 @@ public interface ItemRegistry {
     @Deprecated
     List<ItemStack> getModifiableItemList();
     
+    /**
+     * Gets all possible stacks from an item
+     *
+     * @param item the item to find
+     * @return the array of possible stacks
+     */
     ItemStack[] getAllStacksFromItem(Item item);
     
     /**
@@ -37,12 +43,23 @@ public interface ItemRegistry {
      */
     void registerItemStack(Item afterItem, ItemStack stack);
     
+    /**
+     * Registers multiple stacks to the item list
+     *
+     * @param afterItem the stack to put after
+     * @param stacks    the stacks to register
+     */
     default void registerItemStack(Item afterItem, ItemStack... stacks) {
         for(ItemStack stack : stacks)
             if (stack != null && !stack.isEmpty())
                 registerItemStack(afterItem, stack);
     }
     
+    /**
+     * Registers multiple stacks to the item list
+     *
+     * @param stacks the stacks to register
+     */
     default void registerItemStack(ItemStack... stacks) {
         for(ItemStack stack : stacks)
             if (stack != null && !stack.isEmpty())
