@@ -1,10 +1,14 @@
+/*
+ * Roughly Enough Items by Danielshe.
+ * Licensed under the MIT License.
+ */
+
 package me.shedaniel.rei.gui.widget;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.audio.PositionedSoundInstance;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.sound.SoundEvents;
-import org.lwjgl.glfw.GLFW;
 
 public class SearchFieldWidget extends TextFieldWidget {
     
@@ -54,7 +58,7 @@ public class SearchFieldWidget extends TextFieldWidget {
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (this.isVisible() && this.isFocused())
-            if (int_1 == GLFW.GLFW_KEY_ENTER || int_1 == GLFW.GLFW_KEY_KP_ENTER) {
+            if (int_1 == 257 || int_1 == 335) {
                 setFocused(false);
                 return true;
             }

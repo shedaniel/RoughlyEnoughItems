@@ -1,3 +1,8 @@
+/*
+ * Roughly Enough Items by Danielshe.
+ * Licensed under the MIT License.
+ */
+
 package me.shedaniel.rei.client;
 
 import com.google.common.collect.Lists;
@@ -18,7 +23,7 @@ public class DisplayHelperImpl implements DisplayHelper {
     private static final DisplayBoundsHandler EMPTY = new DisplayBoundsHandler() {
         @Override
         public Class getBaseSupportedClass() {
-            return Object.class;
+            return null;
         }
         
         @Override

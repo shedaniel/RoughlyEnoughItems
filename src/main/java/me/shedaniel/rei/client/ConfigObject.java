@@ -1,3 +1,8 @@
+/*
+ * Roughly Enough Items by Danielshe.
+ * Licensed under the MIT License.
+ */
+
 package me.shedaniel.rei.client;
 
 import blue.endless.jankson.Comment;
@@ -38,9 +43,6 @@ public class ConfigObject {
     @Comment("Disable Recipe Book") public boolean disableRecipeBook = false;
     
     public boolean preferVisibleRecipes = false;
-    
-    //    @Comment("Enable support for old REI plugins which uses registerSpeedCraft")
-    //    public boolean enableLegacySpeedCraftSupport = false;
     
     @Comment("Force enable 2019 REI April Fools' joke") public boolean aprilFoolsFish2019 = false;
     

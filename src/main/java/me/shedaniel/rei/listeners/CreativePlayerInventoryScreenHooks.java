@@ -1,3 +1,8 @@
+/*
+ * Roughly Enough Items by Danielshe.
+ * Licensed under the MIT License.
+ */
+
 package me.shedaniel.rei.listeners;
 
 import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
