@@ -1,3 +1,8 @@
+/*
+ * Roughly Enough Items by Danielshe.
+ * Licensed under the MIT License.
+ */
+
 package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.gui.renderables.EmptyRenderer;
@@ -9,6 +14,9 @@ import net.minecraft.util.math.MathHelper;
 import java.util.List;
 import java.util.function.Supplier;
 
+/**
+ * The base class for renderables
+ */
 public interface Renderable {
     
     static ItemStackRenderer fromItemStackSupplier(Supplier<ItemStack> supplier) {

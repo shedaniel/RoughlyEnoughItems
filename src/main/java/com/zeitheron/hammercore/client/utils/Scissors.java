@@ -11,10 +11,21 @@ import org.lwjgl.opengl.GL11;
  * @author Zeitheron
  */
 public class Scissors {
+    /**
+     * Starts the scissor test
+     */
     public static void begin() {
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
     }
     
+    /**
+     * Setup the scissor bounds
+     *
+     * @param x      the top left x coordinates
+     * @param y      the top left y coordinates
+     * @param width  the width of the bounds
+     * @param height the height of the bounds
+     */
     public static void scissor(int x, int y, int width, int height) {
         Window window = MinecraftClient.getInstance().window;
         
@@ -32,6 +43,9 @@ public class Scissors {
         GL11.glScissor(x, sh - height - y, width, height);
     }
     
+    /**
+     * Stops the scissor test
+     */
     public static void end() {
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
     }

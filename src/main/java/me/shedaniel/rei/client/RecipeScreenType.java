@@ -1,3 +1,8 @@
+/*
+ * Roughly Enough Items by Danielshe.
+ * Licensed under the MIT License.
+ */
+
 package me.shedaniel.rei.client;
 
 import net.minecraft.client.resource.language.I18n;

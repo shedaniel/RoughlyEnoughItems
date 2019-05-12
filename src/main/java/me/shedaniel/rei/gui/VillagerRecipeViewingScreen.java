@@ -1,3 +1,8 @@
+/*
+ * Roughly Enough Items by Danielshe.
+ * Licensed under the MIT License.
+ */
+
 package me.shedaniel.rei.gui;
 
 import com.google.common.collect.Lists;
@@ -101,6 +106,12 @@ public class VillagerRecipeViewingScreen extends Screen {
                 public void onPressed() {
                     selectedRecipeIndex = finalIndex;
                     VillagerRecipeViewingScreen.this.init();
+                }
+                
+                @Override
+                protected int getTextureId(boolean boolean_1) {
+                    enabled = selectedRecipeIndex != finalIndex;
+                    return super.getTextureId(boolean_1);
                 }
             });
             index++;

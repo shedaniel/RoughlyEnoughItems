@@ -1,12 +1,17 @@
+/*
+ * Roughly Enough Items by Danielshe.
+ * Licensed under the MIT License.
+ */
+
 package me.shedaniel.rei.gui.widget;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.client.ScreenHelper;
 import net.minecraft.client.audio.PositionedSoundInstance;
 import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.TextComponent;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
@@ -16,6 +21,7 @@ import java.util.Optional;
 
 public abstract class ButtonWidget extends HighlightableWidget {
     
+    public static final Identifier BUTTON_LOCATION = new Identifier("roughlyenoughitems", "textures/gui/button.png");
     public String text;
     public boolean enabled;
     public boolean focused;
@@ -57,25 +63,26 @@ public abstract class ButtonWidget extends HighlightableWidget {
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;
-        minecraft.getTextureManager().bindTexture(AbstractButtonWidget.WIDGETS_LOCATION);
+        minecraft.getTextureManager().bindTexture(BUTTON_LOCATION);
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         int textureOffset = this.getTextureId(isHovered(mouseX, mouseY));
         GlStateManager.enableBlend();
         GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         //Four Corners
-        this.blit(x, y, 0, 46 + textureOffset * 20, 4, 4);
-        this.blit(x + width - 4, y, 196, 46 + textureOffset * 20, 4, 4);
-        this.blit(x, y + height - 4, 0, 62 + textureOffset * 20, 4, 4);
-        this.blit(x + width - 4, y + height - 4, 196, 62 + textureOffset * 20, 4, 4);
+        blit(x, y, 0, textureOffset * 80, 4, 4);
+        blit(x + width - 4, y, 252, textureOffset * 80, 4, 4);
+        blit(x, y + height - 4, 0, textureOffset * 80 + 76, 4, 4);
+        blit(x + width - 4, y + height - 4, 252, textureOffset * 80 + 76, 4, 4);
         
         //Sides
-        this.blit(x + 4, y, 4, 46 + textureOffset * 20, width - 8, 4);
-        this.blit(x + 4, y + height - 4, 4, 62 + textureOffset * 20, width - 8, 4);
-        
-        for(int i = y + 4; i < y + height - 4; i += 4) {
-            this.blit(x, i, 0, 50 + textureOffset * 20, MathHelper.ceil(width / 2f), MathHelper.clamp(y + height - 4 - i, 0, 4));
-            this.blit(x + MathHelper.ceil(width / 2f), i, 200 - MathHelper.floor(width / 2f), 50 + textureOffset * 20, MathHelper.floor(width / 2f), MathHelper.clamp(y + height - 4 - i, 0, 4));
+        blit(x + 4, y, 4, textureOffset * 80, MathHelper.ceil((width - 8) / 2f), 4);
+        blit(x + 4, y + height - 4, 4, textureOffset * 80 + 76, MathHelper.ceil((width - 8) / 2f), 4);
+        blit(x + 4 + MathHelper.ceil((width - 8) / 2f), y + height - 4, 252 - MathHelper.floor((width - 8) / 2f), textureOffset * 80 + 76, MathHelper.floor((width - 8) / 2f), 4);
+        blit(x + 4 + MathHelper.ceil((width - 8) / 2f), y, 252 - MathHelper.floor((width - 8) / 2f), textureOffset * 80, MathHelper.floor((width - 8) / 2f), 4);
+        for(int i = y + 4; i < y + height - 4; i += 76) {
+            blit(x, i, 0, 4 + textureOffset * 80, MathHelper.ceil(width / 2f), MathHelper.clamp(y + height - 4 - i, 0, 76));
+            blit(x + MathHelper.ceil(width / 2f), i, 256 - MathHelper.floor(width / 2f), 4 + textureOffset * 80, MathHelper.floor(width / 2f), MathHelper.clamp(y + height - 4 - i, 0, 76));
         }
         
         int colour = 14737632;
