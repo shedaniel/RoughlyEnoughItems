@@ -26,6 +26,7 @@ public class ItemRegistryImpl implements ItemRegistry {
         return Collections.unmodifiableList(itemList);
     }
     
+    @SuppressWarnings("deprecation")
     @Override
     public List<ItemStack> getModifiableItemList() {
         return itemList;

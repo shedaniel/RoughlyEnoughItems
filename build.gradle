@@ -1,7 +1,7 @@
 import net.fabricmc.loom.task.RemapJar
 
 plugins {
-    id 'fabric-loom' version '0.2.1-SNAPSHOT'
+    id 'fabric-loom' version '0.2.2-SNAPSHOT'
     id "com.github.johnrengelman.shadow" version "4.0.3"
 }
 
@@ -51,20 +51,20 @@ dependencies {
     mappings "net.fabricmc:yarn:${project.yarn_version}"
     modCompile "net.fabricmc:fabric-loader:${project.fabricloader_version}"
 //    modCompile "net.fabricmc:fabric:${project.fabric_version}"
-    modCompile "net.fabricmc.fabric-api:fabric-keybindings:${project.fabric_keybindings}"
-    modCompile "net.fabricmc.fabric-api:fabric-lib:${project.fabric_lib}"
-    modCompile "net.fabricmc.fabric-api:fabric-networking:${project.fabric_networking}"
-    modCompile "net.fabricmc.fabric-api:fabric-events-lifecycle:${project.fabric_events_lifecycle}"
-    modCompile "net.fabricmc.fabric-api:fabric-resource-loader:${project.fabric_resource_loader}"
+    modCompile "net.fabricmc.fabric-api:fabric-keybindings-v0:${project.fabric_keybindings}"
+    modCompile "net.fabricmc.fabric-api:fabric-api-base:${project.fabric_api_base}"
+    modCompile "net.fabricmc.fabric-api:fabric-networking-v0:${project.fabric_networking}"
+    modCompile "net.fabricmc.fabric-api:fabric-events-lifecycle-v0:${project.fabric_events_lifecycle}"
+    modCompile "net.fabricmc.fabric-api:fabric-resource-loader-v0:${project.fabric_resource_loader}"
     modCompile "cloth:ClothEvents:${cloth_events_version}"
     modCompile "cloth-config:ClothConfig:${cloth_config_version}"
     if (includeDep) {
 //        include "net.fabricmc:fabric:${project.fabric_version}"
-        include "net.fabricmc.fabric-api:fabric-keybindings:${project.fabric_keybindings}"
-        include "net.fabricmc.fabric-api:fabric-lib:${project.fabric_lib}"
-        include "net.fabricmc.fabric-api:fabric-networking:${project.fabric_networking}"
-        include "net.fabricmc.fabric-api:fabric-events-lifecycle:${project.fabric_events_lifecycle}"
-        include "net.fabricmc.fabric-api:fabric-resource-loader:${project.fabric_resource_loader}"
+        include "net.fabricmc.fabric-api:fabric-keybindings-v0:${project.fabric_keybindings}"
+        include "net.fabricmc.fabric-api:fabric-api-base:${project.fabric_api_base}"
+        include "net.fabricmc.fabric-api:fabric-networking-v0:${project.fabric_networking}"
+        include "net.fabricmc.fabric-api:fabric-events-lifecycle-v0:${project.fabric_events_lifecycle}"
+        include "net.fabricmc.fabric-api:fabric-resource-loader-v0:${project.fabric_resource_loader}"
         include "cloth:ClothEvents:${cloth_events_version}"
         include "cloth-config:ClothConfig:${cloth_config_version}"
     }

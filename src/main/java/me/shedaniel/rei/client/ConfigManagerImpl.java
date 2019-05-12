@@ -15,7 +15,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Screen;
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.text.StringTextComponent;
+import net.minecraft.network.chat.TextComponent;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -143,7 +143,7 @@ public class ConfigManagerImpl implements ConfigManager {
                 e.printStackTrace();
             }
         }
-        return new Screen(new StringTextComponent("")) {
+        return new Screen(new TextComponent("")) {
             @Override
             public void render(int int_1, int int_2, float float_1) {
                 renderDirtBackground(0);

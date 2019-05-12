@@ -13,16 +13,16 @@ import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.widget.*;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.audio.PositionedSoundInstance;
 import net.minecraft.client.gui.ContainerScreen;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.Screen;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.Window;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.StringTextComponent;
-import net.minecraft.text.TranslatableTextComponent;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
@@ -52,7 +52,7 @@ public class RecipeViewingScreen extends Screen {
     private ButtonWidget recipeBack, recipeNext, categoryBack, categoryNext;
     
     public RecipeViewingScreen(Map<RecipeCategory, List<RecipeDisplay>> categoriesMap) {
-        super(new StringTextComponent(""));
+        super(new TextComponent(""));
         this.categoryPages = 0;
         this.widgets = Lists.newArrayList();
         Window window = MinecraftClient.getInstance().window;
@@ -129,7 +129,7 @@ public class RecipeViewingScreen extends Screen {
         this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - guiHeight / 2, guiWidth, guiHeight);
         this.page = MathHelper.clamp(page, 0, getTotalPages(selectedCategory) - 1);
         
-        widgets.add(categoryBack = new ButtonWidget((int) bounds.getX() + 5, (int) bounds.getY() + 5, 12, 12, new TranslatableTextComponent("text.rei.left_arrow")) {
+        widgets.add(categoryBack = new ButtonWidget((int) bounds.getX() + 5, (int) bounds.getY() + 5, 12, 12, new TranslatableComponent("text.rei.left_arrow")) {
             @Override
             public void onPressed() {
                 int currentCategoryIndex = categories.indexOf(selectedCategory);
@@ -165,7 +165,7 @@ public class RecipeViewingScreen extends Screen {
                 ClientHelper.getInstance().executeViewAllRecipesKeyBind();
             }
         });
-        widgets.add(categoryNext = new ButtonWidget((int) bounds.getMaxX() - 17, (int) bounds.getY() + 5, 12, 12, new TranslatableTextComponent("text.rei.right_arrow")) {
+        widgets.add(categoryNext = new ButtonWidget((int) bounds.getMaxX() - 17, (int) bounds.getY() + 5, 12, 12, new TranslatableComponent("text.rei.right_arrow")) {
             @Override
             public void onPressed() {
                 int currentCategoryIndex = categories.indexOf(selectedCategory);
@@ -186,7 +186,7 @@ public class RecipeViewingScreen extends Screen {
         categoryBack.enabled = categories.size() > 1;
         categoryNext.enabled = categories.size() > 1;
         
-        widgets.add(recipeBack = new ButtonWidget((int) bounds.getX() + 5, (int) bounds.getY() + 21, 12, 12, new TranslatableTextComponent("text.rei.left_arrow")) {
+        widgets.add(recipeBack = new ButtonWidget((int) bounds.getX() + 5, (int) bounds.getY() + 21, 12, 12, new TranslatableComponent("text.rei.left_arrow")) {
             @Override
             public void onPressed() {
                 page--;
@@ -219,7 +219,7 @@ public class RecipeViewingScreen extends Screen {
                 RecipeViewingScreen.this.init();
             }
         });
-        widgets.add(recipeNext = new ButtonWidget((int) bounds.getMaxX() - 17, (int) bounds.getY() + 21, 12, 12, new TranslatableTextComponent("text.rei.right_arrow")) {
+        widgets.add(recipeNext = new ButtonWidget((int) bounds.getMaxX() - 17, (int) bounds.getY() + 21, 12, 12, new TranslatableComponent("text.rei.right_arrow")) {
             @Override
             public void onPressed() {
                 page++;

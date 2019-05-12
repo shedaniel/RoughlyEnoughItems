@@ -43,12 +43,12 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
     
     @Override
     public Rectangle getLeftBounds(Screen screen) {
-        return DisplayHelper.DisplayBoundsHandler.EMPTY;
+        return new Rectangle();
     }
     
     @Override
     public Rectangle getRightBounds(Screen screen) {
-        return DisplayHelper.DisplayBoundsHandler.EMPTY;
+        return new Rectangle();
     }
     
     @Override

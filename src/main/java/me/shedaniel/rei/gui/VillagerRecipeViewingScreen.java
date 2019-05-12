@@ -9,19 +9,20 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.zeitheron.hammercore.client.utils.Scissors;
+import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.renderables.RecipeRenderer;
 import me.shedaniel.rei.gui.widget.*;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.audio.PositionedSoundInstance;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.Screen;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.StringTextComponent;
-import net.minecraft.text.TranslatableTextComponent;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
@@ -51,7 +52,7 @@ public class VillagerRecipeViewingScreen extends Screen {
     private int tabsPage;
     
     public VillagerRecipeViewingScreen(Map<RecipeCategory, List<RecipeDisplay>> map) {
-        super(new StringTextComponent(""));
+        super(new TextComponent(""));
         this.widgets = Lists.newArrayList();
         this.categoryMap = Maps.newLinkedHashMap();
         this.selectedCategoryIndex = 0;
@@ -140,7 +141,7 @@ public class VillagerRecipeViewingScreen extends Screen {
             }
         }
         ButtonWidget w, w2;
-        this.widgets.add(w = new ButtonWidget(bounds.x + 2, bounds.y - 16, 10, 10, new TranslatableTextComponent("text.rei.left_arrow")) {
+        this.widgets.add(w = new ButtonWidget(bounds.x + 2, bounds.y - 16, 10, 10, new TranslatableComponent("text.rei.left_arrow")) {
             @Override
             public void onPressed() {
                 tabsPage--;
@@ -149,7 +150,7 @@ public class VillagerRecipeViewingScreen extends Screen {
                 VillagerRecipeViewingScreen.this.init();
             }
         });
-        this.widgets.add(w2 = new ButtonWidget(bounds.x + bounds.width - 12, bounds.y - 16, 10, 10, new TranslatableTextComponent("text.rei.right_arrow")) {
+        this.widgets.add(w2 = new ButtonWidget(bounds.x + bounds.width - 12, bounds.y - 16, 10, 10, new TranslatableComponent("text.rei.right_arrow")) {
             @Override
             public void onPressed() {
                 tabsPage++;
@@ -205,6 +206,24 @@ public class VillagerRecipeViewingScreen extends Screen {
                 scroll += 16;
             scroll = MathHelper.clamp(scroll, 0, height - scrollListBounds.height + 2);
             return true;
+        }
+        for(Element listener : children())
+            if (listener.mouseScrolled(double_1, double_2, double_3))
+                return true;
+        if (bounds.contains(ClientUtils.getMouseLocation())) {
+            if (double_3 < 0 && categoryMap.get(categories.get(selectedCategoryIndex)).size() > 1) {
+                selectedCategoryIndex++;
+                if (selectedCategoryIndex >= categoryMap.get(categories.get(selectedCategoryIndex)).size())
+                    selectedCategoryIndex = 0;
+                init();
+                return true;
+            } else if (categoryMap.get(categories.get(selectedCategoryIndex)).size() > 1) {
+                selectedCategoryIndex--;
+                if (selectedCategoryIndex < 0)
+                    selectedCategoryIndex = categoryMap.get(categories.get(selectedCategoryIndex)).size() - 1;
+                init();
+                return true;
+            }
         }
         return super.mouseScrolled(double_1, double_2, double_3);
     }
