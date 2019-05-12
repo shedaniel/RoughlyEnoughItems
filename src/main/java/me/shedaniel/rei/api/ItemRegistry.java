@@ -32,7 +32,7 @@ public interface ItemRegistry {
     /**
      * Registers an new stack to the item list
      *
-     * @param afterItem
+     * @param afterItem the stack to put after
      * @param stack     the stack to register
      */
     void registerItemStack(Item afterItem, ItemStack stack);
