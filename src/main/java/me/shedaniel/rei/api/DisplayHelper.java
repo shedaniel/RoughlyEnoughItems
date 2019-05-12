@@ -63,7 +63,7 @@ public interface DisplayHelper {
         /**
          * Gets the base supported class for the bounds handler
          *
-         * @return
+         * @return the base class
          */
         Class getBaseSupportedClass();
         

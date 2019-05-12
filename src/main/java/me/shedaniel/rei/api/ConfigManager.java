@@ -15,14 +15,14 @@ public interface ConfigManager {
     /**
      * Saves the config.
      *
-     * @throws IOException
+     * @throws IOException when error
      */
     void saveConfig() throws IOException;
     
     /**
      * Loads the config from the json file, creates the file if not found.
      *
-     * @throws IOException
+     * @throws IOException when error
      */
     void loadConfig() throws IOException;
     
