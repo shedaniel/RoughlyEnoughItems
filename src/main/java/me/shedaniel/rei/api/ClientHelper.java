@@ -41,9 +41,9 @@ public interface ClientHelper {
     
     /**
      * Opens a recipe viewing screen:
-     * {@link me.shedaniel.rei.gui.PreRecipeViewingScreen} if not set
-     * {@link me.shedaniel.rei.gui.RecipeViewingScreen} if set to default
-     * {@link me.shedaniel.rei.gui.VillagerRecipeViewingScreen} if set to villager
+     * Opens {@link me.shedaniel.rei.gui.PreRecipeViewingScreen} if not set
+     * Opens {@link me.shedaniel.rei.gui.RecipeViewingScreen} if set to default
+     * Opens {@link me.shedaniel.rei.gui.VillagerRecipeViewingScreen} if set to villager
      *
      * @param map the map of recipes
      */
@@ -115,14 +115,29 @@ public interface ClientHelper {
      */
     String getModFromIdentifier(Identifier identifier);
     
+    /**
+     * @return the recipe keybind, defaulted R
+     */
     FabricKeyBinding getRecipeKeyBinding();
     
+    /**
+     * @return the usage keybind, defaulted U
+     */
     FabricKeyBinding getUsageKeyBinding();
     
+    /**
+     * @return the hide keybind, defaulted O
+     */
     FabricKeyBinding getHideKeyBinding();
     
+    /**
+     * @return the previous page keybind, defaulted not set
+     */
     FabricKeyBinding getPreviousPageKeyBinding();
     
+    /**
+     * @return the next page keybind, defaulted not set
+     */
     FabricKeyBinding getNextPageKeyBinding();
     
     /**

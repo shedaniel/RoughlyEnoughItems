@@ -7,8 +7,10 @@ package me.shedaniel.rei.plugin;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.api.RecipeCategory;
-import me.shedaniel.rei.gui.widget.SlotWidget;
+import me.shedaniel.rei.api.Renderable;
+import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
+import me.shedaniel.rei.gui.widget.SlotWidget;
 import me.shedaniel.rei.gui.widget.Widget;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
@@ -34,8 +36,8 @@ public class DefaultCampfireCategory implements RecipeCategory<DefaultCampfireDi
     }
     
     @Override
-    public ItemStack getCategoryIcon() {
-        return new ItemStack(Blocks.CAMPFIRE);
+    public Renderer getIcon() {
+        return Renderable.fromItemStack(new ItemStack(Blocks.CAMPFIRE));
     }
     
     @Override

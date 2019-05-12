@@ -8,12 +8,12 @@ package me.shedaniel.rei;
 import me.shedaniel.rei.gui.widget.ItemListOverlay;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
+import net.minecraft.ChatFormat;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.StringTextComponent;
-import net.minecraft.text.TextFormat;
-import net.minecraft.text.TranslatableTextComponent;
 import net.minecraft.util.Identifier;
 
 public class RoughlyEnoughItemsNetwork implements ModInitializer {
@@ -26,7 +26,7 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
         ServerSidePacketRegistry.INSTANCE.register(DELETE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
             ServerPlayerEntity player = (ServerPlayerEntity) packetContext.getPlayer();
             if (player.getServer().getPermissionLevel(player.getGameProfile()) < player.getServer().getOpPermissionLevel()) {
-                player.addChatMessage(new TranslatableTextComponent("text.rei.no_permission_cheat").applyFormat(TextFormat.RED), false);
+                player.addChatMessage(new TranslatableComponent("text.rei.no_permission_cheat").applyFormat(ChatFormat.RED), false);
                 return;
             }
             if (!player.inventory.getCursorStack().isEmpty())
@@ -35,14 +35,14 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
         ServerSidePacketRegistry.INSTANCE.register(CREATE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
             ServerPlayerEntity player = (ServerPlayerEntity) packetContext.getPlayer();
             if (player.getServer().getPermissionLevel(player.getGameProfile()) < player.getServer().getOpPermissionLevel()) {
-                player.addChatMessage(new TranslatableTextComponent("text.rei.no_permission_cheat").applyFormat(TextFormat.RED), false);
+                player.addChatMessage(new TranslatableComponent("text.rei.no_permission_cheat").applyFormat(ChatFormat.RED), false);
                 return;
             }
             ItemStack stack = packetByteBuf.readItemStack();
             if (player.inventory.insertStack(stack.copy()))
-                player.addChatMessage(new StringTextComponent(I18n.translate("text.rei.cheat_items").replaceAll("\\{item_name}", ItemListOverlay.tryGetItemStackName(stack.copy())).replaceAll("\\{item_count}", stack.copy().getAmount() + "").replaceAll("\\{player_name}", player.getEntityName())), false);
+                player.addChatMessage(new TextComponent(I18n.translate("text.rei.cheat_items").replaceAll("\\{item_name}", ItemListOverlay.tryGetItemStackName(stack.copy())).replaceAll("\\{item_count}", stack.copy().getAmount() + "").replaceAll("\\{player_name}", player.getEntityName())), false);
             else
-                player.addChatMessage(new TranslatableTextComponent("text.rei.failed_cheat_items"), false);
+                player.addChatMessage(new TranslatableComponent("text.rei.failed_cheat_items"), false);
         });
     }
     

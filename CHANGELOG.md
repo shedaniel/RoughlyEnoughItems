@@ -1,15 +1,20 @@
 View full changelog [here](https://github.com/shedaniel/RoughlyEnoughItems/blob/1.14/CHANGELOG.md).
-## v2.9-beta+build.109 (BETA)
+## v2.9+build.110
+- Fixed: Build 109 Crash
+- Fixed: Next Page / Previous Page crash in villager recipe mode
+- Added: Scrolling in villager recipe mode
+- Added: New bad javadoc: https://shedaniel.me/RoughlyEnoughItems/
+#### v2.9-beta+build.109 (BETA)
 - Fixed [#92](https://github.com/shedaniel/RoughlyEnoughItems/issues/92): Make REI Buttons use an extra sheet
 - Adds: Support for `{item_name}` in cheating items for getting the path of the item identifier
-## v2.9-beta+build.108 (BETA)
+#### v2.9-beta+build.108 (BETA)
 - Fixed [#88](https://github.com/shedaniel/RoughlyEnoughItems/issues/88): Stupid Item Search
-## v2.9-beta+build.107 (BETA)
+#### v2.9-beta+build.107 (BETA)
 - Fixed: Crashing when clicking tabs
 - Added: Buttons to switch category page
 - Fixed: NullPointerException by geniii
 - Fixed [#58](https://github.com/shedaniel/RoughlyEnoughItems/issues/58): Keybinds (e.g. O, R, U) working even a search field is focused
-## v2.9-beta+build.106 (BETA)
+#### v2.9-beta+build.106 (BETA)
 - Using: [HammerLib](https://minecraft.curseforge.com/projects/hammer-lib) as a simple opengl scissors api
 - New: Mod Name of category new shows in category tooltips
 - New: Renderer API

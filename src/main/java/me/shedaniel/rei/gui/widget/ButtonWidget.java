@@ -7,10 +7,10 @@ package me.shedaniel.rei.gui.widget;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.client.ScreenHelper;
-import net.minecraft.client.audio.PositionedSoundInstance;
 import net.minecraft.client.gui.Element;
+import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.network.chat.Component;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.TextComponent;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
@@ -27,7 +27,7 @@ public abstract class ButtonWidget extends HighlightableWidget {
     public boolean focused;
     private Rectangle bounds;
     
-    public ButtonWidget(Rectangle rectangle, TextComponent text) {
+    public ButtonWidget(Rectangle rectangle, Component text) {
         this(rectangle, text.getFormattedText());
     }
     
@@ -41,7 +41,7 @@ public abstract class ButtonWidget extends HighlightableWidget {
         this(new Rectangle(x, y, width, height), text);
     }
     
-    public ButtonWidget(int x, int y, int width, int height, TextComponent text) {
+    public ButtonWidget(int x, int y, int width, int height, Component text) {
         this(new Rectangle(x, y, width, height), text);
     }
     
