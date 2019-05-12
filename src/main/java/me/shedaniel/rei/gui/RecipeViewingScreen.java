@@ -35,9 +35,8 @@ import java.util.function.Supplier;
 
 public class RecipeViewingScreen extends Screen {
     
-    public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui" + "/recipecontainer.png");
+    public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     public static final Color SUB_COLOR = new Color(159, 159, 159);
-    private static final Identifier CREATIVE_INVENTORY_TABS = new Identifier("textures/gui/container" + "/creative_inventory/tabs.png");
     private final List<Widget> widgets;
     private final List<TabWidget> tabs;
     private final Map<RecipeCategory, List<RecipeDisplay>> categoriesMap;

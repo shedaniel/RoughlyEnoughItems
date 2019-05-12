@@ -44,9 +44,6 @@ public class ConfigObject {
     
     public boolean preferVisibleRecipes = false;
     
-    //    @Comment("Enable support for old REI plugins which uses registerSpeedCraft")
-    //    public boolean enableLegacySpeedCraftSupport = false;
-    
     @Comment("Force enable 2019 REI April Fools' joke") public boolean aprilFoolsFish2019 = false;
     
     public ItemCheatingMode itemCheatingMode = ItemCheatingMode.REI_LIKE;

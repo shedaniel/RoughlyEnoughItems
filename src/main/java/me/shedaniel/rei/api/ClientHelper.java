@@ -6,7 +6,6 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.client.ClientHelperImpl;
-import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -15,7 +14,7 @@ import net.minecraft.util.Identifier;
 import java.util.List;
 import java.util.Map;
 
-public interface ClientHelper extends ClientModInitializer {
+public interface ClientHelper {
     /**
      * @return the api instance of {@link ClientHelperImpl}
      */

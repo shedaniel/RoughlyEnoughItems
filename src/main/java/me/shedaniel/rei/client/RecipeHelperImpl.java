@@ -35,7 +35,6 @@ public class RecipeHelperImpl implements RecipeHelper {
         VISIBILITY_HANDLER_COMPARATOR = comparator.reversed();
     }
     
-    private final List<Recipe> sortedRecipes = new ArrayList<>();
     private final AtomicInteger recipeCount = new AtomicInteger();
     private final Map<Identifier, List<RecipeDisplay>> recipeCategoryListMap = Maps.newHashMap();
     private final Map<Identifier, DisplaySettings> categoryDisplaySettingsMap = Maps.newHashMap();
@@ -199,7 +198,6 @@ public class RecipeHelperImpl implements RecipeHelper {
         this.speedCraftFunctionalMap.clear();
         this.categoryDisplaySettingsMap.clear();
         this.displayVisibilityHandlers.clear();
-        this.sortedRecipes.clear();
         ((DisplayHelperImpl) RoughlyEnoughItemsCore.getDisplayHelper()).resetCache();
         BaseBoundsHandler baseBoundsHandler = new BaseBoundsHandlerImpl();
         RoughlyEnoughItemsCore.getDisplayHelper().registerBoundsHandler(baseBoundsHandler);
@@ -253,9 +251,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     
     @Override
     public List<Recipe> getVanillaSortedRecipes() {
-        if (sortedRecipes.isEmpty())
-            sortedRecipes.addAll(getRecipeManager().values().stream().sorted(RECIPE_COMPARATOR).collect(Collectors.toSet()));
-        return sortedRecipes;
+        return getRecipeManager().values().stream().sorted(RECIPE_COMPARATOR).collect(Collectors.toList());
     }
     
     @Override
