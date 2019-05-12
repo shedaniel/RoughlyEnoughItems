@@ -14,6 +14,9 @@ import net.minecraft.util.math.MathHelper;
 import java.util.List;
 import java.util.function.Supplier;
 
+/**
+ * The base class for renderables
+ */
 public interface Renderable {
     
     static ItemStackRenderer fromItemStackSupplier(Supplier<ItemStack> supplier) {

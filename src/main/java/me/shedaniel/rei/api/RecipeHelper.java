@@ -17,6 +17,9 @@ import java.util.Optional;
 
 public interface RecipeHelper {
     
+    /**
+     * @return the api instance of {@link me.shedaniel.rei.client.RecipeHelperImpl}
+     */
     static RecipeHelper getInstance() {
         return RoughlyEnoughItemsCore.getRecipeHelper();
     }
@@ -27,14 +30,34 @@ public interface RecipeHelper {
     
     List<ItemStack> findCraftableByItems(List<ItemStack> inventoryItems);
     
+    /**
+     * Registers a category
+     *
+     * @param category the category to register
+     */
     void registerCategory(RecipeCategory category);
     
+    /**
+     * Registers a recipe display
+     *
+     * @param categoryIdentifier the category to display in
+     * @param display            the recipe display
+     */
     void registerDisplay(Identifier categoryIdentifier, RecipeDisplay display);
     
     Map<RecipeCategory, List<RecipeDisplay>> getRecipesFor(ItemStack stack);
     
+    /**
+     * Gets the vanilla recipe manager
+     *
+     * @return the recipe manager
+     */
     RecipeManager getRecipeManager();
     
+    /**
+     * Gets all registered categories
+     * @return the list of categories
+     */
     List<RecipeCategory> getAllCategories();
     
     Map<RecipeCategory, List<RecipeDisplay>> getUsagesFor(ItemStack stack);
