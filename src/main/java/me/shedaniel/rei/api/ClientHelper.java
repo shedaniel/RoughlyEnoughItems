@@ -81,22 +81,20 @@ public interface ClientHelper {
     /**
      * Gets the mod from an item
      *
-     * @param item
+     * @param item the item to find
      * @return the mod name
      */
     String getModFromItem(Item item);
     
     /**
      * Tries to delete the player's cursor item
-     *
-     * @return whether it failed
      */
     void sendDeletePacket();
     
     /**
      * Gets the formatted mod from an item
      *
-     * @param item
+     * @param item the item to find
      * @return the mod name with blue and italic formatting
      */
     String getFormattedModFromItem(Item item);
@@ -104,7 +102,7 @@ public interface ClientHelper {
     /**
      * Gets the formatted mod from an identifier
      *
-     * @param identifier
+     * @param identifier the identifier to find
      * @return the mod name with blue and italic formatting
      */
     String getFormattedModFromIdentifier(Identifier identifier);
@@ -112,7 +110,7 @@ public interface ClientHelper {
     /**
      * Gets the mod from an identifier
      *
-     * @param identifier
+     * @param identifier the identifier to find
      * @return the mod name
      */
     String getModFromIdentifier(Identifier identifier);
