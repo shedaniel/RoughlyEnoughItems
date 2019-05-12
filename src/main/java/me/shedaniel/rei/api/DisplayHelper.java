@@ -56,11 +56,6 @@ public interface DisplayHelper {
     
     public static interface DisplayBoundsHandler<T> {
         /**
-         * An empty rectangle
-         */
-        public static final Rectangle EMPTY = new Rectangle();
-        
-        /**
          * Gets the base supported class for the bounds handler
          *
          * @return the base class

@@ -16,13 +16,13 @@ import me.shedaniel.rei.gui.widget.ButtonWidget;
 import me.shedaniel.rei.gui.widget.HighlightableWidget;
 import me.shedaniel.rei.gui.widget.Widget;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.audio.PositionedSoundInstance;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.Screen;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.TranslatableTextComponent;
 import net.minecraft.util.Identifier;
 
 import java.awt.*;
@@ -39,7 +39,7 @@ public class PreRecipeViewingScreen extends Screen {
     private Map<RecipeCategory, List<RecipeDisplay>> map;
     
     public PreRecipeViewingScreen(Map<RecipeCategory, List<RecipeDisplay>> map) {
-        super(new TranslatableTextComponent("text.rei.recipe_screen_type.selection"));
+        super(new TextComponent("text.rei.recipe_screen_type.selection"));
         this.widgets = Lists.newArrayList();
         this.original = true;
         this.map = map;

@@ -5,7 +5,7 @@
 
 package me.shedaniel.rei.gui.widget;
 
-import net.minecraft.text.TextComponent;
+import net.minecraft.network.chat.Component;
 
 import java.awt.*;
 
@@ -13,7 +13,7 @@ public class DetailedButtonWidget extends ButtonWidget {
     
     private DetailedButtonWidget.PressAction pressAction;
     
-    public DetailedButtonWidget(Rectangle rectangle, TextComponent text, PressAction pressAction) {
+    public DetailedButtonWidget(Rectangle rectangle, Component text, PressAction pressAction) {
         super(rectangle, text);
         this.pressAction = pressAction;
     }
@@ -28,7 +28,7 @@ public class DetailedButtonWidget extends ButtonWidget {
         this.pressAction = pressAction;
     }
     
-    public DetailedButtonWidget(int x, int y, int width, int height, TextComponent text, PressAction pressAction) {
+    public DetailedButtonWidget(int x, int y, int width, int height, Component text, PressAction pressAction) {
         super(x, y, width, height, text);
         this.pressAction = pressAction;
     }

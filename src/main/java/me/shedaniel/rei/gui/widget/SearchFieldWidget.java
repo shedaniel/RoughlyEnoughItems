@@ -6,8 +6,8 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import net.minecraft.client.audio.PositionedSoundInstance;
 import net.minecraft.client.render.GuiLighting;
+import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.sound.SoundEvents;
 
 public class SearchFieldWidget extends TextFieldWidget {
