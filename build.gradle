@@ -59,12 +59,12 @@ dependencies {
     modCompile "cloth:ClothEvents:${cloth_events_version}"
     modCompile "cloth-config:ClothConfig:${cloth_config_version}"
     if (includeDep) {
-//        include "net.fabricmc:fabric:${project.fabric_version}"
-        include "net.fabricmc.fabric-api:fabric-keybindings-v0:${project.fabric_keybindings}"
-        include "net.fabricmc.fabric-api:fabric-api-base:${project.fabric_api_base}"
-        include "net.fabricmc.fabric-api:fabric-networking-v0:${project.fabric_networking}"
-        include "net.fabricmc.fabric-api:fabric-events-lifecycle-v0:${project.fabric_events_lifecycle}"
-        include "net.fabricmc.fabric-api:fabric-resource-loader-v0:${project.fabric_resource_loader}"
+        include "net.fabricmc:fabric:${project.fabric_version}"
+//        include "net.fabricmc.fabric-api:fabric-keybindings-v0:${project.fabric_keybindings}"
+//        include "net.fabricmc.fabric-api:fabric-api-base:${project.fabric_api_base}"
+//        include "net.fabricmc.fabric-api:fabric-networking-v0:${project.fabric_networking}"
+//        include "net.fabricmc.fabric-api:fabric-events-lifecycle-v0:${project.fabric_events_lifecycle}"
+//        include "net.fabricmc.fabric-api:fabric-resource-loader-v0:${project.fabric_resource_loader}"
         include "cloth:ClothEvents:${cloth_events_version}"
         include "cloth-config:ClothConfig:${cloth_config_version}"
     }

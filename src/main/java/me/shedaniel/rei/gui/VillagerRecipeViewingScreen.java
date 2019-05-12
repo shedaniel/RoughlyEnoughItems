@@ -24,12 +24,8 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.MathHelper;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
-import java.nio.IntBuffer;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -212,15 +208,14 @@ public class VillagerRecipeViewingScreen extends Screen {
                 return true;
         if (bounds.contains(ClientUtils.getMouseLocation())) {
             if (double_3 < 0 && categoryMap.get(categories.get(selectedCategoryIndex)).size() > 1) {
-                selectedCategoryIndex++;
-                if (selectedCategoryIndex >= categoryMap.get(categories.get(selectedCategoryIndex)).size())
-                    selectedCategoryIndex = 0;
+                selectedRecipeIndex++;
+                if (selectedRecipeIndex >= categoryMap.get(categories.get(selectedCategoryIndex)).size())
+                    selectedRecipeIndex = 0;
                 init();
-                return true;
             } else if (categoryMap.get(categories.get(selectedCategoryIndex)).size() > 1) {
-                selectedCategoryIndex--;
-                if (selectedCategoryIndex < 0)
-                    selectedCategoryIndex = categoryMap.get(categories.get(selectedCategoryIndex)).size() - 1;
+                selectedRecipeIndex--;
+                if (selectedRecipeIndex < 0)
+                    selectedRecipeIndex = categoryMap.get(categories.get(selectedCategoryIndex)).size() - 1;
                 init();
                 return true;
             }
@@ -238,7 +233,7 @@ public class VillagerRecipeViewingScreen extends Screen {
         });
         GuiLighting.disable();
         ScreenHelper.getLastOverlay().render(mouseX, mouseY, delta);
-        GL11.glPushMatrix();
+        GlStateManager.pushMatrix();
         Scissors.begin();
         Scissors.scissor(0, scrollListBounds.y + 1, width, scrollListBounds.height - 2);
         for(int i = 0; i < buttonWidgets.size(); i++) {
@@ -258,15 +253,8 @@ public class VillagerRecipeViewingScreen extends Screen {
             }
         }
         Scissors.end();
-        GL11.glPopMatrix();
+        GlStateManager.popMatrix();
         ScreenHelper.getLastOverlay().lateRender(mouseX, mouseY, delta);
-    }
-    
-    private int getTitleBarHeight() {
-        IntBuffer useless = BufferUtils.createIntBuffer(3), top = BufferUtils.createIntBuffer(1);
-        GLFW.glfwGetWindowFrameSize(minecraft.window.getHandle(), useless, top, useless, useless);
-        System.out.println(top.get(0));
-        return top.get(0) / 3 * 2;
     }
     
     private int getReal(int i) {
@@ -288,18 +276,18 @@ public class VillagerRecipeViewingScreen extends Screen {
         }
         if (ClientHelper.getInstance().getNextPageKeyBinding().matchesKey(int_1, int_2)) {
             if (categoryMap.get(categories.get(selectedCategoryIndex)).size() > 1) {
-                selectedCategoryIndex++;
-                if (selectedCategoryIndex >= categoryMap.get(categories.get(selectedCategoryIndex)).size())
-                    selectedCategoryIndex = 0;
+                selectedRecipeIndex ++;
+                if (selectedRecipeIndex >= categoryMap.get(categories.get(selectedCategoryIndex)).size())
+                    selectedRecipeIndex = 0;
                 init();
                 return true;
             }
             return false;
         } else if (ClientHelper.getInstance().getPreviousPageKeyBinding().matchesKey(int_1, int_2)) {
             if (categoryMap.get(categories.get(selectedCategoryIndex)).size() > 1) {
-                selectedCategoryIndex--;
-                if (selectedCategoryIndex < 0)
-                    selectedCategoryIndex = categoryMap.get(categories.get(selectedCategoryIndex)).size() - 1;
+                selectedRecipeIndex--;
+                if (selectedRecipeIndex < 0)
+                    selectedRecipeIndex = categoryMap.get(categories.get(selectedCategoryIndex)).size() - 1;
                 init();
                 return true;
             }

@@ -110,7 +110,7 @@ public class DefaultPlugin implements REIPluginEntry {
     
     @Override
     public void registerRecipeDisplays(RecipeHelper recipeHelper) {
-        for(Recipe recipe : recipeHelper.getVanillaSortedRecipes())
+        for(Recipe recipe : recipeHelper.getAllSortedRecipes())
             if (recipe instanceof ShapelessRecipe)
                 recipeHelper.registerDisplay(CRAFTING, new DefaultShapelessDisplay((ShapelessRecipe) recipe));
             else if (recipe instanceof ShapedRecipe)

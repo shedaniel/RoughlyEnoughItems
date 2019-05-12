@@ -19,6 +19,12 @@ import java.util.function.Supplier;
  */
 public interface Renderable {
     
+    /**
+     * Gets an item stack renderer by an item stack supplier
+     *
+     * @param supplier the supplier for getting the item stack
+     * @return the item stack renderer
+     */
     static ItemStackRenderer fromItemStackSupplier(Supplier<ItemStack> supplier) {
         return new ItemStackRenderer() {
             @Override
@@ -28,19 +34,32 @@ public interface Renderable {
         };
     }
     
+    /**
+     * Gets an item stack renderer by an item stack
+     *
+     * @param stack the item stack to be displayed
+     * @return the item stack renderer
+     */
     static ItemStackRenderer fromItemStack(ItemStack stack) {
-        return new ItemStackRenderer() {
-            @Override
-            public ItemStack getItemStack() {
-                return stack;
-            }
-        };
+        return fromItemStackSupplier(() -> stack);
     }
     
+    /**
+     * Gets an empty renderer
+     *
+     * @return an empty renderer
+     */
     static EmptyRenderer empty() {
         return EmptyRenderer.INSTANCE;
     }
     
+    /**
+     * Gets a simple recipe renderer from inputs and outputs
+     *
+     * @param input  the list of input items
+     * @param output the list of output items
+     * @return the recipe renderer
+     */
     static SimpleRecipeRenderer fromRecipe(Supplier<List<List<ItemStack>>> input, Supplier<List<ItemStack>> output) {
         return new SimpleRecipeRenderer(input, output);
     }
@@ -56,5 +75,14 @@ public interface Renderable {
         };
     }
     
+    /**
+     * Renders of the renderable
+     *
+     * @param x      the x coordinate of the renderable
+     * @param y      the y coordinate of the renderable
+     * @param mouseX the x coordinate of the mouse
+     * @param mouseY the y coordinate of the mouse
+     * @param delta  the delta
+     */
     void render(int x, int y, double mouseX, double mouseY, float delta);
 }
