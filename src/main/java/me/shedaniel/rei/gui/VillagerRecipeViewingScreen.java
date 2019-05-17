@@ -16,7 +16,7 @@ import me.shedaniel.rei.gui.renderables.RecipeRenderer;
 import me.shedaniel.rei.gui.widget.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.Screen;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
@@ -276,7 +276,7 @@ public class VillagerRecipeViewingScreen extends Screen {
         }
         if (ClientHelper.getInstance().getNextPageKeyBinding().matchesKey(int_1, int_2)) {
             if (categoryMap.get(categories.get(selectedCategoryIndex)).size() > 1) {
-                selectedRecipeIndex ++;
+                selectedRecipeIndex++;
                 if (selectedRecipeIndex >= categoryMap.get(categories.get(selectedCategoryIndex)).size())
                     selectedRecipeIndex = 0;
                 init();

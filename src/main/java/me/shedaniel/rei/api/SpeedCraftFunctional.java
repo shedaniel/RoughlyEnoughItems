@@ -5,7 +5,7 @@
 
 package me.shedaniel.rei.api;
 
-import net.minecraft.client.gui.Screen;
+import net.minecraft.client.gui.screen.Screen;
 
 public interface SpeedCraftFunctional<T extends RecipeDisplay> {
     

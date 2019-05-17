@@ -6,7 +6,7 @@
 package me.shedaniel.rei;
 
 import io.github.prospector.modmenu.api.ModMenuApi;
-import net.minecraft.client.gui.Screen;
+import net.minecraft.client.gui.screen.Screen;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -18,6 +18,7 @@ public class REIModMenuEntryPoint implements ModMenuApi {
         return "roughlyenoughitems";
     }
     
+    @SuppressWarnings("deprecation")
     @Override
     public Optional<Supplier<Screen>> getConfigScreen(Screen screen) {
         return Optional.of(() -> getScreen(screen));

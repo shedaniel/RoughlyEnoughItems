@@ -6,7 +6,7 @@
 package me.shedaniel.rei.gui.credits;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.menu.AlwaysSelectedEntryListWidget;
+import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget;
 import net.minecraft.network.chat.Component;
 
 public class CreditsEntryListWidget extends AlwaysSelectedEntryListWidget<CreditsEntryListWidget.CreditsItem> {

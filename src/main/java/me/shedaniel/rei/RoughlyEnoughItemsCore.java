@@ -21,11 +21,11 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.ContainerScreen;
 import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
-import net.minecraft.client.gui.ingame.PlayerInventoryScreen;
-import net.minecraft.client.gui.recipebook.RecipeBookGui;
+import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
+import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
+import net.minecraft.client.gui.screen.recipebook.RecipeBookScreen;
 import net.minecraft.client.gui.widget.RecipeBookButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.util.ActionResult;
@@ -190,15 +190,15 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             ((RecipeHelperImpl) RoughlyEnoughItemsCore.getRecipeHelper()).recipesLoaded(recipeManager);
         });
         ClothClientHooks.SCREEN_ADD_BUTTON.register((minecraftClient, screen, abstractButtonWidget) -> {
-            if (RoughlyEnoughItemsCore.getConfigManager().getConfig().disableRecipeBook && screen instanceof ContainerScreen && abstractButtonWidget instanceof RecipeBookButtonWidget)
+            if (RoughlyEnoughItemsCore.getConfigManager().getConfig().disableRecipeBook && screen instanceof AbstractContainerScreen && abstractButtonWidget instanceof RecipeBookButtonWidget)
                 return ActionResult.FAIL;
             return ActionResult.PASS;
         });
         ClothClientHooks.SCREEN_INIT_POST.register((minecraftClient, screen, screenHooks) -> {
-            if (screen instanceof ContainerScreen) {
-                if (screen instanceof PlayerInventoryScreen && minecraftClient.interactionManager.hasCreativeInventory())
+            if (screen instanceof AbstractContainerScreen) {
+                if (screen instanceof InventoryScreen && minecraftClient.interactionManager.hasCreativeInventory())
                     return;
-                ScreenHelper.setLastContainerScreen((ContainerScreen) screen);
+                ScreenHelper.setLastContainerScreen((AbstractContainerScreen) screen);
                 boolean alreadyAdded = false;
                 for(Element element : Lists.newArrayList(screenHooks.cloth_getInputListeners()))
                     if (ContainerScreenOverlay.class.isAssignableFrom(element.getClass()))
@@ -211,11 +211,11 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             }
         });
         ClothClientHooks.SCREEN_RENDER_POST.register((minecraftClient, screen, i, i1, v) -> {
-            if (screen instanceof ContainerScreen)
+            if (screen instanceof AbstractContainerScreen)
                 ScreenHelper.getLastOverlay().render(i, i1, v);
         });
         ClothClientHooks.SCREEN_MOUSE_CLICKED.register((minecraftClient, screen, v, v1, i) -> {
-            if (screen instanceof CreativePlayerInventoryScreen)
+            if (screen instanceof CreativeInventoryScreen)
                 if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().mouseClicked(v, v1, i)) {
                     screen.setFocused(ScreenHelper.getLastOverlay());
                     if (i == 0)
@@ -225,13 +225,13 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             return ActionResult.PASS;
         });
         ClothClientHooks.SCREEN_MOUSE_SCROLLED.register((minecraftClient, screen, v, v1, v2) -> {
-            if (screen instanceof ContainerScreen)
+            if (screen instanceof AbstractContainerScreen)
                 if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().isInside(ClientUtils.getMouseLocation()) && ScreenHelper.getLastOverlay().mouseScrolled(v, v1, v2))
                     return ActionResult.SUCCESS;
             return ActionResult.PASS;
         });
         ClothClientHooks.SCREEN_CHAR_TYPED.register((minecraftClient, screen, character, keyCode) -> {
-            if (screen instanceof ContainerScreen)
+            if (screen instanceof AbstractContainerScreen)
                 if (ScreenHelper.getLastOverlay().charTyped(character, keyCode))
                     return ActionResult.SUCCESS;
             return ActionResult.PASS;
@@ -239,13 +239,13 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         ClothClientHooks.SCREEN_LATE_RENDER.register((minecraftClient, screen, i, i1, v) -> {
             if (!ScreenHelper.isOverlayVisible())
                 return;
-            if (screen instanceof ContainerScreen)
+            if (screen instanceof AbstractContainerScreen)
                 ScreenHelper.getLastOverlay().lateRender(i, i1, v);
         });
         ClothClientHooks.SCREEN_KEY_PRESSED.register((minecraftClient, screen, i, i1, i2) -> {
-            if (screen.getFocused() != null && screen.getFocused() instanceof TextFieldWidget || (screen.getFocused() instanceof RecipeBookGui && ((RecipeBookGuiHooks) screen.getFocused()).rei_getSearchField() != null && ((RecipeBookGuiHooks) screen.getFocused()).rei_getSearchField().isFocused()))
+            if (screen.getFocused() != null && screen.getFocused() instanceof TextFieldWidget || (screen.getFocused() instanceof RecipeBookScreen && ((RecipeBookGuiHooks) screen.getFocused()).rei_getSearchField() != null && ((RecipeBookGuiHooks) screen.getFocused()).rei_getSearchField().isFocused()))
                 return ActionResult.PASS;
-            if (screen instanceof ContainerScreen)
+            if (screen instanceof AbstractContainerScreen)
                 if (ScreenHelper.getLastOverlay().keyPressed(i, i1, i2))
                     return ActionResult.SUCCESS;
             return ActionResult.PASS;

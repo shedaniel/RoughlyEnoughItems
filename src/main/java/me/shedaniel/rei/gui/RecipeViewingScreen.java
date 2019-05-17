@@ -13,9 +13,9 @@ import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.widget.*;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.ContainerScreen;
 import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.Screen;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
@@ -37,6 +37,7 @@ public class RecipeViewingScreen extends Screen {
     
     public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     public static final Color SUB_COLOR = new Color(159, 159, 159);
+    private static final int TABS_PER_PAGE = 5;
     private final List<Widget> widgets;
     private final List<TabWidget> tabs;
     private final Map<RecipeCategory, List<RecipeDisplay>> categoriesMap;
@@ -68,7 +69,7 @@ public class RecipeViewingScreen extends Screen {
         this.choosePageActivated = false;
     }
     
-    public static SpeedCraftFunctional getSpeedCraftFunctionalByCategory(ContainerScreen containerScreen, RecipeCategory category) {
+    public static SpeedCraftFunctional getSpeedCraftFunctionalByCategory(AbstractContainerScreen containerScreen, RecipeCategory category) {
         for(SpeedCraftFunctional functional : RecipeHelper.getInstance().getSpeedCraftFunctional(category))
             for(Class aClass : functional.getFunctioningFor())
                 if (containerScreen.getClass().isAssignableFrom(aClass))
@@ -129,6 +130,26 @@ public class RecipeViewingScreen extends Screen {
         this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - guiHeight / 2, guiWidth, guiHeight);
         this.page = MathHelper.clamp(page, 0, getTotalPages(selectedCategory) - 1);
         
+        ButtonWidget w, w2;
+        this.widgets.add(w = new ButtonWidget(bounds.x + 2, bounds.y - 16, 10, 10, new TranslatableComponent("text.rei.left_arrow")) {
+            @Override
+            public void onPressed() {
+                categoryPages--;
+                if (categoryPages < 0)
+                    categoryPages = MathHelper.ceil(categories.size() / (float) TABS_PER_PAGE) - 1;
+                RecipeViewingScreen.this.init();
+            }
+        });
+        this.widgets.add(w2 = new ButtonWidget(bounds.x + bounds.width - 12, bounds.y - 16, 10, 10, new TranslatableComponent("text.rei.right_arrow")) {
+            @Override
+            public void onPressed() {
+                categoryPages++;
+                if (categoryPages > MathHelper.ceil(categories.size() / (float) TABS_PER_PAGE) - 1)
+                    categoryPages = 0;
+                RecipeViewingScreen.this.init();
+            }
+        });
+        w.enabled = w2.enabled = categories.size() > TABS_PER_PAGE;
         widgets.add(categoryBack = new ButtonWidget((int) bounds.getX() + 5, (int) bounds.getY() + 5, 12, 12, new TranslatableComponent("text.rei.left_arrow")) {
             @Override
             public void onPressed() {
@@ -137,7 +158,7 @@ public class RecipeViewingScreen extends Screen {
                 if (currentCategoryIndex < 0)
                     currentCategoryIndex = categories.size() - 1;
                 selectedCategory = categories.get(currentCategoryIndex);
-                categoryPages = MathHelper.floor(currentCategoryIndex / 6d);
+                categoryPages = MathHelper.floor(currentCategoryIndex / (double) TABS_PER_PAGE);
                 page = 0;
                 RecipeViewingScreen.this.init();
             }
@@ -173,7 +194,7 @@ public class RecipeViewingScreen extends Screen {
                 if (currentCategoryIndex >= categories.size())
                     currentCategoryIndex = 0;
                 selectedCategory = categories.get(currentCategoryIndex);
-                categoryPages = MathHelper.floor(currentCategoryIndex / 6d);
+                categoryPages = MathHelper.floor(currentCategoryIndex / (double) TABS_PER_PAGE);
                 page = 0;
                 RecipeViewingScreen.this.init();
             }
@@ -234,18 +255,18 @@ public class RecipeViewingScreen extends Screen {
             }
         });
         recipeBack.enabled = recipeNext.enabled = categoriesMap.get(selectedCategory).size() > getRecipesPerPageByHeight();
-        for(int i = 0; i < 6; i++) {
-            int j = i + categoryPages * 6;
+        for(int i = 0; i < TABS_PER_PAGE; i++) {
+            int j = i + categoryPages * TABS_PER_PAGE;
             if (categories.size() > j) {
                 TabWidget tab;
-                tabs.add(tab = new TabWidget(i, new Rectangle(bounds.x + 4 + 28 * i, bounds.y - 28, 28, 28)) {
+                tabs.add(tab = new TabWidget(i, new Rectangle(bounds.x + bounds.width / 2 - Math.min(categories.size() - categoryPages * TABS_PER_PAGE, TABS_PER_PAGE) * 14 + i * 28, bounds.y - 28, 28, 28)) {
                     @Override
                     public boolean mouseClicked(double mouseX, double mouseY, int button) {
                         if (getBounds().contains(mouseX, mouseY)) {
                             MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-                            if (getId() + categoryPages * 6 == categories.indexOf(selectedCategory))
+                            if (getId() + categoryPages * TABS_PER_PAGE == categories.indexOf(selectedCategory))
                                 return false;
-                            selectedCategory = categories.get(getId() + categoryPages * 6);
+                            selectedCategory = categories.get(getId() + categoryPages * TABS_PER_PAGE);
                             page = 0;
                             RecipeViewingScreen.this.init();
                             return true;
@@ -253,7 +274,7 @@ public class RecipeViewingScreen extends Screen {
                         return false;
                     }
                 });
-                tab.setRenderer(categories.get(j), categories.get(j).getIcon(), categories.get(j).getCategoryName(), tab.getId() + categoryPages * 6 == categories.indexOf(selectedCategory));
+                tab.setRenderer(categories.get(j), categories.get(j).getIcon(), categories.get(j).getCategoryName(), tab.getId() + categoryPages * TABS_PER_PAGE == categories.indexOf(selectedCategory));
             }
         }
         Optional<ButtonAreaSupplier> supplier = RecipeHelper.getInstance().getSpeedCraftButtonArea(selectedCategory);

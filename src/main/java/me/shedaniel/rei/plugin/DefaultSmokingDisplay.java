@@ -10,7 +10,7 @@ import me.shedaniel.rei.api.RecipeDisplay;
 import net.minecraft.block.entity.FurnaceBlockEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.cooking.SmokingRecipe;
+import net.minecraft.recipe.SmokingRecipe;
 import net.minecraft.util.Identifier;
 
 import java.util.Collections;

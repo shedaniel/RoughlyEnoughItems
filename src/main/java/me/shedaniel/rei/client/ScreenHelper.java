@@ -12,7 +12,7 @@ import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.event.client.ClientTickCallback;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.ContainerScreen;
+import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.client.util.Window;
 import net.minecraft.item.ItemStack;
 import org.apache.logging.log4j.util.TriConsumer;
@@ -26,7 +26,7 @@ public class ScreenHelper implements ClientModInitializer {
     public static List<ItemStack> inventoryStacks = Lists.newArrayList();
     private static boolean overlayVisible = true;
     private static ContainerScreenOverlay overlay;
-    private static ContainerScreen lastContainerScreen = null;
+    private static AbstractContainerScreen lastContainerScreen = null;
     
     public static boolean isOverlayVisible() {
         return overlayVisible;
@@ -48,11 +48,11 @@ public class ScreenHelper implements ClientModInitializer {
         return getLastOverlay(false, false);
     }
     
-    public static ContainerScreen getLastContainerScreen() {
+    public static AbstractContainerScreen getLastContainerScreen() {
         return lastContainerScreen;
     }
     
-    public static void setLastContainerScreen(ContainerScreen lastContainerScreen) {
+    public static void setLastContainerScreen(AbstractContainerScreen lastContainerScreen) {
         ScreenHelper.lastContainerScreen = lastContainerScreen;
     }
     
@@ -78,8 +78,8 @@ public class ScreenHelper implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ClientTickCallback.EVENT.register(client -> {
-            if (lastContainerScreen != client.currentScreen && client.currentScreen instanceof ContainerScreen)
-                lastContainerScreen = (ContainerScreen) client.currentScreen;
+            if (lastContainerScreen != client.currentScreen && client.currentScreen instanceof AbstractContainerScreen)
+                lastContainerScreen = (AbstractContainerScreen) client.currentScreen;
         });
     }
     

@@ -25,7 +25,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
+import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -131,7 +131,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     @Override
     public void sendDeletePacket() {
-        if (ScreenHelper.getLastContainerScreen() instanceof CreativePlayerInventoryScreen) {
+        if (ScreenHelper.getLastContainerScreen() instanceof CreativeInventoryScreen) {
             MinecraftClient.getInstance().player.inventory.setCursorStack(ItemStack.EMPTY);
             return;
         }

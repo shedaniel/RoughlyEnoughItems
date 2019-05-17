@@ -10,7 +10,7 @@ import me.shedaniel.rei.api.RecipeDisplay;
 import net.minecraft.block.entity.FurnaceBlockEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.cooking.SmeltingRecipe;
+import net.minecraft.recipe.SmeltingRecipe;
 import net.minecraft.util.Identifier;
 
 import java.util.Collections;
