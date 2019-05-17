@@ -5,7 +5,7 @@
 
 package me.shedaniel.rei.api;
 
-import net.minecraft.client.gui.Screen;
+import net.minecraft.client.gui.screen.Screen;
 
 import java.awt.*;
 import java.util.List;

@@ -17,7 +17,7 @@ import me.shedaniel.rei.client.RecipeScreenType;
 import me.shedaniel.rei.gui.config.ItemListOrderingConfig;
 import me.shedaniel.rei.gui.credits.CreditsScreen;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Screen;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 

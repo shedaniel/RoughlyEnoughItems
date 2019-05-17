@@ -17,7 +17,11 @@ import me.shedaniel.rei.gui.widget.*;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.*;
+import net.minecraft.client.gui.AbstractParentElement;
+import net.minecraft.client.gui.Drawable;
+import net.minecraft.client.gui.Element;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
@@ -344,12 +348,12 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             DisplayHelper.DisplayBoundsHandler boundsHandler = RoughlyEnoughItemsCore.getDisplayHelper().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
             itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, true);
         }
-        if (MinecraftClient.getInstance().currentScreen instanceof ContainerScreen && SearchFieldWidget.isSearching) {
+        if (MinecraftClient.getInstance().currentScreen instanceof AbstractContainerScreen && SearchFieldWidget.isSearching) {
             GuiLighting.disable();
             blitOffset = 200;
             ContainerScreenHooks hooks = (ContainerScreenHooks) MinecraftClient.getInstance().currentScreen;
             int left = hooks.rei_getContainerLeft(), top = hooks.rei_getContainerTop();
-            for(Slot slot : ((ContainerScreen) MinecraftClient.getInstance().currentScreen).getContainer().slotList)
+            for(Slot slot : ((AbstractContainerScreen) MinecraftClient.getInstance().currentScreen).getContainer().slotList)
                 if (!slot.hasStack() || !itemListOverlay.filterItem(slot.getStack(), itemListOverlay.getLastSearchArgument()))
                     fillGradient(left + slot.xPosition, top + slot.yPosition, left + slot.xPosition + 16, top + slot.yPosition + 16, -601874400, -601874400);
             blitOffset = 0;
@@ -474,7 +478,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
         if (!ScreenHelper.isOverlayVisible())
             return false;
         ItemStack itemStack = null;
-        if (MinecraftClient.getInstance().currentScreen instanceof ContainerScreen)
+        if (MinecraftClient.getInstance().currentScreen instanceof AbstractContainerScreen)
             if (ScreenHelper.getLastContainerScreenHooks().rei_getHoveredSlot() != null && !ScreenHelper.getLastContainerScreenHooks().rei_getHoveredSlot().getStack().isEmpty())
                 itemStack = ScreenHelper.getLastContainerScreenHooks().rei_getHoveredSlot().getStack();
         if (itemStack != null && !itemStack.isEmpty()) {

@@ -5,12 +5,12 @@
 
 package me.shedaniel.rei.listeners;
 
-import net.minecraft.client.gui.ContainerScreen;
+import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.container.Slot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(ContainerScreen.class)
+@Mixin(AbstractContainerScreen.class)
 public interface ContainerScreenHooks {
     
     @Accessor("left")
