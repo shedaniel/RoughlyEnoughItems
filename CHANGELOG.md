@@ -1,4 +1,7 @@
 View full changelog [here](https://github.com/shedaniel/RoughlyEnoughItems/blob/1.14/CHANGELOG.md).
+## v2.9+build.111
+- Added: Buttons to switch category page in original recipe viewing screen
+- Updated: Mappings to 1.14.1
 ## v2.9+build.110
 - Fixed: Build 109 Crash
 - Fixed: Next Page / Previous Page crash in villager recipe mode

@@ -5,11 +5,11 @@
 
 package me.shedaniel.rei.listeners;
 
-import net.minecraft.client.gui.ingame.CreativePlayerInventoryScreen;
+import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(CreativePlayerInventoryScreen.class)
+@Mixin(CreativeInventoryScreen.class)
 public interface CreativePlayerInventoryScreenHooks {
     @Accessor("selectedTab")
     int rei_getSelectedTab();

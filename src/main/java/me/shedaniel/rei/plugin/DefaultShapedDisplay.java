@@ -8,7 +8,7 @@ package me.shedaniel.rei.plugin;
 import com.google.common.collect.Lists;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.crafting.ShapedRecipe;
+import net.minecraft.recipe.ShapedRecipe;
 
 import java.util.Collections;
 import java.util.List;
