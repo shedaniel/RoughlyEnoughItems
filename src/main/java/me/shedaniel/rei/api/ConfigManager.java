@@ -6,7 +6,7 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.client.ConfigObject;
-import net.minecraft.client.gui.Screen;
+import net.minecraft.client.gui.screen.Screen;
 
 import java.io.IOException;
 

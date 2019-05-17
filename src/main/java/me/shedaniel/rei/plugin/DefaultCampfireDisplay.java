@@ -8,8 +8,8 @@ package me.shedaniel.rei.plugin;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.RecipeDisplay;
 import net.minecraft.item.ItemStack;
+import net.minecraft.recipe.CampfireCookingRecipe;
 import net.minecraft.recipe.Ingredient;
-import net.minecraft.recipe.cooking.CampfireCookingRecipe;
 import net.minecraft.util.DefaultedList;
 import net.minecraft.util.Identifier;
 

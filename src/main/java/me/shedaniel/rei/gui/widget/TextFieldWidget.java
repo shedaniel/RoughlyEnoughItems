@@ -8,7 +8,7 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.base.Predicates;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.SharedConstants;
-import net.minecraft.client.gui.Screen;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
