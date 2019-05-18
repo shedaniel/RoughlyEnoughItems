@@ -15,8 +15,8 @@ import net.minecraft.recipe.RecipeManager;
 import net.minecraft.util.Identifier;
 
 import java.awt.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -257,15 +257,13 @@ public class RecipeHelperImpl implements RecipeHelper {
     @Override
     public Map<RecipeCategory, List<RecipeDisplay>> getAllRecipes() {
         Map<RecipeCategory, List<RecipeDisplay>> map = Maps.newLinkedHashMap();
-        Map<Identifier, List<RecipeDisplay>> tempMap = Maps.newLinkedHashMap();
-        recipeCategoryListMap.forEach((identifier, recipeDisplays) -> tempMap.put(identifier, new LinkedList<>(recipeDisplays)));
-        categories.forEach(category -> {
-            if (tempMap.containsKey(category.getIdentifier()))
-                map.put(category, tempMap.get(category.getIdentifier()).stream().filter(display -> isDisplayVisible(display, true)).collect(Collectors.toList()));
+        categories.forEach(recipeCategory -> {
+            if (recipeCategoryListMap.containsKey(recipeCategory.getIdentifier())) {
+                List<RecipeDisplay> list = recipeCategoryListMap.get(recipeCategory.getIdentifier()).stream().filter(display -> isDisplayVisible(display, true)).collect(Collectors.toList());
+                if (!list.isEmpty())
+                    map.put(recipeCategory, list);
+            }
         });
-        for(RecipeCategory category : map.keySet())
-            if (map.get(category).isEmpty())
-                map.remove(category);
         return map;
     }
     

@@ -25,7 +25,7 @@ public class ConfigObject {
     public boolean sideSearchField = false;
     
     @Comment("The command used in servers to cheat items")
-    public String giveCommand = "/give {player_name} {item_identifier}{nbt} {count}";
+    public String giveCommand = "/minecraft:give {player_name} {item_identifier}{nbt} {count}";
     
     @Comment("The command used to change gamemode") public String gamemodeCommand = "/gamemode {gamemode}";
     

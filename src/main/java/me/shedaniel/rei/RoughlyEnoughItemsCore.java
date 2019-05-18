@@ -74,6 +74,14 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         return DISPLAY_HELPER;
     }
     
+    /**
+     * Registers a REI plugin
+     *
+     * @param identifier the identifier of the plugin
+     * @param plugin     the plugin instance
+     * @deprecated Check REI wiki
+     */
+    @Deprecated
     public static REIPluginEntry registerPlugin(Identifier identifier, REIPluginEntry plugin) {
         plugins.put(identifier, plugin);
         RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered plugin %s from %s", identifier.toString(), plugin.getClass().getSimpleName());
