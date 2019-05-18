@@ -1,4 +1,9 @@
 View full changelog [here](https://github.com/shedaniel/RoughlyEnoughItems/blob/1.14/CHANGELOG.md).
+## v2.9+build.112
+- Fixed: ConcurrentModificationException crash in opening all recipes
+- Fixed: Defaulted cheating command to `minecraft:give` instead of `give`
+- Fixed: Can't cheat a stack of items on servers
+- Fixed [#88](https://github.com/shedaniel/RoughlyEnoughItems/issues/88): Stupid Item Search
 ## v2.9+build.111
 - Added: Buttons to switch category page in original recipe viewing screen
 - Updated: Mappings to 1.14.1
