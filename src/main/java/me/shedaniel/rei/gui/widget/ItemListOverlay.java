@@ -256,11 +256,11 @@ public class ItemListOverlay extends Widget {
         return lastSearchArgument;
     }
     
-    public boolean filterItem(ItemStack itemStack, List<SearchArgument[]> arguments) {
+    public static boolean filterItem(ItemStack itemStack, List<SearchArgument[]> arguments) {
         if (arguments.isEmpty())
             return true;
         String mod = ClientHelper.getInstance().getModFromItem(itemStack.getItem()).toLowerCase();
-        String tooltips = tryGetItemStackToolTip(itemStack, false).stream().skip(1).collect(Collectors.joining("")).replace(SPACE, EMPTY).toLowerCase();
+        String tooltips = tryGetItemStackToolTip(itemStack, true).stream().skip(1).collect(Collectors.joining("")).replace(SPACE, EMPTY).toLowerCase();
         String name = tryGetItemStackName(itemStack).replace(SPACE, EMPTY).toLowerCase();
         for(SearchArgument[] arguments1 : arguments) {
             boolean b = true;
