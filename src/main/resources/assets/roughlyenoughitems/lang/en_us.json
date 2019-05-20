@@ -103,7 +103,7 @@
 
   "_comment": "Config Tooltips",
   "tooltip.rei.config.side_search_box": "Declares the location of the search field:\nYes: Left / Right\nNo: Center\n \nDefaulted: No",
-  "tooltip.rei.config.list_ordering": "Declares the ordering of the side item list:\nYes: Left / Right\nNo: Center\n \nDefaulted: %s",
+  "tooltip.rei.config.list_ordering": "Declares the ordering of the side item list:\nValues: Registry / Name / Item Groups\n(Ascending / Descending)\n \nDefaulted: %s",
   "tooltip.rei.config.item_list_position": "Declares the position of the side item list:\nValues: Left / Right\n \nDefaulted: Right",
   "tooltip.rei.config.max_recipes_per_page": "Declares the maximum possible displayed recipes:\nValues: 2 - 99\n \nDefaulted: 3",
   "tooltip.rei.config.light_gray_recipe_border": "Declares the appearance of the recipe border:\nYes: Light Gray\nNo: Hard Black\n \nDefaulted: No",
