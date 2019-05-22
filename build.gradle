@@ -3,13 +3,17 @@ import net.fabricmc.loom.task.RemapJar
 plugins {
     id 'fabric-loom' version '0.2.2-SNAPSHOT'
     id "com.github.johnrengelman.shadow" version "4.0.3"
+    id 'maven-publish'
 }
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 archivesBaseName = "RoughlyEnoughItems"
-version = project.mod_version
+group = "me.shedaniel"
+
+def ENV = System.getenv()
+version = project.mod_version + "+" + (ENV.BUILD_NUMBER ? ("build." + ENV.BUILD_NUMBER) : "local")
 
 def includeDep = true
 
@@ -36,7 +40,7 @@ configurations {
 }
 
 shadowJar {
-    version = project.mod_version.replaceAll('\\+build.', '.')
+    version = project.mod_version
     classifier = includeDep ? null : "bare"
     configurations = [project.configurations.included]
 }
@@ -67,9 +71,39 @@ dependencies {
         include "cloth-config:ClothConfig:${cloth_config_version}"
     }
 
-    compile "blue.endless:jankson:${project.jankson_version}"
+    modCompile "blue.endless:jankson:${project.jankson_version}"
     included "blue.endless:jankson:${project.jankson_version}"
 
     modCompile "io.github.prospector.modmenu:ModMenu:${modmenu_version}"
     compile "org.lwjgl:lwjgl-jemalloc:3.2.1"
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+	classifier = "sources"
+	from sourceSets.main.allSource
+}
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			artifact(jar) {
+				builtBy remapJar
+			}
+			artifact(sourcesJar) {
+				builtBy remapSourcesJar
+			}
+		}
+	}
+
+	repositories {
+		if (project.hasProperty('danielshe_pass')) {
+			maven {
+				url = "http://deploy.modmuss50.me/"
+				credentials {
+					username = "danielshe"
+					password = project.getProperty('danielshe_pass')
+				}
+			}
+		}
+	}
 }
