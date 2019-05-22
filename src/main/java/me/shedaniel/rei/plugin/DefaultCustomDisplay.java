@@ -9,7 +9,6 @@ import com.google.common.collect.Lists;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Recipe;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,8 +33,8 @@ public class DefaultCustomDisplay implements DefaultCraftingDisplay {
                     column.set(i % 3, true);
                 }
             }
-        width = (int) column.stream().filter(b -> b).count();
-        height = (int) row.stream().filter(b -> b).count();
+        this.width = (int) column.stream().filter(Boolean::booleanValue).count();
+        this.height = (int) row.stream().filter(Boolean::booleanValue).count();
     }
     
     public DefaultCustomDisplay(List<List<ItemStack>> input, List<ItemStack> output) {
@@ -49,17 +48,17 @@ public class DefaultCustomDisplay implements DefaultCraftingDisplay {
     
     @Override
     public List<List<ItemStack>> getInput() {
-        return Collections.unmodifiableList(input);
+        return input;
     }
     
     @Override
     public List<ItemStack> getOutput() {
-        return Collections.unmodifiableList(output);
+        return output;
     }
     
     @Override
     public List<List<ItemStack>> getRequiredItems() {
-        return Collections.unmodifiableList(input);
+        return input;
     }
     
     @Override

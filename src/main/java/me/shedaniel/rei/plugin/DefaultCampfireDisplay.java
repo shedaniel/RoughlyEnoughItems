@@ -5,7 +5,6 @@
 
 package me.shedaniel.rei.plugin;
 
-import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.RecipeDisplay;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.CampfireCookingRecipe;
@@ -13,13 +12,16 @@ import net.minecraft.recipe.Ingredient;
 import net.minecraft.util.DefaultedList;
 import net.minecraft.util.Identifier;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class DefaultCampfireDisplay implements RecipeDisplay<CampfireCookingRecipe> {
     
-    private List<ItemStack> inputs, output;
+    private List<List<ItemStack>> inputs;
+    private List<ItemStack> output;
     private int cookTime;
     private CampfireCookingRecipe display;
     
@@ -29,8 +31,7 @@ public class DefaultCampfireDisplay implements RecipeDisplay<CampfireCookingReci
     }
     
     public DefaultCampfireDisplay(DefaultedList<Ingredient> ingredients, ItemStack output, int cookTime) {
-        this.inputs = Lists.newArrayList();
-        ingredients.stream().map(ingredient -> Lists.newArrayList(ingredient.getStackArray())).forEach(inputs::addAll);
+        this.inputs = ingredients.stream().map(i -> Arrays.asList(i.getStackArray())).collect(Collectors.toList());
         this.output = Collections.singletonList(output);
         this.cookTime = cookTime;
     }
@@ -46,7 +47,7 @@ public class DefaultCampfireDisplay implements RecipeDisplay<CampfireCookingReci
     
     @Override
     public List<List<ItemStack>> getInput() {
-        return Collections.singletonList(inputs);
+        return inputs;
     }
     
     @Override

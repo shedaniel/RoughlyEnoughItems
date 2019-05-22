@@ -13,6 +13,7 @@ import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.SlotWidget;
 import me.shedaniel.rei.gui.widget.Widget;
+import net.minecraft.ChatFormat;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GuiLighting;
@@ -77,7 +78,7 @@ public class DefaultCraftingCategory implements RecipeCategory<DefaultCraftingDi
                 if (currentStack.getAmount() == 1)
                     return "";
                 if (currentStack.getAmount() < 1)
-                    return "§c" + currentStack.getAmount();
+                    return ChatFormat.RED.toString() + currentStack.getAmount();
                 return currentStack.getAmount() + "";
             }
         });

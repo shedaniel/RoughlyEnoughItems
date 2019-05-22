@@ -5,7 +5,6 @@
 
 package me.shedaniel.rei.plugin;
 
-import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.RecipeDisplay;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Ingredient;
@@ -13,6 +12,7 @@ import net.minecraft.recipe.StonecuttingRecipe;
 import net.minecraft.util.DefaultedList;
 import net.minecraft.util.Identifier;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -20,7 +20,8 @@ import java.util.stream.Collectors;
 
 public class DefaultStoneCuttingDisplay implements RecipeDisplay<StonecuttingRecipe> {
     
-    private List<ItemStack> inputs, output;
+    private List<List<ItemStack>> inputs;
+    private List<ItemStack> output;
     private StonecuttingRecipe display;
     
     public DefaultStoneCuttingDisplay(StonecuttingRecipe recipe) {
@@ -29,8 +30,7 @@ public class DefaultStoneCuttingDisplay implements RecipeDisplay<StonecuttingRec
     }
     
     public DefaultStoneCuttingDisplay(DefaultedList<Ingredient> ingredients, ItemStack output) {
-        this.inputs = Lists.newArrayList();
-        ingredients.stream().map(i -> Lists.newArrayList(i.getStackArray())).collect(Collectors.toList()).forEach(inputs::addAll);
+        this.inputs = ingredients.stream().map(i -> Arrays.asList(i.getStackArray())).collect(Collectors.toList());
         this.output = Collections.singletonList(output);
     }
     
@@ -41,7 +41,7 @@ public class DefaultStoneCuttingDisplay implements RecipeDisplay<StonecuttingRec
     
     @Override
     public List<List<ItemStack>> getInput() {
-        return Collections.singletonList(inputs);
+        return inputs;
     }
     
     @Override

@@ -14,6 +14,7 @@ import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.renderables.RecipeRenderer;
 import me.shedaniel.rei.gui.widget.*;
+import net.minecraft.ChatFormat;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
@@ -172,7 +173,7 @@ public class VillagerRecipeViewingScreen extends Screen {
             @Override
             public void render(int mouseX, int mouseY, float delta) {
                 GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-                font.draw((isHovered(mouseX, mouseY) ? "§n" : "") + text, x - font.getStringWidth(text) / 2, y, getDefaultColor());
+                font.draw((isHovered(mouseX, mouseY) ? ChatFormat.UNDERLINE.toString() : "") + text, x - font.getStringWidth(text) / 2, y, getDefaultColor());
                 if (clickable && getTooltips().isPresent())
                     if (!focused && isHighlighted(mouseX, mouseY))
                         ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltips().get().split("\n")));

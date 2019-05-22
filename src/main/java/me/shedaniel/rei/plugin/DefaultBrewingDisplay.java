@@ -13,10 +13,7 @@ import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.util.Identifier;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class DefaultBrewingDisplay implements RecipeDisplay {
     
@@ -36,7 +33,7 @@ public class DefaultBrewingDisplay implements RecipeDisplay {
     
     @Override
     public List<List<ItemStack>> getInput() {
-        return Lists.newArrayList(Collections.singletonList(input), Lists.newArrayList(reactant.getStackArray()));
+        return Lists.newArrayList(Collections.singletonList(input), Arrays.asList(reactant.getStackArray()));
     }
     
     @Override

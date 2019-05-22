@@ -17,6 +17,7 @@ public class SearchFieldWidget extends TextFieldWidget {
     
     public SearchFieldWidget(int x, int y, int width, int height) {
         super(x, y, width, height);
+        setMaxLength(10000);
     }
     
     public void laterRender(int int_1, int int_2, float float_1) {
