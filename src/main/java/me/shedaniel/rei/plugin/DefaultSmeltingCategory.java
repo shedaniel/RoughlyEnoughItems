@@ -10,9 +10,10 @@ import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.Renderable;
 import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.gui.renderables.RecipeRenderer;
-import me.shedaniel.rei.gui.widget.SlotWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
+import me.shedaniel.rei.gui.widget.SlotWidget;
 import me.shedaniel.rei.gui.widget.Widget;
+import net.minecraft.ChatFormat;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GuiLighting;
@@ -23,6 +24,7 @@ import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -73,7 +75,7 @@ public class DefaultSmeltingCategory implements RecipeCategory<DefaultSmeltingDi
         widgets.add(new SlotWidget(startPoint.x + 1, startPoint.y + 37, recipeDisplaySupplier.get().getFuel(), true, true, true) {
             @Override
             protected List<String> getExtraToolTips(ItemStack stack) {
-                return Arrays.asList(I18n.translate("category.rei.smelting.fuel"));
+                return Collections.singletonList(ChatFormat.YELLOW.toString() + I18n.translate("category.rei.smelting.fuel"));
             }
         });
         widgets.add(new SlotWidget(startPoint.x + 61, startPoint.y + 19, recipeDisplaySupplier.get().getOutput(), false, true, true));

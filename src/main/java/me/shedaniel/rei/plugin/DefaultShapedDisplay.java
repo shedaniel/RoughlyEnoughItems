@@ -5,11 +5,11 @@
 
 package me.shedaniel.rei.plugin;
 
-import com.google.common.collect.Lists;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.ShapedRecipe;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +23,7 @@ public class DefaultShapedDisplay implements DefaultCraftingDisplay<ShapedRecipe
     
     public DefaultShapedDisplay(ShapedRecipe recipe) {
         this.display = recipe;
-        this.input = Lists.newArrayList(recipe.getPreviewInputs().stream().map(i -> Lists.newArrayList(i.getStackArray())).collect(Collectors.toList()));
+        this.input = recipe.getPreviewInputs().stream().map(i -> Arrays.asList(i.getStackArray())).collect(Collectors.toList());
         this.output = Collections.singletonList(recipe.getOutput());
     }
     

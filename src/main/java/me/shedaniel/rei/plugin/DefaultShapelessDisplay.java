@@ -9,6 +9,7 @@ import com.google.common.collect.Lists;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.ShapelessRecipe;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -22,7 +23,7 @@ public class DefaultShapelessDisplay implements DefaultCraftingDisplay {
     
     public DefaultShapelessDisplay(ShapelessRecipe recipe) {
         this.display = recipe;
-        this.input = Lists.newArrayList(recipe.getPreviewInputs().stream().map(i -> Lists.newArrayList(i.getStackArray())).collect(Collectors.toList()));
+        this.input = recipe.getPreviewInputs().stream().map(i -> Arrays.asList(i.getStackArray())).collect(Collectors.toList());
         this.output = Collections.singletonList(recipe.getOutput());
     }
     

@@ -24,6 +24,7 @@ import net.fabricmc.fabric.impl.client.keybinding.KeyBindingRegistryImpl;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
+import net.minecraft.ChatFormat;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.util.InputUtil;
@@ -58,7 +59,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         String mod = getModFromItem(item);
         if (mod.equalsIgnoreCase(""))
             return "";
-        return "§9§o" + mod;
+        return ChatFormat.BLUE.toString() + ChatFormat.ITALIC.toString() + mod;
     }
     
     @Override
@@ -66,7 +67,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         String mod = getModFromIdentifier(identifier);
         if (mod.equalsIgnoreCase(""))
             return "";
-        return "§9§o" + mod;
+        return ChatFormat.BLUE.toString() + ChatFormat.ITALIC.toString() + mod;
     }
     
     @Override

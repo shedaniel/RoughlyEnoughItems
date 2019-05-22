@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "roughlyenoughitems",
   "name": "Roughly Enough Items",
-  "description": "To allow players to view items and recipes. Version: ${version}",
+  "description": "To allow players to view items and recipes.",
   "version": "${version}",
   "authors": [
     "Danielshe"
@@ -13,7 +13,7 @@
     "issues": "https://github.com/shedaniel/RoughlyEnoughItems/issues"
   },
   "license": "MIT",
-  "icon": "pack.png",
+  "icon": "icon.png",
   "entrypoints": {
     "client": [
       "me.shedaniel.rei.RoughlyEnoughItemsCore",

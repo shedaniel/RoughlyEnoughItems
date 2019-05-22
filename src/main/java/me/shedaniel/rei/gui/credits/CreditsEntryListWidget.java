@@ -5,18 +5,37 @@
 
 package me.shedaniel.rei.gui.credits;
 
+import me.shedaniel.clothconfig.gui.DynamicSmoothScrollingEntryListWidget;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget;
+import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.network.chat.Component;
 
-public class CreditsEntryListWidget extends AlwaysSelectedEntryListWidget<CreditsEntryListWidget.CreditsItem> {
+public class CreditsEntryListWidget extends DynamicSmoothScrollingEntryListWidget<CreditsEntryListWidget.CreditsItem> {
     
-    public CreditsEntryListWidget(MinecraftClient client, int width, int height, int startY, int endY, int entryHeight) {
-        super(client, width, height, startY, endY, entryHeight);
+    private boolean inFocus;
+    
+    public CreditsEntryListWidget(MinecraftClient client, int width, int height, int startY, int endY) {
+        super(client, width, height, startY, endY, DrawableHelper.BACKGROUND_LOCATION);
+    }
+    
+    @Override
+    public boolean changeFocus(boolean boolean_1) {
+        if (!this.inFocus && this.getItemCount() == 0) {
+            return false;
+        } else {
+            this.inFocus = !this.inFocus;
+            if (this.inFocus && this.getFocused() == null && this.getItemCount() > 0) {
+                this.moveSelection(1);
+            } else if (this.inFocus && this.getFocused() != null) {
+                this.moveSelection(0);
+            }
+            
+            return this.inFocus;
+        }
     }
     
     public void creditsClearEntries() {
-        clearEntries();
+        clearItems();
     }
     
     private CreditsItem rei_getEntry(int int_1) {
@@ -24,11 +43,11 @@ public class CreditsEntryListWidget extends AlwaysSelectedEntryListWidget<Credit
     }
     
     public void creditsAddEntry(CreditsItem entry) {
-        addEntry(entry);
+        addItem(entry);
     }
     
     @Override
-    public int getRowWidth() {
+    public int getItemWidth() {
         return width - 80;
     }
     
@@ -37,7 +56,7 @@ public class CreditsEntryListWidget extends AlwaysSelectedEntryListWidget<Credit
         return width - 40;
     }
     
-    public static class CreditsItem extends AlwaysSelectedEntryListWidget.Entry<CreditsItem> {
+    public static class CreditsItem extends DynamicSmoothScrollingEntryListWidget.Entry<CreditsItem> {
         private String text;
         
         public CreditsItem(Component textComponent) {
@@ -51,6 +70,16 @@ public class CreditsEntryListWidget extends AlwaysSelectedEntryListWidget<Credit
         @Override
         public void render(int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
             MinecraftClient.getInstance().textRenderer.drawWithShadow(text, x + 5, y + 5, -1);
+        }
+        
+        @Override
+        public int getItemHeight() {
+            return 12;
+        }
+        
+        @Override
+        public boolean changeFocus(boolean boolean_1) {
+            return false;
         }
     }
     

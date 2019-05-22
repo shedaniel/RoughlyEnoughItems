@@ -5,7 +5,6 @@
 
 package me.shedaniel.rei.plugin;
 
-import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.RecipeDisplay;
 import net.minecraft.block.entity.FurnaceBlockEntity;
 import net.minecraft.item.Item;
@@ -13,6 +12,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.SmokingRecipe;
 import net.minecraft.util.Identifier;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -26,8 +26,8 @@ public class DefaultSmokingDisplay implements RecipeDisplay<SmokingRecipe> {
     
     public DefaultSmokingDisplay(SmokingRecipe recipe) {
         this.display = recipe;
-        this.input = Lists.newArrayList(recipe.getPreviewInputs().stream().map(i -> Lists.newArrayList(i.getStackArray())).collect(Collectors.toList()));
-        input.add(FurnaceBlockEntity.createFuelTimeMap().keySet().stream().map(Item::getDefaultStack).collect(Collectors.toList()));
+        this.input = recipe.getPreviewInputs().stream().map(i -> Arrays.asList(i.getStackArray())).collect(Collectors.toList());
+        this.input.add(FurnaceBlockEntity.createFuelTimeMap().keySet().stream().map(Item::getDefaultStack).collect(Collectors.toList()));
         this.output = Collections.singletonList(recipe.getOutput());
     }
     

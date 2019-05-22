@@ -37,7 +37,7 @@ public class CreditsScreen extends Screen {
     
     @Override
     protected void init() {
-        children.add(entryListWidget = new CreditsEntryListWidget(minecraft, width, height, 32, height - 32, 12));
+        children.add(entryListWidget = new CreditsEntryListWidget(minecraft, width, height, 32, height - 32));
         entryListWidget.creditsClearEntries();
         for(String line : I18n.translate("text.rei.credit.text").split("\n"))
             entryListWidget.creditsAddEntry(new CreditsItem(new TextComponent(line)));

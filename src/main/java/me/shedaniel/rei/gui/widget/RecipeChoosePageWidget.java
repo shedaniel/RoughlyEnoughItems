@@ -104,6 +104,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
         String endString = String.format(" /%d", maxPage);
         int width = font.getStringWidth(endString);
         this.widgets.add(textFieldWidget = new TextFieldWidget(bounds.x + 7, bounds.y + 16, bounds.width - width - 12, 18));
+        textFieldWidget.setMaxLength(10000);
         textFieldWidget.stripInvaild = s -> {
             StringBuilder stringBuilder_1 = new StringBuilder();
             char[] var2 = s.toCharArray();
