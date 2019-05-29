@@ -54,6 +54,13 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     private final Map<String, String> modNameCache = Maps.newHashMap();
     public FabricKeyBinding recipe, usage, hide, previousPage, nextPage;
     
+    public String getFormattedModNoItalicFromItem(Item item) {
+        String mod = getModFromItem(item);
+        if (mod.equalsIgnoreCase(""))
+            return "";
+        return ChatFormat.BLUE.toString() + mod;
+    }
+    
     @Override
     public String getFormattedModFromItem(Item item) {
         String mod = getModFromItem(item);
