@@ -79,6 +79,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
      *
      * @param identifier the identifier of the plugin
      * @param plugin     the plugin instance
+     * @return the plugin itself
      * @deprecated Check REI wiki
      */
     @Deprecated
