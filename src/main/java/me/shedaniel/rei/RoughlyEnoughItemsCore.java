@@ -14,6 +14,7 @@ import me.shedaniel.cloth.hooks.ClothClientHooks;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.*;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
+import me.shedaniel.rei.gui.widget.ItemListOverlay;
 import me.shedaniel.rei.listeners.RecipeBookGuiHooks;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
@@ -28,6 +29,9 @@ import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookScreen;
 import net.minecraft.client.gui.widget.RecipeBookButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
@@ -129,6 +133,12 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         registerClothEvents();
         discoverOldPlugins();
         discoverPluginEntries();
+        
+        ClientSidePacketRegistry.INSTANCE.register(RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, (packetContext, packetByteBuf) -> {
+            ItemStack stack = packetByteBuf.readItemStack();
+            String player = packetByteBuf.readString();
+            packetContext.getPlayer().addChatMessage(new TextComponent(I18n.translate("text.rei.cheat_items").replaceAll("\\{item_name}", ItemListOverlay.tryGetItemStackName(stack.copy())).replaceAll("\\{item_count}", stack.copy().getAmount() + "").replaceAll("\\{player_name}", player)), false);
+        });
     }
     
     @SuppressWarnings("deprecation")
