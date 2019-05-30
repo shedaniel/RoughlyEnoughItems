@@ -225,7 +225,7 @@ public class RecipeHelperImpl implements RecipeHelper {
                 if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_OTHERS))
                     plugin.registerOthers(this);
             } catch (Exception e) {
-                RoughlyEnoughItemsCore.LOGGER.error("[REI] %s plugin failed to load: %s", identifier.toString(), e.getLocalizedMessage());
+                RoughlyEnoughItemsCore.LOGGER.error("[REI] " + identifier.toString() + " plugin failed to load!", e);
             }
         });
         if (getDisplayVisibilityHandlers().isEmpty())
