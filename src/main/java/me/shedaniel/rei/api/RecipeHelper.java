@@ -173,4 +173,6 @@ public interface RecipeHelper {
      */
     Optional<DisplaySettings> getCachedCategorySettings(Identifier category);
     
+    void registerLiveRecipeGenerator(LiveRecipeGenerator liveRecipeGenerator);
+    
 }
