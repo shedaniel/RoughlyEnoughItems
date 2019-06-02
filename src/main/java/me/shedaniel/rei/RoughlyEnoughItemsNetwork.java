@@ -40,7 +40,7 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
             }
             ItemStack stack = packetByteBuf.readItemStack();
             if (player.inventory.insertStack(stack.copy())) {
-                ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, new PacketByteBuf(Unpooled.buffer()).writeItemStack(stack.copy()).writeString(player.getEntityName()));
+                ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, new PacketByteBuf(Unpooled.buffer()).writeItemStack(stack.copy()).writeString(player.getEntityName(), 32767));
             } else
                 player.addChatMessage(new TranslatableComponent("text.rei.failed_cheat_items"), false);
         });

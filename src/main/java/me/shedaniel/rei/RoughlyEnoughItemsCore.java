@@ -136,7 +136,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         
         ClientSidePacketRegistry.INSTANCE.register(RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, (packetContext, packetByteBuf) -> {
             ItemStack stack = packetByteBuf.readItemStack();
-            String player = packetByteBuf.readString();
+            String player = packetByteBuf.readString(32767);
             packetContext.getPlayer().addChatMessage(new TextComponent(I18n.translate("text.rei.cheat_items").replaceAll("\\{item_name}", ItemListOverlay.tryGetItemStackName(stack.copy())).replaceAll("\\{item_count}", stack.copy().getAmount() + "").replaceAll("\\{player_name}", player)), false);
         });
     }

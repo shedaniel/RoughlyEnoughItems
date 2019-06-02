@@ -300,7 +300,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
                 next = 0;
             return GameMode.byId(next);
         } catch (Exception e) {
-            return GameMode.INVALID;
+            return GameMode.NOT_SET;
         }
     }
     

@@ -42,6 +42,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     private final Map<Identifier, ButtonAreaSupplier> speedCraftAreaSupplierMap = Maps.newHashMap();
     private final Map<Identifier, List<SpeedCraftFunctional>> speedCraftFunctionalMap = Maps.newHashMap();
     private final List<DisplayVisibilityHandler> displayVisibilityHandlers = Lists.newArrayList();
+    private final List<LiveRecipeGenerator> liveRecipeGenerators = Lists.newArrayList();
     private RecipeManager recipeManager;
     
     @Override
@@ -100,6 +101,8 @@ public class RecipeHelperImpl implements RecipeHelper {
                     if (category.checkTags() ? ItemStack.areEqual(stack, outputStack) : ItemStack.areEqualIgnoreTags(stack, outputStack))
                         categoriesMap.get(recipeDisplay.getRecipeCategory()).add(recipeDisplay);
         }
+        for(LiveRecipeGenerator liveRecipeGenerator : liveRecipeGenerators)
+            ((Optional<List>) liveRecipeGenerator.getRecipeFor(stack)).ifPresent(o -> categoriesMap.get(liveRecipeGenerator.getCategoryIdentifier()).addAll(o));
         Map<RecipeCategory, List<RecipeDisplay>> recipeCategoryListMap = Maps.newLinkedHashMap();
         categories.forEach(category -> {
             if (categoriesMap.containsKey(category.getIdentifier()) && !categoriesMap.get(category.getIdentifier()).isEmpty())
@@ -141,6 +144,8 @@ public class RecipeHelperImpl implements RecipeHelper {
                 }
             }
         }
+        for(LiveRecipeGenerator liveRecipeGenerator : liveRecipeGenerators)
+            ((Optional<List>) liveRecipeGenerator.getUsageFor(stack)).ifPresent(o -> categoriesMap.get(liveRecipeGenerator.getCategoryIdentifier()).addAll(o));
         Map<RecipeCategory, List<RecipeDisplay>> recipeCategoryListMap = Maps.newLinkedHashMap();
         categories.forEach(category -> {
             if (categoriesMap.containsKey(category.getIdentifier()) && !categoriesMap.get(category.getIdentifier()).isEmpty())
@@ -198,6 +203,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         this.speedCraftFunctionalMap.clear();
         this.categoryDisplaySettingsMap.clear();
         this.displayVisibilityHandlers.clear();
+        this.liveRecipeGenerators.clear();
         ((DisplayHelperImpl) RoughlyEnoughItemsCore.getDisplayHelper()).resetCache();
         BaseBoundsHandler baseBoundsHandler = new BaseBoundsHandlerImpl();
         RoughlyEnoughItemsCore.getDisplayHelper().registerBoundsHandler(baseBoundsHandler);
@@ -300,6 +306,11 @@ public class RecipeHelperImpl implements RecipeHelper {
     @Override
     public Optional<DisplaySettings> getCachedCategorySettings(Identifier category) {
         return categoryDisplaySettingsMap.entrySet().stream().filter(entry -> entry.getKey().equals(category)).map(Map.Entry::getValue).findAny();
+    }
+    
+    @Override
+    public void registerLiveRecipeGenerator(LiveRecipeGenerator liveRecipeGenerator) {
+        liveRecipeGenerators.add(liveRecipeGenerator);
     }
     
 }
