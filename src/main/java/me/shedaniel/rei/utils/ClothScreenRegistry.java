@@ -52,6 +52,7 @@ public class ClothScreenRegistry {
             }
         });
         ConfigScreenBuilder.CategoryBuilder appearance = builder.addCategory("text.rei.config.appearance");
+        appearance.addOption(new BooleanListEntry("text.rei.config.dark_theme", RoughlyEnoughItemsCore.getConfigManager().getConfig().darkTheme, RESET, () -> false, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().darkTheme = bool, () -> getConfigTooltip("dark_theme")));
         appearance.addOption(new EnumListEntry<>("text.rei.config.recipe_screen_type", RecipeScreenType.class, RoughlyEnoughItemsCore.getConfigManager().getConfig().screenType, RESET, () -> RecipeScreenType.UNSET, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().screenType = bool, EnumListEntry.DEFAULT_NAME_PROVIDER, () -> getConfigTooltip("recipe_screen_type")));
         appearance.addOption(new BooleanListEntry("text.rei.config.side_search_box", RoughlyEnoughItemsCore.getConfigManager().getConfig().sideSearchField, RESET, () -> false, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().sideSearchField = bool, () -> getConfigTooltip("side_search_box")));
         appearance.addOption(new EnumListEntry<>("text.rei.config.list_ordering", ItemListOrderingConfig.class, ItemListOrderingConfig.from(RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering, RoughlyEnoughItemsCore.getConfigManager().getConfig().isAscending), RESET, () -> ItemListOrderingConfig.REGISTRY_ASCENDING, config -> {
@@ -66,6 +67,7 @@ public class ClothScreenRegistry {
         });
         appearance.addOption(new IntegerSliderEntry("text.rei.config.max_recipes_per_page", 2, 99, RoughlyEnoughItemsCore.getConfigManager().getConfig().maxRecipePerPage, RESET, () -> 3, i -> RoughlyEnoughItemsCore.getConfigManager().getConfig().maxRecipePerPage = i, () -> getConfigTooltip("max_recipes_per_page")));
         appearance.addOption(new BooleanListEntry("text.rei.config.light_gray_recipe_border", RoughlyEnoughItemsCore.getConfigManager().getConfig().lightGrayRecipeBorder, RESET, () -> false, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().lightGrayRecipeBorder = bool, () -> getConfigTooltip("light_gray_recipe_border")));
+        appearance.addOption(new BooleanListEntry("text.rei.config.villager_screen_permanent_scroll_bar", RoughlyEnoughItemsCore.getConfigManager().getConfig().villagerScreenPermanentScrollBar, RESET, () -> false, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().villagerScreenPermanentScrollBar = bool, () -> getConfigTooltip("villager_screen_permanent_scroll_bar")));
         ConfigScreenBuilder.CategoryBuilder action = builder.addCategory("text.rei.config.action");
         action.addOption(new EnumListEntry<>("text.rei.config.item_cheating_mode", ItemCheatingMode.class, RoughlyEnoughItemsCore.getConfigManager().getConfig().itemCheatingMode, RESET, () -> ItemCheatingMode.REI_LIKE, i -> RoughlyEnoughItemsCore.getConfigManager().getConfig().itemCheatingMode = i, e -> {
             return I18n.translate("text.rei.config.item_cheating_mode." + e.name().toLowerCase());

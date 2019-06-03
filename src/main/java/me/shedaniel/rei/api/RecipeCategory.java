@@ -5,6 +5,7 @@
 
 package me.shedaniel.rei.api;
 
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.renderables.RecipeRenderer;
 import me.shedaniel.rei.gui.widget.CategoryBaseWidget;
@@ -87,8 +88,13 @@ public interface RecipeCategory<T extends RecipeDisplay> {
      */
     default void drawCategoryBackground(Rectangle bounds, int mouseX, int mouseY, float delta) {
         new CategoryBaseWidget(bounds).render();
-        DrawableHelper.fill(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, RecipeViewingScreen.SUB_COLOR.getRGB());
-        DrawableHelper.fill(bounds.x + 17, bounds.y + 21, bounds.x + bounds.width - 17, bounds.y + 33, RecipeViewingScreen.SUB_COLOR.getRGB());
+        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().darkTheme) {
+            DrawableHelper.fill(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, 0xFF404040);
+            DrawableHelper.fill(bounds.x + 17, bounds.y + 21, bounds.x + bounds.width - 17, bounds.y + 33, 0xFF404040);
+        } else {
+            DrawableHelper.fill(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, 0xFF9E9E9E);
+            DrawableHelper.fill(bounds.x + 17, bounds.y + 21, bounds.x + bounds.width - 17, bounds.y + 33, 0xFF9E9E9E);
+        }
     }
     
     /**

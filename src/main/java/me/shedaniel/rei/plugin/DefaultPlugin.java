@@ -42,6 +42,12 @@ public class DefaultPlugin implements REIPluginEntry {
     public static final Identifier STONE_CUTTING = new Identifier("minecraft", "plugins/stone_cutting");
     public static final Identifier BREWING = new Identifier("minecraft", "plugins/brewing");
     public static final Identifier PLUGIN = new Identifier("roughlyenoughitems", "default_plugin");
+    private static final Identifier DISPLAY_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/display.png");
+    private static final Identifier DISPLAY_TEXTURE_DARK = new Identifier("roughlyenoughitems", "textures/gui/display_dark.png");
+    
+    public static Identifier getDisplayTexture() {
+        return RoughlyEnoughItemsCore.getConfigManager().getConfig().darkTheme ? DISPLAY_TEXTURE_DARK : DISPLAY_TEXTURE;
+    }
     
     private static final List<DefaultBrewingDisplay> BREWING_DISPLAYS = Lists.newArrayList();
     

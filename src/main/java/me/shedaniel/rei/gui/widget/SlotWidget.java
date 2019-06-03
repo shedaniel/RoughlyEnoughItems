@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 public class SlotWidget extends HighlightableWidget {
     
     private static final Identifier RECIPE_GUI = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
+    private static final Identifier RECIPE_GUI_DARK = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
     private static final ItemStackRenderer TROPICAL_FISH_RENDERABLE = Renderable.fromItemStack(Items.TROPICAL_FISH.getDefaultStack());
     private List<Renderer> renderers = new LinkedList<>();
     private boolean drawBackground, showToolTips, clickToMoreRecipes, drawHighlightedBackground;
@@ -99,8 +100,9 @@ public class SlotWidget extends HighlightableWidget {
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         Renderer renderer = getCurrentRenderer();
+        boolean darkTheme = RoughlyEnoughItemsCore.getConfigManager().getConfig().darkTheme;
         if (drawBackground) {
-            minecraft.getTextureManager().bindTexture(RECIPE_GUI);
+            minecraft.getTextureManager().bindTexture(darkTheme ? RECIPE_GUI_DARK : RECIPE_GUI);
             blit(this.x - 1, this.y - 1, 0, 222, 18, 18);
         }
         boolean highlighted = isHighlighted(mouseX, mouseY);
@@ -108,7 +110,8 @@ public class SlotWidget extends HighlightableWidget {
             GlStateManager.disableLighting();
             GlStateManager.disableDepthTest();
             GlStateManager.colorMask(true, true, true, false);
-            fillGradient(x, y, x + 16, y + 16, -2130706433, -2130706433);
+            int color = darkTheme ? 0xFF5E5E5E : -2130706433;
+            fillGradient(x, y, x + 16, y + 16, color, color);
             GlStateManager.colorMask(true, true, true, true);
             GlStateManager.enableLighting();
             GlStateManager.enableDepthTest();

@@ -36,7 +36,6 @@ import java.util.function.Supplier;
 public class RecipeViewingScreen extends Screen {
     
     public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
-    public static final Color SUB_COLOR = new Color(159, 159, 159);
     private static final int TABS_PER_PAGE = 5;
     private final List<Widget> widgets;
     private final List<TabWidget> tabs;
@@ -344,8 +343,13 @@ public class RecipeViewingScreen extends Screen {
             selectedCategory.drawCategoryBackground(bounds, mouseX, mouseY, delta);
         else {
             new CategoryBaseWidget(bounds).render();
-            fill(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, SUB_COLOR.getRGB());
-            fill(bounds.x + 17, bounds.y + 21, bounds.x + bounds.width - 17, bounds.y + 33, SUB_COLOR.getRGB());
+            if (RoughlyEnoughItemsCore.getConfigManager().getConfig().darkTheme) {
+                fill(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, 0xFF404040);
+                fill(bounds.x + 17, bounds.y + 21, bounds.x + bounds.width - 17, bounds.y + 33, 0xFF404040);
+            } else {
+                fill(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, 0xFF9E9E9E);
+                fill(bounds.x + 17, bounds.y + 21, bounds.x + bounds.width - 17, bounds.y + 33, 0xFF9E9E9E);
+            }
         }
         tabs.stream().filter(tabWidget -> !tabWidget.isSelected()).forEach(tabWidget -> tabWidget.render(mouseX, mouseY, delta));
         GuiLighting.disable();
