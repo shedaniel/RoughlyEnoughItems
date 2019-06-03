@@ -162,8 +162,18 @@ public interface RecipeHelper {
      * @param display       the display to be checked
      * @param respectConfig whether it should respect the user's config
      * @return whether the display should be visible
+     * @deprecated {@link RecipeHelper#isDisplayVisible(RecipeDisplay)} )}
      */
+    @Deprecated
     boolean isDisplayVisible(RecipeDisplay display, boolean respectConfig);
+    
+    /**
+     * Checks if the display is visible by asking recipe visibility handlers
+     *
+     * @param display the display to be checked
+     * @return whether the display should be visible
+     */
+    boolean isDisplayVisible(RecipeDisplay display);
     
     /**
      * Gets the cached category setting by the category identifier
