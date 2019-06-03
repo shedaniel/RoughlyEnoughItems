@@ -31,8 +31,6 @@ import java.util.function.Supplier;
 
 public class DefaultSmokingCategory implements RecipeCategory<DefaultSmokingDisplay> {
     
-    private static final Identifier DISPLAY_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/display.png");
-    
     @Override
     public Identifier getIdentifier() {
         return DefaultPlugin.SMOKING;
@@ -62,7 +60,7 @@ public class DefaultSmokingCategory implements RecipeCategory<DefaultSmokingDisp
                 super.render(mouseX, mouseY, delta);
                 GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                 GuiLighting.disable();
-                MinecraftClient.getInstance().getTextureManager().bindTexture(DISPLAY_TEXTURE);
+                MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
                 blit(startPoint.x, startPoint.y, 0, 54, 82, 54);
                 int height = MathHelper.ceil((System.currentTimeMillis() / 250 % 14d) / 1f);
                 blit(startPoint.x + 2, startPoint.y + 21 + (14 - height), 82, 77 + (14 - height), 14, height);

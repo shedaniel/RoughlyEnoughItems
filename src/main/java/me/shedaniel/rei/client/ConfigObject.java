@@ -48,6 +48,10 @@ public class ConfigObject {
     
     public boolean lightGrayRecipeBorder = false;
     
+    public boolean villagerScreenPermanentScrollBar = false;
+    
+    public boolean darkTheme = false;
+    
     public RecipeScreenType screenType = RecipeScreenType.UNSET;
     
     @Comment(

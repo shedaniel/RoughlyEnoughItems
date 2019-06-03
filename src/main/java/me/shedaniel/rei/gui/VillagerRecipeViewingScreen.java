@@ -10,6 +10,7 @@ import com.google.common.collect.Maps;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.zeitheron.hammercore.client.utils.Scissors;
 import me.shedaniel.cloth.api.ClientUtils;
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.renderables.RecipeRenderer;
@@ -194,7 +195,7 @@ public class VillagerRecipeViewingScreen extends Screen {
             
             @Override
             public int getDefaultColor() {
-                return 4210752;
+                return RoughlyEnoughItemsCore.getConfigManager().getConfig().darkTheme ? 0xFFBBBBBB : 4210752;
             }
         });
         this.children.addAll(buttonWidgets);
@@ -256,7 +257,11 @@ public class VillagerRecipeViewingScreen extends Screen {
     
     @Override
     public void render(int mouseX, int mouseY, float delta) {
-        if (scrollBarAlphaFutureTime > 0) {
+        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().villagerScreenPermanentScrollBar) {
+            scrollBarAlphaFutureTime = System.currentTimeMillis();
+            scrollBarAlphaFuture = 0;
+            scrollBarAlpha = 1;
+        } else if (scrollBarAlphaFutureTime > 0) {
             long l = System.currentTimeMillis() - scrollBarAlphaFutureTime;
             if (l > 300f) {
                 if (scrollBarAlphaFutureTime == 0) {
@@ -319,10 +324,11 @@ public class VillagerRecipeViewingScreen extends Screen {
             GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
             GlStateManager.shadeModel(7425);
             buffer.begin(7, VertexFormats.POSITION_COLOR);
-            buffer.vertex(scrollbarPositionMinX, minY + scrollBarHeight, 1000D).color(1f, 1f, 1f, scrollBarAlpha).next();
-            buffer.vertex(scrollbarPositionMaxX, minY + scrollBarHeight, 1000D).color(1f, 1f, 1f, scrollBarAlpha).next();
-            buffer.vertex(scrollbarPositionMaxX, minY, 1000D).color(1f, 1f, 1f, scrollBarAlpha).next();
-            buffer.vertex(scrollbarPositionMinX, minY, 1000D).color(1f, 1f, 1f, scrollBarAlpha).next();
+            float b = RoughlyEnoughItemsCore.getConfigManager().getConfig().darkTheme ? 0.37f : 1f;
+            buffer.vertex(scrollbarPositionMinX, minY + scrollBarHeight, 1000D).color(b, b, b, scrollBarAlpha).next();
+            buffer.vertex(scrollbarPositionMaxX, minY + scrollBarHeight, 1000D).color(b, b, b, scrollBarAlpha).next();
+            buffer.vertex(scrollbarPositionMaxX, minY, 1000D).color(b, b, b, scrollBarAlpha).next();
+            buffer.vertex(scrollbarPositionMinX, minY, 1000D).color(b, b, b, scrollBarAlpha).next();
             tessellator.draw();
             GlStateManager.shadeModel(7424);
             GlStateManager.disableBlend();
