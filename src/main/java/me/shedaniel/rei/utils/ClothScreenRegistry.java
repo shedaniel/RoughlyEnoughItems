@@ -66,7 +66,6 @@ public class ClothScreenRegistry {
         });
         appearance.addOption(new IntegerSliderEntry("text.rei.config.max_recipes_per_page", 2, 99, RoughlyEnoughItemsCore.getConfigManager().getConfig().maxRecipePerPage, RESET, () -> 3, i -> RoughlyEnoughItemsCore.getConfigManager().getConfig().maxRecipePerPage = i, () -> getConfigTooltip("max_recipes_per_page")));
         appearance.addOption(new BooleanListEntry("text.rei.config.light_gray_recipe_border", RoughlyEnoughItemsCore.getConfigManager().getConfig().lightGrayRecipeBorder, RESET, () -> false, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().lightGrayRecipeBorder = bool, () -> getConfigTooltip("light_gray_recipe_border")));
-        appearance.addOption(new BooleanListEntry("text.rei.config.prefer_visible_recipes", RoughlyEnoughItemsCore.getConfigManager().getConfig().preferVisibleRecipes, RESET, () -> false, bool -> RoughlyEnoughItemsCore.getConfigManager().getConfig().preferVisibleRecipes = bool, () -> getConfigTooltip("prefer_visible_recipes")));
         ConfigScreenBuilder.CategoryBuilder action = builder.addCategory("text.rei.config.action");
         action.addOption(new EnumListEntry<>("text.rei.config.item_cheating_mode", ItemCheatingMode.class, RoughlyEnoughItemsCore.getConfigManager().getConfig().itemCheatingMode, RESET, () -> ItemCheatingMode.REI_LIKE, i -> RoughlyEnoughItemsCore.getConfigManager().getConfig().itemCheatingMode = i, e -> {
             return I18n.translate("text.rei.config.item_cheating_mode." + e.name().toLowerCase());

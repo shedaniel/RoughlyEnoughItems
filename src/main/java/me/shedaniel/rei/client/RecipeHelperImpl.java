@@ -106,7 +106,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         Map<RecipeCategory, List<RecipeDisplay>> recipeCategoryListMap = Maps.newLinkedHashMap();
         categories.forEach(category -> {
             if (categoriesMap.containsKey(category.getIdentifier()) && !categoriesMap.get(category.getIdentifier()).isEmpty())
-                recipeCategoryListMap.put(category, categoriesMap.get(category.getIdentifier()).stream().filter(display -> isDisplayVisible(display, true)).collect(Collectors.toList()));
+                recipeCategoryListMap.put(category, categoriesMap.get(category.getIdentifier()).stream().filter(display -> isDisplayVisible(display)).collect(Collectors.toList()));
         });
         for(RecipeCategory category : Lists.newArrayList(recipeCategoryListMap.keySet()))
             if (recipeCategoryListMap.get(category).isEmpty())
@@ -149,7 +149,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         Map<RecipeCategory, List<RecipeDisplay>> recipeCategoryListMap = Maps.newLinkedHashMap();
         categories.forEach(category -> {
             if (categoriesMap.containsKey(category.getIdentifier()) && !categoriesMap.get(category.getIdentifier()).isEmpty())
-                recipeCategoryListMap.put(category, categoriesMap.get(category.getIdentifier()).stream().filter(display -> isDisplayVisible(display, true)).collect(Collectors.toList()));
+                recipeCategoryListMap.put(category, categoriesMap.get(category.getIdentifier()).stream().filter(display -> isDisplayVisible(display)).collect(Collectors.toList()));
         });
         for(RecipeCategory category : Lists.newArrayList(recipeCategoryListMap.keySet()))
             if (recipeCategoryListMap.get(category).isEmpty())
@@ -265,7 +265,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         Map<RecipeCategory, List<RecipeDisplay>> map = Maps.newLinkedHashMap();
         categories.forEach(recipeCategory -> {
             if (recipeCategoryListMap.containsKey(recipeCategory.getIdentifier())) {
-                List<RecipeDisplay> list = recipeCategoryListMap.get(recipeCategory.getIdentifier()).stream().filter(display -> isDisplayVisible(display, true)).collect(Collectors.toList());
+                List<RecipeDisplay> list = recipeCategoryListMap.get(recipeCategory.getIdentifier()).stream().filter(display -> isDisplayVisible(display)).collect(Collectors.toList());
                 if (!list.isEmpty())
                     map.put(recipeCategory, list);
             }
@@ -288,17 +288,21 @@ public class RecipeHelperImpl implements RecipeHelper {
         return Collections.unmodifiableList(displayVisibilityHandlers);
     }
     
+    @SuppressWarnings("deprecation")
     @Override
     public boolean isDisplayVisible(RecipeDisplay display, boolean respectConfig) {
+        return isDisplayVisible(display);
+    }
+    
+    @SuppressWarnings("deprecation")
+    @Override
+    public boolean isDisplayVisible(RecipeDisplay display) {
         RecipeCategory category = getCategory(display.getRecipeCategory());
         List<DisplayVisibilityHandler> list = getDisplayVisibilityHandlers().stream().sorted(VISIBILITY_HANDLER_COMPARATOR).collect(Collectors.toList());
         for(DisplayVisibilityHandler displayVisibilityHandler : list) {
             DisplayVisibility visibility = displayVisibilityHandler.handleDisplay(category, display);
-            if (visibility != DisplayVisibility.PASS) {
-                if (visibility == DisplayVisibility.CONFIG_OPTIONAL)
-                    return RoughlyEnoughItemsCore.getConfigManager().getConfig().preferVisibleRecipes || !respectConfig;
-                return visibility == DisplayVisibility.ALWAYS_VISIBLE;
-            }
+            if (visibility != DisplayVisibility.PASS)
+                return visibility == DisplayVisibility.ALWAYS_VISIBLE || visibility == DisplayVisibility.CONFIG_OPTIONAL;
         }
         return true;
     }
