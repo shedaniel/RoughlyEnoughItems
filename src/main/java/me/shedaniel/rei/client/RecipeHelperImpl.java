@@ -13,6 +13,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.util.Identifier;
+import org.apache.logging.log4j.Level;
 
 import java.awt.*;
 import java.util.List;
@@ -300,9 +301,13 @@ public class RecipeHelperImpl implements RecipeHelper {
         RecipeCategory category = getCategory(display.getRecipeCategory());
         List<DisplayVisibilityHandler> list = getDisplayVisibilityHandlers().stream().sorted(VISIBILITY_HANDLER_COMPARATOR).collect(Collectors.toList());
         for(DisplayVisibilityHandler displayVisibilityHandler : list) {
-            DisplayVisibility visibility = displayVisibilityHandler.handleDisplay(category, display);
-            if (visibility != DisplayVisibility.PASS)
-                return visibility == DisplayVisibility.ALWAYS_VISIBLE || visibility == DisplayVisibility.CONFIG_OPTIONAL;
+            try {
+                DisplayVisibility visibility = displayVisibilityHandler.handleDisplay(category, display);
+                if (visibility != DisplayVisibility.PASS)
+                    return visibility == DisplayVisibility.ALWAYS_VISIBLE || visibility == DisplayVisibility.CONFIG_OPTIONAL;
+            } catch (Throwable throwable) {
+                RoughlyEnoughItemsCore.LOGGER.error("[REI] Failed to check if the recipe is visible!", throwable);
+            }
         }
         return true;
     }
