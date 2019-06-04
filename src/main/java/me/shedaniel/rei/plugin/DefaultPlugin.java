@@ -44,12 +44,11 @@ public class DefaultPlugin implements REIPluginEntry {
     public static final Identifier PLUGIN = new Identifier("roughlyenoughitems", "default_plugin");
     private static final Identifier DISPLAY_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/display.png");
     private static final Identifier DISPLAY_TEXTURE_DARK = new Identifier("roughlyenoughitems", "textures/gui/display_dark.png");
+    private static final List<DefaultBrewingDisplay> BREWING_DISPLAYS = Lists.newArrayList();
     
     public static Identifier getDisplayTexture() {
         return RoughlyEnoughItemsCore.getConfigManager().getConfig().darkTheme ? DISPLAY_TEXTURE_DARK : DISPLAY_TEXTURE;
     }
-    
-    private static final List<DefaultBrewingDisplay> BREWING_DISPLAYS = Lists.newArrayList();
     
     public static void registerBrewingDisplay(DefaultBrewingDisplay display) {
         BREWING_DISPLAYS.add(display);
