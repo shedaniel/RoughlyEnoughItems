@@ -32,7 +32,6 @@ public class SlotWidget extends HighlightableWidget {
     
     private static final Identifier RECIPE_GUI = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private static final Identifier RECIPE_GUI_DARK = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
-    private static final ItemStackRenderer TROPICAL_FISH_RENDERABLE = Renderable.fromItemStack(Items.TROPICAL_FISH.getDefaultStack());
     private List<Renderer> renderers = new LinkedList<>();
     private boolean drawBackground, showToolTips, clickToMoreRecipes, drawHighlightedBackground;
     private int x, y;
@@ -117,8 +116,6 @@ public class SlotWidget extends HighlightableWidget {
             GlStateManager.enableDepthTest();
         }
         if (isCurrentRendererItem() && !getCurrentItemStack().isEmpty()) {
-            if (RoughlyEnoughItemsCore.getConfigManager().getConfig().aprilFoolsFish2019 && !highlighted)
-                renderer = TROPICAL_FISH_RENDERABLE;
             renderer.setBlitOffset(200);
             renderer.render(x + 8, y + 6, mouseX, mouseY, delta);
             if (!getCurrentItemStack().isEmpty() && highlighted && showToolTips)

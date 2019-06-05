@@ -18,7 +18,7 @@ public interface RecipeDisplay<T extends Recipe> {
     /**
      * @return the optional recipe
      */
-    Optional<T> getRecipe();
+    Optional<? extends Recipe> getRecipe();
     
     /**
      * @return a list of items

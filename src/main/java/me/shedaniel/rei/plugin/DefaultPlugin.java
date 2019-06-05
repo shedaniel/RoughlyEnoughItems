@@ -102,21 +102,13 @@ public class DefaultPlugin implements REIPluginEntry {
     
     @Override
     public void registerRecipeDisplays(RecipeHelper recipeHelper) {
-        for(Recipe recipe : recipeHelper.getAllSortedRecipes())
-            if (recipe instanceof ShapelessRecipe)
-                recipeHelper.registerDisplay(CRAFTING, new DefaultShapelessDisplay((ShapelessRecipe) recipe));
-            else if (recipe instanceof ShapedRecipe)
-                recipeHelper.registerDisplay(CRAFTING, new DefaultShapedDisplay((ShapedRecipe) recipe));
-            else if (recipe instanceof SmeltingRecipe)
-                recipeHelper.registerDisplay(SMELTING, new DefaultSmeltingDisplay((SmeltingRecipe) recipe));
-            else if (recipe instanceof SmokingRecipe)
-                recipeHelper.registerDisplay(SMOKING, new DefaultSmokingDisplay((SmokingRecipe) recipe));
-            else if (recipe instanceof BlastingRecipe)
-                recipeHelper.registerDisplay(BLASTING, new DefaultBlastingDisplay((BlastingRecipe) recipe));
-            else if (recipe instanceof CampfireCookingRecipe)
-                recipeHelper.registerDisplay(CAMPFIRE, new DefaultCampfireDisplay((CampfireCookingRecipe) recipe));
-            else if (recipe instanceof StonecuttingRecipe)
-                recipeHelper.registerDisplay(STONE_CUTTING, new DefaultStoneCuttingDisplay((StonecuttingRecipe) recipe));
+        recipeHelper.registerRecipes(CRAFTING, ShapelessRecipe.class, DefaultShapelessDisplay::new);
+        recipeHelper.registerRecipes(CRAFTING, ShapedRecipe.class, DefaultShapedDisplay::new);
+        recipeHelper.registerRecipes(SMELTING, SmeltingRecipe.class, DefaultSmeltingDisplay::new);
+        recipeHelper.registerRecipes(SMOKING, SmokingRecipe.class, DefaultSmokingDisplay::new);
+        recipeHelper.registerRecipes(BLASTING, BlastingRecipe.class, DefaultBlastingDisplay::new);
+        recipeHelper.registerRecipes(CAMPFIRE, CampfireCookingRecipe.class, DefaultCampfireDisplay::new);
+        recipeHelper.registerRecipes(STONE_CUTTING, StonecuttingRecipe.class, DefaultStoneCuttingDisplay::new);
         BREWING_DISPLAYS.stream().forEachOrdered(display -> recipeHelper.registerDisplay(BREWING, display));
         List<ItemStack> arrowStack = Collections.singletonList(Items.ARROW.getDefaultStack());
         RoughlyEnoughItemsCore.getItemRegisterer().getItemList().stream().filter(stack -> stack.getItem().equals(Items.LINGERING_POTION)).forEach(stack -> {
@@ -254,10 +246,7 @@ public class DefaultPlugin implements REIPluginEntry {
                 return -1f;
             }
         });
-        recipeHelper.registerDefaultSpeedCraftButtonArea(DefaultPlugin.CRAFTING);
-        recipeHelper.registerDefaultSpeedCraftButtonArea(DefaultPlugin.SMELTING);
-        recipeHelper.registerDefaultSpeedCraftButtonArea(DefaultPlugin.SMOKING);
-        recipeHelper.registerDefaultSpeedCraftButtonArea(DefaultPlugin.BLASTING);
+        recipeHelper.registerSpeedCraftButtonArea(DefaultPlugin.CAMPFIRE, bounds -> new Rectangle((int) bounds.getMaxX() - 16, bounds.y + 6, 10, 10));
         recipeHelper.registerSpeedCraftFunctional(DefaultPlugin.CRAFTING, new SpeedCraftFunctional<DefaultCraftingDisplay>() {
             @Override
             public Class[] getFunctioningFor() {
@@ -274,7 +263,7 @@ public class DefaultPlugin implements REIPluginEntry {
                     ((RecipeBookGuiHooks) (((InventoryScreen) screen).getRecipeBookGui())).rei_getGhostSlots().reset();
                 else
                     return false;
-                MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, (Recipe) recipe.getRecipe().get(), Screen.hasShiftDown());
+                MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, (Recipe<?>) recipe.getRecipe().get(), Screen.hasShiftDown());
                 return true;
             }
             
@@ -297,7 +286,7 @@ public class DefaultPlugin implements REIPluginEntry {
                     ((RecipeBookGuiHooks) (((FurnaceScreen) screen).getRecipeBookGui())).rei_getGhostSlots().reset();
                 else
                     return false;
-                MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, (Recipe) recipe.getRecipe().get(), Screen.hasShiftDown());
+                MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, (Recipe<?>) recipe.getRecipe().get(), Screen.hasShiftDown());
                 return true;
             }
             
@@ -320,7 +309,7 @@ public class DefaultPlugin implements REIPluginEntry {
                     ((RecipeBookGuiHooks) (((SmokerScreen) screen).getRecipeBookGui())).rei_getGhostSlots().reset();
                 else
                     return false;
-                MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, (Recipe) recipe.getRecipe().get(), Screen.hasShiftDown());
+                MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, (Recipe<?>) recipe.getRecipe().get(), Screen.hasShiftDown());
                 return true;
             }
             
@@ -348,7 +337,7 @@ public class DefaultPlugin implements REIPluginEntry {
                     ((RecipeBookGuiHooks) (((BlastFurnaceScreen) screen).getRecipeBookGui())).rei_getGhostSlots().reset();
                 else
                     return false;
-                MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, (Recipe) recipe.getRecipe().get(), Screen.hasShiftDown());
+                MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, (Recipe<?>) recipe.getRecipe().get(), Screen.hasShiftDown());
                 return true;
             }
         });

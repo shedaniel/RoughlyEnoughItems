@@ -100,6 +100,7 @@
   "text.rei.config.recipe_screen_type.original": "Original",
   "text.rei.config.recipe_screen_type.villager": "Villager",
   "text.rei.select": "Select",
+  "text.rei.recipe_id": "\n%sRecipe Id: %s",
   "text.rei.recipe_screen_type.selection": "Recipe Screen Type Selection",
   "text.rei.recipe_screen_type.selection.sub": "You can always edit this setting again via the config screen.",
   "_comment": "Config Tooltips",

@@ -13,12 +13,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.util.Identifier;
-import org.apache.logging.log4j.Level;
 
 import java.awt.*;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class RecipeHelperImpl implements RecipeHelper {
@@ -36,6 +36,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         VISIBILITY_HANDLER_COMPARATOR = comparator.reversed();
     }
     
+    public final List<RecipeFunction> recipeFunctions = Lists.newArrayList();
     private final AtomicInteger recipeCount = new AtomicInteger();
     private final Map<Identifier, List<RecipeDisplay>> recipeCategoryListMap = Maps.newHashMap();
     private final Map<Identifier, DisplaySettings> categoryDisplaySettingsMap = Maps.newHashMap();
@@ -89,6 +90,13 @@ public class RecipeHelperImpl implements RecipeHelper {
             return;
         recipeCount.incrementAndGet();
         recipeCategoryListMap.get(categoryIdentifier).add(display);
+    }
+    
+    private void registerDisplay(Identifier categoryIdentifier, RecipeDisplay display, int index) {
+        if (!recipeCategoryListMap.containsKey(categoryIdentifier))
+            return;
+        recipeCount.incrementAndGet();
+        recipeCategoryListMap.get(categoryIdentifier).add(index, display);
     }
     
     @Override
@@ -166,13 +174,17 @@ public class RecipeHelperImpl implements RecipeHelper {
     @Override
     public Optional<ButtonAreaSupplier> getSpeedCraftButtonArea(RecipeCategory category) {
         if (!speedCraftAreaSupplierMap.containsKey(category.getIdentifier()))
-            return Optional.empty();
+            return Optional.ofNullable(bounds -> new Rectangle((int) bounds.getMaxX() - 16, (int) bounds.getMaxY() - 16, 10, 10));
         return Optional.ofNullable(speedCraftAreaSupplierMap.get(category.getIdentifier()));
     }
     
     @Override
     public void registerSpeedCraftButtonArea(Identifier category, ButtonAreaSupplier rectangle) {
-        speedCraftAreaSupplierMap.put(category, rectangle);
+        if (rectangle == null) {
+            if (speedCraftAreaSupplierMap.containsKey(category))
+                speedCraftAreaSupplierMap.remove(category);
+        } else
+            speedCraftAreaSupplierMap.put(category, rectangle);
     }
     
     @Override
@@ -203,6 +215,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         this.speedCraftAreaSupplierMap.clear();
         this.speedCraftFunctionalMap.clear();
         this.categoryDisplaySettingsMap.clear();
+        this.recipeFunctions.clear();
         this.displayVisibilityHandlers.clear();
         this.liveRecipeGenerators.clear();
         ((DisplayHelperImpl) RoughlyEnoughItemsCore.getDisplayHelper()).resetCache();
@@ -235,6 +248,17 @@ public class RecipeHelperImpl implements RecipeHelper {
                 RoughlyEnoughItemsCore.LOGGER.error("[REI] " + identifier.toString() + " plugin failed to load!", e);
             }
         });
+        if (!recipeFunctions.isEmpty()) {
+            List<Recipe> allSortedRecipes = getAllSortedRecipes();
+            Collections.reverse(allSortedRecipes);
+            recipeFunctions.forEach(recipeFunction -> {
+                try {
+                    allSortedRecipes.stream().filter(recipe -> recipeFunction.recipeClass.isAssignableFrom(recipe.getClass())).forEach(t -> registerDisplay(recipeFunction.category, (RecipeDisplay) recipeFunction.mappingFunction.apply(t), 0));
+                } catch (Exception e) {
+                    RoughlyEnoughItemsCore.LOGGER.error("[REI] Failed to add recipes!", e);
+                }
+            });
+        }
         if (getDisplayVisibilityHandlers().isEmpty())
             registerRecipeVisibilityHandler(new DisplayVisibilityHandler() {
                 @Override
@@ -313,6 +337,11 @@ public class RecipeHelperImpl implements RecipeHelper {
     }
     
     @Override
+    public <T extends Recipe<?>> void registerRecipes(Identifier category, Class<T> recipeClass, Function<T, RecipeDisplay> mappingFunction) {
+        recipeFunctions.add(new RecipeFunction(category, recipeClass, mappingFunction));
+    }
+    
+    @Override
     public Optional<DisplaySettings> getCachedCategorySettings(Identifier category) {
         return categoryDisplaySettingsMap.entrySet().stream().filter(entry -> entry.getKey().equals(category)).map(Map.Entry::getValue).findAny();
     }
@@ -320,6 +349,18 @@ public class RecipeHelperImpl implements RecipeHelper {
     @Override
     public void registerLiveRecipeGenerator(LiveRecipeGenerator liveRecipeGenerator) {
         liveRecipeGenerators.add(liveRecipeGenerator);
+    }
+    
+    private class RecipeFunction {
+        Identifier category;
+        Class recipeClass;
+        Function mappingFunction;
+        
+        public RecipeFunction(Identifier category, Class<?> recipeClass, Function<?, RecipeDisplay> mappingFunction) {
+            this.category = category;
+            this.recipeClass = recipeClass;
+            this.mappingFunction = mappingFunction;
+        }
     }
     
 }
