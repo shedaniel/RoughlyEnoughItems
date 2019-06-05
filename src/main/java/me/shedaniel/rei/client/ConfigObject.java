@@ -42,8 +42,6 @@ public class ConfigObject {
     
     @Comment("Disable Recipe Book") public boolean disableRecipeBook = false;
     
-    @Comment("Force enable 2019 REI April Fools' joke") public boolean aprilFoolsFish2019 = false;
-    
     public ItemCheatingMode itemCheatingMode = ItemCheatingMode.REI_LIKE;
     
     public boolean lightGrayRecipeBorder = false;

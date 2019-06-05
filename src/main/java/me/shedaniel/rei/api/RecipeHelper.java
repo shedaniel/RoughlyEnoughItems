@@ -14,6 +14,7 @@ import net.minecraft.util.Identifier;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 public interface RecipeHelper {
     
@@ -106,10 +107,10 @@ public interface RecipeHelper {
     void registerSpeedCraftButtonArea(Identifier category, ButtonAreaSupplier rectangle);
     
     /**
-     * Registers a default speed crafting button area, which is bottom right
-     *
      * @param category the category of the button area
+     * @deprecated Not required anymore
      */
+    @Deprecated
     void registerDefaultSpeedCraftButtonArea(Identifier category);
     
     /**
@@ -183,6 +184,13 @@ public interface RecipeHelper {
      */
     Optional<DisplaySettings> getCachedCategorySettings(Identifier category);
     
+    /**
+     * Registers a live recipe generator.
+     *
+     * @param liveRecipeGenerator the generator to register
+     * @apiNote Still work in progress
+     */
     void registerLiveRecipeGenerator(LiveRecipeGenerator liveRecipeGenerator);
     
+    <T extends Recipe<?>> void registerRecipes(Identifier category, Class<T> recipeClass, Function<T, RecipeDisplay> mappingFunction);
 }
