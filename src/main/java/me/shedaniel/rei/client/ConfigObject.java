@@ -42,13 +42,15 @@ public class ConfigObject {
     
     @Comment("Disable Recipe Book") public boolean disableRecipeBook = false;
     
-    public boolean preferVisibleRecipes = false;
-    
-    @Comment("Force enable 2019 REI April Fools' joke") public boolean aprilFoolsFish2019 = false;
-    
     public ItemCheatingMode itemCheatingMode = ItemCheatingMode.REI_LIKE;
     
     public boolean lightGrayRecipeBorder = false;
+    
+    public boolean villagerScreenPermanentScrollBar = false;
+    
+    public boolean darkTheme = false;
+    
+    public boolean registerRecipesInAnotherThread = true;
     
     public RecipeScreenType screenType = RecipeScreenType.UNSET;
     

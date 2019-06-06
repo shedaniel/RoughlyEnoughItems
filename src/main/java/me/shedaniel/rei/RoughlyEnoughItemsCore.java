@@ -42,6 +42,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class RoughlyEnoughItemsCore implements ClientModInitializer {
@@ -206,7 +207,10 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     
     private void registerClothEvents() {
         ClothClientHooks.SYNC_RECIPES.register((minecraftClient, recipeManager, synchronizeRecipesS2CPacket) -> {
-            ((RecipeHelperImpl) RoughlyEnoughItemsCore.getRecipeHelper()).recipesLoaded(recipeManager);
+            if (RoughlyEnoughItemsCore.getConfigManager().getConfig().registerRecipesInAnotherThread)
+                CompletableFuture.runAsync(() -> ((RecipeHelperImpl) RoughlyEnoughItemsCore.getRecipeHelper()).recipesLoaded(recipeManager));
+            else
+                ((RecipeHelperImpl) RoughlyEnoughItemsCore.getRecipeHelper()).recipesLoaded(recipeManager);
         });
         ClothClientHooks.SCREEN_ADD_BUTTON.register((minecraftClient, screen, abstractButtonWidget) -> {
             if (RoughlyEnoughItemsCore.getConfigManager().getConfig().disableRecipeBook && screen instanceof AbstractContainerScreen && abstractButtonWidget instanceof RecipeBookButtonWidget)

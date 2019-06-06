@@ -29,8 +29,6 @@ import java.util.function.Supplier;
 
 public class DefaultCraftingCategory implements RecipeCategory<DefaultCraftingDisplay> {
     
-    private static final Identifier DISPLAY_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/display.png");
-    
     @Override
     public Identifier getIdentifier() {
         return DefaultPlugin.CRAFTING;
@@ -55,7 +53,7 @@ public class DefaultCraftingCategory implements RecipeCategory<DefaultCraftingDi
                 super.render(mouseX, mouseY, delta);
                 GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                 GuiLighting.disable();
-                MinecraftClient.getInstance().getTextureManager().bindTexture(DISPLAY_TEXTURE);
+                MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
                 blit(startPoint.x, startPoint.y, 0, 0, 116, 54);
             }
         }));

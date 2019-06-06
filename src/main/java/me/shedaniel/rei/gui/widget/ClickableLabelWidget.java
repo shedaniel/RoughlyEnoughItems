@@ -5,6 +5,7 @@
 
 package me.shedaniel.rei.gui.widget;
 
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.ScreenHelper;
 import net.minecraft.ChatFormat;
 
@@ -13,7 +14,6 @@ import java.util.Optional;
 
 public abstract class ClickableLabelWidget extends LabelWidget {
     
-    public static final int hoveredColor = (new Color(102, 255, 204)).getRGB();
     public boolean focused;
     public boolean clickable;
     
@@ -40,11 +40,11 @@ public abstract class ClickableLabelWidget extends LabelWidget {
     }
     
     public int getDefaultColor() {
-        return -1;
+        return RoughlyEnoughItemsCore.getConfigManager().getConfig().darkTheme ? 0xFFBBBBBB : -1;
     }
     
     public int getHoveredColor() {
-        return hoveredColor;
+        return RoughlyEnoughItemsCore.getConfigManager().getConfig().darkTheme ? -1 : 0xFF66FFCC;
     }
     
     @Override

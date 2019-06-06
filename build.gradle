@@ -56,6 +56,7 @@ dependencies {
     }
     modCompile "io.github.prospector.modmenu:ModMenu:${modmenu_version}"
     compile "org.lwjgl:lwjgl-jemalloc:3.2.1"
+    compileOnly "com.google.code.findbugs:jsr305:3.0.2"
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
@@ -76,14 +77,14 @@ publishing {
 	}
 
 	repositories {
-		if (project.hasProperty('danielshe_pass')) {
-			maven {
-				url = "http://deploy.modmuss50.me/"
-				credentials {
-					username = "danielshe"
-					password = project.getProperty('danielshe_pass')
-				}
-			}
-		}
+//		if (project.hasProperty('danielshe_pass')) {
+//			maven {
+//				url = "http://deploy.modmuss50.me/"
+//				credentials {
+//					username = "danielshe"
+//					password = project.getProperty('danielshe_pass')
+//				}
+//			}
+//		}
 	}
 }

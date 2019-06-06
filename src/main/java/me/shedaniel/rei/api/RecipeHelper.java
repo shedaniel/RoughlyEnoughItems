@@ -14,6 +14,7 @@ import net.minecraft.util.Identifier;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 public interface RecipeHelper {
     
@@ -50,6 +51,24 @@ public interface RecipeHelper {
      * @param category the category to register
      */
     void registerCategory(RecipeCategory category);
+    
+    /**
+     * Registers the working stations of a category
+     *
+     * @param category        the category
+     * @param workingStations the working stations
+     */
+    void registerWorkingStations(Identifier category, List<ItemStack>... workingStations);
+    
+    /**
+     * Registers the working stations of a category
+     *
+     * @param category        the category
+     * @param workingStations the working stations
+     */
+    void registerWorkingStations(Identifier category, ItemStack... workingStations);
+    
+    List<List<ItemStack>> getWorkingStations(Identifier category);
     
     /**
      * Registers a recipe display
@@ -106,10 +125,10 @@ public interface RecipeHelper {
     void registerSpeedCraftButtonArea(Identifier category, ButtonAreaSupplier rectangle);
     
     /**
-     * Registers a default speed crafting button area, which is bottom right
-     *
      * @param category the category of the button area
+     * @deprecated Not required anymore
      */
+    @Deprecated
     void registerDefaultSpeedCraftButtonArea(Identifier category);
     
     /**
@@ -162,8 +181,18 @@ public interface RecipeHelper {
      * @param display       the display to be checked
      * @param respectConfig whether it should respect the user's config
      * @return whether the display should be visible
+     * @deprecated {@link RecipeHelper#isDisplayVisible(RecipeDisplay)} )}
      */
+    @Deprecated
     boolean isDisplayVisible(RecipeDisplay display, boolean respectConfig);
+    
+    /**
+     * Checks if the display is visible by asking recipe visibility handlers
+     *
+     * @param display the display to be checked
+     * @return whether the display should be visible
+     */
+    boolean isDisplayVisible(RecipeDisplay display);
     
     /**
      * Gets the cached category setting by the category identifier
@@ -173,6 +202,15 @@ public interface RecipeHelper {
      */
     Optional<DisplaySettings> getCachedCategorySettings(Identifier category);
     
+    /**
+     * Registers a live recipe generator.
+     *
+     * @param liveRecipeGenerator the generator to register
+     * @apiNote Still work in progress
+     */
     void registerLiveRecipeGenerator(LiveRecipeGenerator liveRecipeGenerator);
     
+    <T extends Recipe<?>> void registerRecipes(Identifier category, Class<T> recipeClass, Function<T, RecipeDisplay> mappingFunction);
+    
+    <T extends Recipe<?>> void registerRecipes(Identifier category, Function<Recipe, Boolean> recipeFilter, Function<T, RecipeDisplay> mappingFunction);
 }
