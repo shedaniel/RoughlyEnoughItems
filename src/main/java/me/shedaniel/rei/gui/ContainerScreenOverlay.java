@@ -183,31 +183,35 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
                     return false;
                 }
             });
-            widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? window.getScaledWidth() - 80 : 60, 10, 20, 20, "") {
-                @Override
-                public void onPressed() {
-                    MinecraftClient.getInstance().player.sendChatMessage(RoughlyEnoughItemsCore.getConfigManager().getConfig().weatherCommand.replaceAll("\\{weather}", getNextWeather().name().toLowerCase()));
-                }
-                
-                @Override
-                public void render(int mouseX, int mouseY, float delta) {
-                    super.render(mouseX, mouseY, delta);
-                    GuiLighting.disable();
-                    MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
-                    GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-                    blit(getBounds().x + 3, getBounds().y + 3, getCurrentWeather().getId() * 14, 14, 14, 14);
-                }
-                
-                @Override
-                public Optional<String> getTooltips() {
-                    return Optional.ofNullable(I18n.translate("text.rei.weather_button.tooltip", I18n.translate(getNextWeather().getTranslateKey())));
-                }
-                
-                @Override
-                public boolean changeFocus(boolean boolean_1) {
-                    return false;
-                }
-            });
+            int xxx = RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? window.getScaledWidth() -30 : 10;
+            for(Weather weather : Weather.values()) {
+                widgets.add(new ButtonWidget(xxx, 35, 20, 20, "") {
+                    @Override
+                    public void onPressed() {
+                        MinecraftClient.getInstance().player.sendChatMessage(RoughlyEnoughItemsCore.getConfigManager().getConfig().weatherCommand.replaceAll("\\{weather}", weather.name().toLowerCase()));
+                    }
+                    
+                    @Override
+                    public void render(int mouseX, int mouseY, float delta) {
+                        super.render(mouseX, mouseY, delta);
+                        GuiLighting.disable();
+                        MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
+                        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+                        blit(getBounds().x + 3, getBounds().y + 3, weather.getId() * 14, 14, 14, 14);
+                    }
+                    
+                    @Override
+                    public Optional<String> getTooltips() {
+                        return Optional.ofNullable(I18n.translate("text.rei.weather_button.tooltip", I18n.translate(weather.getTranslateKey())));
+                    }
+                    
+                    @Override
+                    public boolean changeFocus(boolean boolean_1) {
+                        return false;
+                    }
+                });
+                xxx += RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? -25 : 25;
+            }
         }
         widgets.add(new ClickableLabelWidget(rectangle.x + (rectangle.width / 2), rectangle.y + 10, "", getTotalPage() > 0) {
             @Override
