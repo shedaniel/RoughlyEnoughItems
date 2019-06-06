@@ -11,6 +11,10 @@ import net.minecraft.item.ItemStack;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * @deprecated Use {@link SlotWidget}
+ */
+@Deprecated
 public class ItemSlotWidget extends SlotWidget {
     public ItemSlotWidget(int x, int y, ItemStack itemStack, boolean drawBackground, boolean showToolTips) {
         super(x, y, itemStack, drawBackground, showToolTips);

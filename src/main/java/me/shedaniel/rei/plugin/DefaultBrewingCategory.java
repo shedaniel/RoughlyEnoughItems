@@ -31,8 +31,6 @@ import java.util.function.Supplier;
 
 public class DefaultBrewingCategory implements RecipeCategory<DefaultBrewingDisplay> {
     
-    private static final Identifier DISPLAY_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/display.png");
-    
     @Override
     public Identifier getIdentifier() {
         return DefaultPlugin.BREWING;
@@ -58,7 +56,7 @@ public class DefaultBrewingCategory implements RecipeCategory<DefaultBrewingDisp
                 super.render(mouseX, mouseY, delta);
                 GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                 GuiLighting.disable();
-                MinecraftClient.getInstance().getTextureManager().bindTexture(DISPLAY_TEXTURE);
+                MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
                 blit(startPoint.x, startPoint.y, 0, 108, 103, 59);
                 int width = MathHelper.ceil((System.currentTimeMillis() / 250 % 18d) / 1f);
                 blit(startPoint.x + 44, startPoint.y + 28, 103, 163, width, 4);

@@ -183,31 +183,35 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
                     return false;
                 }
             });
-            widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? window.getScaledWidth() - 80 : 60, 10, 20, 20, "") {
-                @Override
-                public void onPressed() {
-                    MinecraftClient.getInstance().player.sendChatMessage(RoughlyEnoughItemsCore.getConfigManager().getConfig().weatherCommand.replaceAll("\\{weather}", getNextWeather().name().toLowerCase()));
-                }
-                
-                @Override
-                public void render(int mouseX, int mouseY, float delta) {
-                    super.render(mouseX, mouseY, delta);
-                    GuiLighting.disable();
-                    MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
-                    GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-                    blit(getBounds().x + 3, getBounds().y + 3, getCurrentWeather().getId() * 14, 14, 14, 14);
-                }
-                
-                @Override
-                public Optional<String> getTooltips() {
-                    return Optional.ofNullable(I18n.translate("text.rei.weather_button.tooltip", I18n.translate(getNextWeather().getTranslateKey())));
-                }
-                
-                @Override
-                public boolean changeFocus(boolean boolean_1) {
-                    return false;
-                }
-            });
+            int xxx = RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? window.getScaledWidth() -30 : 10;
+            for(Weather weather : Weather.values()) {
+                widgets.add(new ButtonWidget(xxx, 35, 20, 20, "") {
+                    @Override
+                    public void onPressed() {
+                        MinecraftClient.getInstance().player.sendChatMessage(RoughlyEnoughItemsCore.getConfigManager().getConfig().weatherCommand.replaceAll("\\{weather}", weather.name().toLowerCase()));
+                    }
+                    
+                    @Override
+                    public void render(int mouseX, int mouseY, float delta) {
+                        super.render(mouseX, mouseY, delta);
+                        GuiLighting.disable();
+                        MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
+                        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+                        blit(getBounds().x + 3, getBounds().y + 3, weather.getId() * 14, 14, 14, 14);
+                    }
+                    
+                    @Override
+                    public Optional<String> getTooltips() {
+                        return Optional.ofNullable(I18n.translate("text.rei.weather_button.tooltip", I18n.translate(weather.getTranslateKey())));
+                    }
+                    
+                    @Override
+                    public boolean changeFocus(boolean boolean_1) {
+                        return false;
+                    }
+                });
+                xxx += RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? -25 : 25;
+            }
         }
         widgets.add(new ClickableLabelWidget(rectangle.x + (rectangle.width / 2), rectangle.y + 10, "", getTotalPage() > 0) {
             @Override
@@ -373,28 +377,24 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
         QUEUED_TOOLTIPS.clear();
     }
     
+    @SuppressWarnings("deprecation")
     public void renderTooltip(QueuedTooltip tooltip) {
-        renderTooltip(tooltip.getText(), tooltip.getX(), tooltip.getY());
+        if (tooltip.getConsumer() == null)
+            renderTooltip(tooltip.getText(), tooltip.getX(), tooltip.getY());
+        else
+            tooltip.getConsumer().accept(tooltip);
     }
     
     public void renderTooltip(List<String> lines, int mouseX, int mouseY) {
+        if (lines.isEmpty())
+            return;
         TextRenderer font = MinecraftClient.getInstance().textRenderer;
-        if (!lines.isEmpty()) {
+        int width = lines.stream().map(font::getStringWidth).max(Integer::compareTo).get();
+        int height = lines.size() <= 1 ? 8 : lines.size() * 10;
+        ScreenHelper.drawHoveringWidget(mouseX, mouseY, (x, y, aFloat) -> {
             GlStateManager.disableRescaleNormal();
             GuiLighting.disable();
             GlStateManager.disableLighting();
-            int width = 0;
-            for(String line : lines)
-                if (font.getStringWidth(line) > width)
-                    width = font.getStringWidth(line);
-            int height = lines.size() <= 1 ? 8 : lines.size() * 10;
-            int x = Math.max(mouseX + 12, 6);
-            int y = Math.min(mouseY - 12, window.getScaledHeight() - height - 6);
-            if (x + width > window.getScaledWidth())
-                x -= 24 + width;
-            if (y < 6)
-                y += 24;
-            
             this.blitOffset = 1000;
             this.fillGradient(x - 3, y - 4, x + width + 3, y - 3, -267386864, -267386864);
             this.fillGradient(x - 3, y + height + 3, x + width + 3, y + height + 4, -267386864, -267386864);
@@ -405,7 +405,6 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             this.fillGradient(x + width + 2, y - 3 + 1, x + width + 3, y + height + 3 - 1, 1347420415, 1344798847);
             this.fillGradient(x - 3, y - 3, x + width + 3, y - 3 + 1, 1347420415, 1347420415);
             this.fillGradient(x - 3, y + height + 2, x + width + 3, y + height + 3, 1344798847, 1344798847);
-            
             int currentY = y;
             for(int lineIndex = 0; lineIndex < lines.size(); lineIndex++) {
                 GlStateManager.disableDepthTest();
@@ -417,7 +416,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             GlStateManager.enableLighting();
             GuiLighting.enable();
             GlStateManager.enableRescaleNormal();
-        }
+        }, width, height, 0);
     }
     
     private boolean hasSameListContent(List<ItemStack> list1, List<ItemStack> list2) {

@@ -5,6 +5,8 @@
 
 package me.shedaniel.rei.gui.widget;
 
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
+
 import java.awt.*;
 
 public class SlotBaseWidget extends RecipeBaseWidget {
@@ -15,7 +17,7 @@ public class SlotBaseWidget extends RecipeBaseWidget {
     
     @Override
     public int getInnerColor() {
-        return -7631989;
+        return RoughlyEnoughItemsCore.getConfigManager().getConfig().darkTheme ? 0xFF303030 : -7631989;
     }
     
     @Override

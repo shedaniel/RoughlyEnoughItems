@@ -87,6 +87,8 @@
   "text.rei.config.enable_legacy_speedcraft_support": "Enable Legacy Plugin Support: ",
   "text.rei.config.april_fools": "April Fools",
   "text.rei.config.april_fools.2019": "Force 2019 REI April Fools' joke: ",
+  "text.rei.config.dark_theme": "Dark Mode:",
+  "text.rei.config.villager_screen_permanent_scroll_bar": "Villager Screen Permanent Scroll Bar:",
   "text.rei.config.item_cheating_mode": "Item Cheating Amount:",
   "text.rei.config.item_cheating_mode.rei_like": "Normal",
   "text.rei.config.item_cheating_mode.jei_like": "Reversed",
@@ -98,9 +100,11 @@
   "text.rei.config.recipe_screen_type.original": "Original",
   "text.rei.config.recipe_screen_type.villager": "Villager",
   "text.rei.select": "Select",
+  "text.rei.working_station": "Working Station",
+  "text.rei.recipe_id": "\n%sRecipe Id: %s",
+  "text.rei.config.register_in_other_thread": "Register Recipes in other thread:",
   "text.rei.recipe_screen_type.selection": "Recipe Screen Type Selection",
   "text.rei.recipe_screen_type.selection.sub": "You can always edit this setting again via the config screen.",
-
   "_comment": "Config Tooltips",
   "tooltip.rei.config.side_search_box": "Declares the location of the search field:\nYes: Left / Right\nNo: Center\n \nDefaulted: No",
   "tooltip.rei.config.list_ordering": "Declares the ordering of the side item list:\nValues: Registry / Name / Item Groups\n(Ascending / Descending)\n \nDefaulted: %s",
@@ -108,7 +112,7 @@
   "tooltip.rei.config.max_recipes_per_page": "Declares the maximum possible displayed recipes:\nValues: 2 - 99\n \nDefaulted: 3",
   "tooltip.rei.config.light_gray_recipe_border": "Declares the appearance of the recipe border:\nYes: Light Gray\nNo: Hard Black\n \nDefaulted: No",
   "tooltip.rei.config.april_fools.2019": "Forcefully enables the 2019 april fools joke:\nValues: Yes / No\n \nDefaulted: No",
-
+  "tooltip.rei.config.register_in_other_thread": "Requires datapacks to be reloaded.\nCan be done by rejoin the world / server",
   "_comment": "Don't change / translate the credit down below if you are doing it :)",
   "text.rei.credit.text": "§lRoughly Enough Items\n§7Originally a fork for Almost Enough Items.\n\n§lDevelopers\n  - Originally by ZenDarva\n  - Created by Danielshe\n  - Plugin Support by TehNut\n\n§lLanguage Translation\n  English - Danielshe\n  Simplified Chinese - XuyuEre & Danielshe\n  Traditional Chinese - hugoalh, gxy17886 & Danielshe\n  French - Yanis48\n  German - MelanX\n  Estonian - Madis0\n  Portuguese - thiagokenis\n  LOLCAT - Danielshe\n  Upside Down - Danielshe\n  Brazilian Portuguese - thiagokenis\n  Bulgarian - geniiii\n\n§lLicense\n§7Roughly Enough Items is using MIT."
 }

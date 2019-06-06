@@ -18,6 +18,7 @@ import java.util.List;
 public class RecipeBaseWidget extends HighlightableWidget {
     
     private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
+    private static final Identifier CHEST_GUI_TEXTURE_DARK = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
     
     private Rectangle bounds;
     
@@ -25,6 +26,14 @@ public class RecipeBaseWidget extends HighlightableWidget {
         this.bounds = bounds;
         if (bounds.width < 8 || bounds.height < 8)
             throw new IllegalArgumentException("Base too small, at least 8x8!");
+    }
+    
+    public int getBlitOffset() {
+        return this.blitOffset;
+    }
+    
+    public void setBlitOffset(int offset) {
+        this.blitOffset = offset;
     }
     
     @Override
@@ -47,7 +56,7 @@ public class RecipeBaseWidget extends HighlightableWidget {
             return;
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GuiLighting.disable();
-        minecraft.getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
+        minecraft.getTextureManager().bindTexture(RoughlyEnoughItemsCore.getConfigManager().getConfig().darkTheme ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
         int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;
         int textureOffset = getTextureOffset();
         
@@ -76,7 +85,7 @@ public class RecipeBaseWidget extends HighlightableWidget {
     }
     
     protected int getInnerColor() {
-        return -3750202;
+        return RoughlyEnoughItemsCore.getConfigManager().getConfig().darkTheme ? 0xFF2E2E2E : -3750202;
     }
     
     protected int getTextureOffset() {

@@ -17,7 +17,6 @@ import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.renderables.ItemStackRenderer;
 import net.minecraft.client.gui.Element;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
@@ -30,11 +29,11 @@ import java.util.stream.Collectors;
 
 public class SlotWidget extends HighlightableWidget {
     
-    private static final Identifier RECIPE_GUI = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
-    private static final ItemStackRenderer TROPICAL_FISH_RENDERABLE = Renderable.fromItemStack(Items.TROPICAL_FISH.getDefaultStack());
+    public static final Identifier RECIPE_GUI = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
+    public static final Identifier RECIPE_GUI_DARK = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
     private List<Renderer> renderers = new LinkedList<>();
     private boolean drawBackground, showToolTips, clickToMoreRecipes, drawHighlightedBackground;
-    private int x, y;
+    protected int x, y;
     
     public SlotWidget(int x, int y, ItemStack itemStack, boolean drawBackground, boolean showToolTips) {
         this(x, y, Collections.singletonList(itemStack), drawBackground, showToolTips);
@@ -57,6 +56,22 @@ public class SlotWidget extends HighlightableWidget {
     public SlotWidget(int x, int y, List<ItemStack> itemList, boolean drawBackground, boolean showToolTips, boolean clickToMoreRecipes) {
         this(x, y, itemList, drawBackground, showToolTips);
         this.clickToMoreRecipes = clickToMoreRecipes;
+    }
+    
+    public int getX() {
+        return x;
+    }
+    
+    public void setX(int x) {
+        this.x = x;
+    }
+    
+    public int getY() {
+        return y;
+    }
+    
+    public void setY(int y) {
+        this.y = y;
     }
     
     public boolean isShowToolTips() {
@@ -99,8 +114,9 @@ public class SlotWidget extends HighlightableWidget {
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         Renderer renderer = getCurrentRenderer();
+        boolean darkTheme = RoughlyEnoughItemsCore.getConfigManager().getConfig().darkTheme;
         if (drawBackground) {
-            minecraft.getTextureManager().bindTexture(RECIPE_GUI);
+            minecraft.getTextureManager().bindTexture(darkTheme ? RECIPE_GUI_DARK : RECIPE_GUI);
             blit(this.x - 1, this.y - 1, 0, 222, 18, 18);
         }
         boolean highlighted = isHighlighted(mouseX, mouseY);
@@ -108,14 +124,13 @@ public class SlotWidget extends HighlightableWidget {
             GlStateManager.disableLighting();
             GlStateManager.disableDepthTest();
             GlStateManager.colorMask(true, true, true, false);
-            fillGradient(x, y, x + 16, y + 16, -2130706433, -2130706433);
+            int color = darkTheme ? 0xFF5E5E5E : -2130706433;
+            fillGradient(x, y, x + 16, y + 16, color, color);
             GlStateManager.colorMask(true, true, true, true);
             GlStateManager.enableLighting();
             GlStateManager.enableDepthTest();
         }
         if (isCurrentRendererItem() && !getCurrentItemStack().isEmpty()) {
-            if (RoughlyEnoughItemsCore.getConfigManager().getConfig().aprilFoolsFish2019 && !highlighted)
-                renderer = TROPICAL_FISH_RENDERABLE;
             renderer.setBlitOffset(200);
             renderer.render(x + 8, y + 6, mouseX, mouseY, delta);
             if (!getCurrentItemStack().isEmpty() && highlighted && showToolTips)
@@ -124,6 +139,14 @@ public class SlotWidget extends HighlightableWidget {
             renderer.setBlitOffset(200);
             renderer.render(x + 8, y + 6, mouseX, mouseY, delta);
         }
+    }
+    
+    public int getBlitOffset() {
+        return this.blitOffset;
+    }
+    
+    public void setBlitOffset(int offset) {
+        this.blitOffset = offset;
     }
     
     protected void queueTooltip(ItemStack itemStack, float delta) {

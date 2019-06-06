@@ -28,8 +28,6 @@ import java.util.function.Supplier;
 
 public class DefaultStoneCuttingCategory implements RecipeCategory<DefaultStoneCuttingDisplay> {
     
-    private static final Identifier DISPLAY_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/display.png");
-    
     @Override
     public Identifier getIdentifier() {
         return DefaultPlugin.STONE_CUTTING;
@@ -54,7 +52,7 @@ public class DefaultStoneCuttingCategory implements RecipeCategory<DefaultStoneC
                 super.render(mouseX, mouseY, delta);
                 GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                 GuiLighting.disable();
-                MinecraftClient.getInstance().getTextureManager().bindTexture(DISPLAY_TEXTURE);
+                MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
                 blit(startPoint.x, startPoint.y, 0, 221, 82, 26);
             }
         }));

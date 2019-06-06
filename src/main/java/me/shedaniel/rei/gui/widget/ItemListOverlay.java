@@ -97,6 +97,39 @@ public class ItemListOverlay extends Widget {
         return "ERROR";
     }
     
+    public static boolean filterItem(ItemStack itemStack, List<SearchArgument[]> arguments) {
+        if (arguments.isEmpty())
+            return true;
+        String mod = ClientHelper.getInstance().getModFromItem(itemStack.getItem()).toLowerCase();
+        String tooltips = tryGetItemStackToolTip(itemStack, true).stream().skip(1).collect(Collectors.joining("")).replace(SPACE, EMPTY).toLowerCase();
+        String name = tryGetItemStackName(itemStack).replace(SPACE, EMPTY).toLowerCase();
+        for(SearchArgument[] arguments1 : arguments) {
+            boolean b = true;
+            for(SearchArgument argument : arguments1) {
+                if (argument.getArgumentType().equals(SearchArgument.ArgumentType.ALWAYS))
+                    return true;
+                if (argument.getArgumentType().equals(SearchArgument.ArgumentType.MOD))
+                    if (SearchArgument.getFunction(!argument.isInclude()).apply(mod.indexOf(argument.getText()))) {
+                        b = false;
+                        break;
+                    }
+                if (argument.getArgumentType().equals(SearchArgument.ArgumentType.TOOLTIP))
+                    if (SearchArgument.getFunction(!argument.isInclude()).apply(tooltips.indexOf(argument.getText()))) {
+                        b = false;
+                        break;
+                    }
+                if (argument.getArgumentType().equals(SearchArgument.ArgumentType.TEXT))
+                    if (SearchArgument.getFunction(!argument.isInclude()).apply(name.indexOf(argument.getText()))) {
+                        b = false;
+                        break;
+                    }
+            }
+            if (b)
+                return true;
+        }
+        return false;
+    }
+    
     public int getFullTotalSlotsPerPage() {
         return width * height;
     }
@@ -242,51 +275,14 @@ public class ItemListOverlay extends Widget {
                 lastSearchArgument.add(new SearchArgument[]{SearchArgument.ALWAYS});
         });
         os.stream().filter(itemStack -> filterItem(itemStack, lastSearchArgument)).forEachOrdered(stacks::add);
-        List<ItemStack> workingItems = RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() && !stacks.isEmpty() && !inventoryItems.isEmpty() ? Lists.newArrayList() : Lists.newArrayList(ol);
-        if (RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled()) {
-            RecipeHelper.getInstance().findCraftableByItems(inventoryItems).forEach(workingItems::add);
-            workingItems.addAll(inventoryItems);
-        }
-        if (!RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled())
+        if (!RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() || stacks.isEmpty() || inventoryItems.isEmpty())
             return stacks;
+        List<ItemStack> workingItems = Lists.newArrayList(RecipeHelper.getInstance().findCraftableByItems(inventoryItems));
         return stacks.stream().filter(itemStack -> workingItems.stream().anyMatch(stack -> stack.isEqualIgnoreTags(itemStack))).collect(Collectors.toList());
     }
     
     public List<SearchArgument[]> getLastSearchArgument() {
         return lastSearchArgument;
-    }
-    
-    public static boolean filterItem(ItemStack itemStack, List<SearchArgument[]> arguments) {
-        if (arguments.isEmpty())
-            return true;
-        String mod = ClientHelper.getInstance().getModFromItem(itemStack.getItem()).toLowerCase();
-        String tooltips = tryGetItemStackToolTip(itemStack, true).stream().skip(1).collect(Collectors.joining("")).replace(SPACE, EMPTY).toLowerCase();
-        String name = tryGetItemStackName(itemStack).replace(SPACE, EMPTY).toLowerCase();
-        for(SearchArgument[] arguments1 : arguments) {
-            boolean b = true;
-            for(SearchArgument argument : arguments1) {
-                if (argument.getArgumentType().equals(SearchArgument.ArgumentType.ALWAYS))
-                    return true;
-                if (argument.getArgumentType().equals(SearchArgument.ArgumentType.MOD))
-                    if (SearchArgument.getFunction(!argument.isInclude()).apply(mod.indexOf(argument.getText()))) {
-                        b = false;
-                        break;
-                    }
-                if (argument.getArgumentType().equals(SearchArgument.ArgumentType.TOOLTIP))
-                    if (SearchArgument.getFunction(!argument.isInclude()).apply(tooltips.indexOf(argument.getText()))) {
-                        b = false;
-                        break;
-                    }
-                if (argument.getArgumentType().equals(SearchArgument.ArgumentType.TEXT))
-                    if (SearchArgument.getFunction(!argument.isInclude()).apply(name.indexOf(argument.getText()))) {
-                        b = false;
-                        break;
-                    }
-            }
-            if (b)
-                return true;
-        }
-        return false;
     }
     
     private boolean filterItem(ItemStack itemStack, SearchArgument... arguments) {
