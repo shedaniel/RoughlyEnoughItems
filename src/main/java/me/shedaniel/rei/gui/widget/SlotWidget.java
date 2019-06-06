@@ -33,7 +33,7 @@ public class SlotWidget extends HighlightableWidget {
     public static final Identifier RECIPE_GUI_DARK = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
     private List<Renderer> renderers = new LinkedList<>();
     private boolean drawBackground, showToolTips, clickToMoreRecipes, drawHighlightedBackground;
-    private int x, y;
+    protected int x, y;
     
     public SlotWidget(int x, int y, ItemStack itemStack, boolean drawBackground, boolean showToolTips) {
         this(x, y, Collections.singletonList(itemStack), drawBackground, showToolTips);
