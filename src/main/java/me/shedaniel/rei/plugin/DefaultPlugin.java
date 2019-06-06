@@ -235,6 +235,13 @@ public class DefaultPlugin implements REIPluginEntry {
     
     @Override
     public void registerOthers(RecipeHelper recipeHelper) {
+        recipeHelper.registerWorkingStations(CRAFTING, Items.CRAFTING_TABLE.getDefaultStack(), Items.CAKE.getDefaultStack());
+        recipeHelper.registerWorkingStations(SMELTING, Items.FURNACE.getDefaultStack());
+        recipeHelper.registerWorkingStations(SMOKING, Items.SMOKER.getDefaultStack());
+        recipeHelper.registerWorkingStations(BLASTING, Items.BLAST_FURNACE.getDefaultStack());
+        recipeHelper.registerWorkingStations(CAMPFIRE, Items.CAMPFIRE.getDefaultStack());
+        recipeHelper.registerWorkingStations(BREWING, Items.BREWING_STAND.getDefaultStack());
+        recipeHelper.registerWorkingStations(STONE_CUTTING, Items.STONECUTTER.getDefaultStack());
         recipeHelper.registerRecipeVisibilityHandler(new DisplayVisibilityHandler() {
             @Override
             public DisplayVisibility handleDisplay(RecipeCategory category, RecipeDisplay display) {

@@ -43,6 +43,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     private final List<RecipeCategory> categories = Lists.newArrayList();
     private final Map<Identifier, ButtonAreaSupplier> speedCraftAreaSupplierMap = Maps.newHashMap();
     private final Map<Identifier, List<SpeedCraftFunctional>> speedCraftFunctionalMap = Maps.newHashMap();
+    private final Map<Identifier, List<ItemStack>> categoryWorkingStations = Maps.newHashMap();
     private final List<DisplayVisibilityHandler> displayVisibilityHandlers = Lists.newArrayList();
     private final List<LiveRecipeGenerator> liveRecipeGenerators = Lists.newArrayList();
     private RecipeManager recipeManager;
@@ -82,6 +83,17 @@ public class RecipeHelperImpl implements RecipeHelper {
         categories.add(category);
         categoryDisplaySettingsMap.put(category.getIdentifier(), category.getDisplaySettings());
         recipeCategoryListMap.put(category.getIdentifier(), Lists.newLinkedList());
+        categoryWorkingStations.put(category.getIdentifier(), Lists.newLinkedList());
+    }
+    
+    @Override
+    public void registerWorkingStations(Identifier category, ItemStack... workingStations) {
+        categoryWorkingStations.get(category).addAll(Arrays.asList(workingStations));
+    }
+    
+    @Override
+    public List<ItemStack> getWorkingStations(Identifier category) {
+        return categoryWorkingStations.get(category);
     }
     
     @Override
@@ -213,6 +225,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         this.recipeCategoryListMap.clear();
         this.categories.clear();
         this.speedCraftAreaSupplierMap.clear();
+        this.categoryWorkingStations.clear();
         this.speedCraftFunctionalMap.clear();
         this.categoryDisplaySettingsMap.clear();
         this.recipeFunctions.clear();

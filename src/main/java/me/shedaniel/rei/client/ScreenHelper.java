@@ -66,13 +66,13 @@ public class ScreenHelper implements ClientModInitializer {
     }
     
     public static void drawHoveringWidget(Dimension dimension, int x, int y, TriConsumer<Integer, Integer, Float> consumer, int width, int height, float delta) {
-        int int_5 = x + 12;
-        int int_6 = y - 12;
-        if (int_5 + width > dimension.width)
-            int_5 -= 28 + width;
-        if (int_6 + height + 6 > dimension.height)
-            int_6 = dimension.height - height - 6;
-        consumer.accept(int_5, int_6, delta);
+        int actualX = Math.max(x + 12, 6);
+        int actualY = Math.min(y - height / 2, dimension.height - height - 6);
+        if (actualX + width > dimension.width)
+            actualX -= 24 + width;
+        if (actualY < 6)
+            actualY += 24;
+        consumer.accept(actualX, actualY, delta);
     }
     
     @Override
