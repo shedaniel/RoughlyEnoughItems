@@ -211,4 +211,6 @@ public interface RecipeHelper {
     void registerLiveRecipeGenerator(LiveRecipeGenerator liveRecipeGenerator);
     
     <T extends Recipe<?>> void registerRecipes(Identifier category, Class<T> recipeClass, Function<T, RecipeDisplay> mappingFunction);
+    
+    <T extends Recipe<?>> void registerRecipes(Identifier category, Function<Recipe, Boolean> recipeFilter, Function<T, RecipeDisplay> mappingFunction);
 }

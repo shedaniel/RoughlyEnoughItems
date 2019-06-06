@@ -271,7 +271,7 @@ public class RecipeHelperImpl implements RecipeHelper {
             Collections.reverse(allSortedRecipes);
             recipeFunctions.forEach(recipeFunction -> {
                 try {
-                    allSortedRecipes.stream().filter(recipe -> recipeFunction.recipeClass.isAssignableFrom(recipe.getClass())).forEach(t -> registerDisplay(recipeFunction.category, (RecipeDisplay) recipeFunction.mappingFunction.apply(t), 0));
+                    allSortedRecipes.stream().filter(recipe -> recipeFunction.recipeFilter.apply(recipe)).forEach(t -> registerDisplay(recipeFunction.category, (RecipeDisplay) recipeFunction.mappingFunction.apply(t), 0));
                 } catch (Exception e) {
                     RoughlyEnoughItemsCore.LOGGER.error("[REI] Failed to add recipes!", e);
                 }
@@ -356,7 +356,12 @@ public class RecipeHelperImpl implements RecipeHelper {
     
     @Override
     public <T extends Recipe<?>> void registerRecipes(Identifier category, Class<T> recipeClass, Function<T, RecipeDisplay> mappingFunction) {
-        recipeFunctions.add(new RecipeFunction(category, recipeClass, mappingFunction));
+        recipeFunctions.add(new RecipeFunction(category, recipe -> recipeClass.isAssignableFrom(recipe.getClass()), mappingFunction));
+    }
+    
+    @Override
+    public <T extends Recipe<?>> void registerRecipes(Identifier category, Function<Recipe, Boolean> recipeFilter, Function<T, RecipeDisplay> mappingFunction) {
+        recipeFunctions.add(new RecipeFunction(category, recipeFilter, mappingFunction));
     }
     
     @Override
@@ -371,12 +376,12 @@ public class RecipeHelperImpl implements RecipeHelper {
     
     private class RecipeFunction {
         Identifier category;
-        Class recipeClass;
+        Function<Recipe, Boolean> recipeFilter;
         Function mappingFunction;
         
-        public RecipeFunction(Identifier category, Class<?> recipeClass, Function<?, RecipeDisplay> mappingFunction) {
+        public RecipeFunction(Identifier category, Function<Recipe, Boolean> recipeFilter, Function<?, RecipeDisplay> mappingFunction) {
             this.category = category;
-            this.recipeClass = recipeClass;
+            this.recipeFilter = recipeFilter;
             this.mappingFunction = mappingFunction;
         }
     }
