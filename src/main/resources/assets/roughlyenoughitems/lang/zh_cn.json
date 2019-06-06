@@ -108,5 +108,5 @@
   "tooltip.rei.config.item_list_position": "声明侧边物品列表的位置:\n值: 左 / 右\n \n默认: 右",
   "tooltip.rei.config.max_recipes_per_page": "声明每页显示的最大的配方数目:\n值: 2 - 99\n \n默认: 3",
   "tooltip.rei.config.light_gray_recipe_border": "声明配方边框的外观D:\nYes: 浅灰色\nNo: 深黑色\n \n默认: No",
-  "tooltip.rei.config.april_fools.2019": "强制启用2019愚人节玩笑:\n值: Yes / No\n \n默认: No",
+  "tooltip.rei.config.april_fools.2019": "强制启用2019愚人节玩笑:\n值: Yes / No\n \n默认: No"
 }
