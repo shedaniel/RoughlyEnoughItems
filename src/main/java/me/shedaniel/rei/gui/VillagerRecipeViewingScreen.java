@@ -25,12 +25,14 @@ import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -95,6 +97,34 @@ public class VillagerRecipeViewingScreen extends Screen {
         int guiWidth = MathHelper.clamp(category.getDisplayWidth(display) + 30, 0, largestWidth) + 100;
         int guiHeight = MathHelper.clamp(category.getDisplayHeight() + 40, 166, largestHeight);
         this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - guiHeight / 2, guiWidth, guiHeight);
+        
+        List<List<ItemStack>> workingStations = RoughlyEnoughItemsCore.getRecipeHelper().getWorkingStations(category.getIdentifier());
+        if (!workingStations.isEmpty()) {
+            int ww = MathHelper.floor((bounds.width - 16) / 18f);
+            int w = Math.min(ww, workingStations.size());
+            int h = MathHelper.ceil(workingStations.size() / ((float)ww));
+            int xx = bounds.x + 16;
+            int yy = bounds.y + bounds.height + 5;
+            widgets.add(new CategoryBaseWidget(new Rectangle(xx - 6, bounds.y + bounds.height - 5, 11 + w * 18, 15 + h * 18)));
+            int index = 0;
+            List list = Collections.singletonList(ChatFormat.YELLOW.toString() + I18n.translate("text.rei.working_station"));
+            for(List<ItemStack> workingStation : workingStations) {
+                widgets.add(new SlotWidget(xx, yy, workingStation, true, true, true) {
+                    @Override
+                    protected List<String> getExtraToolTips(ItemStack stack) {
+                        return list;
+                    }
+                });
+                index++;
+                xx += 18;
+                if (index >= ww) {
+                    index = 0;
+                    xx = bounds.x + 16;
+                    yy += 18;
+                }
+            }
+        }
+        
         this.widgets.add(new CategoryBaseWidget(bounds));
         this.scrollListBounds = new Rectangle(bounds.x + 4, bounds.y + 17, 97 + 5, guiHeight - 17 - 7);
         this.widgets.add(new SlotBaseWidget(scrollListBounds));
@@ -198,6 +228,7 @@ public class VillagerRecipeViewingScreen extends Screen {
                 return RoughlyEnoughItemsCore.getConfigManager().getConfig().darkTheme ? 0xFFBBBBBB : 4210752;
             }
         });
+        
         this.children.addAll(buttonWidgets);
         this.widgets.addAll(tabs);
         this.children.addAll(widgets);

@@ -58,9 +58,17 @@ public interface RecipeHelper {
      * @param category        the category
      * @param workingStations the working stations
      */
+    void registerWorkingStations(Identifier category, List<ItemStack>... workingStations);
+    
+    /**
+     * Registers the working stations of a category
+     *
+     * @param category        the category
+     * @param workingStations the working stations
+     */
     void registerWorkingStations(Identifier category, ItemStack... workingStations);
     
-    List<ItemStack> getWorkingStations(Identifier category);
+    List<List<ItemStack>> getWorkingStations(Identifier category);
     
     /**
      * Registers a recipe display

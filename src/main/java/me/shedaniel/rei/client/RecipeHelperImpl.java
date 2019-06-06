@@ -43,7 +43,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     private final List<RecipeCategory> categories = Lists.newArrayList();
     private final Map<Identifier, ButtonAreaSupplier> speedCraftAreaSupplierMap = Maps.newHashMap();
     private final Map<Identifier, List<SpeedCraftFunctional>> speedCraftFunctionalMap = Maps.newHashMap();
-    private final Map<Identifier, List<ItemStack>> categoryWorkingStations = Maps.newHashMap();
+    private final Map<Identifier, List<List<ItemStack>>> categoryWorkingStations = Maps.newHashMap();
     private final List<DisplayVisibilityHandler> displayVisibilityHandlers = Lists.newArrayList();
     private final List<LiveRecipeGenerator> liveRecipeGenerators = Lists.newArrayList();
     private RecipeManager recipeManager;
@@ -87,12 +87,17 @@ public class RecipeHelperImpl implements RecipeHelper {
     }
     
     @Override
-    public void registerWorkingStations(Identifier category, ItemStack... workingStations) {
+    public void registerWorkingStations(Identifier category, List<ItemStack>... workingStations) {
         categoryWorkingStations.get(category).addAll(Arrays.asList(workingStations));
     }
     
     @Override
-    public List<ItemStack> getWorkingStations(Identifier category) {
+    public void registerWorkingStations(Identifier category, ItemStack... workingStations) {
+        categoryWorkingStations.get(category).addAll(Arrays.asList(workingStations).stream().map(Collections::singletonList).collect(Collectors.toList()));
+    }
+    
+    @Override
+    public List<List<ItemStack>> getWorkingStations(Identifier category) {
         return categoryWorkingStations.get(category);
     }
     

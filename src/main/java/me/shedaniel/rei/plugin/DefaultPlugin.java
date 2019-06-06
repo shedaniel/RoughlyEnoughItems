@@ -235,13 +235,13 @@ public class DefaultPlugin implements REIPluginEntry {
     
     @Override
     public void registerOthers(RecipeHelper recipeHelper) {
-        recipeHelper.registerWorkingStations(CRAFTING, Items.CRAFTING_TABLE.getDefaultStack(), Items.CAKE.getDefaultStack());
-        recipeHelper.registerWorkingStations(SMELTING, Items.FURNACE.getDefaultStack());
-        recipeHelper.registerWorkingStations(SMOKING, Items.SMOKER.getDefaultStack());
-        recipeHelper.registerWorkingStations(BLASTING, Items.BLAST_FURNACE.getDefaultStack());
-        recipeHelper.registerWorkingStations(CAMPFIRE, Items.CAMPFIRE.getDefaultStack());
-        recipeHelper.registerWorkingStations(BREWING, Items.BREWING_STAND.getDefaultStack());
-        recipeHelper.registerWorkingStations(STONE_CUTTING, Items.STONECUTTER.getDefaultStack());
+        recipeHelper.registerWorkingStations(CRAFTING, new ItemStack(Items.CRAFTING_TABLE));
+        recipeHelper.registerWorkingStations(SMELTING, new ItemStack(Items.FURNACE));
+        recipeHelper.registerWorkingStations(SMOKING, new ItemStack(Items.SMOKER));
+        recipeHelper.registerWorkingStations(BLASTING, new ItemStack(Items.BLAST_FURNACE));
+        recipeHelper.registerWorkingStations(CAMPFIRE, new ItemStack(Items.CAMPFIRE));
+        recipeHelper.registerWorkingStations(BREWING, new ItemStack(Items.BREWING_STAND));
+        recipeHelper.registerWorkingStations(STONE_CUTTING, new ItemStack(Items.STONECUTTER));
         recipeHelper.registerRecipeVisibilityHandler(new DisplayVisibilityHandler() {
             @Override
             public DisplayVisibility handleDisplay(RecipeCategory category, RecipeDisplay display) {
