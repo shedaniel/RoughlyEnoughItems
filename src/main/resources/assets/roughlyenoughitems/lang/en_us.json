@@ -100,6 +100,7 @@
   "text.rei.config.recipe_screen_type.original": "Original",
   "text.rei.config.recipe_screen_type.villager": "Villager",
   "text.rei.select": "Select",
+  "text.rei.working_station": "Working Station",
   "text.rei.recipe_id": "\n%sRecipe Id: %s",
   "text.rei.config.register_in_other_thread": "Register Recipes in other thread:",
   "text.rei.recipe_screen_type.selection": "Recipe Screen Type Selection",

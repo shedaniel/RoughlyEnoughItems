@@ -12,6 +12,7 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.widget.*;
+import net.minecraft.ChatFormat;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
@@ -20,6 +21,7 @@ import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.Window;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sound.SoundEvents;
@@ -27,16 +29,15 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Supplier;
 
 public class RecipeViewingScreen extends Screen {
     
     public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private static final int TABS_PER_PAGE = 5;
+    private final List<Widget> preWidgets;
     private final List<Widget> widgets;
     private final List<TabWidget> tabs;
     private final Map<RecipeCategory, List<RecipeDisplay>> categoriesMap;
@@ -54,6 +55,7 @@ public class RecipeViewingScreen extends Screen {
     public RecipeViewingScreen(Map<RecipeCategory, List<RecipeDisplay>> categoriesMap) {
         super(new TextComponent(""));
         this.categoryPages = 0;
+        this.preWidgets = Lists.newArrayList();
         this.widgets = Lists.newArrayList();
         Window window = MinecraftClient.getInstance().window;
         this.bounds = new Rectangle(window.getScaledWidth() / 2 - guiWidth / 2, window.getScaledHeight() / 2 - guiHeight / 2, 176, 186);
@@ -121,6 +123,7 @@ public class RecipeViewingScreen extends Screen {
         super.init();
         this.children.clear();
         this.tabs.clear();
+        this.preWidgets.clear();
         this.widgets.clear();
         this.largestWidth = width - 100;
         this.largestHeight = height - 40;
@@ -294,9 +297,38 @@ public class RecipeViewingScreen extends Screen {
         else
             recipeChoosePageWidget = null;
         
+        List<List<ItemStack>> workingStations = RoughlyEnoughItemsCore.getRecipeHelper().getWorkingStations(selectedCategory.getIdentifier());
+        if (!workingStations.isEmpty()) {
+            int hh = MathHelper.floor((bounds.height - 16) / 18f);
+            int actualHeight = Math.min(hh, workingStations.size());
+            int innerWidth = MathHelper.ceil(workingStations.size() / ((float) hh));
+            int xx = bounds.x - (10 + innerWidth * 18) + 6;
+            int yy = bounds.y + 16;
+            preWidgets.add(new CategoryBaseWidget(new Rectangle(xx - 6, yy - 6, 15 + innerWidth * 18, 11 + actualHeight * 18)));
+            int index = 0;
+            List list = Collections.singletonList(ChatFormat.YELLOW.toString() + I18n.translate("text.rei.working_station"));
+            xx += (innerWidth - 1) * 18;
+            for(List<ItemStack> workingStation : workingStations) {
+                preWidgets.add(new SlotWidget(xx, yy, workingStation, true, true, true) {
+                    @Override
+                    protected List<String> getExtraToolTips(ItemStack stack) {
+                        return list;
+                    }
+                });
+                index++;
+                yy += 18;
+                if (index >= hh) {
+                    index = 0;
+                    yy = bounds.y + 16;
+                    xx -= 18;
+                }
+            }
+        }
+        
         children.addAll(tabs);
         children.add(ScreenHelper.getLastOverlay(true, false));
         children.addAll(widgets);
+        children.addAll(preWidgets);
     }
     
     public List<Widget> getWidgets() {
@@ -339,6 +371,10 @@ public class RecipeViewingScreen extends Screen {
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         this.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
+        preWidgets.forEach(widget -> {
+            GuiLighting.disable();
+            widget.render(mouseX, mouseY, delta);
+        });
         if (selectedCategory != null)
             selectedCategory.drawCategoryBackground(bounds, mouseX, mouseY, delta);
         else {
