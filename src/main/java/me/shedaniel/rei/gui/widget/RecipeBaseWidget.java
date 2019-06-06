@@ -28,6 +28,14 @@ public class RecipeBaseWidget extends HighlightableWidget {
             throw new IllegalArgumentException("Base too small, at least 8x8!");
     }
     
+    public int getBlitOffset() {
+        return this.blitOffset;
+    }
+    
+    public void setBlitOffset(int offset) {
+        this.blitOffset = offset;
+    }
+    
     @Override
     public Rectangle getBounds() {
         return bounds;

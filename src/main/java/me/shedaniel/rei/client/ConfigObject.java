@@ -50,6 +50,8 @@ public class ConfigObject {
     
     public boolean darkTheme = false;
     
+    public boolean registerRecipesInAnotherThread = true;
+    
     public RecipeScreenType screenType = RecipeScreenType.UNSET;
     
     @Comment(
