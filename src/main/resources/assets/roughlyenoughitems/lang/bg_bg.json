@@ -71,5 +71,5 @@
   "text.rei.config.enable_legacy_speedcraft_support": "Включи поддръжка на стари приставки: ",
   "text.rei.config.april_fools": "Ден на шегата",
   "text.rei.config.april_fools.2019": "Включи 2019 REI шега за деня на шегата: ",
-  "text.rei.no_config_api": "Cloth Config API не е инсталиран!\nМоля инсталирайте го, за да се покаже екранът за конфигурация!"
+  "text.rei.no_config_api": "Cloth Config v2 API не е инсталиран!\nМоля инсталирайте го, за да се покаже екранът за конфигурация!"
 }

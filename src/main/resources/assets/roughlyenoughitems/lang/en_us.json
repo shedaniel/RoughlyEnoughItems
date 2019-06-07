@@ -93,7 +93,7 @@
   "text.rei.config.item_cheating_mode.rei_like": "Normal",
   "text.rei.config.item_cheating_mode.jei_like": "Reversed",
   "text.rei.config.light_gray_recipe_border": "Light Gray Recipe Border:",
-  "text.rei.config_api_failed": "You arrived here either if Cloth Config API failed or you don't have it installed!\nUpdate / Install the API and report to the bug tracker.",
+  "text.rei.config_api_failed": "You arrived here either if Cloth Config v2 API failed or you don't have it installed!\nUpdate / Install the API and report to the bug tracker.",
   "text.rei.back": "Back",
   "text.rei.config.recipe_screen_type": "Screen Type",
   "text.rei.config.recipe_screen_type.unset": "Not Set",

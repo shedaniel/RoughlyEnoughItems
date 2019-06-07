@@ -136,7 +136,7 @@ public class ConfigManagerImpl implements ConfigManager {
     
     @Override
     public Screen getConfigScreen(Screen parent) {
-        if (FabricLoader.getInstance().isModLoaded("cloth-config")) {
+        if (FabricLoader.getInstance().isModLoaded("cloth-config2")) {
             try {
                 return Screen.class.cast(Class.forName("me.shedaniel.rei.utils.ClothScreenRegistry").getDeclaredMethod("getConfigScreen", Screen.class).invoke(null, parent));
             } catch (Exception e) {

@@ -7,16 +7,16 @@ package me.shedaniel.rei.gui.credits;
 
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.credits.CreditsEntryListWidget.CreditsItem;
-import me.shedaniel.rei.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
+import net.minecraft.client.gui.widget.AbstractPressableButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.network.chat.TextComponent;
 
 public class CreditsScreen extends Screen {
     
     private Screen parent;
-    private ButtonWidget buttonDone;
+    private AbstractPressableButtonWidget buttonDone;
     private CreditsEntryListWidget entryListWidget;
     
     public CreditsScreen(Screen parent) {
@@ -42,9 +42,9 @@ public class CreditsScreen extends Screen {
         for(String line : I18n.translate("text.rei.credit.text").split("\n"))
             entryListWidget.creditsAddEntry(new CreditsItem(new TextComponent(line)));
         entryListWidget.creditsAddEntry(new CreditsItem(new TextComponent("")));
-        children.add(buttonDone = new ButtonWidget(width / 2 - 100, height - 26, 200, 20, I18n.translate("gui.done")) {
+        children.add(buttonDone = new AbstractPressableButtonWidget(width / 2 - 100, height - 26, 200, 20, I18n.translate("gui.done")) {
             @Override
-            public void onPressed() {
+            public void onPress() {
                 CreditsScreen.this.minecraft.openScreen(parent);
                 if (parent instanceof AbstractContainerScreen)
                     ScreenHelper.getLastOverlay().init();

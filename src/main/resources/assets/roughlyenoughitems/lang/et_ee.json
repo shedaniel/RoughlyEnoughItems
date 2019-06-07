@@ -91,7 +91,7 @@
   "text.rei.config.item_cheating_mode.rei_like": "Tavaline",
   "text.rei.config.item_cheating_mode.jei_like": "Pööratud",
   "text.rei.config.light_gray_recipe_border": "Helehall retsepti taust:",
-  "text.rei.config_api_failed": "Sa sattusid siia, kui Cloth Config API nurjus või sul polnud seda paigaldatud!\nUuenda või paigalda antud API and ning teata sellest vigade loetelus.",
+  "text.rei.config_api_failed": "Sa sattusid siia, kui Cloth Config v2 API nurjus või sul polnud seda paigaldatud!\nUuenda või paigalda antud API and ning teata sellest vigade loetelus.",
   "text.rei.back": "Tagasi",
   "text.rei.config.recipe_screen_type": "Kuvatüüp",
   "text.rei.config.recipe_screen_type.unset": "Määramata",
