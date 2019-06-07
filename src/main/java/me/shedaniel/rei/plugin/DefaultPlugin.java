@@ -47,7 +47,7 @@ public class DefaultPlugin implements REIPluginEntry {
     private static final List<DefaultBrewingDisplay> BREWING_DISPLAYS = Lists.newArrayList();
     
     public static Identifier getDisplayTexture() {
-        return RoughlyEnoughItemsCore.getConfigManager().getConfig().darkTheme ? DISPLAY_TEXTURE_DARK : DISPLAY_TEXTURE;
+        return ScreenHelper.isDarkModeEnabled() ? DISPLAY_TEXTURE_DARK : DISPLAY_TEXTURE;
     }
     
     public static void registerBrewingDisplay(DefaultBrewingDisplay display) {

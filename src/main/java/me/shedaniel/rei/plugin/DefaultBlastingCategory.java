@@ -6,7 +6,6 @@
 package me.shedaniel.rei.plugin;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.Renderable;
 import me.shedaniel.rei.api.Renderer;

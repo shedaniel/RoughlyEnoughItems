@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public interface RecipeHelper {
     
@@ -193,6 +194,8 @@ public interface RecipeHelper {
      * @return whether the display should be visible
      */
     boolean isDisplayVisible(RecipeDisplay display);
+    
+    <T extends Recipe<?>> void registerRecipes(Identifier category, Predicate<Recipe> recipeFilter, Function<T, RecipeDisplay> mappingFunction);
     
     /**
      * Gets the cached category setting by the category identifier

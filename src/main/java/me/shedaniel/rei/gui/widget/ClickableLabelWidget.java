@@ -5,7 +5,6 @@
 
 package me.shedaniel.rei.gui.widget;
 
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.ScreenHelper;
 import net.minecraft.ChatFormat;
 
@@ -40,11 +39,11 @@ public abstract class ClickableLabelWidget extends LabelWidget {
     }
     
     public int getDefaultColor() {
-        return RoughlyEnoughItemsCore.getConfigManager().getConfig().darkTheme ? 0xFFBBBBBB : -1;
+        return ScreenHelper.isDarkModeEnabled() ? 0xFFBBBBBB : -1;
     }
     
     public int getHoveredColor() {
-        return RoughlyEnoughItemsCore.getConfigManager().getConfig().darkTheme ? -1 : 0xFF66FFCC;
+        return ScreenHelper.isDarkModeEnabled() ? -1 : 0xFF66FFCC;
     }
     
     @Override
