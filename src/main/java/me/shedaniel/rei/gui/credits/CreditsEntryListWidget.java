@@ -5,7 +5,7 @@
 
 package me.shedaniel.rei.gui.credits;
 
-import me.shedaniel.clothconfig.gui.DynamicSmoothScrollingEntryListWidget;
+import me.shedaniel.clothconfig2.gui.widget.DynamicSmoothScrollingEntryListWidget;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.network.chat.Component;

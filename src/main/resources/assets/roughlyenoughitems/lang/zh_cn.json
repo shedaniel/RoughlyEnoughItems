@@ -93,7 +93,7 @@
   "text.rei.config.item_cheating_mode.rei_like": "标准",
   "text.rei.config.item_cheating_mode.jei_like": "反转",
   "text.rei.config.light_gray_recipe_border": "浅灰色配方边框:",
-  "text.rei.config_api_failed": "如果Cloth Config API装载失败了或你没有安装它，你就会到达这个界面!\n升级/安装API或向bug跟踪器报告.",
+  "text.rei.config_api_failed": "如果Cloth Config v2 API装载失败了或你没有安装它，你就会到达这个界面!\n升级/安装API或向bug跟踪器报告.",
   "text.rei.back": "返回",
   "text.rei.config.recipe_screen_type": "界面类型",
   "text.rei.config.recipe_screen_type.unset": "未设置",
