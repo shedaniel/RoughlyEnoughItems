@@ -6,6 +6,7 @@
 package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.ScreenHelper;
@@ -13,6 +14,7 @@ import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import me.shedaniel.rei.listeners.RecipeBookGuiHooks;
+import net.minecraft.block.ComposterBlock;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.*;
@@ -21,11 +23,13 @@ import net.minecraft.client.recipe.book.ClientRecipeBook;
 import net.minecraft.container.CraftingContainer;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.recipe.*;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 
 import java.awt.*;
@@ -42,6 +46,7 @@ public class DefaultPlugin implements REIPluginEntry {
     public static final Identifier STONE_CUTTING = new Identifier("minecraft", "plugins/stone_cutting");
     public static final Identifier BREWING = new Identifier("minecraft", "plugins/brewing");
     public static final Identifier PLUGIN = new Identifier("roughlyenoughitems", "default_plugin");
+    public static final Identifier COMPOSTING = new Identifier("minecraft", "plugins/composting");
     private static final Identifier DISPLAY_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/display.png");
     private static final Identifier DISPLAY_TEXTURE_DARK = new Identifier("roughlyenoughitems", "textures/gui/display_dark.png");
     private static final List<DefaultBrewingDisplay> BREWING_DISPLAYS = Lists.newArrayList();
@@ -98,6 +103,7 @@ public class DefaultPlugin implements REIPluginEntry {
         recipeHelper.registerCategory(new DefaultCampfireCategory());
         recipeHelper.registerCategory(new DefaultStoneCuttingCategory());
         recipeHelper.registerCategory(new DefaultBrewingCategory());
+        recipeHelper.registerCategory(new DefaultCompostingCategory());
     }
     
     @Override
@@ -124,6 +130,25 @@ public class DefaultPlugin implements REIPluginEntry {
             List<ItemStack> output = Collections.singletonList(outputStack);
             recipeHelper.registerDisplay(CRAFTING, new DefaultCustomDisplay(input, output));
         });
+        Map<ItemConvertible, Float> map = Maps.newLinkedHashMap();
+        if (ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.isEmpty())
+            ComposterBlock.registerDefaultCompostableItems();
+        ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.keySet().forEach(itemConvertible -> {
+            float chance = ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.get(itemConvertible);
+            if (chance > 0)
+                map.put(itemConvertible, chance);
+        });
+        List<ItemConvertible> stacks = new LinkedList<>(map.keySet());
+        stacks.sort((first, second) -> {
+            return (int) ((map.get(first) - map.get(second)) * 100);
+        });
+        for(int i = 0; i < stacks.size(); i += MathHelper.clamp(48, 1, stacks.size() - i)) {
+            List<ItemConvertible> thisStacks = Lists.newArrayList();
+            for(int j = i; j < i + 48; j++)
+                if (j < stacks.size())
+                    thisStacks.add(stacks.get(j));
+            recipeHelper.registerDisplay(COMPOSTING, new DefaultCompostingDisplay(MathHelper.floor(i / 48f), thisStacks, map, Lists.newArrayList(map.keySet()), new ItemStack[]{new ItemStack(Items.BONE_MEAL)}));
+        }
     }
     
     @Override
@@ -132,7 +157,7 @@ public class DefaultPlugin implements REIPluginEntry {
             if (isOnRightSide || !MinecraftClient.getInstance().player.getRecipeBook().isGuiOpen() || !(MinecraftClient.getInstance().currentScreen instanceof RecipeBookProvider) || !(ScreenHelper.getLastContainerScreen().getContainer() instanceof CraftingContainer))
                 return Collections.emptyList();
             ContainerScreenHooks screenHooks = ScreenHelper.getLastContainerScreenHooks();
-            List l = Lists.newArrayList(new Rectangle(screenHooks.rei_getContainerLeft() - 4 - 145, screenHooks.rei_getContainerTop(), 4 + 145 + 30, screenHooks.rei_getContainerHeight()));
+            List<Rectangle> l = Lists.newArrayList(new Rectangle(screenHooks.rei_getContainerLeft() - 4 - 145, screenHooks.rei_getContainerTop(), 4 + 145 + 30, screenHooks.rei_getContainerHeight()));
             int size = ClientRecipeBook.getGroupsForContainer((CraftingContainer) ScreenHelper.getLastContainerScreen().getContainer()).size();
             if (size > 0)
                 l.add(new Rectangle(screenHooks.rei_getContainerLeft() - 4 - 145 - 30, screenHooks.rei_getContainerTop(), 30, (size - 1) * 27));
@@ -242,6 +267,8 @@ public class DefaultPlugin implements REIPluginEntry {
         recipeHelper.registerWorkingStations(CAMPFIRE, new ItemStack(Items.CAMPFIRE));
         recipeHelper.registerWorkingStations(BREWING, new ItemStack(Items.BREWING_STAND));
         recipeHelper.registerWorkingStations(STONE_CUTTING, new ItemStack(Items.STONECUTTER));
+        recipeHelper.registerWorkingStations(COMPOSTING, new ItemStack(Items.COMPOSTER));
+        recipeHelper.registerSpeedCraftButtonArea(COMPOSTING, bounds -> null);
         recipeHelper.registerRecipeVisibilityHandler(new DisplayVisibilityHandler() {
             @Override
             public DisplayVisibility handleDisplay(RecipeCategory category, RecipeDisplay display) {

@@ -102,7 +102,7 @@ public class VillagerRecipeViewingScreen extends Screen {
         if (!workingStations.isEmpty()) {
             int ww = MathHelper.floor((bounds.width - 16) / 18f);
             int w = Math.min(ww, workingStations.size());
-            int h = MathHelper.ceil(workingStations.size() / ((float)ww));
+            int h = MathHelper.ceil(workingStations.size() / ((float) ww));
             int xx = bounds.x + 16;
             int yy = bounds.y + bounds.height + 5;
             widgets.add(new CategoryBaseWidget(new Rectangle(xx - 6, bounds.y + bounds.height - 5, 11 + w * 18, 15 + h * 18)));
@@ -133,7 +133,7 @@ public class VillagerRecipeViewingScreen extends Screen {
         this.widgets.addAll(category.setupDisplay(() -> display, recipeBounds));
         Optional<ButtonAreaSupplier> supplier = RecipeHelper.getInstance().getSpeedCraftButtonArea(category);
         final SpeedCraftFunctional functional = getSpeedCraftFunctionalByCategory(ScreenHelper.getLastContainerScreen(), category);
-        if (supplier.isPresent())
+        if (supplier.isPresent() && supplier.get().get(recipeBounds) != null)
             this.widgets.add(new SpeedCraftingButtonWidget(supplier.get().get(recipeBounds), supplier.get().getButtonText(), functional, () -> display));
         
         int index = 0;
