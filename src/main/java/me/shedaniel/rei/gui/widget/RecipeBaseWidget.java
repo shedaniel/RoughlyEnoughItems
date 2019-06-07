@@ -8,6 +8,7 @@ package me.shedaniel.rei.gui.widget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.RecipeScreenType;
+import me.shedaniel.rei.client.ScreenHelper;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.util.Identifier;
 
@@ -56,7 +57,7 @@ public class RecipeBaseWidget extends HighlightableWidget {
             return;
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GuiLighting.disable();
-        minecraft.getTextureManager().bindTexture(RoughlyEnoughItemsCore.getConfigManager().getConfig().darkTheme ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
+        minecraft.getTextureManager().bindTexture(ScreenHelper.isDarkModeEnabled() ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
         int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;
         int textureOffset = getTextureOffset();
         
@@ -85,7 +86,7 @@ public class RecipeBaseWidget extends HighlightableWidget {
     }
     
     protected int getInnerColor() {
-        return RoughlyEnoughItemsCore.getConfigManager().getConfig().darkTheme ? 0xFF2E2E2E : -3750202;
+        return ScreenHelper.isDarkModeEnabled() ? 0xFF2E2E2E : -3750202;
     }
     
     protected int getTextureOffset() {

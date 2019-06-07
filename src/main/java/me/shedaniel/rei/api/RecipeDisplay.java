@@ -35,7 +35,6 @@ public interface RecipeDisplay<T extends Recipe> {
      *
      * @return the list of required items
      */
-    @Deprecated
     default List<List<ItemStack>> getRequiredItems() {
         return Lists.newArrayList();
     }

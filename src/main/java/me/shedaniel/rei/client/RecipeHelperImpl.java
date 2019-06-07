@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class RecipeHelperImpl implements RecipeHelper {
@@ -204,6 +205,7 @@ public class RecipeHelperImpl implements RecipeHelper {
             speedCraftAreaSupplierMap.put(category, rectangle);
     }
     
+    @SuppressWarnings("deprecation")
     @Override
     public void registerDefaultSpeedCraftButtonArea(Identifier category) {
         registerSpeedCraftButtonArea(category, bounds -> new Rectangle((int) bounds.getMaxX() - 16, (int) bounds.getMaxY() - 16, 10, 10));
@@ -271,7 +273,7 @@ public class RecipeHelperImpl implements RecipeHelper {
             Collections.reverse(allSortedRecipes);
             recipeFunctions.forEach(recipeFunction -> {
                 try {
-                    allSortedRecipes.stream().filter(recipe -> recipeFunction.recipeFilter.apply(recipe)).forEach(t -> registerDisplay(recipeFunction.category, (RecipeDisplay) recipeFunction.mappingFunction.apply(t), 0));
+                    allSortedRecipes.stream().filter(recipe -> recipeFunction.recipeFilter.test(recipe)).forEach(t -> registerDisplay(recipeFunction.category, (RecipeDisplay) recipeFunction.mappingFunction.apply(t), 0));
                 } catch (Exception e) {
                     RoughlyEnoughItemsCore.LOGGER.error("[REI] Failed to add recipes!", e);
                 }
@@ -361,6 +363,11 @@ public class RecipeHelperImpl implements RecipeHelper {
     
     @Override
     public <T extends Recipe<?>> void registerRecipes(Identifier category, Function<Recipe, Boolean> recipeFilter, Function<T, RecipeDisplay> mappingFunction) {
+        recipeFunctions.add(new RecipeFunction(category, recipeFilter::apply, mappingFunction));
+    }
+    
+    @Override
+    public <T extends Recipe<?>> void registerRecipes(Identifier category, Predicate<Recipe> recipeFilter, Function<T, RecipeDisplay> mappingFunction) {
         recipeFunctions.add(new RecipeFunction(category, recipeFilter, mappingFunction));
     }
     
@@ -376,10 +383,10 @@ public class RecipeHelperImpl implements RecipeHelper {
     
     private class RecipeFunction {
         Identifier category;
-        Function<Recipe, Boolean> recipeFilter;
+        Predicate<Recipe> recipeFilter;
         Function mappingFunction;
         
-        public RecipeFunction(Identifier category, Function<Recipe, Boolean> recipeFilter, Function<?, RecipeDisplay> mappingFunction) {
+        public RecipeFunction(Identifier category, Predicate<Recipe> recipeFilter, Function<?, RecipeDisplay> mappingFunction) {
             this.category = category;
             this.recipeFilter = recipeFilter;
             this.mappingFunction = mappingFunction;

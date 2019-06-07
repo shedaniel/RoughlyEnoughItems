@@ -6,7 +6,6 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.client.ScreenHelper;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.sound.PositionedSoundInstance;
@@ -65,7 +64,7 @@ public abstract class ButtonWidget extends HighlightableWidget {
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;
-        minecraft.getTextureManager().bindTexture(RoughlyEnoughItemsCore.getConfigManager().getConfig().darkTheme ? BUTTON_LOCATION_DARK : BUTTON_LOCATION);
+        minecraft.getTextureManager().bindTexture(ScreenHelper.isDarkModeEnabled() ? BUTTON_LOCATION_DARK : BUTTON_LOCATION);
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         int textureOffset = this.getTextureId(isHovered(mouseX, mouseY));
         GlStateManager.enableBlend();

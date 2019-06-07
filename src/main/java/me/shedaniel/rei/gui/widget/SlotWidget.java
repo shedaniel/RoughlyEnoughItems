@@ -8,7 +8,6 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.cloth.api.ClientUtils;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.Renderable;
 import me.shedaniel.rei.api.Renderer;
@@ -114,7 +113,7 @@ public class SlotWidget extends HighlightableWidget {
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         Renderer renderer = getCurrentRenderer();
-        boolean darkTheme = RoughlyEnoughItemsCore.getConfigManager().getConfig().darkTheme;
+        boolean darkTheme = ScreenHelper.isDarkModeEnabled();
         if (drawBackground) {
             minecraft.getTextureManager().bindTexture(darkTheme ? RECIPE_GUI_DARK : RECIPE_GUI);
             blit(this.x - 1, this.y - 1, 0, 222, 18, 18);

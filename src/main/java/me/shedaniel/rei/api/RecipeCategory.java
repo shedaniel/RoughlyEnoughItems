@@ -5,7 +5,7 @@
 
 package me.shedaniel.rei.api;
 
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.renderables.RecipeRenderer;
 import me.shedaniel.rei.gui.widget.CategoryBaseWidget;
@@ -46,6 +46,7 @@ public interface RecipeCategory<T extends RecipeDisplay> {
      *
      * @return the renderer of the icon
      */
+    @SuppressWarnings("deprecation")
     default Renderer getIcon() {
         return Renderable.fromItemStackSupplier(this::getCategoryIcon);
     }
@@ -63,6 +64,7 @@ public interface RecipeCategory<T extends RecipeDisplay> {
      * @param recipe the recipe to render
      * @return the recipe renderer
      */
+    @SuppressWarnings("unchecked")
     default RecipeRenderer getSimpleRenderer(T recipe) {
         return Renderable.fromRecipe(recipe::getInput, recipe::getOutput);
     }
@@ -88,7 +90,7 @@ public interface RecipeCategory<T extends RecipeDisplay> {
      */
     default void drawCategoryBackground(Rectangle bounds, int mouseX, int mouseY, float delta) {
         new CategoryBaseWidget(bounds).render();
-        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().darkTheme) {
+        if (ScreenHelper.isDarkModeEnabled()) {
             DrawableHelper.fill(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, 0xFF404040);
             DrawableHelper.fill(bounds.x + 17, bounds.y + 21, bounds.x + bounds.width - 17, bounds.y + 33, 0xFF404040);
         } else {

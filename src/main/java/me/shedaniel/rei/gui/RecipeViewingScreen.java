@@ -306,7 +306,7 @@ public class RecipeViewingScreen extends Screen {
             int yy = bounds.y + 16;
             preWidgets.add(new CategoryBaseWidget(new Rectangle(xx - 6, yy - 6, 15 + innerWidth * 18, 11 + actualHeight * 18)));
             int index = 0;
-            List list = Collections.singletonList(ChatFormat.YELLOW.toString() + I18n.translate("text.rei.working_station"));
+            List<String> list = Collections.singletonList(ChatFormat.YELLOW.toString() + I18n.translate("text.rei.working_station"));
             xx += (innerWidth - 1) * 18;
             for(List<ItemStack> workingStation : workingStations) {
                 preWidgets.add(new SlotWidget(xx, yy, workingStation, true, true, true) {
@@ -379,7 +379,7 @@ public class RecipeViewingScreen extends Screen {
             selectedCategory.drawCategoryBackground(bounds, mouseX, mouseY, delta);
         else {
             new CategoryBaseWidget(bounds).render();
-            if (RoughlyEnoughItemsCore.getConfigManager().getConfig().darkTheme) {
+            if (ScreenHelper.isDarkModeEnabled()) {
                 fill(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, 0xFF404040);
                 fill(bounds.x + 17, bounds.y + 21, bounds.x + bounds.width - 17, bounds.y + 33, 0xFF404040);
             } else {

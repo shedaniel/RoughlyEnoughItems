@@ -7,8 +7,6 @@ package me.shedaniel.rei.client;
 
 import net.minecraft.client.resource.language.I18n;
 
-import java.util.Locale;
-
 public enum RecipeScreenType {
     UNSET,
     ORIGINAL,

@@ -107,7 +107,7 @@ public class VillagerRecipeViewingScreen extends Screen {
             int yy = bounds.y + bounds.height + 5;
             widgets.add(new CategoryBaseWidget(new Rectangle(xx - 6, bounds.y + bounds.height - 5, 11 + w * 18, 15 + h * 18)));
             int index = 0;
-            List list = Collections.singletonList(ChatFormat.YELLOW.toString() + I18n.translate("text.rei.working_station"));
+            List<String> list = Collections.singletonList(ChatFormat.YELLOW.toString() + I18n.translate("text.rei.working_station"));
             for(List<ItemStack> workingStation : workingStations) {
                 widgets.add(new SlotWidget(xx, yy, workingStation, true, true, true) {
                     @Override
@@ -225,7 +225,7 @@ public class VillagerRecipeViewingScreen extends Screen {
             
             @Override
             public int getDefaultColor() {
-                return RoughlyEnoughItemsCore.getConfigManager().getConfig().darkTheme ? 0xFFBBBBBB : 4210752;
+                return ScreenHelper.isDarkModeEnabled() ? 0xFFBBBBBB : 4210752;
             }
         });
         
@@ -355,7 +355,7 @@ public class VillagerRecipeViewingScreen extends Screen {
             GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
             GlStateManager.shadeModel(7425);
             buffer.begin(7, VertexFormats.POSITION_COLOR);
-            float b = RoughlyEnoughItemsCore.getConfigManager().getConfig().darkTheme ? 0.37f : 1f;
+            float b = ScreenHelper.isDarkModeEnabled() ? 0.37f : 1f;
             buffer.vertex(scrollbarPositionMinX, minY + scrollBarHeight, 1000D).color(b, b, b, scrollBarAlpha).next();
             buffer.vertex(scrollbarPositionMaxX, minY + scrollBarHeight, 1000D).color(b, b, b, scrollBarAlpha).next();
             buffer.vertex(scrollbarPositionMaxX, minY, 1000D).color(b, b, b, scrollBarAlpha).next();

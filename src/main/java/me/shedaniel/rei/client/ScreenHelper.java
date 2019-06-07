@@ -6,6 +6,7 @@
 package me.shedaniel.rei.client;
 
 import com.google.common.collect.Lists;
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.widget.SearchFieldWidget;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
@@ -73,6 +74,10 @@ public class ScreenHelper implements ClientModInitializer {
         if (actualY < 6)
             actualY += 24;
         consumer.accept(actualX, actualY, delta);
+    }
+    
+    public static boolean isDarkModeEnabled() {
+        return RoughlyEnoughItemsCore.getConfigManager().getConfig().darkTheme;
     }
     
     @Override
