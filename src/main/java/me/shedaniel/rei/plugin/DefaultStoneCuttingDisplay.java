@@ -7,6 +7,7 @@ package me.shedaniel.rei.plugin;
 
 import me.shedaniel.rei.api.RecipeDisplay;
 import net.minecraft.item.ItemStack;
+import net.minecraft.recipe.CuttingRecipe;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.StonecuttingRecipe;
 import net.minecraft.util.DefaultedList;
@@ -35,8 +36,8 @@ public class DefaultStoneCuttingDisplay implements RecipeDisplay<StonecuttingRec
     }
     
     @Override
-    public Optional<StonecuttingRecipe> getRecipe() {
-        return Optional.ofNullable(display);
+    public Optional<Identifier> getRecipeLocation() {
+        return Optional.ofNullable(display).map(CuttingRecipe::getId);
     }
     
     @Override

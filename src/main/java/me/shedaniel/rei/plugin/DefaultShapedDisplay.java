@@ -8,6 +8,7 @@ package me.shedaniel.rei.plugin;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.ShapedRecipe;
+import net.minecraft.util.Identifier;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,8 +29,8 @@ public class DefaultShapedDisplay implements DefaultCraftingDisplay<ShapedRecipe
     }
     
     @Override
-    public Optional<Recipe> getRecipe() {
-        return Optional.ofNullable(display);
+    public Optional<Identifier> getRecipeLocation() {
+        return Optional.ofNullable(display).map(ShapedRecipe::getId);
     }
     
     @Override

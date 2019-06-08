@@ -16,11 +16,6 @@ import java.util.Optional;
 public interface RecipeDisplay<T extends Recipe> {
     
     /**
-     * @return the optional recipe
-     */
-    Optional<? extends Recipe> getRecipe();
-    
-    /**
      * @return a list of items
      */
     List<List<ItemStack>> getInput();
@@ -45,5 +40,14 @@ public interface RecipeDisplay<T extends Recipe> {
      * @return the identifier of the category
      */
     Identifier getRecipeCategory();
+    
+    /**
+     * Gets the recipe location from datapack
+     *
+     * @return the recipe location
+     */
+    default Optional<Identifier> getRecipeLocation() {
+        return Optional.empty();
+    }
     
 }

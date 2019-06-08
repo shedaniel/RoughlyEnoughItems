@@ -7,6 +7,7 @@ package me.shedaniel.rei.plugin;
 
 import me.shedaniel.rei.api.RecipeDisplay;
 import net.minecraft.item.ItemStack;
+import net.minecraft.recipe.AbstractCookingRecipe;
 import net.minecraft.recipe.CampfireCookingRecipe;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.util.DefaultedList;
@@ -41,8 +42,8 @@ public class DefaultCampfireDisplay implements RecipeDisplay<CampfireCookingReci
     }
     
     @Override
-    public Optional<CampfireCookingRecipe> getRecipe() {
-        return Optional.ofNullable(display);
+    public Optional<Identifier> getRecipeLocation() {
+        return Optional.ofNullable(display).map(AbstractCookingRecipe::getId);
     }
     
     @Override

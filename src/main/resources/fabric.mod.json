@@ -42,6 +42,18 @@
     "listeners.roughlyenoughitems.mixins.json"
   ],
   "custom": {
-    "modmenu:clientsideOnly": true
+    "rei:translators": {
+      "English": "Danielshe",
+      "Simplified Chinese": ["XuyuEre", "Danielshe"],
+      "Traditional Chinese": ["hugoalh", "gxy17886", "Danielshe"],
+      "French": "Yanis48",
+      "German": "MelanX",
+      "Estonian": "Madis0",
+      "Portuguese": "thiagokenis",
+      "LOLCAT": "Danielshe",
+      "Upside Down English": "Danielshe",
+      "Brazilian Portuguese": "thiagokenis",
+      "Bulgarian": "geniiii"
+    }
   }
 }
