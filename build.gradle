@@ -1,6 +1,7 @@
 plugins {
     id 'fabric-loom' version '0.2.2-SNAPSHOT'
     id 'maven-publish'
+    id 'net.minecrell.licenser' version '0.4.1'
 }
 
 sourceCompatibility = 1.8
@@ -15,6 +16,12 @@ version = project.mod_version + "+" + (ENV.BUILD_NUMBER ? ("build." + ENV.BUILD_
 def includeDep = true
 
 minecraft {
+}
+
+license {
+    header rootProject.file('HEADER')
+    include '**/*.java'
+    exclude '**/Scissors.java'
 }
 
 repositories {
@@ -75,14 +82,14 @@ publishing {
     }
 
     repositories {
-        if (project.hasProperty('danielshe_pass')) {
-            maven {
-                url = "http://deploy.modmuss50.me/"
-                credentials {
-                    username = "danielshe"
-                    password = project.getProperty('danielshe_pass')
-                }
-            }
-        }
+//        if (project.hasProperty('danielshe_pass')) {
+//            maven {
+//                url = "http://deploy.modmuss50.me/"
+//                credentials {
+//                    username = "danielshe"
+//                    password = project.getProperty('danielshe_pass')
+//                }
+//            }
+//        }
     }
 }

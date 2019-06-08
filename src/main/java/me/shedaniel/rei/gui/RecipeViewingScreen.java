@@ -16,7 +16,6 @@ import net.minecraft.ChatFormat;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
@@ -68,14 +67,6 @@ public class RecipeViewingScreen extends Screen {
         this.selectedCategory = categories.get(0);
         this.tabs = new ArrayList<>();
         this.choosePageActivated = false;
-    }
-    
-    public static SpeedCraftFunctional getSpeedCraftFunctionalByCategory(AbstractContainerScreen containerScreen, RecipeCategory category) {
-        for(SpeedCraftFunctional functional : RecipeHelper.getInstance().getSpeedCraftFunctional(category))
-            for(Class aClass : functional.getFunctioningFor())
-                if (containerScreen.getClass().isAssignableFrom(aClass))
-                    return functional;
-        return null;
     }
     
     @Override
@@ -280,7 +271,6 @@ public class RecipeViewingScreen extends Screen {
             }
         }
         Optional<ButtonAreaSupplier> supplier = RecipeHelper.getInstance().getSpeedCraftButtonArea(selectedCategory);
-        final SpeedCraftFunctional functional = getSpeedCraftFunctionalByCategory(ScreenHelper.getLastContainerScreen(), selectedCategory);
         int recipeHeight = selectedCategory.getDisplayHeight();
         List<RecipeDisplay> currentDisplayed = getCurrentDisplayed();
         for(int i = 0; i < currentDisplayed.size(); i++) {
@@ -290,7 +280,7 @@ public class RecipeViewingScreen extends Screen {
             final Rectangle displayBounds = new Rectangle((int) getBounds().getCenterX() - displayWidth / 2, getBounds().y + 40 + recipeHeight * i + 7 * i, displayWidth, recipeHeight);
             widgets.addAll(selectedCategory.setupDisplay(displaySupplier, displayBounds));
             if (supplier.isPresent())
-                widgets.add(new SpeedCraftingButtonWidget(supplier.get().get(displayBounds), supplier.get().getButtonText(), functional, displaySupplier));
+                widgets.add(new AutoCraftingButtonWidget(supplier.get().get(displayBounds), supplier.get().getButtonText(), displaySupplier));
         }
         if (choosePageActivated)
             recipeChoosePageWidget = new RecipeChoosePageWidget(this, page, getTotalPages(selectedCategory));

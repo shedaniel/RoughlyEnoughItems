@@ -9,6 +9,7 @@ import me.shedaniel.rei.api.RecipeDisplay;
 import net.minecraft.block.entity.FurnaceBlockEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.recipe.AbstractCookingRecipe;
 import net.minecraft.recipe.SmeltingRecipe;
 import net.minecraft.util.Identifier;
 
@@ -32,8 +33,8 @@ public class DefaultSmeltingDisplay implements RecipeDisplay<SmeltingRecipe> {
     }
     
     @Override
-    public Optional<SmeltingRecipe> getRecipe() {
-        return Optional.ofNullable(display);
+    public Optional<Identifier> getRecipeLocation() {
+        return Optional.ofNullable(display).map(AbstractCookingRecipe::getId);
     }
     
     @Override

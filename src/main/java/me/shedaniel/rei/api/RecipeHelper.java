@@ -126,27 +126,20 @@ public interface RecipeHelper {
     void registerSpeedCraftButtonArea(Identifier category, ButtonAreaSupplier rectangle);
     
     /**
+     * Removes the speed crafting button
+     *
+     * @param category the category of the button
+     */
+    default void removeSpeedCraftButton(Identifier category) {
+        registerSpeedCraftButtonArea(category, bounds -> null);
+    }
+    
+    /**
      * @param category the category of the button area
      * @deprecated Not required anymore
      */
     @Deprecated
     void registerDefaultSpeedCraftButtonArea(Identifier category);
-    
-    /**
-     * Gets the speed crafting functional from a category
-     *
-     * @param category the category of the speed crafting functional
-     * @return the list of speed crafting functionals
-     */
-    List<SpeedCraftFunctional> getSpeedCraftFunctional(RecipeCategory category);
-    
-    /**
-     * Registers a speed crafting functional
-     *
-     * @param category   the category of the speed crafting functional
-     * @param functional the functional to be registered
-     */
-    void registerSpeedCraftFunctional(Identifier category, SpeedCraftFunctional functional);
     
     /**
      * Gets the map of all recipes visible to the player

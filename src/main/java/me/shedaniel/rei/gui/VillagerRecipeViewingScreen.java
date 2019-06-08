@@ -38,8 +38,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static me.shedaniel.rei.gui.RecipeViewingScreen.getSpeedCraftFunctionalByCategory;
-
 public class VillagerRecipeViewingScreen extends Screen {
     
     private static final int TABS_PER_PAGE = 8;
@@ -132,9 +130,8 @@ public class VillagerRecipeViewingScreen extends Screen {
         Rectangle recipeBounds = new Rectangle(bounds.x + 100 + (guiWidth - 100) / 2 - category.getDisplayWidth(display) / 2, bounds.y + bounds.height / 2 - category.getDisplayHeight() / 2, category.getDisplayWidth(display), category.getDisplayHeight());
         this.widgets.addAll(category.setupDisplay(() -> display, recipeBounds));
         Optional<ButtonAreaSupplier> supplier = RecipeHelper.getInstance().getSpeedCraftButtonArea(category);
-        final SpeedCraftFunctional functional = getSpeedCraftFunctionalByCategory(ScreenHelper.getLastContainerScreen(), category);
         if (supplier.isPresent() && supplier.get().get(recipeBounds) != null)
-            this.widgets.add(new SpeedCraftingButtonWidget(supplier.get().get(recipeBounds), supplier.get().getButtonText(), functional, () -> display));
+            this.widgets.add(new AutoCraftingButtonWidget(supplier.get().get(recipeBounds), supplier.get().getButtonText(), () -> display));
         
         int index = 0;
         for(RecipeDisplay recipeDisplay : categoryMap.get(category)) {

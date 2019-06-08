@@ -10,10 +10,12 @@ import me.shedaniel.rei.api.RecipeDisplay;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Ingredient;
-import net.minecraft.recipe.Recipe;
 import net.minecraft.util.Identifier;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class DefaultBrewingDisplay implements RecipeDisplay {
     
@@ -24,11 +26,6 @@ public class DefaultBrewingDisplay implements RecipeDisplay {
         this.input = input;
         this.reactant = reactant;
         this.output = output;
-    }
-    
-    @Override
-    public Optional<Recipe> getRecipe() {
-        return Optional.empty();
     }
     
     @Override

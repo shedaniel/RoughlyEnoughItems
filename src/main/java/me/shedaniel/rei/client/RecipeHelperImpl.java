@@ -43,7 +43,6 @@ public class RecipeHelperImpl implements RecipeHelper {
     private final Map<Identifier, DisplaySettings> categoryDisplaySettingsMap = Maps.newHashMap();
     private final List<RecipeCategory> categories = Lists.newArrayList();
     private final Map<Identifier, ButtonAreaSupplier> speedCraftAreaSupplierMap = Maps.newHashMap();
-    private final Map<Identifier, List<SpeedCraftFunctional>> speedCraftFunctionalMap = Maps.newHashMap();
     private final Map<Identifier, List<List<ItemStack>>> categoryWorkingStations = Maps.newHashMap();
     private final List<DisplayVisibilityHandler> displayVisibilityHandlers = Lists.newArrayList();
     private final List<LiveRecipeGenerator> liveRecipeGenerators = Lists.newArrayList();
@@ -211,20 +210,6 @@ public class RecipeHelperImpl implements RecipeHelper {
         registerSpeedCraftButtonArea(category, bounds -> new Rectangle((int) bounds.getMaxX() - 16, (int) bounds.getMaxY() - 16, 10, 10));
     }
     
-    @Override
-    public List<SpeedCraftFunctional> getSpeedCraftFunctional(RecipeCategory category) {
-        if (speedCraftFunctionalMap.get(category.getIdentifier()) == null)
-            return Lists.newArrayList();
-        return speedCraftFunctionalMap.get(category.getIdentifier());
-    }
-    
-    @Override
-    public void registerSpeedCraftFunctional(Identifier category, SpeedCraftFunctional functional) {
-        List<SpeedCraftFunctional> list = speedCraftFunctionalMap.containsKey(category) ? new LinkedList<>(speedCraftFunctionalMap.get(category)) : Lists.newLinkedList();
-        list.add(functional);
-        speedCraftFunctionalMap.put(category, list);
-    }
-    
     @SuppressWarnings("deprecation")
     public void recipesLoaded(RecipeManager recipeManager) {
         this.recipeCount.set(0);
@@ -233,7 +218,6 @@ public class RecipeHelperImpl implements RecipeHelper {
         this.categories.clear();
         this.speedCraftAreaSupplierMap.clear();
         this.categoryWorkingStations.clear();
-        this.speedCraftFunctionalMap.clear();
         this.categoryDisplaySettingsMap.clear();
         this.recipeFunctions.clear();
         this.displayVisibilityHandlers.clear();

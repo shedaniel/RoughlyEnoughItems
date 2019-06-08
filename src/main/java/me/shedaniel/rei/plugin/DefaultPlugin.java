@@ -13,11 +13,10 @@ import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
-import me.shedaniel.rei.listeners.RecipeBookGuiHooks;
 import net.minecraft.block.ComposterBlock;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.*;
+import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
+import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
 import net.minecraft.client.recipe.book.ClientRecipeBook;
 import net.minecraft.container.CraftingContainer;
@@ -134,7 +133,7 @@ public class DefaultPlugin implements REIPluginEntry {
         if (ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.isEmpty())
             ComposterBlock.registerDefaultCompostableItems();
         ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.keySet().forEach(itemConvertible -> {
-            float chance = ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.get(itemConvertible);
+            float chance = ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.getOrDefault(itemConvertible, 0);
             if (chance > 0)
                 map.put(itemConvertible, chance);
         });
@@ -269,6 +268,7 @@ public class DefaultPlugin implements REIPluginEntry {
         recipeHelper.registerWorkingStations(STONE_CUTTING, new ItemStack(Items.STONECUTTER));
         recipeHelper.registerWorkingStations(COMPOSTING, new ItemStack(Items.COMPOSTER));
         recipeHelper.registerSpeedCraftButtonArea(COMPOSTING, bounds -> null);
+        recipeHelper.registerSpeedCraftButtonArea(DefaultPlugin.CAMPFIRE, bounds -> new Rectangle((int) bounds.getMaxX() - 16, bounds.y + 6, 10, 10));
         recipeHelper.registerRecipeVisibilityHandler(new DisplayVisibilityHandler() {
             @Override
             public DisplayVisibility handleDisplay(RecipeCategory category, RecipeDisplay display) {
@@ -278,101 +278,6 @@ public class DefaultPlugin implements REIPluginEntry {
             @Override
             public float getPriority() {
                 return -1f;
-            }
-        });
-        recipeHelper.registerSpeedCraftButtonArea(DefaultPlugin.CAMPFIRE, bounds -> new Rectangle((int) bounds.getMaxX() - 16, bounds.y + 6, 10, 10));
-        recipeHelper.registerSpeedCraftFunctional(DefaultPlugin.CRAFTING, new SpeedCraftFunctional<DefaultCraftingDisplay>() {
-            @Override
-            public Class[] getFunctioningFor() {
-                return new Class[]{InventoryScreen.class, CraftingTableScreen.class};
-            }
-            
-            @Override
-            public boolean performAutoCraft(Screen screen, DefaultCraftingDisplay recipe) {
-                if (!recipe.getRecipe().isPresent())
-                    return false;
-                if (screen.getClass().isAssignableFrom(CraftingTableScreen.class))
-                    ((RecipeBookGuiHooks) (((CraftingTableScreen) screen).getRecipeBookGui())).rei_getGhostSlots().reset();
-                else if (screen.getClass().isAssignableFrom(InventoryScreen.class))
-                    ((RecipeBookGuiHooks) (((InventoryScreen) screen).getRecipeBookGui())).rei_getGhostSlots().reset();
-                else
-                    return false;
-                MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, (Recipe<?>) recipe.getRecipe().get(), Screen.hasShiftDown());
-                return true;
-            }
-            
-            @Override
-            public boolean acceptRecipe(Screen screen, DefaultCraftingDisplay recipe) {
-                return screen instanceof CraftingTableScreen || (screen instanceof InventoryScreen && recipe.getHeight() < 3 && recipe.getWidth() < 3);
-            }
-        });
-        recipeHelper.registerSpeedCraftFunctional(DefaultPlugin.SMELTING, new SpeedCraftFunctional<DefaultSmeltingDisplay>() {
-            @Override
-            public Class[] getFunctioningFor() {
-                return new Class[]{FurnaceScreen.class};
-            }
-            
-            @Override
-            public boolean performAutoCraft(Screen screen, DefaultSmeltingDisplay recipe) {
-                if (!recipe.getRecipe().isPresent())
-                    return false;
-                if (screen instanceof FurnaceScreen)
-                    ((RecipeBookGuiHooks) (((FurnaceScreen) screen).getRecipeBookGui())).rei_getGhostSlots().reset();
-                else
-                    return false;
-                MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, (Recipe<?>) recipe.getRecipe().get(), Screen.hasShiftDown());
-                return true;
-            }
-            
-            @Override
-            public boolean acceptRecipe(Screen screen, DefaultSmeltingDisplay recipe) {
-                return screen instanceof FurnaceScreen;
-            }
-        });
-        recipeHelper.registerSpeedCraftFunctional(DefaultPlugin.SMOKING, new SpeedCraftFunctional<DefaultSmokingDisplay>() {
-            @Override
-            public Class[] getFunctioningFor() {
-                return new Class[]{SmokerScreen.class};
-            }
-            
-            @Override
-            public boolean performAutoCraft(Screen screen, DefaultSmokingDisplay recipe) {
-                if (!recipe.getRecipe().isPresent())
-                    return false;
-                if (screen instanceof SmokerScreen)
-                    ((RecipeBookGuiHooks) (((SmokerScreen) screen).getRecipeBookGui())).rei_getGhostSlots().reset();
-                else
-                    return false;
-                MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, (Recipe<?>) recipe.getRecipe().get(), Screen.hasShiftDown());
-                return true;
-            }
-            
-            @Override
-            public boolean acceptRecipe(Screen screen, DefaultSmokingDisplay recipe) {
-                return screen instanceof SmokerScreen;
-            }
-        });
-        recipeHelper.registerSpeedCraftFunctional(DefaultPlugin.BLASTING, new SpeedCraftFunctional<DefaultBlastingDisplay>() {
-            @Override
-            public Class[] getFunctioningFor() {
-                return new Class[]{BlastFurnaceScreen.class};
-            }
-            
-            @Override
-            public boolean acceptRecipe(Screen screen, DefaultBlastingDisplay recipe) {
-                return screen instanceof BlastFurnaceScreen;
-            }
-            
-            @Override
-            public boolean performAutoCraft(Screen screen, DefaultBlastingDisplay recipe) {
-                if (!recipe.getRecipe().isPresent())
-                    return false;
-                if (screen instanceof BlastFurnaceScreen)
-                    ((RecipeBookGuiHooks) (((BlastFurnaceScreen) screen).getRecipeBookGui())).rei_getGhostSlots().reset();
-                else
-                    return false;
-                MinecraftClient.getInstance().interactionManager.clickRecipe(MinecraftClient.getInstance().player.container.syncId, (Recipe<?>) recipe.getRecipe().get(), Screen.hasShiftDown());
-                return true;
             }
         });
     }

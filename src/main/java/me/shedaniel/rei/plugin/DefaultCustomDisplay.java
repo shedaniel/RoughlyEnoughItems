@@ -8,6 +8,7 @@ package me.shedaniel.rei.plugin;
 import com.google.common.collect.Lists;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Recipe;
+import net.minecraft.util.Identifier;
 
 import java.util.List;
 import java.util.Optional;
@@ -41,9 +42,13 @@ public class DefaultCustomDisplay implements DefaultCraftingDisplay {
         this(input, output, null);
     }
     
+    public Recipe getPossibleRecipe() {
+        return possibleRecipe;
+    }
+    
     @Override
-    public Optional<Recipe> getRecipe() {
-        return Optional.ofNullable(possibleRecipe);
+    public Optional<Identifier> getRecipeLocation() {
+        return Optional.ofNullable(possibleRecipe).map(Recipe::getId);
     }
     
     @Override

@@ -7,6 +7,7 @@ package me.shedaniel.rei.plugin;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.ShapelessRecipe;
+import net.minecraft.util.Identifier;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,8 +28,8 @@ public class DefaultShapelessDisplay implements DefaultCraftingDisplay {
     }
     
     @Override
-    public Optional<ShapelessRecipe> getRecipe() {
-        return Optional.ofNullable(display);
+    public Optional<Identifier> getRecipeLocation() {
+        return Optional.ofNullable(display).map(ShapelessRecipe::getId);
     }
     
     @Override
