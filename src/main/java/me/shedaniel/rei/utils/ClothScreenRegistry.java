@@ -41,7 +41,7 @@ public class ClothScreenRegistry {
                 e.printStackTrace();
             }
         });
-        ConfigEntryBuilder entryBuilder = ConfigEntryBuilder.create();
+        ConfigEntryBuilder eb = ConfigEntryBuilder.create();
         ConfigCategory general = builder.getOrCreateCategory("text.rei.config.general");
         general.addEntry(new BooleanListEntry("text.rei.config.cheating", configManager.getConfig().cheating, RESET, () -> false, bool -> configManager.getConfig().cheating = bool) {
             @Override
@@ -59,19 +59,14 @@ public class ClothScreenRegistry {
             }
         });
         ConfigCategory appearance = builder.getOrCreateCategory("text.rei.config.appearance");
-        appearance.addEntry(entryBuilder.startBooleanToggle("text.rei.config.dark_theme", ScreenHelper.isDarkModeEnabled()).setDefaultValue(() -> false).setSaveConsumer(bool -> configManager.getConfig().darkTheme = bool).setTooltipSupplier(() -> getConfigTooltip("dark_theme")).buildEntry());
-        appearance.addEntry(new EnumListEntry<>("text.rei.config.recipe_screen_type", RecipeScreenType.class, configManager.getConfig().screenType, RESET, () -> RecipeScreenType.UNSET, bool -> configManager.getConfig().screenType = bool, EnumListEntry.DEFAULT_NAME_PROVIDER, () -> getConfigTooltip("recipe_screen_type")));
-        appearance.addEntry(entryBuilder.startBooleanToggle("text.rei.config.side_search_box", configManager.getConfig().sideSearchField).setDefaultValue(() -> false).setSaveConsumer(bool -> configManager.getConfig().sideSearchField = bool).setTooltipSupplier(() -> getConfigTooltip("side_search_box")).buildEntry());
-        appearance.addEntry(new EnumListEntry<>("text.rei.config.list_ordering", ItemListOrderingConfig.class, ItemListOrderingConfig.from(configManager.getConfig().itemListOrdering, configManager.getConfig().isAscending), RESET, () -> ItemListOrderingConfig.REGISTRY_ASCENDING, config -> {
-            configManager.getConfig().itemListOrdering = config.getOrdering();
-            configManager.getConfig().isAscending = config.isAscending();
-        }, EnumListEntry.DEFAULT_NAME_PROVIDER, () -> getConfigTooltip("list_ordering", ItemListOrderingConfig.REGISTRY_ASCENDING.toString())));
-        appearance.addEntry(new BooleanListEntry("text.rei.config.item_list_position", configManager.getConfig().mirrorItemPanel, RESET, () -> false, bool -> configManager.getConfig().mirrorItemPanel = bool, () -> getConfigTooltip("item_list_position")) {
-            @Override
-            public String getYesNoText(boolean bool) {
-                return I18n.translate(bool ? "text.rei.config.item_list_position.left" : "text.rei.config.item_list_position.right");
-            }
-        });
+        appearance.addEntry(eb.startBooleanToggle("text.rei.config.dark_theme", ScreenHelper.isDarkModeEnabled()).setDefaultValue(() -> false).setSaveConsumer(bool -> configManager.getConfig().darkTheme = bool).setTooltipSupplier(() -> getConfigTooltip("dark_theme")).buildEntry());
+        appearance.addEntry(eb.startEnumSelector("text.rei.config.recipe_screen_type", RecipeScreenType.class, configManager.getConfig().screenType).setDefaultValue(() -> RecipeScreenType.UNSET).setSaveConsumer(bool -> configManager.getConfig().screenType = (RecipeScreenType) bool).setTooltipSupplier(() -> getConfigTooltip("recipe_screen_type")).buildEntry());
+        appearance.addEntry(eb.startBooleanToggle("text.rei.config.side_search_box", configManager.getConfig().sideSearchField).setDefaultValue(() -> false).setSaveConsumer(bool -> configManager.getConfig().sideSearchField = bool).setTooltipSupplier(() -> getConfigTooltip("side_search_box")).buildEntry());
+        appearance.addEntry(eb.startEnumSelector("text.rei.config.list_ordering", ItemListOrderingConfig.class, ItemListOrderingConfig.from(configManager.getConfig().itemListOrdering, configManager.getConfig().isAscending)).setDefaultValue(() -> ItemListOrderingConfig.REGISTRY_ASCENDING).setSaveConsumer(config -> {
+            configManager.getConfig().itemListOrdering = ((ItemListOrderingConfig) config).getOrdering();
+            configManager.getConfig().isAscending = ((ItemListOrderingConfig) config).isAscending();
+        }).setTooltipSupplier(() -> getConfigTooltip("list_ordering", ItemListOrderingConfig.REGISTRY_ASCENDING.toString())).buildEntry());
+        appearance.addEntry(eb.startBooleanToggle("text.rei.config.item_list_position", configManager.getConfig().mirrorItemPanel).setDefaultValue(() -> false).setYesNoTextSupplier(bool -> I18n.translate(bool ? "text.rei.config.item_list_position.left" : "text.rei.config.item_list_position.right")).setSaveConsumer(bool -> configManager.getConfig().mirrorItemPanel = bool).buildEntry());
         appearance.addEntry(new IntegerSliderEntry("text.rei.config.max_recipes_per_page", 2, 99, configManager.getConfig().maxRecipePerPage, RESET, () -> 3, i -> configManager.getConfig().maxRecipePerPage = i, () -> getConfigTooltip("max_recipes_per_page")));
         appearance.addEntry(new BooleanListEntry("text.rei.config.light_gray_recipe_border", configManager.getConfig().lightGrayRecipeBorder, RESET, () -> false, bool -> configManager.getConfig().lightGrayRecipeBorder = bool, () -> getConfigTooltip("light_gray_recipe_border")));
         appearance.addEntry(new BooleanListEntry("text.rei.config.villager_screen_permanent_scroll_bar", configManager.getConfig().villagerScreenPermanentScrollBar, RESET, () -> false, bool -> configManager.getConfig().villagerScreenPermanentScrollBar = bool, () -> getConfigTooltip("villager_screen_permanent_scroll_bar")));
