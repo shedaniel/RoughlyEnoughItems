@@ -7,8 +7,6 @@ package me.shedaniel.rei;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.cloth.hooks.ClothClientHooks;
 import me.shedaniel.rei.api.*;
@@ -20,7 +18,6 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
-import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
@@ -34,7 +31,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -43,7 +39,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 public class RoughlyEnoughItemsCore implements ClientModInitializer {
     
@@ -132,8 +127,10 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         configManager = new ConfigManagerImpl();
         
         registerClothEvents();
-        discoverOldPlugins();
         discoverPluginEntries();
+        FabricLoader.getInstance().getAllMods().stream().map(ModContainer::getMetadata).filter(metadata -> metadata.containsCustomElement("roughlyenoughitems:plugins")).forEach(modMetadata -> {
+            RoughlyEnoughItemsCore.LOGGER.error("[REI] REI plugin from " + modMetadata.getId() + " is not loaded because it is too old!");
+        });
         
         ClientSidePacketRegistry.INSTANCE.register(RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, (packetContext, packetByteBuf) -> {
             ItemStack stack = packetByteBuf.readItemStack();
@@ -154,55 +151,6 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                 RoughlyEnoughItemsCore.LOGGER.error("[REI] Can't load REI plugins from %s: %s", reiPlugin.getClass(), e.getLocalizedMessage());
             }
         }
-    }
-    
-    @SuppressWarnings("deprecation")
-    private void discoverOldPlugins() {
-        List<Pair<Identifier, String>> list = Lists.newArrayList();
-        for(ModMetadata metadata : FabricLoader.getInstance().getAllMods().stream().map(ModContainer::getMetadata).filter(metadata -> metadata.containsCustomElement("roughlyenoughitems:plugins")).collect(Collectors.toList())) {
-            RoughlyEnoughItemsCore.LOGGER.warn("[REI] %s(%s) is still using the old way to register its plugin! Support will be dropped in the future!", metadata.getName(), metadata.getId());
-            try {
-                JsonElement pluginsElement = metadata.getCustomElement("roughlyenoughitems:plugins");
-                if (pluginsElement.isJsonArray()) {
-                    for(JsonElement element : pluginsElement.getAsJsonArray())
-                        if (element.isJsonObject())
-                            loadPluginFromJsonObject(list, metadata, element.getAsJsonObject());
-                        else
-                            throw new IllegalStateException("Custom Element in an array is not an object.");
-                } else if (pluginsElement.isJsonObject()) {
-                    loadPluginFromJsonObject(list, metadata, pluginsElement.getAsJsonObject());
-                } else
-                    throw new IllegalStateException("Custom Element not an array or an object.");
-            } catch (Exception e) {
-                e.printStackTrace();
-                RoughlyEnoughItemsCore.LOGGER.error("[REI] Can't load REI plugins from %s: %s", metadata.getId(), e.getLocalizedMessage());
-            }
-        }
-        for(Pair<Identifier, String> pair : list) {
-            String s = pair.getRight();
-            try {
-                Class<?> aClass = Class.forName(s);
-                if (!REIPlugin.class.isAssignableFrom(aClass)) {
-                    RoughlyEnoughItemsCore.LOGGER.error("[REI] Plugin class from %s is not implementing REIPlugin!", s);
-                    break;
-                }
-                REIPlugin o = REIPlugin.class.cast(aClass.newInstance());
-                registerPlugin(pair.getLeft(), o);
-            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-                RoughlyEnoughItemsCore.LOGGER.error("[REI] Can't load REI plugin class from %s!", s);
-            } catch (ClassCastException e) {
-                RoughlyEnoughItemsCore.LOGGER.error("[REI] Failed to cast plugin class from %s to REIPlugin!", s);
-            }
-        }
-    }
-    
-    private void loadPluginFromJsonObject(List<Pair<Identifier, String>> list, ModMetadata modMetadata, JsonObject object) {
-        String namespace = modMetadata.getId();
-        if (object.has("namespace"))
-            namespace = object.get("namespace").getAsString();
-        String id = object.get("id").getAsString();
-        String className = object.get("class").getAsString();
-        list.add(new Pair<>(new Identifier(namespace, id), className));
     }
     
     private void registerClothEvents() {
