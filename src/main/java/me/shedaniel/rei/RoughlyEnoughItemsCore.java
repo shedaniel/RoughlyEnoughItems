@@ -39,6 +39,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 public class RoughlyEnoughItemsCore implements ClientModInitializer {
     
@@ -48,6 +51,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     private static final ItemRegistry ITEM_REGISTRY = new ItemRegistryImpl();
     private static final DisplayHelper DISPLAY_HELPER = new DisplayHelperImpl();
     private static final Map<Identifier, REIPluginEntry> plugins = Maps.newHashMap();
+    private static final ExecutorService SYNC_RECIPES = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "REI-SyncRecipes"));
     private static ConfigManagerImpl configManager;
     
     static {
@@ -156,7 +160,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     private void registerClothEvents() {
         ClothClientHooks.SYNC_RECIPES.register((minecraftClient, recipeManager, synchronizeRecipesS2CPacket) -> {
             if (RoughlyEnoughItemsCore.getConfigManager().getConfig().registerRecipesInAnotherThread)
-                CompletableFuture.runAsync(() -> ((RecipeHelperImpl) RoughlyEnoughItemsCore.getRecipeHelper()).recipesLoaded(recipeManager));
+                CompletableFuture.runAsync(() -> ((RecipeHelperImpl) RoughlyEnoughItemsCore.getRecipeHelper()).recipesLoaded(recipeManager), SYNC_RECIPES);
             else
                 ((RecipeHelperImpl) RoughlyEnoughItemsCore.getRecipeHelper()).recipesLoaded(recipeManager);
         });
