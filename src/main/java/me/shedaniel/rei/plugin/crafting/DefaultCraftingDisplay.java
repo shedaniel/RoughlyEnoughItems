@@ -3,9 +3,10 @@
  * Licensed under the MIT License.
  */
 
-package me.shedaniel.rei.plugin;
+package me.shedaniel.rei.plugin.crafting;
 
 import me.shedaniel.rei.api.RecipeDisplay;
+import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.util.Identifier;
 

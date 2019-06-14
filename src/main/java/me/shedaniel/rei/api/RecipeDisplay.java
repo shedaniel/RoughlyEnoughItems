@@ -50,4 +50,11 @@ public interface RecipeDisplay<T extends Recipe> {
         return Optional.empty();
     }
     
+    /**
+     * @return the optional recipe
+     * @deprecated stop
+     */
+    @Deprecated
+    default Optional<? extends Recipe> getRecipe() {return null;}
+    
 }

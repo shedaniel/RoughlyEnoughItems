@@ -3,9 +3,10 @@
  * Licensed under the MIT License.
  */
 
-package me.shedaniel.rei.plugin;
+package me.shedaniel.rei.plugin.composting;
 
 import me.shedaniel.rei.api.RecipeDisplay;
+import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;

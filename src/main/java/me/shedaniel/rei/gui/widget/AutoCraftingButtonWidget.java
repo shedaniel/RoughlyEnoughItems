@@ -18,13 +18,13 @@ import java.util.function.Supplier;
 
 public class AutoCraftingButtonWidget extends ButtonWidget {
     
-    private final Supplier<RecipeDisplay> displaySupplier;
+    private final Supplier<RecipeDisplay<?>> displaySupplier;
     private String extraTooltip;
-    private AbstractContainerScreen containerScreen;
+    private AbstractContainerScreen<?> containerScreen;
     
     public AutoCraftingButtonWidget(Rectangle rectangle, String text, Supplier<RecipeDisplay> displaySupplier) {
         super(rectangle, text);
-        this.displaySupplier = displaySupplier;
+        this.displaySupplier = () -> displaySupplier.get();
         Optional<Identifier> recipe = displaySupplier.get().getRecipeLocation();
         extraTooltip = recipe.isPresent() ? I18n.translate("text.rei.recipe_id", ChatFormat.GRAY.toString(), recipe.get().toString()) : "";
         this.containerScreen = ScreenHelper.getLastContainerScreen();

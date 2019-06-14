@@ -18,7 +18,7 @@ public interface BaseBoundsHandler extends DisplayHelper.DisplayBoundsHandler<Sc
      * @param isOnRightSide      whether the user has set the overlay to the right
      * @return the list of exclusion zones
      */
-    List<Rectangle> getCurrentExclusionZones(Class<? extends Screen> currentScreenClass, boolean isOnRightSide);
+    List<Rectangle> getCurrentExclusionZones(Class<?> currentScreenClass, boolean isOnRightSide);
     
     /**
      * Register an exclusion zone
@@ -26,7 +26,7 @@ public interface BaseBoundsHandler extends DisplayHelper.DisplayBoundsHandler<Sc
      * @param screenClass the screen
      * @param supplier    the exclusion zone supplier
      */
-    void registerExclusionZones(Class<? extends Screen> screenClass, ExclusionZoneSupplier supplier);
+    void registerExclusionZones(Class<?> screenClass, ExclusionZoneSupplier supplier);
     
     public static interface ExclusionZoneSupplier {
         /**

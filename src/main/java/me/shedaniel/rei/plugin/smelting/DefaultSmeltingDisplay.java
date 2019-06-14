@@ -3,14 +3,15 @@
  * Licensed under the MIT License.
  */
 
-package me.shedaniel.rei.plugin;
+package me.shedaniel.rei.plugin.smelting;
 
 import me.shedaniel.rei.api.RecipeDisplay;
+import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.block.entity.FurnaceBlockEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.AbstractCookingRecipe;
-import net.minecraft.recipe.SmokingRecipe;
+import net.minecraft.recipe.SmeltingRecipe;
 import net.minecraft.util.Identifier;
 
 import java.util.Arrays;
@@ -19,13 +20,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class DefaultSmokingDisplay implements RecipeDisplay<SmokingRecipe> {
+public class DefaultSmeltingDisplay implements RecipeDisplay<SmeltingRecipe> {
     
-    private SmokingRecipe display;
+    private SmeltingRecipe display;
     private List<List<ItemStack>> input;
     private List<ItemStack> output;
     
-    public DefaultSmokingDisplay(SmokingRecipe recipe) {
+    public DefaultSmeltingDisplay(SmeltingRecipe recipe) {
         this.display = recipe;
         this.input = recipe.getPreviewInputs().stream().map(i -> Arrays.asList(i.getStackArray())).collect(Collectors.toList());
         this.input.add(FurnaceBlockEntity.createFuelTimeMap().keySet().stream().map(Item::getDefaultStack).collect(Collectors.toList()));
@@ -53,7 +54,7 @@ public class DefaultSmokingDisplay implements RecipeDisplay<SmokingRecipe> {
     
     @Override
     public Identifier getRecipeCategory() {
-        return DefaultPlugin.SMOKING;
+        return DefaultPlugin.SMELTING;
     }
     
     @Override

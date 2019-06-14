@@ -3,7 +3,7 @@
  * Licensed under the MIT License.
  */
 
-package me.shedaniel.rei.plugin;
+package me.shedaniel.rei.plugin.brewing;
 
 import net.minecraft.item.Item;
 import net.minecraft.recipe.Ingredient;

@@ -3,7 +3,7 @@
  * Licensed under the MIT License.
  */
 
-package me.shedaniel.rei.plugin;
+package me.shedaniel.rei.plugin.crafting;
 
 import com.google.common.collect.Lists;
 import net.minecraft.item.ItemStack;

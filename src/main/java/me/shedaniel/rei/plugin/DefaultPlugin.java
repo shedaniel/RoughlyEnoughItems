@@ -12,14 +12,30 @@ import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
-import me.shedaniel.rei.listeners.ContainerScreenHooks;
+import me.shedaniel.rei.plugin.blasting.DefaultBlastingCategory;
+import me.shedaniel.rei.plugin.blasting.DefaultBlastingDisplay;
+import me.shedaniel.rei.plugin.brewing.DefaultBrewingCategory;
+import me.shedaniel.rei.plugin.brewing.DefaultBrewingDisplay;
+import me.shedaniel.rei.plugin.campfire.DefaultCampfireCategory;
+import me.shedaniel.rei.plugin.campfire.DefaultCampfireDisplay;
+import me.shedaniel.rei.plugin.composting.DefaultCompostingCategory;
+import me.shedaniel.rei.plugin.composting.DefaultCompostingDisplay;
+import me.shedaniel.rei.plugin.crafting.DefaultCraftingCategory;
+import me.shedaniel.rei.plugin.crafting.DefaultCustomDisplay;
+import me.shedaniel.rei.plugin.crafting.DefaultShapedDisplay;
+import me.shedaniel.rei.plugin.crafting.DefaultShapelessDisplay;
+import me.shedaniel.rei.plugin.smelting.DefaultSmeltingCategory;
+import me.shedaniel.rei.plugin.smelting.DefaultSmeltingDisplay;
+import me.shedaniel.rei.plugin.smoking.DefaultSmokingCategory;
+import me.shedaniel.rei.plugin.smoking.DefaultSmokingDisplay;
+import me.shedaniel.rei.plugin.stonecutting.DefaultStoneCuttingCategory;
+import me.shedaniel.rei.plugin.stonecutting.DefaultStoneCuttingDisplay;
 import net.minecraft.block.ComposterBlock;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
+import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
-import net.minecraft.client.recipe.book.ClientRecipeBook;
-import net.minecraft.container.CraftingContainer;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.item.ItemConvertible;
@@ -152,16 +168,8 @@ public class DefaultPlugin implements REIPluginEntry {
     
     @Override
     public void registerBounds(DisplayHelper displayHelper) {
-        displayHelper.getBaseBoundsHandler().registerExclusionZones(AbstractContainerScreen.class, isOnRightSide -> {
-            if (isOnRightSide || !MinecraftClient.getInstance().player.getRecipeBook().isGuiOpen() || !(MinecraftClient.getInstance().currentScreen instanceof RecipeBookProvider) || !(ScreenHelper.getLastContainerScreen().getContainer() instanceof CraftingContainer))
-                return Collections.emptyList();
-            ContainerScreenHooks screenHooks = ScreenHelper.getLastContainerScreenHooks();
-            List<Rectangle> l = Lists.newArrayList(new Rectangle(screenHooks.rei_getContainerLeft() - 4 - 145, screenHooks.rei_getContainerTop(), 4 + 145 + 30, screenHooks.rei_getContainerHeight()));
-            int size = ClientRecipeBook.getGroupsForContainer((CraftingContainer) ScreenHelper.getLastContainerScreen().getContainer()).size();
-            if (size > 0)
-                l.add(new Rectangle(screenHooks.rei_getContainerLeft() - 4 - 145 - 30, screenHooks.rei_getContainerTop(), 30, (size - 1) * 27));
-            return l;
-        });
+        displayHelper.getBaseBoundsHandler().registerExclusionZones(AbstractInventoryScreen.class, new DefaultPotionEffectExclusionZones());
+        displayHelper.getBaseBoundsHandler().registerExclusionZones(RecipeBookProvider.class, new DefaultRecipeBookExclusionZones());
         displayHelper.registerBoundsHandler(new DisplayHelper.DisplayBoundsHandler<AbstractContainerScreen>() {
             @Override
             public Class getBaseSupportedClass() {

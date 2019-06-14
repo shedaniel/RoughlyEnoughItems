@@ -3,11 +3,10 @@
  * Licensed under the MIT License.
  */
 
-package me.shedaniel.rei.plugin;
+package me.shedaniel.rei.plugin.crafting;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.ShapedRecipe;
+import net.minecraft.recipe.ShapelessRecipe;
 import net.minecraft.util.Identifier;
 
 import java.util.Arrays;
@@ -16,13 +15,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class DefaultShapedDisplay implements DefaultCraftingDisplay<ShapedRecipe> {
+public class DefaultShapelessDisplay implements DefaultCraftingDisplay {
     
-    private ShapedRecipe display;
+    private ShapelessRecipe display;
     private List<List<ItemStack>> input;
     private List<ItemStack> output;
     
-    public DefaultShapedDisplay(ShapedRecipe recipe) {
+    public DefaultShapelessDisplay(ShapelessRecipe recipe) {
         this.display = recipe;
         this.input = recipe.getPreviewInputs().stream().map(i -> Arrays.asList(i.getStackArray())).collect(Collectors.toList());
         this.output = Collections.singletonList(recipe.getOutput());
@@ -30,7 +29,7 @@ public class DefaultShapedDisplay implements DefaultCraftingDisplay<ShapedRecipe
     
     @Override
     public Optional<Identifier> getRecipeLocation() {
-        return Optional.ofNullable(display).map(ShapedRecipe::getId);
+        return Optional.ofNullable(display).map(ShapelessRecipe::getId);
     }
     
     @Override
@@ -49,13 +48,17 @@ public class DefaultShapedDisplay implements DefaultCraftingDisplay<ShapedRecipe
     }
     
     @Override
-    public int getHeight() {
-        return display.getHeight();
+    public int getWidth() {
+        if (display.getPreviewInputs().size() > 4)
+            return 3;
+        return 2;
     }
     
     @Override
-    public int getWidth() {
-        return display.getWidth();
+    public int getHeight() {
+        if (display.getPreviewInputs().size() > 4)
+            return 3;
+        return 2;
     }
     
 }

@@ -27,7 +27,8 @@
       "me.shedaniel.rei.REIModMenuEntryPoint"
     ],
     "rei_plugins": [
-      "me.shedaniel.rei.plugin.DefaultPlugin"
+      "me.shedaniel.rei.plugin.DefaultPlugin",
+      "me.shedaniel.rei.plugin.DefaultAutoCraftingPlugin"
     ]
   },
   "requires": {
@@ -38,8 +39,8 @@
     "cloth-config": ">=0.1.0"
   },
   "mixins": [
-    "mixin.roughlyenoughitems.mixins.json",
-    "listeners.roughlyenoughitems.mixins.json"
+    "mixin.roughlyenoughitems.json",
+    "listeners.roughlyenoughitems.json"
   ],
   "custom": {
     "rei:translators": {
