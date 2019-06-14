@@ -280,7 +280,7 @@ public class RecipeViewingScreen extends Screen {
             final Rectangle displayBounds = new Rectangle((int) getBounds().getCenterX() - displayWidth / 2, getBounds().y + 40 + recipeHeight * i + 7 * i, displayWidth, recipeHeight);
             widgets.addAll(selectedCategory.setupDisplay(displaySupplier, displayBounds));
             if (supplier.isPresent() && supplier.get().get(displayBounds) != null)
-                widgets.add(new SpeedCraftingButtonWidget(supplier.get().get(displayBounds), supplier.get().getButtonText(), functional, displaySupplier));
+                widgets.add(new AutoCraftingButtonWidget(supplier.get().get(displayBounds), supplier.get().getButtonText(), displaySupplier));
         }
         if (choosePageActivated)
             recipeChoosePageWidget = new RecipeChoosePageWidget(this, page, getTotalPages(selectedCategory));

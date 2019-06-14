@@ -3,10 +3,10 @@
  * Licensed under the MIT License.
  */
 
-package me.shedaniel.rei.plugin;
+package me.shedaniel.rei.plugin.crafting;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.ShapelessRecipe;
+import net.minecraft.recipe.ShapedRecipe;
 import net.minecraft.util.Identifier;
 
 import java.util.Arrays;
@@ -15,13 +15,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class DefaultShapelessDisplay implements DefaultCraftingDisplay {
+public class DefaultShapedDisplay implements DefaultCraftingDisplay<ShapedRecipe> {
     
-    private ShapelessRecipe display;
+    private ShapedRecipe display;
     private List<List<ItemStack>> input;
     private List<ItemStack> output;
     
-    public DefaultShapelessDisplay(ShapelessRecipe recipe) {
+    public DefaultShapedDisplay(ShapedRecipe recipe) {
         this.display = recipe;
         this.input = recipe.getPreviewInputs().stream().map(i -> Arrays.asList(i.getStackArray())).collect(Collectors.toList());
         this.output = Collections.singletonList(recipe.getOutput());
@@ -29,7 +29,7 @@ public class DefaultShapelessDisplay implements DefaultCraftingDisplay {
     
     @Override
     public Optional<Identifier> getRecipeLocation() {
-        return Optional.ofNullable(display).map(ShapelessRecipe::getId);
+        return Optional.ofNullable(display).map(ShapedRecipe::getId);
     }
     
     @Override
@@ -48,17 +48,13 @@ public class DefaultShapelessDisplay implements DefaultCraftingDisplay {
     }
     
     @Override
-    public int getWidth() {
-        if (display.getPreviewInputs().size() > 4)
-            return 3;
-        return 2;
+    public int getHeight() {
+        return display.getHeight();
     }
     
     @Override
-    public int getHeight() {
-        if (display.getPreviewInputs().size() > 4)
-            return 3;
-        return 2;
+    public int getWidth() {
+        return display.getWidth();
     }
     
 }

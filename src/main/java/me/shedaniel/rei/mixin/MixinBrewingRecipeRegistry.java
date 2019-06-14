@@ -6,8 +6,8 @@
 package me.shedaniel.rei.mixin;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.rei.plugin.BrewingRecipe;
-import me.shedaniel.rei.plugin.DefaultBrewingDisplay;
+import me.shedaniel.rei.plugin.brewing.BrewingRecipe;
+import me.shedaniel.rei.plugin.brewing.DefaultBrewingDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemConvertible;

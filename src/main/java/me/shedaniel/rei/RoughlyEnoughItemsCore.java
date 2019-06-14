@@ -147,8 +147,6 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     private void discoverPluginEntries() {
         for(REIPluginEntry reiPlugin : FabricLoader.getInstance().getEntrypoints("rei_plugins", REIPluginEntry.class)) {
             try {
-                if (reiPlugin instanceof REIPlugin)
-                    throw new IllegalStateException("REI Plugins on Entry Points should not implement REIPlugin");
                 registerPlugin(reiPlugin.getPluginIdentifier(), reiPlugin);
             } catch (Exception e) {
                 e.printStackTrace();

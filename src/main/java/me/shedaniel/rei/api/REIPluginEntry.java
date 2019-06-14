@@ -41,15 +41,6 @@ public interface REIPluginEntry {
     default void registerRecipeDisplays(RecipeHelper recipeHelper) {}
     
     /**
-     * Not called anymore!
-     *
-     * @param recipeHelper the helper class
-     * @see REIPluginEntry#registerOthers(RecipeHelper)
-     */
-    @Deprecated
-    default void registerSpeedCraft(RecipeHelper recipeHelper) {}
-    
-    /**
      * Registers bounds handlers
      *
      * @param displayHelper the helper class

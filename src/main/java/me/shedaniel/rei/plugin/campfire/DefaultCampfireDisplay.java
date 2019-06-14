@@ -3,13 +3,14 @@
  * Licensed under the MIT License.
  */
 
-package me.shedaniel.rei.plugin;
+package me.shedaniel.rei.plugin.campfire;
 
 import me.shedaniel.rei.api.RecipeDisplay;
+import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.CuttingRecipe;
+import net.minecraft.recipe.AbstractCookingRecipe;
+import net.minecraft.recipe.CampfireCookingRecipe;
 import net.minecraft.recipe.Ingredient;
-import net.minecraft.recipe.StonecuttingRecipe;
 import net.minecraft.util.DefaultedList;
 import net.minecraft.util.Identifier;
 
@@ -19,25 +20,31 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class DefaultStoneCuttingDisplay implements RecipeDisplay<StonecuttingRecipe> {
+public class DefaultCampfireDisplay implements RecipeDisplay<CampfireCookingRecipe> {
     
     private List<List<ItemStack>> inputs;
     private List<ItemStack> output;
-    private StonecuttingRecipe display;
+    private int cookTime;
+    private CampfireCookingRecipe display;
     
-    public DefaultStoneCuttingDisplay(StonecuttingRecipe recipe) {
-        this(recipe.getPreviewInputs(), recipe.getOutput());
+    public DefaultCampfireDisplay(CampfireCookingRecipe recipe) {
+        this(recipe.getPreviewInputs(), recipe.getOutput(), recipe.getCookTime());
         this.display = recipe;
     }
     
-    public DefaultStoneCuttingDisplay(DefaultedList<Ingredient> ingredients, ItemStack output) {
+    public DefaultCampfireDisplay(DefaultedList<Ingredient> ingredients, ItemStack output, int cookTime) {
         this.inputs = ingredients.stream().map(i -> Arrays.asList(i.getStackArray())).collect(Collectors.toList());
         this.output = Collections.singletonList(output);
+        this.cookTime = cookTime;
+    }
+    
+    public int getCookTime() {
+        return cookTime;
     }
     
     @Override
     public Optional<Identifier> getRecipeLocation() {
-        return Optional.ofNullable(display).map(CuttingRecipe::getId);
+        return Optional.ofNullable(display).map(AbstractCookingRecipe::getId);
     }
     
     @Override
@@ -52,7 +59,7 @@ public class DefaultStoneCuttingDisplay implements RecipeDisplay<StonecuttingRec
     
     @Override
     public Identifier getRecipeCategory() {
-        return DefaultPlugin.STONE_CUTTING;
+        return DefaultPlugin.CAMPFIRE;
     }
     
     @Override
