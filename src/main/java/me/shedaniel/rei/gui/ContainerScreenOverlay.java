@@ -500,6 +500,11 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             else if (ClientHelper.getInstance().getUsageKeyBinding().matchesKey(int_1, int_2))
                 return ClientHelper.getInstance().executeUsageKeyBind(itemStack);
         }
+        if (ClientHelper.getInstance().getFocusSearchFieldKeyBinding().matchesKey(int_1, int_2)) {
+            ScreenHelper.searchField.setFocused(true);
+            setFocused(ScreenHelper.searchField);
+            return true;
+        }
         return false;
     }
     

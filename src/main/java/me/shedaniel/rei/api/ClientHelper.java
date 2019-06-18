@@ -78,6 +78,8 @@ public interface ClientHelper {
      */
     boolean executeUsageKeyBind(ItemStack stack);
     
+    FabricKeyBinding getFocusSearchFieldKeyBinding();
+    
     /**
      * Gets the mod from an item
      *
