@@ -104,20 +104,20 @@ public interface RecipeCategory<T extends RecipeDisplay> {
      *
      * @return the display settings
      */
-    default DisplaySettings getDisplaySettings() {
+    default DisplaySettings<T> getDisplaySettings() {
         return new DisplaySettings<T>() {
             @Override
-            public int getDisplayHeight(RecipeCategory category) {
+            public int getDisplayHeight(RecipeCategory<?> category) {
                 return 66;
             }
             
             @Override
-            public int getDisplayWidth(RecipeCategory category, T display) {
+            public int getDisplayWidth(RecipeCategory<?> category, T display) {
                 return 150;
             }
             
             @Override
-            public int getMaximumRecipePerPage(RecipeCategory category) {
+            public int getMaximumRecipePerPage(RecipeCategory<?> category) {
                 return 99;
             }
         };

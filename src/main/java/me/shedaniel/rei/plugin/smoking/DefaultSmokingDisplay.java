@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class DefaultSmokingDisplay implements RecipeDisplay<SmokingRecipe> {
+public class DefaultSmokingDisplay implements RecipeDisplay {
     
     private SmokingRecipe display;
     private List<List<ItemStack>> input;

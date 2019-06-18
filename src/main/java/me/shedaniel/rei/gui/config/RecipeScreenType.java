@@ -3,9 +3,11 @@
  * Licensed under the MIT License.
  */
 
-package me.shedaniel.rei.client;
+package me.shedaniel.rei.gui.config;
 
 import net.minecraft.client.resource.language.I18n;
+
+import java.util.Locale;
 
 public enum RecipeScreenType {
     UNSET,
@@ -14,6 +16,6 @@ public enum RecipeScreenType {
     
     @Override
     public String toString() {
-        return I18n.translate("text.rei.config.recipe_screen_type." + name().toLowerCase());
+        return I18n.translate("text.rei.config.recipe_screen_type." + name().toLowerCase(Locale.ROOT));
     }
 }

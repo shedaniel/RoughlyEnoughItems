@@ -5,7 +5,6 @@
 
 package me.shedaniel.rei.gui.config;
 
-import me.shedaniel.rei.client.ItemListOrdering;
 import net.minecraft.client.resource.language.I18n;
 
 public enum ItemListOrderingConfig {

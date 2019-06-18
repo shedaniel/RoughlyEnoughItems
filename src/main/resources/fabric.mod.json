@@ -36,7 +36,7 @@
     "cloth": "*"
   },
   "recommends": {
-    "cloth-config": ">=0.1.0"
+    "cloth-config2": ">=0.1.0"
   },
   "mixins": [
     "mixin.roughlyenoughitems.json",

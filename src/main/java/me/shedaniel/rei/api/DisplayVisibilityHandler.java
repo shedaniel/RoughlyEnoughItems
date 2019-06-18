@@ -5,6 +5,8 @@
 
 package me.shedaniel.rei.api;
 
+import me.shedaniel.rei.gui.config.DisplayVisibility;
+
 public interface DisplayVisibilityHandler {
     
     /**
@@ -26,6 +28,6 @@ public interface DisplayVisibilityHandler {
      * @param display  the display of the recipe
      * @return the visibility
      */
-    DisplayVisibility handleDisplay(RecipeCategory category, RecipeDisplay display);
+    DisplayVisibility handleDisplay(RecipeCategory<?> category, RecipeDisplay display);
     
 }

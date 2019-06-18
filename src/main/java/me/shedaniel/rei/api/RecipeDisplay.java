@@ -13,7 +13,7 @@ import net.minecraft.util.Identifier;
 import java.util.List;
 import java.util.Optional;
 
-public interface RecipeDisplay<T extends Recipe> {
+public interface RecipeDisplay {
     
     /**
      * @return a list of items
@@ -49,12 +49,5 @@ public interface RecipeDisplay<T extends Recipe> {
     default Optional<Identifier> getRecipeLocation() {
         return Optional.empty();
     }
-    
-    /**
-     * @return the optional recipe
-     * @deprecated stop
-     */
-    @Deprecated
-    default Optional<? extends Recipe> getRecipe() {return null;}
     
 }
