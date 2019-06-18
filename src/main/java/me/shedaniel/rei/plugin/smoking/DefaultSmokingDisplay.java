@@ -62,4 +62,8 @@ public class DefaultSmokingDisplay implements RecipeDisplay {
         return input;
     }
     
+    public Optional<SmokingRecipe> getOptionalRecipe() {
+        return Optional.ofNullable(display);
+    }
+    
 }

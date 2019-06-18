@@ -17,10 +17,10 @@ public class DefaultCustomDisplay implements DefaultCraftingDisplay {
     
     private List<List<ItemStack>> input;
     private List<ItemStack> output;
-    private Recipe possibleRecipe;
+    private Recipe<?> possibleRecipe;
     private int width, height;
     
-    public DefaultCustomDisplay(List<List<ItemStack>> input, List<ItemStack> output, Recipe possibleRecipe) {
+    public DefaultCustomDisplay(List<List<ItemStack>> input, List<ItemStack> output, Recipe<?> possibleRecipe) {
         this.input = input;
         this.output = output;
         this.possibleRecipe = possibleRecipe;
@@ -74,6 +74,11 @@ public class DefaultCustomDisplay implements DefaultCraftingDisplay {
     @Override
     public int getHeight() {
         return height;
+    }
+    
+    @Override
+    public Optional<Recipe<?>> getOptionalRecipe() {
+        return Optional.ofNullable(possibleRecipe);
     }
     
 }

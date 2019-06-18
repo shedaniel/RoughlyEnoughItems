@@ -7,9 +7,12 @@ package me.shedaniel.rei.plugin.crafting;
 
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
+import net.minecraft.recipe.Recipe;
 import net.minecraft.util.Identifier;
 
-public interface DefaultCraftingDisplay<T> extends RecipeDisplay {
+import java.util.Optional;
+
+public interface DefaultCraftingDisplay extends RecipeDisplay {
     
     @Override
     default Identifier getRecipeCategory() {
@@ -23,5 +26,7 @@ public interface DefaultCraftingDisplay<T> extends RecipeDisplay {
     default public int getHeight() {
         return 2;
     }
+    
+    Optional<Recipe<?>> getOptionalRecipe();
     
 }

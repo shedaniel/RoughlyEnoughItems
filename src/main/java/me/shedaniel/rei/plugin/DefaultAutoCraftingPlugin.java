@@ -10,7 +10,7 @@ import me.shedaniel.rei.api.PluginDisabler;
 import me.shedaniel.rei.api.PluginFunction;
 import me.shedaniel.rei.api.REIPluginEntry;
 import me.shedaniel.rei.api.RecipeHelper;
-import me.shedaniel.rei.plugin.autocrafting.AutoCraftingTableHandler;
+import me.shedaniel.rei.plugin.autocrafting.*;
 import net.minecraft.util.Identifier;
 
 public class DefaultAutoCraftingPlugin implements REIPluginEntry {
@@ -34,7 +34,11 @@ public class DefaultAutoCraftingPlugin implements REIPluginEntry {
     
     @Override
     public void registerOthers(RecipeHelper recipeHelper) {
-        recipeHelper.registerAutoCraftingHandler(new AutoCraftingTableHandler());
+        recipeHelper.registerAutoCraftingHandler(new AutoCraftingTableBookHandler());
+        recipeHelper.registerAutoCraftingHandler(new AutoInventoryBookHandler());
+        recipeHelper.registerAutoCraftingHandler(new AutoFurnaceBookHandler());
+        recipeHelper.registerAutoCraftingHandler(new AutoSmokerBookHandler());
+        recipeHelper.registerAutoCraftingHandler(new AutoBlastingBookHandler());
     }
     
 }
