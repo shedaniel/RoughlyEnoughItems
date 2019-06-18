@@ -52,8 +52,9 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     private final Identifier hideKeybind = new Identifier("roughlyenoughitems", "hide_keybind");
     private final Identifier previousPageKeybind = new Identifier("roughlyenoughitems", "previous_page");
     private final Identifier nextPageKeybind = new Identifier("roughlyenoughitems", "next_page");
+    private final Identifier focusSearchFieldKeybind = new Identifier("roughlyenoughitems", "focus_search");
     private final Map<String, String> modNameCache = Maps.newHashMap();
-    public FabricKeyBinding recipe, usage, hide, previousPage, nextPage;
+    public FabricKeyBinding recipe, usage, hide, previousPage, nextPage,focusSearchField;
     
     public String getFormattedModNoItalicFromItem(Item item) {
         String mod = getModFromItem(item);
@@ -101,6 +102,11 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     @Override
     public FabricKeyBinding getNextPageKeyBinding() {
         return nextPage;
+    }
+    
+    @Override
+    public FabricKeyBinding getFocusSearchFieldKeyBinding() {
+        return focusSearchField;
     }
     
     @Override
@@ -260,6 +266,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         KeyBindingRegistryImpl.INSTANCE.register(hide = FabricKeyBinding.Builder.create(hideKeybind, InputUtil.Type.KEYSYM, 79, category).build());
         KeyBindingRegistryImpl.INSTANCE.register(previousPage = FabricKeyBinding.Builder.create(previousPageKeybind, InputUtil.Type.KEYSYM, -1, category).build());
         KeyBindingRegistryImpl.INSTANCE.register(nextPage = FabricKeyBinding.Builder.create(nextPageKeybind, InputUtil.Type.KEYSYM, -1, category).build());
+        KeyBindingRegistryImpl.INSTANCE.register(focusSearchField = FabricKeyBinding.Builder.create(focusSearchFieldKeybind, InputUtil.Type.KEYSYM, -1, category).build());
     }
     
 }
