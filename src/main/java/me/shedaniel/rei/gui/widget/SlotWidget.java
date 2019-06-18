@@ -12,7 +12,7 @@ import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.client.ClientHelperImpl;
 import me.shedaniel.rei.client.ScreenHelper;
-import me.shedaniel.rei.gui.renderables.ItemStackRenderer;
+import me.shedaniel.rei.gui.renderers.ItemStackRenderer;
 import net.minecraft.client.gui.Element;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;

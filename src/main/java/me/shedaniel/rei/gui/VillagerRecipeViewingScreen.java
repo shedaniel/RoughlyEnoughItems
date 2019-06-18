@@ -13,7 +13,7 @@ import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.ScreenHelper;
-import me.shedaniel.rei.gui.renderables.RecipeRenderer;
+import me.shedaniel.rei.gui.renderers.RecipeRenderer;
 import me.shedaniel.rei.gui.widget.*;
 import net.minecraft.ChatFormat;
 import net.minecraft.client.MinecraftClient;

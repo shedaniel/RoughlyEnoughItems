@@ -11,6 +11,8 @@ import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.DisplayHelper;
+import me.shedaniel.rei.api.RecipeHelper;
+import me.shedaniel.rei.client.RecipeHelperImpl;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.client.Weather;
 import me.shedaniel.rei.gui.widget.*;
@@ -351,7 +353,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             init(true);
         else if (RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() && (!hasSameListContent(new LinkedList<>(ScreenHelper.inventoryStacks), currentStacks) || (currentStacks.size() != ScreenHelper.inventoryStacks.size()))) {
             ScreenHelper.inventoryStacks = ClientHelper.getInstance().getInventoryItemsTypes();
-            DisplayHelper.DisplayBoundsHandler boundsHandler = RoughlyEnoughItemsCore.getDisplayHelper().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
+            DisplayHelper.DisplayBoundsHandler<?> boundsHandler = RoughlyEnoughItemsCore.getDisplayHelper().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
             itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, true);
         }
         if (MinecraftClient.getInstance().currentScreen instanceof AbstractContainerScreen && SearchFieldWidget.isSearching) {
@@ -359,7 +361,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             blitOffset = 200;
             ContainerScreenHooks hooks = (ContainerScreenHooks) MinecraftClient.getInstance().currentScreen;
             int left = hooks.rei_getContainerLeft(), top = hooks.rei_getContainerTop();
-            for(Slot slot : ((AbstractContainerScreen) MinecraftClient.getInstance().currentScreen).getContainer().slotList)
+            for(Slot slot : ((AbstractContainerScreen<?>) MinecraftClient.getInstance().currentScreen).getContainer().slotList)
                 if (!slot.hasStack() || !itemListOverlay.filterItem(slot.getStack(), itemListOverlay.getLastSearchArgument()))
                     fillGradient(left + slot.xPosition, top + slot.yPosition, left + slot.xPosition + 16, top + slot.yPosition + 16, -601874400, -601874400);
             blitOffset = 0;
@@ -367,6 +369,16 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GuiLighting.disable();
         this.renderWidgets(mouseX, mouseY, delta);
+        if (MinecraftClient.getInstance().currentScreen instanceof AbstractContainerScreen) {
+            ContainerScreenHooks hooks = (ContainerScreenHooks) MinecraftClient.getInstance().currentScreen;
+            for(RecipeHelperImpl.ScreenClickArea area : RecipeHelper.getInstance().getScreenClickAreas())
+                if (area.getScreenClass().equals(MinecraftClient.getInstance().currentScreen.getClass()))
+                    if (area.getRectangle().contains(mouseX - hooks.rei_getContainerLeft(), mouseY - hooks.rei_getContainerTop())) {
+                        String collect = Arrays.asList(area.getCategories()).stream().map(identifier -> RecipeHelper.getInstance().getCategory(identifier).getCategoryName()).collect(Collectors.joining(", "));
+                        QUEUED_TOOLTIPS.add(QueuedTooltip.create(I18n.translate("text.rei.view_recipes_for", collect)));
+                        break;
+                    }
+        }
     }
     
     public void lateRender(int mouseX, int mouseY, float delta) {
@@ -510,6 +522,16 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
         if (!ScreenHelper.isOverlayVisible())
             return false;
+        if (MinecraftClient.getInstance().currentScreen instanceof AbstractContainerScreen) {
+            ContainerScreenHooks hooks = (ContainerScreenHooks) MinecraftClient.getInstance().currentScreen;
+            for(RecipeHelperImpl.ScreenClickArea area : RecipeHelper.getInstance().getScreenClickAreas())
+                if (area.getScreenClass().equals(MinecraftClient.getInstance().currentScreen.getClass()))
+                    if (area.getRectangle().contains(double_1 - hooks.rei_getContainerLeft(), double_2 - hooks.rei_getContainerTop())) {
+                        ClientHelper.getInstance().executeViewAllRecipesFromCategories(Arrays.asList(area.getCategories()));
+                        MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                        return true;
+                    }
+        }
         for(Element element : widgets)
             if (element.mouseClicked(double_1, double_2, int_1)) {
                 this.setFocused(element);

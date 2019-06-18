@@ -32,9 +32,7 @@ import me.shedaniel.rei.plugin.stonecutting.DefaultStoneCuttingCategory;
 import me.shedaniel.rei.plugin.stonecutting.DefaultStoneCuttingDisplay;
 import net.minecraft.block.ComposterBlock;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
-import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
+import net.minecraft.client.gui.screen.ingame.*;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -277,6 +275,12 @@ public class DefaultPlugin implements REIPluginEntry {
         recipeHelper.registerWorkingStations(COMPOSTING, new ItemStack(Items.COMPOSTER));
         recipeHelper.registerSpeedCraftButtonArea(COMPOSTING, bounds -> null);
         recipeHelper.registerSpeedCraftButtonArea(DefaultPlugin.CAMPFIRE, bounds -> new Rectangle((int) bounds.getMaxX() - 16, bounds.y + 6, 10, 10));
+        recipeHelper.registerScreenClickArea(new Rectangle(88, 32, 28, 23), CraftingTableScreen.class, CRAFTING);
+        recipeHelper.registerScreenClickArea(new Rectangle(137, 29, 10, 13), InventoryScreen.class, CRAFTING);
+        recipeHelper.registerScreenClickArea(new Rectangle(97, 16, 14, 30), BrewingStandScreen.class, BREWING);
+        recipeHelper.registerScreenClickArea(new Rectangle(78, 32, 28, 23), FurnaceScreen.class, SMELTING);
+        recipeHelper.registerScreenClickArea(new Rectangle(78, 32, 28, 23), SmokerScreen.class, SMOKING);
+        recipeHelper.registerScreenClickArea(new Rectangle(78, 32, 28, 23), BlastFurnaceScreen.class, BLASTING);
     }
     
     @Override

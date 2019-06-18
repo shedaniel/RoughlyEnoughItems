@@ -219,6 +219,21 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     }
     
     @Override
+    public boolean executeViewAllRecipesFromCategories(List<Identifier> categories) {
+        Map<RecipeCategory, List<RecipeDisplay>> map = Maps.newLinkedHashMap();
+        for(Identifier category : categories) {
+            Optional<RecipeCategory> any = RecipeHelper.getInstance().getAllCategories().stream().filter(c -> c.getIdentifier().equals(category)).findAny();
+            if (!any.isPresent())
+                continue;
+            RecipeCategory<?> recipeCategory = any.get();
+            map.put(recipeCategory, RecipeHelper.getInstance().getAllRecipesFromCategory(recipeCategory));
+        }
+        if (map.keySet().size() > 0)
+            openRecipeViewingScreen(map);
+        return map.keySet().size() > 0;
+    }
+    
+    @Override
     public void openRecipeViewingScreen(Map<RecipeCategory, List<RecipeDisplay>> map) {
         if (RoughlyEnoughItemsCore.getConfigManager().getConfig().screenType == RecipeScreenType.VILLAGER)
             MinecraftClient.getInstance().openScreen(new VillagerRecipeViewingScreen(map));

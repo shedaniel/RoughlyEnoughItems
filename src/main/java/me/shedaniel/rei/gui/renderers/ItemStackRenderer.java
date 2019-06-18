@@ -3,7 +3,7 @@
  * Licensed under the MIT License.
  */
 
-package me.shedaniel.rei.gui.renderables;
+package me.shedaniel.rei.gui.renderers;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;

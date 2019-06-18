@@ -5,9 +5,9 @@
 
 package me.shedaniel.rei.api;
 
-import me.shedaniel.rei.gui.renderables.EmptyRenderer;
-import me.shedaniel.rei.gui.renderables.ItemStackRenderer;
-import me.shedaniel.rei.gui.renderables.SimpleRecipeRenderer;
+import me.shedaniel.rei.gui.renderers.EmptyRenderer;
+import me.shedaniel.rei.gui.renderers.ItemStackRenderer;
+import me.shedaniel.rei.gui.renderers.SimpleRecipeRenderer;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
