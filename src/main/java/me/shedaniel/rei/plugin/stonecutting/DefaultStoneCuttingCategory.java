@@ -63,20 +63,20 @@ public class DefaultStoneCuttingCategory implements RecipeCategory<DefaultStoneC
     }
     
     @Override
-    public DisplaySettings getDisplaySettings() {
+    public DisplaySettings<DefaultStoneCuttingDisplay> getDisplaySettings() {
         return new DisplaySettings<DefaultStoneCuttingDisplay>() {
             @Override
-            public int getDisplayHeight(RecipeCategory category) {
+            public int getDisplayHeight(RecipeCategory<?> category) {
                 return 36;
             }
             
             @Override
-            public int getDisplayWidth(RecipeCategory category, DefaultStoneCuttingDisplay display) {
+            public int getDisplayWidth(RecipeCategory<?> category, DefaultStoneCuttingDisplay display) {
                 return 150;
             }
             
             @Override
-            public int getMaximumRecipePerPage(RecipeCategory category) {
+            public int getMaximumRecipePerPage(RecipeCategory<?> category) {
                 return 99;
             }
         };

@@ -7,7 +7,10 @@ package me.shedaniel.rei.plugin.composting;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
-import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.DisplaySettings;
+import me.shedaniel.rei.api.RecipeCategory;
+import me.shedaniel.rei.api.Renderable;
+import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.gui.renderables.RecipeRenderer;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.SlotWidget;
@@ -97,20 +100,20 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
     }
     
     @Override
-    public DisplaySettings getDisplaySettings() {
-        return new DisplaySettings() {
+    public DisplaySettings<DefaultCompostingDisplay> getDisplaySettings() {
+        return new DisplaySettings<DefaultCompostingDisplay>() {
             @Override
-            public int getDisplayHeight(RecipeCategory iRecipeCategory) {
+            public int getDisplayHeight(RecipeCategory<?> recipeCategory) {
                 return 140;
             }
             
             @Override
-            public int getDisplayWidth(RecipeCategory iRecipeCategory, RecipeDisplay display) {
+            public int getDisplayWidth(RecipeCategory<?> recipeCategory, DefaultCompostingDisplay display) {
                 return 150;
             }
             
             @Override
-            public int getMaximumRecipePerPage(RecipeCategory iRecipeCategory) {
+            public int getMaximumRecipePerPage(RecipeCategory<?> recipeCategory) {
                 return -1;
             }
             

@@ -5,6 +5,7 @@ import me.shedaniel.rei.api.PluginDisabler;
 import me.shedaniel.rei.api.PluginFunction;
 import me.shedaniel.rei.api.REIPluginEntry;
 import me.shedaniel.rei.api.RecipeHelper;
+import me.shedaniel.rei.plugin.autocrafting.AutoCraftingTableHandler;
 import net.minecraft.util.Identifier;
 
 public class DefaultAutoCraftingPlugin implements REIPluginEntry {
@@ -28,7 +29,7 @@ public class DefaultAutoCraftingPlugin implements REIPluginEntry {
     
     @Override
     public void registerOthers(RecipeHelper recipeHelper) {
-    
+        recipeHelper.registerAutoCraftingHandler(new AutoCraftingTableHandler());
     }
     
 }

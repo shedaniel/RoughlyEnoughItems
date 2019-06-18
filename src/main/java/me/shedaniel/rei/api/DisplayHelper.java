@@ -60,7 +60,7 @@ public interface DisplayHelper {
          *
          * @return the base class
          */
-        Class getBaseSupportedClass();
+        Class<?> getBaseSupportedClass();
         
         /**
          * Gets the left bounds of the overlay

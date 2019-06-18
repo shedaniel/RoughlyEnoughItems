@@ -18,8 +18,8 @@ import net.minecraft.client.util.Window;
 import net.minecraft.item.ItemStack;
 import org.apache.logging.log4j.util.TriConsumer;
 
-import java.awt.*;
 import java.util.List;
+import java.util.Optional;
 
 public class ScreenHelper implements ClientModInitializer {
     
@@ -35,6 +35,10 @@ public class ScreenHelper implements ClientModInitializer {
     
     public static void toggleOverlayVisible() {
         overlayVisible = !overlayVisible;
+    }
+    
+    public static Optional<ContainerScreenOverlay> getOptionalOverlay() {
+        return Optional.ofNullable(overlay);
     }
     
     public static ContainerScreenOverlay getLastOverlay(boolean reset, boolean setPage) {
@@ -63,13 +67,13 @@ public class ScreenHelper implements ClientModInitializer {
     
     public static void drawHoveringWidget(int x, int y, TriConsumer<Integer, Integer, Float> consumer, int width, int height, float delta) {
         Window window = MinecraftClient.getInstance().window;
-        drawHoveringWidget(new Dimension(window.getScaledWidth(), window.getScaledHeight()), x, y, consumer, width, height, delta);
+        drawHoveringWidget(window.getScaledWidth(), window.getScaledHeight(), x, y, consumer, width, height, delta);
     }
     
-    public static void drawHoveringWidget(Dimension dimension, int x, int y, TriConsumer<Integer, Integer, Float> consumer, int width, int height, float delta) {
+    public static void drawHoveringWidget(int screenWidth, int screenHeight, int x, int y, TriConsumer<Integer, Integer, Float> consumer, int width, int height, float delta) {
         int actualX = Math.max(x + 12, 6);
-        int actualY = Math.min(y - height / 2, dimension.height - height - 6);
-        if (actualX + width > dimension.width)
+        int actualY = Math.min(y - height / 2, screenHeight - height - 6);
+        if (actualX + width > screenWidth)
             actualX -= 24 + width;
         if (actualY < 6)
             actualY += 24;

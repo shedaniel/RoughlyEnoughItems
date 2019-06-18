@@ -5,7 +5,9 @@
 
 package me.shedaniel.rei.gui.widget;
 
+import me.shedaniel.rei.api.AutoCraftingHandler;
 import me.shedaniel.rei.api.RecipeDisplay;
+import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.client.ScreenHelper;
 import net.minecraft.ChatFormat;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
@@ -18,7 +20,7 @@ import java.util.function.Supplier;
 
 public class AutoCraftingButtonWidget extends ButtonWidget {
     
-    private final Supplier<RecipeDisplay<?>> displaySupplier;
+    private final Supplier<RecipeDisplay> displaySupplier;
     private String extraTooltip;
     private AbstractContainerScreen<?> containerScreen;
     
@@ -32,8 +34,9 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
     
     @Override
     public void onPressed() {
-        minecraft.openScreen(containerScreen);
-        ScreenHelper.getLastOverlay().init();
+        for(AutoCraftingHandler autoCraftingHandler : RecipeHelper.getInstance().getSortedAutoCraftingHandler())
+            if (autoCraftingHandler.handle(minecraft,minecraft.currentScreen, containerScreen, ScreenHelper.getLastOverlay()))
+                break;
     }
     
     @Override

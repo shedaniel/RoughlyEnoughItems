@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 /**
  * The base class for renderables
  */
-public interface Renderable {
+public class Renderable {
     
     /**
      * Gets an item stack renderer by an item stack supplier
@@ -25,7 +25,7 @@ public interface Renderable {
      * @param supplier the supplier for getting the item stack
      * @return the item stack renderer
      */
-    static ItemStackRenderer fromItemStackSupplier(Supplier<ItemStack> supplier) {
+    public static ItemStackRenderer fromItemStackSupplier(Supplier<ItemStack> supplier) {
         return new ItemStackRenderer() {
             @Override
             public ItemStack getItemStack() {
@@ -40,7 +40,7 @@ public interface Renderable {
      * @param stack the item stack to be displayed
      * @return the item stack renderer
      */
-    static ItemStackRenderer fromItemStack(ItemStack stack) {
+    public static ItemStackRenderer fromItemStack(ItemStack stack) {
         return fromItemStackSupplier(() -> stack);
     }
     
@@ -49,7 +49,7 @@ public interface Renderable {
      *
      * @return an empty renderer
      */
-    static EmptyRenderer empty() {
+    public static EmptyRenderer empty() {
         return EmptyRenderer.INSTANCE;
     }
     
@@ -60,11 +60,11 @@ public interface Renderable {
      * @param output the list of output items
      * @return the recipe renderer
      */
-    static SimpleRecipeRenderer fromRecipe(Supplier<List<List<ItemStack>>> input, Supplier<List<ItemStack>> output) {
+    public static SimpleRecipeRenderer fromRecipe(Supplier<List<List<ItemStack>>> input, Supplier<List<ItemStack>> output) {
         return new SimpleRecipeRenderer(input, output);
     }
     
-    static ItemStackRenderer fromItemStacks(List<ItemStack> stacks) {
+    public static ItemStackRenderer fromItemStacks(List<ItemStack> stacks) {
         return new ItemStackRenderer() {
             @Override
             public ItemStack getItemStack() {
@@ -74,15 +74,4 @@ public interface Renderable {
             }
         };
     }
-    
-    /**
-     * Renders of the renderable
-     *
-     * @param x      the x coordinate of the renderable
-     * @param y      the y coordinate of the renderable
-     * @param mouseX the x coordinate of the mouse
-     * @param mouseY the y coordinate of the mouse
-     * @param delta  the delta
-     */
-    void render(int x, int y, double mouseX, double mouseY, float delta);
 }

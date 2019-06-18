@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class DefaultSmeltingDisplay implements RecipeDisplay<SmeltingRecipe> {
+public class DefaultSmeltingDisplay implements RecipeDisplay {
     
     private SmeltingRecipe display;
     private List<List<ItemStack>> input;

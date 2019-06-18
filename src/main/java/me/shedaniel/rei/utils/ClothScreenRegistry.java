@@ -15,10 +15,10 @@ import me.shedaniel.clothconfig2.gui.entries.IntegerSliderEntry;
 import me.shedaniel.clothconfig2.gui.entries.StringListEntry;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ConfigManager;
-import me.shedaniel.rei.api.ItemCheatingMode;
-import me.shedaniel.rei.client.RecipeScreenType;
 import me.shedaniel.rei.client.ScreenHelper;
+import me.shedaniel.rei.gui.config.ItemCheatingMode;
 import me.shedaniel.rei.gui.config.ItemListOrderingConfig;
+import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.gui.credits.CreditsScreen;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -26,6 +26,7 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Optional;
 
 public class ClothScreenRegistry {
@@ -72,7 +73,7 @@ public class ClothScreenRegistry {
         appearance.addEntry(new BooleanListEntry("text.rei.config.villager_screen_permanent_scroll_bar", configManager.getConfig().villagerScreenPermanentScrollBar, RESET, () -> false, bool -> configManager.getConfig().villagerScreenPermanentScrollBar = bool, () -> getConfigTooltip("villager_screen_permanent_scroll_bar")));
         ConfigCategory action = builder.getOrCreateCategory("text.rei.config.action");
         action.addEntry(new EnumListEntry<>("text.rei.config.item_cheating_mode", ItemCheatingMode.class, configManager.getConfig().itemCheatingMode, RESET, () -> ItemCheatingMode.REI_LIKE, i -> configManager.getConfig().itemCheatingMode = i, e -> {
-            return I18n.translate("text.rei.config.item_cheating_mode." + e.name().toLowerCase());
+            return I18n.translate("text.rei.config.item_cheating_mode." + e.name().toLowerCase(Locale.ROOT));
         }, () -> getConfigTooltip("item_cheating_mode")));
         action.addEntry(new StringListEntry("text.rei.give_command", configManager.getConfig().giveCommand, RESET, () -> "/give {player_name} {item_identifier}{nbt} {count}", s -> configManager.getConfig().giveCommand = s, () -> getConfigTooltip("give_command")));
         action.addEntry(new StringListEntry("text.rei.gamemode_command", configManager.getConfig().gamemodeCommand, RESET, () -> "/gamemode {gamemode}", s -> configManager.getConfig().gamemodeCommand = s, () -> getConfigTooltip("gamemode_command")));

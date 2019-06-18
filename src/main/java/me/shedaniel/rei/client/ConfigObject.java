@@ -6,8 +6,9 @@
 package me.shedaniel.rei.client;
 
 import blue.endless.jankson.Comment;
-import me.shedaniel.rei.api.ItemCheatingMode;
-import me.shedaniel.rei.api.RelativePoint;
+import me.shedaniel.rei.gui.config.ItemCheatingMode;
+import me.shedaniel.rei.gui.config.ItemListOrdering;
+import me.shedaniel.rei.gui.config.RecipeScreenType;
 
 public class ConfigObject {
     
@@ -57,5 +58,32 @@ public class ConfigObject {
     @Comment(
             "The location of choose page dialog, will automatically be set to your last location so there is no need to change this.")
     public RelativePoint choosePageDialogPoint = new RelativePoint(.5, .5);
+    
+    public static class RelativePoint {
+        
+        private double relativeX, relativeY;
+        
+        public RelativePoint(double relativeX, double relativeY) {
+            this.relativeX = relativeX;
+            this.relativeY = relativeY;
+        }
+        
+        public double getRelativeX() {
+            return relativeX;
+        }
+        
+        public double getRelativeY() {
+            return relativeY;
+        }
+        
+        public double getX(double width) {
+            return width * relativeX;
+        }
+        
+        public double getY(double height) {
+            return height * relativeY;
+        }
+        
+    }
     
 }

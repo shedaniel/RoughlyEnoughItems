@@ -3,7 +3,7 @@
  * Licensed under the MIT License.
  */
 
-package me.shedaniel.rei.api;
+package me.shedaniel.rei.gui.config;
 
 public enum ItemCheatingMode {
     REI_LIKE,

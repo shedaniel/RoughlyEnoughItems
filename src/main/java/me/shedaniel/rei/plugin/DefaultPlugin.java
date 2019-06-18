@@ -12,6 +12,7 @@ import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
+import me.shedaniel.rei.gui.config.DisplayVisibility;
 import me.shedaniel.rei.plugin.blasting.DefaultBlastingCategory;
 import me.shedaniel.rei.plugin.blasting.DefaultBlastingDisplay;
 import me.shedaniel.rei.plugin.brewing.DefaultBrewingCategory;
@@ -279,7 +280,7 @@ public class DefaultPlugin implements REIPluginEntry {
         recipeHelper.registerSpeedCraftButtonArea(DefaultPlugin.CAMPFIRE, bounds -> new Rectangle((int) bounds.getMaxX() - 16, bounds.y + 6, 10, 10));
         recipeHelper.registerRecipeVisibilityHandler(new DisplayVisibilityHandler() {
             @Override
-            public DisplayVisibility handleDisplay(RecipeCategory category, RecipeDisplay display) {
+            public DisplayVisibility handleDisplay(RecipeCategory<?> category, RecipeDisplay display) {
                 return DisplayVisibility.ALWAYS_VISIBLE;
             }
             

@@ -37,10 +37,8 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameMode;
 
 import java.awt.*;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ContainerScreenOverlay extends AbstractParentElement implements Drawable {
@@ -51,6 +49,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
     private static int page = 0;
     private static ItemListOverlay itemListOverlay;
     private final List<Widget> widgets = Lists.newLinkedList();
+    public boolean shouldReInit = false;
     private Rectangle rectangle;
     private Window window;
     private CraftableToggleButtonWidget toggleButtonWidget;
@@ -65,6 +64,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
     }
     
     public void init(boolean setPage) {
+        this.shouldReInit = false;
         //Update Variables
         this.children().clear();
         this.window = MinecraftClient.getInstance().window;
@@ -183,12 +183,12 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
                     return false;
                 }
             });
-            int xxx = RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? window.getScaledWidth() -30 : 10;
+            int xxx = RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? window.getScaledWidth() - 30 : 10;
             for(Weather weather : Weather.values()) {
                 widgets.add(new ButtonWidget(xxx, 35, 20, 20, "") {
                     @Override
                     public void onPressed() {
-                        MinecraftClient.getInstance().player.sendChatMessage(RoughlyEnoughItemsCore.getConfigManager().getConfig().weatherCommand.replaceAll("\\{weather}", weather.name().toLowerCase()));
+                        MinecraftClient.getInstance().player.sendChatMessage(RoughlyEnoughItemsCore.getConfigManager().getConfig().weatherCommand.replaceAll("\\{weather}", weather.name().toLowerCase(Locale.ROOT)));
                     }
                     
                     @Override
@@ -346,6 +346,8 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
     public void render(int mouseX, int mouseY, float delta) {
         List<ItemStack> currentStacks = ClientHelper.getInstance().getInventoryItemsTypes();
         if (RoughlyEnoughItemsCore.getDisplayHelper().getBaseBoundsHandler() != null && RoughlyEnoughItemsCore.getDisplayHelper().getBaseBoundsHandler().shouldRecalculateArea(!RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel, rectangle))
+            shouldReInit = true;
+        if (shouldReInit)
             init(true);
         else if (RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() && (!hasSameListContent(new LinkedList<>(ScreenHelper.inventoryStacks), currentStacks) || (currentStacks.size() != ScreenHelper.inventoryStacks.size()))) {
             ScreenHelper.inventoryStacks = ClientHelper.getInstance().getInventoryItemsTypes();

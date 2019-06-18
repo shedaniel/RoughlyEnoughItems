@@ -5,18 +5,19 @@
 
 package me.shedaniel.rei.client;
 
+import java.util.Locale;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
 public class SearchArgument {
     
-    public static final Function<Integer, Boolean> INCLUDE = integer -> integer > -1;
-    public static final Function<Integer, Boolean> NOT_INCLUDE = integer -> integer <= -1;
+    public static final SearchArgument ALWAYS = new SearchArgument(ArgumentType.ALWAYS, "", true);
     private ArgumentType argumentType;
     private String text;
+    public final Function<String, Boolean> INCLUDE = s -> boyerMooreHorspoolSearch(text, s) > -1;
+    public final Function<String, Boolean> NOT_INCLUDE = s -> boyerMooreHorspoolSearch(text, s) <= -1;
     private boolean include;
     private Pattern pattern;
-    public static final SearchArgument ALWAYS = new SearchArgument(ArgumentType.ALWAYS, "", true);
     
     public SearchArgument(ArgumentType argumentType, String text, boolean include) {
         this(argumentType, text, include, true);
@@ -24,12 +25,31 @@ public class SearchArgument {
     
     public SearchArgument(ArgumentType argumentType, String text, boolean include, boolean autoLowerCase) {
         this.argumentType = argumentType;
-        this.text = autoLowerCase ? text.toLowerCase() : text;
+        this.text = autoLowerCase ? text.toLowerCase(Locale.ROOT) : text;
         this.include = include;
     }
     
-    public static Function<Integer, Boolean> getFunction(boolean include) {
-        return include ? SearchArgument.INCLUDE : SearchArgument.NOT_INCLUDE;
+    public static int boyerMooreHorspoolSearch(CharSequence pattern, CharSequence text) {
+        int shift[] = new int[256];
+        for(int k = 0; k < 256; k++)
+            shift[k] = pattern.length();
+        for(int k = 0; k < pattern.length() - 1; k++)
+            shift[pattern.charAt(k)] = pattern.length() - 1 - k;
+        int i = 0, j = 0;
+        while ((i + pattern.length()) <= text.length()) {
+            j = pattern.length() - 1;
+            while (text.charAt(i + j) == pattern.charAt(j)) {
+                j -= 1;
+                if (j < 0)
+                    return i;
+            }
+            i = i + shift[text.charAt(i + pattern.length() - 1)];
+        }
+        return -1;
+    }
+    
+    public Function<String, Boolean> getFunction(boolean include) {
+        return include ? INCLUDE : NOT_INCLUDE;
     }
     
     public ArgumentType getArgumentType() {

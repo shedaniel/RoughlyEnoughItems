@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class DefaultStoneCuttingDisplay implements RecipeDisplay<StonecuttingRecipe> {
+public class DefaultStoneCuttingDisplay implements RecipeDisplay {
     
     private List<List<ItemStack>> inputs;
     private List<ItemStack> output;

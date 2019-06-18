@@ -9,6 +9,11 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.gui.ContainerScreenOverlay;
+import me.shedaniel.rei.gui.config.DisplayVisibility;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeManager;
@@ -37,7 +42,8 @@ public class RecipeHelperImpl implements RecipeHelper {
         VISIBILITY_HANDLER_COMPARATOR = comparator.reversed();
     }
     
-    public final List<RecipeFunction> recipeFunctions = Lists.newArrayList();
+    private final List<AutoCraftingHandler> autoCraftingHandlers = Lists.newArrayList();
+    private final List<RecipeFunction> recipeFunctions = Lists.newArrayList();
     private final AtomicInteger recipeCount = new AtomicInteger();
     private final Map<Identifier, List<RecipeDisplay>> recipeCategoryListMap = Maps.newHashMap();
     private final Map<Identifier, DisplaySettings> categoryDisplaySettingsMap = Maps.newHashMap();
@@ -45,7 +51,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     private final Map<Identifier, ButtonAreaSupplier> speedCraftAreaSupplierMap = Maps.newHashMap();
     private final Map<Identifier, List<List<ItemStack>>> categoryWorkingStations = Maps.newHashMap();
     private final List<DisplayVisibilityHandler> displayVisibilityHandlers = Lists.newArrayList();
-    private final List<LiveRecipeGenerator> liveRecipeGenerators = Lists.newArrayList();
+    private final List<LiveRecipeGenerator<?>> liveRecipeGenerators = Lists.newArrayList();
     private RecipeManager recipeManager;
     
     @Override
@@ -81,7 +87,6 @@ public class RecipeHelperImpl implements RecipeHelper {
     @Override
     public void registerCategory(RecipeCategory category) {
         categories.add(category);
-        categoryDisplaySettingsMap.put(category.getIdentifier(), category.getDisplaySettings());
         recipeCategoryListMap.put(category.getIdentifier(), Lists.newLinkedList());
         categoryWorkingStations.put(category.getIdentifier(), Lists.newLinkedList());
     }
@@ -218,10 +223,10 @@ public class RecipeHelperImpl implements RecipeHelper {
         this.categories.clear();
         this.speedCraftAreaSupplierMap.clear();
         this.categoryWorkingStations.clear();
-        this.categoryDisplaySettingsMap.clear();
         this.recipeFunctions.clear();
         this.displayVisibilityHandlers.clear();
         this.liveRecipeGenerators.clear();
+        this.autoCraftingHandlers.clear();
         ((DisplayHelperImpl) RoughlyEnoughItemsCore.getDisplayHelper()).resetCache();
         BaseBoundsHandler baseBoundsHandler = new BaseBoundsHandlerImpl();
         RoughlyEnoughItemsCore.getDisplayHelper().registerBoundsHandler(baseBoundsHandler);
@@ -266,7 +271,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         if (getDisplayVisibilityHandlers().isEmpty())
             registerRecipeVisibilityHandler(new DisplayVisibilityHandler() {
                 @Override
-                public DisplayVisibility handleDisplay(RecipeCategory category, RecipeDisplay display) {
+                public DisplayVisibility handleDisplay(RecipeCategory<?> category, RecipeDisplay display) {
                     return DisplayVisibility.ALWAYS_VISIBLE;
                 }
                 
@@ -275,8 +280,39 @@ public class RecipeHelperImpl implements RecipeHelper {
                     return -1f;
                 }
             });
+        registerAutoCraftingHandler(new AutoCraftingHandler() {
+            @Override
+            public double getPriority() {
+                return -Double.MAX_VALUE;
+            }
+            
+            @Override
+            public boolean handle(MinecraftClient minecraft, Screen recipeViewingScreen, AbstractContainerScreen<?> parentScreen, ContainerScreenOverlay overlay) {
+                minecraft.openScreen(parentScreen);
+                ScreenHelper.getLastOverlay().init();
+                return true;
+            }
+        });
+        
+        // Clear Cache
+        ((DisplayHelperImpl) RoughlyEnoughItemsCore.getDisplayHelper()).resetCache();
+        this.categoryDisplaySettingsMap.clear();
+        getAllCategories().forEach(category -> categoryDisplaySettingsMap.put(category.getIdentifier(), category.getDisplaySettings()));
+        ScreenHelper.getOptionalOverlay().ifPresent(overlay -> overlay.shouldReInit = true);
+        
         long usedTime = System.currentTimeMillis() - startTime;
         RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered %d recipes displays, %d bounds handler, %d visibility " + "handlers and %d categories (%s) in %d ms.", recipeCount.get(), RoughlyEnoughItemsCore.getDisplayHelper().getAllBoundsHandlers().size(), getDisplayVisibilityHandlers().size(), categories.size(), String.join(", ", categories.stream().map(RecipeCategory::getCategoryName).collect(Collectors.toList())), usedTime);
+    }
+    
+    @Override
+    public AutoCraftingHandler registerAutoCraftingHandler(AutoCraftingHandler handler) {
+        autoCraftingHandlers.add(handler);
+        return handler;
+    }
+    
+    @Override
+    public List<AutoCraftingHandler> getSortedAutoCraftingHandler() {
+        return autoCraftingHandlers.stream().sorted(Comparator.comparingDouble(AutoCraftingHandler::getPriority).reversed()).collect(Collectors.toList());
     }
     
     @Override
@@ -361,7 +397,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     }
     
     @Override
-    public void registerLiveRecipeGenerator(LiveRecipeGenerator liveRecipeGenerator) {
+    public void registerLiveRecipeGenerator(LiveRecipeGenerator<?> liveRecipeGenerator) {
         liveRecipeGenerators.add(liveRecipeGenerator);
     }
     

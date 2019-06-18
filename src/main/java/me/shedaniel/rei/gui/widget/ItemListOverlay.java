@@ -10,11 +10,11 @@ import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.DisplayHelper;
-import me.shedaniel.rei.api.ItemCheatingMode;
 import me.shedaniel.rei.api.RecipeHelper;
-import me.shedaniel.rei.client.ItemListOrdering;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.client.SearchArgument;
+import me.shedaniel.rei.gui.config.ItemCheatingMode;
+import me.shedaniel.rei.gui.config.ItemListOrdering;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -30,10 +30,9 @@ import net.minecraft.util.registry.Registry;
 import org.apache.commons.lang3.StringUtils;
 
 import java.awt.*;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 public class ItemListOverlay extends Widget {
@@ -100,26 +99,24 @@ public class ItemListOverlay extends Widget {
     public static boolean filterItem(ItemStack itemStack, List<SearchArgument[]> arguments) {
         if (arguments.isEmpty())
             return true;
-        String mod = ClientHelper.getInstance().getModFromItem(itemStack.getItem()).toLowerCase();
-        String tooltips = tryGetItemStackToolTip(itemStack, true).stream().skip(1).collect(Collectors.joining("")).replace(SPACE, EMPTY).toLowerCase();
-        String name = tryGetItemStackName(itemStack).replace(SPACE, EMPTY).toLowerCase();
+        AtomicReference<String> mod = null, tooltips = null, name = null;
         for(SearchArgument[] arguments1 : arguments) {
             boolean b = true;
             for(SearchArgument argument : arguments1) {
                 if (argument.getArgumentType().equals(SearchArgument.ArgumentType.ALWAYS))
                     return true;
                 if (argument.getArgumentType().equals(SearchArgument.ArgumentType.MOD))
-                    if (SearchArgument.getFunction(!argument.isInclude()).apply(mod.indexOf(argument.getText()))) {
+                    if (argument.getFunction(!argument.isInclude()).apply(fillMod(itemStack, mod))) {
                         b = false;
                         break;
                     }
                 if (argument.getArgumentType().equals(SearchArgument.ArgumentType.TOOLTIP))
-                    if (SearchArgument.getFunction(!argument.isInclude()).apply(tooltips.indexOf(argument.getText()))) {
+                    if (argument.getFunction(!argument.isInclude()).apply(fillTooltip(itemStack, tooltips))) {
                         b = false;
                         break;
                     }
                 if (argument.getArgumentType().equals(SearchArgument.ArgumentType.TEXT))
-                    if (SearchArgument.getFunction(!argument.isInclude()).apply(name.indexOf(argument.getText()))) {
+                    if (argument.getFunction(!argument.isInclude()).apply(fillName(itemStack, name))) {
                         b = false;
                         break;
                     }
@@ -128,6 +125,24 @@ public class ItemListOverlay extends Widget {
                 return true;
         }
         return false;
+    }
+    
+    private static String fillMod(ItemStack itemStack, AtomicReference<String> mod) {
+        if (mod == null)
+            mod = new AtomicReference<>(ClientHelper.getInstance().getModFromItem(itemStack.getItem()).toLowerCase(Locale.ROOT));
+        return mod.get();
+    }
+    
+    private static String fillTooltip(ItemStack itemStack, AtomicReference<String> mod) {
+        if (mod == null)
+            mod = new AtomicReference<>(tryGetItemStackToolTip(itemStack, false).stream().collect(Collectors.joining("")).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT));
+        return mod.get();
+    }
+    
+    private static String fillName(ItemStack itemStack, AtomicReference<String> mod) {
+        if (mod == null)
+            mod = new AtomicReference<>(tryGetItemStackName(itemStack).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT));
+        return mod.get();
     }
     
     public int getFullTotalSlotsPerPage() {
@@ -274,7 +289,10 @@ public class ItemListOverlay extends Widget {
             else
                 lastSearchArgument.add(new SearchArgument[]{SearchArgument.ALWAYS});
         });
-        os.stream().filter(itemStack -> filterItem(itemStack, lastSearchArgument)).forEachOrdered(stacks::add);
+        if (lastSearchArgument.isEmpty())
+            os.forEach(stacks::add);
+        else
+            os.stream().filter(itemStack -> filterItem(itemStack, lastSearchArgument)).forEachOrdered(stacks::add);
         if (!RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() || stacks.isEmpty() || inventoryItems.isEmpty())
             return stacks;
         List<ItemStack> workingItems = Lists.newArrayList(RecipeHelper.getInstance().findCraftableByItems(inventoryItems));
@@ -283,26 +301,6 @@ public class ItemListOverlay extends Widget {
     
     public List<SearchArgument[]> getLastSearchArgument() {
         return lastSearchArgument;
-    }
-    
-    private boolean filterItem(ItemStack itemStack, SearchArgument... arguments) {
-        if (arguments.length == 0)
-            return true;
-        String mod = ClientHelper.getInstance().getModFromItem(itemStack.getItem()).toLowerCase();
-        String tooltips = tryGetItemStackToolTip(itemStack, false).stream().skip(1).collect(Collectors.joining("")).replace(SPACE, EMPTY).toLowerCase();
-        String name = tryGetItemStackName(itemStack).replace(SPACE, EMPTY).toLowerCase();
-        for(SearchArgument argument : arguments) {
-            if (argument.getArgumentType().equals(SearchArgument.ArgumentType.MOD))
-                if (SearchArgument.getFunction(!argument.isInclude()).apply(mod.indexOf(argument.getText())))
-                    return false;
-            if (argument.getArgumentType().equals(SearchArgument.ArgumentType.TOOLTIP))
-                if (SearchArgument.getFunction(!argument.isInclude()).apply(tooltips.indexOf(argument.getText())))
-                    return false;
-            if (argument.getArgumentType().equals(SearchArgument.ArgumentType.TEXT))
-                if (SearchArgument.getFunction(!argument.isInclude()).apply(name.indexOf(argument.getText())))
-                    return false;
-        }
-        return true;
     }
     
     public void calculateListSize(Rectangle rect) {

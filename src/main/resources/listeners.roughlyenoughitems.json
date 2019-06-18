@@ -6,7 +6,6 @@
   "mixins": [],
   "client": [
     "ContainerScreenHooks",
-    "CreativePlayerInventoryScreenHooks",
     "RecipeBookGuiHooks",
     "AbstractInventoryScreenHooks"
   ],

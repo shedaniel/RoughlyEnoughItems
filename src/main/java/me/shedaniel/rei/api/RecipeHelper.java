@@ -26,6 +26,10 @@ public interface RecipeHelper {
         return RoughlyEnoughItemsCore.getRecipeHelper();
     }
     
+    AutoCraftingHandler registerAutoCraftingHandler(AutoCraftingHandler handler);
+    
+    List<AutoCraftingHandler> getSortedAutoCraftingHandler();
+    
     /**
      * Gets the total recipe count registered
      *
@@ -204,7 +208,7 @@ public interface RecipeHelper {
      * @param liveRecipeGenerator the generator to register
      * @apiNote Still work in progress
      */
-    void registerLiveRecipeGenerator(LiveRecipeGenerator liveRecipeGenerator);
+    void registerLiveRecipeGenerator(LiveRecipeGenerator<?> liveRecipeGenerator);
     
     <T extends Recipe<?>> void registerRecipes(Identifier category, Class<T> recipeClass, Function<T, RecipeDisplay> mappingFunction);
     

@@ -15,4 +15,5 @@ public class EmptyRenderer extends Renderer {
     public void render(int x, int y, double mouseX, double mouseY, float delta) {
     
     }
+    
 }

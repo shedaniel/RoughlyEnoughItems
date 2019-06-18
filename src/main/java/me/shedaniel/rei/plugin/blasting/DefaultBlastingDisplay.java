@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class DefaultBlastingDisplay implements RecipeDisplay<BlastingRecipe> {
+public class DefaultBlastingDisplay implements RecipeDisplay {
     
     private BlastingRecipe display;
     private List<List<ItemStack>> input;
