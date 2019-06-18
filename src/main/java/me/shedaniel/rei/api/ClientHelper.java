@@ -149,4 +149,5 @@ public interface ClientHelper {
     
     boolean executeViewAllRecipesFromCategory(Identifier category);
     
+    boolean executeViewAllRecipesFromCategories(List<Identifier> categories);
 }

@@ -9,6 +9,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
+import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeManager;
@@ -40,6 +41,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     
     private final List<AutoCraftingHandler> autoCraftingHandlers = Lists.newArrayList();
     private final List<RecipeFunction> recipeFunctions = Lists.newArrayList();
+    private final List<ScreenClickArea> screenClickAreas = Lists.newArrayList();
     private final AtomicInteger recipeCount = new AtomicInteger();
     private final Map<Identifier, List<RecipeDisplay>> recipeCategoryListMap = Maps.newHashMap();
     private final List<RecipeCategory> categories = Lists.newArrayList();
@@ -140,7 +142,8 @@ public class RecipeHelperImpl implements RecipeHelper {
         return recipeCategoryListMap;
     }
     
-    private RecipeCategory getCategory(Identifier identifier) {
+    @Override
+    public RecipeCategory getCategory(Identifier identifier) {
         return categories.stream().filter(category -> category.getIdentifier().equals(identifier)).findFirst().orElse(null);
     }
     
@@ -217,6 +220,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         this.recipeCategoryListMap.clear();
         this.categories.clear();
         this.speedCraftAreaSupplierMap.clear();
+        this.screenClickAreas.clear();
         this.categoryWorkingStations.clear();
         this.recipeFunctions.clear();
         this.displayVisibilityHandlers.clear();
@@ -361,6 +365,11 @@ public class RecipeHelperImpl implements RecipeHelper {
     }
     
     @Override
+    public void registerScreenClickArea(Rectangle rectangle, Class<? extends AbstractContainerScreen> screenClass, Identifier... categories) {
+        this.screenClickAreas.add(new ScreenClickArea(screenClass, rectangle, categories));
+    }
+    
+    @Override
     public <T extends Recipe<?>> void registerRecipes(Identifier category, Class<T> recipeClass, Function<T, RecipeDisplay> mappingFunction) {
         recipeFunctions.add(new RecipeFunction(category, recipe -> recipeClass.isAssignableFrom(recipe.getClass()), mappingFunction));
     }
@@ -378,6 +387,35 @@ public class RecipeHelperImpl implements RecipeHelper {
     @Override
     public void registerLiveRecipeGenerator(LiveRecipeGenerator<?> liveRecipeGenerator) {
         liveRecipeGenerators.add(liveRecipeGenerator);
+    }
+    
+    @Override
+    public List<ScreenClickArea> getScreenClickAreas() {
+        return screenClickAreas;
+    }
+    
+    public class ScreenClickArea {
+        Class<? extends AbstractContainerScreen> screenClass;
+        Rectangle rectangle;
+        Identifier[] categories;
+        
+        private ScreenClickArea(Class<? extends AbstractContainerScreen> screenClass, Rectangle rectangle, Identifier[] categories) {
+            this.screenClass = screenClass;
+            this.rectangle = rectangle;
+            this.categories = categories;
+        }
+        
+        public Class<? extends AbstractContainerScreen> getScreenClass() {
+            return screenClass;
+        }
+        
+        public Rectangle getRectangle() {
+            return rectangle;
+        }
+        
+        public Identifier[] getCategories() {
+            return categories;
+        }
     }
     
     private class RecipeFunction {

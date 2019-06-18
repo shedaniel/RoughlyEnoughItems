@@ -6,11 +6,14 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.client.RecipeHelperImpl;
+import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.util.Identifier;
 
+import java.awt.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -90,6 +93,8 @@ public interface RecipeHelper {
      * @return the map of recipes
      */
     Map<RecipeCategory, List<RecipeDisplay>> getRecipesFor(ItemStack stack);
+    
+    RecipeCategory getCategory(Identifier identifier);
     
     /**
      * Gets the vanilla recipe manager
@@ -204,7 +209,12 @@ public interface RecipeHelper {
      */
     void registerLiveRecipeGenerator(LiveRecipeGenerator<?> liveRecipeGenerator);
     
+    void registerScreenClickArea(Rectangle rectangle, Class<? extends AbstractContainerScreen> screenClass, Identifier... categories);
+    
     <T extends Recipe<?>> void registerRecipes(Identifier category, Class<T> recipeClass, Function<T, RecipeDisplay> mappingFunction);
     
     <T extends Recipe<?>> void registerRecipes(Identifier category, Function<Recipe, Boolean> recipeFilter, Function<T, RecipeDisplay> mappingFunction);
+    
+    List<RecipeHelperImpl.ScreenClickArea> getScreenClickAreas();
+    
 }

@@ -108,6 +108,7 @@
   "text.rei.config.register_in_other_thread": "Register Recipes in other thread:",
   "text.rei.recipe_screen_type.selection": "Recipe Screen Type Selection",
   "text.rei.recipe_screen_type.selection.sub": "You can always edit this setting again via the config screen.",
+  "text.rei.view_recipes_for": "View Recipes for %s",
   "_comment": "Config Tooltips",
   "tooltip.rei.config.side_search_box": "Declares the location of the search field:\nYes: Left / Right\nNo: Center\n \nDefaulted: No",
   "tooltip.rei.config.list_ordering": "Declares the ordering of the side item list:\nValues: Registry / Name / Item Groups\n(Ascending / Descending)\n \nDefaulted: %s",
