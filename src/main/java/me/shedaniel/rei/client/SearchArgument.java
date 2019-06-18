@@ -30,20 +30,23 @@ public class SearchArgument {
     }
     
     public static int boyerMooreHorspoolSearch(CharSequence pattern, CharSequence text) {
+        int patternLength = pattern.length();
+        if (patternLength == 0)
+            return 0;
         int shift[] = new int[256];
         for(int k = 0; k < 256; k++)
-            shift[k] = pattern.length();
-        for(int k = 0; k < pattern.length() - 1; k++)
-            shift[pattern.charAt(k)] = pattern.length() - 1 - k;
+            shift[k] = patternLength;
+        for(int k = 0; k < patternLength - 1; k++)
+            shift[pattern.charAt(k)] = patternLength - 1 - k;
         int i = 0, j = 0;
-        while ((i + pattern.length()) <= text.length()) {
-            j = pattern.length() - 1;
+        while ((i + patternLength) <= text.length()) {
+            j = patternLength - 1;
             while (text.charAt(i + j) == pattern.charAt(j)) {
                 j -= 1;
                 if (j < 0)
                     return i;
             }
-            i = i + shift[text.charAt(i + pattern.length() - 1)];
+            i = i + shift[text.charAt(i + patternLength - 1)];
         }
         return -1;
     }
