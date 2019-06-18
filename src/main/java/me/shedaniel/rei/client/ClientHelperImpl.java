@@ -54,7 +54,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     private final Identifier nextPageKeybind = new Identifier("roughlyenoughitems", "next_page");
     private final Identifier focusSearchFieldKeybind = new Identifier("roughlyenoughitems", "focus_search");
     private final Map<String, String> modNameCache = Maps.newHashMap();
-    public FabricKeyBinding recipe, usage, hide, previousPage, nextPage,focusSearchField;
+    public FabricKeyBinding recipe, usage, hide, previousPage, nextPage, focusSearchField;
     
     public String getFormattedModNoItalicFromItem(Item item) {
         String mod = getModFromItem(item);
