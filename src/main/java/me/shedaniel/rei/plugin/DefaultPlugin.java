@@ -12,7 +12,6 @@ import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
-import me.shedaniel.rei.gui.config.DisplayVisibility;
 import me.shedaniel.rei.plugin.blasting.DefaultBlastingCategory;
 import me.shedaniel.rei.plugin.blasting.DefaultBlastingDisplay;
 import me.shedaniel.rei.plugin.brewing.DefaultBrewingCategory;
@@ -171,19 +170,19 @@ public class DefaultPlugin implements REIPluginEntry {
     public void registerBounds(DisplayHelper displayHelper) {
         displayHelper.getBaseBoundsHandler().registerExclusionZones(AbstractInventoryScreen.class, new DefaultPotionEffectExclusionZones());
         displayHelper.getBaseBoundsHandler().registerExclusionZones(RecipeBookProvider.class, new DefaultRecipeBookExclusionZones());
-        displayHelper.registerBoundsHandler(new DisplayHelper.DisplayBoundsHandler<AbstractContainerScreen>() {
+        displayHelper.registerBoundsHandler(new DisplayHelper.DisplayBoundsHandler<AbstractContainerScreen<?>>() {
             @Override
-            public Class getBaseSupportedClass() {
+            public Class<?> getBaseSupportedClass() {
                 return AbstractContainerScreen.class;
             }
             
             @Override
-            public Rectangle getLeftBounds(AbstractContainerScreen screen) {
+            public Rectangle getLeftBounds(AbstractContainerScreen<?> screen) {
                 return new Rectangle(2, 0, ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() - 4, MinecraftClient.getInstance().window.getScaledHeight());
             }
             
             @Override
-            public Rectangle getRightBounds(AbstractContainerScreen screen) {
+            public Rectangle getRightBounds(AbstractContainerScreen<?> screen) {
                 int startX = ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() + ScreenHelper.getLastContainerScreenHooks().rei_getContainerWidth() + 2;
                 return new Rectangle(startX, 0, MinecraftClient.getInstance().window.getScaledWidth() - startX - 2, MinecraftClient.getInstance().window.getScaledHeight());
             }
@@ -195,7 +194,7 @@ public class DefaultPlugin implements REIPluginEntry {
         });
         displayHelper.registerBoundsHandler(new DisplayHelper.DisplayBoundsHandler<RecipeViewingScreen>() {
             @Override
-            public Class getBaseSupportedClass() {
+            public Class<?> getBaseSupportedClass() {
                 return RecipeViewingScreen.class;
             }
             
@@ -217,7 +216,7 @@ public class DefaultPlugin implements REIPluginEntry {
         });
         displayHelper.registerBoundsHandler(new DisplayHelper.DisplayBoundsHandler<VillagerRecipeViewingScreen>() {
             @Override
-            public Class getBaseSupportedClass() {
+            public Class<?> getBaseSupportedClass() {
                 return VillagerRecipeViewingScreen.class;
             }
             
@@ -239,7 +238,7 @@ public class DefaultPlugin implements REIPluginEntry {
         });
         displayHelper.registerBoundsHandler(new DisplayHelper.DisplayBoundsHandler<CreativeInventoryScreen>() {
             @Override
-            public Class getBaseSupportedClass() {
+            public Class<?> getBaseSupportedClass() {
                 return CreativeInventoryScreen.class;
             }
             
@@ -278,17 +277,6 @@ public class DefaultPlugin implements REIPluginEntry {
         recipeHelper.registerWorkingStations(COMPOSTING, new ItemStack(Items.COMPOSTER));
         recipeHelper.registerSpeedCraftButtonArea(COMPOSTING, bounds -> null);
         recipeHelper.registerSpeedCraftButtonArea(DefaultPlugin.CAMPFIRE, bounds -> new Rectangle((int) bounds.getMaxX() - 16, bounds.y + 6, 10, 10));
-        recipeHelper.registerRecipeVisibilityHandler(new DisplayVisibilityHandler() {
-            @Override
-            public DisplayVisibility handleDisplay(RecipeCategory<?> category, RecipeDisplay display) {
-                return DisplayVisibility.ALWAYS_VISIBLE;
-            }
-            
-            @Override
-            public float getPriority() {
-                return -1f;
-            }
-        });
     }
     
     @Override

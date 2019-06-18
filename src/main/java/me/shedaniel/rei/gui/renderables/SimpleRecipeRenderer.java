@@ -6,7 +6,7 @@
 package me.shedaniel.rei.gui.renderables;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.rei.api.Renderable;
+import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GuiLighting;
@@ -58,8 +58,8 @@ public class SimpleRecipeRenderer extends RecipeRenderer {
                 s.setAmount(pair.getRight().get());
                 return s;
             }).collect(Collectors.toList()));
-        this.inputRenderer = b.stream().filter(stacks -> !stacks.isEmpty()).map(stacks -> Renderable.fromItemStacks(stacks)).collect(Collectors.toList());
-        this.outputRenderer = Renderable.fromItemStacks(output.get().stream().filter(stack -> !stack.isEmpty()).collect(Collectors.toList()));
+        this.inputRenderer = b.stream().filter(stacks -> !stacks.isEmpty()).map(stacks -> Renderer.fromItemStacks(stacks)).collect(Collectors.toList());
+        this.outputRenderer = Renderer.fromItemStacks(output.get().stream().filter(stack -> !stack.isEmpty()).collect(Collectors.toList()));
     }
     
     public static boolean equalsList(List<ItemStack> list_1, List<ItemStack> list_2) {

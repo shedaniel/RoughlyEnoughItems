@@ -9,6 +9,7 @@ import net.minecraft.client.gui.screen.Screen;
 
 import java.awt.*;
 import java.util.List;
+import java.util.function.Function;
 
 public interface BaseBoundsHandler extends DisplayHelper.DisplayBoundsHandler<Screen> {
     /**
@@ -24,17 +25,8 @@ public interface BaseBoundsHandler extends DisplayHelper.DisplayBoundsHandler<Sc
      * Register an exclusion zone
      *
      * @param screenClass the screen
-     * @param supplier    the exclusion zone supplier
+     * @param supplier    the exclusion zone supplier, isOnRightSide -> the list of exclusion zones
      */
-    void registerExclusionZones(Class<?> screenClass, ExclusionZoneSupplier supplier);
+    void registerExclusionZones(Class<?> screenClass, Function<Boolean, List<Rectangle>> supplier);
     
-    public static interface ExclusionZoneSupplier {
-        /**
-         * Gets the current exclusion zones
-         *
-         * @param isOnRightSide whether the user has set the overlay to the right
-         * @return the list of exclusion zones
-         */
-        List<Rectangle> apply(boolean isOnRightSide);
-    }
 }

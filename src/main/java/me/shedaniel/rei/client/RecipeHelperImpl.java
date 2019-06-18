@@ -9,10 +9,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.gui.config.DisplayVisibility;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeManager;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 
 import java.awt.*;
@@ -42,7 +42,6 @@ public class RecipeHelperImpl implements RecipeHelper {
     private final List<RecipeFunction> recipeFunctions = Lists.newArrayList();
     private final AtomicInteger recipeCount = new AtomicInteger();
     private final Map<Identifier, List<RecipeDisplay>> recipeCategoryListMap = Maps.newHashMap();
-    private final Map<Identifier, DisplaySettings> categoryDisplaySettingsMap = Maps.newHashMap();
     private final List<RecipeCategory> categories = Lists.newArrayList();
     private final Map<Identifier, ButtonAreaSupplier> speedCraftAreaSupplierMap = Maps.newHashMap();
     private final Map<Identifier, List<List<ItemStack>>> categoryWorkingStations = Maps.newHashMap();
@@ -267,8 +266,8 @@ public class RecipeHelperImpl implements RecipeHelper {
         if (getDisplayVisibilityHandlers().isEmpty())
             registerRecipeVisibilityHandler(new DisplayVisibilityHandler() {
                 @Override
-                public DisplayVisibility handleDisplay(RecipeCategory<?> category, RecipeDisplay display) {
-                    return DisplayVisibility.ALWAYS_VISIBLE;
+                public ActionResult handleDisplay(RecipeCategory<?> category, RecipeDisplay display) {
+                    return ActionResult.SUCCESS;
                 }
                 
                 @Override
@@ -278,8 +277,6 @@ public class RecipeHelperImpl implements RecipeHelper {
             });
         // Clear Cache
         ((DisplayHelperImpl) RoughlyEnoughItemsCore.getDisplayHelper()).resetCache();
-        this.categoryDisplaySettingsMap.clear();
-        getAllCategories().forEach(category -> categoryDisplaySettingsMap.put(category.getIdentifier(), category.getDisplaySettings()));
         ScreenHelper.getOptionalOverlay().ifPresent(overlay -> overlay.shouldReInit = true);
         
         long usedTime = System.currentTimeMillis() - startTime;
@@ -353,9 +350,9 @@ public class RecipeHelperImpl implements RecipeHelper {
         List<DisplayVisibilityHandler> list = getDisplayVisibilityHandlers().stream().sorted(VISIBILITY_HANDLER_COMPARATOR).collect(Collectors.toList());
         for(DisplayVisibilityHandler displayVisibilityHandler : list) {
             try {
-                DisplayVisibility visibility = displayVisibilityHandler.handleDisplay(category, display);
-                if (visibility != DisplayVisibility.PASS)
-                    return visibility == DisplayVisibility.ALWAYS_VISIBLE || visibility == DisplayVisibility.CONFIG_OPTIONAL;
+                ActionResult visibility = displayVisibilityHandler.handleDisplay(category, display);
+                if (visibility != ActionResult.PASS)
+                    return visibility == ActionResult.SUCCESS;
             } catch (Throwable throwable) {
                 RoughlyEnoughItemsCore.LOGGER.error("[REI] Failed to check if the recipe is visible!", throwable);
             }
@@ -376,11 +373,6 @@ public class RecipeHelperImpl implements RecipeHelper {
     @Override
     public <T extends Recipe<?>> void registerRecipes(Identifier category, Predicate<Recipe> recipeFilter, Function<T, RecipeDisplay> mappingFunction) {
         recipeFunctions.add(new RecipeFunction(category, recipeFilter, mappingFunction));
-    }
-    
-    @Override
-    public Optional<DisplaySettings> getCachedCategorySettings(Identifier category) {
-        return categoryDisplaySettingsMap.entrySet().stream().filter(entry -> entry.getKey().equals(category)).map(Map.Entry::getValue).findAny();
     }
     
     @Override

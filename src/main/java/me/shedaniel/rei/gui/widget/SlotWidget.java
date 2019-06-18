@@ -9,7 +9,6 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.Renderable;
 import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.client.ClientHelperImpl;
 import me.shedaniel.rei.client.ScreenHelper;
@@ -37,7 +36,7 @@ public class SlotWidget extends HighlightableWidget {
     }
     
     public SlotWidget(int x, int y, Collection<ItemStack> itemList, boolean drawBackground, boolean showToolTips) {
-        this(x, y, itemList.stream().map(Renderable::fromItemStack).collect(Collectors.toList()), drawBackground, showToolTips);
+        this(x, y, itemList.stream().map(Renderer::fromItemStack).collect(Collectors.toList()), drawBackground, showToolTips);
     }
     
     public SlotWidget(int x, int y, List<Renderer> renderers, boolean drawBackground, boolean showToolTips) {
@@ -178,12 +177,12 @@ public class SlotWidget extends HighlightableWidget {
     
     public Renderer getCurrentRenderer() {
         if (renderers.size() == 0)
-            return Renderable.empty();
+            return Renderer.empty();
         return renderers.get(MathHelper.floor((System.currentTimeMillis() / 500 % (double) renderers.size()) / 1f));
     }
     
     public void setItemList(List<ItemStack> itemList) {
-        this.setRenderers(itemList.stream().map(Renderable::fromItemStack).collect(Collectors.toList()));
+        this.setRenderers(itemList.stream().map(Renderer::fromItemStack).collect(Collectors.toList()));
     }
     
     public void setRenderers(List<Renderer> renderers) {

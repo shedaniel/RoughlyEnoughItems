@@ -5,7 +5,7 @@
 
 package me.shedaniel.rei.api;
 
-import me.shedaniel.rei.gui.config.DisplayVisibility;
+import net.minecraft.util.ActionResult;
 
 public interface DisplayVisibilityHandler {
     
@@ -20,14 +20,14 @@ public interface DisplayVisibilityHandler {
     
     /**
      * Handles the visibility of the display.
-     * {@link DisplayVisibility#PASS} to pass the handling to another handler
-     * {@link DisplayVisibility#ALWAYS_VISIBLE} to always display it
-     * {@link DisplayVisibility#NEVER_VISIBLE} to never display it
+     * {@link ActionResult#PASS} to pass the handling to another handler
+     * {@link ActionResult#SUCCESS} to always display it
+     * {@link ActionResult#FAIL} to never display it
      *
      * @param category the category of the display
      * @param display  the display of the recipe
      * @return the visibility
      */
-    DisplayVisibility handleDisplay(RecipeCategory<?> category, RecipeDisplay display);
+    ActionResult handleDisplay(RecipeCategory<?> category, RecipeDisplay display);
     
 }

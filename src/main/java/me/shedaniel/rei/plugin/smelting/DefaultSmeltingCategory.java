@@ -7,7 +7,6 @@ package me.shedaniel.rei.plugin.smelting;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.api.RecipeCategory;
-import me.shedaniel.rei.api.Renderable;
 import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.gui.renderables.RecipeRenderer;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
@@ -39,7 +38,7 @@ public class DefaultSmeltingCategory implements RecipeCategory<DefaultSmeltingDi
     
     @Override
     public Renderer getIcon() {
-        return Renderable.fromItemStack(new ItemStack(Blocks.FURNACE));
+        return Renderer.fromItemStack(new ItemStack(Blocks.FURNACE));
     }
     
     @Override
@@ -49,7 +48,7 @@ public class DefaultSmeltingCategory implements RecipeCategory<DefaultSmeltingDi
     
     @Override
     public RecipeRenderer getSimpleRenderer(DefaultSmeltingDisplay recipe) {
-        return Renderable.fromRecipe(() -> Arrays.asList(recipe.getInput().get(0)), recipe::getOutput);
+        return Renderer.fromRecipe(() -> Arrays.asList(recipe.getInput().get(0)), recipe::getOutput);
     }
     
     @Override

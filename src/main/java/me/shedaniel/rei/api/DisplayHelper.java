@@ -22,14 +22,14 @@ public interface DisplayHelper {
      * @return the sorted list of responsible bounds handlers
      * @see DisplayHelper#getResponsibleBoundsHandler(Class) for the unsorted version
      */
-    List<DisplayBoundsHandler> getSortedBoundsHandlers(Class screenClass);
+    List<DisplayBoundsHandler<?>> getSortedBoundsHandlers(Class<?> screenClass);
     
     /**
      * Gets all registered bounds handlers
      *
      * @return the list of registered bounds handlers
      */
-    List<DisplayBoundsHandler> getAllBoundsHandlers();
+    List<DisplayBoundsHandler<?>> getAllBoundsHandlers();
     
     /**
      * Gets all responsible bounds handlers
@@ -38,14 +38,14 @@ public interface DisplayHelper {
      * @return the the list of responsible bounds handlers
      * @see DisplayHelper#getSortedBoundsHandlers(Class) for the sorted version
      */
-    DisplayBoundsHandler getResponsibleBoundsHandler(Class screenClass);
+    DisplayBoundsHandler<?> getResponsibleBoundsHandler(Class<?> screenClass);
     
     /**
      * Registers a bounds handler
      *
      * @param handler the handler to register
      */
-    void registerBoundsHandler(DisplayBoundsHandler handler);
+    void registerBoundsHandler(DisplayBoundsHandler<?> handler);
     
     /**
      * Gets the base bounds handler api for exclusion zones

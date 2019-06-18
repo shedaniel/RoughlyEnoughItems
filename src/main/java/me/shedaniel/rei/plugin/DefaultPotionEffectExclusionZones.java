@@ -6,7 +6,6 @@
 package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Ordering;
-import me.shedaniel.rei.api.BaseBoundsHandler;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.listeners.AbstractInventoryScreenHooks;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
@@ -19,10 +18,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
-public class DefaultPotionEffectExclusionZones implements BaseBoundsHandler.ExclusionZoneSupplier {
+public class DefaultPotionEffectExclusionZones implements Function<Boolean, List<Rectangle>> {
     @Override
-    public List<Rectangle> apply(boolean isOnRightSide) {
+    public List<Rectangle> apply(Boolean isOnRightSide) {
         if (isOnRightSide || !(ScreenHelper.getLastContainerScreen() instanceof AbstractInventoryScreen) || !((AbstractInventoryScreenHooks) ScreenHelper.getLastContainerScreen()).rei_doesOffsetGuiForEffects())
             return Collections.emptyList();
         Collection<StatusEffectInstance> activePotionEffects = MinecraftClient.getInstance().player.getStatusEffects();

@@ -347,8 +347,8 @@ public class RecipeViewingScreen extends Screen {
     }
     
     private int getRecipesPerPage() {
-        if (selectedCategory.getDisplaySettings().getFixedRecipesPerPage() > 0)
-            return selectedCategory.getDisplaySettings().getFixedRecipesPerPage() - 1;
+        if (selectedCategory.getFixedRecipesPerPage() > 0)
+            return selectedCategory.getFixedRecipesPerPage() - 1;
         int height = selectedCategory.getDisplayHeight();
         return MathHelper.clamp(MathHelper.floor(((double) largestHeight - 40d) / ((double) height + 7d)) - 1, 0, Math.min(RoughlyEnoughItemsCore.getConfigManager().getConfig().maxRecipePerPage - 1, selectedCategory.getMaximumRecipePerPage() - 1));
     }
