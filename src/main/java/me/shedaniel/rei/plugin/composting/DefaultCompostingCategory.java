@@ -7,9 +7,7 @@ package me.shedaniel.rei.plugin.composting;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
-import me.shedaniel.rei.api.DisplaySettings;
 import me.shedaniel.rei.api.RecipeCategory;
-import me.shedaniel.rei.api.Renderable;
 import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.gui.renderables.RecipeRenderer;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
@@ -40,7 +38,7 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
     
     @Override
     public Renderer getIcon() {
-        return Renderable.fromItemStack(new ItemStack(Blocks.COMPOSTER));
+        return Renderer.fromItemStack(new ItemStack(Blocks.COMPOSTER));
     }
     
     @Override
@@ -100,28 +98,12 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
     }
     
     @Override
-    public DisplaySettings<DefaultCompostingDisplay> getDisplaySettings() {
-        return new DisplaySettings<DefaultCompostingDisplay>() {
-            @Override
-            public int getDisplayHeight(RecipeCategory<?> recipeCategory) {
-                return 140;
-            }
-            
-            @Override
-            public int getDisplayWidth(RecipeCategory<?> recipeCategory, DefaultCompostingDisplay display) {
-                return 150;
-            }
-            
-            @Override
-            public int getMaximumRecipePerPage(RecipeCategory<?> recipeCategory) {
-                return -1;
-            }
-            
-            @Override
-            public int getFixedRecipesPerPage() {
-                return 1;
-            }
-        };
+    public int getDisplayHeight() {
+        return 140;
     }
     
+    @Override
+    public int getFixedRecipesPerPage() {
+        return 1;
+    }
 }

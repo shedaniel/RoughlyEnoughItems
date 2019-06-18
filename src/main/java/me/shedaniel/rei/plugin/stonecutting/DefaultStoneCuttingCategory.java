@@ -6,9 +6,7 @@
 package me.shedaniel.rei.plugin.stonecutting;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import me.shedaniel.rei.api.DisplaySettings;
 import me.shedaniel.rei.api.RecipeCategory;
-import me.shedaniel.rei.api.Renderable;
 import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.SlotWidget;
@@ -36,7 +34,7 @@ public class DefaultStoneCuttingCategory implements RecipeCategory<DefaultStoneC
     
     @Override
     public Renderer getIcon() {
-        return Renderable.fromItemStack(new ItemStack(Blocks.STONECUTTER));
+        return Renderer.fromItemStack(new ItemStack(Blocks.STONECUTTER));
     }
     
     @Override
@@ -63,23 +61,8 @@ public class DefaultStoneCuttingCategory implements RecipeCategory<DefaultStoneC
     }
     
     @Override
-    public DisplaySettings<DefaultStoneCuttingDisplay> getDisplaySettings() {
-        return new DisplaySettings<DefaultStoneCuttingDisplay>() {
-            @Override
-            public int getDisplayHeight(RecipeCategory<?> category) {
-                return 36;
-            }
-            
-            @Override
-            public int getDisplayWidth(RecipeCategory<?> category, DefaultStoneCuttingDisplay display) {
-                return 150;
-            }
-            
-            @Override
-            public int getMaximumRecipePerPage(RecipeCategory<?> category) {
-                return 99;
-            }
-        };
+    public int getDisplayHeight() {
+        return 36;
     }
     
 }

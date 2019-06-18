@@ -8,7 +8,6 @@ package me.shedaniel.rei.plugin.crafting;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.api.RecipeCategory;
-import me.shedaniel.rei.api.Renderable;
 import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.SlotWidget;
@@ -37,7 +36,7 @@ public class DefaultCraftingCategory implements RecipeCategory<DefaultCraftingDi
     
     @Override
     public Renderer getIcon() {
-        return Renderable.fromItemStack(new ItemStack(Blocks.CRAFTING_TABLE));
+        return Renderer.fromItemStack(new ItemStack(Blocks.CRAFTING_TABLE));
     }
     
     @Override

@@ -19,8 +19,8 @@ import java.util.stream.Collectors;
 
 public class DisplayHelperImpl implements DisplayHelper {
     
-    private static final Comparator<DisplayBoundsHandler> BOUNDS_HANDLER_COMPARATOR;
-    private static final DisplayBoundsHandler EMPTY = new DisplayBoundsHandler() {
+    private static final Comparator<DisplayBoundsHandler<?>> BOUNDS_HANDLER_COMPARATOR;
+    private static final DisplayBoundsHandler<Object> EMPTY = new DisplayBoundsHandler() {
         @Override
         public Class getBaseSupportedClass() {
             return null;
@@ -43,27 +43,27 @@ public class DisplayHelperImpl implements DisplayHelper {
     };
     
     static {
-        Comparator<DisplayBoundsHandler> comparator = Comparator.comparingDouble(DisplayBoundsHandler::getPriority);
+        Comparator<DisplayBoundsHandler<?>> comparator = Comparator.comparingDouble(DisplayBoundsHandler::getPriority);
         BOUNDS_HANDLER_COMPARATOR = comparator.reversed();
     }
     
-    private List<DisplayBoundsHandler> screenDisplayBoundsHandlers = Lists.newArrayList();
-    private Map<Class, DisplayBoundsHandler> handlerCache = Maps.newHashMap();
+    private List<DisplayBoundsHandler<?>> screenDisplayBoundsHandlers = Lists.newArrayList();
+    private Map<Class<?>, DisplayBoundsHandler<?>> handlerCache = Maps.newHashMap();
     private BaseBoundsHandler baseBoundsHandler;
     
     @Override
-    public List<DisplayBoundsHandler> getSortedBoundsHandlers(Class screenClass) {
+    public List<DisplayBoundsHandler<?>> getSortedBoundsHandlers(Class<?> screenClass) {
         return screenDisplayBoundsHandlers.stream().filter(handler -> handler.getBaseSupportedClass().isAssignableFrom(screenClass)).sorted(BOUNDS_HANDLER_COMPARATOR).collect(Collectors.toList());
     }
     
     @Override
-    public List<DisplayBoundsHandler> getAllBoundsHandlers() {
+    public List<DisplayBoundsHandler<?>> getAllBoundsHandlers() {
         return screenDisplayBoundsHandlers;
     }
     
     @Override
-    public DisplayBoundsHandler getResponsibleBoundsHandler(Class screenClass) {
-        Optional<DisplayBoundsHandler> any = handlerCache.entrySet().stream().filter(entry -> entry.getKey().equals(screenClass)).map(Map.Entry::getValue).findAny();
+    public DisplayBoundsHandler<?> getResponsibleBoundsHandler(Class<?> screenClass) {
+        Optional<? extends DisplayBoundsHandler<?>> any = handlerCache.entrySet().stream().filter(entry -> entry.getKey().equals(screenClass)).map(Map.Entry::getValue).findAny();
         if (any.isPresent())
             return any.get();
         handlerCache.put(screenClass, screenDisplayBoundsHandlers.stream().filter(handler -> handler.getBaseSupportedClass().isAssignableFrom(screenClass)).sorted(BOUNDS_HANDLER_COMPARATOR).findAny().orElse(EMPTY));
@@ -71,7 +71,7 @@ public class DisplayHelperImpl implements DisplayHelper {
     }
     
     @Override
-    public void registerBoundsHandler(DisplayBoundsHandler handler) {
+    public void registerBoundsHandler(DisplayBoundsHandler<?> handler) {
         screenDisplayBoundsHandlers.add(handler);
     }
     

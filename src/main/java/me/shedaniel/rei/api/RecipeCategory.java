@@ -12,7 +12,6 @@ import me.shedaniel.rei.gui.widget.CategoryBaseWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.Widget;
 import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
 import java.awt.*;
@@ -31,25 +30,11 @@ public interface RecipeCategory<T extends RecipeDisplay> {
     Identifier getIdentifier();
     
     /**
-     * Gets the stack to render for the icon
-     *
-     * @return the stack to render
-     * @deprecated use {@link RecipeCategory#getIcon()} instead
-     */
-    @Deprecated
-    default ItemStack getCategoryIcon() {
-        return ItemStack.EMPTY;
-    }
-    
-    /**
      * Gets the renderer of the icon, allowing developers to render things other than items
      *
      * @return the renderer of the icon
      */
-    @SuppressWarnings("deprecation")
-    default Renderer getIcon() {
-        return Renderable.fromItemStackSupplier(this::getCategoryIcon);
-    }
+    Renderer getIcon();
     
     /**
      * Gets the category name
@@ -66,7 +51,7 @@ public interface RecipeCategory<T extends RecipeDisplay> {
      */
     @SuppressWarnings("unchecked")
     default RecipeRenderer getSimpleRenderer(T recipe) {
-        return Renderable.fromRecipe(recipe::getInput, recipe::getOutput);
+        return Renderer.fromRecipe(recipe::getInput, recipe::getOutput);
     }
     
     /**
@@ -100,58 +85,40 @@ public interface RecipeCategory<T extends RecipeDisplay> {
     }
     
     /**
-     * Gets the display settings for the category, used for getting the bounds for the display
-     *
-     * @return the display settings
-     */
-    default DisplaySettings<T> getDisplaySettings() {
-        return new DisplaySettings<T>() {
-            @Override
-            public int getDisplayHeight(RecipeCategory<?> category) {
-                return 66;
-            }
-            
-            @Override
-            public int getDisplayWidth(RecipeCategory<?> category, T display) {
-                return 150;
-            }
-            
-            @Override
-            public int getMaximumRecipePerPage(RecipeCategory<?> category) {
-                return 99;
-            }
-        };
-    }
-    
-    /**
      * Gets the recipe display height
-     * Please do not override this, use {@link RecipeCategory#getDisplaySettings()} instead
      *
      * @return the recipe display height
      */
     default int getDisplayHeight() {
-        return RecipeHelper.getInstance().getCachedCategorySettings(getIdentifier()).map(settings -> settings.getDisplayHeight(this)).orElse(0);
+        return 66;
     }
     
     /**
      * Gets the recipe display width
-     * Please do not override this, use {@link RecipeCategory#getDisplaySettings()} instead
      *
      * @param display the recipe display
      * @return the recipe display width
      */
     default int getDisplayWidth(T display) {
-        return RecipeHelper.getInstance().getCachedCategorySettings(getIdentifier()).map(settings -> settings.getDisplayWidth(this, display)).orElse(0);
+        return 150;
     }
     
     /**
      * Gets the maximum recipe per page.
-     * Please do not override this, use {@link RecipeCategory#getDisplaySettings()} instead
      *
      * @return the maximum amount of recipes for page
      */
     default int getMaximumRecipePerPage() {
-        return RecipeHelper.getInstance().getCachedCategorySettings(getIdentifier()).map(settings -> settings.getMaximumRecipePerPage(this)).orElse(0);
+        return 99;
+    }
+    
+    /**
+     * Gets the fixed amount of recipes per page.
+     *
+     * @return the amount of recipes, returns -1 if not fixed
+     */
+    default int getFixedRecipesPerPage() {
+        return -1;
     }
     
     /**

@@ -24,15 +24,15 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
     
     private static final Function<Rectangle, String> RECTANGLE_STRING_FUNCTION = rectangle -> rectangle.x + "," + rectangle.y + "," + rectangle.width + "," + rectangle.height;
     private static final Comparator<Rectangle> RECTANGLE_COMPARATOR = BaseBoundsHandlerImpl::compare;
-    private static final Comparator<Pair<Pair<Class<?>, Float>, ExclusionZoneSupplier>> LIST_PAIR_COMPARATOR;
+    private static final Comparator<Pair<Pair<Class<?>, Float>, Function<Boolean, List<Rectangle>>>> LIST_PAIR_COMPARATOR;
     
     static {
-        Comparator<Pair<Pair<Class<?>, Float>, ExclusionZoneSupplier>> comparator = Comparator.comparingDouble(value -> value.getLeft().getRight());
+        Comparator<Pair<Pair<Class<?>, Float>, Function<Boolean, List<Rectangle>>>> comparator = Comparator.comparingDouble(value -> value.getLeft().getRight());
         LIST_PAIR_COMPARATOR = comparator.reversed();
     }
     
     private String lastArea = null;
-    private List<Pair<Pair<Class<?>, Float>, ExclusionZoneSupplier>> list = Lists.newArrayList();
+    private List<Pair<Pair<Class<?>, Float>, Function<Boolean, List<Rectangle>>>> list = Lists.newArrayList();
     
     private static int compare(Rectangle o1, Rectangle o2) {return RECTANGLE_STRING_FUNCTION.apply(o1).compareTo(RECTANGLE_STRING_FUNCTION.apply(o2));}
     
@@ -94,7 +94,7 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
     }
     
     public List<Rectangle> getCurrentExclusionZones(Class<?> currentScreenClass, boolean isOnRightSide) {
-        List<Pair<Pair<Class<?>, Float>, ExclusionZoneSupplier>> only = list.stream().filter(pair -> pair.getLeft().getLeft().isAssignableFrom(currentScreenClass)).collect(Collectors.toList());
+        List<Pair<Pair<Class<?>, Float>, Function<Boolean, List<Rectangle>>>> only = list.stream().filter(pair -> pair.getLeft().getLeft().isAssignableFrom(currentScreenClass)).collect(Collectors.toList());
         only.sort(LIST_PAIR_COMPARATOR);
         List<Rectangle> rectangles = Lists.newArrayList();
         only.forEach(pair -> rectangles.addAll(pair.getRight().apply(isOnRightSide)));
@@ -102,7 +102,7 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
     }
     
     @Override
-    public void registerExclusionZones(Class<?> screenClass, ExclusionZoneSupplier supplier) {
+    public void registerExclusionZones(Class<?> screenClass, Function<Boolean, List<Rectangle>> supplier) {
         list.add(new Pair<>(new Pair<>(screenClass, 0f), supplier));
     }
     

@@ -197,14 +197,6 @@ public interface RecipeHelper {
     <T extends Recipe<?>> void registerRecipes(Identifier category, Predicate<Recipe> recipeFilter, Function<T, RecipeDisplay> mappingFunction);
     
     /**
-     * Gets the cached category setting by the category identifier
-     *
-     * @param category the identifier of the category
-     * @return the optional of the category settings
-     */
-    Optional<DisplaySettings> getCachedCategorySettings(Identifier category);
-    
-    /**
      * Registers a live recipe generator.
      *
      * @param liveRecipeGenerator the generator to register
