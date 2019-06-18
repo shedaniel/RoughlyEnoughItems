@@ -6,6 +6,7 @@
 package me.shedaniel.rei.plugin.crafting;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.ShapedRecipe;
 import net.minecraft.util.Identifier;
 
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class DefaultShapedDisplay implements DefaultCraftingDisplay<ShapedRecipe> {
+public class DefaultShapedDisplay implements DefaultCraftingDisplay {
     
     private ShapedRecipe display;
     private List<List<ItemStack>> input;
@@ -50,6 +51,11 @@ public class DefaultShapedDisplay implements DefaultCraftingDisplay<ShapedRecipe
     @Override
     public int getHeight() {
         return display.getHeight();
+    }
+    
+    @Override
+    public Optional<Recipe<?>> getOptionalRecipe() {
+        return Optional.ofNullable(display);
     }
     
     @Override

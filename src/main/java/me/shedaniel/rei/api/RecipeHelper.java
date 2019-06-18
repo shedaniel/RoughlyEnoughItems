@@ -152,6 +152,8 @@ public interface RecipeHelper {
      */
     Map<RecipeCategory, List<RecipeDisplay>> getAllRecipes();
     
+    List<RecipeDisplay> getAllRecipesFromCategory(RecipeCategory category);
+    
     /**
      * Registers a recipe visibility handler
      *

@@ -62,4 +62,8 @@ public class DefaultBlastingDisplay implements RecipeDisplay {
         return input;
     }
     
+    public Optional<BlastingRecipe> getOptionalRecipe() {
+        return Optional.ofNullable(display);
+    }
+    
 }

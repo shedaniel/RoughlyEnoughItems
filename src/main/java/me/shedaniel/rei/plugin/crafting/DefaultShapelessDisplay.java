@@ -6,6 +6,7 @@
 package me.shedaniel.rei.plugin.crafting;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.ShapelessRecipe;
 import net.minecraft.util.Identifier;
 
@@ -25,6 +26,11 @@ public class DefaultShapelessDisplay implements DefaultCraftingDisplay {
         this.display = recipe;
         this.input = recipe.getPreviewInputs().stream().map(i -> Arrays.asList(i.getStackArray())).collect(Collectors.toList());
         this.output = Collections.singletonList(recipe.getOutput());
+    }
+    
+    @Override
+    public Optional<Recipe<?>> getOptionalRecipe() {
+        return Optional.ofNullable(display);
     }
     
     @Override

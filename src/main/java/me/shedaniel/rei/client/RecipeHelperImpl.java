@@ -9,11 +9,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.config.DisplayVisibility;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeManager;
@@ -280,20 +276,6 @@ public class RecipeHelperImpl implements RecipeHelper {
                     return -1f;
                 }
             });
-        registerAutoCraftingHandler(new AutoCraftingHandler() {
-            @Override
-            public double getPriority() {
-                return -Double.MAX_VALUE;
-            }
-            
-            @Override
-            public boolean handle(MinecraftClient minecraft, Screen recipeViewingScreen, AbstractContainerScreen<?> parentScreen, ContainerScreenOverlay overlay) {
-                minecraft.openScreen(parentScreen);
-                ScreenHelper.getLastOverlay().init();
-                return true;
-            }
-        });
-        
         // Clear Cache
         ((DisplayHelperImpl) RoughlyEnoughItemsCore.getDisplayHelper()).resetCache();
         this.categoryDisplaySettingsMap.clear();
@@ -336,6 +318,11 @@ public class RecipeHelperImpl implements RecipeHelper {
             }
         });
         return map;
+    }
+    
+    @Override
+    public List<RecipeDisplay> getAllRecipesFromCategory(RecipeCategory category) {
+        return recipeCategoryListMap.get(category.getIdentifier());
     }
     
     @Override

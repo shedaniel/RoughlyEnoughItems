@@ -146,4 +146,7 @@ public interface ClientHelper {
      * @return whether there are any recipes to show
      */
     boolean executeViewAllRecipesKeyBind();
+    
+    boolean executeViewAllRecipesFromCategory(Identifier category);
+    
 }

@@ -62,4 +62,7 @@ public class DefaultSmeltingDisplay implements RecipeDisplay {
         return input;
     }
     
+    public Optional<SmeltingRecipe> getOptionalRecipe() {
+        return Optional.ofNullable(display);
+    }
 }
