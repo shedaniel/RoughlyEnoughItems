@@ -10,13 +10,13 @@ import java.util.regex.Pattern;
 
 public class SearchArgument {
     
-    public static final Function<Integer, Boolean> INCLUDE = integer -> integer > -1;
-    public static final Function<Integer, Boolean> NOT_INCLUDE = integer -> integer <= -1;
+    public static final SearchArgument ALWAYS = new SearchArgument(ArgumentType.ALWAYS, "", true);
     private ArgumentType argumentType;
     private String text;
+    public final Function<String, Boolean> INCLUDE = s -> search(text, s);
+    public final Function<String, Boolean> NOT_INCLUDE = s -> !search(text, s);
     private boolean include;
     private Pattern pattern;
-    public static final SearchArgument ALWAYS = new SearchArgument(ArgumentType.ALWAYS, "", true);
     
     public SearchArgument(ArgumentType argumentType, String text, boolean include) {
         this(argumentType, text, include, true);
@@ -28,8 +28,30 @@ public class SearchArgument {
         this.include = include;
     }
     
-    public static Function<Integer, Boolean> getFunction(boolean include) {
-        return include ? SearchArgument.INCLUDE : SearchArgument.NOT_INCLUDE;
+    public static boolean search(CharSequence pattern, CharSequence text) {
+        int patternLength = pattern.length();
+        if (patternLength == 0)
+            return true;
+        int shift[] = new int[256];
+        for(int k = 0; k < 256; k++)
+            shift[k] = patternLength;
+        for(int k = 0; k < patternLength - 1; k++)
+            shift[pattern.charAt(k)] = patternLength - 1 - k;
+        int i = 0, j = 0;
+        while ((i + patternLength) <= text.length()) {
+            j = patternLength - 1;
+            while (text.charAt(i + j) == pattern.charAt(j)) {
+                j -= 1;
+                if (j < 0)
+                    return i >= 0;
+            }
+            i = i + shift[text.charAt(i + patternLength - 1)];
+        }
+        return false;
+    }
+    
+    public Function<String, Boolean> getFunction(boolean include) {
+        return include ? INCLUDE : NOT_INCLUDE;
     }
     
     public ArgumentType getArgumentType() {

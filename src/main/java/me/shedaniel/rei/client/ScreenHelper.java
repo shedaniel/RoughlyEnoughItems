@@ -20,6 +20,7 @@ import org.apache.logging.log4j.util.TriConsumer;
 
 import java.awt.*;
 import java.util.List;
+import java.util.Optional;
 
 public class ScreenHelper implements ClientModInitializer {
     
@@ -35,6 +36,10 @@ public class ScreenHelper implements ClientModInitializer {
     
     public static void toggleOverlayVisible() {
         overlayVisible = !overlayVisible;
+    }
+    
+    public static Optional<ContainerScreenOverlay> getOptionalOverlay() {
+        return Optional.ofNullable(overlay);
     }
     
     public static ContainerScreenOverlay getLastOverlay(boolean reset, boolean setPage) {
