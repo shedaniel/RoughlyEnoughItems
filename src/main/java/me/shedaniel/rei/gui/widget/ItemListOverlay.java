@@ -259,12 +259,12 @@ public class ItemListOverlay extends Widget {
     
     private List<ItemStack> processSearchTerm(String searchTerm, List<ItemStack> ol, List<ItemStack> inventoryItems) {
         lastSearchArgument.clear();
-        List<ItemStack> os = Lists.newArrayList(ol), stacks = Lists.newArrayList();
+        List<ItemStack> os = ol;
         if (RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering != ItemListOrdering.registry)
             if (RoughlyEnoughItemsCore.getConfigManager().getConfig().isAscending)
-                os.sort(ASCENDING_COMPARATOR);
+                os = ol.stream().sorted(ASCENDING_COMPARATOR).collect(Collectors.toList());
             else
-                os.sort(DECENDING_COMPARATOR);
+                os = ol.stream().sorted(DECENDING_COMPARATOR).collect(Collectors.toList());
         String[] splitSearchTerm = StringUtils.splitByWholeSeparatorPreserveAllTokens(searchTerm, "|");
         Arrays.stream(splitSearchTerm).forEachOrdered(s -> {
             String[] split = StringUtils.split(s);
@@ -289,10 +289,11 @@ public class ItemListOverlay extends Widget {
             else
                 lastSearchArgument.add(new SearchArgument[]{SearchArgument.ALWAYS});
         });
+        List<ItemStack> stacks = Collections.emptyList();
         if (lastSearchArgument.isEmpty())
-            os.forEach(stacks::add);
+            stacks = Collections.unmodifiableList(os);
         else
-            os.stream().filter(itemStack -> filterItem(itemStack, lastSearchArgument)).forEachOrdered(stacks::add);
+            stacks = Collections.unmodifiableList(os.stream().filter(itemStack -> filterItem(itemStack, lastSearchArgument)).collect(Collectors.toList()));
         if (!RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() || stacks.isEmpty() || inventoryItems.isEmpty())
             return stacks;
         List<ItemStack> workingItems = Lists.newArrayList(RecipeHelper.getInstance().findCraftableByItems(inventoryItems));
