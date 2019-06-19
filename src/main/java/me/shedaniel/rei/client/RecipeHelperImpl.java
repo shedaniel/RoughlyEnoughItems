@@ -291,6 +291,12 @@ public class RecipeHelperImpl implements RecipeHelper {
                     return -1f;
                 }
             });
+        // Clear Cache
+        this.categoryDisplaySettingsMap.clear();
+        categories.forEach(category -> categoryDisplaySettingsMap.put(category.getIdentifier(), category.getDisplaySettings()));
+        ((DisplayHelperImpl) RoughlyEnoughItemsCore.getDisplayHelper()).resetCache();
+        ScreenHelper.getOptionalOverlay().ifPresent(overlay -> overlay.shouldReInit = true);
+        
         long usedTime = System.currentTimeMillis() - startTime;
         RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered %d recipes displays, %d bounds handler, %d visibility " + "handlers and %d categories (%s) in %d ms.", recipeCount.get(), RoughlyEnoughItemsCore.getDisplayHelper().getAllBoundsHandlers().size(), getDisplayVisibilityHandlers().size(), categories.size(), String.join(", ", categories.stream().map(RecipeCategory::getCategoryName).collect(Collectors.toList())), usedTime);
     }

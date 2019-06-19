@@ -253,6 +253,14 @@ public class VillagerRecipeViewingScreen extends Screen {
     }
     
     @Override
+    public boolean charTyped(char char_1, int int_1) {
+        for(Element listener : children())
+            if (listener.charTyped(char_1, int_1))
+                return true;
+        return super.charTyped(char_1, int_1);
+    }
+    
+    @Override
     public boolean mouseScrolled(double double_1, double double_2, double double_3) {
         double height = buttonWidgets.stream().map(ButtonWidget::getBounds).collect(Collectors.summingDouble(Rectangle::getHeight));
         if (scrollListBounds.contains(double_1, double_2) && height > scrollListBounds.height - 2) {
