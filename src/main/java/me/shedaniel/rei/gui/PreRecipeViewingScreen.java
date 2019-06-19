@@ -37,9 +37,9 @@ public class PreRecipeViewingScreen extends Screen {
     private static final Identifier IDENTIFIER = new Identifier("roughlyenoughitems", "textures/gui/screenshot.png");
     private final List<Widget> widgets;
     private boolean original;
-    private Map<RecipeCategory, List<RecipeDisplay>> map;
+    private Map<RecipeCategory<?>, List<RecipeDisplay>> map;
     
-    public PreRecipeViewingScreen(Map<RecipeCategory, List<RecipeDisplay>> map) {
+    public PreRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map) {
         super(new TranslatableComponent("text.rei.recipe_screen_type.selection"));
         this.widgets = Lists.newArrayList();
         this.original = true;

@@ -39,8 +39,8 @@ public class RecipeViewingScreen extends Screen {
     private final List<Widget> preWidgets;
     private final List<Widget> widgets;
     private final List<TabWidget> tabs;
-    private final Map<RecipeCategory, List<RecipeDisplay>> categoriesMap;
-    private final List<RecipeCategory> categories;
+    private final Map<RecipeCategory<?>, List<RecipeDisplay>> categoriesMap;
+    private final List<RecipeCategory<?>> categories;
     public int guiWidth;
     public int guiHeight;
     public int page, categoryPages;
@@ -48,10 +48,10 @@ public class RecipeViewingScreen extends Screen {
     public boolean choosePageActivated;
     public RecipeChoosePageWidget recipeChoosePageWidget;
     private Rectangle bounds;
-    private RecipeCategory selectedCategory;
+    private RecipeCategory<RecipeDisplay> selectedCategory;
     private ButtonWidget recipeBack, recipeNext, categoryBack, categoryNext;
     
-    public RecipeViewingScreen(Map<RecipeCategory, List<RecipeDisplay>> categoriesMap) {
+    public RecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> categoriesMap) {
         super(new TextComponent(""));
         this.categoryPages = 0;
         this.preWidgets = Lists.newArrayList();
@@ -64,7 +64,7 @@ public class RecipeViewingScreen extends Screen {
             if (categoriesMap.containsKey(category))
                 categories.add(category);
         });
-        this.selectedCategory = categories.get(0);
+        this.selectedCategory = (RecipeCategory<RecipeDisplay>) categories.get(0);
         this.tabs = new ArrayList<>();
         this.choosePageActivated = false;
     }
@@ -150,7 +150,7 @@ public class RecipeViewingScreen extends Screen {
                 currentCategoryIndex--;
                 if (currentCategoryIndex < 0)
                     currentCategoryIndex = categories.size() - 1;
-                selectedCategory = categories.get(currentCategoryIndex);
+                selectedCategory = (RecipeCategory<RecipeDisplay>) categories.get(currentCategoryIndex);
                 categoryPages = MathHelper.floor(currentCategoryIndex / (double) TABS_PER_PAGE);
                 page = 0;
                 RecipeViewingScreen.this.init();
@@ -186,7 +186,7 @@ public class RecipeViewingScreen extends Screen {
                 currentCategoryIndex++;
                 if (currentCategoryIndex >= categories.size())
                     currentCategoryIndex = 0;
-                selectedCategory = categories.get(currentCategoryIndex);
+                selectedCategory = (RecipeCategory<RecipeDisplay>) categories.get(currentCategoryIndex);
                 categoryPages = MathHelper.floor(currentCategoryIndex / (double) TABS_PER_PAGE);
                 page = 0;
                 RecipeViewingScreen.this.init();
@@ -259,7 +259,7 @@ public class RecipeViewingScreen extends Screen {
                             MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                             if (getId() + categoryPages * TABS_PER_PAGE == categories.indexOf(selectedCategory))
                                 return false;
-                            selectedCategory = categories.get(getId() + categoryPages * TABS_PER_PAGE);
+                            selectedCategory = (RecipeCategory<RecipeDisplay>) categories.get(getId() + categoryPages * TABS_PER_PAGE);
                             page = 0;
                             RecipeViewingScreen.this.init();
                             return true;
@@ -334,7 +334,7 @@ public class RecipeViewingScreen extends Screen {
         return list;
     }
     
-    public RecipeCategory getSelectedCategory() {
+    public RecipeCategory<?> getSelectedCategory() {
         return selectedCategory;
     }
     

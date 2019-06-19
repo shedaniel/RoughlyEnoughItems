@@ -92,7 +92,7 @@ public interface RecipeHelper {
      * @param stack the stack to be crafted
      * @return the map of recipes
      */
-    Map<RecipeCategory, List<RecipeDisplay>> getRecipesFor(ItemStack stack);
+    Map<RecipeCategory<?>, List<RecipeDisplay>> getRecipesFor(ItemStack stack);
     
     RecipeCategory getCategory(Identifier identifier);
     
@@ -116,7 +116,7 @@ public interface RecipeHelper {
      * @param stack the stack to be used
      * @return the map of recipes
      */
-    Map<RecipeCategory, List<RecipeDisplay>> getUsagesFor(ItemStack stack);
+    Map<RecipeCategory<?>, List<RecipeDisplay>> getUsagesFor(ItemStack stack);
     
     /**
      * Gets the optional of the speed crafting button area from a category
@@ -155,7 +155,7 @@ public interface RecipeHelper {
      *
      * @return the map of recipes
      */
-    Map<RecipeCategory, List<RecipeDisplay>> getAllRecipes();
+    Map<RecipeCategory<?>, List<RecipeDisplay>> getAllRecipes();
     
     List<RecipeDisplay> getAllRecipesFromCategory(RecipeCategory category);
     

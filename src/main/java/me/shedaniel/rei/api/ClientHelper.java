@@ -47,7 +47,7 @@ public interface ClientHelper {
      *
      * @param map the map of recipes
      */
-    void openRecipeViewingScreen(Map<RecipeCategory, List<RecipeDisplay>> map);
+    void openRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map);
     
     /**
      * Registers REI's keybinds using Fabric API.

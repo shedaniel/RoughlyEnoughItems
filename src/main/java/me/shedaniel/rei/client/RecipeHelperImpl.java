@@ -119,7 +119,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     }
     
     @Override
-    public Map<RecipeCategory, List<RecipeDisplay>> getRecipesFor(ItemStack stack) {
+    public Map<RecipeCategory<?>, List<RecipeDisplay>> getRecipesFor(ItemStack stack) {
         Map<Identifier, List<RecipeDisplay>> categoriesMap = new HashMap<>();
         categories.forEach(f -> categoriesMap.put(f.getIdentifier(), Lists.newArrayList()));
         for(Map.Entry<Identifier, List<RecipeDisplay>> entry : recipeCategoryListMap.entrySet()) {
@@ -131,12 +131,12 @@ public class RecipeHelperImpl implements RecipeHelper {
         }
         for(LiveRecipeGenerator liveRecipeGenerator : liveRecipeGenerators)
             ((Optional<List>) liveRecipeGenerator.getRecipeFor(stack)).ifPresent(o -> categoriesMap.get(liveRecipeGenerator.getCategoryIdentifier()).addAll(o));
-        Map<RecipeCategory, List<RecipeDisplay>> recipeCategoryListMap = Maps.newLinkedHashMap();
+        Map<RecipeCategory<?>, List<RecipeDisplay>> recipeCategoryListMap = Maps.newLinkedHashMap();
         categories.forEach(category -> {
             if (categoriesMap.containsKey(category.getIdentifier()) && !categoriesMap.get(category.getIdentifier()).isEmpty())
                 recipeCategoryListMap.put(category, categoriesMap.get(category.getIdentifier()).stream().filter(display -> isDisplayVisible(display)).collect(Collectors.toList()));
         });
-        for(RecipeCategory category : Lists.newArrayList(recipeCategoryListMap.keySet()))
+        for(RecipeCategory<?> category : Lists.newArrayList(recipeCategoryListMap.keySet()))
             if (recipeCategoryListMap.get(category).isEmpty())
                 recipeCategoryListMap.remove(category);
         return recipeCategoryListMap;
@@ -153,7 +153,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     }
     
     @Override
-    public Map<RecipeCategory, List<RecipeDisplay>> getUsagesFor(ItemStack stack) {
+    public Map<RecipeCategory<?>, List<RecipeDisplay>> getUsagesFor(ItemStack stack) {
         Map<Identifier, List<RecipeDisplay>> categoriesMap = new HashMap<>();
         categories.forEach(f -> categoriesMap.put(f.getIdentifier(), Lists.newArrayList()));
         for(Map.Entry<Identifier, List<RecipeDisplay>> entry : recipeCategoryListMap.entrySet()) {
@@ -175,12 +175,12 @@ public class RecipeHelperImpl implements RecipeHelper {
         }
         for(LiveRecipeGenerator liveRecipeGenerator : liveRecipeGenerators)
             ((Optional<List>) liveRecipeGenerator.getUsageFor(stack)).ifPresent(o -> categoriesMap.get(liveRecipeGenerator.getCategoryIdentifier()).addAll(o));
-        Map<RecipeCategory, List<RecipeDisplay>> recipeCategoryListMap = Maps.newLinkedHashMap();
+        Map<RecipeCategory<?>, List<RecipeDisplay>> recipeCategoryListMap = Maps.newLinkedHashMap();
         categories.forEach(category -> {
             if (categoriesMap.containsKey(category.getIdentifier()) && !categoriesMap.get(category.getIdentifier()).isEmpty())
                 recipeCategoryListMap.put(category, categoriesMap.get(category.getIdentifier()).stream().filter(display -> isDisplayVisible(display)).collect(Collectors.toList()));
         });
-        for(RecipeCategory category : Lists.newArrayList(recipeCategoryListMap.keySet()))
+        for(RecipeCategory<?> category : Lists.newArrayList(recipeCategoryListMap.keySet()))
             if (recipeCategoryListMap.get(category).isEmpty())
                 recipeCategoryListMap.remove(category);
         return recipeCategoryListMap;
@@ -309,8 +309,8 @@ public class RecipeHelperImpl implements RecipeHelper {
     }
     
     @Override
-    public Map<RecipeCategory, List<RecipeDisplay>> getAllRecipes() {
-        Map<RecipeCategory, List<RecipeDisplay>> map = Maps.newLinkedHashMap();
+    public Map<RecipeCategory<?>, List<RecipeDisplay>> getAllRecipes() {
+        Map<RecipeCategory<?>, List<RecipeDisplay>> map = Maps.newLinkedHashMap();
         categories.forEach(recipeCategory -> {
             if (recipeCategoryListMap.containsKey(recipeCategory.getIdentifier())) {
                 List<RecipeDisplay> list = recipeCategoryListMap.get(recipeCategory.getIdentifier()).stream().filter(display -> isDisplayVisible(display)).collect(Collectors.toList());

@@ -6,16 +6,17 @@
 package me.shedaniel.rei.client;
 
 import com.google.common.collect.Lists;
+import me.shedaniel.cloth.hooks.ClothClientHooks;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.widget.SearchFieldWidget;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.event.client.ClientTickCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.client.util.Window;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ActionResult;
 import org.apache.logging.log4j.util.TriConsumer;
 
 import java.util.List;
@@ -27,7 +28,7 @@ public class ScreenHelper implements ClientModInitializer {
     public static List<ItemStack> inventoryStacks = Lists.newArrayList();
     private static boolean overlayVisible = true;
     private static ContainerScreenOverlay overlay;
-    private static AbstractContainerScreen lastContainerScreen = null;
+    private static AbstractContainerScreen<?> lastContainerScreen = null;
     
     public static boolean isOverlayVisible() {
         return overlayVisible;
@@ -53,11 +54,11 @@ public class ScreenHelper implements ClientModInitializer {
         return getLastOverlay(false, false);
     }
     
-    public static AbstractContainerScreen getLastContainerScreen() {
+    public static AbstractContainerScreen<?> getLastContainerScreen() {
         return lastContainerScreen;
     }
     
-    public static void setLastContainerScreen(AbstractContainerScreen lastContainerScreen) {
+    public static void setLastContainerScreen(AbstractContainerScreen<?> lastContainerScreen) {
         ScreenHelper.lastContainerScreen = lastContainerScreen;
     }
     
@@ -86,9 +87,10 @@ public class ScreenHelper implements ClientModInitializer {
     
     @Override
     public void onInitializeClient() {
-        ClientTickCallback.EVENT.register(client -> {
-            if (lastContainerScreen != client.currentScreen && client.currentScreen instanceof AbstractContainerScreen)
-                lastContainerScreen = (AbstractContainerScreen) client.currentScreen;
+        ClothClientHooks.SCREEN_INIT_PRE.register((client, screen, screenHooks) -> {
+            if (lastContainerScreen != screen && screen instanceof AbstractContainerScreen)
+                lastContainerScreen = (AbstractContainerScreen<?>) screen;
+            return ActionResult.PASS;
         });
     }
     
