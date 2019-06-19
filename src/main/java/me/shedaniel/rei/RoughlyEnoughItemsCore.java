@@ -171,7 +171,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             if (screen instanceof AbstractContainerScreen) {
                 if (screen instanceof InventoryScreen && minecraftClient.interactionManager.hasCreativeInventory())
                     return;
-                ScreenHelper.setLastContainerScreen((AbstractContainerScreen) screen);
+                ScreenHelper.setLastContainerScreen((AbstractContainerScreen<?>) screen);
                 boolean alreadyAdded = false;
                 for(Element element : Lists.newArrayList(screenHooks.cloth_getInputListeners()))
                     if (ContainerScreenOverlay.class.isAssignableFrom(element.getClass()))

@@ -41,8 +41,8 @@ import java.util.stream.Collectors;
 public class VillagerRecipeViewingScreen extends Screen {
     
     private static final int TABS_PER_PAGE = 8;
-    private final Map<RecipeCategory, List<RecipeDisplay>> categoryMap;
-    private final List<RecipeCategory> categories;
+    private final Map<RecipeCategory<?>, List<RecipeDisplay>> categoryMap;
+    private final List<RecipeCategory<?>> categories;
     private final List<Widget> widgets;
     private final List<ButtonWidget> buttonWidgets;
     private final List<Renderer> recipeRenderers;
@@ -56,7 +56,7 @@ public class VillagerRecipeViewingScreen extends Screen {
     private boolean draggingScrollBar = false;
     private int tabsPage;
     
-    public VillagerRecipeViewingScreen(Map<RecipeCategory, List<RecipeDisplay>> map) {
+    public VillagerRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map) {
         super(new TextComponent(""));
         this.widgets = Lists.newArrayList();
         this.categoryMap = Maps.newLinkedHashMap();
@@ -90,7 +90,7 @@ public class VillagerRecipeViewingScreen extends Screen {
         this.tabs.clear();
         int largestWidth = width - 100;
         int largestHeight = height - 40;
-        RecipeCategory category = categories.get(selectedCategoryIndex);
+        RecipeCategory<RecipeDisplay> category = (RecipeCategory<RecipeDisplay>) categories.get(selectedCategoryIndex);
         RecipeDisplay display = categoryMap.get(category).get(selectedRecipeIndex);
         int guiWidth = MathHelper.clamp(category.getDisplayWidth(display) + 30, 0, largestWidth) + 100;
         int guiHeight = MathHelper.clamp(category.getDisplayHeight() + 40, 166, largestHeight);
@@ -247,6 +247,14 @@ public class VillagerRecipeViewingScreen extends Screen {
         }
         this.draggingScrollBar = false;
         return super.mouseClicked(mouseX, mouseY, int_1);
+    }
+    
+    @Override
+    public boolean charTyped(char char_1, int int_1) {
+        for(Element listener : children())
+            if (listener.charTyped(char_1, int_1))
+                return true;
+        return super.charTyped(char_1, int_1);
     }
     
     @Override

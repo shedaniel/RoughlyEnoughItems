@@ -14,8 +14,8 @@ public class SearchArgument {
     public static final SearchArgument ALWAYS = new SearchArgument(ArgumentType.ALWAYS, "", true);
     private ArgumentType argumentType;
     private String text;
-    public final Function<String, Boolean> INCLUDE = s -> boyerMooreHorspoolSearch(text, s) > -1;
-    public final Function<String, Boolean> NOT_INCLUDE = s -> boyerMooreHorspoolSearch(text, s) <= -1;
+    public final Function<String, Boolean> INCLUDE = s -> search(text, s);
+    public final Function<String, Boolean> NOT_INCLUDE = s -> !search(text, s);
     private boolean include;
     private Pattern pattern;
     
@@ -29,10 +29,10 @@ public class SearchArgument {
         this.include = include;
     }
     
-    public static int boyerMooreHorspoolSearch(CharSequence pattern, CharSequence text) {
+    public static boolean search(CharSequence pattern, CharSequence text) {
         int patternLength = pattern.length();
         if (patternLength == 0)
-            return 0;
+            return true;
         int shift[] = new int[256];
         for(int k = 0; k < 256; k++)
             shift[k] = patternLength;
@@ -44,11 +44,11 @@ public class SearchArgument {
             while (text.charAt(i + j) == pattern.charAt(j)) {
                 j -= 1;
                 if (j < 0)
-                    return i;
+                    return i >= 0;
             }
             i = i + shift[text.charAt(i + patternLength - 1)];
         }
-        return -1;
+        return false;
     }
     
     public Function<String, Boolean> getFunction(boolean include) {

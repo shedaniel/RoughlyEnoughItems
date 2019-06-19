@@ -178,7 +178,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     @Override
     public boolean executeRecipeKeyBind(ItemStack stack) {
-        Map<RecipeCategory, List<RecipeDisplay>> map = RecipeHelper.getInstance().getRecipesFor(stack);
+        Map<RecipeCategory<?>, List<RecipeDisplay>> map = RecipeHelper.getInstance().getRecipesFor(stack);
         if (map.keySet().size() > 0)
             openRecipeViewingScreen(map);
         return map.keySet().size() > 0;
@@ -186,7 +186,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     @Override
     public boolean executeUsageKeyBind(ItemStack stack) {
-        Map<RecipeCategory, List<RecipeDisplay>> map = RecipeHelper.getInstance().getUsagesFor(stack);
+        Map<RecipeCategory<?>, List<RecipeDisplay>> map = RecipeHelper.getInstance().getUsagesFor(stack);
         if (map.keySet().size() > 0)
             openRecipeViewingScreen(map);
         return map.keySet().size() > 0;
@@ -205,7 +205,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     @Override
     public boolean executeViewAllRecipesKeyBind() {
-        Map<RecipeCategory, List<RecipeDisplay>> map = RecipeHelper.getInstance().getAllRecipes();
+        Map<RecipeCategory<?>, List<RecipeDisplay>> map = RecipeHelper.getInstance().getAllRecipes();
         if (map.keySet().size() > 0)
             openRecipeViewingScreen(map);
         return map.keySet().size() > 0;
@@ -213,7 +213,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     @Override
     public boolean executeViewAllRecipesFromCategory(Identifier category) {
-        Map<RecipeCategory, List<RecipeDisplay>> map = Maps.newLinkedHashMap();
+        Map<RecipeCategory<?>, List<RecipeDisplay>> map = Maps.newLinkedHashMap();
         Optional<RecipeCategory> any = RecipeHelper.getInstance().getAllCategories().stream().filter(c -> c.getIdentifier().equals(category)).findAny();
         if (!any.isPresent())
             return false;
@@ -226,7 +226,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     @Override
     public boolean executeViewAllRecipesFromCategories(List<Identifier> categories) {
-        Map<RecipeCategory, List<RecipeDisplay>> map = Maps.newLinkedHashMap();
+        Map<RecipeCategory<?>, List<RecipeDisplay>> map = Maps.newLinkedHashMap();
         for(Identifier category : categories) {
             Optional<RecipeCategory> any = RecipeHelper.getInstance().getAllCategories().stream().filter(c -> c.getIdentifier().equals(category)).findAny();
             if (!any.isPresent())
@@ -240,7 +240,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     }
     
     @Override
-    public void openRecipeViewingScreen(Map<RecipeCategory, List<RecipeDisplay>> map) {
+    public void openRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map) {
         if (RoughlyEnoughItemsCore.getConfigManager().getConfig().screenType == RecipeScreenType.VILLAGER)
             MinecraftClient.getInstance().openScreen(new VillagerRecipeViewingScreen(map));
         else if (RoughlyEnoughItemsCore.getConfigManager().getConfig().screenType == RecipeScreenType.UNSET)
