@@ -81,6 +81,7 @@ public class DefaultPlugin implements REIPluginEntry {
             try {
                 itemRegistry.registerItemStack(itemRegistry.getAllStacksFromItem(item));
             } catch (Exception e) {
+                e.printStackTrace();
             }
         });
         Registry.ENCHANTMENT.forEach(enchantment -> {
