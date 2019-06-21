@@ -39,7 +39,6 @@ public class ItemListOverlay extends Widget {
     
     private static final String SPACE = " ", EMPTY = "";
     private static final Comparator<ItemStack> ASCENDING_COMPARATOR;
-    private static final Comparator<ItemStack> DECENDING_COMPARATOR;
     private static List<Item> searchBlacklisted = Lists.newArrayList();
     
     static {
@@ -52,11 +51,10 @@ public class ItemListOverlay extends Widget {
             }
             return 0;
         };
-        DECENDING_COMPARATOR = ASCENDING_COMPARATOR.reversed();
     }
     
-    private final List<ItemStack> currentDisplayed;
     private final List<SearchArgument[]> lastSearchArgument;
+    private List<ItemStack> currentDisplayed;
     private List<Widget> widgets;
     private int width, height, page;
     private Rectangle rectangle, listArea;
@@ -163,10 +161,8 @@ public class ItemListOverlay extends Widget {
         this.page = page;
         this.widgets = Lists.newLinkedList();
         calculateListSize(rectangle);
-        if (currentDisplayed.isEmpty() || processSearchTerm) {
-            currentDisplayed.clear();
-            currentDisplayed.addAll(processSearchTerm(searchTerm, RoughlyEnoughItemsCore.getItemRegisterer().getItemList(), ScreenHelper.inventoryStacks));
-        }
+        if (currentDisplayed.isEmpty() || processSearchTerm)
+            currentDisplayed = processSearchTerm(searchTerm, RoughlyEnoughItemsCore.getItemRegisterer().getItemList(), new ArrayList<>(ScreenHelper.inventoryStacks));
         int startX = (int) rectangle.getCenterX() - width * 9;
         int startY = (int) rectangle.getCenterY() - height * 9;
         this.listArea = new Rectangle((int) startX, (int) startY, width * 18, height * 18);
@@ -259,12 +255,11 @@ public class ItemListOverlay extends Widget {
     
     private List<ItemStack> processSearchTerm(String searchTerm, List<ItemStack> ol, List<ItemStack> inventoryItems) {
         lastSearchArgument.clear();
-        List<ItemStack> os = ol;
+        List<ItemStack> os = new LinkedList<>(ol);
         if (RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering != ItemListOrdering.registry)
-            if (RoughlyEnoughItemsCore.getConfigManager().getConfig().isAscending)
-                os = ol.stream().sorted(ASCENDING_COMPARATOR).collect(Collectors.toList());
-            else
-                os = ol.stream().sorted(DECENDING_COMPARATOR).collect(Collectors.toList());
+            os = ol.stream().sorted(ASCENDING_COMPARATOR).collect(Collectors.toList());
+        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isAscending)
+            Collections.reverse(os);
         String[] splitSearchTerm = StringUtils.splitByWholeSeparatorPreserveAllTokens(searchTerm, "|");
         Arrays.stream(splitSearchTerm).forEachOrdered(s -> {
             String[] split = StringUtils.split(s);
