@@ -13,6 +13,7 @@ import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.*;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.widget.ItemListOverlay;
+import me.shedaniel.rei.listeners.RecipeBookButtonWidgetHooks;
 import me.shedaniel.rei.listeners.RecipeBookGuiHooks;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
@@ -41,7 +42,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 public class RoughlyEnoughItemsCore implements ClientModInitializer {
     
@@ -156,6 +156,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     }
     
     private void registerClothEvents() {
+        final Identifier recipeButtonTex = new Identifier("textures/gui/recipe_button.png");
         ClothClientHooks.SYNC_RECIPES.register((minecraftClient, recipeManager, synchronizeRecipesS2CPacket) -> {
             if (RoughlyEnoughItemsCore.getConfigManager().getConfig().registerRecipesInAnotherThread)
                 CompletableFuture.runAsync(() -> ((RecipeHelperImpl) RoughlyEnoughItemsCore.getRecipeHelper()).recipesLoaded(recipeManager), SYNC_RECIPES);
@@ -164,7 +165,8 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         });
         ClothClientHooks.SCREEN_ADD_BUTTON.register((minecraftClient, screen, abstractButtonWidget) -> {
             if (RoughlyEnoughItemsCore.getConfigManager().getConfig().disableRecipeBook && screen instanceof AbstractContainerScreen && abstractButtonWidget instanceof RecipeBookButtonWidget)
-                return ActionResult.FAIL;
+                if (((RecipeBookButtonWidgetHooks) abstractButtonWidget).rei_getTexture().equals(recipeButtonTex))
+                    return ActionResult.FAIL;
             return ActionResult.PASS;
         });
         ClothClientHooks.SCREEN_INIT_POST.register((minecraftClient, screen, screenHooks) -> {
