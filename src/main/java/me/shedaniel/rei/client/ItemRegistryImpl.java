@@ -15,11 +15,12 @@ import net.minecraft.util.DefaultedList;
 import java.util.Collections;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 public class ItemRegistryImpl implements ItemRegistry {
     
-    private final List<ItemStack> itemList = Lists.newLinkedList();
+    private final CopyOnWriteArrayList<ItemStack> itemList = Lists.newCopyOnWriteArrayList();
     
     @Override
     public List<ItemStack> getItemList() {
