@@ -73,7 +73,7 @@ public interface ItemRegistry {
      * @return whether the stack has been registered
      */
     default boolean alreadyContain(ItemStack stack) {
-        return getItemList().stream().anyMatch(stack1 -> ItemStack.areEqual(stack, stack1));
+        return getItemList().stream().anyMatch(stack1 -> ItemStack.areEqualIgnoreDamage(stack, stack1));
     }
     
 }

@@ -32,6 +32,8 @@ public class SearchArgument {
         int patternLength = pattern.length();
         if (patternLength == 0)
             return true;
+        if (patternLength > text.length())
+            return false;
         int shift[] = new int[256];
         for(int k = 0; k < 256; k++)
             shift[k] = patternLength;

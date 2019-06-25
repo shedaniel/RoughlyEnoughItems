@@ -57,7 +57,7 @@ public class MixinBrewingRecipeRegistry {
     private static void rei_registerPotionType(Potion potion) {
         REGISTERED_POTION_TYPES.add(potion);
         SELF_ITEM_RECIPES.forEach(recipe -> {
-            DefaultPlugin.registerBrewingDisplay(new DefaultBrewingDisplay(PotionUtil.setPotion(recipe.input.getDefaultStack(), potion), recipe.ingredient, PotionUtil.setPotion(recipe.output.getDefaultStack(), potion)));
+            DefaultPlugin.registerBrewingDisplay(new DefaultBrewingDisplay(PotionUtil.setPotion(recipe.input.getStackForRender(), potion), recipe.ingredient, PotionUtil.setPotion(recipe.output.getStackForRender(), potion)));
         });
     }
     

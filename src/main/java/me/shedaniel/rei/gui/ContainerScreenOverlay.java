@@ -29,8 +29,8 @@ import net.minecraft.client.util.Window;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.container.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
@@ -75,7 +75,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
         widgets.add(itemListOverlay = new ItemListOverlay(page));
         itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, false);
         
-        widgets.add(buttonLeft = new ButtonWidget(rectangle.x, rectangle.y + 5, 16, 16, new TranslatableComponent("text.rei.left_arrow")) {
+        widgets.add(buttonLeft = new ButtonWidget(rectangle.x, rectangle.y + 5, 16, 16, new TranslatableText("text.rei.left_arrow")) {
             @Override
             public void onPressed() {
                 page--;
@@ -94,7 +94,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
                 return false;
             }
         });
-        widgets.add(buttonRight = new ButtonWidget(rectangle.x + rectangle.width - 18, rectangle.y + 5, 16, 16, new TranslatableComponent("text.rei.right_arrow")) {
+        widgets.add(buttonRight = new ButtonWidget(rectangle.x + rectangle.width - 18, rectangle.y + 5, 16, 16, new TranslatableText("text.rei.right_arrow")) {
             @Override
             public void onPressed() {
                 page++;

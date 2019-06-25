@@ -24,15 +24,15 @@ import net.fabricmc.fabric.impl.client.keybinding.KeyBindingRegistryImpl;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
-import net.minecraft.ChatFormat;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.DefaultedList;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.PacketByteBuf;
 import net.minecraft.util.registry.Registry;
@@ -58,7 +58,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         String mod = getModFromItem(item);
         if (mod.equalsIgnoreCase(""))
             return "";
-        return ChatFormat.BLUE.toString() + mod;
+        return Formatting.BLUE.toString() + mod;
     }
     
     @Override
@@ -66,7 +66,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         String mod = getModFromItem(item);
         if (mod.equalsIgnoreCase(""))
             return "";
-        return ChatFormat.BLUE.toString() + ChatFormat.ITALIC.toString() + mod;
+        return Formatting.BLUE.toString() + Formatting.ITALIC.toString() + mod;
     }
     
     @Override
@@ -74,7 +74,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         String mod = getModFromIdentifier(identifier);
         if (mod.equalsIgnoreCase(""))
             return "";
-        return ChatFormat.BLUE.toString() + ChatFormat.ITALIC.toString() + mod;
+        return Formatting.BLUE.toString() + Formatting.ITALIC.toString() + mod;
     }
     
     @Override
@@ -158,11 +158,11 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         } else {
             Identifier identifier = Registry.ITEM.getId(cheatedStack.getItem());
             String tagMessage = cheatedStack.copy().getTag() != null && !cheatedStack.copy().getTag().isEmpty() ? cheatedStack.copy().getTag().asString() : "";
-            String og = cheatedStack.getAmount() == 1 ? RoughlyEnoughItemsCore.getConfigManager().getConfig().giveCommand.replaceAll(" \\{count}", "") : RoughlyEnoughItemsCore.getConfigManager().getConfig().giveCommand;
-            String madeUpCommand = og.replaceAll("\\{player_name}", MinecraftClient.getInstance().player.getEntityName()).replaceAll("\\{item_name}", identifier.getPath()).replaceAll("\\{item_identifier}", identifier.toString()).replaceAll("\\{nbt}", tagMessage).replaceAll("\\{count}", String.valueOf(cheatedStack.getAmount()));
+            String og = cheatedStack.getCount() == 1 ? RoughlyEnoughItemsCore.getConfigManager().getConfig().giveCommand.replaceAll(" \\{count}", "") : RoughlyEnoughItemsCore.getConfigManager().getConfig().giveCommand;
+            String madeUpCommand = og.replaceAll("\\{player_name}", MinecraftClient.getInstance().player.getEntityName()).replaceAll("\\{item_name}", identifier.getPath()).replaceAll("\\{item_identifier}", identifier.toString()).replaceAll("\\{nbt}", tagMessage).replaceAll("\\{count}", String.valueOf(cheatedStack.getCount()));
             if (madeUpCommand.length() > 256) {
-                madeUpCommand = og.replaceAll("\\{player_name}", MinecraftClient.getInstance().player.getEntityName()).replaceAll("\\{item_name}", identifier.getPath()).replaceAll("\\{item_identifier}", identifier.toString()).replaceAll("\\{nbt}", "").replaceAll("\\{count}", String.valueOf(cheatedStack.getAmount()));
-                MinecraftClient.getInstance().player.addChatMessage(new TranslatableComponent("text.rei.too_long_nbt"), false);
+                madeUpCommand = og.replaceAll("\\{player_name}", MinecraftClient.getInstance().player.getEntityName()).replaceAll("\\{item_name}", identifier.getPath()).replaceAll("\\{item_identifier}", identifier.toString()).replaceAll("\\{nbt}", "").replaceAll("\\{count}", String.valueOf(cheatedStack.getCount()));
+                MinecraftClient.getInstance().player.addChatMessage(new TranslatableText("text.rei.too_long_nbt"), false);
             }
             MinecraftClient.getInstance().player.sendChatMessage(madeUpCommand);
             return true;

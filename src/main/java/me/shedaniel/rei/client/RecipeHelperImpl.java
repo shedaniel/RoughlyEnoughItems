@@ -64,7 +64,7 @@ public class RecipeHelperImpl implements RecipeHelper {
                     boolean slotDone = false;
                     for(ItemStack possibleType : inventoryItems) {
                         for(ItemStack slotPossible : slot)
-                            if (ItemStack.areEqualIgnoreTags(slotPossible, possibleType)) {
+                            if (ItemStack.areItemsEqualIgnoreDamage(slotPossible, possibleType)) {
                                 slotsCraftable++;
                                 slotDone = true;
                                 break;
@@ -125,7 +125,7 @@ public class RecipeHelperImpl implements RecipeHelper {
             RecipeCategory category = getCategory(entry.getKey());
             for(RecipeDisplay recipeDisplay : entry.getValue())
                 for(ItemStack outputStack : (List<ItemStack>) recipeDisplay.getOutput())
-                    if (category.checkTags() ? ItemStack.areEqual(stack, outputStack) : ItemStack.areEqualIgnoreTags(stack, outputStack))
+                    if (category.checkTags() ? ItemStack.areEqualIgnoreDamage(stack, outputStack) : ItemStack.areItemsEqualIgnoreDamage(stack, outputStack))
                         categoriesMap.get(recipeDisplay.getRecipeCategory()).add(recipeDisplay);
         }
         for(LiveRecipeGenerator liveRecipeGenerator : liveRecipeGenerators)
@@ -160,7 +160,7 @@ public class RecipeHelperImpl implements RecipeHelper {
                 boolean found = false;
                 for(List<ItemStack> input : (List<List<ItemStack>>) recipeDisplay.getInput()) {
                     for(ItemStack itemStack : input) {
-                        if (category.checkTags() ? ItemStack.areEqual(itemStack, stack) : ItemStack.areEqualIgnoreTags(itemStack, stack)) {
+                        if (category.checkTags() ? ItemStack.areEqualIgnoreDamage(itemStack, stack) : ItemStack.areItemsEqualIgnoreDamage(itemStack, stack)) {
                             categoriesMap.get(recipeDisplay.getRecipeCategory()).add(recipeDisplay);
                             found = true;
                             break;
