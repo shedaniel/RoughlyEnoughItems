@@ -9,8 +9,8 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.client.ScreenHelper;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.network.chat.Component;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
@@ -28,8 +28,8 @@ public abstract class ButtonWidget extends HighlightableWidget {
     public boolean focused;
     private Rectangle bounds;
     
-    public ButtonWidget(Rectangle rectangle, Component text) {
-        this(rectangle, text.getFormattedText());
+    public ButtonWidget(Rectangle rectangle, Text text) {
+        this(rectangle, text.asFormattedString());
     }
     
     public ButtonWidget(Rectangle rectangle, String text) {
@@ -42,7 +42,7 @@ public abstract class ButtonWidget extends HighlightableWidget {
         this(new Rectangle(x, y, width, height), text);
     }
     
-    public ButtonWidget(int x, int y, int width, int height, Component text) {
+    public ButtonWidget(int x, int y, int width, int height, Text text) {
         this(new Rectangle(x, y, width, height), text);
     }
     

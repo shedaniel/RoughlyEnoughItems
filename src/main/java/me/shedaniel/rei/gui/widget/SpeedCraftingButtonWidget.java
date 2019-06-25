@@ -8,9 +8,9 @@ package me.shedaniel.rei.gui.widget;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.api.SpeedCraftFunctional;
 import me.shedaniel.rei.client.ScreenHelper;
-import net.minecraft.ChatFormat;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.recipe.Recipe;
+import net.minecraft.util.Formatting;
 
 import java.awt.*;
 import java.util.Optional;
@@ -27,7 +27,7 @@ public class SpeedCraftingButtonWidget extends ButtonWidget {
         this.displaySupplier = displaySupplier;
         this.functional = functional;
         Optional<Recipe> recipe = displaySupplier.get().getRecipe();
-        extraTooltip = recipe.isPresent() ? I18n.translate("text.rei.recipe_id", ChatFormat.GRAY.toString(), recipe.get().getId().toString()) : "";
+        extraTooltip = recipe.isPresent() ? I18n.translate("text.rei.recipe_id", Formatting.GRAY.toString(), recipe.get().getId().toString()) : "";
     }
     
     @Override

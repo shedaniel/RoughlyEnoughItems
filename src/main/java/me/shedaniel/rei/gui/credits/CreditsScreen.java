@@ -11,7 +11,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.client.gui.widget.AbstractPressableButtonWidget;
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.text.LiteralText;
 
 public class CreditsScreen extends Screen {
     
@@ -20,7 +20,7 @@ public class CreditsScreen extends Screen {
     private CreditsEntryListWidget entryListWidget;
     
     public CreditsScreen(Screen parent) {
-        super(new TextComponent(""));
+        super(new LiteralText(""));
         this.parent = parent;
     }
     
@@ -40,8 +40,8 @@ public class CreditsScreen extends Screen {
         children.add(entryListWidget = new CreditsEntryListWidget(minecraft, width, height, 32, height - 32));
         entryListWidget.creditsClearEntries();
         for(String line : I18n.translate("text.rei.credit.text").split("\n"))
-            entryListWidget.creditsAddEntry(new CreditsItem(new TextComponent(line)));
-        entryListWidget.creditsAddEntry(new CreditsItem(new TextComponent("")));
+            entryListWidget.creditsAddEntry(new CreditsItem(new LiteralText(line)));
+        entryListWidget.creditsAddEntry(new CreditsItem(new LiteralText("")));
         children.add(buttonDone = new AbstractPressableButtonWidget(width / 2 - 100, height - 26, 200, 20, I18n.translate("gui.done")) {
             @Override
             public void onPress() {

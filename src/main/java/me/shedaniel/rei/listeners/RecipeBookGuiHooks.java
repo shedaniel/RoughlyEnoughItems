@@ -6,7 +6,7 @@
 package me.shedaniel.rei.listeners;
 
 import net.minecraft.client.gui.screen.recipebook.RecipeBookGhostSlots;
-import net.minecraft.client.gui.screen.recipebook.RecipeBookScreen;
+import net.minecraft.client.gui.screen.recipebook.RecipeBookWidget;
 import net.minecraft.client.gui.screen.recipebook.RecipeGroupButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import org.spongepowered.asm.mixin.Mixin;
@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.List;
 
-@Mixin(RecipeBookScreen.class)
+@Mixin(RecipeBookWidget.class)
 public interface RecipeBookGuiHooks {
     
     @Accessor("ghostSlots")

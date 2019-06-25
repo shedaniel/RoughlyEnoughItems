@@ -27,7 +27,7 @@ public class DefaultSmeltingDisplay implements RecipeDisplay<SmeltingRecipe> {
     public DefaultSmeltingDisplay(SmeltingRecipe recipe) {
         this.display = recipe;
         this.input = recipe.getPreviewInputs().stream().map(i -> Arrays.asList(i.getStackArray())).collect(Collectors.toList());
-        this.input.add(FurnaceBlockEntity.createFuelTimeMap().keySet().stream().map(Item::getDefaultStack).collect(Collectors.toList()));
+        this.input.add(FurnaceBlockEntity.createFuelTimeMap().keySet().stream().map(Item::getStackForRender).collect(Collectors.toList()));
         this.output = Collections.singletonList(recipe.getOutput());
     }
     
