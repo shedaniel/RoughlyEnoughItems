@@ -8,7 +8,6 @@ package me.shedaniel.rei.client;
 import com.google.common.base.CharMatcher;
 
 import java.util.function.Function;
-import java.util.regex.Pattern;
 
 public class SearchArgument {
     
@@ -18,7 +17,6 @@ public class SearchArgument {
     public final Function<String, Boolean> INCLUDE = s -> search(text, s);
     public final Function<String, Boolean> NOT_INCLUDE = s -> !search(text, s);
     private boolean include;
-    private Pattern pattern;
     
     public SearchArgument(ArgumentType argumentType, String text, boolean include) {
         this(argumentType, text, include, true);
