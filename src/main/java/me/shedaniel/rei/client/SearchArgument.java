@@ -5,6 +5,8 @@
 
 package me.shedaniel.rei.client;
 
+import com.google.common.base.CharMatcher;
+
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
@@ -28,12 +30,14 @@ public class SearchArgument {
         this.include = include;
     }
     
-    public static boolean search(CharSequence pattern, CharSequence text) {
+    public static boolean search(CharSequence pattern, String text) {
         int patternLength = pattern.length();
         if (patternLength == 0)
             return true;
         if (patternLength > text.length())
             return false;
+        if (!CharMatcher.ascii().matchesAllOf(text) || !CharMatcher.ascii().matchesAllOf(pattern))
+            return text.contains(pattern);
         int shift[] = new int[256];
         for(int k = 0; k < 256; k++)
             shift[k] = patternLength;
