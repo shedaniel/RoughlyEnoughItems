@@ -9,7 +9,6 @@ import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
-import net.minecraft.util.ActionResult;
 
 import java.util.function.Supplier;
 

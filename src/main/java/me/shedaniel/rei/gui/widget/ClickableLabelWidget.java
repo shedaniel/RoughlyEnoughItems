@@ -6,7 +6,7 @@
 package me.shedaniel.rei.gui.widget;
 
 import me.shedaniel.rei.client.ScreenHelper;
-import net.minecraft.ChatFormat;
+import net.minecraft.util.Formatting;
 
 import java.awt.*;
 import java.util.Optional;
@@ -30,7 +30,7 @@ public abstract class ClickableLabelWidget extends LabelWidget {
         int colour = getDefaultColor();
         if (clickable && isHovered(mouseX, mouseY))
             colour = getHoveredColor();
-        drawCenteredString(font, (isHovered(mouseX, mouseY) ? ChatFormat.UNDERLINE.toString() : "") + text, x, y, colour);
+        drawCenteredString(font, (isHovered(mouseX, mouseY) ? Formatting.UNDERLINE.toString() : "") + text, x, y, colour);
         if (clickable && getTooltips().isPresent())
             if (!focused && isHighlighted(mouseX, mouseY))
                 ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltips().get().split("\n")));

@@ -13,12 +13,12 @@ import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.SlotWidget;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
-import net.minecraft.ChatFormat;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
 import java.awt.*;
@@ -73,11 +73,11 @@ public class DefaultCraftingCategory implements RecipeCategory<DefaultCraftingDi
         widgets.add(new SlotWidget(startPoint.x + 95, startPoint.y + 19, recipeDisplaySupplier.get().getOutput(), false, true, true) {
             @Override
             protected String getItemCountOverlay(ItemStack currentStack) {
-                if (currentStack.getAmount() == 1)
+                if (currentStack.getCount() == 1)
                     return "";
-                if (currentStack.getAmount() < 1)
-                    return ChatFormat.RED.toString() + currentStack.getAmount();
-                return currentStack.getAmount() + "";
+                if (currentStack.getCount() < 1)
+                    return Formatting.RED.toString() + currentStack.getCount();
+                return currentStack.getCount() + "";
             }
         });
         return widgets;

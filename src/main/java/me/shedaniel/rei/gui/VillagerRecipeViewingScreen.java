@@ -15,7 +15,6 @@ import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.renderers.RecipeRenderer;
 import me.shedaniel.rei.gui.widget.*;
-import net.minecraft.ChatFormat;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
@@ -26,9 +25,10 @@ import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
@@ -57,7 +57,7 @@ public class VillagerRecipeViewingScreen extends Screen {
     private int tabsPage;
     
     public VillagerRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map) {
-        super(new TextComponent(""));
+        super(new LiteralText(""));
         this.widgets = Lists.newArrayList();
         this.categoryMap = Maps.newLinkedHashMap();
         this.selectedCategoryIndex = 0;
@@ -105,7 +105,7 @@ public class VillagerRecipeViewingScreen extends Screen {
             int yy = bounds.y + bounds.height + 5;
             widgets.add(new CategoryBaseWidget(new Rectangle(xx - 6, bounds.y + bounds.height - 5, 11 + w * 18, 15 + h * 18)));
             int index = 0;
-            List<String> list = Collections.singletonList(ChatFormat.YELLOW.toString() + I18n.translate("text.rei.working_station"));
+            List<String> list = Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("text.rei.working_station"));
             for(List<ItemStack> workingStation : workingStations) {
                 widgets.add(new SlotWidget(xx, yy, workingStation, true, true, true) {
                     @Override
@@ -177,7 +177,7 @@ public class VillagerRecipeViewingScreen extends Screen {
             }
         }
         ButtonWidget w, w2;
-        this.widgets.add(w = new ButtonWidget(bounds.x + 2, bounds.y - 16, 10, 10, new TranslatableComponent("text.rei.left_arrow")) {
+        this.widgets.add(w = new ButtonWidget(bounds.x + 2, bounds.y - 16, 10, 10, new TranslatableText("text.rei.left_arrow")) {
             @Override
             public void onPressed() {
                 tabsPage--;
@@ -186,7 +186,7 @@ public class VillagerRecipeViewingScreen extends Screen {
                 VillagerRecipeViewingScreen.this.init();
             }
         });
-        this.widgets.add(w2 = new ButtonWidget(bounds.x + bounds.width - 12, bounds.y - 16, 10, 10, new TranslatableComponent("text.rei.right_arrow")) {
+        this.widgets.add(w2 = new ButtonWidget(bounds.x + bounds.width - 12, bounds.y - 16, 10, 10, new TranslatableText("text.rei.right_arrow")) {
             @Override
             public void onPressed() {
                 tabsPage++;
@@ -212,7 +212,7 @@ public class VillagerRecipeViewingScreen extends Screen {
             @Override
             public void render(int mouseX, int mouseY, float delta) {
                 GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-                font.draw((isHovered(mouseX, mouseY) ? ChatFormat.UNDERLINE.toString() : "") + text, x - font.getStringWidth(text) / 2, y, getDefaultColor());
+                font.draw((isHovered(mouseX, mouseY) ? Formatting.UNDERLINE.toString() : "") + text, x - font.getStringWidth(text) / 2, y, getDefaultColor());
                 if (clickable && getTooltips().isPresent())
                     if (!focused && isHighlighted(mouseX, mouseY))
                         ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltips().get().split("\n")));

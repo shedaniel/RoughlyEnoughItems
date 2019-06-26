@@ -46,7 +46,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 
 import java.awt.*;
-import java.util.List;
 import java.util.*;
 
 public class DefaultPlugin implements REIPluginEntry {
@@ -90,7 +89,7 @@ public class DefaultPlugin implements REIPluginEntry {
     @Override
     public void registerItems(ItemRegistry itemRegistry) {
         Registry.ITEM.stream().forEach(item -> {
-            itemRegistry.registerItemStack(item.getDefaultStack());
+            itemRegistry.registerItemStack(item.getStackForRender());
             try {
                 itemRegistry.registerItemStack(itemRegistry.getAllStacksFromItem(item));
             } catch (Exception e) {
@@ -130,7 +129,7 @@ public class DefaultPlugin implements REIPluginEntry {
         recipeHelper.registerRecipes(CAMPFIRE, CampfireCookingRecipe.class, DefaultCampfireDisplay::new);
         recipeHelper.registerRecipes(STONE_CUTTING, StonecuttingRecipe.class, DefaultStoneCuttingDisplay::new);
         BREWING_DISPLAYS.stream().forEachOrdered(display -> recipeHelper.registerDisplay(BREWING, display));
-        List<ItemStack> arrowStack = Collections.singletonList(Items.ARROW.getDefaultStack());
+        List<ItemStack> arrowStack = Collections.singletonList(Items.ARROW.getStackForRender());
         RoughlyEnoughItemsCore.getItemRegisterer().getItemList().stream().filter(stack -> stack.getItem().equals(Items.LINGERING_POTION)).forEach(stack -> {
             List<List<ItemStack>> input = new ArrayList<>();
             for(int i = 0; i < 4; i++)

@@ -12,7 +12,6 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.widget.*;
-import net.minecraft.ChatFormat;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
@@ -21,15 +20,18 @@ import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.Window;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
-import java.util.List;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public class RecipeViewingScreen extends Screen {
@@ -52,7 +54,7 @@ public class RecipeViewingScreen extends Screen {
     private ButtonWidget recipeBack, recipeNext, categoryBack, categoryNext;
     
     public RecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> categoriesMap) {
-        super(new TextComponent(""));
+        super(new LiteralText(""));
         this.categoryPages = 0;
         this.preWidgets = Lists.newArrayList();
         this.widgets = Lists.newArrayList();
@@ -124,7 +126,7 @@ public class RecipeViewingScreen extends Screen {
         this.page = MathHelper.clamp(page, 0, getTotalPages(selectedCategory) - 1);
         
         ButtonWidget w, w2;
-        this.widgets.add(w = new ButtonWidget(bounds.x + 2, bounds.y - 16, 10, 10, new TranslatableComponent("text.rei.left_arrow")) {
+        this.widgets.add(w = new ButtonWidget(bounds.x + 2, bounds.y - 16, 10, 10, new TranslatableText("text.rei.left_arrow")) {
             @Override
             public void onPressed() {
                 categoryPages--;
@@ -133,7 +135,7 @@ public class RecipeViewingScreen extends Screen {
                 RecipeViewingScreen.this.init();
             }
         });
-        this.widgets.add(w2 = new ButtonWidget(bounds.x + bounds.width - 12, bounds.y - 16, 10, 10, new TranslatableComponent("text.rei.right_arrow")) {
+        this.widgets.add(w2 = new ButtonWidget(bounds.x + bounds.width - 12, bounds.y - 16, 10, 10, new TranslatableText("text.rei.right_arrow")) {
             @Override
             public void onPressed() {
                 categoryPages++;
@@ -143,7 +145,7 @@ public class RecipeViewingScreen extends Screen {
             }
         });
         w.enabled = w2.enabled = categories.size() > TABS_PER_PAGE;
-        widgets.add(categoryBack = new ButtonWidget((int) bounds.getX() + 5, (int) bounds.getY() + 5, 12, 12, new TranslatableComponent("text.rei.left_arrow")) {
+        widgets.add(categoryBack = new ButtonWidget((int) bounds.getX() + 5, (int) bounds.getY() + 5, 12, 12, new TranslatableText("text.rei.left_arrow")) {
             @Override
             public void onPressed() {
                 int currentCategoryIndex = categories.indexOf(selectedCategory);
@@ -179,7 +181,7 @@ public class RecipeViewingScreen extends Screen {
                 ClientHelper.getInstance().executeViewAllRecipesKeyBind();
             }
         });
-        widgets.add(categoryNext = new ButtonWidget((int) bounds.getMaxX() - 17, (int) bounds.getY() + 5, 12, 12, new TranslatableComponent("text.rei.right_arrow")) {
+        widgets.add(categoryNext = new ButtonWidget((int) bounds.getMaxX() - 17, (int) bounds.getY() + 5, 12, 12, new TranslatableText("text.rei.right_arrow")) {
             @Override
             public void onPressed() {
                 int currentCategoryIndex = categories.indexOf(selectedCategory);
@@ -200,7 +202,7 @@ public class RecipeViewingScreen extends Screen {
         categoryBack.enabled = categories.size() > 1;
         categoryNext.enabled = categories.size() > 1;
         
-        widgets.add(recipeBack = new ButtonWidget((int) bounds.getX() + 5, (int) bounds.getY() + 21, 12, 12, new TranslatableComponent("text.rei.left_arrow")) {
+        widgets.add(recipeBack = new ButtonWidget((int) bounds.getX() + 5, (int) bounds.getY() + 21, 12, 12, new TranslatableText("text.rei.left_arrow")) {
             @Override
             public void onPressed() {
                 page--;
@@ -233,7 +235,7 @@ public class RecipeViewingScreen extends Screen {
                 RecipeViewingScreen.this.init();
             }
         });
-        widgets.add(recipeNext = new ButtonWidget((int) bounds.getMaxX() - 17, (int) bounds.getY() + 21, 12, 12, new TranslatableComponent("text.rei.right_arrow")) {
+        widgets.add(recipeNext = new ButtonWidget((int) bounds.getMaxX() - 17, (int) bounds.getY() + 21, 12, 12, new TranslatableText("text.rei.right_arrow")) {
             @Override
             public void onPressed() {
                 page++;
@@ -296,7 +298,7 @@ public class RecipeViewingScreen extends Screen {
             int yy = bounds.y + 16;
             preWidgets.add(new CategoryBaseWidget(new Rectangle(xx - 6, yy - 6, 15 + innerWidth * 18, 11 + actualHeight * 18)));
             int index = 0;
-            List<String> list = Collections.singletonList(ChatFormat.YELLOW.toString() + I18n.translate("text.rei.working_station"));
+            List<String> list = Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("text.rei.working_station"));
             xx += (innerWidth - 1) * 18;
             for(List<ItemStack> workingStation : workingStations) {
                 preWidgets.add(new SlotWidget(xx, yy, workingStation, true, true, true) {

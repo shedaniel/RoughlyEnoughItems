@@ -38,7 +38,7 @@ public class DefaultCompostingDisplay implements RecipeDisplay {
     public List<List<ItemStack>> getInput() {
         List<List<ItemStack>> lists = new ArrayList<>();
         allItems.stream().forEachOrdered(itemProvider -> {
-            lists.add(Arrays.asList(itemProvider.asItem().getDefaultStack()));
+            lists.add(Arrays.asList(itemProvider.asItem().getStackForRender()));
         });
         return lists;
     }
@@ -59,7 +59,7 @@ public class DefaultCompostingDisplay implements RecipeDisplay {
     
     @Override
     public List<List<ItemStack>> getRequiredItems() {
-        return Arrays.asList(new LinkedList<>(allItems.stream().map(ItemConvertible::asItem).map(Item::getDefaultStack).collect(Collectors.toList())));
+        return Arrays.asList(new LinkedList<>(allItems.stream().map(ItemConvertible::asItem).map(Item::getStackForRender).collect(Collectors.toList())));
     }
     
     public List<ItemConvertible> getItemsByOrder() {

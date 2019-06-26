@@ -8,7 +8,7 @@ package me.shedaniel.rei.gui.credits;
 import me.shedaniel.clothconfig2.gui.widget.DynamicSmoothScrollingEntryListWidget;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.network.chat.Component;
+import net.minecraft.text.Text;
 
 public class CreditsEntryListWidget extends DynamicSmoothScrollingEntryListWidget<CreditsEntryListWidget.CreditsItem> {
     
@@ -59,8 +59,8 @@ public class CreditsEntryListWidget extends DynamicSmoothScrollingEntryListWidge
     public static class CreditsItem extends DynamicSmoothScrollingEntryListWidget.Entry<CreditsItem> {
         private String text;
         
-        public CreditsItem(Component textComponent) {
-            this(textComponent.getFormattedText());
+        public CreditsItem(Text textComponent) {
+            this(textComponent.asFormattedString());
         }
         
         public CreditsItem(String text) {

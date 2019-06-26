@@ -10,20 +10,20 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.RecipeDisplay;
-import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.client.ScreenHelper;
+import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.gui.widget.ButtonWidget;
 import me.shedaniel.rei.gui.widget.HighlightableWidget;
 import me.shedaniel.rei.gui.widget.Widget;
-import net.minecraft.ChatFormat;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
 import java.awt.*;
@@ -40,7 +40,7 @@ public class PreRecipeViewingScreen extends Screen {
     private Map<RecipeCategory<?>, List<RecipeDisplay>> map;
     
     public PreRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map) {
-        super(new TranslatableComponent("text.rei.recipe_screen_type.selection"));
+        super(new TranslatableText("text.rei.recipe_screen_type.selection"));
         this.widgets = Lists.newArrayList();
         this.original = true;
         this.map = map;
@@ -70,10 +70,10 @@ public class PreRecipeViewingScreen extends Screen {
     @Override
     public void render(int int_1, int int_2, float float_1) {
         this.renderBackground();
-        this.drawCenteredString(this.font, this.title.getFormattedText(), this.width / 2, 20, 16777215);
+        this.drawCenteredString(this.font, this.title.asFormattedString(), this.width / 2, 20, 16777215);
         int i = 30;
         for(String s : this.font.wrapStringToWidthAsList(I18n.translate("text.rei.recipe_screen_type.selection.sub"), width - 30)) {
-            this.drawCenteredString(this.font, ChatFormat.GRAY.toString() + s, width / 2, i, -1);
+            this.drawCenteredString(this.font, Formatting.GRAY.toString() + s, width / 2, i, -1);
             i += 10;
         }
         super.render(int_1, int_2, float_1);
