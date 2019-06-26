@@ -10,8 +10,8 @@ import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.client.ScreenHelper;
-import net.minecraft.ChatFormat;
 import net.minecraft.client.render.GuiLighting;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
 import java.awt.*;
@@ -87,7 +87,7 @@ public class TabWidget extends HighlightableWidget {
     @SuppressWarnings("deprecation")
     private void drawTooltip() {
         if (this.minecraft.options.advancedItemTooltips)
-            ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(categoryName, ChatFormat.DARK_GRAY.toString() + category.getIdentifier().toString(), ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())));
+            ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(categoryName, Formatting.DARK_GRAY.toString() + category.getIdentifier().toString(), ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())));
         else
             ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(categoryName, ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())));
     }

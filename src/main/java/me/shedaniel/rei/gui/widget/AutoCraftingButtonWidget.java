@@ -9,9 +9,9 @@ import me.shedaniel.rei.api.AutoCraftingHandler;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.client.ScreenHelper;
-import net.minecraft.ChatFormat;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
 import java.awt.*;
@@ -28,7 +28,7 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
         super(rectangle, text);
         this.displaySupplier = () -> displaySupplier.get();
         Optional<Identifier> recipe = displaySupplier.get().getRecipeLocation();
-        extraTooltip = recipe.isPresent() ? I18n.translate("text.rei.recipe_id", ChatFormat.GRAY.toString(), recipe.get().toString()) : "";
+        extraTooltip = recipe.isPresent() ? I18n.translate("text.rei.recipe_id", Formatting.GRAY.toString(), recipe.get().toString()) : "";
         this.containerScreen = ScreenHelper.getLastContainerScreen();
     }
     

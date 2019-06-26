@@ -23,14 +23,13 @@ import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.chat.Component;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 import org.apache.commons.lang3.StringUtils;
 
 import java.awt.*;
-import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -47,7 +46,7 @@ public class ItemListOverlay extends Widget {
                 return tryGetItemStackName(itemStack).compareToIgnoreCase(tryGetItemStackName(t1));
             if (RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering.equals(ItemListOrdering.item_groups)) {
                 List<ItemGroup> itemGroups = Arrays.asList(ItemGroup.GROUPS);
-                return itemGroups.indexOf(itemStack.getItem().getItemGroup()) - itemGroups.indexOf(t1.getItem().getItemGroup());
+                return itemGroups.indexOf(itemStack.getItem().getGroup()) - itemGroups.indexOf(t1.getItem().getGroup());
             }
             return 0;
         };
@@ -70,7 +69,7 @@ public class ItemListOverlay extends Widget {
     public static List<String> tryGetItemStackToolTip(ItemStack itemStack, boolean careAboutAdvanced) {
         if (!searchBlacklisted.contains(itemStack.getItem()))
             try {
-                return itemStack.getTooltipText(MinecraftClient.getInstance().player, MinecraftClient.getInstance().options.advancedItemTooltips && careAboutAdvanced ? TooltipContext.Default.ADVANCED : TooltipContext.Default.NORMAL).stream().map(Component::getFormattedText).collect(Collectors.toList());
+                return itemStack.getTooltip(MinecraftClient.getInstance().player, MinecraftClient.getInstance().options.advancedItemTooltips && careAboutAdvanced ? TooltipContext.Default.ADVANCED : TooltipContext.Default.NORMAL).stream().map(Text::asFormattedString).collect(Collectors.toList());
             } catch (Throwable e) {
                 e.printStackTrace();
                 searchBlacklisted.add(itemStack.getItem());
@@ -81,7 +80,7 @@ public class ItemListOverlay extends Widget {
     public static String tryGetItemStackName(ItemStack stack) {
         if (!searchBlacklisted.contains(stack.getItem()))
             try {
-                return stack.getDisplayName().getFormattedText();
+                return stack.getName().asFormattedString();
             } catch (Throwable e) {
                 e.printStackTrace();
                 searchBlacklisted.add(stack.getItem());
@@ -191,11 +190,11 @@ public class ItemListOverlay extends Widget {
                                 if (getCurrentItemStack() != null && !getCurrentItemStack().isEmpty()) {
                                     ItemStack cheatedStack = getCurrentItemStack().copy();
                                     if (RoughlyEnoughItemsCore.getConfigManager().getConfig().itemCheatingMode == ItemCheatingMode.REI_LIKE)
-                                        cheatedStack.setAmount(button != 1 ? 1 : cheatedStack.getMaxAmount());
+                                        cheatedStack.setCount(button != 1 ? 1 : cheatedStack.getMaxCount());
                                     else if (RoughlyEnoughItemsCore.getConfigManager().getConfig().itemCheatingMode == ItemCheatingMode.JEI_LIKE)
-                                        cheatedStack.setAmount(button != 0 ? 1 : cheatedStack.getMaxAmount());
+                                        cheatedStack.setCount(button != 0 ? 1 : cheatedStack.getMaxCount());
                                     else
-                                        cheatedStack.setAmount(1);
+                                        cheatedStack.setCount(1);
                                     return ClientHelper.getInstance().tryCheatingStack(cheatedStack);
                                 }
                             } else if (button == 0)
@@ -292,7 +291,7 @@ public class ItemListOverlay extends Widget {
         if (!RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() || stacks.isEmpty() || inventoryItems.isEmpty())
             return stacks;
         List<ItemStack> workingItems = Lists.newArrayList(RecipeHelper.getInstance().findCraftableByItems(inventoryItems));
-        return stacks.stream().filter(itemStack -> workingItems.stream().anyMatch(stack -> stack.isEqualIgnoreTags(itemStack))).collect(Collectors.toList());
+        return stacks.stream().filter(itemStack -> workingItems.stream().anyMatch(stack -> stack.isItemEqualIgnoreDamage(itemStack))).collect(Collectors.toList());
     }
     
     public List<SearchArgument[]> getLastSearchArgument() {

@@ -26,8 +26,8 @@ public class SimpleRecipeRenderer extends RecipeRenderer {
     
     public static final Comparator<ItemStack> ITEM_STACK_COMPARATOR = (o1, o2) -> {
         if (o1.getItem() == o2.getItem()) {
-            if (o1.getAmount() != o2.getAmount())
-                return o1.getAmount() - o2.getAmount();
+            if (o1.getCount() != o2.getCount())
+                return o1.getCount() - o2.getCount();
             int compare = Boolean.compare(o1.hasTag(), o2.hasTag());
             if (compare != 0)
                 return compare;
@@ -43,7 +43,7 @@ public class SimpleRecipeRenderer extends RecipeRenderer {
     
     public SimpleRecipeRenderer(Supplier<List<List<ItemStack>>> input, Supplier<List<ItemStack>> output) {
         List<Pair<List<ItemStack>, AtomicInteger>> newList = Lists.newArrayList();
-        List<Pair<List<ItemStack>, Integer>> a = input.get().stream().map(stacks -> new Pair<>(stacks, stacks.stream().map(ItemStack::getAmount).max(Integer::compareTo).orElse(1))).collect(Collectors.toList());
+        List<Pair<List<ItemStack>, Integer>> a = input.get().stream().map(stacks -> new Pair<>(stacks, stacks.stream().map(ItemStack::getCount).max(Integer::compareTo).orElse(1))).collect(Collectors.toList());
         for(Pair<List<ItemStack>, Integer> pair : a) {
             Optional<Pair<List<ItemStack>, AtomicInteger>> any = newList.stream().filter(pairr -> equalsList(pair.getLeft(), pairr.getLeft())).findAny();
             if (any.isPresent()) {
@@ -55,7 +55,7 @@ public class SimpleRecipeRenderer extends RecipeRenderer {
         for(Pair<List<ItemStack>, AtomicInteger> pair : newList)
             b.add(pair.getLeft().stream().map(stack -> {
                 ItemStack s = stack.copy();
-                s.setAmount(pair.getRight().get());
+                s.setCount(pair.getRight().get());
                 return s;
             }).collect(Collectors.toList()));
         this.inputRenderer = b.stream().filter(stacks -> !stacks.isEmpty()).map(stacks -> Renderer.fromItemStacks(stacks)).collect(Collectors.toList());
@@ -70,7 +70,7 @@ public class SimpleRecipeRenderer extends RecipeRenderer {
         if (stacks_1.size() != stacks_2.size())
             return false;
         for(int i = 0; i < stacks_1.size(); i++)
-            if (!stacks_1.get(i).isEqualIgnoreTags(stacks_2.get(i)))
+            if (!stacks_1.get(i).isItemEqualIgnoreDamage(stacks_2.get(i)))
                 return false;
         return true;
     }

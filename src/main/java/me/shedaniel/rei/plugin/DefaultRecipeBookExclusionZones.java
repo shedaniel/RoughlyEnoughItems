@@ -6,7 +6,6 @@
 package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.rei.api.BaseBoundsHandler;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import net.minecraft.client.MinecraftClient;

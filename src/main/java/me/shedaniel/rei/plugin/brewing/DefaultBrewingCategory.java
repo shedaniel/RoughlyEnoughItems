@@ -12,13 +12,13 @@ import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.SlotWidget;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
-import net.minecraft.ChatFormat;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
@@ -66,31 +66,31 @@ public class DefaultBrewingCategory implements RecipeCategory<DefaultBrewingDisp
         widgets.add(new SlotWidget(startPoint.x + 63, startPoint.y + 1, recipeDisplay.getInput().get(0), false, true, true) {
             @Override
             protected List<String> getExtraToolTips(ItemStack stack) {
-                return Collections.singletonList(ChatFormat.YELLOW.toString() + I18n.translate("category.rei.brewing.input"));
+                return Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("category.rei.brewing.input"));
             }
         });
         widgets.add(new SlotWidget(startPoint.x + 40, startPoint.y + 1, recipeDisplay.getInput().get(1), false, true, true) {
             @Override
             protected List<String> getExtraToolTips(ItemStack stack) {
-                return Collections.singletonList(ChatFormat.YELLOW.toString() + I18n.translate("category.rei.brewing.reactant"));
+                return Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("category.rei.brewing.reactant"));
             }
         });
         widgets.add(new SlotWidget(startPoint.x + 40, startPoint.y + 35, recipeDisplay.getOutput(0), false, true, true) {
             @Override
             protected List<String> getExtraToolTips(ItemStack stack) {
-                return Collections.singletonList(ChatFormat.YELLOW.toString() + I18n.translate("category.rei.brewing.result"));
+                return Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("category.rei.brewing.result"));
             }
         });
         widgets.add(new SlotWidget(startPoint.x + 63, startPoint.y + 42, recipeDisplay.getOutput(1), false, true, true) {
             @Override
             protected List<String> getExtraToolTips(ItemStack stack) {
-                return Collections.singletonList(ChatFormat.YELLOW.toString() + I18n.translate("category.rei.brewing.result"));
+                return Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("category.rei.brewing.result"));
             }
         });
         widgets.add(new SlotWidget(startPoint.x + 86, startPoint.y + 35, recipeDisplay.getOutput(2), false, true, true) {
             @Override
             protected List<String> getExtraToolTips(ItemStack stack) {
-                return Collections.singletonList(ChatFormat.YELLOW.toString() + I18n.translate("category.rei.brewing.result"));
+                return Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("category.rei.brewing.result"));
             }
         });
         return widgets;
