@@ -34,7 +34,7 @@ public interface PluginDisabler {
     /**
      * Disables a function from a plugin
      *
-     * @param plugin    the identifier of the plugin
+     * @param plugin   the identifier of the plugin
      * @param function the function to be disabled
      */
     void disablePluginFunction(Identifier plugin, PluginFunction function);
@@ -42,7 +42,7 @@ public interface PluginDisabler {
     /**
      * Enables a function from a plugin
      *
-     * @param plugin    the identifier of the plugin
+     * @param plugin   the identifier of the plugin
      * @param function the function to be enabled
      */
     void enablePluginFunction(Identifier plugin, PluginFunction function);
