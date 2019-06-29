@@ -58,8 +58,11 @@ dependencies {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact(jar) {
+            artifact(file("${project.buildDir}/libs/${archivesBaseName}-${version}.jar")) {
                 builtBy remapJar
+            }
+            artifact(jar) {
+                builtBy jar
             }
         }
     }
