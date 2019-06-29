@@ -59,7 +59,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             artifact(jar) {
-                builtBy jar
+                builtBy remapJar
             }
         }
     }
