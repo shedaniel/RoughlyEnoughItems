@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '0.2.2-SNAPSHOT'
+    id 'fabric-loom' version '0.2.4-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -33,14 +33,14 @@ processResources {
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_version}"
-    modCompile "net.fabricmc:fabric-loader:${project.fabricloader_version}"
-    modCompile "net.fabricmc.fabric-api:fabric-keybindings-v0:${project.fabric_keybindings}"
-    modCompile "net.fabricmc.fabric-api:fabric-api-base:${project.fabric_api_base}"
-    modCompile "net.fabricmc.fabric-api:fabric-networking-v0:${project.fabric_networking}"
-    modCompile "net.fabricmc.fabric-api:fabric-resource-loader-v0:${project.fabric_resource_loader}"
-    modCompile "cloth:ClothEvents:${cloth_events_version}"
-    modCompile "cloth-config:ClothConfig2:${cloth_config_version}"
-    modCompile "blue.endless:jankson:${project.jankson_version}"
+    modApi "net.fabricmc:fabric-loader:${project.fabricloader_version}"
+    modApi "net.fabricmc.fabric-api:fabric-keybindings-v0:${project.fabric_keybindings}"
+    modApi "net.fabricmc.fabric-api:fabric-api-base:${project.fabric_api_base}"
+    modApi "net.fabricmc.fabric-api:fabric-networking-v0:${project.fabric_networking}"
+    modApi "net.fabricmc.fabric-api:fabric-resource-loader-v0:${project.fabric_resource_loader}"
+    modApi "cloth:ClothEvents:${cloth_events_version}"
+    modImplementation "cloth-config:ClothConfig2:${cloth_config_version}"
+    modApi "blue.endless:jankson:${project.jankson_version}"
     if (includeDep) {
         include "net.fabricmc.fabric-api:fabric-keybindings-v0:${project.fabric_keybindings}"
         include "net.fabricmc.fabric-api:fabric-api-base:${project.fabric_api_base}"
@@ -50,7 +50,7 @@ dependencies {
         include "cloth-config:ClothConfig2:${cloth_config_version}"
         include "blue.endless:jankson:${project.jankson_version}"
     }
-    modCompile "io.github.prospector.modmenu:ModMenu:${modmenu_version}"
+    modImplementation "io.github.prospector.modmenu:ModMenu:${modmenu_version}"
     compile "org.lwjgl:lwjgl-jemalloc:3.2.1"
     compileOnly "com.google.code.findbugs:jsr305:3.0.2"
 }
