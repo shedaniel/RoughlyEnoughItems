@@ -28,10 +28,8 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
+import java.util.List;
+import java.util.*;
 import java.util.function.Supplier;
 
 public class RecipeViewingScreen extends Screen {

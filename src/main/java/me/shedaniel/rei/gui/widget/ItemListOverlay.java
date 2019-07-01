@@ -30,6 +30,7 @@ import net.minecraft.util.registry.Registry;
 import org.apache.commons.lang3.StringUtils;
 
 import java.awt.*;
+import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
