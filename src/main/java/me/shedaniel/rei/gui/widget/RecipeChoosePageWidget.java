@@ -64,7 +64,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     }
     
     @Override
-    public boolean isHighlighted(double mouseX, double mouseY) {
+    public boolean containsMouse(double mouseX, double mouseY) {
         return getBounds().contains(mouseX, mouseY) || new Rectangle(bounds.x + bounds.width - 50, bounds.y + bounds.height - 3, 50, 36).contains(mouseX, mouseY);
     }
     

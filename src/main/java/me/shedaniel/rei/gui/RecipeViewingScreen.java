@@ -456,7 +456,7 @@ public class RecipeViewingScreen extends Screen {
     @Override
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
         if (choosePageActivated)
-            if (recipeChoosePageWidget.isHighlighted(double_1, double_2)) {
+            if (recipeChoosePageWidget.containsMouse(double_1, double_2)) {
                 return recipeChoosePageWidget.mouseClicked(double_1, double_2, int_1);
             } else {
                 choosePageActivated = false;

@@ -186,7 +186,7 @@ public class ItemListOverlay extends Widget {
                     
                     @Override
                     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                        if (isCurrentRendererItem() && isHighlighted(mouseX, mouseY)) {
+                        if (isCurrentRendererItem() && containsMouse(mouseX, mouseY)) {
                             if (ClientHelper.getInstance().isCheating()) {
                                 if (getCurrentItemStack() != null && !getCurrentItemStack().isEmpty()) {
                                     ItemStack cheatedStack = getCurrentItemStack().copy();

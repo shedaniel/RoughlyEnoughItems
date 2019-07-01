@@ -12,7 +12,7 @@ import net.minecraft.client.util.Window;
 
 import java.awt.*;
 
-public abstract class DraggableWidget extends HighlightableWidget {
+public abstract class DraggableWidget extends WidgetWithBounds {
     
     public boolean dragged = false;
     private Point midPoint, startPoint;

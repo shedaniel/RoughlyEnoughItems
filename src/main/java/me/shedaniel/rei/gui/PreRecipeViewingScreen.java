@@ -13,7 +13,7 @@ import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.gui.widget.ButtonWidget;
-import me.shedaniel.rei.gui.widget.HighlightableWidget;
+import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import me.shedaniel.rei.gui.widget.Widget;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
@@ -93,7 +93,7 @@ public class PreRecipeViewingScreen extends Screen {
         return super.keyPressed(int_1, int_2, int_3);
     }
     
-    public class ScreenTypeSelection extends HighlightableWidget {
+    public class ScreenTypeSelection extends WidgetWithBounds {
         
         private Rectangle bounds;
         private int u, v;
@@ -123,7 +123,7 @@ public class PreRecipeViewingScreen extends Screen {
         
         @Override
         public boolean mouseClicked(double double_1, double double_2, int int_1) {
-            if (isHighlighted(double_1, double_2)) {
+            if (containsMouse(double_1, double_2)) {
                 minecraft.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 original = (v == 0);
                 return true;

@@ -11,7 +11,7 @@ import java.awt.*;
 import java.util.Collections;
 import java.util.List;
 
-public class LabelWidget extends HighlightableWidget {
+public class LabelWidget extends WidgetWithBounds {
     
     public int x;
     public int y;

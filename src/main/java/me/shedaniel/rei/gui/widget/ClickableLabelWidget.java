@@ -32,7 +32,7 @@ public abstract class ClickableLabelWidget extends LabelWidget {
             colour = getHoveredColor();
         drawCenteredString(font, (isHovered(mouseX, mouseY) ? Formatting.UNDERLINE.toString() : "") + text, x, y, colour);
         if (clickable && getTooltips().isPresent())
-            if (!focused && isHighlighted(mouseX, mouseY))
+            if (!focused && containsMouse(mouseX, mouseY))
                 ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltips().get().split("\n")));
             else if (focused)
                 ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(new Point(x, y), getTooltips().get().split("\n")));
@@ -48,7 +48,7 @@ public abstract class ClickableLabelWidget extends LabelWidget {
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 0 && clickable && isHighlighted(mouseX, mouseY)) {
+        if (button == 0 && clickable && containsMouse(mouseX, mouseY)) {
             onLabelClicked();
             return true;
         }
@@ -78,7 +78,7 @@ public abstract class ClickableLabelWidget extends LabelWidget {
     }
     
     public boolean isHovered(int mouseX, int mouseY) {
-        return clickable && (isHighlighted(mouseX, mouseY) || focused);
+        return clickable && (containsMouse(mouseX, mouseY) || focused);
     }
     
     public abstract void onLabelClicked();
