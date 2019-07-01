@@ -19,10 +19,8 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.Locale;
+import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class SlotWidget extends HighlightableWidget {
