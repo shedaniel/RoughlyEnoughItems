@@ -19,7 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class ButtonWidget extends HighlightableWidget {
+public abstract class ButtonWidget extends WidgetWithBounds {
     
     public static final Identifier BUTTON_LOCATION = new Identifier("roughlyenoughitems", "textures/gui/button.png");
     public static final Identifier BUTTON_LOCATION_DARK = new Identifier("roughlyenoughitems", "textures/gui/button_dark.png");
@@ -96,7 +96,7 @@ public abstract class ButtonWidget extends HighlightableWidget {
         this.drawCenteredString(font, text, x + width / 2, y + (height - 8) / 2, colour);
         
         if (getTooltips().isPresent())
-            if (!focused && isHighlighted(mouseX, mouseY))
+            if (!focused && containsMouse(mouseX, mouseY))
                 ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltips().get().split("\n")));
             else if (focused)
                 ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(new Point(x + width / 2, y + height / 2), getTooltips().get().split("\n")));

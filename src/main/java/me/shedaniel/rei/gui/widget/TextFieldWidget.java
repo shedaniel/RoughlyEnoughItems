@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class TextFieldWidget extends HighlightableWidget {
+public class TextFieldWidget extends WidgetWithBounds {
     
     public Function<String, String> stripInvaild;
     protected int focusedTicks;

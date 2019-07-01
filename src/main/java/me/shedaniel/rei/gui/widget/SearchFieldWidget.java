@@ -40,7 +40,7 @@ public class SearchFieldWidget extends TextFieldWidget {
     
     @Override
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
-        boolean contains = isHighlighted(double_1, double_2);
+        boolean contains = containsMouse(double_1, double_2);
         if (isVisible() && contains && int_1 == 1)
             setText("");
         if (contains && int_1 == 0)

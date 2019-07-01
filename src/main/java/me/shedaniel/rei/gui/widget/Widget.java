@@ -13,7 +13,7 @@ import net.minecraft.client.gui.Drawable;
 /**
  * The base class for a screen widget
  *
- * @see HighlightableWidget for a widget with bounds
+ * @see WidgetWithBounds for a widget with bounds
  */
 public abstract class Widget extends AbstractParentElement implements Drawable {
     

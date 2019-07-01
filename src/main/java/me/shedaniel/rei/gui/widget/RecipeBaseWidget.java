@@ -16,7 +16,7 @@ import java.awt.*;
 import java.util.Collections;
 import java.util.List;
 
-public class RecipeBaseWidget extends HighlightableWidget {
+public class RecipeBaseWidget extends WidgetWithBounds {
     
     private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private static final Identifier CHEST_GUI_TEXTURE_DARK = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");

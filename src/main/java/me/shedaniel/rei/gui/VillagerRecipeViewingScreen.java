@@ -214,7 +214,7 @@ public class VillagerRecipeViewingScreen extends Screen {
                 GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                 font.draw((isHovered(mouseX, mouseY) ? Formatting.UNDERLINE.toString() : "") + text, x - font.getStringWidth(text) / 2, y, getDefaultColor());
                 if (clickable && getTooltips().isPresent())
-                    if (!focused && isHighlighted(mouseX, mouseY))
+                    if (!focused && containsMouse(mouseX, mouseY))
                         ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltips().get().split("\n")));
                     else if (focused)
                         ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(new Point(x, y), getTooltips().get().split("\n")));

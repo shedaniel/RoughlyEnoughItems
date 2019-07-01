@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class SlotWidget extends HighlightableWidget {
+public class SlotWidget extends WidgetWithBounds {
     
     public static final Identifier RECIPE_GUI = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     public static final Identifier RECIPE_GUI_DARK = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
@@ -115,7 +115,7 @@ public class SlotWidget extends HighlightableWidget {
             minecraft.getTextureManager().bindTexture(darkTheme ? RECIPE_GUI_DARK : RECIPE_GUI);
             blit(this.x - 1, this.y - 1, 0, 222, 18, 18);
         }
-        boolean highlighted = isHighlighted(mouseX, mouseY);
+        boolean highlighted = containsMouse(mouseX, mouseY);
         if (drawHighlightedBackground && highlighted) {
             GlStateManager.disableLighting();
             GlStateManager.disableDepthTest();

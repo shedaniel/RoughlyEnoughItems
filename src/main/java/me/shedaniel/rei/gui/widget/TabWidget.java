@@ -18,7 +18,7 @@ import java.awt.*;
 import java.util.Collections;
 import java.util.List;
 
-public class TabWidget extends HighlightableWidget {
+public class TabWidget extends WidgetWithBounds {
     
     public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     public static final Identifier CHEST_GUI_TEXTURE_DARK = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
@@ -78,7 +78,7 @@ public class TabWidget extends HighlightableWidget {
             this.blit(bounds.x, bounds.y + 2, selected ? 28 : 0, 192, 28, (selected ? 30 : 27));
             renderer.setBlitOffset(100);
             renderer.render((int) bounds.getCenterX(), (int) bounds.getCenterY(), mouseX, mouseY, delta);
-            if (isHighlighted(mouseX, mouseY)) {
+            if (containsMouse(mouseX, mouseY)) {
                 drawTooltip();
             }
         }
