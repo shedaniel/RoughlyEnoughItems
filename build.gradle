@@ -46,7 +46,9 @@ dependencies {
     modApi "net.fabricmc.fabric-api:fabric-networking-v0:${project.fabric_networking}"
     modApi "net.fabricmc.fabric-api:fabric-resource-loader-v0:${project.fabric_resource_loader}"
     modApi "cloth:ClothEvents:${cloth_events_version}"
-    modImplementation "cloth-config:ClothConfig2:${cloth_config_version}"
+    modImplementation("me.shedaniel.cloth:config-2:${cloth_config_version}") {
+        transitive = false
+    }
     modApi "blue.endless:jankson:${project.jankson_version}"
     if (includeDep) {
         include "net.fabricmc.fabric-api:fabric-keybindings-v0:${project.fabric_keybindings}"
@@ -54,7 +56,9 @@ dependencies {
         include "net.fabricmc.fabric-api:fabric-networking-v0:${project.fabric_networking}"
         include "net.fabricmc.fabric-api:fabric-resource-loader-v0:${project.fabric_resource_loader}"
         include "cloth:ClothEvents:${cloth_events_version}"
-        include "cloth-config:ClothConfig2:${cloth_config_version}"
+        include("me.shedaniel.cloth:config-2:${cloth_config_version}") {
+            transitive = false
+        }
         include "blue.endless:jankson:${project.jankson_version}"
     }
     modImplementation "io.github.prospector.modmenu:ModMenu:${modmenu_version}"
