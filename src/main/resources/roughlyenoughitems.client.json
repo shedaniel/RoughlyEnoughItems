@@ -5,15 +5,17 @@
   "minVersion": "0.7.7",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "MixinScreen",
-    "MixinContainerScreen",
-    "MixinClientPlayNetworkHandler",
-    "MixinPlayerInventoryScreen",
-    "MixinCraftingTableScreen",
-    "MixinCreativePlayerInventoryScreen",
     "MixinBrewingRecipeRegistry",
-    "MixinTabGetter",
-    "GhostSlotsHook",
-    "MixinKeyBinding"
+    "MixinGuiTextField",
+    "MixinScreen",
+    "MixinClientPlayNetworkHandler",
+    "MixinGuiEventHandler",
+    "MixinKeyboardListener",
+    "MixinKeyBinding",
+    "MixinInventoryEffectRenderer",
+    "MixinGuiContainer",
+    "MixinGuiButtonImage",
+    "MixinGuiRecipeBook",
+    "MixinGameRenderer"
   ]
 }

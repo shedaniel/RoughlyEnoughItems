@@ -1,14 +1,20 @@
+/*
+ * Roughly Enough Items by Danielshe.
+ * Licensed under the MIT License.
+ */
+
 package me.shedaniel.rei.gui.widget;
 
-import me.shedaniel.rei.client.ClientHelper;
+import me.shedaniel.reiclothconfig2.api.MouseUtils;
 import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.IGuiEventListener;
 
 import java.awt.*;
 
-public abstract class DraggableWidget implements HighlightableWidget {
+public abstract class DraggableWidget extends WidgetWithBounds {
     
-    protected boolean dragged = false;
+    public boolean dragged = false;
     private Point midPoint, startPoint;
     private int relateX, relateY;
     
@@ -34,7 +40,7 @@ public abstract class DraggableWidget implements HighlightableWidget {
     
     @Override
     public boolean mouseDragged(double double_1, double double_2, int int_1, double double_3, double double_4) {
-        Point mouse = ClientHelper.getMouseLocation();
+        Point mouse = MouseUtils.getMouseLocation();
         if (int_1 == 0) {
             if (!dragged) {
                 if (getGrabBounds().contains(mouse)) {
@@ -44,14 +50,14 @@ public abstract class DraggableWidget implements HighlightableWidget {
                     dragged = true;
                 }
             } else {
-                MainWindow window = Minecraft.getInstance().mainWindow;
+                MainWindow window = minecraft.mainWindow;
                 midPoint = processMidPoint(midPoint, mouse, startPoint, window, relateX, relateY);
                 updateWidgets(midPoint);
             }
             return true;
         }
-        for(IWidget widget : getListeners())
-            if (widget.mouseDragged(double_1, double_2, int_1, double_3, double_4))
+        for(IGuiEventListener listener : getChildren())
+            if (listener.mouseDragged(double_1, double_2, int_1, double_3, double_4))
                 return true;
         return false;
     }
@@ -66,8 +72,8 @@ public abstract class DraggableWidget implements HighlightableWidget {
                 onMouseReleaseMidPoint(getMidPoint());
                 return true;
             }
-        for(IWidget widget : getListeners())
-            if (widget.mouseReleased(double_1, double_2, int_1))
+        for(IGuiEventListener listener : getChildren())
+            if (listener.mouseReleased(double_1, double_2, int_1))
                 return true;
         return false;
     }

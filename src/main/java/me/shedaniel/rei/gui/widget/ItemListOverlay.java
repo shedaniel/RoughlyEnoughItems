@@ -1,48 +1,77 @@
+/*
+ * Roughly Enough Items by Danielshe.
+ * Licensed under the MIT License.
+ */
+
 package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
+import me.shedaniel.rei.RoughlyEnoughItemsClient;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.api.ClientHelper;
+import me.shedaniel.rei.api.DisplayHelper;
 import me.shedaniel.rei.api.RecipeHelper;
-import me.shedaniel.rei.client.ClientHelper;
-import me.shedaniel.rei.client.ItemListOrdering;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.client.SearchArgument;
+import me.shedaniel.rei.gui.config.ItemCheatingMode;
+import me.shedaniel.rei.gui.config.ItemListOrdering;
+import me.shedaniel.reiclothconfig2.api.MouseUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.IRegistry;
+import net.minecraft.util.text.ITextComponent;
 import org.apache.commons.lang3.StringUtils;
 
 import java.awt.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-public class ItemListOverlay extends Gui implements IWidget {
+public class ItemListOverlay extends Widget {
     
+    private static final String SPACE = " ", EMPTY = "";
+    private static final Comparator<ItemStack> ASCENDING_COMPARATOR;
     private static List<Item> searchBlacklisted = Lists.newArrayList();
-    private List<IWidget> widgets;
+    
+    static {
+        ASCENDING_COMPARATOR = (itemStack, t1) -> {
+            if (RoughlyEnoughItemsClient.getConfigManager().getConfig().itemListOrdering.equals(ItemListOrdering.name))
+                return tryGetItemStackName(itemStack).compareToIgnoreCase(tryGetItemStackName(t1));
+            if (RoughlyEnoughItemsClient.getConfigManager().getConfig().itemListOrdering.equals(ItemListOrdering.item_groups)) {
+                List<ItemGroup> itemGroups = Arrays.asList(ItemGroup.GROUPS);
+                return itemGroups.indexOf(itemStack.getItem().getGroup()) - itemGroups.indexOf(t1.getItem().getGroup());
+            }
+            return 0;
+        };
+    }
+    
+    private final List<SearchArgument[]> lastSearchArgument;
+    private List<ItemStack> currentDisplayed;
+    private List<Widget> widgets;
     private int width, height, page;
     private Rectangle rectangle, listArea;
-    private List<ItemStack> currentDisplayed;
     
     public ItemListOverlay(int page) {
         this.currentDisplayed = Lists.newArrayList();
         this.width = 0;
         this.height = 0;
         this.page = page;
+        this.lastSearchArgument = Lists.newArrayList();
     }
     
-    public static List<String> tryGetItemStackToolTip(ItemStack itemStack) {
+    public static List<String> tryGetItemStackToolTip(ItemStack itemStack, boolean careAboutAdvanced) {
         if (!searchBlacklisted.contains(itemStack.getItem()))
             try {
-                return Minecraft.getInstance().currentScreen.getItemToolTip(itemStack);
+                return itemStack.getTooltip(Minecraft.getInstance().player, Minecraft.getInstance().gameSettings.advancedItemTooltips && careAboutAdvanced ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL).stream().map(ITextComponent::getFormattedText).collect(Collectors.toList());
             } catch (Throwable e) {
                 e.printStackTrace();
                 searchBlacklisted.add(itemStack.getItem());
@@ -66,71 +95,159 @@ public class ItemListOverlay extends Gui implements IWidget {
         return "ERROR";
     }
     
-    public int getTotalSlotsPerPage() {
+    public static boolean filterItem(ItemStack itemStack, List<SearchArgument[]> arguments) {
+        if (arguments.isEmpty())
+            return true;
+        AtomicReference<String> mod = null, tooltips = null, name = null;
+        for(SearchArgument[] arguments1 : arguments) {
+            boolean b = true;
+            for(SearchArgument argument : arguments1) {
+                if (argument.getArgumentType().equals(SearchArgument.ArgumentType.ALWAYS))
+                    return true;
+                if (argument.getArgumentType().equals(SearchArgument.ArgumentType.MOD))
+                    if (argument.getFunction(!argument.isInclude()).apply(fillMod(itemStack, mod))) {
+                        b = false;
+                        break;
+                    }
+                if (argument.getArgumentType().equals(SearchArgument.ArgumentType.TOOLTIP))
+                    if (argument.getFunction(!argument.isInclude()).apply(fillTooltip(itemStack, tooltips))) {
+                        b = false;
+                        break;
+                    }
+                if (argument.getArgumentType().equals(SearchArgument.ArgumentType.TEXT))
+                    if (argument.getFunction(!argument.isInclude()).apply(fillName(itemStack, name))) {
+                        b = false;
+                        break;
+                    }
+            }
+            if (b)
+                return true;
+        }
+        return false;
+    }
+    
+    private static String fillMod(ItemStack itemStack, AtomicReference<String> mod) {
+        if (mod == null)
+            mod = new AtomicReference<>(ClientHelper.getInstance().getModFromItem(itemStack.getItem()).toLowerCase(Locale.ROOT));
+        return mod.get();
+    }
+    
+    private static String fillTooltip(ItemStack itemStack, AtomicReference<String> mod) {
+        if (mod == null)
+            mod = new AtomicReference<>(tryGetItemStackToolTip(itemStack, false).stream().collect(Collectors.joining("")).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT));
+        return mod.get();
+    }
+    
+    private static String fillName(ItemStack itemStack, AtomicReference<String> mod) {
+        if (mod == null)
+            mod = new AtomicReference<>(tryGetItemStackName(itemStack).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT));
+        return mod.get();
+    }
+    
+    public int getFullTotalSlotsPerPage() {
         return width * height;
     }
     
     @Override
-    public void draw(int int_1, int int_2, float float_1) {
-        widgets.forEach(widget -> widget.draw(int_1, int_2, float_1));
-        EntityPlayerSP player = Minecraft.getInstance().player;
-        if (rectangle.contains(ClientHelper.getMouseLocation()) && ClientHelper.isCheating() && !player.inventory.getItemStack().isEmpty() && Minecraft.getInstance().isSingleplayer())
-            ScreenHelper.getLastOverlay().addTooltip(new QueuedTooltip(ClientHelper.getMouseLocation(), Arrays.asList(I18n.format("text.rei.delete_items"))));
+    public void render(int int_1, int int_2, float float_1) {
+        RenderHelper.disableStandardItemLighting();
+        widgets.forEach(widget -> widget.render(int_1, int_2, float_1));
+        EntityPlayerSP player = minecraft.player;
+        if (rectangle.contains(MouseUtils.getMouseLocation()) && ClientHelper.getInstance().isCheating() && !player.inventory.getItemStack().isEmpty() && Minecraft.getInstance().isSingleplayer())
+            ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.format("text.rei.delete_items")));
     }
     
-    public List<IWidget> getWidgets() {
-        return widgets;
-    }
-    
-    public void updateList(Rectangle bounds, int page, String searchTerm) {
-        this.rectangle = bounds;
-        this.widgets = Lists.newLinkedList();
-        currentDisplayed = processSearchTerm(searchTerm, RoughlyEnoughItemsCore.getItemRegisterer().getItemList(), ScreenHelper.inventoryStacks);
+    public void updateList(DisplayHelper.DisplayBoundsHandler boundsHandler, Rectangle rectangle, int page, String searchTerm, boolean processSearchTerm) {
+        this.rectangle = rectangle;
         this.page = page;
+        this.widgets = Lists.newLinkedList();
         calculateListSize(rectangle);
-        double startX = rectangle.getCenterX() - width * 9;
-        double startY = rectangle.getCenterY() - height * 9;
+        if (currentDisplayed.isEmpty() || processSearchTerm)
+            currentDisplayed = processSearchTerm(searchTerm, RoughlyEnoughItemsCore.getItemRegisterer().getItemList(), new ArrayList<>(ScreenHelper.inventoryStacks));
+        int startX = (int) rectangle.getCenterX() - width * 9;
+        int startY = (int) rectangle.getCenterY() - height * 9;
         this.listArea = new Rectangle((int) startX, (int) startY, width * 18, height * 18);
-        for(int i = 0; i < getTotalSlotsPerPage(); i++) {
-            int j = i + page * getTotalSlotsPerPage();
-            if (j >= currentDisplayed.size())
-                break;
-            ItemSlotWidget slotWidget = new ItemSlotWidget((int) (startX + (i % width) * 18), (int) (startY + MathHelper.floor(i / width) * 18), Collections.singletonList(currentDisplayed.get(j)), false, true, true) {
-                @Override
-                protected void drawToolTip(ItemStack itemStack) {
-                    EntityPlayerSP player = Minecraft.getInstance().player;
-                    if (!ClientHelper.isCheating() || player.inventory.getItemStack().isEmpty())
-                        super.drawToolTip(itemStack);
-                }
-                
-                @Override
-                public boolean onMouseClick(int button, double mouseX, double mouseY) {
-                    if (isHighlighted(mouseX, mouseY)) {
-                        if (ClientHelper.isCheating()) {
-                            if (getCurrentStack() != null && !getCurrentStack().isEmpty()) {
-                                ItemStack cheatedStack = getCurrentStack().copy();
-                                cheatedStack.setCount(button == 0 ? 1 : button == 1 ? cheatedStack.getMaxStackSize() : cheatedStack.getCount());
-                                return ClientHelper.tryCheatingStack(cheatedStack);
-                            }
-                        } else if (button == 0)
-                            return ClientHelper.executeRecipeKeyBind(getCurrentStack().copy());
-                        else if (button == 1)
-                            return ClientHelper.executeUsageKeyBind(getCurrentStack().copy());
+        int fitSlotsPerPage = getTotalFitSlotsPerPage(startX, startY, listArea);
+        int j = page * fitSlotsPerPage;
+        for(int yy = 0; yy < height; yy++) {
+            for(int xx = 0; xx < width; xx++) {
+                int x = startX + xx * 18, y = startY + yy * 18;
+                if (!canBeFit(x, y, listArea))
+                    continue;
+                j++;
+                if (j > currentDisplayed.size())
+                    break;
+                widgets.add(new SlotWidget(x, y, Collections.singletonList(currentDisplayed.get(j - 1)), false, true, true) {
+                    @Override
+                    protected void queueTooltip(ItemStack itemStack, float delta) {
+                        EntityPlayerSP player = minecraft.player;
+                        if (!ClientHelper.getInstance().isCheating() || player.inventory.getItemStack().isEmpty())
+                            super.queueTooltip(itemStack, delta);
                     }
-                    return false;
-                }
-            };
-            if (true || this.rectangle.contains(slotWidget.getBounds()))
-                widgets.add(slotWidget);
+                    
+                    @Override
+                    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+                        if (isCurrentRendererItem() && containsMouse(mouseX, mouseY)) {
+                            if (ClientHelper.getInstance().isCheating()) {
+                                if (getCurrentItemStack() != null && !getCurrentItemStack().isEmpty()) {
+                                    ItemStack cheatedStack = getCurrentItemStack().copy();
+                                    if (RoughlyEnoughItemsClient.getConfigManager().getConfig().itemCheatingMode == ItemCheatingMode.REI_LIKE)
+                                        cheatedStack.setCount(button != 1 ? 1 : cheatedStack.getMaxStackSize());
+                                    else if (RoughlyEnoughItemsClient.getConfigManager().getConfig().itemCheatingMode == ItemCheatingMode.JEI_LIKE)
+                                        cheatedStack.setCount(button != 0 ? 1 : cheatedStack.getMaxStackSize());
+                                    else
+                                        cheatedStack.setCount(1);
+                                    return ClientHelper.getInstance().tryCheatingStack(cheatedStack);
+                                }
+                            } else if (button == 0)
+                                return ClientHelper.getInstance().executeRecipeKeyBind(getCurrentItemStack().copy());
+                            else if (button == 1)
+                                return ClientHelper.getInstance().executeUsageKeyBind(getCurrentItemStack().copy());
+                        }
+                        return false;
+                    }
+                });
+            }
+            if (j > currentDisplayed.size())
+                break;
         }
+    }
+    
+    public int getTotalPage() {
+        int fitSlotsPerPage = getTotalFitSlotsPerPage(listArea.x, listArea.y, listArea);
+        if (fitSlotsPerPage > 0)
+            return MathHelper.ceil(getCurrentDisplayed().size() / fitSlotsPerPage);
+        return 0;
+    }
+    
+    public int getTotalFitSlotsPerPage(int startX, int startY, Rectangle listArea) {
+        int slots = 0;
+        for(int x = 0; x < width; x++)
+            for(int y = 0; y < height; y++)
+                if (canBeFit(startX + x * 18, startY + y * 18, listArea))
+                    slots++;
+        return slots;
+    }
+    
+    public boolean canBeFit(int left, int top, Rectangle listArea) {
+        for(DisplayHelper.DisplayBoundsHandler sortedBoundsHandler : RoughlyEnoughItemsCore.getDisplayHelper().getSortedBoundsHandlers(minecraft.currentScreen.getClass())) {
+            EnumActionResult fit = sortedBoundsHandler.canItemSlotWidgetFit(!RoughlyEnoughItemsClient.getConfigManager().getConfig().mirrorItemPanel, left, top, minecraft.currentScreen, listArea);
+            if (fit != EnumActionResult.PASS)
+                return fit == EnumActionResult.SUCCESS;
+        }
+        return true;
     }
     
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
-        for(IWidget widget : widgets)
+        for(Widget widget : widgets)
             if (widget.keyPressed(int_1, int_2, int_3))
                 return true;
         return false;
+    }
+    
+    public Rectangle getListArea() {
+        return listArea;
     }
     
     public List<ItemStack> getCurrentDisplayed() {
@@ -138,89 +255,52 @@ public class ItemListOverlay extends Gui implements IWidget {
     }
     
     private List<ItemStack> processSearchTerm(String searchTerm, List<ItemStack> ol, List<ItemStack> inventoryItems) {
-        List<ItemStack> os = new LinkedList<>(ol), stacks = Lists.newArrayList(), finalStacks = Lists.newArrayList();
-        List<ItemGroup> itemGroups = new LinkedList<>(Arrays.asList(ItemGroup.GROUPS));
-        itemGroups.add(null);
-        ItemListOrdering ordering = RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering;
-        if (ordering != ItemListOrdering.registry)
-            Collections.sort(os, (itemStack, t1) -> {
-                if (ordering.equals(ItemListOrdering.name))
-                    return tryGetItemStackName(itemStack).compareToIgnoreCase(tryGetItemStackName(t1));
-                if (ordering.equals(ItemListOrdering.item_groups))
-                    return itemGroups.indexOf(itemStack.getItem().getGroup()) - itemGroups.indexOf(t1.getItem().getGroup());
-                return 0;
-            });
-        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isAscending)
+        lastSearchArgument.clear();
+        List<ItemStack> os = new LinkedList<>(ol);
+        if (RoughlyEnoughItemsClient.getConfigManager().getConfig().itemListOrdering != ItemListOrdering.registry)
+            os = ol.stream().sorted(ASCENDING_COMPARATOR).collect(Collectors.toList());
+        if (!RoughlyEnoughItemsClient.getConfigManager().getConfig().isAscending)
             Collections.reverse(os);
         String[] splitSearchTerm = StringUtils.splitByWholeSeparatorPreserveAllTokens(searchTerm, "|");
         Arrays.stream(splitSearchTerm).forEachOrdered(s -> {
-            List<SearchArgument> arguments = Lists.newArrayList();
-            Arrays.stream(StringUtils.split(s)).forEachOrdered(s1 -> {
+            String[] split = StringUtils.split(s);
+            SearchArgument[] arguments = new SearchArgument[split.length];
+            for(int i = 0; i < split.length; i++) {
+                String s1 = split[i];
                 if (s1.startsWith("@-") || s1.startsWith("-@"))
-                    arguments.add(new SearchArgument(SearchArgument.ArgumentType.MOD, s1.substring(2), false));
+                    arguments[i] = new SearchArgument(SearchArgument.ArgumentType.MOD, s1.substring(2), false);
                 else if (s1.startsWith("@"))
-                    arguments.add(new SearchArgument(SearchArgument.ArgumentType.MOD, s1.substring(1), true));
+                    arguments[i] = new SearchArgument(SearchArgument.ArgumentType.MOD, s1.substring(1), true);
                 else if (s1.startsWith("#-") || s1.startsWith("-#"))
-                    arguments.add(new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, s1.substring(2), false));
+                    arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, s1.substring(2), false);
                 else if (s1.startsWith("#"))
-                    arguments.add(new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, s1.substring(1), true));
+                    arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, s1.substring(1), true);
                 else if (s1.startsWith("-"))
-                    arguments.add(new SearchArgument(SearchArgument.ArgumentType.TEXT, s1.substring(1), false));
+                    arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TEXT, s1.substring(1), false);
                 else
-                    arguments.add(new SearchArgument(SearchArgument.ArgumentType.TEXT, s1, true));
-            });
-            os.stream().filter(itemStack -> arguments.isEmpty() || filterItem(itemStack, arguments)).forEachOrdered(stacks::add);
+                    arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TEXT, s1, true);
+            }
+            if (arguments.length > 0)
+                lastSearchArgument.add(arguments);
+            else
+                lastSearchArgument.add(new SearchArgument[]{SearchArgument.ALWAYS});
         });
-        if (splitSearchTerm.length == 0)
-            stacks.addAll(os);
-        List<ItemStack> workingItems = RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() && inventoryItems.size() > 0 ? new ArrayList<>() : new LinkedList<>(ol);
-        if (RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled()) {
-            RecipeHelper.getInstance().findCraftableByItems(inventoryItems).forEach(workingItems::add);
-            workingItems.addAll(inventoryItems);
-        }
-        final List<ItemStack> finalWorkingItems = workingItems;
-        finalStacks.addAll(stacks.stream().filter(itemStack -> {
-            if (!RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled())
-                return true;
-            for(ItemStack workingItem : finalWorkingItems)
-                if (itemStack.isItemEqual(workingItem))
-                    return true;
-            return false;
-        }).distinct().collect(Collectors.toList()));
-        return finalStacks;
+        List<ItemStack> stacks = Collections.emptyList();
+        if (lastSearchArgument.isEmpty())
+            stacks = Collections.unmodifiableList(os);
+        else
+            stacks = Collections.unmodifiableList(os.stream().filter(itemStack -> filterItem(itemStack, lastSearchArgument)).collect(Collectors.toList()));
+        if (!RoughlyEnoughItemsClient.getConfigManager().isCraftableOnlyEnabled() || stacks.isEmpty() || inventoryItems.isEmpty())
+            return stacks;
+        List<ItemStack> workingItems = Lists.newArrayList(RecipeHelper.getInstance().findCraftableByItems(inventoryItems));
+        return stacks.stream().filter(itemStack -> workingItems.stream().anyMatch(stack -> stack.isItemEqual(itemStack))).collect(Collectors.toList());
     }
     
-    private boolean filterItem(ItemStack itemStack, List<SearchArgument> arguments) {
-        String mod = ClientHelper.getModFromItemStack(itemStack);
-        List<String> toolTipsList = tryGetItemStackToolTip(itemStack);
-        String toolTipsMixed = toolTipsList.stream().skip(1).collect(Collectors.joining()).toLowerCase();
-        String allMixed = Stream.of(tryGetItemStackName(itemStack), toolTipsMixed).collect(Collectors.joining()).toLowerCase();
-        for(SearchArgument searchArgument : arguments.stream().filter(searchArgument -> !searchArgument.isInclude()).collect(Collectors.toList())) {
-            if (searchArgument.getArgumentType().equals(SearchArgument.ArgumentType.MOD))
-                if (mod.toLowerCase().contains(searchArgument.getText().toLowerCase()))
-                    return false;
-            if (searchArgument.getArgumentType().equals(SearchArgument.ArgumentType.TOOLTIP))
-                if (toolTipsMixed.contains(searchArgument.getText().toLowerCase()))
-                    return false;
-            if (searchArgument.getArgumentType().equals(SearchArgument.ArgumentType.TEXT))
-                if (allMixed.contains(searchArgument.getText().toLowerCase()))
-                    return false;
-        }
-        for(SearchArgument searchArgument : arguments.stream().filter(SearchArgument::isInclude).collect(Collectors.toList())) {
-            if (searchArgument.getArgumentType().equals(SearchArgument.ArgumentType.MOD))
-                if (!mod.toLowerCase().contains(searchArgument.getText().toLowerCase()))
-                    return false;
-            if (searchArgument.getArgumentType().equals(SearchArgument.ArgumentType.TOOLTIP))
-                if (!toolTipsMixed.contains(searchArgument.getText().toLowerCase()))
-                    return false;
-            if (searchArgument.getArgumentType().equals(SearchArgument.ArgumentType.TEXT))
-                if (!allMixed.contains(searchArgument.getText().toLowerCase()))
-                    return false;
-        }
-        return true;
+    public List<SearchArgument[]> getLastSearchArgument() {
+        return lastSearchArgument;
     }
     
-    private void calculateListSize(Rectangle rect) {
+    public void calculateListSize(Rectangle rect) {
         int xOffset = 0, yOffset = 0;
         width = 0;
         height = 0;
@@ -241,14 +321,14 @@ public class ItemListOverlay extends Gui implements IWidget {
     @Override
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
         if (rectangle.contains(double_1, double_2)) {
-            EntityPlayerSP player = Minecraft.getInstance().player;
-            if (ClientHelper.isCheating() && !player.inventory.getItemStack().isEmpty() && Minecraft.getInstance().isSingleplayer()) {
-                ClientHelper.sendDeletePacket();
+            EntityPlayerSP player = minecraft.player;
+            if (ClientHelper.getInstance().isCheating() && !player.inventory.getItemStack().isEmpty() && Minecraft.getInstance().isSingleplayer()) {
+                ClientHelper.getInstance().sendDeletePacket();
                 return true;
             }
             if (!player.inventory.getItemStack().isEmpty() && Minecraft.getInstance().isSingleplayer())
                 return false;
-            for(IWidget widget : getListeners())
+            for(Widget widget : getChildren())
                 if (widget.mouseClicked(double_1, double_2, int_1))
                     return true;
         }
@@ -256,7 +336,7 @@ public class ItemListOverlay extends Gui implements IWidget {
     }
     
     @Override
-    public List<IWidget> getListeners() {
+    public List<Widget> getChildren() {
         return widgets;
     }
     

@@ -1,14 +1,21 @@
+/*
+ * Roughly Enough Items by Danielshe.
+ * Licensed under the MIT License.
+ */
+
 package me.shedaniel.rei.client;
 
 public enum Weather {
-    CLEAR(0, "Clear"), RAIN(1, "Rain"), THUNDER(2, "Thunder");
+    CLEAR(0, "text.rei.weather.clear"),
+    RAIN(1, "text.rei.weather.rain"),
+    THUNDER(2, "text.rei.weather.thunder");
     
     private final int id;
-    private final String name;
+    private final String translateKey;
     
-    Weather(int id, String name) {
+    Weather(int id, String translateKey) {
         this.id = id;
-        this.name = name;
+        this.translateKey = translateKey;
     }
     
     public static Weather byId(int int_1) {
@@ -31,8 +38,7 @@ public enum Weather {
         return id;
     }
     
-    public String getName() {
-        return name;
+    public String getTranslateKey() {
+        return translateKey;
     }
-    
 }

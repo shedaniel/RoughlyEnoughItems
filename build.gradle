@@ -57,8 +57,10 @@ processResources {
 }
 
 dependencies {
-    implementation 'com.github.Chocohead:Rift:jitpack-SNAPSHOT:dev'
-    implementation 'com.github.shedaniel:Rift-ModList:43d459d86f0cdbc0797c38dfc0059bda9d0db059'
+    implementation 'com.github.Chocohead:Rift:c283efe7bd:dev'
+    implementation ('com.github.shedaniel:Rift-ModList:43d459d86f0cdbc0797c38dfc0059bda9d0db059') {
+        transitive = false
+    }
 
     extraLibs "blue.endless:jankson:${project.jankson_version}"
     configurations.implementation.extendsFrom(configurations.extraLibs)

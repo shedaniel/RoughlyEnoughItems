@@ -1,3 +1,8 @@
+/*
+ * Roughly Enough Items by Danielshe.
+ * Licensed under the MIT License.
+ */
+
 package me.shedaniel.rei.client;
 
 import com.google.common.collect.Lists;
@@ -10,18 +15,19 @@ import net.minecraft.util.NonNullList;
 import java.util.Collections;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 public class ItemRegistryImpl implements ItemRegistry {
     
-    private final List<ItemStack> itemList = Lists.newLinkedList();
+    private final CopyOnWriteArrayList<ItemStack> itemList = Lists.newCopyOnWriteArrayList();
     
     @Override
     public List<ItemStack> getItemList() {
         return Collections.unmodifiableList(itemList);
     }
     
-    @Deprecated
+    @SuppressWarnings("deprecation")
     @Override
     public List<ItemStack> getModifiableItemList() {
         return itemList;
@@ -32,7 +38,7 @@ public class ItemRegistryImpl implements ItemRegistry {
         NonNullList<ItemStack> list = NonNullList.create();
         list.add(item.getDefaultInstance());
         item.fillItemGroup(item.getGroup(), list);
-        TreeSet<ItemStack> stackSet = list.stream().collect(Collectors.toCollection(() -> new TreeSet<ItemStack>((p1, p2) -> ItemStack.areItemStacksEqual(p1, p2) ? 0 : 1)));
+        TreeSet<ItemStack> stackSet = list.stream().collect(Collectors.toCollection(() -> new TreeSet<ItemStack>((p1, p2) -> ItemStack.areItemsEqualIgnoreDurability(p1, p2) ? 0 : 1)));
         return Lists.newArrayList(stackSet).toArray(new ItemStack[0]);
     }
     

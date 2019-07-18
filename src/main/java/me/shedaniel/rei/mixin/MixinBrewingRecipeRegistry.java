@@ -1,9 +1,14 @@
+/*
+ * Roughly Enough Items by Danielshe.
+ * Licensed under the MIT License.
+ */
+
 package me.shedaniel.rei.mixin;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.rei.plugin.BrewingRecipe;
-import me.shedaniel.rei.plugin.DefaultBrewingDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
+import me.shedaniel.rei.plugin.brewing.BrewingRecipe;
+import me.shedaniel.rei.plugin.brewing.DefaultBrewingDisplay;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemPotion;
 import net.minecraft.item.crafting.Ingredient;
@@ -11,6 +16,7 @@ import net.minecraft.potion.PotionBrewing;
 import net.minecraft.potion.PotionType;
 import net.minecraft.potion.PotionUtils;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -21,9 +27,9 @@ import java.util.List;
 @Mixin(PotionBrewing.class)
 public class MixinBrewingRecipeRegistry {
     
-    private static final List<BrewingRecipe> SELF_ITEM_RECIPES = Lists.newArrayList();
-    private static final List<PotionType> REGISTERED_POTION_TYPES = Lists.newArrayList();
-    private static final List<Ingredient> SELF_POTION_TYPES = Lists.newArrayList();
+    @Unique private static final List<BrewingRecipe> SELF_ITEM_RECIPES = Lists.newArrayList();
+    @Unique private static final List<PotionType> REGISTERED_POTION_TYPES = Lists.newArrayList();
+    @Unique private static final List<Ingredient> SELF_POTION_TYPES = Lists.newArrayList();
     
     @Inject(method = "func_196208_a", at = @At("RETURN"))
     private static void method_8080(Item item_1, CallbackInfo ci) {

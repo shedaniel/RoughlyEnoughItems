@@ -1,35 +1,30 @@
 {
-
   "key.roughlyenoughitems.recipe_keybind": "Zeige Rezept",
   "key.roughlyenoughitems.hide_keybind": "Verstecke/Zeige REI",
   "key.roughlyenoughitems.usage_keybind": "Zeige Verwendung",
-
-
   "category.rei.crafting": "Herstellen",
   "category.rei.smelting": "Schmelzen",
-  "category.rei.smelting.fuel": "§eBrennstoff",
+  "category.rei.smelting.fuel": "Brennstoff",
   "category.rei.smoking": "Räuchern",
   "category.rei.blasting": "Sprengen",
   "category.rei.campfire": "Lagerfeuer",
   "category.rei.campfire.time": "§8%d Sekunden",
   "category.rei.stone_cutting": "Stein schneiden",
   "category.rei.brewing": "Brauen",
-  "category.rei.brewing.input": "§eOriginal Trank",
-  "category.rei.brewing.reactant": "§Zutat",
-  "category.rei.brewing.result": "§eEntstehender Trank",
+  "category.rei.brewing.input": "Original Trank",
+  "category.rei.brewing.reactant": "Zutat",
+  "category.rei.brewing.result": "Entstehender Trank",
   "text.rei.config": "Einstellung",
   "text.rei.config.side_search_box": "Rechte Suchbox: ",
   "text.rei.cheat_items": "[{item_name}] x{item_count} {player_name} gegeben.",
   "text.rei.failed_cheat_items": "§cItems geben fehlgeschlagen.",
   "text.rei.config.list_ordering": "Item Listen Reihenfolge",
-
   "ordering.rei.ascending": "Aufsteigend",
   "ordering.rei.descending": "Absteigend",
   "ordering.rei.registry": "Registrierung",
-
   "ordering.rei.item_groups": "Itemgruppen",
-  "text.speed_craft.failed_move_items": "§cItems können nicht bewegt werden!",
-  "text.speed_craft.move_items": "Items bewegen",
+  "text.auto_craft.failed_move_items": "§cItems können nicht bewegt werden!",
+  "text.auto_craft.move_items": "Items bewegen",
   "text.rei.config.enable_craftable_only": "Aktiviere nur Herstellen: ",
   "text.rei.showing_craftable": "Zeige herstellbar",
   "text.rei.showing_all": "Zeige alle",
@@ -39,11 +34,4 @@
   "text.rei.update_changelog_line": "§6- %s",
   "text.rei.config.load_default_plugin": "Lade Standard-Plugin: ",
   "text.rei.config.load_default_plugin.restart_tooltip": "Du möchtest das wahrscheinlich niemals deaktivieren.\nStarte Minecraft erneut, um die Einstellungen zu übernehmen."
-
-
-
-
-
-
-
 }

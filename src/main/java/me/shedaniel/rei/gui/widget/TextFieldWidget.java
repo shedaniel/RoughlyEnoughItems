@@ -1,9 +1,11 @@
+/*
+ * Roughly Enough Items by Danielshe.
+ * Licensed under the MIT License.
+ */
+
 package me.shedaniel.rei.gui.widget;
 
 import com.google.common.base.Predicates;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -13,16 +15,15 @@ import net.minecraft.util.SharedConstants;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class TextFieldWidget extends Gui implements HighlightableWidget {
+public class TextFieldWidget extends WidgetWithBounds {
     
-    protected final FontRenderer fontRenderer;
     public Function<String, String> stripInvaild;
     protected int focusedTicks;
     protected boolean editable;
@@ -57,7 +58,6 @@ public class TextFieldWidget extends Gui implements HighlightableWidget {
         this.renderTextProvider = (string_1, integer_1) -> {
             return string_1;
         };
-        this.fontRenderer = Minecraft.getInstance().fontRenderer;
         this.bounds = rectangle;
         this.stripInvaild = s -> SharedConstants.filterAllowedCharacters(s);
     }
@@ -271,16 +271,16 @@ public class TextFieldWidget extends Gui implements HighlightableWidget {
                 this.method_1884(0);
                 return true;
             } else if (GuiScreen.isKeyComboCtrlC(int_1)) {
-                Minecraft.getInstance().keyboardListener.setClipboardString(this.getSelectedText());
+                minecraft.keyboardListener.setClipboardString(this.getSelectedText());
                 return true;
             } else if (GuiScreen.isKeyComboCtrlV(int_1)) {
                 if (this.editable) {
-                    this.addText(Minecraft.getInstance().keyboardListener.getClipboardString());
+                    this.addText(minecraft.keyboardListener.getClipboardString());
                 }
                 
                 return true;
             } else if (GuiScreen.isKeyComboCtrlX(int_1)) {
-                Minecraft.getInstance().keyboardListener.setClipboardString(this.getSelectedText());
+                minecraft.keyboardListener.setClipboardString(this.getSelectedText());
                 if (this.editable) {
                     this.addText("");
                 }
@@ -336,6 +336,7 @@ public class TextFieldWidget extends Gui implements HighlightableWidget {
         }
     }
     
+    @Override
     public boolean charTyped(char char_1, int int_1) {
         if (this.isVisible() && this.isFocused()) {
             if (SharedConstants.isAllowedCharacter(char_1)) {
@@ -353,8 +354,8 @@ public class TextFieldWidget extends Gui implements HighlightableWidget {
     }
     
     @Override
-    public List<IWidget> getListeners() {
-        return new ArrayList<>();
+    public List<Widget> getChildren() {
+        return Collections.emptyList();
     }
     
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
@@ -372,8 +373,8 @@ public class TextFieldWidget extends Gui implements HighlightableWidget {
                     int_2 -= 4;
                 }
                 
-                String string_1 = this.fontRenderer.trimStringToWidth(this.text.substring(this.field_2103), this.getWidth());
-                this.method_1883(this.fontRenderer.trimStringToWidth(string_1, int_2).length() + this.field_2103);
+                String string_1 = this.font.trimStringToWidth(this.text.substring(this.field_2103), this.getWidth());
+                this.method_1883(this.font.trimStringToWidth(string_1, int_2).length() + this.field_2103);
                 return true;
             } else {
                 return false;
@@ -381,17 +382,21 @@ public class TextFieldWidget extends Gui implements HighlightableWidget {
         }
     }
     
-    public void draw(int int_1, int int_2, float float_1) {
+    public void renderBorder() {
+        if (this.hasBorder()) {
+            drawRect(this.bounds.x - 1, this.bounds.y - 1, this.bounds.x + this.bounds.width + 1, this.bounds.y + this.bounds.height + 1, -6250336);
+            drawRect(this.bounds.x, this.bounds.y, this.bounds.x + this.bounds.width, this.bounds.y + this.bounds.height, -16777216);
+        }
+    }
+    
+    public void render(int int_1, int int_2, float float_1) {
         if (this.isVisible()) {
-            if (this.hasBorder()) {
-                drawRect(this.bounds.x - 1, this.bounds.y - 1, this.bounds.x + this.bounds.width + 1, this.bounds.y + this.bounds.height + 1, -6250336);
-                drawRect(this.bounds.x, this.bounds.y, this.bounds.x + this.bounds.width, this.bounds.y + this.bounds.height, -16777216);
-            }
+            renderBorder();
             
             int color = this.editable ? this.editableColor : this.notEditableColor;
             int int_4 = this.cursorMax - this.field_2103;
             int int_5 = this.cursorMin - this.field_2103;
-            String string_1 = this.fontRenderer.trimStringToWidth(this.text.substring(this.field_2103), this.getWidth());
+            String string_1 = this.font.trimStringToWidth(this.text.substring(this.field_2103), this.getWidth());
             boolean boolean_1 = int_4 >= 0 && int_4 <= string_1.length();
             boolean boolean_2 = this.focused && this.focusedTicks / 6 % 2 == 0 && boolean_1;
             int int_6 = this.hasBorder ? this.bounds.x + 4 : this.bounds.x;
@@ -403,7 +408,7 @@ public class TextFieldWidget extends Gui implements HighlightableWidget {
             
             if (!string_1.isEmpty()) {
                 String string_2 = boolean_1 ? string_1.substring(0, int_4) : string_1;
-                int_8 = this.fontRenderer.drawStringWithShadow((String) this.renderTextProvider.apply(string_2, this.field_2103), (float) int_6, (float) int_7, color);
+                int_8 = this.font.drawStringWithShadow((String) this.renderTextProvider.apply(string_2, this.field_2103), (float) int_6, (float) int_7, color);
             }
             
             boolean boolean_3 = this.cursorMax < this.text.length() || this.text.length() >= this.getMaxLength();
@@ -416,11 +421,11 @@ public class TextFieldWidget extends Gui implements HighlightableWidget {
             }
             
             if (!string_1.isEmpty() && boolean_1 && int_4 < string_1.length()) {
-                this.fontRenderer.drawStringWithShadow((String) this.renderTextProvider.apply(string_1.substring(int_4), this.cursorMax), (float) int_8, (float) int_7, color);
+                this.font.drawStringWithShadow((String) this.renderTextProvider.apply(string_1.substring(int_4), this.cursorMax), (float) int_8, (float) int_7, color);
             }
             
             if (!boolean_3 && text.isEmpty() && this.suggestion != null) {
-                this.fontRenderer.drawStringWithShadow(this.fontRenderer.trimStringToWidth(this.suggestion, this.getWidth()), (float) int_6, (float) int_7, -8355712);
+                this.font.drawStringWithShadow(this.font.trimStringToWidth(this.suggestion, this.getWidth()), (float) int_6, (float) int_7, -8355712);
             }
             
             int var10002;
@@ -430,22 +435,20 @@ public class TextFieldWidget extends Gui implements HighlightableWidget {
                     int var10001 = int_7 - 1;
                     var10002 = int_9 + 1;
                     var10003 = int_7 + 1;
-                    this.fontRenderer.getClass();
+                    this.font.getClass();
                     drawRect(int_9, var10001, var10002, var10003 + 9, -3092272);
                 } else {
-                    this.fontRenderer.drawStringWithShadow("_", (float) int_9, (float) int_7, color);
+                    this.font.drawStringWithShadow("_", (float) int_9, (float) int_7, color);
                 }
             }
             
             if (int_5 != int_4) {
-                int int_10 = int_6 + this.fontRenderer.getStringWidth(string_1.substring(0, int_5));
+                int int_10 = int_6 + this.font.getStringWidth(string_1.substring(0, int_5));
                 var10002 = int_7 - 1;
                 var10003 = int_10 - 1;
                 int var10004 = int_7 + 1;
-                this.fontRenderer.getClass();
                 this.method_1886(int_9, var10002, var10003, var10004 + 9);
             }
-            
         }
     }
     
@@ -478,12 +481,12 @@ public class TextFieldWidget extends Gui implements HighlightableWidget {
         GlStateManager.enableColorLogic();
         GlStateManager.logicOp(GlStateManager.LogicOp.OR_REVERSE);
         bufferBuilder_1.begin(7, DefaultVertexFormats.POSITION);
-        bufferBuilder_1.pos((double) int_1, (double) int_4, 0.0D).endVertex();
-        bufferBuilder_1.pos((double) int_3, (double) int_4, 0.0D).endVertex();
-        bufferBuilder_1.pos((double) int_3, (double) int_2, 0.0D).endVertex();
-        bufferBuilder_1.pos((double) int_1, (double) int_2, 0.0D).endVertex();
+        bufferBuilder_1.pos((double) int_1, (double) int_4, zLevel + 50d).endVertex();
+        bufferBuilder_1.pos((double) int_3, (double) int_4, zLevel + 50d).endVertex();
+        bufferBuilder_1.pos((double) int_3, (double) int_2, zLevel + 50d).endVertex();
+        bufferBuilder_1.pos((double) int_1, (double) int_2, zLevel + 50d).endVertex();
         tessellator_1.draw();
-        GlStateManager.disableColorLogic();
+        GlStateManager.enableColorLogic();
         GlStateManager.enableTexture2D();
     }
     
@@ -523,12 +526,12 @@ public class TextFieldWidget extends Gui implements HighlightableWidget {
         this.notEditableColor = int_1;
     }
     
-    public void setHasFocus(boolean boolean_1) {
-        this.setFocused(boolean_1);
-    }
-    
-    public boolean hasFocus() {
-        return true;
+    public boolean changeFocus(boolean boolean_1) {
+        if (this.visible && this.editable) {
+            this.setFocused(!this.focused);
+            return this.focused;
+        }
+        return false;
     }
     
     public boolean isFocused() {
@@ -536,10 +539,8 @@ public class TextFieldWidget extends Gui implements HighlightableWidget {
     }
     
     public void setFocused(boolean boolean_1) {
-        if (boolean_1 && !this.focused) {
+        if (boolean_1 && !this.focused)
             this.focusedTicks = 0;
-        }
-        
         this.focused = boolean_1;
     }
     
@@ -554,16 +555,16 @@ public class TextFieldWidget extends Gui implements HighlightableWidget {
     public void method_1884(int int_1) {
         int int_2 = this.text.length();
         this.cursorMin = MathHelper.clamp(int_1, 0, int_2);
-        if (this.fontRenderer != null) {
+        if (this.font != null) {
             if (this.field_2103 > int_2) {
                 this.field_2103 = int_2;
             }
             
             int int_3 = this.getWidth();
-            String string_1 = this.fontRenderer.trimStringToWidth(this.text.substring(this.field_2103), int_3);
+            String string_1 = this.font.trimStringToWidth(this.text.substring(this.field_2103), int_3);
             int int_4 = string_1.length() + this.field_2103;
             if (this.cursorMin == this.field_2103) {
-                this.field_2103 -= this.fontRenderer.trimStringToWidth(this.text, int_3, true).length();
+                this.field_2103 -= this.font.trimStringToWidth(this.text, int_3, true).length();
             }
             
             if (this.cursorMin > int_4) {
@@ -590,7 +591,7 @@ public class TextFieldWidget extends Gui implements HighlightableWidget {
     }
     
     public int method_1889(int int_1) {
-        return int_1 > this.text.length() ? this.bounds.x : this.bounds.x + this.fontRenderer.getStringWidth(this.text.substring(0, int_1));
+        return int_1 > this.text.length() ? this.bounds.x : this.bounds.x + this.font.getStringWidth(this.text.substring(0, int_1));
     }
     
 }

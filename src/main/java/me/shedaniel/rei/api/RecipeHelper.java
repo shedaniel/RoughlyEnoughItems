@@ -1,43 +1,219 @@
+/*
+ * Roughly Enough Items by Danielshe.
+ * Licensed under the MIT License.
+ */
+
 package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.client.RecipeHelperImpl;
+import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.RecipeManager;
 
+import java.awt.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public interface RecipeHelper {
     
+    /**
+     * @return the api instance of {@link me.shedaniel.rei.client.RecipeHelperImpl}
+     */
     static RecipeHelper getInstance() {
         return RoughlyEnoughItemsCore.getRecipeHelper();
     }
     
+    AutoCraftingHandler registerAutoCraftingHandler(AutoCraftingHandler handler);
+    
+    List<AutoCraftingHandler> getSortedAutoCraftingHandler();
+    
+    /**
+     * Gets the total recipe count registered
+     *
+     * @return the recipe count
+     */
     int getRecipeCount();
     
+    /**
+     * @return a list of sorted recipes
+     */
+    List<IRecipe> getAllSortedRecipes();
+    
+    /**
+     * Gets all craftable items from materials.
+     *
+     * @param inventoryItems the materials
+     * @return the list of craftable items
+     */
     List<ItemStack> findCraftableByItems(List<ItemStack> inventoryItems);
     
+    /**
+     * Registers a category
+     *
+     * @param category the category to register
+     */
     void registerCategory(RecipeCategory category);
     
+    /**
+     * Registers the working stations of a category
+     *
+     * @param category        the category
+     * @param workingStations the working stations
+     */
+    void registerWorkingStations(Identifier category, List<ItemStack>... workingStations);
+    
+    /**
+     * Registers the working stations of a category
+     *
+     * @param category        the category
+     * @param workingStations the working stations
+     */
+    void registerWorkingStations(Identifier category, ItemStack... workingStations);
+    
+    List<List<ItemStack>> getWorkingStations(Identifier category);
+    
+    /**
+     * Registers a recipe display
+     *
+     * @param categoryIdentifier the category to display in
+     * @param display            the recipe display
+     */
     void registerDisplay(Identifier categoryIdentifier, RecipeDisplay display);
     
-    Map<RecipeCategory, List<RecipeDisplay>> getRecipesFor(ItemStack stack);
+    /**
+     * Gets a map of recipes for an itemstack
+     *
+     * @param stack the stack to be crafted
+     * @return the map of recipes
+     */
+    Map<RecipeCategory<?>, List<RecipeDisplay>> getRecipesFor(ItemStack stack);
     
+    RecipeCategory getCategory(Identifier identifier);
+    
+    /**
+     * Gets the vanilla recipe manager
+     *
+     * @return the recipe manager
+     */
     RecipeManager getRecipeManager();
     
+    /**
+     * Gets all registered categories
+     *
+     * @return the list of categories
+     */
     List<RecipeCategory> getAllCategories();
     
-    Map<RecipeCategory, List<RecipeDisplay>> getUsagesFor(ItemStack stack);
+    /**
+     * Gets a map of usages for an itemstack
+     *
+     * @param stack the stack to be used
+     * @return the map of recipes
+     */
+    Map<RecipeCategory<?>, List<RecipeDisplay>> getUsagesFor(ItemStack stack);
     
+    /**
+     * Gets the optional of the speed crafting button area from a category
+     *
+     * @param category the category of the display
+     * @return the optional of speed crafting button area
+     */
     Optional<ButtonAreaSupplier> getSpeedCraftButtonArea(RecipeCategory category);
     
+    /**
+     * Registers a speed crafting button area
+     *
+     * @param category  the category of the button area
+     * @param rectangle the button area
+     */
     void registerSpeedCraftButtonArea(Identifier category, ButtonAreaSupplier rectangle);
     
-    List<SpeedCraftFunctional> getSpeedCraftFunctional(RecipeCategory category);
+    /**
+     * Removes the speed crafting button
+     *
+     * @param category the category of the button
+     */
+    default void removeSpeedCraftButton(Identifier category) {
+        registerSpeedCraftButtonArea(category, bounds -> null);
+    }
     
-    void registerSpeedCraftFunctional(Identifier category, SpeedCraftFunctional functional);
+    /**
+     * @param category the category of the button area
+     * @deprecated Not required anymore
+     */
+    @Deprecated
+    void registerDefaultSpeedCraftButtonArea(Identifier category);
     
-    Map<RecipeCategory, List<RecipeDisplay>> getAllRecipes();
+    /**
+     * Gets the map of all recipes visible to the player
+     *
+     * @return the map of recipes
+     */
+    Map<RecipeCategory<?>, List<RecipeDisplay>> getAllRecipes();
+    
+    List<RecipeDisplay> getAllRecipesFromCategory(RecipeCategory category);
+    
+    /**
+     * Registers a recipe visibility handler
+     *
+     * @param visibilityHandler the handler to be registered
+     */
+    void registerRecipeVisibilityHandler(DisplayVisibilityHandler visibilityHandler);
+    
+    /**
+     * Unregisters a recipe visibility handler
+     *
+     * @param visibilityHandler the handler to be unregistered
+     */
+    void unregisterRecipeVisibilityHandler(DisplayVisibilityHandler visibilityHandler);
+    
+    /**
+     * Gets an unmodifiable list of recipe visibility handlers
+     *
+     * @return the unmodifiable list of handlers
+     */
+    List<DisplayVisibilityHandler> getDisplayVisibilityHandlers();
+    
+    /**
+     * Checks if the display is visible by asking recipe visibility handlers
+     *
+     * @param display       the display to be checked
+     * @param respectConfig whether it should respect the user's config
+     * @return whether the display should be visible
+     * @deprecated {@link RecipeHelper#isDisplayVisible(RecipeDisplay)} )}
+     */
+    @Deprecated
+    boolean isDisplayVisible(RecipeDisplay display, boolean respectConfig);
+    
+    /**
+     * Checks if the display is visible by asking recipe visibility handlers
+     *
+     * @param display the display to be checked
+     * @return whether the display should be visible
+     */
+    boolean isDisplayVisible(RecipeDisplay display);
+    
+    <T extends IRecipe> void registerRecipes(Identifier category, Predicate<IRecipe> recipeFilter, Function<T, RecipeDisplay> mappingFunction);
+    
+    /**
+     * Registers a live recipe generator.
+     *
+     * @param liveRecipeGenerator the generator to register
+     * @apiNote Still work in progress
+     */
+    void registerLiveRecipeGenerator(LiveRecipeGenerator<?> liveRecipeGenerator);
+    
+    void registerScreenClickArea(Rectangle rectangle, Class<? extends GuiContainer> screenClass, Identifier... categories);
+    
+    <T extends IRecipe> void registerRecipes(Identifier category, Class<T> recipeClass, Function<T, RecipeDisplay> mappingFunction);
+    
+    <T extends IRecipe> void registerRecipes(Identifier category, Function<IRecipe, Boolean> recipeFilter, Function<T, RecipeDisplay> mappingFunction);
+    
+    List<RecipeHelperImpl.ScreenClickArea> getScreenClickAreas();
     
 }

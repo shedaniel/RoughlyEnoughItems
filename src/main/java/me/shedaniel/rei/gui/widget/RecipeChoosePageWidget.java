@@ -1,9 +1,14 @@
+/*
+ * Roughly Enough Items by Danielshe.
+ * Licensed under the MIT License.
+ */
+
 package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.RoughlyEnoughItemsClient;
 import me.shedaniel.rei.api.ConfigManager;
-import me.shedaniel.rei.api.RelativePoint;
+import me.shedaniel.rei.client.ConfigObject;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
@@ -14,6 +19,7 @@ import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,10 +28,10 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     private int currentPage;
     private int maxPage;
     private Rectangle bounds, grabBounds, dragBounds;
-    private List<IWidget> widgets;
+    private List<Widget> widgets;
     private RecipeViewingScreen recipeViewingScreen;
     private TextFieldWidget textFieldWidget;
-    private RecipeBaseWidget base1, base2;
+    private CategoryBaseWidget base1, base2;
     private ButtonWidget btnDone;
     
     public RecipeChoosePageWidget(RecipeViewingScreen recipeViewingScreen, int currentPage, int maxPage) {
@@ -38,7 +44,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     
     private static Point getPointFromConfig() {
         MainWindow window = Minecraft.getInstance().mainWindow;
-        RelativePoint point = RoughlyEnoughItemsCore.getConfigManager().getConfig().choosePageDialogPoint;
+        ConfigObject.RelativePoint point = RoughlyEnoughItemsClient.getConfigManager().getConfig().choosePageDialogPoint;
         return new Point((int) point.getX(window.getScaledWidth()), (int) point.getY(window.getScaledHeight()));
     }
     
@@ -58,7 +64,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     }
     
     @Override
-    public boolean isHighlighted(int mouseX, int mouseY) {
+    public boolean containsMouse(double mouseX, double mouseY) {
         return getBounds().contains(mouseX, mouseY) || new Rectangle(bounds.x + bounds.width - 50, bounds.y + bounds.height - 3, 50, 36).contains(mouseX, mouseY);
     }
     
@@ -79,25 +85,26 @@ public class RecipeChoosePageWidget extends DraggableWidget {
         this.grabBounds = new Rectangle(midPoint.x - 50, midPoint.y - 20, 100, 16);
         this.dragBounds = new Rectangle(midPoint.x - 50, midPoint.y - 20, 100, 70);
         this.widgets = Lists.newArrayList();
-        this.widgets.add(base1 = new RecipeBaseWidget(new Rectangle(bounds.x + bounds.width - 50, bounds.y + bounds.height - 6, 50, 36)));
-        this.widgets.add(base2 = new RecipeBaseWidget(bounds));
-        this.widgets.add(new IWidget() {
+        this.widgets.add(base1 = new CategoryBaseWidget(new Rectangle(bounds.x + bounds.width - 50, bounds.y + bounds.height - 6, 50, 36)));
+        this.widgets.add(base2 = new CategoryBaseWidget(bounds));
+        this.widgets.add(new Widget() {
             @Override
-            public List<IWidget> getListeners() {
-                return Lists.newArrayList();
+            public List<Widget> getChildren() {
+                return Collections.emptyList();
             }
             
             @Override
-            public void draw(int i, int i1, float v) {
-                Minecraft.getInstance().fontRenderer.drawString(I18n.format("text.rei.choose_page"), bounds.x + 5, bounds.y + 5, 4210752);
+            public void render(int i, int i1, float v) {
+                font.drawString(I18n.format("text.rei.choose_page"), bounds.x + 5, bounds.y + 5, 4210752);
                 String endString = String.format(" /%d", maxPage);
-                int width = Minecraft.getInstance().fontRenderer.getStringWidth(endString);
-                Minecraft.getInstance().fontRenderer.drawString(endString, bounds.x + bounds.width - 5 - width, bounds.y + 22, 4210752);
+                int width = font.getStringWidth(endString);
+                font.drawString(endString, bounds.x + bounds.width - 5 - width, bounds.y + 22, 4210752);
             }
         });
         String endString = String.format(" /%d", maxPage);
-        int width = Minecraft.getInstance().fontRenderer.getStringWidth(endString);
+        int width = font.getStringWidth(endString);
         this.widgets.add(textFieldWidget = new TextFieldWidget(bounds.x + 7, bounds.y + 16, bounds.width - width - 12, 18));
+        textFieldWidget.setMaxLength(10000);
         textFieldWidget.stripInvaild = s -> {
             StringBuilder stringBuilder_1 = new StringBuilder();
             char[] var2 = s.toCharArray();
@@ -114,7 +121,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
         textFieldWidget.setText(String.valueOf(currentPage + 1));
         widgets.add(btnDone = new ButtonWidget(bounds.x + bounds.width - 45, bounds.y + bounds.height + 3, 40, 20, I18n.format("gui.done")) {
             @Override
-            public void onPressed(int button, double mouseX, double mouseY) {
+            public void onPressed() {
                 recipeViewingScreen.page = MathHelper.clamp(getIntFromString(textFieldWidget.getText()).orElse(0) - 1, 0, recipeViewingScreen.getTotalPages(recipeViewingScreen.getSelectedCategory()) - 1);
                 recipeViewingScreen.choosePageActivated = false;
                 recipeViewingScreen.initGui();
@@ -129,23 +136,23 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     }
     
     @Override
-    public List<IWidget> getListeners() {
+    public List<Widget> getChildren() {
         return widgets;
     }
     
     @Override
-    public void draw(int i, int i1, float v) {
+    public void render(int i, int i1, float v) {
         widgets.forEach(widget -> {
             RenderHelper.disableStandardItemLighting();
-            GlStateManager.translatef(0, 0, 600);
-            widget.draw(i, i1, v);
-            GlStateManager.translatef(0, 0, -600);
+            GlStateManager.translatef(0, 0, 800);
+            widget.render(i, i1, v);
+            GlStateManager.translatef(0, 0, -800);
         });
     }
     
     @Override
     public boolean charTyped(char char_1, int int_1) {
-        for(IWidget widget : widgets)
+        for(Widget widget : widgets)
             if (widget.charTyped(char_1, int_1))
                 return true;
         return false;
@@ -159,7 +166,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
             recipeViewingScreen.initGui();
             return true;
         }
-        for(IWidget widget : widgets)
+        for(Widget widget : widgets)
             if (widget.keyPressed(int_1, int_2, int_3))
                 return true;
         return false;
@@ -175,9 +182,9 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     
     @Override
     public void onMouseReleaseMidPoint(Point midPoint) {
-        ConfigManager configManager = RoughlyEnoughItemsCore.getConfigManager();
-        MainWindow window = Minecraft.getInstance().mainWindow;
-        configManager.getConfig().choosePageDialogPoint = new RelativePoint(midPoint.getX() / window.getScaledWidth(), midPoint.getY() / window.getScaledHeight());
+        ConfigManager configManager = RoughlyEnoughItemsClient.getConfigManager();
+        MainWindow window = minecraft.mainWindow;
+        configManager.getConfig().choosePageDialogPoint = new ConfigObject.RelativePoint(midPoint.getX() / window.getScaledWidth(), midPoint.getY() / window.getScaledHeight());
         try {
             configManager.saveConfig();
         } catch (IOException e) {

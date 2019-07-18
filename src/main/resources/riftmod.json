@@ -7,10 +7,18 @@
     "Danielshe"
   ],
   "listeners": [
-    "me.shedaniel.rei.MixinStart",
-    "me.shedaniel.rei.RoughlyEnoughItemsCore",
-    "me.shedaniel.rei.client.KeyBindingRegistry",
-    "me.shedaniel.rei.client.ScreenHelper"
+    {
+      "class": "me.shedaniel.rei.MixinStart",
+      "priority": -15
+    },
+    {
+      "class": "me.shedaniel.rei.RoughlyEnoughItemsClient",
+      "priority": 50
+    },
+    {
+      "class": "me.shedaniel.rei.client.KeybindRegistry",
+      "priority": 50
+    }
   ],
   "url": "https://shedaniel.me"
 }

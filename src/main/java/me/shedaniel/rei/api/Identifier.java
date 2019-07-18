@@ -5,6 +5,8 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.util.JsonUtils;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.ResourceLocationException;
 import net.minecraft.util.text.TextComponentTranslation;
 
 import javax.annotation.Nullable;
@@ -22,11 +24,11 @@ public class Identifier implements Comparable<Identifier> {
         if (!this.namespace.chars().allMatch((p_195825_0_) -> {
             return p_195825_0_ == 95 || p_195825_0_ == 45 || p_195825_0_ >= 97 && p_195825_0_ <= 122 || p_195825_0_ >= 48 && p_195825_0_ <= 57 || p_195825_0_ == 46;
         })) {
-            throw new IdentifierException("Non [a-z0-9_.-] character in namespace of location: " + this.namespace + ':' + this.path);
+            throw new ResourceLocationException("Non [a-z0-9_.-] character in namespace of location: " + this.namespace + ':' + this.path);
         } else if (!this.path.chars().allMatch((p_195827_0_) -> {
             return p_195827_0_ == 95 || p_195827_0_ == 45 || p_195827_0_ >= 97 && p_195827_0_ <= 122 || p_195827_0_ >= 48 && p_195827_0_ <= 57 || p_195827_0_ == 47 || p_195827_0_ == 46;
         })) {
-            throw new IdentifierException("Non [a-z0-9/._-] character in path of location: " + this.namespace + ':' + this.path);
+            throw new ResourceLocationException("Non [a-z0-9/._-] character in path of location: " + this.namespace + ':' + this.path);
         }
     }
     
@@ -34,8 +36,8 @@ public class Identifier implements Comparable<Identifier> {
         this(decompose(resourceName, ':'));
     }
     
-    public Identifier(String namespace, String path) {
-        this(new String[]{namespace, path});
+    public Identifier(String namespaceIn, String pathIn) {
+        this(new String[]{namespaceIn, pathIn});
     }
     
     public static Identifier of(String p_195828_0_, char p_195828_1_) {
@@ -43,10 +45,10 @@ public class Identifier implements Comparable<Identifier> {
     }
     
     @Nullable
-    public static Identifier makeIdentifier(String string) {
+    public static Identifier makeResourceLocation(String string) {
         try {
             return new Identifier(string);
-        } catch (IdentifierException var2) {
+        } catch (ResourceLocationException var2) {
             return null;
         }
     }
@@ -77,7 +79,7 @@ public class Identifier implements Comparable<Identifier> {
         
         try {
             return new Identifier(s);
-        } catch (IdentifierException var4) {
+        } catch (ResourceLocationException var4) {
             reader.setCursor(i);
             throw field_200118_c.createWithContext(reader);
         }
@@ -125,22 +127,13 @@ public class Identifier implements Comparable<Identifier> {
     }
     
     public static class Serializer implements JsonDeserializer<Identifier>, JsonSerializer<Identifier> {
-        public Identifier deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_) throws JsonParseException {
+        public Identifier deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_)
+                throws JsonParseException {
             return new Identifier(JsonUtils.getString(p_deserialize_1_, "location"));
         }
         
         public JsonElement serialize(Identifier p_serialize_1_, Type p_serialize_2_, JsonSerializationContext p_serialize_3_) {
             return new JsonPrimitive(p_serialize_1_.toString());
-        }
-    }
-    
-    public static class IdentifierException extends RuntimeException {
-        public IdentifierException(String p_i48222_1_) {
-            super(p_i48222_1_);
-        }
-        
-        public IdentifierException(String p_i49530_1_, Throwable p_i49530_2_) {
-            super(p_i49530_1_, p_i49530_2_);
         }
     }
 }

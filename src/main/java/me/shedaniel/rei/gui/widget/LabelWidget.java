@@ -1,34 +1,42 @@
+/*
+ * Roughly Enough Items by Danielshe.
+ * Licensed under the MIT License.
+ */
+
 package me.shedaniel.rei.gui.widget;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.IGuiEventListener;
 
-import java.util.ArrayList;
+import java.awt.*;
+import java.util.Collections;
 import java.util.List;
 
-public class LabelWidget extends Gui implements IWidget {
+public class LabelWidget extends WidgetWithBounds {
     
     public int x;
     public int y;
     public String text;
-    protected FontRenderer fontRenderer;
     
     public LabelWidget(int x, int y, String text) {
         this.x = x;
         this.y = y;
         this.text = text;
-        this.fontRenderer = Minecraft.getInstance().fontRenderer;
     }
     
     @Override
-    public List<IWidget> getListeners() {
-        return new ArrayList<>();
+    public Rectangle getBounds() {
+        int width = font.getStringWidth(text);
+        return new Rectangle(x - width / 2 - 1, y - 5, width + 2, 14);
     }
     
     @Override
-    public void draw(int mouseX, int mouseY, float partialTicks) {
-        drawCenteredString(fontRenderer, text, x, y, -1);
+    public List<? extends IGuiEventListener> getChildren() {
+        return Collections.emptyList();
+    }
+    
+    @Override
+    public void render(int mouseX, int mouseY, float delta) {
+        drawCenteredString(font, text, x, y, -1);
     }
     
 }
