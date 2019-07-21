@@ -41,20 +41,13 @@ dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_version}"
     modApi "net.fabricmc:fabric-loader:${project.fabricloader_version}"
-    modApi "net.fabricmc.fabric-api:fabric-keybindings-v0:${project.fabric_keybindings}"
-    modApi "net.fabricmc.fabric-api:fabric-api-base:${project.fabric_api_base}"
-    modApi "net.fabricmc.fabric-api:fabric-networking-v0:${project.fabric_networking}"
-    modApi "net.fabricmc.fabric-api:fabric-resource-loader-v0:${project.fabric_resource_loader}"
+    modApi "net.fabricmc.fabric-api:fabric-api:${project.fabric_api}"
     modApi "cloth:ClothEvents:${cloth_events_version}"
     modImplementation("me.shedaniel.cloth:config-2:${cloth_config_version}") {
         transitive = false
     }
     modApi "blue.endless:jankson:${project.jankson_version}"
     if (includeDep) {
-        include "net.fabricmc.fabric-api:fabric-keybindings-v0:${project.fabric_keybindings}"
-        include "net.fabricmc.fabric-api:fabric-api-base:${project.fabric_api_base}"
-        include "net.fabricmc.fabric-api:fabric-networking-v0:${project.fabric_networking}"
-        include "net.fabricmc.fabric-api:fabric-resource-loader-v0:${project.fabric_resource_loader}"
         include "cloth:ClothEvents:${cloth_events_version}"
         include("me.shedaniel.cloth:config-2:${cloth_config_version}") {
             transitive = false
