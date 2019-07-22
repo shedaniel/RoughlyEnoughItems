@@ -11,7 +11,6 @@ import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.Renderable;
 import me.shedaniel.rei.api.Renderer;
-import me.shedaniel.rei.client.ClientHelperImpl;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.renderables.ItemStackRenderer;
 import net.minecraft.client.gui.Element;
@@ -20,19 +19,17 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class SlotWidget extends HighlightableWidget {
     
     public static final Identifier RECIPE_GUI = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     public static final Identifier RECIPE_GUI_DARK = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
+    protected int x, y;
     private List<Renderer> renderers = new LinkedList<>();
     private boolean drawBackground, showToolTips, clickToMoreRecipes, drawHighlightedBackground;
-    protected int x, y;
     
     public SlotWidget(int x, int y, ItemStack itemStack, boolean drawBackground, boolean showToolTips) {
         this(x, y, Collections.singletonList(itemStack), drawBackground, showToolTips);
@@ -155,10 +152,10 @@ public class SlotWidget extends HighlightableWidget {
     protected List<String> getTooltip(ItemStack itemStack) {
         final String modString = ClientHelper.getInstance().getFormattedModFromItem(itemStack.getItem());
         List<String> toolTip = Lists.newArrayList(ItemListOverlay.tryGetItemStackToolTip(itemStack, true));
-        String s1 = ClientHelperImpl.instance.getFormattedModNoItalicFromItem(itemStack.getItem()).toLowerCase();
+        String s1 = ClientHelper.getInstance().getModFromItem(itemStack.getItem()).toLowerCase(Locale.ROOT);
         toolTip.addAll(getExtraToolTips(itemStack));
         if (!modString.isEmpty()) {
-            toolTip.removeIf(s -> s.toLowerCase().contains(s1));
+            toolTip.removeIf(s -> s.toLowerCase(Locale.ROOT).contains(s1));
             toolTip.add(modString);
         }
         return toolTip;
