@@ -10,7 +10,6 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.Renderer;
-import me.shedaniel.rei.client.ClientHelperImpl;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.renderers.ItemStackRenderer;
 import net.minecraft.client.gui.Element;
@@ -152,7 +151,7 @@ public class SlotWidget extends WidgetWithBounds {
     protected List<String> getTooltip(ItemStack itemStack) {
         final String modString = ClientHelper.getInstance().getFormattedModFromItem(itemStack.getItem());
         List<String> toolTip = Lists.newArrayList(ItemListOverlay.tryGetItemStackToolTip(itemStack, true));
-        String s1 = ClientHelperImpl.instance.getFormattedModNoItalicFromItem(itemStack.getItem()).toLowerCase(Locale.ROOT);
+        String s1 = ClientHelper.getInstance().getModFromItem(itemStack.getItem()).toLowerCase(Locale.ROOT);
         toolTip.addAll(getExtraToolTips(itemStack));
         if (!modString.isEmpty()) {
             toolTip.removeIf(s -> s.toLowerCase(Locale.ROOT).contains(s1));
