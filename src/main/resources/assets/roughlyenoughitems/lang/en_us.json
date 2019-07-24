@@ -71,7 +71,7 @@
   "text.rei.choose_page": "Choose Page",
   "text.rei.config.max_recipes_per_page": "Maximum Recipes Each Page:",
   "text.rei.config.enable_util_buttons": "Enable Utils Buttons:",
-  "text.rei.gamemode_button.tooltip": "Switch GameMode\n§7Switch to %s mode.",
+  "text.rei.gamemode_button.tooltip": "Switch GameMode\n§7Switch to %s mode.\n\n§7Shift-Click to switch in a reverse cycle.",
   "text.rei.weather_button.tooltip": "Switch Weather\n§7Switch to %s.",
   "text.rei.enabled": "Yes",
   "text.rei.disabled": "No",

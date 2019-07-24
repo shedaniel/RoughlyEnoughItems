@@ -166,7 +166,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? window.getScaledWidth() - 55 : 35, 10, 20, 20, "") {
                 @Override
                 public void onPressed() {
-                    MinecraftClient.getInstance().player.sendChatMessage(RoughlyEnoughItemsCore.getConfigManager().getConfig().gamemodeCommand.replaceAll("\\{gamemode}", getNextGameMode().getName()));
+                    MinecraftClient.getInstance().player.sendChatMessage(RoughlyEnoughItemsCore.getConfigManager().getConfig().gamemodeCommand.replaceAll("\\{gamemode}", getNextGameMode(Screen.hasShiftDown()).getName()));
                 }
                 
                 @Override
@@ -177,7 +177,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
                 
                 @Override
                 public Optional<String> getTooltips() {
-                    return Optional.ofNullable(I18n.translate("text.rei.gamemode_button.tooltip", getGameModeText(getNextGameMode())));
+                    return Optional.ofNullable(I18n.translate("text.rei.gamemode_button.tooltip", getGameModeText(getNextGameMode(Screen.hasShiftDown()))));
                 }
                 
                 @Override
@@ -298,12 +298,16 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
         return I18n.translate("selectWorld.gameMode." + gameMode.getName());
     }
     
-    private GameMode getNextGameMode() {
+    private GameMode getNextGameMode(boolean reverse) {
         try {
             GameMode current = getCurrentGameMode();
             int next = current.getId() + 1;
+            if (reverse)
+                next -= 2;
             if (next > 3)
                 next = 0;
+            if (next < 0)
+                next = 3;
             return GameMode.byId(next);
         } catch (Exception e) {
             return GameMode.NOT_SET;

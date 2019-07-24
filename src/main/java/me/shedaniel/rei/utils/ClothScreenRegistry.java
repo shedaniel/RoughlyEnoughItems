@@ -33,6 +33,7 @@ public class ClothScreenRegistry {
     
     public static final String RESET = "text.cloth-config.reset_value";
     
+    @SuppressWarnings("deprecation")
     public static Screen getConfigScreen(Screen parent) {
         final ConfigManager configManager = RoughlyEnoughItemsCore.getConfigManager();
         ConfigBuilder builder = ConfigBuilder.create().setParentScreen(parent).setTitle("text.rei.config.title").setSavingRunnable(() -> {
