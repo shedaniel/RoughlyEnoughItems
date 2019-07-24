@@ -492,8 +492,6 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             ScreenHelper.toggleOverlayVisible();
             return true;
         }
-        if (!ScreenHelper.isOverlayVisible())
-            return false;
         ItemStack itemStack = null;
         if (MinecraftClient.getInstance().currentScreen instanceof AbstractContainerScreen)
             if (ScreenHelper.getLastContainerScreenHooks().rei_getHoveredSlot() != null && !ScreenHelper.getLastContainerScreenHooks().rei_getHoveredSlot().getStack().isEmpty())
@@ -504,6 +502,8 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             else if (ClientHelper.getInstance().getUsageKeyBinding().matchesKey(int_1, int_2))
                 return ClientHelper.getInstance().executeUsageKeyBind(itemStack);
         }
+        if (!ScreenHelper.isOverlayVisible())
+            return false;
         if (ClientHelper.getInstance().getFocusSearchFieldKeyBinding().matchesKey(int_1, int_2)) {
             ScreenHelper.searchField.setFocused(true);
             setFocused(ScreenHelper.searchField);
