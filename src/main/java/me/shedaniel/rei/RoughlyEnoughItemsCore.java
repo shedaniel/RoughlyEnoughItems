@@ -10,6 +10,7 @@ import com.google.common.collect.Maps;
 import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.cloth.hooks.ClothClientHooks;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.client.*;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.widget.ItemListOverlay;
@@ -87,10 +88,9 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
      * @deprecated Check REI wiki
      */
     @Deprecated
-    public static REIPluginEntry registerPlugin(Identifier identifier, REIPluginEntry plugin) {
-        plugins.put(identifier, plugin);
-        RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered plugin %s from %s", identifier.toString(), plugin.getClass().getSimpleName());
-        plugin.onFirstLoad(getPluginDisabler());
+    public static REIPluginEntry registerPlugin(REIPluginEntry plugin) {
+        plugins.put(plugin.getPluginIdentifier(), plugin);
+        RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered plugin %s from %s", plugin.getPluginIdentifier().toString(), plugin.getClass().getSimpleName());
         return plugin;
     }
     
@@ -147,7 +147,11 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     private void discoverPluginEntries() {
         for(REIPluginEntry reiPlugin : FabricLoader.getInstance().getEntrypoints("rei_plugins", REIPluginEntry.class)) {
             try {
-                registerPlugin(reiPlugin.getPluginIdentifier(), reiPlugin);
+                if (!REIPluginV0.class.isAssignableFrom(reiPlugin.getClass()))
+                    throw new IllegalArgumentException("REI plugin is too old!");
+                registerPlugin(reiPlugin);
+                if (reiPlugin instanceof REIPluginV0)
+                    ((REIPluginV0) reiPlugin).onFirstLoad(getPluginDisabler());
             } catch (Exception e) {
                 e.printStackTrace();
                 RoughlyEnoughItemsCore.LOGGER.error("[REI] Can't load REI plugins from %s: %s", reiPlugin.getClass(), e.getLocalizedMessage());

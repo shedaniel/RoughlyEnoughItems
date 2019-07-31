@@ -9,6 +9,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
@@ -30,6 +31,9 @@ import me.shedaniel.rei.plugin.smoking.DefaultSmokingCategory;
 import me.shedaniel.rei.plugin.smoking.DefaultSmokingDisplay;
 import me.shedaniel.rei.plugin.stonecutting.DefaultStoneCuttingCategory;
 import me.shedaniel.rei.plugin.stonecutting.DefaultStoneCuttingDisplay;
+import net.fabricmc.loader.api.SemanticVersion;
+import net.fabricmc.loader.util.version.SemanticVersionImpl;
+import net.fabricmc.loader.util.version.VersionParsingException;
 import net.minecraft.block.ComposterBlock;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.*;
@@ -49,7 +53,7 @@ import java.awt.*;
 import java.util.List;
 import java.util.*;
 
-public class DefaultPlugin implements REIPluginEntry {
+public class DefaultPlugin implements REIPluginV0 {
     
     public static final Identifier CRAFTING = new Identifier("minecraft", "plugins/crafting");
     public static final Identifier SMELTING = new Identifier("minecraft", "plugins/smelting");
@@ -75,6 +79,11 @@ public class DefaultPlugin implements REIPluginEntry {
     @Override
     public Identifier getPluginIdentifier() {
         return PLUGIN;
+    }
+    
+    @Override
+    public SemanticVersion getMinimumVersion() throws VersionParsingException {
+        return SemanticVersion.parse("2.10");
     }
     
     @Override
