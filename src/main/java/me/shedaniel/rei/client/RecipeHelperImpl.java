@@ -9,6 +9,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.plugins.REIPluginV0;
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.SemanticVersion;
+import net.fabricmc.loader.api.Version;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Recipe;
@@ -239,19 +243,30 @@ public class RecipeHelperImpl implements RecipeHelper {
         Collections.reverse(plugins);
         RoughlyEnoughItemsCore.getItemRegisterer().getModifiableItemList().clear();
         PluginDisabler pluginDisabler = RoughlyEnoughItemsCore.getPluginDisabler();
+        Version reiVersion = FabricLoader.getInstance().getModContainer("roughlyenoughitems").get().getMetadata().getVersion();
+        if (!(reiVersion instanceof SemanticVersion))
+            RoughlyEnoughItemsCore.LOGGER.warn("[REI] Roughly Enough Items is not using semantic versioning, will be ignoring plugins' minimum versions!");
         plugins.forEach(plugin -> {
             Identifier identifier = plugin.getPluginIdentifier();
             try {
-                if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_ITEMS))
-                    plugin.registerItems(RoughlyEnoughItemsCore.getItemRegisterer());
-                if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_CATEGORIES))
-                    plugin.registerPluginCategories(this);
-                if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_RECIPE_DISPLAYS))
-                    plugin.registerRecipeDisplays(this);
-                if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_BOUNDS))
-                    plugin.registerBounds(RoughlyEnoughItemsCore.getDisplayHelper());
-                if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_OTHERS))
-                    plugin.registerOthers(this);
+                if (plugin instanceof REIPluginV0) {
+                    if (reiVersion instanceof SemanticVersion)
+                        if (((REIPluginV0) plugin).getMinimumVersion().compareTo((SemanticVersion) reiVersion) > 0) {
+                            throw new IllegalStateException("Requires " + ((REIPluginV0) plugin).getMinimumVersion().getFriendlyString() + " REI version!");
+                        }
+                    if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_CATEGORIES))
+                        ((REIPluginV0) plugin).registerPluginCategories(this);
+                    if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_RECIPE_DISPLAYS))
+                        ((REIPluginV0) plugin).registerRecipeDisplays(this);
+                    if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_BOUNDS))
+                        ((REIPluginV0) plugin).registerBounds(RoughlyEnoughItemsCore.getDisplayHelper());
+                    if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_OTHERS))
+                        ((REIPluginV0) plugin).registerOthers(this);
+                    if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_ITEMS))
+                        ((REIPluginV0) plugin).registerItems(RoughlyEnoughItemsCore.getItemRegisterer());
+                } else {
+                    throw new IllegalStateException("Invaild Plugin Class!");
+                }
             } catch (Exception e) {
                 RoughlyEnoughItemsCore.LOGGER.error("[REI] " + identifier.toString() + " plugin failed to load!", e);
             }
