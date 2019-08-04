@@ -50,9 +50,11 @@ public interface ItemRegistry {
      * @param stacks    the stacks to register
      */
     default void registerItemStack(Item afterItem, ItemStack... stacks) {
-        for(ItemStack stack : stacks)
+        for(int i = stacks.length - 1; i >= 0; i--) {
+            ItemStack stack = stacks[i];
             if (stack != null && !stack.isEmpty())
                 registerItemStack(afterItem, stack);
+        }
     }
     
     /**
@@ -61,9 +63,7 @@ public interface ItemRegistry {
      * @param stacks the stacks to register
      */
     default void registerItemStack(ItemStack... stacks) {
-        for(ItemStack stack : stacks)
-            if (stack != null && !stack.isEmpty())
-                registerItemStack(null, stack);
+        registerItemStack(null, stacks);
     }
     
     /**

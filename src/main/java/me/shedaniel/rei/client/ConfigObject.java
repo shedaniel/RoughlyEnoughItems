@@ -20,7 +20,7 @@ public class ConfigObject {
     @Comment("The ordering of the items on the item panel.") public boolean isAscending = true;
     
     @Comment("To toggle the craftable button next to the search field.")
-    public boolean enableCraftableOnlyButton = true;
+    public boolean enableCraftableOnlyButton = false;
     
     @Comment("True: search field will be on the side (left / right), false: in the middle")
     public boolean sideSearchField = false;
