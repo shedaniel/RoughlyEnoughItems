@@ -25,8 +25,6 @@ public class RecipeBaseWidget extends WidgetWithBounds {
     
     public RecipeBaseWidget(Rectangle bounds) {
         this.bounds = bounds;
-        if (bounds.width < 8 || bounds.height < 8)
-            throw new IllegalArgumentException("Base too small, at least 8x8!");
     }
     
     public int getBlitOffset() {
