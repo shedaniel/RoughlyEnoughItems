@@ -28,6 +28,7 @@
   "category.rei.brewing.reactant": "Ingredient",
   "category.rei.brewing.result": "Resulted Potion",
   "category.rei.composting": "Composting",
+  "category.rei.stripping": "Stripping",
   "text.rei.composting.chance": "§e%d%% Chance",
   "text.rei.composting.page": "Page %d",
   "text.rei.config": "Config",
