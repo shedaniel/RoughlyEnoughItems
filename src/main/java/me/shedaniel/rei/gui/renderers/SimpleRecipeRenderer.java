@@ -44,7 +44,7 @@ public class SimpleRecipeRenderer extends RecipeRenderer {
     public SimpleRecipeRenderer(Supplier<List<List<ItemStack>>> input, Supplier<List<ItemStack>> output) {
         List<Pair<List<ItemStack>, AtomicInteger>> newList = Lists.newArrayList();
         List<Pair<List<ItemStack>, Integer>> a = input.get().stream().map(stacks -> new Pair<>(stacks, stacks.stream().map(ItemStack::getCount).max(Integer::compareTo).orElse(1))).collect(Collectors.toList());
-        for(Pair<List<ItemStack>, Integer> pair : a) {
+        for (Pair<List<ItemStack>, Integer> pair : a) {
             Optional<Pair<List<ItemStack>, AtomicInteger>> any = newList.stream().filter(pairr -> equalsList(pair.getLeft(), pairr.getLeft())).findAny();
             if (any.isPresent()) {
                 any.get().getRight().addAndGet(pair.getRight());
@@ -52,7 +52,7 @@ public class SimpleRecipeRenderer extends RecipeRenderer {
                 newList.add(new Pair<>(pair.getLeft(), new AtomicInteger(pair.getRight())));
         }
         List<List<ItemStack>> b = Lists.newArrayList();
-        for(Pair<List<ItemStack>, AtomicInteger> pair : newList)
+        for (Pair<List<ItemStack>, AtomicInteger> pair : newList)
             b.add(pair.getLeft().stream().map(stack -> {
                 ItemStack s = stack.copy();
                 s.setCount(pair.getRight().get());
@@ -69,7 +69,7 @@ public class SimpleRecipeRenderer extends RecipeRenderer {
             return true;
         if (stacks_1.size() != stacks_2.size())
             return false;
-        for(int i = 0; i < stacks_1.size(); i++)
+        for (int i = 0; i < stacks_1.size(); i++)
             if (!stacks_1.get(i).isItemEqualIgnoreDamage(stacks_2.get(i)))
                 return false;
         return true;
@@ -80,7 +80,7 @@ public class SimpleRecipeRenderer extends RecipeRenderer {
         int xx = x + 4, yy = y + 2;
         int j = 0;
         int itemsPerLine = getItemsPerLine();
-        for(ItemStackRenderer itemStackRenderer : inputRenderer) {
+        for (ItemStackRenderer itemStackRenderer : inputRenderer) {
             itemStackRenderer.setBlitOffset(getBlitOffset() + 50);
             itemStackRenderer.drawTooltip = MinecraftClient.getInstance().currentScreen instanceof VillagerRecipeViewingScreen;
             itemStackRenderer.render(xx + 8, yy + 6, mouseX, mouseY, delta);

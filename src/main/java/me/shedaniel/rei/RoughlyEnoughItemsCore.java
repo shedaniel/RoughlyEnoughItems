@@ -99,7 +99,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     }
     
     public static Optional<Identifier> getPluginIdentifier(REIPluginEntry plugin) {
-        for(Identifier identifier : plugins.keySet())
+        for (Identifier identifier : plugins.keySet())
             if (identifier != null && plugins.get(identifier).equals(plugin))
                 return Optional.of(identifier);
         return Optional.empty();
@@ -145,7 +145,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     
     @SuppressWarnings("deprecation")
     private void discoverPluginEntries() {
-        for(REIPluginEntry reiPlugin : FabricLoader.getInstance().getEntrypoints("rei_plugins", REIPluginEntry.class)) {
+        for (REIPluginEntry reiPlugin : FabricLoader.getInstance().getEntrypoints("rei_plugins", REIPluginEntry.class)) {
             try {
                 if (!REIPluginV0.class.isAssignableFrom(reiPlugin.getClass()))
                     throw new IllegalArgumentException("REI plugin is too old!");
@@ -179,7 +179,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                     return;
                 ScreenHelper.setLastContainerScreen((AbstractContainerScreen<?>) screen);
                 boolean alreadyAdded = false;
-                for(Element element : Lists.newArrayList(screenHooks.cloth_getInputListeners()))
+                for (Element element : Lists.newArrayList(screenHooks.cloth_getInputListeners()))
                     if (ContainerScreenOverlay.class.isAssignableFrom(element.getClass()))
                         if (alreadyAdded)
                             screenHooks.cloth_getInputListeners().remove(element);

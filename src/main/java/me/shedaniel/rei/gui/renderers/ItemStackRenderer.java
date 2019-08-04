@@ -55,7 +55,7 @@ public abstract class ItemStackRenderer extends Renderer {
         List<String> toolTip = Lists.newArrayList(ItemListOverlay.tryGetItemStackToolTip(itemStack, true));
         toolTip.addAll(getExtraToolTips(itemStack));
         boolean alreadyHasMod = false;
-        for(String s : toolTip)
+        for (String s : toolTip)
             if (s.equalsIgnoreCase(modString)) {
                 alreadyHasMod = true;
                 break;

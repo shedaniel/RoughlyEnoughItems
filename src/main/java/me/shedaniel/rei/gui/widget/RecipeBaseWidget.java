@@ -66,12 +66,12 @@ public class RecipeBaseWidget extends WidgetWithBounds {
         this.blit(x + width - 4, y + height - 4, 252, 186 + textureOffset, 4, 4);
         
         //Sides
-        for(int xx = 4; xx < width - 4; xx += 128) {
+        for (int xx = 4; xx < width - 4; xx += 128) {
             int thisWidth = Math.min(128, width - 4 - xx);
             this.blit(x + xx, y, 110, 124 + textureOffset, thisWidth, 4);
             this.blit(x + xx, y + height - 4, 110, 186 + textureOffset, thisWidth, 4);
         }
-        for(int yy = 4; yy < height - 4; yy += 50) {
+        for (int yy = 4; yy < height - 4; yy += 50) {
             int thisHeight = Math.min(50, height - 4 - yy);
             this.blit(x, y + yy, 106, 128 + textureOffset, 4, thisHeight);
             this.blit(x + width - 4, y + yy, 252, 128 + textureOffset, 4, thisHeight);

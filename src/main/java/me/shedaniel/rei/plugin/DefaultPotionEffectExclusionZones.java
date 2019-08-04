@@ -35,7 +35,7 @@ public class DefaultPotionEffectExclusionZones implements Function<Boolean, List
         int height = 33;
         if (activePotionEffects.size() > 5)
             height = 132 / (activePotionEffects.size() - 1);
-        for(StatusEffectInstance instance : Ordering.natural().sortedCopy(activePotionEffects)) {
+        for (StatusEffectInstance instance : Ordering.natural().sortedCopy(activePotionEffects)) {
             list.add(new Rectangle(x, y, 166, height));
             y += height;
         }

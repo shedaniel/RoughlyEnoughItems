@@ -13,8 +13,8 @@ import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.gui.widget.ButtonWidget;
-import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import me.shedaniel.rei.gui.widget.Widget;
+import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
@@ -72,7 +72,7 @@ public class PreRecipeViewingScreen extends Screen {
         this.renderBackground();
         this.drawCenteredString(this.font, this.title.asFormattedString(), this.width / 2, 20, 16777215);
         int i = 30;
-        for(String s : this.font.wrapStringToWidthAsList(I18n.translate("text.rei.recipe_screen_type.selection.sub"), width - 30)) {
+        for (String s : this.font.wrapStringToWidthAsList(I18n.translate("text.rei.recipe_screen_type.selection.sub"), width - 30)) {
             this.drawCenteredString(this.font, Formatting.GRAY.toString() + s, width / 2, i, -1);
             i += 10;
         }

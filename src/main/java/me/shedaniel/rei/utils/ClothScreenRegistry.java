@@ -26,9 +26,9 @@ import java.util.Locale;
 import java.util.Optional;
 
 public class ClothScreenRegistry {
-
+    
     public static final String RESET = "text.cloth-config.reset_value";
-
+    
     @SuppressWarnings("deprecation")
     public static Screen getConfigScreen(Screen parent) {
         final ConfigManager configManager = RoughlyEnoughItemsCore.getConfigManager();
@@ -105,7 +105,7 @@ public class ClothScreenRegistry {
                 .setSaveConsumer(bool -> configManager.getConfig().villagerScreenPermanentScrollBar = bool)
                 .setTooltip(getConfigTooltip("villager_screen_permanent_scroll_bar"))
                 .build());
-
+        
         ConfigCategory action = builder.getOrCreateCategory("text.rei.config.action");
         action.addEntry(eb.startEnumSelector("text.rei.config.item_cheating_mode", ItemCheatingMode.class, configManager.getConfig().itemCheatingMode)
                 .setDefaultValue(ItemCheatingMode.REI_LIKE)
@@ -150,11 +150,11 @@ public class ClothScreenRegistry {
             ((ScreenHooks) screen).cloth_getChildren().add(0, w);
         }).build();
     }
-
+    
     private static Optional<String[]> getConfigTooltip(String s, Object... o) {
         if (I18n.hasTranslation("tooltip.rei.config." + s))
             return Optional.ofNullable(I18n.translate("tooltip.rei.config." + s, o).split("\n"));
         return Optional.empty();
     }
-
+    
 }

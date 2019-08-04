@@ -26,7 +26,7 @@ public class DefaultCustomDisplay implements DefaultCraftingDisplay {
         this.possibleRecipe = possibleRecipe;
         List<Boolean> row = Lists.newArrayList(false, false, false);
         List<Boolean> column = Lists.newArrayList(false, false, false);
-        for(int i = 0; i < 9; i++)
+        for (int i = 0; i < 9; i++)
             if (i < input.size()) {
                 List<ItemStack> stacks = input.get(i);
                 if (stacks.stream().filter(stack -> !stack.isEmpty()).count() > 0) {

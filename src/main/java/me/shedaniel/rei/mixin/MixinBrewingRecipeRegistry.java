@@ -28,9 +28,12 @@ import java.util.List;
 @Mixin(BrewingRecipeRegistry.class)
 public class MixinBrewingRecipeRegistry {
     
-    @Unique private static final List<BrewingRecipe> SELF_ITEM_RECIPES = Lists.newArrayList();
-    @Unique private static final List<Potion> REGISTERED_POTION_TYPES = Lists.newArrayList();
-    @Unique private static final List<Ingredient> SELF_POTION_TYPES = Lists.newArrayList();
+    @Unique
+    private static final List<BrewingRecipe> SELF_ITEM_RECIPES = Lists.newArrayList();
+    @Unique
+    private static final List<Potion> REGISTERED_POTION_TYPES = Lists.newArrayList();
+    @Unique
+    private static final List<Ingredient> SELF_POTION_TYPES = Lists.newArrayList();
     
     @Inject(method = "registerPotionType", at = @At("RETURN"))
     private static void method_8080(Item item_1, CallbackInfo ci) {

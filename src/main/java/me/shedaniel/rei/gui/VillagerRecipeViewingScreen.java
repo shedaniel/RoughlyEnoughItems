@@ -106,7 +106,7 @@ public class VillagerRecipeViewingScreen extends Screen {
             widgets.add(new CategoryBaseWidget(new Rectangle(xx - 6, bounds.y + bounds.height - 5, 11 + w * 18, 15 + h * 18)));
             int index = 0;
             List<String> list = Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("text.rei.working_station"));
-            for(List<ItemStack> workingStation : workingStations) {
+            for (List<ItemStack> workingStation : workingStations) {
                 widgets.add(new SlotWidget(xx, yy, workingStation, true, true, true) {
                     @Override
                     protected List<String> getExtraToolTips(ItemStack stack) {
@@ -134,7 +134,7 @@ public class VillagerRecipeViewingScreen extends Screen {
             this.widgets.add(new AutoCraftingButtonWidget(supplier.get().get(recipeBounds), supplier.get().getButtonText(), () -> display));
         
         int index = 0;
-        for(RecipeDisplay recipeDisplay : categoryMap.get(category)) {
+        for (RecipeDisplay recipeDisplay : categoryMap.get(category)) {
             int finalIndex = index;
             RecipeRenderer recipeRenderer;
             recipeRenderers.add(recipeRenderer = category.getSimpleRenderer(recipeDisplay));
@@ -153,7 +153,7 @@ public class VillagerRecipeViewingScreen extends Screen {
             });
             index++;
         }
-        for(int i = 0; i < TABS_PER_PAGE; i++) {
+        for (int i = 0; i < TABS_PER_PAGE; i++) {
             int j = i + tabsPage * TABS_PER_PAGE;
             if (categories.size() > j) {
                 TabWidget tab;
@@ -251,7 +251,7 @@ public class VillagerRecipeViewingScreen extends Screen {
     
     @Override
     public boolean charTyped(char char_1, int int_1) {
-        for(Element listener : children())
+        for (Element listener : children())
             if (listener.charTyped(char_1, int_1))
                 return true;
         return super.charTyped(char_1, int_1);
@@ -271,7 +271,7 @@ public class VillagerRecipeViewingScreen extends Screen {
             scrollBarAlphaFutureTime = System.currentTimeMillis();
             return true;
         }
-        for(Element listener : children())
+        for (Element listener : children())
             if (listener.mouseScrolled(double_1, double_2, double_3))
                 return true;
         if (bounds.contains(ClientUtils.getMouseLocation())) {
@@ -326,7 +326,7 @@ public class VillagerRecipeViewingScreen extends Screen {
         GlStateManager.pushMatrix();
         Scissors.begin();
         Scissors.scissor(0, scrollListBounds.y + 1, width, scrollListBounds.height - 2);
-        for(int i = 0; i < buttonWidgets.size(); i++) {
+        for (int i = 0; i < buttonWidgets.size(); i++) {
             ButtonWidget buttonWidget = buttonWidgets.get(i);
             buttonWidget.getBounds().y = scrollListBounds.y + 1 + yOffset - (int) scroll;
             if (buttonWidget.getBounds().getMaxY() > scrollListBounds.getMinY() && buttonWidget.getBounds().getMinY() < scrollListBounds.getMaxY()) {
@@ -335,7 +335,7 @@ public class VillagerRecipeViewingScreen extends Screen {
             }
             yOffset += buttonWidget.getBounds().height;
         }
-        for(int i = 0; i < buttonWidgets.size(); i++) {
+        for (int i = 0; i < buttonWidgets.size(); i++) {
             if (buttonWidgets.get(i).getBounds().getMaxY() > scrollListBounds.getMinY() && buttonWidgets.get(i).getBounds().getMinY() < scrollListBounds.getMaxY()) {
                 GuiLighting.disable();
                 recipeRenderers.get(i).setBlitOffset(1);
@@ -429,7 +429,7 @@ public class VillagerRecipeViewingScreen extends Screen {
             }
             return false;
         }
-        for(Element element : children())
+        for (Element element : children())
             if (element.keyPressed(int_1, int_2, int_3))
                 return true;
         return super.keyPressed(int_1, int_2, int_3);

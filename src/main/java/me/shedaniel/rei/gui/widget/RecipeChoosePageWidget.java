@@ -110,7 +110,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
             char[] var2 = s.toCharArray();
             int var3 = var2.length;
             
-            for(int var4 = 0; var4 < var3; ++var4) {
+            for (int var4 = 0; var4 < var3; ++var4) {
                 char char_1 = var2[var4];
                 if (Character.isDigit(char_1))
                     stringBuilder_1.append(char_1);
@@ -152,7 +152,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     
     @Override
     public boolean charTyped(char char_1, int int_1) {
-        for(Widget widget : widgets)
+        for (Widget widget : widgets)
             if (widget.charTyped(char_1, int_1))
                 return true;
         return false;
@@ -166,7 +166,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
             recipeViewingScreen.init();
             return true;
         }
-        for(Widget widget : widgets)
+        for (Widget widget : widgets)
             if (widget.keyPressed(int_1, int_2, int_3))
                 return true;
         return false;
