@@ -98,7 +98,7 @@ public class RecipeViewingScreen extends Screen {
                 recipeBack.onPressed();
             return recipeBack.enabled;
         }
-        for(Element element : children())
+        for (Element element : children())
             if (element.keyPressed(int_1, int_2, int_3))
                 return true;
         return super.keyPressed(int_1, int_2, int_3);
@@ -248,7 +248,7 @@ public class RecipeViewingScreen extends Screen {
             }
         });
         recipeBack.enabled = recipeNext.enabled = categoriesMap.get(selectedCategory).size() > getRecipesPerPageByHeight();
-        for(int i = 0; i < TABS_PER_PAGE; i++) {
+        for (int i = 0; i < TABS_PER_PAGE; i++) {
             int j = i + categoryPages * TABS_PER_PAGE;
             if (categories.size() > j) {
                 TabWidget tab;
@@ -273,7 +273,7 @@ public class RecipeViewingScreen extends Screen {
         Optional<ButtonAreaSupplier> supplier = RecipeHelper.getInstance().getSpeedCraftButtonArea(selectedCategory);
         int recipeHeight = selectedCategory.getDisplayHeight();
         List<RecipeDisplay> currentDisplayed = getCurrentDisplayed();
-        for(int i = 0; i < currentDisplayed.size(); i++) {
+        for (int i = 0; i < currentDisplayed.size(); i++) {
             int finalI = i;
             final Supplier<RecipeDisplay> displaySupplier = () -> currentDisplayed.get(finalI);
             int displayWidth = selectedCategory.getDisplayWidth(displaySupplier.get());
@@ -298,7 +298,7 @@ public class RecipeViewingScreen extends Screen {
             int index = 0;
             List<String> list = Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("text.rei.working_station"));
             xx += (innerWidth - 1) * 18;
-            for(List<ItemStack> workingStation : workingStations) {
+            for (List<ItemStack> workingStation : workingStations) {
                 preWidgets.add(new SlotWidget(xx, yy, workingStation, true, true, true) {
                     @Override
                     protected List<String> getExtraToolTips(ItemStack stack) {
@@ -328,7 +328,7 @@ public class RecipeViewingScreen extends Screen {
     public List<RecipeDisplay> getCurrentDisplayed() {
         List<RecipeDisplay> list = Lists.newArrayList();
         int recipesPerPage = getRecipesPerPage();
-        for(int i = 0; i <= recipesPerPage; i++)
+        for (int i = 0; i <= recipesPerPage; i++)
             if (page * (recipesPerPage + 1) + i < categoriesMap.get(selectedCategory).size())
                 list.add(categoriesMap.get(selectedCategory).get(page * (recipesPerPage + 1) + i));
         return list;
@@ -411,7 +411,7 @@ public class RecipeViewingScreen extends Screen {
         if (choosePageActivated) {
             return recipeChoosePageWidget.charTyped(char_1, int_1);
         }
-        for(Element listener : children())
+        for (Element listener : children())
             if (listener.charTyped(char_1, int_1))
                 return true;
         return super.charTyped(char_1, int_1);
@@ -435,7 +435,7 @@ public class RecipeViewingScreen extends Screen {
     
     @Override
     public boolean mouseScrolled(double i, double j, double amount) {
-        for(Element listener : children())
+        for (Element listener : children())
             if (listener.mouseScrolled(i, j, amount))
                 return true;
         if (getBounds().contains(ClientUtils.getMouseLocation())) {
@@ -463,7 +463,7 @@ public class RecipeViewingScreen extends Screen {
                 init();
                 return false;
             }
-        for(Element entry : children())
+        for (Element entry : children())
             if (entry.mouseClicked(double_1, double_2, int_1)) {
                 setFocused(entry);
                 if (int_1 == 0)

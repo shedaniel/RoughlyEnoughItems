@@ -16,7 +16,7 @@ public interface PluginDisabler {
      * @param functions the array of functions to be disabled
      */
     default void disablePluginFunctions(Identifier plugin, PluginFunction... functions) {
-        for(PluginFunction function : functions)
+        for (PluginFunction function : functions)
             disablePluginFunction(plugin, function);
     }
     
@@ -27,7 +27,7 @@ public interface PluginDisabler {
      * @param functions the array of functions to be enabled
      */
     default void enablePluginFunctions(Identifier plugin, PluginFunction... functions) {
-        for(PluginFunction function : functions)
+        for (PluginFunction function : functions)
             enablePluginFunction(plugin, function);
     }
     

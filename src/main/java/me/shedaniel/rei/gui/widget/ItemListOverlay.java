@@ -98,9 +98,9 @@ public class ItemListOverlay extends Widget {
         if (arguments.isEmpty())
             return true;
         AtomicReference<String> mod = null, tooltips = null, name = null;
-        for(SearchArgument[] arguments1 : arguments) {
+        for (SearchArgument[] arguments1 : arguments) {
             boolean b = true;
-            for(SearchArgument argument : arguments1) {
+            for (SearchArgument argument : arguments1) {
                 if (argument.getArgumentType().equals(SearchArgument.ArgumentType.ALWAYS))
                     return true;
                 if (argument.getArgumentType().equals(SearchArgument.ArgumentType.MOD))
@@ -168,8 +168,8 @@ public class ItemListOverlay extends Widget {
         this.listArea = new Rectangle((int) startX, (int) startY, width * 18, height * 18);
         int fitSlotsPerPage = getTotalFitSlotsPerPage(startX, startY, listArea);
         int j = page * fitSlotsPerPage;
-        for(int yy = 0; yy < height; yy++) {
-            for(int xx = 0; xx < width; xx++) {
+        for (int yy = 0; yy < height; yy++) {
+            for (int xx = 0; xx < width; xx++) {
                 int x = startX + xx * 18, y = startY + yy * 18;
                 if (!canBeFit(x, y, listArea))
                     continue;
@@ -221,15 +221,15 @@ public class ItemListOverlay extends Widget {
     
     public int getTotalFitSlotsPerPage(int startX, int startY, Rectangle listArea) {
         int slots = 0;
-        for(int x = 0; x < width; x++)
-            for(int y = 0; y < height; y++)
+        for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++)
                 if (canBeFit(startX + x * 18, startY + y * 18, listArea))
                     slots++;
         return slots;
     }
     
     public boolean canBeFit(int left, int top, Rectangle listArea) {
-        for(DisplayHelper.DisplayBoundsHandler sortedBoundsHandler : RoughlyEnoughItemsCore.getDisplayHelper().getSortedBoundsHandlers(minecraft.currentScreen.getClass())) {
+        for (DisplayHelper.DisplayBoundsHandler sortedBoundsHandler : RoughlyEnoughItemsCore.getDisplayHelper().getSortedBoundsHandlers(minecraft.currentScreen.getClass())) {
             ActionResult fit = sortedBoundsHandler.canItemSlotWidgetFit(!RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel, left, top, minecraft.currentScreen, listArea);
             if (fit != ActionResult.PASS)
                 return fit == ActionResult.SUCCESS;
@@ -239,7 +239,7 @@ public class ItemListOverlay extends Widget {
     
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
-        for(Widget widget : widgets)
+        for (Widget widget : widgets)
             if (widget.keyPressed(int_1, int_2, int_3))
                 return true;
         return false;
@@ -264,7 +264,7 @@ public class ItemListOverlay extends Widget {
         Arrays.stream(splitSearchTerm).forEachOrdered(s -> {
             String[] split = StringUtils.split(s);
             SearchArgument[] arguments = new SearchArgument[split.length];
-            for(int i = 0; i < split.length; i++) {
+            for (int i = 0; i < split.length; i++) {
                 String s1 = split[i];
                 if (s1.startsWith("@-") || s1.startsWith("-@"))
                     arguments[i] = new SearchArgument(SearchArgument.ArgumentType.MOD, s1.substring(2), false);
@@ -327,7 +327,7 @@ public class ItemListOverlay extends Widget {
             }
             if (!player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
                 return false;
-            for(Widget widget : children())
+            for (Widget widget : children())
                 if (widget.mouseClicked(double_1, double_2, int_1))
                     return true;
         }

@@ -59,10 +59,10 @@ public class DefaultCraftingCategory implements RecipeCategory<DefaultCraftingDi
         }));
         List<List<ItemStack>> input = recipeDisplaySupplier.get().getInput();
         List<SlotWidget> slots = Lists.newArrayList();
-        for(int y = 0; y < 3; y++)
-            for(int x = 0; x < 3; x++)
+        for (int y = 0; y < 3; y++)
+            for (int x = 0; x < 3; x++)
                 slots.add(new SlotWidget(startPoint.x + 1 + x * 18, startPoint.y + 1 + y * 18, Lists.newArrayList(), true, true, true));
-        for(int i = 0; i < input.size(); i++) {
+        for (int i = 0; i < input.size(); i++) {
             if (recipeDisplaySupplier.get() instanceof DefaultShapedDisplay) {
                 if (!input.get(i).isEmpty())
                     slots.get(getSlotWithSize(recipeDisplaySupplier.get(), i)).setItemList(input.get(i));

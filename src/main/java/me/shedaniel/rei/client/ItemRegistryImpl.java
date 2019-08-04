@@ -49,7 +49,7 @@ public class ItemRegistryImpl implements ItemRegistry {
                 itemList.add(stack);
             else {
                 int last = itemList.size();
-                for(int i = 0; i < itemList.size(); i++)
+                for (int i = 0; i < itemList.size(); i++)
                     if (itemList.get(i).getItem().equals(afterItem))
                         last = i + 1;
                 itemList.add(last, stack);

@@ -220,7 +220,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     @Override
     public boolean executeViewAllRecipesFromCategories(List<Identifier> categories) {
         Map<RecipeCategory<?>, List<RecipeDisplay>> map = Maps.newLinkedHashMap();
-        for(Identifier category : categories) {
+        for (Identifier category : categories) {
             Optional<RecipeCategory> any = RecipeHelper.getInstance().getAllCategories().stream().filter(c -> c.getIdentifier().equals(category)).findAny();
             if (!any.isPresent())
                 continue;

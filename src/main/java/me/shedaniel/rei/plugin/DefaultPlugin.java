@@ -57,7 +57,7 @@ import java.util.List;
 import java.util.*;
 
 public class DefaultPlugin implements REIPluginV0 {
-
+    
     public static final Identifier CRAFTING = new Identifier("minecraft", "plugins/crafting");
     public static final Identifier SMELTING = new Identifier("minecraft", "plugins/smelting");
     public static final Identifier SMOKING = new Identifier("minecraft", "plugins/smoking");
@@ -71,25 +71,25 @@ public class DefaultPlugin implements REIPluginV0 {
     private static final Identifier DISPLAY_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/display.png");
     private static final Identifier DISPLAY_TEXTURE_DARK = new Identifier("roughlyenoughitems", "textures/gui/display_dark.png");
     private static final List<DefaultBrewingDisplay> BREWING_DISPLAYS = Lists.newArrayList();
-
+    
     public static Identifier getDisplayTexture() {
         return ScreenHelper.isDarkModeEnabled() ? DISPLAY_TEXTURE_DARK : DISPLAY_TEXTURE;
     }
-
+    
     public static void registerBrewingDisplay(DefaultBrewingDisplay display) {
         BREWING_DISPLAYS.add(display);
     }
-
+    
     @Override
     public Identifier getPluginIdentifier() {
         return PLUGIN;
     }
-
+    
     @Override
     public SemanticVersion getMinimumVersion() throws VersionParsingException {
         return SemanticVersion.parse("2.10");
     }
-
+    
     @Override
     public void onFirstLoad(PluginDisabler pluginDisabler) {
         if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().loadDefaultPlugin) {
@@ -99,7 +99,7 @@ public class DefaultPlugin implements REIPluginV0 {
             pluginDisabler.disablePluginFunction(PLUGIN, PluginFunction.REGISTER_OTHERS);
         }
     }
-
+    
     @Override
     public void registerItems(ItemRegistry itemRegistry) {
         Registry.ITEM.stream().forEach(item -> {
@@ -121,7 +121,7 @@ public class DefaultPlugin implements REIPluginV0 {
             }
         });
     }
-
+    
     @Override
     public void registerPluginCategories(RecipeHelper recipeHelper) {
         recipeHelper.registerCategory(new DefaultCraftingCategory());
@@ -134,7 +134,7 @@ public class DefaultPlugin implements REIPluginV0 {
         recipeHelper.registerCategory(new DefaultCompostingCategory());
         recipeHelper.registerCategory(new DefaultStrippingCategory());
     }
-
+    
     @Override
     public void registerRecipeDisplays(RecipeHelper recipeHelper) {
         recipeHelper.registerRecipes(CRAFTING, ShapelessRecipe.class, DefaultShapelessDisplay::new);
@@ -182,7 +182,7 @@ public class DefaultPlugin implements REIPluginV0 {
             recipeHelper.registerDisplay(STRIPPING, new DefaultStrippingDisplay(new ItemStack(set.getKey()), new ItemStack(set.getValue())));
         });
     }
-
+    
     @Override
     public void registerBounds(DisplayHelper displayHelper) {
         displayHelper.getBaseBoundsHandler().registerExclusionZones(AbstractInventoryScreen.class, new DefaultPotionEffectExclusionZones());
@@ -192,18 +192,18 @@ public class DefaultPlugin implements REIPluginV0 {
             public Class<?> getBaseSupportedClass() {
                 return AbstractContainerScreen.class;
             }
-
+            
             @Override
             public Rectangle getLeftBounds(AbstractContainerScreen<?> screen) {
                 return new Rectangle(2, 0, ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() - 4, MinecraftClient.getInstance().window.getScaledHeight());
             }
-
+            
             @Override
             public Rectangle getRightBounds(AbstractContainerScreen<?> screen) {
                 int startX = ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() + ScreenHelper.getLastContainerScreenHooks().rei_getContainerWidth() + 2;
                 return new Rectangle(startX, 0, MinecraftClient.getInstance().window.getScaledWidth() - startX - 2, MinecraftClient.getInstance().window.getScaledHeight());
             }
-
+            
             @Override
             public float getPriority() {
                 return -1.0f;
@@ -214,18 +214,18 @@ public class DefaultPlugin implements REIPluginV0 {
             public Class<?> getBaseSupportedClass() {
                 return RecipeViewingScreen.class;
             }
-
+            
             @Override
             public Rectangle getLeftBounds(RecipeViewingScreen screen) {
                 return new Rectangle(2, 0, ((RecipeViewingScreen) screen).getBounds().x - 4, MinecraftClient.getInstance().window.getScaledHeight());
             }
-
+            
             @Override
             public Rectangle getRightBounds(RecipeViewingScreen screen) {
                 int startX = ((RecipeViewingScreen) screen).getBounds().x + ((RecipeViewingScreen) screen).getBounds().width + 2;
                 return new Rectangle(startX, 0, MinecraftClient.getInstance().window.getScaledWidth() - startX - 2, MinecraftClient.getInstance().window.getScaledHeight());
             }
-
+            
             @Override
             public float getPriority() {
                 return -1.0f;
@@ -236,18 +236,18 @@ public class DefaultPlugin implements REIPluginV0 {
             public Class<?> getBaseSupportedClass() {
                 return VillagerRecipeViewingScreen.class;
             }
-
+            
             @Override
             public Rectangle getLeftBounds(VillagerRecipeViewingScreen screen) {
                 return new Rectangle(2, 0, ((VillagerRecipeViewingScreen) screen).bounds.x - 4, MinecraftClient.getInstance().window.getScaledHeight());
             }
-
+            
             @Override
             public Rectangle getRightBounds(VillagerRecipeViewingScreen screen) {
                 int startX = ((VillagerRecipeViewingScreen) screen).bounds.x + ((VillagerRecipeViewingScreen) screen).bounds.width + 2;
                 return new Rectangle(startX, 0, MinecraftClient.getInstance().window.getScaledWidth() - startX - 2, MinecraftClient.getInstance().window.getScaledHeight());
             }
-
+            
             @Override
             public float getPriority() {
                 return -1.0f;
@@ -258,30 +258,30 @@ public class DefaultPlugin implements REIPluginV0 {
             public Class<?> getBaseSupportedClass() {
                 return CreativeInventoryScreen.class;
             }
-
+            
             @Override
             public Rectangle getLeftBounds(CreativeInventoryScreen screen) {
                 return new Rectangle(2, 0, ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() - 2, MinecraftClient.getInstance().window.getScaledHeight());
             }
-
+            
             @Override
             public Rectangle getRightBounds(CreativeInventoryScreen screen) {
                 int startX = ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() + ScreenHelper.getLastContainerScreenHooks().rei_getContainerWidth();
                 return new Rectangle(startX, 0, MinecraftClient.getInstance().window.getScaledWidth() - startX - 2, MinecraftClient.getInstance().window.getScaledHeight());
             }
-
+            
             @Override
             public Rectangle getItemListArea(Rectangle rectangle) {
                 return new Rectangle(rectangle.x + 1, rectangle.y + 24, rectangle.width - 2, rectangle.height - (RoughlyEnoughItemsCore.getConfigManager().getConfig().sideSearchField ? 27 + 22 : 27));
             }
-
+            
             @Override
             public float getPriority() {
                 return -0.9f;
             }
         });
     }
-
+    
     @Override
     public void registerOthers(RecipeHelper recipeHelper) {
         recipeHelper.registerWorkingStations(CRAFTING, new ItemStack(Items.CRAFTING_TABLE));
@@ -301,10 +301,10 @@ public class DefaultPlugin implements REIPluginV0 {
         recipeHelper.registerScreenClickArea(new Rectangle(78, 32, 28, 23), SmokerScreen.class, SMOKING);
         recipeHelper.registerScreenClickArea(new Rectangle(78, 32, 28, 23), BlastFurnaceScreen.class, BLASTING);
     }
-
+    
     @Override
     public int getPriority() {
         return -1;
     }
-
+    
 }

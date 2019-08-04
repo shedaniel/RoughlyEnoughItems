@@ -13,7 +13,7 @@ public class EmptyRenderer extends Renderer {
     
     @Override
     public void render(int x, int y, double mouseX, double mouseY, float delta) {
-    
+
     }
     
 }

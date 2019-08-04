@@ -52,7 +52,7 @@ public class CreditsScreen extends Screen {
             try {
                 if (rei.getMetadata().containsCustomElement("rei:translators")) {
                     JsonObject jsonObject = rei.getMetadata().getCustomElement("rei:translators").getAsJsonObject();
-                    for(Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
+                    for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
                         JsonElement value = entry.getValue();
                         String behind = value.isJsonArray() ? Lists.newArrayList(value.getAsJsonArray().iterator()).stream().map(json -> json.getAsString()).sorted(String::compareToIgnoreCase).collect(Collectors.joining(", ")) : value.getAsString();
                         translators.add(String.format("  %s - %s", entry.getKey(), behind));
@@ -62,7 +62,7 @@ public class CreditsScreen extends Screen {
             } catch (Exception e) {
                 translators.clear();
                 translators.add("Failed to get translators: " + e.toString());
-                for(StackTraceElement traceElement : e.getStackTrace())
+                for (StackTraceElement traceElement : e.getStackTrace())
                     translators.add("  at " + traceElement);
                 e.printStackTrace();
             }
@@ -70,7 +70,7 @@ public class CreditsScreen extends Screen {
         List<String> actualTranslators = Lists.newArrayList();
         int i = width - 80 - 6;
         translators.forEach(s -> font.wrapStringToWidthAsList(s, i).forEach(actualTranslators::add));
-        for(String line : I18n.translate("text.rei.credit.text", FabricLoader.getInstance().getModContainer("roughlyenoughitems").map(mod -> mod.getMetadata().getVersion().getFriendlyString()).orElse("Unknown"), String.join("\n", actualTranslators)).split("\n"))
+        for (String line : I18n.translate("text.rei.credit.text", FabricLoader.getInstance().getModContainer("roughlyenoughitems").map(mod -> mod.getMetadata().getVersion().getFriendlyString()).orElse("Unknown"), String.join("\n", actualTranslators)).split("\n"))
             entryListWidget.creditsAddEntry(new CreditsItem(new LiteralText(line)));
         entryListWidget.creditsAddEntry(new CreditsItem(new LiteralText("")));
         children.add(buttonDone = new AbstractPressableButtonWidget(width / 2 - 100, height - 26, 200, 20, I18n.translate("gui.done")) {

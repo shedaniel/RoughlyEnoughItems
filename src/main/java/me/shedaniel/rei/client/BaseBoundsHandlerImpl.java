@@ -55,7 +55,7 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
     
     @Override
     public ActionResult isInZone(boolean isOnRightSide, double mouseX, double mouseY) {
-        for(Rectangle zone : getCurrentExclusionZones(MinecraftClient.getInstance().currentScreen.getClass(), isOnRightSide))
+        for (Rectangle zone : getCurrentExclusionZones(MinecraftClient.getInstance().currentScreen.getClass(), isOnRightSide))
             if (zone.contains(mouseX, mouseY))
                 return ActionResult.FAIL;
         return ActionResult.PASS;
@@ -81,7 +81,7 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
     @Override
     public ActionResult canItemSlotWidgetFit(boolean isOnRightSide, int left, int top, Screen screen, Rectangle fullBounds) {
         List<Rectangle> currentExclusionZones = getCurrentExclusionZones(MinecraftClient.getInstance().currentScreen.getClass(), isOnRightSide);
-        for(Rectangle currentExclusionZone : currentExclusionZones)
+        for (Rectangle currentExclusionZone : currentExclusionZones)
             if (left + 18 >= currentExclusionZone.x && top + 18 >= currentExclusionZone.y && left <= currentExclusionZone.x + currentExclusionZone.width && top <= currentExclusionZone.y + currentExclusionZone.height)
                 return ActionResult.FAIL;
         return ActionResult.PASS;
@@ -102,7 +102,7 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
     
     public long getLongFromAreas(Rectangle rectangle, List<Rectangle> exclusionZones) {
         long a = RECTANGLE_LONG_FUNCTION.apply(rectangle);
-        for(Rectangle exclusionZone : exclusionZones)
+        for (Rectangle exclusionZone : exclusionZones)
             a -= RECTANGLE_LONG_FUNCTION.apply(exclusionZone);
         return a;
     }

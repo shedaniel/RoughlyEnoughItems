@@ -149,7 +149,7 @@ public class ConfigManagerImpl implements ConfigManager {
                 renderDirtBackground(0);
                 List<String> list = minecraft.textRenderer.wrapStringToWidthAsList(I18n.translate("text.rei.config_api_failed"), width - 100);
                 int y = (int) (height / 2 - minecraft.textRenderer.fontHeight * 1.3f / 2 * list.size());
-                for(int i = 0; i < list.size(); i++) {
+                for (int i = 0; i < list.size(); i++) {
                     String s = list.get(i);
                     drawCenteredString(minecraft.textRenderer, s, width / 2, y, -1);
                     y += minecraft.textRenderer.fontHeight;

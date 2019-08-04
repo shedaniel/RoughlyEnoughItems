@@ -46,9 +46,9 @@ public class DefaultBrewingDisplay implements RecipeDisplay {
     
     public List<ItemStack> getOutput(int slot) {
         List<ItemStack> stack = new ArrayList<>();
-        for(int i = 0; i < slot * 2; i++)
+        for (int i = 0; i < slot * 2; i++)
             stack.add(new ItemStack(Blocks.AIR));
-        for(int i = 0; i < 6 - slot * 2; i++)
+        for (int i = 0; i < 6 - slot * 2; i++)
             stack.addAll(getOutput());
         return stack;
     }

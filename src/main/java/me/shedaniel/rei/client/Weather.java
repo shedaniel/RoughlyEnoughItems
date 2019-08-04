@@ -26,7 +26,7 @@ public enum Weather {
         Weather[] var2 = values();
         int var3 = var2.length;
         
-        for(int var4 = 0; var4 < var3; ++var4) {
+        for (int var4 = 0; var4 < var3; ++var4) {
             Weather gameMode_2 = var2[var4];
             if (gameMode_2.id == int_1)
                 return gameMode_2;

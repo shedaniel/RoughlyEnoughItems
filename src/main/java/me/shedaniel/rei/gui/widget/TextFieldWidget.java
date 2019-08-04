@@ -217,7 +217,7 @@ public class TextFieldWidget extends WidgetWithBounds {
         boolean boolean_2 = int_1 < 0;
         int int_4 = Math.abs(int_1);
         
-        for(int int_5 = 0; int_5 < int_4; ++int_5) {
+        for (int int_5 = 0; int_5 < int_4; ++int_5) {
             if (!boolean_2) {
                 int int_6 = this.text.length();
                 int_3 = this.text.indexOf(32, int_3);
