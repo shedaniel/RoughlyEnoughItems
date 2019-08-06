@@ -83,7 +83,7 @@ public class DefaultCraftingCategory implements RecipeCategory<DefaultCraftingDi
         return widgets;
     }
     
-    private int getSlotWithSize(DefaultCraftingDisplay recipeDisplay, int num) {
+    public static int getSlotWithSize(DefaultCraftingDisplay recipeDisplay, int num) {
         if (recipeDisplay.getWidth() == 1) {
             if (num == 1)
                 return 3;
