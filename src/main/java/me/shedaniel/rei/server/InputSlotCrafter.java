@@ -42,12 +42,13 @@ public class InputSlotCrafter<C extends Inventory> {
             // Return the already placed items on the grid
             this.returnInputs();
             
-            if (!hasItems(map)) {
+            if (!isPossibleToCraft(map)) {
                 craftingContainer.sendContentUpdates();
                 player.inventory.markDirty();
                 throw new NullPointerException();
             }
             
+            // TODO: Rewrite most parts of this
             map.entrySet().stream().sorted(Comparator.comparingInt(Map.Entry::getKey)).forEach(entry -> {
                 int id = entry.getKey().intValue();
                 List<ItemStack> possibleStacks = entry.getValue();
@@ -85,7 +86,7 @@ public class InputSlotCrafter<C extends Inventory> {
         }
     }
     
-    private boolean hasItems(Map<Integer, List<ItemStack>> map) {
+    private boolean isPossibleToCraft(Map<Integer, List<ItemStack>> map) {
         // Create a clone of player's inventory, and count
         DefaultedList<ItemStack> copyMain = DefaultedList.create();
         for (ItemStack stack : inventory.main) {
