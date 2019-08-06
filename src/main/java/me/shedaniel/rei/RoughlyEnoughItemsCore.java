@@ -22,14 +22,22 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
+import net.minecraft.client.gui.screen.ingame.CraftingTableScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
+import net.minecraft.client.gui.screen.recipebook.RecipeBookGhostSlots;
+import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.container.CraftingTableContainer;
+import net.minecraft.container.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.recipe.Ingredient;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
@@ -140,6 +148,35 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             ItemStack stack = packetByteBuf.readItemStack();
             String player = packetByteBuf.readString(32767);
             packetContext.getPlayer().addChatMessage(new LiteralText(I18n.translate("text.rei.cheat_items").replaceAll("\\{item_name}", ItemListOverlay.tryGetItemStackName(stack.copy())).replaceAll("\\{item_count}", stack.copy().getCount() + "").replaceAll("\\{player_name}", player)), false);
+        });
+        ClientSidePacketRegistry.INSTANCE.register(RoughlyEnoughItemsNetwork.NOT_ENOUGH_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
+            Screen currentScreen = MinecraftClient.getInstance().currentScreen;
+            if (currentScreen instanceof CraftingTableScreen) {
+                RecipeBookWidget recipeBookGui = ((RecipeBookProvider) currentScreen).getRecipeBookGui();
+                RecipeBookGhostSlots ghostSlots = ((RecipeBookGuiHooks) recipeBookGui).rei_getGhostSlots();
+                ghostSlots.reset();
+                
+                List<List<ItemStack>> input = Lists.newArrayList();
+                int mapSize = packetByteBuf.readInt();
+                for (int i = 0; i < mapSize; i++) {
+                    List<ItemStack> list = Lists.newArrayList();
+                    int count = packetByteBuf.readInt();
+                    for (int j = 0; j < count; j++) {
+                        list.add(packetByteBuf.readItemStack());
+                    }
+                    input.add(list);
+                }
+                
+                ghostSlots.addSlot(Ingredient.ofItems(Items.STONE), 381203812, 12738291);
+                CraftingTableContainer container = ((CraftingTableScreen) currentScreen).getContainer();
+                for (int i = 0; i < input.size(); i++) {
+                    List<ItemStack> stacks = input.get(i);
+                    if (!stacks.isEmpty()) {
+                        Slot slot = container.getSlot(i + container.getCraftingResultSlotIndex() + 1);
+                        ghostSlots.addSlot(Ingredient.ofStacks(stacks.toArray(new ItemStack[0])), slot.xPosition, slot.yPosition);
+                    }
+                }
+            }
         });
     }
     

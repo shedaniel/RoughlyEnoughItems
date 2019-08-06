@@ -46,6 +46,7 @@ public class DefaultAutoCraftingPlugin implements REIPluginV0 {
         recipeHelper.registerAutoCraftingHandler(new AutoFurnaceBookHandler());
         recipeHelper.registerAutoCraftingHandler(new AutoSmokerBookHandler());
         recipeHelper.registerAutoCraftingHandler(new AutoBlastingBookHandler());
+        recipeHelper.registerAutoCraftingHandler(new AutoCraftingTableHandler());
     }
     
 }
