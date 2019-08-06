@@ -8,9 +8,7 @@ package me.shedaniel.rei.plugin.autocrafting;
 import com.google.common.collect.Lists;
 import io.netty.buffer.Unpooled;
 import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
-import me.shedaniel.rei.api.AutoCraftingHandler;
-import me.shedaniel.rei.api.RecipeDisplay;
-import me.shedaniel.rei.gui.ContainerScreenOverlay;
+import me.shedaniel.rei.api.AutoTransferHandler;
 import me.shedaniel.rei.listeners.RecipeBookGuiHooks;
 import me.shedaniel.rei.plugin.crafting.DefaultCraftingCategory;
 import me.shedaniel.rei.plugin.crafting.DefaultCraftingDisplay;
@@ -18,7 +16,6 @@ import me.shedaniel.rei.plugin.crafting.DefaultShapedDisplay;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.client.gui.screen.ingame.CraftingTableScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
@@ -28,18 +25,30 @@ import net.minecraft.util.DefaultedList;
 import net.minecraft.util.PacketByteBuf;
 
 import java.util.List;
-import java.util.function.Supplier;
 
-public class AutoCraftingTableHandler implements AutoCraftingHandler {
+public class AutoCraftingTableHandler implements AutoTransferHandler {
     @Override
-    public boolean handle(Supplier<RecipeDisplay> displaySupplier, MinecraftClient minecraft, Screen recipeViewingScreen, AbstractContainerScreen<?> parentScreen, ContainerScreenOverlay overlay) {
-        minecraft.openScreen(parentScreen);
-        ((RecipeBookGuiHooks) ((RecipeBookProvider) parentScreen).getRecipeBookGui()).rei_getGhostSlots().reset();
-        DefaultCraftingDisplay display = (DefaultCraftingDisplay) displaySupplier.get();
+    public Result handle(Context context) {
+        if (!(context.getRecipe() instanceof DefaultCraftingDisplay))
+            return Result.createNotApplicable();
+        if (!(context.getContainerScreen() instanceof CraftingTableScreen) && !(context.getContainerScreen() instanceof InventoryScreen))
+            return Result.createNotApplicable();
+        if (context.getContainerScreen() instanceof InventoryScreen && (((DefaultCraftingDisplay) context.getRecipe()).getWidth() > 2 || ((DefaultCraftingDisplay) context.getRecipe()).getHeight() > 2))
+            return Result.createFailed("error.rei.transfer.too_small");
+        if (!canUseMovePackets())
+            return Result.createFailed("error.rei.not.on.server");
+        if (!hasItems(context.getRecipe().getInput()))
+            return Result.createFailed("error.rei.not.enough.materials");
+        if (!context.isActuallyCrafting())
+            return Result.createSuccessful();
+        
+        context.getMinecraft().openScreen(context.getContainerScreen());
+        ((RecipeBookGuiHooks) ((RecipeBookProvider) context.getContainerScreen()).getRecipeBookGui()).rei_getGhostSlots().reset();
+        DefaultCraftingDisplay display = (DefaultCraftingDisplay) context.getRecipe();
         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
         buf.writeUuid(RoughlyEnoughItemsNetwork.CRAFTING_TABLE_MOVE);
         buf.writeBoolean(Screen.hasShiftDown());
-        CraftingContainer craftingContainer = (CraftingContainer) parentScreen.getContainer();
+        CraftingContainer craftingContainer = (CraftingContainer) context.getContainer();
         
         List<List<ItemStack>> ogInput = display.getInput();
         List<List<ItemStack>> input = Lists.newArrayListWithCapacity(craftingContainer.getCraftingWidth() * craftingContainer.getCraftingHeight());
@@ -63,15 +72,7 @@ public class AutoCraftingTableHandler implements AutoCraftingHandler {
             }
         }
         ClientSidePacketRegistry.INSTANCE.sendToServer(RoughlyEnoughItemsNetwork.MOVE_ITEMS_PACKET, buf);
-        return true;
-    }
-    
-    @Override
-    public boolean canHandle(Supplier<RecipeDisplay> displaySupplier, MinecraftClient minecraft, Screen recipeViewingScreen, AbstractContainerScreen<?> parentScreen, ContainerScreenOverlay overlay) {
-        if (displaySupplier.get() instanceof DefaultCraftingDisplay && (parentScreen instanceof CraftingTableScreen || (parentScreen instanceof InventoryScreen && ((DefaultCraftingDisplay) displaySupplier.get()).getWidth() <= 2 && ((DefaultCraftingDisplay) displaySupplier.get()).getHeight() <= 2)) && canUseMovePackets()) {
-            return hasItems(displaySupplier.get().getInput());
-        }
-        return false;
+        return Result.createSuccessful();
     }
     
     @Override

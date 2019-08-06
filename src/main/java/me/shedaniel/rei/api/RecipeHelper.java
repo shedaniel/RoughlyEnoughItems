@@ -29,9 +29,9 @@ public interface RecipeHelper {
         return RoughlyEnoughItemsCore.getRecipeHelper();
     }
     
-    AutoCraftingHandler registerAutoCraftingHandler(AutoCraftingHandler handler);
+    AutoTransferHandler registerAutoCraftingHandler(AutoTransferHandler handler);
     
-    List<AutoCraftingHandler> getSortedAutoCraftingHandler();
+    List<AutoTransferHandler> getSortedAutoCraftingHandler();
     
     /**
      * Gets the total recipe count registered

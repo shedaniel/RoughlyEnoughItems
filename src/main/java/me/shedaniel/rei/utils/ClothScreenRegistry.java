@@ -129,6 +129,12 @@ public class ClothScreenRegistry {
                 .setSaveConsumer(s -> configManager.getConfig().weatherCommand = s)
                 .setTooltip(getConfigTooltip("weather_command"))
                 .build());
+        action.addEntry(eb.startBooleanToggle("text.rei.config.clickable_recipe_arrows", configManager.getConfig().clickableRecipeArrows)
+                .setDefaultValue(true)
+                .setYesNoTextSupplier(bool -> I18n.translate("text.rei.config.text." + bool))
+                .setSaveConsumer(bool -> configManager.getConfig().clickableRecipeArrows = bool)
+                .setTooltip(getConfigTooltip("clickable_recipe_arrows"))
+                .build());
         ConfigCategory modules = builder.getOrCreateCategory("text.rei.config.modules");
         modules.addEntry(eb.startBooleanToggle("text.rei.config.craftable_only", configManager.getConfig().enableCraftableOnlyButton)
                 .setDefaultValue(false)

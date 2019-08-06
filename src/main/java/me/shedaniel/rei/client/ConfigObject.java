@@ -50,6 +50,8 @@ public class ConfigObject {
     @Comment("Disable Recipe Book")
     public boolean disableRecipeBook = false;
     
+    public boolean clickableRecipeArrows = true;
+    
     public ItemCheatingMode itemCheatingMode = ItemCheatingMode.REI_LIKE;
     
     public boolean lightGrayRecipeBorder = false;

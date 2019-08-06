@@ -9,7 +9,6 @@ import com.google.common.collect.Lists;
 import net.minecraft.container.CraftingContainer;
 import net.minecraft.container.CraftingTableContainer;
 import net.minecraft.container.PlayerContainer;
-import net.minecraft.container.Slot;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
@@ -17,7 +16,6 @@ import net.minecraft.recipe.RecipeFinder;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.DefaultedList;
 
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -37,49 +35,65 @@ public class InputSlotCrafter<C extends Inventory> {
     }
     
     private void fillInputSlots(ServerPlayerEntity player, Map<Integer, List<ItemStack>> map, boolean hasShift) {
+        /*
+         * Steps:
+         * Return the already placed items on the grid
+         * Check if the player have the enough resource to even craft one
+         * Calculate how many items the player is going to craft
+         * Move the best suited items for the player to use
+         * Send container updates to the player
+         * Profit??
+         */
         this.inventory = player.inventory;
         if (this.canReturnInputs() || player.isCreative()) {
             // Return the already placed items on the grid
             this.returnInputs();
             
+            // Check if the player have the enough resource to even craft one
             if (!isPossibleToCraft(map)) {
                 craftingContainer.sendContentUpdates();
                 player.inventory.markDirty();
                 throw new NullPointerException();
             }
             
+            // Calculate how many items the player is going to craft
+            int amountCrafting = hasShift ? 0 : 1;
+            if (hasShift) {
+            
+            }
+            
             // TODO: Rewrite most parts of this
-            map.entrySet().stream().sorted(Comparator.comparingInt(Map.Entry::getKey)).forEach(entry -> {
-                int id = entry.getKey().intValue();
-                List<ItemStack> possibleStacks = entry.getValue();
-                boolean done = false;
-                for (ItemStack possibleStack : possibleStacks) {
-                    int requiredCount = possibleStack.getCount();
-                    int invCount = 0;
-                    for (ItemStack stack : inventory.main) {
-                        if (ItemStack.areItemsEqualIgnoreDamage(possibleStack, stack))
-                            invCount += stack.getCount();
-                    }
-                    if (invCount >= requiredCount) {
-                        for (ItemStack stack : inventory.main) {
-                            if (ItemStack.areItemsEqualIgnoreDamage(possibleStack, stack)) {
-                                Slot containerSlot = craftingContainer.getSlot(id + craftingContainer.getCraftingResultSlotIndex() + 1);
-                                while (containerSlot.getStack().getCount() < requiredCount && !stack.isEmpty()) {
-                                    if (containerSlot.getStack().isEmpty()) {
-                                        containerSlot.setStack(new ItemStack(stack.getItem(), 1));
-                                    } else {
-                                        containerSlot.getStack().setCount(containerSlot.getStack().getCount() + 1);
-                                    }
-                                    stack.setCount(stack.getCount() - 1);
-                                }
-                                if (containerSlot.getStack().getCount() >= requiredCount)
-                                    break;
-                            }
-                        }
-                        break;
-                    }
-                }
-            });
+            //            map.entrySet().stream().sorted(Comparator.comparingInt(Map.Entry::getKey)).forEach(entry -> {
+            //                int id = entry.getKey().intValue();
+            //                List<ItemStack> possibleStacks = entry.getValue();
+            //                boolean done = false;
+            //                for (ItemStack possibleStack : possibleStacks) {
+            //                    int requiredCount = possibleStack.getCount();
+            //                    int invCount = 0;
+            //                    for (ItemStack stack : inventory.main) {
+            //                        if (ItemStack.areItemsEqualIgnoreDamage(possibleStack, stack))
+            //                            invCount += stack.getCount();
+            //                    }
+            //                    if (invCount >= requiredCount) {
+            //                        for (ItemStack stack : inventory.main) {
+            //                            if (ItemStack.areItemsEqualIgnoreDamage(possibleStack, stack)) {
+            //                                Slot containerSlot = craftingContainer.getSlot(id + craftingContainer.getCraftingResultSlotIndex() + 1);
+            //                                while (containerSlot.getStack().getCount() < requiredCount && !stack.isEmpty()) {
+            //                                    if (containerSlot.getStack().isEmpty()) {
+            //                                        containerSlot.setStack(new ItemStack(stack.getItem(), 1));
+            //                                    } else {
+            //                                        containerSlot.getStack().setCount(containerSlot.getStack().getCount() + 1);
+            //                                    }
+            //                                    stack.setCount(stack.getCount() - 1);
+            //                                }
+            //                                if (containerSlot.getStack().getCount() >= requiredCount)
+            //                                    break;
+            //                            }
+            //                        }
+            //                        break;
+            //                    }
+            //                }
+            //            });
             
             craftingContainer.sendContentUpdates();
             player.inventory.markDirty();

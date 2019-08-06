@@ -373,7 +373,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GuiLighting.disable();
         this.renderWidgets(mouseX, mouseY, delta);
-        if (MinecraftClient.getInstance().currentScreen instanceof AbstractContainerScreen) {
+        if (MinecraftClient.getInstance().currentScreen instanceof AbstractContainerScreen && RoughlyEnoughItemsCore.getConfigManager().getConfig().clickableRecipeArrows) {
             ContainerScreenHooks hooks = (ContainerScreenHooks) MinecraftClient.getInstance().currentScreen;
             for (RecipeHelperImpl.ScreenClickArea area : RecipeHelper.getInstance().getScreenClickAreas())
                 if (area.getScreenClass().equals(MinecraftClient.getInstance().currentScreen.getClass()))
@@ -532,7 +532,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
         if (!ScreenHelper.isOverlayVisible())
             return false;
-        if (MinecraftClient.getInstance().currentScreen instanceof AbstractContainerScreen) {
+        if (MinecraftClient.getInstance().currentScreen instanceof AbstractContainerScreen && RoughlyEnoughItemsCore.getConfigManager().getConfig().clickableRecipeArrows) {
             ContainerScreenHooks hooks = (ContainerScreenHooks) MinecraftClient.getInstance().currentScreen;
             for (RecipeHelperImpl.ScreenClickArea area : RecipeHelper.getInstance().getScreenClickAreas())
                 if (area.getScreenClass().equals(MinecraftClient.getInstance().currentScreen.getClass()))
