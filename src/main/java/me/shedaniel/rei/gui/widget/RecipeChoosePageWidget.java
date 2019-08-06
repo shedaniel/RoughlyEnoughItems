@@ -10,6 +10,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.client.ConfigObject;
+import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GuiLighting;
@@ -95,10 +96,10 @@ public class RecipeChoosePageWidget extends DraggableWidget {
             
             @Override
             public void render(int i, int i1, float v) {
-                font.draw(I18n.translate("text.rei.choose_page"), bounds.x + 5, bounds.y + 5, 4210752);
+                font.draw(I18n.translate("text.rei.choose_page"), bounds.x + 5, bounds.y + 5, ScreenHelper.isDarkModeEnabled() ? 0xFFBBBBBB : 0xFF404040);
                 String endString = String.format(" /%d", maxPage);
                 int width = font.getStringWidth(endString);
-                font.draw(endString, bounds.x + bounds.width - 5 - width, bounds.y + 22, 4210752);
+                font.draw(endString, bounds.x + bounds.width - 5 - width, bounds.y + 22, ScreenHelper.isDarkModeEnabled() ? 0xFFBBBBBB : 0xFF404040);
             }
         });
         String endString = String.format(" /%d", maxPage);

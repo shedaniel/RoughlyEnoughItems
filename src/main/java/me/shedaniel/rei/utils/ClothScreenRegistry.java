@@ -58,10 +58,11 @@ public class ClothScreenRegistry {
                 })
                 .build());
         ConfigCategory appearance = builder.getOrCreateCategory("text.rei.config.appearance");
-        appearance.addEntry(eb.startBooleanToggle("text.rei.config.dark_theme", ScreenHelper.isDarkModeEnabled())
+        appearance.addEntry(eb.startBooleanToggle("text.rei.config.appearance_theme", ScreenHelper.isDarkModeEnabled())
                 .setDefaultValue(false)
                 .setSaveConsumer(bool -> configManager.getConfig().darkTheme = bool)
-                .setTooltip(getConfigTooltip("dark_theme"))
+                .setYesNoTextSupplier(bool -> I18n.translate("text.rei.config.appearance_theme." + bool))
+                .setTooltip(getConfigTooltip("appearance_theme"))
                 .build());
         appearance.addEntry(eb.startEnumSelector("text.rei.config.recipe_screen_type", RecipeScreenType.class, configManager.getConfig().screenType)
                 .setDefaultValue(RecipeScreenType.UNSET)
@@ -129,20 +130,23 @@ public class ClothScreenRegistry {
                 .setTooltip(getConfigTooltip("weather_command"))
                 .build());
         ConfigCategory modules = builder.getOrCreateCategory("text.rei.config.modules");
-        modules.addEntry(eb.startBooleanToggle("text.rei.config.enable_craftable_only", configManager.getConfig().enableCraftableOnlyButton)
+        modules.addEntry(eb.startBooleanToggle("text.rei.config.craftable_only", configManager.getConfig().enableCraftableOnlyButton)
                 .setDefaultValue(false)
                 .setSaveConsumer(bool -> configManager.getConfig().enableCraftableOnlyButton = bool)
-                .setTooltip(getConfigTooltip("enable_craftable_only"))
+                .setYesNoTextSupplier(bool -> I18n.translate("text.rei.config.text." + bool))
+                .setTooltip(getConfigTooltip("craftable_only"))
                 .build());
-        modules.addEntry(eb.startBooleanToggle("text.rei.config.enable_util_buttons", configManager.getConfig().showUtilsButtons)
+        modules.addEntry(eb.startBooleanToggle("text.rei.config.util_buttons", configManager.getConfig().showUtilsButtons)
                 .setDefaultValue(false)
                 .setSaveConsumer(bool -> configManager.getConfig().showUtilsButtons = bool)
-                .setTooltip(getConfigTooltip("enable_util_buttons"))
+                .setYesNoTextSupplier(bool -> I18n.translate("text.rei.config.text." + bool))
+                .setTooltip(getConfigTooltip("util_buttons"))
                 .build());
-        modules.addEntry(eb.startBooleanToggle("text.rei.config.disable_recipe_book", configManager.getConfig().disableRecipeBook)
+        modules.addEntry(eb.startBooleanToggle("text.rei.config.vanilla_recipe_book", configManager.getConfig().disableRecipeBook)
                 .setDefaultValue(false)
                 .setSaveConsumer(bool -> configManager.getConfig().disableRecipeBook = bool)
-                .setTooltip(getConfigTooltip("disable_recipe_book"))
+                .setYesNoTextSupplier(bool -> I18n.translate("text.rei.config.text." + !bool))
+                .setTooltip(getConfigTooltip("vanilla_recipe_book"))
                 .build());
         return builder.setAfterInitConsumer(screen -> {
             ButtonWidget w = new ButtonWidget(6, 6, 60, 20, I18n.translate("text.rei.credits"), widget -> MinecraftClient.getInstance().openScreen(new CreditsScreen(MinecraftClient.getInstance().currentScreen)));

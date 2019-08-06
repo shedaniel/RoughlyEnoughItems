@@ -8,6 +8,7 @@ package me.shedaniel.rei.plugin.campfire;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.Renderer;
+import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.SlotWidget;
 import me.shedaniel.rei.gui.widget.Widget;
@@ -60,7 +61,7 @@ public class DefaultCampfireCategory implements RecipeCategory<DefaultCampfireDi
                 blit(startPoint.x + 24, startPoint.y + 18, 82, 91, width, 17);
                 String text = I18n.translate("category.rei.campfire.time", MathHelper.floor(recipeDisplaySupplier.get().getCookTime() / 20d));
                 int length = MinecraftClient.getInstance().textRenderer.getStringWidth(text);
-                MinecraftClient.getInstance().textRenderer.draw(text, bounds.x + bounds.width - length - 5, startPoint.y + 54 - 8, 4210752);
+                MinecraftClient.getInstance().textRenderer.draw(text, bounds.x + bounds.width - length - 5, startPoint.y + 54 - 8, ScreenHelper.isDarkModeEnabled() ? 0xFFBBBBBB : 0xFF404040);
             }
         }));
         widgets.add(new SlotWidget(startPoint.x + 1, startPoint.y + 11, recipeDisplaySupplier.get().getInput().get(0), true, true, true));
