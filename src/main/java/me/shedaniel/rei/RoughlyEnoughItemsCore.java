@@ -51,6 +51,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class RoughlyEnoughItemsCore implements ClientModInitializer {
     
@@ -98,7 +99,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     @Deprecated
     public static REIPluginEntry registerPlugin(REIPluginEntry plugin) {
         plugins.put(plugin.getPluginIdentifier(), plugin);
-        RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered plugin %s from %s", plugin.getPluginIdentifier().toString(), plugin.getClass().getSimpleName());
+        RoughlyEnoughItemsCore.LOGGER.debug("[REI] Registered plugin %s from %s", plugin.getPluginIdentifier().toString(), plugin.getClass().getSimpleName());
         return plugin;
     }
     
@@ -194,15 +195,31 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                 RoughlyEnoughItemsCore.LOGGER.error("[REI] Can't load REI plugins from %s: %s", reiPlugin.getClass(), e.getLocalizedMessage());
             }
         }
+        for (REIPluginV0 reiPlugin : FabricLoader.getInstance().getEntrypoints("rei_plugins_v0", REIPluginV0.class)) {
+            try {
+                registerPlugin(reiPlugin);
+                reiPlugin.onFirstLoad(getPluginDisabler());
+            } catch (Exception e) {
+                e.printStackTrace();
+                RoughlyEnoughItemsCore.LOGGER.error("[REI] Can't load REI plugins from %s: %s", reiPlugin.getClass(), e.getLocalizedMessage());
+            }
+        }
     }
     
     private void registerClothEvents() {
         final Identifier recipeButtonTex = new Identifier("textures/gui/recipe_button.png");
+        AtomicLong lastSync = new AtomicLong(-1);
         ClothClientHooks.SYNC_RECIPES.register((minecraftClient, recipeManager, synchronizeRecipesS2CPacket) -> {
-            if (RoughlyEnoughItemsCore.getConfigManager().getConfig().registerRecipesInAnotherThread)
+            if (lastSync.get() > 0 && System.currentTimeMillis() - lastSync.get() > 5000) {
+                RoughlyEnoughItemsCore.LOGGER.warn("[REI] Suppressing Sync Recipes!");
+                return;
+            }
+            lastSync.set(System.currentTimeMillis());
+            if (RoughlyEnoughItemsCore.getConfigManager().getConfig().registerRecipesInAnotherThread) {
                 CompletableFuture.runAsync(() -> ((RecipeHelperImpl) RoughlyEnoughItemsCore.getRecipeHelper()).recipesLoaded(recipeManager), SYNC_RECIPES);
-            else
+            } else {
                 ((RecipeHelperImpl) RoughlyEnoughItemsCore.getRecipeHelper()).recipesLoaded(recipeManager);
+            }
         });
         ClothClientHooks.SCREEN_ADD_BUTTON.register((minecraftClient, screen, abstractButtonWidget) -> {
             if (RoughlyEnoughItemsCore.getConfigManager().getConfig().disableRecipeBook && screen instanceof AbstractContainerScreen && abstractButtonWidget instanceof TexturedButtonWidget)
