@@ -5,7 +5,7 @@
 
 package me.shedaniel.rei.gui.widget;
 
-import me.shedaniel.rei.api.AutoCraftingHandler;
+import me.shedaniel.rei.api.AutoTransferHandler;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.client.ScreenHelper;
@@ -22,6 +22,7 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
     
     private final Supplier<RecipeDisplay> displaySupplier;
     private String extraTooltip;
+    private String errorTooltip;
     private AbstractContainerScreen<?> containerScreen;
     
     public AutoCraftingButtonWidget(Rectangle rectangle, String text, Supplier<RecipeDisplay> displaySupplier) {
@@ -34,14 +35,15 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
     
     @Override
     public void onPressed() {
-        for (AutoCraftingHandler autoCraftingHandler : RecipeHelper.getInstance().getSortedAutoCraftingHandler())
-            if (autoCraftingHandler.canHandle(displaySupplier, minecraft, minecraft.currentScreen, containerScreen, ScreenHelper.getLastOverlay()))
-                try {
-                    if (autoCraftingHandler.handle(displaySupplier, minecraft, minecraft.currentScreen, containerScreen, ScreenHelper.getLastOverlay()))
-                        return;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        AutoTransferHandler.Context context = AutoTransferHandler.Context.create(true, containerScreen, displaySupplier.get());
+        for (AutoTransferHandler autoTransferHandler : RecipeHelper.getInstance().getSortedAutoCraftingHandler())
+            try {
+                AutoTransferHandler.Result result = autoTransferHandler.handle(context);
+                if (result.isSuccessful())
+                    return;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         minecraft.openScreen(containerScreen);
         ScreenHelper.getLastOverlay().init();
     }
@@ -49,24 +51,32 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         this.enabled = false;
-        for (AutoCraftingHandler autoCraftingHandler : RecipeHelper.getInstance().getSortedAutoCraftingHandler())
-            if (autoCraftingHandler.canHandle(displaySupplier, minecraft, minecraft.currentScreen, containerScreen, ScreenHelper.getLastOverlay())) {
+        String error = null;
+        AutoTransferHandler.Context context = AutoTransferHandler.Context.create(false, containerScreen, displaySupplier.get());
+        for (AutoTransferHandler autoTransferHandler : RecipeHelper.getInstance().getSortedAutoCraftingHandler()) {
+            AutoTransferHandler.Result result = autoTransferHandler.handle(context);
+            if (result.isSuccessful()) {
                 enabled = true;
+                error = null;
                 break;
+            } else if (error == null) {
+                error = result.getErrorKey();
             }
+        }
+        errorTooltip = error;
         super.render(mouseX, mouseY, delta);
     }
     
     @Override
     public Optional<String> getTooltips() {
         if (this.minecraft.options.advancedItemTooltips)
-            if (enabled)
+            if (errorTooltip == null)
                 return Optional.ofNullable(I18n.translate("text.auto_craft.move_items") + extraTooltip);
             else
-                return Optional.ofNullable(I18n.translate("text.auto_craft.failed_move_items") + extraTooltip);
-        if (enabled)
+                return Optional.ofNullable("§c" + I18n.translate(errorTooltip) + extraTooltip);
+        if (errorTooltip == null)
             return Optional.ofNullable(I18n.translate("text.auto_craft.move_items"));
         else
-            return Optional.ofNullable(I18n.translate("text.auto_craft.failed_move_items"));
+            return Optional.ofNullable("§c" + I18n.translate(errorTooltip));
     }
 }

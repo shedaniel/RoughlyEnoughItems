@@ -43,7 +43,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         VISIBILITY_HANDLER_COMPARATOR = comparator.reversed();
     }
     
-    private final List<AutoCraftingHandler> autoCraftingHandlers = Lists.newArrayList();
+    private final List<AutoTransferHandler> autoTransferHandlers = Lists.newArrayList();
     private final List<RecipeFunction> recipeFunctions = Lists.newArrayList();
     private final List<ScreenClickArea> screenClickAreas = Lists.newArrayList();
     private final AtomicInteger recipeCount = new AtomicInteger();
@@ -229,7 +229,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         this.recipeFunctions.clear();
         this.displayVisibilityHandlers.clear();
         this.liveRecipeGenerators.clear();
-        this.autoCraftingHandlers.clear();
+        this.autoTransferHandlers.clear();
         ((DisplayHelperImpl) RoughlyEnoughItemsCore.getDisplayHelper()).resetCache();
         BaseBoundsHandler baseBoundsHandler = new BaseBoundsHandlerImpl();
         RoughlyEnoughItemsCore.getDisplayHelper().registerBoundsHandler(baseBoundsHandler);
@@ -303,14 +303,14 @@ public class RecipeHelperImpl implements RecipeHelper {
     }
     
     @Override
-    public AutoCraftingHandler registerAutoCraftingHandler(AutoCraftingHandler handler) {
-        autoCraftingHandlers.add(handler);
+    public AutoTransferHandler registerAutoCraftingHandler(AutoTransferHandler handler) {
+        autoTransferHandlers.add(handler);
         return handler;
     }
     
     @Override
-    public List<AutoCraftingHandler> getSortedAutoCraftingHandler() {
-        return autoCraftingHandlers.stream().sorted(Comparator.comparingDouble(AutoCraftingHandler::getPriority).reversed()).collect(Collectors.toList());
+    public List<AutoTransferHandler> getSortedAutoCraftingHandler() {
+        return autoTransferHandlers.stream().sorted(Comparator.comparingDouble(AutoTransferHandler::getPriority).reversed()).collect(Collectors.toList());
     }
     
     @Override
