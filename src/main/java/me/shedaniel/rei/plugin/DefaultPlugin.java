@@ -107,8 +107,6 @@ public class DefaultPlugin implements REIPluginV0 {
             try {
                 itemRegistry.registerItemStack(itemRegistry.getAllStacksFromItem(item));
             } catch (Exception e) {
-                if (!(item instanceof EnchantedBookItem))
-                    e.printStackTrace();
             }
         });
         Registry.ENCHANTMENT.forEach(enchantment -> {
