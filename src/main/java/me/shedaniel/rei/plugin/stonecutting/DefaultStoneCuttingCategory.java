@@ -55,8 +55,8 @@ public class DefaultStoneCuttingCategory implements RecipeCategory<DefaultStoneC
                 blit(startPoint.x, startPoint.y, 0, 221, 82, 26);
             }
         }));
-        widgets.add(new SlotWidget(startPoint.x + 4, startPoint.y + 5, recipeDisplaySupplier.get().getInput().get(0), true, true, true));
-        widgets.add(new SlotWidget(startPoint.x + 61, startPoint.y + 5, recipeDisplaySupplier.get().getOutput(), false, true, true));
+        widgets.add(new SlotWidget(startPoint.x + 4, startPoint.y + 5, Renderer.fromItemStacks(recipeDisplaySupplier.get().getInput().get(0)), true, true, true));
+        widgets.add(new SlotWidget(startPoint.x + 61, startPoint.y + 5, Renderer.fromItemStacks(recipeDisplaySupplier.get().getOutput()), false, true, true));
         return widgets;
     }
     

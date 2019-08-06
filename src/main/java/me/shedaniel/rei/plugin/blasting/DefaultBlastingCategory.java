@@ -70,14 +70,14 @@ public class DefaultBlastingCategory implements RecipeCategory<DefaultBlastingDi
             }
         }));
         List<List<ItemStack>> input = recipeDisplay.getInput();
-        widgets.add(new SlotWidget(startPoint.x + 1, startPoint.y + 1, input.get(0), true, true, true));
-        widgets.add(new SlotWidget(startPoint.x + 1, startPoint.y + 37, recipeDisplay.getFuel(), true, true, true) {
+        widgets.add(new SlotWidget(startPoint.x + 1, startPoint.y + 1, Renderer.fromItemStacks(input.get(0)), true, true, true));
+        widgets.add(new SlotWidget(startPoint.x + 1, startPoint.y + 37, Renderer.fromItemStacks(recipeDisplay.getFuel()), true, true, true) {
             @Override
             protected List<String> getExtraToolTips(ItemStack stack) {
                 return Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("category.rei.smelting.fuel"));
             }
         });
-        widgets.add(new SlotWidget(startPoint.x + 61, startPoint.y + 19, recipeDisplay.getOutput(), false, true, true));
+        widgets.add(new SlotWidget(startPoint.x + 61, startPoint.y + 19, Renderer.fromItemStacks(recipeDisplay.getOutput()), false, true, true));
         return widgets;
     }
     

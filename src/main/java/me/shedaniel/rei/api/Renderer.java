@@ -32,6 +32,26 @@ public abstract class Renderer extends DrawableHelper {
     }
     
     /**
+     * Gets an item stack renderer by an item stack supplier
+     *
+     * @param supplier the supplier for getting the item stack
+     * @return the item stack renderer
+     */
+    public static ItemStackRenderer fromItemStackSupplierNoCounts(Supplier<ItemStack> supplier) {
+        return new ItemStackRenderer() {
+            @Override
+            public ItemStack getItemStack() {
+                return supplier.get();
+            }
+            
+            @Override
+            protected boolean renderCounts() {
+                return false;
+            }
+        };
+    }
+    
+    /**
      * Gets an item stack renderer by an item stack
      *
      * @param stack the item stack to be displayed
@@ -39,6 +59,16 @@ public abstract class Renderer extends DrawableHelper {
      */
     public static ItemStackRenderer fromItemStack(ItemStack stack) {
         return fromItemStackSupplier(() -> stack);
+    }
+    
+    /**
+     * Gets an item stack renderer by an item stack
+     *
+     * @param stack the item stack to be displayed
+     * @return the item stack renderer
+     */
+    public static ItemStackRenderer fromItemStackNoCounts(ItemStack stack) {
+        return fromItemStackSupplierNoCounts(() -> stack);
     }
     
     /**
@@ -68,6 +98,22 @@ public abstract class Renderer extends DrawableHelper {
                 if (stacks.isEmpty())
                     return ItemStack.EMPTY;
                 return stacks.get(MathHelper.floor((System.currentTimeMillis() / 500 % (double) stacks.size()) / 1f));
+            }
+        };
+    }
+    
+    public static ItemStackRenderer fromItemStacksNoCounts(List<ItemStack> stacks) {
+        return new ItemStackRenderer() {
+            @Override
+            public ItemStack getItemStack() {
+                if (stacks.isEmpty())
+                    return ItemStack.EMPTY;
+                return stacks.get(MathHelper.floor((System.currentTimeMillis() / 500 % (double) stacks.size()) / 1f));
+            }
+            
+            @Override
+            protected boolean renderCounts() {
+                return false;
             }
         };
     }

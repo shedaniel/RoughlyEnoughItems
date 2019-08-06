@@ -11,6 +11,7 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.DisplayHelper;
 import me.shedaniel.rei.api.RecipeHelper;
+import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.client.SearchArgument;
 import me.shedaniel.rei.gui.config.ItemCheatingMode;
@@ -176,7 +177,7 @@ public class ItemListOverlay extends Widget {
                 j++;
                 if (j > currentDisplayed.size())
                     break;
-                widgets.add(new SlotWidget(x, y, Collections.singletonList(currentDisplayed.get(j - 1)), false, true, true) {
+                widgets.add(new SlotWidget(x, y, Renderer.fromItemStackNoCounts(currentDisplayed.get(j - 1)), false, true, true) {
                     @Override
                     protected void queueTooltip(ItemStack itemStack, float delta) {
                         ClientPlayerEntity player = minecraft.player;
@@ -286,13 +287,18 @@ public class ItemListOverlay extends Widget {
         });
         List<ItemStack> stacks = Collections.emptyList();
         if (lastSearchArgument.isEmpty())
-            stacks = Collections.unmodifiableList(os);
+            stacks = os;
         else
-            stacks = Collections.unmodifiableList(os.stream().filter(itemStack -> filterItem(itemStack, lastSearchArgument)).collect(Collectors.toList()));
+            stacks = os.stream().filter(itemStack -> filterItem(itemStack, lastSearchArgument)).collect(Collectors.toList());
         if (!RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() || stacks.isEmpty() || inventoryItems.isEmpty())
-            return stacks;
-        List<ItemStack> workingItems = Lists.newArrayList(RecipeHelper.getInstance().findCraftableByItems(inventoryItems));
-        return stacks.stream().filter(itemStack -> workingItems.stream().anyMatch(stack -> stack.isItemEqualIgnoreDamage(itemStack))).collect(Collectors.toList());
+            return Collections.unmodifiableList(stacks);
+        List<ItemStack> workingItems = RecipeHelper.getInstance().findCraftableByItems(inventoryItems);
+        List<ItemStack> newList = Lists.newArrayList();
+        for (ItemStack workingItem : workingItems) {
+            if (stacks.stream().anyMatch(i -> i.isItemEqualIgnoreDamage(workingItem)))
+                newList.add(workingItem);
+        }
+        return newList;
     }
     
     public List<SearchArgument[]> getLastSearchArgument() {
