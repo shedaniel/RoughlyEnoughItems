@@ -20,6 +20,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.client.gui.screen.ingame.CraftingTableScreen;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
 import net.minecraft.container.CraftingContainer;
 import net.minecraft.item.ItemStack;
@@ -67,7 +68,7 @@ public class AutoCraftingTableHandler implements AutoCraftingHandler {
     
     @Override
     public boolean canHandle(Supplier<RecipeDisplay> displaySupplier, MinecraftClient minecraft, Screen recipeViewingScreen, AbstractContainerScreen<?> parentScreen, ContainerScreenOverlay overlay) {
-        if (parentScreen instanceof CraftingTableScreen && displaySupplier.get() instanceof DefaultCraftingDisplay && canUseMovePackets()) {
+        if (displaySupplier.get() instanceof DefaultCraftingDisplay && (parentScreen instanceof CraftingTableScreen || (parentScreen instanceof InventoryScreen && ((DefaultCraftingDisplay) displaySupplier.get()).getWidth() <= 2 && ((DefaultCraftingDisplay) displaySupplier.get()).getHeight() <= 2)) && canUseMovePackets()) {
             return hasItems(displaySupplier.get().getInput());
         }
         return false;
