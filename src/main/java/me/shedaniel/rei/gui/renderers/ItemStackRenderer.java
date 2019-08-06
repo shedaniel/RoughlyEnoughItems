@@ -38,7 +38,7 @@ public abstract class ItemStackRenderer extends Renderer {
         GlStateManager.enableRescaleNormal();
         GlStateManager.enableDepthTest();
         itemRenderer.renderGuiItem(getItemStack(), l, i1);
-        itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, getItemStack(), l, i1);
+        itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, getItemStack(), l, i1, renderCounts() ? null : "");
         itemRenderer.zOffset = 0.0F;
         this.blitOffset = 0;
         if (drawTooltip && mouseX >= x - 8 && mouseX <= x + 8 && mouseY >= y - 6 && mouseY <= y + 10)
@@ -48,6 +48,10 @@ public abstract class ItemStackRenderer extends Renderer {
     
     protected void queueTooltip(ItemStack itemStack, float delta) {
         ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltip(itemStack)));
+    }
+    
+    protected boolean renderCounts() {
+        return true;
     }
     
     protected List<String> getTooltip(ItemStack itemStack) {

@@ -18,8 +18,10 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.*;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.*;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 public class SlotWidget extends WidgetWithBounds {
@@ -30,12 +32,12 @@ public class SlotWidget extends WidgetWithBounds {
     private List<Renderer> renderers = new LinkedList<>();
     private boolean drawBackground, showToolTips, clickToMoreRecipes, drawHighlightedBackground;
     
-    public SlotWidget(int x, int y, ItemStack itemStack, boolean drawBackground, boolean showToolTips) {
-        this(x, y, Collections.singletonList(itemStack), drawBackground, showToolTips);
+    public SlotWidget(int x, int y, Renderer renderer, boolean drawBackground, boolean showToolTips) {
+        this(x, y, Collections.singletonList(renderer), drawBackground, showToolTips);
     }
     
-    public SlotWidget(int x, int y, Collection<ItemStack> itemList, boolean drawBackground, boolean showToolTips) {
-        this(x, y, itemList.stream().map(Renderer::fromItemStack).collect(Collectors.toList()), drawBackground, showToolTips);
+    public SlotWidget(int x, int y, Renderer renderer, boolean drawBackground, boolean showToolTips, boolean clickToMoreRecipes) {
+        this(x, y, Collections.singletonList(renderer), drawBackground, showToolTips, clickToMoreRecipes);
     }
     
     public SlotWidget(int x, int y, List<Renderer> renderers, boolean drawBackground, boolean showToolTips) {
@@ -48,7 +50,7 @@ public class SlotWidget extends WidgetWithBounds {
         this.drawHighlightedBackground = true;
     }
     
-    public SlotWidget(int x, int y, List<ItemStack> itemList, boolean drawBackground, boolean showToolTips, boolean clickToMoreRecipes) {
+    public SlotWidget(int x, int y, List<Renderer> itemList, boolean drawBackground, boolean showToolTips, boolean clickToMoreRecipes) {
         this(x, y, itemList, drawBackground, showToolTips);
         this.clickToMoreRecipes = clickToMoreRecipes;
     }
@@ -162,10 +164,6 @@ public class SlotWidget extends WidgetWithBounds {
     
     protected List<String> getExtraToolTips(ItemStack stack) {
         return Collections.emptyList();
-    }
-    
-    protected String getItemCountOverlay(ItemStack currentStack) {
-        return "";
     }
     
     public ItemStack getCurrentItemStack() {

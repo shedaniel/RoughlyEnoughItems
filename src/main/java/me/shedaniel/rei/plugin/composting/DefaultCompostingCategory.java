@@ -78,7 +78,7 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
         int i = 0;
         for (int y = 0; y < 6; y++)
             for (int x = 0; x < 8; x++) {
-                widgets.add(new SlotWidget((int) bounds.getCenterX() - 72 + x * 18, bounds.y + y * 18, stacks.size() > i ? Arrays.asList(stacks.get(i).asItem().getStackForRender()) : Lists.newArrayList(), true, true, true) {
+                widgets.add(new SlotWidget((int) bounds.getCenterX() - 72 + x * 18, bounds.y + y * 18, stacks.size() > i ? Renderer.fromItemStack(stacks.get(i).asItem().getStackForRender()) : Renderer.empty(), true, true, true) {
                     @Override
                     protected List<String> getExtraToolTips(ItemStack stack) {
                         final List<String>[] thing = new List[]{null};
@@ -93,7 +93,7 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
                 });
                 i++;
             }
-        widgets.add(new SlotWidget((int) startingPoint.x + 34, startingPoint.y + 5, recipeDisplaySupplier.get().getOutput(), false, true, true));
+        widgets.add(new SlotWidget((int) startingPoint.x + 34, startingPoint.y + 5, Renderer.fromItemStacks(recipeDisplaySupplier.get().getOutput()), false, true, true));
         return widgets;
     }
     

@@ -64,8 +64,8 @@ public class DefaultCampfireCategory implements RecipeCategory<DefaultCampfireDi
                 MinecraftClient.getInstance().textRenderer.draw(text, bounds.x + bounds.width - length - 5, startPoint.y + 54 - 8, ScreenHelper.isDarkModeEnabled() ? 0xFFBBBBBB : 0xFF404040);
             }
         }));
-        widgets.add(new SlotWidget(startPoint.x + 1, startPoint.y + 11, recipeDisplaySupplier.get().getInput().get(0), true, true, true));
-        widgets.add(new SlotWidget(startPoint.x + 61, startPoint.y + 19, recipeDisplaySupplier.get().getOutput(), false, true, true));
+        widgets.add(new SlotWidget(startPoint.x + 1, startPoint.y + 11, Renderer.fromItemStacks(recipeDisplaySupplier.get().getInput().get(0)), true, true, true));
+        widgets.add(new SlotWidget(startPoint.x + 61, startPoint.y + 19, Renderer.fromItemStacks(recipeDisplaySupplier.get().getOutput()), false, true, true));
         return widgets;
     }
     

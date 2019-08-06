@@ -18,7 +18,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
 import java.awt.*;
@@ -28,6 +27,27 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class DefaultCraftingCategory implements RecipeCategory<DefaultCraftingDisplay> {
+    
+    public static int getSlotWithSize(DefaultCraftingDisplay recipeDisplay, int num) {
+        if (recipeDisplay.getWidth() == 1) {
+            if (num == 1)
+                return 3;
+            if (num == 2)
+                return 6;
+        }
+        
+        if (recipeDisplay.getWidth() == 2) {
+            if (num == 2)
+                return 3;
+            if (num == 3)
+                return 4;
+            if (num == 4)
+                return 6;
+            if (num == 5)
+                return 7;
+        }
+        return num;
+    }
     
     @Override
     public Identifier getIdentifier() {
@@ -70,38 +90,8 @@ public class DefaultCraftingCategory implements RecipeCategory<DefaultCraftingDi
                 slots.get(i).setItemList(input.get(i));
         }
         widgets.addAll(slots);
-        widgets.add(new SlotWidget(startPoint.x + 95, startPoint.y + 19, recipeDisplaySupplier.get().getOutput(), false, true, true) {
-            @Override
-            protected String getItemCountOverlay(ItemStack currentStack) {
-                if (currentStack.getCount() == 1)
-                    return "";
-                if (currentStack.getCount() < 1)
-                    return Formatting.RED.toString() + currentStack.getCount();
-                return currentStack.getCount() + "";
-            }
-        });
+        widgets.add(new SlotWidget(startPoint.x + 95, startPoint.y + 19, Renderer.fromItemStacks(recipeDisplaySupplier.get().getOutput()), false, true, true));
         return widgets;
-    }
-    
-    public static int getSlotWithSize(DefaultCraftingDisplay recipeDisplay, int num) {
-        if (recipeDisplay.getWidth() == 1) {
-            if (num == 1)
-                return 3;
-            if (num == 2)
-                return 6;
-        }
-        
-        if (recipeDisplay.getWidth() == 2) {
-            if (num == 2)
-                return 3;
-            if (num == 3)
-                return 4;
-            if (num == 4)
-                return 6;
-            if (num == 5)
-                return 7;
-        }
-        return num;
     }
     
 }
