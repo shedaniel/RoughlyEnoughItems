@@ -11,6 +11,10 @@ public class EmptyRenderer extends Renderer {
     
     public static final EmptyRenderer INSTANCE = new EmptyRenderer();
     
+    private EmptyRenderer() {
+    
+    }
+    
     @Override
     public void render(int x, int y, double mouseX, double mouseY, float delta) {
 
