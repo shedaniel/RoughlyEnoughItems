@@ -36,8 +36,12 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
     public void onPressed() {
         for (AutoCraftingHandler autoCraftingHandler : RecipeHelper.getInstance().getSortedAutoCraftingHandler())
             if (autoCraftingHandler.canHandle(displaySupplier, minecraft, minecraft.currentScreen, containerScreen, ScreenHelper.getLastOverlay()))
-                if (autoCraftingHandler.handle(displaySupplier, minecraft, minecraft.currentScreen, containerScreen, ScreenHelper.getLastOverlay()))
-                    return;
+                try {
+                    if (autoCraftingHandler.handle(displaySupplier, minecraft, minecraft.currentScreen, containerScreen, ScreenHelper.getLastOverlay()))
+                        return;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
         minecraft.openScreen(containerScreen);
         ScreenHelper.getLastOverlay().init();
     }

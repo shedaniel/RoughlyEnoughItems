@@ -32,11 +32,11 @@ public class InputSlotCrafter<C extends Inventory> {
         this.craftingContainer = craftingContainer_1;
     }
     
-    public static <C extends Inventory> void start(CraftingContainer<C> craftingContainer_1, ServerPlayerEntity player, Map<Integer, List<ItemStack>> map, boolean shifting) {
-        new InputSlotCrafter<C>(craftingContainer_1).fillInputSlots(player, map, shifting);
+    public static <C extends Inventory> void start(CraftingContainer<C> craftingContainer_1, ServerPlayerEntity player, Map<Integer, List<ItemStack>> map, boolean hasShift) {
+        new InputSlotCrafter<C>(craftingContainer_1).fillInputSlots(player, map, hasShift);
     }
     
-    private void fillInputSlots(ServerPlayerEntity player, Map<Integer, List<ItemStack>> map, boolean boolean_1) {
+    private void fillInputSlots(ServerPlayerEntity player, Map<Integer, List<ItemStack>> map, boolean hasShift) {
         this.inventory = player.inventory;
         if (this.canReturnInputs() || player.isCreative()) {
             // Return the already placed items on the grid
