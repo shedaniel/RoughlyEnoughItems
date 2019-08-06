@@ -355,8 +355,8 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             shouldReInit = true;
         if (shouldReInit)
             init(true);
-        else if (RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() && (!hasSameListContent(new LinkedList<>(ScreenHelper.inventoryStacks), currentStacks) || (currentStacks.size() != ScreenHelper.inventoryStacks.size()))) {
-            ScreenHelper.inventoryStacks = ClientHelper.getInstance().getInventoryItemsTypes();
+        else if (RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() && ((currentStacks.size() != ScreenHelper.inventoryStacks.size()) || !hasSameListContent(new LinkedList<>(ScreenHelper.inventoryStacks), currentStacks))) {
+            ScreenHelper.inventoryStacks = currentStacks;
             DisplayHelper.DisplayBoundsHandler<?> boundsHandler = RoughlyEnoughItemsCore.getDisplayHelper().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
             itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, true);
         }
@@ -440,10 +440,9 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
     }
     
     private boolean hasSameListContent(List<ItemStack> list1, List<ItemStack> list2) {
-        list1.sort((itemStack, t1) -> ItemListOverlay.tryGetItemStackName(itemStack).compareToIgnoreCase(ItemListOverlay.tryGetItemStackName(t1)));
-        list2.sort((itemStack, t1) -> ItemListOverlay.tryGetItemStackName(itemStack).compareToIgnoreCase(ItemListOverlay.tryGetItemStackName(t1)));
-        
-        return list1.stream().map(ItemListOverlay::tryGetItemStackName).collect(Collectors.joining("")).equals(list2.stream().map(ItemListOverlay::tryGetItemStackName).collect(Collectors.joining("")));
+        list1.sort(Comparator.comparing(Object::toString));
+        list2.sort(Comparator.comparing(Object::toString));
+        return list1.stream().map(Objects::toString).collect(Collectors.joining("")).equals(list2.stream().map(Objects::toString).collect(Collectors.joining("")));
     }
     
     public void addTooltip(QueuedTooltip queuedTooltip) {
