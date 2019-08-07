@@ -6,7 +6,6 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.client.RecipeHelperImpl;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Recipe;
@@ -215,6 +214,14 @@ public interface RecipeHelper {
     
     <T extends Recipe<?>> void registerRecipes(Identifier category, Function<Recipe, Boolean> recipeFilter, Function<T, RecipeDisplay> mappingFunction);
     
-    List<RecipeHelperImpl.ScreenClickArea> getScreenClickAreas();
+    List<RecipeHelper.ScreenClickArea> getScreenClickAreas();
+    
+    interface ScreenClickArea {
+        Class<? extends AbstractContainerScreen> getScreenClass();
+        
+        Rectangle getRectangle();
+        
+        Identifier[] getCategories();
+    }
     
 }
