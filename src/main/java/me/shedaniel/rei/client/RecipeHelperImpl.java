@@ -242,7 +242,6 @@ public class RecipeHelperImpl implements RecipeHelper {
         RoughlyEnoughItemsCore.LOGGER.info("[REI] Loading %d plugins: %s", plugins.size(), plugins.stream().map(REIPluginEntry::getPluginIdentifier).map(Identifier::toString).collect(Collectors.joining(", ")));
         Collections.reverse(plugins);
         RoughlyEnoughItemsCore.getItemRegisterer().getModifiableItemList().clear();
-        PluginDisabler pluginDisabler = RoughlyEnoughItemsCore.getPluginDisabler();
         Version reiVersion = FabricLoader.getInstance().getModContainer("roughlyenoughitems").get().getMetadata().getVersion();
         if (!(reiVersion instanceof SemanticVersion))
             RoughlyEnoughItemsCore.LOGGER.warn("[REI] Roughly Enough Items is not using semantic versioning, will be ignoring plugins' minimum versions!");
@@ -254,16 +253,11 @@ public class RecipeHelperImpl implements RecipeHelper {
                         if (((REIPluginV0) plugin).getMinimumVersion().compareTo((SemanticVersion) reiVersion) > 0) {
                             throw new IllegalStateException("Requires " + ((REIPluginV0) plugin).getMinimumVersion().getFriendlyString() + " REI version!");
                         }
-                    if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_CATEGORIES))
-                        ((REIPluginV0) plugin).registerPluginCategories(this);
-                    if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_RECIPE_DISPLAYS))
-                        ((REIPluginV0) plugin).registerRecipeDisplays(this);
-                    if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_BOUNDS))
-                        ((REIPluginV0) plugin).registerBounds(RoughlyEnoughItemsCore.getDisplayHelper());
-                    if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_OTHERS))
-                        ((REIPluginV0) plugin).registerOthers(this);
-                    if (pluginDisabler.isFunctionEnabled(identifier, PluginFunction.REGISTER_ITEMS))
-                        ((REIPluginV0) plugin).registerItems(RoughlyEnoughItemsCore.getItemRegisterer());
+                    ((REIPluginV0) plugin).registerPluginCategories(this);
+                    ((REIPluginV0) plugin).registerRecipeDisplays(this);
+                    ((REIPluginV0) plugin).registerBounds(RoughlyEnoughItemsCore.getDisplayHelper());
+                    ((REIPluginV0) plugin).registerOthers(this);
+                    ((REIPluginV0) plugin).registerItems(RoughlyEnoughItemsCore.getItemRegisterer());
                 } else {
                     throw new IllegalStateException("Invaild Plugin Class!");
                 }
@@ -381,7 +375,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     
     @Override
     public void registerScreenClickArea(Rectangle rectangle, Class<? extends AbstractContainerScreen> screenClass, Identifier... categories) {
-        this.screenClickAreas.add(new ScreenClickArea(screenClass, rectangle, categories));
+        this.screenClickAreas.add(new ScreenClickAreaImpl(screenClass, rectangle, categories));
     }
     
     @Override
@@ -409,12 +403,12 @@ public class RecipeHelperImpl implements RecipeHelper {
         return screenClickAreas;
     }
     
-    public class ScreenClickArea {
+    private class ScreenClickAreaImpl implements ScreenClickArea {
         Class<? extends AbstractContainerScreen> screenClass;
         Rectangle rectangle;
         Identifier[] categories;
         
-        private ScreenClickArea(Class<? extends AbstractContainerScreen> screenClass, Rectangle rectangle, Identifier[] categories) {
+        private ScreenClickAreaImpl(Class<? extends AbstractContainerScreen> screenClass, Rectangle rectangle, Identifier[] categories) {
             this.screenClass = screenClass;
             this.rectangle = rectangle;
             this.categories = categories;

@@ -5,7 +5,10 @@
 
 package me.shedaniel.rei.api.plugins;
 
-import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.DisplayHelper;
+import me.shedaniel.rei.api.ItemRegistry;
+import me.shedaniel.rei.api.REIPluginEntry;
+import me.shedaniel.rei.api.RecipeHelper;
 import net.fabricmc.loader.api.SemanticVersion;
 import net.fabricmc.loader.util.version.VersionParsingException;
 
@@ -15,10 +18,8 @@ public interface REIPluginV0 extends REIPluginEntry {
     
     /**
      * On register of the plugin
-     *
-     * @param pluginDisabler the helper class to disable other plugins
      */
-    default void onFirstLoad(PluginDisabler pluginDisabler) {
+    default void onFirstLoad() {
     }
     
     /**

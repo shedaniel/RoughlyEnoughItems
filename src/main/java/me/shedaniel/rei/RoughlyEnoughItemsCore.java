@@ -57,7 +57,6 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     
     public static final Logger LOGGER;
     private static final RecipeHelper RECIPE_HELPER = new RecipeHelperImpl();
-    private static final PluginDisabler PLUGIN_DISABLER = new PluginDisablerImpl();
     private static final ItemRegistry ITEM_REGISTRY = new ItemRegistryImpl();
     private static final DisplayHelper DISPLAY_HELPER = new DisplayHelperImpl();
     private static final Map<Identifier, REIPluginEntry> plugins = Maps.newHashMap();
@@ -72,16 +71,12 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         return RECIPE_HELPER;
     }
     
-    public static me.shedaniel.rei.api.ConfigManager getConfigManager() {
+    public static ConfigManager getConfigManager() {
         return configManager;
     }
     
     public static ItemRegistry getItemRegisterer() {
         return ITEM_REGISTRY;
-    }
-    
-    public static PluginDisabler getPluginDisabler() {
-        return PLUGIN_DISABLER;
     }
     
     public static DisplayHelper getDisplayHelper() {
@@ -189,7 +184,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                     throw new IllegalArgumentException("REI plugin is too old!");
                 registerPlugin(reiPlugin);
                 if (reiPlugin instanceof REIPluginV0)
-                    ((REIPluginV0) reiPlugin).onFirstLoad(getPluginDisabler());
+                    ((REIPluginV0) reiPlugin).onFirstLoad();
             } catch (Exception e) {
                 e.printStackTrace();
                 RoughlyEnoughItemsCore.LOGGER.error("[REI] Can't load REI plugins from %s: %s", reiPlugin.getClass(), e.getLocalizedMessage());
@@ -198,7 +193,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         for (REIPluginV0 reiPlugin : FabricLoader.getInstance().getEntrypoints("rei_plugins_v0", REIPluginV0.class)) {
             try {
                 registerPlugin(reiPlugin);
-                reiPlugin.onFirstLoad(getPluginDisabler());
+                reiPlugin.onFirstLoad();
             } catch (Exception e) {
                 e.printStackTrace();
                 RoughlyEnoughItemsCore.LOGGER.error("[REI] Can't load REI plugins from %s: %s", reiPlugin.getClass(), e.getLocalizedMessage());

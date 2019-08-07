@@ -91,17 +91,10 @@ public class DefaultPlugin implements REIPluginV0 {
     }
     
     @Override
-    public void onFirstLoad(PluginDisabler pluginDisabler) {
-        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().loadDefaultPlugin) {
-            pluginDisabler.disablePluginFunction(PLUGIN, PluginFunction.REGISTER_ITEMS);
-            pluginDisabler.disablePluginFunction(PLUGIN, PluginFunction.REGISTER_CATEGORIES);
-            pluginDisabler.disablePluginFunction(PLUGIN, PluginFunction.REGISTER_RECIPE_DISPLAYS);
-            pluginDisabler.disablePluginFunction(PLUGIN, PluginFunction.REGISTER_OTHERS);
-        }
-    }
-    
-    @Override
     public void registerItems(ItemRegistry itemRegistry) {
+        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().loadDefaultPlugin) {
+            return;
+        }
         Registry.ITEM.stream().forEach(item -> {
             itemRegistry.registerItemStack(item.getStackForRender());
             try {
@@ -122,6 +115,9 @@ public class DefaultPlugin implements REIPluginV0 {
     
     @Override
     public void registerPluginCategories(RecipeHelper recipeHelper) {
+        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().loadDefaultPlugin) {
+            return;
+        }
         recipeHelper.registerCategory(new DefaultCraftingCategory());
         recipeHelper.registerCategory(new DefaultSmeltingCategory());
         recipeHelper.registerCategory(new DefaultSmokingCategory());
@@ -135,6 +131,9 @@ public class DefaultPlugin implements REIPluginV0 {
     
     @Override
     public void registerRecipeDisplays(RecipeHelper recipeHelper) {
+        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().loadDefaultPlugin) {
+            return;
+        }
         recipeHelper.registerRecipes(CRAFTING, ShapelessRecipe.class, DefaultShapelessDisplay::new);
         recipeHelper.registerRecipes(CRAFTING, ShapedRecipe.class, DefaultShapedDisplay::new);
         recipeHelper.registerRecipes(SMELTING, SmeltingRecipe.class, DefaultSmeltingDisplay::new);
@@ -183,6 +182,9 @@ public class DefaultPlugin implements REIPluginV0 {
     
     @Override
     public void registerBounds(DisplayHelper displayHelper) {
+        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().loadDefaultPlugin) {
+            return;
+        }
         displayHelper.getBaseBoundsHandler().registerExclusionZones(AbstractInventoryScreen.class, new DefaultPotionEffectExclusionZones());
         displayHelper.getBaseBoundsHandler().registerExclusionZones(RecipeBookProvider.class, new DefaultRecipeBookExclusionZones());
         displayHelper.registerBoundsHandler(new DisplayHelper.DisplayBoundsHandler<AbstractContainerScreen<?>>() {
@@ -282,6 +284,9 @@ public class DefaultPlugin implements REIPluginV0 {
     
     @Override
     public void registerOthers(RecipeHelper recipeHelper) {
+        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().loadDefaultPlugin) {
+            return;
+        }
         recipeHelper.registerWorkingStations(CRAFTING, new ItemStack(Items.CRAFTING_TABLE));
         recipeHelper.registerWorkingStations(SMELTING, new ItemStack(Items.FURNACE));
         recipeHelper.registerWorkingStations(SMOKING, new ItemStack(Items.SMOKER));

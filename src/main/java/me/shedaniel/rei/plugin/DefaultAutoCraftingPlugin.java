@@ -6,8 +6,6 @@
 package me.shedaniel.rei.plugin;
 
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.PluginDisabler;
-import me.shedaniel.rei.api.PluginFunction;
 import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.plugin.autocrafting.*;
@@ -30,17 +28,10 @@ public class DefaultAutoCraftingPlugin implements REIPluginV0 {
     }
     
     @Override
-    public void onFirstLoad(PluginDisabler pluginDisabler) {
-        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().loadDefaultPlugin) {
-            pluginDisabler.disablePluginFunction(PLUGIN, PluginFunction.REGISTER_ITEMS);
-            pluginDisabler.disablePluginFunction(PLUGIN, PluginFunction.REGISTER_CATEGORIES);
-            pluginDisabler.disablePluginFunction(PLUGIN, PluginFunction.REGISTER_RECIPE_DISPLAYS);
-            pluginDisabler.disablePluginFunction(PLUGIN, PluginFunction.REGISTER_OTHERS);
-        }
-    }
-    
-    @Override
     public void registerOthers(RecipeHelper recipeHelper) {
+        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().loadDefaultPlugin) {
+            return;
+        }
         recipeHelper.registerAutoCraftingHandler(new AutoCraftingTableBookHandler());
         recipeHelper.registerAutoCraftingHandler(new AutoInventoryBookHandler());
         recipeHelper.registerAutoCraftingHandler(new AutoFurnaceBookHandler());
