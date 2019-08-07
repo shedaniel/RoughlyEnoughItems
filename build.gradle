@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '0.2.4-SNAPSHOT'
+    id 'fabric-loom' version '0.2.5-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -48,15 +48,20 @@ dependencies {
     compileOnly "com.google.code.findbugs:jsr305:3.0.2"
 }
 
+task sourcesJar(type: Jar, dependsOn: classes) {
+	classifier = "sources"
+	from sourceSets.main.allSource
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact(file("${project.buildDir}/libs/${archivesBaseName}-${version}.jar")) {
-                builtBy remapJar
-            }
-            artifact(jar) {
-                builtBy jar
-            }
+            artifact(remapJar) {
+				builtBy remapJar
+			}
+			artifact(sourcesJar) {
+				builtBy remapSourcesJar
+			}
         }
     }
 
