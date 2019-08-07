@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '0.2.4-SNAPSHOT'
+    id 'fabric-loom' version '0.2.5-SNAPSHOT'
     id 'maven-publish'
     id 'net.minecrell.licenser' version '0.4.1'
 }
@@ -42,13 +42,17 @@ dependencies {
     mappings "net.fabricmc:yarn:${project.yarn_version}"
     modApi "net.fabricmc:fabric-loader:${project.fabricloader_version}"
     modApi "net.fabricmc.fabric-api:fabric-api:${project.fabric_api}"
-    modApi "cloth:ClothEvents:${cloth_events_version}"
+    modApi("me.shedaniel.cloth:cloth-events:${cloth_events_version}") {
+        transitive = false
+    }
     modImplementation("me.shedaniel.cloth:config-2:${cloth_config_version}") {
         transitive = false
     }
     modApi "blue.endless:jankson:${project.jankson_version}"
     if (includeDep) {
-        include "cloth:ClothEvents:${cloth_events_version}"
+        include("me.shedaniel.cloth:cloth-events:${cloth_events_version}") {
+            transitive = false
+        }
         include("me.shedaniel.cloth:config-2:${cloth_config_version}") {
             transitive = false
         }
@@ -59,14 +63,19 @@ dependencies {
     compileOnly "com.google.code.findbugs:jsr305:3.0.2"
 }
 
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = "sources"
+    from sourceSets.main.allSource
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact(file("${project.buildDir}/libs/${archivesBaseName}-${version}.jar")) {
+            artifact(remapJar) {
                 builtBy remapJar
             }
-            artifact(jar) {
-                builtBy jar
+            artifact(sourcesJar) {
+                builtBy remapSourcesJar
             }
         }
     }
