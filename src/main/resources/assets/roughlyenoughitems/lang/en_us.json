@@ -98,6 +98,7 @@
   "text.rei.config.light_gray_recipe_border": "Light Gray Recipe Border: ",
   "text.rei.config_api_failed": "You arrived here either if Cloth Config v2 API failed or you don't have it installed!\nUpdate / Install the API and report to the bug tracker.",
   "text.rei.back": "Back",
+  "text.rei.config.appendModNames": "Append Mod Names: ",
   "text.rei.config.recipe_screen_type": "Screen Type: ",
   "text.rei.config.recipe_screen_type.unset": "Not Set",
   "text.rei.config.recipe_screen_type.original": "Original",
