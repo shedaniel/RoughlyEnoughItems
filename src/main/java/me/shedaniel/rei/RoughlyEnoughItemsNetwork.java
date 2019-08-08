@@ -90,6 +90,8 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
                         if (ServerSidePacketRegistry.INSTANCE.canPlayerReceive(player, NOT_ENOUGH_ITEMS_PACKET)) {
                             ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, NOT_ENOUGH_ITEMS_PACKET, buf);
                         }
+                    } catch (IllegalStateException e) {
+                        player.sendMessage(new TranslatableText(e.getMessage()).formatted(Formatting.RED));
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

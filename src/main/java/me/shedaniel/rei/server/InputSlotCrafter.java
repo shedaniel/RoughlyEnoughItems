@@ -153,10 +153,9 @@ public class InputSlotCrafter<C extends Inventory> {
                 ItemStack itemStack_2 = itemStack_1.copy();
                 itemStack_2.setCount(1);
                 if (!this.inventory.insertStack(int_2, itemStack_2)) {
-                    throw new IllegalStateException("Can't find any space for item in the inventory");
+                    throw new IllegalStateException("rei.rei.no.slot.in.inv");
                 }
             }
-            
         }
     }
     
