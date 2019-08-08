@@ -15,6 +15,7 @@ import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.gui.widget.ButtonWidget;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
+import me.zeroeightsix.fiber.exception.FiberException;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
@@ -53,10 +54,10 @@ public class PreRecipeViewingScreen extends Screen {
         this.widgets.add(new ButtonWidget(width / 2 - 100, height - 40, 200, 20, I18n.translate("text.rei.select")) {
             @Override
             public void onPressed() {
-                RoughlyEnoughItemsCore.getConfigManager().getConfig().screenType = original ? RecipeScreenType.ORIGINAL : RecipeScreenType.VILLAGER;
+                RoughlyEnoughItemsCore.getConfigManager().getConfig().setRecipeScreenType(original ? RecipeScreenType.ORIGINAL : RecipeScreenType.VILLAGER);
                 try {
                     RoughlyEnoughItemsCore.getConfigManager().saveConfig();
-                } catch (IOException e) {
+                } catch (IOException | FiberException e) {
                     e.printStackTrace();
                 }
                 ClientHelper.getInstance().openRecipeViewingScreen(map);

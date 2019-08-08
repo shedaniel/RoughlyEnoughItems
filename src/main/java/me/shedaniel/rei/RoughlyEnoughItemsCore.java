@@ -210,14 +210,14 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                 return;
             }
             lastSync.set(System.currentTimeMillis());
-            if (RoughlyEnoughItemsCore.getConfigManager().getConfig().registerRecipesInAnotherThread) {
+            if (RoughlyEnoughItemsCore.getConfigManager().getConfig().doesRegisterRecipesInAnotherThread()) {
                 CompletableFuture.runAsync(() -> ((RecipeHelperImpl) RoughlyEnoughItemsCore.getRecipeHelper()).recipesLoaded(recipeManager), SYNC_RECIPES);
             } else {
                 ((RecipeHelperImpl) RoughlyEnoughItemsCore.getRecipeHelper()).recipesLoaded(recipeManager);
             }
         });
         ClothClientHooks.SCREEN_ADD_BUTTON.register((minecraftClient, screen, abstractButtonWidget) -> {
-            if (RoughlyEnoughItemsCore.getConfigManager().getConfig().disableRecipeBook && screen instanceof AbstractContainerScreen && abstractButtonWidget instanceof TexturedButtonWidget)
+            if (RoughlyEnoughItemsCore.getConfigManager().getConfig().doesDisableRecipeBook() && screen instanceof AbstractContainerScreen && abstractButtonWidget instanceof TexturedButtonWidget)
                 if (((RecipeBookButtonWidgetHooks) abstractButtonWidget).rei_getTexture().equals(recipeButtonTex))
                     return ActionResult.FAIL;
             return ActionResult.PASS;

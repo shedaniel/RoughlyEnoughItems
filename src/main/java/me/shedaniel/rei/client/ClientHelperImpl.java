@@ -18,6 +18,7 @@ import me.shedaniel.rei.gui.PreRecipeViewingScreen;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
+import me.zeroeightsix.fiber.exception.FiberException;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
@@ -124,15 +125,15 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     @Override
     public boolean isCheating() {
-        return RoughlyEnoughItemsCore.getConfigManager().getConfig().cheating;
+        return RoughlyEnoughItemsCore.getConfigManager().getConfig().isCheating();
     }
     
     @Override
     public void setCheating(boolean cheating) {
-        RoughlyEnoughItemsCore.getConfigManager().getConfig().cheating = cheating;
+        RoughlyEnoughItemsCore.getConfigManager().getConfig().setCheating(cheating);
         try {
             RoughlyEnoughItemsCore.getConfigManager().saveConfig();
-        } catch (IOException e) {
+        } catch (IOException | FiberException e) {
             e.printStackTrace();
         }
     }
@@ -158,7 +159,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         } else {
             Identifier identifier = Registry.ITEM.getId(cheatedStack.getItem());
             String tagMessage = cheatedStack.copy().getTag() != null && !cheatedStack.copy().getTag().isEmpty() ? cheatedStack.copy().getTag().asString() : "";
-            String og = cheatedStack.getCount() == 1 ? RoughlyEnoughItemsCore.getConfigManager().getConfig().giveCommand.replaceAll(" \\{count}", "") : RoughlyEnoughItemsCore.getConfigManager().getConfig().giveCommand;
+            String og = cheatedStack.getCount() == 1 ? RoughlyEnoughItemsCore.getConfigManager().getConfig().getGiveCommand().replaceAll(" \\{count}", "") : RoughlyEnoughItemsCore.getConfigManager().getConfig().getGiveCommand();
             String madeUpCommand = og.replaceAll("\\{player_name}", MinecraftClient.getInstance().player.getEntityName()).replaceAll("\\{item_name}", identifier.getPath()).replaceAll("\\{item_identifier}", identifier.toString()).replaceAll("\\{nbt}", tagMessage).replaceAll("\\{count}", String.valueOf(cheatedStack.getCount()));
             if (madeUpCommand.length() > 256) {
                 madeUpCommand = og.replaceAll("\\{player_name}", MinecraftClient.getInstance().player.getEntityName()).replaceAll("\\{item_name}", identifier.getPath()).replaceAll("\\{item_identifier}", identifier.toString()).replaceAll("\\{nbt}", "").replaceAll("\\{count}", String.valueOf(cheatedStack.getCount()));
@@ -234,9 +235,9 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     @Override
     public void openRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map) {
-        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().screenType == RecipeScreenType.VILLAGER)
+        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().getRecipeScreenType() == RecipeScreenType.VILLAGER)
             MinecraftClient.getInstance().openScreen(new VillagerRecipeViewingScreen(map));
-        else if (RoughlyEnoughItemsCore.getConfigManager().getConfig().screenType == RecipeScreenType.UNSET)
+        else if (RoughlyEnoughItemsCore.getConfigManager().getConfig().getRecipeScreenType() == RecipeScreenType.UNSET)
             MinecraftClient.getInstance().openScreen(new PreRecipeViewingScreen(map));
         else
             MinecraftClient.getInstance().openScreen(new RecipeViewingScreen(map));
