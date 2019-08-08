@@ -5,12 +5,11 @@
 
 package me.shedaniel.rei.client;
 
-import blue.endless.jankson.Jankson;
-import blue.endless.jankson.JsonObject;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ConfigManager;
+import me.shedaniel.rei.api.ConfigObject;
+import me.zeroeightsix.fiber.JanksonSettings;
+import me.zeroeightsix.fiber.exception.FiberException;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -18,98 +17,65 @@ import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.LiteralText;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 public class ConfigManagerImpl implements ConfigManager {
     
-    private static final Gson GSON = new GsonBuilder().create();
-    private static final Jankson JANKSON = Jankson.builder().build();
-    private final File configFile, veryOldConfigFile, oldConfigFile;
+    private final File configFile;
     private ConfigObject config;
     private boolean craftableOnly;
     
     public ConfigManagerImpl() {
-        this.veryOldConfigFile = new File(FabricLoader.getInstance().getConfigDirectory(), "rei.json");
-        this.oldConfigFile = new File(FabricLoader.getInstance().getConfigDirectory(), "roughlyenoughitems/config.json");
         this.configFile = new File(FabricLoader.getInstance().getConfigDirectory(), "roughlyenoughitems/config.json5");
         this.craftableOnly = false;
         try {
             loadConfig();
             RoughlyEnoughItemsCore.LOGGER.info("[REI] Config is loaded.");
-        } catch (IOException e) {
+        } catch (IOException | FiberException e) {
             e.printStackTrace();
         }
     }
     
     @Override
-    public void saveConfig() throws IOException {
+    public void saveConfig() throws IOException, FiberException {
         configFile.getParentFile().mkdirs();
         if (!configFile.exists() && !configFile.createNewFile()) {
             RoughlyEnoughItemsCore.LOGGER.error("[REI] Failed to save config! Overwriting with default config.");
-            config = new ConfigObject();
+            config = new ConfigObjectImpl();
             return;
         }
         try {
-            String result = JANKSON.toJson(config).toJson(true, true, 0);
-            if (!configFile.exists())
-                configFile.createNewFile();
-            FileOutputStream out = new FileOutputStream(configFile, false);
-            
-            out.write(result.getBytes());
-            out.flush();
-            out.close();
+            new JanksonSettings().serialize(config.getConfigNode(), Files.newOutputStream(configFile.toPath()), false);
         } catch (Exception e) {
             e.printStackTrace();
             RoughlyEnoughItemsCore.LOGGER.error("[REI] Failed to save config! Overwriting with default config.");
-            config = new ConfigObject();
+            config = new ConfigObjectImpl();
             return;
         }
     }
     
     @Override
-    public void loadConfig() throws IOException {
+    public void loadConfig() throws IOException, FiberException {
         configFile.getParentFile().mkdirs();
-        if (!configFile.exists() && veryOldConfigFile.exists()) {
-            RoughlyEnoughItemsCore.LOGGER.info("[REI] Detected old config file, trying to move it.");
-            try {
-                Files.move(veryOldConfigFile.toPath(), configFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            } catch (Exception e) {
-                e.printStackTrace();
-                RoughlyEnoughItemsCore.LOGGER.error("[REI] Failed to move config file.");
-            }
-        }
-        if (!configFile.exists() && oldConfigFile.exists()) {
-            RoughlyEnoughItemsCore.LOGGER.info("[REI] Detected old config file, trying to move it.");
-            try {
-                Files.move(oldConfigFile.toPath(), configFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            } catch (Exception e) {
-                e.printStackTrace();
-                RoughlyEnoughItemsCore.LOGGER.error("[REI] Failed to move config file.");
-            }
-        }
         if (!configFile.exists() || !configFile.canRead()) {
             RoughlyEnoughItemsCore.LOGGER.warn("[REI] Config not found! Creating one.");
-            config = new ConfigObject();
+            config = new ConfigObjectImpl();
             saveConfig();
             return;
         }
         boolean failed = false;
         try {
-            JsonObject configJson = JANKSON.load(configFile);
-            String regularized = configJson.toJson(false, false, 0);
-            
-            config = GSON.fromJson(regularized, ConfigObject.class);
+            config = new ConfigObjectImpl();
+            new JanksonSettings().deserialize(config.getConfigNode(), Files.newInputStream(configFile.toPath()));
         } catch (Exception e) {
             e.printStackTrace();
             failed = true;
         }
         if (failed || config == null) {
             RoughlyEnoughItemsCore.LOGGER.error("[REI] Failed to load config! Overwriting with default config.");
-            config = new ConfigObject();
+            config = new ConfigObjectImpl();
         }
         saveConfig();
     }

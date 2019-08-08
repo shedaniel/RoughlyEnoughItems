@@ -293,7 +293,7 @@ public class VillagerRecipeViewingScreen extends Screen {
     
     @Override
     public void render(int mouseX, int mouseY, float delta) {
-        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().villagerScreenPermanentScrollBar) {
+        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().doesVillagerScreenHavePermanentScrollBar()) {
             scrollBarAlphaFutureTime = System.currentTimeMillis();
             scrollBarAlphaFuture = 0;
             scrollBarAlpha = 1;

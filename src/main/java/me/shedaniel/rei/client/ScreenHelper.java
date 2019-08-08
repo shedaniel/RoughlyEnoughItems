@@ -82,7 +82,7 @@ public class ScreenHelper implements ClientModInitializer {
     }
     
     public static boolean isDarkModeEnabled() {
-        return RoughlyEnoughItemsCore.getConfigManager().getConfig().darkTheme;
+        return RoughlyEnoughItemsCore.getConfigManager().getConfig().isUsingDarkTheme();
     }
     
     @Override

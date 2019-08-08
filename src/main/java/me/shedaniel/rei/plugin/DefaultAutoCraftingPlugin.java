@@ -29,7 +29,7 @@ public class DefaultAutoCraftingPlugin implements REIPluginV0 {
     
     @Override
     public void registerOthers(RecipeHelper recipeHelper) {
-        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().loadDefaultPlugin) {
+        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isLoadingDefaultPlugin()) {
             return;
         }
         recipeHelper.registerAutoCraftingHandler(new AutoCraftingTableBookHandler());

@@ -80,7 +80,7 @@ public class RecipeBaseWidget extends WidgetWithBounds {
     }
     
     protected boolean isRendering() {
-        return RoughlyEnoughItemsCore.getConfigManager().getConfig().screenType != RecipeScreenType.VILLAGER;
+        return RoughlyEnoughItemsCore.getConfigManager().getConfig().getRecipeScreenType() != RecipeScreenType.VILLAGER;
     }
     
     protected int getInnerColor() {
@@ -88,7 +88,7 @@ public class RecipeBaseWidget extends WidgetWithBounds {
     }
     
     protected int getTextureOffset() {
-        return RoughlyEnoughItemsCore.getConfigManager().getConfig().lightGrayRecipeBorder ? 0 : 66;
+        return RoughlyEnoughItemsCore.getConfigManager().getConfig().isUsingLightGrayRecipeBorder() ? 0 : 66;
     }
     
     

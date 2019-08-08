@@ -8,7 +8,9 @@ package me.shedaniel.rei.plugin;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.DisplayHelper;
+import me.shedaniel.rei.api.ItemRegistry;
+import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
@@ -42,7 +44,6 @@ import net.minecraft.client.gui.screen.ingame.*;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.item.EnchantedBookItem;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -92,7 +93,7 @@ public class DefaultPlugin implements REIPluginV0 {
     
     @Override
     public void registerItems(ItemRegistry itemRegistry) {
-        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().loadDefaultPlugin) {
+        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isLoadingDefaultPlugin()) {
             return;
         }
         Registry.ITEM.stream().forEach(item -> {
@@ -115,7 +116,7 @@ public class DefaultPlugin implements REIPluginV0 {
     
     @Override
     public void registerPluginCategories(RecipeHelper recipeHelper) {
-        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().loadDefaultPlugin) {
+        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isLoadingDefaultPlugin()) {
             return;
         }
         recipeHelper.registerCategory(new DefaultCraftingCategory());
@@ -131,7 +132,7 @@ public class DefaultPlugin implements REIPluginV0 {
     
     @Override
     public void registerRecipeDisplays(RecipeHelper recipeHelper) {
-        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().loadDefaultPlugin) {
+        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isLoadingDefaultPlugin()) {
             return;
         }
         recipeHelper.registerRecipes(CRAFTING, ShapelessRecipe.class, DefaultShapelessDisplay::new);
@@ -182,7 +183,7 @@ public class DefaultPlugin implements REIPluginV0 {
     
     @Override
     public void registerBounds(DisplayHelper displayHelper) {
-        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().loadDefaultPlugin) {
+        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isLoadingDefaultPlugin()) {
             return;
         }
         displayHelper.getBaseBoundsHandler().registerExclusionZones(AbstractInventoryScreen.class, new DefaultPotionEffectExclusionZones());
@@ -272,7 +273,7 @@ public class DefaultPlugin implements REIPluginV0 {
             
             @Override
             public Rectangle getItemListArea(Rectangle rectangle) {
-                return new Rectangle(rectangle.x + 1, rectangle.y + 24, rectangle.width - 2, rectangle.height - (RoughlyEnoughItemsCore.getConfigManager().getConfig().sideSearchField ? 27 + 22 : 27));
+                return new Rectangle(rectangle.x + 1, rectangle.y + 24, rectangle.width - 2, rectangle.height - (RoughlyEnoughItemsCore.getConfigManager().getConfig().isSideSearchField() ? 27 + 22 : 27));
             }
             
             @Override
@@ -284,7 +285,7 @@ public class DefaultPlugin implements REIPluginV0 {
     
     @Override
     public void registerOthers(RecipeHelper recipeHelper) {
-        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().loadDefaultPlugin) {
+        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isLoadingDefaultPlugin()) {
             return;
         }
         recipeHelper.registerWorkingStations(CRAFTING, new ItemStack(Items.CRAFTING_TABLE));

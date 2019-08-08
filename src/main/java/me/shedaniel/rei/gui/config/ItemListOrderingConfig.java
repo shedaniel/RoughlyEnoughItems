@@ -38,6 +38,6 @@ public enum ItemListOrderingConfig {
     
     @Override
     public String toString() {
-        return I18n.translate("text.rei.config.list_ordering_button", I18n.translate(getOrdering().getNameTranslationKey()), I18n.translate(isAscending ? "ordering.rei.ascending" : "ordering.rei.descending"));
+        return I18n.translate("config.roughlyenoughitems.list_ordering_button", I18n.translate(getOrdering().getNameTranslationKey()), I18n.translate(isAscending ? "ordering.rei.ascending" : "ordering.rei.descending"));
     }
 }

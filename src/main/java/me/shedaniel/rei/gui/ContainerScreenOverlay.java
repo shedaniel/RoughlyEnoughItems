@@ -43,7 +43,7 @@ import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ContainerScreenOverlay extends AbstractParentElement implements Drawable {
+public class ContainerScreenOverlay extends Widget {
     
     private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private static final List<QueuedTooltip> QUEUED_TOOLTIPS = Lists.newArrayList();
@@ -71,7 +71,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
         this.children().clear();
         this.window = MinecraftClient.getInstance().window;
         DisplayHelper.DisplayBoundsHandler boundsHandler = RoughlyEnoughItemsCore.getDisplayHelper().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
-        this.rectangle = RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? boundsHandler.getLeftBounds(MinecraftClient.getInstance().currentScreen) : boundsHandler.getRightBounds(MinecraftClient.getInstance().currentScreen);
+        this.rectangle = RoughlyEnoughItemsCore.getConfigManager().getConfig().isLeftHandSidePanel() ? boundsHandler.getLeftBounds(MinecraftClient.getInstance().currentScreen) : boundsHandler.getRightBounds(MinecraftClient.getInstance().currentScreen);
         widgets.add(itemListOverlay = new ItemListOverlay(page));
         itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, false);
         
@@ -117,7 +117,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
         if (setPage)
             page = MathHelper.clamp(page, 0, getTotalPage());
         
-        widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? window.getScaledWidth() - 30 : 10, 10, 20, 20, "") {
+        widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigManager().getConfig().isLeftHandSidePanel() ? window.getScaledWidth() - 30 : 10, 10, 20, 20, "") {
             @Override
             public void onPressed() {
                 if (Screen.hasShiftDown()) {
@@ -162,11 +162,11 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
                 return false;
             }
         });
-        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().showUtilsButtons) {
-            widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? window.getScaledWidth() - 55 : 35, 10, 20, 20, "") {
+        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().doesShowUtilsButtons()) {
+            widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigManager().getConfig().isLeftHandSidePanel() ? window.getScaledWidth() - 55 : 35, 10, 20, 20, "") {
                 @Override
                 public void onPressed() {
-                    MinecraftClient.getInstance().player.sendChatMessage(RoughlyEnoughItemsCore.getConfigManager().getConfig().gamemodeCommand.replaceAll("\\{gamemode}", getNextGameMode(Screen.hasShiftDown()).getName()));
+                    MinecraftClient.getInstance().player.sendChatMessage(RoughlyEnoughItemsCore.getConfigManager().getConfig().getGamemodeCommand().replaceAll("\\{gamemode}", getNextGameMode(Screen.hasShiftDown()).getName()));
                 }
                 
                 @Override
@@ -185,12 +185,12 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
                     return false;
                 }
             });
-            int xxx = RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? window.getScaledWidth() - 30 : 10;
+            int xxx = RoughlyEnoughItemsCore.getConfigManager().getConfig().isLeftHandSidePanel() ? window.getScaledWidth() - 30 : 10;
             for (Weather weather : Weather.values()) {
                 widgets.add(new ButtonWidget(xxx, 35, 20, 20, "") {
                     @Override
                     public void onPressed() {
-                        MinecraftClient.getInstance().player.sendChatMessage(RoughlyEnoughItemsCore.getConfigManager().getConfig().weatherCommand.replaceAll("\\{weather}", weather.name().toLowerCase(Locale.ROOT)));
+                        MinecraftClient.getInstance().player.sendChatMessage(RoughlyEnoughItemsCore.getConfigManager().getConfig().getWeatherCommand().replaceAll("\\{weather}", weather.name().toLowerCase(Locale.ROOT)));
                     }
                     
                     @Override
@@ -212,7 +212,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
                         return false;
                     }
                 });
-                xxx += RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel ? -25 : 25;
+                xxx += RoughlyEnoughItemsCore.getConfigManager().getConfig().isLeftHandSidePanel() ? -25 : 25;
             }
         }
         widgets.add(new ClickableLabelWidget(rectangle.x + (rectangle.width / 2), rectangle.y + 10, "", getTotalPage() > 0) {
@@ -250,7 +250,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
             searchTerm = s;
             itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, true);
         });
-        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().enableCraftableOnlyButton)
+        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().isCraftableFilterEnabled())
             this.widgets.add(toggleButtonWidget = new CraftableToggleButtonWidget(getCraftableToggleArea()) {
                 @Override
                 public void onPressed() {
@@ -319,8 +319,8 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
     }
     
     private Rectangle getTextFieldArea() {
-        int widthRemoved = RoughlyEnoughItemsCore.getConfigManager().getConfig().enableCraftableOnlyButton ? 22 : 2;
-        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().sideSearchField)
+        int widthRemoved = RoughlyEnoughItemsCore.getConfigManager().getConfig().isCraftableFilterEnabled() ? 22 : 2;
+        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().isSideSearchField())
             return new Rectangle(rectangle.x + 2, window.getScaledHeight() - 22, rectangle.width - 6 - widthRemoved, 18);
         if (MinecraftClient.getInstance().currentScreen instanceof RecipeViewingScreen) {
             RecipeViewingScreen widget = (RecipeViewingScreen) MinecraftClient.getInstance().currentScreen;
@@ -351,7 +351,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         List<ItemStack> currentStacks = ClientHelper.getInstance().getInventoryItemsTypes();
-        if (RoughlyEnoughItemsCore.getDisplayHelper().getBaseBoundsHandler() != null && RoughlyEnoughItemsCore.getDisplayHelper().getBaseBoundsHandler().shouldRecalculateArea(!RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel, rectangle))
+        if (RoughlyEnoughItemsCore.getDisplayHelper().getBaseBoundsHandler() != null && RoughlyEnoughItemsCore.getDisplayHelper().getBaseBoundsHandler().shouldRecalculateArea(!RoughlyEnoughItemsCore.getConfigManager().getConfig().isLeftHandSidePanel(), rectangle))
             shouldReInit = true;
         if (shouldReInit)
             init(true);
@@ -373,7 +373,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GuiLighting.disable();
         this.renderWidgets(mouseX, mouseY, delta);
-        if (MinecraftClient.getInstance().currentScreen instanceof AbstractContainerScreen && RoughlyEnoughItemsCore.getConfigManager().getConfig().clickableRecipeArrows) {
+        if (MinecraftClient.getInstance().currentScreen instanceof AbstractContainerScreen && RoughlyEnoughItemsCore.getConfigManager().getConfig().areClickableRecipeArrowsEnabled()) {
             ContainerScreenHooks hooks = (ContainerScreenHooks) MinecraftClient.getInstance().currentScreen;
             for (RecipeHelperImpl.ScreenClickArea area : RecipeHelper.getInstance().getScreenClickAreas())
                 if (area.getScreenClass().equals(MinecraftClient.getInstance().currentScreen.getClass()))
@@ -532,7 +532,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
         if (!ScreenHelper.isOverlayVisible())
             return false;
-        if (MinecraftClient.getInstance().currentScreen instanceof AbstractContainerScreen && RoughlyEnoughItemsCore.getConfigManager().getConfig().clickableRecipeArrows) {
+        if (MinecraftClient.getInstance().currentScreen instanceof AbstractContainerScreen && RoughlyEnoughItemsCore.getConfigManager().getConfig().areClickableRecipeArrowsEnabled()) {
             ContainerScreenHooks hooks = (ContainerScreenHooks) MinecraftClient.getInstance().currentScreen;
             for (RecipeHelperImpl.ScreenClickArea area : RecipeHelper.getInstance().getScreenClickAreas())
                 if (area.getScreenClass().equals(MinecraftClient.getInstance().currentScreen.getClass()))
@@ -556,7 +556,7 @@ public class ContainerScreenOverlay extends AbstractParentElement implements Dra
         if (!rectangle.contains(mouseX, mouseY))
             return false;
         for (DisplayHelper.DisplayBoundsHandler handler : RoughlyEnoughItemsCore.getDisplayHelper().getSortedBoundsHandlers(MinecraftClient.getInstance().currentScreen.getClass())) {
-            ActionResult in = handler.isInZone(!RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel, mouseX, mouseY);
+            ActionResult in = handler.isInZone(!RoughlyEnoughItemsCore.getConfigManager().getConfig().isLeftHandSidePanel(), mouseX, mouseY);
             if (in != ActionResult.PASS)
                 return in == ActionResult.SUCCESS;
         }

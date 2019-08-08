@@ -44,9 +44,9 @@ public class ItemListOverlay extends Widget {
     
     static {
         ASCENDING_COMPARATOR = (itemStack, t1) -> {
-            if (RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering.equals(ItemListOrdering.name))
+            if (RoughlyEnoughItemsCore.getConfigManager().getConfig().getItemListOrdering().equals(ItemListOrdering.name))
                 return tryGetItemStackName(itemStack).compareToIgnoreCase(tryGetItemStackName(t1));
-            if (RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering.equals(ItemListOrdering.item_groups)) {
+            if (RoughlyEnoughItemsCore.getConfigManager().getConfig().getItemListOrdering().equals(ItemListOrdering.item_groups)) {
                 List<ItemGroup> itemGroups = Arrays.asList(ItemGroup.GROUPS);
                 return itemGroups.indexOf(itemStack.getItem().getGroup()) - itemGroups.indexOf(t1.getItem().getGroup());
             }
@@ -191,9 +191,9 @@ public class ItemListOverlay extends Widget {
                             if (ClientHelper.getInstance().isCheating()) {
                                 if (getCurrentItemStack() != null && !getCurrentItemStack().isEmpty()) {
                                     ItemStack cheatedStack = getCurrentItemStack().copy();
-                                    if (RoughlyEnoughItemsCore.getConfigManager().getConfig().itemCheatingMode == ItemCheatingMode.REI_LIKE)
+                                    if (RoughlyEnoughItemsCore.getConfigManager().getConfig().getItemCheatingMode() == ItemCheatingMode.REI_LIKE)
                                         cheatedStack.setCount(button != 1 ? 1 : cheatedStack.getMaxCount());
-                                    else if (RoughlyEnoughItemsCore.getConfigManager().getConfig().itemCheatingMode == ItemCheatingMode.JEI_LIKE)
+                                    else if (RoughlyEnoughItemsCore.getConfigManager().getConfig().getItemCheatingMode() == ItemCheatingMode.JEI_LIKE)
                                         cheatedStack.setCount(button != 0 ? 1 : cheatedStack.getMaxCount());
                                     else
                                         cheatedStack.setCount(1);
@@ -231,7 +231,7 @@ public class ItemListOverlay extends Widget {
     
     public boolean canBeFit(int left, int top, Rectangle listArea) {
         for (DisplayHelper.DisplayBoundsHandler sortedBoundsHandler : RoughlyEnoughItemsCore.getDisplayHelper().getSortedBoundsHandlers(minecraft.currentScreen.getClass())) {
-            ActionResult fit = sortedBoundsHandler.canItemSlotWidgetFit(!RoughlyEnoughItemsCore.getConfigManager().getConfig().mirrorItemPanel, left, top, minecraft.currentScreen, listArea);
+            ActionResult fit = sortedBoundsHandler.canItemSlotWidgetFit(!RoughlyEnoughItemsCore.getConfigManager().getConfig().isLeftHandSidePanel(), left, top, minecraft.currentScreen, listArea);
             if (fit != ActionResult.PASS)
                 return fit == ActionResult.SUCCESS;
         }
@@ -257,9 +257,9 @@ public class ItemListOverlay extends Widget {
     private List<ItemStack> processSearchTerm(String searchTerm, List<ItemStack> ol, List<ItemStack> inventoryItems) {
         lastSearchArgument.clear();
         List<ItemStack> os = new LinkedList<>(ol);
-        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().itemListOrdering != ItemListOrdering.registry)
+        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().getItemListOrdering() != ItemListOrdering.registry)
             os = ol.stream().sorted(ASCENDING_COMPARATOR).collect(Collectors.toList());
-        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isAscending)
+        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isItemListAscending())
             Collections.reverse(os);
         String[] splitSearchTerm = StringUtils.splitByWholeSeparatorPreserveAllTokens(searchTerm, "|");
         Arrays.stream(splitSearchTerm).forEachOrdered(s -> {
