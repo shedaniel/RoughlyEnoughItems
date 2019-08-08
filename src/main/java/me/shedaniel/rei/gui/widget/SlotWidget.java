@@ -8,6 +8,7 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.cloth.api.ClientUtils;
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.Renderable;
 import me.shedaniel.rei.api.Renderer;
@@ -150,13 +151,15 @@ public class SlotWidget extends HighlightableWidget {
     }
     
     protected List<String> getTooltip(ItemStack itemStack) {
-        final String modString = ClientHelper.getInstance().getFormattedModFromItem(itemStack.getItem());
         List<String> toolTip = Lists.newArrayList(ItemListOverlay.tryGetItemStackToolTip(itemStack, true));
-        String s1 = ClientHelper.getInstance().getModFromItem(itemStack.getItem()).toLowerCase(Locale.ROOT);
         toolTip.addAll(getExtraToolTips(itemStack));
-        if (!modString.isEmpty()) {
-            toolTip.removeIf(s -> s.toLowerCase(Locale.ROOT).contains(s1));
-            toolTip.add(modString);
+        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().appendModNames) {
+            final String modString = ClientHelper.getInstance().getFormattedModFromItem(itemStack.getItem());
+            String s1 = ClientHelper.getInstance().getModFromItem(itemStack.getItem()).toLowerCase(Locale.ROOT);
+            if (!modString.isEmpty()) {
+                toolTip.removeIf(s -> s.toLowerCase(Locale.ROOT).contains(s1));
+                toolTip.add(modString);
+            }
         }
         return toolTip;
     }

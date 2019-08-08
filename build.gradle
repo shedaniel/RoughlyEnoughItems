@@ -35,12 +35,20 @@ dependencies {
     mappings "net.fabricmc:yarn:${project.yarn_version}"
     modApi "net.fabricmc:fabric-loader:${project.fabricloader_version}"
     modApi "net.fabricmc.fabric-api:fabric-api:${project.fabric_api}"
-    modApi "cloth:ClothEvents:${cloth_events_version}"
-    modImplementation "cloth-config:ClothConfig2:${cloth_config_version}"
+    modApi("me.shedaniel.cloth:cloth-events:${cloth_events_version}") {
+        transitive = false
+    }
+    modImplementation("me.shedaniel.cloth:config-2:${cloth_config_version}") {
+        transitive = false
+    }
     modApi "blue.endless:jankson:${project.jankson_version}"
     if (includeDep) {
-        include "cloth:ClothEvents:${cloth_events_version}"
-        include "cloth-config:ClothConfig2:${cloth_config_version}"
+        include("me.shedaniel.cloth:cloth-events:${cloth_events_version}") {
+            transitive = false
+        }
+        include("me.shedaniel.cloth:config-2:${cloth_config_version}") {
+            transitive = false
+        }
         include "blue.endless:jankson:${project.jankson_version}"
     }
     modImplementation "io.github.prospector.modmenu:ModMenu:${modmenu_version}"

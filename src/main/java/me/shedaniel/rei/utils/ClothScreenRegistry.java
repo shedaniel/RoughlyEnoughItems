@@ -60,6 +60,11 @@ public class ClothScreenRegistry {
         });
         ConfigCategory appearance = builder.getOrCreateCategory("text.rei.config.appearance");
         appearance.addEntry(entryBuilder.startBooleanToggle("text.rei.config.dark_theme", ScreenHelper.isDarkModeEnabled()).setDefaultValue(() -> false).setSaveConsumer(bool -> configManager.getConfig().darkTheme = bool).setTooltipSupplier(() -> getConfigTooltip("dark_theme")).buildEntry());
+        appearance.addEntry(entryBuilder.startBooleanToggle("text.rei.config.appendModNames", configManager.getConfig().appendModNames)
+                .setDefaultValue(true)
+                .setSaveConsumer(bool -> configManager.getConfig().appendModNames = bool)
+                .setTooltip(getConfigTooltip("appendModNames"))
+                .build());
         appearance.addEntry(new EnumListEntry<>("text.rei.config.recipe_screen_type", RecipeScreenType.class, configManager.getConfig().screenType, RESET, () -> RecipeScreenType.UNSET, bool -> configManager.getConfig().screenType = bool, EnumListEntry.DEFAULT_NAME_PROVIDER, () -> getConfigTooltip("recipe_screen_type")));
         appearance.addEntry(entryBuilder.startBooleanToggle("text.rei.config.side_search_box", configManager.getConfig().sideSearchField).setDefaultValue(() -> false).setSaveConsumer(bool -> configManager.getConfig().sideSearchField = bool).setTooltipSupplier(() -> getConfigTooltip("side_search_box")).buildEntry());
         appearance.addEntry(new EnumListEntry<>("text.rei.config.list_ordering", ItemListOrderingConfig.class, ItemListOrderingConfig.from(configManager.getConfig().itemListOrdering, configManager.getConfig().isAscending), RESET, () -> ItemListOrderingConfig.REGISTRY_ASCENDING, config -> {
