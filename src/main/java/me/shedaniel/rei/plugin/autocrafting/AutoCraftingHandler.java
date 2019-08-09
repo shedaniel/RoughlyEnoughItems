@@ -26,7 +26,7 @@ import net.minecraft.util.PacketByteBuf;
 
 import java.util.List;
 
-public class AutoCraftingTableHandler implements AutoTransferHandler {
+public class AutoCraftingHandler implements AutoTransferHandler {
     @Override
     public Result handle(Context context) {
         if (!(context.getRecipe() instanceof DefaultCraftingDisplay))

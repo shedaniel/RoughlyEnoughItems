@@ -92,6 +92,9 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
                         }
                     } catch (IllegalStateException e) {
                         player.sendMessage(new TranslatableText(e.getMessage()).formatted(Formatting.RED));
+                    } catch (Exception e) {
+                        player.sendMessage(new TranslatableText("error.rei.internal.error",e.getMessage()).formatted(Formatting.RED));
+                        e.printStackTrace();
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
