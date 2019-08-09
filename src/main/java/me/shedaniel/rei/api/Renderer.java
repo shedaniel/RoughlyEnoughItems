@@ -6,9 +6,11 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.gui.renderers.EmptyRenderer;
+import me.shedaniel.rei.gui.renderers.FluidRenderer;
 import me.shedaniel.rei.gui.renderers.ItemStackRenderer;
 import me.shedaniel.rei.gui.renderers.SimpleRecipeRenderer;
 import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 
@@ -59,6 +61,14 @@ public abstract class Renderer extends DrawableHelper {
      */
     public static ItemStackRenderer fromItemStack(ItemStack stack) {
         return fromItemStackSupplier(() -> stack);
+    }
+    public static FluidRenderer fromFluid(Fluid fluid) {
+        return new FluidRenderer() {
+            @Override
+            public Fluid getFluid() {
+                return fluid;
+            }
+        };
     }
     
     /**

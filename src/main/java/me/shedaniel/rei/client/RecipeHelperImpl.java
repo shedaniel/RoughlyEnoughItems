@@ -241,7 +241,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         });
         RoughlyEnoughItemsCore.LOGGER.info("[REI] Loading %d plugins: %s", plugins.size(), plugins.stream().map(REIPluginEntry::getPluginIdentifier).map(Identifier::toString).collect(Collectors.joining(", ")));
         Collections.reverse(plugins);
-        RoughlyEnoughItemsCore.getItemRegisterer().getModifiableItemList().clear();
+        RoughlyEnoughItemsCore.getEntryRegistry().getModifiableEntryList().clear();
         Version reiVersion = FabricLoader.getInstance().getModContainer("roughlyenoughitems").get().getMetadata().getVersion();
         if (!(reiVersion instanceof SemanticVersion))
             RoughlyEnoughItemsCore.LOGGER.warn("[REI] Roughly Enough Items is not using semantic versioning, will be ignoring plugins' minimum versions!");
@@ -257,7 +257,7 @@ public class RecipeHelperImpl implements RecipeHelper {
                     ((REIPluginV0) plugin).registerRecipeDisplays(this);
                     ((REIPluginV0) plugin).registerBounds(RoughlyEnoughItemsCore.getDisplayHelper());
                     ((REIPluginV0) plugin).registerOthers(this);
-                    ((REIPluginV0) plugin).registerItems(RoughlyEnoughItemsCore.getItemRegisterer());
+                    ((REIPluginV0) plugin).registerItems(RoughlyEnoughItemsCore.getEntryRegistry());
                 } else {
                     throw new IllegalStateException("Invaild Plugin Class!");
                 }
@@ -293,7 +293,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         ScreenHelper.getOptionalOverlay().ifPresent(overlay -> overlay.shouldReInit = true);
         
         long usedTime = System.currentTimeMillis() - startTime;
-        RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered %d stack entries, %d recipes displays, %d bounds handler, %d visibility handlers and %d categories (%s) in %d ms.", RoughlyEnoughItemsCore.getItemRegisterer().getItemList().size(), recipeCount.get(), RoughlyEnoughItemsCore.getDisplayHelper().getAllBoundsHandlers().size(), getDisplayVisibilityHandlers().size(), categories.size(), String.join(", ", categories.stream().map(RecipeCategory::getCategoryName).collect(Collectors.toList())), usedTime);
+        RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered %d stack entries, %d recipes displays, %d bounds handler, %d visibility handlers and %d categories (%s) in %d ms.", RoughlyEnoughItemsCore.getEntryRegistry().getEntryList().size(), recipeCount.get(), RoughlyEnoughItemsCore.getDisplayHelper().getAllBoundsHandlers().size(), getDisplayVisibilityHandlers().size(), categories.size(), String.join(", ", categories.stream().map(RecipeCategory::getCategoryName).collect(Collectors.toList())), usedTime);
     }
     
     @Override

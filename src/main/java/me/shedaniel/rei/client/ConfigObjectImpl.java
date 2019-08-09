@@ -165,11 +165,11 @@ public class ConfigObjectImpl implements ConfigObject {
             .withName("registerRecipesInAnotherThread")
             .build();
     
-    private ConfigValue<RelativePoint> choosePageDialogPoint = ConfigValue.builder(RelativePoint.class)
-            .withParent(technical)
-            .withDefaultValue(new RelativePoint(.5, .5))
-            .withName("choosePageDialogPoint")
-            .build();
+    //    private ConfigValue<RelativePoint> choosePageDialogPoint = ConfigValue.builder(RelativePoint.class)
+    //            .withParent(technical)
+    //            .withDefaultValue(new RelativePoint(.5, .5))
+    //            .withName("choosePageDialogPoint")
+    //            .build();
     
     public ConfigObjectImpl() throws FiberException {
     
@@ -297,11 +297,12 @@ public class ConfigObjectImpl implements ConfigObject {
     
     @Override
     public RelativePoint getChoosePageDialogPoint() {
-        return choosePageDialogPoint.getValue();
+        //        return choosePageDialogPoint.getValue();
+        return new RelativePoint(.5, .5);
     }
     
     @Override
     public void setChoosePageDialogPoint(RelativePoint choosePageDialogPoint) {
-        this.choosePageDialogPoint.setValue(choosePageDialogPoint);
+        //        this.choosePageDialogPoint.setValue(choosePageDialogPoint);
     }
 }

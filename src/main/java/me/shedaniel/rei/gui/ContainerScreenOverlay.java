@@ -11,6 +11,7 @@ import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.DisplayHelper;
+import me.shedaniel.rei.api.Entry;
 import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.client.RecipeHelperImpl;
 import me.shedaniel.rei.client.ScreenHelper;
@@ -19,8 +20,6 @@ import me.shedaniel.rei.gui.widget.*;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.AbstractParentElement;
-import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
@@ -49,7 +48,7 @@ public class ContainerScreenOverlay extends Widget {
     private static final List<QueuedTooltip> QUEUED_TOOLTIPS = Lists.newArrayList();
     public static String searchTerm = "";
     private static int page = 0;
-    private static ItemListOverlay itemListOverlay;
+    private static EntryListOverlay entryListOverlay;
     private final List<Widget> widgets = Lists.newLinkedList();
     public boolean shouldReInit = false;
     private Rectangle rectangle;
@@ -57,8 +56,8 @@ public class ContainerScreenOverlay extends Widget {
     private CraftableToggleButtonWidget toggleButtonWidget;
     private ButtonWidget buttonLeft, buttonRight;
     
-    public static ItemListOverlay getItemListOverlay() {
-        return itemListOverlay;
+    public static EntryListOverlay getEntryListOverlay() {
+        return entryListOverlay;
     }
     
     public void init() {
@@ -72,8 +71,8 @@ public class ContainerScreenOverlay extends Widget {
         this.window = MinecraftClient.getInstance().window;
         DisplayHelper.DisplayBoundsHandler boundsHandler = RoughlyEnoughItemsCore.getDisplayHelper().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
         this.rectangle = RoughlyEnoughItemsCore.getConfigManager().getConfig().isLeftHandSidePanel() ? boundsHandler.getLeftBounds(MinecraftClient.getInstance().currentScreen) : boundsHandler.getRightBounds(MinecraftClient.getInstance().currentScreen);
-        widgets.add(itemListOverlay = new ItemListOverlay(page));
-        itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, false);
+        widgets.add(entryListOverlay = new EntryListOverlay(page));
+        entryListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, false);
         
         widgets.add(buttonLeft = new ButtonWidget(rectangle.x, rectangle.y + 5, 16, 16, new TranslatableText("text.rei.left_arrow")) {
             @Override
@@ -81,7 +80,7 @@ public class ContainerScreenOverlay extends Widget {
                 page--;
                 if (page < 0)
                     page = getTotalPage();
-                itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, false);
+                entryListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, false);
             }
             
             @Override
@@ -100,7 +99,7 @@ public class ContainerScreenOverlay extends Widget {
                 page++;
                 if (page > getTotalPage())
                     page = 0;
-                itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, false);
+                entryListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, false);
             }
             
             @Override
@@ -232,7 +231,7 @@ public class ContainerScreenOverlay extends Widget {
             public void onLabelClicked() {
                 MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 page = 0;
-                itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, false);
+                entryListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, false);
             }
             
             @Override
@@ -248,14 +247,14 @@ public class ContainerScreenOverlay extends Widget {
         ScreenHelper.searchField.setText(searchTerm);
         ScreenHelper.searchField.setChangedListener(s -> {
             searchTerm = s;
-            itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, true);
+            entryListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, true);
         });
         if (RoughlyEnoughItemsCore.getConfigManager().getConfig().isCraftableFilterEnabled())
             this.widgets.add(toggleButtonWidget = new CraftableToggleButtonWidget(getCraftableToggleArea()) {
                 @Override
                 public void onPressed() {
                     RoughlyEnoughItemsCore.getConfigManager().toggleCraftableOnly();
-                    itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, true);
+                    entryListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, true);
                 }
                 
                 @Override
@@ -266,7 +265,7 @@ public class ContainerScreenOverlay extends Widget {
             });
         else
             toggleButtonWidget = null;
-        this.itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, false);
+        this.entryListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, false);
     }
     
     private Weather getNextWeather() {
@@ -358,16 +357,18 @@ public class ContainerScreenOverlay extends Widget {
         else if (RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() && ((currentStacks.size() != ScreenHelper.inventoryStacks.size()) || !hasSameListContent(new LinkedList<>(ScreenHelper.inventoryStacks), currentStacks))) {
             ScreenHelper.inventoryStacks = currentStacks;
             DisplayHelper.DisplayBoundsHandler<?> boundsHandler = RoughlyEnoughItemsCore.getDisplayHelper().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
-            itemListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, true);
+            entryListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, true);
         }
-        if (MinecraftClient.getInstance().currentScreen instanceof AbstractContainerScreen && SearchFieldWidget.isSearching) {
+        if (SearchFieldWidget.isSearching) {
             GuiLighting.disable();
             blitOffset = 200;
-            ContainerScreenHooks hooks = (ContainerScreenHooks) MinecraftClient.getInstance().currentScreen;
-            int left = hooks.rei_getContainerLeft(), top = hooks.rei_getContainerTop();
-            for (Slot slot : ((AbstractContainerScreen<?>) MinecraftClient.getInstance().currentScreen).getContainer().slotList)
-                if (!slot.hasStack() || !itemListOverlay.filterItem(slot.getStack(), itemListOverlay.getLastSearchArgument()))
-                    fillGradient(left + slot.xPosition, top + slot.yPosition, left + slot.xPosition + 16, top + slot.yPosition + 16, -601874400, -601874400);
+            if (MinecraftClient.getInstance().currentScreen instanceof AbstractContainerScreen) {
+                ContainerScreenHooks hooks = (ContainerScreenHooks) MinecraftClient.getInstance().currentScreen;
+                int left = hooks.rei_getContainerLeft(), top = hooks.rei_getContainerTop();
+                for (Slot slot : ((AbstractContainerScreen<?>) MinecraftClient.getInstance().currentScreen).getContainer().slotList)
+                    if (!slot.hasStack() || !entryListOverlay.filterEntry(Entry.create(slot.getStack()), entryListOverlay.getLastSearchArgument()))
+                        fillGradient(left + slot.xPosition, top + slot.yPosition, left + slot.xPosition + 16, top + slot.yPosition + 16, -601874400, -601874400);
+            }
             blitOffset = 0;
         }
         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
@@ -461,7 +462,7 @@ public class ContainerScreenOverlay extends Widget {
     }
     
     private int getTotalPage() {
-        return itemListOverlay.getTotalPage();
+        return entryListOverlay.getTotalPage();
     }
     
     @Override

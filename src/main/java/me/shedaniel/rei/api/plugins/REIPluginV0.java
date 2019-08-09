@@ -6,7 +6,7 @@
 package me.shedaniel.rei.api.plugins;
 
 import me.shedaniel.rei.api.DisplayHelper;
-import me.shedaniel.rei.api.ItemRegistry;
+import me.shedaniel.rei.api.EntryRegistry;
 import me.shedaniel.rei.api.REIPluginEntry;
 import me.shedaniel.rei.api.RecipeHelper;
 import net.fabricmc.loader.api.SemanticVersion;
@@ -25,9 +25,9 @@ public interface REIPluginV0 extends REIPluginEntry {
     /**
      * Registers items on the item panel
      *
-     * @param itemRegistry the helper class
+     * @param entryRegistry the helper class
      */
-    default void registerItems(ItemRegistry itemRegistry) {
+    default void registerItems(EntryRegistry entryRegistry) {
     }
     
     /**

@@ -65,31 +65,31 @@ public class DefaultBrewingCategory implements RecipeCategory<DefaultBrewingDisp
         widgets.add(new SlotWidget(startPoint.x + 1, startPoint.y + 1, Renderer.fromItemStack(new ItemStack(Items.BLAZE_POWDER)), false, true, true));
         widgets.add(new SlotWidget(startPoint.x + 63, startPoint.y + 1, Renderer.fromItemStacks(recipeDisplay.getInput().get(0)), false, true, true) {
             @Override
-            protected List<String> getExtraToolTips(ItemStack stack) {
+            protected List<String> getExtraItemToolTips(ItemStack stack) {
                 return Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("category.rei.brewing.input"));
             }
         });
         widgets.add(new SlotWidget(startPoint.x + 40, startPoint.y + 1, Renderer.fromItemStacks(recipeDisplay.getInput().get(1)), false, true, true) {
             @Override
-            protected List<String> getExtraToolTips(ItemStack stack) {
+            protected List<String> getExtraItemToolTips(ItemStack stack) {
                 return Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("category.rei.brewing.reactant"));
             }
         });
         widgets.add(new SlotWidget(startPoint.x + 40, startPoint.y + 35, Renderer.fromItemStacks(recipeDisplay.getOutput(0)), false, true, true) {
             @Override
-            protected List<String> getExtraToolTips(ItemStack stack) {
+            protected List<String> getExtraItemToolTips(ItemStack stack) {
                 return Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("category.rei.brewing.result"));
             }
         });
         widgets.add(new SlotWidget(startPoint.x + 63, startPoint.y + 42, Renderer.fromItemStacks(recipeDisplay.getOutput(1)), false, true, true) {
             @Override
-            protected List<String> getExtraToolTips(ItemStack stack) {
+            protected List<String> getExtraItemToolTips(ItemStack stack) {
                 return Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("category.rei.brewing.result"));
             }
         });
         widgets.add(new SlotWidget(startPoint.x + 86, startPoint.y + 35, Renderer.fromItemStacks(recipeDisplay.getOutput(2)), false, true, true) {
             @Override
-            protected List<String> getExtraToolTips(ItemStack stack) {
+            protected List<String> getExtraItemToolTips(ItemStack stack) {
                 return Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("category.rei.brewing.result"));
             }
         });

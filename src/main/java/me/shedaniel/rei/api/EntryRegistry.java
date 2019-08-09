@@ -5,19 +5,20 @@
 
 package me.shedaniel.rei.api;
 
+import net.minecraft.fluid.Fluid;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 import java.util.List;
 
-public interface ItemRegistry {
+public interface EntryRegistry {
     
     /**
      * Gets the current unmodifiable item list
      *
      * @return an unmodifiable item list
      */
-    List<ItemStack> getItemList();
+    List<Entry> getEntryList();
     
     /**
      * Gets the current modifiable item list
@@ -25,7 +26,7 @@ public interface ItemRegistry {
      * @return an modifiable item list
      */
     @Deprecated
-    List<ItemStack> getModifiableItemList();
+    List<Entry> getModifiableEntryList();
     
     /**
      * Gets all possible stacks from an item
@@ -42,6 +43,8 @@ public interface ItemRegistry {
      * @param stack     the stack to register
      */
     void registerItemStack(Item afterItem, ItemStack stack);
+    
+    void registerFluid(Fluid fluid);
     
     /**
      * Registers multiple stacks to the item list
@@ -73,7 +76,7 @@ public interface ItemRegistry {
      * @return whether the stack has been registered
      */
     default boolean alreadyContain(ItemStack stack) {
-        return getItemList().stream().anyMatch(stack1 -> ItemStack.areEqualIgnoreDamage(stack, stack1));
+        return getEntryList().stream().filter(entry -> entry.getEntryType() == Entry.Type.ITEM).anyMatch(entry -> ItemStack.areEqualIgnoreDamage(stack, entry.getItemStack()));
     }
     
 }

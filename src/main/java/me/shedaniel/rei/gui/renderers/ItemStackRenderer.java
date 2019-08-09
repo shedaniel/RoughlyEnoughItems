@@ -7,10 +7,11 @@ package me.shedaniel.rei.gui.renderers;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.client.ScreenHelper;
-import me.shedaniel.rei.gui.widget.ItemListOverlay;
+import me.shedaniel.rei.gui.widget.EntryListOverlay;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GuiLighting;
@@ -55,17 +56,19 @@ public abstract class ItemStackRenderer extends Renderer {
     }
     
     protected List<String> getTooltip(ItemStack itemStack) {
-        final String modString = ClientHelper.getInstance().getFormattedModFromItem(itemStack.getItem());
-        List<String> toolTip = Lists.newArrayList(ItemListOverlay.tryGetItemStackToolTip(itemStack, true));
-        toolTip.addAll(getExtraToolTips(itemStack));
-        boolean alreadyHasMod = false;
-        for (String s : toolTip)
-            if (s.equalsIgnoreCase(modString)) {
-                alreadyHasMod = true;
-                break;
-            }
-        if (!alreadyHasMod)
-            toolTip.add(modString);
+        List<String> toolTip = Lists.newArrayList(EntryListOverlay.tryGetItemStackToolTip(itemStack, true));
+        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().shouldAppendModNames()) {
+            final String modString = ClientHelper.getInstance().getFormattedModFromItem(itemStack.getItem());
+            toolTip.addAll(getExtraToolTips(itemStack));
+            boolean alreadyHasMod = false;
+            for (String s : toolTip)
+                if (s.equalsIgnoreCase(modString)) {
+                    alreadyHasMod = true;
+                    break;
+                }
+            if (!alreadyHasMod)
+                toolTip.add(modString);
+        }
         return toolTip;
     }
     
