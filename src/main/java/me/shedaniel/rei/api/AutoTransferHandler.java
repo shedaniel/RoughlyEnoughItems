@@ -5,6 +5,8 @@
 
 package me.shedaniel.rei.api;
 
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import net.minecraft.client.MinecraftClient;
@@ -31,7 +33,11 @@ public interface AutoTransferHandler {
         }
         
         static Result createFailed(String errorKey) {
-            return new ResultImpl(errorKey);
+            return new ResultImpl(errorKey, new IntArrayList());
+        }
+        
+        static Result createFailed(String errorKey, IntList redSlots) {
+            return new ResultImpl(errorKey, redSlots);
         }
         
         boolean isSuccessful();
@@ -68,6 +74,7 @@ public interface AutoTransferHandler {
     public final class ResultImpl implements Result {
         private boolean successful, applicable;
         private String errorKey;
+        private IntList integers = new IntArrayList();
         
         private ResultImpl() {
             this.successful = true;
@@ -79,22 +86,24 @@ public interface AutoTransferHandler {
             this.applicable = applicable;
         }
         
-        public ResultImpl(String errorKey) {
+        public ResultImpl(String errorKey, IntList integers) {
             this.successful = false;
             this.applicable = true;
             this.errorKey = errorKey;
+            if (integers != null)
+                this.integers = integers;
         }
         
         @Override
         public boolean isSuccessful() {
             return successful;
         }
-    
+        
         @Override
         public boolean isApplicable() {
             return applicable;
         }
-    
+        
         @Override
         public String getErrorKey() {
             return errorKey;

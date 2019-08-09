@@ -6,23 +6,27 @@
 package me.shedaniel.rei.server;
 
 import com.google.common.collect.Lists;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.ints.IntListIterator;
 import net.minecraft.container.CraftingContainer;
 import net.minecraft.container.CraftingTableContainer;
 import net.minecraft.container.PlayerContainer;
+import net.minecraft.container.Slot;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.RecipeFinder;
+import net.minecraft.recipe.Ingredient;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.DefaultedList;
 
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class InputSlotCrafter<C extends Inventory> {
+public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<Integer> {
     
-    protected final RecipeFinder recipeFinder = new RecipeFinder();
     protected CraftingContainer<C> craftingContainer;
     protected PlayerInventory inventory;
     
@@ -35,100 +39,130 @@ public class InputSlotCrafter<C extends Inventory> {
     }
     
     private void fillInputSlots(ServerPlayerEntity player, Map<Integer, List<ItemStack>> map, boolean hasShift) {
-        /*
-         * Steps:
-         * Return the already placed items on the grid
-         * Check if the player have the enough resource to even craft one
-         * Calculate how many items the player is going to craft
-         * Move the best suited items for the player to use
-         * Send container updates to the player
-         * Profit??
-         */
         this.inventory = player.inventory;
         if (this.canReturnInputs() || player.isCreative()) {
             // Return the already placed items on the grid
             this.returnInputs();
             
-            // Check if the player have the enough resource to even craft one
-            if (!isPossibleToCraft(map)) {
+            RecipeFinder recipeFinder = new RecipeFinder();
+            recipeFinder.clear();
+            for (ItemStack stack : player.inventory.main) {
+                recipeFinder.addNormalItem(stack);
+            }
+            this.craftingContainer.populateRecipeFinder(new net.minecraft.recipe.RecipeFinder() {
+                @Override
+                public void addNormalItem(ItemStack itemStack_1) {
+                    recipeFinder.addNormalItem(itemStack_1);
+                }
+            });
+            DefaultedList<Ingredient> ingredients = DefaultedList.create();
+            map.entrySet().stream().sorted(Comparator.comparingInt(Map.Entry::getKey)).forEach(entry -> {
+                ingredients.add(Ingredient.ofStacks(entry.getValue().toArray(new ItemStack[0])));
+            });
+            if (recipeFinder.findRecipe(ingredients, (IntList) null)) {
+                this.fillInputSlots(recipeFinder, ingredients, hasShift);
+            } else {
+                this.returnInputs();
                 craftingContainer.sendContentUpdates();
                 player.inventory.markDirty();
                 throw new NullPointerException();
             }
-            
-            // Calculate how many items the player is going to craft
-            int amountCrafting = hasShift ? 0 : 1;
-            if (hasShift) {
-            
-            }
-            
-            // TODO: Rewrite most parts of this
-            //            map.entrySet().stream().sorted(Comparator.comparingInt(Map.Entry::getKey)).forEach(entry -> {
-            //                int id = entry.getKey().intValue();
-            //                List<ItemStack> possibleStacks = entry.getValue();
-            //                boolean done = false;
-            //                for (ItemStack possibleStack : possibleStacks) {
-            //                    int requiredCount = possibleStack.getCount();
-            //                    int invCount = 0;
-            //                    for (ItemStack stack : inventory.main) {
-            //                        if (ItemStack.areItemsEqualIgnoreDamage(possibleStack, stack))
-            //                            invCount += stack.getCount();
-            //                    }
-            //                    if (invCount >= requiredCount) {
-            //                        for (ItemStack stack : inventory.main) {
-            //                            if (ItemStack.areItemsEqualIgnoreDamage(possibleStack, stack)) {
-            //                                Slot containerSlot = craftingContainer.getSlot(id + craftingContainer.getCraftingResultSlotIndex() + 1);
-            //                                while (containerSlot.getStack().getCount() < requiredCount && !stack.isEmpty()) {
-            //                                    if (containerSlot.getStack().isEmpty()) {
-            //                                        containerSlot.setStack(new ItemStack(stack.getItem(), 1));
-            //                                    } else {
-            //                                        containerSlot.getStack().setCount(containerSlot.getStack().getCount() + 1);
-            //                                    }
-            //                                    stack.setCount(stack.getCount() - 1);
-            //                                }
-            //                                if (containerSlot.getStack().getCount() >= requiredCount)
-            //                                    break;
-            //                            }
-            //                        }
-            //                        break;
-            //                    }
-            //                }
-            //            });
             
             craftingContainer.sendContentUpdates();
             player.inventory.markDirty();
         }
     }
     
-    private boolean isPossibleToCraft(Map<Integer, List<ItemStack>> map) {
-        // Create a clone of player's inventory, and count
-        DefaultedList<ItemStack> copyMain = DefaultedList.create();
-        for (ItemStack stack : inventory.main) {
-            copyMain.add(stack.copy());
+    @Override
+    public void acceptAlignedInput(Iterator<Integer> iterator_1, int int_1, int int_2, int int_3, int int_4) {
+        Slot slot_1 = this.craftingContainer.getSlot(int_1);
+        ItemStack itemStack_1 = net.minecraft.recipe.RecipeFinder.getStackFromId((Integer) iterator_1.next());
+        if (!itemStack_1.isEmpty()) {
+            for (int int_5 = 0; int_5 < int_2; ++int_5) {
+                this.fillInputSlot(slot_1, itemStack_1);
+            }
         }
-        for (Map.Entry<Integer, List<ItemStack>> entry : map.entrySet()) {
-            List<ItemStack> possibleStacks = entry.getValue();
-            boolean done = possibleStacks.isEmpty();
-            for (ItemStack possibleStack : possibleStacks) {
-                if (!done) {
-                    int invRequiredCount = possibleStack.getCount();
-                    for (ItemStack stack : copyMain) {
-                        if (ItemStack.areItemsEqualIgnoreDamage(possibleStack, stack)) {
-                            while (invRequiredCount > 0 && !stack.isEmpty()) {
-                                invRequiredCount--;
-                                stack.decrement(1);
-                            }
-                        }
-                    }
-                    if (invRequiredCount <= 0) {
-                        done = true;
+    }
+    
+    protected void fillInputSlot(Slot slot_1, ItemStack itemStack_1) {
+        int int_1 = this.inventory.method_7371(itemStack_1);
+        if (int_1 != -1) {
+            ItemStack itemStack_2 = this.inventory.getInvStack(int_1).copy();
+            if (!itemStack_2.isEmpty()) {
+                if (itemStack_2.getCount() > 1) {
+                    this.inventory.takeInvStack(int_1, 1);
+                } else {
+                    this.inventory.removeInvStack(int_1);
+                }
+                
+                itemStack_2.setCount(1);
+                if (slot_1.getStack().isEmpty()) {
+                    slot_1.setStack(itemStack_2);
+                } else {
+                    slot_1.getStack().increment(1);
+                }
+                
+            }
+        }
+    }
+    
+    protected void fillInputSlots(RecipeFinder recipeFinder, DefaultedList<Ingredient> ingredients, boolean boolean_1) {
+        //        boolean boolean_2 = this.craftingContainer.matches(recipe_1);
+        boolean boolean_2 = true;
+        int int_1 = recipeFinder.countRecipeCrafts(ingredients, (IntList) null);
+        int int_2;
+        if (boolean_2) {
+            for (int_2 = 0; int_2 < this.craftingContainer.getCraftingHeight() * this.craftingContainer.getCraftingWidth() + 1; ++int_2) {
+                if (int_2 != this.craftingContainer.getCraftingResultSlotIndex()) {
+                    ItemStack itemStack_1 = this.craftingContainer.getSlot(int_2).getStack();
+                    if (!itemStack_1.isEmpty() && Math.min(int_1, itemStack_1.getMaxCount()) < itemStack_1.getCount() + 1) {
+                        return;
                     }
                 }
             }
-            if (!done)
-                return false;
         }
-        return true;
+        
+        int_2 = this.getAmountToFill(boolean_1, int_1, boolean_2);
+        IntList intList_1 = new IntArrayList();
+        if (recipeFinder.findRecipe(ingredients, intList_1, int_2)) {
+            int int_4 = int_2;
+            IntListIterator var8 = intList_1.iterator();
+            
+            while (var8.hasNext()) {
+                int int_5 = (Integer) var8.next();
+                int int_6 = RecipeFinder.getStackFromId(int_5).getMaxCount();
+                if (int_6 < int_4) {
+                    int_4 = int_6;
+                }
+            }
+            
+            if (recipeFinder.findRecipe(ingredients, intList_1, int_4)) {
+                this.returnInputs();
+                this.alignRecipeToGrid(this.craftingContainer.getCraftingWidth(), this.craftingContainer.getCraftingHeight(), this.craftingContainer.getCraftingResultSlotIndex(), ingredients, intList_1.iterator(), int_4);
+            }
+        }
+        
+    }
+    
+    protected int getAmountToFill(boolean boolean_1, int int_1, boolean boolean_2) {
+        int int_2 = 1;
+        if (boolean_1) {
+            int_2 = int_1;
+        } else if (boolean_2) {
+            int_2 = 64;
+            for (int int_3 = 0; int_3 < this.craftingContainer.getCraftingWidth() * this.craftingContainer.getCraftingHeight() + 1; ++int_3) {
+                if (int_3 != this.craftingContainer.getCraftingResultSlotIndex()) {
+                    ItemStack itemStack_1 = this.craftingContainer.getSlot(int_3).getStack();
+                    if (!itemStack_1.isEmpty() && int_2 > itemStack_1.getCount()) {
+                        int_2 = itemStack_1.getCount();
+                    }
+                }
+            }
+            if (int_2 < 64) {
+                ++int_2;
+            }
+        }
+        return int_2;
     }
     
     protected void returnInputs() {
