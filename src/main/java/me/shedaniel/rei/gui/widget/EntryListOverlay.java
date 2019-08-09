@@ -8,10 +8,7 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.collect.Lists;
 import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.DisplayHelper;
-import me.shedaniel.rei.api.RecipeHelper;
-import me.shedaniel.rei.api.Renderer;
+import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.client.SearchArgument;
 import me.shedaniel.rei.gui.config.ItemCheatingMode;
@@ -21,6 +18,7 @@ import net.minecraft.client.item.TooltipContext;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -35,32 +33,37 @@ import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public class ItemListOverlay extends Widget {
+public class EntryListOverlay extends Widget {
     
     private static final String SPACE = " ", EMPTY = "";
-    private static final Comparator<ItemStack> ASCENDING_COMPARATOR;
+    private static final Comparator<Entry> ASCENDING_COMPARATOR;
     private static List<Item> searchBlacklisted = Lists.newArrayList();
     
     static {
-        ASCENDING_COMPARATOR = (itemStack, t1) -> {
+        ASCENDING_COMPARATOR = (entry, entry1) -> {
             if (RoughlyEnoughItemsCore.getConfigManager().getConfig().getItemListOrdering().equals(ItemListOrdering.name))
-                return tryGetItemStackName(itemStack).compareToIgnoreCase(tryGetItemStackName(t1));
+                return tryGetEntryName(entry).compareToIgnoreCase(tryGetEntryName(entry1));
             if (RoughlyEnoughItemsCore.getConfigManager().getConfig().getItemListOrdering().equals(ItemListOrdering.item_groups)) {
-                List<ItemGroup> itemGroups = Arrays.asList(ItemGroup.GROUPS);
-                return itemGroups.indexOf(itemStack.getItem().getGroup()) - itemGroups.indexOf(t1.getItem().getGroup());
+                if (entry.getEntryType() == Entry.Type.ITEM && entry1.getEntryType() == Entry.Type.ITEM) {
+                    ItemStack stack0 = entry.getItemStack();
+                    ItemStack stack1 = entry1.getItemStack();
+                    List<ItemGroup> itemGroups = Arrays.asList(ItemGroup.GROUPS);
+                    return itemGroups.indexOf(stack0.getItem().getGroup()) - itemGroups.indexOf(stack1.getItem().getGroup());
+                }
             }
             return 0;
         };
     }
     
     private final List<SearchArgument[]> lastSearchArgument;
-    private List<ItemStack> currentDisplayed;
+    private List<Entry> currentDisplayed;
     private List<Widget> widgets;
     private int width, height, page;
     private Rectangle rectangle, listArea;
     
-    public ItemListOverlay(int page) {
+    public EntryListOverlay(int page) {
         this.currentDisplayed = Lists.newArrayList();
         this.width = 0;
         this.height = 0;
@@ -79,6 +82,18 @@ public class ItemListOverlay extends Widget {
         return Collections.singletonList(tryGetItemStackName(itemStack));
     }
     
+    public static String tryGetEntryName(Entry stack) {
+        if (stack.getEntryType() == Entry.Type.ITEM)
+            return tryGetItemStackName(stack.getItemStack());
+        else if (stack.getEntryType() == Entry.Type.FLUID)
+            return tryGetFluidName(stack.getFluid());
+        return "";
+    }
+    
+    public static String tryGetFluidName(Fluid fluid) {
+        return Stream.of(Registry.FLUID.getId(fluid).getPath().split("_")).map(StringUtils::capitalize).collect(Collectors.joining(" "));
+    }
+    
     public static String tryGetItemStackName(ItemStack stack) {
         if (!searchBlacklisted.contains(stack.getItem()))
             try {
@@ -95,27 +110,27 @@ public class ItemListOverlay extends Widget {
         return "ERROR";
     }
     
-    public static boolean filterItem(ItemStack itemStack, List<SearchArgument[]> arguments) {
+    public static boolean filterEntry(Entry entry, List<SearchArgument[]> arguments) {
         if (arguments.isEmpty())
             return true;
-        AtomicReference<String> mod = null, tooltips = null, name = null;
+        AtomicReference<String> mod = new AtomicReference<>(), tooltips = new AtomicReference<>(), name = new AtomicReference<>();
         for (SearchArgument[] arguments1 : arguments) {
             boolean b = true;
             for (SearchArgument argument : arguments1) {
-                if (argument.getArgumentType().equals(SearchArgument.ArgumentType.ALWAYS))
+                if (argument.getArgumentType() == (SearchArgument.ArgumentType.ALWAYS))
                     return true;
-                if (argument.getArgumentType().equals(SearchArgument.ArgumentType.MOD))
-                    if (argument.getFunction(!argument.isInclude()).apply(fillMod(itemStack, mod))) {
+                if (argument.getArgumentType() == SearchArgument.ArgumentType.MOD)
+                    if (argument.getFunction(!argument.isInclude()).apply(fillMod(entry, mod).get())) {
                         b = false;
                         break;
                     }
-                if (argument.getArgumentType().equals(SearchArgument.ArgumentType.TOOLTIP))
-                    if (argument.getFunction(!argument.isInclude()).apply(fillTooltip(itemStack, tooltips))) {
+                if (argument.getArgumentType() == SearchArgument.ArgumentType.TOOLTIP)
+                    if (argument.getFunction(!argument.isInclude()).apply(fillTooltip(entry, tooltips).get())) {
                         b = false;
                         break;
                     }
-                if (argument.getArgumentType().equals(SearchArgument.ArgumentType.TEXT))
-                    if (argument.getFunction(!argument.isInclude()).apply(fillName(itemStack, name))) {
+                if (argument.getArgumentType() == SearchArgument.ArgumentType.TEXT)
+                    if (argument.getFunction(!argument.isInclude()).apply(fillName(entry, name).get())) {
                         b = false;
                         break;
                     }
@@ -126,22 +141,31 @@ public class ItemListOverlay extends Widget {
         return false;
     }
     
-    private static String fillMod(ItemStack itemStack, AtomicReference<String> mod) {
-        if (mod == null)
-            mod = new AtomicReference<>(ClientHelper.getInstance().getModFromItem(itemStack.getItem()).toLowerCase(Locale.ROOT));
-        return mod.get();
+    private static AtomicReference<String> fillMod(Entry entry, AtomicReference<String> mod) {
+        if (mod.get() == null)
+            if (entry.getEntryType() == Entry.Type.ITEM)
+                mod.set(ClientHelper.getInstance().getModFromItem(entry.getItemStack().getItem()).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT));
+            else if (entry.getEntryType() == Entry.Type.FLUID)
+                mod.set(ClientHelper.getInstance().getModFromIdentifier(Registry.FLUID.getId(entry.getFluid())).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT));
+        return mod;
     }
     
-    private static String fillTooltip(ItemStack itemStack, AtomicReference<String> mod) {
-        if (mod == null)
-            mod = new AtomicReference<>(tryGetItemStackToolTip(itemStack, false).stream().collect(Collectors.joining("")).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT));
-        return mod.get();
+    private static AtomicReference<String> fillTooltip(Entry entry, AtomicReference<String> mod) {
+        if (mod.get() == null)
+            if (entry.getEntryType() == Entry.Type.ITEM)
+                mod.set(tryGetItemStackToolTip(entry.getItemStack(), false).stream().collect(Collectors.joining("")).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT));
+            else
+                mod.set(tryGetFluidName(entry.getFluid()).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT));
+        return mod;
     }
     
-    private static String fillName(ItemStack itemStack, AtomicReference<String> mod) {
-        if (mod == null)
-            mod = new AtomicReference<>(tryGetItemStackName(itemStack).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT));
-        return mod.get();
+    private static AtomicReference<String> fillName(Entry entry, AtomicReference<String> mod) {
+        if (mod.get() == null)
+            if (entry.getEntryType() == Entry.Type.ITEM)
+                mod.set(tryGetItemStackName(entry.getItemStack()).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT));
+            else
+                mod.set(tryGetFluidName(entry.getFluid()).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT));
+        return mod;
     }
     
     public int getFullTotalSlotsPerPage() {
@@ -163,7 +187,7 @@ public class ItemListOverlay extends Widget {
         this.widgets = Lists.newLinkedList();
         calculateListSize(rectangle);
         if (currentDisplayed.isEmpty() || processSearchTerm)
-            currentDisplayed = processSearchTerm(searchTerm, RoughlyEnoughItemsCore.getItemRegisterer().getItemList(), new ArrayList<>(ScreenHelper.inventoryStacks));
+            currentDisplayed = processSearchTerm(searchTerm, RoughlyEnoughItemsCore.getEntryRegistry().getEntryList(), new ArrayList<>(ScreenHelper.inventoryStacks));
         int startX = (int) rectangle.getCenterX() - width * 9;
         int startY = (int) rectangle.getCenterY() - height * 9;
         this.listArea = new Rectangle((int) startX, (int) startY, width * 18, height * 18);
@@ -177,12 +201,20 @@ public class ItemListOverlay extends Widget {
                 j++;
                 if (j > currentDisplayed.size())
                     break;
-                widgets.add(new SlotWidget(x, y, Renderer.fromItemStackNoCounts(currentDisplayed.get(j - 1)), false, true, true) {
+                final Entry entry = currentDisplayed.get(j - 1);
+                widgets.add(new SlotWidget(x, y, entry.getEntryType() == Entry.Type.ITEM ? Renderer.fromItemStackNoCounts(entry.getItemStack()) : Renderer.fromFluid(entry.getFluid()), false, true, true) {
                     @Override
                     protected void queueTooltip(ItemStack itemStack, float delta) {
                         ClientPlayerEntity player = minecraft.player;
                         if (!ClientHelper.getInstance().isCheating() || player.inventory.getCursorStack().isEmpty())
                             super.queueTooltip(itemStack, delta);
+                    }
+                    
+                    @Override
+                    protected List<String> getExtraFluidToolTips(Fluid fluid) {
+                        if (MinecraftClient.getInstance().options.advancedItemTooltips)
+                            return Collections.singletonList("§8" + Registry.FLUID.getId(fluid).toString());
+                        return super.getExtraFluidToolTips(fluid);
                     }
                     
                     @Override
@@ -250,13 +282,13 @@ public class ItemListOverlay extends Widget {
         return listArea;
     }
     
-    public List<ItemStack> getCurrentDisplayed() {
+    public List<Entry> getCurrentDisplayed() {
         return currentDisplayed;
     }
     
-    private List<ItemStack> processSearchTerm(String searchTerm, List<ItemStack> ol, List<ItemStack> inventoryItems) {
+    private List<Entry> processSearchTerm(String searchTerm, List<Entry> ol, List<ItemStack> inventoryItems) {
         lastSearchArgument.clear();
-        List<ItemStack> os = new LinkedList<>(ol);
+        List<Entry> os = new LinkedList<>(ol);
         if (RoughlyEnoughItemsCore.getConfigManager().getConfig().getItemListOrdering() != ItemListOrdering.registry)
             os = ol.stream().sorted(ASCENDING_COMPARATOR).collect(Collectors.toList());
         if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isItemListAscending())
@@ -285,18 +317,21 @@ public class ItemListOverlay extends Widget {
             else
                 lastSearchArgument.add(new SearchArgument[]{SearchArgument.ALWAYS});
         });
-        List<ItemStack> stacks = Collections.emptyList();
+        List<Entry> stacks = Collections.emptyList();
         if (lastSearchArgument.isEmpty())
             stacks = os;
         else
-            stacks = os.stream().filter(itemStack -> filterItem(itemStack, lastSearchArgument)).collect(Collectors.toList());
+            stacks = os.stream().filter(entry -> filterEntry(entry, lastSearchArgument)).collect(Collectors.toList());
         if (!RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() || stacks.isEmpty() || inventoryItems.isEmpty())
             return Collections.unmodifiableList(stacks);
         List<ItemStack> workingItems = RecipeHelper.getInstance().findCraftableByItems(inventoryItems);
-        List<ItemStack> newList = Lists.newArrayList();
+        List<Entry> newList = Lists.newArrayList();
         for (ItemStack workingItem : workingItems) {
-            if (stacks.stream().anyMatch(i -> i.isItemEqualIgnoreDamage(workingItem)))
-                newList.add(workingItem);
+            Optional<Entry> any = stacks.stream().filter(i -> i.getItemStack() != null && i.getItemStack().isItemEqualIgnoreDamage(workingItem)).findAny();
+            //            if (stacks.stream().anyMatch(i -> i.getItemStack() != null && i.getItemStack().isItemEqualIgnoreDamage(workingItem)))
+            //                newList.add(Entry.create(workingItem));
+            if (any.isPresent())
+                newList.add(any.get());
         }
         return newList;
     }

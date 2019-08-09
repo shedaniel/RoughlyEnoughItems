@@ -13,7 +13,7 @@ import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.client.*;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
-import me.shedaniel.rei.gui.widget.ItemListOverlay;
+import me.shedaniel.rei.gui.widget.EntryListOverlay;
 import me.shedaniel.rei.listeners.RecipeBookButtonWidgetHooks;
 import me.shedaniel.rei.listeners.RecipeBookGuiHooks;
 import net.fabricmc.api.ClientModInitializer;
@@ -57,7 +57,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     
     public static final Logger LOGGER;
     private static final RecipeHelper RECIPE_HELPER = new RecipeHelperImpl();
-    private static final ItemRegistry ITEM_REGISTRY = new ItemRegistryImpl();
+    private static final EntryRegistry ENTRY_REGISTRY = new EntryRegistryImpl();
     private static final DisplayHelper DISPLAY_HELPER = new DisplayHelperImpl();
     private static final Map<Identifier, REIPluginEntry> plugins = Maps.newHashMap();
     private static final ExecutorService SYNC_RECIPES = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "REI-SyncRecipes"));
@@ -75,8 +75,8 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         return configManager;
     }
     
-    public static ItemRegistry getItemRegisterer() {
-        return ITEM_REGISTRY;
+    public static EntryRegistry getEntryRegistry() {
+        return ENTRY_REGISTRY;
     }
     
     public static DisplayHelper getDisplayHelper() {
@@ -143,7 +143,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         ClientSidePacketRegistry.INSTANCE.register(RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, (packetContext, packetByteBuf) -> {
             ItemStack stack = packetByteBuf.readItemStack();
             String player = packetByteBuf.readString(32767);
-            packetContext.getPlayer().addChatMessage(new LiteralText(I18n.translate("text.rei.cheat_items").replaceAll("\\{item_name}", ItemListOverlay.tryGetItemStackName(stack.copy())).replaceAll("\\{item_count}", stack.copy().getCount() + "").replaceAll("\\{player_name}", player)), false);
+            packetContext.getPlayer().addChatMessage(new LiteralText(I18n.translate("text.rei.cheat_items").replaceAll("\\{item_name}", EntryListOverlay.tryGetItemStackName(stack.copy())).replaceAll("\\{item_count}", stack.copy().getCount() + "").replaceAll("\\{player_name}", player)), false);
         });
         ClientSidePacketRegistry.INSTANCE.register(RoughlyEnoughItemsNetwork.NOT_ENOUGH_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
             Screen currentScreen = MinecraftClient.getInstance().currentScreen;

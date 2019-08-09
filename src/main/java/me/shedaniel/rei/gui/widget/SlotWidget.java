@@ -12,11 +12,14 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.client.ScreenHelper;
+import me.shedaniel.rei.gui.renderers.FluidRenderer;
 import me.shedaniel.rei.gui.renderers.ItemStackRenderer;
 import net.minecraft.client.gui.Element;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.registry.Registry;
 
 import java.awt.*;
 import java.util.Collections;
@@ -133,6 +136,11 @@ public class SlotWidget extends WidgetWithBounds {
             renderer.render(x + 8, y + 6, mouseX, mouseY, delta);
             if (!getCurrentItemStack().isEmpty() && highlighted && showToolTips)
                 queueTooltip(getCurrentItemStack(), delta);
+        } else if (isCurrentRendererFluid()) {
+            renderer.setBlitOffset(200);
+            renderer.render(x + 8, y + 6, mouseX, mouseY, delta);
+            if (((FluidRenderer) renderer).getFluid() != null && highlighted && showToolTips)
+                queueTooltip(((FluidRenderer) renderer).getFluid(), delta);
         } else {
             renderer.setBlitOffset(200);
             renderer.render(x + 8, y + 6, mouseX, mouseY, delta);
@@ -147,13 +155,34 @@ public class SlotWidget extends WidgetWithBounds {
         this.blitOffset = offset;
     }
     
+    protected void queueTooltip(Fluid fluid, float delta) {
+        ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltip(fluid)));
+    }
+    
+    private List<String> getTooltip(Fluid fluid) {
+        List<String> toolTip = Lists.newArrayList(EntryListOverlay.tryGetFluidName(fluid));
+        toolTip.addAll(getExtraFluidToolTips(fluid));
+        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().shouldAppendModNames()) {
+            final String modString = ClientHelper.getInstance().getFormattedModFromIdentifier(Registry.FLUID.getId(fluid));
+            boolean alreadyHasMod = false;
+            for (String s : toolTip)
+                if (s.equalsIgnoreCase(modString)) {
+                    alreadyHasMod = true;
+                    break;
+                }
+            if (!alreadyHasMod)
+                toolTip.add(modString);
+        }
+        return toolTip;
+    }
+    
     protected void queueTooltip(ItemStack itemStack, float delta) {
         ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltip(itemStack)));
     }
     
     protected List<String> getTooltip(ItemStack itemStack) {
-        List<String> toolTip = Lists.newArrayList(ItemListOverlay.tryGetItemStackToolTip(itemStack, true));
-        toolTip.addAll(getExtraToolTips(itemStack));
+        List<String> toolTip = Lists.newArrayList(EntryListOverlay.tryGetItemStackToolTip(itemStack, true));
+        toolTip.addAll(getExtraItemToolTips(itemStack));
         if (RoughlyEnoughItemsCore.getConfigManager().getConfig().shouldAppendModNames()) {
             final String modString = ClientHelper.getInstance().getFormattedModFromItem(itemStack.getItem());
             String s1 = ClientHelper.getInstance().getModFromItem(itemStack.getItem()).toLowerCase(Locale.ROOT);
@@ -165,7 +194,11 @@ public class SlotWidget extends WidgetWithBounds {
         return toolTip;
     }
     
-    protected List<String> getExtraToolTips(ItemStack stack) {
+    protected List<String> getExtraItemToolTips(ItemStack stack) {
+        return Collections.emptyList();
+    }
+    
+    protected List<String> getExtraFluidToolTips(Fluid fluid) {
         return Collections.emptyList();
     }
     
@@ -208,6 +241,10 @@ public class SlotWidget extends WidgetWithBounds {
     
     public boolean isCurrentRendererItem() {
         return getCurrentRenderer() instanceof ItemStackRenderer;
+    }
+    
+    public boolean isCurrentRendererFluid() {
+        return getCurrentRenderer() instanceof FluidRenderer;
     }
     
     @Override

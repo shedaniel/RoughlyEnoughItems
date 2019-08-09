@@ -9,7 +9,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.DisplayHelper;
-import me.shedaniel.rei.api.ItemRegistry;
+import me.shedaniel.rei.api.Entry;
+import me.shedaniel.rei.api.EntryRegistry;
 import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.client.ScreenHelper;
@@ -92,14 +93,14 @@ public class DefaultPlugin implements REIPluginV0 {
     }
     
     @Override
-    public void registerItems(ItemRegistry itemRegistry) {
+    public void registerItems(EntryRegistry entryRegistry) {
         if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isLoadingDefaultPlugin()) {
             return;
         }
         Registry.ITEM.stream().forEach(item -> {
-            itemRegistry.registerItemStack(item.getStackForRender());
+            entryRegistry.registerItemStack(item.getStackForRender());
             try {
-                itemRegistry.registerItemStack(itemRegistry.getAllStacksFromItem(item));
+                entryRegistry.registerItemStack(entryRegistry.getAllStacksFromItem(item));
             } catch (Exception e) {
             }
         });
@@ -109,8 +110,11 @@ public class DefaultPlugin implements REIPluginV0 {
                 map.put(enchantment, i);
                 ItemStack itemStack = new ItemStack(Items.ENCHANTED_BOOK);
                 EnchantmentHelper.set(map, itemStack);
-                itemRegistry.registerItemStack(Items.ENCHANTED_BOOK, itemStack);
+                entryRegistry.registerItemStack(Items.ENCHANTED_BOOK, itemStack);
             }
+        });
+        Registry.FLUID.forEach(fluid -> {
+            entryRegistry.registerFluid(fluid);
         });
     }
     
@@ -144,16 +148,16 @@ public class DefaultPlugin implements REIPluginV0 {
         recipeHelper.registerRecipes(STONE_CUTTING, StonecuttingRecipe.class, DefaultStoneCuttingDisplay::new);
         BREWING_DISPLAYS.stream().forEachOrdered(display -> recipeHelper.registerDisplay(BREWING, display));
         List<ItemStack> arrowStack = Collections.singletonList(Items.ARROW.getStackForRender());
-        RoughlyEnoughItemsCore.getItemRegisterer().getItemList().stream().filter(stack -> stack.getItem().equals(Items.LINGERING_POTION)).forEach(stack -> {
+        RoughlyEnoughItemsCore.getEntryRegistry().getEntryList().stream().filter(stack -> stack.getEntryType() == Entry.Type.ITEM && stack.getItemStack().getItem().equals(Items.LINGERING_POTION)).forEach(entry -> {
             List<List<ItemStack>> input = new ArrayList<>();
             for (int i = 0; i < 4; i++)
                 input.add(arrowStack);
-            input.add(Collections.singletonList(stack));
+            input.add(Collections.singletonList(entry.getItemStack()));
             for (int i = 0; i < 4; i++)
                 input.add(arrowStack);
             ItemStack outputStack = new ItemStack(Items.TIPPED_ARROW, 8);
-            PotionUtil.setPotion(outputStack, PotionUtil.getPotion(stack));
-            PotionUtil.setCustomPotionEffects(outputStack, PotionUtil.getCustomPotionEffects(stack));
+            PotionUtil.setPotion(outputStack, PotionUtil.getPotion(entry.getItemStack()));
+            PotionUtil.setCustomPotionEffects(outputStack, PotionUtil.getCustomPotionEffects(entry.getItemStack()));
             List<ItemStack> output = Collections.singletonList(outputStack);
             recipeHelper.registerDisplay(CRAFTING, new DefaultCustomDisplay(input, output));
         });

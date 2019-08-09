@@ -109,7 +109,7 @@ public class VillagerRecipeViewingScreen extends Screen {
             for (List<ItemStack> workingStation : workingStations) {
                 widgets.add(new SlotWidget(xx, yy, Renderer.fromItemStacks(workingStation), true, true, true) {
                     @Override
-                    protected List<String> getExtraToolTips(ItemStack stack) {
+                    protected List<String> getExtraItemToolTips(ItemStack stack) {
                         return list;
                     }
                 });
