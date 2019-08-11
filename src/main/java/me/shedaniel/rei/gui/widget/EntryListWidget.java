@@ -104,6 +104,7 @@ public class EntryListWidget extends Widget {
         this.height = 0;
         this.page = page;
         this.lastSearchArgument = Lists.newArrayList();
+        scroller.unregisterTick();
     }
     
     public static List<String> tryGetItemStackToolTip(ItemStack itemStack, boolean careAboutAdvanced) {
