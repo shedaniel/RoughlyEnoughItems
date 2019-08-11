@@ -6,7 +6,7 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import me.shedaniel.rei.client.ScreenHelper;
+import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.sound.SoundEvents;

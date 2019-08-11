@@ -8,7 +8,7 @@ package me.shedaniel.rei.plugin.campfire;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.Renderer;
-import me.shedaniel.rei.client.ScreenHelper;
+import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.SlotWidget;
 import me.shedaniel.rei.gui.widget.Widget;

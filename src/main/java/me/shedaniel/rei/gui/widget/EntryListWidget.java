@@ -6,13 +6,16 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.zeitheron.hammercore.client.utils.Scissors;
 import me.shedaniel.cloth.api.ClientUtils;
+import me.shedaniel.clothconfig2.api.RunSixtyTimesEverySec;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.client.ScreenHelper;
-import me.shedaniel.rei.client.SearchArgument;
 import me.shedaniel.rei.gui.config.ItemCheatingMode;
 import me.shedaniel.rei.gui.config.ItemListOrdering;
+import me.shedaniel.rei.impl.ScreenHelper;
+import me.shedaniel.rei.impl.SearchArgument;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -35,11 +38,43 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class EntryListOverlay extends Widget {
+public class EntryListWidget extends Widget {
     
     private static final String SPACE = " ", EMPTY = "";
     private static final Comparator<Entry> ASCENDING_COMPARATOR;
     private static List<Item> searchBlacklisted = Lists.newArrayList();
+    private static float scroll;
+    private static float scrollVelocity;
+    private static float maxScroll;
+    protected static RunSixtyTimesEverySec scroller = () -> {
+        try {
+            if (scrollVelocity == 0.0F && scroll >= 0.0F && scroll <= getMaxScroll()) {
+                scrollerUnregisterTick();
+            } else {
+                double change = scrollVelocity * 0.3D;
+                if (scrollVelocity != 0) {
+                    scroll += change;
+                    scrollVelocity -= scrollVelocity * (scroll >= 0.0F && scroll <= getMaxScroll() ? 0.2D : 0.4D);
+                    if (Math.abs(scrollVelocity) < 0.1D) {
+                        scrollVelocity = 0.0F;
+                    }
+                }
+                
+                if (scroll < 0.0F && scrollVelocity == 0.0F) {
+                    scroll = Math.min(scroll + (0.0F - scroll) * 0.2F, 0.0F);
+                    if (Math.abs(scroll) < 0.1F)
+                        scroll = 0.0F;
+                } else if (scroll > getMaxScroll() && scrollVelocity == 0.0F) {
+                    scroll = Math.max(scroll - (scroll - getMaxScroll()) * 0.2F, getMaxScroll());
+                    if (scroll > getMaxScroll() && scroll < getMaxScroll() + 0.1F) {
+                        scroll = getMaxScroll();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    };
     
     static {
         ASCENDING_COMPARATOR = (entry, entry1) -> {
@@ -59,11 +94,11 @@ public class EntryListOverlay extends Widget {
     
     private final List<SearchArgument[]> lastSearchArgument;
     private List<Entry> currentDisplayed;
-    private List<Widget> widgets;
+    private List<Slot> widgets;
     private int width, height, page;
     private Rectangle rectangle, listArea;
     
-    public EntryListOverlay(int page) {
+    public EntryListWidget(int page) {
         this.currentDisplayed = Lists.newArrayList();
         this.width = 0;
         this.height = 0;
@@ -168,14 +203,65 @@ public class EntryListOverlay extends Widget {
         return mod;
     }
     
+    private static void scrollerUnregisterTick() {
+        scroller.unregisterTick();
+    }
+    
+    public static float getMaxScroll() {
+        return Math.max(maxScroll - ScreenHelper.getLastOverlay().getEntryListWidget().rectangle.height, 0);
+    }
+    
+    public static float getScroll() {
+        return scroll;
+    }
+    
+    public static float getScrollVelocity() {
+        return scrollVelocity;
+    }
+    
     public int getFullTotalSlotsPerPage() {
         return width * height;
     }
     
     @Override
+    public boolean mouseScrolled(double double_1, double double_2, double double_3) {
+        if (!this.scroller.isRegistered())
+            this.scroller.registerTick();
+        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled() && rectangle.contains(double_1, double_2)) {
+            if (this.scroll >= 0F && double_3 > 0)
+                scrollVelocity -= 24;
+            else if (this.scroll <= this.getMaxScroll() && double_3 < 0)
+                scrollVelocity += 24;
+            return true;
+        }
+        return super.mouseScrolled(double_1, double_2, double_3);
+    }
+    
+    @Override
     public void render(int int_1, int int_2, float float_1) {
         GuiLighting.disable();
-        widgets.forEach(widget -> widget.render(int_1, int_2, float_1));
+        GlStateManager.pushMatrix();
+        boolean widgetScrolled = RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled();
+        if (!widgetScrolled)
+            scroll = 0;
+        else {
+            page = 0;
+            ScreenHelper.getLastOverlay().setPage(0);
+            Scissors.begin();
+            Scissors.scissor(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+        }
+        widgets.forEach(widget -> {
+            if (widgetScrolled) {
+                widget.y = (int) (widget.backupY - scroll);
+                if (widget.y <= rectangle.y + rectangle.height && widget.y + widget.getBounds().height >= rectangle.y)
+                    widget.render(int_1, int_2, float_1);
+            } else {
+                widget.render(int_1, int_2, float_1);
+            }
+        });
+        if (widgetScrolled)
+            Scissors.end();
+        GlStateManager.popMatrix();
         ClientPlayerEntity player = minecraft.player;
         if (rectangle.contains(ClientUtils.getMouseLocation()) && ClientHelper.getInstance().isCheating() && !player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
             ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.delete_items")));
@@ -184,7 +270,7 @@ public class EntryListOverlay extends Widget {
     public void updateList(DisplayHelper.DisplayBoundsHandler boundsHandler, Rectangle rectangle, int page, String searchTerm, boolean processSearchTerm) {
         this.rectangle = rectangle;
         this.page = page;
-        this.widgets = Lists.newLinkedList();
+        this.widgets = Lists.newCopyOnWriteArrayList();
         calculateListSize(rectangle);
         if (currentDisplayed.isEmpty() || processSearchTerm)
             currentDisplayed = processSearchTerm(searchTerm, RoughlyEnoughItemsCore.getEntryRegistry().getEntryList(), new ArrayList<>(ScreenHelper.inventoryStacks));
@@ -193,6 +279,10 @@ public class EntryListOverlay extends Widget {
         this.listArea = new Rectangle((int) startX, (int) startY, width * 18, height * 18);
         int fitSlotsPerPage = getTotalFitSlotsPerPage(startX, startY, listArea);
         int j = page * fitSlotsPerPage;
+        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled()) {
+            height = Integer.MAX_VALUE;
+            j = 0;
+        }
         for (int yy = 0; yy < height; yy++) {
             for (int xx = 0; xx < width; xx++) {
                 int x = startX + xx * 18, y = startY + yy * 18;
@@ -202,7 +292,8 @@ public class EntryListOverlay extends Widget {
                 if (j > currentDisplayed.size())
                     break;
                 final Entry entry = currentDisplayed.get(j - 1);
-                widgets.add(new SlotWidget(x, y, entry.getEntryType() == Entry.Type.ITEM ? Renderer.fromItemStackNoCounts(entry.getItemStack()) : Renderer.fromFluid(entry.getFluid()), false, true, true) {
+                maxScroll = y + 18;
+                widgets.add(new Slot(entry, xx, yy, x, y, entry.getEntryType() == Entry.Type.ITEM ? Renderer.fromItemStackNoCounts(entry.getItemStack()) : Renderer.fromFluid(entry.getFluid()), false, true, true) {
                     @Override
                     protected void queueTooltip(ItemStack itemStack, float delta) {
                         ClientPlayerEntity player = minecraft.player;
@@ -243,9 +334,13 @@ public class EntryListOverlay extends Widget {
             if (j > currentDisplayed.size())
                 break;
         }
+        if (!scroller.isRegistered())
+            scroller.registerTick();
     }
     
     public int getTotalPage() {
+        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled())
+            return 1;
         int fitSlotsPerPage = getTotalFitSlotsPerPage(listArea.x, listArea.y, listArea);
         if (fitSlotsPerPage > 0)
             return MathHelper.ceil(getCurrentDisplayed().size() / fitSlotsPerPage);
@@ -272,14 +367,11 @@ public class EntryListOverlay extends Widget {
     
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
-        for (Widget widget : widgets)
-            if (widget.keyPressed(int_1, int_2, int_3))
-                return true;
+        if (rectangle.contains(ClientUtils.getMouseLocation()))
+            for (Widget widget : widgets)
+                if (widget.keyPressed(int_1, int_2, int_3))
+                    return true;
         return false;
-    }
-    
-    public Rectangle getListArea() {
-        return listArea;
     }
     
     public List<Entry> getCurrentDisplayed() {
@@ -328,8 +420,6 @@ public class EntryListOverlay extends Widget {
         List<Entry> newList = Lists.newArrayList();
         for (ItemStack workingItem : workingItems) {
             Optional<Entry> any = stacks.stream().filter(i -> i.getItemStack() != null && i.getItemStack().isItemEqualIgnoreDamage(workingItem)).findAny();
-            //            if (stacks.stream().anyMatch(i -> i.getItemStack() != null && i.getItemStack().isItemEqualIgnoreDamage(workingItem)))
-            //                newList.add(Entry.create(workingItem));
             if (any.isPresent())
                 newList.add(any.get());
         }
@@ -376,8 +466,43 @@ public class EntryListOverlay extends Widget {
     }
     
     @Override
-    public List<Widget> children() {
+    public List<Slot> children() {
         return widgets;
+    }
+    
+    public class Slot extends SlotWidget {
+        private final int backupY;
+        private int xx, yy;
+        private Entry entry;
+        
+        public Slot(Entry entry, int xx, int yy, int x, int y, Renderer renderer, boolean drawBackground, boolean showToolTips, boolean clickToMoreRecipes) {
+            super(x, y, renderer, drawBackground, showToolTips, clickToMoreRecipes);
+            this.xx = xx;
+            this.yy = yy;
+            this.backupY = y;
+            this.entry = entry;
+        }
+        
+        public int getBackupY() {
+            return backupY;
+        }
+        
+        public Entry getEntry() {
+            return entry;
+        }
+        
+        public int getXx() {
+            return xx;
+        }
+        
+        public int getYy() {
+            return yy;
+        }
+        
+        @Override
+        public boolean containsMouse(double mouseX, double mouseY) {
+            return super.containsMouse(mouseX, mouseY) && rectangle.contains(mouseX, mouseY);
+        }
     }
     
 }

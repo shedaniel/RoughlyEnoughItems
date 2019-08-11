@@ -6,7 +6,7 @@
 package me.shedaniel.rei.plugin.autocrafting;
 
 import me.shedaniel.rei.api.AutoTransferHandler;
-import me.shedaniel.rei.client.ScreenHelper;
+import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.listeners.RecipeBookGuiHooks;
 import me.shedaniel.rei.plugin.smoking.DefaultSmokingDisplay;
 import net.minecraft.client.gui.screen.Screen;

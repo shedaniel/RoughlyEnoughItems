@@ -10,8 +10,8 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.Renderer;
-import me.shedaniel.rei.client.ScreenHelper;
-import me.shedaniel.rei.gui.widget.EntryListOverlay;
+import me.shedaniel.rei.impl.ScreenHelper;
+import me.shedaniel.rei.gui.widget.EntryListWidget;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GuiLighting;
@@ -56,7 +56,7 @@ public abstract class ItemStackRenderer extends Renderer {
     }
     
     protected List<String> getTooltip(ItemStack itemStack) {
-        List<String> toolTip = Lists.newArrayList(EntryListOverlay.tryGetItemStackToolTip(itemStack, true));
+        List<String> toolTip = Lists.newArrayList(EntryListWidget.tryGetItemStackToolTip(itemStack, true));
         if (RoughlyEnoughItemsCore.getConfigManager().getConfig().shouldAppendModNames()) {
             final String modString = ClientHelper.getInstance().getFormattedModFromItem(itemStack.getItem());
             toolTip.addAll(getExtraToolTips(itemStack));

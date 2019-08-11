@@ -5,7 +5,7 @@
 
 package me.shedaniel.rei.api;
 
-import me.shedaniel.rei.client.ClientHelperImpl;
+import me.shedaniel.rei.impl.ClientHelperImpl;
 import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;

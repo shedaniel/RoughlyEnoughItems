@@ -1,7 +1,7 @@
 package me.shedaniel.rei.api;
 
-import me.shedaniel.rei.client.FluidEntry;
-import me.shedaniel.rei.client.ItemStackEntry;
+import me.shedaniel.rei.impl.FluidEntry;
+import me.shedaniel.rei.impl.ItemStackEntry;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.ItemStack;
 

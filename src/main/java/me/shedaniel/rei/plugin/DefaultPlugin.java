@@ -13,9 +13,9 @@ import me.shedaniel.rei.api.Entry;
 import me.shedaniel.rei.api.EntryRegistry;
 import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
-import me.shedaniel.rei.client.ScreenHelper;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
+import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.plugin.blasting.DefaultBlastingCategory;
 import me.shedaniel.rei.plugin.blasting.DefaultBlastingDisplay;
 import me.shedaniel.rei.plugin.brewing.DefaultBrewingCategory;
@@ -45,6 +45,7 @@ import net.minecraft.client.gui.screen.ingame.*;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.fluid.EmptyFluid;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -114,7 +115,8 @@ public class DefaultPlugin implements REIPluginV0 {
             }
         });
         Registry.FLUID.forEach(fluid -> {
-            entryRegistry.registerFluid(fluid);
+            if (!(fluid instanceof EmptyFluid))
+                entryRegistry.registerFluid(fluid);
         });
     }
     
@@ -258,33 +260,33 @@ public class DefaultPlugin implements REIPluginV0 {
                 return -1.0f;
             }
         });
-        displayHelper.registerBoundsHandler(new DisplayHelper.DisplayBoundsHandler<CreativeInventoryScreen>() {
-            @Override
-            public Class<?> getBaseSupportedClass() {
-                return CreativeInventoryScreen.class;
-            }
-            
-            @Override
-            public Rectangle getLeftBounds(CreativeInventoryScreen screen) {
-                return new Rectangle(2, 0, ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() - 2, MinecraftClient.getInstance().window.getScaledHeight());
-            }
-            
-            @Override
-            public Rectangle getRightBounds(CreativeInventoryScreen screen) {
-                int startX = ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() + ScreenHelper.getLastContainerScreenHooks().rei_getContainerWidth();
-                return new Rectangle(startX, 0, MinecraftClient.getInstance().window.getScaledWidth() - startX - 2, MinecraftClient.getInstance().window.getScaledHeight());
-            }
-            
-            @Override
-            public Rectangle getItemListArea(Rectangle rectangle) {
-                return new Rectangle(rectangle.x + 1, rectangle.y + 24, rectangle.width - 2, rectangle.height - (RoughlyEnoughItemsCore.getConfigManager().getConfig().isSideSearchField() ? 27 + 22 : 27));
-            }
-            
-            @Override
-            public float getPriority() {
-                return -0.9f;
-            }
-        });
+        //        displayHelper.registerBoundsHandler(new DisplayHelper.DisplayBoundsHandler<CreativeInventoryScreen>() {
+        //            @Override
+        //            public Class<?> getBaseSupportedClass() {
+        //                return CreativeInventoryScreen.class;
+        //            }
+        //
+        //            @Override
+        //            public Rectangle getLeftBounds(CreativeInventoryScreen screen) {
+        //                return new Rectangle(2, 0, ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() - 2, MinecraftClient.getInstance().window.getScaledHeight());
+        //            }
+        //
+        //            @Override
+        //            public Rectangle getRightBounds(CreativeInventoryScreen screen) {
+        //                int startX = ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() + ScreenHelper.getLastContainerScreenHooks().rei_getContainerWidth();
+        //                return new Rectangle(startX, 0, MinecraftClient.getInstance().window.getScaledWidth() - startX - 2, MinecraftClient.getInstance().window.getScaledHeight());
+        //            }
+        //
+        //            @Override
+        //            public Rectangle getItemListArea(Rectangle rectangle) {
+        //                return new Rectangle(rectangle.x + 1, rectangle.y + 24, rectangle.width - 2, rectangle.height - (RoughlyEnoughItemsCore.getConfigManager().getConfig().isSideSearchField() ? 27 + 22 : 27));
+        //            }
+        //
+        //            @Override
+        //            public float getPriority() {
+        //                return -0.9f;
+        //            }
+        //        });
     }
     
     @Override

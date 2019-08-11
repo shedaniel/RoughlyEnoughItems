@@ -10,7 +10,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.client.ScreenHelper;
+import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.gui.widget.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;

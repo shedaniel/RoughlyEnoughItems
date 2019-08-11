@@ -3,7 +3,7 @@
  * Licensed under the MIT License.
  */
 
-package me.shedaniel.rei.client;
+package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.Entry;

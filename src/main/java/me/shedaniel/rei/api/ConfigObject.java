@@ -9,15 +9,17 @@ public interface ConfigObject {
     
     ConfigNode getConfigNode();
     
-    void setCheating(boolean cheating);
-    
     boolean isCheating();
+    
+    void setCheating(boolean cheating);
     
     ItemListOrdering getItemListOrdering();
     
     boolean isItemListAscending();
     
     boolean isUsingDarkTheme();
+    
+    boolean isEntryListWidgetScrolled();
     
     boolean shouldAppendModNames();
     

@@ -8,7 +8,7 @@ package me.shedaniel.rei.gui.credits;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import me.shedaniel.rei.client.ScreenHelper;
+import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.gui.credits.CreditsEntryListWidget.CreditsItem;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.screen.Screen;

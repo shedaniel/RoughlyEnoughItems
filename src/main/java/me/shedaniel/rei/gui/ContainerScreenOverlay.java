@@ -8,15 +8,16 @@ package me.shedaniel.rei.gui;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.cloth.api.ClientUtils;
+import me.shedaniel.clothconfig2.api.MouseUtils;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.DisplayHelper;
 import me.shedaniel.rei.api.Entry;
 import me.shedaniel.rei.api.RecipeHelper;
-import me.shedaniel.rei.client.RecipeHelperImpl;
-import me.shedaniel.rei.client.ScreenHelper;
-import me.shedaniel.rei.client.Weather;
 import me.shedaniel.rei.gui.widget.*;
+import me.shedaniel.rei.impl.RecipeHelperImpl;
+import me.shedaniel.rei.impl.ScreenHelper;
+import me.shedaniel.rei.impl.Weather;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -48,7 +49,7 @@ public class ContainerScreenOverlay extends Widget {
     private static final List<QueuedTooltip> QUEUED_TOOLTIPS = Lists.newArrayList();
     public static String searchTerm = "";
     private static int page = 0;
-    private static EntryListOverlay entryListOverlay;
+    private static EntryListWidget entryListWidget;
     private final List<Widget> widgets = Lists.newLinkedList();
     public boolean shouldReInit = false;
     private Rectangle rectangle;
@@ -56,8 +57,12 @@ public class ContainerScreenOverlay extends Widget {
     private CraftableToggleButtonWidget toggleButtonWidget;
     private ButtonWidget buttonLeft, buttonRight;
     
-    public static EntryListOverlay getEntryListOverlay() {
-        return entryListOverlay;
+    public static EntryListWidget getEntryListWidget() {
+        return entryListWidget;
+    }
+    
+    public static void setPage(int page) {
+        ContainerScreenOverlay.page = page;
     }
     
     public void init() {
@@ -71,47 +76,49 @@ public class ContainerScreenOverlay extends Widget {
         this.window = MinecraftClient.getInstance().window;
         DisplayHelper.DisplayBoundsHandler boundsHandler = RoughlyEnoughItemsCore.getDisplayHelper().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
         this.rectangle = RoughlyEnoughItemsCore.getConfigManager().getConfig().isLeftHandSidePanel() ? boundsHandler.getLeftBounds(MinecraftClient.getInstance().currentScreen) : boundsHandler.getRightBounds(MinecraftClient.getInstance().currentScreen);
-        widgets.add(entryListOverlay = new EntryListOverlay(page));
-        entryListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, false);
+        widgets.add(entryListWidget = new EntryListWidget(page));
+        entryListWidget.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, false);
         
-        widgets.add(buttonLeft = new ButtonWidget(rectangle.x, rectangle.y + 5, 16, 16, new TranslatableText("text.rei.left_arrow")) {
-            @Override
-            public void onPressed() {
-                page--;
-                if (page < 0)
-                    page = getTotalPage();
-                entryListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, false);
-            }
-            
-            @Override
-            public Optional<String> getTooltips() {
-                return Optional.ofNullable(I18n.translate("text.rei.previous_page"));
-            }
-            
-            @Override
-            public boolean changeFocus(boolean boolean_1) {
-                return false;
-            }
-        });
-        widgets.add(buttonRight = new ButtonWidget(rectangle.x + rectangle.width - 18, rectangle.y + 5, 16, 16, new TranslatableText("text.rei.right_arrow")) {
-            @Override
-            public void onPressed() {
-                page++;
-                if (page > getTotalPage())
-                    page = 0;
-                entryListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, false);
-            }
-            
-            @Override
-            public Optional<String> getTooltips() {
-                return Optional.ofNullable(I18n.translate("text.rei.next_page"));
-            }
-            
-            @Override
-            public boolean changeFocus(boolean boolean_1) {
-                return false;
-            }
-        });
+        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled()) {
+            widgets.add(buttonLeft = new ButtonWidget(rectangle.x, rectangle.y + 5, 16, 16, new TranslatableText("text.rei.left_arrow")) {
+                @Override
+                public void onPressed() {
+                    page--;
+                    if (page < 0)
+                        page = getTotalPage();
+                    entryListWidget.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, false);
+                }
+                
+                @Override
+                public Optional<String> getTooltips() {
+                    return Optional.ofNullable(I18n.translate("text.rei.previous_page"));
+                }
+                
+                @Override
+                public boolean changeFocus(boolean boolean_1) {
+                    return false;
+                }
+            });
+            widgets.add(buttonRight = new ButtonWidget(rectangle.x + rectangle.width - 18, rectangle.y + 5, 16, 16, new TranslatableText("text.rei.right_arrow")) {
+                @Override
+                public void onPressed() {
+                    page++;
+                    if (page > getTotalPage())
+                        page = 0;
+                    entryListWidget.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, false);
+                }
+                
+                @Override
+                public Optional<String> getTooltips() {
+                    return Optional.ofNullable(I18n.translate("text.rei.next_page"));
+                }
+                
+                @Override
+                public boolean changeFocus(boolean boolean_1) {
+                    return false;
+                }
+            });
+        }
         
         if (setPage)
             page = MathHelper.clamp(page, 0, getTotalPage());
@@ -214,32 +221,34 @@ public class ContainerScreenOverlay extends Widget {
                 xxx += RoughlyEnoughItemsCore.getConfigManager().getConfig().isLeftHandSidePanel() ? -25 : 25;
             }
         }
-        widgets.add(new ClickableLabelWidget(rectangle.x + (rectangle.width / 2), rectangle.y + 10, "", getTotalPage() > 0) {
-            @Override
-            public void render(int mouseX, int mouseY, float delta) {
-                page = MathHelper.clamp(page, 0, getTotalPage());
-                this.text = String.format("%s/%s", page + 1, getTotalPage() + 1);
-                super.render(mouseX, mouseY, delta);
-            }
-            
-            @Override
-            public Optional<String> getTooltips() {
-                return Optional.ofNullable(I18n.translate("text.rei.go_back_first_page"));
-            }
-            
-            @Override
-            public void onLabelClicked() {
-                MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-                page = 0;
-                entryListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, false);
-            }
-            
-            @Override
-            public boolean changeFocus(boolean boolean_1) {
-                return false;
-            }
-        });
-        buttonLeft.enabled = buttonRight.enabled = getTotalPage() > 0;
+        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled()) {
+            widgets.add(new ClickableLabelWidget(rectangle.x + (rectangle.width / 2), rectangle.y + 10, "", getTotalPage() > 0) {
+                @Override
+                public void render(int mouseX, int mouseY, float delta) {
+                    page = MathHelper.clamp(page, 0, getTotalPage());
+                    this.text = String.format("%s/%s", page + 1, getTotalPage() + 1);
+                    super.render(mouseX, mouseY, delta);
+                }
+                
+                @Override
+                public Optional<String> getTooltips() {
+                    return Optional.ofNullable(I18n.translate("text.rei.go_back_first_page"));
+                }
+                
+                @Override
+                public void onLabelClicked() {
+                    MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                    page = 0;
+                    entryListWidget.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, false);
+                }
+                
+                @Override
+                public boolean changeFocus(boolean boolean_1) {
+                    return false;
+                }
+            });
+            buttonLeft.enabled = buttonRight.enabled = getTotalPage() > 0;
+        }
         if (ScreenHelper.searchField == null)
             ScreenHelper.searchField = new SearchFieldWidget(0, 0, 0, 0);
         ScreenHelper.searchField.getBounds().setBounds(getTextFieldArea());
@@ -247,14 +256,14 @@ public class ContainerScreenOverlay extends Widget {
         ScreenHelper.searchField.setText(searchTerm);
         ScreenHelper.searchField.setChangedListener(s -> {
             searchTerm = s;
-            entryListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, true);
+            entryListWidget.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, true);
         });
         if (RoughlyEnoughItemsCore.getConfigManager().getConfig().isCraftableFilterEnabled())
             this.widgets.add(toggleButtonWidget = new CraftableToggleButtonWidget(getCraftableToggleArea()) {
                 @Override
                 public void onPressed() {
                     RoughlyEnoughItemsCore.getConfigManager().toggleCraftableOnly();
-                    entryListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, true);
+                    entryListWidget.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, true);
                 }
                 
                 @Override
@@ -265,7 +274,7 @@ public class ContainerScreenOverlay extends Widget {
             });
         else
             toggleButtonWidget = null;
-        this.entryListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, false);
+        this.entryListWidget.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, false);
     }
     
     private Weather getNextWeather() {
@@ -357,7 +366,7 @@ public class ContainerScreenOverlay extends Widget {
         else if (RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() && ((currentStacks.size() != ScreenHelper.inventoryStacks.size()) || !hasSameListContent(new LinkedList<>(ScreenHelper.inventoryStacks), currentStacks))) {
             ScreenHelper.inventoryStacks = currentStacks;
             DisplayHelper.DisplayBoundsHandler<?> boundsHandler = RoughlyEnoughItemsCore.getDisplayHelper().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
-            entryListOverlay.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, true);
+            entryListWidget.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, true);
         }
         if (SearchFieldWidget.isSearching) {
             GuiLighting.disable();
@@ -366,7 +375,7 @@ public class ContainerScreenOverlay extends Widget {
                 ContainerScreenHooks hooks = (ContainerScreenHooks) MinecraftClient.getInstance().currentScreen;
                 int left = hooks.rei_getContainerLeft(), top = hooks.rei_getContainerTop();
                 for (Slot slot : ((AbstractContainerScreen<?>) MinecraftClient.getInstance().currentScreen).getContainer().slotList)
-                    if (!slot.hasStack() || !entryListOverlay.filterEntry(Entry.create(slot.getStack()), entryListOverlay.getLastSearchArgument()))
+                    if (!slot.hasStack() || !entryListWidget.filterEntry(Entry.create(slot.getStack()), entryListWidget.getLastSearchArgument()))
                         fillGradient(left + slot.xPosition, top + slot.yPosition, left + slot.xPosition + 16, top + slot.yPosition + 16, -601874400, -601874400);
             }
             blitOffset = 0;
@@ -453,7 +462,8 @@ public class ContainerScreenOverlay extends Widget {
     public void renderWidgets(int int_1, int int_2, float float_1) {
         if (!ScreenHelper.isOverlayVisible())
             return;
-        buttonLeft.enabled = buttonRight.enabled = getTotalPage() > 0;
+        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled())
+            buttonLeft.enabled = buttonRight.enabled = getTotalPage() > 0;
         widgets.forEach(widget -> {
             GuiLighting.disable();
             widget.render(int_1, int_2, float_1);
@@ -462,7 +472,7 @@ public class ContainerScreenOverlay extends Widget {
     }
     
     private int getTotalPage() {
-        return entryListOverlay.getTotalPage();
+        return entryListWidget.getTotalPage();
     }
     
     @Override
@@ -470,13 +480,17 @@ public class ContainerScreenOverlay extends Widget {
         if (!ScreenHelper.isOverlayVisible())
             return false;
         if (isInside(ClientUtils.getMouseLocation())) {
-            if (amount > 0 && buttonLeft.enabled)
-                buttonLeft.onPressed();
-            else if (amount < 0 && buttonRight.enabled)
-                buttonRight.onPressed();
-            else
-                return false;
-            return true;
+            if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled()) {
+                if (amount > 0 && buttonLeft.enabled)
+                    buttonLeft.onPressed();
+                else if (amount < 0 && buttonRight.enabled)
+                    buttonRight.onPressed();
+                else
+                    return false;
+                return true;
+            } else {
+                return entryListWidget.mouseScrolled(i, j, amount);
+            }
         }
         for (Widget widget : widgets)
             if (widget.mouseScrolled(i, j, amount))
@@ -486,7 +500,7 @@ public class ContainerScreenOverlay extends Widget {
     
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
-        if (ScreenHelper.isOverlayVisible())
+        if (ScreenHelper.isOverlayVisible() && isInside(MouseUtils.getMouseLocation()))
             for (Element listener : widgets)
                 if (listener.keyPressed(int_1, int_2, int_3))
                     return true;
@@ -518,9 +532,10 @@ public class ContainerScreenOverlay extends Widget {
     public boolean charTyped(char char_1, int int_1) {
         if (!ScreenHelper.isOverlayVisible())
             return false;
-        for (Element listener : widgets)
-            if (listener.charTyped(char_1, int_1))
-                return true;
+        if (isInside(MouseUtils.getMouseLocation()))
+            for (Element listener : widgets)
+                if (listener.charTyped(char_1, int_1))
+                    return true;
         return false;
     }
     

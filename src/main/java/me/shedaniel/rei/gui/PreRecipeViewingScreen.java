@@ -10,7 +10,7 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.RecipeDisplay;
-import me.shedaniel.rei.client.ScreenHelper;
+import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.gui.widget.ButtonWidget;
 import me.shedaniel.rei.gui.widget.Widget;

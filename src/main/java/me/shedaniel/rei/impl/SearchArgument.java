@@ -3,7 +3,7 @@
  * Licensed under the MIT License.
  */
 
-package me.shedaniel.rei.client;
+package me.shedaniel.rei.impl;
 
 import java.util.Locale;
 import java.util.function.Function;
