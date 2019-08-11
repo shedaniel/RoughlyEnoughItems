@@ -22,7 +22,7 @@ import java.util.function.Predicate;
 public interface RecipeHelper {
     
     /**
-     * @return the api instance of {@link me.shedaniel.rei.client.RecipeHelperImpl}
+     * @return the api instance of {@link me.shedaniel.rei.impl.RecipeHelperImpl}
      */
     static RecipeHelper getInstance() {
         return RoughlyEnoughItemsCore.getRecipeHelper();

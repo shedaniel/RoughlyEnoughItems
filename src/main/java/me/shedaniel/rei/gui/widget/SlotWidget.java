@@ -11,7 +11,7 @@ import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.Renderer;
-import me.shedaniel.rei.client.ScreenHelper;
+import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.gui.renderers.FluidRenderer;
 import me.shedaniel.rei.gui.renderers.ItemStackRenderer;
 import net.minecraft.client.gui.Element;
@@ -121,16 +121,6 @@ public class SlotWidget extends WidgetWithBounds {
             blit(this.x - 1, this.y - 1, 0, 222, 18, 18);
         }
         boolean highlighted = containsMouse(mouseX, mouseY);
-        if (drawHighlightedBackground && highlighted) {
-            GlStateManager.disableLighting();
-            GlStateManager.disableDepthTest();
-            GlStateManager.colorMask(true, true, true, false);
-            int color = darkTheme ? 0xFF5E5E5E : -2130706433;
-            fillGradient(x, y, x + 16, y + 16, color, color);
-            GlStateManager.colorMask(true, true, true, true);
-            GlStateManager.enableLighting();
-            GlStateManager.enableDepthTest();
-        }
         if (isCurrentRendererItem() && !getCurrentItemStack().isEmpty()) {
             renderer.setBlitOffset(200);
             renderer.render(x + 8, y + 6, mouseX, mouseY, delta);
@@ -144,6 +134,18 @@ public class SlotWidget extends WidgetWithBounds {
         } else {
             renderer.setBlitOffset(200);
             renderer.render(x + 8, y + 6, mouseX, mouseY, delta);
+        }
+        if (drawHighlightedBackground && highlighted) {
+            GlStateManager.disableLighting();
+            GlStateManager.disableDepthTest();
+            GlStateManager.colorMask(true, true, true, false);
+            int color = darkTheme ? 0xFF5E5E5E : -2130706433;
+            blitOffset = 300;
+            fillGradient(x, y, x + 16, y + 16, color, color);
+            blitOffset = 0;
+            GlStateManager.colorMask(true, true, true, true);
+            GlStateManager.enableLighting();
+            GlStateManager.enableDepthTest();
         }
     }
     
@@ -160,7 +162,7 @@ public class SlotWidget extends WidgetWithBounds {
     }
     
     private List<String> getTooltip(Fluid fluid) {
-        List<String> toolTip = Lists.newArrayList(EntryListOverlay.tryGetFluidName(fluid));
+        List<String> toolTip = Lists.newArrayList(EntryListWidget.tryGetFluidName(fluid));
         toolTip.addAll(getExtraFluidToolTips(fluid));
         if (RoughlyEnoughItemsCore.getConfigManager().getConfig().shouldAppendModNames()) {
             final String modString = ClientHelper.getInstance().getFormattedModFromIdentifier(Registry.FLUID.getId(fluid));
@@ -181,7 +183,7 @@ public class SlotWidget extends WidgetWithBounds {
     }
     
     protected List<String> getTooltip(ItemStack itemStack) {
-        List<String> toolTip = Lists.newArrayList(EntryListOverlay.tryGetItemStackToolTip(itemStack, true));
+        List<String> toolTip = Lists.newArrayList(EntryListWidget.tryGetItemStackToolTip(itemStack, true));
         toolTip.addAll(getExtraItemToolTips(itemStack));
         if (RoughlyEnoughItemsCore.getConfigManager().getConfig().shouldAppendModNames()) {
             final String modString = ClientHelper.getInstance().getFormattedModFromItem(itemStack.getItem());

@@ -6,7 +6,7 @@
 package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Ordering;
-import me.shedaniel.rei.client.ScreenHelper;
+import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.listeners.AbstractInventoryScreenHooks;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import net.minecraft.client.MinecraftClient;

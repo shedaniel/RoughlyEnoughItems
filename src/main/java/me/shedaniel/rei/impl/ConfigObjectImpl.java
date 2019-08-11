@@ -3,7 +3,7 @@
  * Licensed under the MIT License.
  */
 
-package me.shedaniel.rei.client;
+package me.shedaniel.rei.impl;
 
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.gui.config.ItemCheatingMode;
@@ -165,6 +165,13 @@ public class ConfigObjectImpl implements ConfigObject {
             .withName("registerRecipesInAnotherThread")
             .build();
     
+    private ConfigValue<Boolean> scrollingEntryListWidget = ConfigValue.builder(Boolean.class)
+            .withParent(appearance)
+            .withDefaultValue(false)
+            .withComment("Declares whether if entry list widget is scrolled.")
+            .withName("scrollingEntryListWidget")
+            .build();
+    
     //    private ConfigValue<RelativePoint> choosePageDialogPoint = ConfigValue.builder(RelativePoint.class)
     //            .withParent(technical)
     //            .withDefaultValue(new RelativePoint(.5, .5))
@@ -203,6 +210,11 @@ public class ConfigObjectImpl implements ConfigObject {
     @Override
     public boolean isUsingDarkTheme() {
         return darkTheme.getValue().booleanValue();
+    }
+    
+    @Override
+    public boolean isEntryListWidgetScrolled() {
+        return scrollingEntryListWidget.getValue().booleanValue();
     }
     
     @Override

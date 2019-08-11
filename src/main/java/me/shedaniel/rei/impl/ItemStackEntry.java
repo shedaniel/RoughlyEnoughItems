@@ -1,4 +1,4 @@
-package me.shedaniel.rei.client;
+package me.shedaniel.rei.impl;
 
 import me.shedaniel.rei.api.Entry;
 import net.minecraft.fluid.Fluid;

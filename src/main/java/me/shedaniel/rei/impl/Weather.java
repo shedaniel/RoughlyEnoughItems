@@ -3,7 +3,7 @@
  * Licensed under the MIT License.
  */
 
-package me.shedaniel.rei.client;
+package me.shedaniel.rei.impl;
 
 public enum Weather {
     CLEAR(0, "text.rei.weather.clear"),

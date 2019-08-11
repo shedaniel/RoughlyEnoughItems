@@ -9,7 +9,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.Renderer;
-import me.shedaniel.rei.client.ScreenHelper;
+import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;

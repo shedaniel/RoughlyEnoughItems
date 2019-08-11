@@ -112,7 +112,7 @@ public interface DisplayHelper {
          * @return the item list bounds
          */
         default Rectangle getItemListArea(Rectangle rectangle) {
-            return new Rectangle(rectangle.x + 2, rectangle.y + 24, rectangle.width - 4, rectangle.height - (RoughlyEnoughItemsCore.getConfigManager().getConfig().isSideSearchField() ? 27 + 22 : 27));
+            return new Rectangle(rectangle.x + 1, rectangle.y + 2 + (RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled() ? 0 : 22), rectangle.width - 2, rectangle.height - (RoughlyEnoughItemsCore.getConfigManager().getConfig().isSideSearchField() ? 27 + 22 : 27) + (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled() ? 0 : 22));
         }
         
         /**

@@ -5,7 +5,7 @@
 
 package me.shedaniel.rei.gui.widget;
 
-import me.shedaniel.rei.client.ScreenHelper;
+import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.util.Formatting;
 
 import java.awt.*;
