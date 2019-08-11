@@ -51,11 +51,11 @@ public class EntryListWidget extends Widget {
             if (scrollVelocity == 0.0F && scroll >= 0.0F && scroll <= getMaxScroll()) {
                 scrollerUnregisterTick();
             } else {
-                double change = scrollVelocity * 0.3D;
+                float change = scrollVelocity * 0.3F;
                 if (scrollVelocity != 0) {
                     scroll += change;
                     scrollVelocity -= scrollVelocity * (scroll >= 0.0F && scroll <= getMaxScroll() ? 0.2D : 0.4D);
-                    if (Math.abs(scrollVelocity) < 0.1D) {
+                    if (Math.abs(scrollVelocity) < 0.1F) {
                         scrollVelocity = 0.0F;
                     }
                 }
@@ -105,6 +105,7 @@ public class EntryListWidget extends Widget {
         this.page = page;
         this.lastSearchArgument = Lists.newArrayList();
         scroller.unregisterTick();
+        this.scrollVelocity = 0;
     }
     
     public static List<String> tryGetItemStackToolTip(ItemStack itemStack, boolean careAboutAdvanced) {
@@ -284,6 +285,7 @@ public class EntryListWidget extends Widget {
             height = Integer.MAX_VALUE;
             j = 0;
         }
+        float maxScroll = 0;
         for (int yy = 0; yy < height; yy++) {
             for (int xx = 0; xx < width; xx++) {
                 int x = startX + xx * 18, y = startY + yy * 18;
@@ -335,6 +337,7 @@ public class EntryListWidget extends Widget {
             if (j > currentDisplayed.size())
                 break;
         }
+        EntryListWidget.maxScroll = maxScroll;
         if (!scroller.isRegistered())
             scroller.registerTick();
     }
