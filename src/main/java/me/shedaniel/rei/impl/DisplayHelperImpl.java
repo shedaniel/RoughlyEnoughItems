@@ -14,7 +14,6 @@ import java.awt.*;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class DisplayHelperImpl implements DisplayHelper {
@@ -49,11 +48,17 @@ public class DisplayHelperImpl implements DisplayHelper {
     
     private List<DisplayBoundsHandler<?>> screenDisplayBoundsHandlers = Lists.newArrayList();
     private Map<Class<?>, DisplayBoundsHandler<?>> handlerCache = Maps.newHashMap();
+    private Map<Class, List<DisplayBoundsHandler<?>>> handlerSortedCache = Maps.newHashMap();
     private BaseBoundsHandler baseBoundsHandler;
+    private Class tempScreen;
     
     @Override
     public List<DisplayBoundsHandler<?>> getSortedBoundsHandlers(Class<?> screenClass) {
-        return screenDisplayBoundsHandlers.stream().filter(handler -> handler.getBaseSupportedClass().isAssignableFrom(screenClass)).sorted(BOUNDS_HANDLER_COMPARATOR).collect(Collectors.toList());
+        if (handlerSortedCache.containsKey(screenClass))
+            return handlerSortedCache.get(screenClass);
+        tempScreen = screenClass;
+        handlerSortedCache.put(screenClass, screenDisplayBoundsHandlers.stream().filter(this::filterResponsible).sorted(BOUNDS_HANDLER_COMPARATOR).collect(Collectors.toList()));
+        return handlerSortedCache.get(screenClass);
     }
     
     @Override
@@ -63,11 +68,15 @@ public class DisplayHelperImpl implements DisplayHelper {
     
     @Override
     public DisplayBoundsHandler<?> getResponsibleBoundsHandler(Class<?> screenClass) {
-        Optional<? extends DisplayBoundsHandler<?>> any = handlerCache.entrySet().stream().filter(entry -> entry.getKey().equals(screenClass)).map(Map.Entry::getValue).findAny();
-        if (any.isPresent())
-            return any.get();
-        handlerCache.put(screenClass, screenDisplayBoundsHandlers.stream().filter(handler -> handler.getBaseSupportedClass().isAssignableFrom(screenClass)).sorted(BOUNDS_HANDLER_COMPARATOR).findAny().orElse(EMPTY));
+        if (handlerCache.containsKey(screenClass))
+            return handlerCache.get(screenClass);
+        tempScreen = screenClass;
+        handlerCache.put(screenClass, screenDisplayBoundsHandlers.stream().filter(this::filterResponsible).sorted(BOUNDS_HANDLER_COMPARATOR).findAny().orElse(EMPTY));
         return handlerCache.get(screenClass);
+    }
+    
+    public boolean filterResponsible(DisplayBoundsHandler handler) {
+        return handler.getBaseSupportedClass().isAssignableFrom(tempScreen);
     }
     
     @Override
@@ -86,6 +95,7 @@ public class DisplayHelperImpl implements DisplayHelper {
     
     public void resetCache() {
         handlerCache.clear();
+        handlerSortedCache.clear();
     }
     
 }
