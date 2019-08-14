@@ -93,6 +93,10 @@ public class DisplayHelperImpl implements DisplayHelper {
         this.baseBoundsHandler = baseBoundsHandler;
     }
     
+    public void resetData() {
+        screenDisplayBoundsHandlers.clear();
+    }
+    
     public void resetCache() {
         handlerCache.clear();
         handlerSortedCache.clear();
