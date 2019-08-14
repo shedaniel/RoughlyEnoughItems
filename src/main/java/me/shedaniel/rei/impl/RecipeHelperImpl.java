@@ -230,6 +230,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         this.displayVisibilityHandlers.clear();
         this.liveRecipeGenerators.clear();
         this.autoTransferHandlers.clear();
+        ((DisplayHelperImpl) RoughlyEnoughItemsCore.getDisplayHelper()).resetData();
         ((DisplayHelperImpl) RoughlyEnoughItemsCore.getDisplayHelper()).resetCache();
         BaseBoundsHandler baseBoundsHandler = new BaseBoundsHandlerImpl();
         RoughlyEnoughItemsCore.getDisplayHelper().registerBoundsHandler(baseBoundsHandler);
