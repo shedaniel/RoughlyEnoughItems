@@ -18,12 +18,12 @@ import java.awt.*;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
     
     private static final Function<Rectangle, Long> RECTANGLE_LONG_FUNCTION = r -> r.x + 1000l * r.y + 1000000l * r.width + 1000000000l * r.height;
     private static final Comparator<Pair<Pair<Class<?>, Float>, Function<Boolean, List<Rectangle>>>> LIST_PAIR_COMPARATOR;
+    private static final Comparator<? super Rectangle> RECTANGLE_COMPARER = Comparator.comparingLong(RECTANGLE_LONG_FUNCTION::apply);
     
     static {
         Comparator<Pair<Pair<Class<?>, Float>, Function<Boolean, List<Rectangle>>>> comparator = Comparator.comparingDouble(value -> value.getLeft().getRight());
@@ -55,7 +55,7 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
     
     @Override
     public ActionResult isInZone(boolean isOnRightSide, double mouseX, double mouseY) {
-        for (Rectangle zone : getCurrentExclusionZones(MinecraftClient.getInstance().currentScreen.getClass(), isOnRightSide))
+        for (Rectangle zone : getCurrentExclusionZones(MinecraftClient.getInstance().currentScreen.getClass(), isOnRightSide, false))
             if (zone.contains(mouseX, mouseY))
                 return ActionResult.FAIL;
         return ActionResult.PASS;
@@ -75,23 +75,26 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
     }
     
     private long getStringFromCurrent(boolean isOnRightSide) {
-        return getLongFromAreas(isOnRightSide ? getHandler().getRightBounds(MinecraftClient.getInstance().currentScreen) : getHandler().getLeftBounds(MinecraftClient.getInstance().currentScreen), getCurrentExclusionZones(MinecraftClient.getInstance().currentScreen.getClass(), isOnRightSide));
+        return getLongFromAreas(isOnRightSide ? getHandler().getRightBounds(MinecraftClient.getInstance().currentScreen) : getHandler().getLeftBounds(MinecraftClient.getInstance().currentScreen), getCurrentExclusionZones(MinecraftClient.getInstance().currentScreen.getClass(), isOnRightSide, false));
     }
     
     @Override
     public ActionResult canItemSlotWidgetFit(boolean isOnRightSide, int left, int top, Screen screen, Rectangle fullBounds) {
-        List<Rectangle> currentExclusionZones = getCurrentExclusionZones(MinecraftClient.getInstance().currentScreen.getClass(), isOnRightSide);
-        for (Rectangle currentExclusionZone : currentExclusionZones)
+        for (Rectangle currentExclusionZone : getCurrentExclusionZones(MinecraftClient.getInstance().currentScreen.getClass(), isOnRightSide, false))
             if (left + 18 >= currentExclusionZone.x && top + 18 >= currentExclusionZone.y && left <= currentExclusionZone.x + currentExclusionZone.width && top <= currentExclusionZone.y + currentExclusionZone.height)
                 return ActionResult.FAIL;
         return ActionResult.PASS;
     }
     
-    public List<Rectangle> getCurrentExclusionZones(Class<?> currentScreenClass, boolean isOnRightSide) {
-        List<Pair<Pair<Class<?>, Float>, Function<Boolean, List<Rectangle>>>> only = list.stream().filter(pair -> pair.getLeft().getLeft().isAssignableFrom(currentScreenClass)).collect(Collectors.toList());
-        only.sort(LIST_PAIR_COMPARATOR);
+    @Override
+    public List<Rectangle> getCurrentExclusionZones(Class<?> currentScreenClass, boolean isOnRightSide, boolean sort) {
         List<Rectangle> rectangles = Lists.newArrayList();
-        only.forEach(pair -> rectangles.addAll(pair.getRight().apply(isOnRightSide)));
+        for (Pair<Pair<Class<?>, Float>, Function<Boolean, List<Rectangle>>> pair : list) {
+            if (pair.getLeft().getLeft().isAssignableFrom(currentScreenClass))
+                rectangles.addAll(pair.getRight().apply(isOnRightSide));
+        }
+        if (sort)
+            rectangles.sort(RECTANGLE_COMPARER);
         return rectangles;
     }
     
