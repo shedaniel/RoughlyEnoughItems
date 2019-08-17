@@ -12,9 +12,9 @@ import com.zeitheron.hammercore.client.utils.Scissors;
 import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.gui.renderers.RecipeRenderer;
 import me.shedaniel.rei.gui.widget.*;
+import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
@@ -128,10 +128,11 @@ public class VillagerRecipeViewingScreen extends Screen {
         this.widgets.add(new SlotBaseWidget(scrollListBounds));
         
         Rectangle recipeBounds = new Rectangle(bounds.x + 100 + (guiWidth - 100) / 2 - category.getDisplayWidth(display) / 2, bounds.y + bounds.height / 2 - category.getDisplayHeight() / 2, category.getDisplayWidth(display), category.getDisplayHeight());
-        this.widgets.addAll(category.setupDisplay(() -> display, recipeBounds));
+        List<Widget> setupDisplay = category.setupDisplay(() -> display, recipeBounds);
+        this.widgets.addAll(setupDisplay);
         Optional<ButtonAreaSupplier> supplier = RecipeHelper.getInstance().getSpeedCraftButtonArea(category);
         if (supplier.isPresent() && supplier.get().get(recipeBounds) != null)
-            this.widgets.add(new AutoCraftingButtonWidget(supplier.get().get(recipeBounds), supplier.get().getButtonText(), () -> display));
+            this.widgets.add(new AutoCraftingButtonWidget(supplier.get().get(recipeBounds), supplier.get().getButtonText(), () -> display, setupDisplay));
         
         int index = 0;
         for (RecipeDisplay recipeDisplay : categoryMap.get(category)) {

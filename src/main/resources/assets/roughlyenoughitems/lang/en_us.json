@@ -38,7 +38,7 @@
   "ordering.rei.name": "Name",
   "ordering.rei.item_groups": "Item Groups",
   "text.auto_craft.move_items": "Move Items",
-  "error.rei.transfer.too_small": "Unable to move items to a 2x2 grid.",
+  "error.rei.transfer.too_small": "Unable to move items to a %dx%d grid.",
   "error.rei.not.on.server": "REI is not on the server.",
   "error.rei.not.enough.materials": "Not Enough Materials.",
   "error.rei.internal.error": "Internal Error: %s",

@@ -421,13 +421,13 @@ public class EntryListWidget extends Widget {
         if (!RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() || stacks.isEmpty() || inventoryItems.isEmpty())
             return Collections.unmodifiableList(stacks);
         List<ItemStack> workingItems = RecipeHelper.getInstance().findCraftableByItems(inventoryItems);
-        List<Entry> newList = Lists.newArrayList();
+        List<Entry> newList = Lists.newLinkedList();
         for (ItemStack workingItem : workingItems) {
             Optional<Entry> any = stacks.stream().filter(i -> i.getItemStack() != null && i.getItemStack().isItemEqualIgnoreDamage(workingItem)).findAny();
             if (any.isPresent())
                 newList.add(any.get());
         }
-        return newList;
+        return Collections.unmodifiableList(newList);
     }
     
     public List<SearchArgument[]> getLastSearchArgument() {

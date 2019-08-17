@@ -29,6 +29,9 @@
     "rei_plugins": [
       "me.shedaniel.rei.plugin.DefaultPlugin",
       "me.shedaniel.rei.plugin.DefaultAutoCraftingPlugin"
+    ],
+    "rei_containers": [
+      "me.shedaniel.rei.plugin.DefaultServerContainerPlugin"
     ]
   },
   "depends": {
