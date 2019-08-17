@@ -269,6 +269,7 @@ public class VillagerRecipeViewingScreen extends Screen {
             scroll = MathHelper.clamp(scroll, 0, height - scrollListBounds.height + 2);
             if (scrollBarAlphaFuture == 0)
                 scrollBarAlphaFuture = 1f;
+            if (System.currentTimeMillis() - scrollBarAlphaFutureTime > 300f)
             scrollBarAlphaFutureTime = System.currentTimeMillis();
             return true;
         }

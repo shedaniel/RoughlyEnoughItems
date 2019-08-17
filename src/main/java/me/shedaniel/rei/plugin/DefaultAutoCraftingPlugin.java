@@ -32,11 +32,6 @@ public class DefaultAutoCraftingPlugin implements REIPluginV0 {
         if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isLoadingDefaultPlugin()) {
             return;
         }
-        //        recipeHelper.registerAutoCraftingHandler(new AutoCraftingTableBookHandler());
-        //        recipeHelper.registerAutoCraftingHandler(new AutoInventoryBookHandler());
-        //        recipeHelper.registerAutoCraftingHandler(new AutoFurnaceBookHandler());
-        //        recipeHelper.registerAutoCraftingHandler(new AutoSmokerBookHandler());
-        //        recipeHelper.registerAutoCraftingHandler(new AutoBlastingBookHandler());
         recipeHelper.registerAutoCraftingHandler(new DefaultCategoryHandler());
     }
 }
