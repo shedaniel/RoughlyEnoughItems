@@ -11,6 +11,8 @@ import io.netty.buffer.Unpooled;
 import me.shedaniel.rei.server.InputSlotCrafter;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.container.Container;
 import net.minecraft.container.CraftingContainer;
 import net.minecraft.container.PlayerContainer;
 import net.minecraft.item.ItemStack;
@@ -23,7 +25,6 @@ import net.minecraft.util.PacketByteBuf;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public class RoughlyEnoughItemsNetwork implements ModInitializer {
     
@@ -32,7 +33,7 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
     public static final Identifier CREATE_ITEMS_MESSAGE_PACKET = new Identifier("roughlyenoughitems", "ci_msg");
     public static final Identifier MOVE_ITEMS_PACKET = new Identifier("roughlyenoughitems", "move_items");
     public static final Identifier NOT_ENOUGH_ITEMS_PACKET = new Identifier("roughlyenoughitems", "og_not_enough");
-    public static final UUID CRAFTING_TABLE_MOVE = UUID.fromString("190c2b2d-d1f6-4149-a4a8-62860189403e");
+    //    public static final UUID CRAFTING_TABLE_MOVE = UUID.fromString("190c2b2d-d1f6-4149-a4a8-62860189403e");
     
     @Override
     public void onInitialize() {
@@ -58,49 +59,53 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
                 player.addChatMessage(new TranslatableText("text.rei.failed_cheat_items"), false);
         });
         ServerSidePacketRegistry.INSTANCE.register(MOVE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
-            UUID type = packetByteBuf.readUuid();
+            //            UUID type = packetByteBuf.readUuid();
+            Identifier category = packetByteBuf.readIdentifier();
             ServerPlayerEntity player = (ServerPlayerEntity) packetContext.getPlayer();
-            CraftingContainer container = (CraftingContainer) player.container;
+            Container container = player.container;
             PlayerContainer playerContainer = player.playerContainer;
-            if (type.equals(CRAFTING_TABLE_MOVE)) {
+            //            if (type.equals(CRAFTING_TABLE_MOVE)) {
+            try {
+                boolean shift = packetByteBuf.readBoolean();
+                Map<Integer, List<ItemStack>> input = Maps.newHashMap();
+                int mapSize = packetByteBuf.readInt();
+                for (int i = 0; i < mapSize; i++) {
+                    List<ItemStack> list = Lists.newArrayList();
+                    int count = packetByteBuf.readInt();
+                    for (int j = 0; j < count; j++) {
+                        list.add(packetByteBuf.readItemStack());
+                    }
+                    input.put(i, list);
+                }
                 try {
-                    boolean shift = packetByteBuf.readBoolean();
-                    Map<Integer, List<ItemStack>> input = Maps.newHashMap();
-                    int mapSize = packetByteBuf.readInt();
-                    for (int i = 0; i < mapSize; i++) {
-                        List<ItemStack> list = Lists.newArrayList();
-                        int count = packetByteBuf.readInt();
-                        for (int j = 0; j < count; j++) {
-                            list.add(packetByteBuf.readItemStack());
+                    InputSlotCrafter.start(category, container, player, input, shift);
+                } catch (NullPointerException e) {
+                    if (!(container instanceof CraftingContainer))
+                        return;
+                    PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+                    buf.writeInt(input.size());
+                    input.entrySet().stream().sorted(Comparator.comparingInt(Map.Entry::getKey)).forEach(entry -> {
+                        List<ItemStack> stacks = entry.getValue();
+                        buf.writeInt(stacks.size());
+                        for (ItemStack stack : stacks) {
+                            buf.writeItemStack(stack);
                         }
-                        input.put(i, list);
+                    });
+                    if (ServerSidePacketRegistry.INSTANCE.canPlayerReceive(player, NOT_ENOUGH_ITEMS_PACKET)) {
+                        ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, NOT_ENOUGH_ITEMS_PACKET, buf);
                     }
-                    try {
-                        InputSlotCrafter.start(container, player, input, shift);
-                    } catch (NullPointerException e) {
-                        PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-                        buf.writeInt(input.size());
-                        input.entrySet().stream().sorted(Comparator.comparingInt(Map.Entry::getKey)).forEach(entry -> {
-                            List<ItemStack> stacks = entry.getValue();
-                            buf.writeInt(stacks.size());
-                            for (ItemStack stack : stacks) {
-                                buf.writeItemStack(stack);
-                            }
-                        });
-                        if (ServerSidePacketRegistry.INSTANCE.canPlayerReceive(player, NOT_ENOUGH_ITEMS_PACKET)) {
-                            ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, NOT_ENOUGH_ITEMS_PACKET, buf);
-                        }
-                    } catch (IllegalStateException e) {
-                        player.sendMessage(new TranslatableText(e.getMessage()).formatted(Formatting.RED));
-                    } catch (Exception e) {
-                        player.sendMessage(new TranslatableText("error.rei.internal.error",e.getMessage()).formatted(Formatting.RED));
-                        e.printStackTrace();
-                    }
+                } catch (IllegalStateException e) {
+                    player.sendMessage(new TranslatableText(e.getMessage()).formatted(Formatting.RED));
                 } catch (Exception e) {
+                    player.sendMessage(new TranslatableText("error.rei.internal.error", e.getMessage()).formatted(Formatting.RED));
                     e.printStackTrace();
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+            //            }
         });
+        FabricLoader.getInstance().getEntrypoints("rei_containers", Runnable.class).forEach(Runnable::run);
     }
     
 }

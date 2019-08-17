@@ -7,8 +7,8 @@ package me.shedaniel.rei.api;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
+import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.container.Container;
@@ -33,12 +33,22 @@ public interface AutoTransferHandler {
         }
         
         static Result createFailed(String errorKey) {
-            return new ResultImpl(errorKey, new IntArrayList());
+            return new ResultImpl(errorKey, new IntArrayList(), 1744764928);
+        }
+        
+        static Result createFailedCustomButtonColor(String errorKey, int color) {
+            return new ResultImpl(errorKey, new IntArrayList(), color);
         }
         
         static Result createFailed(String errorKey, IntList redSlots) {
-            return new ResultImpl(errorKey, redSlots);
+            return new ResultImpl(errorKey, redSlots, 1744764928);
         }
+        
+        static Result createFailedCustomButtonColor(String errorKey, IntList redSlots, int color) {
+            return new ResultImpl(errorKey, redSlots, color);
+        }
+        
+        int getColor();
         
         boolean isSuccessful();
         
@@ -75,6 +85,7 @@ public interface AutoTransferHandler {
         private boolean successful, applicable;
         private String errorKey;
         private IntList integers = new IntArrayList();
+        private int color;
         
         private ResultImpl() {
             this.successful = true;
@@ -86,12 +97,18 @@ public interface AutoTransferHandler {
             this.applicable = applicable;
         }
         
-        public ResultImpl(String errorKey, IntList integers) {
+        public ResultImpl(String errorKey, IntList integers, int color) {
             this.successful = false;
             this.applicable = true;
             this.errorKey = errorKey;
             if (integers != null)
                 this.integers = integers;
+            this.color = color;
+        }
+        
+        @Override
+        public int getColor() {
+            return color;
         }
         
         @Override

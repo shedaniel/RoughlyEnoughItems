@@ -6,8 +6,11 @@
 package me.shedaniel.rei.plugin.blasting;
 
 import me.shedaniel.rei.api.RecipeDisplay;
+import me.shedaniel.rei.api.TransferRecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
+import me.shedaniel.rei.server.ContainerInfo;
 import net.minecraft.block.entity.FurnaceBlockEntity;
+import net.minecraft.container.Container;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.AbstractCookingRecipe;
@@ -20,7 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class DefaultBlastingDisplay implements RecipeDisplay {
+public class DefaultBlastingDisplay implements TransferRecipeDisplay {
     
     private BlastingRecipe display;
     private List<List<ItemStack>> input;
@@ -66,4 +69,18 @@ public class DefaultBlastingDisplay implements RecipeDisplay {
         return Optional.ofNullable(display);
     }
     
+    @Override
+    public int getWidth() {
+        return 1;
+    }
+    
+    @Override
+    public int getHeight() {
+        return 1;
+    }
+    
+    @Override
+    public List<List<ItemStack>> getOrganisedInput(ContainerInfo<Container> containerInfo, Container container) {
+        return display.getPreviewInputs().stream().map(i -> Arrays.asList(i.getStackArray())).collect(Collectors.toList());
+    }
 }

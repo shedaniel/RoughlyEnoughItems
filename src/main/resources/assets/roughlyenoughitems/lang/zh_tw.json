@@ -38,7 +38,7 @@
   "ordering.rei.name": "名稱",
   "ordering.rei.item_groups": "物品分類",
   "text.auto_craft.move_items": "移動物品",
-  "error.rei.transfer.too_small": "無法移動物品至 2x2 的方格.",
+  "error.rei.transfer.too_small": "無法移動物品至 %dx%d 的方格.",
   "error.rei.not.on.server": "REI 不在伺服器上.",
   "error.rei.not.enough.materials": "不夠材料.",
   "error.rei.internal.error": "內部錯誤: %s",

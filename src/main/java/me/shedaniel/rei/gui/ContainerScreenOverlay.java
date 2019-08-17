@@ -8,7 +8,6 @@ package me.shedaniel.rei.gui;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.cloth.api.ClientUtils;
-import me.shedaniel.clothconfig2.api.MouseUtils;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.DisplayHelper;
@@ -500,7 +499,7 @@ public class ContainerScreenOverlay extends Widget {
     
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
-        if (ScreenHelper.isOverlayVisible() && isInside(MouseUtils.getMouseLocation()))
+        if (ScreenHelper.isOverlayVisible())
             for (Element listener : widgets)
                 if (listener.keyPressed(int_1, int_2, int_3))
                     return true;
@@ -532,10 +531,9 @@ public class ContainerScreenOverlay extends Widget {
     public boolean charTyped(char char_1, int int_1) {
         if (!ScreenHelper.isOverlayVisible())
             return false;
-        if (isInside(MouseUtils.getMouseLocation()))
-            for (Element listener : widgets)
-                if (listener.charTyped(char_1, int_1))
-                    return true;
+        for (Element listener : widgets)
+            if (listener.charTyped(char_1, int_1))
+                return true;
         return false;
     }
     

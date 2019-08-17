@@ -5,64 +5,60 @@
 
 package me.shedaniel.rei.plugin.autocrafting;
 
-import com.google.common.collect.Lists;
 import io.netty.buffer.Unpooled;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
 import me.shedaniel.rei.api.AutoTransferHandler;
+import me.shedaniel.rei.api.TransferRecipeDisplay;
 import me.shedaniel.rei.listeners.RecipeBookGuiHooks;
-import me.shedaniel.rei.plugin.crafting.DefaultCraftingCategory;
-import me.shedaniel.rei.plugin.crafting.DefaultCraftingDisplay;
-import me.shedaniel.rei.plugin.crafting.DefaultShapedDisplay;
+import me.shedaniel.rei.server.ContainerInfo;
+import me.shedaniel.rei.server.ContainerInfoHandler;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.CraftingTableScreen;
-import net.minecraft.client.gui.screen.ingame.InventoryScreen;
+import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
-import net.minecraft.container.CraftingContainer;
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.container.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DefaultedList;
 import net.minecraft.util.PacketByteBuf;
 
 import java.util.List;
 
-public class AutoCraftingHandler implements AutoTransferHandler {
+public class DefaultCategoryHandler implements AutoTransferHandler {
+    
     @Override
     public Result handle(Context context) {
-        if (!(context.getRecipe() instanceof DefaultCraftingDisplay))
+        if (!(context.getRecipe() instanceof TransferRecipeDisplay))
             return Result.createNotApplicable();
-        if (!(context.getContainerScreen() instanceof CraftingTableScreen) && !(context.getContainerScreen() instanceof InventoryScreen))
+        TransferRecipeDisplay recipe = (TransferRecipeDisplay) context.getRecipe();
+        if (!ContainerInfoHandler.isCategoryHandled(recipe.getRecipeCategory()))
             return Result.createNotApplicable();
-        if (context.getContainerScreen() instanceof InventoryScreen && (((DefaultCraftingDisplay) context.getRecipe()).getWidth() > 2 || ((DefaultCraftingDisplay) context.getRecipe()).getHeight() > 2))
-            return Result.createFailed("error.rei.transfer.too_small");
+        AbstractContainerScreen<?> containerScreen = context.getContainerScreen();
+        Container container = containerScreen.getContainer();
+        ContainerInfo containerInfo = ContainerInfoHandler.getContainerInfo(recipe.getRecipeCategory(), container.getClass());
+        if (containerInfo == null)
+            return Result.createNotApplicable();
+        if (recipe.getHeight() > containerInfo.getCraftingHeight(container) || recipe.getWidth() > containerInfo.getCraftingWidth(container))
+            return Result.createFailed(I18n.translate("error.rei.transfer.too_small", containerInfo.getCraftingWidth(container), containerInfo.getCraftingHeight(container)));
         if (!canUseMovePackets())
             return Result.createFailed("error.rei.not.on.server");
-        if (!hasItems(context.getRecipe().getInput()))
-            return Result.createFailed("error.rei.not.enough.materials");
+        List<List<ItemStack>> input = recipe.getOrganisedInput(containerInfo, container);
+        IntList intList = hasItems(input);
+        if (!intList.isEmpty())
+            return Result.createFailed("error.rei.not.enough.materials", intList);
         if (!context.isActuallyCrafting())
             return Result.createSuccessful();
         
-        context.getMinecraft().openScreen(context.getContainerScreen());
-        ((RecipeBookGuiHooks) ((RecipeBookProvider) context.getContainerScreen()).getRecipeBookGui()).rei_getGhostSlots().reset();
-        DefaultCraftingDisplay display = (DefaultCraftingDisplay) context.getRecipe();
+        context.getMinecraft().openScreen(containerScreen);
+        if (containerScreen instanceof RecipeBookProvider)
+            ((RecipeBookGuiHooks) ((RecipeBookProvider) containerScreen).getRecipeBookGui()).rei_getGhostSlots().reset();
         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-        buf.writeUuid(RoughlyEnoughItemsNetwork.CRAFTING_TABLE_MOVE);
+        //        buf.writeUuid(RoughlyEnoughItemsNetwork.CRAFTING_TABLE_MOVE);
+        buf.writeIdentifier(recipe.getRecipeCategory());
         buf.writeBoolean(Screen.hasShiftDown());
-        CraftingContainer craftingContainer = (CraftingContainer) context.getContainer();
-        
-        List<List<ItemStack>> ogInput = display.getInput();
-        List<List<ItemStack>> input = Lists.newArrayListWithCapacity(craftingContainer.getCraftingWidth() * craftingContainer.getCraftingHeight());
-        for (int i = 0; i < craftingContainer.getCraftingWidth() * craftingContainer.getCraftingHeight(); i++) {
-            input.add(Lists.newArrayList());
-        }
-        for (int i = 0; i < ogInput.size(); i++) {
-            List<ItemStack> ogStacks = ogInput.get(i);
-            if (display instanceof DefaultShapedDisplay) {
-                if (!ogInput.get(i).isEmpty())
-                    input.set(DefaultCraftingCategory.getSlotWithSize(display, i), ogInput.get(i));
-            } else if (!ogInput.get(i).isEmpty())
-                input.set(i, ogInput.get(i));
-        }
         
         buf.writeInt(input.size());
         for (List<ItemStack> stacks : input) {
@@ -84,13 +80,15 @@ public class AutoCraftingHandler implements AutoTransferHandler {
         return ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.MOVE_ITEMS_PACKET);
     }
     
-    public boolean hasItems(List<List<ItemStack>> inputs) {
+    public IntList hasItems(List<List<ItemStack>> inputs) {
         // Create a clone of player's inventory, and count
         DefaultedList<ItemStack> copyMain = DefaultedList.create();
         for (ItemStack stack : MinecraftClient.getInstance().player.inventory.main) {
             copyMain.add(stack.copy());
         }
-        for (List<ItemStack> possibleStacks : inputs) {
+        IntList intList = new IntArrayList();
+        for (int i = 0; i < inputs.size(); i++) {
+            List<ItemStack> possibleStacks = inputs.get(i);
             boolean done = possibleStacks.isEmpty();
             for (ItemStack possibleStack : possibleStacks) {
                 if (!done) {
@@ -105,12 +103,14 @@ public class AutoCraftingHandler implements AutoTransferHandler {
                     }
                     if (invRequiredCount <= 0) {
                         done = true;
+                        break;
                     }
                 }
             }
-            if (!done)
-                return false;
+            if (!done) {
+                intList.add(i);
+            }
         }
-        return true;
+        return intList;
     }
 }

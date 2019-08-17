@@ -8,10 +8,7 @@ package me.shedaniel.rei.plugin;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
-import me.shedaniel.rei.plugin.autocrafting.AutoBlastingBookHandler;
-import me.shedaniel.rei.plugin.autocrafting.AutoCraftingHandler;
-import me.shedaniel.rei.plugin.autocrafting.AutoFurnaceBookHandler;
-import me.shedaniel.rei.plugin.autocrafting.AutoSmokerBookHandler;
+import me.shedaniel.rei.plugin.autocrafting.DefaultCategoryHandler;
 import net.fabricmc.loader.api.SemanticVersion;
 import net.fabricmc.loader.util.version.VersionParsingException;
 import net.minecraft.util.Identifier;
@@ -37,10 +34,9 @@ public class DefaultAutoCraftingPlugin implements REIPluginV0 {
         }
         //        recipeHelper.registerAutoCraftingHandler(new AutoCraftingTableBookHandler());
         //        recipeHelper.registerAutoCraftingHandler(new AutoInventoryBookHandler());
-        recipeHelper.registerAutoCraftingHandler(new AutoFurnaceBookHandler());
-        recipeHelper.registerAutoCraftingHandler(new AutoSmokerBookHandler());
-        recipeHelper.registerAutoCraftingHandler(new AutoBlastingBookHandler());
-        recipeHelper.registerAutoCraftingHandler(new AutoCraftingHandler());
+        //        recipeHelper.registerAutoCraftingHandler(new AutoFurnaceBookHandler());
+        //        recipeHelper.registerAutoCraftingHandler(new AutoSmokerBookHandler());
+        //        recipeHelper.registerAutoCraftingHandler(new AutoBlastingBookHandler());
+        recipeHelper.registerAutoCraftingHandler(new DefaultCategoryHandler());
     }
-    
 }
