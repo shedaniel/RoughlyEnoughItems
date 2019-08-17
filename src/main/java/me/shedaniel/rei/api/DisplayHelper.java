@@ -5,10 +5,10 @@
 
 package me.shedaniel.rei.api;
 
+import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import net.minecraft.util.ActionResult;
 
-import java.awt.*;
 import java.util.List;
 
 import static net.minecraft.util.ActionResult.PASS;

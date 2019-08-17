@@ -6,6 +6,7 @@
 package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Ordering;
+import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.listeners.AbstractInventoryScreenHooks;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
@@ -13,7 +14,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.entity.effect.StatusEffectInstance;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;

@@ -5,6 +5,7 @@
 
 package me.shedaniel.rei.api;
 
+import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.renderers.RecipeRenderer;
 import me.shedaniel.rei.gui.widget.CategoryBaseWidget;
@@ -14,7 +15,6 @@ import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.util.Identifier;
 
-import java.awt.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;

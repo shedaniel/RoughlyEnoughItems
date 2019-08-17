@@ -7,9 +7,9 @@ package me.shedaniel.rei.gui.widget;
 
 
 import com.google.common.collect.Lists;
-import me.shedaniel.cloth.api.ClientUtils;
+import me.shedaniel.math.api.Point;
+import me.shedaniel.math.impl.PointHelper;
 
-import java.awt.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -34,11 +34,11 @@ public class QueuedTooltip {
     }
     
     public static QueuedTooltip create(List<String> text) {
-        return QueuedTooltip.create(ClientUtils.getMouseLocation(), text);
+        return QueuedTooltip.create(PointHelper.fromMouse(), text);
     }
     
     public static QueuedTooltip create(String... text) {
-        return QueuedTooltip.create(ClientUtils.getMouseLocation(), text);
+        return QueuedTooltip.create(PointHelper.fromMouse(), text);
     }
     
     @Deprecated

@@ -6,6 +6,7 @@
 package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Lists;
+import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import net.minecraft.client.MinecraftClient;
@@ -13,7 +14,6 @@ import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
 import net.minecraft.client.recipe.book.ClientRecipeBook;
 import net.minecraft.container.CraftingContainer;
 
-import java.awt.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;

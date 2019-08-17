@@ -5,7 +5,7 @@
 
 package me.shedaniel.rei.api;
 
-import java.awt.*;
+import me.shedaniel.math.api.Rectangle;
 
 public interface ButtonAreaSupplier {
     

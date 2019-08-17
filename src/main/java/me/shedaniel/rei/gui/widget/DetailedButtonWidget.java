@@ -5,9 +5,8 @@
 
 package me.shedaniel.rei.gui.widget;
 
+import me.shedaniel.math.api.Rectangle;
 import net.minecraft.text.Text;
-
-import java.awt.*;
 
 public class DetailedButtonWidget extends ButtonWidget {
     

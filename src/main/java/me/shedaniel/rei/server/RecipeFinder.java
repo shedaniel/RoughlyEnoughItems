@@ -300,7 +300,7 @@ public class RecipeFinder {
                 }
             }
         }
-    
+        
         @SuppressWarnings("deprecation")
         private int method_7415() {
             int int_1 = Integer.MAX_VALUE;

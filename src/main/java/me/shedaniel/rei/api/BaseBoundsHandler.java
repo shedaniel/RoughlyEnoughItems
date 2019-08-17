@@ -5,9 +5,9 @@
 
 package me.shedaniel.rei.api;
 
+import me.shedaniel.math.api.Rectangle;
 import net.minecraft.client.gui.screen.Screen;
 
-import java.awt.*;
 import java.util.List;
 import java.util.function.Function;
 

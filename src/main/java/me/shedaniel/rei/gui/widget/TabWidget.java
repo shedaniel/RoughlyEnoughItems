@@ -6,6 +6,7 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.Renderer;
@@ -14,7 +15,6 @@ import net.minecraft.client.render.GuiLighting;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
-import java.awt.*;
 import java.util.Collections;
 import java.util.List;
 
@@ -77,7 +77,7 @@ public class TabWidget extends WidgetWithBounds {
             minecraft.getTextureManager().bindTexture(ScreenHelper.isDarkModeEnabled() ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
             this.blit(bounds.x, bounds.y + 2, selected ? 28 : 0, 192, 28, (selected ? 30 : 27));
             renderer.setBlitOffset(100);
-            renderer.render((int) bounds.getCenterX(), (int) bounds.getCenterY(), mouseX, mouseY, delta);
+            renderer.render(bounds.getCenterX(), bounds.getCenterY(), mouseX, mouseY, delta);
             if (containsMouse(mouseX, mouseY)) {
                 drawTooltip();
             }

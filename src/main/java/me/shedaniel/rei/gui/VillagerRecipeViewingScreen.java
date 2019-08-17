@@ -9,7 +9,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.zeitheron.hammercore.client.utils.Scissors;
-import me.shedaniel.cloth.api.ClientUtils;
+import me.shedaniel.math.api.Point;
+import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.gui.renderers.RecipeRenderer;
@@ -31,7 +33,6 @@ import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
 
-import java.awt.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -276,7 +277,7 @@ public class VillagerRecipeViewingScreen extends Screen {
         for (Element listener : children())
             if (listener.mouseScrolled(double_1, double_2, double_3))
                 return true;
-        if (bounds.contains(ClientUtils.getMouseLocation())) {
+        if (bounds.contains(PointHelper.fromMouse())) {
             if (double_3 < 0 && categoryMap.get(categories.get(selectedCategoryIndex)).size() > 1) {
                 selectedRecipeIndex++;
                 if (selectedRecipeIndex >= categoryMap.get(categories.get(selectedCategoryIndex)).size())
@@ -393,10 +394,6 @@ public class VillagerRecipeViewingScreen extends Screen {
             }
         }
         return super.mouseDragged(mouseX, mouseY, int_1, double_3, double_4);
-    }
-    
-    private int getReal(int i) {
-        return (int) (i / ((double) minecraft.window.getScaledWidth() / (double) minecraft.window.getWidth()));
     }
     
     @Override

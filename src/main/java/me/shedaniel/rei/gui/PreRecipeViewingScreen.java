@@ -6,6 +6,7 @@
 package me.shedaniel.rei.gui;
 
 import com.google.common.collect.Lists;
+import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.RecipeCategory;
@@ -27,7 +28,6 @@ import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
-import java.awt.*;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;

@@ -5,12 +5,12 @@
 
 package me.shedaniel.rei.gui.widget;
 
-import me.shedaniel.cloth.api.ClientUtils;
+import me.shedaniel.math.api.Point;
+import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.impl.PointHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.Window;
-
-import java.awt.*;
 
 public abstract class DraggableWidget extends WidgetWithBounds {
     
@@ -40,7 +40,7 @@ public abstract class DraggableWidget extends WidgetWithBounds {
     
     @Override
     public boolean mouseDragged(double double_1, double double_2, int int_1, double double_3, double double_4) {
-        Point mouse = ClientUtils.getMouseLocation();
+        Point mouse = PointHelper.fromMouse();
         if (int_1 == 0) {
             if (!dragged) {
                 if (getGrabBounds().contains(mouse)) {

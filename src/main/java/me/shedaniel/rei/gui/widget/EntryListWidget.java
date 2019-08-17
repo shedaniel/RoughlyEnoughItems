@@ -8,8 +8,9 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.zeitheron.hammercore.client.utils.Scissors;
-import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.clothconfig2.api.RunSixtyTimesEverySec;
+import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.gui.config.ItemCheatingMode;
@@ -31,8 +32,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 import org.apache.commons.lang3.StringUtils;
 
-import java.awt.*;
-import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -265,7 +264,7 @@ public class EntryListWidget extends Widget {
             Scissors.end();
         GlStateManager.popMatrix();
         ClientPlayerEntity player = minecraft.player;
-        if (rectangle.contains(ClientUtils.getMouseLocation()) && ClientHelper.getInstance().isCheating() && !player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
+        if (rectangle.contains(PointHelper.fromMouse()) && ClientHelper.getInstance().isCheating() && !player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
             ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.delete_items")));
     }
     
@@ -276,9 +275,9 @@ public class EntryListWidget extends Widget {
         calculateListSize(rectangle);
         if (currentDisplayed.isEmpty() || processSearchTerm)
             currentDisplayed = processSearchTerm(searchTerm, RoughlyEnoughItemsCore.getEntryRegistry().getEntryList(), new ArrayList<>(ScreenHelper.inventoryStacks));
-        int startX = (int) rectangle.getCenterX() - width * 9;
-        int startY = (int) rectangle.getCenterY() - height * 9;
-        this.listArea = new Rectangle((int) startX, (int) startY, width * 18, height * 18);
+        int startX = rectangle.getCenterX() - width * 9;
+        int startY = rectangle.getCenterY() - height * 9;
+        this.listArea = new Rectangle(startX, startY, width * 18, height * 18);
         int fitSlotsPerPage = getTotalFitSlotsPerPage(startX, startY, listArea);
         int j = page * fitSlotsPerPage;
         if (RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled()) {
@@ -371,7 +370,7 @@ public class EntryListWidget extends Widget {
     
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
-        if (rectangle.contains(ClientUtils.getMouseLocation()))
+        if (rectangle.contains(PointHelper.fromMouse()))
             for (Widget widget : widgets)
                 if (widget.keyPressed(int_1, int_2, int_3))
                     return true;

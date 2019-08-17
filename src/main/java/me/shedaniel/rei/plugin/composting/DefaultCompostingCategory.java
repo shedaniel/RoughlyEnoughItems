@@ -7,6 +7,8 @@ package me.shedaniel.rei.plugin.composting;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
+import me.shedaniel.math.api.Point;
+import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.gui.renderers.RecipeRenderer;
@@ -23,7 +25,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
-import java.awt.*;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -78,7 +79,7 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
         int i = 0;
         for (int y = 0; y < 6; y++)
             for (int x = 0; x < 8; x++) {
-                widgets.add(new SlotWidget((int) bounds.getCenterX() - 72 + x * 18, bounds.y + y * 18, stacks.size() > i ? Renderer.fromItemStack(stacks.get(i).asItem().getStackForRender()) : Renderer.empty(), true, true, true) {
+                widgets.add(new SlotWidget(bounds.getCenterX() - 72 + x * 18, bounds.y + y * 18, stacks.size() > i ? Renderer.fromItemStack(stacks.get(i).asItem().getStackForRender()) : Renderer.empty(), true, true, true) {
                     @Override
                     protected List<String> getExtraItemToolTips(ItemStack stack) {
                         final List<String>[] thing = new List[]{null};
@@ -93,7 +94,7 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
                 });
                 i++;
             }
-        widgets.add(new SlotWidget((int) startingPoint.x + 34, startingPoint.y + 5, Renderer.fromItemStacks(recipeDisplaySupplier.get().getOutput()), false, true, true));
+        widgets.add(new SlotWidget(startingPoint.x + 34, startingPoint.y + 5, Renderer.fromItemStacks(recipeDisplaySupplier.get().getOutput()), false, true, true));
         return widgets;
     }
     
