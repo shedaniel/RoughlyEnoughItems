@@ -6,6 +6,7 @@
 package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
+import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.BaseBoundsHandler;
 import me.shedaniel.rei.api.DisplayHelper;
@@ -14,7 +15,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Pair;
 
-import java.awt.*;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;

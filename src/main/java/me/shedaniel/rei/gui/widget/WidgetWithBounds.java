@@ -5,11 +5,12 @@
 
 package me.shedaniel.rei.gui.widget;
 
-import java.awt.*;
+import me.shedaniel.math.api.Point;
+import me.shedaniel.math.api.Rectangle;
 
 public abstract class WidgetWithBounds extends Widget {
     
-    abstract public Shape getBounds();
+    abstract public Rectangle getBounds();
     
     public final boolean containsMouse(int mouseX, int mouseY) {
         return containsMouse((double) mouseX, (double) mouseY);

@@ -7,6 +7,7 @@ package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.DisplayHelper;
 import me.shedaniel.rei.api.Entry;
@@ -55,8 +56,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 
-import java.awt.*;
-import java.util.List;
 import java.util.*;
 
 public class DefaultPlugin implements REIPluginV0 {
@@ -303,7 +302,7 @@ public class DefaultPlugin implements REIPluginV0 {
         recipeHelper.registerWorkingStations(STONE_CUTTING, new ItemStack(Items.STONECUTTER));
         recipeHelper.registerWorkingStations(COMPOSTING, new ItemStack(Items.COMPOSTER));
         recipeHelper.registerSpeedCraftButtonArea(COMPOSTING, bounds -> null);
-        recipeHelper.registerSpeedCraftButtonArea(DefaultPlugin.CAMPFIRE, bounds -> new Rectangle((int) bounds.getMaxX() - 16, bounds.y + 6, 10, 10));
+        recipeHelper.registerSpeedCraftButtonArea(DefaultPlugin.CAMPFIRE, bounds -> new Rectangle(bounds.getMaxX() - 16, bounds.y + 6, 10, 10));
         recipeHelper.registerScreenClickArea(new Rectangle(88, 32, 28, 23), CraftingTableScreen.class, CRAFTING);
         recipeHelper.registerScreenClickArea(new Rectangle(137, 29, 10, 13), InventoryScreen.class, CRAFTING);
         recipeHelper.registerScreenClickArea(new Rectangle(97, 16, 14, 30), BrewingStandScreen.class, BREWING);

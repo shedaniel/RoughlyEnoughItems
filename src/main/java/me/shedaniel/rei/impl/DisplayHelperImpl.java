@@ -7,10 +7,10 @@ package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.BaseBoundsHandler;
 import me.shedaniel.rei.api.DisplayHelper;
 
-import java.awt.*;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;

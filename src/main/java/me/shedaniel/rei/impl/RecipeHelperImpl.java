@@ -7,6 +7,7 @@ package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
@@ -20,8 +21,6 @@ import net.minecraft.recipe.RecipeManager;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 
-import java.awt.*;
-import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -198,7 +197,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     @Override
     public Optional<ButtonAreaSupplier> getSpeedCraftButtonArea(RecipeCategory category) {
         if (!speedCraftAreaSupplierMap.containsKey(category.getIdentifier()))
-            return Optional.ofNullable(bounds -> new Rectangle((int) bounds.getMaxX() - 16, (int) bounds.getMaxY() - 16, 10, 10));
+            return Optional.ofNullable(bounds -> new Rectangle(bounds.getMaxX() - 16, bounds.getMaxY() - 16, 10, 10));
         return Optional.ofNullable(speedCraftAreaSupplierMap.get(category.getIdentifier()));
     }
     
@@ -214,7 +213,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     @SuppressWarnings("deprecation")
     @Override
     public void registerDefaultSpeedCraftButtonArea(Identifier category) {
-        registerSpeedCraftButtonArea(category, bounds -> new Rectangle((int) bounds.getMaxX() - 16, (int) bounds.getMaxY() - 16, 10, 10));
+        registerSpeedCraftButtonArea(category, bounds -> new Rectangle(bounds.getMaxX() - 16, bounds.getMaxY() - 16, 10, 10));
     }
     
     @SuppressWarnings("deprecation")

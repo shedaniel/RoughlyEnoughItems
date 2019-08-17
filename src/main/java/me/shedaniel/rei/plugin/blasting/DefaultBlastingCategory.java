@@ -7,6 +7,8 @@ package me.shedaniel.rei.plugin.blasting;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import it.unimi.dsi.fastutil.ints.IntList;
+import me.shedaniel.math.api.Point;
+import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.api.TransferRecipeCategory;
 import me.shedaniel.rei.gui.renderers.RecipeRenderer;
@@ -24,7 +26,6 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
-import java.awt.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -56,7 +57,7 @@ public class DefaultBlastingCategory implements TransferRecipeCategory<DefaultBl
     @Override
     public List<Widget> setupDisplay(Supplier<DefaultBlastingDisplay> recipeDisplaySupplier, Rectangle bounds) {
         final DefaultBlastingDisplay recipeDisplay = recipeDisplaySupplier.get();
-        Point startPoint = new Point((int) bounds.getCenterX() - 41, (int) bounds.getCenterY() - 27);
+        Point startPoint = new Point(bounds.getCenterX() - 41, bounds.getCenterY() - 27);
         List<Widget> widgets = new LinkedList<>(Arrays.asList(new RecipeBaseWidget(bounds) {
             @Override
             public void render(int mouseX, int mouseY, float delta) {
@@ -85,7 +86,7 @@ public class DefaultBlastingCategory implements TransferRecipeCategory<DefaultBl
     
     @Override
     public void renderRedSlots(List<Widget> widgets, Rectangle bounds, DefaultBlastingDisplay display, IntList redSlots) {
-        Point startPoint = new Point((int) bounds.getCenterX() - 41, (int) bounds.getCenterY() - 27);
+        Point startPoint = new Point(bounds.getCenterX() - 41, bounds.getCenterY() - 27);
         GlStateManager.translatef(0, 0, 400);
         if (redSlots.contains(0)) {
             DrawableHelper.fill(startPoint.x + 1, startPoint.y + 1, startPoint.x + 1 + 16, startPoint.y + 1 + 16, 0x30ff0000);

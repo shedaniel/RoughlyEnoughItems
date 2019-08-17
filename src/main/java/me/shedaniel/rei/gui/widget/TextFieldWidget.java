@@ -7,6 +7,7 @@ package me.shedaniel.rei.gui.widget;
 
 import com.google.common.base.Predicates;
 import com.mojang.blaze3d.platform.GlStateManager;
+import me.shedaniel.math.api.Rectangle;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.BufferBuilder;
@@ -14,7 +15,6 @@ import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.util.math.MathHelper;
 
-import java.awt.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;

@@ -6,6 +6,8 @@
 package me.shedaniel.rei.plugin.stripping;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import me.shedaniel.math.api.Point;
+import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
@@ -19,7 +21,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
 
-import java.awt.*;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -44,7 +45,7 @@ public class DefaultStrippingCategory implements RecipeCategory<DefaultStripping
     
     @Override
     public List<Widget> setupDisplay(Supplier<DefaultStrippingDisplay> recipeDisplaySupplier, Rectangle bounds) {
-        Point startPoint = new Point((int) bounds.getCenterX() - 41, (int) bounds.getCenterY() - 13);
+        Point startPoint = new Point(bounds.getCenterX() - 41, bounds.getCenterY() - 13);
         List<Widget> widgets = new LinkedList<>(Arrays.asList(new RecipeBaseWidget(bounds) {
             @Override
             public void render(int mouseX, int mouseY, float delta) {

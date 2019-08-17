@@ -5,9 +5,8 @@
 
 package me.shedaniel.rei.gui.widget;
 
+import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.impl.ScreenHelper;
-
-import java.awt.*;
 
 public class SlotBaseWidget extends RecipeBaseWidget {
     

@@ -7,6 +7,8 @@ package me.shedaniel.rei.gui.widget;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import it.unimi.dsi.fastutil.ints.IntList;
+import me.shedaniel.math.api.Point;
+import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
@@ -15,7 +17,6 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
-import java.awt.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;

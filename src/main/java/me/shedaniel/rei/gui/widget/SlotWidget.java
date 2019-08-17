@@ -7,7 +7,8 @@ package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
-import me.shedaniel.cloth.api.ClientUtils;
+import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.Renderer;
@@ -21,7 +22,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 
-import java.awt.*;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -253,7 +253,7 @@ public class SlotWidget extends WidgetWithBounds {
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (!clickToMoreRecipes)
             return false;
-        if (isCurrentRendererItem() && getBounds().contains(ClientUtils.getMouseLocation()))
+        if (isCurrentRendererItem() && getBounds().contains(PointHelper.fromMouse()))
             if (ClientHelper.getInstance().getRecipeKeyBinding().matchesKey(int_1, int_2))
                 return ClientHelper.getInstance().executeRecipeKeyBind(getCurrentItemStack());
             else if (ClientHelper.getInstance().getUsageKeyBinding().matchesKey(int_1, int_2))

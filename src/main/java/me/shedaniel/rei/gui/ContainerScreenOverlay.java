@@ -7,7 +7,9 @@ package me.shedaniel.rei.gui;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
-import me.shedaniel.cloth.api.ClientUtils;
+import me.shedaniel.math.api.Point;
+import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.DisplayHelper;
@@ -37,8 +39,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameMode;
 
-import java.awt.*;
-import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -478,7 +478,7 @@ public class ContainerScreenOverlay extends Widget {
     public boolean mouseScrolled(double i, double j, double amount) {
         if (!ScreenHelper.isOverlayVisible())
             return false;
-        if (isInside(ClientUtils.getMouseLocation())) {
+        if (isInside(PointHelper.fromMouse())) {
             if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled()) {
                 if (amount > 0 && buttonLeft.enabled)
                     buttonLeft.onPressed();

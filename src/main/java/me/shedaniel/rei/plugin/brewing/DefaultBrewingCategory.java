@@ -6,6 +6,8 @@
 package me.shedaniel.rei.plugin.brewing;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import me.shedaniel.math.api.Point;
+import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
@@ -22,7 +24,6 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
-import java.awt.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -49,7 +50,7 @@ public class DefaultBrewingCategory implements RecipeCategory<DefaultBrewingDisp
     @Override
     public List<Widget> setupDisplay(Supplier<DefaultBrewingDisplay> recipeDisplaySupplier, Rectangle bounds) {
         final DefaultBrewingDisplay recipeDisplay = recipeDisplaySupplier.get();
-        Point startPoint = new Point((int) bounds.getCenterX() - 52, (int) bounds.getCenterY() - 29);
+        Point startPoint = new Point(bounds.getCenterX() - 52, bounds.getCenterY() - 29);
         List<Widget> widgets = new LinkedList<>(Arrays.asList(new RecipeBaseWidget(bounds) {
             @Override
             public void render(int mouseX, int mouseY, float delta) {

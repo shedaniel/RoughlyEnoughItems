@@ -5,10 +5,10 @@
 
 package me.shedaniel.rei.gui.widget;
 
+import me.shedaniel.math.api.Point;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.util.Formatting;
 
-import java.awt.*;
 import java.util.Optional;
 
 public abstract class ClickableLabelWidget extends LabelWidget {

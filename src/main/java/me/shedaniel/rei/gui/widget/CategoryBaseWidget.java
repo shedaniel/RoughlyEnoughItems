@@ -5,7 +5,7 @@
 
 package me.shedaniel.rei.gui.widget;
 
-import java.awt.*;
+import me.shedaniel.math.api.Rectangle;
 
 public class CategoryBaseWidget extends RecipeBaseWidget {
     

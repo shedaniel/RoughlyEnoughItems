@@ -5,6 +5,7 @@
 
 package me.shedaniel.rei.api;
 
+import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.item.ItemStack;
@@ -12,7 +13,6 @@ import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.util.Identifier;
 
-import java.awt.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
