@@ -117,7 +117,7 @@
   "config.roughlyenoughitems.registerRecipesInAnotherThread.boolean.true": "New REI Thread",
   "config.roughlyenoughitems.registerRecipesInAnotherThread.boolean.false": "§cPacket Thread",
   "config.roughlyenoughitems.weatherCommand": "Weather Command:",
-  "config.roughlyenoughitems.itemListOrdering": "Item List Ordering:",
+  "config.roughlyenoughitems.itemListOrdering": "Entry List Ordering:",
   "config.roughlyenoughitems.list_ordering_button": "%s [%s]",
   "config.roughlyenoughitems.recipeScreenType": "Recipe Screen Type:",
   "config.roughlyenoughitems.recipeScreenType.unset": "Not Set",
@@ -126,6 +126,9 @@
   "config.roughlyenoughitems.itemCheatingMode": "Item Cheating Amount:",
   "config.roughlyenoughitems.itemCheatingMode.rei_like": "Normal",
   "config.roughlyenoughitems.itemCheatingMode.jei_like": "Inverted",
-  "config.roughlyenoughitems.appendModNames": "Append Mod Names",
+  "config.roughlyenoughitems.appendModNames": "Append Mod Names:",
+  "config.roughlyenoughitems.scrollingEntryListWidget": "Entry List Action:",
+  "config.roughlyenoughitems.scrollingEntryListWidget.boolean.true": "Scrolled",
+  "config.roughlyenoughitems.scrollingEntryListWidget.boolean.false": "Paginated",
   "text.rei.credit.text": "§lRoughly Enough Items (v%s)\n§7Originally a fork for Almost Enough Items.\n\n§lDevelopers\n  Originally by ZenDarva\n  Rewritten by Danielshe\n  Old Plugin Support by TehNut\n\n§lLanguage Translation\n%s\n\n§lLicense\n§7Roughly Enough Items is licensed with MIT."
 }
