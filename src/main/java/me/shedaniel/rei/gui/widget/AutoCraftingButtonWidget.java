@@ -6,9 +6,8 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import me.shedaniel.rei.api.AutoTransferHandler;
-import me.shedaniel.rei.api.RecipeDisplay;
-import me.shedaniel.rei.api.RecipeHelper;
+import it.unimi.dsi.fastutil.ints.IntList;
+import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.client.resource.language.I18n;
@@ -28,15 +27,19 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
     private String errorTooltip;
     private List<Widget> setupDisplay;
     private AbstractContainerScreen<?> containerScreen;
-    private  boolean visible = false;
+    private boolean visible = false;
+    private RecipeCategory<?> category;
+    private Rectangle displayBounds;
     
-    public AutoCraftingButtonWidget(Rectangle rectangle, String text, Supplier<RecipeDisplay> displaySupplier, List<Widget> setupDisplay) {
+    public AutoCraftingButtonWidget(Rectangle displayBounds, Rectangle rectangle, String text, Supplier<RecipeDisplay> displaySupplier, List<Widget> setupDisplay, RecipeCategory<?> recipeCategory) {
         super(rectangle, text);
+        this.displayBounds = displayBounds;
         this.displaySupplier = () -> displaySupplier.get();
         Optional<Identifier> recipe = displaySupplier.get().getRecipeLocation();
         extraTooltip = recipe.isPresent() ? I18n.translate("text.rei.recipe_id", Formatting.GRAY.toString(), recipe.get().toString()) : "";
         this.containerScreen = ScreenHelper.getLastContainerScreen();
         this.setupDisplay = setupDisplay;
+        this.category = recipeCategory;
     }
     
     @Override
@@ -60,6 +63,7 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
         String error = null;
         int color = 0;
         visible = false;
+        IntList redSlots = null;
         AutoTransferHandler.Context context = AutoTransferHandler.Context.create(false, containerScreen, displaySupplier.get());
         for (AutoTransferHandler autoTransferHandler : RecipeHelper.getInstance().getSortedAutoCraftingHandler()) {
             try {
@@ -73,13 +77,19 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
                 } else if (error == null) {
                     error = result.getErrorKey();
                     color = result.getColor();
+                    redSlots = result.getIntegers();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        if (!visible)
+        if (!visible) {
             enabled = false;
+            error = "error.rei.no.handlers.applicable";
+        }
+        if (isHovered(mouseX, mouseY) && category instanceof TransferRecipeCategory && redSlots != null) {
+            ((TransferRecipeCategory<RecipeDisplay>) category).renderRedSlots(setupDisplay, displayBounds, displaySupplier.get(), redSlots);
+        }
         errorTooltip = error;
         int x = getBounds().x, y = getBounds().y, width = getBounds().width, height = getBounds().height;
         minecraft.getTextureManager().bindTexture(ScreenHelper.isDarkModeEnabled() ? BUTTON_LOCATION_DARK : BUTTON_LOCATION);
@@ -107,7 +117,7 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
         int colour = 14737632;
         if (!this.visible) {
             colour = 10526880;
-        } else  if (enabled && isHovered(mouseX, mouseY)) {
+        } else if (enabled && isHovered(mouseX, mouseY)) {
             colour = 16777120;
         }
         
@@ -123,7 +133,7 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
     
     @Override
     protected int getTextureId(boolean boolean_1) {
-        return !visible ? 0 :boolean_1 && enabled ? 2 : 1;
+        return !visible ? 0 : boolean_1 && enabled ? 2 : 1;
     }
     
     @Override

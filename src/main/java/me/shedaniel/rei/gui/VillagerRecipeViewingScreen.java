@@ -132,7 +132,7 @@ public class VillagerRecipeViewingScreen extends Screen {
         this.widgets.addAll(setupDisplay);
         Optional<ButtonAreaSupplier> supplier = RecipeHelper.getInstance().getSpeedCraftButtonArea(category);
         if (supplier.isPresent() && supplier.get().get(recipeBounds) != null)
-            this.widgets.add(new AutoCraftingButtonWidget(supplier.get().get(recipeBounds), supplier.get().getButtonText(), () -> display, setupDisplay));
+            this.widgets.add(new AutoCraftingButtonWidget(recipeBounds, supplier.get().get(recipeBounds), supplier.get().getButtonText(), () -> display, setupDisplay, category));
         
         int index = 0;
         for (RecipeDisplay recipeDisplay : categoryMap.get(category)) {
@@ -270,7 +270,7 @@ public class VillagerRecipeViewingScreen extends Screen {
             if (scrollBarAlphaFuture == 0)
                 scrollBarAlphaFuture = 1f;
             if (System.currentTimeMillis() - scrollBarAlphaFutureTime > 300f)
-            scrollBarAlphaFutureTime = System.currentTimeMillis();
+                scrollBarAlphaFutureTime = System.currentTimeMillis();
             return true;
         }
         for (Element listener : children())

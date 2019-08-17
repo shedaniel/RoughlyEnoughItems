@@ -6,8 +6,9 @@
 package me.shedaniel.rei.plugin.blasting;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import me.shedaniel.rei.api.RecipeCategory;
+import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.rei.api.Renderer;
+import me.shedaniel.rei.api.TransferRecipeCategory;
 import me.shedaniel.rei.gui.renderers.RecipeRenderer;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.SlotWidget;
@@ -15,6 +16,7 @@ import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.ItemStack;
@@ -29,7 +31,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class DefaultBlastingCategory implements RecipeCategory<DefaultBlastingDisplay> {
+public class DefaultBlastingCategory implements TransferRecipeCategory<DefaultBlastingDisplay> {
     
     @Override
     public Identifier getIdentifier() {
@@ -79,6 +81,16 @@ public class DefaultBlastingCategory implements RecipeCategory<DefaultBlastingDi
         });
         widgets.add(new SlotWidget(startPoint.x + 61, startPoint.y + 19, Renderer.fromItemStacks(recipeDisplay.getOutput()), false, true, true));
         return widgets;
+    }
+    
+    @Override
+    public void renderRedSlots(List<Widget> widgets, Rectangle bounds, DefaultBlastingDisplay display, IntList redSlots) {
+        Point startPoint = new Point((int) bounds.getCenterX() - 41, (int) bounds.getCenterY() - 27);
+        GlStateManager.translatef(0, 0, 400);
+        if (redSlots.contains(0)) {
+            DrawableHelper.fill(startPoint.x + 1, startPoint.y + 1, startPoint.x + 1 + 16, startPoint.y + 1 + 16, 0x30ff0000);
+        }
+        GlStateManager.translatef(0, 0, -400);
     }
     
 }

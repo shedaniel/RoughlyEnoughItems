@@ -55,6 +55,8 @@ public interface AutoTransferHandler {
         boolean isApplicable();
         
         String getErrorKey();
+        
+        IntList getIntegers();
     }
     
     public interface Context {
@@ -124,6 +126,11 @@ public interface AutoTransferHandler {
         @Override
         public String getErrorKey() {
             return errorKey;
+        }
+        
+        @Override
+        public IntList getIntegers() {
+            return integers;
         }
     }
     

@@ -62,6 +62,7 @@ public abstract class Renderer extends DrawableHelper {
     public static ItemStackRenderer fromItemStack(ItemStack stack) {
         return fromItemStackSupplier(() -> stack);
     }
+    
     public static FluidRenderer fromFluid(Fluid fluid) {
         return new FluidRenderer() {
             @Override

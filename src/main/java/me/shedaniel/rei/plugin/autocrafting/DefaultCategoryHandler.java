@@ -56,7 +56,6 @@ public class DefaultCategoryHandler implements AutoTransferHandler {
         if (containerScreen instanceof RecipeBookProvider)
             ((RecipeBookGuiHooks) ((RecipeBookProvider) containerScreen).getRecipeBookGui()).rei_getGhostSlots().reset();
         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-        //        buf.writeUuid(RoughlyEnoughItemsNetwork.CRAFTING_TABLE_MOVE);
         buf.writeIdentifier(recipe.getRecipeCategory());
         buf.writeBoolean(Screen.hasShiftDown());
         

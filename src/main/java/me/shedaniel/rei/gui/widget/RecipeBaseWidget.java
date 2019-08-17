@@ -7,8 +7,8 @@ package me.shedaniel.rei.gui.widget;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
+import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.util.Identifier;
 

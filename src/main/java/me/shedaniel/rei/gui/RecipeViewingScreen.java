@@ -10,8 +10,8 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.gui.widget.*;
+import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
@@ -281,7 +281,7 @@ public class RecipeViewingScreen extends Screen {
             List<Widget> setupDisplay = selectedCategory.setupDisplay(displaySupplier, displayBounds);
             this.widgets.addAll(setupDisplay);
             if (supplier.isPresent() && supplier.get().get(displayBounds) != null)
-                this.widgets.add(new AutoCraftingButtonWidget(supplier.get().get(displayBounds), supplier.get().getButtonText(), displaySupplier, setupDisplay));
+                this.widgets.add(new AutoCraftingButtonWidget(displayBounds, supplier.get().get(displayBounds), supplier.get().getButtonText(), displaySupplier, setupDisplay, selectedCategory));
         }
         if (choosePageActivated)
             recipeChoosePageWidget = new RecipeChoosePageWidget(this, page, getTotalPages(selectedCategory));

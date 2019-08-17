@@ -33,7 +33,6 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
     public static final Identifier CREATE_ITEMS_MESSAGE_PACKET = new Identifier("roughlyenoughitems", "ci_msg");
     public static final Identifier MOVE_ITEMS_PACKET = new Identifier("roughlyenoughitems", "move_items");
     public static final Identifier NOT_ENOUGH_ITEMS_PACKET = new Identifier("roughlyenoughitems", "og_not_enough");
-    //    public static final UUID CRAFTING_TABLE_MOVE = UUID.fromString("190c2b2d-d1f6-4149-a4a8-62860189403e");
     
     @Override
     public void onInitialize() {
@@ -59,12 +58,10 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
                 player.addChatMessage(new TranslatableText("text.rei.failed_cheat_items"), false);
         });
         ServerSidePacketRegistry.INSTANCE.register(MOVE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
-            //            UUID type = packetByteBuf.readUuid();
             Identifier category = packetByteBuf.readIdentifier();
             ServerPlayerEntity player = (ServerPlayerEntity) packetContext.getPlayer();
             Container container = player.container;
             PlayerContainer playerContainer = player.playerContainer;
-            //            if (type.equals(CRAFTING_TABLE_MOVE)) {
             try {
                 boolean shift = packetByteBuf.readBoolean();
                 Map<Integer, List<ItemStack>> input = Maps.newHashMap();
