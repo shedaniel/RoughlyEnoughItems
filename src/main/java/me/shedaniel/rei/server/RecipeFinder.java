@@ -124,6 +124,7 @@ public class RecipeFinder {
             
         }
         
+        @SuppressWarnings("deprecation")
         public boolean find(int int_1, @Nullable IntList intList_1) {
             if (int_1 <= 0) {
                 return true;
@@ -299,7 +300,8 @@ public class RecipeFinder {
                 }
             }
         }
-        
+    
+        @SuppressWarnings("deprecation")
         private int method_7415() {
             int int_1 = Integer.MAX_VALUE;
             Iterator var2 = this.ingredients.iterator();
