@@ -103,6 +103,7 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
         }
     }
     
+    @SuppressWarnings("deprecation")
     protected void fillInputSlots(RecipeFinder recipeFinder, DefaultedList<Ingredient> ingredients, boolean boolean_1) {
         //        boolean boolean_2 = this.craftingContainer.matches(recipe_1);
         boolean boolean_2 = true;

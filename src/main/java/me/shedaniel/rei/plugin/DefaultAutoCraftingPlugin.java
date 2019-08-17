@@ -24,7 +24,7 @@ public class DefaultAutoCraftingPlugin implements REIPluginV0 {
     
     @Override
     public SemanticVersion getMinimumVersion() throws VersionParsingException {
-        return SemanticVersion.parse("2.11");
+        return SemanticVersion.parse("3.0-pre");
     }
     
     @Override

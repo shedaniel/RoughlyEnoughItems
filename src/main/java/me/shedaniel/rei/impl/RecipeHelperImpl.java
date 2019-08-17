@@ -252,7 +252,7 @@ public class RecipeHelperImpl implements RecipeHelper {
                 if (plugin instanceof REIPluginV0) {
                     if (reiVersion instanceof SemanticVersion)
                         if (((REIPluginV0) plugin).getMinimumVersion().compareTo((SemanticVersion) reiVersion) > 0) {
-                            throw new IllegalStateException("Requires " + ((REIPluginV0) plugin).getMinimumVersion().getFriendlyString() + " REI version!");
+                            throw new IllegalStateException("Requires " + ((REIPluginV0) plugin).getMinimumVersion().getFriendlyString() + " version of REI!");
                         }
                     ((REIPluginV0) plugin).registerPluginCategories(this);
                     ((REIPluginV0) plugin).registerRecipeDisplays(this);
