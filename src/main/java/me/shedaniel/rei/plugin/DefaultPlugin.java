@@ -90,7 +90,7 @@ public class DefaultPlugin implements REIPluginV0 {
     
     @Override
     public SemanticVersion getMinimumVersion() throws VersionParsingException {
-        return SemanticVersion.parse("2.10");
+        return SemanticVersion.parse("2.11");
     }
     
     @Override

@@ -15,12 +15,6 @@ public interface RecipeGridAligner<T> {
     default void alignRecipeToGrid(int int_1, int int_2, int int_3, DefaultedList<Ingredient> recipe_1, Iterator<T> iterator_1, int int_4) {
         int int_5 = int_1;
         int int_6 = int_2;
-        //      if (recipe_1 instanceof ShapedRecipe) {
-        //         ShapedRecipe shapedRecipe_1 = (ShapedRecipe)recipe_1;
-        //         int_5 = shapedRecipe_1.getWidth();
-        //         int_6 = shapedRecipe_1.getHeight();
-        //      }
-        
         int int_7 = 0;
         
         for (int int_8 = 0; int_8 < int_2; ++int_8) {
