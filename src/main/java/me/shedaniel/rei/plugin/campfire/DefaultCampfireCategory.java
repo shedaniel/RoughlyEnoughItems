@@ -10,6 +10,7 @@ import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.Renderer;
+import me.shedaniel.rei.gui.widget.RecipeArrowWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.SlotWidget;
 import me.shedaniel.rei.gui.widget.Widget;
@@ -58,13 +59,12 @@ public class DefaultCampfireCategory implements RecipeCategory<DefaultCampfireDi
                 blit(startPoint.x, startPoint.y, 0, 167, 82, 54);
                 int height = MathHelper.ceil((System.currentTimeMillis() / 250 % 14d) / 1f);
                 blit(startPoint.x + 2, startPoint.y + 31 + (14 - height), 82, 77 + (14 - height), 14, height);
-                int width = MathHelper.ceil((System.currentTimeMillis() / 250 % 24d) / 1f);
-                blit(startPoint.x + 24, startPoint.y + 18, 82, 91, width, 17);
                 String text = I18n.translate("category.rei.campfire.time", MathHelper.floor(recipeDisplaySupplier.get().getCookTime() / 20d));
                 int length = MinecraftClient.getInstance().textRenderer.getStringWidth(text);
                 MinecraftClient.getInstance().textRenderer.draw(text, bounds.x + bounds.width - length - 5, startPoint.y + 54 - 8, ScreenHelper.isDarkModeEnabled() ? 0xFFBBBBBB : 0xFF404040);
             }
         }));
+        widgets.add(new RecipeArrowWidget(startPoint.x + 24, startPoint.y + 18, true));
         widgets.add(new SlotWidget(startPoint.x + 1, startPoint.y + 11, Renderer.fromItemStacks(recipeDisplaySupplier.get().getInput().get(0)), true, true, true));
         widgets.add(new SlotWidget(startPoint.x + 61, startPoint.y + 19, Renderer.fromItemStacks(recipeDisplaySupplier.get().getOutput()), false, true, true));
         return widgets;

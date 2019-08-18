@@ -195,14 +195,14 @@ public class RecipeHelperImpl implements RecipeHelper {
     }
     
     @Override
-    public Optional<ButtonAreaSupplier> getSpeedCraftButtonArea(RecipeCategory category) {
+    public Optional<ButtonAreaSupplier> getAutoCraftButtonArea(RecipeCategory category) {
         if (!speedCraftAreaSupplierMap.containsKey(category.getIdentifier()))
             return Optional.ofNullable(bounds -> new Rectangle(bounds.getMaxX() - 16, bounds.getMaxY() - 16, 10, 10));
         return Optional.ofNullable(speedCraftAreaSupplierMap.get(category.getIdentifier()));
     }
     
     @Override
-    public void registerSpeedCraftButtonArea(Identifier category, ButtonAreaSupplier rectangle) {
+    public void registerAutoCraftButtonArea(Identifier category, ButtonAreaSupplier rectangle) {
         if (rectangle == null) {
             if (speedCraftAreaSupplierMap.containsKey(category))
                 speedCraftAreaSupplierMap.remove(category);
@@ -213,7 +213,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     @SuppressWarnings("deprecation")
     @Override
     public void registerDefaultSpeedCraftButtonArea(Identifier category) {
-        registerSpeedCraftButtonArea(category, bounds -> new Rectangle(bounds.getMaxX() - 16, bounds.getMaxY() - 16, 10, 10));
+        registerAutoCraftButtonArea(category, bounds -> new Rectangle(bounds.getMaxX() - 16, bounds.getMaxY() - 16, 10, 10));
     }
     
     @SuppressWarnings("deprecation")

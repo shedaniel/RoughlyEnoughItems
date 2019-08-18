@@ -131,7 +131,7 @@ public class VillagerRecipeViewingScreen extends Screen {
         Rectangle recipeBounds = new Rectangle(bounds.x + 100 + (guiWidth - 100) / 2 - category.getDisplayWidth(display) / 2, bounds.y + bounds.height / 2 - category.getDisplayHeight() / 2, category.getDisplayWidth(display), category.getDisplayHeight());
         List<Widget> setupDisplay = category.setupDisplay(() -> display, recipeBounds);
         this.widgets.addAll(setupDisplay);
-        Optional<ButtonAreaSupplier> supplier = RecipeHelper.getInstance().getSpeedCraftButtonArea(category);
+        Optional<ButtonAreaSupplier> supplier = RecipeHelper.getInstance().getAutoCraftButtonArea(category);
         if (supplier.isPresent() && supplier.get().get(recipeBounds) != null)
             this.widgets.add(new AutoCraftingButtonWidget(recipeBounds, supplier.get().get(recipeBounds), supplier.get().getButtonText(), () -> display, setupDisplay, category));
         

@@ -117,6 +117,7 @@ public interface RecipeCategory<T extends RecipeDisplay> {
      *
      * @return the amount of recipes, returns -1 if not fixed
      */
+    @Deprecated
     default int getFixedRecipesPerPage() {
         return -1;
     }

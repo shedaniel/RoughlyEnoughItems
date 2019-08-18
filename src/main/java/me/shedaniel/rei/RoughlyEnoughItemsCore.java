@@ -9,6 +9,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.cloth.hooks.ClothClientHooks;
+import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
@@ -254,7 +255,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         });
         ClothClientHooks.SCREEN_MOUSE_SCROLLED.register((minecraftClient, screen, v, v1, v2) -> {
             if (screen instanceof AbstractContainerScreen)
-                if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().isInside(ClientUtils.getMouseLocation()) && ScreenHelper.getLastOverlay().mouseScrolled(v, v1, v2))
+                if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().isInside(PointHelper.fromMouse()) && ScreenHelper.getLastOverlay().mouseScrolled(v, v1, v2))
                     return ActionResult.SUCCESS;
             return ActionResult.PASS;
         });

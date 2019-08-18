@@ -123,7 +123,7 @@ public interface RecipeHelper {
      * @param category the category of the display
      * @return the optional of speed crafting button area
      */
-    Optional<ButtonAreaSupplier> getSpeedCraftButtonArea(RecipeCategory category);
+    Optional<ButtonAreaSupplier> getAutoCraftButtonArea(RecipeCategory category);
     
     /**
      * Registers a speed crafting button area
@@ -131,7 +131,7 @@ public interface RecipeHelper {
      * @param category  the category of the button area
      * @param rectangle the button area
      */
-    void registerSpeedCraftButtonArea(Identifier category, ButtonAreaSupplier rectangle);
+    void registerAutoCraftButtonArea(Identifier category, ButtonAreaSupplier rectangle);
     
     /**
      * Removes the speed crafting button
@@ -139,7 +139,7 @@ public interface RecipeHelper {
      * @param category the category of the button
      */
     default void removeSpeedCraftButton(Identifier category) {
-        registerSpeedCraftButtonArea(category, bounds -> null);
+        registerAutoCraftButtonArea(category, bounds -> null);
     }
     
     /**
