@@ -12,6 +12,7 @@ import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.gui.config.ItemCheatingMode;
 import me.shedaniel.rei.gui.config.ItemListOrderingConfig;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
+import me.shedaniel.rei.gui.config.SearchFieldLocation;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.tree.ConfigValue;
 import net.minecraft.client.gui.screen.Screen;
@@ -56,6 +57,14 @@ public class ClothScreenRegistry {
                     .setTooltip(splitLine(configValue.getComment()))
                     .setSaveConsumer(var -> configValue.setValue((ItemCheatingMode) var))
                     .setErrorSupplier(var -> error((List) configValue.getConstraints(), var, ItemCheatingMode.class))
+                    .build();
+        }).registerConfigEntryFunction(SearchFieldLocation.class, o -> {
+            ConfigValue<SearchFieldLocation> configValue = (ConfigValue<SearchFieldLocation>) o;
+            return configEntryBuilder.startEnumSelector("config.roughlyenoughitems." + configValue.getName(), SearchFieldLocation.class, configValue.getValue())
+                    .setDefaultValue(configValue.getDefaultValue())
+                    .setTooltip(splitLine(configValue.getComment()))
+                    .setSaveConsumer(var -> configValue.setValue((SearchFieldLocation) var))
+                    .setErrorSupplier(var -> error((List) configValue.getConstraints(), var, SearchFieldLocation.class))
                     .build();
         }).build().getScreen();
     }
