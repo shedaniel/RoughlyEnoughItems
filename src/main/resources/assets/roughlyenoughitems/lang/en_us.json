@@ -12,6 +12,7 @@
   "text.rei.cheating_limited_enabled": "§bCheating Enabled (Using Commands)",
   "text.rei.cheating_enabled_no_perms": "§7Cheating §cEnabled §7(No Permission)",
   "text.rei.no_permission_cheat": "Operator permissions are required to cheat items",
+  "text.rei.search.field.suggestion": "Search...",
   "category.rei.crafting": "Crafting",
   "category.rei.smelting": "Smelting",
   "category.rei.smelting.fuel": "Fuel",

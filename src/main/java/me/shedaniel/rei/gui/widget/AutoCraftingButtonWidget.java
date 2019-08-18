@@ -143,10 +143,10 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
             if (errorTooltip == null)
                 return Optional.ofNullable(I18n.translate("text.auto_craft.move_items") + extraTooltip);
             else
-                return Optional.ofNullable("§c" + I18n.translate(errorTooltip) + extraTooltip);
+                return Optional.ofNullable(Formatting.RED.toString() + I18n.translate(errorTooltip) + extraTooltip);
         if (errorTooltip == null)
             return Optional.ofNullable(I18n.translate("text.auto_craft.move_items"));
         else
-            return Optional.ofNullable("§c" + I18n.translate(errorTooltip));
+            return Optional.ofNullable(Formatting.RED.toString() + I18n.translate(errorTooltip));
     }
 }

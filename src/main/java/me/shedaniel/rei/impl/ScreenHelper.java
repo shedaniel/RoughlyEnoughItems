@@ -12,6 +12,7 @@ import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.widget.SearchFieldWidget;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.event.client.ClientTickCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.client.util.Window;
@@ -91,6 +92,10 @@ public class ScreenHelper implements ClientModInitializer {
             if (lastContainerScreen != screen && screen instanceof AbstractContainerScreen)
                 lastContainerScreen = (AbstractContainerScreen<?>) screen;
             return ActionResult.PASS;
+        });
+        ClientTickCallback.EVENT.register(minecraftClient -> {
+            if (isOverlayVisible() && searchField != null)
+                searchField.tick();
         });
     }
     
