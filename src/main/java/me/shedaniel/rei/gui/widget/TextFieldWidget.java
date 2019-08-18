@@ -13,6 +13,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
+import net.minecraft.util.Tickable;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.Collections;
@@ -22,7 +23,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class TextFieldWidget extends WidgetWithBounds {
+public class TextFieldWidget extends WidgetWithBounds implements Tickable {
     
     public Function<String, String> stripInvaild;
     protected int focusedTicks;
@@ -87,6 +88,7 @@ public class TextFieldWidget extends WidgetWithBounds {
         this.renderTextProvider = biFunction_1;
     }
     
+    @Override
     public void tick() {
         ++this.focusedTicks;
     }

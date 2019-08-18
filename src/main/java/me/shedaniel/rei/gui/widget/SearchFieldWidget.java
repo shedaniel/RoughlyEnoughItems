@@ -7,6 +7,7 @@ package me.shedaniel.rei.gui.widget;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.render.GuiLighting;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.sound.SoundEvents;
 
@@ -24,6 +25,7 @@ public class SearchFieldWidget extends TextFieldWidget {
         GuiLighting.disable();
         GlStateManager.disableDepthTest();
         setEditableColor(isSearching ? -1313241 : 14737632);
+        setSuggestion(!isFocused() && getText().isEmpty() ? I18n.translate("text.rei.search.field.suggestion") : null);
         super.render(int_1, int_2, float_1);
         GlStateManager.enableDepthTest();
     }
@@ -32,7 +34,7 @@ public class SearchFieldWidget extends TextFieldWidget {
     public void renderBorder() {
         if (!isSearching)
             super.renderBorder();
-        else {
+        else if (this.hasBorder()) {
             fill(this.getBounds().x - 1, this.getBounds().y - 1, this.getBounds().x + this.getBounds().width + 1, this.getBounds().y + this.getBounds().height + 1, -1313241);
             fill(this.getBounds().x, this.getBounds().y, this.getBounds().x + this.getBounds().width, this.getBounds().y + this.getBounds().height, -16777216);
         }

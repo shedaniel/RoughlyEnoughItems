@@ -28,6 +28,7 @@ import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 import org.apache.commons.lang3.StringUtils;
@@ -306,7 +307,7 @@ public class EntryListWidget extends Widget {
                     @Override
                     protected List<String> getExtraFluidToolTips(Fluid fluid) {
                         if (MinecraftClient.getInstance().options.advancedItemTooltips)
-                            return Collections.singletonList("§8" + Registry.FLUID.getId(fluid).toString());
+                            return Collections.singletonList(Formatting.DARK_GRAY.toString() + Registry.FLUID.getId(fluid).toString());
                         return super.getExtraFluidToolTips(fluid);
                     }
                     
