@@ -48,7 +48,7 @@ dependencies {
     modImplementation("me.shedaniel.cloth:config-2:${cloth_config_version}") {
         transitive = false
     }
-    modApi ("me.shedaniel.cloth:fiber2cloth:1.0.1") {
+    modApi("me.shedaniel.cloth:fiber2cloth:1.0.1") {
         transitive = false
     }
     modApi "me.zeroeightsix:fiber:0.6.0-7"
@@ -60,7 +60,7 @@ dependencies {
         include("me.shedaniel.cloth:config-2:${cloth_config_version}") {
             transitive = false
         }
-        include ("me.shedaniel.cloth:fiber2cloth:1.0.1") {
+        include("me.shedaniel.cloth:fiber2cloth:1.0.1") {
             transitive = false
         }
         include "me.zeroeightsix:fiber:0.6.0-7"
@@ -89,14 +89,14 @@ publishing {
     }
 
     repositories {
-//        if (project.hasProperty('danielshe_pass')) {
-//            maven {
-//                url = "http://deploy.modmuss50.me/"
-//                credentials {
-//                    username = "danielshe"
-//                    password = project.getProperty('danielshe_pass')
-//                }
-//            }
-//        }
+        if (project.hasProperty('danielshe_pass')) {
+            maven {
+                url = "http://deploy.modmuss50.me/"
+                credentials {
+                    username = "danielshe"
+                    password = project.getProperty('danielshe_pass')
+                }
+            }
+        }
     }
 }
