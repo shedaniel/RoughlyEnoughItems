@@ -1,4 +1,5 @@
 # Roughly Enough Items
+This is the legacy branch of REI (Version v2.x). This branch is no longer supported.
 https://minecraft.curseforge.com/projects/roughly-enough-items <br>
 Roughly Enough Items is a mod to view Items and Recipes for Minecraft 1.13 - 1.14, supporting mod loaders from Forge, Rift to Fabric.
 
