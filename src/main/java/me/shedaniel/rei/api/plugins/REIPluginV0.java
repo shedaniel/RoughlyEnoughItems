@@ -23,11 +23,11 @@ public interface REIPluginV0 extends REIPluginEntry {
     }
     
     /**
-     * Registers items on the item panel
+     * Registers entries on the item panel
      *
      * @param entryRegistry the helper class
      */
-    default void registerItems(EntryRegistry entryRegistry) {
+    default void registerEntries(EntryRegistry entryRegistry) {
     }
     
     /**

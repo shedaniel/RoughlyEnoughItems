@@ -93,7 +93,7 @@ public class DefaultPlugin implements REIPluginV0 {
     }
     
     @Override
-    public void registerItems(EntryRegistry entryRegistry) {
+    public void registerEntries(EntryRegistry entryRegistry) {
         if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isLoadingDefaultPlugin()) {
             return;
         }

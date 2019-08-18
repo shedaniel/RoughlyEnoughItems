@@ -16,7 +16,7 @@ public class SlotBaseWidget extends RecipeBaseWidget {
     
     @Override
     public int getInnerColor() {
-        return ScreenHelper.isDarkModeEnabled() ? 0xFF303030 : -7631989;
+        return ScreenHelper.isDarkModeEnabled() ? -13619152 : -7631989;
     }
     
     @Override
