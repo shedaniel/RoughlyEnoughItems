@@ -5,7 +5,9 @@
 
 package me.shedaniel.rei.impl;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import me.shedaniel.cloth.hooks.ClothClientHooks;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
@@ -14,12 +16,14 @@ import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.event.client.ClientTickCallback;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.client.util.Window;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import org.apache.logging.log4j.util.TriConsumer;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,6 +34,27 @@ public class ScreenHelper implements ClientModInitializer {
     private static boolean overlayVisible = true;
     private static ContainerScreenOverlay overlay;
     private static AbstractContainerScreen<?> lastContainerScreen = null;
+    private static LinkedHashSet<Screen> lastRecipeScreen = Sets.newLinkedHashSetWithExpectedSize(5);
+    
+    public static void storeRecipeScreen(Screen screen) {
+        while (lastRecipeScreen.size() >= 5)
+            lastRecipeScreen.remove(0);
+        lastRecipeScreen.add(screen);
+    }
+    
+    public static boolean hasLastRecipeScreen() {
+        return !lastRecipeScreen.isEmpty();
+    }
+    
+    public static Screen getLastRecipeScreen() {
+        Screen screen = Iterables.getLast(lastRecipeScreen);
+        lastRecipeScreen.remove(screen);
+        return screen;
+    }
+    
+    public static void clearRecipeScreens() {
+        lastRecipeScreen.clear();
+    }
     
     public static boolean isOverlayVisible() {
         return overlayVisible;
