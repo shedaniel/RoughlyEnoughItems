@@ -18,6 +18,7 @@ import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.gui.Element;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
@@ -189,7 +190,7 @@ public class SlotWidget extends WidgetWithBounds {
             final String modString = ClientHelper.getInstance().getFormattedModFromItem(itemStack.getItem());
             String s1 = ClientHelper.getInstance().getModFromItem(itemStack.getItem()).toLowerCase(Locale.ROOT);
             if (!modString.isEmpty()) {
-                toolTip.removeIf(s -> s.toLowerCase(Locale.ROOT).contains(s1));
+                toolTip.removeIf(s -> !s.equals(toolTip.get(0)) && Formatting.strip(s).equalsIgnoreCase(s1));
                 toolTip.add(modString);
             }
         }
