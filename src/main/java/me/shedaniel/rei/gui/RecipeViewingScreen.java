@@ -100,6 +100,12 @@ public class RecipeViewingScreen extends Screen {
         for (Element element : children())
             if (element.keyPressed(int_1, int_2, int_3))
                 return true;
+        if (int_1 == 259) {
+            if (ScreenHelper.hasLastRecipeScreen())
+                minecraft.openScreen(ScreenHelper.getLastRecipeScreen());
+            else minecraft.openScreen(ScreenHelper.getLastContainerScreen());
+            return true;
+        }
         return super.keyPressed(int_1, int_2, int_3);
     }
     

@@ -27,6 +27,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.item.Item;
@@ -235,12 +236,16 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     @Override
     public void openRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map) {
+        Screen screen = null;
         if (RoughlyEnoughItemsCore.getConfigManager().getConfig().getRecipeScreenType() == RecipeScreenType.VILLAGER)
-            MinecraftClient.getInstance().openScreen(new VillagerRecipeViewingScreen(map));
+            screen = new VillagerRecipeViewingScreen(map);
         else if (RoughlyEnoughItemsCore.getConfigManager().getConfig().getRecipeScreenType() == RecipeScreenType.UNSET)
-            MinecraftClient.getInstance().openScreen(new PreRecipeViewingScreen(map));
+            screen = new PreRecipeViewingScreen(map);
         else
-            MinecraftClient.getInstance().openScreen(new RecipeViewingScreen(map));
+            screen = new RecipeViewingScreen(map);
+        if (MinecraftClient.getInstance().currentScreen instanceof VillagerRecipeViewingScreen || MinecraftClient.getInstance().currentScreen instanceof RecipeViewingScreen)
+            ScreenHelper.storeRecipeScreen(MinecraftClient.getInstance().currentScreen);
+        MinecraftClient.getInstance().openScreen(screen);
     }
     
     @Override
