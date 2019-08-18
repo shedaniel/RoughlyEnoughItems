@@ -259,33 +259,6 @@ public class DefaultPlugin implements REIPluginV0 {
                 return -1.0f;
             }
         });
-        //        displayHelper.registerBoundsHandler(new DisplayHelper.DisplayBoundsHandler<CreativeInventoryScreen>() {
-        //            @Override
-        //            public Class<?> getBaseSupportedClass() {
-        //                return CreativeInventoryScreen.class;
-        //            }
-        //
-        //            @Override
-        //            public Rectangle getLeftBounds(CreativeInventoryScreen screen) {
-        //                return new Rectangle(2, 0, ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() - 2, MinecraftClient.getInstance().window.getScaledHeight());
-        //            }
-        //
-        //            @Override
-        //            public Rectangle getRightBounds(CreativeInventoryScreen screen) {
-        //                int startX = ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() + ScreenHelper.getLastContainerScreenHooks().rei_getContainerWidth();
-        //                return new Rectangle(startX, 0, MinecraftClient.getInstance().window.getScaledWidth() - startX - 2, MinecraftClient.getInstance().window.getScaledHeight());
-        //            }
-        //
-        //            @Override
-        //            public Rectangle getItemListArea(Rectangle rectangle) {
-        //                return new Rectangle(rectangle.x + 1, rectangle.y + 24, rectangle.width - 2, rectangle.height - (RoughlyEnoughItemsCore.getConfigManager().getConfig().isSideSearchField() ? 27 + 22 : 27));
-        //            }
-        //
-        //            @Override
-        //            public float getPriority() {
-        //                return -0.9f;
-        //            }
-        //        });
     }
     
     @Override
@@ -301,8 +274,8 @@ public class DefaultPlugin implements REIPluginV0 {
         recipeHelper.registerWorkingStations(BREWING, new ItemStack(Items.BREWING_STAND));
         recipeHelper.registerWorkingStations(STONE_CUTTING, new ItemStack(Items.STONECUTTER));
         recipeHelper.registerWorkingStations(COMPOSTING, new ItemStack(Items.COMPOSTER));
-        recipeHelper.registerSpeedCraftButtonArea(COMPOSTING, bounds -> null);
-        recipeHelper.registerSpeedCraftButtonArea(DefaultPlugin.CAMPFIRE, bounds -> new Rectangle(bounds.getMaxX() - 16, bounds.y + 6, 10, 10));
+        recipeHelper.registerAutoCraftButtonArea(CAMPFIRE, bounds -> null);
+        recipeHelper.registerAutoCraftButtonArea(COMPOSTING, bounds -> null);
         recipeHelper.registerScreenClickArea(new Rectangle(88, 32, 28, 23), CraftingTableScreen.class, CRAFTING);
         recipeHelper.registerScreenClickArea(new Rectangle(137, 29, 10, 13), InventoryScreen.class, CRAFTING);
         recipeHelper.registerScreenClickArea(new Rectangle(97, 16, 14, 30), BrewingStandScreen.class, BREWING);

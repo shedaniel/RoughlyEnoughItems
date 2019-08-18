@@ -12,6 +12,7 @@ import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.api.TransferRecipeCategory;
 import me.shedaniel.rei.gui.renderers.RecipeRenderer;
+import me.shedaniel.rei.gui.widget.RecipeArrowWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.SlotWidget;
 import me.shedaniel.rei.gui.widget.Widget;
@@ -67,10 +68,9 @@ public class DefaultSmokingCategory implements TransferRecipeCategory<DefaultSmo
                 blit(startPoint.x, startPoint.y, 0, 54, 82, 54);
                 int height = MathHelper.ceil((System.currentTimeMillis() / 250 % 14d) / 1f);
                 blit(startPoint.x + 2, startPoint.y + 21 + (14 - height), 82, 77 + (14 - height), 14, height);
-                int width = MathHelper.ceil((System.currentTimeMillis() / 250 % 24d) / 1f);
-                blit(startPoint.x + 24, startPoint.y + 18, 82, 91, width, 17);
             }
         }));
+        widgets.add(new RecipeArrowWidget(startPoint.x + 24, startPoint.y + 18, true));
         List<List<ItemStack>> input = recipeDisplaySupplier.get().getInput();
         widgets.add(new SlotWidget(startPoint.x + 1, startPoint.y + 1, Renderer.fromItemStacks(input.get(0)), true, true, true));
         widgets.add(new SlotWidget(startPoint.x + 1, startPoint.y + 37, Renderer.fromItemStacks(recipeDisplaySupplier.get().getFuel()), true, true, true) {
@@ -88,7 +88,7 @@ public class DefaultSmokingCategory implements TransferRecipeCategory<DefaultSmo
         Point startPoint = new Point(bounds.getCenterX() - 41, bounds.getCenterY() - 27);
         GlStateManager.translatef(0, 0, 400);
         if (redSlots.contains(0)) {
-            DrawableHelper.fill(startPoint.x + 1, startPoint.y + 1, startPoint.x + 1 + 16, startPoint.y + 1 + 16, 0x30ff0000);
+            DrawableHelper.fill(startPoint.x + 1, startPoint.y + 1, startPoint.x + 1 + 16, startPoint.y + 1 + 16, 822018048);
         }
         GlStateManager.translatef(0, 0, -400);
     }

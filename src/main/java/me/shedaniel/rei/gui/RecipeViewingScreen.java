@@ -269,7 +269,7 @@ public class RecipeViewingScreen extends Screen {
                 tab.setRenderer(categories.get(j), categories.get(j).getIcon(), categories.get(j).getCategoryName(), tab.getId() + categoryPages * TABS_PER_PAGE == categories.indexOf(selectedCategory));
             }
         }
-        Optional<ButtonAreaSupplier> supplier = RecipeHelper.getInstance().getSpeedCraftButtonArea(selectedCategory);
+        Optional<ButtonAreaSupplier> supplier = RecipeHelper.getInstance().getAutoCraftButtonArea(selectedCategory);
         int recipeHeight = selectedCategory.getDisplayHeight();
         List<RecipeDisplay> currentDisplayed = getCurrentDisplayed();
         for (int i = 0; i < currentDisplayed.size(); i++) {
@@ -346,6 +346,7 @@ public class RecipeViewingScreen extends Screen {
         return categoryPages;
     }
     
+    @SuppressWarnings("deprecation")
     private int getRecipesPerPage() {
         if (selectedCategory.getFixedRecipesPerPage() > 0)
             return selectedCategory.getFixedRecipesPerPage() - 1;

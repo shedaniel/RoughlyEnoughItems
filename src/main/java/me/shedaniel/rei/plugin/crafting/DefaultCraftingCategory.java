@@ -105,7 +105,7 @@ public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCr
             int i = getSlotWithSize(display, slot);
             int x = i % 3;
             int y = (i - x) / 3;
-            DrawableHelper.fill(startPoint.x + 1 + x * 18, startPoint.y + 1 + y * 18, startPoint.x + 1 + x * 18 + 16, startPoint.y + 1 + y * 18 + 16, 0x30ff0000);
+            DrawableHelper.fill(startPoint.x + 1 + x * 18, startPoint.y + 1 + y * 18, startPoint.x + 1 + x * 18 + 16, startPoint.y + 1 + y * 18 + 16, 822018048);
         }
         GlStateManager.translatef(0, 0, -400);
     }
