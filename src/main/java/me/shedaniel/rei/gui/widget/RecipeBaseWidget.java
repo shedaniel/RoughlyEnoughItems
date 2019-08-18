@@ -84,7 +84,7 @@ public class RecipeBaseWidget extends WidgetWithBounds {
     }
     
     protected int getInnerColor() {
-        return ScreenHelper.isDarkModeEnabled() ? 0xFF2E2E2E : -3750202;
+        return ScreenHelper.isDarkModeEnabled() ? -13750738 : -3750202;
     }
     
     protected int getTextureOffset() {

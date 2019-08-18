@@ -243,8 +243,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
             screen = new PreRecipeViewingScreen(map);
         else
             screen = new RecipeViewingScreen(map);
-        if (MinecraftClient.getInstance().currentScreen instanceof VillagerRecipeViewingScreen || MinecraftClient.getInstance().currentScreen instanceof RecipeViewingScreen)
-            ScreenHelper.storeRecipeScreen(MinecraftClient.getInstance().currentScreen);
+        ScreenHelper.storeRecipeScreen(MinecraftClient.getInstance().currentScreen);
         MinecraftClient.getInstance().openScreen(screen);
     }
     

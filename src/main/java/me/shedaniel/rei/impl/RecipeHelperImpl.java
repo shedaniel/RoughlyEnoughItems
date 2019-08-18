@@ -258,7 +258,7 @@ public class RecipeHelperImpl implements RecipeHelper {
                     ((REIPluginV0) plugin).registerRecipeDisplays(this);
                     ((REIPluginV0) plugin).registerBounds(RoughlyEnoughItemsCore.getDisplayHelper());
                     ((REIPluginV0) plugin).registerOthers(this);
-                    ((REIPluginV0) plugin).registerItems(RoughlyEnoughItemsCore.getEntryRegistry());
+                    ((REIPluginV0) plugin).registerEntries(RoughlyEnoughItemsCore.getEntryRegistry());
                 } else {
                     throw new IllegalStateException("Invaild Plugin Class!");
                 }
