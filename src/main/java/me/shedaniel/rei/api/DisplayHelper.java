@@ -7,6 +7,7 @@ package me.shedaniel.rei.api;
 
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.gui.config.SearchFieldLocation;
 import net.minecraft.util.ActionResult;
 
 import java.util.List;
@@ -112,7 +113,7 @@ public interface DisplayHelper {
          * @return the item list bounds
          */
         default Rectangle getItemListArea(Rectangle rectangle) {
-            return new Rectangle(rectangle.x + 1, rectangle.y + 2 + (RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled() ? 0 : 22), rectangle.width - 2, rectangle.height - (RoughlyEnoughItemsCore.getConfigManager().getConfig().isSideSearchField() ? 27 + 22 : 27) + (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled() ? 0 : 22));
+            return new Rectangle(rectangle.x + 1, rectangle.y + 2 + (RoughlyEnoughItemsCore.getConfigManager().getConfig().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + (RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled() ? 0 : 22), rectangle.width - 2, rectangle.height - (RoughlyEnoughItemsCore.getConfigManager().getConfig().getSearchFieldLocation() != SearchFieldLocation.CENTER ? 27 + 22 : 27) + (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled() ? 0 : 22));
         }
         
         /**

@@ -15,6 +15,7 @@ import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.DisplayHelper;
 import me.shedaniel.rei.api.Entry;
 import me.shedaniel.rei.api.RecipeHelper;
+import me.shedaniel.rei.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.gui.widget.*;
 import me.shedaniel.rei.impl.RecipeHelperImpl;
 import me.shedaniel.rei.impl.ScreenHelper;
@@ -327,8 +328,11 @@ public class ContainerScreenOverlay extends Widget {
     
     private Rectangle getTextFieldArea() {
         int widthRemoved = RoughlyEnoughItemsCore.getConfigManager().getConfig().isCraftableFilterEnabled() ? 22 : 2;
-        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().isSideSearchField())
+        SearchFieldLocation searchFieldLocation = RoughlyEnoughItemsCore.getConfigManager().getConfig().getSearchFieldLocation();
+        if (searchFieldLocation == SearchFieldLocation.BOTTOM_SIDE)
             return new Rectangle(rectangle.x + 2, window.getScaledHeight() - 22, rectangle.width - 6 - widthRemoved, 18);
+        if (searchFieldLocation == SearchFieldLocation.TOP_SIDE)
+            return new Rectangle(rectangle.x + 2, 4, rectangle.width - 6 - widthRemoved, 18);
         if (MinecraftClient.getInstance().currentScreen instanceof RecipeViewingScreen) {
             RecipeViewingScreen widget = (RecipeViewingScreen) MinecraftClient.getInstance().currentScreen;
             return new Rectangle(widget.getBounds().x, window.getScaledHeight() - 22, widget.getBounds().width - widthRemoved, 18);

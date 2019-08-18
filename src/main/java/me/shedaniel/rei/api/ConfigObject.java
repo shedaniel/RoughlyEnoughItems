@@ -8,6 +8,7 @@ package me.shedaniel.rei.api;
 import me.shedaniel.rei.gui.config.ItemCheatingMode;
 import me.shedaniel.rei.gui.config.ItemListOrdering;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
+import me.shedaniel.rei.gui.config.SearchFieldLocation;
 import me.zeroeightsix.fiber.tree.ConfigNode;
 
 public interface ConfigObject {
@@ -34,7 +35,7 @@ public interface ConfigObject {
     
     boolean isLoadingDefaultPlugin();
     
-    boolean isSideSearchField();
+    SearchFieldLocation getSearchFieldLocation();
     
     boolean isLeftHandSidePanel();
     

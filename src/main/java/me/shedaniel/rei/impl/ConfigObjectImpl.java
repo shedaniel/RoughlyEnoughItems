@@ -6,10 +6,7 @@
 package me.shedaniel.rei.impl;
 
 import me.shedaniel.rei.api.ConfigObject;
-import me.shedaniel.rei.gui.config.ItemCheatingMode;
-import me.shedaniel.rei.gui.config.ItemListOrdering;
-import me.shedaniel.rei.gui.config.ItemListOrderingConfig;
-import me.shedaniel.rei.gui.config.RecipeScreenType;
+import me.shedaniel.rei.gui.config.*;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.tree.ConfigNode;
 import me.zeroeightsix.fiber.tree.ConfigValue;
@@ -59,11 +56,11 @@ public class ConfigObjectImpl implements ConfigObject {
             .withName("loadDefaultPlugin")
             .build();
     
-    private ConfigValue<Boolean> sideSearchField = ConfigValue.builder(Boolean.class)
+    private ConfigValue<SearchFieldLocation> sideSearchField = ConfigValue.builder(SearchFieldLocation.class)
             .withParent(appearance)
-            .withDefaultValue(false)
+            .withDefaultValue(SearchFieldLocation.CENTER)
             .withComment("Declares the position of the search field.")
-            .withName("sideSearchField")
+            .withName("searchFieldLocation")
             .build();
     
     private ConfigValue<Boolean> mirrorItemPanel = ConfigValue.builder(Boolean.class)
@@ -238,8 +235,8 @@ public class ConfigObjectImpl implements ConfigObject {
     }
     
     @Override
-    public boolean isSideSearchField() {
-        return sideSearchField.getValue().booleanValue();
+    public SearchFieldLocation getSearchFieldLocation() {
+        return sideSearchField.getValue();
     }
     
     @Override
