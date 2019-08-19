@@ -38,7 +38,7 @@ public class ScreenHelper implements ClientModInitializer {
     
     public static void storeRecipeScreen(Screen screen) {
         while (lastRecipeScreen.size() >= 5)
-            lastRecipeScreen.remove(0);
+            lastRecipeScreen.remove(Iterables.get(lastRecipeScreen, 0));
         lastRecipeScreen.add(screen);
     }
     
@@ -52,7 +52,7 @@ public class ScreenHelper implements ClientModInitializer {
         return screen;
     }
     
-    public static void clearRecipeScreens() {
+    public static void clearData() {
         lastRecipeScreen.clear();
     }
     

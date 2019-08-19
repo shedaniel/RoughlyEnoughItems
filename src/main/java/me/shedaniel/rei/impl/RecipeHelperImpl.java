@@ -218,7 +218,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     
     @SuppressWarnings("deprecation")
     public void recipesLoaded(RecipeManager recipeManager) {
-        ScreenHelper.clearRecipeScreens();
+        ScreenHelper.clearData();
         this.recipeCount.set(0);
         this.recipeManager = recipeManager;
         this.recipeCategoryListMap.clear();
