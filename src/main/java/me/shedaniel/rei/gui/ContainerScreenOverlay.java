@@ -80,7 +80,7 @@ public class ContainerScreenOverlay extends Widget {
         entryListWidget.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, false);
         
         if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled()) {
-            widgets.add(buttonLeft = new ButtonWidget(rectangle.x, rectangle.y + 5, 16, 16, new TranslatableText("text.rei.left_arrow")) {
+            widgets.add(buttonLeft = new ButtonWidget(rectangle.x, rectangle.y + (RoughlyEnoughItemsCore.getConfigManager().getConfig().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16, new TranslatableText("text.rei.left_arrow")) {
                 @Override
                 public void onPressed() {
                     page--;
@@ -99,7 +99,7 @@ public class ContainerScreenOverlay extends Widget {
                     return false;
                 }
             });
-            widgets.add(buttonRight = new ButtonWidget(rectangle.x + rectangle.width - 18, rectangle.y + 5, 16, 16, new TranslatableText("text.rei.right_arrow")) {
+            widgets.add(buttonRight = new ButtonWidget(rectangle.x + rectangle.width - 18, rectangle.y + (RoughlyEnoughItemsCore.getConfigManager().getConfig().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16, new TranslatableText("text.rei.right_arrow")) {
                 @Override
                 public void onPressed() {
                     page++;
@@ -222,7 +222,7 @@ public class ContainerScreenOverlay extends Widget {
             }
         }
         if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled()) {
-            widgets.add(new ClickableLabelWidget(rectangle.x + (rectangle.width / 2), rectangle.y + 10, "", getTotalPage() > 0) {
+            widgets.add(new ClickableLabelWidget(rectangle.x + (rectangle.width / 2), rectangle.y + (RoughlyEnoughItemsCore.getConfigManager().getConfig().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 10, "", getTotalPage() > 0) {
                 @Override
                 public void render(int mouseX, int mouseY, float delta) {
                     page = MathHelper.clamp(page, 0, getTotalPage());
@@ -526,6 +526,8 @@ public class ContainerScreenOverlay extends Widget {
         if (ClientHelper.getInstance().getFocusSearchFieldKeyBinding().matchesKey(int_1, int_2)) {
             ScreenHelper.searchField.setFocused(true);
             setFocused(ScreenHelper.searchField);
+            ScreenHelper.searchField.keybindFocusTime = System.currentTimeMillis();
+            ScreenHelper.searchField.keybindFocusKey = int_1;
             return true;
         }
         return false;

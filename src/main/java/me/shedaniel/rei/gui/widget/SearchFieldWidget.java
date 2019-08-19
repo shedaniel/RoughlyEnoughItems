@@ -6,14 +6,19 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import me.shedaniel.rei.gui.ContainerScreenOverlay;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.sound.SoundEvents;
 
 public class SearchFieldWidget extends TextFieldWidget {
     
     public static boolean isSearching = false;
+    public long keybindFocusTime = -1;
+    public int keybindFocusKey = -1;
     protected long lastClickedTime = -1;
     
     public SearchFieldWidget(int x, int y, int width, int height) {
@@ -24,7 +29,7 @@ public class SearchFieldWidget extends TextFieldWidget {
     public void laterRender(int int_1, int int_2, float float_1) {
         GuiLighting.disable();
         GlStateManager.disableDepthTest();
-        setEditableColor(isSearching ? -1313241 : 14737632);
+        setEditableColor(ContainerScreenOverlay.getEntryListWidget().children().isEmpty() && !getText().isEmpty() ? 16733525 : isSearching ? -1313241 : 14737632);
         setSuggestion(!isFocused() && getText().isEmpty() ? I18n.translate("text.rei.search.field.suggestion") : null);
         super.render(int_1, int_2, float_1);
         GlStateManager.enableDepthTest();
@@ -66,6 +71,16 @@ public class SearchFieldWidget extends TextFieldWidget {
                 return true;
             }
         return super.keyPressed(int_1, int_2, int_3);
+    }
+    
+    @Override
+    public boolean charTyped(char char_1, int int_1) {
+        if (System.currentTimeMillis() - keybindFocusTime < 1000 && InputUtil.isKeyPressed(MinecraftClient.getInstance().window.getHandle(), keybindFocusKey)) {
+            keybindFocusTime = -1;
+            keybindFocusKey = -1;
+            return true;
+        }
+        return super.charTyped(char_1, int_1);
     }
     
     @Override
