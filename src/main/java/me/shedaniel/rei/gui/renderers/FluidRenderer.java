@@ -23,6 +23,8 @@ import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.util.Lazy;
+import net.minecraft.util.Pair;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 
 import java.util.Collections;
@@ -30,13 +32,16 @@ import java.util.List;
 
 public abstract class FluidRenderer extends Renderer {
     public boolean drawTooltip = false;
-    public Lazy<Sprite> sprite = new Lazy<>(() -> {
+    public Lazy<Pair<Sprite, Integer>> sprite = new Lazy<>(() -> {
         try {
             FluidRenderHandler fluidRenderHandler = FluidRenderHandlerRegistry.INSTANCE.get(getFluid());
             if (fluidRenderHandler == null)
                 return null;
-            Sprite[] sprites = fluidRenderHandler.getFluidSprites(null, null, getFluid().getDefaultState());
-            return sprites[0];
+            Sprite[] sprites = fluidRenderHandler.getFluidSprites(MinecraftClient.getInstance().world, MinecraftClient.getInstance().world == null ? null : BlockPos.ORIGIN, getFluid().getDefaultState());
+            int color = -1;
+            if (MinecraftClient.getInstance().world != null)
+                color = fluidRenderHandler.getFluidColor(MinecraftClient.getInstance().world, BlockPos.ORIGIN, getFluid().getDefaultState());
+            return new Pair<>(sprites[0], color);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -47,17 +52,23 @@ public abstract class FluidRenderer extends Renderer {
     public void render(int x, int y, double mouseX, double mouseY, float delta) {
         x = x - 8;
         y = y - 6;
-        Sprite f = this.sprite.get();
-        if (f != null) {
+        Pair<Sprite, Integer> pair = this.sprite.get();
+        if (pair != null) {
+            Sprite sprite = pair.getLeft();
+            Integer int_5 = pair.getRight();
+            int a = 255;
+            int r = (int_5 >> 16 & 255);
+            int g = (int_5 >> 8 & 255);
+            int b = (int_5 & 255);
             MinecraftClient.getInstance().getTextureManager().bindTexture(SpriteAtlasTexture.BLOCK_ATLAS_TEX);
             GuiLighting.disable();
             Tessellator tess = Tessellator.getInstance();
             BufferBuilder bb = tess.getBufferBuilder();
             bb.begin(7, VertexFormats.POSITION_UV_COLOR);
-            bb.vertex(x + 16, y, blitOffset).texture(f.getMaxU(), f.getMinV()).color(255, 255, 255, 255).next();
-            bb.vertex(x, y, blitOffset).texture(f.getMinU(), f.getMinV()).color(255, 255, 255, 255).next();
-            bb.vertex(x, y + 16, blitOffset).texture(f.getMinU(), f.getMaxV()).color(255, 255, 255, 255).next();
-            bb.vertex(x + 16, y + 16, blitOffset).texture(f.getMaxU(), f.getMaxV()).color(255, 255, 255, 255).next();
+            bb.vertex(x + 16, y, blitOffset).texture(sprite.getMaxU(), sprite.getMinV()).color(r, g, b, a).next();
+            bb.vertex(x, y, blitOffset).texture(sprite.getMinU(), sprite.getMinV()).color(r, g, b, a).next();
+            bb.vertex(x, y + 16, blitOffset).texture(sprite.getMinU(), sprite.getMaxV()).color(r, g, b, a).next();
+            bb.vertex(x + 16, y + 16, blitOffset).texture(sprite.getMaxU(), sprite.getMaxV()).color(r, g, b, a).next();
             tess.draw();
         }
         this.blitOffset = 0;

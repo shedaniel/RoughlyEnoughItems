@@ -140,7 +140,7 @@ public class SlotWidget extends WidgetWithBounds {
             GlStateManager.disableLighting();
             GlStateManager.disableDepthTest();
             GlStateManager.colorMask(true, true, true, false);
-            int color = darkTheme ? 0xFF5E5E5E : -2130706433;
+            int color = darkTheme ? -1877929711 : -2130706433;
             blitOffset = 300;
             fillGradient(x, y, x + 16, y + 16, color, color);
             blitOffset = 0;

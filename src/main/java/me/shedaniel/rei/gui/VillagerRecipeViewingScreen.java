@@ -33,10 +33,7 @@ import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class VillagerRecipeViewingScreen extends Screen {
@@ -146,11 +143,26 @@ public class VillagerRecipeViewingScreen extends Screen {
                     selectedRecipeIndex = finalIndex;
                     VillagerRecipeViewingScreen.this.init();
                 }
-                
+    
+                @Override
+                public boolean isHovered(int mouseX, int mouseY) {
+                    return (isMouseOver(mouseX, mouseY) && scrollListBounds.contains(mouseX, mouseY)) || focused;
+                }
+    
                 @Override
                 protected int getTextureId(boolean boolean_1) {
                     enabled = selectedRecipeIndex != finalIndex;
                     return super.getTextureId(boolean_1);
+                }
+    
+                @Override
+                public boolean mouseClicked(double mouseX, double mouseY, int button) {
+                    if ((isMouseOver(mouseX, mouseY) && scrollListBounds.contains(mouseX, mouseY)) && enabled && button == 0) {
+                        minecraft.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                        onPressed();
+                        return true;
+                    }
+                    return false;
                 }
             });
             index++;
