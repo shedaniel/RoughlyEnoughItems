@@ -34,7 +34,7 @@ public class ClothScreenRegistry {
             } catch (IOException | FiberException e) {
                 e.printStackTrace();
             }
-        }).registerConfigEntryFunction(ItemListOrderingConfig.class, o -> {
+        }).registerNodeEntryFunction(ItemListOrderingConfig.class, o -> {
             ConfigValue<ItemListOrderingConfig> configValue = (ConfigValue<ItemListOrderingConfig>) o;
             return configEntryBuilder.startEnumSelector("config.roughlyenoughitems." + configValue.getName(), ItemListOrderingConfig.class, configValue.getValue())
                     .setDefaultValue(configValue.getDefaultValue())
@@ -42,7 +42,7 @@ public class ClothScreenRegistry {
                     .setSaveConsumer(var -> configValue.setValue((ItemListOrderingConfig) var))
                     .setErrorSupplier(var -> error((List) configValue.getConstraints(), var, ItemListOrderingConfig.class))
                     .build();
-        }).registerConfigEntryFunction(RecipeScreenType.class, o -> {
+        }).registerNodeEntryFunction(RecipeScreenType.class, o -> {
             ConfigValue<RecipeScreenType> configValue = (ConfigValue<RecipeScreenType>) o;
             return configEntryBuilder.startEnumSelector("config.roughlyenoughitems." + configValue.getName(), RecipeScreenType.class, configValue.getValue())
                     .setDefaultValue(configValue.getDefaultValue())
@@ -50,7 +50,7 @@ public class ClothScreenRegistry {
                     .setSaveConsumer(var -> configValue.setValue((RecipeScreenType) var))
                     .setErrorSupplier(var -> error((List) configValue.getConstraints(), var, RecipeScreenType.class))
                     .build();
-        }).registerConfigEntryFunction(ItemCheatingMode.class, o -> {
+        }).registerNodeEntryFunction(ItemCheatingMode.class, o -> {
             ConfigValue<ItemCheatingMode> configValue = (ConfigValue<ItemCheatingMode>) o;
             return configEntryBuilder.startEnumSelector("config.roughlyenoughitems." + configValue.getName(), ItemCheatingMode.class, configValue.getValue())
                     .setDefaultValue(configValue.getDefaultValue())
@@ -58,7 +58,7 @@ public class ClothScreenRegistry {
                     .setSaveConsumer(var -> configValue.setValue((ItemCheatingMode) var))
                     .setErrorSupplier(var -> error((List) configValue.getConstraints(), var, ItemCheatingMode.class))
                     .build();
-        }).registerConfigEntryFunction(SearchFieldLocation.class, o -> {
+        }).registerNodeEntryFunction(SearchFieldLocation.class, o -> {
             ConfigValue<SearchFieldLocation> configValue = (ConfigValue<SearchFieldLocation>) o;
             return configEntryBuilder.startEnumSelector("config.roughlyenoughitems." + configValue.getName(), SearchFieldLocation.class, configValue.getValue())
                     .setDefaultValue(configValue.getDefaultValue())
@@ -66,7 +66,8 @@ public class ClothScreenRegistry {
                     .setSaveConsumer(var -> configValue.setValue((SearchFieldLocation) var))
                     .setErrorSupplier(var -> error((List) configValue.getConstraints(), var, SearchFieldLocation.class))
                     .build();
-        }).build().getScreen();
+        })
+                .build().getScreen();
     }
     
 }

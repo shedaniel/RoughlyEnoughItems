@@ -48,7 +48,7 @@ dependencies {
     modImplementation("me.shedaniel.cloth:config-2:${cloth_config_version}") {
         transitive = false
     }
-    modApi("me.shedaniel.cloth:fiber2cloth:1.0.1") {
+    modApi("me.shedaniel.cloth:fiber2cloth:1.1.0") {
         transitive = false
     }
     modApi "me.zeroeightsix:fiber:0.6.0-7"
@@ -60,12 +60,12 @@ dependencies {
         include("me.shedaniel.cloth:config-2:${cloth_config_version}") {
             transitive = false
         }
-        include("me.shedaniel.cloth:fiber2cloth:1.0.1") {
+        include("me.shedaniel.cloth:fiber2cloth:1.1.0") {
             transitive = false
         }
         include "me.zeroeightsix:fiber:0.6.0-7"
     }
-    modImplementation "io.github.prospector.modmenu:ModMenu:${modmenu_version}"
+    modImplementation "io.github.prospector:modmenu:${modmenu_version}"
     compile "org.lwjgl:lwjgl-jemalloc:3.2.1"
     compileOnly "com.google.code.findbugs:jsr305:3.0.2"
     implementation 'org.jetbrains:annotations:15.0'
