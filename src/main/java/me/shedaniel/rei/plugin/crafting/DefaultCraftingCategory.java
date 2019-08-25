@@ -6,10 +6,10 @@
 package me.shedaniel.rei.plugin.crafting;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.GlStateManager;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.compat.RenderHelper;
 import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.api.TransferRecipeCategory;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
@@ -74,7 +74,7 @@ public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCr
             @Override
             public void render(int mouseX, int mouseY, float delta) {
                 super.render(mouseX, mouseY, delta);
-                GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+                RenderHelper.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                 GuiLighting.disable();
                 MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
                 blit(startPoint.x, startPoint.y, 0, 0, 116, 54);
@@ -100,13 +100,13 @@ public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCr
     @Override
     public void renderRedSlots(List<Widget> widgets, Rectangle bounds, DefaultCraftingDisplay display, IntList redSlots) {
         Point startPoint = new Point(bounds.getCenterX() - 58, bounds.getCenterY() - 27);
-        GlStateManager.translatef(0, 0, 400);
+        RenderHelper.translatef(0, 0, 400);
         for (Integer slot : redSlots) {
             int i = getSlotWithSize(display, slot);
             int x = i % 3;
             int y = (i - x) / 3;
             DrawableHelper.fill(startPoint.x + 1 + x * 18, startPoint.y + 1 + y * 18, startPoint.x + 1 + x * 18 + 16, startPoint.y + 1 + y * 18 + 16, 822018048);
         }
-        GlStateManager.translatef(0, 0, -400);
+        RenderHelper.translatef(0, 0, -400);
     }
 }

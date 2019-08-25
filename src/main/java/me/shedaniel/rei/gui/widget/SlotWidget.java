@@ -6,8 +6,8 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.compat.RenderHelper;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ClientHelper;
@@ -137,16 +137,16 @@ public class SlotWidget extends WidgetWithBounds {
             renderer.render(x + 8, y + 6, mouseX, mouseY, delta);
         }
         if (drawHighlightedBackground && highlighted) {
-            GlStateManager.disableLighting();
-            GlStateManager.disableDepthTest();
-            GlStateManager.colorMask(true, true, true, false);
+            RenderHelper.disableLighting();
+            RenderHelper.disableDepthTest();
+            RenderHelper.colorMask(true, true, true, false);
             int color = darkTheme ? -1877929711 : -2130706433;
             blitOffset = 300;
             fillGradient(x, y, x + 16, y + 16, color, color);
             blitOffset = 0;
-            GlStateManager.colorMask(true, true, true, true);
-            GlStateManager.enableLighting();
-            GlStateManager.enableDepthTest();
+            RenderHelper.colorMask(true, true, true, true);
+            RenderHelper.enableLighting();
+            RenderHelper.enableDepthTest();
         }
     }
     

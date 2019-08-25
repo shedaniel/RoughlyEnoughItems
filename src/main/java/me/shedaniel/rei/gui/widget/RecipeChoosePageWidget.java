@@ -6,9 +6,9 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.compat.RenderHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
@@ -147,9 +147,9 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     public void render(int i, int i1, float v) {
         widgets.forEach(widget -> {
             GuiLighting.disable();
-            GlStateManager.translatef(0, 0, 800);
+            RenderHelper.translatef(0, 0, 800);
             widget.render(i, i1, v);
-            GlStateManager.translatef(0, 0, -800);
+            RenderHelper.translatef(0, 0, -800);
         });
     }
     

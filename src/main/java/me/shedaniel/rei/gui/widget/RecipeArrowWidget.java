@@ -5,8 +5,8 @@
 
 package me.shedaniel.rei.gui.widget;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.compat.RenderHelper;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
@@ -34,7 +34,7 @@ public class RecipeArrowWidget extends WidgetWithBounds {
     
     @Override
     public void render(int mouseX, int mouseY, float delta) {
-        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderHelper.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GuiLighting.disable();
         MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
         blit(x, y, 106, 91, 24, 17);

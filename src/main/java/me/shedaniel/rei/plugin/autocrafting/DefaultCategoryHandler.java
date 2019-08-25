@@ -43,12 +43,12 @@ public class DefaultCategoryHandler implements AutoTransferHandler {
             return Result.createNotApplicable();
         if (recipe.getHeight() > containerInfo.getCraftingHeight(container) || recipe.getWidth() > containerInfo.getCraftingWidth(container))
             return Result.createFailed(I18n.translate("error.rei.transfer.too_small", containerInfo.getCraftingWidth(container), containerInfo.getCraftingHeight(container)));
-        if (!canUseMovePackets())
-            return Result.createFailed("error.rei.not.on.server");
         List<List<ItemStack>> input = recipe.getOrganisedInput(containerInfo, container);
         IntList intList = hasItems(input);
         if (!intList.isEmpty())
             return Result.createFailed("error.rei.not.enough.materials", intList);
+        if (!canUseMovePackets())
+            return Result.createFailed("error.rei.not.on.server");
         if (!context.isActuallyCrafting())
             return Result.createSuccessful();
         

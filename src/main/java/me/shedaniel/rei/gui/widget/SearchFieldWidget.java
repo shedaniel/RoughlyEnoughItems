@@ -5,7 +5,7 @@
 
 package me.shedaniel.rei.gui.widget;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import me.shedaniel.math.compat.RenderHelper;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GuiLighting;
@@ -28,11 +28,11 @@ public class SearchFieldWidget extends TextFieldWidget {
     
     public void laterRender(int int_1, int int_2, float float_1) {
         GuiLighting.disable();
-        GlStateManager.disableDepthTest();
+        RenderHelper.disableDepthTest();
         setEditableColor(ContainerScreenOverlay.getEntryListWidget().children().isEmpty() && !getText().isEmpty() ? 16733525 : isSearching ? -1313241 : 14737632);
         setSuggestion(!isFocused() && getText().isEmpty() ? I18n.translate("text.rei.search.field.suggestion") : null);
         super.render(int_1, int_2, float_1);
-        GlStateManager.enableDepthTest();
+        RenderHelper.enableDepthTest();
     }
     
     @Override

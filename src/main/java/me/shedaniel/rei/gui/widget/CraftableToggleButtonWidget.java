@@ -5,8 +5,8 @@
 
 package me.shedaniel.rei.gui.widget;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.compat.RenderHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
@@ -42,7 +42,7 @@ public abstract class CraftableToggleButtonWidget extends ButtonWidget {
         this.itemRenderer.zOffset = 0.0F;
         GuiLighting.disable();
         MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
-        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderHelper.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         int color = RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() ? 939579655 : 956235776;
         this.blitOffset += 10f;
         this.fillGradient(getBounds().x, getBounds().y, getBounds().x + getBounds().width, getBounds().y + getBounds().height, color, color);
