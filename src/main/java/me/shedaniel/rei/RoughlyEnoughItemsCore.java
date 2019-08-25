@@ -7,7 +7,6 @@ package me.shedaniel.rei;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import me.shedaniel.cloth.api.ClientUtils;
 import me.shedaniel.cloth.hooks.ClothClientHooks;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;

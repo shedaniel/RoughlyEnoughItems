@@ -5,9 +5,9 @@
 
 package me.shedaniel.rei.plugin.campfire;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.compat.RenderHelper;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.gui.widget.RecipeArrowWidget;
@@ -53,7 +53,7 @@ public class DefaultCampfireCategory implements RecipeCategory<DefaultCampfireDi
             @Override
             public void render(int mouseX, int mouseY, float delta) {
                 super.render(mouseX, mouseY, delta);
-                GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+                RenderHelper.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                 GuiLighting.disable();
                 MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
                 blit(startPoint.x, startPoint.y, 0, 167, 82, 54);

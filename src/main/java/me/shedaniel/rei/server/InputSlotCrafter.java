@@ -104,9 +104,9 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
     }
     
     @SuppressWarnings("deprecation")
-    protected void fillInputSlots(RecipeFinder recipeFinder, DefaultedList<Ingredient> ingredients, boolean boolean_1) {
+    protected void fillInputSlots(RecipeFinder recipeFinder, DefaultedList<Ingredient> ingredients, boolean hasShift) {
         //        boolean boolean_2 = this.craftingContainer.matches(recipe_1);
-        boolean boolean_2 = true;
+        boolean boolean_2 = false;
         int int_1 = recipeFinder.countRecipeCrafts(ingredients, (IntList) null);
         int int_2;
         if (boolean_2) {
@@ -120,7 +120,7 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
             }
         }
         
-        int_2 = this.getAmountToFill(boolean_1, int_1, boolean_2);
+        int_2 = this.getAmountToFill(hasShift, int_1, boolean_2);
         IntList intList_1 = new IntArrayList();
         if (recipeFinder.findRecipe(ingredients, intList_1, int_2)) {
             int int_4 = int_2;
@@ -142,9 +142,9 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
         
     }
     
-    protected int getAmountToFill(boolean boolean_1, int int_1, boolean boolean_2) {
+    protected int getAmountToFill(boolean hasShift, int int_1, boolean boolean_2) {
         int int_2 = 1;
-        if (boolean_1) {
+        if (hasShift) {
             int_2 = int_1;
         } else if (boolean_2) {
             int_2 = 64;

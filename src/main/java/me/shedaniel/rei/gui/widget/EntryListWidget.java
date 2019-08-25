@@ -6,10 +6,10 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.zeitheron.hammercore.client.utils.Scissors;
 import me.shedaniel.clothconfig2.api.RunSixtyTimesEverySec;
 import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.compat.RenderHelper;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
@@ -242,7 +242,7 @@ public class EntryListWidget extends Widget {
     @Override
     public void render(int int_1, int int_2, float float_1) {
         GuiLighting.disable();
-        GlStateManager.pushMatrix();
+        RenderHelper.pushMatrix();
         boolean widgetScrolled = RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled();
         if (!widgetScrolled)
             scroll = 0;
@@ -263,7 +263,7 @@ public class EntryListWidget extends Widget {
         });
         if (widgetScrolled)
             Scissors.end();
-        GlStateManager.popMatrix();
+        RenderHelper.popMatrix();
         ClientPlayerEntity player = minecraft.player;
         if (rectangle.contains(PointHelper.fromMouse()) && ClientHelper.getInstance().isCheating() && !player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
             ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.delete_items")));

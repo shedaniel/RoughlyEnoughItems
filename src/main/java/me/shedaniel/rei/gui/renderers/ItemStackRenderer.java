@@ -6,7 +6,7 @@
 package me.shedaniel.rei.gui.renderers;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.GlStateManager;
+import me.shedaniel.math.compat.RenderHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.Renderer;
@@ -30,14 +30,14 @@ public abstract class ItemStackRenderer extends Renderer {
     @Override
     public void render(int x, int y, double mouseX, double mouseY, float delta) {
         int l = x - 8, i1 = y - 6;
-        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderHelper.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
         itemRenderer.zOffset = blitOffset;
         GuiLighting.enableForItems();
-        GlStateManager.colorMask(true, true, true, true);
-        GlStateManager.enableLighting();
-        GlStateManager.enableRescaleNormal();
-        GlStateManager.enableDepthTest();
+        RenderHelper.colorMask(true, true, true, true);
+        RenderHelper.enableLighting();
+        RenderHelper.enableRescaleNormal();
+        RenderHelper.enableDepthTest();
         itemRenderer.renderGuiItem(getItemStack(), l, i1);
         itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, getItemStack(), l, i1, renderCounts() ? null : "");
         itemRenderer.zOffset = 0.0F;

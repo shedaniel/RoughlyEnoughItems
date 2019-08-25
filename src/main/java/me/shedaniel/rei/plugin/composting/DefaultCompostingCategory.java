@@ -6,9 +6,9 @@
 package me.shedaniel.rei.plugin.composting;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.compat.RenderHelper;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.gui.renderers.RecipeRenderer;
@@ -69,7 +69,7 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
         widgets.add(new RecipeBaseWidget(bounds) {
             @Override
             public void render(int mouseX, int mouseY, float partialTicks) {
-                GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+                RenderHelper.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                 GuiLighting.disable();
                 MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
                 this.blit(startingPoint.x, startingPoint.y, 28, 221, 55, 26);

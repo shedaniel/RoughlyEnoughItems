@@ -5,8 +5,8 @@
 
 package me.shedaniel.rei.gui.widget;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.compat.RenderHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.impl.ScreenHelper;
@@ -53,7 +53,7 @@ public class RecipeBaseWidget extends WidgetWithBounds {
     public void render(int mouseX, int mouseY, float delta) {
         if (!isRendering())
             return;
-        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderHelper.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GuiLighting.disable();
         minecraft.getTextureManager().bindTexture(ScreenHelper.isDarkModeEnabled() ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
         int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;
