@@ -27,10 +27,15 @@ import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 
 public abstract class FluidRenderer extends Renderer {
+    /**
+     * @deprecated This boolean is no longer used
+     */
+    @Deprecated
     public boolean drawTooltip = false;
     public Lazy<Pair<Sprite, Integer>> sprite = new Lazy<>(() -> {
         try {
@@ -72,16 +77,27 @@ public abstract class FluidRenderer extends Renderer {
             tess.draw();
         }
         this.blitOffset = 0;
-        if (drawTooltip && mouseX >= x - 8 && mouseX <= x + 8 && mouseY >= y - 6 && mouseY <= y + 10)
-            queueTooltip(getFluid(), delta);
-        this.drawTooltip = false;
     }
     
+    @Nullable
+    @Override
+    public QueuedTooltip getQueuedTooltip(float delta) {
+        return QueuedTooltip.create(getTooltip(getFluid()));
+    }
+    
+    /**
+     * Queue a tooltip to the REI overlay
+     *
+     * @param fluid the fluid to queue
+     * @param delta the delta
+     * @deprecated Use {@link Renderer#getQueuedTooltip(float)} instead and queue manually
+     */
+    @Deprecated
     protected void queueTooltip(Fluid fluid, float delta) {
-        ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltip(fluid)));
+        ScreenHelper.getLastOverlay().addTooltip(getQueuedTooltip(delta));
     }
     
-    private List<String> getTooltip(Fluid fluid) {
+    protected List<String> getTooltip(Fluid fluid) {
         List<String> toolTip = Lists.newArrayList(EntryListWidget.tryGetFluidName(fluid));
         if (RoughlyEnoughItemsCore.getConfigManager().getConfig().shouldAppendModNames()) {
             final String modString = ClientHelper.getInstance().getFormattedModFromIdentifier(Registry.FLUID.getId(fluid));

@@ -52,7 +52,7 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
                 recipeFinder.addNormalItem(stack);
             }
             this.containerInfo.populateRecipeFinder(craftingContainer, recipeFinder);
-            DefaultedList<Ingredient> ingredients = DefaultedList.create();
+            DefaultedList<Ingredient> ingredients = DefaultedList.of();
             map.entrySet().stream().sorted(Comparator.comparingInt(Map.Entry::getKey)).forEach(entry -> {
                 ingredients.add(Ingredient.ofStacks(entry.getValue().toArray(new ItemStack[0])));
             });

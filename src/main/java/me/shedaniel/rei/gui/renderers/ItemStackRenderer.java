@@ -19,12 +19,17 @@ import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 
 public abstract class ItemStackRenderer extends Renderer {
     
     public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
+    /**
+     * @deprecated This boolean is no longer used
+     */
+    @Deprecated
     public boolean drawTooltip = false;
     
     @Override
@@ -42,13 +47,24 @@ public abstract class ItemStackRenderer extends Renderer {
         itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, getItemStack(), l, i1, renderCounts() ? null : "");
         itemRenderer.zOffset = 0.0F;
         this.blitOffset = 0;
-        if (drawTooltip && mouseX >= x - 8 && mouseX <= x + 8 && mouseY >= y - 6 && mouseY <= y + 10)
-            queueTooltip(getItemStack(), delta);
-        this.drawTooltip = false;
     }
     
+    /**
+     * Queue a tooltip to the REI overlay
+     *
+     * @param itemStack the stack to queue
+     * @param delta     the delta
+     * @deprecated Use {@link Renderer#getQueuedTooltip(float)} instead and queue manually
+     */
+    @Deprecated
     protected void queueTooltip(ItemStack itemStack, float delta) {
         ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltip(itemStack)));
+    }
+    
+    @Nullable
+    @Override
+    public QueuedTooltip getQueuedTooltip(float delta) {
+        return QueuedTooltip.create(getTooltip(getItemStack()));
     }
     
     protected boolean renderCounts() {
