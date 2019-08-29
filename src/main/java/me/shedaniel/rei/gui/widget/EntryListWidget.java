@@ -29,6 +29,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 import org.apache.commons.lang3.StringUtils;
@@ -128,7 +129,10 @@ public class EntryListWidget extends Widget {
     }
     
     public static String tryGetFluidName(Fluid fluid) {
-        return Stream.of(Registry.FLUID.getId(fluid).getPath().split("_")).map(StringUtils::capitalize).collect(Collectors.joining(" "));
+        Identifier id = Registry.FLUID.getId(fluid);
+        if (I18n.hasTranslation("block." + id.toString().replaceFirst(":", ".")))
+            return I18n.translate("block." + id.toString().replaceFirst(":", "."));
+        return Stream.of(id.getPath().split("_")).map(StringUtils::capitalize).collect(Collectors.joining(" "));
     }
     
     public static String tryGetItemStackName(ItemStack stack) {
@@ -325,9 +329,9 @@ public class EntryListWidget extends Widget {
                                         cheatedStack.setCount(1);
                                     return ClientHelper.getInstance().tryCheatingStack(cheatedStack);
                                 }
-                            } else if (button == 0)
+                            } else if (button == 0) {
                                 return ClientHelper.getInstance().executeRecipeKeyBind(getCurrentItemStack().copy());
-                            else if (button == 1)
+                            } else if (button == 1)
                                 return ClientHelper.getInstance().executeUsageKeyBind(getCurrentItemStack().copy());
                         }
                         return false;

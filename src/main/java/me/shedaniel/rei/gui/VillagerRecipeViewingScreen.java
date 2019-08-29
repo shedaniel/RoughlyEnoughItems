@@ -358,6 +358,7 @@ public class VillagerRecipeViewingScreen extends Screen {
                 GuiLighting.disable();
                 recipeRenderers.get(i).setBlitOffset(1);
                 recipeRenderers.get(i).render(buttonWidgets.get(i).getBounds().x, buttonWidgets.get(i).getBounds().y, mouseX, mouseY, delta);
+                ScreenHelper.getLastOverlay().addTooltip(recipeRenderers.get(i).getQueuedTooltip(delta));
             }
         }
         double height = buttonWidgets.stream().map(ButtonWidget::getBounds).collect(Collectors.summingDouble(Rectangle::getHeight));

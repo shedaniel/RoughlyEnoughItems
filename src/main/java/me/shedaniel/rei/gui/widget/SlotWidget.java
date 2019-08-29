@@ -122,19 +122,13 @@ public class SlotWidget extends WidgetWithBounds {
             blit(this.x - 1, this.y - 1, 0, 222, 18, 18);
         }
         boolean highlighted = containsMouse(mouseX, mouseY);
-        if (isCurrentRendererItem() && !getCurrentItemStack().isEmpty()) {
-            renderer.setBlitOffset(200);
-            renderer.render(x + 8, y + 6, mouseX, mouseY, delta);
-            if (!getCurrentItemStack().isEmpty() && highlighted && showToolTips)
-                queueTooltip(getCurrentItemStack(), delta);
-        } else if (isCurrentRendererFluid()) {
-            renderer.setBlitOffset(200);
-            renderer.render(x + 8, y + 6, mouseX, mouseY, delta);
-            if (((FluidRenderer) renderer).getFluid() != null && highlighted && showToolTips)
-                queueTooltip(((FluidRenderer) renderer).getFluid(), delta);
-        } else {
-            renderer.setBlitOffset(200);
-            renderer.render(x + 8, y + 6, mouseX, mouseY, delta);
+        renderer.setBlitOffset(200);
+        renderer.render(x + 8, y + 6, mouseX, mouseY, delta);
+        if (highlighted && showToolTips) {
+            QueuedTooltip queuedTooltip = renderer.getQueuedTooltip(delta);
+            if (queuedTooltip != null) {
+                ScreenHelper.getLastOverlay().addTooltip(queuedTooltip);
+            }
         }
         if (drawHighlightedBackground && highlighted) {
             RenderHelper.disableLighting();
@@ -150,18 +144,28 @@ public class SlotWidget extends WidgetWithBounds {
         }
     }
     
+    @Deprecated
     public int getBlitOffset() {
         return this.blitOffset;
     }
     
+    @Deprecated
     public void setBlitOffset(int offset) {
         this.blitOffset = offset;
     }
     
+    /**
+     * @deprecated Not used anymore, see {@link Renderer#getQueuedTooltip(float)}
+     */
+    @Deprecated
     protected void queueTooltip(Fluid fluid, float delta) {
         ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltip(fluid)));
     }
     
+    /**
+     * @deprecated Not used anymore, see {@link Renderer#getQueuedTooltip(float)}
+     */
+    @Deprecated
     private List<String> getTooltip(Fluid fluid) {
         List<String> toolTip = Lists.newArrayList(EntryListWidget.tryGetFluidName(fluid));
         toolTip.addAll(getExtraFluidToolTips(fluid));
@@ -179,10 +183,18 @@ public class SlotWidget extends WidgetWithBounds {
         return toolTip;
     }
     
+    /**
+     * @deprecated Not used anymore, see {@link Renderer#getQueuedTooltip(float)}
+     */
+    @Deprecated
     protected void queueTooltip(ItemStack itemStack, float delta) {
         ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltip(itemStack)));
     }
     
+    /**
+     * @deprecated Not used anymore, see {@link Renderer#getQueuedTooltip(float)}
+     */
+    @Deprecated
     protected List<String> getTooltip(ItemStack itemStack) {
         List<String> toolTip = Lists.newArrayList(EntryListWidget.tryGetItemStackToolTip(itemStack, true));
         toolTip.addAll(getExtraItemToolTips(itemStack));
@@ -197,10 +209,18 @@ public class SlotWidget extends WidgetWithBounds {
         return toolTip;
     }
     
+    /**
+     * @deprecated See {@link ItemStackRenderer#getExtraToolTips(ItemStack)}
+     */
+    @Deprecated
     protected List<String> getExtraItemToolTips(ItemStack stack) {
         return Collections.emptyList();
     }
     
+    /**
+     * @deprecated See {@link FluidRenderer#getExtraToolTips(Fluid)}
+     */
+    @Deprecated
     protected List<String> getExtraFluidToolTips(Fluid fluid) {
         return Collections.emptyList();
     }
@@ -212,11 +232,16 @@ public class SlotWidget extends WidgetWithBounds {
     }
     
     public Renderer getCurrentRenderer() {
-        if (renderers.size() == 0)
+        if (renderers.isEmpty())
             return Renderer.empty();
         return renderers.get(MathHelper.floor((System.currentTimeMillis() / 500 % (double) renderers.size()) / 1f));
     }
     
+    /**
+     * @param itemList the list of items
+     * @deprecated Use {@link SlotWidget#setRenderers(List)}
+     */
+    @Deprecated
     public void setItemList(List<ItemStack> itemList) {
         this.setRenderers(itemList.stream().map(Renderer::fromItemStack).collect(Collectors.toList()));
     }

@@ -26,6 +26,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -79,19 +80,17 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
         int i = 0;
         for (int y = 0; y < 6; y++)
             for (int x = 0; x < 8; x++) {
-                widgets.add(new SlotWidget(bounds.getCenterX() - 72 + x * 18, bounds.y + y * 18, stacks.size() > i ? Renderer.fromItemStack(stacks.get(i).asItem().getStackForRender()) : Renderer.empty(), true, true, true) {
-                    @Override
-                    protected List<String> getExtraItemToolTips(ItemStack stack) {
-                        final List<String>[] thing = new List[]{null};
-                        recipeDisplaySupplier.get().getInputMap().forEach((itemProvider, aFloat) -> {
-                            if (itemProvider.asItem().equals(stack.getItem()))
-                                thing[0] = Arrays.asList(I18n.translate("text.rei.composting.chance", MathHelper.fastFloor(aFloat * 100)));
-                        });
-                        if (thing[0] != null)
-                            return thing[0];
-                        return super.getExtraItemToolTips(stack);
-                    }
-                });
+                int finalI = i;
+                widgets.add(new SlotWidget(bounds.getCenterX() - 72 + x * 18, bounds.y + y * 18, stacks.size() > i ? Renderer.fromItemStacks(() -> Collections.singletonList(new ItemStack(stacks.get(finalI))), true, stack -> {
+                    final List<String>[] thing = new List[]{null};
+                    recipeDisplaySupplier.get().getInputMap().forEach((itemProvider, aFloat) -> {
+                        if (itemProvider.asItem().equals(stack.getItem()))
+                            thing[0] = Arrays.asList(I18n.translate("text.rei.composting.chance", MathHelper.fastFloor(aFloat * 100)));
+                    });
+                    if (thing[0] != null)
+                        return thing[0];
+                    return null;
+                }) : Renderer.empty(), true, true, true));
                 i++;
             }
         widgets.add(new SlotWidget(startingPoint.x + 34, startingPoint.y + 5, Renderer.fromItemStacks(recipeDisplaySupplier.get().getOutput()), false, true, true));

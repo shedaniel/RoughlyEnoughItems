@@ -9,12 +9,16 @@ import me.shedaniel.rei.gui.renderers.EmptyRenderer;
 import me.shedaniel.rei.gui.renderers.FluidRenderer;
 import me.shedaniel.rei.gui.renderers.ItemStackRenderer;
 import me.shedaniel.rei.gui.renderers.SimpleRecipeRenderer;
+import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 
+import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public abstract class Renderer extends DrawableHelper {
@@ -25,12 +29,7 @@ public abstract class Renderer extends DrawableHelper {
      * @return the item stack renderer
      */
     public static ItemStackRenderer fromItemStackSupplier(Supplier<ItemStack> supplier) {
-        return new ItemStackRenderer() {
-            @Override
-            public ItemStack getItemStack() {
-                return supplier.get();
-            }
-        };
+        return fromItemStacks(() -> Collections.singletonList(supplier.get()), true, null);
     }
     
     /**
@@ -40,17 +39,7 @@ public abstract class Renderer extends DrawableHelper {
      * @return the item stack renderer
      */
     public static ItemStackRenderer fromItemStackSupplierNoCounts(Supplier<ItemStack> supplier) {
-        return new ItemStackRenderer() {
-            @Override
-            public ItemStack getItemStack() {
-                return supplier.get();
-            }
-            
-            @Override
-            protected boolean renderCounts() {
-                return false;
-            }
-        };
+        return fromItemStacks(() -> Collections.singletonList(supplier.get()), false, null);
     }
     
     /**
@@ -60,14 +49,28 @@ public abstract class Renderer extends DrawableHelper {
      * @return the item stack renderer
      */
     public static ItemStackRenderer fromItemStack(ItemStack stack) {
-        return fromItemStackSupplier(() -> stack);
+        return fromItemStacks(() -> Collections.singletonList(stack), true, null);
     }
     
     public static FluidRenderer fromFluid(Fluid fluid) {
+        return fromFluid(() -> fluid, null);
+    }
+    
+    public static FluidRenderer fromFluid(Supplier<Fluid> fluidSupplier, @Nullable Function<Fluid, List<String>> extraTooltipSupplier) {
         return new FluidRenderer() {
             @Override
             public Fluid getFluid() {
-                return fluid;
+                return fluidSupplier.get();
+            }
+            
+            @Override
+            protected List<String> getExtraToolTips(Fluid fluid) {
+                if (extraTooltipSupplier == null)
+                    return super.getExtraToolTips(fluid);
+                List<String> apply = extraTooltipSupplier.apply(fluid);
+                if (apply == null)
+                    return super.getExtraToolTips(fluid);
+                return apply;
             }
         };
     }
@@ -79,7 +82,7 @@ public abstract class Renderer extends DrawableHelper {
      * @return the item stack renderer
      */
     public static ItemStackRenderer fromItemStackNoCounts(ItemStack stack) {
-        return fromItemStackSupplierNoCounts(() -> stack);
+        return fromItemStacks(() -> Collections.singletonList(stack), false, null);
     }
     
     /**
@@ -103,30 +106,37 @@ public abstract class Renderer extends DrawableHelper {
     }
     
     public static ItemStackRenderer fromItemStacks(List<ItemStack> stacks) {
+        return fromItemStacks(() -> stacks, true, null);
+    }
+    
+    public static ItemStackRenderer fromItemStacks(Supplier<List<ItemStack>> stacksSupplier, boolean renderCounts, @Nullable Function<ItemStack, List<String>> extraTooltipSupplier) {
         return new ItemStackRenderer() {
             @Override
             public ItemStack getItemStack() {
-                if (stacks.isEmpty())
+                if (stacksSupplier.get().isEmpty())
                     return ItemStack.EMPTY;
-                return stacks.get(MathHelper.floor((System.currentTimeMillis() / 500 % (double) stacks.size()) / 1f));
+                return stacksSupplier.get().get(MathHelper.floor((System.currentTimeMillis() / 500 % (double) stacksSupplier.get().size()) / 1f));
+            }
+            
+            @Override
+            protected boolean renderCounts() {
+                return renderCounts;
+            }
+            
+            @Override
+            protected List<String> getExtraToolTips(ItemStack stack) {
+                if (extraTooltipSupplier == null)
+                    return super.getExtraToolTips(stack);
+                List<String> apply = extraTooltipSupplier.apply(stack);
+                if (apply == null)
+                    return super.getExtraToolTips(stack);
+                return apply;
             }
         };
     }
     
     public static ItemStackRenderer fromItemStacksNoCounts(List<ItemStack> stacks) {
-        return new ItemStackRenderer() {
-            @Override
-            public ItemStack getItemStack() {
-                if (stacks.isEmpty())
-                    return ItemStack.EMPTY;
-                return stacks.get(MathHelper.floor((System.currentTimeMillis() / 500 % (double) stacks.size()) / 1f));
-            }
-            
-            @Override
-            protected boolean renderCounts() {
-                return false;
-            }
-        };
+        return fromItemStacks(() -> stacks, false, null);
     }
     
     /**
@@ -157,5 +167,10 @@ public abstract class Renderer extends DrawableHelper {
      * @param delta  the delta
      */
     public abstract void render(int x, int y, double mouseX, double mouseY, float delta);
+    
+    @Nullable
+    public QueuedTooltip getQueuedTooltip(float delta) {
+        return null;
+    }
     
 }

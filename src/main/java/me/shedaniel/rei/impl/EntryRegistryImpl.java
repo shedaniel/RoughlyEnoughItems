@@ -37,7 +37,7 @@ public class EntryRegistryImpl implements EntryRegistry {
     
     @Override
     public ItemStack[] getAllStacksFromItem(Item item) {
-        DefaultedList<ItemStack> list = DefaultedList.create();
+        DefaultedList<ItemStack> list = DefaultedList.of();
         list.add(item.getStackForRender());
         item.appendStacks(item.getGroup(), list);
         TreeSet<ItemStack> stackSet = list.stream().collect(Collectors.toCollection(() -> new TreeSet<ItemStack>((p1, p2) -> ItemStack.areEqualIgnoreDamage(p1, p2) ? 0 : 1)));

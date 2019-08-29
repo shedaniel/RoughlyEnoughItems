@@ -8,6 +8,7 @@ package me.shedaniel.rei.gui.renderers;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
+import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.item.ItemStack;
@@ -15,6 +16,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.MathHelper;
 
+import javax.annotation.Nullable;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -40,6 +42,7 @@ public class SimpleRecipeRenderer extends RecipeRenderer {
     private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private List<ItemStackRenderer> inputRenderer;
     private ItemStackRenderer outputRenderer;
+    private QueuedTooltip lastTooltip;
     
     public SimpleRecipeRenderer(Supplier<List<List<ItemStack>>> input, Supplier<List<ItemStack>> output) {
         List<Pair<List<ItemStack>, AtomicInteger>> newList = Lists.newArrayList();
@@ -77,12 +80,15 @@ public class SimpleRecipeRenderer extends RecipeRenderer {
     
     @Override
     public void render(int x, int y, double mouseX, double mouseY, float delta) {
+        lastTooltip = null;
         int xx = x + 4, yy = y + 2;
         int j = 0;
         int itemsPerLine = getItemsPerLine();
         for (ItemStackRenderer itemStackRenderer : inputRenderer) {
             itemStackRenderer.setBlitOffset(getBlitOffset() + 50);
-            itemStackRenderer.drawTooltip = MinecraftClient.getInstance().currentScreen instanceof VillagerRecipeViewingScreen;
+            if (lastTooltip == null && MinecraftClient.getInstance().currentScreen instanceof VillagerRecipeViewingScreen && mouseX >= xx && mouseX <= xx + 16 && mouseY >= yy && mouseY <= yy + 16) {
+                lastTooltip = itemStackRenderer.getQueuedTooltip(delta);
+            }
             itemStackRenderer.render(xx + 8, yy + 6, mouseX, mouseY, delta);
             xx += 18;
             j++;
@@ -99,8 +105,16 @@ public class SimpleRecipeRenderer extends RecipeRenderer {
         blit(xx, yy, 0, 28, 18, 18);
         xx += 18;
         outputRenderer.setBlitOffset(getBlitOffset() + 50);
-        outputRenderer.drawTooltip = MinecraftClient.getInstance().currentScreen instanceof VillagerRecipeViewingScreen;
         outputRenderer.render(xx + 8, yy + 6, mouseX, mouseY, delta);
+        if (lastTooltip == null && MinecraftClient.getInstance().currentScreen instanceof VillagerRecipeViewingScreen && mouseX >= xx && mouseX <= xx + 16 && mouseY >= yy && mouseY <= yy + 16) {
+            lastTooltip = outputRenderer.getQueuedTooltip(delta);
+        }
+    }
+    
+    @Nullable
+    @Override
+    public QueuedTooltip getQueuedTooltip(float delta) {
+        return lastTooltip;
     }
     
     @Override

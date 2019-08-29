@@ -73,12 +73,7 @@ public class DefaultSmokingCategory implements TransferRecipeCategory<DefaultSmo
         widgets.add(new RecipeArrowWidget(startPoint.x + 24, startPoint.y + 18, true));
         List<List<ItemStack>> input = recipeDisplaySupplier.get().getInput();
         widgets.add(new SlotWidget(startPoint.x + 1, startPoint.y + 1, Renderer.fromItemStacks(input.get(0)), true, true, true));
-        widgets.add(new SlotWidget(startPoint.x + 1, startPoint.y + 37, Renderer.fromItemStacks(recipeDisplaySupplier.get().getFuel()), true, true, true) {
-            @Override
-            protected List<String> getExtraItemToolTips(ItemStack stack) {
-                return Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("category.rei.smelting.fuel"));
-            }
-        });
+        widgets.add(new SlotWidget(startPoint.x + 1, startPoint.y + 37, Renderer.fromItemStacks(() -> recipeDisplaySupplier.get().getFuel(), true, stack -> Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("category.rei.smelting.fuel"))), true, true, true));
         widgets.add(new SlotWidget(startPoint.x + 61, startPoint.y + 19, Renderer.fromItemStacks(recipeDisplaySupplier.get().getOutput()), false, true, true));
         return widgets;
     }

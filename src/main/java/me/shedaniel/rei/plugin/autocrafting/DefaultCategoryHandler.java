@@ -81,7 +81,7 @@ public class DefaultCategoryHandler implements AutoTransferHandler {
     
     public IntList hasItems(List<List<ItemStack>> inputs) {
         // Create a clone of player's inventory, and count
-        DefaultedList<ItemStack> copyMain = DefaultedList.create();
+        DefaultedList<ItemStack> copyMain = DefaultedList.of();
         for (ItemStack stack : MinecraftClient.getInstance().player.inventory.main) {
             copyMain.add(stack.copy());
         }
