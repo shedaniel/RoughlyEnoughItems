@@ -37,7 +37,7 @@
   "depends": {
     "fabricloader": ">=0.4.0",
     "cloth": "*",
-    "cloth-config2": ">=0.5.2"
+    "cloth-config2": ">=1.1.1"
   },
   "mixins": [
     "mixin.roughlyenoughitems.json",
