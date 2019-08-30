@@ -5,6 +5,7 @@
 
 package me.shedaniel.rei.gui.widget;
 
+import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
@@ -20,12 +21,13 @@ import net.minecraft.util.math.MathHelper;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class AutoCraftingButtonWidget extends ButtonWidget {
     
     private final Supplier<RecipeDisplay> displaySupplier;
     private String extraTooltip;
-    private String errorTooltip;
+    private List<String> errorTooltip;
     private List<Widget> setupDisplay;
     private AbstractContainerScreen<?> containerScreen;
     private boolean visible = false;
@@ -61,7 +63,7 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         this.enabled = false;
-        String error = null;
+        List<String> error = null;
         int color = 0;
         visible = false;
         IntList redSlots = null;
@@ -74,9 +76,14 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
                 if (result.isSuccessful()) {
                     enabled = true;
                     error = null;
+                    color = 0;
+                    redSlots = null;
                     break;
-                } else if (error == null) {
-                    error = result.getErrorKey();
+                } else if (result.isApplicable()) {
+                    if (error == null) {
+                        error = Lists.newArrayList();
+                    }
+                    error.add(result.getErrorKey());
                     color = result.getColor();
                     redSlots = result.getIntegers();
                 }
@@ -86,12 +93,17 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
         }
         if (!visible) {
             enabled = false;
-            error = "error.rei.no.handlers.applicable";
+            if (error == null) {
+                error = Lists.newArrayList();
+            } else {
+                error.clear();
+            }
+            error.add("error.rei.no.handlers.applicable");
         }
         if (isHovered(mouseX, mouseY) && category instanceof TransferRecipeCategory && redSlots != null) {
             ((TransferRecipeCategory<RecipeDisplay>) category).renderRedSlots(setupDisplay, displayBounds, displaySupplier.get(), redSlots);
         }
-        errorTooltip = error;
+        errorTooltip = error == null || error.isEmpty() ? null : error;
         int x = getBounds().x, y = getBounds().y, width = getBounds().width, height = getBounds().height;
         minecraft.getTextureManager().bindTexture(ScreenHelper.isDarkModeEnabled() ? BUTTON_LOCATION_DARK : BUTTON_LOCATION);
         RenderHelper.color4f(1.0F, 1.0F, 1.0F, 1.0F);
@@ -139,14 +151,17 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
     
     @Override
     public Optional<String> getTooltips() {
-        if (this.minecraft.options.advancedItemTooltips)
-            if (errorTooltip == null)
-                return Optional.ofNullable(I18n.translate("text.auto_craft.move_items") + extraTooltip);
-            else
-                return Optional.ofNullable(Formatting.RED.toString() + I18n.translate(errorTooltip) + extraTooltip);
-        if (errorTooltip == null)
-            return Optional.ofNullable(I18n.translate("text.auto_craft.move_items"));
-        else
-            return Optional.ofNullable(Formatting.RED.toString() + I18n.translate(errorTooltip));
+        String str = "";
+        if (errorTooltip == null) {
+            str += I18n.translate("text.auto_craft.move_items");
+        } else {
+            if (errorTooltip.size() > 1)
+                str += Formatting.RED.toString() + I18n.translate("error.rei.multi.errors") + "\n";
+            str += errorTooltip.stream().map(s -> Formatting.RED.toString() + (errorTooltip.size() > 1 ? "- " : "") + I18n.translate(s)).collect(Collectors.joining("\n"));
+        }
+        if (this.minecraft.options.advancedItemTooltips) {
+            str += extraTooltip;
+        }
+        return Optional.of(str);
     }
 }

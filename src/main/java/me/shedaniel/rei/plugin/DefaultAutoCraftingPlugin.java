@@ -9,6 +9,7 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.plugin.autocrafting.DefaultCategoryHandler;
+import me.shedaniel.rei.plugin.autocrafting.DefaultRecipeBookHandler;
 import net.fabricmc.loader.api.SemanticVersion;
 import net.fabricmc.loader.util.version.VersionParsingException;
 import net.minecraft.util.Identifier;
@@ -33,5 +34,6 @@ public class DefaultAutoCraftingPlugin implements REIPluginV0 {
             return;
         }
         recipeHelper.registerAutoCraftingHandler(new DefaultCategoryHandler());
+        recipeHelper.registerAutoCraftingHandler(new DefaultRecipeBookHandler());
     }
 }
