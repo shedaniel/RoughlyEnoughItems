@@ -61,12 +61,10 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
             } else {
                 this.returnInputs();
                 craftingContainer.sendContentUpdates();
-                player.inventory.markDirty();
                 throw new NullPointerException();
             }
             
             craftingContainer.sendContentUpdates();
-            player.inventory.markDirty();
         }
     }
     
