@@ -572,6 +572,13 @@ public class ContainerScreenOverlay extends Widget {
         return false;
     }
     
+    @Override
+    public boolean mouseDragged(double double_1, double double_2, int int_1, double double_3, double double_4) {
+        if (!ScreenHelper.isOverlayVisible())
+            return false;
+        return this.getFocused() != null && this.isDragging() && int_1 == 0 ? this.getFocused().mouseDragged(double_1, double_2, int_1, double_3, double_4) : false;
+    }
+    
     public boolean isInside(double mouseX, double mouseY) {
         if (!rectangle.contains(mouseX, mouseY))
             return false;
