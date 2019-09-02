@@ -44,7 +44,7 @@ public interface DefaultCraftingDisplay extends TransferRecipeDisplay {
         }
         for (int i = 0; i < getInput().size(); i++) {
             List<ItemStack> stacks = getInput().get(i);
-            list.set(DefaultCraftingCategory.getSlotWithSize(this, i), stacks);
+            list.set(DefaultCraftingCategory.getSlotWithSize(this, i, containerInfo.getCraftingWidth(container)), stacks);
         }
         return list;
     }
