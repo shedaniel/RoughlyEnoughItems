@@ -31,25 +31,15 @@ import java.util.function.Supplier;
 
 public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCraftingDisplay> {
     
+    @Deprecated
     public static int getSlotWithSize(DefaultCraftingDisplay recipeDisplay, int num) {
-        if (recipeDisplay.getWidth() == 1) {
-            if (num == 1)
-                return 3;
-            if (num == 2)
-                return 6;
-        }
-        
-        if (recipeDisplay.getWidth() == 2) {
-            if (num == 2)
-                return 3;
-            if (num == 3)
-                return 4;
-            if (num == 4)
-                return 6;
-            if (num == 5)
-                return 7;
-        }
-        return num;
+        return getSlotWithSize(recipeDisplay, num, 3);
+    }
+    
+    public static int getSlotWithSize(DefaultCraftingDisplay recipeDisplay, int num, int craftingGridWidth) {
+        int x = num % recipeDisplay.getWidth();
+        int y = (num - x) / recipeDisplay.getWidth();
+        return craftingGridWidth * y + x;
     }
     
     @Override
@@ -88,7 +78,7 @@ public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCr
         for (int i = 0; i < input.size(); i++) {
             if (recipeDisplaySupplier.get() instanceof DefaultShapedDisplay) {
                 if (!input.get(i).isEmpty())
-                    slots.get(getSlotWithSize(recipeDisplaySupplier.get(), i)).setItemList(input.get(i));
+                    slots.get(getSlotWithSize(recipeDisplaySupplier.get(), i, 3)).setItemList(input.get(i));
             } else if (!input.get(i).isEmpty())
                 slots.get(i).setItemList(input.get(i));
         }
@@ -102,7 +92,7 @@ public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCr
         Point startPoint = new Point(bounds.getCenterX() - 58, bounds.getCenterY() - 27);
         RenderHelper.translatef(0, 0, 400);
         for (Integer slot : redSlots) {
-            int i = getSlotWithSize(display, slot);
+            int i = getSlotWithSize(display, slot, 3);
             int x = i % 3;
             int y = (i - x) / 3;
             DrawableHelper.fill(startPoint.x + 1 + x * 18, startPoint.y + 1 + y * 18, startPoint.x + 1 + x * 18 + 16, startPoint.y + 1 + y * 18 + 16, 822018048);

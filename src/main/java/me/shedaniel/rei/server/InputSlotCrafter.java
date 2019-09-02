@@ -13,6 +13,7 @@ import net.minecraft.container.Container;
 import net.minecraft.container.Slot;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -23,6 +24,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<Integer> {
     
@@ -54,7 +56,7 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
             this.containerInfo.populateRecipeFinder(craftingContainer, recipeFinder);
             DefaultedList<Ingredient> ingredients = DefaultedList.of();
             map.entrySet().stream().sorted(Comparator.comparingInt(Map.Entry::getKey)).forEach(entry -> {
-                ingredients.add(Ingredient.ofStacks(entry.getValue().toArray(new ItemStack[0])));
+                ingredients.add(Ingredient.ofItems(entry.getValue().stream().map(ItemStack::getItem).collect(Collectors.toList()).toArray(new Item[0])));
             });
             if (recipeFinder.findRecipe(ingredients, (IntList) null)) {
                 this.fillInputSlots(recipeFinder, ingredients, hasShift);
