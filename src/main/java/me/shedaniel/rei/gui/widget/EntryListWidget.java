@@ -20,7 +20,10 @@ import me.shedaniel.rei.impl.SearchArgument;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.GuiLighting;
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.Item;
@@ -76,6 +79,10 @@ public class EntryListWidget extends Widget {
             e.printStackTrace();
         }
     };
+    private static float scrollBarAlpha = 0;
+    private static float scrollBarAlphaFuture = 0;
+    private static long scrollBarAlphaFutureTime = -1;
+    private static boolean draggingScrollBar = false;
     
     static {
         ASCENDING_COMPARATOR = (entry, entry1) -> {
@@ -238,6 +245,10 @@ public class EntryListWidget extends Widget {
                 scrollVelocity -= 24;
             else if (this.scroll <= this.getMaxScroll() && double_3 < 0)
                 scrollVelocity += 24;
+            if (scrollBarAlphaFuture == 0)
+                scrollBarAlphaFuture = 1f;
+            if (System.currentTimeMillis() - scrollBarAlphaFutureTime > 300f)
+                scrollBarAlphaFutureTime = System.currentTimeMillis();
             return true;
         }
         return super.mouseScrolled(double_1, double_2, double_3);
@@ -245,6 +256,29 @@ public class EntryListWidget extends Widget {
     
     @Override
     public void render(int int_1, int int_2, float float_1) {
+        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().doesVillagerScreenHavePermanentScrollBar()) {
+            scrollBarAlphaFutureTime = System.currentTimeMillis();
+            scrollBarAlphaFuture = 0;
+            scrollBarAlpha = 1;
+        } else if (scrollBarAlphaFutureTime > 0) {
+            long l = System.currentTimeMillis() - scrollBarAlphaFutureTime;
+            if (l > 300f) {
+                if (scrollBarAlphaFutureTime == 0) {
+                    scrollBarAlpha = scrollBarAlphaFuture;
+                    scrollBarAlphaFutureTime = -1;
+                } else if (l > 2000f && scrollBarAlphaFuture == 1) {
+                    scrollBarAlphaFuture = 0;
+                    scrollBarAlphaFutureTime = System.currentTimeMillis();
+                } else
+                    scrollBarAlpha = scrollBarAlphaFuture;
+            } else {
+                if (scrollBarAlphaFuture == 0)
+                    scrollBarAlpha = Math.min(scrollBarAlpha, 1 - Math.min(1f, l / 300f));
+                else if (scrollBarAlphaFuture == 1)
+                    scrollBarAlpha = Math.max(Math.min(1f, l / 300f), scrollBarAlpha);
+            }
+        }
+        
         GuiLighting.disable();
         RenderHelper.pushMatrix();
         boolean widgetScrolled = RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled();
@@ -265,8 +299,44 @@ public class EntryListWidget extends Widget {
                 widget.render(int_1, int_2, float_1);
             }
         });
-        if (widgetScrolled)
+        if (widgetScrolled) {
+            double height = getMaxScroll();
+            if (height > rectangle.height) {
+                Tessellator tessellator = Tessellator.getInstance();
+                BufferBuilder buffer = tessellator.getBufferBuilder();
+                double maxScroll = height;
+                //                int scrollBarHeight = MathHelper.floor((rectangle.height) * (rectangle.height) / maxScroll);
+                //                scrollBarHeight = MathHelper.clamp(scrollBarHeight, 32, rectangle.height - 8);
+                //                int minY = (int) (scroll * (rectangle.height - scrollBarHeight) / maxScroll) + rectangle.y + 1;
+                //                if (minY < this.rectangle.y + 1)
+                //                    minY = this.rectangle.y;
+                //                if (minY + scrollBarHeight >= rectangle.getMaxY())
+                //                    minY = rectangle.getMaxY() - scrollBarHeight;
+                int scrollBarHeight = MathHelper.floor((rectangle.height) * (rectangle.height) / maxScroll);
+                scrollBarHeight = MathHelper.clamp(scrollBarHeight, 32, rectangle.height - 8);
+                scrollBarHeight = (int) ((double) scrollBarHeight - Math.min((double) (this.scroll < 0.0D ? (int) (-this.scroll) : (this.scroll > (double) this.getMaxScroll() ? (int) this.scroll - this.getMaxScroll() : 0)), (double) scrollBarHeight * 0.75D));
+                int minY = (int) Math.min(Math.max((int) this.getScroll() * (rectangle.height - scrollBarHeight) / maxScroll + rectangle.y, rectangle.y), rectangle.getMaxY() - scrollBarHeight);
+                double scrollbarPositionMinX = rectangle.getMaxX() - 6, scrollbarPositionMaxX = rectangle.getMaxX() - 1;
+                GuiLighting.disable();
+                RenderHelper.disableTexture();
+                RenderHelper.enableBlend();
+                RenderHelper.disableAlphaTest();
+                RenderHelper.blendFuncSeparate(770, 771, 1, 0);
+                RenderHelper.shadeModel(7425);
+                buffer.begin(7, VertexFormats.POSITION_COLOR);
+                float b = ScreenHelper.isDarkModeEnabled() ? 0.8f : 1f;
+                buffer.vertex(scrollbarPositionMinX, minY + scrollBarHeight, 1000D).color(b, b, b, scrollBarAlpha).next();
+                buffer.vertex(scrollbarPositionMaxX, minY + scrollBarHeight, 1000D).color(b, b, b, scrollBarAlpha).next();
+                buffer.vertex(scrollbarPositionMaxX, minY, 1000D).color(b, b, b, scrollBarAlpha).next();
+                buffer.vertex(scrollbarPositionMinX, minY, 1000D).color(b, b, b, scrollBarAlpha).next();
+                tessellator.draw();
+                RenderHelper.shadeModel(7424);
+                RenderHelper.disableBlend();
+                RenderHelper.enableAlphaTest();
+                RenderHelper.enableTexture();
+            }
             Scissors.end();
+        }
         RenderHelper.popMatrix();
         ClientPlayerEntity player = minecraft.player;
         if (rectangle.contains(PointHelper.fromMouse()) && ClientHelper.getInstance().isCheating() && !player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
@@ -374,6 +444,22 @@ public class EntryListWidget extends Widget {
     }
     
     @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int int_1, double double_3, double double_4) {
+        if (int_1 == 0 && scrollBarAlpha > 0 && draggingScrollBar) {
+            float height = maxScroll;
+            int actualHeight = rectangle.height;
+            if (height > actualHeight && mouseY >= rectangle.y && mouseY <= rectangle.getMaxY()) {
+                double double_5 = (double) Math.max(1, this.getMaxScroll());
+                int int_2 = rectangle.height;
+                int int_3 = MathHelper.clamp((int) ((float) (int_2 * int_2) / (float) maxScroll), 32, int_2 - 8);
+                double double_6 = Math.max(1.0D, double_5 / (double) (int_2 - int_3));
+                scroll = MathHelper.clamp((float) (scroll + double_4 * double_6), 0, height - rectangle.height);
+            }
+        }
+        return super.mouseDragged(mouseX, mouseY, int_1, double_3, double_4);
+    }
+    
+    @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (rectangle.contains(PointHelper.fromMouse()))
             for (Widget widget : widgets)
@@ -458,6 +544,18 @@ public class EntryListWidget extends Widget {
     
     @Override
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
+        double height = getMaxScroll();
+        int actualHeight = rectangle.height;
+        if (height > actualHeight && scrollBarAlpha > 0 && double_2 >= rectangle.y && double_2 <= rectangle.getMaxY()) {
+            double scrollbarPositionMinX = rectangle.getMaxX() - 6;
+            if (double_1 >= scrollbarPositionMinX - 2 & double_1 <= scrollbarPositionMinX + 8) {
+                this.draggingScrollBar = true;
+                scrollBarAlpha = 1;
+                return true;
+            }
+        }
+        this.draggingScrollBar = false;
+        
         if (rectangle.contains(double_1, double_2)) {
             ClientPlayerEntity player = minecraft.player;
             if (ClientHelper.getInstance().isCheating() && !player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets()) {

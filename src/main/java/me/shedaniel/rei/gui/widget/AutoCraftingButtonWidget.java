@@ -103,7 +103,13 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
         if (isHovered(mouseX, mouseY) && category instanceof TransferRecipeCategory && redSlots != null) {
             ((TransferRecipeCategory<RecipeDisplay>) category).renderRedSlots(setupDisplay, displayBounds, displaySupplier.get(), redSlots);
         }
-        errorTooltip = error == null || error.isEmpty() ? null : error;
+        errorTooltip = error == null || error.isEmpty() ? null : Lists.newArrayList();
+        if (errorTooltip != null) {
+            for (String s : error) {
+                if (!errorTooltip.stream().anyMatch(ss -> ss.equalsIgnoreCase(s)))
+                    errorTooltip.add(s);
+            }
+        }
         int x = getBounds().x, y = getBounds().y, width = getBounds().width, height = getBounds().height;
         minecraft.getTextureManager().bindTexture(ScreenHelper.isDarkModeEnabled() ? BUTTON_LOCATION_DARK : BUTTON_LOCATION);
         RenderHelper.color4f(1.0F, 1.0F, 1.0F, 1.0F);
