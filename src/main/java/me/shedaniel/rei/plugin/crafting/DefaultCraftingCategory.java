@@ -25,6 +25,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -78,9 +79,9 @@ public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCr
         for (int i = 0; i < input.size(); i++) {
             if (recipeDisplaySupplier.get() instanceof DefaultShapedDisplay) {
                 if (!input.get(i).isEmpty())
-                    slots.get(getSlotWithSize(recipeDisplaySupplier.get(), i, 3)).setItemList(input.get(i));
+                    slots.get(getSlotWithSize(recipeDisplaySupplier.get(), i, 3)).setRenderers(Collections.singletonList(Renderer.fromItemStacks(input.get(i))));
             } else if (!input.get(i).isEmpty())
-                slots.get(i).setItemList(input.get(i));
+                slots.get(i).setRenderers(Collections.singletonList(Renderer.fromItemStacks(input.get(i))));
         }
         widgets.addAll(slots);
         widgets.add(new SlotWidget(startPoint.x + 95, startPoint.y + 19, Renderer.fromItemStacks(recipeDisplaySupplier.get().getOutput()), false, true, true));

@@ -99,9 +99,9 @@ public abstract class FluidRenderer extends Renderer {
     
     protected List<String> getTooltip(Fluid fluid) {
         List<String> toolTip = Lists.newArrayList(EntryListWidget.tryGetFluidName(fluid));
+        toolTip.addAll(getExtraToolTips(fluid));
         if (RoughlyEnoughItemsCore.getConfigManager().getConfig().shouldAppendModNames()) {
             final String modString = ClientHelper.getInstance().getFormattedModFromIdentifier(Registry.FLUID.getId(fluid));
-            toolTip.addAll(getExtraToolTips(fluid));
             boolean alreadyHasMod = false;
             for (String s : toolTip)
                 if (s.equalsIgnoreCase(modString)) {
@@ -114,7 +114,7 @@ public abstract class FluidRenderer extends Renderer {
         return toolTip;
     }
     
-    protected List<String> getExtraToolTips(Fluid stack) {
+    protected List<String> getExtraToolTips(Fluid fluid) {
         return Collections.emptyList();
     }
     

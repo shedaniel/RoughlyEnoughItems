@@ -305,12 +305,7 @@ public class RecipeViewingScreen extends Screen {
             List<String> list = Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("text.rei.working_station"));
             xx += (innerWidth - 1) * 18;
             for (List<ItemStack> workingStation : workingStations) {
-                preWidgets.add(new SlotWidget(xx, yy, Renderer.fromItemStacks(workingStation), true, true, true) {
-                    @Override
-                    protected List<String> getExtraItemToolTips(ItemStack stack) {
-                        return list;
-                    }
-                });
+                preWidgets.add(new SlotWidget(xx, yy, Renderer.fromItemStacks(() -> workingStation, true, stack -> list), true, true, true));
                 index++;
                 yy += 18;
                 if (index >= hh) {
