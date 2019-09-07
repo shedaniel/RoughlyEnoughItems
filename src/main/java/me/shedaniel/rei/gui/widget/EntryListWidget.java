@@ -15,6 +15,8 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.gui.config.ItemCheatingMode;
 import me.shedaniel.rei.gui.config.ItemListOrdering;
+import me.shedaniel.rei.gui.renderers.FluidRenderer;
+import me.shedaniel.rei.gui.renderers.ItemStackRenderer;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.SearchArgument;
 import net.minecraft.client.MinecraftClient;
@@ -37,6 +39,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -343,7 +346,7 @@ public class EntryListWidget extends Widget {
             ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.delete_items")));
     }
     
-    public void updateList(DisplayHelper.DisplayBoundsHandler boundsHandler, Rectangle rectangle, int page, String searchTerm, boolean processSearchTerm) {
+    public void updateList(DisplayHelper.DisplayBoundsHandler<?> boundsHandler, Rectangle rectangle, int page, String searchTerm, boolean processSearchTerm) {
         this.rectangle = rectangle;
         this.page = page;
         this.widgets = Lists.newCopyOnWriteArrayList();
@@ -370,21 +373,38 @@ public class EntryListWidget extends Widget {
                     break;
                 final Entry entry = currentDisplayed.get(j - 1);
                 maxScroll = y + 18;
-                widgets.add(new Slot(entry, xx, yy, x, y, entry.getEntryType() == Entry.Type.ITEM ? Renderer.fromItemStackNoCounts(entry.getItemStack()) : Renderer.fromFluid(entry.getFluid()), false, true, true) {
+                widgets.add(new Slot(entry, xx, yy, x, y, entry.getEntryType() == Entry.Type.ITEM ? new ItemStackRenderer() {
                     @Override
-                    protected void queueTooltip(ItemStack itemStack, float delta) {
+                    public ItemStack getItemStack() {
+                        return entry.getItemStack();
+                    }
+                    
+                    @Override
+                    protected String getCounts() {
+                        return "";
+                    }
+                    
+                    @Nullable
+                    @Override
+                    public QueuedTooltip getQueuedTooltip(float delta) {
                         ClientPlayerEntity player = minecraft.player;
                         if (!ClientHelper.getInstance().isCheating() || player.inventory.getCursorStack().isEmpty())
-                            super.queueTooltip(itemStack, delta);
+                            return super.getQueuedTooltip(delta);
+                        return null;
+                    }
+                } : new FluidRenderer() {
+                    @Override
+                    public Fluid getFluid() {
+                        return entry.getFluid();
                     }
                     
                     @Override
-                    protected List<String> getExtraFluidToolTips(Fluid fluid) {
+                    protected List<String> getExtraToolTips(Fluid fluid) {
                         if (MinecraftClient.getInstance().options.advancedItemTooltips)
                             return Collections.singletonList(Formatting.DARK_GRAY.toString() + Registry.FLUID.getId(fluid).toString());
-                        return super.getExtraFluidToolTips(fluid);
+                        return super.getExtraToolTips(fluid);
                     }
-                    
+                }, false, true, true) {
                     @Override
                     public boolean mouseClicked(double mouseX, double mouseY, int button) {
                         if (isCurrentRendererItem() && containsMouse(mouseX, mouseY)) {

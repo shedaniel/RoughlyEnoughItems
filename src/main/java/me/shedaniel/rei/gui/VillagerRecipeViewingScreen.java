@@ -108,12 +108,7 @@ public class VillagerRecipeViewingScreen extends Screen {
             int index = 0;
             List<String> list = Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("text.rei.working_station"));
             for (List<ItemStack> workingStation : workingStations) {
-                widgets.add(new SlotWidget(xx, yy, Renderer.fromItemStacks(workingStation), true, true, true) {
-                    @Override
-                    protected List<String> getExtraItemToolTips(ItemStack stack) {
-                        return list;
-                    }
-                });
+                widgets.add(new SlotWidget(xx, yy, Renderer.fromItemStacks(() -> workingStation, true, stack -> list), true, true, true));
                 index++;
                 xx += 18;
                 if (index >= ww) {

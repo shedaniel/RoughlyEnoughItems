@@ -110,6 +110,10 @@ public abstract class Renderer extends DrawableHelper {
     }
     
     public static ItemStackRenderer fromItemStacks(Supplier<List<ItemStack>> stacksSupplier, boolean renderCounts, @Nullable Function<ItemStack, List<String>> extraTooltipSupplier) {
+        return fromItemStacks(stacksSupplier, stack -> renderCounts ? null : "", extraTooltipSupplier);
+    }
+    
+    public static ItemStackRenderer fromItemStacks(Supplier<List<ItemStack>> stacksSupplier, Function<ItemStack, String> countsFunction, @Nullable Function<ItemStack, List<String>> extraTooltipSupplier) {
         return new ItemStackRenderer() {
             @Override
             public ItemStack getItemStack() {
@@ -119,8 +123,8 @@ public abstract class Renderer extends DrawableHelper {
             }
             
             @Override
-            protected boolean renderCounts() {
-                return renderCounts;
+            protected String getCounts() {
+                return countsFunction.apply(getItemStack());
             }
             
             @Override

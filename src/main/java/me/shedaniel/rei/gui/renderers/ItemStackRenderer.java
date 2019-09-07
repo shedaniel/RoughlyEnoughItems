@@ -44,7 +44,7 @@ public abstract class ItemStackRenderer extends Renderer {
         RenderHelper.enableRescaleNormal();
         RenderHelper.enableDepthTest();
         itemRenderer.renderGuiItem(getItemStack(), l, i1);
-        itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, getItemStack(), l, i1, renderCounts() ? null : "");
+        itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, getItemStack(), l, i1, getCounts());
         itemRenderer.zOffset = 0.0F;
         this.blitOffset = 0;
     }
@@ -71,11 +71,15 @@ public abstract class ItemStackRenderer extends Renderer {
         return true;
     }
     
+    protected String getCounts() {
+        return renderCounts() ? null : "";
+    }
+    
     protected List<String> getTooltip(ItemStack itemStack) {
         List<String> toolTip = Lists.newArrayList(EntryListWidget.tryGetItemStackToolTip(itemStack, true));
+        toolTip.addAll(getExtraToolTips(itemStack));
         if (RoughlyEnoughItemsCore.getConfigManager().getConfig().shouldAppendModNames()) {
             final String modString = ClientHelper.getInstance().getFormattedModFromItem(itemStack.getItem());
-            toolTip.addAll(getExtraToolTips(itemStack));
             boolean alreadyHasMod = false;
             for (String s : toolTip)
                 if (s.equalsIgnoreCase(modString)) {

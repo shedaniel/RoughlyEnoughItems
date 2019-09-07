@@ -40,6 +40,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameMode;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -458,8 +459,9 @@ public class ContainerScreenOverlay extends Widget {
         return list1.stream().map(Objects::toString).collect(Collectors.joining("")).equals(list2.stream().map(Objects::toString).collect(Collectors.joining("")));
     }
     
-    public void addTooltip(QueuedTooltip queuedTooltip) {
-        QUEUED_TOOLTIPS.add(queuedTooltip);
+    public void addTooltip(@Nullable QueuedTooltip queuedTooltip) {
+        if (queuedTooltip != null)
+            QUEUED_TOOLTIPS.add(queuedTooltip);
     }
     
     public void renderWidgets(int int_1, int int_2, float float_1) {
