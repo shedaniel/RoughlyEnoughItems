@@ -308,13 +308,6 @@ public class EntryListWidget extends Widget {
                 Tessellator tessellator = Tessellator.getInstance();
                 BufferBuilder buffer = tessellator.getBufferBuilder();
                 double maxScroll = height;
-                //                int scrollBarHeight = MathHelper.floor((rectangle.height) * (rectangle.height) / maxScroll);
-                //                scrollBarHeight = MathHelper.clamp(scrollBarHeight, 32, rectangle.height - 8);
-                //                int minY = (int) (scroll * (rectangle.height - scrollBarHeight) / maxScroll) + rectangle.y + 1;
-                //                if (minY < this.rectangle.y + 1)
-                //                    minY = this.rectangle.y;
-                //                if (minY + scrollBarHeight >= rectangle.getMaxY())
-                //                    minY = rectangle.getMaxY() - scrollBarHeight;
                 int scrollBarHeight = MathHelper.floor((rectangle.height) * (rectangle.height) / maxScroll);
                 scrollBarHeight = MathHelper.clamp(scrollBarHeight, 32, rectangle.height - 8);
                 scrollBarHeight = (int) ((double) scrollBarHeight - Math.min((double) (this.scroll < 0.0D ? (int) (-this.scroll) : (this.scroll > (double) this.getMaxScroll() ? (int) this.scroll - this.getMaxScroll() : 0)), (double) scrollBarHeight * 0.75D));
@@ -537,6 +530,8 @@ public class EntryListWidget extends Widget {
             if (any.isPresent())
                 newList.add(any.get());
         }
+        if (newList.isEmpty())
+            return Collections.unmodifiableList(stacks);
         return Collections.unmodifiableList(newList);
     }
     

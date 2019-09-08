@@ -62,11 +62,11 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
                 this.fillInputSlots(recipeFinder, ingredients, hasShift);
             } else {
                 this.returnInputs();
-                craftingContainer.sendContentUpdates();
-                throw new NullPointerException();
+                player.inventory.markDirty();
+                throw new NotEnoughMaterialsException();
             }
-            
-            craftingContainer.sendContentUpdates();
+    
+            player.inventory.markDirty();
         }
     }
     
@@ -239,6 +239,9 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
             }
         }
         return int_1;
+    }
+    
+    public static class NotEnoughMaterialsException extends RuntimeException {
     }
     
 }
