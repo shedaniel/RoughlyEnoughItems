@@ -76,7 +76,7 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
                 }
                 try {
                     InputSlotCrafter.start(category, container, player, input, shift);
-                } catch (NullPointerException e) {
+                } catch (InputSlotCrafter.NotEnoughMaterialsException e) {
                     if (!(container instanceof CraftingContainer))
                         return;
                     PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
