@@ -205,7 +205,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         final Identifier recipeButtonTex = new Identifier("textures/gui/recipe_button.png");
         AtomicLong lastSync = new AtomicLong(-1);
         ClothClientHooks.SYNC_RECIPES.register((minecraftClient, recipeManager, synchronizeRecipesS2CPacket) -> {
-            if (lastSync.get() > 0 && System.currentTimeMillis() - lastSync.get() > 5000) {
+            if (lastSync.get() > 0 && System.currentTimeMillis() - lastSync.get() <= 5000) {
                 RoughlyEnoughItemsCore.LOGGER.warn("[REI] Suppressing Sync Recipes!");
                 return;
             }
