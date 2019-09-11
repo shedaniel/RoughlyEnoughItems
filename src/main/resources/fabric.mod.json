@@ -46,7 +46,7 @@
   "custom": {
     "rei:translators": {
       "English": "Danielshe",
-      "Japanese": "swordglowsblue",
+      "Japanese": ["swordglowsblue", "hinataaki"],
       "Simplified Chinese": ["XuyuEre", "Danielshe"],
       "Traditional Chinese": ["hugoalh", "gxy17886", "Danielshe"],
       "French": "Yanis48",
@@ -56,7 +56,8 @@
       "LOLCAT": "Danielshe",
       "Upside Down English": "Danielshe",
       "Brazilian Portuguese": ["thiagokenis", "joaoh1"],
-      "Bulgarian": "geniiii"
+      "Bulgarian": "geniiii",
+      "Russian": "MrYonter"
     }
   }
 }
