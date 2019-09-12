@@ -48,7 +48,7 @@ dependencies {
     modImplementation("me.shedaniel.cloth:config-2:${cloth_config_version}") {
         transitive = false
     }
-    modApi("me.shedaniel.cloth:fiber2cloth:1.1.0") {
+    modApi("me.shedaniel.cloth:fiber2cloth:1.2.0") {
         transitive = false
     }
     modApi "me.zeroeightsix:fiber:0.6.0-7"
@@ -60,7 +60,7 @@ dependencies {
         include("me.shedaniel.cloth:config-2:${cloth_config_version}") {
             transitive = false
         }
-        include("me.shedaniel.cloth:fiber2cloth:1.1.0") {
+        include("me.shedaniel.cloth:fiber2cloth:1.2.0") {
             transitive = false
         }
         include "me.zeroeightsix:fiber:0.6.0-7"

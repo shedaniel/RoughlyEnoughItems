@@ -65,7 +65,7 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
                 player.inventory.markDirty();
                 throw new NotEnoughMaterialsException();
             }
-    
+            
             player.inventory.markDirty();
         }
     }
@@ -73,7 +73,7 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
     @Override
     public void acceptAlignedInput(Iterator<Integer> iterator_1, int int_1, int int_2, int int_3, int int_4) {
         Slot slot_1 = this.craftingContainer.getSlot(int_1);
-        ItemStack itemStack_1 = net.minecraft.recipe.RecipeFinder.getStackFromId((Integer) iterator_1.next());
+        ItemStack itemStack_1 = RecipeFinder.getStackFromId(iterator_1.next());
         if (!itemStack_1.isEmpty()) {
             for (int int_5 = 0; int_5 < int_2; ++int_5) {
                 this.fillInputSlot(slot_1, itemStack_1);

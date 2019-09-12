@@ -88,6 +88,7 @@
   "config.roughlyenoughitems.clickableRecipeArrows": "Clickable Recipe Arrows:",
   "config.roughlyenoughitems.clickableRecipeArrows.boolean.true": "Enabled",
   "config.roughlyenoughitems.clickableRecipeArrows.boolean.false": "Disabled",
+  "config.roughlyenoughitems.renderEntryExtraOverlay": "Render Entry Extra Overlay:",
   "config.roughlyenoughitems.darkTheme": "Appearance Theme:",
   "config.roughlyenoughitems.darkTheme.boolean.true": "Dark Theme",
   "config.roughlyenoughitems.darkTheme.boolean.false": "Light Theme",

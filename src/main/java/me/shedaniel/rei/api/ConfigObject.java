@@ -10,8 +10,11 @@ import me.shedaniel.rei.gui.config.ItemListOrdering;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.gui.config.SearchFieldLocation;
 import me.zeroeightsix.fiber.tree.ConfigNode;
+import me.zeroeightsix.fiber.tree.Node;
 
 public interface ConfigObject {
+    
+    Node getGeneral();
     
     ConfigNode getConfigNode();
     
@@ -24,6 +27,8 @@ public interface ConfigObject {
     boolean isItemListAscending();
     
     boolean isUsingDarkTheme();
+    
+    boolean doesRenderEntryExtraOverlay();
     
     boolean isEntryListWidgetScrolled();
     

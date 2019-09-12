@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public abstract class Renderer extends DrawableHelper {
     /**
@@ -114,17 +115,27 @@ public abstract class Renderer extends DrawableHelper {
     }
     
     public static ItemStackRenderer fromItemStacks(Supplier<List<ItemStack>> stacksSupplier, @Nullable Function<ItemStack, String> countsFunction, @Nullable Function<ItemStack, List<String>> extraTooltipSupplier) {
+        return fromItemStacks(stacksSupplier, countsFunction, extraTooltipSupplier, true);
+    }
+    
+    public static ItemStackRenderer fromItemStacks(Supplier<List<ItemStack>> stacksSupplier, @Nullable Function<ItemStack, String> countsFunction, @Nullable Function<ItemStack, List<String>> extraTooltipSupplier, boolean renderOverlay) {
+        List<ItemStack> stacks = stacksSupplier.get().stream().map(ItemStack::copy).collect(Collectors.toList());
         return new ItemStackRenderer() {
             @Override
             public ItemStack getItemStack() {
-                if (stacksSupplier.get().isEmpty())
+                if (stacks.isEmpty())
                     return ItemStack.EMPTY;
-                return stacksSupplier.get().get(MathHelper.floor((System.currentTimeMillis() / 500 % (double) stacksSupplier.get().size()) / 1f));
+                return stacks.get(MathHelper.floor((System.currentTimeMillis() / 500 % (double) stacks.size()) / 1f));
             }
             
             @Override
             protected String getCounts() {
                 return countsFunction == null ? null : countsFunction.apply(getItemStack());
+            }
+            
+            @Override
+            protected boolean renderOverlay() {
+                return renderOverlay;
             }
             
             @Override
