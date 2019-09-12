@@ -78,7 +78,7 @@ public class ClothScreenRegistry {
                     MinecraftClient.getInstance().openScreen(new CreditsScreen(screen));
                 }
             });
-        }).build().getScreen();
+        }).setDefaultCategoryNode(configManager.getConfig().getGeneral()).build().getScreen();
     }
     
 }

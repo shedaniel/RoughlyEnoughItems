@@ -9,6 +9,7 @@ import com.google.common.collect.Lists;
 import me.shedaniel.math.compat.RenderHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ClientHelper;
+import me.shedaniel.rei.api.ItemStackRenderOverlayHook;
 import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.gui.widget.EntryListWidget;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
@@ -35,6 +36,8 @@ public abstract class ItemStackRenderer extends Renderer {
     @Override
     public void render(int x, int y, double mouseX, double mouseY, float delta) {
         int l = x - 8, i1 = y - 6;
+        ItemStack stack = getItemStack();
+        ((ItemStackRenderOverlayHook) (Object) stack).rei_setRenderOverlay(renderOverlay());
         RenderHelper.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
         itemRenderer.zOffset = blitOffset;
@@ -43,8 +46,8 @@ public abstract class ItemStackRenderer extends Renderer {
         RenderHelper.enableLighting();
         RenderHelper.enableRescaleNormal();
         RenderHelper.enableDepthTest();
-        itemRenderer.renderGuiItem(getItemStack(), l, i1);
-        itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, getItemStack(), l, i1, getCounts());
+        itemRenderer.renderGuiItem(stack, l, i1);
+        itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, stack, l, i1, getCounts());
         itemRenderer.zOffset = 0.0F;
         this.blitOffset = 0;
     }
@@ -68,6 +71,10 @@ public abstract class ItemStackRenderer extends Renderer {
     }
     
     protected boolean renderCounts() {
+        return true;
+    }
+    
+    protected boolean renderOverlay() {
         return true;
     }
     

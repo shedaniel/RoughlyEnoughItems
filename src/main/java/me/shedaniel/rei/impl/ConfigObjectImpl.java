@@ -42,6 +42,13 @@ public class ConfigObjectImpl implements ConfigObject {
             .withName("darkTheme")
             .build();
     
+    private ConfigValue<Boolean> renderEntryExtraOverlay = ConfigValue.builder(Boolean.class)
+            .withParent(appearance)
+            .withDefaultValue(true)
+            .withComment("Whether REI should render entry's overlay.\nExample: Enchantment Glint")
+            .withName("renderEntryExtraOverlay")
+            .build();
+    
     private ConfigValue<RecipeScreenType> recipeScreenType = ConfigValue.builder(RecipeScreenType.class)
             .withParent(appearance)
             .withDefaultValue(RecipeScreenType.UNSET)
@@ -180,6 +187,11 @@ public class ConfigObjectImpl implements ConfigObject {
     }
     
     @Override
+    public Node getGeneral() {
+        return general;
+    }
+    
+    @Override
     public ConfigNode getConfigNode() {
         return configNode;
     }
@@ -207,6 +219,11 @@ public class ConfigObjectImpl implements ConfigObject {
     @Override
     public boolean isUsingDarkTheme() {
         return darkTheme.getValue().booleanValue();
+    }
+    
+    @Override
+    public boolean doesRenderEntryExtraOverlay() {
+        return renderEntryExtraOverlay.getValue().booleanValue();
     }
     
     @Override

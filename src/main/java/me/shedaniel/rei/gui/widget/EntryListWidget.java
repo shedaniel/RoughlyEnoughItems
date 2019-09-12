@@ -376,7 +376,12 @@ public class EntryListWidget extends Widget {
                     protected String getCounts() {
                         return "";
                     }
-                    
+    
+                    @Override
+                    protected boolean renderOverlay() {
+                        return RoughlyEnoughItemsCore.getConfigManager().getConfig().doesRenderEntryExtraOverlay();
+                    }
+    
                     @Nullable
                     @Override
                     public QueuedTooltip getQueuedTooltip(float delta) {
