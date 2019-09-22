@@ -282,6 +282,11 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             if (screen instanceof AbstractContainerScreen)
                 if (ScreenHelper.getLastOverlay().keyPressed(i, i1, i2))
                     return ActionResult.SUCCESS;
+            if (screen instanceof AbstractContainerScreen && configManager.getConfig().doesDisableRecipeBook() && configManager.getConfig().doesFixTabCloseContainer())
+                if (i == 258 && minecraftClient.options.keyInventory.matchesKey(i, i1)) {
+                    minecraftClient.player.closeContainer();
+                    return ActionResult.SUCCESS;
+                }
             return ActionResult.PASS;
         });
     }

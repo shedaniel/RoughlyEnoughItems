@@ -58,6 +58,8 @@ public interface ConfigObject {
     
     boolean doesDisableRecipeBook();
     
+    boolean doesFixTabCloseContainer();
+    
     boolean areClickableRecipeArrowsEnabled();
     
     ItemCheatingMode getItemCheatingMode();

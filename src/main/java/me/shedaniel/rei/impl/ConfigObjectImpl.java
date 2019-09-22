@@ -130,6 +130,13 @@ public class ConfigObjectImpl implements ConfigObject {
             .withName("disableRecipeBook")
             .build();
     
+    private ConfigValue<Boolean> fixTabCloseContainer = ConfigValue.builder(Boolean.class)
+            .withParent(modules)
+            .withDefaultValue(false)
+            .withComment("Declares whether REI should fix closing container with tab.")
+            .withName("fixTabCloseContainer")
+            .build();
+    
     private ConfigValue<Boolean> clickableRecipeArrows = ConfigValue.builder(Boolean.class)
             .withParent(appearance)
             .withDefaultValue(true)
@@ -294,6 +301,11 @@ public class ConfigObjectImpl implements ConfigObject {
     @Override
     public boolean doesDisableRecipeBook() {
         return disableRecipeBook.getValue().booleanValue();
+    }
+    
+    @Override
+    public boolean doesFixTabCloseContainer() {
+        return fixTabCloseContainer.getValue().booleanValue();
     }
     
     @Override
