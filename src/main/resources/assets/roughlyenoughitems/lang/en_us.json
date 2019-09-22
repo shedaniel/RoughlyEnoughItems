@@ -109,6 +109,7 @@
   "config.roughlyenoughitems.disableRecipeBook": "Vanilla Recipe Book:",
   "config.roughlyenoughitems.disableRecipeBook.boolean.true": "Disabled",
   "config.roughlyenoughitems.disableRecipeBook.boolean.false": "Enabled",
+  "config.roughlyenoughitems.fixTabCloseContainer": "Fix Vanilla Tab Container (When Recipe Book Disabled):",
   "config.roughlyenoughitems.enableCraftableOnlyButton": "Craftable Filter:",
   "config.roughlyenoughitems.enableCraftableOnlyButton.boolean.true": "Enabled",
   "config.roughlyenoughitems.enableCraftableOnlyButton.boolean.false": "Disabled",
