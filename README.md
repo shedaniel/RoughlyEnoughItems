@@ -4,6 +4,8 @@ REI bundles [Fiber](https://github.com/DaemonicLabs/fiber), which is licensed un
 https://minecraft.curseforge.com/projects/roughly-enough-items <br>
 Roughly Enough Items is a mod to view Items and Recipes for Minecraft 1.13 - 1.14, supporting mod loaders from Forge, Rift to Fabric.
 
+[Help translate REI on Crowdin!](https://crowdin.com/project/roughly-enough-items)
+
 ### Dependencies
 1.13's version requires [Rift](https://minecraft.curseforge.com/projects/rift).  
 1.13.2's version requires [Chocohead's Rift Fork](https://github.com/Chocohead/Rift) or [Forge 1.13.2](https://files.minecraftforge.net/maven/net/minecraftforge/forge/index_1.13.2.html).  
