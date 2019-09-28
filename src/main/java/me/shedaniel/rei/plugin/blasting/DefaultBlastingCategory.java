@@ -5,10 +5,10 @@
 
 package me.shedaniel.rei.plugin.blasting;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
-import me.shedaniel.math.compat.RenderHelper;
 import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.api.TransferRecipeCategory;
 import me.shedaniel.rei.gui.renderers.RecipeRenderer;
@@ -63,7 +63,7 @@ public class DefaultBlastingCategory implements TransferRecipeCategory<DefaultBl
             @Override
             public void render(int mouseX, int mouseY, float delta) {
                 super.render(mouseX, mouseY, delta);
-                RenderHelper.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                 GuiLighting.disable();
                 MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
                 blit(startPoint.x, startPoint.y, 0, 54, 82, 54);
@@ -82,11 +82,11 @@ public class DefaultBlastingCategory implements TransferRecipeCategory<DefaultBl
     @Override
     public void renderRedSlots(List<Widget> widgets, Rectangle bounds, DefaultBlastingDisplay display, IntList redSlots) {
         Point startPoint = new Point(bounds.getCenterX() - 41, bounds.getCenterY() - 27);
-        RenderHelper.translatef(0, 0, 400);
+        RenderSystem.translatef(0, 0, 400);
         if (redSlots.contains(0)) {
             DrawableHelper.fill(startPoint.x + 1, startPoint.y + 1, startPoint.x + 1 + 16, startPoint.y + 1 + 16, 822018048);
         }
-        RenderHelper.translatef(0, 0, -400);
+        RenderSystem.translatef(0, 0, -400);
     }
     
 }

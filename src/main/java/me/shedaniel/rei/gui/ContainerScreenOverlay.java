@@ -6,9 +6,9 @@
 package me.shedaniel.rei.gui;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
-import me.shedaniel.math.compat.RenderHelper;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ClientHelper;
@@ -74,7 +74,7 @@ public class ContainerScreenOverlay extends Widget {
         this.shouldReInit = false;
         //Update Variables
         this.children().clear();
-        this.window = MinecraftClient.getInstance().window;
+        this.window = MinecraftClient.getInstance().method_22683();
         DisplayHelper.DisplayBoundsHandler boundsHandler = RoughlyEnoughItemsCore.getDisplayHelper().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
         this.rectangle = RoughlyEnoughItemsCore.getConfigManager().getConfig().isLeftHandSidePanel() ? boundsHandler.getLeftBounds(MinecraftClient.getInstance().currentScreen) : boundsHandler.getRightBounds(MinecraftClient.getInstance().currentScreen);
         widgets.add(entryListWidget = new EntryListWidget(page));
@@ -145,7 +145,7 @@ public class ContainerScreenOverlay extends Widget {
                         fill(getBounds().x, getBounds().y, getBounds().x + 20, getBounds().y + 20, 1476440063);
                 }
                 MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
-                RenderHelper.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                 blit(getBounds().x + 3, getBounds().y + 3, 0, 0, 14, 14);
             }
             
@@ -205,7 +205,7 @@ public class ContainerScreenOverlay extends Widget {
                         super.render(mouseX, mouseY, delta);
                         GuiLighting.disable();
                         MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
-                        RenderHelper.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+                        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                         blit(getBounds().x + 3, getBounds().y + 3, weather.getId() * 14, 14, 14, 14);
                     }
                     
@@ -269,7 +269,7 @@ public class ContainerScreenOverlay extends Widget {
                 
                 @Override
                 public void lateRender(int mouseX, int mouseY, float delta) {
-                    blitOffset = 300;
+                    setBlitOffset(300);
                     super.lateRender(mouseX, mouseY, delta);
                 }
             });
@@ -374,7 +374,7 @@ public class ContainerScreenOverlay extends Widget {
         }
         if (SearchFieldWidget.isSearching) {
             GuiLighting.disable();
-            blitOffset = 200;
+            setBlitOffset(200);
             if (MinecraftClient.getInstance().currentScreen instanceof AbstractContainerScreen) {
                 ContainerScreenHooks hooks = (ContainerScreenHooks) MinecraftClient.getInstance().currentScreen;
                 int left = hooks.rei_getContainerLeft(), top = hooks.rei_getContainerTop();
@@ -382,9 +382,9 @@ public class ContainerScreenOverlay extends Widget {
                     if (!slot.hasStack() || !entryListWidget.filterEntry(Entry.create(slot.getStack()), entryListWidget.getLastSearchArgument()))
                         fillGradient(left + slot.xPosition, top + slot.yPosition, left + slot.xPosition + 16, top + slot.yPosition + 16, -601874400, -601874400);
             }
-            blitOffset = 0;
+            setBlitOffset(0);
         }
-        RenderHelper.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GuiLighting.disable();
         this.renderWidgets(mouseX, mouseY, delta);
         if (MinecraftClient.getInstance().currentScreen instanceof AbstractContainerScreen && RoughlyEnoughItemsCore.getConfigManager().getConfig().areClickableRecipeArrowsEnabled()) {
@@ -426,10 +426,10 @@ public class ContainerScreenOverlay extends Widget {
         int width = lines.stream().map(font::getStringWidth).max(Integer::compareTo).get();
         int height = lines.size() <= 1 ? 8 : lines.size() * 10;
         ScreenHelper.drawHoveringWidget(mouseX, mouseY, (x, y, aFloat) -> {
-            RenderHelper.disableRescaleNormal();
+            RenderSystem.disableRescaleNormal();
             GuiLighting.disable();
-            RenderHelper.disableLighting();
-            this.blitOffset = 1000;
+            RenderSystem.disableLighting();
+            setBlitOffset(1000);
             this.fillGradient(x - 3, y - 4, x + width + 3, y - 3, -267386864, -267386864);
             this.fillGradient(x - 3, y + height + 3, x + width + 3, y + height + 4, -267386864, -267386864);
             this.fillGradient(x - 3, y - 3, x + width + 3, y + height + 3, -267386864, -267386864);
@@ -441,15 +441,15 @@ public class ContainerScreenOverlay extends Widget {
             this.fillGradient(x - 3, y + height + 2, x + width + 3, y + height + 3, 1344798847, 1344798847);
             int currentY = y;
             for (int lineIndex = 0; lineIndex < lines.size(); lineIndex++) {
-                RenderHelper.disableDepthTest();
+                RenderSystem.disableDepthTest();
                 font.drawWithShadow(lines.get(lineIndex), x, currentY, -1);
-                RenderHelper.enableDepthTest();
+                RenderSystem.enableDepthTest();
                 currentY += lineIndex == 0 ? 12 : 10;
             }
-            this.blitOffset = 0;
-            RenderHelper.enableLighting();
+            setBlitOffset(0);
+            RenderSystem.enableLighting();
             GuiLighting.enable();
-            RenderHelper.enableRescaleNormal();
+            RenderSystem.enableRescaleNormal();
         }, width, height, 0);
     }
     

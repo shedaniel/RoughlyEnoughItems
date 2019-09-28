@@ -70,13 +70,13 @@ public abstract class FluidRenderer extends Renderer {
             Tessellator tess = Tessellator.getInstance();
             BufferBuilder bb = tess.getBufferBuilder();
             bb.begin(7, VertexFormats.POSITION_UV_COLOR);
-            bb.vertex(x + 16, y, blitOffset).texture(sprite.getMaxU(), sprite.getMinV()).color(r, g, b, a).next();
-            bb.vertex(x, y, blitOffset).texture(sprite.getMinU(), sprite.getMinV()).color(r, g, b, a).next();
-            bb.vertex(x, y + 16, blitOffset).texture(sprite.getMinU(), sprite.getMaxV()).color(r, g, b, a).next();
-            bb.vertex(x + 16, y + 16, blitOffset).texture(sprite.getMaxU(), sprite.getMaxV()).color(r, g, b, a).next();
+            bb.vertex(x + 16, y, getBlitOffset()).texture(sprite.getMaxU(), sprite.getMinV()).color(r, g, b, a).next();
+            bb.vertex(x, y, getBlitOffset()).texture(sprite.getMinU(), sprite.getMinV()).color(r, g, b, a).next();
+            bb.vertex(x, y + 16, getBlitOffset()).texture(sprite.getMinU(), sprite.getMaxV()).color(r, g, b, a).next();
+            bb.vertex(x + 16, y + 16, getBlitOffset()).texture(sprite.getMaxU(), sprite.getMaxV()).color(r, g, b, a).next();
             tess.draw();
         }
-        this.blitOffset = 0;
+        setBlitOffset(0);
     }
     
     @Nullable

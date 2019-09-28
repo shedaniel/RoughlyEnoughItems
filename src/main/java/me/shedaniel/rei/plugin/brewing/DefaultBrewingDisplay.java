@@ -31,7 +31,7 @@ public class DefaultBrewingDisplay implements RecipeDisplay {
     
     @Override
     public List<List<ItemStack>> getInput() {
-        return Lists.newArrayList(Collections.singletonList(input), Arrays.asList(reactant.getStackArray()));
+        return Lists.newArrayList(Collections.singletonList(input), Arrays.asList(reactant.getMatchingStacksClient()));
     }
     
     @Override

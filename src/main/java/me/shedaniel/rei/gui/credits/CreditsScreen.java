@@ -6,11 +6,10 @@
 package me.shedaniel.rei.gui.credits;
 
 import com.google.common.collect.Lists;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import me.shedaniel.rei.gui.credits.CreditsEntryListWidget.CreditsItem;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.metadata.CustomValue;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.client.gui.widget.AbstractPressableButtonWidget;
@@ -18,7 +17,6 @@ import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.LiteralText;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class CreditsScreen extends Screen {
@@ -50,13 +48,13 @@ public class CreditsScreen extends Screen {
         List<String> translators = Lists.newArrayList();
         FabricLoader.getInstance().getModContainer("roughlyenoughitems").ifPresent(rei -> {
             try {
-                if (rei.getMetadata().containsCustomElement("rei:translators")) {
-                    JsonObject jsonObject = rei.getMetadata().getCustomElement("rei:translators").getAsJsonObject();
-                    for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
-                        JsonElement value = entry.getValue();
-                        String behind = value.isJsonArray() ? Lists.newArrayList(value.getAsJsonArray().iterator()).stream().map(json -> json.getAsString()).sorted(String::compareToIgnoreCase).collect(Collectors.joining(", ")) : value.getAsString();
+                if (rei.getMetadata().containsCustomValue("rei:translators")) {
+                    CustomValue.CvObject jsonObject = rei.getMetadata().getCustomValue("rei:translators").getAsObject();
+                    jsonObject.forEach(entry -> {
+                        CustomValue value = entry.getValue();
+                        String behind = value.getType() == CustomValue.CvType.ARRAY ? Lists.newArrayList(value.getAsArray().iterator()).stream().map(json -> json.getAsString()).sorted(String::compareToIgnoreCase).collect(Collectors.joining(", ")) : value.getAsString();
                         translators.add(String.format("  %s - %s", entry.getKey(), behind));
-                    }
+                    });
                 }
                 translators.sort(String::compareToIgnoreCase);
             } catch (Exception e) {

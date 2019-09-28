@@ -6,8 +6,8 @@
 package me.shedaniel.rei.gui;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Rectangle;
-import me.shedaniel.math.compat.RenderHelper;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
@@ -55,7 +55,7 @@ public class RecipeViewingScreen extends Screen {
         this.categoryPages = 0;
         this.preWidgets = Lists.newArrayList();
         this.widgets = Lists.newArrayList();
-        Window window = MinecraftClient.getInstance().window;
+        Window window = MinecraftClient.getInstance().method_22683();
         this.bounds = new Rectangle(window.getScaledWidth() / 2 - guiWidth / 2, window.getScaledHeight() / 2 - guiHeight / 2, 176, 186);
         this.categoriesMap = categoriesMap;
         this.categories = Lists.newArrayList();
@@ -386,16 +386,16 @@ public class RecipeViewingScreen extends Screen {
             GuiLighting.disable();
             widget.render(mouseX, mouseY, delta);
         });
-        RenderHelper.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GuiLighting.disable();
         tabs.stream().filter(TabWidget::isSelected).forEach(tabWidget -> tabWidget.render(mouseX, mouseY, delta));
         GuiLighting.disable();
         ScreenHelper.getLastOverlay().render(mouseX, mouseY, delta);
         ScreenHelper.getLastOverlay().lateRender(mouseX, mouseY, delta);
         if (choosePageActivated) {
-            blitOffset = 500;
+            setBlitOffset(500);
             this.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
-            blitOffset = 0;
+            setBlitOffset(0);
             recipeChoosePageWidget.render(mouseX, mouseY, delta);
         }
     }

@@ -24,7 +24,7 @@ public class DefaultShapedDisplay implements DefaultCraftingDisplay {
     
     public DefaultShapedDisplay(ShapedRecipe recipe) {
         this.display = recipe;
-        this.input = recipe.getPreviewInputs().stream().map(i -> Arrays.asList(i.getStackArray())).collect(Collectors.toList());
+        this.input = recipe.getPreviewInputs().stream().map(i -> Arrays.asList(i.getMatchingStacksClient())).collect(Collectors.toList());
         this.output = Collections.singletonList(recipe.getOutput());
     }
     

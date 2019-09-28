@@ -93,7 +93,7 @@ public class ScreenHelper implements ClientModInitializer {
     }
     
     public static void drawHoveringWidget(int x, int y, TriConsumer<Integer, Integer, Float> consumer, int width, int height, float delta) {
-        Window window = MinecraftClient.getInstance().window;
+        Window window = MinecraftClient.getInstance().method_22683();
         drawHoveringWidget(window.getScaledWidth(), window.getScaledHeight(), x, y, consumer, width, height, delta);
     }
     

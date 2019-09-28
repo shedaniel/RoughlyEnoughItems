@@ -6,8 +6,8 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.google.common.base.Predicates;
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Rectangle;
-import me.shedaniel.math.compat.RenderHelper;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.BufferBuilder;
@@ -478,18 +478,18 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
         
         Tessellator tessellator_1 = Tessellator.getInstance();
         BufferBuilder bufferBuilder_1 = tessellator_1.getBufferBuilder();
-        RenderHelper.color4f(0.0F, 0.0F, 255.0F, 255.0F);
-        RenderHelper.disableTexture();
-        RenderHelper.enableColorLogicOp();
-        RenderHelper.logicOp(5387);
+        RenderSystem.color4f(0.0F, 0.0F, 255.0F, 255.0F);
+        RenderSystem.disableTexture();
+        RenderSystem.enableColorLogicOp();
+        RenderSystem.logicOp(5387);
         bufferBuilder_1.begin(7, VertexFormats.POSITION);
-        bufferBuilder_1.vertex((double) int_1, (double) int_4, blitOffset + 50d).next();
-        bufferBuilder_1.vertex((double) int_3, (double) int_4, blitOffset + 50d).next();
-        bufferBuilder_1.vertex((double) int_3, (double) int_2, blitOffset + 50d).next();
-        bufferBuilder_1.vertex((double) int_1, (double) int_2, blitOffset + 50d).next();
+        bufferBuilder_1.vertex((double) int_1, (double) int_4, getBlitOffset() + 50d).next();
+        bufferBuilder_1.vertex((double) int_3, (double) int_4, getBlitOffset() + 50d).next();
+        bufferBuilder_1.vertex((double) int_3, (double) int_2, getBlitOffset() + 50d).next();
+        bufferBuilder_1.vertex((double) int_1, (double) int_2, getBlitOffset() + 50d).next();
         tessellator_1.draw();
-        RenderHelper.disableColorLogicOp();
-        RenderHelper.enableTexture();
+        RenderSystem.disableColorLogicOp();
+        RenderSystem.enableTexture();
     }
     
     public int getMaxLength() {

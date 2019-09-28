@@ -159,8 +159,9 @@ public abstract class Renderer extends DrawableHelper {
      *
      * @return the blit offset
      */
+    @Override
     public int getBlitOffset() {
-        return this.blitOffset;
+        return super.getBlitOffset();
     }
     
     /**
@@ -168,8 +169,9 @@ public abstract class Renderer extends DrawableHelper {
      *
      * @param offset the new blit offset
      */
+    @Override
     public void setBlitOffset(int offset) {
-        this.blitOffset = offset;
+        super.setBlitOffset(offset);
     }
     
     /**

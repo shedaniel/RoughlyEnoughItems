@@ -9,7 +9,7 @@ import com.google.common.collect.Lists;
 import com.zeitheron.hammercore.client.utils.Scissors;
 import me.shedaniel.clothconfig2.api.RunSixtyTimesEverySec;
 import me.shedaniel.math.api.Rectangle;
-import me.shedaniel.math.compat.RenderHelper;
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
@@ -283,7 +283,7 @@ public class EntryListWidget extends Widget {
         }
         
         GuiLighting.disable();
-        RenderHelper.pushMatrix();
+        RenderSystem.pushMatrix();
         boolean widgetScrolled = RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled();
         if (!widgetScrolled)
             scroll = 0;
@@ -314,11 +314,11 @@ public class EntryListWidget extends Widget {
                 int minY = (int) Math.min(Math.max((int) this.getScroll() * (rectangle.height - scrollBarHeight) / maxScroll + rectangle.y, rectangle.y), rectangle.getMaxY() - scrollBarHeight);
                 double scrollbarPositionMinX = rectangle.getMaxX() - 6, scrollbarPositionMaxX = rectangle.getMaxX() - 1;
                 GuiLighting.disable();
-                RenderHelper.disableTexture();
-                RenderHelper.enableBlend();
-                RenderHelper.disableAlphaTest();
-                RenderHelper.blendFuncSeparate(770, 771, 1, 0);
-                RenderHelper.shadeModel(7425);
+                RenderSystem.disableTexture();
+                RenderSystem.enableBlend();
+                RenderSystem.disableAlphaTest();
+                RenderSystem.blendFuncSeparate(770, 771, 1, 0);
+                RenderSystem.shadeModel(7425);
                 buffer.begin(7, VertexFormats.POSITION_COLOR);
                 float b = ScreenHelper.isDarkModeEnabled() ? 0.8f : 1f;
                 buffer.vertex(scrollbarPositionMinX, minY + scrollBarHeight, 1000D).color(b, b, b, scrollBarAlpha).next();
@@ -326,14 +326,14 @@ public class EntryListWidget extends Widget {
                 buffer.vertex(scrollbarPositionMaxX, minY, 1000D).color(b, b, b, scrollBarAlpha).next();
                 buffer.vertex(scrollbarPositionMinX, minY, 1000D).color(b, b, b, scrollBarAlpha).next();
                 tessellator.draw();
-                RenderHelper.shadeModel(7424);
-                RenderHelper.disableBlend();
-                RenderHelper.enableAlphaTest();
-                RenderHelper.enableTexture();
+                RenderSystem.shadeModel(7424);
+                RenderSystem.disableBlend();
+                RenderSystem.enableAlphaTest();
+                RenderSystem.enableTexture();
             }
             Scissors.end();
         }
-        RenderHelper.popMatrix();
+        RenderSystem.popMatrix();
         ClientPlayerEntity player = minecraft.player;
         if (rectangle.contains(PointHelper.fromMouse()) && ClientHelper.getInstance().isCheating() && !player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
             ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.delete_items")));
