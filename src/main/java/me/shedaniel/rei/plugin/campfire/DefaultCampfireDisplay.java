@@ -33,7 +33,7 @@ public class DefaultCampfireDisplay implements RecipeDisplay {
     }
     
     public DefaultCampfireDisplay(DefaultedList<Ingredient> ingredients, ItemStack output, int cookTime) {
-        this.inputs = ingredients.stream().map(i -> Arrays.asList(i.getStackArray())).collect(Collectors.toList());
+        this.inputs = ingredients.stream().map(i -> Arrays.asList(i.getMatchingStacksClient())).collect(Collectors.toList());
         this.output = Collections.singletonList(output);
         this.cookTime = cookTime;
     }

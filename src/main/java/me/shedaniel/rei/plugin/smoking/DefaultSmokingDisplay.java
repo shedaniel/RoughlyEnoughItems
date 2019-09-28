@@ -30,7 +30,7 @@ public class DefaultSmokingDisplay implements TransferRecipeDisplay {
     
     public DefaultSmokingDisplay(SmokingRecipe recipe) {
         this.display = recipe;
-        this.input = recipe.getPreviewInputs().stream().map(i -> Arrays.asList(i.getStackArray())).collect(Collectors.toList());
+        this.input = recipe.getPreviewInputs().stream().map(i -> Arrays.asList(i.getMatchingStacksClient())).collect(Collectors.toList());
         this.input.add(FurnaceBlockEntity.createFuelTimeMap().keySet().stream().map(Item::getStackForRender).collect(Collectors.toList()));
         this.output = Collections.singletonList(recipe.getOutput());
     }
@@ -80,7 +80,7 @@ public class DefaultSmokingDisplay implements TransferRecipeDisplay {
     
     @Override
     public List<List<ItemStack>> getOrganisedInput(ContainerInfo<Container> containerInfo, Container container) {
-        return display.getPreviewInputs().stream().map(i -> Arrays.asList(i.getStackArray())).collect(Collectors.toList());
+        return display.getPreviewInputs().stream().map(i -> Arrays.asList(i.getMatchingStacksClient())).collect(Collectors.toList());
     }
     
 }

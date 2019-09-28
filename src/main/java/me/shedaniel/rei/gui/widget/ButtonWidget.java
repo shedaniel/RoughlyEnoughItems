@@ -5,9 +5,10 @@
 
 package me.shedaniel.rei.gui.widget;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
-import me.shedaniel.math.compat.RenderHelper;
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.sound.PositionedSoundInstance;
@@ -66,11 +67,11 @@ public abstract class ButtonWidget extends WidgetWithBounds {
     public void render(int mouseX, int mouseY, float delta) {
         int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;
         minecraft.getTextureManager().bindTexture(ScreenHelper.isDarkModeEnabled() ? BUTTON_LOCATION_DARK : BUTTON_LOCATION);
-        RenderHelper.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         int textureOffset = this.getTextureId(isHovered(mouseX, mouseY));
-        RenderHelper.enableBlend();
-        RenderHelper.blendFuncSeparate(770, 771, 1, 0);
-        RenderHelper.blendFunc(770, 771);
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(770, 771, 1, 0);
+        RenderSystem.blendFunc(770, 771);
         //Four Corners
         blit(x, y, 0, textureOffset * 80, 4, 4);
         blit(x + width - 4, y, 252, textureOffset * 80, 4, 4);

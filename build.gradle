@@ -1,3 +1,5 @@
+import java.text.SimpleDateFormat
+
 plugins {
     id 'fabric-loom' version '0.2.5-SNAPSHOT'
     id 'maven-publish'
@@ -11,11 +13,17 @@ archivesBaseName = "RoughlyEnoughItems"
 group = "me.shedaniel"
 
 def ENV = System.getenv()
-version = project.mod_version + "+" + (ENV.BUILD_NUMBER ? ("build." + ENV.BUILD_NUMBER) : "local")
+version = (((String) project.mod_version).contains("unstable") ? (project.mod_version + "." + buildTime()) : project.mod_version) + "+" + (ENV.BUILD_NUMBER ? ("build." + ENV.BUILD_NUMBER) : "local")
 
 def includeDep = true
 
 minecraft {
+}
+
+static def buildTime() {
+    def df = new SimpleDateFormat("yyyyMMddHHmm")
+    df.setTimeZone(TimeZone.getTimeZone("UTC"))
+    return df.format(new Date())
 }
 
 license {

@@ -10,7 +10,7 @@ import com.google.common.collect.Maps;
 import com.zeitheron.hammercore.client.utils.Scissors;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
-import me.shedaniel.math.compat.RenderHelper;
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
@@ -223,7 +223,7 @@ public class VillagerRecipeViewingScreen extends Screen {
             
             @Override
             public void render(int mouseX, int mouseY, float delta) {
-                RenderHelper.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                 font.draw((isHovered(mouseX, mouseY) ? Formatting.UNDERLINE.toString() : "") + text, x - font.getStringWidth(text) / 2, y, getDefaultColor());
                 if (clickable && getTooltips().isPresent())
                     if (!focused && containsMouse(mouseX, mouseY))
@@ -336,7 +336,7 @@ public class VillagerRecipeViewingScreen extends Screen {
         });
         GuiLighting.disable();
         ScreenHelper.getLastOverlay().render(mouseX, mouseY, delta);
-        RenderHelper.pushMatrix();
+        RenderSystem.pushMatrix();
         Scissors.begin();
         Scissors.scissor(0, scrollListBounds.y + 1, width, scrollListBounds.height - 2);
         for (int i = 0; i < buttonWidgets.size(); i++) {
@@ -368,11 +368,11 @@ public class VillagerRecipeViewingScreen extends Screen {
                 minY = this.scrollListBounds.y + 1;
             double scrollbarPositionMinX = scrollListBounds.getMaxX() - 6, scrollbarPositionMaxX = scrollListBounds.getMaxX() - 2;
             GuiLighting.disable();
-            RenderHelper.disableTexture();
-            RenderHelper.enableBlend();
-            RenderHelper.disableAlphaTest();
-            RenderHelper.blendFuncSeparate(770, 771, 1, 0);
-            RenderHelper.shadeModel(7425);
+            RenderSystem.disableTexture();
+            RenderSystem.enableBlend();
+            RenderSystem.disableAlphaTest();
+            RenderSystem.blendFuncSeparate(770, 771, 1, 0);
+            RenderSystem.shadeModel(7425);
             buffer.begin(7, VertexFormats.POSITION_COLOR);
             float b = ScreenHelper.isDarkModeEnabled() ? 0.37f : 1f;
             buffer.vertex(scrollbarPositionMinX, minY + scrollBarHeight, 1000D).color(b, b, b, scrollBarAlpha).next();
@@ -380,13 +380,13 @@ public class VillagerRecipeViewingScreen extends Screen {
             buffer.vertex(scrollbarPositionMaxX, minY, 1000D).color(b, b, b, scrollBarAlpha).next();
             buffer.vertex(scrollbarPositionMinX, minY, 1000D).color(b, b, b, scrollBarAlpha).next();
             tessellator.draw();
-            RenderHelper.shadeModel(7424);
-            RenderHelper.disableBlend();
-            RenderHelper.enableAlphaTest();
-            RenderHelper.enableTexture();
+            RenderSystem.shadeModel(7424);
+            RenderSystem.disableBlend();
+            RenderSystem.enableAlphaTest();
+            RenderSystem.enableTexture();
         }
         Scissors.end();
-        RenderHelper.popMatrix();
+        RenderSystem.popMatrix();
         ScreenHelper.getLastOverlay().lateRender(mouseX, mouseY, delta);
     }
     

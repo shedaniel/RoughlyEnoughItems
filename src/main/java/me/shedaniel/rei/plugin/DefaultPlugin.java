@@ -201,13 +201,13 @@ public class DefaultPlugin implements REIPluginV0 {
             
             @Override
             public Rectangle getLeftBounds(AbstractContainerScreen<?> screen) {
-                return new Rectangle(2, 0, ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() - 4, MinecraftClient.getInstance().window.getScaledHeight());
+                return new Rectangle(2, 0, ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() - 4, MinecraftClient.getInstance().method_22683().getScaledHeight());
             }
             
             @Override
             public Rectangle getRightBounds(AbstractContainerScreen<?> screen) {
                 int startX = ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() + ScreenHelper.getLastContainerScreenHooks().rei_getContainerWidth() + 2;
-                return new Rectangle(startX, 0, MinecraftClient.getInstance().window.getScaledWidth() - startX - 2, MinecraftClient.getInstance().window.getScaledHeight());
+                return new Rectangle(startX, 0, MinecraftClient.getInstance().method_22683().getScaledWidth() - startX - 2, MinecraftClient.getInstance().method_22683().getScaledHeight());
             }
             
             @Override
@@ -223,13 +223,13 @@ public class DefaultPlugin implements REIPluginV0 {
             
             @Override
             public Rectangle getLeftBounds(RecipeViewingScreen screen) {
-                return new Rectangle(2, 0, ((RecipeViewingScreen) screen).getBounds().x - 4, MinecraftClient.getInstance().window.getScaledHeight());
+                return new Rectangle(2, 0, ((RecipeViewingScreen) screen).getBounds().x - 4, MinecraftClient.getInstance().method_22683().getScaledHeight());
             }
             
             @Override
             public Rectangle getRightBounds(RecipeViewingScreen screen) {
                 int startX = ((RecipeViewingScreen) screen).getBounds().x + ((RecipeViewingScreen) screen).getBounds().width + 2;
-                return new Rectangle(startX, 0, MinecraftClient.getInstance().window.getScaledWidth() - startX - 2, MinecraftClient.getInstance().window.getScaledHeight());
+                return new Rectangle(startX, 0, MinecraftClient.getInstance().method_22683().getScaledWidth() - startX - 2, MinecraftClient.getInstance().method_22683().getScaledHeight());
             }
             
             @Override
@@ -245,13 +245,13 @@ public class DefaultPlugin implements REIPluginV0 {
             
             @Override
             public Rectangle getLeftBounds(VillagerRecipeViewingScreen screen) {
-                return new Rectangle(2, 0, ((VillagerRecipeViewingScreen) screen).bounds.x - 4, MinecraftClient.getInstance().window.getScaledHeight());
+                return new Rectangle(2, 0, ((VillagerRecipeViewingScreen) screen).bounds.x - 4, MinecraftClient.getInstance().method_22683().getScaledHeight());
             }
             
             @Override
             public Rectangle getRightBounds(VillagerRecipeViewingScreen screen) {
                 int startX = ((VillagerRecipeViewingScreen) screen).bounds.x + ((VillagerRecipeViewingScreen) screen).bounds.width + 2;
-                return new Rectangle(startX, 0, MinecraftClient.getInstance().window.getScaledWidth() - startX - 2, MinecraftClient.getInstance().window.getScaledHeight());
+                return new Rectangle(startX, 0, MinecraftClient.getInstance().method_22683().getScaledWidth() - startX - 2, MinecraftClient.getInstance().method_22683().getScaledHeight());
             }
             
             @Override

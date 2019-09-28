@@ -23,7 +23,7 @@ public abstract class DraggableWidget extends WidgetWithBounds {
     }
     
     public DraggableWidget() {
-        this(new Point(MinecraftClient.getInstance().window.getScaledWidth() / 2, MinecraftClient.getInstance().window.getScaledHeight() / 2));
+        this(new Point(MinecraftClient.getInstance().method_22683().getScaledWidth() / 2, MinecraftClient.getInstance().method_22683().getScaledHeight() / 2));
     }
     
     protected abstract void initWidgets(Point midPoint);
@@ -50,7 +50,7 @@ public abstract class DraggableWidget extends WidgetWithBounds {
                     dragged = true;
                 }
             } else {
-                Window window = minecraft.window;
+                Window window = minecraft.method_22683();
                 midPoint = processMidPoint(midPoint, mouse, startPoint, window, relateX, relateY);
                 updateWidgets(midPoint);
             }
