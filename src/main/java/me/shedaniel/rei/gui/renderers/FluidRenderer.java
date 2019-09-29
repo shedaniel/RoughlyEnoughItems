@@ -70,10 +70,10 @@ public abstract class FluidRenderer extends Renderer {
             Tessellator tess = Tessellator.getInstance();
             BufferBuilder bb = tess.getBufferBuilder();
             bb.begin(7, VertexFormats.POSITION_UV_COLOR);
-            bb.vertex(x + 16, y, getBlitOffset()).texture(sprite.getMaxU(), sprite.getMinV()).color(r, g, b, a).next();
-            bb.vertex(x, y, getBlitOffset()).texture(sprite.getMinU(), sprite.getMinV()).color(r, g, b, a).next();
-            bb.vertex(x, y + 16, getBlitOffset()).texture(sprite.getMinU(), sprite.getMaxV()).color(r, g, b, a).next();
-            bb.vertex(x + 16, y + 16, getBlitOffset()).texture(sprite.getMaxU(), sprite.getMaxV()).color(r, g, b, a).next();
+            bb.method_22912(x + 16, y, getBlitOffset()).method_22913(sprite.getMaxU(), sprite.getMinV()).color(r, g, b, a).next();
+            bb.method_22912(x, y, getBlitOffset()).method_22913(sprite.getMinU(), sprite.getMinV()).color(r, g, b, a).next();
+            bb.method_22912(x, y + 16, getBlitOffset()).method_22913(sprite.getMinU(), sprite.getMaxV()).color(r, g, b, a).next();
+            bb.method_22912(x + 16, y + 16, getBlitOffset()).method_22913(sprite.getMaxU(), sprite.getMaxV()).color(r, g, b, a).next();
             tess.draw();
         }
         setBlitOffset(0);
