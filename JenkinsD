@@ -3,6 +3,9 @@ pipeline {
    stages {
 
       stage ('Build') {
+         when {
+            branch '3.x'
+         }
          steps {
             sh "rm -rf build/libs/"
             sh "chmod +x gradlew"
