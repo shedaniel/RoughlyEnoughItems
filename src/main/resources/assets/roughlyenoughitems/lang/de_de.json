@@ -76,7 +76,7 @@
   "text.rei.working_station": "Working Station",
   "text.rei.recipe_id": "\n%sRezept-Id: %s",
   "text.rei.recipe_screen_type.selection": "Darstellung Rezept-Bildschirm",
-  "text.rei.recipe_screen_type.selection.sub": "You can always edit this setting again via the config screen.",
+  "text.rei.recipe_screen_type.selection.sub": "Du kannst diese Einstellung jederzeit über den Konfigurationsbildschirm wieder bearbeiten.",
   "text.rei.view_recipes_for": "Rezepte für %s anzeigen",
   "_comment": "Config Tooltips",
   "config.roughlyenoughitems.title": "Roughly Enough Items Konfiguration",
