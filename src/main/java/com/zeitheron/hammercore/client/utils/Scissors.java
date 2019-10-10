@@ -27,7 +27,7 @@ public class Scissors {
      * @param height the height of the bounds
      */
     public static void scissor(int x, int y, int width, int height) {
-        Window window = MinecraftClient.getInstance().method_22683();
+        Window window = MinecraftClient.getInstance().getWindow();
         
         int sw = window.getWidth();
         int sh = window.getHeight();

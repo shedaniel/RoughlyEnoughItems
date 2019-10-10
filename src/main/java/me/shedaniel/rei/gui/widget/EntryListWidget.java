@@ -321,10 +321,10 @@ public class EntryListWidget extends Widget {
                 RenderSystem.shadeModel(7425);
                 buffer.begin(7, VertexFormats.POSITION_COLOR);
                 float b = ScreenHelper.isDarkModeEnabled() ? 0.8f : 1f;
-                buffer.method_22912(scrollbarPositionMinX, minY + scrollBarHeight, 1000D).method_22915(b, b, b, scrollBarAlpha).next();
-                buffer.method_22912(scrollbarPositionMaxX, minY + scrollBarHeight, 1000D).method_22915(b, b, b, scrollBarAlpha).next();
-                buffer.method_22912(scrollbarPositionMaxX, minY, 1000D).method_22915(b, b, b, scrollBarAlpha).next();
-                buffer.method_22912(scrollbarPositionMinX, minY, 1000D).method_22915(b, b, b, scrollBarAlpha).next();
+                buffer.vertex(scrollbarPositionMinX, minY + scrollBarHeight, 1000D).color(b, b, b, scrollBarAlpha).next();
+                buffer.vertex(scrollbarPositionMaxX, minY + scrollBarHeight, 1000D).color(b, b, b, scrollBarAlpha).next();
+                buffer.vertex(scrollbarPositionMaxX, minY, 1000D).color(b, b, b, scrollBarAlpha).next();
+                buffer.vertex(scrollbarPositionMinX, minY, 1000D).color(b, b, b, scrollBarAlpha).next();
                 tessellator.draw();
                 RenderSystem.shadeModel(7424);
                 RenderSystem.disableBlend();

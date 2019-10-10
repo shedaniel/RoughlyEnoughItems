@@ -22,14 +22,17 @@ import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.Weather;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.client.render.GuiLighting;
+import net.minecraft.client.render.LayeredVertexConsumerStorage;
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.Window;
+import net.minecraft.client.util.math.Matrix4f;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.container.Slot;
 import net.minecraft.item.ItemStack;
@@ -38,7 +41,9 @@ import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.MatrixStack;
 import net.minecraft.world.GameMode;
+import org.apache.logging.log4j.util.TriConsumer;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -53,6 +58,36 @@ public class ContainerScreenOverlay extends Widget {
     private static EntryListWidget entryListWidget;
     private final List<Widget> widgets = Lists.newLinkedList();
     public boolean shouldReInit = false;
+    private int tooltipWidth;
+    private int tooltipHeight;
+    private List<String> tooltipLines;
+    public final TriConsumer<Integer, Integer, Float> renderTooltipCallback = (x, y, aFloat) -> {
+        RenderSystem.disableRescaleNormal();
+        RenderSystem.disableDepthTest();
+        setBlitOffset(1000);
+        this.fillGradient(x - 3, y - 4, x + tooltipWidth + 3, y - 3, -267386864, -267386864);
+        this.fillGradient(x - 3, y + tooltipHeight + 3, x + tooltipWidth + 3, y + tooltipHeight + 4, -267386864, -267386864);
+        this.fillGradient(x - 3, y - 3, x + tooltipWidth + 3, y + tooltipHeight + 3, -267386864, -267386864);
+        this.fillGradient(x - 4, y - 3, x - 3, y + tooltipHeight + 3, -267386864, -267386864);
+        this.fillGradient(x + tooltipWidth + 3, y - 3, x + tooltipWidth + 4, y + tooltipHeight + 3, -267386864, -267386864);
+        this.fillGradient(x - 3, y - 3 + 1, x - 3 + 1, y + tooltipHeight + 3 - 1, 1347420415, 1344798847);
+        this.fillGradient(x + tooltipWidth + 2, y - 3 + 1, x + tooltipWidth + 3, y + tooltipHeight + 3 - 1, 1347420415, 1344798847);
+        this.fillGradient(x - 3, y - 3, x + tooltipWidth + 3, y - 3 + 1, 1347420415, 1347420415);
+        this.fillGradient(x - 3, y + tooltipHeight + 2, x + tooltipWidth + 3, y + tooltipHeight + 3, 1344798847, 1344798847);
+        int currentY = y;
+        MatrixStack matrixStack_1 = new MatrixStack();
+        LayeredVertexConsumerStorage.class_4598 layeredVertexConsumerStorage$class_4598_1 = LayeredVertexConsumerStorage.method_22991(Tessellator.getInstance().getBufferBuilder());
+        matrixStack_1.translate(0.0D, 0.0D, getBlitOffset());
+        Matrix4f matrix4f_1 = matrixStack_1.peek();
+        for (int lineIndex = 0; lineIndex < tooltipLines.size(); lineIndex++) {
+            font.method_22942(tooltipLines.get(lineIndex), (float) x, (float) currentY, -1, true, matrix4f_1, layeredVertexConsumerStorage$class_4598_1, false, 0, 15728880);
+            currentY += lineIndex == 0 ? 12 : 10;
+        }
+        layeredVertexConsumerStorage$class_4598_1.method_22993();
+        setBlitOffset(0);
+        RenderSystem.enableDepthTest();
+        RenderSystem.enableRescaleNormal();
+    };
     private Rectangle rectangle;
     private Window window;
     private CraftableToggleButtonWidget toggleButtonWidget;
@@ -74,7 +109,7 @@ public class ContainerScreenOverlay extends Widget {
         this.shouldReInit = false;
         //Update Variables
         this.children().clear();
-        this.window = MinecraftClient.getInstance().method_22683();
+        this.window = MinecraftClient.getInstance().getWindow();
         DisplayHelper.DisplayBoundsHandler boundsHandler = RoughlyEnoughItemsCore.getDisplayHelper().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
         this.rectangle = RoughlyEnoughItemsCore.getConfigManager().getConfig().isLeftHandSidePanel() ? boundsHandler.getLeftBounds(MinecraftClient.getInstance().currentScreen) : boundsHandler.getRightBounds(MinecraftClient.getInstance().currentScreen);
         widgets.add(entryListWidget = new EntryListWidget(page));
@@ -422,35 +457,10 @@ public class ContainerScreenOverlay extends Widget {
     public void renderTooltip(List<String> lines, int mouseX, int mouseY) {
         if (lines.isEmpty())
             return;
-        TextRenderer font = MinecraftClient.getInstance().textRenderer;
-        int width = lines.stream().map(font::getStringWidth).max(Integer::compareTo).get();
-        int height = lines.size() <= 1 ? 8 : lines.size() * 10;
-        ScreenHelper.drawHoveringWidget(mouseX, mouseY, (x, y, aFloat) -> {
-            RenderSystem.disableRescaleNormal();
-            GuiLighting.disable();
-            RenderSystem.disableLighting();
-            setBlitOffset(1000);
-            this.fillGradient(x - 3, y - 4, x + width + 3, y - 3, -267386864, -267386864);
-            this.fillGradient(x - 3, y + height + 3, x + width + 3, y + height + 4, -267386864, -267386864);
-            this.fillGradient(x - 3, y - 3, x + width + 3, y + height + 3, -267386864, -267386864);
-            this.fillGradient(x - 4, y - 3, x - 3, y + height + 3, -267386864, -267386864);
-            this.fillGradient(x + width + 3, y - 3, x + width + 4, y + height + 3, -267386864, -267386864);
-            this.fillGradient(x - 3, y - 3 + 1, x - 3 + 1, y + height + 3 - 1, 1347420415, 1344798847);
-            this.fillGradient(x + width + 2, y - 3 + 1, x + width + 3, y + height + 3 - 1, 1347420415, 1344798847);
-            this.fillGradient(x - 3, y - 3, x + width + 3, y - 3 + 1, 1347420415, 1347420415);
-            this.fillGradient(x - 3, y + height + 2, x + width + 3, y + height + 3, 1344798847, 1344798847);
-            int currentY = y;
-            for (int lineIndex = 0; lineIndex < lines.size(); lineIndex++) {
-                RenderSystem.disableDepthTest();
-                font.drawWithShadow(lines.get(lineIndex), x, currentY, -1);
-                RenderSystem.enableDepthTest();
-                currentY += lineIndex == 0 ? 12 : 10;
-            }
-            setBlitOffset(0);
-            RenderSystem.enableLighting();
-            GuiLighting.enable();
-            RenderSystem.enableRescaleNormal();
-        }, width, height, 0);
+        tooltipWidth = lines.stream().map(font::getStringWidth).max(Integer::compareTo).get();
+        tooltipHeight = lines.size() <= 1 ? 8 : lines.size() * 10;
+        tooltipLines = lines;
+        ScreenHelper.drawHoveringWidget(mouseX, mouseY, renderTooltipCallback, tooltipWidth, tooltipHeight, 0);
     }
     
     private boolean hasSameListContent(List<ItemStack> list1, List<ItemStack> list2) {

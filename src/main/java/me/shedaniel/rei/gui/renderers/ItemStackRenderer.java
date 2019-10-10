@@ -19,6 +19,7 @@ import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MatrixStack;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -41,7 +42,6 @@ public abstract class ItemStackRenderer extends Renderer {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
         itemRenderer.zOffset = getBlitOffset();
-        GuiLighting.enableForItems();
         RenderSystem.colorMask(true, true, true, true);
         RenderSystem.enableLighting();
         RenderSystem.enableRescaleNormal();
