@@ -55,7 +55,7 @@ public class RecipeViewingScreen extends Screen {
         this.categoryPages = 0;
         this.preWidgets = Lists.newArrayList();
         this.widgets = Lists.newArrayList();
-        Window window = MinecraftClient.getInstance().method_22683();
+        Window window = MinecraftClient.getInstance().getWindow();
         this.bounds = new Rectangle(window.getScaledWidth() / 2 - guiWidth / 2, window.getScaledHeight() / 2 - guiHeight / 2, 176, 186);
         this.categoriesMap = categoriesMap;
         this.categories = Lists.newArrayList();

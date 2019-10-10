@@ -484,10 +484,10 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
         RenderSystem.enableColorLogicOp();
         RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
         bufferBuilder_1.begin(7, VertexFormats.POSITION);
-        bufferBuilder_1.method_22912((double) int_1, (double) int_4, getBlitOffset() + 50d).next();
-        bufferBuilder_1.method_22912((double) int_3, (double) int_4, getBlitOffset() + 50d).next();
-        bufferBuilder_1.method_22912((double) int_3, (double) int_2, getBlitOffset() + 50d).next();
-        bufferBuilder_1.method_22912((double) int_1, (double) int_2, getBlitOffset() + 50d).next();
+        bufferBuilder_1.vertex((double) int_1, (double) int_4, getBlitOffset() + 50d).next();
+        bufferBuilder_1.vertex((double) int_3, (double) int_4, getBlitOffset() + 50d).next();
+        bufferBuilder_1.vertex((double) int_3, (double) int_2, getBlitOffset() + 50d).next();
+        bufferBuilder_1.vertex((double) int_1, (double) int_2, getBlitOffset() + 50d).next();
         tessellator_1.draw();
         RenderSystem.disableColorLogicOp();
         RenderSystem.enableTexture();

@@ -46,7 +46,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     }
     
     private static Point getPointFromConfig() {
-        Window window = MinecraftClient.getInstance().method_22683();
+        Window window = MinecraftClient.getInstance().getWindow();
         ConfigObjectImpl.RelativePoint point = RoughlyEnoughItemsCore.getConfigManager().getConfig().getChoosePageDialogPoint();
         return new Point(point.getX(window.getScaledWidth()), point.getY(window.getScaledHeight()));
     }
@@ -186,7 +186,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     @Override
     public void onMouseReleaseMidPoint(Point midPoint) {
         ConfigManager configManager = RoughlyEnoughItemsCore.getConfigManager();
-        Window window = minecraft.method_22683();
+        Window window = minecraft.getWindow();
         configManager.getConfig().setChoosePageDialogPoint(new ConfigObjectImpl.RelativePoint(midPoint.getX() / window.getScaledWidth(), midPoint.getY() / window.getScaledHeight()));
         try {
             configManager.saveConfig();
