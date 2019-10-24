@@ -28,6 +28,8 @@ public interface ConfigObject {
     
     boolean isUsingDarkTheme();
     
+    boolean isToastDisplayedOnCopyIdentifier();
+    
     boolean doesRenderEntryExtraOverlay();
     
     boolean isEntryListWidgetScrolled();
