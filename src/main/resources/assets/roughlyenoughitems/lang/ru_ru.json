@@ -88,7 +88,7 @@
   "config.roughlyenoughitems.clickableRecipeArrows": "Показать рецепт нажатием:",
   "config.roughlyenoughitems.clickableRecipeArrows.boolean.true": "Включено",
   "config.roughlyenoughitems.clickableRecipeArrows.boolean.false": "Выключено",
-  "config.roughlyenoughitems.renderEntryExtraOverlay": "Render Entry Extra Overlay:",
+  "config.roughlyenoughitems.renderEntryExtraOverlay": "Отрисовывать визуальные эффекты предмета:",
   "config.roughlyenoughitems.darkTheme": "Тема внешнего вида REI:",
   "config.roughlyenoughitems.darkTheme.boolean.true": "Тёмная тема",
   "config.roughlyenoughitems.darkTheme.boolean.false": "Светлая тема",
