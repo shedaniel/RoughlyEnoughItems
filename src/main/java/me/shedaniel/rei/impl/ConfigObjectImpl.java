@@ -84,6 +84,12 @@ public class ConfigObjectImpl implements ConfigObject {
             .withName("enableCraftableOnlyButton")
             .build();
     
+    private ConfigValue<Boolean> toastDisplayedOnCopyIdentifier = ConfigValue.builder(Boolean.class)
+            .withParent(modules)
+            .withDefaultValue(true)
+            .withName("toastDisplayedOnCopyIdentifier")
+            .build();
+    
     private ConfigValue<String> gamemodeCommand = ConfigValue.builder(String.class)
             .withParent(technical)
             .withDefaultValue("/gamemode {gamemode}")
@@ -226,6 +232,11 @@ public class ConfigObjectImpl implements ConfigObject {
     @Override
     public boolean isUsingDarkTheme() {
         return darkTheme.getValue().booleanValue();
+    }
+    
+    @Override
+    public boolean isToastDisplayedOnCopyIdentifier() {
+        return toastDisplayedOnCopyIdentifier.getValue();
     }
     
     @Override

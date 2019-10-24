@@ -55,8 +55,9 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     private final Identifier previousPageKeybind = new Identifier("roughlyenoughitems", "previous_page");
     private final Identifier nextPageKeybind = new Identifier("roughlyenoughitems", "next_page");
     private final Identifier focusSearchFieldKeybind = new Identifier("roughlyenoughitems", "focus_search");
+    private final Identifier copyRecipeIdentifierKeybind = new Identifier("roughlyenoughitems", "copy_recipe_id");
     private final Map<String, String> modNameCache = Maps.newHashMap();
-    public FabricKeyBinding recipe, usage, hide, previousPage, nextPage, focusSearchField;
+    public FabricKeyBinding recipe, usage, hide, previousPage, nextPage, focusSearchField, copyRecipeIdentifier;
     
     @Override
     public String getFormattedModFromItem(Item item) {
@@ -102,6 +103,11 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     @Override
     public FabricKeyBinding getFocusSearchFieldKeyBinding() {
         return focusSearchField;
+    }
+    
+    @Override
+    public FabricKeyBinding getCopyRecipeIdentifierKeyBinding() {
+        return copyRecipeIdentifier;
     }
     
     @Override
@@ -265,6 +271,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         KeyBindingRegistryImpl.INSTANCE.register(previousPage = FabricKeyBinding.Builder.create(previousPageKeybind, InputUtil.Type.KEYSYM, -1, category).build());
         KeyBindingRegistryImpl.INSTANCE.register(nextPage = FabricKeyBinding.Builder.create(nextPageKeybind, InputUtil.Type.KEYSYM, -1, category).build());
         KeyBindingRegistryImpl.INSTANCE.register(focusSearchField = FabricKeyBinding.Builder.create(focusSearchFieldKeybind, InputUtil.Type.KEYSYM, -1, category).build());
+        KeyBindingRegistryImpl.INSTANCE.register(copyRecipeIdentifier = FabricKeyBinding.Builder.create(copyRecipeIdentifierKeybind, InputUtil.Type.KEYSYM, -1, category).build());
     }
     
 }

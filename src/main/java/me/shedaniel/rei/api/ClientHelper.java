@@ -80,6 +80,8 @@ public interface ClientHelper {
     
     FabricKeyBinding getFocusSearchFieldKeyBinding();
     
+    FabricKeyBinding getCopyRecipeIdentifierKeyBinding();
+    
     /**
      * Gets the mod from an item
      *

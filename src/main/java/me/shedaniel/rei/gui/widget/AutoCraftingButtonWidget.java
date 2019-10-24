@@ -10,7 +10,10 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.impl.PointHelper;
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.gui.toast.CopyRecipeIdentifierToast;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.client.resource.language.I18n;
@@ -169,5 +172,17 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
             str += extraTooltip;
         }
         return Optional.of(str);
+    }
+    
+    @Override
+    public boolean keyPressed(int int_1, int int_2, int int_3) {
+        if (displaySupplier.get().getRecipeLocation().isPresent() && ClientHelper.getInstance().getCopyRecipeIdentifierKeyBinding().matchesKey(int_1, int_2) && containsMouse(PointHelper.fromMouse())) {
+            minecraft.keyboard.setClipboard(displaySupplier.get().getRecipeLocation().get().toString());
+            if (RoughlyEnoughItemsCore.getConfigManager().getConfig().isToastDisplayedOnCopyIdentifier()) {
+                CopyRecipeIdentifierToast.addToast(I18n.translate("msg.rei.copied_recipe_id"), I18n.translate("msg.rei.recipe_id_details", displaySupplier.get().getRecipeLocation().get().toString()));
+            }
+            return true;
+        }
+        return super.keyPressed(int_1, int_2, int_3);
     }
 }
