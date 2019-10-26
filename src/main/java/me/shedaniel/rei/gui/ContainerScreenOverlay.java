@@ -99,6 +99,11 @@ public class ContainerScreenOverlay extends Widget {
                 public boolean changeFocus(boolean boolean_1) {
                     return false;
                 }
+    
+                @Override
+                public boolean containsMouse(double mouseX, double mouseY) {
+                    return isNotInExclusionZones(mouseX, mouseY) && super.containsMouse(mouseX, mouseY);
+                }
             });
             widgets.add(buttonRight = new ButtonWidget(rectangle.x + rectangle.width - 18, rectangle.y + (RoughlyEnoughItemsCore.getConfigManager().getConfig().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16, new TranslatableText("text.rei.right_arrow")) {
                 @Override
@@ -117,6 +122,11 @@ public class ContainerScreenOverlay extends Widget {
                 @Override
                 public boolean changeFocus(boolean boolean_1) {
                     return false;
+                }
+    
+                @Override
+                public boolean containsMouse(double mouseX, double mouseY) {
+                    return isNotInExclusionZones(mouseX, mouseY) && super.containsMouse(mouseX, mouseY);
                 }
             });
         }
@@ -168,6 +178,11 @@ public class ContainerScreenOverlay extends Widget {
             public boolean changeFocus(boolean boolean_1) {
                 return false;
             }
+    
+            @Override
+            public boolean containsMouse(double mouseX, double mouseY) {
+                return isNotInExclusionZones(mouseX, mouseY) && super.containsMouse(mouseX, mouseY);
+            }
         });
         if (RoughlyEnoughItemsCore.getConfigManager().getConfig().doesShowUtilsButtons()) {
             widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigManager().getConfig().isLeftHandSidePanel() ? window.getScaledWidth() - 55 : 35, 10, 20, 20, "") {
@@ -190,6 +205,11 @@ public class ContainerScreenOverlay extends Widget {
                 @Override
                 public boolean changeFocus(boolean boolean_1) {
                     return false;
+                }
+    
+                @Override
+                public boolean containsMouse(double mouseX, double mouseY) {
+                    return isNotInExclusionZones(mouseX, mouseY) && super.containsMouse(mouseX, mouseY);
                 }
             });
             int xxx = RoughlyEnoughItemsCore.getConfigManager().getConfig().isLeftHandSidePanel() ? window.getScaledWidth() - 30 : 10;
@@ -217,6 +237,11 @@ public class ContainerScreenOverlay extends Widget {
                     @Override
                     public boolean changeFocus(boolean boolean_1) {
                         return false;
+                    }
+                    
+                    @Override
+                    public boolean containsMouse(double mouseX, double mouseY) {
+                        return isNotInExclusionZones(mouseX, mouseY) && super.containsMouse(mouseX, mouseY);
                     }
                 });
                 xxx += RoughlyEnoughItemsCore.getConfigManager().getConfig().isLeftHandSidePanel() ? -25 : 25;
@@ -271,6 +296,11 @@ public class ContainerScreenOverlay extends Widget {
                 public void lateRender(int mouseX, int mouseY, float delta) {
                     blitOffset = 300;
                     super.lateRender(mouseX, mouseY, delta);
+                }
+    
+                @Override
+                public boolean containsMouse(double mouseX, double mouseY) {
+                    return isNotInExclusionZones(mouseX, mouseY) && super.containsMouse(mouseX, mouseY);
                 }
             });
         else
@@ -584,8 +614,20 @@ public class ContainerScreenOverlay extends Widget {
     public boolean isInside(double mouseX, double mouseY) {
         if (!rectangle.contains(mouseX, mouseY))
             return false;
-        for (DisplayHelper.DisplayBoundsHandler handler : RoughlyEnoughItemsCore.getDisplayHelper().getSortedBoundsHandlers(MinecraftClient.getInstance().currentScreen.getClass())) {
+        for (DisplayHelper.DisplayBoundsHandler<?> handler : RoughlyEnoughItemsCore.getDisplayHelper().getSortedBoundsHandlers(MinecraftClient.getInstance().currentScreen.getClass())) {
             ActionResult in = handler.isInZone(!RoughlyEnoughItemsCore.getConfigManager().getConfig().isLeftHandSidePanel(), mouseX, mouseY);
+            if (in != ActionResult.PASS)
+                return in == ActionResult.SUCCESS;
+        }
+        return true;
+    }
+    
+    public boolean isNotInExclusionZones(double mouseX, double mouseY) {
+        for (DisplayHelper.DisplayBoundsHandler<?> handler : RoughlyEnoughItemsCore.getDisplayHelper().getSortedBoundsHandlers(MinecraftClient.getInstance().currentScreen.getClass())) {
+            ActionResult in = handler.isInZone(true, mouseX, mouseY);
+            if (in != ActionResult.PASS)
+                return in == ActionResult.SUCCESS;
+            in = handler.isInZone(false, mouseX, mouseY);
             if (in != ActionResult.PASS)
                 return in == ActionResult.SUCCESS;
         }
