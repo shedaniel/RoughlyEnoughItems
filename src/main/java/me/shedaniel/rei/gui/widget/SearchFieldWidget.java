@@ -6,7 +6,9 @@
 package me.shedaniel.rei.gui.widget;
 
 import me.shedaniel.math.compat.RenderHelper;
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
+import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
@@ -81,6 +83,11 @@ public class SearchFieldWidget extends TextFieldWidget {
             return true;
         }
         return super.charTyped(char_1, int_1);
+    }
+    
+    @Override
+    public boolean containsMouse(double mouseX, double mouseY) {
+        return ScreenHelper.getLastOverlay().isNotInExclusionZones(mouseX, mouseY) && super.containsMouse(mouseX, mouseY);
     }
     
     @Override
