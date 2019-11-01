@@ -35,4 +35,16 @@ public class ItemStackEntry implements Entry {
     public Fluid getFluid() {
         return null;
     }
+    
+    @Override
+    public Entry clone() {
+        return Entry.create(getItemStack().copy());
+    }
+    
+    @Override
+    public boolean equalsEntry(Entry other, boolean checkTags) {
+        if (other.getEntryType() == Type.ITEM) {
+            return checkTags ? other.getItemStack().isItemEqualIgnoreDamage(getItemStack()) : other.getItemStack().isItemEqualIgnoreDamage(getItemStack());
+        } else return false;
+    }
 }

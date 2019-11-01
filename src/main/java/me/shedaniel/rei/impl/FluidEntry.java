@@ -35,4 +35,16 @@ public class FluidEntry implements Entry {
     public Fluid getFluid() {
         return fluid;
     }
+    
+    @Override
+    public Entry clone() {
+        return this;
+    }
+    
+    @Override
+    public boolean equalsEntry(Entry other, boolean checkTags) {
+        if (other.getEntryType() == Type.FLUID) {
+            return other.getFluid().matchesType(getFluid());
+        } else return false;
+    }
 }

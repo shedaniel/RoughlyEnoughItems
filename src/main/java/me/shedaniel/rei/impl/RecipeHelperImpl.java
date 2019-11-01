@@ -122,18 +122,22 @@ public class RecipeHelperImpl implements RecipeHelper {
     }
     
     @Override
-    public Map<RecipeCategory<?>, List<RecipeDisplay>> getRecipesFor(ItemStack stack) {
+    public Map<RecipeCategory<?>, List<RecipeDisplay>> getRecipesFor(Entry e) {
         Map<Identifier, List<RecipeDisplay>> categoriesMap = new HashMap<>();
         categories.forEach(f -> categoriesMap.put(f.getIdentifier(), Lists.newArrayList()));
         for (Map.Entry<Identifier, List<RecipeDisplay>> entry : recipeCategoryListMap.entrySet()) {
             RecipeCategory category = getCategory(entry.getKey());
+            boolean checkTags = category.checkTags();
             for (RecipeDisplay recipeDisplay : entry.getValue())
-                for (ItemStack outputStack : (List<ItemStack>) recipeDisplay.getOutput())
-                    if (category.checkTags() ? ItemStack.areEqualIgnoreDamage(stack, outputStack) : ItemStack.areItemsEqualIgnoreDamage(stack, outputStack))
+                for (Entry outputStack : recipeDisplay.getOutputEntry())
+                    if (e.equalsEntry(outputStack, checkTags))
                         categoriesMap.get(recipeDisplay.getRecipeCategory()).add(recipeDisplay);
         }
-        for (LiveRecipeGenerator liveRecipeGenerator : liveRecipeGenerators)
-            ((Optional<List>) liveRecipeGenerator.getRecipeFor(stack)).ifPresent(o -> categoriesMap.get(liveRecipeGenerator.getCategoryIdentifier()).addAll(o));
+        for (LiveRecipeGenerator<?> liveRecipeGenerator : liveRecipeGenerators) {
+            liveRecipeGenerator.getRecipeFor(e).ifPresent(o -> categoriesMap.get(liveRecipeGenerator.getCategoryIdentifier()).addAll((List<RecipeDisplay>) o));
+            if (e.getEntryType() == Entry.Type.ITEM)
+                liveRecipeGenerator.getRecipeFor(e.getItemStack()).ifPresent(o -> categoriesMap.get(liveRecipeGenerator.getCategoryIdentifier()).addAll((List<RecipeDisplay>) o));
+        }
         Map<RecipeCategory<?>, List<RecipeDisplay>> recipeCategoryListMap = Maps.newLinkedHashMap();
         categories.forEach(category -> {
             if (categoriesMap.containsKey(category.getIdentifier()) && !categoriesMap.get(category.getIdentifier()).isEmpty())
@@ -156,16 +160,17 @@ public class RecipeHelperImpl implements RecipeHelper {
     }
     
     @Override
-    public Map<RecipeCategory<?>, List<RecipeDisplay>> getUsagesFor(ItemStack stack) {
+    public Map<RecipeCategory<?>, List<RecipeDisplay>> getUsagesFor(Entry e) {
         Map<Identifier, List<RecipeDisplay>> categoriesMap = new HashMap<>();
         categories.forEach(f -> categoriesMap.put(f.getIdentifier(), Lists.newArrayList()));
         for (Map.Entry<Identifier, List<RecipeDisplay>> entry : recipeCategoryListMap.entrySet()) {
             RecipeCategory category = getCategory(entry.getKey());
+            boolean checkTags = category.checkTags();
             for (RecipeDisplay recipeDisplay : entry.getValue()) {
                 boolean found = false;
-                for (List<ItemStack> input : (List<List<ItemStack>>) recipeDisplay.getInput()) {
-                    for (ItemStack itemStack : input) {
-                        if (category.checkTags() ? ItemStack.areEqualIgnoreDamage(itemStack, stack) : ItemStack.areItemsEqualIgnoreDamage(itemStack, stack)) {
+                for (List<Entry> input : recipeDisplay.getInputEntries()) {
+                    for (Entry otherEntry : input) {
+                        if (otherEntry.equalsEntry(e, checkTags)) {
                             categoriesMap.get(recipeDisplay.getRecipeCategory()).add(recipeDisplay);
                             found = true;
                             break;
@@ -176,8 +181,11 @@ public class RecipeHelperImpl implements RecipeHelper {
                 }
             }
         }
-        for (LiveRecipeGenerator liveRecipeGenerator : liveRecipeGenerators)
-            ((Optional<List>) liveRecipeGenerator.getUsageFor(stack)).ifPresent(o -> categoriesMap.get(liveRecipeGenerator.getCategoryIdentifier()).addAll(o));
+        for (LiveRecipeGenerator<?> liveRecipeGenerator : liveRecipeGenerators) {
+            liveRecipeGenerator.getUsageFor(e).ifPresent(o -> categoriesMap.get(liveRecipeGenerator.getCategoryIdentifier()).addAll((List<RecipeDisplay>) o));
+            if (e.getEntryType() == Entry.Type.ITEM)
+                liveRecipeGenerator.getUsageFor(e.getItemStack()).ifPresent(o -> categoriesMap.get(liveRecipeGenerator.getCategoryIdentifier()).addAll((List<RecipeDisplay>) o));
+        }
         Map<RecipeCategory<?>, List<RecipeDisplay>> recipeCategoryListMap = Maps.newLinkedHashMap();
         categories.forEach(category -> {
             if (categoriesMap.containsKey(category.getIdentifier()) && !categoriesMap.get(category.getIdentifier()).isEmpty())

@@ -21,7 +21,6 @@ minecraft {
 license {
     header rootProject.file('HEADER')
     include '**/*.java'
-    exclude '**/Scissors.java'
 }
 
 repositories {

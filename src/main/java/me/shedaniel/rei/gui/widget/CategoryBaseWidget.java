@@ -14,7 +14,7 @@ public class CategoryBaseWidget extends RecipeBaseWidget {
     }
     
     @Override
-    protected int getTextureOffset() {
+    protected int getYTextureOffset() {
         return 66;
     }
     

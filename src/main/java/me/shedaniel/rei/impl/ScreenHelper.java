@@ -11,7 +11,7 @@ import com.google.common.collect.Sets;
 import me.shedaniel.cloth.hooks.ClothClientHooks;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
-import me.shedaniel.rei.gui.widget.SearchFieldWidget;
+import me.shedaniel.rei.gui.OverlaySearchField;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.event.client.ClientTickCallback;
@@ -29,12 +29,25 @@ import java.util.Optional;
 
 public class ScreenHelper implements ClientModInitializer {
     
-    public static SearchFieldWidget searchField;
+    /**
+     * @deprecated Use getters instead
+     */
+    @Deprecated
+    public static OverlaySearchField searchField;
     public static List<ItemStack> inventoryStacks = Lists.newArrayList();
     private static boolean overlayVisible = true;
     private static ContainerScreenOverlay overlay;
     private static AbstractContainerScreen<?> lastContainerScreen = null;
     private static LinkedHashSet<Screen> lastRecipeScreen = Sets.newLinkedHashSetWithExpectedSize(5);
+    
+    public static OverlaySearchField getSearchField() {
+        return searchField;
+    }
+    
+    @Deprecated
+    public static void setSearchField(OverlaySearchField searchField) {
+        ScreenHelper.searchField = searchField;
+    }
     
     public static void storeRecipeScreen(Screen screen) {
         while (lastRecipeScreen.size() >= 5)

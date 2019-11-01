@@ -27,19 +27,19 @@ public abstract class ClickableLabelWidget extends LabelWidget {
     
     @Override
     public void render(int mouseX, int mouseY, float delta) {
-        int colour = getDefaultColor();
+        int color = getDefaultColor();
         if (clickable && isHovered(mouseX, mouseY))
-            colour = getHoveredColor();
-        drawCenteredString(font, (isHovered(mouseX, mouseY) ? Formatting.UNDERLINE.toString() : "") + text, x, y, colour);
+            color = getHoveredColor();
+        int width = font.getStringWidth(text);
+        if (isHasShadows())
+            font.drawWithShadow((isHovered(mouseX, mouseY) ? Formatting.UNDERLINE.toString() : "") + text, x - width / 2, y, color);
+        else
+            font.draw((isHovered(mouseX, mouseY) ? Formatting.UNDERLINE.toString() : "") + text, x - width / 2, y, color);
         if (clickable && getTooltips().isPresent())
             if (!focused && containsMouse(mouseX, mouseY))
                 ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltips().get().split("\n")));
             else if (focused)
                 ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(new Point(x, y), getTooltips().get().split("\n")));
-    }
-    
-    public int getDefaultColor() {
-        return ScreenHelper.isDarkModeEnabled() ? 0xFFBBBBBB : -1;
     }
     
     public int getHoveredColor() {

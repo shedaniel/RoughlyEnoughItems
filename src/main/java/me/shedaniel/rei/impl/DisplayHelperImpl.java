@@ -50,12 +50,13 @@ public class DisplayHelperImpl implements DisplayHelper {
     private Map<Class<?>, DisplayBoundsHandler<?>> handlerCache = Maps.newHashMap();
     private Map<Class, List<DisplayBoundsHandler<?>>> handlerSortedCache = Maps.newHashMap();
     private BaseBoundsHandler baseBoundsHandler;
-    private Class tempScreen;
+    private Class<?> tempScreen;
     
     @Override
     public List<DisplayBoundsHandler<?>> getSortedBoundsHandlers(Class<?> screenClass) {
-        if (handlerSortedCache.containsKey(screenClass))
-            return handlerSortedCache.get(screenClass);
+        List<DisplayBoundsHandler<?>> possibleCached = handlerSortedCache.get(screenClass);
+        if (possibleCached != null)
+            return possibleCached;
         tempScreen = screenClass;
         handlerSortedCache.put(screenClass, screenDisplayBoundsHandlers.stream().filter(this::filterResponsible).sorted(BOUNDS_HANDLER_COMPARATOR).collect(Collectors.toList()));
         return handlerSortedCache.get(screenClass);
@@ -68,14 +69,16 @@ public class DisplayHelperImpl implements DisplayHelper {
     
     @Override
     public DisplayBoundsHandler<?> getResponsibleBoundsHandler(Class<?> screenClass) {
-        if (handlerCache.containsKey(screenClass))
-            return handlerCache.get(screenClass);
-        tempScreen = screenClass;
-        handlerCache.put(screenClass, screenDisplayBoundsHandlers.stream().filter(this::filterResponsible).sorted(BOUNDS_HANDLER_COMPARATOR).findAny().orElse(EMPTY));
+        DisplayBoundsHandler<?> possibleCached = handlerCache.get(screenClass);
+        if (possibleCached != null)
+            return possibleCached;
+        List<DisplayBoundsHandler<?>> handlers = getSortedBoundsHandlers(screenClass);
+        handlerCache.put(screenClass, handlers.isEmpty() ? EMPTY : handlers.get(0));
         return handlerCache.get(screenClass);
     }
     
-    public boolean filterResponsible(DisplayBoundsHandler handler) {
+    @Deprecated
+    public boolean filterResponsible(DisplayBoundsHandler<?> handler) {
         return handler.getBaseSupportedClass().isAssignableFrom(tempScreen);
     }
     
@@ -89,14 +92,17 @@ public class DisplayHelperImpl implements DisplayHelper {
         return baseBoundsHandler;
     }
     
+    @Deprecated
     public void setBaseBoundsHandler(BaseBoundsHandler baseBoundsHandler) {
         this.baseBoundsHandler = baseBoundsHandler;
     }
     
+    @Deprecated
     public void resetData() {
         screenDisplayBoundsHandlers.clear();
     }
     
+    @Deprecated
     public void resetCache() {
         handlerCache.clear();
         handlerSortedCache.clear();

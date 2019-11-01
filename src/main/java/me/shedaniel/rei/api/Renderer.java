@@ -14,10 +14,12 @@ import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -182,6 +184,15 @@ public abstract class Renderer extends DrawableHelper {
      * @param delta  the delta
      */
     public abstract void render(int x, int y, double mouseX, double mouseY, float delta);
+    
+    @NotNull
+    public Optional<Entry> getEntry() {
+        if (this instanceof ItemStackRenderer)
+            return Optional.of(Entry.create(((ItemStackRenderer) this).getItemStack()));
+        if (this instanceof FluidRenderer)
+            return Optional.of(Entry.create(((FluidRenderer) this).getFluid()));
+        return Optional.empty();
+    }
     
     @Nullable
     public QueuedTooltip getQueuedTooltip(float delta) {

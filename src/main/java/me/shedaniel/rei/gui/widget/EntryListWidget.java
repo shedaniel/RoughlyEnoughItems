@@ -6,8 +6,8 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
-import com.zeitheron.hammercore.client.utils.Scissors;
 import me.shedaniel.clothconfig2.api.RunSixtyTimesEverySec;
+import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.compat.RenderHelper;
 import me.shedaniel.math.impl.PointHelper;
@@ -45,6 +45,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@SuppressWarnings("deprecation")
 public class EntryListWidget extends Widget {
     
     private static final String SPACE = " ", EMPTY = "";
@@ -290,13 +291,12 @@ public class EntryListWidget extends Widget {
         else {
             page = 0;
             ScreenHelper.getLastOverlay().setPage(0);
-            Scissors.begin();
-            Scissors.scissor(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+            ScissorsHandler.INSTANCE.scissor(rectangle);
         }
         widgets.forEach(widget -> {
             if (widgetScrolled) {
-                widget.y = (int) (widget.backupY - scroll);
-                if (widget.y <= rectangle.y + rectangle.height && widget.y + widget.getBounds().height >= rectangle.y)
+                widget.getBounds().y = (int) (widget.backupY - scroll);
+                if (widget.getBounds().y <= rectangle.y + rectangle.height && widget.getBounds().getMaxY() >= rectangle.y)
                     widget.render(int_1, int_2, float_1);
             } else {
                 widget.render(int_1, int_2, float_1);
@@ -331,7 +331,7 @@ public class EntryListWidget extends Widget {
                 RenderHelper.enableAlphaTest();
                 RenderHelper.enableTexture();
             }
-            Scissors.end();
+            ScissorsHandler.INSTANCE.removeLastScissor();
         }
         RenderHelper.popMatrix();
         ClientPlayerEntity player = minecraft.player;
@@ -376,12 +376,12 @@ public class EntryListWidget extends Widget {
                     protected String getCounts() {
                         return "";
                     }
-    
+                    
                     @Override
                     protected boolean renderOverlay() {
                         return RoughlyEnoughItemsCore.getConfigManager().getConfig().doesRenderEntryExtraOverlay();
                     }
-    
+                    
                     @Nullable
                     @Override
                     public QueuedTooltip getQueuedTooltip(float delta) {
@@ -405,22 +405,22 @@ public class EntryListWidget extends Widget {
                 }, false, true, true) {
                     @Override
                     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                        if (isCurrentRendererItem() && containsMouse(mouseX, mouseY)) {
+                        Optional<Entry> entryOptional = getCurrentRenderer().getEntry();
+                        if (entryOptional.isPresent() && containsMouse(mouseX, mouseY)) {
                             if (ClientHelper.getInstance().isCheating()) {
-                                if (getCurrentItemStack() != null && !getCurrentItemStack().isEmpty()) {
-                                    ItemStack cheatedStack = getCurrentItemStack().copy();
+                                Entry entry = entryOptional.get().clone();
+                                if (entry.getEntryType() == Entry.Type.ITEM) {
                                     if (RoughlyEnoughItemsCore.getConfigManager().getConfig().getItemCheatingMode() == ItemCheatingMode.REI_LIKE)
-                                        cheatedStack.setCount(button != 1 ? 1 : cheatedStack.getMaxCount());
+                                        entry.getItemStack().setCount(button != 1 ? 1 : entry.getItemStack().getMaxCount());
                                     else if (RoughlyEnoughItemsCore.getConfigManager().getConfig().getItemCheatingMode() == ItemCheatingMode.JEI_LIKE)
-                                        cheatedStack.setCount(button != 0 ? 1 : cheatedStack.getMaxCount());
+                                        entry.getItemStack().setCount(button != 0 ? 1 : entry.getItemStack().getMaxCount());
                                     else
-                                        cheatedStack.setCount(1);
-                                    return ClientHelper.getInstance().tryCheatingStack(cheatedStack);
+                                        entry.getItemStack().setCount(1);
                                 }
                             } else if (button == 0) {
-                                return ClientHelper.getInstance().executeRecipeKeyBind(getCurrentItemStack().copy());
+                                return ClientHelper.getInstance().executeRecipeKeyBind(entryOptional.get());
                             } else if (button == 1)
-                                return ClientHelper.getInstance().executeUsageKeyBind(getCurrentItemStack().copy());
+                                return ClientHelper.getInstance().executeUsageKeyBind(entryOptional.get());
                         }
                         return false;
                     }

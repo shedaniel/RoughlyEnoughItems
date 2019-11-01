@@ -276,7 +276,7 @@ public class ContainerScreenOverlay extends Widget {
             buttonLeft.enabled = buttonRight.enabled = getTotalPage() > 0;
         }
         if (ScreenHelper.searchField == null)
-            ScreenHelper.searchField = new SearchFieldWidget(0, 0, 0, 0);
+            ScreenHelper.setSearchField(new OverlaySearchField(0, 0, 0, 0));
         ScreenHelper.searchField.getBounds().setBounds(getTextFieldArea());
         this.widgets.add(ScreenHelper.searchField);
         ScreenHelper.searchField.setText(searchTerm);
@@ -402,7 +402,7 @@ public class ContainerScreenOverlay extends Widget {
             DisplayHelper.DisplayBoundsHandler<?> boundsHandler = RoughlyEnoughItemsCore.getDisplayHelper().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
             entryListWidget.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, true);
         }
-        if (SearchFieldWidget.isSearching) {
+        if (OverlaySearchField.isSearching) {
             GuiLighting.disable();
             blitOffset = 200;
             if (MinecraftClient.getInstance().currentScreen instanceof AbstractContainerScreen) {

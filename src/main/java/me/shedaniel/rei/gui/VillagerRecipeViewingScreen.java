@@ -7,7 +7,7 @@ package me.shedaniel.rei.gui;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.zeitheron.hammercore.client.utils.Scissors;
+import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.compat.RenderHelper;
@@ -337,8 +337,7 @@ public class VillagerRecipeViewingScreen extends Screen {
         GuiLighting.disable();
         ScreenHelper.getLastOverlay().render(mouseX, mouseY, delta);
         RenderHelper.pushMatrix();
-        Scissors.begin();
-        Scissors.scissor(0, scrollListBounds.y + 1, width, scrollListBounds.height - 2);
+        ScissorsHandler.INSTANCE.scissor(new Rectangle(0, scrollListBounds.y + 1, width, scrollListBounds.height - 2));
         for (int i = 0; i < buttonWidgets.size(); i++) {
             ButtonWidget buttonWidget = buttonWidgets.get(i);
             buttonWidget.getBounds().y = scrollListBounds.y + 1 + yOffset - (int) scroll;
@@ -385,7 +384,7 @@ public class VillagerRecipeViewingScreen extends Screen {
             RenderHelper.enableAlphaTest();
             RenderHelper.enableTexture();
         }
-        Scissors.end();
+        ScissorsHandler.INSTANCE.removeLastScissor();
         RenderHelper.popMatrix();
         ScreenHelper.getLastOverlay().lateRender(mouseX, mouseY, delta);
     }
