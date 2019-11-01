@@ -5,12 +5,13 @@
 
 package me.shedaniel.rei.gui.credits;
 
+import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
 import me.shedaniel.clothconfig2.gui.widget.DynamicSmoothScrollingEntryListWidget;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.text.Text;
 
-public class CreditsEntryListWidget extends DynamicSmoothScrollingEntryListWidget<CreditsEntryListWidget.CreditsItem> {
+public class CreditsEntryListWidget extends DynamicNewSmoothScrollingEntryListWidget<CreditsEntryListWidget.CreditsItem> {
     
     private boolean inFocus;
     
