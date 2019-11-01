@@ -6,7 +6,6 @@
 package me.shedaniel.rei.gui.credits;
 
 import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
-import me.shedaniel.clothconfig2.gui.widget.DynamicSmoothScrollingEntryListWidget;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.text.Text;
@@ -57,7 +56,7 @@ public class CreditsEntryListWidget extends DynamicNewSmoothScrollingEntryListWi
         return width - 40;
     }
     
-    public static class CreditsItem extends DynamicSmoothScrollingEntryListWidget.Entry<CreditsItem> {
+    public static class CreditsItem extends DynamicNewSmoothScrollingEntryListWidget.Entry<CreditsItem> {
         private String text;
         
         public CreditsItem(Text textComponent) {
