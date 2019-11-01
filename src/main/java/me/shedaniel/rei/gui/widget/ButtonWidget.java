@@ -123,7 +123,7 @@ public abstract class ButtonWidget extends WidgetWithBounds {
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (bounds.contains(mouseX, mouseY) && enabled && button == 0) {
+        if (isMouseOver(mouseX, mouseY) && enabled && button == 0) {
             minecraft.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             onPressed();
             return true;
