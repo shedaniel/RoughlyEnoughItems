@@ -85,7 +85,7 @@ public class CreditsScreen extends Screen {
     
     @Override
     public boolean mouseScrolled(double double_1, double double_2, double double_3) {
-        if (entryListWidget.mouseScrolled(double_1, double_2, double_3 * 3))
+        if (entryListWidget.mouseScrolled(double_1, double_2, double_3))
             return true;
         return super.mouseScrolled(double_1, double_2, double_3);
     }

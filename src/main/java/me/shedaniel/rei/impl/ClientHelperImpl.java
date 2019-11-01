@@ -10,10 +10,7 @@ import com.google.common.collect.Maps;
 import io.netty.buffer.Unpooled;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
-import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.RecipeCategory;
-import me.shedaniel.rei.api.RecipeDisplay;
-import me.shedaniel.rei.api.RecipeHelper;
+import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.gui.PreRecipeViewingScreen;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
@@ -155,7 +152,10 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     }
     
     @Override
-    public boolean tryCheatingStack(ItemStack cheatedStack) {
+    public boolean tryCheatingEntry(Entry entry) {
+        if (entry.getEntryType() == Entry.Type.FLUID)
+            return false;
+        ItemStack cheatedStack = entry.getItemStack().copy();
         if (RoughlyEnoughItemsCore.canUsePackets()) {
             try {
                 ClientSidePacketRegistry.INSTANCE.sendToServer(RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET, new PacketByteBuf(Unpooled.buffer()).writeItemStack(cheatedStack.copy()));
@@ -178,16 +178,16 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     }
     
     @Override
-    public boolean executeRecipeKeyBind(ItemStack stack) {
-        Map<RecipeCategory<?>, List<RecipeDisplay>> map = RecipeHelper.getInstance().getRecipesFor(stack);
+    public boolean executeRecipeKeyBind(Entry entry) {
+        Map<RecipeCategory<?>, List<RecipeDisplay>> map = RecipeHelper.getInstance().getRecipesFor(entry);
         if (map.keySet().size() > 0)
             openRecipeViewingScreen(map);
         return map.keySet().size() > 0;
     }
     
     @Override
-    public boolean executeUsageKeyBind(ItemStack stack) {
-        Map<RecipeCategory<?>, List<RecipeDisplay>> map = RecipeHelper.getInstance().getUsagesFor(stack);
+    public boolean executeUsageKeyBind(Entry entry) {
+        Map<RecipeCategory<?>, List<RecipeDisplay>> map = RecipeHelper.getInstance().getUsagesFor(entry);
         if (map.keySet().size() > 0)
             openRecipeViewingScreen(map);
         return map.keySet().size() > 0;

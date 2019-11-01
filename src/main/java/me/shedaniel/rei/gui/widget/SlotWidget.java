@@ -11,7 +11,9 @@ import me.shedaniel.math.compat.RenderHelper;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ClientHelper;
+import me.shedaniel.rei.api.Entry;
 import me.shedaniel.rei.api.Renderer;
+import me.shedaniel.rei.api.annotations.ToBeRemoved;
 import me.shedaniel.rei.gui.renderers.FluidRenderer;
 import me.shedaniel.rei.gui.renderers.ItemStackRenderer;
 import me.shedaniel.rei.impl.ScreenHelper;
@@ -23,17 +25,15 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("deprecation")
 public class SlotWidget extends WidgetWithBounds {
     
     public static final Identifier RECIPE_GUI = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     public static final Identifier RECIPE_GUI_DARK = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
-    protected int x, y;
+    private Rectangle bounds;
     private List<Renderer> renderers = new LinkedList<>();
     private boolean drawBackground, showToolTips, clickToMoreRecipes, drawHighlightedBackground;
     
@@ -49,8 +49,7 @@ public class SlotWidget extends WidgetWithBounds {
         this.renderers = renderers;
         this.drawBackground = drawBackground;
         this.showToolTips = showToolTips;
-        this.x = x;
-        this.y = y;
+        this.bounds = new Rectangle(x - 1, y - 1, 18, 18);
         this.clickToMoreRecipes = false;
         this.drawHighlightedBackground = true;
     }
@@ -60,20 +59,40 @@ public class SlotWidget extends WidgetWithBounds {
         this.clickToMoreRecipes = clickToMoreRecipes;
     }
     
+    /**
+     * @see WidgetWithBounds#getBounds()
+     */
+    @ToBeRemoved
+    @Deprecated
     public int getX() {
-        return x;
+        return bounds.x + 1;
     }
     
+    /**
+     * @see WidgetWithBounds#getBounds()
+     */
+    @ToBeRemoved
+    @Deprecated
     public void setX(int x) {
-        this.x = x;
+        bounds.x = x - 1;
     }
     
+    /**
+     * @see WidgetWithBounds#getBounds()
+     */
+    @ToBeRemoved
+    @Deprecated
     public int getY() {
-        return y;
+        return bounds.y + 1;
     }
     
+    /**
+     * @see WidgetWithBounds#getBounds()
+     */
+    @ToBeRemoved
+    @Deprecated
     public void setY(int y) {
-        this.y = y;
+        bounds.y = y - 1;
     }
     
     public boolean isShowToolTips() {
@@ -119,11 +138,11 @@ public class SlotWidget extends WidgetWithBounds {
         boolean darkTheme = ScreenHelper.isDarkModeEnabled();
         if (drawBackground) {
             minecraft.getTextureManager().bindTexture(darkTheme ? RECIPE_GUI_DARK : RECIPE_GUI);
-            blit(this.x - 1, this.y - 1, 0, 222, 18, 18);
+            blit(bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
         }
         boolean highlighted = containsMouse(mouseX, mouseY);
         renderer.setBlitOffset(200);
-        renderer.render(x + 8, y + 6, mouseX, mouseY, delta);
+        renderer.render(bounds.x + 9, bounds.y + 7, mouseX, mouseY, delta);
         if (highlighted && showToolTips) {
             QueuedTooltip queuedTooltip = renderer.getQueuedTooltip(delta);
             if (queuedTooltip != null) {
@@ -136,7 +155,7 @@ public class SlotWidget extends WidgetWithBounds {
             RenderHelper.colorMask(true, true, true, false);
             int color = darkTheme ? -1877929711 : -2130706433;
             blitOffset = 300;
-            fillGradient(x, y, x + 16, y + 16, color, color);
+            fillGradient(bounds.x + 1, bounds.y + 1, bounds.getMaxX() - 1, bounds.getMaxY() - 1, color, color);
             blitOffset = 0;
             RenderHelper.colorMask(true, true, true, true);
             RenderHelper.enableLighting();
@@ -144,19 +163,22 @@ public class SlotWidget extends WidgetWithBounds {
         }
     }
     
+    @ToBeRemoved
     @Deprecated
     public int getBlitOffset() {
-        return this.blitOffset;
+        return getZ();
     }
     
+    @ToBeRemoved
     @Deprecated
     public void setBlitOffset(int offset) {
-        this.blitOffset = offset;
+        setZ(offset);
     }
     
     /**
      * @deprecated Not used anymore, see {@link Renderer#getQueuedTooltip(float)}
      */
+    @ToBeRemoved
     @Deprecated
     protected void queueTooltip(Fluid fluid, float delta) {
         ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltip(fluid)));
@@ -165,6 +187,7 @@ public class SlotWidget extends WidgetWithBounds {
     /**
      * @deprecated Not used anymore, see {@link Renderer#getQueuedTooltip(float)}
      */
+    @ToBeRemoved
     @Deprecated
     private List<String> getTooltip(Fluid fluid) {
         List<String> toolTip = Lists.newArrayList(EntryListWidget.tryGetFluidName(fluid));
@@ -186,6 +209,7 @@ public class SlotWidget extends WidgetWithBounds {
     /**
      * @deprecated Not used anymore, see {@link Renderer#getQueuedTooltip(float)}
      */
+    @ToBeRemoved
     @Deprecated
     protected void queueTooltip(ItemStack itemStack, float delta) {
         ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltip(itemStack)));
@@ -194,6 +218,7 @@ public class SlotWidget extends WidgetWithBounds {
     /**
      * @deprecated Not used anymore, see {@link Renderer#getQueuedTooltip(float)}
      */
+    @ToBeRemoved
     @Deprecated
     protected List<String> getTooltip(ItemStack itemStack) {
         List<String> toolTip = Lists.newArrayList(EntryListWidget.tryGetItemStackToolTip(itemStack, true));
@@ -212,6 +237,7 @@ public class SlotWidget extends WidgetWithBounds {
     /**
      * @deprecated See {@link ItemStackRenderer#getExtraToolTips(ItemStack)}
      */
+    @ToBeRemoved
     @Deprecated
     protected List<String> getExtraItemToolTips(ItemStack stack) {
         return Collections.emptyList();
@@ -220,11 +246,14 @@ public class SlotWidget extends WidgetWithBounds {
     /**
      * @deprecated See {@link FluidRenderer#getExtraToolTips(Fluid)}
      */
+    @ToBeRemoved
     @Deprecated
     protected List<String> getExtraFluidToolTips(Fluid fluid) {
         return Collections.emptyList();
     }
     
+    @ToBeRemoved
+    @Deprecated
     public ItemStack getCurrentItemStack() {
         if (getCurrentRenderer() instanceof ItemStackRenderer)
             return ((ItemStackRenderer) getCurrentRenderer()).getItemStack();
@@ -241,6 +270,7 @@ public class SlotWidget extends WidgetWithBounds {
      * @param itemList the list of items
      * @deprecated Use {@link SlotWidget#setRenderers(List)}
      */
+    @ToBeRemoved
     @Deprecated
     public void setItemList(List<ItemStack> itemList) {
         this.setRenderers(itemList.stream().map(Renderer::fromItemStack).collect(Collectors.toList()));
@@ -252,25 +282,30 @@ public class SlotWidget extends WidgetWithBounds {
     
     @Override
     public Rectangle getBounds() {
-        return new Rectangle(this.x - 1, this.y - 1, 18, 18);
+        return bounds;
     }
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (!clickToMoreRecipes)
             return false;
-        if (isCurrentRendererItem() && getBounds().contains(mouseX, mouseY))
+        Optional<Entry> entry = getCurrentRenderer().getEntry();
+        if (entry.isPresent() && getBounds().contains(mouseX, mouseY))
             if (button == 0)
-                return ClientHelper.getInstance().executeRecipeKeyBind(getCurrentItemStack());
+                return ClientHelper.getInstance().executeRecipeKeyBind(entry.get());
             else if (button == 1)
-                return ClientHelper.getInstance().executeUsageKeyBind(getCurrentItemStack());
+                return ClientHelper.getInstance().executeUsageKeyBind(entry.get());
         return false;
     }
     
+    @ToBeRemoved
+    @Deprecated
     public boolean isCurrentRendererItem() {
         return getCurrentRenderer() instanceof ItemStackRenderer;
     }
     
+    @ToBeRemoved
+    @Deprecated
     public boolean isCurrentRendererFluid() {
         return getCurrentRenderer() instanceof FluidRenderer;
     }
@@ -279,11 +314,12 @@ public class SlotWidget extends WidgetWithBounds {
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (!clickToMoreRecipes)
             return false;
-        if (isCurrentRendererItem() && getBounds().contains(PointHelper.fromMouse()))
+        Optional<Entry> entry = getCurrentRenderer().getEntry();
+        if (entry.isPresent() && getBounds().contains(PointHelper.fromMouse()))
             if (ClientHelper.getInstance().getRecipeKeyBinding().matchesKey(int_1, int_2))
-                return ClientHelper.getInstance().executeRecipeKeyBind(getCurrentItemStack());
+                return ClientHelper.getInstance().executeRecipeKeyBind(entry.get());
             else if (ClientHelper.getInstance().getUsageKeyBinding().matchesKey(int_1, int_2))
-                return ClientHelper.getInstance().executeUsageKeyBind(getCurrentItemStack());
+                return ClientHelper.getInstance().executeUsageKeyBind(entry.get());
         return false;
     }
     

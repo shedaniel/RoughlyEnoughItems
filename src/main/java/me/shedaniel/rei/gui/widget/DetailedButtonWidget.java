@@ -6,8 +6,11 @@
 package me.shedaniel.rei.gui.widget;
 
 import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.rei.api.annotations.ToBeRemoved;
 import net.minecraft.text.Text;
 
+@ToBeRemoved
+@Deprecated
 public class DetailedButtonWidget extends ButtonWidget {
     
     private DetailedButtonWidget.PressAction pressAction;

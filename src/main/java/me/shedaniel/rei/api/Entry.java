@@ -12,7 +12,7 @@ import net.minecraft.item.ItemStack;
 
 import javax.annotation.Nullable;
 
-public interface Entry {
+public interface Entry extends Cloneable {
     @SuppressWarnings("deprecation")
     static Entry create(ItemStack itemStack) {
         return new ItemStackEntry(itemStack);
@@ -30,6 +30,10 @@ public interface Entry {
     
     @Nullable
     Fluid getFluid();
+    
+    Entry clone();
+    
+    boolean equalsEntry(Entry other, boolean checkTags);
     
     public static enum Type {
         ITEM, FLUID

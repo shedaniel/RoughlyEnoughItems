@@ -3,11 +3,10 @@
  * Licensed under the MIT License.
  */
 
-package me.shedaniel.rei.gui.widget;
+package me.shedaniel.rei.gui;
 
 import me.shedaniel.math.compat.RenderHelper;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.gui.ContainerScreenOverlay;
+import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GuiLighting;
@@ -16,14 +15,14 @@ import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.sound.SoundEvents;
 
-public class SearchFieldWidget extends TextFieldWidget {
+public class OverlaySearchField extends TextFieldWidget {
     
     public static boolean isSearching = false;
     public long keybindFocusTime = -1;
     public int keybindFocusKey = -1;
     protected long lastClickedTime = -1;
     
-    public SearchFieldWidget(int x, int y, int width, int height) {
+    OverlaySearchField(int x, int y, int width, int height) {
         super(x, y, width, height);
         setMaxLength(10000);
     }

@@ -20,7 +20,7 @@ public class SlotBaseWidget extends RecipeBaseWidget {
     }
     
     @Override
-    protected int getTextureOffset() {
+    protected int getYTextureOffset() {
         return -66;
     }
     
