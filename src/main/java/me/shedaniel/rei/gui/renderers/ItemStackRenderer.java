@@ -15,11 +15,9 @@ import me.shedaniel.rei.gui.widget.EntryListWidget;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MatrixStack;
 
 import javax.annotation.Nullable;
 import java.util.Collections;

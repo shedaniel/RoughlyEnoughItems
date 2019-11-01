@@ -28,11 +28,11 @@ import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.render.LayeredVertexConsumerStorage;
 import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.util.math.Matrix4f;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.container.Slot;
 import net.minecraft.item.ItemStack;
@@ -41,7 +41,6 @@ import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.MatrixStack;
 import net.minecraft.world.GameMode;
 import org.apache.logging.log4j.util.TriConsumer;
 
@@ -76,14 +75,14 @@ public class ContainerScreenOverlay extends Widget {
         this.fillGradient(x - 3, y + tooltipHeight + 2, x + tooltipWidth + 3, y + tooltipHeight + 3, 1344798847, 1344798847);
         int currentY = y;
         MatrixStack matrixStack_1 = new MatrixStack();
-        LayeredVertexConsumerStorage.class_4598 layeredVertexConsumerStorage$class_4598_1 = LayeredVertexConsumerStorage.method_22991(Tessellator.getInstance().getBufferBuilder());
+        LayeredVertexConsumerStorage.Drawer drawer = LayeredVertexConsumerStorage.makeDrawer(Tessellator.getInstance().getBufferBuilder());
         matrixStack_1.translate(0.0D, 0.0D, getBlitOffset());
         Matrix4f matrix4f_1 = matrixStack_1.peek();
         for (int lineIndex = 0; lineIndex < tooltipLines.size(); lineIndex++) {
-            font.method_22942(tooltipLines.get(lineIndex), (float) x, (float) currentY, -1, true, matrix4f_1, layeredVertexConsumerStorage$class_4598_1, false, 0, 15728880);
+            font.method_22942(tooltipLines.get(lineIndex), (float) x, (float) currentY, -1, true, matrix4f_1, drawer, false, 0, 15728880);
             currentY += lineIndex == 0 ? 12 : 10;
         }
-        layeredVertexConsumerStorage$class_4598_1.method_22993();
+        drawer.draw();
         setBlitOffset(0);
         RenderSystem.enableDepthTest();
         RenderSystem.enableRescaleNormal();
@@ -134,7 +133,7 @@ public class ContainerScreenOverlay extends Widget {
                 public boolean changeFocus(boolean boolean_1) {
                     return false;
                 }
-    
+                
                 @Override
                 public boolean containsMouse(double mouseX, double mouseY) {
                     return isNotInExclusionZones(mouseX, mouseY) && super.containsMouse(mouseX, mouseY);
@@ -158,7 +157,7 @@ public class ContainerScreenOverlay extends Widget {
                 public boolean changeFocus(boolean boolean_1) {
                     return false;
                 }
-    
+                
                 @Override
                 public boolean containsMouse(double mouseX, double mouseY) {
                     return isNotInExclusionZones(mouseX, mouseY) && super.containsMouse(mouseX, mouseY);
@@ -213,7 +212,7 @@ public class ContainerScreenOverlay extends Widget {
             public boolean changeFocus(boolean boolean_1) {
                 return false;
             }
-    
+            
             @Override
             public boolean containsMouse(double mouseX, double mouseY) {
                 return isNotInExclusionZones(mouseX, mouseY) && super.containsMouse(mouseX, mouseY);
@@ -241,7 +240,7 @@ public class ContainerScreenOverlay extends Widget {
                 public boolean changeFocus(boolean boolean_1) {
                     return false;
                 }
-    
+                
                 @Override
                 public boolean containsMouse(double mouseX, double mouseY) {
                     return isNotInExclusionZones(mouseX, mouseY) && super.containsMouse(mouseX, mouseY);
@@ -332,7 +331,7 @@ public class ContainerScreenOverlay extends Widget {
                     setBlitOffset(300);
                     super.lateRender(mouseX, mouseY, delta);
                 }
-    
+                
                 @Override
                 public boolean containsMouse(double mouseX, double mouseY) {
                     return isNotInExclusionZones(mouseX, mouseY) && super.containsMouse(mouseX, mouseY);
