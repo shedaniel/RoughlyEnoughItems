@@ -152,19 +152,21 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     }
     
     @Override
-    public boolean tryCheatingEntry(Entry entry) {
-        if (entry.getEntryType() == Entry.Type.FLUID)
+    public boolean tryCheatingEntry(EntryStack entry) {
+        if (entry.getType() != EntryStack.Type.ITEM)
             return false;
         ItemStack cheatedStack = entry.getItemStack().copy();
         if (RoughlyEnoughItemsCore.canUsePackets()) {
             try {
-                ClientSidePacketRegistry.INSTANCE.sendToServer(RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET, new PacketByteBuf(Unpooled.buffer()).writeItemStack(cheatedStack.copy()));
+                ClientSidePacketRegistry.INSTANCE.sendToServer(RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET, new PacketByteBuf(Unpooled.buffer()).writeItemStack(cheatedStack));
                 return true;
             } catch (Exception e) {
                 return false;
             }
         } else {
-            Identifier identifier = Registry.ITEM.getId(cheatedStack.getItem());
+            Identifier identifier = entry.getIdentifier().orElse(null);
+            if (identifier == null)
+                return false;
             String tagMessage = cheatedStack.copy().getTag() != null && !cheatedStack.copy().getTag().isEmpty() ? cheatedStack.copy().getTag().asString() : "";
             String og = cheatedStack.getCount() == 1 ? RoughlyEnoughItemsCore.getConfigManager().getConfig().getGiveCommand().replaceAll(" \\{count}", "") : RoughlyEnoughItemsCore.getConfigManager().getConfig().getGiveCommand();
             String madeUpCommand = og.replaceAll("\\{player_name}", MinecraftClient.getInstance().player.getEntityName()).replaceAll("\\{item_name}", identifier.getPath()).replaceAll("\\{item_identifier}", identifier.toString()).replaceAll("\\{nbt}", tagMessage).replaceAll("\\{count}", String.valueOf(cheatedStack.getCount()));
@@ -178,16 +180,16 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     }
     
     @Override
-    public boolean executeRecipeKeyBind(Entry entry) {
-        Map<RecipeCategory<?>, List<RecipeDisplay>> map = RecipeHelper.getInstance().getRecipesFor(entry);
+    public boolean executeRecipeKeyBind(EntryStack stack) {
+        Map<RecipeCategory<?>, List<RecipeDisplay>> map = RecipeHelper.getInstance().getRecipesFor(stack);
         if (map.keySet().size() > 0)
             openRecipeViewingScreen(map);
         return map.keySet().size() > 0;
     }
     
     @Override
-    public boolean executeUsageKeyBind(Entry entry) {
-        Map<RecipeCategory<?>, List<RecipeDisplay>> map = RecipeHelper.getInstance().getUsagesFor(entry);
+    public boolean executeUsageKeyBind(EntryStack stack) {
+        Map<RecipeCategory<?>, List<RecipeDisplay>> map = RecipeHelper.getInstance().getUsagesFor(stack);
         if (map.keySet().size() > 0)
             openRecipeViewingScreen(map);
         return map.keySet().size() > 0;

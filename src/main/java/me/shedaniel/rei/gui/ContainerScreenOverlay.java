@@ -11,10 +11,7 @@ import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.compat.RenderHelper;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.DisplayHelper;
-import me.shedaniel.rei.api.Entry;
-import me.shedaniel.rei.api.RecipeHelper;
+import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.gui.widget.*;
 import me.shedaniel.rei.impl.RecipeHelperImpl;
@@ -409,7 +406,7 @@ public class ContainerScreenOverlay extends Widget {
                 ContainerScreenHooks hooks = (ContainerScreenHooks) MinecraftClient.getInstance().currentScreen;
                 int left = hooks.rei_getContainerLeft(), top = hooks.rei_getContainerTop();
                 for (Slot slot : ((AbstractContainerScreen<?>) MinecraftClient.getInstance().currentScreen).getContainer().slotList)
-                    if (!slot.hasStack() || !entryListWidget.filterEntry(Entry.create(slot.getStack()), entryListWidget.getLastSearchArgument()))
+                    if (!slot.hasStack() || !entryListWidget.filterEntry(EntryStack.create(slot.getStack()), entryListWidget.getLastSearchArgument()))
                         fillGradient(left + slot.xPosition, top + slot.yPosition, left + slot.xPosition + 16, top + slot.yPosition + 16, -601874400, -601874400);
             }
             blitOffset = 0;

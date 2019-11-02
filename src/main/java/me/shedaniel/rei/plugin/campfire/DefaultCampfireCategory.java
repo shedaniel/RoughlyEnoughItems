@@ -8,12 +8,10 @@ package me.shedaniel.rei.plugin.campfire;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.compat.RenderHelper;
+import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.Renderer;
-import me.shedaniel.rei.gui.widget.RecipeArrowWidget;
-import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
-import me.shedaniel.rei.gui.widget.SlotWidget;
-import me.shedaniel.rei.gui.widget.Widget;
+import me.shedaniel.rei.gui.widget.*;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.block.Blocks;
@@ -21,6 +19,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
@@ -37,8 +36,8 @@ public class DefaultCampfireCategory implements RecipeCategory<DefaultCampfireDi
     }
     
     @Override
-    public Renderer getIcon() {
-        return Renderer.fromItemStack(new ItemStack(Blocks.CAMPFIRE));
+    public EntryStack getLogo() {
+        return EntryStack.create(Items.CAMPFIRE);
     }
     
     @Override
@@ -65,8 +64,8 @@ public class DefaultCampfireCategory implements RecipeCategory<DefaultCampfireDi
             }
         }));
         widgets.add(new RecipeArrowWidget(startPoint.x + 24, startPoint.y + 18, true));
-        widgets.add(new SlotWidget(startPoint.x + 1, startPoint.y + 11, Renderer.fromItemStacks(recipeDisplaySupplier.get().getInput().get(0)), true, true, true));
-        widgets.add(new SlotWidget(startPoint.x + 61, startPoint.y + 19, Renderer.fromItemStacks(recipeDisplaySupplier.get().getOutput()), false, true, true));
+        widgets.add(EntryWidget.create(startPoint.x + 1, startPoint.y + 11).entries(recipeDisplaySupplier.get().getInputEntries().get(0)));
+        widgets.add(EntryWidget.create(startPoint.x + 61, startPoint.y + 19).entries(recipeDisplaySupplier.get().getOutputEntries()).noBackground());
         return widgets;
     }
     

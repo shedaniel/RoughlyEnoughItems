@@ -10,8 +10,10 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.compat.RenderHelper;
+import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.api.TransferRecipeCategory;
+import me.shedaniel.rei.gui.widget.EntryWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.SlotWidget;
 import me.shedaniel.rei.gui.widget.Widget;
@@ -71,20 +73,20 @@ public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCr
                 blit(startPoint.x, startPoint.y, 0, 0, 116, 54);
             }
         }));
-        List<List<ItemStack>> input = recipeDisplaySupplier.get().getInput();
-        List<SlotWidget> slots = Lists.newArrayList();
+        List<List<EntryStack>> input = recipeDisplaySupplier.get().getInputEntries();
+        List<EntryWidget> slots = Lists.newArrayList();
         for (int y = 0; y < 3; y++)
             for (int x = 0; x < 3; x++)
-                slots.add(new SlotWidget(startPoint.x + 1 + x * 18, startPoint.y + 1 + y * 18, Lists.newArrayList(), true, true, true));
+                slots.add(EntryWidget.create(startPoint.x + 1 + x * 18, startPoint.y + 1 + y * 18));
         for (int i = 0; i < input.size(); i++) {
             if (recipeDisplaySupplier.get() instanceof DefaultShapedDisplay) {
                 if (!input.get(i).isEmpty())
-                    slots.get(getSlotWithSize(recipeDisplaySupplier.get(), i, 3)).setRenderers(Collections.singletonList(Renderer.fromItemStacks(input.get(i))));
+                    slots.get(getSlotWithSize(recipeDisplaySupplier.get(), i, 3)).entries(input.get(i));
             } else if (!input.get(i).isEmpty())
-                slots.get(i).setRenderers(Collections.singletonList(Renderer.fromItemStacks(input.get(i))));
+                slots.get(i).entries(input.get(i));
         }
         widgets.addAll(slots);
-        widgets.add(new SlotWidget(startPoint.x + 95, startPoint.y + 19, Renderer.fromItemStacks(recipeDisplaySupplier.get().getOutput()), false, true, true));
+        widgets.add(EntryWidget.create(startPoint.x + 95, startPoint.y + 19).entries(recipeDisplaySupplier.get().getOutputEntries()).noBackground());
         return widgets;
     }
     
