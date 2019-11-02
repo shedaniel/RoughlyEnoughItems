@@ -93,9 +93,6 @@ publishing {
             artifact(sourcesJar) {
                 builtBy remapSourcesJar
             }
-            artifact(file("${project.buildDir}/libs/$archivesBaseName-${version}-maven.jar")) {
-                builtBy remapMavenJar
-            }
         }
     }
 
