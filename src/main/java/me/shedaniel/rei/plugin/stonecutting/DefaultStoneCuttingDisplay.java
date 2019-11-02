@@ -5,6 +5,7 @@
 
 package me.shedaniel.rei.plugin.stonecutting;
 
+import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.item.ItemStack;
@@ -14,7 +15,7 @@ import net.minecraft.recipe.StonecuttingRecipe;
 import net.minecraft.util.DefaultedList;
 import net.minecraft.util.Identifier;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -22,8 +23,8 @@ import java.util.stream.Collectors;
 
 public class DefaultStoneCuttingDisplay implements RecipeDisplay {
     
-    private List<List<ItemStack>> inputs;
-    private List<ItemStack> output;
+    private List<List<EntryStack>> inputs;
+    private List<EntryStack> output;
     private StonecuttingRecipe display;
     
     public DefaultStoneCuttingDisplay(StonecuttingRecipe recipe) {
@@ -32,8 +33,14 @@ public class DefaultStoneCuttingDisplay implements RecipeDisplay {
     }
     
     public DefaultStoneCuttingDisplay(DefaultedList<Ingredient> ingredients, ItemStack output) {
-        this.inputs = ingredients.stream().map(i -> Arrays.asList(i.getStackArray())).collect(Collectors.toList());
-        this.output = Collections.singletonList(output);
+        this.inputs = ingredients.stream().map(i -> {
+            List<EntryStack> entries = new ArrayList<>();
+            for (ItemStack stack : i.getStackArray()) {
+                entries.add(EntryStack.create(stack));
+            }
+            return entries;
+        }).collect(Collectors.toList());
+        this.output = Collections.singletonList(EntryStack.create(output));
     }
     
     @Override
@@ -42,13 +49,13 @@ public class DefaultStoneCuttingDisplay implements RecipeDisplay {
     }
     
     @Override
-    public List<List<ItemStack>> getInput() {
+    public List<List<EntryStack>> getInputEntries() {
         return inputs;
     }
     
     @Override
-    public List<ItemStack> getOutput() {
-        return this.output;
+    public List<EntryStack> getOutputEntries() {
+        return output;
     }
     
     @Override
@@ -57,8 +64,7 @@ public class DefaultStoneCuttingDisplay implements RecipeDisplay {
     }
     
     @Override
-    public List<List<ItemStack>> getRequiredItems() {
-        return getInput();
+    public List<List<EntryStack>> getRequiredEntries() {
+        return getInputEntries();
     }
-    
 }

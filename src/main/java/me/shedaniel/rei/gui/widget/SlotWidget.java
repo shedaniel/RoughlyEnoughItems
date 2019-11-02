@@ -11,7 +11,7 @@ import me.shedaniel.math.compat.RenderHelper;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.Entry;
+import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.api.annotations.ToBeRemoved;
 import me.shedaniel.rei.gui.renderers.FluidRenderer;
@@ -25,7 +25,10 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("deprecation")
@@ -289,12 +292,12 @@ public class SlotWidget extends WidgetWithBounds {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (!clickToMoreRecipes)
             return false;
-        Optional<Entry> entry = getCurrentRenderer().getEntry();
-        if (entry.isPresent() && getBounds().contains(mouseX, mouseY))
+        EntryStack entry = getCurrentRenderer().getEntry();
+        if (getBounds().contains(mouseX, mouseY))
             if (button == 0)
-                return ClientHelper.getInstance().executeRecipeKeyBind(entry.get());
+                return ClientHelper.getInstance().executeRecipeKeyBind(entry);
             else if (button == 1)
-                return ClientHelper.getInstance().executeUsageKeyBind(entry.get());
+                return ClientHelper.getInstance().executeUsageKeyBind(entry);
         return false;
     }
     
@@ -314,12 +317,12 @@ public class SlotWidget extends WidgetWithBounds {
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (!clickToMoreRecipes)
             return false;
-        Optional<Entry> entry = getCurrentRenderer().getEntry();
-        if (entry.isPresent() && getBounds().contains(PointHelper.fromMouse()))
+        EntryStack entry = getCurrentRenderer().getEntry();
+        if (getBounds().contains(PointHelper.fromMouse()))
             if (ClientHelper.getInstance().getRecipeKeyBinding().matchesKey(int_1, int_2))
-                return ClientHelper.getInstance().executeRecipeKeyBind(entry.get());
+                return ClientHelper.getInstance().executeRecipeKeyBind(entry);
             else if (ClientHelper.getInstance().getUsageKeyBinding().matchesKey(int_1, int_2))
-                return ClientHelper.getInstance().executeUsageKeyBind(entry.get());
+                return ClientHelper.getInstance().executeUsageKeyBind(entry);
         return false;
     }
     

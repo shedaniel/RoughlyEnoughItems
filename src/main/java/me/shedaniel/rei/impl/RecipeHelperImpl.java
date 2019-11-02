@@ -55,21 +55,22 @@ public class RecipeHelperImpl implements RecipeHelper {
     private RecipeManager recipeManager;
     
     @Override
-    public List<ItemStack> findCraftableByItems(List<ItemStack> inventoryItems) {
-        List<ItemStack> craftables = new ArrayList<>();
+    public List<EntryStack> findCraftableEntriesByItems(List<ItemStack> inventoryItems) {
+        List<EntryStack> craftables = new ArrayList<>();
         for (List<RecipeDisplay> value : recipeCategoryListMap.values())
             for (RecipeDisplay recipeDisplay : value) {
                 int slotsCraftable = 0;
-                List<List<ItemStack>> requiredInput = (List<List<ItemStack>>) recipeDisplay.getRequiredItems();
-                for (List<ItemStack> slot : requiredInput) {
+                List<List<EntryStack>> requiredInput = (List<List<EntryStack>>) recipeDisplay.getRequiredEntries();
+                for (List<EntryStack> slot : requiredInput) {
                     if (slot.isEmpty()) {
                         slotsCraftable++;
                         continue;
                     }
                     boolean slotDone = false;
                     for (ItemStack possibleType : inventoryItems) {
-                        for (ItemStack slotPossible : slot)
-                            if (ItemStack.areItemsEqualIgnoreDamage(slotPossible, possibleType)) {
+                        EntryStack possibleEntryStack = EntryStack.create(possibleType);
+                        for (EntryStack slotPossible : slot)
+                            if (possibleEntryStack.equals(slotPossible)) {
                                 slotsCraftable++;
                                 slotDone = true;
                                 break;
@@ -78,8 +79,8 @@ public class RecipeHelperImpl implements RecipeHelper {
                             break;
                     }
                 }
-                if (slotsCraftable == recipeDisplay.getRequiredItems().size())
-                    craftables.addAll((List<ItemStack>) recipeDisplay.getOutput());
+                if (slotsCraftable == recipeDisplay.getRequiredEntries().size())
+                    craftables.addAll((List<EntryStack>) recipeDisplay.getOutputEntries());
             }
         return craftables.stream().distinct().collect(Collectors.toList());
     }
@@ -122,21 +123,20 @@ public class RecipeHelperImpl implements RecipeHelper {
     }
     
     @Override
-    public Map<RecipeCategory<?>, List<RecipeDisplay>> getRecipesFor(Entry e) {
+    public Map<RecipeCategory<?>, List<RecipeDisplay>> getRecipesFor(EntryStack stack) {
         Map<Identifier, List<RecipeDisplay>> categoriesMap = new HashMap<>();
         categories.forEach(f -> categoriesMap.put(f.getIdentifier(), Lists.newArrayList()));
         for (Map.Entry<Identifier, List<RecipeDisplay>> entry : recipeCategoryListMap.entrySet()) {
             RecipeCategory category = getCategory(entry.getKey());
-            boolean checkTags = category.checkTags();
             for (RecipeDisplay recipeDisplay : entry.getValue())
-                for (Entry outputStack : recipeDisplay.getOutputEntry())
-                    if (e.equalsEntry(outputStack, checkTags))
+                for (EntryStack outputStack : recipeDisplay.getOutputEntries())
+                    if (stack.equals(outputStack))
                         categoriesMap.get(recipeDisplay.getRecipeCategory()).add(recipeDisplay);
         }
         for (LiveRecipeGenerator<?> liveRecipeGenerator : liveRecipeGenerators) {
-            liveRecipeGenerator.getRecipeFor(e).ifPresent(o -> categoriesMap.get(liveRecipeGenerator.getCategoryIdentifier()).addAll((List<RecipeDisplay>) o));
-            if (e.getEntryType() == Entry.Type.ITEM)
-                liveRecipeGenerator.getRecipeFor(e.getItemStack()).ifPresent(o -> categoriesMap.get(liveRecipeGenerator.getCategoryIdentifier()).addAll((List<RecipeDisplay>) o));
+            liveRecipeGenerator.getRecipeFor(stack).ifPresent(o -> categoriesMap.get(liveRecipeGenerator.getCategoryIdentifier()).addAll((List<RecipeDisplay>) o));
+            if (stack.getType() == EntryStack.Type.ITEM)
+                liveRecipeGenerator.getRecipeFor(stack.getItemStack()).ifPresent(o -> categoriesMap.get(liveRecipeGenerator.getCategoryIdentifier()).addAll((List<RecipeDisplay>) o));
         }
         Map<RecipeCategory<?>, List<RecipeDisplay>> recipeCategoryListMap = Maps.newLinkedHashMap();
         categories.forEach(category -> {
@@ -160,17 +160,16 @@ public class RecipeHelperImpl implements RecipeHelper {
     }
     
     @Override
-    public Map<RecipeCategory<?>, List<RecipeDisplay>> getUsagesFor(Entry e) {
+    public Map<RecipeCategory<?>, List<RecipeDisplay>> getUsagesFor(EntryStack stack) {
         Map<Identifier, List<RecipeDisplay>> categoriesMap = new HashMap<>();
         categories.forEach(f -> categoriesMap.put(f.getIdentifier(), Lists.newArrayList()));
         for (Map.Entry<Identifier, List<RecipeDisplay>> entry : recipeCategoryListMap.entrySet()) {
             RecipeCategory category = getCategory(entry.getKey());
-            boolean checkTags = category.checkTags();
             for (RecipeDisplay recipeDisplay : entry.getValue()) {
                 boolean found = false;
-                for (List<Entry> input : recipeDisplay.getInputEntries()) {
-                    for (Entry otherEntry : input) {
-                        if (otherEntry.equalsEntry(e, checkTags)) {
+                for (List<EntryStack> input : recipeDisplay.getInputEntries()) {
+                    for (EntryStack otherEntry : input) {
+                        if (otherEntry.equals(stack)) {
                             categoriesMap.get(recipeDisplay.getRecipeCategory()).add(recipeDisplay);
                             found = true;
                             break;
@@ -182,9 +181,9 @@ public class RecipeHelperImpl implements RecipeHelper {
             }
         }
         for (LiveRecipeGenerator<?> liveRecipeGenerator : liveRecipeGenerators) {
-            liveRecipeGenerator.getUsageFor(e).ifPresent(o -> categoriesMap.get(liveRecipeGenerator.getCategoryIdentifier()).addAll((List<RecipeDisplay>) o));
-            if (e.getEntryType() == Entry.Type.ITEM)
-                liveRecipeGenerator.getUsageFor(e.getItemStack()).ifPresent(o -> categoriesMap.get(liveRecipeGenerator.getCategoryIdentifier()).addAll((List<RecipeDisplay>) o));
+            liveRecipeGenerator.getUsageFor(stack).ifPresent(o -> categoriesMap.get(liveRecipeGenerator.getCategoryIdentifier()).addAll((List<RecipeDisplay>) o));
+            if (stack.getType() == EntryStack.Type.ITEM)
+                liveRecipeGenerator.getUsageFor(stack.getItemStack()).ifPresent(o -> categoriesMap.get(liveRecipeGenerator.getCategoryIdentifier()).addAll((List<RecipeDisplay>) o));
         }
         Map<RecipeCategory<?>, List<RecipeDisplay>> recipeCategoryListMap = Maps.newLinkedHashMap();
         categories.forEach(category -> {
@@ -262,11 +261,11 @@ public class RecipeHelperImpl implements RecipeHelper {
                         if (((REIPluginV0) plugin).getMinimumVersion().compareTo((SemanticVersion) reiVersion) > 0) {
                             throw new IllegalStateException("Requires " + ((REIPluginV0) plugin).getMinimumVersion().getFriendlyString() + " version of REI!");
                         }
+                    ((REIPluginV0) plugin).registerBounds(RoughlyEnoughItemsCore.getDisplayHelper());
+                    ((REIPluginV0) plugin).registerEntries(RoughlyEnoughItemsCore.getEntryRegistry());
                     ((REIPluginV0) plugin).registerPluginCategories(this);
                     ((REIPluginV0) plugin).registerRecipeDisplays(this);
-                    ((REIPluginV0) plugin).registerBounds(RoughlyEnoughItemsCore.getDisplayHelper());
                     ((REIPluginV0) plugin).registerOthers(this);
-                    ((REIPluginV0) plugin).registerEntries(RoughlyEnoughItemsCore.getEntryRegistry());
                 } else {
                     throw new IllegalStateException("Invaild Plugin Class!");
                 }

@@ -185,7 +185,7 @@ public class VillagerRecipeViewingScreen extends Screen {
                         return false;
                     }
                 });
-                tab.setRenderer(categories.get(j), categories.get(j).getIcon(), categories.get(j).getCategoryName(), tab.getId() + tabsPage * TABS_PER_PAGE == selectedCategoryIndex);
+                tab.setRenderer(categories.get(j), categories.get(j).getLogo(), categories.get(j).getCategoryName(), tab.getId() + tabsPage * TABS_PER_PAGE == selectedCategoryIndex);
             }
         }
         ButtonWidget w, w2;

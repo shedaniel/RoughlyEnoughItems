@@ -5,9 +5,9 @@
 
 package me.shedaniel.rei.plugin.composting;
 
+import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
@@ -17,17 +17,17 @@ import java.util.stream.Collectors;
 
 public class DefaultCompostingDisplay implements RecipeDisplay {
     
-    private List<ItemConvertible> order, allItems;
+    private List<EntryStack> order, allItems;
     private Map<ItemConvertible, Float> inputMap;
-    private ItemStack[] output;
+    private List<EntryStack> output;
     private int page;
     
     public DefaultCompostingDisplay(int page, List<ItemConvertible> order, Map<ItemConvertible, Float> inputMap, List<ItemConvertible> allItems, ItemStack[] output) {
         this.page = page;
-        this.order = order;
+        this.order = order.stream().map(EntryStack::create).collect(Collectors.toList());
         this.inputMap = inputMap;
-        this.output = output;
-        this.allItems = allItems;
+        this.output = Arrays.asList(output).stream().map(EntryStack::create).collect(Collectors.toList());
+        this.allItems = allItems.stream().map(EntryStack::create).collect(Collectors.toList());
     }
     
     public int getPage() {
@@ -35,11 +35,11 @@ public class DefaultCompostingDisplay implements RecipeDisplay {
     }
     
     @Override
-    public List<List<ItemStack>> getInput() {
-        List<List<ItemStack>> lists = new ArrayList<>();
-        allItems.stream().forEachOrdered(itemProvider -> {
-            lists.add(Arrays.asList(itemProvider.asItem().getStackForRender()));
-        });
+    public List<List<EntryStack>> getInputEntries() {
+        List<List<EntryStack>> lists = new ArrayList<>();
+        for (EntryStack allItem : allItems) {
+            lists.add(Collections.singletonList(allItem));
+        }
         return lists;
     }
     
@@ -48,8 +48,8 @@ public class DefaultCompostingDisplay implements RecipeDisplay {
     }
     
     @Override
-    public List<ItemStack> getOutput() {
-        return Arrays.asList(output);
+    public List<EntryStack> getOutputEntries() {
+        return output;
     }
     
     @Override
@@ -58,11 +58,11 @@ public class DefaultCompostingDisplay implements RecipeDisplay {
     }
     
     @Override
-    public List<List<ItemStack>> getRequiredItems() {
-        return Arrays.asList(new LinkedList<>(allItems.stream().map(ItemConvertible::asItem).map(Item::getStackForRender).collect(Collectors.toList())));
+    public List<List<EntryStack>> getRequiredEntries() {
+        return Collections.singletonList(allItems);
     }
     
-    public List<ItemConvertible> getItemsByOrder() {
+    public List<EntryStack> getItemsByOrder() {
         return order;
     }
     

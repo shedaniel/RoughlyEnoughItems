@@ -5,7 +5,6 @@
 
 package me.shedaniel.rei.api;
 
-import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.annotations.ToBeRemoved;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
@@ -19,7 +18,7 @@ public interface RecipeDisplay {
     
     /**
      * @return a list of items
-     * @see RecipeDisplay#getInputEntries()
+     * @see RecipeDisplay#getInputStacks()
      */
     @ToBeRemoved
     @Deprecated
@@ -30,15 +29,15 @@ public interface RecipeDisplay {
     /**
      * @return a list of inputs
      */
-    default List<List<Entry>> getInputEntries() {
+    default List<List<EntryStack>> getInputEntries() {
         List<List<ItemStack>> input = getInput();
         if (input.isEmpty())
             return Collections.emptyList();
-        List<List<Entry>> list = new ArrayList<>();
+        List<List<EntryStack>> list = new ArrayList<>();
         for (List<ItemStack> stacks : input) {
-            List<Entry> entries = new ArrayList<>();
+            List<EntryStack> entries = new ArrayList<>();
             for (ItemStack stack : stacks) {
-                entries.add(Entry.create(stack));
+                entries.add(EntryStack.create(stack));
             }
             list.add(entries);
         }
@@ -57,13 +56,13 @@ public interface RecipeDisplay {
     /**
      * @return a list of outputs
      */
-    default List<Entry> getOutputEntry() {
+    default List<EntryStack> getOutputEntries() {
         List<ItemStack> input = getOutput();
         if (input.isEmpty())
             return Collections.emptyList();
-        List<Entry> entries = new ArrayList<>();
+        List<EntryStack> entries = new ArrayList<>();
         for (ItemStack stack : input) {
-            entries.add(Entry.create(stack));
+            entries.add(EntryStack.create(stack));
         }
         return entries;
     }
@@ -73,8 +72,25 @@ public interface RecipeDisplay {
      *
      * @return the list of required items
      */
+    default List<List<EntryStack>> getRequiredEntries() {
+        List<List<ItemStack>> input = getRequiredItems();
+        if (input.isEmpty())
+            return Collections.emptyList();
+        List<List<EntryStack>> list = new ArrayList<>();
+        for (List<ItemStack> stacks : input) {
+            List<EntryStack> entries = new ArrayList<>();
+            for (ItemStack stack : stacks) {
+                entries.add(EntryStack.create(stack));
+            }
+            list.add(entries);
+        }
+        return list;
+    }
+    
+    @ToBeRemoved
+    @Deprecated
     default List<List<ItemStack>> getRequiredItems() {
-        return Lists.newArrayList();
+        return Collections.emptyList();
     }
     
     /**

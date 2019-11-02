@@ -5,12 +5,14 @@
 
 package me.shedaniel.rei.plugin.crafting;
 
+import me.shedaniel.rei.api.EntryStack;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.PotionItem;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.ShapelessRecipe;
 import net.minecraft.util.Identifier;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -19,13 +21,23 @@ import java.util.stream.Collectors;
 public class DefaultShapelessDisplay implements DefaultCraftingDisplay {
     
     private ShapelessRecipe display;
-    private List<List<ItemStack>> input;
-    private List<ItemStack> output;
+    private List<List<EntryStack>> input;
+    private List<EntryStack> output;
     
     public DefaultShapelessDisplay(ShapelessRecipe recipe) {
         this.display = recipe;
-        this.input = recipe.getPreviewInputs().stream().map(i -> Arrays.asList(i.getStackArray())).collect(Collectors.toList());
-        this.output = Collections.singletonList(recipe.getOutput());
+        this.input = recipe.getPreviewInputs().stream().map(i -> {
+            List<EntryStack> entries = new ArrayList<>();
+            for (ItemStack stack : i.getStackArray()) {
+                if (stack.getItem() instanceof PotionItem)
+                    entries.add(EntryStack.create(stack).setting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE));
+                else entries.add(EntryStack.create(stack));
+            }
+            return entries;
+        }).collect(Collectors.toList());
+        if (recipe.getOutput().getItem() instanceof PotionItem)
+            this.output = Collections.singletonList(EntryStack.create(recipe.getOutput()).setting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE));
+        else this.output = Collections.singletonList(EntryStack.create(recipe.getOutput()));
     }
     
     @Override
@@ -39,17 +51,17 @@ public class DefaultShapelessDisplay implements DefaultCraftingDisplay {
     }
     
     @Override
-    public List<List<ItemStack>> getInput() {
+    public List<List<EntryStack>> getInputEntries() {
         return input;
     }
     
     @Override
-    public List<ItemStack> getOutput() {
+    public List<EntryStack> getOutputEntries() {
         return output;
     }
     
     @Override
-    public List<List<ItemStack>> getRequiredItems() {
+    public List<List<EntryStack>> getRequiredEntries() {
         return input;
     }
     

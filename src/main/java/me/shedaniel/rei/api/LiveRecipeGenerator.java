@@ -20,7 +20,7 @@ public interface LiveRecipeGenerator<T extends RecipeDisplay> {
         return Optional.empty();
     }
     
-    default Optional<List<T>> getRecipeFor(Entry entry) {
+    default Optional<List<T>> getRecipeFor(EntryStack entry) {
         return Optional.empty();
     }
     
@@ -29,7 +29,7 @@ public interface LiveRecipeGenerator<T extends RecipeDisplay> {
         return Optional.empty();
     }
     
-    default Optional<List<T>> getUsageFor(Entry entry) {
+    default Optional<List<T>> getUsageFor(EntryStack entry) {
         return Optional.empty();
     }
     

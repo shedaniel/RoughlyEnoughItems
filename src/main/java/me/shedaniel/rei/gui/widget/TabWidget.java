@@ -8,8 +8,8 @@ package me.shedaniel.rei.gui.widget;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.compat.RenderHelper;
 import me.shedaniel.rei.api.ClientHelper;
+import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeCategory;
-import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.util.Formatting;
@@ -24,7 +24,7 @@ public class TabWidget extends WidgetWithBounds {
     public static final Identifier CHEST_GUI_TEXTURE_DARK = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
     
     public boolean shown = false, selected = false;
-    public Renderer renderer;
+    public EntryStack logo;
     public int id;
     public String categoryName;
     public Rectangle bounds;
@@ -35,13 +35,13 @@ public class TabWidget extends WidgetWithBounds {
         this.bounds = bounds;
     }
     
-    public void setRenderer(RecipeCategory category, Renderer renderable, String categoryName, boolean selected) {
-        if (renderable == null) {
+    public void setRenderer(RecipeCategory category, EntryStack logo, String categoryName, boolean selected) {
+        if (logo == null) {
             shown = false;
-            this.renderer = null;
+            this.logo = null;
         } else {
             shown = true;
-            this.renderer = renderable;
+            this.logo = logo;
         }
         this.category = category;
         this.selected = selected;
@@ -60,10 +60,6 @@ public class TabWidget extends WidgetWithBounds {
         return shown;
     }
     
-    public Renderer getRenderer() {
-        return renderer;
-    }
-    
     @Override
     public List<Widget> children() {
         return Collections.emptyList();
@@ -76,8 +72,8 @@ public class TabWidget extends WidgetWithBounds {
             GuiLighting.disable();
             minecraft.getTextureManager().bindTexture(ScreenHelper.isDarkModeEnabled() ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
             this.blit(bounds.x, bounds.y + 2, selected ? 28 : 0, 192, 28, (selected ? 30 : 27));
-            renderer.setBlitOffset(100);
-            renderer.render(bounds.getCenterX(), bounds.getCenterY(), mouseX, mouseY, delta);
+            logo.setZ(100);
+            logo.render(new Rectangle(bounds.getCenterX() - 8, bounds.getCenterY() - 6, 16, 16), mouseX, mouseY, delta);
             if (containsMouse(mouseX, mouseY)) {
                 drawTooltip();
             }

@@ -6,11 +6,14 @@
 package me.shedaniel.rei.impl;
 
 import me.shedaniel.rei.api.Entry;
+import me.shedaniel.rei.api.annotations.ToBeRemoved;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.ItemStack;
 
 import javax.annotation.Nullable;
 
+@ToBeRemoved
+@Deprecated
 public class FluidEntry implements Entry {
     private Fluid fluid;
     
