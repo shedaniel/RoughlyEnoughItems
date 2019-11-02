@@ -76,10 +76,10 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 }
 
 task remapMavenJar(type: net.fabricmc.loom.task.RemapJarTask, dependsOn: jar) {
+    classifier = "maven"
     afterEvaluate {
         input = file("${project.buildDir}/libs/${archivesBaseName}-${version}-dev.jar")
 //        archiveName = "${archivesBaseName}-${version}-maven.jar"
-        classifier = "maven"
         addNestedDependencies = false
     }
 }
