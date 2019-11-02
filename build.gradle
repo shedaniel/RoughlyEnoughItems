@@ -75,6 +75,14 @@ task sourcesJar(type: Jar, dependsOn: classes) {
     from sourceSets.main.allSource
 }
 
+task remapMavenJar(type: net.fabricmc.loom.task.RemapJarTask, dependsOn: jar) {
+    afterEvaluate {
+        input = file("${project.buildDir}/libs/${archivesBaseName}-${version}-dev.jar")
+        archiveName = "${archivesBaseName}-${version}-maven.jar"
+        addNestedDependencies = false
+    }
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -83,6 +91,9 @@ publishing {
             }
             artifact(sourcesJar) {
                 builtBy remapSourcesJar
+            }
+            artifact(file("${project.buildDir}/libs/$archivesBaseName-${version}-maven.jar")) {
+                builtBy remapMavenJar
             }
         }
     }
