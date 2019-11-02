@@ -6,8 +6,10 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.clothconfig2.api.RunSixtyTimesEverySec;
+import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
+import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget.Interpolation;
+import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget.Precision;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.compat.RenderHelper;
 import me.shedaniel.math.impl.PointHelper;
@@ -52,37 +54,10 @@ public class EntryListWidget extends Widget {
     private static final Comparator<Entry> ASCENDING_COMPARATOR;
     private static List<Item> searchBlacklisted = Lists.newArrayList();
     private static float scroll;
-    private static float scrollVelocity;
+    private static float target;
+    private static long start;
+    private static long duration;
     private static float maxScroll;
-    protected static RunSixtyTimesEverySec scroller = () -> {
-        try {
-            if (scrollVelocity == 0.0F && scroll >= 0.0F && scroll <= getMaxScroll()) {
-                scrollerUnregisterTick();
-            } else {
-                float change = scrollVelocity * 0.3F;
-                if (scrollVelocity != 0) {
-                    scroll += change;
-                    scrollVelocity -= scrollVelocity * (scroll >= 0.0F && scroll <= getMaxScroll() ? 0.2D : 0.4D);
-                    if (Math.abs(scrollVelocity) < 0.1F) {
-                        scrollVelocity = 0.0F;
-                    }
-                }
-                
-                if (scroll < 0.0F && scrollVelocity == 0.0F) {
-                    scroll = Math.min(scroll + (0.0F - scroll) * 0.2F, 0.0F);
-                    if (Math.abs(scroll) < 0.1F)
-                        scroll = 0.0F;
-                } else if (scroll > getMaxScroll() && scrollVelocity == 0.0F) {
-                    scroll = Math.max(scroll - (scroll - getMaxScroll()) * 0.2F, getMaxScroll());
-                    if (scroll > getMaxScroll() && scroll < getMaxScroll() + 0.1F) {
-                        scroll = getMaxScroll();
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    };
     private static float scrollBarAlpha = 0;
     private static float scrollBarAlphaFuture = 0;
     private static long scrollBarAlphaFutureTime = -1;
@@ -116,8 +91,6 @@ public class EntryListWidget extends Widget {
         this.height = 0;
         this.page = page;
         this.lastSearchArgument = Lists.newArrayList();
-        scroller.unregisterTick();
-        this.scrollVelocity = 0;
     }
     
     public static List<String> tryGetItemStackToolTip(ItemStack itemStack, boolean careAboutAdvanced) {
@@ -220,10 +193,6 @@ public class EntryListWidget extends Widget {
         return mod;
     }
     
-    private static void scrollerUnregisterTick() {
-        scroller.unregisterTick();
-    }
-    
     public static float getMaxScroll() {
         return Math.max(maxScroll - ScreenHelper.getLastOverlay().getEntryListWidget().rectangle.height, 0);
     }
@@ -232,8 +201,43 @@ public class EntryListWidget extends Widget {
         return scroll;
     }
     
-    public static float getScrollVelocity() {
-        return scrollVelocity;
+    public static final float clamp(float v) {
+        return clamp(v, 300f);
+    }
+    
+    public static final float clamp(float v, float clampExtension) {
+        return MathHelper.clamp(v, -clampExtension, getMaxScroll() + clampExtension);
+    }
+    
+    public static void offset(float value, boolean animated) {
+        scrollTo(target + value, animated);
+    }
+    
+    public static void scrollTo(float value, boolean animated) {
+        scrollTo(value, animated, ClothConfigInitializer.getScrollDuration());
+    }
+    
+    public static void scrollTo(float value, boolean animated, long duration) {
+        target = clamp(value);
+        
+        if (animated) {
+            start = System.currentTimeMillis();
+            EntryListWidget.duration = duration;
+        } else
+            scroll = target;
+    }
+    
+    private static void updatePosition(float delta) {
+        target = clamp(target);
+        if (target < 0) {
+            target -= target * (1 - ClothConfigInitializer.getBounceBackMultiplier()) * delta / 3;
+        } else if (target > getMaxScroll()) {
+            target = (float) ((target - getMaxScroll()) * (1 - (1 - ClothConfigInitializer.getBounceBackMultiplier()) * delta / 3) + getMaxScroll());
+        }
+        if (!Precision.almostEquals(scroll, target, Precision.FLOAT_EPSILON))
+            scroll = (float) Interpolation.expoEase(scroll, target, Math.min((System.currentTimeMillis() - start) / ((double) duration), 1));
+        else
+            scroll = target;
     }
     
     public int getFullTotalSlotsPerPage() {
@@ -242,17 +246,12 @@ public class EntryListWidget extends Widget {
     
     @Override
     public boolean mouseScrolled(double double_1, double double_2, double double_3) {
-        if (!this.scroller.isRegistered())
-            this.scroller.registerTick();
         if (RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled() && rectangle.contains(double_1, double_2)) {
-            if (this.scroll >= 0F && double_3 > 0)
-                scrollVelocity -= 24;
-            else if (this.scroll <= this.getMaxScroll() && double_3 < 0)
-                scrollVelocity += 24;
             if (scrollBarAlphaFuture == 0)
                 scrollBarAlphaFuture = 1f;
             if (System.currentTimeMillis() - scrollBarAlphaFutureTime > 300f)
                 scrollBarAlphaFutureTime = System.currentTimeMillis();
+            offset((float) (ClothConfigInitializer.getScrollStep() * -double_3), true);
             return true;
         }
         return super.mouseScrolled(double_1, double_2, double_3);
@@ -289,6 +288,7 @@ public class EntryListWidget extends Widget {
         if (!widgetScrolled)
             scroll = 0;
         else {
+            updatePosition(float_1);
             page = 0;
             ScreenHelper.getLastOverlay().setPage(0);
             ScissorsHandler.INSTANCE.scissor(rectangle);
@@ -429,9 +429,7 @@ public class EntryListWidget extends Widget {
             if (j > currentDisplayed.size())
                 break;
         }
-        EntryListWidget.maxScroll = maxScroll;
-        if (!scroller.isRegistered())
-            scroller.registerTick();
+        EntryListWidget.maxScroll = Math.max(maxScroll - 18, 0);
     }
     
     public int getTotalPage() {
@@ -471,7 +469,9 @@ public class EntryListWidget extends Widget {
                 int int_2 = rectangle.height;
                 int int_3 = MathHelper.clamp((int) ((float) (int_2 * int_2) / (float) maxScroll), 32, int_2 - 8);
                 double double_6 = Math.max(1.0D, double_5 / (double) (int_2 - int_3));
-                scroll = MathHelper.clamp((float) (scroll + double_4 * double_6), 0, height - rectangle.height);
+                scrollBarAlphaFutureTime = System.currentTimeMillis();
+                scrollBarAlphaFuture = 1f;
+                scrollTo(MathHelper.clamp((float) (scroll + double_4 * double_6), 0, height - rectangle.height), false);
             }
         }
         return super.mouseDragged(mouseX, mouseY, int_1, double_3, double_4);
