@@ -97,7 +97,13 @@ public class EntryWidget extends WidgetWithBounds {
     protected EntryStack getCurrentEntry() {
         if (entryStacks.isEmpty())
             return EntryStack.empty();
+        if (entryStacks.size() == 1)
+            return entryStacks.get(0);
         return entryStacks.get(MathHelper.floor((System.currentTimeMillis() / 500 % (double) entryStacks.size()) / 1f));
+    }
+    
+    public List<EntryStack> entries() {
+        return entryStacks;
     }
     
     @Override
@@ -167,12 +173,11 @@ public class EntryWidget extends WidgetWithBounds {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (!interactable)
             return false;
-        EntryStack entry = getCurrentEntry();
         if (containsMouse(mouseX, mouseY))
             if (button == 0)
-                return ClientHelper.getInstance().executeRecipeKeyBind(entry);
+                return ClientHelper.getInstance().executeRecipeKeyBind(getCurrentEntry());
             else if (button == 1)
-                return ClientHelper.getInstance().executeUsageKeyBind(entry);
+                return ClientHelper.getInstance().executeUsageKeyBind(getCurrentEntry());
         return false;
     }
     
@@ -180,12 +185,11 @@ public class EntryWidget extends WidgetWithBounds {
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (!interactable)
             return false;
-        EntryStack entry = getCurrentEntry();
         if (containsMouse(PointHelper.fromMouse()))
             if (ClientHelper.getInstance().getRecipeKeyBinding().matchesKey(int_1, int_2))
-                return ClientHelper.getInstance().executeRecipeKeyBind(entry);
+                return ClientHelper.getInstance().executeRecipeKeyBind(getCurrentEntry());
             else if (ClientHelper.getInstance().getUsageKeyBinding().matchesKey(int_1, int_2))
-                return ClientHelper.getInstance().executeUsageKeyBind(entry);
+                return ClientHelper.getInstance().executeUsageKeyBind(getCurrentEntry());
         return false;
     }
 }

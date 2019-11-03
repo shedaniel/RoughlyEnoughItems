@@ -7,6 +7,7 @@ package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.DisplayHelper;
@@ -45,6 +46,8 @@ import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.fluid.EmptyFluid;
+import net.minecraft.fluid.Fluid;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -95,7 +98,7 @@ public class DefaultPlugin implements REIPluginV0 {
         if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isLoadingDefaultPlugin()) {
             return;
         }
-        Registry.ITEM.stream().forEach(item -> {
+        for (Item item : Registry.ITEM) {
             entryRegistry.registerEntry(EntryStack.create(item));
             try {
                 for (ItemStack stack : entryRegistry.getAllStacksFromItem(item)) {
@@ -103,8 +106,8 @@ public class DefaultPlugin implements REIPluginV0 {
                 }
             } catch (Exception e) {
             }
-        });
-        Registry.ENCHANTMENT.forEach(enchantment -> {
+        }
+        for (Enchantment enchantment : Registry.ENCHANTMENT) {
             for (int i = enchantment.getMinimumLevel(); i <= enchantment.getMaximumLevel(); i++) {
                 Map<Enchantment, Integer> map = new HashMap<>();
                 map.put(enchantment, i);
@@ -112,11 +115,11 @@ public class DefaultPlugin implements REIPluginV0 {
                 EnchantmentHelper.set(map, itemStack);
                 entryRegistry.registerEntriesAfter(EntryStack.create(Items.ENCHANTED_BOOK), EntryStack.create(itemStack));
             }
-        });
-        Registry.FLUID.forEach(fluid -> {
+        }
+        for (Fluid fluid : Registry.FLUID) {
             if (!(fluid instanceof EmptyFluid))
                 entryRegistry.registerEntry(EntryStack.create(fluid));
-        });
+        }
     }
     
     @Override
@@ -147,7 +150,9 @@ public class DefaultPlugin implements REIPluginV0 {
         recipeHelper.registerRecipes(BLASTING, BlastingRecipe.class, DefaultBlastingDisplay::new);
         recipeHelper.registerRecipes(CAMPFIRE, CampfireCookingRecipe.class, DefaultCampfireDisplay::new);
         recipeHelper.registerRecipes(STONE_CUTTING, StonecuttingRecipe.class, DefaultStoneCuttingDisplay::new);
-        BREWING_DISPLAYS.stream().forEachOrdered(display -> recipeHelper.registerDisplay(BREWING, display));
+        for (DefaultBrewingDisplay display : BREWING_DISPLAYS) {
+            recipeHelper.registerDisplay(BREWING, display);
+        }
         List<EntryStack> arrowStack = Collections.singletonList(EntryStack.create(Items.ARROW));
         for (EntryStack entry : RoughlyEnoughItemsCore.getEntryRegistry().getStacksList()) {
             if (entry.getItem() == Items.LINGERING_POTION) {
@@ -167,11 +172,10 @@ public class DefaultPlugin implements REIPluginV0 {
         Map<ItemConvertible, Float> map = Maps.newLinkedHashMap();
         if (ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.isEmpty())
             ComposterBlock.registerDefaultCompostableItems();
-        ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.keySet().forEach(itemConvertible -> {
-            float chance = ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.getOrDefault(itemConvertible, 0);
-            if (chance > 0)
-                map.put(itemConvertible, chance);
-        });
+        for (Object2FloatMap.Entry<ItemConvertible> entry : ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.object2FloatEntrySet()) {
+            if (entry.getFloatValue() > 0)
+                map.put(entry.getKey(), entry.getFloatValue());
+        }
         List<ItemConvertible> stacks = new LinkedList<>(map.keySet());
         stacks.sort((first, second) -> {
             return (int) ((map.get(first) - map.get(second)) * 100);

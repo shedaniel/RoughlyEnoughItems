@@ -6,13 +6,13 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.api.annotations.ToBeRemoved;
+import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public interface EntryRegistry {
     
@@ -40,7 +40,7 @@ public interface EntryRegistry {
      */
     @Deprecated
     default List<Entry> getModifiableEntryList() {
-        return getStacksList().stream().map(EntryStack::toEntry).collect(Collectors.toList());
+        return CollectionUtils.map(getStacksList(), EntryStack::toEntry);
     }
     
     /**
@@ -126,7 +126,7 @@ public interface EntryRegistry {
      * @return whether the stack has been registered
      */
     default boolean alreadyContain(EntryStack stack) {
-        return getStacksList().stream().anyMatch(entry -> stack.equalsAll(entry));
+        return CollectionUtils.anyMatchEqualsAll(getStacksList(), stack);
     }
     
 }

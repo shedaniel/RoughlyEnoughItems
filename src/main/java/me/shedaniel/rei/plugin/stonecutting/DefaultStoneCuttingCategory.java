@@ -8,6 +8,7 @@ package me.shedaniel.rei.plugin.stonecutting;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.compat.RenderHelper;
+import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.gui.widget.EntryWidget;
@@ -34,8 +35,8 @@ public class DefaultStoneCuttingCategory implements RecipeCategory<DefaultStoneC
     }
     
     @Override
-    public Renderer getIcon() {
-        return Renderer.fromItemStack(new ItemStack(Blocks.STONECUTTER));
+    public EntryStack getLogo() {
+        return EntryStack.create(Blocks.STONECUTTER);
     }
     
     @Override

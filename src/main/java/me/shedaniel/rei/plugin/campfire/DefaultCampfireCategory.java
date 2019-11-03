@@ -10,16 +10,16 @@ import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.compat.RenderHelper;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeCategory;
-import me.shedaniel.rei.api.Renderer;
-import me.shedaniel.rei.gui.widget.*;
+import me.shedaniel.rei.gui.widget.EntryWidget;
+import me.shedaniel.rei.gui.widget.RecipeArrowWidget;
+import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
+import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
@@ -37,7 +37,7 @@ public class DefaultCampfireCategory implements RecipeCategory<DefaultCampfireDi
     
     @Override
     public EntryStack getLogo() {
-        return EntryStack.create(Items.CAMPFIRE);
+        return EntryStack.create(Blocks.CAMPFIRE);
     }
     
     @Override

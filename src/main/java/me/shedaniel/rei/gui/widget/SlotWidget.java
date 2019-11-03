@@ -17,6 +17,7 @@ import me.shedaniel.rei.api.annotations.ToBeRemoved;
 import me.shedaniel.rei.gui.renderers.FluidRenderer;
 import me.shedaniel.rei.gui.renderers.ItemStackRenderer;
 import me.shedaniel.rei.impl.ScreenHelper;
+import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.gui.Element;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.ItemStack;
@@ -29,13 +30,14 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
 @SuppressWarnings("deprecation")
 public class SlotWidget extends WidgetWithBounds {
     
     public static final Identifier RECIPE_GUI = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     public static final Identifier RECIPE_GUI_DARK = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
+    private static final Function<ItemStack, Renderer> ITEM_STACK_RENDERER = Renderer::fromItemStack;
     private Rectangle bounds;
     private List<Renderer> renderers = new LinkedList<>();
     private boolean drawBackground, showToolTips, clickToMoreRecipes, drawHighlightedBackground;
@@ -276,7 +278,7 @@ public class SlotWidget extends WidgetWithBounds {
     @ToBeRemoved
     @Deprecated
     public void setItemList(List<ItemStack> itemList) {
-        this.setRenderers(itemList.stream().map(Renderer::fromItemStack).collect(Collectors.toList()));
+        setRenderers(CollectionUtils.map(itemList, ITEM_STACK_RENDERER));
     }
     
     public void setRenderers(List<Renderer> renderers) {
