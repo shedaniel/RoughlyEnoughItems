@@ -125,7 +125,7 @@ public class RecipeViewingScreen extends Screen {
         this.largestWidth = width - 100;
         this.largestHeight = height - 40;
         int maxWidthDisplay = CollectionUtils.mapAndMax(getCurrentDisplayed(), display -> selectedCategory.getDisplayWidth((RecipeDisplay) display), (Comparator<Integer>) Comparator.naturalOrder()).orElse(150);
-        this.guiWidth = MathHelper.clamp(maxWidthDisplay, 0, largestWidth);
+        this.guiWidth = MathHelper.clamp(maxWidthDisplay + 30, 0, largestWidth);
         this.guiHeight = MathHelper.floor(MathHelper.clamp((selectedCategory.getDisplayHeight() + 7d) * (getRecipesPerPage() + 1d) + 40d, 186d, (double) largestHeight));
         this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - guiHeight / 2, guiWidth, guiHeight);
         this.page = MathHelper.clamp(page, 0, getTotalPages(selectedCategory) - 1);
