@@ -6,11 +6,13 @@
 package me.shedaniel.rei.gui.renderers;
 
 import com.google.common.collect.Lists;
+import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GuiLighting;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
@@ -26,54 +28,94 @@ import java.util.stream.Collectors;
 
 public class SimpleRecipeRenderer extends RecipeRenderer {
     
-    public static final Comparator<ItemStack> ITEM_STACK_COMPARATOR = (o1, o2) -> {
-        if (o1.getItem() == o2.getItem()) {
-            if (o1.getCount() != o2.getCount())
-                return o1.getCount() - o2.getCount();
-            int compare = Boolean.compare(o1.hasTag(), o2.hasTag());
+    private static final Comparator<EntryStack> ENTRY_COMPARATOR = (o1, o2) -> {
+        if (o1.getType() == EntryStack.Type.FLUID) {
+            if (o2.getType() == EntryStack.Type.ITEM)
+                return -1;
+            return o1.getFluid().hashCode() - o2.getFluid().hashCode();
+        } else if (o2.getType() == EntryStack.Type.FLUID) {
+            if (o1.getType() == EntryStack.Type.ITEM)
+                return 1;
+            return o1.getFluid().hashCode() - o2.getFluid().hashCode();
+        }
+        ItemStack i1 = o1.getItemStack();
+        ItemStack i2 = o2.getItemStack();
+        if (i1.getItem() == i2.getItem()) {
+            if (i1.getCount() != i2.getCount())
+                return i1.getCount() - i2.getCount();
+            int compare = Boolean.compare(i1.hasTag(), i2.hasTag());
             if (compare != 0)
                 return compare;
-            if (o1.getTag().getSize() != o2.getTag().getSize())
-                return o1.getTag().getSize() - o2.getTag().getSize();
-            return o1.getTag().hashCode() - o2.getTag().hashCode();
+            if (i1.getTag().getSize() != i2.getTag().getSize())
+                return i1.getTag().getSize() - i2.getTag().getSize();
+            return i1.getTag().hashCode() - i2.getTag().hashCode();
         }
-        return o1.getItem().hashCode() - o2.getItem().hashCode();
+        return i1.getItem().hashCode() - i2.getItem().hashCode();
     };
     private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
-    private List<ItemStackRenderer> inputRenderer;
-    private ItemStackRenderer outputRenderer;
+    private List<Renderer> inputRenderer;
+    private Renderer outputRenderer;
     private QueuedTooltip lastTooltip;
     
+    @Deprecated
     public SimpleRecipeRenderer(Supplier<List<List<ItemStack>>> input, Supplier<List<ItemStack>> output) {
-        List<Pair<List<ItemStack>, AtomicInteger>> newList = Lists.newArrayList();
-        List<Pair<List<ItemStack>, Integer>> a = input.get().stream().map(stacks -> new Pair<>(stacks, stacks.stream().map(ItemStack::getCount).max(Integer::compareTo).orElse(1))).collect(Collectors.toList());
-        for (Pair<List<ItemStack>, Integer> pair : a) {
-            Optional<Pair<List<ItemStack>, AtomicInteger>> any = newList.stream().filter(pairr -> equalsList(pair.getLeft(), pairr.getLeft())).findAny();
+        this(() -> (List<List<EntryStack>>) input.get().stream().map(s -> s.stream().map(EntryStack::create).collect(Collectors.toList())).collect(Collectors.toList()),
+                () -> output.get().stream().map(EntryStack::create).collect(Collectors.toList()), 0);
+    }
+    
+    public SimpleRecipeRenderer(Supplier<List<List<EntryStack>>> input, Supplier<List<EntryStack>> output, int forDifferentConstructor) {
+        List<Pair<List<EntryStack>, AtomicInteger>> newList = Lists.newArrayList();
+        List<Pair<List<EntryStack>, Integer>> a = input.get().stream().map(stacks -> new Pair<>(stacks, stacks.stream().map(EntryStack::getAmount).max(Integer::compareTo).orElse(1))).collect(Collectors.toList());
+        for (Pair<List<EntryStack>, Integer> pair : a) {
+            Optional<Pair<List<EntryStack>, AtomicInteger>> any = newList.stream().filter(pairr -> equalsList(pair.getLeft(), pairr.getLeft())).findAny();
             if (any.isPresent()) {
                 any.get().getRight().addAndGet(pair.getRight());
             } else
                 newList.add(new Pair<>(pair.getLeft(), new AtomicInteger(pair.getRight())));
         }
-        List<List<ItemStack>> b = Lists.newArrayList();
-        for (Pair<List<ItemStack>, AtomicInteger> pair : newList)
+        List<List<EntryStack>> b = Lists.newArrayList();
+        for (Pair<List<EntryStack>, AtomicInteger> pair : newList)
             b.add(pair.getLeft().stream().map(stack -> {
-                ItemStack s = stack.copy();
-                s.setCount(pair.getRight().get());
+                EntryStack s = stack.copy();
+                s.setAmount(pair.getRight().get());
                 return s;
             }).collect(Collectors.toList()));
-        this.inputRenderer = b.stream().filter(stacks -> !stacks.isEmpty()).map(stacks -> Renderer.fromItemStacks(stacks)).collect(Collectors.toList());
-        this.outputRenderer = Renderer.fromItemStacks(output.get().stream().filter(stack -> !stack.isEmpty()).collect(Collectors.toList()));
+        this.inputRenderer = b.stream().filter(stacks -> !stacks.isEmpty()).map(stacks -> fromEntries(stacks)).collect(Collectors.toList());
+        this.outputRenderer = fromEntries(output.get().stream().filter(stack -> !stack.isEmpty()).collect(Collectors.toList()));
     }
     
-    public static boolean equalsList(List<ItemStack> list_1, List<ItemStack> list_2) {
-        List<ItemStack> stacks_1 = list_1.stream().distinct().sorted(ITEM_STACK_COMPARATOR).collect(Collectors.toList());
-        List<ItemStack> stacks_2 = list_2.stream().distinct().sorted(ITEM_STACK_COMPARATOR).collect(Collectors.toList());
+    @Deprecated
+    private static Renderer fromEntries(List<EntryStack> entries) {
+        boolean isItem = true;
+        for (EntryStack entry : entries) {
+            if (entry.getType() != EntryStack.Type.ITEM)
+                isItem = false;
+        }
+        if (isItem)
+            return Renderer.fromItemStacks(entries.stream().map(EntryStack::getItemStack).collect(Collectors.toList()));
+        boolean isFluid = true;
+        for (EntryStack entry : entries) {
+            if (entry.getType() != EntryStack.Type.FLUID)
+                isFluid = false;
+        }
+        
+        if (isFluid) {
+            List<Fluid> fluids = entries.stream().map(EntryStack::getFluid).collect(Collectors.toList());
+            if (!fluids.isEmpty())
+                return Renderer.fromFluid(fluids.get(0));
+        }
+        return Renderer.empty();
+    }
+    
+    public static boolean equalsList(List<EntryStack> list_1, List<EntryStack> list_2) {
+        List<EntryStack> stacks_1 = list_1.stream().distinct().sorted(ENTRY_COMPARATOR).collect(Collectors.toList());
+        List<EntryStack> stacks_2 = list_2.stream().distinct().sorted(ENTRY_COMPARATOR).collect(Collectors.toList());
         if (stacks_1.equals(stacks_2))
             return true;
         if (stacks_1.size() != stacks_2.size())
             return false;
         for (int i = 0; i < stacks_1.size(); i++)
-            if (!stacks_1.get(i).isItemEqualIgnoreDamage(stacks_2.get(i)))
+            if (!stacks_1.get(i).equalsIgnoreTagsAndAmount(stacks_2.get(i)))
                 return false;
         return true;
     }
@@ -84,7 +126,7 @@ public class SimpleRecipeRenderer extends RecipeRenderer {
         int xx = x + 4, yy = y + 2;
         int j = 0;
         int itemsPerLine = getItemsPerLine();
-        for (ItemStackRenderer itemStackRenderer : inputRenderer) {
+        for (Renderer itemStackRenderer : inputRenderer) {
             itemStackRenderer.setBlitOffset(getBlitOffset() + 50);
             if (lastTooltip == null && MinecraftClient.getInstance().currentScreen instanceof VillagerRecipeViewingScreen && mouseX >= xx && mouseX <= xx + 16 && mouseY >= yy && mouseY <= yy + 16) {
                 lastTooltip = itemStackRenderer.getQueuedTooltip(delta);

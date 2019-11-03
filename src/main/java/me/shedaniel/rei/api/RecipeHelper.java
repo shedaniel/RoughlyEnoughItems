@@ -7,12 +7,14 @@ package me.shedaniel.rei.api;
 
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.api.annotations.ToBeRemoved;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.util.Identifier;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -50,7 +52,22 @@ public interface RecipeHelper {
      * @param inventoryItems the materials
      * @return the list of craftable items
      */
-    List<ItemStack> findCraftableByItems(List<ItemStack> inventoryItems);
+    default List<ItemStack> findCraftableByItems(List<ItemStack> inventoryItems) {
+        List<ItemStack> itemStacks = new ArrayList<>();
+        for (EntryStack item : findCraftableEntriesByItems(inventoryItems)) {
+            if (item.getItemStack() != null)
+                itemStacks.add(item.getItemStack());
+        }
+        return itemStacks;
+    }
+    
+    /**
+     * Gets all craftable items from materials.
+     *
+     * @param inventoryItems the materials
+     * @return the list of craftable entries
+     */
+    List<EntryStack> findCraftableEntriesByItems(List<ItemStack> inventoryItems);
     
     /**
      * Registers a category
@@ -91,7 +108,13 @@ public interface RecipeHelper {
      * @param stack the stack to be crafted
      * @return the map of recipes
      */
-    Map<RecipeCategory<?>, List<RecipeDisplay>> getRecipesFor(ItemStack stack);
+    Map<RecipeCategory<?>, List<RecipeDisplay>> getRecipesFor(EntryStack stack);
+    
+    @ToBeRemoved
+    @Deprecated
+    default Map<RecipeCategory<?>, List<RecipeDisplay>> getRecipesFor(ItemStack stack) {
+        return getRecipesFor(EntryStack.create(stack));
+    }
     
     RecipeCategory getCategory(Identifier identifier);
     
@@ -115,7 +138,13 @@ public interface RecipeHelper {
      * @param stack the stack to be used
      * @return the map of recipes
      */
-    Map<RecipeCategory<?>, List<RecipeDisplay>> getUsagesFor(ItemStack stack);
+    Map<RecipeCategory<?>, List<RecipeDisplay>> getUsagesFor(EntryStack stack);
+    
+    @ToBeRemoved
+    @Deprecated
+    default Map<RecipeCategory<?>, List<RecipeDisplay>> getUsagesFor(ItemStack stack) {
+        return getUsagesFor(EntryStack.create(stack));
+    }
     
     /**
      * Gets the optional of the speed crafting button area from a category

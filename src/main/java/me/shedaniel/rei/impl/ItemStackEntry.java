@@ -6,11 +6,14 @@
 package me.shedaniel.rei.impl;
 
 import me.shedaniel.rei.api.Entry;
+import me.shedaniel.rei.api.annotations.ToBeRemoved;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.ItemStack;
 
 import javax.annotation.Nullable;
 
+@ToBeRemoved
+@Deprecated
 public class ItemStackEntry implements Entry {
     private ItemStack itemStack;
     
@@ -34,5 +37,17 @@ public class ItemStackEntry implements Entry {
     @Override
     public Fluid getFluid() {
         return null;
+    }
+    
+    @Override
+    public Entry clone() {
+        return Entry.create(getItemStack().copy());
+    }
+    
+    @Override
+    public boolean equalsEntry(Entry other, boolean checkTags) {
+        if (other.getEntryType() == Type.ITEM) {
+            return checkTags ? ItemStack.areEqualIgnoreDamage(other.getItemStack(), getItemStack()) : other.getItemStack().isItemEqualIgnoreDamage(getItemStack());
+        } else return false;
     }
 }

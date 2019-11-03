@@ -10,6 +10,7 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
 import me.shedaniel.rei.api.AutoTransferHandler;
+import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.TransferRecipeDisplay;
 import me.shedaniel.rei.listeners.RecipeBookGuiHooks;
 import me.shedaniel.rei.server.ContainerInfo;
@@ -43,7 +44,7 @@ public class DefaultCategoryHandler implements AutoTransferHandler {
             return Result.createNotApplicable();
         if (recipe.getHeight() > containerInfo.getCraftingHeight(container) || recipe.getWidth() > containerInfo.getCraftingWidth(container))
             return Result.createFailed(I18n.translate("error.rei.transfer.too_small", containerInfo.getCraftingWidth(container), containerInfo.getCraftingHeight(container)));
-        List<List<ItemStack>> input = recipe.getOrganisedInput(containerInfo, container);
+        List<List<EntryStack>> input = recipe.getOrganisedInputEntries(containerInfo, container);
         IntList intList = hasItems(input);
         if (!intList.isEmpty())
             return Result.createFailed("error.rei.not.enough.materials", intList);
@@ -60,10 +61,12 @@ public class DefaultCategoryHandler implements AutoTransferHandler {
         buf.writeBoolean(Screen.hasShiftDown());
         
         buf.writeInt(input.size());
-        for (List<ItemStack> stacks : input) {
+        for (List<EntryStack> stacks : input) {
             buf.writeInt(stacks.size());
-            for (ItemStack stack : stacks) {
-                buf.writeItemStack(stack);
+            for (EntryStack stack : stacks) {
+                if (stack.getItemStack() != null)
+                    buf.writeItemStack(stack.getItemStack());
+                else buf.writeItemStack(ItemStack.EMPTY);
             }
         }
         ClientSidePacketRegistry.INSTANCE.sendToServer(RoughlyEnoughItemsNetwork.MOVE_ITEMS_PACKET, buf);
@@ -79,7 +82,7 @@ public class DefaultCategoryHandler implements AutoTransferHandler {
         return ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.MOVE_ITEMS_PACKET);
     }
     
-    public IntList hasItems(List<List<ItemStack>> inputs) {
+    public IntList hasItems(List<List<EntryStack>> inputs) {
         // Create a clone of player's inventory, and count
         DefaultedList<ItemStack> copyMain = DefaultedList.of();
         for (ItemStack stack : MinecraftClient.getInstance().player.inventory.main) {
@@ -87,13 +90,14 @@ public class DefaultCategoryHandler implements AutoTransferHandler {
         }
         IntList intList = new IntArrayList();
         for (int i = 0; i < inputs.size(); i++) {
-            List<ItemStack> possibleStacks = inputs.get(i);
+            List<EntryStack> possibleStacks = inputs.get(i);
             boolean done = possibleStacks.isEmpty();
-            for (ItemStack possibleStack : possibleStacks) {
+            for (EntryStack possibleStack : possibleStacks) {
                 if (!done) {
-                    int invRequiredCount = possibleStack.getCount();
+                    int invRequiredCount = possibleStack.getAmount();
                     for (ItemStack stack : copyMain) {
-                        if (ItemStack.areItemsEqualIgnoreDamage(possibleStack, stack)) {
+                        EntryStack entryStack = EntryStack.create(stack);
+                        if (entryStack.equals(possibleStack)) {
                             while (invRequiredCount > 0 && !stack.isEmpty()) {
                                 invRequiredCount--;
                                 stack.decrement(1);

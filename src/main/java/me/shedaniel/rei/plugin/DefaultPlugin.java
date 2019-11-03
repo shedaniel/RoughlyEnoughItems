@@ -7,17 +7,17 @@ package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.DisplayHelper;
-import me.shedaniel.rei.api.Entry;
 import me.shedaniel.rei.api.EntryRegistry;
+import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
 import me.shedaniel.rei.impl.ScreenHelper;
-import me.shedaniel.rei.plugin.blasting.DefaultBlastingCategory;
 import me.shedaniel.rei.plugin.blasting.DefaultBlastingDisplay;
 import me.shedaniel.rei.plugin.brewing.DefaultBrewingCategory;
 import me.shedaniel.rei.plugin.brewing.DefaultBrewingDisplay;
@@ -25,13 +25,12 @@ import me.shedaniel.rei.plugin.campfire.DefaultCampfireCategory;
 import me.shedaniel.rei.plugin.campfire.DefaultCampfireDisplay;
 import me.shedaniel.rei.plugin.composting.DefaultCompostingCategory;
 import me.shedaniel.rei.plugin.composting.DefaultCompostingDisplay;
+import me.shedaniel.rei.plugin.cooking.DefaultCookingCategory;
 import me.shedaniel.rei.plugin.crafting.DefaultCraftingCategory;
 import me.shedaniel.rei.plugin.crafting.DefaultCustomDisplay;
 import me.shedaniel.rei.plugin.crafting.DefaultShapedDisplay;
 import me.shedaniel.rei.plugin.crafting.DefaultShapelessDisplay;
-import me.shedaniel.rei.plugin.smelting.DefaultSmeltingCategory;
 import me.shedaniel.rei.plugin.smelting.DefaultSmeltingDisplay;
-import me.shedaniel.rei.plugin.smoking.DefaultSmokingCategory;
 import me.shedaniel.rei.plugin.smoking.DefaultSmokingDisplay;
 import me.shedaniel.rei.plugin.stonecutting.DefaultStoneCuttingCategory;
 import me.shedaniel.rei.plugin.stonecutting.DefaultStoneCuttingDisplay;
@@ -47,6 +46,8 @@ import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.fluid.EmptyFluid;
+import net.minecraft.fluid.Fluid;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -97,26 +98,28 @@ public class DefaultPlugin implements REIPluginV0 {
         if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isLoadingDefaultPlugin()) {
             return;
         }
-        Registry.ITEM.stream().forEach(item -> {
-            entryRegistry.registerItemStack(item.getStackForRender());
+        for (Item item : Registry.ITEM) {
+            entryRegistry.registerEntry(EntryStack.create(item));
             try {
-                entryRegistry.registerItemStack(entryRegistry.getAllStacksFromItem(item));
+                for (ItemStack stack : entryRegistry.getAllStacksFromItem(item)) {
+                    entryRegistry.registerEntry(EntryStack.create(stack));
+                }
             } catch (Exception e) {
             }
-        });
-        Registry.ENCHANTMENT.forEach(enchantment -> {
+        }
+        for (Enchantment enchantment : Registry.ENCHANTMENT) {
             for (int i = enchantment.getMinimumLevel(); i <= enchantment.getMaximumLevel(); i++) {
                 Map<Enchantment, Integer> map = new HashMap<>();
                 map.put(enchantment, i);
                 ItemStack itemStack = new ItemStack(Items.ENCHANTED_BOOK);
                 EnchantmentHelper.set(map, itemStack);
-                entryRegistry.registerItemStack(Items.ENCHANTED_BOOK, itemStack);
+                entryRegistry.registerEntriesAfter(EntryStack.create(Items.ENCHANTED_BOOK), EntryStack.create(itemStack));
             }
-        });
-        Registry.FLUID.forEach(fluid -> {
+        }
+        for (Fluid fluid : Registry.FLUID) {
             if (!(fluid instanceof EmptyFluid))
-                entryRegistry.registerFluid(fluid);
-        });
+                entryRegistry.registerEntry(EntryStack.create(fluid));
+        }
     }
     
     @Override
@@ -125,9 +128,9 @@ public class DefaultPlugin implements REIPluginV0 {
             return;
         }
         recipeHelper.registerCategory(new DefaultCraftingCategory());
-        recipeHelper.registerCategory(new DefaultSmeltingCategory());
-        recipeHelper.registerCategory(new DefaultSmokingCategory());
-        recipeHelper.registerCategory(new DefaultBlastingCategory());
+        recipeHelper.registerCategory(new DefaultCookingCategory(SMELTING, EntryStack.create(Items.FURNACE), "category.rei.smelting"));
+        recipeHelper.registerCategory(new DefaultCookingCategory(SMOKING, EntryStack.create(Items.SMOKER), "category.rei.smoking"));
+        recipeHelper.registerCategory(new DefaultCookingCategory(BLASTING, EntryStack.create(Items.BLAST_FURNACE), "category.rei.blasting"));
         recipeHelper.registerCategory(new DefaultCampfireCategory());
         recipeHelper.registerCategory(new DefaultStoneCuttingCategory());
         recipeHelper.registerCategory(new DefaultBrewingCategory());
@@ -147,29 +150,32 @@ public class DefaultPlugin implements REIPluginV0 {
         recipeHelper.registerRecipes(BLASTING, BlastingRecipe.class, DefaultBlastingDisplay::new);
         recipeHelper.registerRecipes(CAMPFIRE, CampfireCookingRecipe.class, DefaultCampfireDisplay::new);
         recipeHelper.registerRecipes(STONE_CUTTING, StonecuttingRecipe.class, DefaultStoneCuttingDisplay::new);
-        BREWING_DISPLAYS.stream().forEachOrdered(display -> recipeHelper.registerDisplay(BREWING, display));
-        List<ItemStack> arrowStack = Collections.singletonList(Items.ARROW.getStackForRender());
-        RoughlyEnoughItemsCore.getEntryRegistry().getEntryList().stream().filter(stack -> stack.getEntryType() == Entry.Type.ITEM && stack.getItemStack().getItem().equals(Items.LINGERING_POTION)).forEach(entry -> {
-            List<List<ItemStack>> input = new ArrayList<>();
-            for (int i = 0; i < 4; i++)
-                input.add(arrowStack);
-            input.add(Collections.singletonList(entry.getItemStack()));
-            for (int i = 0; i < 4; i++)
-                input.add(arrowStack);
-            ItemStack outputStack = new ItemStack(Items.TIPPED_ARROW, 8);
-            PotionUtil.setPotion(outputStack, PotionUtil.getPotion(entry.getItemStack()));
-            PotionUtil.setCustomPotionEffects(outputStack, PotionUtil.getCustomPotionEffects(entry.getItemStack()));
-            List<ItemStack> output = Collections.singletonList(outputStack);
-            recipeHelper.registerDisplay(CRAFTING, new DefaultCustomDisplay(input, output));
-        });
+        for (DefaultBrewingDisplay display : BREWING_DISPLAYS) {
+            recipeHelper.registerDisplay(BREWING, display);
+        }
+        List<EntryStack> arrowStack = Collections.singletonList(EntryStack.create(Items.ARROW));
+        for (EntryStack entry : RoughlyEnoughItemsCore.getEntryRegistry().getStacksList()) {
+            if (entry.getItem() == Items.LINGERING_POTION) {
+                List<List<EntryStack>> input = new ArrayList<>();
+                for (int i = 0; i < 4; i++)
+                    input.add(arrowStack);
+                input.add(Collections.singletonList(EntryStack.create(entry.getItemStack())));
+                for (int i = 0; i < 4; i++)
+                    input.add(arrowStack);
+                ItemStack outputStack = new ItemStack(Items.TIPPED_ARROW, 8);
+                PotionUtil.setPotion(outputStack, PotionUtil.getPotion(entry.getItemStack()));
+                PotionUtil.setCustomPotionEffects(outputStack, PotionUtil.getCustomPotionEffects(entry.getItemStack()));
+                List<EntryStack> output = Collections.singletonList(EntryStack.create(outputStack).addSetting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE));
+                recipeHelper.registerDisplay(CRAFTING, new DefaultCustomDisplay(null, input, output));
+            }
+        }
         Map<ItemConvertible, Float> map = Maps.newLinkedHashMap();
         if (ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.isEmpty())
             ComposterBlock.registerDefaultCompostableItems();
-        ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.keySet().forEach(itemConvertible -> {
-            float chance = ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.getOrDefault(itemConvertible, 0);
-            if (chance > 0)
-                map.put(itemConvertible, chance);
-        });
+        for (Object2FloatMap.Entry<ItemConvertible> entry : ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.object2FloatEntrySet()) {
+            if (entry.getFloatValue() > 0)
+                map.put(entry.getKey(), entry.getFloatValue());
+        }
         List<ItemConvertible> stacks = new LinkedList<>(map.keySet());
         stacks.sort((first, second) -> {
             return (int) ((map.get(first) - map.get(second)) * 100);

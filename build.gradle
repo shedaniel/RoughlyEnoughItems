@@ -29,7 +29,6 @@ static def buildTime() {
 license {
     header rootProject.file('HEADER')
     include '**/*.java'
-    exclude '**/Scissors.java'
 }
 
 repositories {
@@ -56,7 +55,7 @@ dependencies {
     modImplementation("me.shedaniel.cloth:config-2:${cloth_config_version}") {
         transitive = false
     }
-    modApi("me.shedaniel.cloth:fiber2cloth:1.2.0") {
+    modApi("me.shedaniel.cloth:fiber2cloth:1.2.1") {
         transitive = false
     }
     modApi "me.zeroeightsix:fiber:0.6.0-7"
@@ -68,7 +67,7 @@ dependencies {
         include("me.shedaniel.cloth:config-2:${cloth_config_version}") {
             transitive = false
         }
-        include("me.shedaniel.cloth:fiber2cloth:1.2.0") {
+        include("me.shedaniel.cloth:fiber2cloth:1.2.1") {
             transitive = false
         }
         include "me.zeroeightsix:fiber:0.6.0-7"
@@ -82,6 +81,15 @@ dependencies {
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = "sources"
     from sourceSets.main.allSource
+}
+
+task remapMavenJar(type: net.fabricmc.loom.task.RemapJarTask, dependsOn: jar) {
+    classifier = "maven"
+    afterEvaluate {
+        input = file("${project.buildDir}/libs/${archivesBaseName}-${version}-dev.jar")
+//        archiveName = "${archivesBaseName}-${version}-maven.jar"
+        addNestedDependencies = false
+    }
 }
 
 publishing {

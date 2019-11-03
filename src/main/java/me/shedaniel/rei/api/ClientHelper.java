@@ -55,28 +55,40 @@ public interface ClientHelper {
     void registerFabricKeyBinds();
     
     /**
-     * Tries to cheat items using either packets or commands.
+     * Tries to cheat stack using either packets or commands.
      *
      * @param stack the stack to cheat in
      * @return whether it failed
      */
-    boolean tryCheatingStack(ItemStack stack);
+    boolean tryCheatingEntry(EntryStack stack);
+    
+    default boolean tryCheatingStack(ItemStack stack) {
+        return tryCheatingEntry(EntryStack.create(stack));
+    }
     
     /**
-     * Finds recipe for the item and opens the recipe screen.
+     * Finds recipe for the stack and opens the recipe screen.
      *
      * @param stack the stack to find recipe for
      * @return whether the stack has any recipes to show
      */
-    boolean executeRecipeKeyBind(ItemStack stack);
+    boolean executeRecipeKeyBind(EntryStack stack);
+    
+    default boolean executeRecipeKeyBind(ItemStack stack) {
+        return executeRecipeKeyBind(EntryStack.create(stack));
+    }
     
     /**
-     * Finds usage for the item and opens the recipe screen.
+     * Finds usage for the stack and opens the recipe screen.
      *
      * @param stack the stack to find usage for
      * @return whether the stack has any usages to show
      */
-    boolean executeUsageKeyBind(ItemStack stack);
+    boolean executeUsageKeyBind(EntryStack stack);
+    
+    default boolean executeUsageKeyBind(ItemStack stack) {
+        return executeUsageKeyBind(EntryStack.create(stack));
+    }
     
     FabricKeyBinding getFocusSearchFieldKeyBinding();
     

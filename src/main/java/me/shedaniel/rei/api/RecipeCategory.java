@@ -6,6 +6,7 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.rei.api.annotations.ToBeRemoved;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.renderers.RecipeRenderer;
 import me.shedaniel.rei.gui.widget.CategoryBaseWidget;
@@ -32,9 +33,18 @@ public interface RecipeCategory<T extends RecipeDisplay> {
     /**
      * Gets the renderer of the icon, allowing developers to render things other than items
      *
+     * @see RecipeCategory#getLogo()
      * @return the renderer of the icon
      */
-    Renderer getIcon();
+    @ToBeRemoved
+    @Deprecated
+    default Renderer getIcon() {
+        return Renderer.empty();
+    }
+    
+    default EntryStack getLogo() {
+        return getIcon().getEntry();
+    }
     
     /**
      * Gets the category name
@@ -51,7 +61,7 @@ public interface RecipeCategory<T extends RecipeDisplay> {
      */
     @SuppressWarnings("unchecked")
     default RecipeRenderer getSimpleRenderer(T recipe) {
-        return Renderer.fromRecipe(recipe::getInput, recipe::getOutput);
+        return Renderer.fromRecipeEntries(recipe::getInputEntries, recipe::getOutputEntries);
     }
     
     /**
@@ -126,7 +136,9 @@ public interface RecipeCategory<T extends RecipeDisplay> {
      * Gets whether the category will check tags, useful for potions
      *
      * @return whether the category will check tags
+     * @deprecated no longer used
      */
+    @Deprecated
     default boolean checkTags() {
         return false;
     }

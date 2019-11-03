@@ -5,81 +5,19 @@
 
 package me.shedaniel.rei.plugin.smelting;
 
-import me.shedaniel.rei.api.TransferRecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
-import me.shedaniel.rei.server.ContainerInfo;
-import net.minecraft.block.entity.FurnaceBlockEntity;
-import net.minecraft.container.Container;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.AbstractCookingRecipe;
+import me.shedaniel.rei.plugin.cooking.DefaultCookingDisplay;
 import net.minecraft.recipe.SmeltingRecipe;
 import net.minecraft.util.Identifier;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-public class DefaultSmeltingDisplay implements TransferRecipeDisplay {
-    
-    private SmeltingRecipe display;
-    private List<List<ItemStack>> input;
-    private List<ItemStack> output;
+public class DefaultSmeltingDisplay extends DefaultCookingDisplay {
     
     public DefaultSmeltingDisplay(SmeltingRecipe recipe) {
-        this.display = recipe;
-        this.input = recipe.getPreviewInputs().stream().map(i -> Arrays.asList(i.getMatchingStacksClient())).collect(Collectors.toList());
-        this.input.add(FurnaceBlockEntity.createFuelTimeMap().keySet().stream().map(Item::getStackForRender).collect(Collectors.toList()));
-        this.output = Collections.singletonList(recipe.getOutput());
-    }
-    
-    @Override
-    public Optional<Identifier> getRecipeLocation() {
-        return Optional.ofNullable(display).map(AbstractCookingRecipe::getId);
-    }
-    
-    @Override
-    public List<List<ItemStack>> getInput() {
-        return input;
-    }
-    
-    public List<ItemStack> getFuel() {
-        return input.get(1);
-    }
-    
-    @Override
-    public List<ItemStack> getOutput() {
-        return output;
+        super(recipe);
     }
     
     @Override
     public Identifier getRecipeCategory() {
         return DefaultPlugin.SMELTING;
-    }
-    
-    @Override
-    public List<List<ItemStack>> getRequiredItems() {
-        return input;
-    }
-    
-    public Optional<SmeltingRecipe> getOptionalRecipe() {
-        return Optional.ofNullable(display);
-    }
-    
-    @Override
-    public int getWidth() {
-        return 1;
-    }
-    
-    @Override
-    public int getHeight() {
-        return 1;
-    }
-    
-    @Override
-    public List<List<ItemStack>> getOrganisedInput(ContainerInfo<Container> containerInfo, Container container) {
-        return display.getPreviewInputs().stream().map(i -> Arrays.asList(i.getMatchingStacksClient())).collect(Collectors.toList());
     }
 }

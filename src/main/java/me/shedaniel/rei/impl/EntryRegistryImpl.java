@@ -6,15 +6,12 @@
 package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.rei.api.Entry;
 import me.shedaniel.rei.api.EntryRegistry;
-import net.minecraft.fluid.Fluid;
+import me.shedaniel.rei.api.EntryStack;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.util.DefaultedList;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -22,16 +19,10 @@ import java.util.stream.Collectors;
 
 public class EntryRegistryImpl implements EntryRegistry {
     
-    private final CopyOnWriteArrayList<Entry> entries = Lists.newCopyOnWriteArrayList();
+    private final CopyOnWriteArrayList<EntryStack> entries = Lists.newCopyOnWriteArrayList();
     
     @Override
-    public List<Entry> getEntryList() {
-        return Collections.unmodifiableList(entries);
-    }
-    
-    @SuppressWarnings("deprecation")
-    @Override
-    public List<Entry> getModifiableEntryList() {
+    public List<EntryStack> getStacksList() {
         return entries;
     }
     
@@ -45,22 +36,17 @@ public class EntryRegistryImpl implements EntryRegistry {
     }
     
     @Override
-    public void registerItemStack(Item afterItem, ItemStack stack) {
+    public void registerEntryAfter(EntryStack afterEntry, EntryStack stack) {
         if (!stack.isEmpty() && !alreadyContain(stack))
-            if (afterItem == null || afterItem.equals(Items.AIR))
-                entries.add(Entry.create(stack));
+            if (afterEntry == null || afterEntry.isEmpty())
+                entries.add(stack);
             else {
                 int last = entries.size();
                 for (int i = 0; i < entries.size(); i++)
-                    if (entries.get(i).getEntryType() == Entry.Type.ITEM && entries.get(i).getItemStack().getItem().equals(afterItem))
+                    if (entries.get(i).equalsAll(afterEntry))
                         last = i + 1;
-                entries.add(last, Entry.create(stack));
+                entries.add(last, stack);
             }
-    }
-    
-    @Override
-    public void registerFluid(Fluid fluid) {
-        entries.add(Entry.create(fluid));
     }
     
 }

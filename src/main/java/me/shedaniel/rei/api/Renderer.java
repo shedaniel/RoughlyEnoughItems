@@ -5,6 +5,7 @@
 
 package me.shedaniel.rei.api;
 
+import me.shedaniel.rei.api.annotations.ToBeRemoved;
 import me.shedaniel.rei.gui.renderers.EmptyRenderer;
 import me.shedaniel.rei.gui.renderers.FluidRenderer;
 import me.shedaniel.rei.gui.renderers.ItemStackRenderer;
@@ -14,14 +15,17 @@ import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+@Deprecated
 public abstract class Renderer extends DrawableHelper {
     /**
      * Gets an item stack renderer by an item stack supplier
@@ -102,8 +106,14 @@ public abstract class Renderer extends DrawableHelper {
      * @param output the list of output items
      * @return the recipe renderer
      */
+    @ToBeRemoved
+    @Deprecated
     public static SimpleRecipeRenderer fromRecipe(Supplier<List<List<ItemStack>>> input, Supplier<List<ItemStack>> output) {
         return new SimpleRecipeRenderer(input, output);
+    }
+    
+    public static SimpleRecipeRenderer fromRecipeEntries(Supplier<List<List<EntryStack>>> input, Supplier<List<EntryStack>> output) {
+        return new SimpleRecipeRenderer(input, output, 0);
     }
     
     public static ItemStackRenderer fromItemStacks(List<ItemStack> stacks) {
@@ -184,6 +194,14 @@ public abstract class Renderer extends DrawableHelper {
      * @param delta  the delta
      */
     public abstract void render(int x, int y, double mouseX, double mouseY, float delta);
+    
+    public EntryStack getEntry() {
+        if (this instanceof ItemStackRenderer)
+            return EntryStack.create(((ItemStackRenderer) this).getItemStack());
+        if (this instanceof FluidRenderer)
+            return EntryStack.create(((FluidRenderer) this).getFluid());
+        return EntryStack.empty();
+    }
     
     @Nullable
     public QueuedTooltip getQueuedTooltip(float delta) {

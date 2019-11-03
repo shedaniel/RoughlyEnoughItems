@@ -15,8 +15,22 @@ public interface LiveRecipeGenerator<T extends RecipeDisplay> {
     
     Identifier getCategoryIdentifier();
     
-    Optional<List<T>> getRecipeFor(ItemStack stack);
+    @Deprecated
+    default Optional<List<T>> getRecipeFor(ItemStack stack) {
+        return Optional.empty();
+    }
     
-    Optional<List<T>> getUsageFor(ItemStack stack);
+    default Optional<List<T>> getRecipeFor(EntryStack entry) {
+        return Optional.empty();
+    }
+    
+    @Deprecated
+    default Optional<List<T>> getUsageFor(ItemStack stack) {
+        return Optional.empty();
+    }
+    
+    default Optional<List<T>> getUsageFor(EntryStack entry) {
+        return Optional.empty();
+    }
     
 }

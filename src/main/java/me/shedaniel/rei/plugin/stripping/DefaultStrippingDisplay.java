@@ -5,6 +5,7 @@
 
 package me.shedaniel.rei.plugin.stripping;
 
+import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.item.ItemStack;
@@ -15,28 +16,28 @@ import java.util.List;
 
 public class DefaultStrippingDisplay implements RecipeDisplay {
     
-    private ItemStack in, out;
+    private EntryStack in, out;
     
     public DefaultStrippingDisplay(ItemStack in, ItemStack out) {
-        this.in = in;
-        this.out = out;
+        this.in = EntryStack.create(in);
+        this.out = EntryStack.create(out);
     }
     
-    public final ItemStack getIn() {
+    public final EntryStack getIn() {
         return in;
     }
     
-    public final ItemStack getOut() {
+    public final EntryStack getOut() {
         return out;
     }
     
     @Override
-    public List<List<ItemStack>> getInput() {
+    public List<List<EntryStack>> getInputEntries() {
         return Collections.singletonList(Collections.singletonList(in));
     }
     
     @Override
-    public List<ItemStack> getOutput() {
+    public List<EntryStack> getOutputEntries() {
         return Collections.singletonList(out);
     }
     
@@ -46,8 +47,7 @@ public class DefaultStrippingDisplay implements RecipeDisplay {
     }
     
     @Override
-    public List<List<ItemStack>> getRequiredItems() {
-        return getInput();
+    public List<List<EntryStack>> getRequiredEntries() {
+        return getInputEntries();
     }
-    
 }
