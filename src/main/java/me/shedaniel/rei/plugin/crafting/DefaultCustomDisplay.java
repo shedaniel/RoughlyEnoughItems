@@ -7,14 +7,13 @@ package me.shedaniel.rei.plugin.crafting;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.util.Identifier;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class DefaultCustomDisplay implements DefaultCraftingDisplay {
     
@@ -24,14 +23,7 @@ public class DefaultCustomDisplay implements DefaultCraftingDisplay {
     private int width, height;
     
     public DefaultCustomDisplay(List<List<ItemStack>> input, List<ItemStack> output, Recipe<?> possibleRecipe) {
-        this(possibleRecipe, input.stream().map(i -> {
-                    List<EntryStack> entries = new ArrayList<>();
-                    for (ItemStack stack : i) {
-                        entries.add(EntryStack.create(stack));
-                    }
-                    return entries;
-                }).collect(Collectors.toList()),
-                output.stream().map(EntryStack::create).collect(Collectors.toList()));
+        this(possibleRecipe, CollectionUtils.map(input, i -> CollectionUtils.map(i, EntryStack::create)), CollectionUtils.map(output, EntryStack::create));
     }
     
     public DefaultCustomDisplay(Recipe<?> possibleRecipe, List<List<EntryStack>> input, List<EntryStack> output) {

@@ -20,6 +20,7 @@ import me.shedaniel.rei.gui.config.ItemCheatingMode;
 import me.shedaniel.rei.gui.config.ItemListOrdering;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.SearchArgument;
+import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -42,8 +43,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @SuppressWarnings({"deprecation", "rawtypes"})
 public class EntryListWidget extends Widget {
@@ -95,7 +94,7 @@ public class EntryListWidget extends Widget {
     public static List<String> tryGetItemStackToolTip(ItemStack itemStack, boolean careAboutAdvanced) {
         if (!searchBlacklisted.contains(itemStack.getItem()))
             try {
-                return itemStack.getTooltip(MinecraftClient.getInstance().player, MinecraftClient.getInstance().options.advancedItemTooltips && careAboutAdvanced ? TooltipContext.Default.ADVANCED : TooltipContext.Default.NORMAL).stream().map(Text::asFormattedString).collect(Collectors.toList());
+                return CollectionUtils.map(itemStack.getTooltip(MinecraftClient.getInstance().player, MinecraftClient.getInstance().options.advancedItemTooltips && careAboutAdvanced ? TooltipContext.Default.ADVANCED : TooltipContext.Default.NORMAL), Text::asFormattedString);
             } catch (Throwable e) {
                 e.printStackTrace();
                 searchBlacklisted.add(itemStack.getItem());
@@ -125,7 +124,7 @@ public class EntryListWidget extends Widget {
         Identifier id = Registry.FLUID.getId(fluid);
         if (I18n.hasTranslation("block." + id.toString().replaceFirst(":", ".")))
             return I18n.translate("block." + id.toString().replaceFirst(":", "."));
-        return Stream.of(id.getPath().split("_")).map(StringUtils::capitalize).collect(Collectors.joining(" "));
+        return CollectionUtils.mapAndJoinToString(id.getPath().split("_"), StringUtils::capitalize, " ");
     }
     
     public static String tryGetItemStackName(ItemStack stack) {
@@ -194,7 +193,7 @@ public class EntryListWidget extends Widget {
     private static AtomicReference<String> fillTooltip(EntryStack entry, AtomicReference<String> mod) {
         if (mod.get() == null)
             if (entry.getType() == EntryStack.Type.ITEM)
-                mod.set(tryGetItemStackToolTip(entry.getItemStack(), false).stream().collect(Collectors.joining("")).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT));
+                mod.set(CollectionUtils.joinToString(tryGetItemStackToolTip(entry.getItemStack(), false), "").replace(SPACE, EMPTY).toLowerCase(Locale.ROOT));
             else
                 mod.set(tryGetEntryStackName(entry).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT));
         return mod;
@@ -451,11 +450,11 @@ public class EntryListWidget extends Widget {
         lastSearchArgument.clear();
         List<EntryStack> os = new LinkedList<>(ol);
         if (RoughlyEnoughItemsCore.getConfigManager().getConfig().getItemListOrdering() != ItemListOrdering.registry)
-            os = ol.stream().sorted(ASCENDING_COMPARATOR).collect(Collectors.toList());
+            os.sort(ASCENDING_COMPARATOR);
         if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isItemListAscending())
             Collections.reverse(os);
         String[] splitSearchTerm = StringUtils.splitByWholeSeparatorPreserveAllTokens(searchTerm, "|");
-        Arrays.stream(splitSearchTerm).forEachOrdered(s -> {
+        for (String s : splitSearchTerm) {
             String[] split = StringUtils.split(s);
             SearchArgument[] arguments = new SearchArgument[split.length];
             for (int i = 0; i < split.length; i++) {
@@ -477,20 +476,20 @@ public class EntryListWidget extends Widget {
                 lastSearchArgument.add(arguments);
             else
                 lastSearchArgument.add(new SearchArgument[]{SearchArgument.ALWAYS});
-        });
+        }
         List<EntryStack> stacks = Collections.emptyList();
         if (lastSearchArgument.isEmpty())
             stacks = os;
         else
-            stacks = os.stream().filter(entry -> filterEntry(entry, lastSearchArgument)).collect(Collectors.toList());
+            stacks = CollectionUtils.filter(os, entry -> filterEntry(entry, lastSearchArgument));
         if (!RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() || stacks.isEmpty() || inventoryItems.isEmpty())
             return Collections.unmodifiableList(stacks);
         List<EntryStack> workingItems = RecipeHelper.getInstance().findCraftableEntriesByItems(inventoryItems);
         List<EntryStack> newList = Lists.newLinkedList();
         for (EntryStack workingItem : workingItems) {
-            Optional<EntryStack> any = stacks.stream().filter(i -> i.getItemStack() != null && i.equals(workingItem)).findAny();
-            if (any.isPresent())
-                newList.add(any.get());
+            EntryStack any = CollectionUtils.findFirstOrNullEquals(stacks, workingItem);
+            if (any != null)
+                newList.add(any);
         }
         if (newList.isEmpty())
             return Collections.unmodifiableList(stacks);
@@ -592,7 +591,7 @@ public class EntryListWidget extends Widget {
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             if (!interactable)
                 return super.mouseClicked(mouseX, mouseY, button);
-            if (ClientHelper.getInstance().isCheating()) {
+            if (containsMouse(mouseX, mouseY) && ClientHelper.getInstance().isCheating()) {
                 EntryStack entry = getCurrentEntry().copy();
                 if (entry.getType() == EntryStack.Type.ITEM) {
                     if (RoughlyEnoughItemsCore.getConfigManager().getConfig().getItemCheatingMode() == ItemCheatingMode.REI_LIKE)

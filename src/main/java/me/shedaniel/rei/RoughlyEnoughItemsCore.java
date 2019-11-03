@@ -136,9 +136,10 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         
         registerClothEvents();
         discoverPluginEntries();
-        FabricLoader.getInstance().getAllMods().stream().map(ModContainer::getMetadata).filter(metadata -> metadata.containsCustomElement("roughlyenoughitems:plugins")).forEach(modMetadata -> {
-            RoughlyEnoughItemsCore.LOGGER.error("[REI] REI plugin from " + modMetadata.getId() + " is not loaded because it is too old!");
-        });
+        for (ModContainer modContainer : FabricLoader.getInstance().getAllMods()) {
+            if (modContainer.getMetadata().containsCustomValue("roughlyenoughitems:plugins"))
+                RoughlyEnoughItemsCore.LOGGER.error("[REI] REI plugin from " + modContainer.getMetadata().getId() + " is not loaded because it is too old!");
+        }
         
         ClientSidePacketRegistry.INSTANCE.register(RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, (packetContext, packetByteBuf) -> {
             ItemStack stack = packetByteBuf.readItemStack();

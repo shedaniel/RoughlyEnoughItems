@@ -11,6 +11,7 @@ import me.shedaniel.rei.plugin.brewing.BrewingRecipe;
 import me.shedaniel.rei.plugin.brewing.DefaultBrewingDisplay;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemConvertible;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.PotionItem;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionUtil;
@@ -22,7 +23,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Mixin(BrewingRecipeRegistry.class)
@@ -53,16 +53,18 @@ public class MixinBrewingRecipeRegistry {
             rei_registerPotionType(potion_1);
         if (!REGISTERED_POTION_TYPES.contains(potion_2))
             rei_registerPotionType(potion_2);
-        SELF_POTION_TYPES.stream().map(Ingredient::getStackArray).forEach(itemStacks -> Arrays.stream(itemStacks).forEach(stack -> {
-            DefaultPlugin.registerBrewingDisplay(new DefaultBrewingDisplay(PotionUtil.setPotion(stack.copy(), potion_1), Ingredient.ofItems(new ItemConvertible[]{item_1}), PotionUtil.setPotion(stack.copy(), potion_2)));
-        }));
+        for (Ingredient type : SELF_POTION_TYPES) {
+            for (ItemStack stack : type.getStackArray()) {
+                DefaultPlugin.registerBrewingDisplay(new DefaultBrewingDisplay(PotionUtil.setPotion(stack.copy(), potion_1), Ingredient.ofItems(new ItemConvertible[]{item_1}), PotionUtil.setPotion(stack.copy(), potion_2)));
+            }
+        }
     }
     
     private static void rei_registerPotionType(Potion potion) {
         REGISTERED_POTION_TYPES.add(potion);
-        SELF_ITEM_RECIPES.forEach(recipe -> {
+        for (BrewingRecipe recipe : SELF_ITEM_RECIPES) {
             DefaultPlugin.registerBrewingDisplay(new DefaultBrewingDisplay(PotionUtil.setPotion(recipe.input.getStackForRender(), potion), recipe.ingredient, PotionUtil.setPotion(recipe.output.getStackForRender(), potion)));
-        });
+        }
     }
     
 }

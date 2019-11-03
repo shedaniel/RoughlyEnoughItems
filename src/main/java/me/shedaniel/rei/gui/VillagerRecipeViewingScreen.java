@@ -17,6 +17,7 @@ import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.gui.renderers.RecipeRenderer;
 import me.shedaniel.rei.gui.widget.*;
 import me.shedaniel.rei.impl.ScreenHelper;
+import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
@@ -37,7 +38,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class VillagerRecipeViewingScreen extends Screen {
     
@@ -247,7 +247,7 @@ public class VillagerRecipeViewingScreen extends Screen {
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int int_1) {
-        double height = buttonWidgets.stream().map(ButtonWidget::getBounds).collect(Collectors.summingDouble(Rectangle::getHeight));
+        double height = CollectionUtils.sumInt(buttonWidgets, b -> b.getBounds().getHeight());
         int actualHeight = scrollListBounds.height - 2;
         if (height > actualHeight && scrollBarAlpha > 0 && mouseY >= scrollListBounds.y + 1 && mouseY <= scrollListBounds.getMaxY() - 1) {
             double scrollbarPositionMinX = scrollListBounds.getMaxX() - 6;
@@ -271,7 +271,7 @@ public class VillagerRecipeViewingScreen extends Screen {
     
     @Override
     public boolean mouseScrolled(double double_1, double double_2, double double_3) {
-        double height = buttonWidgets.stream().map(ButtonWidget::getBounds).collect(Collectors.summingDouble(Rectangle::getHeight));
+        double height = CollectionUtils.sumInt(buttonWidgets, b -> b.getBounds().getHeight());
         if (scrollListBounds.contains(double_1, double_2) && height > scrollListBounds.height - 2) {
             if (double_3 > 0)
                 scroll -= 16;
@@ -355,7 +355,7 @@ public class VillagerRecipeViewingScreen extends Screen {
                 ScreenHelper.getLastOverlay().addTooltip(recipeRenderers.get(i).getQueuedTooltip(delta));
             }
         }
-        double height = buttonWidgets.stream().map(ButtonWidget::getBounds).collect(Collectors.summingDouble(Rectangle::getHeight));
+        double height = CollectionUtils.sumInt(buttonWidgets, b -> b.getBounds().getHeight());
         if (height > scrollListBounds.height - 2) {
             Tessellator tessellator = Tessellator.getInstance();
             BufferBuilder buffer = tessellator.getBufferBuilder();
@@ -392,7 +392,7 @@ public class VillagerRecipeViewingScreen extends Screen {
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int int_1, double double_3, double double_4) {
         if (int_1 == 0 && scrollBarAlpha > 0 && draggingScrollBar) {
-            double height = buttonWidgets.stream().map(ButtonWidget::getBounds).collect(Collectors.summingDouble(Rectangle::getHeight));
+            double height = CollectionUtils.sumInt(buttonWidgets, b -> b.getBounds().getHeight());
             int actualHeight = scrollListBounds.height - 2;
             if (height > actualHeight && mouseY >= scrollListBounds.y + 1 && mouseY <= scrollListBounds.getMaxY() - 1) {
                 int int_3 = MathHelper.clamp((int) ((actualHeight * actualHeight) / height), 32, actualHeight - 8);

@@ -13,6 +13,7 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.gui.widget.*;
 import me.shedaniel.rei.impl.ScreenHelper;
+import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
@@ -123,7 +124,8 @@ public class RecipeViewingScreen extends Screen {
         this.widgets.clear();
         this.largestWidth = width - 100;
         this.largestHeight = height - 40;
-        this.guiWidth = MathHelper.clamp(getCurrentDisplayed().stream().map(display -> selectedCategory.getDisplayWidth(display)).max(Integer::compareTo).orElse(150) + 30, 0, largestWidth);
+        int maxWidthDisplay = CollectionUtils.mapAndMax(getCurrentDisplayed(), display -> selectedCategory.getDisplayWidth((RecipeDisplay) display), (Comparator<Integer>) Comparator.naturalOrder()).orElse(150);
+        this.guiWidth = MathHelper.clamp(maxWidthDisplay, 0, largestWidth);
         this.guiHeight = MathHelper.floor(MathHelper.clamp((selectedCategory.getDisplayHeight() + 7d) * (getRecipesPerPage() + 1d) + 40d, 186d, (double) largestHeight));
         this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - guiHeight / 2, guiWidth, guiHeight);
         this.page = MathHelper.clamp(page, 0, getTotalPages(selectedCategory) - 1);
@@ -379,7 +381,10 @@ public class RecipeViewingScreen extends Screen {
                 fill(bounds.x + 17, bounds.y + 21, bounds.x + bounds.width - 17, bounds.y + 33, 0xFF9E9E9E);
             }
         }
-        tabs.stream().filter(tabWidget -> !tabWidget.isSelected()).forEach(tabWidget -> tabWidget.render(mouseX, mouseY, delta));
+        for (TabWidget tab : tabs) {
+            if (!tab.isSelected())
+                tab.render(mouseX, mouseY, delta);
+        }
         GuiLighting.disable();
         super.render(mouseX, mouseY, delta);
         widgets.forEach(widget -> {
@@ -388,7 +393,10 @@ public class RecipeViewingScreen extends Screen {
         });
         RenderHelper.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GuiLighting.disable();
-        tabs.stream().filter(TabWidget::isSelected).forEach(tabWidget -> tabWidget.render(mouseX, mouseY, delta));
+        for (TabWidget tab : tabs) {
+            if (tab.isSelected())
+                tab.render(mouseX, mouseY, delta);
+        }
         GuiLighting.disable();
         ScreenHelper.getLastOverlay().render(mouseX, mouseY, delta);
         ScreenHelper.getLastOverlay().lateRender(mouseX, mouseY, delta);

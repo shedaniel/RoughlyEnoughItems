@@ -10,7 +10,6 @@ import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.compat.RenderHelper;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeCategory;
-import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.gui.widget.EntryWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.Widget;
@@ -19,7 +18,6 @@ import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
@@ -37,8 +35,8 @@ public class DefaultBrewingCategory implements RecipeCategory<DefaultBrewingDisp
     }
     
     @Override
-    public Renderer getIcon() {
-        return Renderer.fromItemStack(new ItemStack(Blocks.BREWING_STAND));
+    public EntryStack getLogo() {
+        return EntryStack.create(Blocks.BREWING_STAND);
     }
     
     @Override
