@@ -21,7 +21,6 @@ import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.Window;
-import net.minecraft.item.ItemStack;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
@@ -125,7 +124,7 @@ public class RecipeViewingScreen extends Screen {
         this.largestWidth = width - 100;
         this.largestHeight = height - 40;
         int maxWidthDisplay = CollectionUtils.mapAndMax(getCurrentDisplayed(), display -> selectedCategory.getDisplayWidth((RecipeDisplay) display), (Comparator<Integer>) Comparator.naturalOrder()).orElse(150);
-        this.guiWidth = MathHelper.clamp(maxWidthDisplay, 0, largestWidth);
+        this.guiWidth = MathHelper.clamp(maxWidthDisplay + 30, 0, largestWidth);
         this.guiHeight = MathHelper.floor(MathHelper.clamp((selectedCategory.getDisplayHeight() + 7d) * (getRecipesPerPage() + 1d) + 40d, 186d, (double) largestHeight));
         this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - guiHeight / 2, guiWidth, guiHeight);
         this.page = MathHelper.clamp(page, 0, getTotalPages(selectedCategory) - 1);
@@ -295,7 +294,7 @@ public class RecipeViewingScreen extends Screen {
         else
             recipeChoosePageWidget = null;
         
-        List<List<ItemStack>> workingStations = RoughlyEnoughItemsCore.getRecipeHelper().getWorkingStations(selectedCategory.getIdentifier());
+        List<List<EntryStack>> workingStations = RoughlyEnoughItemsCore.getRecipeHelper().getWorkingStations(selectedCategory.getIdentifier());
         if (!workingStations.isEmpty()) {
             int hh = MathHelper.floor((bounds.height - 16) / 18f);
             int actualHeight = Math.min(hh, workingStations.size());
@@ -306,8 +305,8 @@ public class RecipeViewingScreen extends Screen {
             int index = 0;
             List<String> list = Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("text.rei.working_station"));
             xx += (innerWidth - 1) * 18;
-            for (List<ItemStack> workingStation : workingStations) {
-                preWidgets.add(new SlotWidget(xx, yy, Renderer.fromItemStacks(() -> workingStation, true, stack -> list), true, true, true));
+            for (List<EntryStack> workingStation : workingStations) {
+                preWidgets.add(EntryWidget.create(xx, yy).entries(CollectionUtils.map(workingStation, stack -> stack.copy().setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> list))));
                 index++;
                 yy += 18;
                 if (index >= hh) {

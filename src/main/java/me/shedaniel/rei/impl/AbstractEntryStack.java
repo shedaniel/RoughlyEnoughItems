@@ -68,11 +68,11 @@ public abstract class AbstractEntryStack extends DrawableHelper implements Entry
     
     @Override
     public int getZ() {
-        return blitOffset;
+        return getBlitOffset();
     }
     
     @Override
     public void setZ(int z) {
-        blitOffset = z;
+        setBlitOffset(z);
     }
 }

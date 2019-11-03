@@ -5,14 +5,14 @@
 
 package me.shedaniel.rei.plugin.cooking;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
-import me.shedaniel.math.compat.RenderHelper;
 import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.api.TransferRecipeCategory;
-import me.shedaniel.rei.gui.renderers.RecipeRenderer;
+import me.shedaniel.rei.gui.entries.RecipeEntry;
+import me.shedaniel.rei.gui.renderers.SimpleRecipeEntry;
 import me.shedaniel.rei.gui.widget.EntryWidget;
 import me.shedaniel.rei.gui.widget.RecipeArrowWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
@@ -26,6 +26,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -44,11 +45,11 @@ public class DefaultCookingCategory implements TransferRecipeCategory<DefaultCoo
     @Override
     public void renderRedSlots(List<Widget> widgets, Rectangle bounds, DefaultCookingDisplay display, IntList redSlots) {
         Point startPoint = new Point(bounds.getCenterX() - 41, bounds.getCenterY() - 27);
-        RenderHelper.translatef(0, 0, 400);
+        RenderSystem.translatef(0, 0, 400);
         if (redSlots.contains(0)) {
             DrawableHelper.fill(startPoint.x + 1, startPoint.y + 1, startPoint.x + 1 + 16, startPoint.y + 1 + 16, 822018048);
         }
-        RenderHelper.translatef(0, 0, -400);
+        RenderSystem.translatef(0, 0, -400);
     }
     
     @Override
@@ -58,7 +59,7 @@ public class DefaultCookingCategory implements TransferRecipeCategory<DefaultCoo
             @Override
             public void render(int mouseX, int mouseY, float delta) {
                 super.render(mouseX, mouseY, delta);
-                RenderHelper.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                 GuiLighting.disable();
                 MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
                 blit(startPoint.x, startPoint.y, 0, 54, 82, 54);
@@ -75,8 +76,8 @@ public class DefaultCookingCategory implements TransferRecipeCategory<DefaultCoo
     }
     
     @Override
-    public RecipeRenderer getSimpleRenderer(DefaultCookingDisplay recipe) {
-        return Renderer.fromRecipeEntries(() -> Arrays.asList(recipe.getInputEntries().get(0)), recipe::getOutputEntries);
+    public RecipeEntry getSimpleRenderer(DefaultCookingDisplay recipe) {
+        return SimpleRecipeEntry.create(Collections.singletonList(recipe.getInputEntries().get(0)), recipe.getOutputEntries());
     }
     
     @Override

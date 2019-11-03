@@ -6,16 +6,18 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget.Interpolation;
 import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget.Precision;
 import me.shedaniel.math.api.Rectangle;
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.api.annotations.ToBeRemoved;
+import me.shedaniel.rei.api.ClientHelper;
+import me.shedaniel.rei.api.DisplayHelper;
+import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.gui.config.ItemCheatingMode;
 import me.shedaniel.rei.gui.config.ItemListOrdering;
 import me.shedaniel.rei.impl.ScreenHelper;
@@ -100,16 +102,6 @@ public class EntryListWidget extends Widget {
                 searchBlacklisted.add(itemStack.getItem());
             }
         return Collections.singletonList(tryGetItemStackName(itemStack));
-    }
-    
-    @ToBeRemoved
-    @Deprecated
-    public static String tryGetEntryName(Entry stack) {
-        if (stack.getEntryType() == Entry.Type.ITEM)
-            return tryGetItemStackName(stack.getItemStack());
-        else if (stack.getEntryType() == Entry.Type.FLUID)
-            return tryGetFluidName(stack.getFluid());
-        return "";
     }
     
     public static String tryGetEntryStackName(EntryStack stack) {
@@ -357,7 +349,7 @@ public class EntryListWidget extends Widget {
         this.widgets = Lists.newCopyOnWriteArrayList();
         calculateListSize(rectangle);
         if (currentDisplayed.isEmpty() || processSearchTerm)
-            currentDisplayed = processSearchTerm(searchTerm, RoughlyEnoughItemsCore.getEntryRegistry().getStacksList(), new ArrayList<>(ScreenHelper.inventoryStacks));
+            currentDisplayed = processSearchTerm(searchTerm, RoughlyEnoughItemsCore.getEntryRegistry().getStacksList(), CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create));
         int startX = rectangle.getCenterX() - width * 9;
         int startY = rectangle.getCenterY() - height * 9;
         this.listArea = new Rectangle(startX, startY, width * 18, height * 18);
@@ -446,7 +438,7 @@ public class EntryListWidget extends Widget {
         return currentDisplayed;
     }
     
-    private List<EntryStack> processSearchTerm(String searchTerm, List<EntryStack> ol, List<ItemStack> inventoryItems) {
+    private List<EntryStack> processSearchTerm(String searchTerm, List<EntryStack> ol, List<EntryStack> inventoryItems) {
         lastSearchArgument.clear();
         List<EntryStack> os = new LinkedList<>(ol);
         if (RoughlyEnoughItemsCore.getConfigManager().getConfig().getItemListOrdering() != ItemListOrdering.registry)

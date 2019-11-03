@@ -36,7 +36,7 @@ public abstract class CraftableToggleButtonWidget extends ButtonWidget {
         GuiLighting.disable();
         super.render(mouseX, mouseY, delta);
         
-//        GuiLighting.enableForItems();
+        //        GuiLighting.enableForItems();
         this.itemRenderer.zOffset = getBlitOffset();
         this.itemRenderer.renderGuiItem(new ItemStack(Blocks.CRAFTING_TABLE), getBounds().x + 2, getBounds().y + 2);
         this.itemRenderer.zOffset = 0.0F;

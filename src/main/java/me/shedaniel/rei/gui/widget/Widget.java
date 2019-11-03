@@ -27,11 +27,11 @@ public abstract class Widget extends AbstractParentElement implements Drawable {
     protected final TextRenderer font = minecraft.textRenderer;
     
     public int getZ() {
-        return this.blitOffset;
+        return this.getBlitOffset();
     }
     
     public void setZ(int z) {
-        this.blitOffset = z;
+        this.setBlitOffset(z);
     }
     
 }

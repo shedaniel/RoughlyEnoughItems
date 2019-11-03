@@ -30,7 +30,7 @@ public class DefaultBrewingDisplay implements RecipeDisplay {
         if (this.input.getItem() instanceof PotionItem)
             this.input = this.input.setting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE);
         this.reactant = new ArrayList<>();
-        for (ItemStack stack : reactant.getStackArray()) {
+        for (ItemStack stack : reactant.getMatchingStacksClient()) {
             EntryStack entryStack = EntryStack.create(stack);
             if (stack.getItem() instanceof PotionItem)
                 entryStack.setting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE);

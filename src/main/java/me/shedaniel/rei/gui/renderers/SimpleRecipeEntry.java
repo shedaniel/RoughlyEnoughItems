@@ -6,13 +6,14 @@
 package me.shedaniel.rei.gui.renderers;
 
 import com.google.common.collect.Lists;
+import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.Renderer;
-import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
+import me.shedaniel.rei.gui.entries.RecipeEntry;
+import me.shedaniel.rei.gui.widget.EntryWidget;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
+import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GuiLighting;
-import net.minecraft.fluid.Fluid;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
@@ -26,7 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class SimpleRecipeRenderer extends RecipeRenderer {
+public class SimpleRecipeEntry extends RecipeEntry {
     
     private static final Comparator<EntryStack> ENTRY_COMPARATOR = (o1, o2) -> {
         if (o1.getType() == EntryStack.Type.FLUID) {
@@ -53,19 +54,12 @@ public class SimpleRecipeRenderer extends RecipeRenderer {
         return i1.getItem().hashCode() - i2.getItem().hashCode();
     };
     private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
-    private List<Renderer> inputRenderer;
-    private Renderer outputRenderer;
-    private QueuedTooltip lastTooltip;
+    private List<EntryWidget> inputWidgets;
+    private EntryWidget outputWidget;
     
-    @Deprecated
-    public SimpleRecipeRenderer(Supplier<List<List<ItemStack>>> input, Supplier<List<ItemStack>> output) {
-        this(() -> (List<List<EntryStack>>) input.get().stream().map(s -> s.stream().map(EntryStack::create).collect(Collectors.toList())).collect(Collectors.toList()),
-                () -> output.get().stream().map(EntryStack::create).collect(Collectors.toList()), 0);
-    }
-    
-    public SimpleRecipeRenderer(Supplier<List<List<EntryStack>>> input, Supplier<List<EntryStack>> output, int forDifferentConstructor) {
+    protected SimpleRecipeEntry(List<List<EntryStack>> input, List<EntryStack> output) {
         List<Pair<List<EntryStack>, AtomicInteger>> newList = Lists.newArrayList();
-        List<Pair<List<EntryStack>, Integer>> a = input.get().stream().map(stacks -> new Pair<>(stacks, stacks.stream().map(EntryStack::getAmount).max(Integer::compareTo).orElse(1))).collect(Collectors.toList());
+        List<Pair<List<EntryStack>, Integer>> a = input.stream().map(stacks -> new Pair<>(stacks, stacks.stream().map(EntryStack::getAmount).max(Integer::compareTo).orElse(1))).collect(Collectors.toList());
         for (Pair<List<EntryStack>, Integer> pair : a) {
             Optional<Pair<List<EntryStack>, AtomicInteger>> any = newList.stream().filter(pairr -> equalsList(pair.getLeft(), pairr.getLeft())).findAny();
             if (any.isPresent()) {
@@ -80,31 +74,18 @@ public class SimpleRecipeRenderer extends RecipeRenderer {
                 s.setAmount(pair.getRight().get());
                 return s;
             }).collect(Collectors.toList()));
-        this.inputRenderer = b.stream().filter(stacks -> !stacks.isEmpty()).map(stacks -> fromEntries(stacks)).collect(Collectors.toList());
-        this.outputRenderer = fromEntries(output.get().stream().filter(stack -> !stack.isEmpty()).collect(Collectors.toList()));
+        this.inputWidgets = b.stream().filter(stacks -> !stacks.isEmpty()).map(stacks -> {
+            return EntryWidget.create(0, 0).entries(stacks).noBackground().noHighlight().noTooltips();
+        }).collect(Collectors.toList());
+        this.outputWidget = EntryWidget.create(0, 0).entries(CollectionUtils.filter(output, stack -> !stack.isEmpty())).noBackground().noHighlight().noTooltips();
     }
     
-    @Deprecated
-    private static Renderer fromEntries(List<EntryStack> entries) {
-        boolean isItem = true;
-        for (EntryStack entry : entries) {
-            if (entry.getType() != EntryStack.Type.ITEM)
-                isItem = false;
-        }
-        if (isItem)
-            return Renderer.fromItemStacks(entries.stream().map(EntryStack::getItemStack).collect(Collectors.toList()));
-        boolean isFluid = true;
-        for (EntryStack entry : entries) {
-            if (entry.getType() != EntryStack.Type.FLUID)
-                isFluid = false;
-        }
-        
-        if (isFluid) {
-            List<Fluid> fluids = entries.stream().map(EntryStack::getFluid).collect(Collectors.toList());
-            if (!fluids.isEmpty())
-                return Renderer.fromFluid(fluids.get(0));
-        }
-        return Renderer.empty();
+    public static RecipeEntry create(Supplier<List<List<EntryStack>>> input, Supplier<List<EntryStack>> output) {
+        return create(input.get(), output.get());
+    }
+    
+    public static RecipeEntry create(List<List<EntryStack>> input, List<EntryStack> output) {
+        return new SimpleRecipeEntry(input, output);
     }
     
     public static boolean equalsList(List<EntryStack> list_1, List<EntryStack> list_2) {
@@ -121,42 +102,43 @@ public class SimpleRecipeRenderer extends RecipeRenderer {
     }
     
     @Override
-    public void render(int x, int y, double mouseX, double mouseY, float delta) {
-        lastTooltip = null;
-        int xx = x + 4, yy = y + 2;
+    public void render(Rectangle bounds, int mouseX, int mouseY, float delta) {
+        int xx = bounds.x + 4, yy = bounds.y + 2;
         int j = 0;
         int itemsPerLine = getItemsPerLine();
-        for (Renderer itemStackRenderer : inputRenderer) {
-            itemStackRenderer.setBlitOffset(getBlitOffset() + 50);
-            if (lastTooltip == null && MinecraftClient.getInstance().currentScreen instanceof VillagerRecipeViewingScreen && mouseX >= xx && mouseX <= xx + 16 && mouseY >= yy && mouseY <= yy + 16) {
-                lastTooltip = itemStackRenderer.getQueuedTooltip(delta);
-            }
-            itemStackRenderer.render(xx + 8, yy + 6, mouseX, mouseY, delta);
+        for (EntryWidget entryWidget : inputWidgets) {
+            entryWidget.setZ(getZ() + 50);
+            entryWidget.getBounds().setLocation(xx, yy);
+            entryWidget.render(mouseX, mouseY, delta);
             xx += 18;
             j++;
             if (j >= getItemsPerLine() - 2) {
                 yy += 18;
-                xx = x + 5;
+                xx = bounds.x + 4;
                 j = 0;
             }
         }
-        xx = x + 5 + 18 * (getItemsPerLine() - 2);
-        yy = y + getHeight() / 2 - 8;
+        xx = bounds.x + 4 + 18 * (getItemsPerLine() - 2);
+        yy = bounds.y + getHeight() / 2 - 8;
         GuiLighting.disable();
         MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
         blit(xx, yy, 0, 28, 18, 18);
         xx += 18;
-        outputRenderer.setBlitOffset(getBlitOffset() + 50);
-        outputRenderer.render(xx + 8, yy + 6, mouseX, mouseY, delta);
-        if (lastTooltip == null && MinecraftClient.getInstance().currentScreen instanceof VillagerRecipeViewingScreen && mouseX >= xx && mouseX <= xx + 16 && mouseY >= yy && mouseY <= yy + 16) {
-            lastTooltip = outputRenderer.getQueuedTooltip(delta);
-        }
+        outputWidget.setZ(getZ() + 50);
+        outputWidget.getBounds().setLocation(xx, yy);
+        outputWidget.render(mouseX, mouseY, delta);
     }
     
     @Nullable
     @Override
-    public QueuedTooltip getQueuedTooltip(float delta) {
-        return lastTooltip;
+    public QueuedTooltip getTooltip(int mouseX, int mouseY) {
+        for (EntryWidget widget : inputWidgets) {
+            if (widget.containsMouse(mouseX, mouseY))
+                return widget.getCurrentTooltip(mouseX, mouseY);
+        }
+        if (outputWidget.containsMouse(mouseX, mouseY))
+            return outputWidget.getCurrentTooltip(mouseX, mouseY);
+        return null;
     }
     
     @Override
@@ -165,7 +147,7 @@ public class SimpleRecipeRenderer extends RecipeRenderer {
     }
     
     public int getItemsHeight() {
-        return MathHelper.ceil(((float) inputRenderer.size()) / (getItemsPerLine() - 2));
+        return MathHelper.ceil(((float) inputWidgets.size()) / (getItemsPerLine() - 2));
     }
     
     public int getItemsPerLine() {

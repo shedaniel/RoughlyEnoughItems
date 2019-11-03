@@ -20,27 +20,6 @@ public interface TransferRecipeDisplay extends RecipeDisplay {
     
     int getHeight();
     
-    default List<List<ItemStack>> getOrganisedInput(ContainerInfo<Container> containerInfo, Container container) {
-        List<List<ItemStack>> list = Lists.newArrayListWithCapacity(containerInfo.getCraftingWidth(container) * containerInfo.getCraftingHeight(container));
-        for (int i = 0; i < containerInfo.getCraftingWidth(container) * containerInfo.getCraftingHeight(container); i++) {
-            list.add(Lists.newArrayList());
-        }
-        return list;
-    }
-    
-    default List<List<EntryStack>> getOrganisedInputEntries(ContainerInfo<Container> containerInfo, Container container) {
-        List<List<ItemStack>> input = getOrganisedInput(containerInfo, container);
-        if (input.isEmpty())
-            return Collections.emptyList();
-        List<List<EntryStack>> list = new ArrayList<>();
-        for (List<ItemStack> stacks : input) {
-            List<EntryStack> entries = new ArrayList<>();
-            for (ItemStack stack : stacks) {
-                entries.add(EntryStack.create(stack));
-            }
-            list.add(entries);
-        }
-        return list;
-    }
+    List<List<EntryStack>> getOrganisedInputEntries(ContainerInfo<Container> containerInfo, Container container);
     
 }

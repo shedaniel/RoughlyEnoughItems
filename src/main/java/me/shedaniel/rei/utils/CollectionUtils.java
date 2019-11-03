@@ -1,3 +1,8 @@
+/*
+ * Roughly Enough Items by Danielshe.
+ * Licensed under the MIT License.
+ */
+
 package me.shedaniel.rei.utils;
 
 import me.shedaniel.rei.api.EntryStack;
@@ -151,10 +156,26 @@ public class CollectionUtils {
         return sum;
     }
     
+    public static final <T> int sumInt(List<Integer> list) {
+        int sum = 0;
+        for (Integer t : list) {
+            sum += t;
+        }
+        return sum;
+    }
+    
     public static final <T> double sumDouble(List<T> list, Function<T, Double> function) {
         double sum = 0;
         for (T t : list) {
             sum += function.apply(t);
+        }
+        return sum;
+    }
+    
+    public static final <T> double sumDouble(List<Double> list) {
+        double sum = 0;
+        for (Double t : list) {
+            sum += t;
         }
         return sum;
     }

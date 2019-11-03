@@ -5,8 +5,8 @@
 
 package me.shedaniel.rei.gui.widget;
 
-import me.shedaniel.math.api.Rectangle;
 import com.mojang.blaze3d.systems.RenderSystem;
+import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;

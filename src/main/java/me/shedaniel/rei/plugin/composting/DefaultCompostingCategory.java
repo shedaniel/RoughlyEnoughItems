@@ -6,13 +6,14 @@
 package me.shedaniel.rei.plugin.composting;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeCategory;
-import me.shedaniel.rei.gui.renderers.RecipeRenderer;
+import me.shedaniel.rei.gui.entries.RecipeEntry;
 import me.shedaniel.rei.gui.widget.EntryWidget;
+import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
@@ -24,6 +25,7 @@ import net.minecraft.item.ItemConvertible;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,16 +50,22 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
     }
     
     @Override
-    public RecipeRenderer getSimpleRenderer(DefaultCompostingDisplay recipe) {
-        return new RecipeRenderer() {
+    public RecipeEntry getSimpleRenderer(DefaultCompostingDisplay recipe) {
+        return new RecipeEntry() {
             @Override
             public int getHeight() {
                 return 10 + MinecraftClient.getInstance().textRenderer.fontHeight;
             }
             
+            @Nullable
             @Override
-            public void render(int x, int y, double mouseX, double mouseY, float delta) {
-                MinecraftClient.getInstance().textRenderer.draw(I18n.translate("text.rei.composting.page", recipe.getPage() + 1), x + 5, y + 6, -1);
+            public QueuedTooltip getTooltip(int mouseX, int mouseY) {
+                return null;
+            }
+            
+            @Override
+            public void render(Rectangle rectangle, int mouseX, int mouseY, float delta) {
+                MinecraftClient.getInstance().textRenderer.draw(I18n.translate("text.rei.composting.page", recipe.getPage() + 1), rectangle.x + 5, rectangle.y + 6, -1);
             }
         };
     }

@@ -5,12 +5,11 @@
 
 package me.shedaniel.rei.gui.widget;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Rectangle;
-import me.shedaniel.math.compat.RenderHelper;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.annotations.Experimental;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.gui.Element;
 import net.minecraft.util.Identifier;
@@ -21,7 +20,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-@Experimental
 public class EntryWidget extends WidgetWithBounds {
     
     protected static final Identifier RECIPE_GUI = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
@@ -138,30 +136,33 @@ public class EntryWidget extends WidgetWithBounds {
     
     protected void drawCurrentEntry(int mouseX, int mouseY, float delta) {
         EntryStack entry = getCurrentEntry();
-        entry.setZ(200);
+        entry.setZ(100);
         entry.render(getInnerBounds(), mouseX, mouseY, delta);
     }
     
     protected void queueTooltip(int mouseX, int mouseY, float delta) {
-        EntryStack entry = getCurrentEntry();
-        QueuedTooltip tooltip = entry.getTooltip(mouseX, mouseY);
+        QueuedTooltip tooltip = getCurrentTooltip(mouseX, mouseY);
         if (tooltip != null) {
             ScreenHelper.getLastOverlay().addTooltip(tooltip);
         }
     }
     
+    public QueuedTooltip getCurrentTooltip(int mouseX, int mouseY) {
+        return getCurrentEntry().getTooltip(mouseX, mouseY);
+    }
+    
     protected void drawHighlighted(int mouseX, int mouseY, float delta) {
-        RenderHelper.disableLighting();
-        RenderHelper.disableDepthTest();
-        RenderHelper.colorMask(true, true, true, false);
+        RenderSystem.disableLighting();
+        RenderSystem.disableDepthTest();
+        RenderSystem.colorMask(true, true, true, false);
         int color = ScreenHelper.isDarkModeEnabled() ? -1877929711 : -2130706433;
-        blitOffset = 300;
+        setZ(300);
         Rectangle bounds = getInnerBounds();
         fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), color, color);
-        blitOffset = 0;
-        RenderHelper.colorMask(true, true, true, true);
-        RenderHelper.enableLighting();
-        RenderHelper.enableDepthTest();
+        setZ(0);
+        RenderSystem.colorMask(true, true, true, true);
+        RenderSystem.enableLighting();
+        RenderSystem.enableDepthTest();
     }
     
     @Override

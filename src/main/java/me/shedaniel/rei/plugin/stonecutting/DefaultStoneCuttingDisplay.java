@@ -35,7 +35,7 @@ public class DefaultStoneCuttingDisplay implements RecipeDisplay {
     public DefaultStoneCuttingDisplay(DefaultedList<Ingredient> ingredients, ItemStack output) {
         this.inputs = ingredients.stream().map(i -> {
             List<EntryStack> entries = new ArrayList<>();
-            for (ItemStack stack : i.getStackArray()) {
+            for (ItemStack stack : i.getMatchingStacksClient()) {
                 entries.add(EntryStack.create(stack));
             }
             return entries;

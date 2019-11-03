@@ -5,9 +5,9 @@
 
 package me.shedaniel.rei.plugin.stripping;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.gui.widget.EntryWidget;

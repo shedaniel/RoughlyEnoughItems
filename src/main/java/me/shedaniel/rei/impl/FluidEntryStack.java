@@ -9,7 +9,6 @@ import com.google.common.collect.Lists;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.Entry;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.gui.widget.EntryListWidget;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
@@ -89,11 +88,6 @@ public class FluidEntryStack extends AbstractEntryStack {
     @Override
     public boolean isEmpty() {
         return amount <= 0 || fluid == Fluids.EMPTY;
-    }
-    
-    @Override
-    public Entry toEntry() {
-        return Entry.create(getFluid());
     }
     
     @Override

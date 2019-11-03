@@ -7,7 +7,6 @@ package me.shedaniel.rei.gui.widget;
 
 import me.shedaniel.math.api.Point;
 import me.shedaniel.rei.impl.ScreenHelper;
-import net.minecraft.util.Formatting;
 
 import java.util.Optional;
 
@@ -15,14 +14,21 @@ public abstract class ClickableLabelWidget extends LabelWidget {
     
     public boolean focused;
     public boolean clickable;
+    public int hoveredColor;
     
     public ClickableLabelWidget(int x, int y, String text, boolean clickable) {
         super(x, y, text);
         this.clickable = clickable;
+        this.hoveredColor = ScreenHelper.isDarkModeEnabled() ? -1 : 0xFF66FFCC;
     }
     
     public ClickableLabelWidget(int x, int y, String text) {
         this(x, y, text, true);
+    }
+    
+    public LabelWidget hoveredColor(int hoveredColor) {
+        this.hoveredColor = hoveredColor;
+        return this;
     }
     
     @Override
@@ -32,9 +38,9 @@ public abstract class ClickableLabelWidget extends LabelWidget {
             color = getHoveredColor();
         int width = font.getStringWidth(text);
         if (isHasShadows())
-            font.drawWithShadow((isHovered(mouseX, mouseY) ? Formatting.UNDERLINE.toString() : "") + text, x - width / 2, y, color);
+            font.drawWithShadow(text, x - width / 2, y, color);
         else
-            font.draw((isHovered(mouseX, mouseY) ? Formatting.UNDERLINE.toString() : "") + text, x - width / 2, y, color);
+            font.draw(text, x - width / 2, y, color);
         if (clickable && getTooltips().isPresent())
             if (!focused && containsMouse(mouseX, mouseY))
                 ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltips().get().split("\n")));
@@ -43,7 +49,7 @@ public abstract class ClickableLabelWidget extends LabelWidget {
     }
     
     public int getHoveredColor() {
-        return ScreenHelper.isDarkModeEnabled() ? -1 : 0xFF66FFCC;
+        return hoveredColor;
     }
     
     @Override
