@@ -6,6 +6,7 @@
 package me.shedaniel.rei.gui.widget;
 
 import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.gui.Element;
 
 import java.util.Collections;
@@ -16,11 +17,30 @@ public class LabelWidget extends WidgetWithBounds {
     public int x;
     public int y;
     public String text;
+    private int defaultColor;
+    private boolean hasShadows = true;
     
     public LabelWidget(int x, int y, String text) {
         this.x = x;
         this.y = y;
         this.text = text;
+        this.defaultColor = ScreenHelper.isDarkModeEnabled() ? 0xFFBBBBBB : -1;
+    }
+    
+    public boolean isHasShadows() {
+        return hasShadows;
+    }
+    
+    public void setHasShadows(boolean hasShadows) {
+        this.hasShadows = hasShadows;
+    }
+    
+    public int getDefaultColor() {
+        return defaultColor;
+    }
+    
+    public void setDefaultColor(int defaultColor) {
+        this.defaultColor = defaultColor;
     }
     
     @Override
@@ -36,7 +56,10 @@ public class LabelWidget extends WidgetWithBounds {
     
     @Override
     public void render(int mouseX, int mouseY, float delta) {
-        drawCenteredString(font, text, x, y, -1);
+        int width = font.getStringWidth(text);
+        if (hasShadows)
+            font.drawWithShadow(text, x - width / 2, y, defaultColor);
+        else font.draw(text, x - width / 2, y, defaultColor);
     }
     
 }

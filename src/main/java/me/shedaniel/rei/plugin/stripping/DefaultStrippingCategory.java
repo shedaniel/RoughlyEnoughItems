@@ -8,16 +8,15 @@ package me.shedaniel.rei.plugin.stripping;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import com.mojang.blaze3d.systems.RenderSystem;
+import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeCategory;
-import me.shedaniel.rei.api.Renderer;
+import me.shedaniel.rei.gui.widget.EntryWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
-import me.shedaniel.rei.gui.widget.SlotWidget;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
 
@@ -34,8 +33,8 @@ public class DefaultStrippingCategory implements RecipeCategory<DefaultStripping
     }
     
     @Override
-    public Renderer getIcon() {
-        return Renderer.fromItemStack(new ItemStack(Items.IRON_AXE));
+    public EntryStack getLogo() {
+        return EntryStack.create(Items.IRON_AXE);
     }
     
     @Override
@@ -56,8 +55,8 @@ public class DefaultStrippingCategory implements RecipeCategory<DefaultStripping
                 blit(startPoint.x, startPoint.y, 0, 221, 82, 26);
             }
         }));
-        widgets.add(new SlotWidget(startPoint.x + 4, startPoint.y + 5, Renderer.fromItemStacks(recipeDisplaySupplier.get().getInput().get(0)), true, true, true));
-        widgets.add(new SlotWidget(startPoint.x + 61, startPoint.y + 5, Renderer.fromItemStacks(recipeDisplaySupplier.get().getOutput()), false, true, true));
+        widgets.add(EntryWidget.create(startPoint.x + 4, startPoint.y + 5).entry(recipeDisplaySupplier.get().getIn()));
+        widgets.add(EntryWidget.create(startPoint.x + 61, startPoint.y + 5).entry(recipeDisplaySupplier.get().getOut()).noBackground());
         return widgets;
     }
     

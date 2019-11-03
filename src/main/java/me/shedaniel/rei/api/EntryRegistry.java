@@ -5,10 +5,13 @@
 
 package me.shedaniel.rei.api;
 
+import me.shedaniel.rei.api.annotations.ToBeRemoved;
+import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
+import java.util.Collections;
 import java.util.List;
 
 public interface EntryRegistry {
@@ -18,7 +21,17 @@ public interface EntryRegistry {
      *
      * @return an unmodifiable item list
      */
-    List<Entry> getEntryList();
+    @Deprecated
+    default List<Entry> getEntryList() {
+        return Collections.unmodifiableList(getModifiableEntryList());
+    }
+    
+    /**
+     * Gets the current modifiable stacks list
+     *
+     * @return a stacks list
+     */
+    List<EntryStack> getStacksList();
     
     /**
      * Gets the current modifiable item list
@@ -26,7 +39,9 @@ public interface EntryRegistry {
      * @return an modifiable item list
      */
     @Deprecated
-    List<Entry> getModifiableEntryList();
+    default List<Entry> getModifiableEntryList() {
+        return CollectionUtils.map(getStacksList(), EntryStack::toEntry);
+    }
     
     /**
      * Gets all possible stacks from an item
@@ -42,22 +57,51 @@ public interface EntryRegistry {
      * @param afterItem the stack to put after
      * @param stack     the stack to register
      */
-    void registerItemStack(Item afterItem, ItemStack stack);
+    @Deprecated
+    default void registerItemStack(Item afterItem, ItemStack stack) {
+        registerEntryAfter(EntryStack.create(afterItem), EntryStack.create(stack));
+    }
     
-    void registerFluid(Fluid fluid);
+    @Deprecated
+    default void registerFluid(Fluid fluid) {
+        registerEntry(EntryStack.create(fluid));
+    }
+    
+    default void registerEntry(EntryStack stack) {
+        registerEntryAfter(null, stack);
+    }
+    
+    void registerEntryAfter(EntryStack afterEntry, EntryStack stack);
+    
+    @ToBeRemoved
+    @Deprecated
+    default void registerItemStack(Item afterItem, ItemStack... stacks) {
+        EntryStack afterStack = EntryStack.create(afterItem);
+        for (int i = stacks.length - 1; i >= 0; i--) {
+            ItemStack stack = stacks[i];
+            if (stack != null && !stack.isEmpty())
+                registerEntryAfter(afterStack, EntryStack.create(stack));
+        }
+    }
     
     /**
      * Registers multiple stacks to the item list
      *
-     * @param afterItem the stack to put after
-     * @param stacks    the stacks to register
+     * @param afterStack the stack to put after
+     * @param stacks     the stacks to register
      */
-    default void registerItemStack(Item afterItem, ItemStack... stacks) {
+    default void registerEntriesAfter(EntryStack afterStack, EntryStack... stacks) {
         for (int i = stacks.length - 1; i >= 0; i--) {
-            ItemStack stack = stacks[i];
+            EntryStack stack = stacks[i];
             if (stack != null && !stack.isEmpty())
-                registerItemStack(afterItem, stack);
+                registerEntryAfter(afterStack, stack);
         }
+    }
+    
+    @ToBeRemoved
+    @Deprecated
+    default void registerItemStack(ItemStack... stacks) {
+        registerItemStack(null, stacks);
     }
     
     /**
@@ -65,8 +109,14 @@ public interface EntryRegistry {
      *
      * @param stacks the stacks to register
      */
-    default void registerItemStack(ItemStack... stacks) {
-        registerItemStack(null, stacks);
+    default void registerEntries(EntryStack... stacks) {
+        registerEntriesAfter(null, stacks);
+    }
+    
+    @ToBeRemoved
+    @Deprecated
+    default boolean alreadyContain(ItemStack stack) {
+        return alreadyContain(EntryStack.create(stack));
     }
     
     /**
@@ -75,8 +125,8 @@ public interface EntryRegistry {
      * @param stack the stack to check
      * @return whether the stack has been registered
      */
-    default boolean alreadyContain(ItemStack stack) {
-        return getEntryList().stream().filter(entry -> entry.getEntryType() == Entry.Type.ITEM).anyMatch(entry -> ItemStack.areEqualIgnoreDamage(stack, entry.getItemStack()));
+    default boolean alreadyContain(EntryStack stack) {
+        return CollectionUtils.anyMatchEqualsAll(getStacksList(), stack);
     }
     
 }

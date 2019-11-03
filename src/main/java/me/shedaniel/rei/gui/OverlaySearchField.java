@@ -3,11 +3,10 @@
  * Licensed under the MIT License.
  */
 
-package me.shedaniel.rei.gui.widget;
+package me.shedaniel.rei.gui;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.gui.ContainerScreenOverlay;
+import me.shedaniel.math.compat.RenderHelper;
+import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GuiLighting;
@@ -16,25 +15,25 @@ import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.sound.SoundEvents;
 
-public class SearchFieldWidget extends TextFieldWidget {
+public class OverlaySearchField extends TextFieldWidget {
     
     public static boolean isSearching = false;
     public long keybindFocusTime = -1;
     public int keybindFocusKey = -1;
     protected long lastClickedTime = -1;
     
-    public SearchFieldWidget(int x, int y, int width, int height) {
+    OverlaySearchField(int x, int y, int width, int height) {
         super(x, y, width, height);
         setMaxLength(10000);
     }
     
     public void laterRender(int int_1, int int_2, float float_1) {
         GuiLighting.disable();
-        RenderSystem.disableDepthTest();
+        RenderHelper.disableDepthTest();
         setEditableColor(ContainerScreenOverlay.getEntryListWidget().children().isEmpty() && !getText().isEmpty() ? 16733525 : isSearching ? -1313241 : 14737632);
         setSuggestion(!isFocused() && getText().isEmpty() ? I18n.translate("text.rei.search.field.suggestion") : null);
         super.render(int_1, int_2, float_1);
-        RenderSystem.enableDepthTest();
+        RenderHelper.enableDepthTest();
     }
     
     @Override
@@ -77,7 +76,7 @@ public class SearchFieldWidget extends TextFieldWidget {
     
     @Override
     public boolean charTyped(char char_1, int int_1) {
-        if (System.currentTimeMillis() - keybindFocusTime < 1000 && InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), keybindFocusKey)) {
+        if (System.currentTimeMillis() - keybindFocusTime < 1000 && InputUtil.isKeyPressed(MinecraftClient.getInstance().window.getHandle(), keybindFocusKey)) {
             keybindFocusTime = -1;
             keybindFocusKey = -1;
             return true;

@@ -8,24 +8,21 @@ package me.shedaniel.rei.plugin.brewing;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import com.mojang.blaze3d.systems.RenderSystem;
+import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeCategory;
-import me.shedaniel.rei.api.Renderer;
+import me.shedaniel.rei.gui.widget.EntryWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
-import me.shedaniel.rei.gui.widget.SlotWidget;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -38,8 +35,8 @@ public class DefaultBrewingCategory implements RecipeCategory<DefaultBrewingDisp
     }
     
     @Override
-    public Renderer getIcon() {
-        return Renderer.fromItemStack(new ItemStack(Blocks.BREWING_STAND));
+    public EntryStack getLogo() {
+        return EntryStack.create(Blocks.BREWING_STAND);
     }
     
     @Override
@@ -63,12 +60,12 @@ public class DefaultBrewingCategory implements RecipeCategory<DefaultBrewingDisp
                 blit(startPoint.x + 44, startPoint.y + 28, 103, 163, width, 4);
             }
         }));
-        widgets.add(new SlotWidget(startPoint.x + 1, startPoint.y + 1, Renderer.fromItemStack(new ItemStack(Items.BLAZE_POWDER)), false, true, true));
-        widgets.add(new SlotWidget(startPoint.x + 40, startPoint.y + 1, Renderer.fromItemStacks(() -> recipeDisplay.getInput().get(0), true, stack -> Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("category.rei.brewing.input"))), false, true, true));
-        widgets.add(new SlotWidget(startPoint.x + 63, startPoint.y + 1, Renderer.fromItemStacks(() -> recipeDisplay.getInput().get(1), true, stack -> Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("category.rei.brewing.reactant"))), false, true, true));
-        widgets.add(new SlotWidget(startPoint.x + 40, startPoint.y + 35, Renderer.fromItemStacks(() -> recipeDisplay.getOutput(0), true, stack -> Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("category.rei.brewing.result"))), false, true, true));
-        widgets.add(new SlotWidget(startPoint.x + 63, startPoint.y + 42, Renderer.fromItemStacks(() -> recipeDisplay.getOutput(1), true, stack -> Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("category.rei.brewing.result"))), false, true, true));
-        widgets.add(new SlotWidget(startPoint.x + 86, startPoint.y + 35, Renderer.fromItemStacks(() -> recipeDisplay.getOutput(2), true, stack -> Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("category.rei.brewing.result"))), false, true, true));
+        widgets.add(EntryWidget.create(startPoint.x + 1, startPoint.y + 1).entry(EntryStack.create(Items.BLAZE_POWDER)).noBackground());
+        widgets.add(EntryWidget.create(startPoint.x + 40, startPoint.y + 1).entries(recipeDisplay.getInputEntries().get(0)).noBackground());
+        widgets.add(EntryWidget.create(startPoint.x + 63, startPoint.y + 1).entries(recipeDisplay.getInputEntries().get(1)).noBackground());
+        widgets.add(EntryWidget.create(startPoint.x + 40, startPoint.y + 35).entries(recipeDisplay.getOutput(0)).noBackground());
+        widgets.add(EntryWidget.create(startPoint.x + 63, startPoint.y + 42).entries(recipeDisplay.getOutput(1)).noBackground());
+        widgets.add(EntryWidget.create(startPoint.x + 86, startPoint.y + 35).entries(recipeDisplay.getOutput(2)).noBackground());
         return widgets;
     }
     

@@ -21,14 +21,7 @@ import java.util.function.Function;
 
 public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
     
-    private static final Function<Rectangle, Long> RECTANGLE_LONG_FUNCTION = r -> r.x + 1000l * r.y + 1000000l * r.width + 1000000000l * r.height;
-    private static final Comparator<Pair<Pair<Class<?>, Float>, Function<Boolean, List<Rectangle>>>> LIST_PAIR_COMPARATOR;
-    private static final Comparator<? super Rectangle> RECTANGLE_COMPARER = Comparator.comparingLong(RECTANGLE_LONG_FUNCTION::apply);
-    
-    static {
-        Comparator<Pair<Pair<Class<?>, Float>, Function<Boolean, List<Rectangle>>>> comparator = Comparator.comparingDouble(value -> value.getLeft().getRight());
-        LIST_PAIR_COMPARATOR = comparator.reversed();
-    }
+    private static final Comparator<? super Rectangle> RECTANGLE_COMPARER = Comparator.comparingLong(Rectangle::hashCode);
     
     private long lastArea = -1;
     private List<Pair<Pair<Class<?>, Float>, Function<Boolean, List<Rectangle>>>> list = Lists.newArrayList();
@@ -63,19 +56,16 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
     
     @Override
     public boolean shouldRecalculateArea(boolean isOnRightSide, Rectangle rectangle) {
-        long current = getStringFromCurrent(isOnRightSide);
+        long current = currentHashCode(isOnRightSide);
         if (lastArea == current)
             return false;
         lastArea = current;
         return true;
     }
     
-    private DisplayHelper.DisplayBoundsHandler getHandler() {
-        return RoughlyEnoughItemsCore.getDisplayHelper().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
-    }
-    
-    private long getStringFromCurrent(boolean isOnRightSide) {
-        return getLongFromAreas(isOnRightSide ? getHandler().getRightBounds(MinecraftClient.getInstance().currentScreen) : getHandler().getLeftBounds(MinecraftClient.getInstance().currentScreen), getCurrentExclusionZones(MinecraftClient.getInstance().currentScreen.getClass(), isOnRightSide, false));
+    private long currentHashCode(boolean isOnRightSide) {
+        DisplayHelper.DisplayBoundsHandler handler = RoughlyEnoughItemsCore.getDisplayHelper().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
+        return areasHashCode(isOnRightSide ? handler.getRightBounds(MinecraftClient.getInstance().currentScreen) : handler.getLeftBounds(MinecraftClient.getInstance().currentScreen), getCurrentExclusionZones(MinecraftClient.getInstance().currentScreen.getClass(), isOnRightSide, false));
     }
     
     @Override
@@ -103,11 +93,11 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
         list.add(new Pair<>(new Pair<>(screenClass, 0f), supplier));
     }
     
-    public long getLongFromAreas(Rectangle rectangle, List<Rectangle> exclusionZones) {
-        long a = RECTANGLE_LONG_FUNCTION.apply(rectangle);
-        for (Rectangle exclusionZone : exclusionZones)
-            a -= RECTANGLE_LONG_FUNCTION.apply(exclusionZone);
-        return a;
+    private long areasHashCode(Rectangle rectangle, List<Rectangle> exclusionZones) {
+        int hashCode = 31 + (rectangle == null ? 0 : rectangle.hashCode());
+        for (Rectangle e : exclusionZones)
+            hashCode = 31 * hashCode + (e == null ? 0 : e.hashCode());
+        return hashCode;
     }
     
 }

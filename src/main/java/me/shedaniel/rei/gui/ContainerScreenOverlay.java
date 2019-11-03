@@ -13,7 +13,7 @@ import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.DisplayHelper;
-import me.shedaniel.rei.api.Entry;
+import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.gui.widget.*;
@@ -21,6 +21,7 @@ import me.shedaniel.rei.impl.RecipeHelperImpl;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.Weather;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
+import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
@@ -46,7 +47,6 @@ import org.apache.logging.log4j.util.TriConsumer;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ContainerScreenOverlay extends Widget {
     
@@ -310,7 +310,7 @@ public class ContainerScreenOverlay extends Widget {
             buttonLeft.enabled = buttonRight.enabled = getTotalPage() > 0;
         }
         if (ScreenHelper.searchField == null)
-            ScreenHelper.searchField = new SearchFieldWidget(0, 0, 0, 0);
+            ScreenHelper.setSearchField(new OverlaySearchField(0, 0, 0, 0));
         ScreenHelper.searchField.getBounds().setBounds(getTextFieldArea());
         this.widgets.add(ScreenHelper.searchField);
         ScreenHelper.searchField.setText(searchTerm);
@@ -436,14 +436,14 @@ public class ContainerScreenOverlay extends Widget {
             DisplayHelper.DisplayBoundsHandler<?> boundsHandler = RoughlyEnoughItemsCore.getDisplayHelper().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
             entryListWidget.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, true);
         }
-        if (SearchFieldWidget.isSearching) {
+        if (OverlaySearchField.isSearching) {
             GuiLighting.disable();
             setBlitOffset(200);
             if (MinecraftClient.getInstance().currentScreen instanceof AbstractContainerScreen) {
                 ContainerScreenHooks hooks = (ContainerScreenHooks) MinecraftClient.getInstance().currentScreen;
                 int left = hooks.rei_getContainerLeft(), top = hooks.rei_getContainerTop();
                 for (Slot slot : ((AbstractContainerScreen<?>) MinecraftClient.getInstance().currentScreen).getContainer().slotList)
-                    if (!slot.hasStack() || !entryListWidget.filterEntry(Entry.create(slot.getStack()), entryListWidget.getLastSearchArgument()))
+                    if (!slot.hasStack() || !entryListWidget.filterEntry(EntryStack.create(slot.getStack()), entryListWidget.getLastSearchArgument()))
                         fillGradient(left + slot.xPosition, top + slot.yPosition, left + slot.xPosition + 16, top + slot.yPosition + 16, -601874400, -601874400);
             }
             setBlitOffset(0);
@@ -456,7 +456,7 @@ public class ContainerScreenOverlay extends Widget {
             for (RecipeHelperImpl.ScreenClickArea area : RecipeHelper.getInstance().getScreenClickAreas())
                 if (area.getScreenClass().equals(MinecraftClient.getInstance().currentScreen.getClass()))
                     if (area.getRectangle().contains(mouseX - hooks.rei_getContainerLeft(), mouseY - hooks.rei_getContainerTop())) {
-                        String collect = Arrays.asList(area.getCategories()).stream().map(identifier -> RecipeHelper.getInstance().getCategory(identifier).getCategoryName()).collect(Collectors.joining(", "));
+                        String collect = CollectionUtils.mapAndJoinToString(area.getCategories(), identifier -> RecipeHelper.getInstance().getCategory(identifier).getCategoryName(), ", ");
                         QUEUED_TOOLTIPS.add(QueuedTooltip.create(I18n.translate("text.rei.view_recipes_for", collect)));
                         break;
                     }
@@ -470,7 +470,10 @@ public class ContainerScreenOverlay extends Widget {
                 toggleButtonWidget.lateRender(mouseX, mouseY, delta);
             Screen currentScreen = MinecraftClient.getInstance().currentScreen;
             if (!(currentScreen instanceof RecipeViewingScreen) || !((RecipeViewingScreen) currentScreen).choosePageActivated)
-                QUEUED_TOOLTIPS.stream().filter(Objects::nonNull).forEach(this::renderTooltip);
+                for (QueuedTooltip queuedTooltip : QUEUED_TOOLTIPS) {
+                    if (queuedTooltip != null)
+                        renderTooltip(queuedTooltip);
+                }
         }
         QUEUED_TOOLTIPS.clear();
     }
@@ -495,7 +498,7 @@ public class ContainerScreenOverlay extends Widget {
     private boolean hasSameListContent(List<ItemStack> list1, List<ItemStack> list2) {
         list1.sort(Comparator.comparing(Object::toString));
         list2.sort(Comparator.comparing(Object::toString));
-        return list1.stream().map(Objects::toString).collect(Collectors.joining("")).equals(list2.stream().map(Objects::toString).collect(Collectors.joining("")));
+        return CollectionUtils.mapAndJoinToString(list1, Object::toString, "").equals(CollectionUtils.mapAndJoinToString(list2, Object::toString, ""));
     }
     
     public void addTooltip(@Nullable QueuedTooltip queuedTooltip) {

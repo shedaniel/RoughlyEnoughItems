@@ -8,10 +8,11 @@ package me.shedaniel.rei.plugin.stonecutting;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import com.mojang.blaze3d.systems.RenderSystem;
+import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.Renderer;
+import me.shedaniel.rei.gui.widget.EntryWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
-import me.shedaniel.rei.gui.widget.SlotWidget;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.block.Blocks;
@@ -34,8 +35,8 @@ public class DefaultStoneCuttingCategory implements RecipeCategory<DefaultStoneC
     }
     
     @Override
-    public Renderer getIcon() {
-        return Renderer.fromItemStack(new ItemStack(Blocks.STONECUTTER));
+    public EntryStack getLogo() {
+        return EntryStack.create(Blocks.STONECUTTER);
     }
     
     @Override
@@ -56,8 +57,8 @@ public class DefaultStoneCuttingCategory implements RecipeCategory<DefaultStoneC
                 blit(startPoint.x, startPoint.y, 0, 221, 82, 26);
             }
         }));
-        widgets.add(new SlotWidget(startPoint.x + 4, startPoint.y + 5, Renderer.fromItemStacks(recipeDisplaySupplier.get().getInput().get(0)), true, true, true));
-        widgets.add(new SlotWidget(startPoint.x + 61, startPoint.y + 5, Renderer.fromItemStacks(recipeDisplaySupplier.get().getOutput()), false, true, true));
+        widgets.add(EntryWidget.create(startPoint.x + 4, startPoint.y + 5).entries(recipeDisplaySupplier.get().getInputEntries().get(0)).noBackground());
+        widgets.add(EntryWidget.create(startPoint.x + 61, startPoint.y + 5).entries(recipeDisplaySupplier.get().getOutputEntries()).noBackground());
         return widgets;
     }
     
