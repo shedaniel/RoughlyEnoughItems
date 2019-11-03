@@ -8,6 +8,7 @@ package me.shedaniel.rei.plugin.cooking;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.TransferRecipeDisplay;
 import me.shedaniel.rei.server.ContainerInfo;
+import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.block.entity.FurnaceBlockEntity;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.container.Container;
@@ -17,7 +18,10 @@ import net.minecraft.recipe.AbstractCookingRecipe;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public abstract class DefaultCookingDisplay implements TransferRecipeDisplay {
@@ -29,7 +33,7 @@ public abstract class DefaultCookingDisplay implements TransferRecipeDisplay {
         this.recipe = recipe;
         this.input = recipe.getPreviewInputs().stream().map(i -> {
             List<EntryStack> entries = new ArrayList<>();
-            for (ItemStack stack : i.getStackArray()) {
+            for (ItemStack stack : i.getMatchingStacksClient()) {
                 entries.add(EntryStack.create(stack));
             }
             return entries;
@@ -78,7 +82,8 @@ public abstract class DefaultCookingDisplay implements TransferRecipeDisplay {
     }
     
     @Override
-    public List<List<ItemStack>> getOrganisedInput(ContainerInfo<Container> containerInfo, Container container) {
-        return recipe.getPreviewInputs().stream().map(i -> Arrays.asList(i.getStackArray())).collect(Collectors.toList());
+    public List<List<EntryStack>> getOrganisedInputEntries(ContainerInfo<Container> containerInfo, Container container) {
+        return CollectionUtils.map(recipe.getPreviewInputs(), i -> CollectionUtils.map(i.getMatchingStacksClient(), EntryStack::create));
     }
+    
 }

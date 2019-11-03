@@ -97,6 +97,7 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
         int hashCode = 31 + (rectangle == null ? 0 : rectangle.hashCode());
         for (Rectangle e : exclusionZones)
             hashCode = 31 * hashCode + (e == null ? 0 : e.hashCode());
+        // hashCode -= (e == null ? 0 : e.hashCode());
         return hashCode;
     }
     

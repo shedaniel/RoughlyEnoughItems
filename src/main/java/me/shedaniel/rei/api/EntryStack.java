@@ -6,7 +6,6 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.math.api.Rectangle;
-import me.shedaniel.rei.api.annotations.ToBeRemoved;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.impl.EmptyEntryStack;
 import me.shedaniel.rei.impl.FluidEntryStack;
@@ -60,10 +59,6 @@ public interface EntryStack {
     void setAmount(int amount);
     
     boolean isEmpty();
-    
-    @ToBeRemoved
-    @Deprecated
-    Entry toEntry();
     
     EntryStack copy();
     
@@ -119,7 +114,7 @@ public interface EntryStack {
     void render(Rectangle bounds, int mouseX, int mouseY, float delta);
     
     public static enum Type {
-        ITEM, FLUID, EMPTY
+        ITEM, FLUID, EMPTY, RENDER
     }
     
     public static class Settings<T> {

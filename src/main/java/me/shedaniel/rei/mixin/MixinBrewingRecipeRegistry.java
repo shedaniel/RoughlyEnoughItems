@@ -54,7 +54,7 @@ public class MixinBrewingRecipeRegistry {
         if (!REGISTERED_POTION_TYPES.contains(potion_2))
             rei_registerPotionType(potion_2);
         for (Ingredient type : SELF_POTION_TYPES) {
-            for (ItemStack stack : type.getStackArray()) {
+            for (ItemStack stack : type.getMatchingStacksClient()) {
                 DefaultPlugin.registerBrewingDisplay(new DefaultBrewingDisplay(PotionUtil.setPotion(stack.copy(), potion_1), Ingredient.ofItems(new ItemConvertible[]{item_1}), PotionUtil.setPotion(stack.copy(), potion_2)));
             }
         }

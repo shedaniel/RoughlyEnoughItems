@@ -6,9 +6,9 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.math.api.Rectangle;
-import me.shedaniel.rei.api.annotations.ToBeRemoved;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
-import me.shedaniel.rei.gui.renderers.RecipeRenderer;
+import me.shedaniel.rei.gui.entries.RecipeEntry;
+import me.shedaniel.rei.gui.renderers.SimpleRecipeEntry;
 import me.shedaniel.rei.gui.widget.CategoryBaseWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.Widget;
@@ -33,17 +33,10 @@ public interface RecipeCategory<T extends RecipeDisplay> {
     /**
      * Gets the renderer of the icon, allowing developers to render things other than items
      *
-     * @see RecipeCategory#getLogo()
      * @return the renderer of the icon
      */
-    @ToBeRemoved
-    @Deprecated
-    default Renderer getIcon() {
-        return Renderer.empty();
-    }
-    
     default EntryStack getLogo() {
-        return getIcon().getEntry();
+        return EntryStack.empty();
     }
     
     /**
@@ -60,8 +53,8 @@ public interface RecipeCategory<T extends RecipeDisplay> {
      * @return the recipe renderer
      */
     @SuppressWarnings("unchecked")
-    default RecipeRenderer getSimpleRenderer(T recipe) {
-        return Renderer.fromRecipeEntries(recipe::getInputEntries, recipe::getOutputEntries);
+    default RecipeEntry getSimpleRenderer(T recipe) {
+        return SimpleRecipeEntry.create(recipe::getInputEntries, recipe::getOutputEntries);
     }
     
     /**

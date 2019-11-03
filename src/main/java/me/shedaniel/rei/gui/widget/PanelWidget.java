@@ -5,24 +5,17 @@
 
 package me.shedaniel.rei.gui.widget;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Rectangle;
-import me.shedaniel.math.compat.RenderHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.annotations.Experimental;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.impl.ScreenHelper;
-import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.GuiLighting;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.util.Identifier;
 
 import java.util.Collections;
 import java.util.List;
 
-@Experimental
-@Deprecated
 public class PanelWidget extends WidgetWithBounds {
     
     private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
@@ -65,7 +58,7 @@ public class PanelWidget extends WidgetWithBounds {
         float green = ((color >> 8) & 0xFF) / 255f;
         float blue = ((color >> 0) & 0xFF) / 255f;
         float alpha = ((color >> 32) & 0xFF) / 255f;
-        RenderHelper.color4f(red, green, blue, alpha);
+        RenderSystem.color4f(red, green, blue, alpha);
         GuiLighting.disable();
         minecraft.getTextureManager().bindTexture(ScreenHelper.isDarkModeEnabled() ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
         int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;

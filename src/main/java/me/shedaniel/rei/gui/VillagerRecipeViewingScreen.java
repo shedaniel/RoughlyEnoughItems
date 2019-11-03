@@ -7,14 +7,16 @@ package me.shedaniel.rei.gui;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import com.mojang.blaze3d.systems.RenderSystem;
-import me.shedaniel.math.api.Point;
+import me.shedaniel.clothconfig2.ClothConfigInitializer;
+import me.shedaniel.clothconfig2.api.ScissorsHandler;
+import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget.Interpolation;
+import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget.Precision;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.gui.renderers.RecipeRenderer;
+import me.shedaniel.rei.gui.entries.RecipeEntry;
 import me.shedaniel.rei.gui.widget.*;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.CollectionUtils;
@@ -27,7 +29,6 @@ import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.item.ItemStack;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
@@ -46,11 +47,14 @@ public class VillagerRecipeViewingScreen extends Screen {
     private final List<RecipeCategory<?>> categories;
     private final List<Widget> widgets;
     private final List<ButtonWidget> buttonWidgets;
-    private final List<Renderer> recipeRenderers;
+    private final List<RecipeEntry> recipeRenderers;
     private final List<TabWidget> tabs;
     public Rectangle bounds, scrollListBounds;
     private int selectedCategoryIndex, selectedRecipeIndex;
     private double scroll;
+    private double target;
+    private long start;
+    private long duration;
     private float scrollBarAlpha = 0;
     private float scrollBarAlphaFuture = 0;
     private long scrollBarAlphaFutureTime = -1;
@@ -97,7 +101,7 @@ public class VillagerRecipeViewingScreen extends Screen {
         int guiHeight = MathHelper.clamp(category.getDisplayHeight() + 40, 166, largestHeight);
         this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - guiHeight / 2, guiWidth, guiHeight);
         
-        List<List<ItemStack>> workingStations = RoughlyEnoughItemsCore.getRecipeHelper().getWorkingStations(category.getIdentifier());
+        List<List<EntryStack>> workingStations = RoughlyEnoughItemsCore.getRecipeHelper().getWorkingStations(category.getIdentifier());
         if (!workingStations.isEmpty()) {
             int ww = MathHelper.floor((bounds.width - 16) / 18f);
             int w = Math.min(ww, workingStations.size());
@@ -107,8 +111,8 @@ public class VillagerRecipeViewingScreen extends Screen {
             widgets.add(new CategoryBaseWidget(new Rectangle(xx - 6, bounds.y + bounds.height - 5, 11 + w * 18, 15 + h * 18)));
             int index = 0;
             List<String> list = Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("text.rei.working_station"));
-            for (List<ItemStack> workingStation : workingStations) {
-                widgets.add(new SlotWidget(xx, yy, Renderer.fromItemStacks(() -> workingStation, true, stack -> list), true, true, true));
+            for (List<EntryStack> workingStation : workingStations) {
+                widgets.add(EntryWidget.create(xx, yy).entries(CollectionUtils.map(workingStation, stack -> stack.copy().setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> list))));
                 index++;
                 xx += 18;
                 if (index >= ww) {
@@ -133,9 +137,9 @@ public class VillagerRecipeViewingScreen extends Screen {
         int index = 0;
         for (RecipeDisplay recipeDisplay : categoryMap.get(category)) {
             int finalIndex = index;
-            RecipeRenderer recipeRenderer;
-            recipeRenderers.add(recipeRenderer = category.getSimpleRenderer(recipeDisplay));
-            buttonWidgets.add(new ButtonWidget(bounds.x + 5, 0, recipeRenderer.getWidth(), recipeRenderer.getHeight(), "") {
+            RecipeEntry recipeEntry;
+            recipeRenderers.add(recipeEntry = category.getSimpleRenderer(recipeDisplay));
+            buttonWidgets.add(new ButtonWidget(bounds.x + 5, 0, recipeEntry.getWidth(), recipeEntry.getHeight(), "") {
                 @Override
                 public void onPressed() {
                     selectedRecipeIndex = finalIndex;
@@ -220,22 +224,6 @@ public class VillagerRecipeViewingScreen extends Screen {
             public Optional<String> getTooltips() {
                 return Optional.ofNullable(I18n.translate("text.rei.view_all_categories"));
             }
-            
-            @Override
-            public void render(int mouseX, int mouseY, float delta) {
-                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-                font.draw((isHovered(mouseX, mouseY) ? Formatting.UNDERLINE.toString() : "") + text, x - font.getStringWidth(text) / 2, y, getDefaultColor());
-                if (clickable && getTooltips().isPresent())
-                    if (!focused && containsMouse(mouseX, mouseY))
-                        ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltips().get().split("\n")));
-                    else if (focused)
-                        ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(new Point(x, y), getTooltips().get().split("\n")));
-            }
-            
-            @Override
-            public int getDefaultColor() {
-                return ScreenHelper.isDarkModeEnabled() ? 0xFFBBBBBB : 4210752;
-            }
         });
         
         this.children.addAll(buttonWidgets);
@@ -245,9 +233,21 @@ public class VillagerRecipeViewingScreen extends Screen {
         ScreenHelper.getLastOverlay().init();
     }
     
+    private final double clamp(double v) {
+        return clamp(v, 200);
+    }
+    
+    private final double clamp(double v, double clampExtension) {
+        return MathHelper.clamp(v, -clampExtension, getMaxScroll() + clampExtension);
+    }
+    
+    private double getMaxScroll() {
+        return Math.max(0, this.getMaxScrollPosition() - (scrollListBounds.height - 2));
+    }
+    
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int int_1) {
-        double height = CollectionUtils.sumInt(buttonWidgets, b -> b.getBounds().getHeight());
+        double height = getMaxScrollPosition();
         int actualHeight = scrollListBounds.height - 2;
         if (height > actualHeight && scrollBarAlpha > 0 && mouseY >= scrollListBounds.y + 1 && mouseY <= scrollListBounds.getMaxY() - 1) {
             double scrollbarPositionMinX = scrollListBounds.getMaxX() - 6;
@@ -269,15 +269,29 @@ public class VillagerRecipeViewingScreen extends Screen {
         return super.charTyped(char_1, int_1);
     }
     
+    public void offset(double value, boolean animated) {
+        scrollTo(target + value, animated);
+    }
+    
+    public void scrollTo(double value, boolean animated) {
+        scrollTo(value, animated, ClothConfigInitializer.getScrollDuration());
+    }
+    
+    public void scrollTo(double value, boolean animated, long duration) {
+        target = clamp(value);
+        
+        if (animated) {
+            start = System.currentTimeMillis();
+            this.duration = duration;
+        } else
+            scroll = target;
+    }
+    
     @Override
     public boolean mouseScrolled(double double_1, double double_2, double double_3) {
         double height = CollectionUtils.sumInt(buttonWidgets, b -> b.getBounds().getHeight());
         if (scrollListBounds.contains(double_1, double_2) && height > scrollListBounds.height - 2) {
-            if (double_3 > 0)
-                scroll -= 16;
-            else
-                scroll += 16;
-            scroll = MathHelper.clamp(scroll, 0, height - scrollListBounds.height + 2);
+            offset(ClothConfigInitializer.getScrollStep() * -double_3, true);
             if (scrollBarAlphaFuture == 0)
                 scrollBarAlphaFuture = 1f;
             if (System.currentTimeMillis() - scrollBarAlphaFutureTime > 300f)
@@ -304,6 +318,10 @@ public class VillagerRecipeViewingScreen extends Screen {
         return super.mouseScrolled(double_1, double_2, double_3);
     }
     
+    private double getMaxScrollPosition() {
+        return CollectionUtils.sumInt(buttonWidgets, b -> b.getBounds().getHeight());
+    }
+    
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         if (RoughlyEnoughItemsCore.getConfigManager().getConfig().doesVillagerScreenHavePermanentScrollBar()) {
@@ -328,6 +346,7 @@ public class VillagerRecipeViewingScreen extends Screen {
                     scrollBarAlpha = Math.max(Math.min(1f, l / 300f), scrollBarAlpha);
             }
         }
+        updatePosition(delta);
         this.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
         int yOffset = 0;
         this.widgets.forEach(widget -> {
@@ -350,21 +369,20 @@ public class VillagerRecipeViewingScreen extends Screen {
         for (int i = 0; i < buttonWidgets.size(); i++) {
             if (buttonWidgets.get(i).getBounds().getMaxY() > scrollListBounds.getMinY() && buttonWidgets.get(i).getBounds().getMinY() < scrollListBounds.getMaxY()) {
                 GuiLighting.disable();
-                recipeRenderers.get(i).setBlitOffset(1);
-                recipeRenderers.get(i).render(buttonWidgets.get(i).getBounds().x, buttonWidgets.get(i).getBounds().y, mouseX, mouseY, delta);
-                ScreenHelper.getLastOverlay().addTooltip(recipeRenderers.get(i).getQueuedTooltip(delta));
+                recipeRenderers.get(i).setZ(1);
+                recipeRenderers.get(i).render(buttonWidgets.get(i).getBounds(), mouseX, mouseY, delta);
+                ScreenHelper.getLastOverlay().addTooltip(recipeRenderers.get(i).getTooltip(mouseX, mouseY));
             }
         }
-        double height = CollectionUtils.sumInt(buttonWidgets, b -> b.getBounds().getHeight());
-        if (height > scrollListBounds.height - 2) {
+        double maxScroll = getMaxScrollPosition();
+        if (maxScroll > scrollListBounds.height - 2) {
             Tessellator tessellator = Tessellator.getInstance();
             BufferBuilder buffer = tessellator.getBufferBuilder();
-            double maxScroll = height - scrollListBounds.height + 2;
-            int scrollBarHeight = MathHelper.floor((scrollListBounds.height - 2) * (scrollListBounds.height - 2) / maxScroll);
-            scrollBarHeight = MathHelper.clamp(scrollBarHeight, 32, scrollListBounds.height - 2 - 8);
-            int minY = (int) (scroll * (scrollListBounds.height - 2 - scrollBarHeight) / maxScroll) + scrollListBounds.y + 1;
-            if (minY < this.scrollListBounds.y + 1)
-                minY = this.scrollListBounds.y + 1;
+            int height = (int) (((scrollListBounds.height - 2) * (scrollListBounds.height - 2)) / this.getMaxScrollPosition());
+            height = MathHelper.clamp(height, 32, scrollListBounds.height - 2 - 8);
+            height -= Math.min((scroll < 0 ? (int) -scroll : scroll > getMaxScroll() ? (int) scroll - getMaxScroll() : 0), height * .95);
+            height = Math.max(10, height);
+            int minY = (int) Math.min(Math.max((int) scroll * (scrollListBounds.height - 2 - height) / getMaxScroll() + scrollListBounds.y + 1, scrollListBounds.y + 1), scrollListBounds.getMaxY() - 1 - height);
             double scrollbarPositionMinX = scrollListBounds.getMaxX() - 6, scrollbarPositionMaxX = scrollListBounds.getMaxX() - 2;
             GuiLighting.disable();
             RenderSystem.disableTexture();
@@ -374,8 +392,8 @@ public class VillagerRecipeViewingScreen extends Screen {
             RenderSystem.shadeModel(7425);
             buffer.begin(7, VertexFormats.POSITION_COLOR);
             float b = ScreenHelper.isDarkModeEnabled() ? 0.37f : 1f;
-            buffer.vertex(scrollbarPositionMinX, minY + scrollBarHeight, 1000D).color(b, b, b, scrollBarAlpha).next();
-            buffer.vertex(scrollbarPositionMaxX, minY + scrollBarHeight, 1000D).color(b, b, b, scrollBarAlpha).next();
+            buffer.vertex(scrollbarPositionMinX, minY + height, 1000D).color(b, b, b, scrollBarAlpha).next();
+            buffer.vertex(scrollbarPositionMaxX, minY + height, 1000D).color(b, b, b, scrollBarAlpha).next();
             buffer.vertex(scrollbarPositionMaxX, minY, 1000D).color(b, b, b, scrollBarAlpha).next();
             buffer.vertex(scrollbarPositionMinX, minY, 1000D).color(b, b, b, scrollBarAlpha).next();
             tessellator.draw();
@@ -389,6 +407,19 @@ public class VillagerRecipeViewingScreen extends Screen {
         ScreenHelper.getLastOverlay().lateRender(mouseX, mouseY, delta);
     }
     
+    private void updatePosition(float delta) {
+        target = clamp(target);
+        if (target < 0) {
+            target -= target * (1 - ClothConfigInitializer.getBounceBackMultiplier()) * delta / 3;
+        } else if (target > getMaxScroll()) {
+            target = (target - getMaxScroll()) * (1 - (1 - ClothConfigInitializer.getBounceBackMultiplier()) * delta / 3) + getMaxScroll();
+        }
+        if (!Precision.almostEquals(scroll, target, Precision.FLOAT_EPSILON))
+            scroll = (float) Interpolation.expoEase(scroll, target, Math.min((System.currentTimeMillis() - start) / ((double) duration), 1));
+        else
+            scroll = target;
+    }
+    
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int int_1, double double_3, double double_4) {
         if (int_1 == 0 && scrollBarAlpha > 0 && draggingScrollBar) {
@@ -399,7 +430,7 @@ public class VillagerRecipeViewingScreen extends Screen {
                 double double_6 = Math.max(1.0D, Math.max(1d, height) / (double) (actualHeight - int_3));
                 scrollBarAlphaFutureTime = System.currentTimeMillis();
                 scrollBarAlphaFuture = 1f;
-                scroll = MathHelper.clamp(scroll + double_4 * double_6, 0, height - scrollListBounds.height + 2);
+                scroll = target = MathHelper.clamp(scroll + double_4 * double_6, 0, height - scrollListBounds.height + 2);
                 return true;
             }
         }

@@ -6,7 +6,6 @@
 package me.shedaniel.rei.impl;
 
 import me.shedaniel.math.api.Rectangle;
-import me.shedaniel.rei.api.Entry;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import net.minecraft.util.Identifier;
@@ -46,11 +45,6 @@ public class EmptyEntryStack extends AbstractEntryStack {
     @Override
     public boolean isEmpty() {
         return true;
-    }
-    
-    @Override
-    public Entry toEntry() {
-        return null;
     }
     
     @Override

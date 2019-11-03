@@ -43,6 +43,11 @@ public class LabelWidget extends WidgetWithBounds {
         this.defaultColor = defaultColor;
     }
     
+    public LabelWidget color(int defaultColor) {
+        this.defaultColor = defaultColor;
+        return this;
+    }
+    
     @Override
     public Rectangle getBounds() {
         int width = font.getStringWidth(text);

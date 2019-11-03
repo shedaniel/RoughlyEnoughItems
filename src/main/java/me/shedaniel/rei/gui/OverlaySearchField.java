@@ -5,7 +5,7 @@
 
 package me.shedaniel.rei.gui;
 
-import me.shedaniel.math.compat.RenderHelper;
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
@@ -29,11 +29,11 @@ public class OverlaySearchField extends TextFieldWidget {
     
     public void laterRender(int int_1, int int_2, float float_1) {
         GuiLighting.disable();
-        RenderHelper.disableDepthTest();
+        RenderSystem.disableDepthTest();
         setEditableColor(ContainerScreenOverlay.getEntryListWidget().children().isEmpty() && !getText().isEmpty() ? 16733525 : isSearching ? -1313241 : 14737632);
         setSuggestion(!isFocused() && getText().isEmpty() ? I18n.translate("text.rei.search.field.suggestion") : null);
         super.render(int_1, int_2, float_1);
-        RenderHelper.enableDepthTest();
+        RenderSystem.enableDepthTest();
     }
     
     @Override
@@ -76,7 +76,7 @@ public class OverlaySearchField extends TextFieldWidget {
     
     @Override
     public boolean charTyped(char char_1, int int_1) {
-        if (System.currentTimeMillis() - keybindFocusTime < 1000 && InputUtil.isKeyPressed(MinecraftClient.getInstance().window.getHandle(), keybindFocusKey)) {
+        if (System.currentTimeMillis() - keybindFocusTime < 1000 && InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), keybindFocusKey)) {
             keybindFocusTime = -1;
             keybindFocusKey = -1;
             return true;

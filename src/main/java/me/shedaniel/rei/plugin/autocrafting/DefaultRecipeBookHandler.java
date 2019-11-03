@@ -10,6 +10,7 @@ import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.listeners.RecipeBookGuiHooks;
 import me.shedaniel.rei.plugin.blasting.DefaultBlastingDisplay;
+import me.shedaniel.rei.plugin.cooking.DefaultCookingDisplay;
 import me.shedaniel.rei.plugin.crafting.DefaultCraftingDisplay;
 import me.shedaniel.rei.plugin.smelting.DefaultSmeltingDisplay;
 import me.shedaniel.rei.plugin.smoking.DefaultSmokingDisplay;
@@ -54,36 +55,8 @@ public class DefaultRecipeBookHandler implements AutoTransferHandler {
                 context.getMinecraft().interactionManager.clickRecipe(container.syncId, recipe, Screen.hasShiftDown());
                 ScreenHelper.getLastOverlay().init();
             }
-        } else if (display instanceof DefaultSmeltingDisplay) {
-            DefaultSmeltingDisplay defaultDisplay = (DefaultSmeltingDisplay) display;
-            if (defaultDisplay.getOptionalRecipe().isPresent()) {
-                Recipe<?> recipe = (defaultDisplay).getOptionalRecipe().get();
-                if (!context.getMinecraft().player.getRecipeBook().contains(recipe))
-                    return Result.createFailed(I18n.translate("error.rei.recipe.not.unlocked"));
-                if (!context.isActuallyCrafting())
-                    return Result.createSuccessful();
-                context.getMinecraft().openScreen(context.getContainerScreen());
-                if (context.getContainerScreen() instanceof RecipeBookProvider)
-                    ((RecipeBookGuiHooks) ((RecipeBookProvider) context.getContainerScreen()).getRecipeBookGui()).rei_getGhostSlots().reset();
-                context.getMinecraft().interactionManager.clickRecipe(container.syncId, recipe, Screen.hasShiftDown());
-                ScreenHelper.getLastOverlay().init();
-            }
-        } else if (display instanceof DefaultSmokingDisplay) {
-            DefaultSmokingDisplay defaultDisplay = (DefaultSmokingDisplay) display;
-            if (defaultDisplay.getOptionalRecipe().isPresent()) {
-                Recipe<?> recipe = (defaultDisplay).getOptionalRecipe().get();
-                if (!context.getMinecraft().player.getRecipeBook().contains(recipe))
-                    return Result.createFailed(I18n.translate("error.rei.recipe.not.unlocked"));
-                if (!context.isActuallyCrafting())
-                    return Result.createSuccessful();
-                context.getMinecraft().openScreen(context.getContainerScreen());
-                if (context.getContainerScreen() instanceof RecipeBookProvider)
-                    ((RecipeBookGuiHooks) ((RecipeBookProvider) context.getContainerScreen()).getRecipeBookGui()).rei_getGhostSlots().reset();
-                context.getMinecraft().interactionManager.clickRecipe(container.syncId, recipe, Screen.hasShiftDown());
-                ScreenHelper.getLastOverlay().init();
-            }
-        } else if (display instanceof DefaultBlastingDisplay) {
-            DefaultBlastingDisplay defaultDisplay = (DefaultBlastingDisplay) display;
+        } else if (display instanceof DefaultCookingDisplay) {
+            DefaultCookingDisplay defaultDisplay = (DefaultCookingDisplay) display;
             if (defaultDisplay.getOptionalRecipe().isPresent()) {
                 Recipe<?> recipe = (defaultDisplay).getOptionalRecipe().get();
                 if (!context.getMinecraft().player.getRecipeBook().contains(recipe))

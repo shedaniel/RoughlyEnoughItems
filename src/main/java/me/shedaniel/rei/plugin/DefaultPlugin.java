@@ -272,14 +272,14 @@ public class DefaultPlugin implements REIPluginV0 {
         if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isLoadingDefaultPlugin()) {
             return;
         }
-        recipeHelper.registerWorkingStations(CRAFTING, new ItemStack(Items.CRAFTING_TABLE));
-        recipeHelper.registerWorkingStations(SMELTING, new ItemStack(Items.FURNACE));
-        recipeHelper.registerWorkingStations(SMOKING, new ItemStack(Items.SMOKER));
-        recipeHelper.registerWorkingStations(BLASTING, new ItemStack(Items.BLAST_FURNACE));
-        recipeHelper.registerWorkingStations(CAMPFIRE, new ItemStack(Items.CAMPFIRE));
-        recipeHelper.registerWorkingStations(BREWING, new ItemStack(Items.BREWING_STAND));
-        recipeHelper.registerWorkingStations(STONE_CUTTING, new ItemStack(Items.STONECUTTER));
-        recipeHelper.registerWorkingStations(COMPOSTING, new ItemStack(Items.COMPOSTER));
+        recipeHelper.registerWorkingStations(CRAFTING, EntryStack.create(Items.CRAFTING_TABLE));
+        recipeHelper.registerWorkingStations(SMELTING, EntryStack.create(Items.FURNACE));
+        recipeHelper.registerWorkingStations(SMOKING, EntryStack.create(Items.SMOKER));
+        recipeHelper.registerWorkingStations(BLASTING, EntryStack.create(Items.BLAST_FURNACE));
+        recipeHelper.registerWorkingStations(CAMPFIRE, EntryStack.create(Items.CAMPFIRE));
+        recipeHelper.registerWorkingStations(BREWING, EntryStack.create(Items.BREWING_STAND));
+        recipeHelper.registerWorkingStations(STONE_CUTTING, EntryStack.create(Items.STONECUTTER));
+        recipeHelper.registerWorkingStations(COMPOSTING, EntryStack.create(Items.COMPOSTER));
         recipeHelper.registerAutoCraftButtonArea(CAMPFIRE, bounds -> null);
         recipeHelper.registerAutoCraftButtonArea(COMPOSTING, bounds -> null);
         recipeHelper.registerScreenClickArea(new Rectangle(88, 32, 28, 23), CraftingTableScreen.class, CRAFTING);

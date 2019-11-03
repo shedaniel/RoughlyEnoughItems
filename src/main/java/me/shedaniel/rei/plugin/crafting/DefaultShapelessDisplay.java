@@ -28,7 +28,7 @@ public class DefaultShapelessDisplay implements DefaultCraftingDisplay {
         this.display = recipe;
         this.input = recipe.getPreviewInputs().stream().map(i -> {
             List<EntryStack> entries = new ArrayList<>();
-            for (ItemStack stack : i.getStackArray()) {
+            for (ItemStack stack : i.getMatchingStacksClient()) {
                 if (stack.getItem() instanceof PotionItem)
                     entries.add(EntryStack.create(stack).setting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE));
                 else entries.add(EntryStack.create(stack));

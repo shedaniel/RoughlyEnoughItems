@@ -6,11 +6,10 @@
 package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Rectangle;
-import me.shedaniel.math.compat.RenderHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.Entry;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.ItemStackRenderOverlayHook;
 import me.shedaniel.rei.gui.widget.EntryListWidget;
@@ -59,11 +58,6 @@ public class ItemEntryStack extends AbstractEntryStack {
     @Override
     public boolean isEmpty() {
         return itemStack.isEmpty();
-    }
-    
-    @Override
-    public Entry toEntry() {
-        return Entry.create(getItemStack());
     }
     
     @Override
@@ -140,14 +134,13 @@ public class ItemEntryStack extends AbstractEntryStack {
         if (getSetting(Settings.RENDER).value().get()) {
             ItemStack stack = getItemStack().copy();
             ((ItemStackRenderOverlayHook) (Object) stack).rei_setRenderOverlay(getSetting(Settings.Item.RENDER_OVERLAY).value().get());
-            RenderHelper.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
             itemRenderer.zOffset = getZ();
-            GuiLighting.enableForItems();
-            RenderHelper.colorMask(true, true, true, true);
-            RenderHelper.enableLighting();
-            RenderHelper.enableRescaleNormal();
-            RenderHelper.enableDepthTest();
+            RenderSystem.colorMask(true, true, true, true);
+            RenderSystem.enableLighting();
+            RenderSystem.enableRescaleNormal();
+            RenderSystem.enableDepthTest();
             int i1 = bounds.getCenterX() - 8;
             int i2 = bounds.getCenterY() - 8;
             itemRenderer.renderGuiItem(stack, i1, i2);

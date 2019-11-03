@@ -5,10 +5,8 @@
 
 package me.shedaniel.rei.gui.widget;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.annotations.ToBeRemoved;
 
 public class RecipeBaseWidget extends PanelWidget {
     
@@ -18,12 +16,6 @@ public class RecipeBaseWidget extends PanelWidget {
     
     @Override
     protected int getYTextureOffset() {
-        return getTextureOffset();
-    }
-    
-    @ToBeRemoved
-    @Deprecated
-    protected int getTextureOffset() {
         return RoughlyEnoughItemsCore.getConfigManager().getConfig().isUsingLightGrayRecipeBorder() ? 0 : 66;
     }
     

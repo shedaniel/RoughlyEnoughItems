@@ -15,7 +15,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.SemanticVersion;
 import net.fabricmc.loader.api.Version;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
-import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.util.ActionResult;
@@ -49,13 +48,13 @@ public class RecipeHelperImpl implements RecipeHelper {
     private final Map<Identifier, List<RecipeDisplay>> recipeCategoryListMap = Maps.newHashMap();
     private final List<RecipeCategory> categories = Lists.newArrayList();
     private final Map<Identifier, ButtonAreaSupplier> speedCraftAreaSupplierMap = Maps.newHashMap();
-    private final Map<Identifier, List<List<ItemStack>>> categoryWorkingStations = Maps.newHashMap();
+    private final Map<Identifier, List<List<EntryStack>>> categoryWorkingStations = Maps.newHashMap();
     private final List<DisplayVisibilityHandler> displayVisibilityHandlers = Lists.newArrayList();
     private final List<LiveRecipeGenerator<?>> liveRecipeGenerators = Lists.newArrayList();
     private RecipeManager recipeManager;
     
     @Override
-    public List<EntryStack> findCraftableEntriesByItems(List<ItemStack> inventoryItems) {
+    public List<EntryStack> findCraftableEntriesByItems(List<EntryStack> inventoryItems) {
         List<EntryStack> craftables = new ArrayList<>();
         for (List<RecipeDisplay> value : recipeCategoryListMap.values())
             for (RecipeDisplay recipeDisplay : value) {
@@ -67,10 +66,9 @@ public class RecipeHelperImpl implements RecipeHelper {
                         continue;
                     }
                     boolean slotDone = false;
-                    for (ItemStack possibleType : inventoryItems) {
-                        EntryStack possibleEntryStack = EntryStack.create(possibleType);
+                    for (EntryStack possibleType : inventoryItems) {
                         for (EntryStack slotPossible : slot)
-                            if (possibleEntryStack.equals(slotPossible)) {
+                            if (possibleType.equals(slotPossible)) {
                                 slotsCraftable++;
                                 slotDone = true;
                                 break;
@@ -93,17 +91,17 @@ public class RecipeHelperImpl implements RecipeHelper {
     }
     
     @Override
-    public void registerWorkingStations(Identifier category, List<ItemStack>... workingStations) {
+    public void registerWorkingStations(Identifier category, List<EntryStack>... workingStations) {
         categoryWorkingStations.get(category).addAll(Arrays.asList(workingStations));
     }
     
     @Override
-    public void registerWorkingStations(Identifier category, ItemStack... workingStations) {
+    public void registerWorkingStations(Identifier category, EntryStack... workingStations) {
         categoryWorkingStations.get(category).addAll(Arrays.asList(workingStations).stream().map(Collections::singletonList).collect(Collectors.toList()));
     }
     
     @Override
-    public List<List<ItemStack>> getWorkingStations(Identifier category) {
+    public List<List<EntryStack>> getWorkingStations(Identifier category) {
         return categoryWorkingStations.get(category);
     }
     
@@ -249,7 +247,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         });
         RoughlyEnoughItemsCore.LOGGER.info("[REI] Loading %d plugins: %s", plugins.size(), plugins.stream().map(REIPluginEntry::getPluginIdentifier).map(Identifier::toString).collect(Collectors.joining(", ")));
         Collections.reverse(plugins);
-        RoughlyEnoughItemsCore.getEntryRegistry().getModifiableEntryList().clear();
+        RoughlyEnoughItemsCore.getEntryRegistry().getStacksList().clear();
         Version reiVersion = FabricLoader.getInstance().getModContainer("roughlyenoughitems").get().getMetadata().getVersion();
         if (!(reiVersion instanceof SemanticVersion))
             RoughlyEnoughItemsCore.LOGGER.warn("[REI] Roughly Enough Items is not using semantic versioning, will be ignoring plugins' minimum versions!");
@@ -301,7 +299,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         ScreenHelper.getOptionalOverlay().ifPresent(overlay -> overlay.shouldReInit = true);
         
         long usedTime = System.currentTimeMillis() - startTime;
-        RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered %d stack entries, %d recipes displays, %d bounds handler, %d visibility handlers and %d categories (%s) in %d ms.", RoughlyEnoughItemsCore.getEntryRegistry().getEntryList().size(), recipeCount.get(), RoughlyEnoughItemsCore.getDisplayHelper().getAllBoundsHandlers().size(), getDisplayVisibilityHandlers().size(), categories.size(), String.join(", ", categories.stream().map(RecipeCategory::getCategoryName).collect(Collectors.toList())), usedTime);
+        RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered %d stack entries, %d recipes displays, %d bounds handler, %d visibility handlers and %d categories (%s) in %d ms.", RoughlyEnoughItemsCore.getEntryRegistry().getStacksList().size(), recipeCount.get(), RoughlyEnoughItemsCore.getDisplayHelper().getAllBoundsHandlers().size(), getDisplayVisibilityHandlers().size(), categories.size(), String.join(", ", categories.stream().map(RecipeCategory::getCategoryName).collect(Collectors.toList())), usedTime);
     }
     
     @Override

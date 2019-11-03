@@ -36,7 +36,7 @@ public class DefaultCampfireDisplay implements RecipeDisplay {
     public DefaultCampfireDisplay(DefaultedList<Ingredient> ingredients, ItemStack output, int cookTime) {
         this.inputs = ingredients.stream().map(i -> {
             List<EntryStack> entries = new ArrayList<>();
-            for (ItemStack stack : i.getStackArray()) {
+            for (ItemStack stack : i.getMatchingStacksClient()) {
                 entries.add(EntryStack.create(stack));
             }
             return entries;
