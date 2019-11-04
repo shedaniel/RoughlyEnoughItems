@@ -79,7 +79,7 @@
   "text.rei.recipe_screen_type.selection": "合成界面类型选择",
   "text.rei.recipe_screen_type.selection.sub": "你始终可以通过配置界面再次编辑此设置.",
   "text.rei.view_recipes_for": "查看 %s 的配方",
-  "msg.rei.copied_recipe_id": "Copied Recipe Identifier",
+  "msg.rei.copied_recipe_id": "已复制配方ID",
   "msg.rei.recipe_id_details": "配方ID：%s",
   "_comment": "配置提示",
   "config.roughlyenoughitems.title": "配置",
