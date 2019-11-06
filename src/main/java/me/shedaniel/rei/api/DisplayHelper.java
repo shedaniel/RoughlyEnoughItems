@@ -16,6 +16,10 @@ import static net.minecraft.util.ActionResult.PASS;
 
 public interface DisplayHelper {
     
+    static DisplayHelper getInstance() {
+        return RoughlyEnoughItemsCore.getDisplayHelper();
+    }
+    
     /**
      * Gets the sorted version of all responsible bounds handlers
      *

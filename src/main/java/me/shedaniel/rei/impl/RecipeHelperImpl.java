@@ -251,14 +251,25 @@ public class RecipeHelperImpl implements RecipeHelper {
         Version reiVersion = FabricLoader.getInstance().getModContainer("roughlyenoughitems").get().getMetadata().getVersion();
         if (!(reiVersion instanceof SemanticVersion))
             RoughlyEnoughItemsCore.LOGGER.warn("[REI] Roughly Enough Items is not using semantic versioning, will be ignoring plugins' minimum versions!");
-        plugins.forEach(plugin -> {
+        for (REIPluginEntry plugin : plugins) {
+            try {
+                if (reiVersion instanceof SemanticVersion)
+                    if (plugin.getMinimumVersion().compareTo((SemanticVersion) reiVersion) > 0) {
+                        throw new IllegalStateException("Requires " + plugin.getMinimumVersion().getFriendlyString() + " version of REI!");
+                    }
+                if (plugin instanceof REIPluginV0)
+                    ((REIPluginV0) plugin).preRegister();
+            } catch (Exception e) {
+                RoughlyEnoughItemsCore.LOGGER.error("[REI] " + plugin.getPluginIdentifier().toString() + " plugin failed to pre register!", e);
+            }
+        }
+        for (REIPluginEntry plugin : plugins) {
             Identifier identifier = plugin.getPluginIdentifier();
             try {
+                if (reiVersion instanceof SemanticVersion)
+                    if (plugin.getMinimumVersion().compareTo((SemanticVersion) reiVersion) > 0)
+                        return;
                 if (plugin instanceof REIPluginV0) {
-                    if (reiVersion instanceof SemanticVersion)
-                        if (((REIPluginV0) plugin).getMinimumVersion().compareTo((SemanticVersion) reiVersion) > 0) {
-                            throw new IllegalStateException("Requires " + ((REIPluginV0) plugin).getMinimumVersion().getFriendlyString() + " version of REI!");
-                        }
                     ((REIPluginV0) plugin).registerBounds(RoughlyEnoughItemsCore.getDisplayHelper());
                     ((REIPluginV0) plugin).registerEntries(RoughlyEnoughItemsCore.getEntryRegistry());
                     ((REIPluginV0) plugin).registerPluginCategories(this);
@@ -270,7 +281,18 @@ public class RecipeHelperImpl implements RecipeHelper {
             } catch (Exception e) {
                 RoughlyEnoughItemsCore.LOGGER.error("[REI] " + identifier.toString() + " plugin failed to load!", e);
             }
-        });
+        }
+        for (REIPluginEntry plugin : plugins) {
+            try {
+                if (reiVersion instanceof SemanticVersion)
+                    if (plugin.getMinimumVersion().compareTo((SemanticVersion) reiVersion) > 0)
+                        return;
+                if (plugin instanceof REIPluginV0)
+                    ((REIPluginV0) plugin).postRegister();
+            } catch (Exception e) {
+                RoughlyEnoughItemsCore.LOGGER.error("[REI] " + plugin.getPluginIdentifier().toString() + " plugin failed to post register!", e);
+            }
+        }
         if (!recipeFunctions.isEmpty()) {
             List<Recipe> allSortedRecipes = getAllSortedRecipes();
             Collections.reverse(allSortedRecipes);

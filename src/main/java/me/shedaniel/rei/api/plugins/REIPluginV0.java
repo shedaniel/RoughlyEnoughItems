@@ -9,16 +9,17 @@ import me.shedaniel.rei.api.DisplayHelper;
 import me.shedaniel.rei.api.EntryRegistry;
 import me.shedaniel.rei.api.REIPluginEntry;
 import me.shedaniel.rei.api.RecipeHelper;
+import me.shedaniel.rei.api.annotations.ToBeRemoved;
 import net.fabricmc.loader.api.SemanticVersion;
 import net.fabricmc.loader.util.version.VersionParsingException;
 
 public interface REIPluginV0 extends REIPluginEntry {
     
-    SemanticVersion getMinimumVersion() throws VersionParsingException;
-    
     /**
      * On register of the plugin
      */
+    @ToBeRemoved
+    @Deprecated
     default void onFirstLoad() {
     }
     
@@ -60,6 +61,12 @@ public interface REIPluginV0 extends REIPluginEntry {
      * @param recipeHelper the helper class
      */
     default void registerOthers(RecipeHelper recipeHelper) {
+    }
+    
+    default void preRegister() {
+    }
+    
+    default void postRegister() {
     }
     
 }

@@ -100,7 +100,6 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            //            }
         });
         FabricLoader.getInstance().getEntrypoints("rei_containers", Runnable.class).forEach(Runnable::run);
     }
