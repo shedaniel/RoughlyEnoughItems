@@ -144,6 +144,10 @@ public class FluidEntryStack extends AbstractEntryStack {
         if (!getSetting(Settings.TOOLTIP_ENABLED).value().get() || isEmpty())
             return null;
         List<String> toolTip = Lists.newArrayList(EntryListWidget.tryGetEntryStackName(this));
+        if (amount >= 0) {
+            String amountTooltip = getSetting(Settings.Fluid.AMOUNT_TOOLTIP).value().apply(this);
+            if (amountTooltip != null) for (String s : amountTooltip.split("\n")) toolTip.add(s);
+        }
         toolTip.addAll(getSetting(Settings.TOOLTIP_APPEND_EXTRA).value().apply(this));
         if (getSetting(Settings.TOOLTIP_APPEND_MOD).value().get() && RoughlyEnoughItemsCore.getConfigManager().getConfig().shouldAppendModNames()) {
             final String modString = ClientHelper.getInstance().getFormattedModFromIdentifier(Registry.FLUID.getId(fluid));

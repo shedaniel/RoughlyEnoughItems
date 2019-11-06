@@ -89,7 +89,7 @@ public class DefaultPlugin implements REIPluginV0 {
     
     @Override
     public void registerEntries(EntryRegistry entryRegistry) {
-        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isLoadingDefaultPlugin()) {
+        if (!ConfigManager.getInstance().getConfig().isLoadingDefaultPlugin()) {
             return;
         }
         for (Item item : Registry.ITEM) {
@@ -112,13 +112,13 @@ public class DefaultPlugin implements REIPluginV0 {
         }
         for (Fluid fluid : Registry.FLUID) {
             if (!(fluid instanceof EmptyFluid))
-                entryRegistry.registerEntry(EntryStack.create(fluid));
+                entryRegistry.registerEntry(EntryStack.create(fluid, -1));
         }
     }
     
     @Override
     public void registerPluginCategories(RecipeHelper recipeHelper) {
-        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isLoadingDefaultPlugin()) {
+        if (!ConfigManager.getInstance().getConfig().isLoadingDefaultPlugin()) {
             return;
         }
         recipeHelper.registerCategory(new DefaultCraftingCategory());
@@ -134,7 +134,7 @@ public class DefaultPlugin implements REIPluginV0 {
     
     @Override
     public void registerRecipeDisplays(RecipeHelper recipeHelper) {
-        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isLoadingDefaultPlugin()) {
+        if (!ConfigManager.getInstance().getConfig().isLoadingDefaultPlugin()) {
             return;
         }
         recipeHelper.registerRecipes(CRAFTING, ShapelessRecipe.class, DefaultShapelessDisplay::new);
@@ -148,7 +148,7 @@ public class DefaultPlugin implements REIPluginV0 {
             recipeHelper.registerDisplay(BREWING, display);
         }
         List<EntryStack> arrowStack = Collections.singletonList(EntryStack.create(Items.ARROW));
-        for (EntryStack entry : RoughlyEnoughItemsCore.getEntryRegistry().getStacksList()) {
+        for (EntryStack entry : EntryRegistry.getInstance().getStacksList()) {
             if (entry.getItem() == Items.LINGERING_POTION) {
                 List<List<EntryStack>> input = new ArrayList<>();
                 for (int i = 0; i < 4; i++)
@@ -188,8 +188,10 @@ public class DefaultPlugin implements REIPluginV0 {
     
     @Override
     public void postRegister() {
-        // Sit tight!
+        // Sit tight! This will be a fast journey!
         long time = System.currentTimeMillis();
+        for (EntryStack stack : EntryRegistry.getInstance().getStacksList())
+            applyPotionTransformer(stack);
         for (List<RecipeDisplay> displays : RecipeHelper.getInstance().getAllRecipes().values()) {
             for (RecipeDisplay display : displays) {
                 for (List<EntryStack> entries : display.getInputEntries())
@@ -200,7 +202,7 @@ public class DefaultPlugin implements REIPluginV0 {
             }
         }
         time = System.currentTimeMillis() - time;
-        System.out.printf("Applied Check Tags for potion in %dms.", time);
+        RoughlyEnoughItemsCore.LOGGER.info("[REI] Applied Check Tags for potion in %dms.", time);
     }
     
     private void applyPotionTransformer(EntryStack stack) {
@@ -210,7 +212,7 @@ public class DefaultPlugin implements REIPluginV0 {
     
     @Override
     public void registerBounds(DisplayHelper displayHelper) {
-        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isLoadingDefaultPlugin()) {
+        if (!ConfigManager.getInstance().getConfig().isLoadingDefaultPlugin()) {
             return;
         }
         displayHelper.getBaseBoundsHandler().registerExclusionZones(AbstractInventoryScreen.class, new DefaultPotionEffectExclusionZones());
@@ -285,7 +287,7 @@ public class DefaultPlugin implements REIPluginV0 {
     
     @Override
     public void registerOthers(RecipeHelper recipeHelper) {
-        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isLoadingDefaultPlugin()) {
+        if (!ConfigManager.getInstance().getConfig().isLoadingDefaultPlugin()) {
             return;
         }
         recipeHelper.registerWorkingStations(CRAFTING, new ItemStack(Items.CRAFTING_TABLE));
