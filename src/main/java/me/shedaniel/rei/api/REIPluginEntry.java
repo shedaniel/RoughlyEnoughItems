@@ -5,12 +5,18 @@
 
 package me.shedaniel.rei.api;
 
+import net.fabricmc.loader.api.SemanticVersion;
+import net.fabricmc.loader.util.version.VersionParsingException;
 import net.minecraft.util.Identifier;
 
 /**
  * Get base class of a REI plugin.
  */
 public interface REIPluginEntry {
+    
+    default SemanticVersion getMinimumVersion() throws VersionParsingException {
+        return null;
+    }
     
     /**
      * Gets the priority of the plugin.
