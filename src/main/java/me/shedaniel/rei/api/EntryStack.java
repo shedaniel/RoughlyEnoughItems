@@ -33,7 +33,7 @@ public interface EntryStack {
     }
     
     static EntryStack create(Fluid fluid) {
-        return create(fluid, -1);
+        return new FluidEntryStack(fluid);
     }
     
     static EntryStack create(Fluid fluid, int amount) {
@@ -46,10 +46,6 @@ public interface EntryStack {
     
     static EntryStack create(ItemConvertible item) {
         return new ItemEntryStack(new ItemStack(item));
-    }
-    
-    static EntryStack create(Block block) {
-        return new ItemEntryStack(new ItemStack(block));
     }
     
     Optional<Identifier> getIdentifier();
