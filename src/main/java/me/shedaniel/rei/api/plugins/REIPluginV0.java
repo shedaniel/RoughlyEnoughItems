@@ -15,8 +15,6 @@ import net.fabricmc.loader.util.version.VersionParsingException;
 
 public interface REIPluginV0 extends REIPluginEntry {
     
-    SemanticVersion getMinimumVersion() throws VersionParsingException;
-    
     /**
      * On register of the plugin
      */

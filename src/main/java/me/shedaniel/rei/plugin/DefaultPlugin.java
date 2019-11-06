@@ -10,10 +10,7 @@ import com.google.common.collect.Maps;
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.DisplayHelper;
-import me.shedaniel.rei.api.EntryRegistry;
-import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.RecipeHelper;
+import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
@@ -47,10 +44,7 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.fluid.EmptyFluid;
 import net.minecraft.fluid.Fluid;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemConvertible;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.item.*;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.recipe.*;
 import net.minecraft.util.Identifier;
@@ -190,6 +184,28 @@ public class DefaultPlugin implements REIPluginV0 {
         DummyAxeItem.getStrippedBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getId(b.getKey()))).forEach(set -> {
             recipeHelper.registerDisplay(STRIPPING, new DefaultStrippingDisplay(new ItemStack(set.getKey()), new ItemStack(set.getValue())));
         });
+    }
+    
+    @Override
+    public void postRegister() {
+        // Sit tight!
+        long time = System.currentTimeMillis();
+        for (List<RecipeDisplay> displays : RecipeHelper.getInstance().getAllRecipes().values()) {
+            for (RecipeDisplay display : displays) {
+                for (List<EntryStack> entries : display.getInputEntries())
+                    for (EntryStack stack : entries)
+                        applyPotionTransformer(stack);
+                for (EntryStack stack : display.getOutputEntries())
+                    applyPotionTransformer(stack);
+            }
+        }
+        time = System.currentTimeMillis() - time;
+        System.out.printf("Applied Check Tags for potion in %dms.", time);
+    }
+    
+    private void applyPotionTransformer(EntryStack stack) {
+        if (stack.getItem() instanceof PotionItem)
+            stack.addSetting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE);
     }
     
     @Override

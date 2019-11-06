@@ -255,6 +255,10 @@ public class RecipeHelperImpl implements RecipeHelper {
             RoughlyEnoughItemsCore.LOGGER.warn("[REI] Roughly Enough Items is not using semantic versioning, will be ignoring plugins' minimum versions!");
         for (REIPluginEntry plugin : plugins) {
             try {
+                if (reiVersion instanceof SemanticVersion)
+                    if (plugin.getMinimumVersion().compareTo((SemanticVersion) reiVersion) > 0) {
+                        throw new IllegalStateException("Requires " + plugin.getMinimumVersion().getFriendlyString() + " version of REI!");
+                    }
                 if (plugin instanceof REIPluginV0)
                     ((REIPluginV0) plugin).preRegister();
             } catch (Exception e) {
@@ -264,11 +268,10 @@ public class RecipeHelperImpl implements RecipeHelper {
         for (REIPluginEntry plugin : plugins) {
             Identifier identifier = plugin.getPluginIdentifier();
             try {
+                if (reiVersion instanceof SemanticVersion)
+                    if (plugin.getMinimumVersion().compareTo((SemanticVersion) reiVersion) > 0)
+                        return;
                 if (plugin instanceof REIPluginV0) {
-                    if (reiVersion instanceof SemanticVersion)
-                        if (((REIPluginV0) plugin).getMinimumVersion().compareTo((SemanticVersion) reiVersion) > 0) {
-                            throw new IllegalStateException("Requires " + ((REIPluginV0) plugin).getMinimumVersion().getFriendlyString() + " version of REI!");
-                        }
                     ((REIPluginV0) plugin).registerBounds(RoughlyEnoughItemsCore.getDisplayHelper());
                     ((REIPluginV0) plugin).registerEntries(RoughlyEnoughItemsCore.getEntryRegistry());
                     ((REIPluginV0) plugin).registerPluginCategories(this);
@@ -283,6 +286,9 @@ public class RecipeHelperImpl implements RecipeHelper {
         }
         for (REIPluginEntry plugin : plugins) {
             try {
+                if (reiVersion instanceof SemanticVersion)
+                    if (plugin.getMinimumVersion().compareTo((SemanticVersion) reiVersion) > 0)
+                        return;
                 if (plugin instanceof REIPluginV0)
                     ((REIPluginV0) plugin).postRegister();
             } catch (Exception e) {
