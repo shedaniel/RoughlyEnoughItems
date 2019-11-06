@@ -33,7 +33,7 @@ public interface EntryStack {
     }
     
     static EntryStack create(Fluid fluid) {
-        return create(fluid, 1000);
+        return create(fluid, -1);
     }
     
     static EntryStack create(Fluid fluid, int amount) {
