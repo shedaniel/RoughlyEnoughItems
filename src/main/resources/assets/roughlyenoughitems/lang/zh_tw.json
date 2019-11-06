@@ -79,6 +79,7 @@
   "text.rei.recipe_screen_type.selection": "合成介面選擇",
   "text.rei.recipe_screen_type.selection.sub": "你可以在設置中改變合成介面.",
   "text.rei.view_recipes_for": "顯示%s的所有合成",
+  "tooltip.rei.fluid_amount": "§7%d Unit",
   "msg.rei.copied_recipe_id": "已復製配方ID",
   "msg.rei.recipe_id_details": "配方ID：%s",
   "_comment": "設置提示",
