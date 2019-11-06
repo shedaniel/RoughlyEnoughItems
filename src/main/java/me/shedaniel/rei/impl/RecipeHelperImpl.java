@@ -253,7 +253,15 @@ public class RecipeHelperImpl implements RecipeHelper {
         Version reiVersion = FabricLoader.getInstance().getModContainer("roughlyenoughitems").get().getMetadata().getVersion();
         if (!(reiVersion instanceof SemanticVersion))
             RoughlyEnoughItemsCore.LOGGER.warn("[REI] Roughly Enough Items is not using semantic versioning, will be ignoring plugins' minimum versions!");
-        plugins.forEach(plugin -> {
+        for (REIPluginEntry plugin : plugins) {
+            try {
+                if (plugin instanceof REIPluginV0)
+                    ((REIPluginV0) plugin).preRegister();
+            } catch (Exception e) {
+                RoughlyEnoughItemsCore.LOGGER.error("[REI] " + plugin.getPluginIdentifier().toString() + " plugin failed to pre register!", e);
+            }
+        }
+        for (REIPluginEntry plugin : plugins) {
             Identifier identifier = plugin.getPluginIdentifier();
             try {
                 if (plugin instanceof REIPluginV0) {
@@ -272,7 +280,15 @@ public class RecipeHelperImpl implements RecipeHelper {
             } catch (Exception e) {
                 RoughlyEnoughItemsCore.LOGGER.error("[REI] " + identifier.toString() + " plugin failed to load!", e);
             }
-        });
+        }
+        for (REIPluginEntry plugin : plugins) {
+            try {
+                if (plugin instanceof REIPluginV0)
+                    ((REIPluginV0) plugin).postRegister();
+            } catch (Exception e) {
+                RoughlyEnoughItemsCore.LOGGER.error("[REI] " + plugin.getPluginIdentifier().toString() + " plugin failed to post register!", e);
+            }
+        }
         if (!recipeFunctions.isEmpty()) {
             List<Recipe> allSortedRecipes = getAllSortedRecipes();
             Collections.reverse(allSortedRecipes);
