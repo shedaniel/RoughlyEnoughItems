@@ -61,24 +61,28 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     private static final DisplayHelper DISPLAY_HELPER = new DisplayHelperImpl();
     private static final Map<Identifier, REIPluginEntry> plugins = Maps.newHashMap();
     private static final ExecutorService SYNC_RECIPES = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "REI-SyncRecipes"));
-    private static ConfigManagerImpl configManager;
+    private static ConfigManager configManager;
     
     static {
         LOGGER = LogManager.getFormatterLogger("REI");
     }
     
+    @Deprecated
     public static RecipeHelper getRecipeHelper() {
         return RECIPE_HELPER;
     }
     
+    @Deprecated
     public static ConfigManager getConfigManager() {
         return configManager;
     }
     
+    @Deprecated
     public static EntryRegistry getEntryRegistry() {
         return ENTRY_REGISTRY;
     }
     
+    @Deprecated
     public static DisplayHelper getDisplayHelper() {
         return DISPLAY_HELPER;
     }

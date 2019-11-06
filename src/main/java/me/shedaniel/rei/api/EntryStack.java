@@ -11,6 +11,7 @@ import me.shedaniel.rei.impl.EmptyEntryStack;
 import me.shedaniel.rei.impl.FluidEntryStack;
 import me.shedaniel.rei.impl.ItemEntryStack;
 import net.minecraft.block.Block;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemConvertible;
@@ -31,7 +32,7 @@ public interface EntryStack {
     }
     
     static EntryStack create(Fluid fluid) {
-        return create(fluid, 1000);
+        return new FluidEntryStack(fluid);
     }
     
     static EntryStack create(Fluid fluid, int amount) {
@@ -44,10 +45,6 @@ public interface EntryStack {
     
     static EntryStack create(ItemConvertible item) {
         return new ItemEntryStack(new ItemStack(item));
-    }
-    
-    static EntryStack create(Block block) {
-        return new ItemEntryStack(new ItemStack(block));
     }
     
     Optional<Identifier> getIdentifier();
@@ -142,6 +139,14 @@ public interface EntryStack {
             public static final Settings<Supplier<Boolean>> RENDER_OVERLAY = new Settings(TRUE);
             
             private Item() {
+            }
+        }
+        
+        public static class Fluid {
+            // Return null to disable
+            public static final Settings<Function<EntryStack, String>> AMOUNT_TOOLTIP = new Settings<Function<EntryStack, String>>(stack -> I18n.translate("tooltip.rei.fluid_amount", stack.getAmount()));
+            
+            private Fluid() {
             }
         }
     }

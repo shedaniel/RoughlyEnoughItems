@@ -3,12 +3,11 @@
  * Licensed under the MIT License.
  */
 
-package me.shedaniel.rei.gui.renderers;
+package me.shedaniel.rei.gui.entries;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.gui.entries.RecipeEntry;
 import me.shedaniel.rei.gui.widget.EntryWidget;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.utils.CollectionUtils;

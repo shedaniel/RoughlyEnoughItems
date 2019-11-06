@@ -7,7 +7,6 @@ package me.shedaniel.rei.plugin.crafting;
 
 import me.shedaniel.rei.api.EntryStack;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.PotionItem;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.ShapelessRecipe;
 import net.minecraft.util.Identifier;
@@ -29,15 +28,11 @@ public class DefaultShapelessDisplay implements DefaultCraftingDisplay {
         this.input = recipe.getPreviewInputs().stream().map(i -> {
             List<EntryStack> entries = new ArrayList<>();
             for (ItemStack stack : i.getMatchingStacksClient()) {
-                if (stack.getItem() instanceof PotionItem)
-                    entries.add(EntryStack.create(stack).setting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE));
-                else entries.add(EntryStack.create(stack));
+                entries.add(EntryStack.create(stack));
             }
             return entries;
         }).collect(Collectors.toList());
-        if (recipe.getOutput().getItem() instanceof PotionItem)
-            this.output = Collections.singletonList(EntryStack.create(recipe.getOutput()).setting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE));
-        else this.output = Collections.singletonList(EntryStack.create(recipe.getOutput()));
+        this.output = Collections.singletonList(EntryStack.create(recipe.getOutput()));
     }
     
     @Override

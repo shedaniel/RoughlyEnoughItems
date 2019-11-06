@@ -5,6 +5,8 @@
 
 package me.shedaniel.rei.api;
 
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.api.annotations.ToBeRemoved;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -12,6 +14,10 @@ import net.minecraft.item.ItemStack;
 import java.util.List;
 
 public interface EntryRegistry {
+    
+    static EntryRegistry getInstance() {
+        return RoughlyEnoughItemsCore.getEntryRegistry();
+    }
     
     /**
      * Gets the current modifiable stacks list
