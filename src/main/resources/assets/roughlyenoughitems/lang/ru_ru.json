@@ -79,6 +79,7 @@
   "text.rei.recipe_screen_type.selection": "Выбор типа экрана рецепта",
   "text.rei.recipe_screen_type.selection.sub": "Вы всегда можете изменить эту настройку через окно конфигурации.",
   "text.rei.view_recipes_for": "Посмотреть рецепты на %s",
+  "tooltip.rei.fluid_amount": "§7%d Unit",
   "msg.rei.copied_recipe_id": "Copied Recipe Identifier",
   "msg.rei.recipe_id_details": "Recipe ID: %s",
   "_comment": "Конфигурация подсказок",

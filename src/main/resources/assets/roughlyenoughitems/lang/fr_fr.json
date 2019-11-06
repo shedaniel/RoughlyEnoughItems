@@ -79,6 +79,7 @@
   "text.rei.recipe_screen_type.selection": "Écran de sélection du type d'affichage des recettes",
   "text.rei.recipe_screen_type.selection.sub": "Vous pouvez toujours changer cette option dans l'écran de configuration.",
   "text.rei.view_recipes_for": "View Recipes for %s",
+  "tooltip.rei.fluid_amount": "§7%d Unit",
   "msg.rei.copied_recipe_id": "Copied Recipe Identifier",
   "msg.rei.recipe_id_details": "Recipe ID: %s",
   "_comment": "Config Tooltips",

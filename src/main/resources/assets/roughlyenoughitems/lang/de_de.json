@@ -79,6 +79,7 @@
   "text.rei.recipe_screen_type.selection": "Darstellung Rezept-Bildschirm",
   "text.rei.recipe_screen_type.selection.sub": "Du kannst diese Einstellung jederzeit über den Konfigurationsbildschirm wieder bearbeiten.",
   "text.rei.view_recipes_for": "Rezepte für %s anzeigen",
+  "tooltip.rei.fluid_amount": "§7%d Unit",
   "msg.rei.copied_recipe_id": "Copied Recipe Identifier",
   "msg.rei.recipe_id_details": "Recipe ID: %s",
   "_comment": "Konfigurations-Tooltips",
