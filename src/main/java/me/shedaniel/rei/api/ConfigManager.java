@@ -5,12 +5,17 @@
 
 package me.shedaniel.rei.api;
 
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.zeroeightsix.fiber.exception.FiberException;
 import net.minecraft.client.gui.screen.Screen;
 
 import java.io.IOException;
 
 public interface ConfigManager {
+    
+    static ConfigManager getInstance() {
+        return RoughlyEnoughItemsCore.getConfigManager();
+    }
     
     /**
      * Saves the config.

@@ -67,18 +67,22 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         LOGGER = LogManager.getFormatterLogger("REI");
     }
     
+    @Deprecated
     public static RecipeHelper getRecipeHelper() {
         return RECIPE_HELPER;
     }
     
+    @Deprecated
     public static ConfigManager getConfigManager() {
         return configManager;
     }
     
+    @Deprecated
     public static EntryRegistry getEntryRegistry() {
         return ENTRY_REGISTRY;
     }
     
+    @Deprecated
     public static DisplayHelper getDisplayHelper() {
         return DISPLAY_HELPER;
     }
