@@ -112,7 +112,7 @@ public class DefaultPlugin implements REIPluginV0 {
         }
         for (Fluid fluid : Registry.FLUID) {
             if (!(fluid instanceof EmptyFluid))
-                entryRegistry.registerEntry(EntryStack.create(fluid, -1));
+                entryRegistry.registerEntry(EntryStack.create(fluid));
         }
     }
     

@@ -38,8 +38,13 @@ import java.util.Optional;
 @Deprecated
 public class FluidEntryStack extends AbstractEntryStack {
     private static final Map<Fluid, Pair<Sprite, Integer>> FLUID_SPRITE_CACHE = new HashMap<>();
+    private static final int EMPTY_AMOUNT = -1319182373;
     private Fluid fluid;
     private int amount;
+    
+    public FluidEntryStack(Fluid fluid) {
+        this(fluid, EMPTY_AMOUNT);
+    }
     
     public FluidEntryStack(Fluid fluid, int amount) {
         this.fluid = fluid;
@@ -80,7 +85,7 @@ public class FluidEntryStack extends AbstractEntryStack {
     
     @Override
     public void setAmount(int amount) {
-        this.amount = Math.max(amount, 0);
+        this.amount = amount == EMPTY_AMOUNT ? EMPTY_AMOUNT : Math.max(amount, 0);
         if (isEmpty()) {
             fluid = Fluids.EMPTY;
         }
@@ -88,7 +93,7 @@ public class FluidEntryStack extends AbstractEntryStack {
     
     @Override
     public boolean isEmpty() {
-        return amount <= 0 || fluid == Fluids.EMPTY;
+        return (amount != EMPTY_AMOUNT && amount <= 0) || fluid == Fluids.EMPTY;
     }
     
     @Override
