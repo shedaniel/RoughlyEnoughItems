@@ -478,7 +478,7 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
         }
         
         Tessellator tessellator_1 = Tessellator.getInstance();
-        BufferBuilder bufferBuilder_1 = tessellator_1.getBufferBuilder();
+        BufferBuilder bufferBuilder_1 = tessellator_1.getBuffer();
         RenderSystem.color4f(0.0F, 0.0F, 255.0F, 255.0F);
         RenderSystem.disableTexture();
         RenderSystem.enableColorLogicOp();

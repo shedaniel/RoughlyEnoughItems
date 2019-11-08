@@ -27,8 +27,8 @@ import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.client.render.GuiLighting;
-import net.minecraft.client.render.LayeredVertexConsumerStorage;
 import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.Window;
@@ -63,7 +63,7 @@ public class ContainerScreenOverlay extends Widget {
     public final TriConsumer<Integer, Integer, Float> renderTooltipCallback = (x, y, aFloat) -> {
         RenderSystem.disableRescaleNormal();
         RenderSystem.disableDepthTest();
-        setBlitOffset(1000);
+        setBlitOffset(999);
         this.fillGradient(x - 3, y - 4, x + tooltipWidth + 3, y - 3, -267386864, -267386864);
         this.fillGradient(x - 3, y + tooltipHeight + 3, x + tooltipWidth + 3, y + tooltipHeight + 4, -267386864, -267386864);
         this.fillGradient(x - 3, y - 3, x + tooltipWidth + 3, y + tooltipHeight + 3, -267386864, -267386864);
@@ -75,14 +75,14 @@ public class ContainerScreenOverlay extends Widget {
         this.fillGradient(x - 3, y + tooltipHeight + 2, x + tooltipWidth + 3, y + tooltipHeight + 3, 1344798847, 1344798847);
         int currentY = y;
         MatrixStack matrixStack_1 = new MatrixStack();
-        LayeredVertexConsumerStorage.Drawer drawer = LayeredVertexConsumerStorage.makeDrawer(Tessellator.getInstance().getBufferBuilder());
+        VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
         matrixStack_1.translate(0.0D, 0.0D, getBlitOffset());
-        Matrix4f matrix4f_1 = matrixStack_1.peek();
+        Matrix4f matrix4f_1 = matrixStack_1.method_23760().method_23761();
         for (int lineIndex = 0; lineIndex < tooltipLines.size(); lineIndex++) {
-            font.method_22942(tooltipLines.get(lineIndex), (float) x, (float) currentY, -1, true, matrix4f_1, drawer, false, 0, 15728880);
+            font.draw(tooltipLines.get(lineIndex), x, currentY, -1, true, matrix4f_1, immediate, false, 0, 15728880);
             currentY += lineIndex == 0 ? 12 : 10;
         }
-        drawer.draw();
+        immediate.draw();
         setBlitOffset(0);
         RenderSystem.enableDepthTest();
         RenderSystem.enableRescaleNormal();
