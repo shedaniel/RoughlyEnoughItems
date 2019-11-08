@@ -310,7 +310,7 @@ public class EntryListWidget extends Widget {
             double height = getMaxScroll();
             if (height > rectangle.height) {
                 Tessellator tessellator = Tessellator.getInstance();
-                BufferBuilder buffer = tessellator.getBufferBuilder();
+                BufferBuilder buffer = tessellator.getBuffer();
                 double maxScroll = height;
                 int scrollBarHeight = MathHelper.floor((rectangle.height) * (rectangle.height) / maxScroll);
                 scrollBarHeight = MathHelper.clamp(scrollBarHeight, 32, rectangle.height - 8);

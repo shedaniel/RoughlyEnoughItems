@@ -377,7 +377,7 @@ public class VillagerRecipeViewingScreen extends Screen {
         double maxScroll = getMaxScrollPosition();
         if (maxScroll > scrollListBounds.height - 2) {
             Tessellator tessellator = Tessellator.getInstance();
-            BufferBuilder buffer = tessellator.getBufferBuilder();
+            BufferBuilder buffer = tessellator.getBuffer();
             int height = (int) (((scrollListBounds.height - 2) * (scrollListBounds.height - 2)) / this.getMaxScrollPosition());
             height = MathHelper.clamp(height, 32, scrollListBounds.height - 2 - 8);
             height -= Math.min((scroll < 0 ? (int) -scroll : scroll > getMaxScroll() ? (int) scroll - getMaxScroll() : 0), height * .95);
@@ -392,10 +392,10 @@ public class VillagerRecipeViewingScreen extends Screen {
             RenderSystem.shadeModel(7425);
             buffer.begin(7, VertexFormats.POSITION_COLOR);
             float b = ScreenHelper.isDarkModeEnabled() ? 0.37f : 1f;
-            buffer.vertex(scrollbarPositionMinX, minY + height, 1000D).color(b, b, b, scrollBarAlpha).next();
-            buffer.vertex(scrollbarPositionMaxX, minY + height, 1000D).color(b, b, b, scrollBarAlpha).next();
-            buffer.vertex(scrollbarPositionMaxX, minY, 1000D).color(b, b, b, scrollBarAlpha).next();
-            buffer.vertex(scrollbarPositionMinX, minY, 1000D).color(b, b, b, scrollBarAlpha).next();
+            buffer.vertex(scrollbarPositionMinX, minY + height, 800).color(b, b, b, scrollBarAlpha).next();
+            buffer.vertex(scrollbarPositionMaxX, minY + height, 800).color(b, b, b, scrollBarAlpha).next();
+            buffer.vertex(scrollbarPositionMaxX, minY, 800).color(b, b, b, scrollBarAlpha).next();
+            buffer.vertex(scrollbarPositionMinX, minY, 800).color(b, b, b, scrollBarAlpha).next();
             tessellator.draw();
             RenderSystem.shadeModel(7424);
             RenderSystem.disableBlend();

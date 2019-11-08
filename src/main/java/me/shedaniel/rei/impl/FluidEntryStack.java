@@ -176,8 +176,8 @@ public class FluidEntryStack extends AbstractEntryStack {
                 MinecraftClient.getInstance().getTextureManager().bindTexture(SpriteAtlasTexture.BLOCK_ATLAS_TEX);
                 GuiLighting.disable();
                 Tessellator tess = Tessellator.getInstance();
-                BufferBuilder bb = tess.getBufferBuilder();
-                bb.begin(7, VertexFormats.POSITION_UV_COLOR);
+                BufferBuilder bb = tess.getBuffer();
+                bb.begin(7, VertexFormats.POSITION_TEXTURE_COLOR);
                 bb.vertex(bounds.getMaxX(), bounds.y, getZ()).texture(sprite.getMaxU(), sprite.getMinV()).color(r, g, b, a).next();
                 bb.vertex(bounds.x, bounds.y, getZ()).texture(sprite.getMinU(), sprite.getMinV()).color(r, g, b, a).next();
                 bb.vertex(bounds.x, bounds.getMaxY(), getZ()).texture(sprite.getMinU(), sprite.getMaxV()).color(r, g, b, a).next();
