@@ -79,7 +79,7 @@
   "text.rei.recipe_screen_type.selection": "Retseptide kuvatüübi valik",
   "text.rei.recipe_screen_type.selection.sub": "Sa saad seda seadistust alati seadistuskuvalt muuta.",
   "text.rei.view_recipes_for": "Vaata %s retsepte",
-  "tooltip.rei.fluid_amount": "§7%d Unit",
+  "tooltip.rei.fluid_amount": "§7%d ühik",
   "msg.rei.copied_recipe_id": "Retsepti ID kopeeritud",
   "msg.rei.recipe_id_details": "Retsepti ID: %s",
   "_comment": "Seadistuse vihjetekstid",
