@@ -7,7 +7,7 @@ package me.shedaniel.rei.gui.widget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Rectangle;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.api.ConfigManager;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GuiLighting;
@@ -43,7 +43,7 @@ public abstract class CraftableToggleButtonWidget extends ButtonWidget {
         GuiLighting.disable();
         MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        int color = RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() ? 939579655 : 956235776;
+        int color = ConfigManager.getInstance().isCraftableOnlyEnabled() ? 939579655 : 956235776;
         setBlitOffset(getBlitOffset() + 10);
         this.fillGradient(getBounds().x, getBounds().y, getBounds().x + getBounds().width, getBounds().y + getBounds().height, color, color);
         setBlitOffset(0);
@@ -60,6 +60,6 @@ public abstract class CraftableToggleButtonWidget extends ButtonWidget {
     
     @Override
     public Optional<String> getTooltips() {
-        return Optional.ofNullable(I18n.translate(RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() ? "text.rei.showing_craftable" : "text.rei.showing_all"));
+        return Optional.ofNullable(I18n.translate(ConfigManager.getInstance().isCraftableOnlyEnabled() ? "text.rei.showing_craftable" : "text.rei.showing_all"));
     }
 }

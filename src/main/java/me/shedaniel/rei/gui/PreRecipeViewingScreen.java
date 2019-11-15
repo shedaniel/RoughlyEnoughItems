@@ -7,8 +7,8 @@ package me.shedaniel.rei.gui;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.math.api.Rectangle;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ClientHelper;
+import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
@@ -54,9 +54,9 @@ public class PreRecipeViewingScreen extends Screen {
         this.widgets.add(new ButtonWidget(width / 2 - 100, height - 40, 200, 20, I18n.translate("text.rei.select")) {
             @Override
             public void onPressed() {
-                RoughlyEnoughItemsCore.getConfigManager().getConfig().setRecipeScreenType(original ? RecipeScreenType.ORIGINAL : RecipeScreenType.VILLAGER);
+                ConfigManager.getInstance().getConfig().setRecipeScreenType(original ? RecipeScreenType.ORIGINAL : RecipeScreenType.VILLAGER);
                 try {
-                    RoughlyEnoughItemsCore.getConfigManager().saveConfig();
+                    ConfigManager.getInstance().saveConfig();
                 } catch (IOException | FiberException e) {
                     e.printStackTrace();
                 }

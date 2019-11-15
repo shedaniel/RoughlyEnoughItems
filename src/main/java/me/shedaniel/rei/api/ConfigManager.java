@@ -14,6 +14,7 @@ import java.io.IOException;
 public interface ConfigManager {
     
     static ConfigManager getInstance() {
+        //noinspection deprecation
         return RoughlyEnoughItemsCore.getConfigManager();
     }
     

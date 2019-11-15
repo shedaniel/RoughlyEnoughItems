@@ -7,6 +7,7 @@ package me.shedaniel.rei.impl;
 
 import me.shedaniel.rei.api.ObjectHolder;
 
+@Deprecated
 public class ObjectHolderImpl<T> implements ObjectHolder<T> {
     private Object o;
     

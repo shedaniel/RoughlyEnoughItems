@@ -10,8 +10,6 @@ import me.shedaniel.rei.api.EntryRegistry;
 import me.shedaniel.rei.api.REIPluginEntry;
 import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.api.annotations.ToBeRemoved;
-import net.fabricmc.loader.api.SemanticVersion;
-import net.fabricmc.loader.util.version.VersionParsingException;
 
 public interface REIPluginV0 extends REIPluginEntry {
     

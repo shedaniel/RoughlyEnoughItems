@@ -20,10 +20,8 @@ import java.util.function.Predicate;
 
 public interface RecipeHelper {
     
-    /**
-     * @return the api instance of {@link me.shedaniel.rei.impl.RecipeHelperImpl}
-     */
     static RecipeHelper getInstance() {
+        //noinspection deprecation
         return RoughlyEnoughItemsCore.getRecipeHelper();
     }
     
@@ -56,7 +54,7 @@ public interface RecipeHelper {
      *
      * @param category the category to register
      */
-    void registerCategory(RecipeCategory category);
+    void registerCategory(RecipeCategory<?> category);
     
     /**
      * Registers the working stations of a category
@@ -106,7 +104,7 @@ public interface RecipeHelper {
      *
      * @return the list of categories
      */
-    List<RecipeCategory> getAllCategories();
+    List<RecipeCategory<?>> getAllCategories();
     
     /**
      * Gets a map of usages for an entry
@@ -122,7 +120,7 @@ public interface RecipeHelper {
      * @param category the category of the display
      * @return the optional of speed crafting button area
      */
-    Optional<ButtonAreaSupplier> getAutoCraftButtonArea(RecipeCategory category);
+    Optional<ButtonAreaSupplier> getAutoCraftButtonArea(RecipeCategory<?> category);
     
     /**
      * Registers a speed crafting button area
@@ -155,7 +153,7 @@ public interface RecipeHelper {
      */
     Map<RecipeCategory<?>, List<RecipeDisplay>> getAllRecipes();
     
-    List<RecipeDisplay> getAllRecipesFromCategory(RecipeCategory category);
+    List<RecipeDisplay> getAllRecipesFromCategory(RecipeCategory<?> category);
     
     /**
      * Registers a recipe visibility handler
@@ -207,7 +205,7 @@ public interface RecipeHelper {
      */
     void registerLiveRecipeGenerator(LiveRecipeGenerator<?> liveRecipeGenerator);
     
-    void registerScreenClickArea(Rectangle rectangle, Class<? extends AbstractContainerScreen> screenClass, Identifier... categories);
+    void registerScreenClickArea(Rectangle rectangle, Class<? extends AbstractContainerScreen<?>> screenClass, Identifier... categories);
     
     <T extends Recipe<?>> void registerRecipes(Identifier category, Class<T> recipeClass, Function<T, RecipeDisplay> mappingFunction);
     

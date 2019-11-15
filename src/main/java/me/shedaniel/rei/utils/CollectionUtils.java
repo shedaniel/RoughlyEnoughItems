@@ -47,14 +47,13 @@ public class CollectionUtils {
     }
     
     public static final <T> List<T> filter(List<T> list, Predicate<T> predicate) {
-        List<T> l = null;
+        List<T> l = new LinkedList<>();
         for (T t : list) {
             if (predicate.test(t)) {
-                if (l == null) l = new LinkedList<>();
                 l.add(t);
             }
         }
-        return l == null ? Collections.emptyList() : l;
+        return l;
     }
     
     public static final <T, R> List<R> map(List<T> list, Function<T, R> function) {
@@ -158,7 +157,7 @@ public class CollectionUtils {
     
     public static final <T> int sumInt(List<Integer> list) {
         int sum = 0;
-        for (Integer t : list) {
+        for (int t : list) {
             sum += t;
         }
         return sum;
@@ -174,7 +173,7 @@ public class CollectionUtils {
     
     public static final <T> double sumDouble(List<Double> list) {
         double sum = 0;
-        for (Double t : list) {
+        for (double t : list) {
             sum += t;
         }
         return sum;

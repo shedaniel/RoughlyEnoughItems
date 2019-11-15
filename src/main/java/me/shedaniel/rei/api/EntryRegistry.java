@@ -6,7 +6,6 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.annotations.ToBeRemoved;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;

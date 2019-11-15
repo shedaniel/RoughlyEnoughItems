@@ -7,8 +7,8 @@ package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.math.api.Rectangle;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ClientHelper;
+import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.gui.widget.EntryListWidget;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
@@ -137,6 +137,16 @@ public class FluidEntryStack extends AbstractEntryStack {
         return fluid == stack.getFluid() && amount == stack.getAmount();
     }
     
+    @Override
+    public int hashCode() {
+        int result = 1;
+        result = 31 * result + getType().ordinal();
+        result = 31 * result + fluid.hashCode();
+        result = 31 * result + amount;
+        result = 31 * result;
+        return result;
+    }
+    
     @Nullable
     @Override
     public QueuedTooltip getTooltip(int mouseX, int mouseY) {
@@ -148,7 +158,7 @@ public class FluidEntryStack extends AbstractEntryStack {
             if (amountTooltip != null) for (String s : amountTooltip.split("\n")) toolTip.add(s);
         }
         toolTip.addAll(getSetting(Settings.TOOLTIP_APPEND_EXTRA).value().apply(this));
-        if (getSetting(Settings.TOOLTIP_APPEND_MOD).value().get() && RoughlyEnoughItemsCore.getConfigManager().getConfig().shouldAppendModNames()) {
+        if (getSetting(Settings.TOOLTIP_APPEND_MOD).value().get() && ConfigManager.getInstance().getConfig().shouldAppendModNames()) {
             final String modString = ClientHelper.getInstance().getFormattedModFromIdentifier(Registry.FLUID.getId(fluid));
             boolean alreadyHasMod = false;
             for (String s : toolTip)

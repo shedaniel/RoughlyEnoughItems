@@ -10,12 +10,15 @@ import com.google.common.collect.Maps;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.BaseBoundsHandler;
 import me.shedaniel.rei.api.DisplayHelper;
+import me.shedaniel.rei.api.annotations.Internal;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Deprecated
+@Internal
 public class DisplayHelperImpl implements DisplayHelper {
     
     private static final Comparator<DisplayBoundsHandler<?>> BOUNDS_HANDLER_COMPARATOR;

@@ -6,12 +6,15 @@
 package me.shedaniel.rei.impl;
 
 import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.gui.config.*;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.tree.ConfigNode;
 import me.zeroeightsix.fiber.tree.ConfigValue;
 import me.zeroeightsix.fiber.tree.Node;
 
+@Deprecated
+@Internal
 public class ConfigObjectImpl implements ConfigObject {
     
     public ConfigNode configNode = new ConfigNode();
@@ -189,12 +192,6 @@ public class ConfigObjectImpl implements ConfigObject {
             .withName("scrollingEntryListWidget")
             .build();
     
-    //    private ConfigValue<RelativePoint> choosePageDialogPoint = ConfigValue.builder(RelativePoint.class)
-    //            .withParent(technical)
-    //            .withDefaultValue(new RelativePoint(.5, .5))
-    //            .withName("choosePageDialogPoint")
-    //            .build();
-    
     public ConfigObjectImpl() throws FiberException {
     
     }
@@ -342,16 +339,5 @@ public class ConfigObjectImpl implements ConfigObject {
     @Override
     public boolean doesRegisterRecipesInAnotherThread() {
         return registerRecipesInAnotherThread.getValue().booleanValue();
-    }
-    
-    @Override
-    public RelativePoint getChoosePageDialogPoint() {
-        //        return choosePageDialogPoint.getValue();
-        return new RelativePoint(.5, .5);
-    }
-    
-    @Override
-    public void setChoosePageDialogPoint(RelativePoint choosePageDialogPoint) {
-        //        this.choosePageDialogPoint.setValue(choosePageDialogPoint);
     }
 }

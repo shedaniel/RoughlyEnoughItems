@@ -9,7 +9,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import me.shedaniel.cloth.hooks.ClothClientHooks;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.OverlaySearchField;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
@@ -40,6 +40,7 @@ public class ScreenHelper implements ClientModInitializer {
     private static AbstractContainerScreen<?> lastContainerScreen = null;
     private static LinkedHashSet<Screen> lastRecipeScreen = Sets.newLinkedHashSetWithExpectedSize(5);
     
+    @SuppressWarnings("deprecation")
     public static OverlaySearchField getSearchField() {
         return searchField;
     }
@@ -121,7 +122,7 @@ public class ScreenHelper implements ClientModInitializer {
     }
     
     public static boolean isDarkModeEnabled() {
-        return RoughlyEnoughItemsCore.getConfigManager().getConfig().isUsingDarkTheme();
+        return ConfigManager.getInstance().getConfig().isUsingDarkTheme();
     }
     
     @Override
@@ -132,8 +133,8 @@ public class ScreenHelper implements ClientModInitializer {
             return ActionResult.PASS;
         });
         ClientTickCallback.EVENT.register(minecraftClient -> {
-            if (isOverlayVisible() && searchField != null)
-                searchField.tick();
+            if (isOverlayVisible() && getSearchField() != null)
+                getSearchField().tick();
         });
     }
     

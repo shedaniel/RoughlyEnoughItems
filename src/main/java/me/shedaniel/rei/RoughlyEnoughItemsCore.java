@@ -134,6 +134,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         return ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET) && ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.DELETE_ITEMS_PACKET);
     }
     
+    @SuppressWarnings("deprecation")
     @Override
     public void onInitializeClient() {
         configManager = new ConfigManagerImpl();
@@ -215,14 +216,16 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                 return;
             }
             lastSync.set(System.currentTimeMillis());
-            if (RoughlyEnoughItemsCore.getConfigManager().getConfig().doesRegisterRecipesInAnotherThread()) {
-                CompletableFuture.runAsync(() -> ((RecipeHelperImpl) RoughlyEnoughItemsCore.getRecipeHelper()).recipesLoaded(recipeManager), SYNC_RECIPES);
+            if (ConfigManager.getInstance().getConfig().doesRegisterRecipesInAnotherThread()) {
+                //noinspection deprecation
+                CompletableFuture.runAsync(() -> ((RecipeHelperImpl) RecipeHelper.getInstance()).recipesLoaded(recipeManager), SYNC_RECIPES);
             } else {
-                ((RecipeHelperImpl) RoughlyEnoughItemsCore.getRecipeHelper()).recipesLoaded(recipeManager);
+                //noinspection deprecation
+                ((RecipeHelperImpl) RecipeHelper.getInstance()).recipesLoaded(recipeManager);
             }
         });
         ClothClientHooks.SCREEN_ADD_BUTTON.register((minecraftClient, screen, abstractButtonWidget) -> {
-            if (RoughlyEnoughItemsCore.getConfigManager().getConfig().doesDisableRecipeBook() && screen instanceof AbstractContainerScreen && abstractButtonWidget instanceof TexturedButtonWidget)
+            if (ConfigManager.getInstance().getConfig().doesDisableRecipeBook() && screen instanceof AbstractContainerScreen && abstractButtonWidget instanceof TexturedButtonWidget)
                 if (((RecipeBookButtonWidgetHooks) abstractButtonWidget).rei_getTexture().equals(recipeButtonTex))
                     return ActionResult.FAIL;
             return ActionResult.PASS;

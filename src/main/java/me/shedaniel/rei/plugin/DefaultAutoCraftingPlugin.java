@@ -5,7 +5,7 @@
 
 package me.shedaniel.rei.plugin;
 
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.plugin.autocrafting.DefaultCategoryHandler;
@@ -30,7 +30,7 @@ public class DefaultAutoCraftingPlugin implements REIPluginV0 {
     
     @Override
     public void registerOthers(RecipeHelper recipeHelper) {
-        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isLoadingDefaultPlugin()) {
+        if (!ConfigManager.getInstance().getConfig().isLoadingDefaultPlugin()) {
             return;
         }
         recipeHelper.registerAutoCraftingHandler(new DefaultCategoryHandler());

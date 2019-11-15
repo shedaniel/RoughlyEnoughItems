@@ -5,7 +5,6 @@
 
 package me.shedaniel.rei.api;
 
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
 import java.util.List;
@@ -15,17 +14,7 @@ public interface LiveRecipeGenerator<T extends RecipeDisplay> {
     
     Identifier getCategoryIdentifier();
     
-    @Deprecated
-    default Optional<List<T>> getRecipeFor(ItemStack stack) {
-        return Optional.empty();
-    }
-    
     default Optional<List<T>> getRecipeFor(EntryStack entry) {
-        return Optional.empty();
-    }
-    
-    @Deprecated
-    default Optional<List<T>> getUsageFor(ItemStack stack) {
         return Optional.empty();
     }
     

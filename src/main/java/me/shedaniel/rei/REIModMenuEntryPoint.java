@@ -6,6 +6,7 @@
 package me.shedaniel.rei;
 
 import io.github.prospector.modmenu.api.ModMenuApi;
+import me.shedaniel.rei.api.ConfigManager;
 import net.minecraft.client.gui.screen.Screen;
 
 import java.util.Optional;
@@ -25,7 +26,7 @@ public class REIModMenuEntryPoint implements ModMenuApi {
     }
     
     public Screen getScreen(Screen parent) {
-        return RoughlyEnoughItemsCore.getConfigManager().getConfigScreen(parent);
+        return ConfigManager.getInstance().getConfigScreen(parent);
     }
     
 }

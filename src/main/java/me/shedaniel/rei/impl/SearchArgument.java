@@ -5,9 +5,13 @@
 
 package me.shedaniel.rei.impl;
 
+import me.shedaniel.rei.api.annotations.Internal;
+
 import java.util.Locale;
 import java.util.function.Function;
 
+@Deprecated
+@Internal
 public class SearchArgument {
     
     public static final SearchArgument ALWAYS = new SearchArgument(ArgumentType.ALWAYS, "", true);
