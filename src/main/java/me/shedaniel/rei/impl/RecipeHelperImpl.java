@@ -261,7 +261,7 @@ public class RecipeHelperImpl implements RecipeHelper {
                     }
                 if (plugin instanceof REIPluginV0)
                     ((REIPluginV0) plugin).preRegister();
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 RoughlyEnoughItemsCore.LOGGER.error("[REI] " + plugin.getPluginIdentifier().toString() + " plugin failed to pre register!", e);
             }
         }
@@ -280,7 +280,7 @@ public class RecipeHelperImpl implements RecipeHelper {
                 } else {
                     throw new IllegalStateException("Invaild Plugin Class!");
                 }
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 RoughlyEnoughItemsCore.LOGGER.error("[REI] " + identifier.toString() + " plugin failed to load!", e);
             }
         }
@@ -291,7 +291,7 @@ public class RecipeHelperImpl implements RecipeHelper {
                         return;
                 if (plugin instanceof REIPluginV0)
                     ((REIPluginV0) plugin).postRegister();
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 RoughlyEnoughItemsCore.LOGGER.error("[REI] " + plugin.getPluginIdentifier().toString() + " plugin failed to post register!", e);
             }
         }
