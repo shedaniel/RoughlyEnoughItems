@@ -7,7 +7,7 @@ package me.shedaniel.rei.gui.widget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Rectangle;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.render.GuiLighting;
@@ -86,7 +86,7 @@ public class PanelWidget extends WidgetWithBounds {
     }
     
     protected boolean isRendering() {
-        return RoughlyEnoughItemsCore.getConfigManager().getConfig().getRecipeScreenType() != RecipeScreenType.VILLAGER;
+        return ConfigManager.getInstance().getConfig().getRecipeScreenType() != RecipeScreenType.VILLAGER;
     }
     
     protected int getInnerColor() {
@@ -98,7 +98,7 @@ public class PanelWidget extends WidgetWithBounds {
     }
     
     protected int getYTextureOffset() {
-        return RoughlyEnoughItemsCore.getConfigManager().getConfig().isUsingLightGrayRecipeBorder() ? 0 : 66;
+        return ConfigManager.getInstance().getConfig().isUsingLightGrayRecipeBorder() ? 0 : 66;
     }
     
 }

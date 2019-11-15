@@ -8,14 +8,13 @@ package me.shedaniel.rei.impl;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Rectangle;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ClientHelper;
+import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.ItemStackRenderOverlayHook;
 import me.shedaniel.rei.gui.widget.EntryListWidget;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
@@ -108,6 +107,16 @@ public class ItemEntryStack extends AbstractEntryStack {
         return getAmount() == stack.getAmount();
     }
     
+    @Override
+    public int hashCode() {
+        int result = 1;
+        result = 31 * result + getType().ordinal();
+        result = 31 * result + itemStack.getItem().hashCode();
+        result = 31 * result + itemStack.getCount();
+        result = 31 * result + (itemStack.hasTag() ? itemStack.getTag().hashCode() : 0);
+        return result;
+    }
+    
     @Nullable
     @Override
     public QueuedTooltip getTooltip(int mouseX, int mouseY) {
@@ -115,7 +124,7 @@ public class ItemEntryStack extends AbstractEntryStack {
             return null;
         List<String> toolTip = Lists.newArrayList(EntryListWidget.tryGetItemStackToolTip(getItemStack(), true));
         toolTip.addAll(getSetting(Settings.TOOLTIP_APPEND_EXTRA).value().apply(this));
-        if (getSetting(Settings.TOOLTIP_APPEND_MOD).value().get() && RoughlyEnoughItemsCore.getConfigManager().getConfig().shouldAppendModNames()) {
+        if (getSetting(Settings.TOOLTIP_APPEND_MOD).value().get() && ConfigManager.getInstance().getConfig().shouldAppendModNames()) {
             final String modString = ClientHelper.getInstance().getFormattedModFromItem(getItem());
             boolean alreadyHasMod = false;
             for (String s : toolTip)

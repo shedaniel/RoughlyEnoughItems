@@ -10,7 +10,6 @@ import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.impl.EmptyEntryStack;
 import me.shedaniel.rei.impl.FluidEntryStack;
 import me.shedaniel.rei.impl.ItemEntryStack;
-import net.minecraft.block.Block;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.Item;
@@ -25,6 +24,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+@SuppressWarnings("deprecation")
 public interface EntryStack {
     
     static EntryStack empty() {

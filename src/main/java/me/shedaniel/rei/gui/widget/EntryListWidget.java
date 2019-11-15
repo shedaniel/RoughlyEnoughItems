@@ -14,10 +14,7 @@ import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWi
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.DisplayHelper;
-import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.RecipeHelper;
+import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.gui.config.ItemCheatingMode;
 import me.shedaniel.rei.gui.config.ItemListOrdering;
 import me.shedaniel.rei.impl.ScreenHelper;
@@ -49,7 +46,7 @@ import java.util.function.Supplier;
 @SuppressWarnings({"deprecation", "rawtypes"})
 public class EntryListWidget extends Widget {
     
-    private static final Supplier<Boolean> RENDER_EXTRA_CONFIG = () -> RoughlyEnoughItemsCore.getConfigManager().getConfig().doesRenderEntryExtraOverlay();
+    private static final Supplier<Boolean> RENDER_EXTRA_CONFIG = () -> ConfigManager.getInstance().getConfig().doesRenderEntryExtraOverlay();
     private static final String SPACE = " ", EMPTY = "";
     private static final Comparator<EntryStack> ASCENDING_COMPARATOR;
     private static List<Item> searchBlacklisted = Lists.newArrayList();
@@ -65,9 +62,9 @@ public class EntryListWidget extends Widget {
     
     static {
         ASCENDING_COMPARATOR = (entry, entry1) -> {
-            if (RoughlyEnoughItemsCore.getConfigManager().getConfig().getItemListOrdering().equals(ItemListOrdering.name))
+            if (ConfigManager.getInstance().getConfig().getItemListOrdering().equals(ItemListOrdering.name))
                 return tryGetEntryStackName(entry).compareToIgnoreCase(tryGetEntryStackName(entry1));
-            if (RoughlyEnoughItemsCore.getConfigManager().getConfig().getItemListOrdering().equals(ItemListOrdering.item_groups)) {
+            if (ConfigManager.getInstance().getConfig().getItemListOrdering().equals(ItemListOrdering.item_groups)) {
                 if (entry.getType() == EntryStack.Type.ITEM && entry1.getType() == EntryStack.Type.ITEM) {
                     ItemStack stack0 = entry.getItemStack();
                     ItemStack stack1 = entry1.getItemStack();
@@ -250,7 +247,7 @@ public class EntryListWidget extends Widget {
     
     @Override
     public boolean mouseScrolled(double double_1, double double_2, double double_3) {
-        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled() && rectangle.contains(double_1, double_2)) {
+        if (ConfigManager.getInstance().getConfig().isEntryListWidgetScrolled() && rectangle.contains(double_1, double_2)) {
             if (scrollBarAlphaFuture == 0)
                 scrollBarAlphaFuture = 1f;
             if (System.currentTimeMillis() - scrollBarAlphaFutureTime > 300f)
@@ -263,7 +260,7 @@ public class EntryListWidget extends Widget {
     
     @Override
     public void render(int int_1, int int_2, float float_1) {
-        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().doesVillagerScreenHavePermanentScrollBar()) {
+        if (ConfigManager.getInstance().getConfig().doesVillagerScreenHavePermanentScrollBar()) {
             scrollBarAlphaFutureTime = System.currentTimeMillis();
             scrollBarAlphaFuture = 0;
             scrollBarAlpha = 1;
@@ -288,7 +285,7 @@ public class EntryListWidget extends Widget {
         
         GuiLighting.disable();
         RenderSystem.pushMatrix();
-        boolean widgetScrolled = RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled();
+        boolean widgetScrolled = ConfigManager.getInstance().getConfig().isEntryListWidgetScrolled();
         if (!widgetScrolled)
             scroll = 0;
         else {
@@ -349,13 +346,13 @@ public class EntryListWidget extends Widget {
         this.widgets = Lists.newCopyOnWriteArrayList();
         calculateListSize(rectangle);
         if (currentDisplayed.isEmpty() || processSearchTerm)
-            currentDisplayed = processSearchTerm(searchTerm, RoughlyEnoughItemsCore.getEntryRegistry().getStacksList(), CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create));
+            currentDisplayed = processSearchTerm(searchTerm, EntryRegistry.getInstance().getStacksList(), CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create));
         int startX = rectangle.getCenterX() - width * 9;
         int startY = rectangle.getCenterY() - height * 9;
         this.listArea = new Rectangle(startX, startY, width * 18, height * 18);
         int fitSlotsPerPage = getTotalFitSlotsPerPage(startX, startY, listArea);
         int j = page * fitSlotsPerPage;
-        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled()) {
+        if (ConfigManager.getInstance().getConfig().isEntryListWidgetScrolled()) {
             height = Integer.MAX_VALUE;
             j = 0;
         }
@@ -381,7 +378,7 @@ public class EntryListWidget extends Widget {
     }
     
     public int getTotalPage() {
-        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled())
+        if (ConfigManager.getInstance().getConfig().isEntryListWidgetScrolled())
             return 1;
         int fitSlotsPerPage = getTotalFitSlotsPerPage(listArea.x, listArea.y, listArea);
         if (fitSlotsPerPage > 0)
@@ -399,8 +396,8 @@ public class EntryListWidget extends Widget {
     }
     
     public boolean canBeFit(int left, int top, Rectangle listArea) {
-        for (DisplayHelper.DisplayBoundsHandler sortedBoundsHandler : RoughlyEnoughItemsCore.getDisplayHelper().getSortedBoundsHandlers(minecraft.currentScreen.getClass())) {
-            ActionResult fit = sortedBoundsHandler.canItemSlotWidgetFit(!RoughlyEnoughItemsCore.getConfigManager().getConfig().isLeftHandSidePanel(), left, top, minecraft.currentScreen, listArea);
+        for (DisplayHelper.DisplayBoundsHandler sortedBoundsHandler : DisplayHelper.getInstance().getSortedBoundsHandlers(minecraft.currentScreen.getClass())) {
+            ActionResult fit = sortedBoundsHandler.canItemSlotWidgetFit(!ConfigManager.getInstance().getConfig().isLeftHandSidePanel(), left, top, minecraft.currentScreen, listArea);
             if (fit != ActionResult.PASS)
                 return fit == ActionResult.SUCCESS;
         }
@@ -441,9 +438,9 @@ public class EntryListWidget extends Widget {
     private List<EntryStack> processSearchTerm(String searchTerm, List<EntryStack> ol, List<EntryStack> inventoryItems) {
         lastSearchArgument.clear();
         List<EntryStack> os = new LinkedList<>(ol);
-        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().getItemListOrdering() != ItemListOrdering.registry)
+        if (ConfigManager.getInstance().getConfig().getItemListOrdering() != ItemListOrdering.registry)
             os.sort(ASCENDING_COMPARATOR);
-        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isItemListAscending())
+        if (!ConfigManager.getInstance().getConfig().isItemListAscending())
             Collections.reverse(os);
         String[] splitSearchTerm = StringUtils.splitByWholeSeparatorPreserveAllTokens(searchTerm, "|");
         for (String s : splitSearchTerm) {
@@ -474,7 +471,7 @@ public class EntryListWidget extends Widget {
             stacks = os;
         else
             stacks = CollectionUtils.filter(os, entry -> filterEntry(entry, lastSearchArgument));
-        if (!RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() || stacks.isEmpty() || inventoryItems.isEmpty())
+        if (!ConfigManager.getInstance().isCraftableOnlyEnabled() || stacks.isEmpty() || inventoryItems.isEmpty())
             return Collections.unmodifiableList(stacks);
         List<EntryStack> workingItems = RecipeHelper.getInstance().findCraftableEntriesByItems(inventoryItems);
         List<EntryStack> newList = Lists.newLinkedList();
@@ -586,9 +583,9 @@ public class EntryListWidget extends Widget {
             if (containsMouse(mouseX, mouseY) && ClientHelper.getInstance().isCheating()) {
                 EntryStack entry = getCurrentEntry().copy();
                 if (entry.getType() == EntryStack.Type.ITEM) {
-                    if (RoughlyEnoughItemsCore.getConfigManager().getConfig().getItemCheatingMode() == ItemCheatingMode.REI_LIKE)
+                    if (ConfigManager.getInstance().getConfig().getItemCheatingMode() == ItemCheatingMode.REI_LIKE)
                         entry.setAmount(button != 1 ? 1 : entry.getItemStack().getMaxCount());
-                    else if (RoughlyEnoughItemsCore.getConfigManager().getConfig().getItemCheatingMode() == ItemCheatingMode.JEI_LIKE)
+                    else if (ConfigManager.getInstance().getConfig().getItemCheatingMode() == ItemCheatingMode.JEI_LIKE)
                         entry.setAmount(button != 0 ? 1 : entry.getItemStack().getMaxCount());
                     else
                         entry.setAmount(1);

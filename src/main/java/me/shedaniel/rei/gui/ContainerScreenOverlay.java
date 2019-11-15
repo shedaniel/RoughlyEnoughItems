@@ -11,13 +11,9 @@ import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.DisplayHelper;
-import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.RecipeHelper;
+import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.gui.widget.*;
-import me.shedaniel.rei.impl.RecipeHelperImpl;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.Weather;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
@@ -109,13 +105,14 @@ public class ContainerScreenOverlay extends Widget {
         //Update Variables
         this.children().clear();
         this.window = MinecraftClient.getInstance().getWindow();
-        DisplayHelper.DisplayBoundsHandler boundsHandler = RoughlyEnoughItemsCore.getDisplayHelper().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
-        this.rectangle = RoughlyEnoughItemsCore.getConfigManager().getConfig().isLeftHandSidePanel() ? boundsHandler.getLeftBounds(MinecraftClient.getInstance().currentScreen) : boundsHandler.getRightBounds(MinecraftClient.getInstance().currentScreen);
+        @SuppressWarnings({"RawTypeCanBeGeneric", "rawtypes"})
+        DisplayHelper.DisplayBoundsHandler boundsHandler = DisplayHelper.getInstance().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
+        this.rectangle = ConfigManager.getInstance().getConfig().isLeftHandSidePanel() ? boundsHandler.getLeftBounds(MinecraftClient.getInstance().currentScreen) : boundsHandler.getRightBounds(MinecraftClient.getInstance().currentScreen);
         widgets.add(entryListWidget = new EntryListWidget(page));
         entryListWidget.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, false);
         
-        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled()) {
-            widgets.add(buttonLeft = new ButtonWidget(rectangle.x, rectangle.y + (RoughlyEnoughItemsCore.getConfigManager().getConfig().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16, new TranslatableText("text.rei.left_arrow")) {
+        if (!ConfigManager.getInstance().getConfig().isEntryListWidgetScrolled()) {
+            widgets.add(buttonLeft = new ButtonWidget(rectangle.x, rectangle.y + (ConfigManager.getInstance().getConfig().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16, new TranslatableText("text.rei.left_arrow")) {
                 @Override
                 public void onPressed() {
                     page--;
@@ -139,7 +136,7 @@ public class ContainerScreenOverlay extends Widget {
                     return isNotInExclusionZones(mouseX, mouseY) && super.containsMouse(mouseX, mouseY);
                 }
             });
-            widgets.add(buttonRight = new ButtonWidget(rectangle.x + rectangle.width - 18, rectangle.y + (RoughlyEnoughItemsCore.getConfigManager().getConfig().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16, new TranslatableText("text.rei.right_arrow")) {
+            widgets.add(buttonRight = new ButtonWidget(rectangle.x + rectangle.width - 18, rectangle.y + (ConfigManager.getInstance().getConfig().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16, new TranslatableText("text.rei.right_arrow")) {
                 @Override
                 public void onPressed() {
                     page++;
@@ -168,14 +165,14 @@ public class ContainerScreenOverlay extends Widget {
         if (setPage)
             page = MathHelper.clamp(page, 0, getTotalPage());
         
-        widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigManager().getConfig().isLeftHandSidePanel() ? window.getScaledWidth() - 30 : 10, 10, 20, 20, "") {
+        widgets.add(new ButtonWidget(ConfigManager.getInstance().getConfig().isLeftHandSidePanel() ? window.getScaledWidth() - 30 : 10, 10, 20, 20, "") {
             @Override
             public void onPressed() {
                 if (Screen.hasShiftDown()) {
                     ClientHelper.getInstance().setCheating(!ClientHelper.getInstance().isCheating());
                     return;
                 }
-                RoughlyEnoughItemsCore.getConfigManager().openConfigScreen(ScreenHelper.getLastContainerScreen());
+                ConfigManager.getInstance().openConfigScreen(ScreenHelper.getLastContainerScreen());
             }
             
             @Override
@@ -218,11 +215,11 @@ public class ContainerScreenOverlay extends Widget {
                 return isNotInExclusionZones(mouseX, mouseY) && super.containsMouse(mouseX, mouseY);
             }
         });
-        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().doesShowUtilsButtons()) {
-            widgets.add(new ButtonWidget(RoughlyEnoughItemsCore.getConfigManager().getConfig().isLeftHandSidePanel() ? window.getScaledWidth() - 55 : 35, 10, 20, 20, "") {
+        if (ConfigManager.getInstance().getConfig().doesShowUtilsButtons()) {
+            widgets.add(new ButtonWidget(ConfigManager.getInstance().getConfig().isLeftHandSidePanel() ? window.getScaledWidth() - 55 : 35, 10, 20, 20, "") {
                 @Override
                 public void onPressed() {
-                    MinecraftClient.getInstance().player.sendChatMessage(RoughlyEnoughItemsCore.getConfigManager().getConfig().getGamemodeCommand().replaceAll("\\{gamemode}", getNextGameMode(Screen.hasShiftDown()).getName()));
+                    MinecraftClient.getInstance().player.sendChatMessage(ConfigManager.getInstance().getConfig().getGamemodeCommand().replaceAll("\\{gamemode}", getNextGameMode(Screen.hasShiftDown()).getName()));
                 }
                 
                 @Override
@@ -246,12 +243,12 @@ public class ContainerScreenOverlay extends Widget {
                     return isNotInExclusionZones(mouseX, mouseY) && super.containsMouse(mouseX, mouseY);
                 }
             });
-            int xxx = RoughlyEnoughItemsCore.getConfigManager().getConfig().isLeftHandSidePanel() ? window.getScaledWidth() - 30 : 10;
+            int xxx = ConfigManager.getInstance().getConfig().isLeftHandSidePanel() ? window.getScaledWidth() - 30 : 10;
             for (Weather weather : Weather.values()) {
                 widgets.add(new ButtonWidget(xxx, 35, 20, 20, "") {
                     @Override
                     public void onPressed() {
-                        MinecraftClient.getInstance().player.sendChatMessage(RoughlyEnoughItemsCore.getConfigManager().getConfig().getWeatherCommand().replaceAll("\\{weather}", weather.name().toLowerCase(Locale.ROOT)));
+                        MinecraftClient.getInstance().player.sendChatMessage(ConfigManager.getInstance().getConfig().getWeatherCommand().replaceAll("\\{weather}", weather.name().toLowerCase(Locale.ROOT)));
                     }
                     
                     @Override
@@ -278,11 +275,11 @@ public class ContainerScreenOverlay extends Widget {
                         return isNotInExclusionZones(mouseX, mouseY) && super.containsMouse(mouseX, mouseY);
                     }
                 });
-                xxx += RoughlyEnoughItemsCore.getConfigManager().getConfig().isLeftHandSidePanel() ? -25 : 25;
+                xxx += ConfigManager.getInstance().getConfig().isLeftHandSidePanel() ? -25 : 25;
             }
         }
-        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled()) {
-            widgets.add(new ClickableLabelWidget(rectangle.x + (rectangle.width / 2), rectangle.y + (RoughlyEnoughItemsCore.getConfigManager().getConfig().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 10, "", getTotalPage() > 0) {
+        if (!ConfigManager.getInstance().getConfig().isEntryListWidgetScrolled()) {
+            widgets.add(new ClickableLabelWidget(rectangle.x + (rectangle.width / 2), rectangle.y + (ConfigManager.getInstance().getConfig().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 10, "", getTotalPage() > 0) {
                 @Override
                 public void render(int mouseX, int mouseY, float delta) {
                     page = MathHelper.clamp(page, 0, getTotalPage());
@@ -309,20 +306,22 @@ public class ContainerScreenOverlay extends Widget {
             });
             buttonLeft.enabled = buttonRight.enabled = getTotalPage() > 0;
         }
-        if (ScreenHelper.searchField == null)
+        if (ScreenHelper.getSearchField() == null) {
+            //noinspection deprecation
             ScreenHelper.setSearchField(new OverlaySearchField(0, 0, 0, 0));
-        ScreenHelper.searchField.getBounds().setBounds(getTextFieldArea());
-        this.widgets.add(ScreenHelper.searchField);
-        ScreenHelper.searchField.setText(searchTerm);
-        ScreenHelper.searchField.setChangedListener(s -> {
+        }
+        ScreenHelper.getSearchField().getBounds().setBounds(getTextFieldArea());
+        this.widgets.add(ScreenHelper.getSearchField());
+        ScreenHelper.getSearchField().setText(searchTerm);
+        ScreenHelper.getSearchField().setChangedListener(s -> {
             searchTerm = s;
             entryListWidget.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, true);
         });
-        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().isCraftableFilterEnabled())
+        if (ConfigManager.getInstance().getConfig().isCraftableFilterEnabled())
             this.widgets.add(toggleButtonWidget = new CraftableToggleButtonWidget(getCraftableToggleArea()) {
                 @Override
                 public void onPressed() {
-                    RoughlyEnoughItemsCore.getConfigManager().toggleCraftableOnly();
+                    ConfigManager.getInstance().toggleCraftableOnly();
                     entryListWidget.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, true);
                 }
                 
@@ -392,8 +391,8 @@ public class ContainerScreenOverlay extends Widget {
     }
     
     private Rectangle getTextFieldArea() {
-        int widthRemoved = RoughlyEnoughItemsCore.getConfigManager().getConfig().isCraftableFilterEnabled() ? 22 : 2;
-        SearchFieldLocation searchFieldLocation = RoughlyEnoughItemsCore.getConfigManager().getConfig().getSearchFieldLocation();
+        int widthRemoved = ConfigManager.getInstance().getConfig().isCraftableFilterEnabled() ? 22 : 2;
+        SearchFieldLocation searchFieldLocation = ConfigManager.getInstance().getConfig().getSearchFieldLocation();
         if (searchFieldLocation == SearchFieldLocation.BOTTOM_SIDE)
             return new Rectangle(rectangle.x + 2, window.getScaledHeight() - 22, rectangle.width - 6 - widthRemoved, 18);
         if (searchFieldLocation == SearchFieldLocation.TOP_SIDE)
@@ -427,13 +426,13 @@ public class ContainerScreenOverlay extends Widget {
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         List<ItemStack> currentStacks = ClientHelper.getInstance().getInventoryItemsTypes();
-        if (RoughlyEnoughItemsCore.getDisplayHelper().getBaseBoundsHandler() != null && RoughlyEnoughItemsCore.getDisplayHelper().getBaseBoundsHandler().shouldRecalculateArea(!RoughlyEnoughItemsCore.getConfigManager().getConfig().isLeftHandSidePanel(), rectangle))
+        if (DisplayHelper.getInstance().getBaseBoundsHandler() != null && DisplayHelper.getInstance().getBaseBoundsHandler().shouldRecalculateArea(!ConfigManager.getInstance().getConfig().isLeftHandSidePanel(), rectangle))
             shouldReInit = true;
         if (shouldReInit)
             init(true);
-        else if (RoughlyEnoughItemsCore.getConfigManager().isCraftableOnlyEnabled() && ((currentStacks.size() != ScreenHelper.inventoryStacks.size()) || !hasSameListContent(new LinkedList<>(ScreenHelper.inventoryStacks), currentStacks))) {
+        else if (ConfigManager.getInstance().isCraftableOnlyEnabled() && ((currentStacks.size() != ScreenHelper.inventoryStacks.size()) || !hasSameListContent(new LinkedList<>(ScreenHelper.inventoryStacks), currentStacks))) {
             ScreenHelper.inventoryStacks = currentStacks;
-            DisplayHelper.DisplayBoundsHandler<?> boundsHandler = RoughlyEnoughItemsCore.getDisplayHelper().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
+            DisplayHelper.DisplayBoundsHandler<?> boundsHandler = DisplayHelper.getInstance().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
             entryListWidget.updateList(boundsHandler, boundsHandler.getItemListArea(rectangle), page, searchTerm, true);
         }
         if (OverlaySearchField.isSearching) {
@@ -451,9 +450,9 @@ public class ContainerScreenOverlay extends Widget {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GuiLighting.disable();
         this.renderWidgets(mouseX, mouseY, delta);
-        if (MinecraftClient.getInstance().currentScreen instanceof AbstractContainerScreen && RoughlyEnoughItemsCore.getConfigManager().getConfig().areClickableRecipeArrowsEnabled()) {
+        if (MinecraftClient.getInstance().currentScreen instanceof AbstractContainerScreen && ConfigManager.getInstance().getConfig().areClickableRecipeArrowsEnabled()) {
             ContainerScreenHooks hooks = (ContainerScreenHooks) MinecraftClient.getInstance().currentScreen;
-            for (RecipeHelperImpl.ScreenClickArea area : RecipeHelper.getInstance().getScreenClickAreas())
+            for (RecipeHelper.ScreenClickArea area : RecipeHelper.getInstance().getScreenClickAreas())
                 if (area.getScreenClass().equals(MinecraftClient.getInstance().currentScreen.getClass()))
                     if (area.getRectangle().contains(mouseX - hooks.rei_getContainerLeft(), mouseY - hooks.rei_getContainerTop())) {
                         String collect = CollectionUtils.mapAndJoinToString(area.getCategories(), identifier -> RecipeHelper.getInstance().getCategory(identifier).getCategoryName(), ", ");
@@ -465,7 +464,7 @@ public class ContainerScreenOverlay extends Widget {
     
     public void lateRender(int mouseX, int mouseY, float delta) {
         if (ScreenHelper.isOverlayVisible()) {
-            ScreenHelper.searchField.laterRender(mouseX, mouseY, delta);
+            ScreenHelper.getSearchField().laterRender(mouseX, mouseY, delta);
             if (toggleButtonWidget != null)
                 toggleButtonWidget.lateRender(mouseX, mouseY, delta);
             Screen currentScreen = MinecraftClient.getInstance().currentScreen;
@@ -509,7 +508,7 @@ public class ContainerScreenOverlay extends Widget {
     public void renderWidgets(int int_1, int int_2, float float_1) {
         if (!ScreenHelper.isOverlayVisible())
             return;
-        if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled())
+        if (!ConfigManager.getInstance().getConfig().isEntryListWidgetScrolled())
             buttonLeft.enabled = buttonRight.enabled = getTotalPage() > 0;
         widgets.forEach(widget -> {
             GuiLighting.disable();
@@ -527,7 +526,7 @@ public class ContainerScreenOverlay extends Widget {
         if (!ScreenHelper.isOverlayVisible())
             return false;
         if (isInside(PointHelper.fromMouse())) {
-            if (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled()) {
+            if (!ConfigManager.getInstance().getConfig().isEntryListWidgetScrolled()) {
                 if (amount > 0 && buttonLeft.enabled)
                     buttonLeft.onPressed();
                 else if (amount < 0 && buttonRight.enabled)
@@ -568,10 +567,10 @@ public class ContainerScreenOverlay extends Widget {
         if (!ScreenHelper.isOverlayVisible())
             return false;
         if (ClientHelper.getInstance().getFocusSearchFieldKeyBinding().matchesKey(int_1, int_2)) {
-            ScreenHelper.searchField.setFocused(true);
-            setFocused(ScreenHelper.searchField);
-            ScreenHelper.searchField.keybindFocusTime = System.currentTimeMillis();
-            ScreenHelper.searchField.keybindFocusKey = int_1;
+            ScreenHelper.getSearchField().setFocused(true);
+            setFocused(ScreenHelper.getSearchField());
+            ScreenHelper.getSearchField().keybindFocusTime = System.currentTimeMillis();
+            ScreenHelper.getSearchField().keybindFocusKey = int_1;
             return true;
         }
         return false;
@@ -596,9 +595,9 @@ public class ContainerScreenOverlay extends Widget {
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
         if (!ScreenHelper.isOverlayVisible())
             return false;
-        if (MinecraftClient.getInstance().currentScreen instanceof AbstractContainerScreen && RoughlyEnoughItemsCore.getConfigManager().getConfig().areClickableRecipeArrowsEnabled()) {
+        if (MinecraftClient.getInstance().currentScreen instanceof AbstractContainerScreen && ConfigManager.getInstance().getConfig().areClickableRecipeArrowsEnabled()) {
             ContainerScreenHooks hooks = (ContainerScreenHooks) MinecraftClient.getInstance().currentScreen;
-            for (RecipeHelperImpl.ScreenClickArea area : RecipeHelper.getInstance().getScreenClickAreas())
+            for (RecipeHelper.ScreenClickArea area : RecipeHelper.getInstance().getScreenClickAreas())
                 if (area.getScreenClass().equals(MinecraftClient.getInstance().currentScreen.getClass()))
                     if (area.getRectangle().contains(double_1 - hooks.rei_getContainerLeft(), double_2 - hooks.rei_getContainerTop())) {
                         ClientHelper.getInstance().executeViewAllRecipesFromCategories(Arrays.asList(area.getCategories()));
@@ -626,8 +625,8 @@ public class ContainerScreenOverlay extends Widget {
     public boolean isInside(double mouseX, double mouseY) {
         if (!rectangle.contains(mouseX, mouseY))
             return false;
-        for (DisplayHelper.DisplayBoundsHandler<?> handler : RoughlyEnoughItemsCore.getDisplayHelper().getSortedBoundsHandlers(MinecraftClient.getInstance().currentScreen.getClass())) {
-            ActionResult in = handler.isInZone(!RoughlyEnoughItemsCore.getConfigManager().getConfig().isLeftHandSidePanel(), mouseX, mouseY);
+        for (DisplayHelper.DisplayBoundsHandler<?> handler : DisplayHelper.getInstance().getSortedBoundsHandlers(MinecraftClient.getInstance().currentScreen.getClass())) {
+            ActionResult in = handler.isInZone(!ConfigManager.getInstance().getConfig().isLeftHandSidePanel(), mouseX, mouseY);
             if (in != ActionResult.PASS)
                 return in == ActionResult.SUCCESS;
         }
@@ -635,7 +634,7 @@ public class ContainerScreenOverlay extends Widget {
     }
     
     public boolean isNotInExclusionZones(double mouseX, double mouseY) {
-        for (DisplayHelper.DisplayBoundsHandler<?> handler : RoughlyEnoughItemsCore.getDisplayHelper().getSortedBoundsHandlers(MinecraftClient.getInstance().currentScreen.getClass())) {
+        for (DisplayHelper.DisplayBoundsHandler<?> handler : DisplayHelper.getInstance().getSortedBoundsHandlers(MinecraftClient.getInstance().currentScreen.getClass())) {
             ActionResult in = handler.isInZone(true, mouseX, mouseY);
             if (in != ActionResult.PASS)
                 return in == ActionResult.SUCCESS;

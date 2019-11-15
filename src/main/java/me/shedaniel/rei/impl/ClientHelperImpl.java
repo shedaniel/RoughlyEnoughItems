@@ -11,6 +11,7 @@ import io.netty.buffer.Unpooled;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.gui.PreRecipeViewingScreen;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
@@ -43,6 +44,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@Deprecated
+@Internal
 public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     public static ClientHelperImpl instance;
@@ -129,14 +132,14 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     @Override
     public boolean isCheating() {
-        return RoughlyEnoughItemsCore.getConfigManager().getConfig().isCheating();
+        return ConfigManager.getInstance().getConfig().isCheating();
     }
     
     @Override
     public void setCheating(boolean cheating) {
-        RoughlyEnoughItemsCore.getConfigManager().getConfig().setCheating(cheating);
+        ConfigManager.getInstance().getConfig().setCheating(cheating);
         try {
-            RoughlyEnoughItemsCore.getConfigManager().saveConfig();
+            ConfigManager.getInstance().saveConfig();
         } catch (IOException | FiberException e) {
             e.printStackTrace();
         }
@@ -168,7 +171,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
             if (identifier == null)
                 return false;
             String tagMessage = cheatedStack.copy().getTag() != null && !cheatedStack.copy().getTag().isEmpty() ? cheatedStack.copy().getTag().asString() : "";
-            String og = cheatedStack.getCount() == 1 ? RoughlyEnoughItemsCore.getConfigManager().getConfig().getGiveCommand().replaceAll(" \\{count}", "") : RoughlyEnoughItemsCore.getConfigManager().getConfig().getGiveCommand();
+            String og = cheatedStack.getCount() == 1 ? ConfigManager.getInstance().getConfig().getGiveCommand().replaceAll(" \\{count}", "") : ConfigManager.getInstance().getConfig().getGiveCommand();
             String madeUpCommand = og.replaceAll("\\{player_name}", MinecraftClient.getInstance().player.getEntityName()).replaceAll("\\{item_name}", identifier.getPath()).replaceAll("\\{item_identifier}", identifier.toString()).replaceAll("\\{nbt}", tagMessage).replaceAll("\\{count}", String.valueOf(cheatedStack.getCount()));
             if (madeUpCommand.length() > 256) {
                 madeUpCommand = og.replaceAll("\\{player_name}", MinecraftClient.getInstance().player.getEntityName()).replaceAll("\\{item_name}", identifier.getPath()).replaceAll("\\{item_identifier}", identifier.toString()).replaceAll("\\{nbt}", "").replaceAll("\\{count}", String.valueOf(cheatedStack.getCount()));
@@ -217,7 +220,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     @Override
     public boolean executeViewAllRecipesFromCategory(Identifier category) {
         Map<RecipeCategory<?>, List<RecipeDisplay>> map = Maps.newLinkedHashMap();
-        Optional<RecipeCategory> any = RecipeHelper.getInstance().getAllCategories().stream().filter(c -> c.getIdentifier().equals(category)).findAny();
+        Optional<RecipeCategory<?>> any = RecipeHelper.getInstance().getAllCategories().stream().filter(c -> c.getIdentifier().equals(category)).findAny();
         if (!any.isPresent())
             return false;
         RecipeCategory<?> recipeCategory = any.get();
@@ -231,7 +234,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     public boolean executeViewAllRecipesFromCategories(List<Identifier> categories) {
         Map<RecipeCategory<?>, List<RecipeDisplay>> map = Maps.newLinkedHashMap();
         for (Identifier category : categories) {
-            Optional<RecipeCategory> any = RecipeHelper.getInstance().getAllCategories().stream().filter(c -> c.getIdentifier().equals(category)).findAny();
+            Optional<RecipeCategory<?>> any = RecipeHelper.getInstance().getAllCategories().stream().filter(c -> c.getIdentifier().equals(category)).findAny();
             if (!any.isPresent())
                 continue;
             RecipeCategory<?> recipeCategory = any.get();
@@ -245,9 +248,9 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     @Override
     public void openRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map) {
         Screen screen = null;
-        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().getRecipeScreenType() == RecipeScreenType.VILLAGER)
+        if (ConfigManager.getInstance().getConfig().getRecipeScreenType() == RecipeScreenType.VILLAGER)
             screen = new VillagerRecipeViewingScreen(map);
-        else if (RoughlyEnoughItemsCore.getConfigManager().getConfig().getRecipeScreenType() == RecipeScreenType.UNSET)
+        else if (ConfigManager.getInstance().getConfig().getRecipeScreenType() == RecipeScreenType.UNSET)
             screen = new PreRecipeViewingScreen(map);
         else
             screen = new RecipeViewingScreen(map);

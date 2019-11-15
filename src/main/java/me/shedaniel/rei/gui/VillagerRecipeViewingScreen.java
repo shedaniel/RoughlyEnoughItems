@@ -14,7 +14,6 @@ import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWi
 import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget.Precision;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.gui.entries.RecipeEntry;
 import me.shedaniel.rei.gui.widget.*;
@@ -101,7 +100,7 @@ public class VillagerRecipeViewingScreen extends Screen {
         int guiHeight = MathHelper.clamp(category.getDisplayHeight() + 40, 166, largestHeight);
         this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - guiHeight / 2, guiWidth, guiHeight);
         
-        List<List<EntryStack>> workingStations = RoughlyEnoughItemsCore.getRecipeHelper().getWorkingStations(category.getIdentifier());
+        List<List<EntryStack>> workingStations = RecipeHelper.getInstance().getWorkingStations(category.getIdentifier());
         if (!workingStations.isEmpty()) {
             int ww = MathHelper.floor((bounds.width - 16) / 18f);
             int w = Math.min(ww, workingStations.size());
@@ -324,7 +323,7 @@ public class VillagerRecipeViewingScreen extends Screen {
     
     @Override
     public void render(int mouseX, int mouseY, float delta) {
-        if (RoughlyEnoughItemsCore.getConfigManager().getConfig().doesVillagerScreenHavePermanentScrollBar()) {
+        if (ConfigManager.getInstance().getConfig().doesVillagerScreenHavePermanentScrollBar()) {
             scrollBarAlphaFutureTime = System.currentTimeMillis();
             scrollBarAlphaFuture = 0;
             scrollBarAlpha = 1;

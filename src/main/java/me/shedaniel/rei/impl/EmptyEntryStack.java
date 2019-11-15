@@ -87,4 +87,9 @@ public class EmptyEntryStack extends AbstractEntryStack {
     public void render(Rectangle bounds, int mouseX, int mouseY, float delta) {
     
     }
+    
+    @Override
+    public int hashCode() {
+        return 0;
+    }
 }

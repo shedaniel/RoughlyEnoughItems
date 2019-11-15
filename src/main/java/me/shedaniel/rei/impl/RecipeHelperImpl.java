@@ -10,7 +10,9 @@ import com.google.common.collect.Maps;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
+import me.shedaniel.rei.utils.CollectionUtils;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.SemanticVersion;
 import net.fabricmc.loader.api.Version;
@@ -26,9 +28,12 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+@Deprecated
+@Internal
 public class RecipeHelperImpl implements RecipeHelper {
     
     private static final Comparator<DisplayVisibilityHandler> VISIBILITY_HANDLER_COMPARATOR;
+    @SuppressWarnings("rawtypes")
     private static final Comparator<Recipe> RECIPE_COMPARATOR = (o1, o2) -> {
         int int_1 = o1.getId().getNamespace().compareTo(o2.getId().getNamespace());
         if (int_1 == 0)
@@ -46,11 +51,11 @@ public class RecipeHelperImpl implements RecipeHelper {
     private final List<ScreenClickArea> screenClickAreas = Lists.newArrayList();
     private final AtomicInteger recipeCount = new AtomicInteger();
     private final Map<Identifier, List<RecipeDisplay>> recipeCategoryListMap = Maps.newHashMap();
-    private final List<RecipeCategory> categories = Lists.newArrayList();
+    private final List<RecipeCategory<?>> categories = Lists.newArrayList();
     private final Map<Identifier, ButtonAreaSupplier> speedCraftAreaSupplierMap = Maps.newHashMap();
     private final Map<Identifier, List<List<EntryStack>>> categoryWorkingStations = Maps.newHashMap();
     private final List<DisplayVisibilityHandler> displayVisibilityHandlers = Lists.newArrayList();
-    private final List<LiveRecipeGenerator<?>> liveRecipeGenerators = Lists.newArrayList();
+    private final List<LiveRecipeGenerator<RecipeDisplay>> liveRecipeGenerators = Lists.newArrayList();
     private RecipeManager recipeManager;
     
     @Override
@@ -84,7 +89,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     }
     
     @Override
-    public void registerCategory(RecipeCategory category) {
+    public void registerCategory(RecipeCategory<?> category) {
         categories.add(category);
         recipeCategoryListMap.put(category.getIdentifier(), Lists.newLinkedList());
         categoryWorkingStations.put(category.getIdentifier(), Lists.newLinkedList());
@@ -125,16 +130,14 @@ public class RecipeHelperImpl implements RecipeHelper {
         Map<Identifier, List<RecipeDisplay>> categoriesMap = new HashMap<>();
         categories.forEach(f -> categoriesMap.put(f.getIdentifier(), Lists.newArrayList()));
         for (Map.Entry<Identifier, List<RecipeDisplay>> entry : recipeCategoryListMap.entrySet()) {
-            RecipeCategory category = getCategory(entry.getKey());
+            RecipeCategory<?> category = getCategory(entry.getKey());
             for (RecipeDisplay recipeDisplay : entry.getValue())
                 for (EntryStack outputStack : recipeDisplay.getOutputEntries())
                     if (stack.equals(outputStack))
                         categoriesMap.get(recipeDisplay.getRecipeCategory()).add(recipeDisplay);
         }
-        for (LiveRecipeGenerator<?> liveRecipeGenerator : liveRecipeGenerators) {
-            liveRecipeGenerator.getRecipeFor(stack).ifPresent(o -> categoriesMap.get(liveRecipeGenerator.getCategoryIdentifier()).addAll((List<RecipeDisplay>) o));
-            if (stack.getType() == EntryStack.Type.ITEM)
-                liveRecipeGenerator.getRecipeFor(stack.getItemStack()).ifPresent(o -> categoriesMap.get(liveRecipeGenerator.getCategoryIdentifier()).addAll((List<RecipeDisplay>) o));
+        for (LiveRecipeGenerator<RecipeDisplay> liveRecipeGenerator : liveRecipeGenerators) {
+            liveRecipeGenerator.getRecipeFor(stack).ifPresent(o -> categoriesMap.get(liveRecipeGenerator.getCategoryIdentifier()).addAll(o));
         }
         Map<RecipeCategory<?>, List<RecipeDisplay>> recipeCategoryListMap = Maps.newLinkedHashMap();
         categories.forEach(category -> {
@@ -148,8 +151,8 @@ public class RecipeHelperImpl implements RecipeHelper {
     }
     
     @Override
-    public RecipeCategory getCategory(Identifier identifier) {
-        return categories.stream().filter(category -> category.getIdentifier().equals(identifier)).findFirst().orElse(null);
+    public RecipeCategory<?> getCategory(Identifier identifier) {
+        return CollectionUtils.findFirstOrNull(categories, category -> category.getIdentifier().equals(identifier));
     }
     
     @Override
@@ -162,7 +165,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         Map<Identifier, List<RecipeDisplay>> categoriesMap = new HashMap<>();
         categories.forEach(f -> categoriesMap.put(f.getIdentifier(), Lists.newArrayList()));
         for (Map.Entry<Identifier, List<RecipeDisplay>> entry : recipeCategoryListMap.entrySet()) {
-            RecipeCategory category = getCategory(entry.getKey());
+            RecipeCategory<?> category = getCategory(entry.getKey());
             for (RecipeDisplay recipeDisplay : entry.getValue()) {
                 boolean found = false;
                 for (List<EntryStack> input : recipeDisplay.getInputEntries()) {
@@ -178,16 +181,14 @@ public class RecipeHelperImpl implements RecipeHelper {
                 }
             }
         }
-        for (LiveRecipeGenerator<?> liveRecipeGenerator : liveRecipeGenerators) {
-            liveRecipeGenerator.getUsageFor(stack).ifPresent(o -> categoriesMap.get(liveRecipeGenerator.getCategoryIdentifier()).addAll((List<RecipeDisplay>) o));
-            if (stack.getType() == EntryStack.Type.ITEM)
-                liveRecipeGenerator.getUsageFor(stack.getItemStack()).ifPresent(o -> categoriesMap.get(liveRecipeGenerator.getCategoryIdentifier()).addAll((List<RecipeDisplay>) o));
+        for (LiveRecipeGenerator<RecipeDisplay> liveRecipeGenerator : liveRecipeGenerators) {
+            liveRecipeGenerator.getUsageFor(stack).ifPresent(o -> categoriesMap.get(liveRecipeGenerator.getCategoryIdentifier()).addAll(o));
         }
         Map<RecipeCategory<?>, List<RecipeDisplay>> recipeCategoryListMap = Maps.newLinkedHashMap();
-        categories.forEach(category -> {
+        for (RecipeCategory<?> category : categories) {
             if (categoriesMap.containsKey(category.getIdentifier()) && !categoriesMap.get(category.getIdentifier()).isEmpty())
                 recipeCategoryListMap.put(category, categoriesMap.get(category.getIdentifier()).stream().filter(display -> isDisplayVisible(display)).collect(Collectors.toList()));
-        });
+        }
         for (RecipeCategory<?> category : Lists.newArrayList(recipeCategoryListMap.keySet()))
             if (recipeCategoryListMap.get(category).isEmpty())
                 recipeCategoryListMap.remove(category);
@@ -195,12 +196,12 @@ public class RecipeHelperImpl implements RecipeHelper {
     }
     
     @Override
-    public List<RecipeCategory> getAllCategories() {
-        return new LinkedList<>(categories);
+    public List<RecipeCategory<?>> getAllCategories() {
+        return Collections.unmodifiableList(categories);
     }
     
     @Override
-    public Optional<ButtonAreaSupplier> getAutoCraftButtonArea(RecipeCategory category) {
+    public Optional<ButtonAreaSupplier> getAutoCraftButtonArea(RecipeCategory<?> category) {
         if (!speedCraftAreaSupplierMap.containsKey(category.getIdentifier()))
             return Optional.ofNullable(bounds -> new Rectangle(bounds.getMaxX() - 16, bounds.getMaxY() - 16, 10, 10));
         return Optional.ofNullable(speedCraftAreaSupplierMap.get(category.getIdentifier()));
@@ -235,11 +236,11 @@ public class RecipeHelperImpl implements RecipeHelper {
         this.displayVisibilityHandlers.clear();
         this.liveRecipeGenerators.clear();
         this.autoTransferHandlers.clear();
-        ((DisplayHelperImpl) RoughlyEnoughItemsCore.getDisplayHelper()).resetData();
-        ((DisplayHelperImpl) RoughlyEnoughItemsCore.getDisplayHelper()).resetCache();
+        ((DisplayHelperImpl) DisplayHelper.getInstance()).resetData();
+        ((DisplayHelperImpl) DisplayHelper.getInstance()).resetCache();
         BaseBoundsHandler baseBoundsHandler = new BaseBoundsHandlerImpl();
-        RoughlyEnoughItemsCore.getDisplayHelper().registerBoundsHandler(baseBoundsHandler);
-        ((DisplayHelperImpl) RoughlyEnoughItemsCore.getDisplayHelper()).setBaseBoundsHandler(baseBoundsHandler);
+        DisplayHelper.getInstance().registerBoundsHandler(baseBoundsHandler);
+        ((DisplayHelperImpl) DisplayHelper.getInstance()).setBaseBoundsHandler(baseBoundsHandler);
         long startTime = System.currentTimeMillis();
         List<REIPluginEntry> plugins = new LinkedList<>(RoughlyEnoughItemsCore.getPlugins());
         plugins.sort((first, second) -> {
@@ -247,7 +248,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         });
         RoughlyEnoughItemsCore.LOGGER.info("[REI] Loading %d plugins: %s", plugins.size(), plugins.stream().map(REIPluginEntry::getPluginIdentifier).map(Identifier::toString).collect(Collectors.joining(", ")));
         Collections.reverse(plugins);
-        RoughlyEnoughItemsCore.getEntryRegistry().getStacksList().clear();
+        EntryRegistry.getInstance().getStacksList().clear();
         Version reiVersion = FabricLoader.getInstance().getModContainer("roughlyenoughitems").get().getMetadata().getVersion();
         if (!(reiVersion instanceof SemanticVersion))
             RoughlyEnoughItemsCore.LOGGER.warn("[REI] Roughly Enough Items is not using semantic versioning, will be ignoring plugins' minimum versions!");
@@ -270,8 +271,8 @@ public class RecipeHelperImpl implements RecipeHelper {
                     if (plugin.getMinimumVersion().compareTo((SemanticVersion) reiVersion) > 0)
                         return;
                 if (plugin instanceof REIPluginV0) {
-                    ((REIPluginV0) plugin).registerBounds(RoughlyEnoughItemsCore.getDisplayHelper());
-                    ((REIPluginV0) plugin).registerEntries(RoughlyEnoughItemsCore.getEntryRegistry());
+                    ((REIPluginV0) plugin).registerBounds(DisplayHelper.getInstance());
+                    ((REIPluginV0) plugin).registerEntries(EntryRegistry.getInstance());
                     ((REIPluginV0) plugin).registerPluginCategories(this);
                     ((REIPluginV0) plugin).registerRecipeDisplays(this);
                     ((REIPluginV0) plugin).registerOthers(this);
@@ -294,15 +295,17 @@ public class RecipeHelperImpl implements RecipeHelper {
             }
         }
         if (!recipeFunctions.isEmpty()) {
-            List<Recipe> allSortedRecipes = getAllSortedRecipes();
+            @SuppressWarnings("rawtypes") List<Recipe> allSortedRecipes = getAllSortedRecipes();
             Collections.reverse(allSortedRecipes);
-            recipeFunctions.forEach(recipeFunction -> {
+            for (RecipeFunction recipeFunction : recipeFunctions) {
                 try {
-                    allSortedRecipes.stream().filter(recipe -> recipeFunction.recipeFilter.test(recipe)).forEach(t -> registerDisplay(recipeFunction.category, (RecipeDisplay) recipeFunction.mappingFunction.apply(t), 0));
+                    for (Recipe<?> recipe : CollectionUtils.filter(allSortedRecipes, recipe -> recipeFunction.recipeFilter.test(recipe))) {
+                        registerDisplay(recipeFunction.category, (RecipeDisplay) recipeFunction.mappingFunction.apply(recipe), 0);
+                    }
                 } catch (Exception e) {
                     RoughlyEnoughItemsCore.LOGGER.error("[REI] Failed to add recipes!", e);
                 }
-            });
+            }
         }
         if (getDisplayVisibilityHandlers().isEmpty())
             registerRecipeVisibilityHandler(new DisplayVisibilityHandler() {
@@ -317,11 +320,11 @@ public class RecipeHelperImpl implements RecipeHelper {
                 }
             });
         // Clear Cache
-        ((DisplayHelperImpl) RoughlyEnoughItemsCore.getDisplayHelper()).resetCache();
+        ((DisplayHelperImpl) DisplayHelper.getInstance()).resetCache();
         ScreenHelper.getOptionalOverlay().ifPresent(overlay -> overlay.shouldReInit = true);
         
         long usedTime = System.currentTimeMillis() - startTime;
-        RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered %d stack entries, %d recipes displays, %d bounds handler, %d visibility handlers and %d categories (%s) in %d ms.", RoughlyEnoughItemsCore.getEntryRegistry().getStacksList().size(), recipeCount.get(), RoughlyEnoughItemsCore.getDisplayHelper().getAllBoundsHandlers().size(), getDisplayVisibilityHandlers().size(), categories.size(), String.join(", ", categories.stream().map(RecipeCategory::getCategoryName).collect(Collectors.toList())), usedTime);
+        RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered %d stack entries, %d recipes displays, %d bounds handler, %d visibility handlers and %d categories (%s) in %d ms.", EntryRegistry.getInstance().getStacksList().size(), recipeCount.get(), DisplayHelper.getInstance().getAllBoundsHandlers().size(), getDisplayVisibilityHandlers().size(), categories.size(), String.join(", ", categories.stream().map(RecipeCategory::getCategoryName).collect(Collectors.toList())), usedTime);
     }
     
     @Override
@@ -341,6 +344,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     }
     
     @Override
+    @SuppressWarnings("rawtypes")
     public List<Recipe> getAllSortedRecipes() {
         return getRecipeManager().values().stream().sorted(RECIPE_COMPARATOR).collect(Collectors.toList());
     }
@@ -348,18 +352,18 @@ public class RecipeHelperImpl implements RecipeHelper {
     @Override
     public Map<RecipeCategory<?>, List<RecipeDisplay>> getAllRecipes() {
         Map<RecipeCategory<?>, List<RecipeDisplay>> map = Maps.newLinkedHashMap();
-        categories.forEach(recipeCategory -> {
+        for (RecipeCategory<?> recipeCategory : categories) {
             if (recipeCategoryListMap.containsKey(recipeCategory.getIdentifier())) {
-                List<RecipeDisplay> list = recipeCategoryListMap.get(recipeCategory.getIdentifier()).stream().filter(display -> isDisplayVisible(display)).collect(Collectors.toList());
+                List<RecipeDisplay> list = CollectionUtils.filter(recipeCategoryListMap.get(recipeCategory.getIdentifier()), this::isDisplayVisible);
                 if (!list.isEmpty())
                     map.put(recipeCategory, list);
             }
-        });
+        }
         return map;
     }
     
     @Override
-    public List<RecipeDisplay> getAllRecipesFromCategory(RecipeCategory category) {
+    public List<RecipeDisplay> getAllRecipesFromCategory(RecipeCategory<?> category) {
         return recipeCategoryListMap.get(category.getIdentifier());
     }
     
@@ -387,7 +391,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     @SuppressWarnings("deprecation")
     @Override
     public boolean isDisplayVisible(RecipeDisplay display) {
-        RecipeCategory category = getCategory(display.getRecipeCategory());
+        RecipeCategory<?> category = getCategory(display.getRecipeCategory());
         List<DisplayVisibilityHandler> list = getDisplayVisibilityHandlers().stream().sorted(VISIBILITY_HANDLER_COMPARATOR).collect(Collectors.toList());
         for (DisplayVisibilityHandler displayVisibilityHandler : list) {
             try {
@@ -402,7 +406,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     }
     
     @Override
-    public void registerScreenClickArea(Rectangle rectangle, Class<? extends AbstractContainerScreen> screenClass, Identifier... categories) {
+    public void registerScreenClickArea(Rectangle rectangle, Class<? extends AbstractContainerScreen<?>> screenClass, Identifier... categories) {
         this.screenClickAreas.add(new ScreenClickAreaImpl(screenClass, rectangle, categories));
     }
     
@@ -412,18 +416,18 @@ public class RecipeHelperImpl implements RecipeHelper {
     }
     
     @Override
-    public <T extends Recipe<?>> void registerRecipes(Identifier category, Function<Recipe, Boolean> recipeFilter, Function<T, RecipeDisplay> mappingFunction) {
+    public <T extends Recipe<?>> void registerRecipes(Identifier category, @SuppressWarnings("rawtypes") Function<Recipe, Boolean> recipeFilter, Function<T, RecipeDisplay> mappingFunction) {
         recipeFunctions.add(new RecipeFunction(category, recipeFilter::apply, mappingFunction));
     }
     
     @Override
-    public <T extends Recipe<?>> void registerRecipes(Identifier category, Predicate<Recipe> recipeFilter, Function<T, RecipeDisplay> mappingFunction) {
+    public <T extends Recipe<?>> void registerRecipes(Identifier category, @SuppressWarnings("rawtypes") Predicate<Recipe> recipeFilter, Function<T, RecipeDisplay> mappingFunction) {
         recipeFunctions.add(new RecipeFunction(category, recipeFilter, mappingFunction));
     }
     
     @Override
     public void registerLiveRecipeGenerator(LiveRecipeGenerator<?> liveRecipeGenerator) {
-        liveRecipeGenerators.add(liveRecipeGenerator);
+        liveRecipeGenerators.add((LiveRecipeGenerator<RecipeDisplay>) liveRecipeGenerator);
     }
     
     @Override
@@ -432,17 +436,17 @@ public class RecipeHelperImpl implements RecipeHelper {
     }
     
     private class ScreenClickAreaImpl implements ScreenClickArea {
-        Class<? extends AbstractContainerScreen> screenClass;
+        Class<? extends AbstractContainerScreen<?>> screenClass;
         Rectangle rectangle;
         Identifier[] categories;
         
-        private ScreenClickAreaImpl(Class<? extends AbstractContainerScreen> screenClass, Rectangle rectangle, Identifier[] categories) {
+        private ScreenClickAreaImpl(Class<? extends AbstractContainerScreen<?>> screenClass, Rectangle rectangle, Identifier[] categories) {
             this.screenClass = screenClass;
             this.rectangle = rectangle;
             this.categories = categories;
         }
         
-        public Class<? extends AbstractContainerScreen> getScreenClass() {
+        public Class<? extends AbstractContainerScreen<?>> getScreenClass() {
             return screenClass;
         }
         
@@ -455,6 +459,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         }
     }
     
+    @SuppressWarnings("rawtypes")
     private class RecipeFunction {
         Identifier category;
         Predicate<Recipe> recipeFilter;

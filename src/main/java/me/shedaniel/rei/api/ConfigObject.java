@@ -72,35 +72,4 @@ public interface ConfigObject {
     
     boolean doesRegisterRecipesInAnotherThread();
     
-    RelativePoint getChoosePageDialogPoint();
-    
-    void setChoosePageDialogPoint(RelativePoint choosePageDialogPoint);
-    
-    public static class RelativePoint {
-        
-        private double relativeX, relativeY;
-        
-        public RelativePoint(double relativeX, double relativeY) {
-            this.relativeX = relativeX;
-            this.relativeY = relativeY;
-        }
-        
-        public double getRelativeX() {
-            return relativeX;
-        }
-        
-        public double getRelativeY() {
-            return relativeY;
-        }
-        
-        public double getX(double width) {
-            return width * relativeX;
-        }
-        
-        public double getY(double height) {
-            return height * relativeY;
-        }
-        
-    }
-    
 }

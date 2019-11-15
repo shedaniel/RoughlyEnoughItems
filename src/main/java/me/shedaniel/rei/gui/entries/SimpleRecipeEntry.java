@@ -13,7 +13,6 @@ import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GuiLighting;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.MathHelper;
@@ -28,30 +27,7 @@ import java.util.stream.Collectors;
 
 public class SimpleRecipeEntry extends RecipeEntry {
     
-    private static final Comparator<EntryStack> ENTRY_COMPARATOR = (o1, o2) -> {
-        if (o1.getType() == EntryStack.Type.FLUID) {
-            if (o2.getType() == EntryStack.Type.ITEM)
-                return -1;
-            return o1.getFluid().hashCode() - o2.getFluid().hashCode();
-        } else if (o2.getType() == EntryStack.Type.FLUID) {
-            if (o1.getType() == EntryStack.Type.ITEM)
-                return 1;
-            return o1.getFluid().hashCode() - o2.getFluid().hashCode();
-        }
-        ItemStack i1 = o1.getItemStack();
-        ItemStack i2 = o2.getItemStack();
-        if (i1.getItem() == i2.getItem()) {
-            if (i1.getCount() != i2.getCount())
-                return i1.getCount() - i2.getCount();
-            int compare = Boolean.compare(i1.hasTag(), i2.hasTag());
-            if (compare != 0)
-                return compare;
-            if (i1.getTag().getSize() != i2.getTag().getSize())
-                return i1.getTag().getSize() - i2.getTag().getSize();
-            return i1.getTag().hashCode() - i2.getTag().hashCode();
-        }
-        return i1.getItem().hashCode() - i2.getItem().hashCode();
-    };
+    private static final Comparator<EntryStack> ENTRY_COMPARATOR = Comparator.comparingLong(EntryStack::hashCode);
     private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private List<EntryWidget> inputWidgets;
     private EntryWidget outputWidget;

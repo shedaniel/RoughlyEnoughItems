@@ -8,7 +8,6 @@ package me.shedaniel.rei.utils;
 import me.shedaniel.cloth.hooks.ScreenHooks;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import me.shedaniel.fiber2cloth.api.Fiber2Cloth;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.gui.config.ItemCheatingMode;
 import me.shedaniel.rei.gui.config.ItemListOrderingConfig;
@@ -31,7 +30,7 @@ import static me.shedaniel.fiber2cloth.impl.Fiber2ClothImpl.splitLine;
 public class ClothScreenRegistry {
     
     public static Screen getConfigScreen(Screen parent) {
-        final ConfigManager configManager = RoughlyEnoughItemsCore.getConfigManager();
+        final ConfigManager configManager = ConfigManager.getInstance();
         ConfigEntryBuilder configEntryBuilder = ConfigEntryBuilder.create();
         return Fiber2Cloth.create(parent, "roughlyenoughitems", configManager.getConfig().getConfigNode(), "config.roughlyenoughitems.title").setSaveRunnable(() -> {
             try {

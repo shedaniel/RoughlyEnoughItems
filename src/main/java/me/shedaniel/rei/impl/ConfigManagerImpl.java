@@ -8,6 +8,7 @@ package me.shedaniel.rei.impl;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.annotations.Internal;
 import me.zeroeightsix.fiber.JanksonSettings;
 import me.zeroeightsix.fiber.exception.FiberException;
 import net.fabricmc.loader.api.FabricLoader;
@@ -21,6 +22,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 
+@Deprecated
+@Internal
 public class ConfigManagerImpl implements ConfigManager {
     
     private final File configFile;

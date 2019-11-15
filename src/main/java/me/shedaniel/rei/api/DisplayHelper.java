@@ -17,6 +17,7 @@ import static net.minecraft.util.ActionResult.PASS;
 public interface DisplayHelper {
     
     static DisplayHelper getInstance() {
+        //noinspection deprecation
         return RoughlyEnoughItemsCore.getDisplayHelper();
     }
     
@@ -117,7 +118,7 @@ public interface DisplayHelper {
          * @return the item list bounds
          */
         default Rectangle getItemListArea(Rectangle rectangle) {
-            return new Rectangle(rectangle.x + 1, rectangle.y + 2 + (RoughlyEnoughItemsCore.getConfigManager().getConfig().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + (RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled() ? 0 : 22), rectangle.width - 2, rectangle.height - (RoughlyEnoughItemsCore.getConfigManager().getConfig().getSearchFieldLocation() != SearchFieldLocation.CENTER ? 27 + 22 : 27) + (!RoughlyEnoughItemsCore.getConfigManager().getConfig().isEntryListWidgetScrolled() ? 0 : 22));
+            return new Rectangle(rectangle.x + 1, rectangle.y + 2 + (ConfigManager.getInstance().getConfig().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + (ConfigManager.getInstance().getConfig().isEntryListWidgetScrolled() ? 0 : 22), rectangle.width - 2, rectangle.height - (ConfigManager.getInstance().getConfig().getSearchFieldLocation() != SearchFieldLocation.CENTER ? 27 + 22 : 27) + (!ConfigManager.getInstance().getConfig().isEntryListWidgetScrolled() ? 0 : 22));
         }
         
         /**

@@ -8,6 +8,7 @@ package me.shedaniel.rei.impl;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.EntryRegistry;
 import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.annotations.Internal;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DefaultedList;
@@ -17,6 +18,8 @@ import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
+@Deprecated
+@Internal
 public class EntryRegistryImpl implements EntryRegistry {
     
     private final CopyOnWriteArrayList<EntryStack> entries = Lists.newCopyOnWriteArrayList();
