@@ -40,6 +40,7 @@
   "ordering.rei.name": "Имя",
   "ordering.rei.item_groups": "Группы",
   "text.auto_craft.move_items": "Переместить предметы",
+  "text.auto_craft.move_items.yog": "Generate NullPointerException!!",
   "error.rei.transfer.too_small": "Создание в сетке %dx%d невозможно!",
   "error.rei.not.on.server": "Мод REI отсутствует на сервере!",
   "error.rei.not.enough.materials": "Недостаточно материалов!",
