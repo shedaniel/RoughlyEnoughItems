@@ -40,6 +40,7 @@
   "ordering.rei.name": "Nimi",
   "ordering.rei.item_groups": "Esemegrupid",
   "text.auto_craft.move_items": "Liiguta esemeid",
+  "text.auto_craft.move_items.yog": "Generate NullPointerException!!",
   "error.rei.transfer.too_small": "Esemeid ei saanud %dx%d ruudustikule liigutada.",
   "error.rei.not.on.server": "REI puudub serverist.",
   "error.rei.not.enough.materials": "Materjale pole piisavalt.",
