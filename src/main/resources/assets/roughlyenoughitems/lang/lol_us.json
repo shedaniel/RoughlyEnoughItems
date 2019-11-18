@@ -40,6 +40,7 @@
   "ordering.rei.name": "Name",
   "ordering.rei.item_groups": "Item Gwoups",
   "text.auto_craft.move_items": "Move Items",
+  "text.auto_craft.move_items.yog": "Generate NullPointerException!!",
   "error.rei.transfer.too_small": "Unabwe to move items to a 2x2 gwid.",
   "error.rei.not.on.server": "WEI is not on de sewvew.",
   "error.rei.not.enough.materials": "Not Enough Matewiaws.",
