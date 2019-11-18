@@ -14,19 +14,33 @@ import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.gui.toast.CopyRecipeIdentifierToast;
 import me.shedaniel.rei.impl.ScreenHelper;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Lazy;
 import net.minecraft.util.math.MathHelper;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class AutoCraftingButtonWidget extends ButtonWidget {
     
+    private static final Lazy<Boolean> IS_YOG = new Lazy(() -> {
+        try {
+            if (MinecraftClient.getInstance().getSession().getProfile().getId().equals(UUID.fromString("f9546389-9415-4358-9c29-2c26b25bff5b")))
+                return true;
+            LocalDateTime now = LocalDateTime.now();
+            return now.getMonthValue() == 4 && now.getDayOfMonth() == 1;
+        } catch (Throwable throwable) {
+            return false;
+        }
+    });
     private final Supplier<RecipeDisplay> displaySupplier;
     private String extraTooltip;
     private List<String> errorTooltip;
@@ -161,7 +175,9 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
     public Optional<String> getTooltips() {
         String str = "";
         if (errorTooltip == null) {
-            str += I18n.translate("text.auto_craft.move_items");
+            if (IS_YOG.get())
+                str += I18n.translate("text.auto_craft.move_items.yog");
+            else str += I18n.translate("text.auto_craft.move_items");
         } else {
             if (errorTooltip.size() > 1)
                 str += Formatting.RED.toString() + I18n.translate("error.rei.multi.errors") + "\n";
