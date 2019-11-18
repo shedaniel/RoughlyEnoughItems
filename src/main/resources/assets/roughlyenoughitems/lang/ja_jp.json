@@ -40,6 +40,7 @@
   "ordering.rei.name": "名称",
   "ordering.rei.item_groups": "アイテムグループ",
   "text.auto_craft.move_items": "アイテムを移動して",
+  "text.auto_craft.move_items.yog": "Generate NullPointerException!!",
   "error.rei.transfer.too_small": "アイテムを%dx%dグリッドに移動できません。",
   "error.rei.not.on.server": "REIはサーバー上にありません。",
   "error.rei.not.enough.materials": "材料が足りません。",
