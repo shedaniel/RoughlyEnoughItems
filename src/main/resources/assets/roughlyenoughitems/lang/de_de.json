@@ -40,6 +40,7 @@
   "ordering.rei.name": "Name",
   "ordering.rei.item_groups": "Itemgruppen",
   "text.auto_craft.move_items": "Items bewegen",
+  "text.auto_craft.move_items.yog": "Generate NullPointerException!!",
   "error.rei.transfer.too_small": "Gegenstände können nicht in ein %dx%d-Raster verschoben werden.",
   "error.rei.not.on.server": "REI ist nicht auf dem Server installiert.",
   "error.rei.not.enough.materials": "Nicht genügend Materialien.",
