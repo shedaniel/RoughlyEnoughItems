@@ -40,6 +40,7 @@
   "ordering.rei.name": "名稱",
   "ordering.rei.item_groups": "物品分類",
   "text.auto_craft.move_items": "移動物品",
+  "text.auto_craft.move_items.yog": "Generate NullPointerException!!",
   "error.rei.transfer.too_small": "無法移動物品至 %dx%d 的方格.",
   "error.rei.not.on.server": "REI 不在伺服器上.",
   "error.rei.not.enough.materials": "不夠材料.",
