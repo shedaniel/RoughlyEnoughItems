@@ -115,6 +115,7 @@
   "config.roughlyenoughitems.disableRecipeBook.boolean.true": "禁用",
   "config.roughlyenoughitems.disableRecipeBook.boolean.false": "啟用",
   "config.roughlyenoughitems.fixTabCloseContainer": "修復Tab按鈕（禁用配方手冊時）：",
+  "config.roughlyenoughitems.lighterButtonHover": "Lighter Button Hover:",
   "config.roughlyenoughitems.enableCraftableOnlyButton": "過濾不可合成的物品:",
   "config.roughlyenoughitems.enableCraftableOnlyButton.boolean.true": "啟用",
   "config.roughlyenoughitems.enableCraftableOnlyButton.boolean.false": "禁用",
