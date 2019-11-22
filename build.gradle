@@ -13,7 +13,9 @@ archivesBaseName = "RoughlyEnoughItems"
 group = "me.shedaniel"
 
 def ENV = System.getenv()
-version = (((String) project.mod_version).contains("unstable") ? (project.mod_version + "." + buildTime()) : project.mod_version + "+" + (ENV.BUILD_NUMBER ? ("build." + ENV.BUILD_NUMBER) : "local"))
+def forceVersion = ""
+
+version = forceVersion != "" ? forceVersion : (((String) project.mod_version).contains("unstable") ? (project.mod_version + "." + buildTime()) : project.mod_version + "+" + (ENV.BUILD_NUMBER ? ("build." + ENV.BUILD_NUMBER) : "local"))
 
 def includeDep = true
 
@@ -87,7 +89,7 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 }
 
 task remapMavenJar(type: net.fabricmc.loom.task.RemapJarTask, dependsOn: jar) {
-    classifier = "maven"
+//    classifier = "maven"
     afterEvaluate {
         input = file("${project.buildDir}/libs/${archivesBaseName}-${version}-dev.jar")
         archiveName = "${archivesBaseName}-${version}-maven.jar"
@@ -98,8 +100,8 @@ task remapMavenJar(type: net.fabricmc.loom.task.RemapJarTask, dependsOn: jar) {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact(remapJar) {
-                builtBy remapJar
+            artifact(file("${project.buildDir}/libs/$archivesBaseName-${version}-maven.jar")) {
+                builtBy remapMavenJar
             }
             artifact(sourcesJar) {
                 builtBy remapSourcesJar
