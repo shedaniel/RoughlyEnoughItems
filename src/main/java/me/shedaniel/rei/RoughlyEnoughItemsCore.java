@@ -10,6 +10,7 @@ import com.google.common.collect.Maps;
 import me.shedaniel.cloth.hooks.ClothClientHooks;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.widget.EntryListWidget;
@@ -53,11 +54,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 
+@Internal
 public class RoughlyEnoughItemsCore implements ClientModInitializer {
     
+    @Internal
     public static final Logger LOGGER;
+    @SuppressWarnings("deprecation")
     private static final RecipeHelper RECIPE_HELPER = new RecipeHelperImpl();
+    @SuppressWarnings("deprecation")
     private static final EntryRegistry ENTRY_REGISTRY = new EntryRegistryImpl();
+    @SuppressWarnings("deprecation")
     private static final DisplayHelper DISPLAY_HELPER = new DisplayHelperImpl();
     private static final Map<Identifier, REIPluginEntry> plugins = Maps.newHashMap();
     private static final ExecutorService SYNC_RECIPES = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "REI-SyncRecipes"));
@@ -207,6 +213,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         }
     }
     
+    @SuppressWarnings("deprecation")
     private void registerClothEvents() {
         final Identifier recipeButtonTex = new Identifier("textures/gui/recipe_button.png");
         AtomicLong lastSync = new AtomicLong(-1);
@@ -217,10 +224,8 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             }
             lastSync.set(System.currentTimeMillis());
             if (ConfigManager.getInstance().getConfig().doesRegisterRecipesInAnotherThread()) {
-                //noinspection deprecation
                 CompletableFuture.runAsync(() -> ((RecipeHelperImpl) RecipeHelper.getInstance()).recipesLoaded(recipeManager), SYNC_RECIPES);
             } else {
-                //noinspection deprecation
                 ((RecipeHelperImpl) RecipeHelper.getInstance()).recipesLoaded(recipeManager);
             }
         });

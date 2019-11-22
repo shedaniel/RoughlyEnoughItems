@@ -12,6 +12,7 @@ import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget.Interpolation;
 import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget.Precision;
+import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
@@ -138,7 +139,7 @@ public class VillagerRecipeViewingScreen extends Screen {
             int finalIndex = index;
             RecipeEntry recipeEntry;
             recipeRenderers.add(recipeEntry = category.getSimpleRenderer(recipeDisplay));
-            buttonWidgets.add(new ButtonWidget(bounds.x + 5, 0, recipeEntry.getWidth(), recipeEntry.getHeight(), "") {
+            buttonWidgets.add(new ButtonWidget(new Rectangle(bounds.x + 5, 0, recipeEntry.getWidth(), recipeEntry.getHeight()), "") {
                 @Override
                 public void onPressed() {
                     selectedRecipeIndex = finalIndex;
@@ -192,7 +193,7 @@ public class VillagerRecipeViewingScreen extends Screen {
             }
         }
         ButtonWidget w, w2;
-        this.widgets.add(w = new ButtonWidget(bounds.x + 2, bounds.y - 16, 10, 10, new TranslatableText("text.rei.left_arrow")) {
+        this.widgets.add(w = new ButtonWidget(new Rectangle(bounds.x + 2, bounds.y - 16, 10, 10), new TranslatableText("text.rei.left_arrow")) {
             @Override
             public void onPressed() {
                 tabsPage--;
@@ -201,7 +202,7 @@ public class VillagerRecipeViewingScreen extends Screen {
                 VillagerRecipeViewingScreen.this.init();
             }
         });
-        this.widgets.add(w2 = new ButtonWidget(bounds.x + bounds.width - 12, bounds.y - 16, 10, 10, new TranslatableText("text.rei.right_arrow")) {
+        this.widgets.add(w2 = new ButtonWidget(new Rectangle(bounds.x + bounds.width - 12, bounds.y - 16, 10, 10), new TranslatableText("text.rei.right_arrow")) {
             @Override
             public void onPressed() {
                 tabsPage++;
@@ -212,7 +213,7 @@ public class VillagerRecipeViewingScreen extends Screen {
         });
         w.enabled = w2.enabled = categories.size() > TABS_PER_PAGE;
         
-        this.widgets.add(new ClickableLabelWidget(bounds.x + 4 + scrollListBounds.width / 2, bounds.y + 6, categories.get(selectedCategoryIndex).getCategoryName()) {
+        this.widgets.add(new ClickableLabelWidget(new Point(bounds.x + 4 + scrollListBounds.width / 2, bounds.y + 6), categories.get(selectedCategoryIndex).getCategoryName()) {
             @Override
             public void onLabelClicked() {
                 MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
@@ -382,7 +383,10 @@ public class VillagerRecipeViewingScreen extends Screen {
             height -= Math.min((scroll < 0 ? (int) -scroll : scroll > getMaxScroll() ? (int) scroll - getMaxScroll() : 0), height * .95);
             height = Math.max(10, height);
             int minY = (int) Math.min(Math.max((int) scroll * (scrollListBounds.height - 2 - height) / getMaxScroll() + scrollListBounds.y + 1, scrollListBounds.y + 1), scrollListBounds.getMaxY() - 1 - height);
-            double scrollbarPositionMinX = scrollListBounds.getMaxX() - 6, scrollbarPositionMaxX = scrollListBounds.getMaxX() - 2;
+            int scrollbarPositionMinX = scrollListBounds.getMaxX() - 6, scrollbarPositionMaxX = scrollListBounds.getMaxX() - 1;
+            boolean hovered = (new Rectangle(scrollbarPositionMinX, minY, scrollbarPositionMaxX - scrollbarPositionMinX, height)).contains(PointHelper.fromMouse());
+            float bottomC = (hovered ? .67f : .5f) * (ScreenHelper.isDarkModeEnabled() ? 0.8f : 1f);
+            float topC = (hovered ? .87f : .67f) * (ScreenHelper.isDarkModeEnabled() ? 0.8f : 1f);
             GuiLighting.disable();
             RenderSystem.disableTexture();
             RenderSystem.enableBlend();
@@ -390,11 +394,16 @@ public class VillagerRecipeViewingScreen extends Screen {
             RenderSystem.blendFuncSeparate(770, 771, 1, 0);
             RenderSystem.shadeModel(7425);
             buffer.begin(7, VertexFormats.POSITION_COLOR);
-            float b = ScreenHelper.isDarkModeEnabled() ? 0.37f : 1f;
-            buffer.vertex(scrollbarPositionMinX, minY + height, 800).color(b, b, b, scrollBarAlpha).next();
-            buffer.vertex(scrollbarPositionMaxX, minY + height, 800).color(b, b, b, scrollBarAlpha).next();
-            buffer.vertex(scrollbarPositionMaxX, minY, 800).color(b, b, b, scrollBarAlpha).next();
-            buffer.vertex(scrollbarPositionMinX, minY, 800).color(b, b, b, scrollBarAlpha).next();
+            buffer.vertex(scrollbarPositionMinX, minY + height, 800).color(bottomC, bottomC, bottomC, scrollBarAlpha).next();
+            buffer.vertex(scrollbarPositionMaxX, minY + height, 800).color(bottomC, bottomC, bottomC, scrollBarAlpha).next();
+            buffer.vertex(scrollbarPositionMaxX, minY, 800).color(bottomC, bottomC, bottomC, scrollBarAlpha).next();
+            buffer.vertex(scrollbarPositionMinX, minY, 800).color(bottomC, bottomC, bottomC, scrollBarAlpha).next();
+            tessellator.draw();
+            buffer.begin(7, VertexFormats.POSITION_COLOR);
+            buffer.vertex(scrollbarPositionMinX, minY + height - 1, 800).color(topC, topC, topC, scrollBarAlpha).next();
+            buffer.vertex(scrollbarPositionMaxX - 1, minY + height - 1, 800).color(topC, topC, topC, scrollBarAlpha).next();
+            buffer.vertex(scrollbarPositionMaxX - 1, minY, 800).color(topC, topC, topC, scrollBarAlpha).next();
+            buffer.vertex(scrollbarPositionMinX, minY, 800).color(topC, topC, topC, scrollBarAlpha).next();
             tessellator.draw();
             RenderSystem.shadeModel(7424);
             RenderSystem.disableBlend();

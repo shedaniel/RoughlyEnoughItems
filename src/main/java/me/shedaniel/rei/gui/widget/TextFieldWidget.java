@@ -9,6 +9,8 @@ import com.google.common.base.Predicates;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.impl.PointHelper;
+import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.BufferBuilder;
@@ -387,7 +389,10 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
     
     public void renderBorder() {
         if (this.hasBorder()) {
-            fill(this.bounds.x - 1, this.bounds.y - 1, this.bounds.x + this.bounds.width + 1, this.bounds.y + this.bounds.height + 1, -6250336);
+            if (containsMouse(PointHelper.fromMouse()) || focused)
+                fill(this.bounds.x - 1, this.bounds.y - 1, this.bounds.x + this.bounds.width + 1, this.bounds.y + this.bounds.height + 1, ScreenHelper.isDarkModeEnabled() ? 0xffffbb4d : -1);
+            else
+                fill(this.bounds.x - 1, this.bounds.y - 1, this.bounds.x + this.bounds.width + 1, this.bounds.y + this.bounds.height + 1, -6250336);
             fill(this.bounds.x, this.bounds.y, this.bounds.x + this.bounds.width, this.bounds.y + this.bounds.height, -16777216);
         }
     }

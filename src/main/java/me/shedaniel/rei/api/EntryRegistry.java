@@ -14,6 +14,7 @@ import java.util.List;
 
 public interface EntryRegistry {
     
+    @SuppressWarnings("deprecation")
     static EntryRegistry getInstance() {
         return RoughlyEnoughItemsCore.getEntryRegistry();
     }

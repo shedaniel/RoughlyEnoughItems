@@ -20,8 +20,8 @@ import java.util.function.Predicate;
 
 public interface RecipeHelper {
     
+    @SuppressWarnings("deprecation")
     static RecipeHelper getInstance() {
-        //noinspection deprecation
         return RoughlyEnoughItemsCore.getRecipeHelper();
     }
     
@@ -115,15 +115,15 @@ public interface RecipeHelper {
     Map<RecipeCategory<?>, List<RecipeDisplay>> getUsagesFor(EntryStack stack);
     
     /**
-     * Gets the optional of the speed crafting button area from a category
+     * Gets the optional of the auto crafting button area from a category
      *
      * @param category the category of the display
-     * @return the optional of speed crafting button area
+     * @return the optional of auto crafting button area
      */
     Optional<ButtonAreaSupplier> getAutoCraftButtonArea(RecipeCategory<?> category);
     
     /**
-     * Registers a speed crafting button area
+     * Registers a auto crafting button area
      *
      * @param category  the category of the button area
      * @param rectangle the button area
@@ -131,20 +131,13 @@ public interface RecipeHelper {
     void registerAutoCraftButtonArea(Identifier category, ButtonAreaSupplier rectangle);
     
     /**
-     * Removes the speed crafting button
+     * Removes the auto crafting button
      *
      * @param category the category of the button
      */
-    default void removeSpeedCraftButton(Identifier category) {
+    default void removeAutoCraftButton(Identifier category) {
         registerAutoCraftButtonArea(category, bounds -> null);
     }
-    
-    /**
-     * @param category the category of the button area
-     * @deprecated Not required anymore
-     */
-    @Deprecated
-    void registerDefaultSpeedCraftButtonArea(Identifier category);
     
     /**
      * Gets the map of all recipes visible to the player
@@ -222,3 +215,4 @@ public interface RecipeHelper {
     }
     
 }
+

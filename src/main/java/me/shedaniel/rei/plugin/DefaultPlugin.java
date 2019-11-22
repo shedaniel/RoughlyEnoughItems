@@ -298,8 +298,8 @@ public class DefaultPlugin implements REIPluginV0 {
         recipeHelper.registerWorkingStations(BREWING, EntryStack.create(Items.BREWING_STAND));
         recipeHelper.registerWorkingStations(STONE_CUTTING, EntryStack.create(Items.STONECUTTER));
         recipeHelper.registerWorkingStations(COMPOSTING, EntryStack.create(Items.COMPOSTER));
-        recipeHelper.registerAutoCraftButtonArea(CAMPFIRE, bounds -> null);
-        recipeHelper.registerAutoCraftButtonArea(COMPOSTING, bounds -> null);
+        recipeHelper.registerAutoCraftButtonArea(CAMPFIRE, bounds -> new Rectangle(bounds.x + 6, bounds.y + 6, 10, 10));
+        recipeHelper.removeAutoCraftButton(COMPOSTING);
         recipeHelper.registerScreenClickArea(new Rectangle(88, 32, 28, 23), CraftingTableScreen.class, CRAFTING);
         recipeHelper.registerScreenClickArea(new Rectangle(137, 29, 10, 13), InventoryScreen.class, CRAFTING);
         recipeHelper.registerScreenClickArea(new Rectangle(97, 16, 14, 30), BrewingStandScreen.class, BREWING);

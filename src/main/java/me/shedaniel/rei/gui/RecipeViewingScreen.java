@@ -7,6 +7,7 @@ package me.shedaniel.rei.gui;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
+import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
@@ -22,7 +23,6 @@ import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.Window;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
@@ -129,7 +129,7 @@ public class RecipeViewingScreen extends Screen {
         this.page = MathHelper.clamp(page, 0, getTotalPages(selectedCategory) - 1);
         
         ButtonWidget w, w2;
-        this.widgets.add(w = new ButtonWidget(bounds.x + 2, bounds.y - 16, 10, 10, new TranslatableText("text.rei.left_arrow")) {
+        this.widgets.add(w = new ButtonWidget(new Rectangle(bounds.x + 2, bounds.y - 16, 10, 10), I18n.translate("text.rei.left_arrow")) {
             @Override
             public void onPressed() {
                 categoryPages--;
@@ -138,7 +138,7 @@ public class RecipeViewingScreen extends Screen {
                 RecipeViewingScreen.this.init();
             }
         });
-        this.widgets.add(w2 = new ButtonWidget(bounds.x + bounds.width - 12, bounds.y - 16, 10, 10, new TranslatableText("text.rei.right_arrow")) {
+        this.widgets.add(w2 = new ButtonWidget(new Rectangle(bounds.x + bounds.width - 12, bounds.y - 16, 10, 10), I18n.translate("text.rei.right_arrow")) {
             @Override
             public void onPressed() {
                 categoryPages++;
@@ -148,7 +148,7 @@ public class RecipeViewingScreen extends Screen {
             }
         });
         w.enabled = w2.enabled = categories.size() > TABS_PER_PAGE;
-        widgets.add(categoryBack = new ButtonWidget(bounds.getX() + 5, bounds.getY() + 5, 12, 12, new TranslatableText("text.rei.left_arrow")) {
+        widgets.add(categoryBack = new ButtonWidget(new Rectangle(bounds.getX() + 5, bounds.getY() + 5, 12, 12), I18n.translate("text.rei.left_arrow")) {
             @Override
             public void onPressed() {
                 int currentCategoryIndex = categories.indexOf(selectedCategory);
@@ -166,10 +166,10 @@ public class RecipeViewingScreen extends Screen {
                 return Optional.ofNullable(I18n.translate("text.rei.previous_category"));
             }
         });
-        widgets.add(new ClickableLabelWidget(bounds.getCenterX(), bounds.getY() + 7, "") {
+        widgets.add(new ClickableLabelWidget(new Point(bounds.getCenterX(), bounds.getY() + 7), "") {
             @Override
             public void render(int mouseX, int mouseY, float delta) {
-                this.text = selectedCategory.getCategoryName();
+                setText(selectedCategory.getCategoryName());
                 super.render(mouseX, mouseY, delta);
             }
             
@@ -184,7 +184,7 @@ public class RecipeViewingScreen extends Screen {
                 ClientHelper.getInstance().executeViewAllRecipesKeyBind();
             }
         });
-        widgets.add(categoryNext = new ButtonWidget(bounds.getMaxX() - 17, bounds.getY() + 5, 12, 12, new TranslatableText("text.rei.right_arrow")) {
+        widgets.add(categoryNext = new ButtonWidget(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 5, 12, 12), I18n.translate("text.rei.right_arrow")) {
             @Override
             public void onPressed() {
                 int currentCategoryIndex = categories.indexOf(selectedCategory);
@@ -205,7 +205,7 @@ public class RecipeViewingScreen extends Screen {
         categoryBack.enabled = categories.size() > 1;
         categoryNext.enabled = categories.size() > 1;
         
-        widgets.add(recipeBack = new ButtonWidget(bounds.getX() + 5, bounds.getY() + 21, 12, 12, new TranslatableText("text.rei.left_arrow")) {
+        widgets.add(recipeBack = new ButtonWidget(new Rectangle(bounds.getX() + 5, bounds.getY() + 21, 12, 12), I18n.translate("text.rei.left_arrow")) {
             @Override
             public void onPressed() {
                 page--;
@@ -219,10 +219,10 @@ public class RecipeViewingScreen extends Screen {
                 return Optional.ofNullable(I18n.translate("text.rei.previous_page"));
             }
         });
-        widgets.add(new ClickableLabelWidget(bounds.getCenterX(), bounds.getY() + 23, "", categoriesMap.get(selectedCategory).size() > getRecipesPerPageByHeight()) {
+        widgets.add(new ClickableLabelWidget(new Point(bounds.getCenterX(), bounds.getY() + 23), "") {
             @Override
             public void render(int mouseX, int mouseY, float delta) {
-                this.text = String.format("%d/%d", page + 1, getTotalPages(selectedCategory));
+                setText(String.format("%d/%d", page + 1, getTotalPages(selectedCategory)));
                 super.render(mouseX, mouseY, delta);
             }
             
@@ -237,8 +237,8 @@ public class RecipeViewingScreen extends Screen {
                 RecipeViewingScreen.this.choosePageActivated = true;
                 RecipeViewingScreen.this.init();
             }
-        });
-        widgets.add(recipeNext = new ButtonWidget(bounds.getMaxX() - 17, bounds.getY() + 21, 12, 12, new TranslatableText("text.rei.right_arrow")) {
+        }.clickable(categoriesMap.get(selectedCategory).size() > getRecipesPerPageByHeight()));
+        widgets.add(recipeNext = new ButtonWidget(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 21, 12, 12), I18n.translate("text.rei.right_arrow")) {
             @Override
             public void onPressed() {
                 page++;

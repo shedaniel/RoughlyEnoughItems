@@ -20,6 +20,7 @@ import net.minecraft.container.PlayerContainer;
 import net.minecraft.recipe.Recipe;
 
 public class DefaultRecipeBookHandler implements AutoTransferHandler {
+    @SuppressWarnings("deprecation")
     @Override
     public Result handle(Context context) {
         RecipeDisplay display = context.getRecipe();

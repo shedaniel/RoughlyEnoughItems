@@ -46,7 +46,7 @@ public class ConfigManagerImpl implements ConfigManager {
         configFile.getParentFile().mkdirs();
         if (!configFile.exists() && !configFile.createNewFile()) {
             RoughlyEnoughItemsCore.LOGGER.error("[REI] Failed to save config! Overwriting with default config.");
-            config = new ConfigObjectImpl();
+            config = new OldConfigObjectImpl();
             return;
         }
         try {
@@ -54,7 +54,7 @@ public class ConfigManagerImpl implements ConfigManager {
         } catch (Exception e) {
             e.printStackTrace();
             RoughlyEnoughItemsCore.LOGGER.error("[REI] Failed to save config! Overwriting with default config.");
-            config = new ConfigObjectImpl();
+            config = new OldConfigObjectImpl();
             return;
         }
     }
@@ -64,13 +64,13 @@ public class ConfigManagerImpl implements ConfigManager {
         configFile.getParentFile().mkdirs();
         if (!configFile.exists() || !configFile.canRead()) {
             RoughlyEnoughItemsCore.LOGGER.warn("[REI] Config not found! Creating one.");
-            config = new ConfigObjectImpl();
+            config = new OldConfigObjectImpl();
             saveConfig();
             return;
         }
         boolean failed = false;
         try {
-            config = new ConfigObjectImpl();
+            config = new OldConfigObjectImpl();
             new JanksonSettings().deserialize(config.getConfigNode(), Files.newInputStream(configFile.toPath()));
         } catch (Exception e) {
             e.printStackTrace();
@@ -78,7 +78,7 @@ public class ConfigManagerImpl implements ConfigManager {
         }
         if (failed || config == null) {
             RoughlyEnoughItemsCore.LOGGER.error("[REI] Failed to load config! Overwriting with default config.");
-            config = new ConfigObjectImpl();
+            config = new OldConfigObjectImpl();
         }
         saveConfig();
     }

@@ -34,7 +34,7 @@ license {
 repositories {
     maven { url "https://tehnut.info/maven/" }
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
-    maven { url "https://minecraft.curseforge.com/api/maven" }
+    maven { url "https://dl.bintray.com/shedaniel/autoconfig1u/" }
 }
 
 processResources {
@@ -59,7 +59,7 @@ dependencies {
         transitive = false
     }
     modApi "me.zeroeightsix:fiber:0.6.0-7"
-    modApi "blue.endless:jankson:${project.jankson_version}"
+    modApi("me.sargunvohra.mcmods:autoconfig1u:${project.autoconfig1u}")
     if (includeDep) {
         include("me.shedaniel.cloth:cloth-events:${cloth_events_version}") {
             transitive = false
@@ -68,6 +68,9 @@ dependencies {
             transitive = false
         }
         include("me.shedaniel.cloth:fiber2cloth:1.2.1") {
+            transitive = false
+        }
+        include("me.sargunvohra.mcmods:autoconfig1u:${project.autoconfig1u}") {
             transitive = false
         }
         include "me.zeroeightsix:fiber:0.6.0-7"
@@ -87,7 +90,7 @@ task remapMavenJar(type: net.fabricmc.loom.task.RemapJarTask, dependsOn: jar) {
     classifier = "maven"
     afterEvaluate {
         input = file("${project.buildDir}/libs/${archivesBaseName}-${version}-dev.jar")
-//        archiveName = "${archivesBaseName}-${version}-maven.jar"
+        archiveName = "${archivesBaseName}-${version}-maven.jar"
         addNestedDependencies = false
     }
 }

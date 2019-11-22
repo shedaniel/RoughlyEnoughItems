@@ -116,7 +116,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
             return stringBuilder_1.toString();
         };
         textFieldWidget.setText(String.valueOf(currentPage + 1));
-        widgets.add(btnDone = new ButtonWidget(bounds.x + bounds.width - 45, bounds.y + bounds.height + 3, 40, 20, I18n.translate("gui.done")) {
+        widgets.add(btnDone = new ButtonWidget(new Rectangle(bounds.x + bounds.width - 45, bounds.y + bounds.height + 3, 40, 20), I18n.translate("gui.done")) {
             @Override
             public void onPressed() {
                 recipeViewingScreen.page = MathHelper.clamp(getIntFromString(textFieldWidget.getText()).orElse(0) - 1, 0, recipeViewingScreen.getTotalPages(recipeViewingScreen.getSelectedCategory()) - 1);

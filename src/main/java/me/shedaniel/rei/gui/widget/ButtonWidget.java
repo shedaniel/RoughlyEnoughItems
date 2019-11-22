@@ -8,6 +8,7 @@ package me.shedaniel.rei.gui.widget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.sound.PositionedSoundInstance;
@@ -18,37 +19,38 @@ import net.minecraft.util.math.MathHelper;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public abstract class ButtonWidget extends WidgetWithBounds {
     
-    public static final Identifier BUTTON_LOCATION = new Identifier("roughlyenoughitems", "textures/gui/button.png");
-    public static final Identifier BUTTON_LOCATION_DARK = new Identifier("roughlyenoughitems", "textures/gui/button_dark.png");
-    public String text;
+    protected static final Identifier BUTTON_LOCATION = new Identifier("roughlyenoughitems", "textures/gui/button.png");
+    protected static final Identifier BUTTON_LOCATION_DARK = new Identifier("roughlyenoughitems", "textures/gui/button_dark.png");
     public boolean enabled;
     public boolean focused;
+    private String text;
     private Rectangle bounds;
     
     public ButtonWidget(Rectangle rectangle, Text text) {
-        this(rectangle, text.asFormattedString());
+        this(rectangle, Objects.requireNonNull(text).asFormattedString());
     }
     
     public ButtonWidget(Rectangle rectangle, String text) {
-        this.bounds = rectangle;
+        this.bounds = Objects.requireNonNull(rectangle);
         this.enabled = true;
-        this.text = text;
-    }
-    
-    public ButtonWidget(int x, int y, int width, int height, String text) {
-        this(new Rectangle(x, y, width, height), text);
-    }
-    
-    public ButtonWidget(int x, int y, int width, int height, Text text) {
-        this(new Rectangle(x, y, width, height), text);
+        this.text = Objects.requireNonNull(text);
     }
     
     public Rectangle getBounds() {
         return bounds;
+    }
+    
+    public String getText() {
+        return text;
+    }
+    
+    public void setText(String text) {
+        this.text = text;
     }
     
     protected int getTextureId(boolean boolean_1) {
@@ -56,45 +58,48 @@ public abstract class ButtonWidget extends WidgetWithBounds {
         if (!this.enabled) {
             int_1 = 0;
         } else if (boolean_1) {
-            int_1 = 2;
+            int_1 = ConfigManager.getInstance().getConfig().isLighterButtonHover() ? 4 : 3; // 2 is the old blue highlight, 3 is the 1.15 outline, 4 is the 1.15 online + light hover
         }
         
         return int_1;
     }
     
-    @Override
-    public void render(int mouseX, int mouseY, float delta) {
-        int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;
+    protected void renderBackground(int x, int y, int width, int height, int textureOffset) {
         minecraft.getTextureManager().bindTexture(ScreenHelper.isDarkModeEnabled() ? BUTTON_LOCATION_DARK : BUTTON_LOCATION);
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        int textureOffset = this.getTextureId(isHovered(mouseX, mouseY));
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(770, 771, 1, 0);
         RenderSystem.blendFunc(770, 771);
         //Four Corners
-        blit(x, y, 0, textureOffset * 80, 4, 4);
-        blit(x + width - 4, y, 252, textureOffset * 80, 4, 4);
-        blit(x, y + height - 4, 0, textureOffset * 80 + 76, 4, 4);
-        blit(x + width - 4, y + height - 4, 252, textureOffset * 80 + 76, 4, 4);
+        blit(x, y, getBlitOffset(), 0, textureOffset * 80, 4, 4, 512, 256);
+        blit(x + width - 4, y, getBlitOffset(), 252, textureOffset * 80, 4, 4, 512, 256);
+        blit(x, y + height - 4, getBlitOffset(), 0, textureOffset * 80 + 76, 4, 4, 512, 256);
+        blit(x + width - 4, y + height - 4, getBlitOffset(), 252, textureOffset * 80 + 76, 4, 4, 512, 256);
         
         //Sides
-        blit(x + 4, y, 4, textureOffset * 80, MathHelper.ceil((width - 8) / 2f), 4);
-        blit(x + 4, y + height - 4, 4, textureOffset * 80 + 76, MathHelper.ceil((width - 8) / 2f), 4);
-        blit(x + 4 + MathHelper.ceil((width - 8) / 2f), y + height - 4, 252 - MathHelper.floor((width - 8) / 2f), textureOffset * 80 + 76, MathHelper.floor((width - 8) / 2f), 4);
-        blit(x + 4 + MathHelper.ceil((width - 8) / 2f), y, 252 - MathHelper.floor((width - 8) / 2f), textureOffset * 80, MathHelper.floor((width - 8) / 2f), 4);
+        blit(x + 4, y, getBlitOffset(), 4, textureOffset * 80, MathHelper.ceil((width - 8) / 2f), 4, 512, 256);
+        blit(x + 4, y + height - 4, getBlitOffset(), 4, textureOffset * 80 + 76, MathHelper.ceil((width - 8) / 2f), 4, 512, 256);
+        blit(x + 4 + MathHelper.ceil((width - 8) / 2f), y + height - 4, getBlitOffset(), 252 - MathHelper.floor((width - 8) / 2f), textureOffset * 80 + 76, MathHelper.floor((width - 8) / 2f), 4, 512, 256);
+        blit(x + 4 + MathHelper.ceil((width - 8) / 2f), y, getBlitOffset(), 252 - MathHelper.floor((width - 8) / 2f), textureOffset * 80, MathHelper.floor((width - 8) / 2f), 4, 512, 256);
         for (int i = y + 4; i < y + height - 4; i += 76) {
-            blit(x, i, 0, 4 + textureOffset * 80, MathHelper.ceil(width / 2f), MathHelper.clamp(y + height - 4 - i, 0, 76));
-            blit(x + MathHelper.ceil(width / 2f), i, 256 - MathHelper.floor(width / 2f), 4 + textureOffset * 80, MathHelper.floor(width / 2f), MathHelper.clamp(y + height - 4 - i, 0, 76));
+            blit(x, i, getBlitOffset(), 0, 4 + textureOffset * 80, MathHelper.ceil(width / 2f), MathHelper.clamp(y + height - 4 - i, 0, 76), 512, 256);
+            blit(x + MathHelper.ceil(width / 2f), i, getBlitOffset(), 256 - MathHelper.floor(width / 2f), 4 + textureOffset * 80, MathHelper.floor(width / 2f), MathHelper.clamp(y + height - 4 - i, 0, 76), 512, 256);
         }
+    }
+    
+    @Override
+    public void render(int mouseX, int mouseY, float delta) {
+        int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;
+        renderBackground(x, y, width, height, this.getTextureId(isHovered(mouseX, mouseY)));
         
-        int colour = 14737632;
+        int color = 14737632;
         if (!this.enabled) {
-            colour = 10526880;
+            color = 10526880;
         } else if (isHovered(mouseX, mouseY)) {
-            colour = 16777120;
+            color = 16777120;
         }
         
-        this.drawCenteredString(font, text, x + width / 2, y + (height - 8) / 2, colour);
+        this.drawCenteredString(font, getText(), x + width / 2, y + (height - 8) / 2, color);
         
         if (getTooltips().isPresent())
             if (!focused && containsMouse(mouseX, mouseY))

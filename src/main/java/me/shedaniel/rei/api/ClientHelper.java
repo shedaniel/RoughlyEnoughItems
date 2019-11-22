@@ -18,6 +18,7 @@ public interface ClientHelper {
     /**
      * @return the api instance of {@link ClientHelperImpl}
      */
+    @SuppressWarnings("deprecation")
     static ClientHelper getInstance() {
         return ClientHelperImpl.instance;
     }

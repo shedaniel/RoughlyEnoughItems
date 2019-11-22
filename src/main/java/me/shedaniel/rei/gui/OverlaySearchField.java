@@ -30,7 +30,7 @@ public class OverlaySearchField extends TextFieldWidget {
     public void laterRender(int int_1, int int_2, float float_1) {
         GuiLighting.disable();
         RenderSystem.disableDepthTest();
-        setEditableColor(ContainerScreenOverlay.getEntryListWidget().children().isEmpty() && !getText().isEmpty() ? 16733525 : isSearching ? -1313241 : 14737632);
+        setEditableColor(ContainerScreenOverlay.getEntryListWidget().children().isEmpty() && !getText().isEmpty() ? 16733525 : isSearching ? -852212 : 14737632);
         setSuggestion(!isFocused() && getText().isEmpty() ? I18n.translate("text.rei.search.field.suggestion") : null);
         super.render(int_1, int_2, float_1);
         RenderSystem.enableDepthTest();
@@ -41,7 +41,7 @@ public class OverlaySearchField extends TextFieldWidget {
         if (!isSearching)
             super.renderBorder();
         else if (this.hasBorder()) {
-            fill(this.getBounds().x - 1, this.getBounds().y - 1, this.getBounds().x + this.getBounds().width + 1, this.getBounds().y + this.getBounds().height + 1, -1313241);
+            fill(this.getBounds().x - 1, this.getBounds().y - 1, this.getBounds().x + this.getBounds().width + 1, this.getBounds().y + this.getBounds().height + 1, -852212);
             fill(this.getBounds().x, this.getBounds().y, this.getBounds().x + this.getBounds().width, this.getBounds().y + this.getBounds().height, -16777216);
         }
     }
