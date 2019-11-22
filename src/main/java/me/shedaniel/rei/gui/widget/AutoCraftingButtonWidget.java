@@ -6,7 +6,6 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
@@ -20,7 +19,6 @@ import net.minecraft.client.resource.language.I18n;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Lazy;
-import net.minecraft.util.math.MathHelper;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -127,27 +125,7 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
             }
         }
         int x = getBounds().x, y = getBounds().y, width = getBounds().width, height = getBounds().height;
-        minecraft.getTextureManager().bindTexture(ScreenHelper.isDarkModeEnabled() ? BUTTON_LOCATION_DARK : BUTTON_LOCATION);
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        int textureOffset = this.getTextureId(isHovered(mouseX, mouseY));
-        RenderSystem.enableBlend();
-        RenderSystem.blendFuncSeparate(770, 771, 1, 0);
-        RenderSystem.blendFunc(770, 771);
-        //Four Corners
-        blit(x, y, 0, textureOffset * 80, 4, 4);
-        blit(x + width - 4, y, 252, textureOffset * 80, 4, 4);
-        blit(x, y + height - 4, 0, textureOffset * 80 + 76, 4, 4);
-        blit(x + width - 4, y + height - 4, 252, textureOffset * 80 + 76, 4, 4);
-        
-        //Sides
-        blit(x + 4, y, 4, textureOffset * 80, MathHelper.ceil((width - 8) / 2f), 4);
-        blit(x + 4, y + height - 4, 4, textureOffset * 80 + 76, MathHelper.ceil((width - 8) / 2f), 4);
-        blit(x + 4 + MathHelper.ceil((width - 8) / 2f), y + height - 4, 252 - MathHelper.floor((width - 8) / 2f), textureOffset * 80 + 76, MathHelper.floor((width - 8) / 2f), 4);
-        blit(x + 4 + MathHelper.ceil((width - 8) / 2f), y, 252 - MathHelper.floor((width - 8) / 2f), textureOffset * 80, MathHelper.floor((width - 8) / 2f), 4);
-        for (int i = y + 4; i < y + height - 4; i += 76) {
-            blit(x, i, 0, 4 + textureOffset * 80, MathHelper.ceil(width / 2f), MathHelper.clamp(y + height - 4 - i, 0, 76));
-            blit(x + MathHelper.ceil(width / 2f), i, 256 - MathHelper.floor(width / 2f), 4 + textureOffset * 80, MathHelper.floor(width / 2f), MathHelper.clamp(y + height - 4 - i, 0, 76));
-        }
+        renderBackground(x, y, width, height, this.getTextureId(isHovered(mouseX, mouseY)));
         
         int colour = 14737632;
         if (!this.visible) {
@@ -157,7 +135,7 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
         }
         
         fillGradient(x, y, x + width, y + height, color, color);
-        this.drawCenteredString(font, text, x + width / 2, y + (height - 8) / 2, colour);
+        this.drawCenteredString(font, getText(), x + width / 2, y + (height - 8) / 2, colour);
         
         if (getTooltips().isPresent())
             if (!focused && containsMouse(mouseX, mouseY))
@@ -168,7 +146,7 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
     
     @Override
     protected int getTextureId(boolean boolean_1) {
-        return !visible ? 0 : boolean_1 && enabled ? 2 : 1;
+        return !visible ? 0 : boolean_1 && enabled ? (ConfigManager.getInstance().getConfig().isLighterButtonHover() ? 4 : 3) : 1;
     }
     
     @Override

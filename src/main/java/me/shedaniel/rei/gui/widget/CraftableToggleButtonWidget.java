@@ -36,16 +36,16 @@ public abstract class CraftableToggleButtonWidget extends ButtonWidget {
         GuiLighting.disable();
         super.render(mouseX, mouseY, delta);
         
-        //        GuiLighting.enableForItems();
         this.itemRenderer.zOffset = getBlitOffset();
-        this.itemRenderer.renderGuiItem(new ItemStack(Blocks.CRAFTING_TABLE), getBounds().x + 2, getBounds().y + 2);
+        Rectangle bounds = getBounds();
+        this.itemRenderer.renderGuiItem(new ItemStack(Blocks.CRAFTING_TABLE), bounds.x + 2, bounds.y + 2);
         this.itemRenderer.zOffset = 0.0F;
         GuiLighting.disable();
         MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         int color = ConfigManager.getInstance().isCraftableOnlyEnabled() ? 939579655 : 956235776;
         setBlitOffset(getBlitOffset() + 10);
-        this.fillGradient(getBounds().x, getBounds().y, getBounds().x + getBounds().width, getBounds().y + getBounds().height, color, color);
+        this.fillGradient(bounds.x + 1, bounds.y + 1, bounds.getMaxX() - 1, bounds.getMaxY() - 1, color, color);
         setBlitOffset(0);
     }
     

@@ -16,8 +16,8 @@ import static net.minecraft.util.ActionResult.PASS;
 
 public interface DisplayHelper {
     
+    @SuppressWarnings("deprecation")
     static DisplayHelper getInstance() {
-        //noinspection deprecation
         return RoughlyEnoughItemsCore.getDisplayHelper();
     }
     

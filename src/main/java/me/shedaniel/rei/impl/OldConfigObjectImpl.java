@@ -15,7 +15,7 @@ import me.zeroeightsix.fiber.tree.Node;
 
 @Deprecated
 @Internal
-public class ConfigObjectImpl implements ConfigObject {
+public class OldConfigObjectImpl implements ConfigObject {
     
     public ConfigNode configNode = new ConfigNode();
     
@@ -139,6 +139,13 @@ public class ConfigObjectImpl implements ConfigObject {
             .withName("disableRecipeBook")
             .build();
     
+    private ConfigValue<Boolean> lighterButtonHover = ConfigValue.builder(Boolean.class)
+            .withParent(appearance)
+            .withDefaultValue(true)
+            .withComment("Declares whether REI should lighten the button if hovered.")
+            .withName("lighterButtonHover")
+            .build();
+    
     private ConfigValue<Boolean> fixTabCloseContainer = ConfigValue.builder(Boolean.class)
             .withParent(modules)
             .withDefaultValue(false)
@@ -192,7 +199,13 @@ public class ConfigObjectImpl implements ConfigObject {
             .withName("scrollingEntryListWidget")
             .build();
     
-    public ConfigObjectImpl() throws FiberException {
+    private ConfigValue<Boolean> overlayVisible = ConfigValue.builder(Boolean.class)
+            .withParent(general)
+            .withDefaultValue(true)
+            .withName("overlayVisible")
+            .build();
+    
+    public OldConfigObjectImpl() throws FiberException {
     
     }
     
@@ -204,6 +217,31 @@ public class ConfigObjectImpl implements ConfigObject {
     @Override
     public ConfigNode getConfigNode() {
         return configNode;
+    }
+    
+    @Override
+    public ConfigValue<Boolean> getOverlayVisibleNode() {
+        return overlayVisible;
+    }
+    
+    @Override
+    public boolean isLighterButtonHover() {
+        return this.lighterButtonHover.getValue();
+    }
+    
+    @Override
+    public void setLighterButtonHover(boolean lighterButtonHover) {
+        this.lighterButtonHover.setValue(lighterButtonHover);
+    }
+    
+    @Override
+    public boolean isOverlayVisible() {
+        return this.overlayVisible.getValue();
+    }
+    
+    @Override
+    public void setOverlayVisible(boolean overlayVisible) {
+        this.overlayVisible.setValue(overlayVisible);
     }
     
     @Override

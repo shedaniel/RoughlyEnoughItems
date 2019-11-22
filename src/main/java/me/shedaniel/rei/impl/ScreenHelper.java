@@ -13,6 +13,7 @@ import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.OverlaySearchField;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
+import me.zeroeightsix.fiber.exception.FiberException;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.event.client.ClientTickCallback;
 import net.minecraft.client.MinecraftClient;
@@ -23,6 +24,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import org.apache.logging.log4j.util.TriConsumer;
 
+import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -35,7 +37,6 @@ public class ScreenHelper implements ClientModInitializer {
     @Deprecated
     public static OverlaySearchField searchField;
     public static List<ItemStack> inventoryStacks = Lists.newArrayList();
-    private static boolean overlayVisible = true;
     private static ContainerScreenOverlay overlay;
     private static AbstractContainerScreen<?> lastContainerScreen = null;
     private static LinkedHashSet<Screen> lastRecipeScreen = Sets.newLinkedHashSetWithExpectedSize(5);
@@ -71,11 +72,16 @@ public class ScreenHelper implements ClientModInitializer {
     }
     
     public static boolean isOverlayVisible() {
-        return overlayVisible;
+        return ConfigManager.getInstance().getConfig().isOverlayVisible();
     }
     
     public static void toggleOverlayVisible() {
-        overlayVisible = !overlayVisible;
+        ConfigManager.getInstance().getConfig().setOverlayVisible(!ConfigManager.getInstance().getConfig().isOverlayVisible());
+        try {
+            ConfigManager.getInstance().saveConfig();
+        } catch (IOException | FiberException e) {
+            e.printStackTrace();
+        }
     }
     
     public static Optional<ContainerScreenOverlay> getOptionalOverlay() {

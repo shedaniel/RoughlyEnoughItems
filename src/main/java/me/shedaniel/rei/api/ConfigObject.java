@@ -10,6 +10,7 @@ import me.shedaniel.rei.gui.config.ItemListOrdering;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.gui.config.SearchFieldLocation;
 import me.zeroeightsix.fiber.tree.ConfigNode;
+import me.zeroeightsix.fiber.tree.ConfigValue;
 import me.zeroeightsix.fiber.tree.Node;
 
 public interface ConfigObject {
@@ -17,6 +18,16 @@ public interface ConfigObject {
     Node getGeneral();
     
     ConfigNode getConfigNode();
+    
+    ConfigValue<Boolean> getOverlayVisibleNode();
+    
+    boolean isLighterButtonHover();
+    
+    void setLighterButtonHover(boolean lighterButtonHover);
+    
+    boolean isOverlayVisible();
+    
+    void setOverlayVisible(boolean overlayVisible);
     
     boolean isCheating();
     

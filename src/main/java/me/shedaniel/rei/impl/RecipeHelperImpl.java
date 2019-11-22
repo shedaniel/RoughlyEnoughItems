@@ -52,7 +52,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     private final AtomicInteger recipeCount = new AtomicInteger();
     private final Map<Identifier, List<RecipeDisplay>> recipeCategoryListMap = Maps.newHashMap();
     private final List<RecipeCategory<?>> categories = Lists.newArrayList();
-    private final Map<Identifier, ButtonAreaSupplier> speedCraftAreaSupplierMap = Maps.newHashMap();
+    private final Map<Identifier, ButtonAreaSupplier> autoCraftAreaSupplierMap = Maps.newHashMap();
     private final Map<Identifier, List<List<EntryStack>>> categoryWorkingStations = Maps.newHashMap();
     private final List<DisplayVisibilityHandler> displayVisibilityHandlers = Lists.newArrayList();
     private final List<LiveRecipeGenerator<RecipeDisplay>> liveRecipeGenerators = Lists.newArrayList();
@@ -202,24 +202,18 @@ public class RecipeHelperImpl implements RecipeHelper {
     
     @Override
     public Optional<ButtonAreaSupplier> getAutoCraftButtonArea(RecipeCategory<?> category) {
-        if (!speedCraftAreaSupplierMap.containsKey(category.getIdentifier()))
+        if (!autoCraftAreaSupplierMap.containsKey(category.getIdentifier()))
             return Optional.ofNullable(bounds -> new Rectangle(bounds.getMaxX() - 16, bounds.getMaxY() - 16, 10, 10));
-        return Optional.ofNullable(speedCraftAreaSupplierMap.get(category.getIdentifier()));
+        return Optional.ofNullable(autoCraftAreaSupplierMap.get(category.getIdentifier()));
     }
     
     @Override
     public void registerAutoCraftButtonArea(Identifier category, ButtonAreaSupplier rectangle) {
         if (rectangle == null) {
-            if (speedCraftAreaSupplierMap.containsKey(category))
-                speedCraftAreaSupplierMap.remove(category);
+            if (autoCraftAreaSupplierMap.containsKey(category))
+                autoCraftAreaSupplierMap.remove(category);
         } else
-            speedCraftAreaSupplierMap.put(category, rectangle);
-    }
-    
-    @SuppressWarnings("deprecation")
-    @Override
-    public void registerDefaultSpeedCraftButtonArea(Identifier category) {
-        registerAutoCraftButtonArea(category, bounds -> new Rectangle(bounds.getMaxX() - 16, bounds.getMaxY() - 16, 10, 10));
+            autoCraftAreaSupplierMap.put(category, rectangle);
     }
     
     @SuppressWarnings("deprecation")
@@ -229,7 +223,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         this.recipeManager = recipeManager;
         this.recipeCategoryListMap.clear();
         this.categories.clear();
-        this.speedCraftAreaSupplierMap.clear();
+        this.autoCraftAreaSupplierMap.clear();
         this.screenClickAreas.clear();
         this.categoryWorkingStations.clear();
         this.recipeFunctions.clear();

@@ -69,9 +69,4 @@ public class DefaultBrewingCategory implements RecipeCategory<DefaultBrewingDisp
         return widgets;
     }
     
-    @Override
-    public boolean checkTags() {
-        return true;
-    }
-    
 }

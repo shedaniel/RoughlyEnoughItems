@@ -38,7 +38,9 @@ public class ClothScreenRegistry {
             } catch (IOException | FiberException e) {
                 e.printStackTrace();
             }
-        }).registerNodeEntryFunction(ItemListOrderingConfig.class, o -> {
+        }).hideTreeEntry(
+                configManager.getConfig().getOverlayVisibleNode()
+        ).registerNodeEntryFunction(ItemListOrderingConfig.class, o -> {
             ConfigValue<ItemListOrderingConfig> configValue = (ConfigValue<ItemListOrderingConfig>) o;
             return configEntryBuilder.startEnumSelector("config.roughlyenoughitems." + configValue.getName(), ItemListOrderingConfig.class, configValue.getValue())
                     .setDefaultValue(configValue.getDefaultValue())
