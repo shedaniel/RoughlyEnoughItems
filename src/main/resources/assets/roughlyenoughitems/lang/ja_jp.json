@@ -115,6 +115,7 @@
   "config.roughlyenoughitems.disableRecipeBook.boolean.true": "無効",
   "config.roughlyenoughitems.disableRecipeBook.boolean.false": "有効",
   "config.roughlyenoughitems.fixTabCloseContainer": "Fix Vanilla Tab Container (When Recipe Book Disabled):",
+  "config.roughlyenoughitems.lighterButtonHover": "Lighter Button Hover:",
   "config.roughlyenoughitems.enableCraftableOnlyButton": "作成可能なフィルタ:",
   "config.roughlyenoughitems.enableCraftableOnlyButton.boolean.true": "有効",
   "config.roughlyenoughitems.enableCraftableOnlyButton.boolean.false": "無効",

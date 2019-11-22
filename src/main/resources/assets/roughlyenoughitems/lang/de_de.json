@@ -115,6 +115,7 @@
   "config.roughlyenoughitems.disableRecipeBook.boolean.true": "Deaktiviert",
   "config.roughlyenoughitems.disableRecipeBook.boolean.false": "Aktiviert",
   "config.roughlyenoughitems.fixTabCloseContainer": "Korrigier den Vanilla Tab Container (wenn das Rezeptbuch deaktiviert ist):",
+  "config.roughlyenoughitems.lighterButtonHover": "Lighter Button Hover:",
   "config.roughlyenoughitems.enableCraftableOnlyButton": "Filter für Herstellbare Gegenstände:",
   "config.roughlyenoughitems.enableCraftableOnlyButton.boolean.true": "Aktiviert",
   "config.roughlyenoughitems.enableCraftableOnlyButton.boolean.false": "Deaktiviert",
