@@ -57,10 +57,6 @@ dependencies {
     modImplementation("me.shedaniel.cloth:config-2:${cloth_config_version}") {
         transitive = false
     }
-    modApi("me.shedaniel.cloth:fiber2cloth:1.2.1") {
-        transitive = false
-    }
-    modApi "me.zeroeightsix:fiber:0.6.0-7"
     modApi("me.sargunvohra.mcmods:autoconfig1u:${project.autoconfig1u}")
     if (includeDep) {
         include("me.shedaniel.cloth:cloth-events:${cloth_events_version}") {
@@ -69,13 +65,9 @@ dependencies {
         include("me.shedaniel.cloth:config-2:${cloth_config_version}") {
             transitive = false
         }
-        include("me.shedaniel.cloth:fiber2cloth:1.2.1") {
-            transitive = false
-        }
         include("me.sargunvohra.mcmods:autoconfig1u:${project.autoconfig1u}") {
             transitive = false
         }
-        include "me.zeroeightsix:fiber:0.6.0-7"
     }
     modImplementation "io.github.prospector:modmenu:${modmenu_version}"
     compile "org.lwjgl:lwjgl-jemalloc:3.2.1"

@@ -16,7 +16,6 @@ import me.shedaniel.rei.gui.PreRecipeViewingScreen;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
-import me.zeroeightsix.fiber.exception.FiberException;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
@@ -38,7 +37,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.PacketByteBuf;
 import net.minecraft.util.registry.Registry;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -138,11 +136,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     @Override
     public void setCheating(boolean cheating) {
         ConfigManager.getInstance().getConfig().setCheating(cheating);
-        try {
-            ConfigManager.getInstance().saveConfig();
-        } catch (IOException | FiberException e) {
-            e.printStackTrace();
-        }
+        ConfigManager.getInstance().saveConfig();
     }
     
     @Override

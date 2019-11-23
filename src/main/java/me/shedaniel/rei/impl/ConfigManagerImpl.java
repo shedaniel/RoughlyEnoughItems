@@ -5,87 +5,40 @@
 
 package me.shedaniel.rei.impl;
 
+import me.sargunvohra.mcmods.autoconfig1u.AutoConfig;
+import me.sargunvohra.mcmods.autoconfig1u.gui.ConfigScreenProvider;
+import me.sargunvohra.mcmods.autoconfig1u.serializer.JanksonConfigSerializer;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.annotations.Internal;
-import me.zeroeightsix.fiber.JanksonSettings;
-import me.zeroeightsix.fiber.exception.FiberException;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.LiteralText;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.List;
 
 @Deprecated
 @Internal
 public class ConfigManagerImpl implements ConfigManager {
     
-    private final File configFile;
-    private ConfigObject config;
     private boolean craftableOnly;
     
     public ConfigManagerImpl() {
-        this.configFile = new File(FabricLoader.getInstance().getConfigDirectory(), "roughlyenoughitems/config.json5");
         this.craftableOnly = false;
-        try {
-            loadConfig();
-            RoughlyEnoughItemsCore.LOGGER.info("[REI] Config is loaded.");
-        } catch (IOException | FiberException e) {
-            e.printStackTrace();
-        }
+        AutoConfig.register(ConfigObjectImpl.class, JanksonConfigSerializer::new);
+        RoughlyEnoughItemsCore.LOGGER.info("[REI] Config is loaded.");
     }
     
     @Override
-    public void saveConfig() throws IOException, FiberException {
-        configFile.getParentFile().mkdirs();
-        if (!configFile.exists() && !configFile.createNewFile()) {
-            RoughlyEnoughItemsCore.LOGGER.error("[REI] Failed to save config! Overwriting with default config.");
-            config = new OldConfigObjectImpl();
-            return;
-        }
-        try {
-            new JanksonSettings().serialize(config.getConfigNode(), Files.newOutputStream(configFile.toPath()), false);
-        } catch (Exception e) {
-            e.printStackTrace();
-            RoughlyEnoughItemsCore.LOGGER.error("[REI] Failed to save config! Overwriting with default config.");
-            config = new OldConfigObjectImpl();
-            return;
-        }
-    }
-    
-    @Override
-    public void loadConfig() throws IOException, FiberException {
-        configFile.getParentFile().mkdirs();
-        if (!configFile.exists() || !configFile.canRead()) {
-            RoughlyEnoughItemsCore.LOGGER.warn("[REI] Config not found! Creating one.");
-            config = new OldConfigObjectImpl();
-            saveConfig();
-            return;
-        }
-        boolean failed = false;
-        try {
-            config = new OldConfigObjectImpl();
-            new JanksonSettings().deserialize(config.getConfigNode(), Files.newInputStream(configFile.toPath()));
-        } catch (Exception e) {
-            e.printStackTrace();
-            failed = true;
-        }
-        if (failed || config == null) {
-            RoughlyEnoughItemsCore.LOGGER.error("[REI] Failed to load config! Overwriting with default config.");
-            config = new OldConfigObjectImpl();
-        }
-        saveConfig();
+    public void saveConfig() {
+        ((me.sargunvohra.mcmods.autoconfig1u.ConfigManager<ConfigObjectImpl>) AutoConfig.getConfigHolder(ConfigObjectImpl.class)).save();
     }
     
     @Override
     public ConfigObject getConfig() {
-        return config;
+        return AutoConfig.getConfigHolder(ConfigObjectImpl.class).getConfig();
     }
     
     @Override
@@ -105,12 +58,14 @@ public class ConfigManagerImpl implements ConfigManager {
     
     @Override
     public Screen getConfigScreen(Screen parent) {
-        if (FabricLoader.getInstance().isModLoaded("cloth-config2")) {
-            try {
-                return Screen.class.cast(Class.forName("me.shedaniel.rei.utils.ClothScreenRegistry").getDeclaredMethod("getConfigScreen", Screen.class).invoke(null, parent));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        try {
+            ConfigScreenProvider<ConfigObjectImpl> provider = (ConfigScreenProvider<ConfigObjectImpl>) AutoConfig.getConfigScreen(ConfigObjectImpl.class, parent);
+            provider.setI13nFunction(manager -> "config.roughlyenoughitems");
+            provider.setOptionFunction((baseI13n, field) -> field.isAnnotationPresent(ConfigObject.DontApplyFieldName.class) ? baseI13n : String.format("%s.%s", baseI13n, field.getName()));
+            provider.setCategoryFunction((baseI13n, categoryName) -> String.format("%s.%s", baseI13n, categoryName));
+            return provider.get();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return new Screen(new LiteralText("")) {
             @Override

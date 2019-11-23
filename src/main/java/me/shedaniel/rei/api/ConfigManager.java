@@ -6,7 +6,6 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.zeroeightsix.fiber.exception.FiberException;
 import net.minecraft.client.gui.screen.Screen;
 
 import java.io.IOException;
@@ -20,17 +19,8 @@ public interface ConfigManager {
     
     /**
      * Saves the config.
-     *
-     * @throws IOException when error
      */
-    void saveConfig() throws IOException, FiberException;
-    
-    /**
-     * Loads the config from the json file, creates the file if not found.
-     *
-     * @throws IOException when error
-     */
-    void loadConfig() throws IOException, FiberException;
+    void saveConfig();
     
     /**
      * Gets the config instance

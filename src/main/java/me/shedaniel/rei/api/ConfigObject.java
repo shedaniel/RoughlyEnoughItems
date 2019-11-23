@@ -9,17 +9,13 @@ import me.shedaniel.rei.gui.config.ItemCheatingMode;
 import me.shedaniel.rei.gui.config.ItemListOrdering;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.gui.config.SearchFieldLocation;
-import me.zeroeightsix.fiber.tree.ConfigNode;
-import me.zeroeightsix.fiber.tree.ConfigValue;
-import me.zeroeightsix.fiber.tree.Node;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 public interface ConfigObject {
-    
-    Node getGeneral();
-    
-    ConfigNode getConfigNode();
-    
-    ConfigValue<Boolean> getOverlayVisibleNode();
     
     boolean isLighterButtonHover();
     
@@ -82,5 +78,10 @@ public interface ConfigObject {
     boolean doesVillagerScreenHavePermanentScrollBar();
     
     boolean doesRegisterRecipesInAnotherThread();
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD})
+    public @interface DontApplyFieldName {
+    }
     
 }
