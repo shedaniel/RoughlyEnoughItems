@@ -467,13 +467,13 @@ public class ContainerScreenOverlay extends Widget {
             ScreenHelper.getSearchField().laterRender(mouseX, mouseY, delta);
             if (toggleButtonWidget != null)
                 toggleButtonWidget.lateRender(mouseX, mouseY, delta);
-            Screen currentScreen = MinecraftClient.getInstance().currentScreen;
-            if (!(currentScreen instanceof RecipeViewingScreen) || !((RecipeViewingScreen) currentScreen).choosePageActivated)
-                for (QueuedTooltip queuedTooltip : QUEUED_TOOLTIPS) {
-                    if (queuedTooltip != null)
-                        renderTooltip(queuedTooltip);
-                }
         }
+        Screen currentScreen = MinecraftClient.getInstance().currentScreen;
+        if (!(currentScreen instanceof RecipeViewingScreen) || !((RecipeViewingScreen) currentScreen).choosePageActivated)
+            for (QueuedTooltip queuedTooltip : QUEUED_TOOLTIPS) {
+                if (queuedTooltip != null)
+                    renderTooltip(queuedTooltip);
+            }
         QUEUED_TOOLTIPS.clear();
     }
     
