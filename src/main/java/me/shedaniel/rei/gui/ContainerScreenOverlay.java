@@ -164,7 +164,7 @@ public class ContainerScreenOverlay extends Widget {
         
         if (setPage)
             page = MathHelper.clamp(page, 0, getTotalPage());
-    
+        
         widgets.add(new ButtonWidget(new Rectangle(ConfigManager.getInstance().getConfig().isLeftHandSidePanel() ? window.getScaledWidth() - 30 : 10, 10, 20, 20), "") {
             @Override
             public void onPressed() {
@@ -182,9 +182,9 @@ public class ContainerScreenOverlay extends Widget {
                 Rectangle bounds = getBounds();
                 if (ClientHelper.getInstance().isCheating() && RoughlyEnoughItemsCore.hasOperatorPermission()) {
                     if (RoughlyEnoughItemsCore.hasPermissionToUsePackets())
-                        fill(bounds.x + 1, bounds.y+ 1, bounds.getMaxX() - 1, bounds.getMaxY() - 1, 721354752);
+                        fill(bounds.x + 1, bounds.y + 1, bounds.getMaxX() - 1, bounds.getMaxY() - 1, 721354752);
                     else
-                        fill(bounds.x+ 1, bounds.y+ 1, bounds.getMaxX() - 1, bounds.getMaxY() - 1, 1476440063);
+                        fill(bounds.x + 1, bounds.y + 1, bounds.getMaxX() - 1, bounds.getMaxY() - 1, 1476440063);
                 }
                 MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);

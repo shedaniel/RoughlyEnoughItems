@@ -104,9 +104,9 @@ public abstract class RecipeEntry extends DrawableHelper implements EntryStack {
         return this;
     }
     
+    @SuppressWarnings("deprecation")
     @Override
     public <T> ObjectHolder<T> getSetting(Settings<T> settings) {
-        //noinspection deprecation
         return new ObjectHolderImpl<>(settings.getDefaultValue());
     }
     
