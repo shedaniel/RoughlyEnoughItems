@@ -10,7 +10,6 @@ import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.gui.widget.EntryListWidget;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
@@ -152,7 +151,7 @@ public class FluidEntryStack extends AbstractEntryStack {
     public QueuedTooltip getTooltip(int mouseX, int mouseY) {
         if (!getSetting(Settings.TOOLTIP_ENABLED).value().get() || isEmpty())
             return null;
-        List<String> toolTip = Lists.newArrayList(EntryListWidget.tryGetEntryStackName(this));
+        List<String> toolTip = Lists.newArrayList(SearchArgument.tryGetEntryStackName(this));
         if (amount >= 0) {
             String amountTooltip = getSetting(Settings.Fluid.AMOUNT_TOOLTIP).value().apply(this);
             if (amountTooltip != null) for (String s : amountTooltip.split("\n")) toolTip.add(s);

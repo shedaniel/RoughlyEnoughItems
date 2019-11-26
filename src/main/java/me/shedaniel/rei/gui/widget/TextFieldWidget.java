@@ -390,7 +390,7 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
     public void renderBorder() {
         if (this.hasBorder()) {
             if (containsMouse(PointHelper.fromMouse()) || focused)
-                fill(this.bounds.x - 1, this.bounds.y - 1, this.bounds.x + this.bounds.width + 1, this.bounds.y + this.bounds.height + 1, ScreenHelper.isDarkModeEnabled() ? 0xffffbb4d : -1);
+                fill(this.bounds.x - 1, this.bounds.y - 1, this.bounds.x + this.bounds.width + 1, this.bounds.y + this.bounds.height + 1, ScreenHelper.isDarkModeEnabled() ? -17587 : -1);
             else
                 fill(this.bounds.x - 1, this.bounds.y - 1, this.bounds.x + this.bounds.width + 1, this.bounds.y + this.bounds.height + 1, -6250336);
             fill(this.bounds.x, this.bounds.y, this.bounds.x + this.bounds.width, this.bounds.y + this.bounds.height, -16777216);

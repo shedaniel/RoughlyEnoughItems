@@ -7,7 +7,9 @@ package me.shedaniel.rei.impl;
 
 import me.sargunvohra.mcmods.autoconfig1u.AutoConfig;
 import me.sargunvohra.mcmods.autoconfig1u.gui.ConfigScreenProvider;
+import me.sargunvohra.mcmods.autoconfig1u.gui.registry.GuiRegistry;
 import me.sargunvohra.mcmods.autoconfig1u.serializer.JanksonConfigSerializer;
+import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.api.ConfigObject;
@@ -17,7 +19,11 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.LiteralText;
 
+import java.util.Collections;
 import java.util.List;
+
+import static me.sargunvohra.mcmods.autoconfig1u.util.Utils.getUnsafely;
+import static me.sargunvohra.mcmods.autoconfig1u.util.Utils.setUnsafely;
 
 @Deprecated
 @Internal
@@ -28,6 +34,14 @@ public class ConfigManagerImpl implements ConfigManager {
     public ConfigManagerImpl() {
         this.craftableOnly = false;
         AutoConfig.register(ConfigObjectImpl.class, JanksonConfigSerializer::new);
+        GuiRegistry guiRegistry = AutoConfig.getGuiRegistry(ConfigObjectImpl.class);
+        //noinspection rawtypes
+        guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> Collections.singletonList(
+                ConfigEntryBuilder.create().startEnumSelector(i13n, (Class) field.getType(), getUnsafely(field, config, null))
+                        .setDefaultValue(() -> getUnsafely(field, defaults))
+                        .setSaveConsumer(newValue -> setUnsafely(field, config, newValue))
+                        .build()
+        ), field -> field.getType().isEnum(), ConfigObject.UseEnumSelectorInstead.class);
         RoughlyEnoughItemsCore.LOGGER.info("[REI] Config is loaded.");
     }
     

@@ -6,6 +6,7 @@
 package me.shedaniel.rei.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
@@ -27,10 +28,11 @@ public class OverlaySearchField extends TextFieldWidget {
         setMaxLength(10000);
     }
     
+    @SuppressWarnings("deprecation")
     public void laterRender(int int_1, int int_2, float float_1) {
         GuiLighting.disable();
         RenderSystem.disableDepthTest();
-        setEditableColor(ContainerScreenOverlay.getEntryListWidget().children().isEmpty() && !getText().isEmpty() ? 16733525 : isSearching ? -852212 : 14737632);
+        setEditableColor(ContainerScreenOverlay.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty() ? 16733525 : isSearching ? -852212 : (containsMouse(PointHelper.fromMouse()) || isFocused()) ? (ScreenHelper.isDarkModeEnabled() ? -17587 : -1) : -6250336);
         setSuggestion(!isFocused() && getText().isEmpty() ? I18n.translate("text.rei.search.field.suggestion") : null);
         super.render(int_1, int_2, float_1);
         RenderSystem.enableDepthTest();

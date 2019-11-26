@@ -9,8 +9,7 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
-import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget.Interpolation;
-import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget.Precision;
+import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
@@ -20,516 +19,432 @@ import me.shedaniel.rei.gui.config.ItemListOrdering;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.SearchArgument;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.item.TooltipContext;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.registry.Registry;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
+import javax.annotation.Nullable;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
-@SuppressWarnings({"deprecation", "rawtypes"})
-public class EntryListWidget extends Widget {
+public class EntryListWidget extends WidgetWithBounds {
     
-    private static final Supplier<Boolean> RENDER_EXTRA_CONFIG = () -> ConfigManager.getInstance().getConfig().doesRenderEntryExtraOverlay();
     private static final String SPACE = " ", EMPTY = "";
-    private static final Comparator<EntryStack> ASCENDING_COMPARATOR;
-    private static List<Item> searchBlacklisted = Lists.newArrayList();
-    private static float scroll;
-    private static float target;
-    private static long start;
-    private static long duration;
-    private static float maxScroll;
-    private static float scrollBarAlpha = 0;
-    private static float scrollBarAlphaFuture = 0;
-    private static long scrollBarAlphaFutureTime = -1;
-    private static boolean draggingScrollBar = false;
-    
-    static {
-        ASCENDING_COMPARATOR = (entry, entry1) -> {
-            if (ConfigManager.getInstance().getConfig().getItemListOrdering().equals(ItemListOrdering.name))
-                return tryGetEntryStackName(entry).compareToIgnoreCase(tryGetEntryStackName(entry1));
-            if (ConfigManager.getInstance().getConfig().getItemListOrdering().equals(ItemListOrdering.item_groups)) {
-                if (entry.getType() == EntryStack.Type.ITEM && entry1.getType() == EntryStack.Type.ITEM) {
-                    ItemStack stack0 = entry.getItemStack();
-                    ItemStack stack1 = entry1.getItemStack();
-                    List<ItemGroup> itemGroups = Arrays.asList(ItemGroup.GROUPS);
-                    return itemGroups.indexOf(stack0.getItem().getGroup()) - itemGroups.indexOf(stack1.getItem().getGroup());
-                }
-            }
-            return 0;
-        };
-    }
-    
-    private final List<SearchArgument[]> lastSearchArgument;
-    private List<EntryStack> currentDisplayed;
-    private List<Slot> widgets;
-    private int width, height, page;
-    private Rectangle rectangle, listArea;
-    
-    public EntryListWidget(int page) {
-        this.currentDisplayed = Lists.newArrayList();
-        this.width = 0;
-        this.height = 0;
-        this.page = page;
-        this.lastSearchArgument = Lists.newArrayList();
-    }
-    
-    public static List<String> tryGetItemStackToolTip(ItemStack itemStack, boolean careAboutAdvanced) {
-        if (!searchBlacklisted.contains(itemStack.getItem()))
-            try {
-                return CollectionUtils.map(itemStack.getTooltip(MinecraftClient.getInstance().player, MinecraftClient.getInstance().options.advancedItemTooltips && careAboutAdvanced ? TooltipContext.Default.ADVANCED : TooltipContext.Default.NORMAL), Text::asFormattedString);
-            } catch (Throwable e) {
-                e.printStackTrace();
-                searchBlacklisted.add(itemStack.getItem());
-            }
-        return Collections.singletonList(tryGetItemStackName(itemStack));
-    }
-    
-    public static String tryGetEntryStackName(EntryStack stack) {
-        if (stack.getType() == EntryStack.Type.ITEM)
-            return tryGetItemStackName(stack.getItemStack());
-        else if (stack.getType() == EntryStack.Type.FLUID)
-            return tryGetFluidName(stack.getFluid());
-        return "";
-    }
-    
-    public static String tryGetFluidName(Fluid fluid) {
-        Identifier id = Registry.FLUID.getId(fluid);
-        if (I18n.hasTranslation("block." + id.toString().replaceFirst(":", ".")))
-            return I18n.translate("block." + id.toString().replaceFirst(":", "."));
-        return CollectionUtils.mapAndJoinToString(id.getPath().split("_"), StringUtils::capitalize, " ");
-    }
-    
-    public static String tryGetItemStackName(ItemStack stack) {
-        if (!searchBlacklisted.contains(stack.getItem()))
-            try {
-                return stack.getName().asFormattedString();
-            } catch (Throwable e) {
-                e.printStackTrace();
-                searchBlacklisted.add(stack.getItem());
-            }
-        try {
-            return I18n.translate("item." + Registry.ITEM.getId(stack.getItem()).toString().replace(":", "."));
-        } catch (Throwable e) {
-            e.printStackTrace();
+    private static final Supplier<Boolean> RENDER_EXTRA_CONFIG = ConfigManager.getInstance().getConfig()::doesRenderEntryExtraOverlay;
+    @SuppressWarnings("deprecation")
+    private static final Comparator<? super EntryStack> ENTRY_NAME_COMPARER = Comparator.comparing(SearchArgument::tryGetEntryStackName);
+    private static final Comparator<? super EntryStack> ENTRY_GROUP_COMPARER = Comparator.comparingInt(stack -> {
+        if (stack.getType() == EntryStack.Type.ITEM) {
+            ItemGroup group = stack.getItem().getGroup();
+            if (group != null) return group.getIndex();
         }
-        return "ERROR";
-    }
+        return Integer.MAX_VALUE;
+    });
+    private static int page;
+    protected double target;
+    protected double scroll;
+    protected long start;
+    protected long duration;
+    private Rectangle bounds, innerBounds;
+    private List<EntryStack> allStacks = null;
+    private List<EntryListEntry> entries = Collections.emptyList();
+    @SuppressWarnings("deprecation")
+    private List<SearchArgument.SearchArguments> lastSearchArguments = Collections.emptyList();
+    private boolean draggingScrollBar = false;
     
-    public static boolean filterEntry(EntryStack entry, List<SearchArgument[]> arguments) {
-        if (arguments.isEmpty())
-            return true;
-        AtomicReference<String> mod = new AtomicReference<>(), tooltips = new AtomicReference<>(), name = new AtomicReference<>();
-        for (SearchArgument[] arguments1 : arguments) {
-            boolean b = true;
-            for (SearchArgument argument : arguments1) {
-                if (argument.getArgumentType() == (SearchArgument.ArgumentType.ALWAYS))
-                    return true;
-                if (argument.getArgumentType() == SearchArgument.ArgumentType.MOD) {
-                    fillMod(entry, mod);
-                    if (mod.get() != null && !mod.get().isEmpty() && argument.getFunction(!argument.isInclude()).apply(mod.get())) {
-                        b = false;
-                        break;
-                    }
-                }
-                if (argument.getArgumentType() == SearchArgument.ArgumentType.TOOLTIP) {
-                    fillTooltip(entry, tooltips);
-                    if (tooltips.get() != null && !tooltips.get().isEmpty() && argument.getFunction(!argument.isInclude()).apply(tooltips.get())) {
-                        b = false;
-                        break;
-                    }
-                }
-                if (argument.getArgumentType() == SearchArgument.ArgumentType.TEXT) {
-                    fillName(entry, name);
-                    if (name.get() != null && !name.get().isEmpty() && argument.getFunction(!argument.isInclude()).apply(name.get())) {
-                        b = false;
-                        break;
-                    }
-                }
-            }
-            if (b)
-                return true;
+    protected final int getMaxScrollPosition() {
+        int candidate = 0;
+        for (EntryListEntry entry : entries) {
+            if (entry.getCurrentEntry().getType() != EntryStack.Type.EMPTY && entry.backupY > candidate)
+                candidate = entry.backupY;
         }
-        return false;
+        return candidate;
     }
     
-    private static AtomicReference<String> fillMod(EntryStack entry, AtomicReference<String> mod) {
-        if (mod.get() == null) {
-            Optional<Identifier> identifier = entry.getIdentifier();
-            if (identifier.isPresent())
-                mod.set(ClientHelper.getInstance().getModFromIdentifier(identifier.get()).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT));
-            else mod.set("");
-        }
-        return mod;
+    protected final int getMaxScroll() {
+        return Math.max(0, this.getMaxScrollPosition() - innerBounds.height);
     }
     
-    private static AtomicReference<String> fillTooltip(EntryStack entry, AtomicReference<String> mod) {
-        if (mod.get() == null)
-            if (entry.getType() == EntryStack.Type.ITEM)
-                mod.set(CollectionUtils.joinToString(tryGetItemStackToolTip(entry.getItemStack(), false), "").replace(SPACE, EMPTY).toLowerCase(Locale.ROOT));
-            else
-                mod.set(tryGetEntryStackName(entry).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT));
-        return mod;
+    protected final double clamp(double v) {
+        return this.clamp(v, 200.0D);
     }
     
-    private static AtomicReference<String> fillName(EntryStack entry, AtomicReference<String> mod) {
-        if (mod.get() == null)
-            mod.set(tryGetEntryStackName(entry).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT));
-        return mod;
+    protected final double clamp(double v, double clampExtension) {
+        return MathHelper.clamp(v, -clampExtension, (double) this.getMaxScroll() + clampExtension);
     }
     
-    public static float getMaxScroll() {
-        return Math.max(maxScroll - ScreenHelper.getLastOverlay().getEntryListWidget().rectangle.height, 0);
-    }
-    
-    public static float getScroll() {
-        return scroll;
-    }
-    
-    public static final float clamp(float v) {
-        return clamp(v, 300f);
-    }
-    
-    public static final float clamp(float v, float clampExtension) {
-        return MathHelper.clamp(v, -clampExtension, getMaxScroll() + clampExtension);
-    }
-    
-    public static void offset(float value, boolean animated) {
+    protected final void offset(double value, boolean animated) {
         scrollTo(target + value, animated);
     }
     
-    public static void scrollTo(float value, boolean animated) {
+    protected final void scrollTo(double value, boolean animated) {
         scrollTo(value, animated, ClothConfigInitializer.getScrollDuration());
     }
     
-    public static void scrollTo(float value, boolean animated, long duration) {
+    protected final void scrollTo(double value, boolean animated, long duration) {
         target = clamp(value);
         
         if (animated) {
             start = System.currentTimeMillis();
-            EntryListWidget.duration = duration;
+            this.duration = duration;
         } else
             scroll = target;
     }
     
-    private static void updatePosition(float delta) {
-        target = clamp(target);
-        if (target < 0) {
-            target -= target * (1 - ClothConfigInitializer.getBounceBackMultiplier()) * delta / 3;
-        } else if (target > getMaxScroll()) {
-            target = (float) ((target - getMaxScroll()) * (1 - (1 - ClothConfigInitializer.getBounceBackMultiplier()) * delta / 3) + getMaxScroll());
-        }
-        if (!Precision.almostEquals(scroll, target, Precision.FLOAT_EPSILON))
-            scroll = (float) Interpolation.expoEase(scroll, target, Math.min((System.currentTimeMillis() - start) / ((double) duration), 1));
-        else
-            scroll = target;
-    }
-    
-    public int getFullTotalSlotsPerPage() {
-        return width * height;
-    }
-    
     @Override
     public boolean mouseScrolled(double double_1, double double_2, double double_3) {
-        if (ConfigManager.getInstance().getConfig().isEntryListWidgetScrolled() && rectangle.contains(double_1, double_2)) {
-            if (scrollBarAlphaFuture == 0)
-                scrollBarAlphaFuture = 1f;
-            if (System.currentTimeMillis() - scrollBarAlphaFutureTime > 300f)
-                scrollBarAlphaFutureTime = System.currentTimeMillis();
-            offset((float) (ClothConfigInitializer.getScrollStep() * -double_3), true);
-            return true;
-        }
-        return super.mouseScrolled(double_1, double_2, double_3);
-    }
-    
-    @Override
-    public void render(int int_1, int int_2, float float_1) {
-        if (ConfigManager.getInstance().getConfig().doesVillagerScreenHavePermanentScrollBar()) {
-            scrollBarAlphaFutureTime = System.currentTimeMillis();
-            scrollBarAlphaFuture = 0;
-            scrollBarAlpha = 1;
-        } else if (scrollBarAlphaFutureTime > 0) {
-            long l = System.currentTimeMillis() - scrollBarAlphaFutureTime;
-            if (l > 300f) {
-                if (scrollBarAlphaFutureTime == 0) {
-                    scrollBarAlpha = scrollBarAlphaFuture;
-                    scrollBarAlphaFutureTime = -1;
-                } else if (l > 2000f && scrollBarAlphaFuture == 1) {
-                    scrollBarAlphaFuture = 0;
-                    scrollBarAlphaFutureTime = System.currentTimeMillis();
-                } else
-                    scrollBarAlpha = scrollBarAlphaFuture;
-            } else {
-                if (scrollBarAlphaFuture == 0)
-                    scrollBarAlpha = Math.min(scrollBarAlpha, 1 - Math.min(1f, l / 300f));
-                else if (scrollBarAlphaFuture == 1)
-                    scrollBarAlpha = Math.max(Math.min(1f, l / 300f), scrollBarAlpha);
-            }
-        }
-        
-        GuiLighting.disable();
-        RenderSystem.pushMatrix();
-        boolean widgetScrolled = ConfigManager.getInstance().getConfig().isEntryListWidgetScrolled();
-        if (!widgetScrolled)
-            scroll = 0;
-        else {
-            updatePosition(float_1);
-            page = 0;
-            ScreenHelper.getLastOverlay().setPage(0);
-            ScissorsHandler.INSTANCE.scissor(rectangle);
-        }
-        widgets.forEach(widget -> {
-            if (widgetScrolled) {
-                widget.getBounds().y = (int) (widget.backupY - scroll);
-                if (widget.getBounds().y <= rectangle.y + rectangle.height && widget.getBounds().getMaxY() >= rectangle.y)
-                    widget.render(int_1, int_2, float_1);
-            } else {
-                widget.render(int_1, int_2, float_1);
-            }
-        });
-        if (widgetScrolled) {
-            double height = getMaxScroll();
-            if (height > rectangle.height) {
-                Tessellator tessellator = Tessellator.getInstance();
-                BufferBuilder buffer = tessellator.getBuffer();
-                double maxScroll = height;
-                int scrollBarHeight = MathHelper.floor((rectangle.height) * (rectangle.height) / maxScroll);
-                scrollBarHeight = MathHelper.clamp(scrollBarHeight, 32, rectangle.height - 8);
-                scrollBarHeight = (int) ((double) scrollBarHeight - Math.min((double) (this.scroll < 0.0D ? (int) (-this.scroll) : (this.scroll > (double) this.getMaxScroll() ? (int) this.scroll - this.getMaxScroll() : 0)), (double) scrollBarHeight * 0.75D));
-                int minY = (int) Math.min(Math.max((int) this.getScroll() * (rectangle.height - scrollBarHeight) / maxScroll + rectangle.y, rectangle.y), rectangle.getMaxY() - scrollBarHeight);
-                int scrollbarPositionMinX = rectangle.getMaxX() - 5, scrollbarPositionMaxX = rectangle.getMaxX();
-                boolean hovered = (new Rectangle(scrollbarPositionMinX, minY, scrollbarPositionMaxX - scrollbarPositionMinX, scrollBarHeight)).contains(PointHelper.fromMouse());
-                float bottomC = (hovered ? .67f : .5f) * (ScreenHelper.isDarkModeEnabled() ? 0.8f : 1f);
-                float topC = (hovered ? .87f : .67f) * (ScreenHelper.isDarkModeEnabled() ? 0.8f : 1f);
-                GuiLighting.disable();
-                RenderSystem.disableTexture();
-                RenderSystem.enableBlend();
-                RenderSystem.disableAlphaTest();
-                RenderSystem.blendFuncSeparate(770, 771, 1, 0);
-                RenderSystem.shadeModel(7425);
-                buffer.begin(7, VertexFormats.POSITION_COLOR);
-                buffer.vertex(scrollbarPositionMinX, minY + scrollBarHeight, 800).color(bottomC, bottomC, bottomC, scrollBarAlpha).next();
-                buffer.vertex(scrollbarPositionMaxX, minY + scrollBarHeight, 800).color(bottomC, bottomC, bottomC, scrollBarAlpha).next();
-                buffer.vertex(scrollbarPositionMaxX, minY, 800).color(bottomC, bottomC, bottomC, scrollBarAlpha).next();
-                buffer.vertex(scrollbarPositionMinX, minY, 800).color(bottomC, bottomC, bottomC, scrollBarAlpha).next();
-                tessellator.draw();
-                buffer.begin(7, VertexFormats.POSITION_COLOR);
-                buffer.vertex(scrollbarPositionMinX, minY + scrollBarHeight - 1, 800).color(topC, topC, topC, scrollBarAlpha).next();
-                buffer.vertex(scrollbarPositionMaxX - 1, minY + scrollBarHeight - 1, 800).color(topC, topC, topC, scrollBarAlpha).next();
-                buffer.vertex(scrollbarPositionMaxX - 1, minY, 800).color(topC, topC, topC, scrollBarAlpha).next();
-                buffer.vertex(scrollbarPositionMinX, minY, 800).color(topC, topC, topC, scrollBarAlpha).next();
-                tessellator.draw();
-                RenderSystem.shadeModel(7424);
-                RenderSystem.disableBlend();
-                RenderSystem.enableAlphaTest();
-                RenderSystem.enableTexture();
-            }
-            ScissorsHandler.INSTANCE.removeLastScissor();
-        }
-        RenderSystem.popMatrix();
-        ClientPlayerEntity player = minecraft.player;
-        if (rectangle.contains(PointHelper.fromMouse()) && ClientHelper.getInstance().isCheating() && !player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
-            ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.delete_items")));
-    }
-    
-    public void updateList(DisplayHelper.DisplayBoundsHandler<?> boundsHandler, Rectangle rectangle, int page, String searchTerm, boolean processSearchTerm) {
-        this.rectangle = rectangle;
-        this.page = page;
-        this.widgets = Lists.newCopyOnWriteArrayList();
-        calculateListSize(rectangle);
-        if (currentDisplayed.isEmpty() || processSearchTerm)
-            currentDisplayed = processSearchTerm(searchTerm, EntryRegistry.getInstance().getStacksList(), CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create));
-        int startX = rectangle.getCenterX() - width * 9;
-        int startY = rectangle.getCenterY() - height * 9;
-        this.listArea = new Rectangle(startX, startY, width * 18, height * 18);
-        int fitSlotsPerPage = getTotalFitSlotsPerPage(startX, startY, listArea);
-        int j = page * fitSlotsPerPage;
-        if (ConfigManager.getInstance().getConfig().isEntryListWidgetScrolled()) {
-            height = Integer.MAX_VALUE;
-            j = 0;
-        }
-        float maxScroll = 0;
-        for (int yy = 0; yy < height; yy++) {
-            for (int xx = 0; xx < width; xx++) {
-                int x = startX + xx * 18, y = startY + yy * 18;
-                if (!canBeFit(x, y, listArea))
-                    continue;
-                j++;
-                if (j > currentDisplayed.size())
-                    break;
-                final EntryStack stack = currentDisplayed.get(j - 1).copy()
-                        .setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE)
-                        .setting(EntryStack.Settings.Item.RENDER_OVERLAY, RENDER_EXTRA_CONFIG);
-                maxScroll = y + 18;
-                widgets.add((Slot) new Slot(xx, yy, x, y).entry(stack).noBackground());
-            }
-            if (j > currentDisplayed.size())
-                break;
-        }
-        EntryListWidget.maxScroll = Math.max(maxScroll - 18, 0);
-    }
-    
-    public int getTotalPage() {
-        if (ConfigManager.getInstance().getConfig().isEntryListWidgetScrolled())
-            return 1;
-        int fitSlotsPerPage = getTotalFitSlotsPerPage(listArea.x, listArea.y, listArea);
-        if (fitSlotsPerPage > 0)
-            return MathHelper.ceil(getCurrentDisplayed().size() / fitSlotsPerPage);
-        return 0;
-    }
-    
-    public int getTotalFitSlotsPerPage(int startX, int startY, Rectangle listArea) {
-        int slots = 0;
-        for (int x = 0; x < width; x++)
-            for (int y = 0; y < height; y++)
-                if (canBeFit(startX + x * 18, startY + y * 18, listArea))
-                    slots++;
-        return slots;
-    }
-    
-    public boolean canBeFit(int left, int top, Rectangle listArea) {
-        for (DisplayHelper.DisplayBoundsHandler sortedBoundsHandler : DisplayHelper.getInstance().getSortedBoundsHandlers(minecraft.currentScreen.getClass())) {
-            ActionResult fit = sortedBoundsHandler.canItemSlotWidgetFit(!ConfigManager.getInstance().getConfig().isLeftHandSidePanel(), left, top, minecraft.currentScreen, listArea);
-            if (fit != ActionResult.PASS)
-                return fit == ActionResult.SUCCESS;
-        }
+        offset(ClothConfigInitializer.getScrollStep() * -double_3, true);
         return true;
     }
     
     @Override
+    public Rectangle getBounds() {
+        return bounds;
+    }
+    
+    public int getPage() {
+        return page;
+    }
+    
+    public void setPage(int page) {
+        this.page = page;
+    }
+    
+    public void previousPage() {
+        this.page--;
+    }
+    
+    public void nextPage() {
+        this.page++;
+    }
+    
+    public int getTotalPages() {
+        if (ConfigManager.getInstance().getConfig().isEntryListWidgetScrolled()) return 1;
+        return MathHelper.ceil(allStacks.size() / (float) entries.size());
+    }
+    
+    @Override
+    public void render(int mouseX, int mouseY, float delta) {
+        if (ConfigManager.getInstance().getConfig().isEntryListWidgetScrolled()) {
+            for (EntryListEntry entry : entries) entry.clearStacks();
+            int nextIndex = 0;
+            for (int i = 0; i < allStacks.size(); i++) {
+                EntryStack stack = allStacks.get(i);
+                while (true) {
+                    EntryListEntry entry = entries.get(nextIndex);
+                    entry.getBounds().y = (int) (entry.backupY - scroll);
+                    if (notSteppingOnExclusionZones(entry.getBounds().x, entry.getBounds().y, innerBounds)) {
+                        entry.entry(stack);
+                        nextIndex++;
+                        break;
+                    } else {
+                        nextIndex++;
+                    }
+                }
+            }
+            updatePosition(delta);
+            ScissorsHandler.INSTANCE.scissor(bounds);
+            for (EntryListEntry widget : entries) {
+                if (widget.getBounds().getMaxY() >= bounds.y && widget.getBounds().y <= bounds.getMaxY())
+                    widget.render(mouseX, mouseY, delta);
+            }
+            ScissorsHandler.INSTANCE.removeLastScissor();
+            renderScrollbar();
+        } else {
+            for (Widget widget : entries) {
+                widget.render(mouseX, mouseY, delta);
+            }
+        }
+    }
+    
+    private int getScrollbarMinX() {
+        if (ConfigManager.getInstance().getConfig().isLeftHandSidePanel())
+            return bounds.x + 1;
+        return bounds.getMaxX() - 7;
+    }
+    
+    @Override
     public boolean mouseDragged(double mouseX, double mouseY, int int_1, double double_3, double double_4) {
-        if (int_1 == 0 && scrollBarAlpha > 0 && draggingScrollBar) {
-            float height = maxScroll;
-            int actualHeight = rectangle.height;
-            if (height > actualHeight && mouseY >= rectangle.y && mouseY <= rectangle.getMaxY()) {
+        if (int_1 == 0 && draggingScrollBar) {
+            float height = getMaxScrollPosition();
+            int actualHeight = innerBounds.height;
+            if (height > actualHeight && mouseY >= innerBounds.y && mouseY <= innerBounds.getMaxY()) {
                 double double_5 = (double) Math.max(1, this.getMaxScroll());
-                int int_2 = rectangle.height;
-                int int_3 = MathHelper.clamp((int) ((float) (int_2 * int_2) / (float) maxScroll), 32, int_2 - 8);
+                int int_2 = innerBounds.height;
+                int int_3 = MathHelper.clamp((int) ((float) (int_2 * int_2) / (float) getMaxScrollPosition()), 32, int_2 - 8);
                 double double_6 = Math.max(1.0D, double_5 / (double) (int_2 - int_3));
-                scrollBarAlphaFutureTime = System.currentTimeMillis();
-                scrollBarAlphaFuture = 1f;
-                scrollTo(MathHelper.clamp((float) (scroll + double_4 * double_6), 0, height - rectangle.height), false);
+                scrollTo(MathHelper.clamp((float) (scroll + double_4 * double_6), 0, height - innerBounds.height), false);
             }
         }
         return super.mouseDragged(mouseX, mouseY, int_1, double_3, double_4);
     }
     
+    private void renderScrollbar() {
+        int maxScroll = getMaxScroll();
+        if (maxScroll > 0) {
+            int height = innerBounds.height * innerBounds.height / getMaxScrollPosition();
+            height = MathHelper.clamp(height, 32, innerBounds.height - 8);
+            height -= Math.min((scroll < 0 ? (int) -scroll : scroll > maxScroll ? (int) scroll - maxScroll : 0), height * .95);
+            height = Math.max(10, height);
+            int minY = Math.min(Math.max((int) scroll * (innerBounds.height - height) / maxScroll + innerBounds.y, innerBounds.y), innerBounds.getMaxY() - height);
+            
+            int scrollbarPositionMinX = getScrollbarMinX();
+            int scrollbarPositionMaxX = scrollbarPositionMinX + 6;
+            boolean hovered = (new Rectangle(scrollbarPositionMinX, minY, scrollbarPositionMaxX - scrollbarPositionMinX, height)).contains(PointHelper.fromMouse());
+            float bottomC = (hovered ? .67f : .5f) * (ScreenHelper.isDarkModeEnabled() ? 0.8f : 1f);
+            float topC = (hovered ? .87f : .67f) * (ScreenHelper.isDarkModeEnabled() ? 0.8f : 1f);
+            
+            GuiLighting.disable();
+            RenderSystem.disableTexture();
+            RenderSystem.enableBlend();
+            RenderSystem.disableAlphaTest();
+            RenderSystem.blendFuncSeparate(770, 771, 1, 0);
+            RenderSystem.shadeModel(7425);
+            Tessellator tessellator = Tessellator.getInstance();
+            BufferBuilder buffer = tessellator.getBuffer();
+            buffer.begin(7, VertexFormats.POSITION_COLOR);
+            buffer.vertex(scrollbarPositionMinX, minY + height, 0.0D).color(bottomC, bottomC, bottomC, 1).next();
+            buffer.vertex(scrollbarPositionMaxX, minY + height, 0.0D).color(bottomC, bottomC, bottomC, 1).next();
+            buffer.vertex(scrollbarPositionMaxX, minY, 0.0D).color(bottomC, bottomC, bottomC, 1).next();
+            buffer.vertex(scrollbarPositionMinX, minY, 0.0D).color(bottomC, bottomC, bottomC, 1).next();
+            tessellator.draw();
+            buffer.begin(7, VertexFormats.POSITION_COLOR);
+            buffer.vertex(scrollbarPositionMinX, (minY + height - 1), 0.0D).color(topC, topC, topC, 1).next();
+            buffer.vertex((scrollbarPositionMaxX - 1), (minY + height - 1), 0.0D).color(topC, topC, topC, 1).next();
+            buffer.vertex((scrollbarPositionMaxX - 1), minY, 0.0D).color(topC, topC, topC, 1).next();
+            buffer.vertex(scrollbarPositionMinX, minY, 0.0D).color(topC, topC, topC, 1).next();
+            tessellator.draw();
+            RenderSystem.shadeModel(7424);
+            RenderSystem.disableBlend();
+            RenderSystem.enableAlphaTest();
+            RenderSystem.enableTexture();
+        }
+    }
+    
+    private void updatePosition(float delta) {
+        target = clamp(target);
+        if (target < 0) {
+            target -= target * (1 - ClothConfigInitializer.getBounceBackMultiplier()) * delta / 3;
+        } else if (target > getMaxScroll()) {
+            target = (target - getMaxScroll()) * (1 - (1 - ClothConfigInitializer.getBounceBackMultiplier()) * delta / 3) + getMaxScroll();
+        }
+        if (!DynamicNewSmoothScrollingEntryListWidget.Precision.almostEquals(scroll, target, DynamicNewSmoothScrollingEntryListWidget.Precision.FLOAT_EPSILON))
+            scroll = (float) DynamicNewSmoothScrollingEntryListWidget.Interpolation.expoEase(scroll, target, Math.min((System.currentTimeMillis() - start) / ((double) duration), 1));
+        else
+            scroll = target;
+    }
+    
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
-        if (rectangle.contains(PointHelper.fromMouse()))
-            for (Widget widget : widgets)
+        if (containsMouse(PointHelper.fromMouse()))
+            for (Widget widget : entries)
                 if (widget.keyPressed(int_1, int_2, int_3))
                     return true;
         return false;
     }
     
-    public List getCurrentDisplayed() {
-        return currentDisplayed;
+    public void updateArea(DisplayHelper.DisplayBoundsHandler<?> boundsHandler, @Nullable String searchTerm) {
+        this.bounds = boundsHandler.getItemListArea(ScreenHelper.getLastOverlay().getBounds());
+        if (searchTerm != null)
+            updateSearch(searchTerm);
+        else if (allStacks == null)
+            updateSearch("");
+        else updateEntriesPosition();
     }
     
-    private List<EntryStack> processSearchTerm(String searchTerm, List<EntryStack> ol, List<EntryStack> inventoryItems) {
-        lastSearchArgument.clear();
-        List<EntryStack> os = new LinkedList<>(ol);
-        if (ConfigManager.getInstance().getConfig().getItemListOrdering() != ItemListOrdering.registry)
-            os.sort(ASCENDING_COMPARATOR);
-        if (!ConfigManager.getInstance().getConfig().isItemListAscending())
-            Collections.reverse(os);
-        String[] splitSearchTerm = StringUtils.splitByWholeSeparatorPreserveAllTokens(searchTerm, "|");
-        for (String s : splitSearchTerm) {
-            String[] split = StringUtils.split(s);
-            SearchArgument[] arguments = new SearchArgument[split.length];
-            for (int i = 0; i < split.length; i++) {
-                String s1 = split[i];
-                if (s1.startsWith("@-") || s1.startsWith("-@"))
-                    arguments[i] = new SearchArgument(SearchArgument.ArgumentType.MOD, s1.substring(2), false);
-                else if (s1.startsWith("@"))
-                    arguments[i] = new SearchArgument(SearchArgument.ArgumentType.MOD, s1.substring(1), true);
-                else if (s1.startsWith("#-") || s1.startsWith("-#"))
-                    arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, s1.substring(2), false);
-                else if (s1.startsWith("#"))
-                    arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, s1.substring(1), true);
-                else if (s1.startsWith("-"))
-                    arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TEXT, s1.substring(1), false);
-                else
-                    arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TEXT, s1, true);
+    public void updateEntriesPosition() {
+        this.innerBounds = updateInnerBounds();
+        if (!ConfigManager.getInstance().getConfig().isEntryListWidgetScrolled()) {
+            page = Math.max(page, 0);
+            List<EntryListEntry> entries = Lists.newLinkedList();
+            int width = innerBounds.width / 18;
+            int height = innerBounds.height / 18;
+            for (int currentY = 0; currentY < height; currentY++) {
+                for (int currentX = 0; currentX < width; currentX++) {
+                    if (notSteppingOnExclusionZones(currentX * 18 + innerBounds.x, currentY * 18 + innerBounds.y, innerBounds)) {
+                        entries.add((EntryListEntry) new EntryListEntry(currentX * 18 + innerBounds.x, currentY * 18 + innerBounds.y).noBackground());
+                    }
+                }
             }
-            if (arguments.length > 0)
-                lastSearchArgument.add(arguments);
-            else
-                lastSearchArgument.add(new SearchArgument[]{SearchArgument.ALWAYS});
-        }
-        List<EntryStack> stacks = Collections.emptyList();
-        if (lastSearchArgument.isEmpty())
-            stacks = os;
-        else
-            stacks = CollectionUtils.filter(os, entry -> filterEntry(entry, lastSearchArgument));
-        if (!ConfigManager.getInstance().isCraftableOnlyEnabled() || stacks.isEmpty() || inventoryItems.isEmpty())
-            return Collections.unmodifiableList(stacks);
-        List<EntryStack> workingItems = RecipeHelper.getInstance().findCraftableEntriesByItems(inventoryItems);
-        List<EntryStack> newList = Lists.newLinkedList();
-        for (EntryStack workingItem : workingItems) {
-            EntryStack any = CollectionUtils.findFirstOrNullEquals(stacks, workingItem);
-            if (any != null)
-                newList.add(any);
-        }
-        if (newList.isEmpty())
-            return Collections.unmodifiableList(stacks);
-        return Collections.unmodifiableList(newList);
-    }
-    
-    public List<SearchArgument[]> getLastSearchArgument() {
-        return lastSearchArgument;
-    }
-    
-    public void calculateListSize(Rectangle rect) {
-        int xOffset = 0, yOffset = 0;
-        width = 0;
-        height = 0;
-        while (true) {
-            xOffset += 18;
-            if (height == 0)
-                width++;
-            if (xOffset + 19 > rect.width) {
-                xOffset = 0;
-                yOffset += 18;
-                height++;
+            page = Math.max(Math.min(page, getTotalPages() - 1), 0);
+            List<EntryStack> subList = allStacks.stream().skip(page * entries.size()).limit(entries.size()).collect(Collectors.toList());
+            for (int i = 0; i < subList.size(); i++) {
+                EntryStack stack = subList.get(i);
+                entries.get(i).clearStacks().entry(stack);
             }
-            if (yOffset + 19 > rect.height)
-                break;
+            this.entries = entries;
+        } else {
+            page = 0;
+            int width = innerBounds.width / 18;
+            int pageHeight = innerBounds.height / 18;
+            int slotsToPrepare = allStacks.size();
+            int currentX = 0;
+            int currentY = 0;
+            List<EntryListEntry> entries = Lists.newLinkedList();
+            for (int i = 0; i < slotsToPrepare; i++) {
+                int xPos = currentX * 18 + innerBounds.x;
+                int yPos = currentY * 18 + innerBounds.y;
+                entries.add((EntryListEntry) new EntryListEntry(xPos, yPos).noBackground());
+                if (!notSteppingOnExclusionZones(xPos, yPos, innerBounds)) slotsToPrepare += 2;
+                currentX++;
+                if (currentX >= width) {
+                    currentX = 0;
+                    currentY++;
+                }
+            }
+            this.entries = entries;
         }
+    }
+    
+    @Deprecated
+    public List<EntryStack> getAllStacks() {
+        return allStacks;
+    }
+    
+    private Rectangle updateInnerBounds() {
+        if (ConfigManager.getInstance().getConfig().isEntryListWidgetScrolled()) {
+            int width = Math.max(MathHelper.floor((bounds.width - 2 - 6) / 18f), 1);
+            if (ConfigManager.getInstance().getConfig().isLeftHandSidePanel())
+                return new Rectangle(bounds.getCenterX() - width * 9 + 3, bounds.y, width * 18, bounds.height);
+            return new Rectangle(bounds.getCenterX() - width * 9 - 3, bounds.y, width * 18, bounds.height);
+        }
+        int width = Math.max(MathHelper.floor((bounds.width - 2) / 18f), 1);
+        int height = Math.max(MathHelper.floor((bounds.height - 2) / 18f), 1);
+        return new Rectangle(bounds.getCenterX() - width * 9, bounds.getCenterY() - height * 9, width * 18, height * 18);
+    }
+    
+    @SuppressWarnings("rawtypes")
+    private boolean notSteppingOnExclusionZones(int left, int top, Rectangle listArea) {
+        for (DisplayHelper.DisplayBoundsHandler sortedBoundsHandler : DisplayHelper.getInstance().getSortedBoundsHandlers(minecraft.currentScreen.getClass())) {
+            ActionResult fit = sortedBoundsHandler.canItemSlotWidgetFit(!ConfigManager.getInstance().getConfig().isLeftHandSidePanel(), left, top, minecraft.currentScreen, listArea);
+            if (fit != ActionResult.PASS) return fit == ActionResult.SUCCESS;
+        }
+        return true;
+    }
+    
+    @SuppressWarnings("deprecation")
+    public void updateSearch(String searchTerm) {
+        lastSearchArguments = processSearchTerm(searchTerm);
+        List<EntryStack> list = Lists.newLinkedList();
+        boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
+        List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
+        for (EntryStack stack : EntryRegistry.getInstance().getStacksList()) {
+            if (lastSearchArguments.isEmpty() || canSearchTermsBeAppliedTo(stack, lastSearchArguments)) {
+                if (workingItems != null && CollectionUtils.findFirstOrNullEquals(workingItems, stack) == null)
+                    continue;
+                list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE)
+                        .setting(EntryStack.Settings.Item.RENDER_OVERLAY, RENDER_EXTRA_CONFIG));
+            }
+        }
+        ItemListOrdering ordering = ConfigManager.getInstance().getConfig().getItemListOrdering();
+        if (ordering == ItemListOrdering.name) list.sort(ENTRY_NAME_COMPARER);
+        if (ordering == ItemListOrdering.item_groups) list.sort(ENTRY_GROUP_COMPARER);
+        if (!ConfigManager.getInstance().getConfig().isItemListAscending()) Collections.reverse(list);
+        allStacks = list;
+        updateEntriesPosition();
+    }
+    
+    @SuppressWarnings("deprecation")
+    public boolean canLastSearchTermsBeAppliedTo(EntryStack stack) {
+        return canSearchTermsBeAppliedTo(stack, lastSearchArguments);
+    }
+    
+    @SuppressWarnings("deprecation")
+    private boolean canSearchTermsBeAppliedTo(EntryStack stack, List<SearchArgument.SearchArguments> searchArguments) {
+        if (searchArguments.isEmpty()) return true;
+        String mod = null, name = null, tooltip = null;
+        for (SearchArgument.SearchArguments arguments : searchArguments) {
+            boolean applicable = true;
+            for (SearchArgument argument : arguments.getArguments()) {
+                if (argument.getArgumentType() == SearchArgument.ArgumentType.ALWAYS) return true;
+                else if (argument.getArgumentType() == SearchArgument.ArgumentType.MOD) {
+                    if (mod == null)
+                        mod = stack.getIdentifier().map(Identifier::getNamespace).orElse("").replace(SPACE, EMPTY).toLowerCase(Locale.ROOT);
+                    if (mod != null && !mod.isEmpty() && argument.getFunction(!argument.isInclude()).apply(mod)) {
+                        applicable = false;
+                        break;
+                    }
+                } else if (argument.getArgumentType() == SearchArgument.ArgumentType.TEXT) {
+                    if (name == null)
+                        name = SearchArgument.tryGetEntryStackName(stack).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT);
+                    if (name != null && !name.isEmpty() && argument.getFunction(!argument.isInclude()).apply(name)) {
+                        applicable = false;
+                        break;
+                    }
+                } else if (argument.getArgumentType() == SearchArgument.ArgumentType.TOOLTIP) {
+                    if (name == null)
+                        name = SearchArgument.tryGetEntryStackTooltip(stack).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT);
+                    if (name != null && !name.isEmpty() && argument.getFunction(!argument.isInclude()).apply(name)) {
+                        applicable = false;
+                        break;
+                    }
+                }
+            }
+            if (applicable) return true;
+        }
+        return false;
+    }
+    
+    @SuppressWarnings("deprecation")
+    private List<SearchArgument.SearchArguments> processSearchTerm(String searchTerm) {
+        List<SearchArgument.SearchArguments> searchArguments = Lists.newArrayList();
+        for (String split : StringUtils.splitByWholeSeparatorPreserveAllTokens(searchTerm.toLowerCase(Locale.ROOT), "|")) {
+            String[] terms = StringUtils.split(split);
+            if (terms.length == 0) searchArguments.add(SearchArgument.SearchArguments.ALWAYS);
+            else {
+                SearchArgument[] arguments = new SearchArgument[terms.length];
+                for (int i = 0; i < terms.length; i++) {
+                    String term = terms[i];
+                    if (term.startsWith("-@") || term.startsWith("@-")) {
+                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.MOD, term.substring(2), false);
+                    } else if (term.startsWith("@")) {
+                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.MOD, term.substring(1), true);
+                    } else if (term.startsWith("-#") || term.startsWith("#-")) {
+                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, term.substring(2), false);
+                    } else if (term.startsWith("#")) {
+                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, term.substring(1), true);
+                    } else if (term.startsWith("-")) {
+                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TEXT, term.substring(1), false);
+                    } else {
+                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TEXT, term, true);
+                    }
+                }
+                searchArguments.add(new SearchArgument.SearchArguments(arguments));
+            }
+        }
+        return searchArguments;
+    }
+    
+    @Override
+    public List<? extends Widget> children() {
+        return entries;
     }
     
     @Override
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
         double height = getMaxScroll();
-        int actualHeight = rectangle.height;
-        if (height > actualHeight && scrollBarAlpha > 0 && double_2 >= rectangle.y && double_2 <= rectangle.getMaxY()) {
-            double scrollbarPositionMinX = rectangle.getMaxX() - 6;
-            if (double_1 >= scrollbarPositionMinX - 2 & double_1 <= scrollbarPositionMinX + 8) {
+        int actualHeight = bounds.height;
+        if (height > actualHeight && double_2 >= bounds.y && double_2 <= bounds.getMaxY()) {
+            double scrollbarPositionMinX = getScrollbarMinX();
+            if (double_1 >= scrollbarPositionMinX - 1 & double_1 <= scrollbarPositionMinX + 8) {
                 this.draggingScrollBar = true;
-                scrollBarAlpha = 1;
                 return true;
             }
         }
         this.draggingScrollBar = false;
         
-        if (rectangle.contains(double_1, double_2)) {
+        if (containsMouse(double_1, double_2)) {
             ClientPlayerEntity player = minecraft.player;
             if (ClientHelper.getInstance().isCheating() && !player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets()) {
                 ClientHelper.getInstance().sendDeletePacket();
@@ -544,43 +459,27 @@ public class EntryListWidget extends Widget {
         return false;
     }
     
-    @Override
-    public List<Slot> children() {
-        return widgets;
-    }
-    
-    private class Slot extends EntryWidget {
-        private final int backupY;
-        private int xx, yy;
+    private class EntryListEntry extends EntryWidget {
+        private int backupY;
         
-        public Slot(int xx, int yy, int x, int y) {
+        private EntryListEntry(int x, int y) {
             super(x, y);
-            this.xx = xx;
-            this.yy = yy;
             this.backupY = y;
-        }
-        
-        public int getBackupY() {
-            return backupY;
-        }
-        
-        public int getXx() {
-            return xx;
-        }
-        
-        public int getYy() {
-            return yy;
         }
         
         @Override
         public boolean containsMouse(double mouseX, double mouseY) {
-            return super.containsMouse(mouseX, mouseY) && rectangle.contains(mouseX, mouseY);
+            return super.containsMouse(mouseX, mouseY) && bounds.contains(mouseX, mouseY);
+        }
+        
+        @Override
+        protected void drawHighlighted(int mouseX, int mouseY, float delta) {
+            if (getCurrentEntry().getType() != EntryStack.Type.EMPTY) super.drawHighlighted(mouseX, mouseY, delta);
         }
         
         @Override
         protected void queueTooltip(int mouseX, int mouseY, float delta) {
-            ClientPlayerEntity player = minecraft.player;
-            if (!ClientHelper.getInstance().isCheating() || player.inventory.getCursorStack().isEmpty())
+            if (!ClientHelper.getInstance().isCheating() || minecraft.player.inventory.getCursorStack().isEmpty())
                 super.queueTooltip(mouseX, mouseY, delta);
         }
         
@@ -604,5 +503,4 @@ public class EntryListWidget extends Widget {
             return super.mouseClicked(mouseX, mouseY, button);
         }
     }
-    
 }
