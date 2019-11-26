@@ -12,7 +12,6 @@ import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.ItemStackRenderOverlayHook;
-import me.shedaniel.rei.gui.widget.EntryListWidget;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.item.ItemRenderer;
@@ -122,7 +121,7 @@ public class ItemEntryStack extends AbstractEntryStack {
     public QueuedTooltip getTooltip(int mouseX, int mouseY) {
         if (!getSetting(Settings.TOOLTIP_ENABLED).value().get() || isEmpty())
             return null;
-        List<String> toolTip = Lists.newArrayList(EntryListWidget.tryGetItemStackToolTip(getItemStack(), true));
+        List<String> toolTip = Lists.newArrayList(SearchArgument.tryGetItemStackToolTip(getItemStack(), true));
         toolTip.addAll(getSetting(Settings.TOOLTIP_APPEND_EXTRA).value().apply(this));
         if (getSetting(Settings.TOOLTIP_APPEND_MOD).value().get() && ConfigManager.getInstance().getConfig().shouldAppendModNames()) {
             final String modString = ClientHelper.getInstance().getFormattedModFromItem(getItem());

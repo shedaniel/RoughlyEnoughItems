@@ -84,4 +84,9 @@ public interface ConfigObject {
     public @interface DontApplyFieldName {
     }
     
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD})
+    public @interface UseEnumSelectorInstead {
+    }
+    
 }

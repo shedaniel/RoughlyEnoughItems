@@ -13,7 +13,6 @@ import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
-import me.shedaniel.rei.gui.widget.EntryListWidget;
 import me.shedaniel.rei.impl.*;
 import me.shedaniel.rei.listeners.RecipeBookButtonWidgetHooks;
 import me.shedaniel.rei.listeners.RecipeBookGuiHooks;
@@ -155,7 +154,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         ClientSidePacketRegistry.INSTANCE.register(RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, (packetContext, packetByteBuf) -> {
             ItemStack stack = packetByteBuf.readItemStack();
             String player = packetByteBuf.readString(32767);
-            packetContext.getPlayer().addChatMessage(new LiteralText(I18n.translate("text.rei.cheat_items").replaceAll("\\{item_name}", EntryListWidget.tryGetItemStackName(stack.copy())).replaceAll("\\{item_count}", stack.copy().getCount() + "").replaceAll("\\{player_name}", player)), false);
+            packetContext.getPlayer().addChatMessage(new LiteralText(I18n.translate("text.rei.cheat_items").replaceAll("\\{item_name}", SearchArgument.tryGetItemStackName(stack.copy())).replaceAll("\\{item_count}", stack.copy().getCount() + "").replaceAll("\\{player_name}", player)), false);
         });
         ClientSidePacketRegistry.INSTANCE.register(RoughlyEnoughItemsNetwork.NOT_ENOUGH_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
             Screen currentScreen = MinecraftClient.getInstance().currentScreen;
@@ -195,8 +194,6 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                 if (!REIPluginV0.class.isAssignableFrom(reiPlugin.getClass()))
                     throw new IllegalArgumentException("REI plugin is too old!");
                 registerPlugin(reiPlugin);
-                if (reiPlugin instanceof REIPluginV0)
-                    ((REIPluginV0) reiPlugin).onFirstLoad();
             } catch (Exception e) {
                 e.printStackTrace();
                 RoughlyEnoughItemsCore.LOGGER.error("[REI] Can't load REI plugins from %s: %s", reiPlugin.getClass(), e.getLocalizedMessage());
@@ -205,7 +202,6 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         for (REIPluginV0 reiPlugin : FabricLoader.getInstance().getEntrypoints("rei_plugins_v0", REIPluginV0.class)) {
             try {
                 registerPlugin(reiPlugin);
-                reiPlugin.onFirstLoad();
             } catch (Exception e) {
                 e.printStackTrace();
                 RoughlyEnoughItemsCore.LOGGER.error("[REI] Can't load REI plugins from %s: %s", reiPlugin.getClass(), e.getLocalizedMessage());

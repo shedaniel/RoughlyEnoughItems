@@ -14,14 +14,6 @@ import me.shedaniel.rei.api.annotations.ToBeRemoved;
 public interface REIPluginV0 extends REIPluginEntry {
     
     /**
-     * On register of the plugin
-     */
-    @ToBeRemoved
-    @Deprecated
-    default void onFirstLoad() {
-    }
-    
-    /**
      * Registers entries on the item panel
      *
      * @param entryRegistry the helper class

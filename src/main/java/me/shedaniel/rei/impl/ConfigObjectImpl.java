@@ -203,14 +203,17 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     public static class Appearance {
         @Comment("The ordering of the items on the item panel.")
+        @UseEnumSelectorInstead
         private ItemListOrderingConfig itemListOrdering = ItemListOrderingConfig.REGISTRY_ASCENDING;
         @Comment("Declares the appearance of REI windows.")
         private boolean darkTheme = false;
         @Comment("Whether REI should render entry's overlay.\nExample: Enchantment Glint")
         private boolean renderEntryExtraOverlay = true;
         @Comment("The ordering of the items on the item panel.")
+        @UseEnumSelectorInstead
         private RecipeScreenType recipeScreenType = RecipeScreenType.UNSET;
         @Comment("Declares the position of the search field.")
+        @UseEnumSelectorInstead
         private SearchFieldLocation searchFieldLocation = SearchFieldLocation.CENTER;
         @Comment("Declares the position of the item list panel.")
         private boolean mirrorItemPanel = false;
@@ -220,6 +223,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         @Comment("Declares whether REI should lighten the button if hovered.")
         private boolean lighterButtonHover = true;
         private boolean clickableRecipeArrows = true;
+        @UseEnumSelectorInstead
         private ItemCheatingMode itemCheatingMode = ItemCheatingMode.REI_LIKE;
         @Comment("Declares the appearance of recipe's border.")
         private boolean lightGrayRecipeBorder = false;
