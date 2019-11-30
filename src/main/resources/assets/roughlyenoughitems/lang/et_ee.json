@@ -115,7 +115,7 @@
   "config.roughlyenoughitems.disableRecipeBook.boolean.true": "Keelatud",
   "config.roughlyenoughitems.disableRecipeBook.boolean.false": "Lubatud",
   "config.roughlyenoughitems.fixTabCloseContainer": "Paranda vanilli Tab-konteiner (kui retseptiraamat on keelatud):",
-  "config.roughlyenoughitems.lighterButtonHover": "Lighter Button Hover:",
+  "config.roughlyenoughitems.lighterButtonHover": "Heledam nupul hõljumine:",
   "config.roughlyenoughitems.enableCraftableOnlyButton": "Meisterdavate filter:",
   "config.roughlyenoughitems.enableCraftableOnlyButton.boolean.true": "Lubatud",
   "config.roughlyenoughitems.enableCraftableOnlyButton.boolean.false": "Keelatud",
