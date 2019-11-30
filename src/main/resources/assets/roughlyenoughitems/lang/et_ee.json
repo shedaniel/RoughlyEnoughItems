@@ -40,7 +40,7 @@
   "ordering.rei.name": "Nimi",
   "ordering.rei.item_groups": "Esemegrupid",
   "text.auto_craft.move_items": "Liiguta esemeid",
-  "text.auto_craft.move_items.yog": "Generate NullPointerException!!",
+  "text.auto_craft.move_items.yog": "Genereeri NullPointerException!",
   "error.rei.transfer.too_small": "Esemeid ei saanud %dx%d ruudustikule liigutada.",
   "error.rei.not.on.server": "REI puudub serverist.",
   "error.rei.not.enough.materials": "Materjale pole piisavalt.",
@@ -144,5 +144,5 @@
   "config.roughlyenoughitems.scrollingEntryListWidget": "Esemenimekirja tegevus:",
   "config.roughlyenoughitems.scrollingEntryListWidget.boolean.true": "Keritav",
   "config.roughlyenoughitems.scrollingEntryListWidget.boolean.false": "Lehekülgedega",
-  "text.rei.credit.text": "§lRoughly Enough Items (v%s)\n§7Originaalselt Almost Enough Items'i koodi jätk.\n\n§lArendajad\n  Originaal ZenDarva poolt\n  Ümber kirjutanud Danielshe\n  Vana plugina tõlge TehNut poolt\n\n§lKeelte tõlked\n%s\n\n§lLitsents\n§7Roughly Enough Items on litsenseeritud MIT-i alusel."
+  "text.rei.credit.text": "§lRoughly Enough Items (v%s)\n§7Originaalselt Almost Enough Items'i koodi jätk.\n\n§lArendajad\n  Originaal ZenDarva poolt\n  Ümber kirjutanud Danielshe\n  Vana plugina tugi TehNut poolt\n\n§lKeelte tõlked\n%s\n\n§lLitsents\n§7Roughly Enough Items on litsenseeritud MIT-i alusel."
 }
