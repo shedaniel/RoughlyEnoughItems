@@ -1,3 +1,0 @@
-files:
-  - source: /src/main/resources/assets/roughlyenoughitems/lang/en_us.json
-    translation: /src/main/resources/assets/roughlyenoughitems/lang/%language%.json
