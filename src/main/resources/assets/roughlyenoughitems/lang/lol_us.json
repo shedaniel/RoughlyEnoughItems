@@ -141,7 +141,7 @@
   "config.roughlyenoughitems.itemCheatingMode.jei_like": "Inverted",
   "config.roughlyenoughitems.appendModNames": "Append Mod Names:",
   "config.roughlyenoughitems.toastDisplayedOnCopyIdentifier": "Copy Identifier Toast:",
-  "config.roughlyenoughitems.scrollingEntryListWidget": "Entry List Action:",
+  "config.roughlyenoughitems.scrollingEntryListWidget": "Entwy List Action:",
   "config.roughlyenoughitems.scrollingEntryListWidget.boolean.true": "Scwolled",
   "config.roughlyenoughitems.scrollingEntryListWidget.boolean.false": "Paginwated",
   "text.rei.credit.text": "§wWoughwy Enough Items (v%s)\n§7Owiginawwy a fowk fow Awmost Enough Items.\n\n§wDevewopews\n  Owiginawwy by ZenDawva\n  Wewwitten by Daniewshe\n  Owd Pwugin Suppowt by TehNut\n\n§wWanguage Twanswation\n%s\n\n§wWicense\n§7Woughwy Enough Items is wicensed wid MIT."
