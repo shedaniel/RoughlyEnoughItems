@@ -104,8 +104,11 @@ public class EntryListWidget extends WidgetWithBounds {
     
     @Override
     public boolean mouseScrolled(double double_1, double double_2, double double_3) {
-        offset(ClothConfigInitializer.getScrollStep() * -double_3, true);
-        return true;
+        if (ConfigManager.getInstance().getConfig().isEntryListWidgetScrolled() && bounds.contains(double_1, double_2)) {
+            offset(ClothConfigInitializer.getScrollStep() * -double_3, true);
+            return true;
+        }
+        return super.mouseScrolled(double_1, double_2, double_3);
     }
     
     @Override
