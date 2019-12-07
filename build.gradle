@@ -15,7 +15,7 @@ group = "me.shedaniel"
 def ENV = System.getenv()
 def forceVersion = ""
 
-version = forceVersion != "" ? forceVersion : (((String) project.mod_version).contains("unstable") ? (project.mod_version + "." + buildTime()) : project.mod_version + "+" + (ENV.BUILD_NUMBER ? ("build." + ENV.BUILD_NUMBER) : "local"))
+version = forceVersion != "" ? forceVersion : (((String) project.mod_version).contains("unstable") ? (project.mod_version + "." + buildTime()) : project.mod_version)
 
 def includeDep = true
 
