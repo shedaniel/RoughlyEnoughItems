@@ -10,7 +10,7 @@ import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.impl.ScreenHelper;
-import net.minecraft.client.render.GuiLighting;
+import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.util.Identifier;
 
 import java.util.Collections;
@@ -59,7 +59,7 @@ public class PanelWidget extends WidgetWithBounds {
         float blue = ((color >> 0) & 0xFF) / 255f;
         float alpha = ((color >> 32) & 0xFF) / 255f;
         RenderSystem.color4f(red, green, blue, alpha);
-        GuiLighting.disable();
+        DiffuseLighting.disable();
         minecraft.getTextureManager().bindTexture(ScreenHelper.isDarkModeEnabled() ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
         int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;
         int xTextureOffset = getXTextureOffset();

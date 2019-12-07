@@ -22,7 +22,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
-import net.minecraft.client.render.GuiLighting;
+import net.minecraft.client.render.DiffuseLighting;
+import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.resource.language.I18n;
@@ -174,7 +175,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             @Override
             public void render(int mouseX, int mouseY, float delta) {
                 super.render(mouseX, mouseY, delta);
-                GuiLighting.disable();
+                DiffuseLighting.disable();
                 Rectangle bounds = getBounds();
                 if (ClientHelper.getInstance().isCheating() && RoughlyEnoughItemsCore.hasOperatorPermission()) {
                     if (RoughlyEnoughItemsCore.hasPermissionToUsePackets())
@@ -251,7 +252,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                     @Override
                     public void render(int mouseX, int mouseY, float delta) {
                         super.render(mouseX, mouseY, delta);
-                        GuiLighting.disable();
+                        DiffuseLighting.disable();
                         MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
                         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                         blit(getBounds().x + 3, getBounds().y + 3, weather.getId() * 14, 14, 14, 14);
@@ -430,7 +431,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             ENTRY_LIST_WIDGET.updateSearch(ScreenHelper.getSearchField().getText());
         }
         if (OverlaySearchField.isSearching) {
-            GuiLighting.disable();
+            DiffuseLighting.disable();
             setBlitOffset(200);
             if (MinecraftClient.getInstance().currentScreen instanceof AbstractContainerScreen) {
                 ContainerScreenHooks hooks = (ContainerScreenHooks) MinecraftClient.getInstance().currentScreen;
@@ -442,7 +443,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             setBlitOffset(0);
         }
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        GuiLighting.disable();
+        DiffuseLighting.disable();
         this.renderWidgets(mouseX, mouseY, delta);
         if (MinecraftClient.getInstance().currentScreen instanceof AbstractContainerScreen && ConfigManager.getInstance().getConfig().areClickableRecipeArrowsEnabled()) {
             ContainerScreenHooks hooks = (ContainerScreenHooks) MinecraftClient.getInstance().currentScreen;
@@ -505,10 +506,10 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         if (!ConfigManager.getInstance().getConfig().isEntryListWidgetScrolled())
             buttonLeft.enabled = buttonRight.enabled = ENTRY_LIST_WIDGET.getTotalPages() != 1;
         widgets.forEach(widget -> {
-            GuiLighting.disable();
+            DiffuseLighting.disable();
             widget.render(int_1, int_2, float_1);
         });
-        GuiLighting.disable();
+        DiffuseLighting.disable();
     }
     
     @Override
@@ -529,7 +530,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             }
         }
         for (Widget widget : widgets)
-            if (widget.mouseScrolled(i, j, amount))
+            if (widget != ENTRY_LIST_WIDGET && widget.mouseScrolled(i, j, amount))
                 return true;
         return false;
     }

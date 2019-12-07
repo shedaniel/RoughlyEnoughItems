@@ -206,6 +206,8 @@ public interface RecipeHelper {
     
     List<RecipeHelper.ScreenClickArea> getScreenClickAreas();
     
+    boolean arePluginsLoading();
+    
     interface ScreenClickArea {
         Class<? extends AbstractContainerScreen> getScreenClass();
         

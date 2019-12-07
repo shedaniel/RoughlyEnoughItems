@@ -17,7 +17,7 @@ import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.render.GuiLighting;
+import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.Window;
@@ -27,6 +27,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -46,6 +47,8 @@ public class RecipeViewingScreen extends Screen {
     public boolean choosePageActivated;
     public RecipeChoosePageWidget recipeChoosePageWidget;
     private Rectangle bounds;
+    @Nullable
+    private CategoryBaseWidget workingStationsBaseWidget;
     private RecipeCategory<RecipeDisplay> selectedCategory;
     private ButtonWidget recipeBack, recipeNext, categoryBack, categoryNext;
     
@@ -65,6 +68,11 @@ public class RecipeViewingScreen extends Screen {
         this.selectedCategory = (RecipeCategory<RecipeDisplay>) categories.get(0);
         this.tabs = new ArrayList<>();
         this.choosePageActivated = false;
+    }
+    
+    @Nullable
+    public CategoryBaseWidget getWorkingStationsBaseWidget() {
+        return workingStationsBaseWidget;
     }
     
     @Override
@@ -292,7 +300,8 @@ public class RecipeViewingScreen extends Screen {
             recipeChoosePageWidget = new RecipeChoosePageWidget(this, page, getTotalPages(selectedCategory));
         else
             recipeChoosePageWidget = null;
-        
+    
+        workingStationsBaseWidget = null;
         List<List<EntryStack>> workingStations = RecipeHelper.getInstance().getWorkingStations(selectedCategory.getIdentifier());
         if (!workingStations.isEmpty()) {
             int hh = MathHelper.floor((bounds.height - 16) / 18f);
@@ -300,7 +309,7 @@ public class RecipeViewingScreen extends Screen {
             int innerWidth = MathHelper.ceil(workingStations.size() / ((float) hh));
             int xx = bounds.x - (10 + innerWidth * 18) + 6;
             int yy = bounds.y + 16;
-            preWidgets.add(new CategoryBaseWidget(new Rectangle(xx - 6, yy - 6, 15 + innerWidth * 18, 11 + actualHeight * 18)));
+            preWidgets.add(workingStationsBaseWidget = new CategoryBaseWidget(new Rectangle(xx - 6, yy - 6, 15 + innerWidth * 18, 11 + actualHeight * 18)));
             int index = 0;
             List<String> list = Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("text.rei.working_station"));
             xx += (innerWidth - 1) * 18;
@@ -364,7 +373,7 @@ public class RecipeViewingScreen extends Screen {
     public void render(int mouseX, int mouseY, float delta) {
         this.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
         preWidgets.forEach(widget -> {
-            GuiLighting.disable();
+            DiffuseLighting.disable();
             widget.render(mouseX, mouseY, delta);
         });
         if (selectedCategory != null)
@@ -383,19 +392,19 @@ public class RecipeViewingScreen extends Screen {
             if (!tab.isSelected())
                 tab.render(mouseX, mouseY, delta);
         }
-        GuiLighting.disable();
+        DiffuseLighting.disable();
         super.render(mouseX, mouseY, delta);
         widgets.forEach(widget -> {
-            GuiLighting.disable();
+            DiffuseLighting.disable();
             widget.render(mouseX, mouseY, delta);
         });
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        GuiLighting.disable();
+        DiffuseLighting.disable();
         for (TabWidget tab : tabs) {
             if (tab.isSelected())
                 tab.render(mouseX, mouseY, delta);
         }
-        GuiLighting.disable();
+        DiffuseLighting.disable();
         ScreenHelper.getLastOverlay().render(mouseX, mouseY, delta);
         ScreenHelper.getLastOverlay().lateRender(mouseX, mouseY, delta);
         if (choosePageActivated) {

@@ -39,8 +39,9 @@ public class EntryRegistryImpl implements EntryRegistry {
     }
     
     @Override
-    public void registerEntryAfter(EntryStack afterEntry, EntryStack stack) {
-        if (!stack.isEmpty() && !alreadyContain(stack))
+    @Deprecated
+    public void registerEntryAfter(EntryStack afterEntry, EntryStack stack, boolean checkAlreadyContains) {
+        if (!stack.isEmpty() && (!checkAlreadyContains || !alreadyContain(stack)))
             if (afterEntry == null || afterEntry.isEmpty())
                 entries.add(stack);
             else {

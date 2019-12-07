@@ -10,7 +10,7 @@ import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
-import net.minecraft.client.render.GuiLighting;
+import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.Collections;
@@ -35,7 +35,7 @@ public class RecipeArrowWidget extends WidgetWithBounds {
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        GuiLighting.disable();
+        DiffuseLighting.disable();
         MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
         blit(x, y, 106, 91, 24, 17);
         if (animated) {

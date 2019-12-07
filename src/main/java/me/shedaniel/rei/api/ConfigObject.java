@@ -79,6 +79,8 @@ public interface ConfigObject {
     
     boolean doesRegisterRecipesInAnotherThread();
     
+    boolean doesSnapToRows();
+    
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD})
     public @interface DontApplyFieldName {

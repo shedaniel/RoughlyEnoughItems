@@ -9,13 +9,19 @@ import me.sargunvohra.mcmods.autoconfig1u.AutoConfig;
 import me.sargunvohra.mcmods.autoconfig1u.gui.ConfigScreenProvider;
 import me.sargunvohra.mcmods.autoconfig1u.gui.registry.GuiRegistry;
 import me.sargunvohra.mcmods.autoconfig1u.serializer.JanksonConfigSerializer;
+import me.shedaniel.cloth.hooks.ScreenHooks;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.api.annotations.Internal;
+import me.shedaniel.rei.gui.ConfigReloadingScreen;
+import me.shedaniel.rei.gui.credits.CreditsScreen;
+import me.shedaniel.rei.gui.widget.ReloadConfigButtonWidget;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.AbstractPressableButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.LiteralText;
 
@@ -77,6 +83,28 @@ public class ConfigManagerImpl implements ConfigManager {
             provider.setI13nFunction(manager -> "config.roughlyenoughitems");
             provider.setOptionFunction((baseI13n, field) -> field.isAnnotationPresent(ConfigObject.DontApplyFieldName.class) ? baseI13n : String.format("%s.%s", baseI13n, field.getName()));
             provider.setCategoryFunction((baseI13n, categoryName) -> String.format("%s.%s", baseI13n, categoryName));
+            provider.setBuildFunction(builder -> {
+                return builder.setAfterInitConsumer(screen -> {
+                    if (MinecraftClient.getInstance().getNetworkHandler() != null && MinecraftClient.getInstance().getNetworkHandler().getRecipeManager() != null) {
+                        ((ScreenHooks) screen).cloth_addButton(new ReloadConfigButtonWidget(4, 4, 100, 20, I18n.translate("text.rei.reload_config"), buttonWidget -> {
+                            RoughlyEnoughItemsCore.syncRecipes(null);
+                        }) {
+                            @Override
+                            public void render(int int_1, int int_2, float float_1) {
+                                if (RecipeHelper.getInstance().arePluginsLoading()) {
+                                    MinecraftClient.getInstance().openScreen(new ConfigReloadingScreen(MinecraftClient.getInstance().currentScreen));
+                                } else super.render(int_1, int_2, float_1);
+                            }
+                        });
+                    }
+                    ((ScreenHooks) screen).cloth_addButton(new AbstractPressableButtonWidget(screen.width - 104, 4, 100, 20, I18n.translate("text.rei.credits")) {
+                        @Override
+                        public void onPress() {
+                            MinecraftClient.getInstance().openScreen(new CreditsScreen(screen));
+                        }
+                    });
+                }).build();
+            });
             return provider.get();
         } catch (Exception e) {
             e.printStackTrace();
