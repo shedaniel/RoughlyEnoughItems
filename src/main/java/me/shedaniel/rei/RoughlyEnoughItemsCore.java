@@ -16,6 +16,7 @@ import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.impl.*;
 import me.shedaniel.rei.listeners.RecipeBookButtonWidgetHooks;
 import me.shedaniel.rei.listeners.RecipeBookGuiHooks;
+import me.shedaniel.rei.tests.plugin.REITestPlugin;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.fabricmc.loader.api.FabricLoader;
@@ -38,6 +39,7 @@ import net.minecraft.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.Ingredient;
+import net.minecraft.recipe.RecipeManager;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
@@ -207,24 +209,41 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                 RoughlyEnoughItemsCore.LOGGER.error("[REI] Can't load REI plugins from %s: %s", reiPlugin.getClass(), e.getLocalizedMessage());
             }
         }
+        
+        // Test Only
+        loadTestPlugins();
+    }
+    
+    @SuppressWarnings("deprecation")
+    private void loadTestPlugins() {
+        if (System.getProperty("rei.test", "false").equals("true")) {
+            registerPlugin(new REITestPlugin());
+        }
+    }
+    
+    @Internal
+    @Deprecated
+    public static void syncRecipes(AtomicLong lastSync) {
+        if (lastSync != null) {
+            if (lastSync.get() > 0 && System.currentTimeMillis() - lastSync.get() <= 5000) {
+                RoughlyEnoughItemsCore.LOGGER.warn("[REI] Suppressing Sync Recipes!");
+                return;
+            }
+            lastSync.set(System.currentTimeMillis());
+        }
+        RecipeManager recipeManager = MinecraftClient.getInstance().getNetworkHandler().getRecipeManager();
+        if (ConfigManager.getInstance().getConfig().doesRegisterRecipesInAnotherThread()) {
+            CompletableFuture.runAsync(() -> ((RecipeHelperImpl) RecipeHelper.getInstance()).recipesLoaded(recipeManager), SYNC_RECIPES);
+        } else {
+            ((RecipeHelperImpl) RecipeHelper.getInstance()).recipesLoaded(recipeManager);
+        }
     }
     
     @SuppressWarnings("deprecation")
     private void registerClothEvents() {
         final Identifier recipeButtonTex = new Identifier("textures/gui/recipe_button.png");
         AtomicLong lastSync = new AtomicLong(-1);
-        ClothClientHooks.SYNC_RECIPES.register((minecraftClient, recipeManager, synchronizeRecipesS2CPacket) -> {
-            if (lastSync.get() > 0 && System.currentTimeMillis() - lastSync.get() <= 5000) {
-                RoughlyEnoughItemsCore.LOGGER.warn("[REI] Suppressing Sync Recipes!");
-                return;
-            }
-            lastSync.set(System.currentTimeMillis());
-            if (ConfigManager.getInstance().getConfig().doesRegisterRecipesInAnotherThread()) {
-                CompletableFuture.runAsync(() -> ((RecipeHelperImpl) RecipeHelper.getInstance()).recipesLoaded(recipeManager), SYNC_RECIPES);
-            } else {
-                ((RecipeHelperImpl) RecipeHelper.getInstance()).recipesLoaded(recipeManager);
-            }
-        });
+        ClothClientHooks.SYNC_RECIPES.register((minecraftClient, recipeManager, synchronizeRecipesS2CPacket) -> syncRecipes(lastSync));
         ClothClientHooks.SCREEN_ADD_BUTTON.register((minecraftClient, screen, abstractButtonWidget) -> {
             if (ConfigManager.getInstance().getConfig().doesDisableRecipeBook() && screen instanceof AbstractContainerScreen && abstractButtonWidget instanceof TexturedButtonWidget)
                 if (((RecipeBookButtonWidgetHooks) abstractButtonWidget).rei_getTexture().equals(recipeButtonTex))

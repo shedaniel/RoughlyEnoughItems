@@ -12,7 +12,7 @@ import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.GuiLighting;
+import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.Window;
 import net.minecraft.util.math.MathHelper;
@@ -140,7 +140,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     @Override
     public void render(int i, int i1, float v) {
         widgets.forEach(widget -> {
-            GuiLighting.disable();
+            DiffuseLighting.disable();
             RenderSystem.translatef(0, 0, 800);
             widget.render(i, i1, v);
             RenderSystem.translatef(0, 0, -800);

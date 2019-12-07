@@ -57,6 +57,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     private final List<DisplayVisibilityHandler> displayVisibilityHandlers = Lists.newArrayList();
     private final List<LiveRecipeGenerator<RecipeDisplay>> liveRecipeGenerators = Lists.newArrayList();
     private RecipeManager recipeManager;
+    private boolean arePluginsLoading = false;
     
     @Override
     public List<EntryStack> findCraftableEntriesByItems(List<EntryStack> inventoryItems) {
@@ -86,6 +87,11 @@ public class RecipeHelperImpl implements RecipeHelper {
                     craftables.addAll((List<EntryStack>) recipeDisplay.getOutputEntries());
             }
         return craftables.stream().distinct().collect(Collectors.toList());
+    }
+    
+    @Override
+    public boolean arePluginsLoading() {
+        return arePluginsLoading;
     }
     
     @Override
@@ -218,6 +224,8 @@ public class RecipeHelperImpl implements RecipeHelper {
     
     @SuppressWarnings("deprecation")
     public void recipesLoaded(RecipeManager recipeManager) {
+        long startTime = System.currentTimeMillis();
+        arePluginsLoading = true;
         ScreenHelper.clearData();
         this.recipeCount.set(0);
         this.recipeManager = recipeManager;
@@ -235,11 +243,8 @@ public class RecipeHelperImpl implements RecipeHelper {
         BaseBoundsHandler baseBoundsHandler = new BaseBoundsHandlerImpl();
         DisplayHelper.getInstance().registerBoundsHandler(baseBoundsHandler);
         ((DisplayHelperImpl) DisplayHelper.getInstance()).setBaseBoundsHandler(baseBoundsHandler);
-        long startTime = System.currentTimeMillis();
-        List<REIPluginEntry> plugins = new LinkedList<>(RoughlyEnoughItemsCore.getPlugins());
-        plugins.sort((first, second) -> {
-            return second.getPriority() - first.getPriority();
-        });
+        List<REIPluginEntry> plugins = Lists.newLinkedList(RoughlyEnoughItemsCore.getPlugins());
+        plugins.sort(Comparator.comparingInt(REIPluginEntry::getPriority).reversed());
         RoughlyEnoughItemsCore.LOGGER.info("[REI] Loading %d plugins: %s", plugins.size(), plugins.stream().map(REIPluginEntry::getPluginIdentifier).map(Identifier::toString).collect(Collectors.joining(", ")));
         Collections.reverse(plugins);
         EntryRegistry.getInstance().getStacksList().clear();
@@ -319,6 +324,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         
         long usedTime = System.currentTimeMillis() - startTime;
         RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered %d stack entries, %d recipes displays, %d bounds handler, %d visibility handlers and %d categories (%s) in %d ms.", EntryRegistry.getInstance().getStacksList().size(), recipeCount.get(), DisplayHelper.getInstance().getAllBoundsHandlers().size(), getDisplayVisibilityHandlers().size(), categories.size(), String.join(", ", categories.stream().map(RecipeCategory::getCategoryName).collect(Collectors.toList())), usedTime);
+        arePluginsLoading = false;
     }
     
     @Override

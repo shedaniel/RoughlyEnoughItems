@@ -12,7 +12,7 @@ import me.shedaniel.rei.gui.widget.EntryWidget;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.GuiLighting;
+import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.MathHelper;
@@ -95,7 +95,7 @@ public class SimpleRecipeEntry extends RecipeEntry {
         }
         xx = bounds.x + 4 + 18 * (getItemsPerLine() - 2);
         yy = bounds.y + getHeight() / 2 - 8;
-        GuiLighting.disable();
+        DiffuseLighting.disable();
         MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
         blit(xx, yy, 0, 28, 18, 18);
         xx += 18;

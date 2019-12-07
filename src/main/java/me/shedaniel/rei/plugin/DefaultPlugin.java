@@ -14,6 +14,7 @@ import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
+import me.shedaniel.rei.gui.widget.CategoryBaseWidget;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.plugin.blasting.DefaultBlastingDisplay;
 import me.shedaniel.rei.plugin.brewing.DefaultBrewingCategory;
@@ -217,6 +218,11 @@ public class DefaultPlugin implements REIPluginV0 {
         }
         displayHelper.getBaseBoundsHandler().registerExclusionZones(AbstractInventoryScreen.class, new DefaultPotionEffectExclusionZones());
         displayHelper.getBaseBoundsHandler().registerExclusionZones(RecipeBookProvider.class, new DefaultRecipeBookExclusionZones());
+        displayHelper.getBaseBoundsHandler().registerExclusionZones(RecipeViewingScreen.class, isLeftSide -> {
+            CategoryBaseWidget widget = ((RecipeViewingScreen) MinecraftClient.getInstance().currentScreen).getWorkingStationsBaseWidget();
+            if (widget == null) return Collections.emptyList();
+            return Collections.singletonList(widget.getBounds().clone());
+        });
         displayHelper.registerBoundsHandler(new DisplayHelper.DisplayBoundsHandler<AbstractContainerScreen<?>>() {
             @Override
             public Class<?> getBaseSupportedClass() {

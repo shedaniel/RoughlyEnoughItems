@@ -16,7 +16,7 @@ import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.GuiLighting;
+import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
@@ -53,7 +53,7 @@ public class DefaultBrewingCategory implements RecipeCategory<DefaultBrewingDisp
             public void render(int mouseX, int mouseY, float delta) {
                 super.render(mouseX, mouseY, delta);
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-                GuiLighting.disable();
+                DiffuseLighting.disable();
                 MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
                 blit(startPoint.x, startPoint.y, 0, 108, 103, 59);
                 int width = MathHelper.ceil((System.currentTimeMillis() / 250 % 18d) / 1f);

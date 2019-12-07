@@ -19,7 +19,7 @@ import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.GuiLighting;
+import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.util.Identifier;
@@ -78,7 +78,7 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
             @Override
             public void render(int mouseX, int mouseY, float partialTicks) {
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-                GuiLighting.disable();
+                DiffuseLighting.disable();
                 MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
                 this.blit(startingPoint.x, startingPoint.y, 28, 221, 55, 26);
             }

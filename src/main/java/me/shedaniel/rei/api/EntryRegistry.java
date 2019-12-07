@@ -44,7 +44,19 @@ public interface EntryRegistry {
      * @param afterEntry the stack to put after
      * @param stack      the stack to register
      */
-    void registerEntryAfter(EntryStack afterEntry, EntryStack stack);
+    default void registerEntryAfter(EntryStack afterEntry, EntryStack stack) {
+        registerEntryAfter(afterEntry, stack, true);
+    }
+    
+    /**
+     * Registers an new stack to the entry list
+     *
+     * @param afterEntry           the stack to put after
+     * @param stack                the stack to register
+     * @param checkAlreadyContains whether the list should check if it is already on the list
+     */
+    @Deprecated
+    void registerEntryAfter(EntryStack afterEntry, EntryStack stack, boolean checkAlreadyContains);
     
     /**
      * Registers multiple stacks to the item list

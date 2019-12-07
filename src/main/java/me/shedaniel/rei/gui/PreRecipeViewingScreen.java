@@ -19,7 +19,7 @@ import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.render.GuiLighting;
+import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.sound.SoundEvents;
@@ -73,7 +73,7 @@ public class PreRecipeViewingScreen extends Screen {
         }
         super.render(int_1, int_2, float_1);
         this.widgets.forEach(widget -> {
-            GuiLighting.disable();
+            DiffuseLighting.disable();
             widget.render(int_1, int_2, float_1);
         });
     }

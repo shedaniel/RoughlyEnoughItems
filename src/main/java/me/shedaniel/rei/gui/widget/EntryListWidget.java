@@ -21,7 +21,7 @@ import me.shedaniel.rei.impl.SearchArgument;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.GuiLighting;
+import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.item.ItemGroup;
@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
 
 public class EntryListWidget extends WidgetWithBounds {
     
+    private static final boolean LAZY = true;
     private static final String SPACE = " ", EMPTY = "";
     private static final Supplier<Boolean> RENDER_EXTRA_CONFIG = ConfigManager.getInstance().getConfig()::doesRenderEntryExtraOverlay;
     @SuppressWarnings("deprecation")
@@ -56,6 +57,7 @@ public class EntryListWidget extends WidgetWithBounds {
     protected double scroll;
     protected long start;
     protected long duration;
+    protected int blockedCount;
     private Rectangle bounds, innerBounds;
     private List<EntryStack> allStacks = null;
     private List<EntryListEntry> entries = Collections.emptyList();
@@ -64,12 +66,7 @@ public class EntryListWidget extends WidgetWithBounds {
     private boolean draggingScrollBar = false;
     
     protected final int getMaxScrollPosition() {
-        int candidate = 0;
-        for (EntryListEntry entry : entries) {
-            if (entry.getCurrentEntry().getType() != EntryStack.Type.EMPTY && entry.backupY > candidate)
-                candidate = entry.backupY;
-        }
-        return candidate;
+        return MathHelper.ceil((allStacks.size() + blockedCount) / (innerBounds.width / 18f)) * 18;
     }
     
     protected final int getMaxScroll() {
@@ -141,27 +138,31 @@ public class EntryListWidget extends WidgetWithBounds {
     public void render(int mouseX, int mouseY, float delta) {
         if (ConfigManager.getInstance().getConfig().isEntryListWidgetScrolled()) {
             for (EntryListEntry entry : entries) entry.clearStacks();
-            int nextIndex = 0;
-            for (int i = 0; i < allStacks.size(); i++) {
+            ScissorsHandler.INSTANCE.scissor(bounds);
+            int skip = Math.max(0, MathHelper.floor(scroll / 18f));
+            int nextIndex = skip * innerBounds.width / 18;
+            int i = nextIndex;
+            blockedCount = 0;
+            back:
+            for (; i < allStacks.size(); i++) {
                 EntryStack stack = allStacks.get(i);
                 while (true) {
                     EntryListEntry entry = entries.get(nextIndex);
                     entry.getBounds().y = (int) (entry.backupY - scroll);
+                    if (entry.getBounds().y > bounds.getMaxY())
+                        break back;
                     if (notSteppingOnExclusionZones(entry.getBounds().x, entry.getBounds().y, innerBounds)) {
                         entry.entry(stack);
+                        entry.render(mouseX, mouseY, delta);
                         nextIndex++;
                         break;
                     } else {
+                        blockedCount++;
                         nextIndex++;
                     }
                 }
             }
             updatePosition(delta);
-            ScissorsHandler.INSTANCE.scissor(bounds);
-            for (EntryListEntry widget : entries) {
-                if (widget.getBounds().getMaxY() >= bounds.y && widget.getBounds().y <= bounds.getMaxY())
-                    widget.render(mouseX, mouseY, delta);
-            }
             ScissorsHandler.INSTANCE.removeLastScissor();
             renderScrollbar();
         } else {
@@ -187,7 +188,11 @@ public class EntryListWidget extends WidgetWithBounds {
                 int int_2 = innerBounds.height;
                 int int_3 = MathHelper.clamp((int) ((float) (int_2 * int_2) / (float) getMaxScrollPosition()), 32, int_2 - 8);
                 double double_6 = Math.max(1.0D, double_5 / (double) (int_2 - int_3));
-                scrollTo(MathHelper.clamp((float) (scroll + double_4 * double_6), 0, height - innerBounds.height), false);
+                float to = MathHelper.clamp((float) (scroll + double_4 * double_6), 0, height - innerBounds.height);
+                if (ConfigManager.getInstance().getConfig().doesSnapToRows()) {
+                    double nearestRow = Math.round(to / 18.0) * 18.0;
+                    scrollTo(nearestRow, false);
+                } else scrollTo(to, false);
             }
         }
         return super.mouseDragged(mouseX, mouseY, int_1, double_3, double_4);
@@ -208,7 +213,7 @@ public class EntryListWidget extends WidgetWithBounds {
             float bottomC = (hovered ? .67f : .5f) * (ScreenHelper.isDarkModeEnabled() ? 0.8f : 1f);
             float topC = (hovered ? .87f : .67f) * (ScreenHelper.isDarkModeEnabled() ? 0.8f : 1f);
             
-            GuiLighting.disable();
+            DiffuseLighting.disable();
             RenderSystem.disableTexture();
             RenderSystem.enableBlend();
             RenderSystem.disableAlphaTest();
@@ -241,6 +246,12 @@ public class EntryListWidget extends WidgetWithBounds {
             target -= target * (1 - ClothConfigInitializer.getBounceBackMultiplier()) * delta / 3;
         } else if (target > getMaxScroll()) {
             target = (target - getMaxScroll()) * (1 - (1 - ClothConfigInitializer.getBounceBackMultiplier()) * delta / 3) + getMaxScroll();
+        } else if (ConfigManager.getInstance().getConfig().doesSnapToRows()) {
+            double nearestRow = Math.round(target / 18.0) * 18.0;
+            if (!DynamicNewSmoothScrollingEntryListWidget.Precision.almostEquals(target, nearestRow, DynamicNewSmoothScrollingEntryListWidget.Precision.FLOAT_EPSILON))
+                target += (nearestRow - target) * Math.min(delta / 2.0, 1.0);
+            else
+                target = nearestRow;
         }
         if (!DynamicNewSmoothScrollingEntryListWidget.Precision.almostEquals(scroll, target, DynamicNewSmoothScrollingEntryListWidget.Precision.FLOAT_EPSILON))
             scroll = (float) DynamicNewSmoothScrollingEntryListWidget.Interpolation.expoEase(scroll, target, Math.min((System.currentTimeMillis() - start) / ((double) duration), 1));

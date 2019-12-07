@@ -193,6 +193,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         return technical.registerRecipesInAnotherThread;
     }
     
+    @Override
+    public boolean doesSnapToRows() {
+        return appearance.snapToRows;
+    }
+    
     public static class General {
         @Comment("Declares whether cheating mode is on.")
         private boolean cheating = false;
@@ -233,6 +238,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         private boolean villagerScreenPermanentScrollBar = false;
         @Comment("Declares whether if entry list widget is scrolled.")
         private boolean scrollingEntryListWidget = false;
+        private boolean snapToRows = false;
     }
     
     public static class Technical {
