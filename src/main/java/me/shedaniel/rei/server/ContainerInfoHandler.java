@@ -12,19 +12,19 @@ import net.minecraft.util.Identifier;
 import java.util.Map;
 
 public class ContainerInfoHandler {
-    private static final Map<Identifier, Map<Class<? extends Container>, ContainerInfo>> containerInfoMap = Maps.newHashMap();
+    private static final Map<String, Map<Class<? extends Container>, ContainerInfo>> containerInfoMap = Maps.newHashMap();
     
     public static void registerContainerInfo(Identifier category, ContainerInfo containerInfo) {
         if (!containerInfoMap.containsKey(category))
-            containerInfoMap.put(category, Maps.newHashMap());
-        containerInfoMap.get(category).put(containerInfo.getContainerClass(), containerInfo);
+            containerInfoMap.put(category.toString(), Maps.newHashMap());
+        containerInfoMap.get(category.toString()).put(containerInfo.getContainerClass(), containerInfo);
     }
     
     public static boolean isCategoryHandled(Identifier category) {
-        return containerInfoMap.containsKey(category) && !containerInfoMap.get(category).isEmpty();
+        return containerInfoMap.containsKey(category.toString()) && !containerInfoMap.get(category.toString()).isEmpty();
     }
     
     public static ContainerInfo getContainerInfo(Identifier category, Class<?> containerClass) {
-        return containerInfoMap.get(category).get(containerClass);
+        return isCategoryHandled(category) ? containerInfoMap.get(category.toString()).get(containerClass) : null;
     }
 }
