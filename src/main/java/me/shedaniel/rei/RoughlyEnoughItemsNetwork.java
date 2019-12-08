@@ -36,6 +36,7 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
     
     @Override
     public void onInitialize() {
+        FabricLoader.getInstance().getEntrypoints("rei_containers", Runnable.class).forEach(Runnable::run);
         ServerSidePacketRegistry.INSTANCE.register(DELETE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
             ServerPlayerEntity player = (ServerPlayerEntity) packetContext.getPlayer();
             if (player.getServer().getPermissionLevel(player.getGameProfile()) < player.getServer().getOpPermissionLevel()) {
@@ -101,7 +102,6 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
                 e.printStackTrace();
             }
         });
-        FabricLoader.getInstance().getEntrypoints("rei_containers", Runnable.class).forEach(Runnable::run);
     }
     
 }

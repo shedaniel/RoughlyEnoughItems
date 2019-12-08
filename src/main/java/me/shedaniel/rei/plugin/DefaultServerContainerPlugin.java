@@ -13,10 +13,10 @@ import net.minecraft.util.Identifier;
 public class DefaultServerContainerPlugin implements Runnable {
     @Override
     public void run() {
-        ContainerInfoHandler.registerContainerInfo(new Identifier("minecraft", "plugins/crafting"), new CraftingContainerInfoWrapper(CraftingTableContainer.class));
-        ContainerInfoHandler.registerContainerInfo(new Identifier("minecraft", "plugins/crafting"), new CraftingContainerInfoWrapper(PlayerContainer.class));
-        ContainerInfoHandler.registerContainerInfo(new Identifier("minecraft", "plugins/smelting"), new CraftingContainerInfoWrapper(FurnaceContainer.class));
-        ContainerInfoHandler.registerContainerInfo(new Identifier("minecraft", "plugins/smoking"), new CraftingContainerInfoWrapper(SmokerContainer.class));
-        ContainerInfoHandler.registerContainerInfo(new Identifier("minecraft", "plugins/blasting"), new CraftingContainerInfoWrapper(BlastFurnaceContainer.class));
+        ContainerInfoHandler.registerContainerInfo(new Identifier("minecraft", "plugins/crafting"), CraftingContainerInfoWrapper.create(CraftingTableContainer.class));
+        ContainerInfoHandler.registerContainerInfo(new Identifier("minecraft", "plugins/crafting"), CraftingContainerInfoWrapper.create(PlayerContainer.class));
+        ContainerInfoHandler.registerContainerInfo(new Identifier("minecraft", "plugins/smelting"), CraftingContainerInfoWrapper.create(FurnaceContainer.class));
+        ContainerInfoHandler.registerContainerInfo(new Identifier("minecraft", "plugins/smoking"), CraftingContainerInfoWrapper.create(SmokerContainer.class));
+        ContainerInfoHandler.registerContainerInfo(new Identifier("minecraft", "plugins/blasting"), CraftingContainerInfoWrapper.create(BlastFurnaceContainer.class));
     }
 }

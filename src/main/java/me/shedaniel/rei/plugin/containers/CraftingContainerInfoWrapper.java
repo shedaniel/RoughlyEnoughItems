@@ -18,6 +18,10 @@ public class CraftingContainerInfoWrapper<T extends CraftingContainer<?>> implem
         this.containerClass = containerClass;
     }
     
+    public static <T extends CraftingContainer<?>> ContainerInfo<T> create(Class<T> containerClass) {
+        return new CraftingContainerInfoWrapper<T>(containerClass);
+    }
+    
     @Override
     public Class<? extends Container> getContainerClass() {
         return containerClass;
