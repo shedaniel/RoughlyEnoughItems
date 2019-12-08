@@ -12,11 +12,11 @@ import net.minecraft.util.Identifier;
 import java.util.Map;
 
 public class ContainerInfoHandler {
-    private static final Map<String, Map<Class<? extends Container>, ContainerInfo>> containerInfoMap = Maps.newHashMap();
+    private static final Map<String, Map<Class<? extends Container>, ContainerInfo>> containerInfoMap = Maps.newLinkedHashMap();
     
     public static void registerContainerInfo(Identifier category, ContainerInfo containerInfo) {
-        if (!containerInfoMap.containsKey(category))
-            containerInfoMap.put(category.toString(), Maps.newHashMap());
+        if (!containerInfoMap.containsKey(category.toString()))
+            containerInfoMap.put(category.toString(), Maps.newLinkedHashMap());
         containerInfoMap.get(category.toString()).put(containerInfo.getContainerClass(), containerInfo);
     }
     
@@ -25,6 +25,11 @@ public class ContainerInfoHandler {
     }
     
     public static ContainerInfo getContainerInfo(Identifier category, Class<?> containerClass) {
-        return isCategoryHandled(category) ? containerInfoMap.get(category.toString()).get(containerClass) : null;
+        if (!isCategoryHandled(category)) return null;
+        Map<Class<? extends Container>, ContainerInfo> infoMap = containerInfoMap.get(category.toString());
+        if (infoMap.containsKey(containerClass)) return infoMap.get(containerClass);
+        for (Map.Entry<Class<? extends Container>, ContainerInfo> entry : infoMap.entrySet())
+            if (entry.getKey().isAssignableFrom(containerClass)) return entry.getValue();
+        return null;
     }
 }
