@@ -79,7 +79,7 @@
   "text.rei.select": "Vali",
   "text.rei.favorites": "Lemmikud",
   "text.rei.favorites_tooltip": " \n§7Vajuta %s, et lisada see lemmikutesse.",
-  "text.rei.remove_favorites_tooltip": " \n§7Press %s to remove this from favorites.",
+  "text.rei.remove_favorites_tooltip": " \n§7Vajuta %s, et eemaldada see lemmikutest.",
   "text.rei.working_station": "Tööjaam",
   "text.rei.recipe_id": "\n%sRetsepti ID: %s",
   "text.rei.recipe_screen_type.selection": "Retseptide kuvatüübi valik",
