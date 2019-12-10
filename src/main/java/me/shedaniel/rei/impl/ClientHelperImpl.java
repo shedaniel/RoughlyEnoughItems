@@ -54,6 +54,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     private final Identifier nextPageKeybind = new Identifier("roughlyenoughitems", "next_page");
     private final Identifier focusSearchFieldKeybind = new Identifier("roughlyenoughitems", "focus_search");
     private final Identifier copyRecipeIdentifierKeybind = new Identifier("roughlyenoughitems", "copy_recipe_id");
+    private final Identifier favoriteEntryKeybind = new Identifier("roughlyenoughitems", "favorite_entry");
     private final Map<String, String> modNameCache = Maps.newHashMap();
     public FabricKeyBinding recipe, usage, hide, previousPage, nextPage, focusSearchField, copyRecipeIdentifier;
     
@@ -71,6 +72,13 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         if (mod.isEmpty())
             return "";
         return Formatting.BLUE.toString() + Formatting.ITALIC.toString() + mod;
+    }
+    
+    @Override
+    public FabricKeyBinding[] getREIKeyBindings() {
+        return new FabricKeyBinding[]{
+                recipe, usage, hide, previousPage, nextPage, focusSearchField, copyRecipeIdentifier
+        };
     }
     
     @Override

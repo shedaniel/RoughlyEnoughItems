@@ -23,7 +23,6 @@ import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.client.render.DiffuseLighting;
-import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.resource.language.I18n;
@@ -89,12 +88,12 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         return ENTRY_LIST_WIDGET;
     }
     
-    public void init() {
-        init(false);
+    public void init(boolean useless) {
+        init();
     }
     
     @SuppressWarnings("deprecation")
-    public void init(boolean setPage) {
+    public void init() {
         this.shouldReInit = false;
         //Update Variables
         this.children().clear();
@@ -103,9 +102,10 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         DisplayHelper.DisplayBoundsHandler boundsHandler = DisplayHelper.getInstance().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
         this.rectangle = ConfigManager.getInstance().getConfig().isLeftHandSidePanel() ? boundsHandler.getLeftBounds(MinecraftClient.getInstance().currentScreen) : boundsHandler.getRightBounds(MinecraftClient.getInstance().currentScreen);
         widgets.add(ENTRY_LIST_WIDGET);
-        if (ScreenHelper.getSearchField() == null)
+        ENTRY_LIST_WIDGET.updateArea(boundsHandler, ScreenHelper.getSearchField() == null ? "" : null);
+        if (ScreenHelper.getSearchField() == null) {
             ScreenHelper.setSearchField(new OverlaySearchField(0, 0, 0, 0));
-        ENTRY_LIST_WIDGET.updateArea(boundsHandler, ScreenHelper.getSearchField().getText());
+        }
         ScreenHelper.getSearchField().getBounds().setBounds(getTextFieldArea());
         this.widgets.add(ScreenHelper.getSearchField());
         ScreenHelper.getSearchField().setChangedListener(s -> {
@@ -414,11 +414,11 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
     public void render(int mouseX, int mouseY, float delta) {
         List<ItemStack> currentStacks = ClientHelper.getInstance().getInventoryItemsTypes();
         if (shouldReInit)
-            init(true);
+            init();
         else {
             for (DisplayHelper.DisplayBoundsHandler<?> handler : DisplayHelper.getInstance().getSortedBoundsHandlers(minecraft.currentScreen.getClass())) {
                 if (handler != null && handler.shouldRecalculateArea(!ConfigManager.getInstance().getConfig().isLeftHandSidePanel(), rectangle)) {
-                    init(true);
+                    init();
                     break;
                 }
             }

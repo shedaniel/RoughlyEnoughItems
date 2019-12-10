@@ -132,6 +132,8 @@ public interface ClientHelper {
      */
     String getModFromIdentifier(Identifier identifier);
     
+    FabricKeyBinding[] getREIKeyBindings();
+    
     /**
      * @return the recipe keybind, defaulted R
      */

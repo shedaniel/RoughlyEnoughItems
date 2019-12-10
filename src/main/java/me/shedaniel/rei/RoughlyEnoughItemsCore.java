@@ -141,6 +141,24 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         return ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET) && ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.DELETE_ITEMS_PACKET);
     }
     
+    @Internal
+    @Deprecated
+    public static void syncRecipes(AtomicLong lastSync) {
+        if (lastSync != null) {
+            if (lastSync.get() > 0 && System.currentTimeMillis() - lastSync.get() <= 5000) {
+                RoughlyEnoughItemsCore.LOGGER.warn("[REI] Suppressing Sync Recipes!");
+                return;
+            }
+            lastSync.set(System.currentTimeMillis());
+        }
+        RecipeManager recipeManager = MinecraftClient.getInstance().getNetworkHandler().getRecipeManager();
+        if (ConfigManager.getInstance().getConfig().doesRegisterRecipesInAnotherThread()) {
+            CompletableFuture.runAsync(() -> ((RecipeHelperImpl) RecipeHelper.getInstance()).recipesLoaded(recipeManager), SYNC_RECIPES);
+        } else {
+            ((RecipeHelperImpl) RecipeHelper.getInstance()).recipesLoaded(recipeManager);
+        }
+    }
+    
     @SuppressWarnings("deprecation")
     @Override
     public void onInitializeClient() {
@@ -218,24 +236,6 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     private void loadTestPlugins() {
         if (System.getProperty("rei.test", "false").equals("true")) {
             registerPlugin(new REITestPlugin());
-        }
-    }
-    
-    @Internal
-    @Deprecated
-    public static void syncRecipes(AtomicLong lastSync) {
-        if (lastSync != null) {
-            if (lastSync.get() > 0 && System.currentTimeMillis() - lastSync.get() <= 5000) {
-                RoughlyEnoughItemsCore.LOGGER.warn("[REI] Suppressing Sync Recipes!");
-                return;
-            }
-            lastSync.set(System.currentTimeMillis());
-        }
-        RecipeManager recipeManager = MinecraftClient.getInstance().getNetworkHandler().getRecipeManager();
-        if (ConfigManager.getInstance().getConfig().doesRegisterRecipesInAnotherThread()) {
-            CompletableFuture.runAsync(() -> ((RecipeHelperImpl) RecipeHelper.getInstance()).recipesLoaded(recipeManager), SYNC_RECIPES);
-        } else {
-            ((RecipeHelperImpl) RecipeHelper.getInstance()).recipesLoaded(recipeManager);
         }
     }
     

@@ -9,6 +9,7 @@ import me.shedaniel.rei.gui.config.ItemCheatingMode;
 import me.shedaniel.rei.gui.config.ItemListOrdering;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.gui.config.SearchFieldLocation;
+import net.minecraft.client.util.InputUtil;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -80,6 +81,15 @@ public interface ConfigObject {
     boolean doesRegisterRecipesInAnotherThread();
     
     boolean doesSnapToRows();
+    
+    boolean isFavoritesEnabled();
+    
+    InputUtil.KeyCode getFavoriteKeybind();
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD})
+    public @interface AddInFrontKeyCode {
+    }
     
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD})

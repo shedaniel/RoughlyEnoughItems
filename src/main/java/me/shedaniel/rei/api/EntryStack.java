@@ -5,6 +5,8 @@
 
 package me.shedaniel.rei.api;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.impl.EmptyEntryStack;
@@ -15,7 +17,10 @@ import net.minecraft.fluid.Fluid;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -45,6 +50,53 @@ public interface EntryStack {
     
     static EntryStack create(ItemConvertible item) {
         return new ItemEntryStack(new ItemStack(item));
+    }
+    
+    static EntryStack readFromJson(JsonElement jsonElement) {
+        try {
+            JsonObject obj = jsonElement.getAsJsonObject();
+            switch (obj.get("type").getAsString()) {
+                case "stack":
+                    return EntryStack.create(ItemStack.fromTag(StringNbtReader.parse(obj.get("nbt").getAsString())));
+                case "fluid":
+                    return EntryStack.create(Registry.FLUID.get(Identifier.tryParse(obj.get("id").getAsString())));
+                case "empty":
+                    return EntryStack.empty();
+                default:
+                    throw new IllegalArgumentException("Invalid Entry Type!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return EntryStack.empty();
+        }
+    }
+    
+    @Nullable
+    default JsonElement toJson() {
+        try {
+            switch (getType()) {
+                case ITEM:
+                    JsonObject obj1 = new JsonObject();
+                    obj1.addProperty("type", "stack");
+                    obj1.addProperty("nbt", getItemStack().toTag(new CompoundTag()).toString());
+                    return obj1;
+                case FLUID:
+                    JsonObject obj2 = new JsonObject();
+                    obj2.addProperty("type", "fluid");
+                    obj2.addProperty("id", getIdentifier().get().toString());
+                    return obj2;
+                case RENDER:
+                case EMPTY:
+                    JsonObject obj3 = new JsonObject();
+                    obj3.addProperty("type", "empty");
+                    return obj3;
+                default:
+                    throw new IllegalArgumentException("Invalid Entry Type!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
     
     Optional<Identifier> getIdentifier();

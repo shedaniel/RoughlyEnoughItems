@@ -14,6 +14,7 @@ import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.config.ItemCheatingMode;
 import me.shedaniel.rei.gui.config.ItemListOrdering;
 import me.shedaniel.rei.impl.ScreenHelper;
@@ -24,6 +25,8 @@ import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
@@ -31,10 +34,7 @@ import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -60,13 +60,26 @@ public class EntryListWidget extends WidgetWithBounds {
     protected int blockedCount;
     private Rectangle bounds, innerBounds;
     private List<EntryStack> allStacks = null;
+    private List<EntryStack> favorites = null;
     private List<EntryListEntry> entries = Collections.emptyList();
     @SuppressWarnings("deprecation")
     private List<SearchArgument.SearchArguments> lastSearchArguments = Collections.emptyList();
     private boolean draggingScrollBar = false;
     
+    protected final int getSlotsHeightNumberForFavorites() {
+        if (favorites.isEmpty()) return 0;
+        return MathHelper.ceil(2 + favorites.size() / (innerBounds.width / 18f));
+    }
+    
+    protected final int getScrollNumberForFavorites() {
+        if (favorites.isEmpty()) return 0;
+        return (innerBounds.width / 18) * getSlotsHeightNumberForFavorites();
+    }
+    
     protected final int getMaxScrollPosition() {
-        return MathHelper.ceil((allStacks.size() + blockedCount) / (innerBounds.width / 18f)) * 18;
+        if (favorites.isEmpty())
+            return MathHelper.ceil((allStacks.size() + blockedCount) / (innerBounds.width / 18f)) * 18;
+        return MathHelper.ceil((allStacks.size() + blockedCount + getScrollNumberForFavorites()) / (innerBounds.width / 18f)) * 18 - 12;
     }
     
     protected final int getMaxScroll() {
@@ -139,20 +152,48 @@ public class EntryListWidget extends WidgetWithBounds {
         if (ConfigManager.getInstance().getConfig().isEntryListWidgetScrolled()) {
             for (EntryListEntry entry : entries) entry.clearStacks();
             ScissorsHandler.INSTANCE.scissor(bounds);
-            int skip = Math.max(0, MathHelper.floor(scroll / 18f));
+            int sizeForFavorites = getSlotsHeightNumberForFavorites();
+            int skip = Math.max(0, MathHelper.floor(scroll / 18f) - sizeForFavorites);
             int nextIndex = skip * innerBounds.width / 18;
             int i = nextIndex;
             blockedCount = 0;
+            if (sizeForFavorites > 0) {
+                drawString(font, I18n.translate("text.rei.favorites"), innerBounds.x + 2, (int) (innerBounds.y + 6 - scroll), -1);
+                nextIndex += innerBounds.width / 18;
+                for (int i1 = 0; i1 < favorites.size(); i1++) {
+                    EntryStack stack = favorites.get(i1);
+                    back1:
+                    while (true) {
+                        EntryListEntry entry = entries.get(nextIndex);
+                        entry.getBounds().y = (int) (entry.backupY - scroll);
+                        if (entry.getBounds().y > bounds.getMaxY())
+                            break back1;
+                        if (notSteppingOnExclusionZones(entry.getBounds().x, entry.getBounds().y, innerBounds)) {
+                            entry.entry(stack);
+                            entry.isFavorites = true;
+                            entry.render(mouseX, mouseY, delta);
+                            nextIndex++;
+                            break;
+                        } else {
+                            blockedCount++;
+                            nextIndex++;
+                        }
+                    }
+                }
+                nextIndex += innerBounds.width / -18 + getScrollNumberForFavorites() - favorites.size();
+            }
+            int offset = sizeForFavorites > 0 ? -12 : 0;
             back:
             for (; i < allStacks.size(); i++) {
                 EntryStack stack = allStacks.get(i);
                 while (true) {
                     EntryListEntry entry = entries.get(nextIndex);
-                    entry.getBounds().y = (int) (entry.backupY - scroll);
+                    entry.getBounds().y = (int) (entry.backupY - scroll + offset);
                     if (entry.getBounds().y > bounds.getMaxY())
                         break back;
                     if (notSteppingOnExclusionZones(entry.getBounds().x, entry.getBounds().y, innerBounds)) {
                         entry.entry(stack);
+                        entry.isFavorites = false;
                         entry.render(mouseX, mouseY, delta);
                         nextIndex++;
                         break;
@@ -166,7 +207,8 @@ public class EntryListWidget extends WidgetWithBounds {
             ScissorsHandler.INSTANCE.removeLastScissor();
             renderScrollbar();
         } else {
-            for (Widget widget : entries) {
+            for (EntryListEntry widget : entries) {
+                widget.isFavorites = false;
                 widget.render(mouseX, mouseY, delta);
             }
         }
@@ -272,7 +314,7 @@ public class EntryListWidget extends WidgetWithBounds {
         this.bounds = boundsHandler.getItemListArea(ScreenHelper.getLastOverlay().getBounds());
         if (searchTerm != null)
             updateSearch(searchTerm);
-        else if (allStacks == null)
+        else if (allStacks == null || favorites == null)
             updateSearch("");
         else updateEntriesPosition();
     }
@@ -302,7 +344,8 @@ public class EntryListWidget extends WidgetWithBounds {
             page = 0;
             int width = innerBounds.width / 18;
             int pageHeight = innerBounds.height / 18;
-            int slotsToPrepare = allStacks.size();
+            int sizeForFavorites = getScrollNumberForFavorites();
+            int slotsToPrepare = allStacks.size() + sizeForFavorites;
             int currentX = 0;
             int currentY = 0;
             List<EntryListEntry> entries = Lists.newLinkedList();
@@ -350,22 +393,42 @@ public class EntryListWidget extends WidgetWithBounds {
     @SuppressWarnings("deprecation")
     public void updateSearch(String searchTerm) {
         lastSearchArguments = processSearchTerm(searchTerm);
-        List<EntryStack> list = Lists.newLinkedList();
-        boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
-        List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
-        for (EntryStack stack : EntryRegistry.getInstance().getStacksList()) {
-            if (lastSearchArguments.isEmpty() || canSearchTermsBeAppliedTo(stack, lastSearchArguments)) {
-                if (workingItems != null && CollectionUtils.findFirstOrNullEquals(workingItems, stack) == null)
-                    continue;
-                list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE)
-                        .setting(EntryStack.Settings.Item.RENDER_OVERLAY, RENDER_EXTRA_CONFIG));
+        {
+            List<EntryStack> list = Lists.newLinkedList();
+            boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
+            List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
+            for (EntryStack stack : EntryRegistry.getInstance().getStacksList()) {
+                if (lastSearchArguments.isEmpty() || canSearchTermsBeAppliedTo(stack, lastSearchArguments)) {
+                    if (workingItems != null && CollectionUtils.findFirstOrNullEquals(workingItems, stack) == null)
+                        continue;
+                    list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE)
+                            .setting(EntryStack.Settings.Item.RENDER_OVERLAY, RENDER_EXTRA_CONFIG));
+                }
             }
+            ItemListOrdering ordering = ConfigManager.getInstance().getConfig().getItemListOrdering();
+            if (ordering == ItemListOrdering.name) list.sort(ENTRY_NAME_COMPARER);
+            if (ordering == ItemListOrdering.item_groups) list.sort(ENTRY_GROUP_COMPARER);
+            if (!ConfigManager.getInstance().getConfig().isItemListAscending()) Collections.reverse(list);
+            allStacks = list;
         }
-        ItemListOrdering ordering = ConfigManager.getInstance().getConfig().getItemListOrdering();
-        if (ordering == ItemListOrdering.name) list.sort(ENTRY_NAME_COMPARER);
-        if (ordering == ItemListOrdering.item_groups) list.sort(ENTRY_GROUP_COMPARER);
-        if (!ConfigManager.getInstance().getConfig().isItemListAscending()) Collections.reverse(list);
-        allStacks = list;
+        if (ConfigManager.getInstance().getConfig().isFavoritesEnabled()) {
+            List<EntryStack> list = Lists.newLinkedList();
+            boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
+            List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
+            for (EntryStack stack : ConfigManager.getInstance().getFavorites()) {
+                if (lastSearchArguments.isEmpty() || canSearchTermsBeAppliedTo(stack, lastSearchArguments)) {
+                    if (workingItems != null && CollectionUtils.findFirstOrNullEquals(workingItems, stack) == null)
+                        continue;
+                    list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE)
+                            .setting(EntryStack.Settings.Item.RENDER_OVERLAY, RENDER_EXTRA_CONFIG));
+                }
+            }
+            ItemListOrdering ordering = ConfigManager.getInstance().getConfig().getItemListOrdering();
+            if (ordering == ItemListOrdering.name) list.sort(ENTRY_NAME_COMPARER);
+            if (ordering == ItemListOrdering.item_groups) list.sort(ENTRY_GROUP_COMPARER);
+            if (!ConfigManager.getInstance().getConfig().isItemListAscending()) Collections.reverse(list);
+            favorites = list;
+        } else favorites = Collections.emptyList();
         updateEntriesPosition();
     }
     
@@ -475,6 +538,7 @@ public class EntryListWidget extends WidgetWithBounds {
     
     private class EntryListEntry extends EntryWidget {
         private int backupY;
+        private boolean isFavorites;
         
         private EntryListEntry(int x, int y) {
             super(x, y);
@@ -491,10 +555,72 @@ public class EntryListWidget extends WidgetWithBounds {
             if (getCurrentEntry().getType() != EntryStack.Type.EMPTY) super.drawHighlighted(mouseX, mouseY, delta);
         }
         
+        private String getLocalizedName(InputUtil.KeyCode value) {
+            String string_1 = value.getName();
+            int int_1 = value.getKeyCode();
+            String string_2 = null;
+            switch (value.getCategory()) {
+                case KEYSYM:
+                    string_2 = InputUtil.getKeycodeName(int_1);
+                    break;
+                case SCANCODE:
+                    string_2 = InputUtil.getScancodeName(int_1);
+                    break;
+                case MOUSE:
+                    String string_3 = I18n.translate(string_1, new Object[0]);
+                    string_2 = Objects.equals(string_3, string_1) ? I18n.translate(InputUtil.Type.MOUSE.getName(), new Object[]{int_1 + 1}) : string_3;
+            }
+            
+            return string_2 == null ? I18n.translate(string_1, new Object[0]) : string_2;
+        }
+        
         @Override
         protected void queueTooltip(int mouseX, int mouseY, float delta) {
-            if (!ClientHelper.getInstance().isCheating() || minecraft.player.inventory.getCursorStack().isEmpty())
-                super.queueTooltip(mouseX, mouseY, delta);
+            if (!ClientHelper.getInstance().isCheating() || minecraft.player.inventory.getCursorStack().isEmpty()) {
+                QueuedTooltip tooltip = getCurrentTooltip(mouseX, mouseY);
+                if (tooltip != null) {
+                    // TODO Finalize favorites
+//                    if (ConfigManager.getInstance().getConfig().isFavoritesEnabled()) {
+//                        String name = getLocalizedName(ConfigManager.getInstance().getConfig().getFavoriteKeybind());
+//                        if (!isFavorites)
+//                            tooltip.getText().addAll(Arrays.asList(I18n.translate("text.rei.favorites_tooltip", name).split("\n")));
+//                        else
+//                            tooltip.getText().addAll(Arrays.asList(I18n.translate("text.rei.remove_favorites_tooltip", name).split("\n")));
+//                    }
+                    ScreenHelper.getLastOverlay().addTooltip(tooltip);
+                }
+            }
+        }
+        
+        @Override
+        public boolean keyPressed(int int_1, int int_2, int int_3) {
+            if (!interactable)
+                return false;
+            if (containsMouse(PointHelper.fromMouse()) && !getCurrentEntry().isEmpty()) {
+                InputUtil.KeyCode keyCode = ConfigManager.getInstance().getConfig().getFavoriteKeybind();
+                if (int_1 == InputUtil.UNKNOWN_KEYCODE.getKeyCode()) {
+                    if (keyCode.getCategory() == InputUtil.Type.SCANCODE && keyCode.getKeyCode() == int_2) {
+                        if (!isFavorites) {
+                            ConfigManager.getInstance().getFavorites().add(getCurrentEntry().copy());
+                            ContainerScreenOverlay.getEntryListWidget().updateSearch(ScreenHelper.getSearchField().getText());
+                        } else {
+                            ConfigManager.getInstance().getFavorites().remove(getCurrentEntry());
+                            ContainerScreenOverlay.getEntryListWidget().updateSearch(ScreenHelper.getSearchField().getText());
+                        }
+                        return true;
+                    }
+                } else if (keyCode.getCategory() == InputUtil.Type.KEYSYM && keyCode.getKeyCode() == int_1) {
+                    if (!isFavorites) {
+                        ConfigManager.getInstance().getFavorites().add(getCurrentEntry().copy());
+                        ContainerScreenOverlay.getEntryListWidget().updateSearch(ScreenHelper.getSearchField().getText());
+                    } else {
+                        ConfigManager.getInstance().getFavorites().remove(getCurrentEntry());
+                        ContainerScreenOverlay.getEntryListWidget().updateSearch(ScreenHelper.getSearchField().getText());
+                    }
+                    return true;
+                }
+            }
+            return super.keyPressed(int_1, int_2, int_3);
         }
         
         @Override
