@@ -12,6 +12,10 @@ import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.Comment;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.gui.config.*;
+import net.minecraft.client.util.InputUtil;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Deprecated
 @Internal
@@ -21,18 +25,15 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @ConfigEntry.Category("!general")
     @ConfigEntry.Gui.TransitiveObject
     @DontApplyFieldName
-    private General general = new General();
-    
+    public General general = new General();
     @ConfigEntry.Category("appearance")
     @ConfigEntry.Gui.TransitiveObject
     @DontApplyFieldName
     private Appearance appearance = new Appearance();
-    
     @ConfigEntry.Category("modules")
     @ConfigEntry.Gui.TransitiveObject
     @DontApplyFieldName
     private Modules modules = new Modules();
-    
     @ConfigEntry.Category("technical")
     @ConfigEntry.Gui.TransitiveObject
     @DontApplyFieldName
@@ -198,12 +199,27 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         return appearance.snapToRows;
     }
     
+    @Override
+    public boolean isFavoritesEnabled() {
+        return general.favoritesEnabled;
+    }
+    
+    @Override
+    public InputUtil.KeyCode getFavoriteKeybind() {
+        return general.favoriteKeybind;
+    }
+    
     public static class General {
+        @ConfigEntry.Gui.Excluded
+        public List<String> favorites = new ArrayList<>();
         @Comment("Declares whether cheating mode is on.")
         private boolean cheating = false;
         @Comment("Declares whether REI is visible.")
         @ConfigEntry.Gui.Excluded
         private boolean overlayVisible = true;
+        private boolean favoritesEnabled = true;
+        @AddInFrontKeyCode
+        private InputUtil.KeyCode favoriteKeybind = InputUtil.Type.KEYSYM.createFromCode(65);
     }
     
     public static class Appearance {

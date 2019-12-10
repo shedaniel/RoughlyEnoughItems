@@ -8,7 +8,7 @@ package me.shedaniel.rei.api;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import net.minecraft.client.gui.screen.Screen;
 
-import java.io.IOException;
+import java.util.List;
 
 public interface ConfigManager {
     
@@ -16,6 +16,8 @@ public interface ConfigManager {
     static ConfigManager getInstance() {
         return RoughlyEnoughItemsCore.getConfigManager();
     }
+    
+    List<EntryStack> getFavorites();
     
     /**
      * Saves the config.

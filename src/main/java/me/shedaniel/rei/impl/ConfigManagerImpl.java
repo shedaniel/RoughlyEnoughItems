@@ -5,26 +5,35 @@
 
 package me.shedaniel.rei.impl;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import me.sargunvohra.mcmods.autoconfig1u.AutoConfig;
 import me.sargunvohra.mcmods.autoconfig1u.gui.ConfigScreenProvider;
 import me.sargunvohra.mcmods.autoconfig1u.gui.registry.GuiRegistry;
 import me.sargunvohra.mcmods.autoconfig1u.serializer.JanksonConfigSerializer;
+import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.Jankson;
+import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.JsonPrimitive;
 import me.shedaniel.cloth.hooks.ScreenHooks;
+import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
+import me.shedaniel.clothconfig2.gui.entries.KeyCodeEntry;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.ConfigManager;
-import me.shedaniel.rei.api.ConfigObject;
-import me.shedaniel.rei.api.RecipeHelper;
+import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.gui.ConfigReloadingScreen;
+import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.credits.CreditsScreen;
 import me.shedaniel.rei.gui.widget.ReloadConfigButtonWidget;
+import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.AbstractPressableButtonWidget;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.LiteralText;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -36,10 +45,18 @@ import static me.sargunvohra.mcmods.autoconfig1u.util.Utils.setUnsafely;
 public class ConfigManagerImpl implements ConfigManager {
     
     private boolean craftableOnly;
+    private List<EntryStack> favorites = new ArrayList<>();
     
     public ConfigManagerImpl() {
         this.craftableOnly = false;
-        AutoConfig.register(ConfigObjectImpl.class, JanksonConfigSerializer::new);
+        AutoConfig.register(ConfigObjectImpl.class, (definition, configClass) -> {
+            return new JanksonConfigSerializer<ConfigObjectImpl>(definition, configClass, Jankson.builder()
+                    .registerPrimitiveTypeAdapter(InputUtil.KeyCode.class, it -> {
+                        return it instanceof String ? InputUtil.fromName((String) it) : null;
+                    })
+                    .registerSerializer(InputUtil.KeyCode.class, (it, marshaller) -> new JsonPrimitive(it.getName()))
+                    .build());
+        });
         GuiRegistry guiRegistry = AutoConfig.getGuiRegistry(ConfigObjectImpl.class);
         //noinspection rawtypes
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> Collections.singletonList(
@@ -48,11 +65,48 @@ public class ConfigManagerImpl implements ConfigManager {
                         .setSaveConsumer(newValue -> setUnsafely(field, config, newValue))
                         .build()
         ), field -> field.getType().isEnum(), ConfigObject.UseEnumSelectorInstead.class);
+        loadFavoredEntries();
+        guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> {
+            @SuppressWarnings("rawtypes") List<AbstractConfigListEntry> entries = new ArrayList<>();
+            for (FabricKeyBinding binding : ClientHelper.getInstance().getREIKeyBindings()) {
+                entries.add(ConfigEntryBuilder.create().fillKeybindingField(I18n.translate(binding.getId()) + ":", binding).build());
+            }
+            KeyCodeEntry entry = ConfigEntryBuilder.create().startKeyCodeField(i13n, getUnsafely(field, config, null))
+                    .setDefaultValue(() -> getUnsafely(field, defaults))
+                    .setSaveConsumer(newValue -> setUnsafely(field, config, newValue))
+                    .build();
+            entry.setAllowMouse(false);
+            entries.add(entry);
+            return entries;
+        }, field -> field.getType() == InputUtil.KeyCode.class, ConfigObject.AddInFrontKeyCode.class);
+        loadFavoredEntries();
         RoughlyEnoughItemsCore.LOGGER.info("[REI] Config is loaded.");
     }
     
     @Override
+    public List<EntryStack> getFavorites() {
+        return favorites;
+    }
+    
+    public void loadFavoredEntries() {
+        favorites.clear();
+        Gson gson = new GsonBuilder().create();
+        for (String entry : ((ConfigObjectImpl) getConfig()).general.favorites) {
+            EntryStack stack = EntryStack.readFromJson(gson.fromJson(entry, JsonElement.class));
+            if (!stack.isEmpty()) favorites.add(stack);
+        }
+        saveConfig();
+    }
+    
+    @Override
     public void saveConfig() {
+        Gson gson = new GsonBuilder().create();
+        ConfigObjectImpl object = (ConfigObjectImpl) getConfig();
+        object.general.favorites.clear();
+        for (EntryStack stack : favorites) {
+            JsonElement element = stack.toJson();
+            if (element != null) object.general.favorites.add(gson.toJson(element));
+        }
         ((me.sargunvohra.mcmods.autoconfig1u.ConfigManager<ConfigObjectImpl>) AutoConfig.getConfigHolder(ConfigObjectImpl.class)).save();
     }
     
@@ -103,6 +157,9 @@ public class ConfigManagerImpl implements ConfigManager {
                             MinecraftClient.getInstance().openScreen(new CreditsScreen(screen));
                         }
                     });
+                }).setSavingRunnable(() -> {
+                    saveConfig();
+                    ContainerScreenOverlay.getEntryListWidget().updateSearch(ScreenHelper.getSearchField().getText());
                 }).build();
             });
             return provider.get();

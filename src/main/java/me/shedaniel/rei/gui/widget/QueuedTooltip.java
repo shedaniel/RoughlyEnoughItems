@@ -22,7 +22,7 @@ public class QueuedTooltip {
     
     private QueuedTooltip(Point location, List<String> text) {
         this.location = location;
-        this.text = Collections.unmodifiableList(text);
+        this.text = Lists.newArrayList(text);
     }
     
     public static QueuedTooltip create(Point location, List<String> text) {
