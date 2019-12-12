@@ -347,7 +347,7 @@ public class EntryListWidget extends WidgetWithBounds {
             int width = innerBounds.width / 18;
             int pageHeight = innerBounds.height / 18;
             int sizeForFavorites = getScrollNumberForFavorites();
-            int slotsToPrepare = allStacks.size() + sizeForFavorites;
+            int slotsToPrepare = allStacks.size() + sizeForFavorites * 3;
             int currentX = 0;
             int currentY = 0;
             List<EntryListEntry> entries = Lists.newLinkedList();
