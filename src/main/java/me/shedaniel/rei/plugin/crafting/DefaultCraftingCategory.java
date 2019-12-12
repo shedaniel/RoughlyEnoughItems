@@ -91,10 +91,10 @@ public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCr
         Point startPoint = new Point(bounds.getCenterX() - 58, bounds.getCenterY() - 27);
         RenderSystem.translatef(0, 0, 400);
         for (Integer slot : redSlots) {
-            int i = getSlotWithSize(display, slot, 3);
+            int i = slot;
             int x = i % 3;
             int y = (i - x) / 3;
-            DrawableHelper.fill(startPoint.x + 1 + x * 18, startPoint.y + 1 + y * 18, startPoint.x + 1 + x * 18 + 16, startPoint.y + 1 + y * 18 + 16, 822018048);
+            DrawableHelper.fill(startPoint.x + 1 + x * 18, startPoint.y + 1 + y * 18, startPoint.x + 1 + x * 18 + 16, startPoint.y + 1 + y * 18 + 16, 0x60ff0000);
         }
         RenderSystem.translatef(0, 0, -400);
     }

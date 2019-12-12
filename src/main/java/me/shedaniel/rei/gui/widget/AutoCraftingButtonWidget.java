@@ -99,7 +99,8 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
                     }
                     error.add(result.getErrorKey());
                     color = result.getColor();
-                    redSlots = result.getIntegers();
+                    if (result.getIntegers() != null && !result.getIntegers().isEmpty())
+                        redSlots = result.getIntegers();
                 }
             } catch (Exception e) {
                 e.printStackTrace();

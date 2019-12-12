@@ -7,6 +7,7 @@ package me.shedaniel.rei.plugin.autocrafting;
 
 import me.shedaniel.rei.api.AutoTransferHandler;
 import me.shedaniel.rei.api.RecipeDisplay;
+import me.shedaniel.rei.api.TransferRecipeDisplay;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.listeners.RecipeBookGuiHooks;
 import me.shedaniel.rei.plugin.cooking.DefaultCookingDisplay;
@@ -23,6 +24,8 @@ public class DefaultRecipeBookHandler implements AutoTransferHandler {
     @SuppressWarnings("deprecation")
     @Override
     public Result handle(Context context) {
+        if (context.getRecipe() instanceof TransferRecipeDisplay && DefaultCategoryHandler.canUseMovePackets())
+            return Result.createNotApplicable();
         RecipeDisplay display = context.getRecipe();
         if (!(context.getContainer() instanceof CraftingContainer))
             return Result.createNotApplicable();

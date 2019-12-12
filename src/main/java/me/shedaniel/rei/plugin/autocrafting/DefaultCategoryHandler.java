@@ -76,7 +76,7 @@ public class DefaultCategoryHandler implements AutoTransferHandler {
         return -10;
     }
     
-    public boolean canUseMovePackets() {
+    public static boolean canUseMovePackets() {
         return ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.MOVE_ITEMS_PACKET);
     }
     

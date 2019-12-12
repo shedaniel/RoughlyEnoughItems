@@ -47,7 +47,7 @@ public class DefaultCookingCategory implements TransferRecipeCategory<DefaultCoo
         Point startPoint = new Point(bounds.getCenterX() - 41, bounds.getCenterY() - 27);
         RenderSystem.translatef(0, 0, 400);
         if (redSlots.contains(0)) {
-            DrawableHelper.fill(startPoint.x + 1, startPoint.y + 1, startPoint.x + 1 + 16, startPoint.y + 1 + 16, 822018048);
+            DrawableHelper.fill(startPoint.x + 1, startPoint.y + 1, startPoint.x + 1 + 16, startPoint.y + 1 + 16, 1090453504);
         }
         RenderSystem.translatef(0, 0, -400);
     }
