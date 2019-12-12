@@ -10,7 +10,6 @@ import com.google.common.collect.Lists;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.impl.PointHelper;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 

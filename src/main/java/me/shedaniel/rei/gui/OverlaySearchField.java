@@ -5,8 +5,10 @@
 
 package me.shedaniel.rei.gui;
 
+import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.impl.PointHelper;
+import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
@@ -16,16 +18,35 @@ import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.sound.SoundEvents;
 
+import java.util.List;
+
 public class OverlaySearchField extends TextFieldWidget {
     
     public static boolean isSearching = false;
     public long keybindFocusTime = -1;
     public int keybindFocusKey = -1;
     protected long lastClickedTime = -1;
+    private List<String> history = Lists.newArrayListWithCapacity(100);
     
     OverlaySearchField(int x, int y, int width, int height) {
         super(x, y, width, height);
         setMaxLength(10000);
+    }
+    
+    @Override
+    public void setFocused(boolean boolean_1) {
+        if (isFocused() != boolean_1) addToHistory(getText());
+        super.setFocused(boolean_1);
+    }
+    
+    @Deprecated
+    @Internal
+    public void addToHistory(String text) {
+        if (!text.isEmpty()) {
+            history.removeIf(str -> str.equalsIgnoreCase(text));
+            history.add(text);
+            if (history.size() > 100) history.remove(0);
+        }
     }
     
     @SuppressWarnings("deprecation")
@@ -70,8 +91,26 @@ public class OverlaySearchField extends TextFieldWidget {
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (this.isVisible() && this.isFocused())
             if (int_1 == 257 || int_1 == 335) {
+                addToHistory(getText());
                 setFocused(false);
                 return true;
+            } else if (int_1 == 265) {
+                int i = history.indexOf(getText()) - 1;
+                if (i < -1 && getText().isEmpty()) i = history.size() - 1;
+                else if (i < -1) {
+                    addToHistory(getText());
+                    i = history.size() - 2;
+                }
+                if (i >= 0) {
+                    setText(history.get(i));
+                    return true;
+                }
+            } else if (int_1 == 264) {
+                int i = history.indexOf(getText()) + 1;
+                if (i > 0) {
+                    setText(i < history.size() ? history.get(i) : "");
+                    return true;
+                }
             }
         return super.keyPressed(int_1, int_2, int_3);
     }

@@ -205,6 +205,16 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
+    public boolean doDisplayFavoritesTooltip() {
+        return isFavoritesEnabled() && appearance.displayFavoritesTooltip;
+    }
+    
+    @Override
+    public boolean doDisplayFavoritesOnTheLeft() {
+        return appearance.displayFavoritesOnTheLeft;
+    }
+    
+    @Override
     public InputUtil.KeyCode getFavoriteKeybind() {
         return general.favoriteKeybind;
     }
@@ -255,6 +265,8 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         @Comment("Declares whether if entry list widget is scrolled.")
         private boolean scrollingEntryListWidget = false;
         private boolean snapToRows = false;
+        private boolean displayFavoritesOnTheLeft = true;
+        private boolean displayFavoritesTooltip = true;
     }
     
     public static class Technical {

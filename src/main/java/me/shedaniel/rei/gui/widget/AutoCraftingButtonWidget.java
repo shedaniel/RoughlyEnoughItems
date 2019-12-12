@@ -146,7 +146,7 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
     
     @Override
     protected int getTextureId(boolean boolean_1) {
-        return !visible ? 0 : boolean_1 && enabled ? (ConfigManager.getInstance().getConfig().isLighterButtonHover() ? 4 : 3) : 1;
+        return !visible ? 0 : boolean_1 && enabled ? (ConfigObject.getInstance().isLighterButtonHover() ? 4 : 3) : 1;
     }
     
     @Override
@@ -171,7 +171,7 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (displaySupplier.get().getRecipeLocation().isPresent() && ClientHelper.getInstance().getCopyRecipeIdentifierKeyBinding().matchesKey(int_1, int_2) && containsMouse(PointHelper.fromMouse())) {
             minecraft.keyboard.setClipboard(displaySupplier.get().getRecipeLocation().get().toString());
-            if (ConfigManager.getInstance().getConfig().isToastDisplayedOnCopyIdentifier()) {
+            if (ConfigObject.getInstance().isToastDisplayedOnCopyIdentifier()) {
                 CopyRecipeIdentifierToast.addToast(I18n.translate("msg.rei.copied_recipe_id"), I18n.translate("msg.rei.recipe_id_details", displaySupplier.get().getRecipeLocation().get().toString()));
             }
             return true;

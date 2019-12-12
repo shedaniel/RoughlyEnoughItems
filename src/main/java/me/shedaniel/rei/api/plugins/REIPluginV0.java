@@ -9,7 +9,6 @@ import me.shedaniel.rei.api.DisplayHelper;
 import me.shedaniel.rei.api.EntryRegistry;
 import me.shedaniel.rei.api.REIPluginEntry;
 import me.shedaniel.rei.api.RecipeHelper;
-import me.shedaniel.rei.api.annotations.ToBeRemoved;
 
 public interface REIPluginV0 extends REIPluginEntry {
     

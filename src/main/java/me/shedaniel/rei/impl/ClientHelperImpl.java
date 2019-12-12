@@ -138,12 +138,12 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     @Override
     public boolean isCheating() {
-        return ConfigManager.getInstance().getConfig().isCheating();
+        return ConfigObject.getInstance().isCheating();
     }
     
     @Override
     public void setCheating(boolean cheating) {
-        ConfigManager.getInstance().getConfig().setCheating(cheating);
+        ConfigObject.getInstance().setCheating(cheating);
         ConfigManager.getInstance().saveConfig();
     }
     
@@ -173,7 +173,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
             if (identifier == null)
                 return false;
             String tagMessage = cheatedStack.copy().getTag() != null && !cheatedStack.copy().getTag().isEmpty() ? cheatedStack.copy().getTag().asString() : "";
-            String og = cheatedStack.getCount() == 1 ? ConfigManager.getInstance().getConfig().getGiveCommand().replaceAll(" \\{count}", "") : ConfigManager.getInstance().getConfig().getGiveCommand();
+            String og = cheatedStack.getCount() == 1 ? ConfigObject.getInstance().getGiveCommand().replaceAll(" \\{count}", "") : ConfigObject.getInstance().getGiveCommand();
             String madeUpCommand = og.replaceAll("\\{player_name}", MinecraftClient.getInstance().player.getEntityName()).replaceAll("\\{item_name}", identifier.getPath()).replaceAll("\\{item_identifier}", identifier.toString()).replaceAll("\\{nbt}", tagMessage).replaceAll("\\{count}", String.valueOf(cheatedStack.getCount()));
             if (madeUpCommand.length() > 256) {
                 madeUpCommand = og.replaceAll("\\{player_name}", MinecraftClient.getInstance().player.getEntityName()).replaceAll("\\{item_name}", identifier.getPath()).replaceAll("\\{item_identifier}", identifier.toString()).replaceAll("\\{nbt}", "").replaceAll("\\{count}", String.valueOf(cheatedStack.getCount()));
@@ -250,9 +250,9 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     @Override
     public void openRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map) {
         Screen screen = null;
-        if (ConfigManager.getInstance().getConfig().getRecipeScreenType() == RecipeScreenType.VILLAGER)
+        if (ConfigObject.getInstance().getRecipeScreenType() == RecipeScreenType.VILLAGER)
             screen = new VillagerRecipeViewingScreen(map);
-        else if (ConfigManager.getInstance().getConfig().getRecipeScreenType() == RecipeScreenType.UNSET)
+        else if (ConfigObject.getInstance().getRecipeScreenType() == RecipeScreenType.UNSET)
             screen = new PreRecipeViewingScreen(map);
         else
             screen = new RecipeViewingScreen(map);

@@ -18,6 +18,11 @@ import java.lang.annotation.Target;
 
 public interface ConfigObject {
     
+    @SuppressWarnings("deprecation")
+    static ConfigObject getInstance() {
+        return ConfigManager.getInstance().getConfig();
+    }
+    
     boolean isLighterButtonHover();
     
     void setLighterButtonHover(boolean lighterButtonHover);
@@ -83,6 +88,10 @@ public interface ConfigObject {
     boolean doesSnapToRows();
     
     boolean isFavoritesEnabled();
+    
+    boolean doDisplayFavoritesTooltip();
+    
+    boolean doDisplayFavoritesOnTheLeft();
     
     InputUtil.KeyCode getFavoriteKeybind();
     

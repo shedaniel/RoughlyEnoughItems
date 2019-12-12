@@ -79,6 +79,14 @@ public class ConfigManagerImpl implements ConfigManager {
             entries.add(entry);
             return entries;
         }, field -> field.getType() == InputUtil.KeyCode.class, ConfigObject.AddInFrontKeyCode.class);
+        guiRegistry.registerPredicateProvider((i13n, field, config, defaults, guiProvider) -> {
+            KeyCodeEntry entry = ConfigEntryBuilder.create().startKeyCodeField(i13n, getUnsafely(field, config, null))
+                    .setDefaultValue(() -> getUnsafely(field, defaults))
+                    .setSaveConsumer(newValue -> setUnsafely(field, config, newValue))
+                    .build();
+            entry.setAllowMouse(false);
+            return Collections.singletonList(entry);
+        }, field -> field.getType() == InputUtil.KeyCode.class);
         loadFavoredEntries();
         RoughlyEnoughItemsCore.LOGGER.info("[REI] Config is loaded.");
     }

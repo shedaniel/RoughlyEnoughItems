@@ -61,10 +61,10 @@ public class RecipeViewingScreen extends Screen {
         this.bounds = new Rectangle(window.getScaledWidth() / 2 - guiWidth / 2, window.getScaledHeight() / 2 - guiHeight / 2, 176, 186);
         this.categoriesMap = categoriesMap;
         this.categories = Lists.newArrayList();
-        RecipeHelper.getInstance().getAllCategories().forEach(category -> {
+        for (RecipeCategory<?> category : RecipeHelper.getInstance().getAllCategories()) {
             if (categoriesMap.containsKey(category))
                 categories.add(category);
-        });
+        }
         this.selectedCategory = (RecipeCategory<RecipeDisplay>) categories.get(0);
         this.tabs = new ArrayList<>();
         this.choosePageActivated = false;
@@ -361,12 +361,12 @@ public class RecipeViewingScreen extends Screen {
         if (selectedCategory.getFixedRecipesPerPage() > 0)
             return selectedCategory.getFixedRecipesPerPage() - 1;
         int height = selectedCategory.getDisplayHeight();
-        return MathHelper.clamp(MathHelper.floor(((double) largestHeight - 40d) / ((double) height + 7d)) - 1, 0, Math.min(ConfigManager.getInstance().getConfig().getMaxRecipePerPage() - 1, selectedCategory.getMaximumRecipePerPage() - 1));
+        return MathHelper.clamp(MathHelper.floor(((double) largestHeight - 40d) / ((double) height + 7d)) - 1, 0, Math.min(ConfigObject.getInstance().getMaxRecipePerPage() - 1, selectedCategory.getMaximumRecipePerPage() - 1));
     }
     
     private int getRecipesPerPageByHeight() {
         int height = selectedCategory.getDisplayHeight();
-        return MathHelper.clamp(MathHelper.floor(((double) guiHeight - 40d) / ((double) height + 7d)), 0, Math.min(ConfigManager.getInstance().getConfig().getMaxRecipePerPage() - 1, selectedCategory.getMaximumRecipePerPage() - 1));
+        return MathHelper.clamp(MathHelper.floor(((double) guiHeight - 40d) / ((double) height + 7d)), 0, Math.min(ConfigObject.getInstance().getMaxRecipePerPage() - 1, selectedCategory.getMaximumRecipePerPage() - 1));
     }
     
     @Override

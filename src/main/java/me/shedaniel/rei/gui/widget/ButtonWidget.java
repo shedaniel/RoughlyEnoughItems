@@ -8,7 +8,7 @@ package me.shedaniel.rei.gui.widget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
-import me.shedaniel.rei.api.ConfigManager;
+import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.sound.PositionedSoundInstance;
@@ -58,7 +58,7 @@ public abstract class ButtonWidget extends WidgetWithBounds {
         if (!this.enabled) {
             int_1 = 0;
         } else if (boolean_1) {
-            int_1 = ConfigManager.getInstance().getConfig().isLighterButtonHover() ? 4 : 3; // 2 is the old blue highlight, 3 is the 1.15 outline, 4 is the 1.15 online + light hover
+            int_1 = ConfigObject.getInstance().isLighterButtonHover() ? 4 : 3; // 2 is the old blue highlight, 3 is the 1.15 outline, 4 is the 1.15 online + light hover
         }
         
         return int_1;
