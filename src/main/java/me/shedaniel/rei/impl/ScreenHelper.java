@@ -10,6 +10,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import me.shedaniel.cloth.hooks.ClothClientHooks;
 import me.shedaniel.rei.api.ConfigManager;
+import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.OverlaySearchField;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
@@ -70,11 +71,11 @@ public class ScreenHelper implements ClientModInitializer {
     }
     
     public static boolean isOverlayVisible() {
-        return ConfigManager.getInstance().getConfig().isOverlayVisible();
+        return ConfigObject.getInstance().isOverlayVisible();
     }
     
     public static void toggleOverlayVisible() {
-        ConfigManager.getInstance().getConfig().setOverlayVisible(!ConfigManager.getInstance().getConfig().isOverlayVisible());
+        ConfigObject.getInstance().setOverlayVisible(!ConfigObject.getInstance().isOverlayVisible());
         ConfigManager.getInstance().saveConfig();
     }
     
@@ -86,6 +87,7 @@ public class ScreenHelper implements ClientModInitializer {
         if (overlay == null || reset) {
             overlay = new ContainerScreenOverlay();
             overlay.init();
+            getSearchField().setFocused(false);
         }
         return overlay;
     }
@@ -122,7 +124,7 @@ public class ScreenHelper implements ClientModInitializer {
     }
     
     public static boolean isDarkModeEnabled() {
-        return ConfigManager.getInstance().getConfig().isUsingDarkTheme();
+        return ConfigObject.getInstance().isUsingDarkTheme();
     }
     
     @Override

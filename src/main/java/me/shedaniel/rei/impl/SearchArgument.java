@@ -127,6 +127,7 @@ public class SearchArgument {
         TEXT,
         MOD,
         TOOLTIP,
+        TAG,
         ALWAYS
     }
     

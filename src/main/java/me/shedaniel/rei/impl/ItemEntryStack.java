@@ -9,7 +9,7 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.ConfigManager;
+import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.ItemStackRenderOverlayHook;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
@@ -123,7 +123,7 @@ public class ItemEntryStack extends AbstractEntryStack {
             return null;
         List<String> toolTip = Lists.newArrayList(SearchArgument.tryGetItemStackToolTip(getItemStack(), true));
         toolTip.addAll(getSetting(Settings.TOOLTIP_APPEND_EXTRA).value().apply(this));
-        if (getSetting(Settings.TOOLTIP_APPEND_MOD).value().get() && ConfigManager.getInstance().getConfig().shouldAppendModNames()) {
+        if (getSetting(Settings.TOOLTIP_APPEND_MOD).value().get() && ConfigObject.getInstance().shouldAppendModNames()) {
             final String modString = ClientHelper.getInstance().getFormattedModFromItem(getItem());
             boolean alreadyHasMod = false;
             for (String s : toolTip)

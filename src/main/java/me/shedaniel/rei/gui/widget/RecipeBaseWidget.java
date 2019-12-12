@@ -6,7 +6,7 @@
 package me.shedaniel.rei.gui.widget;
 
 import me.shedaniel.math.api.Rectangle;
-import me.shedaniel.rei.api.ConfigManager;
+import me.shedaniel.rei.api.ConfigObject;
 
 public class RecipeBaseWidget extends PanelWidget {
     
@@ -16,7 +16,7 @@ public class RecipeBaseWidget extends PanelWidget {
     
     @Override
     protected int getYTextureOffset() {
-        return ConfigManager.getInstance().getConfig().isUsingLightGrayRecipeBorder() ? 0 : 66;
+        return ConfigObject.getInstance().isUsingLightGrayRecipeBorder() ? 0 : 66;
     }
     
 }

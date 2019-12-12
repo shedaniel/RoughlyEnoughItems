@@ -90,7 +90,7 @@ public class DefaultPlugin implements REIPluginV0 {
     
     @Override
     public void registerEntries(EntryRegistry entryRegistry) {
-        if (!ConfigManager.getInstance().getConfig().isLoadingDefaultPlugin()) {
+        if (!ConfigObject.getInstance().isLoadingDefaultPlugin()) {
             return;
         }
         for (Item item : Registry.ITEM) {
@@ -119,7 +119,7 @@ public class DefaultPlugin implements REIPluginV0 {
     
     @Override
     public void registerPluginCategories(RecipeHelper recipeHelper) {
-        if (!ConfigManager.getInstance().getConfig().isLoadingDefaultPlugin()) {
+        if (!ConfigObject.getInstance().isLoadingDefaultPlugin()) {
             return;
         }
         recipeHelper.registerCategory(new DefaultCraftingCategory());
@@ -135,7 +135,7 @@ public class DefaultPlugin implements REIPluginV0 {
     
     @Override
     public void registerRecipeDisplays(RecipeHelper recipeHelper) {
-        if (!ConfigManager.getInstance().getConfig().isLoadingDefaultPlugin()) {
+        if (!ConfigObject.getInstance().isLoadingDefaultPlugin()) {
             return;
         }
         recipeHelper.registerRecipes(CRAFTING, ShapelessRecipe.class, DefaultShapelessDisplay::new);
@@ -213,7 +213,7 @@ public class DefaultPlugin implements REIPluginV0 {
     
     @Override
     public void registerBounds(DisplayHelper displayHelper) {
-        if (!ConfigManager.getInstance().getConfig().isLoadingDefaultPlugin()) {
+        if (!ConfigObject.getInstance().isLoadingDefaultPlugin()) {
             return;
         }
         displayHelper.getBaseBoundsHandler().registerExclusionZones(AbstractInventoryScreen.class, new DefaultPotionEffectExclusionZones());
@@ -293,7 +293,7 @@ public class DefaultPlugin implements REIPluginV0 {
     
     @Override
     public void registerOthers(RecipeHelper recipeHelper) {
-        if (!ConfigManager.getInstance().getConfig().isLoadingDefaultPlugin()) {
+        if (!ConfigObject.getInstance().isLoadingDefaultPlugin()) {
             return;
         }
         recipeHelper.registerWorkingStations(CRAFTING, EntryStack.create(Items.CRAFTING_TABLE));

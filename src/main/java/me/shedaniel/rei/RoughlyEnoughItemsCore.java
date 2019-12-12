@@ -152,7 +152,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             lastSync.set(System.currentTimeMillis());
         }
         RecipeManager recipeManager = MinecraftClient.getInstance().getNetworkHandler().getRecipeManager();
-        if (ConfigManager.getInstance().getConfig().doesRegisterRecipesInAnotherThread()) {
+        if (ConfigObject.getInstance().doesRegisterRecipesInAnotherThread()) {
             CompletableFuture.runAsync(() -> ((RecipeHelperImpl) RecipeHelper.getInstance()).recipesLoaded(recipeManager), SYNC_RECIPES);
         } else {
             ((RecipeHelperImpl) RecipeHelper.getInstance()).recipesLoaded(recipeManager);
@@ -245,7 +245,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         AtomicLong lastSync = new AtomicLong(-1);
         ClothClientHooks.SYNC_RECIPES.register((minecraftClient, recipeManager, synchronizeRecipesS2CPacket) -> syncRecipes(lastSync));
         ClothClientHooks.SCREEN_ADD_BUTTON.register((minecraftClient, screen, abstractButtonWidget) -> {
-            if (ConfigManager.getInstance().getConfig().doesDisableRecipeBook() && screen instanceof AbstractContainerScreen && abstractButtonWidget instanceof TexturedButtonWidget)
+            if (ConfigObject.getInstance().doesDisableRecipeBook() && screen instanceof AbstractContainerScreen && abstractButtonWidget instanceof TexturedButtonWidget)
                 if (((RecipeBookButtonWidgetHooks) abstractButtonWidget).rei_getTexture().equals(recipeButtonTex))
                     return ActionResult.FAIL;
             return ActionResult.PASS;

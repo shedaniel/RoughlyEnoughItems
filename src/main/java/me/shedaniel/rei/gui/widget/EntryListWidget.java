@@ -26,8 +26,10 @@ import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
@@ -42,7 +44,7 @@ public class EntryListWidget extends WidgetWithBounds {
     
     private static final boolean LAZY = true;
     private static final String SPACE = " ", EMPTY = "";
-    private static final Supplier<Boolean> RENDER_EXTRA_CONFIG = ConfigManager.getInstance().getConfig()::doesRenderEntryExtraOverlay;
+    private static final Supplier<Boolean> RENDER_EXTRA_CONFIG = ConfigObject.getInstance()::doesRenderEntryExtraOverlay;
     @SuppressWarnings("deprecation")
     private static final Comparator<? super EntryStack> ENTRY_NAME_COMPARER = Comparator.comparing(SearchArgument::tryGetEntryStackName);
     private static final Comparator<? super EntryStack> ENTRY_GROUP_COMPARER = Comparator.comparingInt(stack -> {
@@ -114,7 +116,7 @@ public class EntryListWidget extends WidgetWithBounds {
     
     @Override
     public boolean mouseScrolled(double double_1, double double_2, double double_3) {
-        if (ConfigManager.getInstance().getConfig().isEntryListWidgetScrolled() && bounds.contains(double_1, double_2)) {
+        if (ConfigObject.getInstance().isEntryListWidgetScrolled() && bounds.contains(double_1, double_2)) {
             offset(ClothConfigInitializer.getScrollStep() * -double_3, true);
             return true;
         }
@@ -143,13 +145,13 @@ public class EntryListWidget extends WidgetWithBounds {
     }
     
     public int getTotalPages() {
-        if (ConfigManager.getInstance().getConfig().isEntryListWidgetScrolled()) return 1;
+        if (ConfigObject.getInstance().isEntryListWidgetScrolled()) return 1;
         return MathHelper.ceil(allStacks.size() / (float) entries.size());
     }
     
     @Override
     public void render(int mouseX, int mouseY, float delta) {
-        if (ConfigManager.getInstance().getConfig().isEntryListWidgetScrolled()) {
+        if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
             for (EntryListEntry entry : entries) entry.clearStacks();
             ScissorsHandler.INSTANCE.scissor(bounds);
             int sizeForFavorites = getSlotsHeightNumberForFavorites();
@@ -215,7 +217,7 @@ public class EntryListWidget extends WidgetWithBounds {
     }
     
     private int getScrollbarMinX() {
-        if (ConfigManager.getInstance().getConfig().isLeftHandSidePanel())
+        if (ConfigObject.getInstance().isLeftHandSidePanel())
             return bounds.x + 1;
         return bounds.getMaxX() - 7;
     }
@@ -231,7 +233,7 @@ public class EntryListWidget extends WidgetWithBounds {
                 int int_3 = MathHelper.clamp((int) ((float) (int_2 * int_2) / (float) getMaxScrollPosition()), 32, int_2 - 8);
                 double double_6 = Math.max(1.0D, double_5 / (double) (int_2 - int_3));
                 float to = MathHelper.clamp((float) (scroll + double_4 * double_6), 0, height - innerBounds.height);
-                if (ConfigManager.getInstance().getConfig().doesSnapToRows()) {
+                if (ConfigObject.getInstance().doesSnapToRows()) {
                     double nearestRow = Math.round(to / 18.0) * 18.0;
                     scrollTo(nearestRow, false);
                 } else scrollTo(to, false);
@@ -288,7 +290,7 @@ public class EntryListWidget extends WidgetWithBounds {
             target -= target * (1 - ClothConfigInitializer.getBounceBackMultiplier()) * delta / 3;
         } else if (target > getMaxScroll()) {
             target = (target - getMaxScroll()) * (1 - (1 - ClothConfigInitializer.getBounceBackMultiplier()) * delta / 3) + getMaxScroll();
-        } else if (ConfigManager.getInstance().getConfig().doesSnapToRows()) {
+        } else if (ConfigObject.getInstance().doesSnapToRows()) {
             double nearestRow = Math.round(target / 18.0) * 18.0;
             if (!DynamicNewSmoothScrollingEntryListWidget.Precision.almostEquals(target, nearestRow, DynamicNewSmoothScrollingEntryListWidget.Precision.FLOAT_EPSILON))
                 target += (nearestRow - target) * Math.min(delta / 2.0, 1.0);
@@ -321,7 +323,7 @@ public class EntryListWidget extends WidgetWithBounds {
     
     public void updateEntriesPosition() {
         this.innerBounds = updateInnerBounds();
-        if (!ConfigManager.getInstance().getConfig().isEntryListWidgetScrolled()) {
+        if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
             page = Math.max(page, 0);
             List<EntryListEntry> entries = Lists.newLinkedList();
             int width = innerBounds.width / 18;
@@ -370,9 +372,9 @@ public class EntryListWidget extends WidgetWithBounds {
     }
     
     private Rectangle updateInnerBounds() {
-        if (ConfigManager.getInstance().getConfig().isEntryListWidgetScrolled()) {
+        if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
             int width = Math.max(MathHelper.floor((bounds.width - 2 - 6) / 18f), 1);
-            if (ConfigManager.getInstance().getConfig().isLeftHandSidePanel())
+            if (ConfigObject.getInstance().isLeftHandSidePanel())
                 return new Rectangle(bounds.getCenterX() - width * 9 + 3, bounds.y, width * 18, bounds.height);
             return new Rectangle(bounds.getCenterX() - width * 9 - 3, bounds.y, width * 18, bounds.height);
         }
@@ -384,7 +386,7 @@ public class EntryListWidget extends WidgetWithBounds {
     @SuppressWarnings("rawtypes")
     private boolean notSteppingOnExclusionZones(int left, int top, Rectangle listArea) {
         for (DisplayHelper.DisplayBoundsHandler sortedBoundsHandler : DisplayHelper.getInstance().getSortedBoundsHandlers(minecraft.currentScreen.getClass())) {
-            ActionResult fit = sortedBoundsHandler.canItemSlotWidgetFit(!ConfigManager.getInstance().getConfig().isLeftHandSidePanel(), left, top, minecraft.currentScreen, listArea);
+            ActionResult fit = sortedBoundsHandler.canItemSlotWidgetFit(!ConfigObject.getInstance().isLeftHandSidePanel(), left, top, minecraft.currentScreen, listArea);
             if (fit != ActionResult.PASS) return fit == ActionResult.SUCCESS;
         }
         return true;
@@ -405,13 +407,13 @@ public class EntryListWidget extends WidgetWithBounds {
                             .setting(EntryStack.Settings.Item.RENDER_OVERLAY, RENDER_EXTRA_CONFIG));
                 }
             }
-            ItemListOrdering ordering = ConfigManager.getInstance().getConfig().getItemListOrdering();
+            ItemListOrdering ordering = ConfigObject.getInstance().getItemListOrdering();
             if (ordering == ItemListOrdering.name) list.sort(ENTRY_NAME_COMPARER);
             if (ordering == ItemListOrdering.item_groups) list.sort(ENTRY_GROUP_COMPARER);
-            if (!ConfigManager.getInstance().getConfig().isItemListAscending()) Collections.reverse(list);
+            if (!ConfigObject.getInstance().isItemListAscending()) Collections.reverse(list);
             allStacks = list;
         }
-        if (ConfigManager.getInstance().getConfig().isFavoritesEnabled()) {
+        if (ConfigObject.getInstance().isFavoritesEnabled() && !ConfigObject.getInstance().doDisplayFavoritesOnTheLeft()) {
             List<EntryStack> list = Lists.newLinkedList();
             boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
             List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
@@ -423,10 +425,10 @@ public class EntryListWidget extends WidgetWithBounds {
                             .setting(EntryStack.Settings.Item.RENDER_OVERLAY, RENDER_EXTRA_CONFIG));
                 }
             }
-            ItemListOrdering ordering = ConfigManager.getInstance().getConfig().getItemListOrdering();
+            ItemListOrdering ordering = ConfigObject.getInstance().getItemListOrdering();
             if (ordering == ItemListOrdering.name) list.sort(ENTRY_NAME_COMPARER);
             if (ordering == ItemListOrdering.item_groups) list.sort(ENTRY_GROUP_COMPARER);
-            if (!ConfigManager.getInstance().getConfig().isItemListAscending()) Collections.reverse(list);
+            if (!ConfigObject.getInstance().isItemListAscending()) Collections.reverse(list);
             favorites = list;
         } else favorites = Collections.emptyList();
         updateEntriesPosition();
@@ -440,7 +442,7 @@ public class EntryListWidget extends WidgetWithBounds {
     @SuppressWarnings("deprecation")
     private boolean canSearchTermsBeAppliedTo(EntryStack stack, List<SearchArgument.SearchArguments> searchArguments) {
         if (searchArguments.isEmpty()) return true;
-        String mod = null, name = null, tooltip = null;
+        String mod = null, name = null, tooltip = null, tags[] = null;
         for (SearchArgument.SearchArguments arguments : searchArguments) {
             boolean applicable = true;
             for (SearchArgument argument : arguments.getArguments()) {
@@ -466,6 +468,31 @@ public class EntryListWidget extends WidgetWithBounds {
                         applicable = false;
                         break;
                     }
+                } else if (argument.getArgumentType() == SearchArgument.ArgumentType.TAG) {
+                    if (tags == null) {
+                        if (stack.getType() == EntryStack.Type.ITEM) {
+                            Identifier[] tagsFor = minecraft.getNetworkHandler().getTagManager().items().getTagsFor(stack.getItem()).toArray(new Identifier[0]);
+                            tags = new String[tagsFor.length];
+                            for (int i = 0; i < tagsFor.length; i++) tags[i] = tagsFor[i].toString();
+                        } else if (stack.getType() == EntryStack.Type.FLUID) {
+                            Identifier[] tagsFor = minecraft.getNetworkHandler().getTagManager().fluids().getTagsFor(stack.getFluid()).toArray(new Identifier[0]);
+                            tags = new String[tagsFor.length];
+                            for (int i = 0; i < tagsFor.length; i++) tags[i] = tagsFor[i].toString();
+                        } else tags = new String[0];
+                    }
+                    if (tags != null && tags.length > 0) {
+                        boolean a = false;
+                        for (String tag : tags)
+                            if (argument.getFunction(argument.isInclude()).apply(tag))
+                                a = true;
+                        if (!a) {
+                            applicable = false;
+                            break;
+                        }
+                    } else {
+                        applicable = false;
+                        break;
+                    }
                 }
             }
             if (applicable) return true;
@@ -487,6 +514,10 @@ public class EntryListWidget extends WidgetWithBounds {
                         arguments[i] = new SearchArgument(SearchArgument.ArgumentType.MOD, term.substring(2), false);
                     } else if (term.startsWith("@")) {
                         arguments[i] = new SearchArgument(SearchArgument.ArgumentType.MOD, term.substring(1), true);
+                    } else if (term.startsWith("-$") || term.startsWith("$-")) {
+                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TAG, term.substring(2), false);
+                    } else if (term.startsWith("$")) {
+                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TAG, term.substring(1), true);
                     } else if (term.startsWith("-#") || term.startsWith("#-")) {
                         arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, term.substring(2), false);
                     } else if (term.startsWith("#")) {
@@ -579,14 +610,14 @@ public class EntryListWidget extends WidgetWithBounds {
             if (!ClientHelper.getInstance().isCheating() || minecraft.player.inventory.getCursorStack().isEmpty()) {
                 QueuedTooltip tooltip = getCurrentTooltip(mouseX, mouseY);
                 if (tooltip != null) {
-                    // TODO Finalize favorites
-//                    if (ConfigManager.getInstance().getConfig().isFavoritesEnabled()) {
-//                        String name = getLocalizedName(ConfigManager.getInstance().getConfig().getFavoriteKeybind());
-//                        if (!isFavorites)
-//                            tooltip.getText().addAll(Arrays.asList(I18n.translate("text.rei.favorites_tooltip", name).split("\n")));
-//                        else
-//                            tooltip.getText().addAll(Arrays.asList(I18n.translate("text.rei.remove_favorites_tooltip", name).split("\n")));
-//                    }
+                    //                    if (ConfigObject.getInstance().doDisplayFavoritesTooltip()) {
+                    if (ConfigObject.getInstance().doDisplayFavoritesTooltip() && !ConfigObject.getInstance().doDisplayFavoritesOnTheLeft()) {
+                        String name = getLocalizedName(ConfigObject.getInstance().getFavoriteKeybind());
+                        if (!isFavorites)
+                            tooltip.getText().addAll(Arrays.asList(I18n.translate("text.rei.favorites_tooltip", name).split("\n")));
+                        else
+                            tooltip.getText().addAll(Arrays.asList(I18n.translate("text.rei.remove_favorites_tooltip", name).split("\n")));
+                    }
                     ScreenHelper.getLastOverlay().addTooltip(tooltip);
                 }
             }
@@ -594,10 +625,8 @@ public class EntryListWidget extends WidgetWithBounds {
         
         @Override
         public boolean keyPressed(int int_1, int int_2, int int_3) {
-            if (!interactable)
-                return false;
-            if (containsMouse(PointHelper.fromMouse()) && !getCurrentEntry().isEmpty()) {
-                InputUtil.KeyCode keyCode = ConfigManager.getInstance().getConfig().getFavoriteKeybind();
+            if (interactable && ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(PointHelper.fromMouse()) && !getCurrentEntry().isEmpty()) {
+                InputUtil.KeyCode keyCode = ConfigObject.getInstance().getFavoriteKeybind();
                 if (int_1 == InputUtil.UNKNOWN_KEYCODE.getKeyCode()) {
                     if (keyCode.getCategory() == InputUtil.Type.SCANCODE && keyCode.getKeyCode() == int_2) {
                         if (!isFavorites) {
@@ -607,6 +636,7 @@ public class EntryListWidget extends WidgetWithBounds {
                             ConfigManager.getInstance().getFavorites().remove(getCurrentEntry());
                             ContainerScreenOverlay.getEntryListWidget().updateSearch(ScreenHelper.getSearchField().getText());
                         }
+                        minecraft.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                         return true;
                     }
                 } else if (keyCode.getCategory() == InputUtil.Type.KEYSYM && keyCode.getKeyCode() == int_1) {
@@ -617,6 +647,7 @@ public class EntryListWidget extends WidgetWithBounds {
                         ConfigManager.getInstance().getFavorites().remove(getCurrentEntry());
                         ContainerScreenOverlay.getEntryListWidget().updateSearch(ScreenHelper.getSearchField().getText());
                     }
+                    minecraft.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                     return true;
                 }
             }
@@ -630,9 +661,9 @@ public class EntryListWidget extends WidgetWithBounds {
             if (containsMouse(mouseX, mouseY) && ClientHelper.getInstance().isCheating()) {
                 EntryStack entry = getCurrentEntry().copy();
                 if (entry.getType() == EntryStack.Type.ITEM) {
-                    if (ConfigManager.getInstance().getConfig().getItemCheatingMode() == ItemCheatingMode.REI_LIKE)
+                    if (ConfigObject.getInstance().getItemCheatingMode() == ItemCheatingMode.REI_LIKE)
                         entry.setAmount(button != 1 ? 1 : entry.getItemStack().getMaxCount());
-                    else if (ConfigManager.getInstance().getConfig().getItemCheatingMode() == ItemCheatingMode.JEI_LIKE)
+                    else if (ConfigObject.getInstance().getItemCheatingMode() == ItemCheatingMode.JEI_LIKE)
                         entry.setAmount(button != 0 ? 1 : entry.getItemStack().getMaxCount());
                     else
                         entry.setAmount(1);
