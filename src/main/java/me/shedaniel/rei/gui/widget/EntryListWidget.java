@@ -347,7 +347,7 @@ public class EntryListWidget extends WidgetWithBounds {
             int width = innerBounds.width / 18;
             int pageHeight = innerBounds.height / 18;
             int sizeForFavorites = getScrollNumberForFavorites();
-            int slotsToPrepare = allStacks.size() + sizeForFavorites * 3;
+            int slotsToPrepare = allStacks.size() * 2 + sizeForFavorites * 2;
             int currentX = 0;
             int currentY = 0;
             List<EntryListEntry> entries = Lists.newLinkedList();
@@ -355,7 +355,6 @@ public class EntryListWidget extends WidgetWithBounds {
                 int xPos = currentX * 18 + innerBounds.x;
                 int yPos = currentY * 18 + innerBounds.y;
                 entries.add((EntryListEntry) new EntryListEntry(xPos, yPos).noBackground());
-                if (!notSteppingOnExclusionZones(xPos, yPos, innerBounds)) slotsToPrepare += 2;
                 currentX++;
                 if (currentX >= width) {
                     currentX = 0;
