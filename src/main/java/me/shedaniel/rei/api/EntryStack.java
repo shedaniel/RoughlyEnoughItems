@@ -58,7 +58,7 @@ public interface EntryStack {
     static EntryStack readFromJson(JsonElement jsonElement) {
         try {
             JsonObject obj = jsonElement.getAsJsonObject();
-            switch (obj.get("type").getAsString()) {
+            switch (obj.getAsJsonPrimitive("type").getAsString()) {
                 case "stack":
                     return EntryStack.create(ItemStack.fromTag(StringNbtReader.parse(obj.get("nbt").getAsString())));
                 case "fluid":

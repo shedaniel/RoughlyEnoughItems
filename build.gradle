@@ -67,11 +67,16 @@ dependencies {
             transitive = false
         }
     }
-    modImplementation "io.github.prospector:modmenu:${modmenu_version}"
+    modCompileOnly ("io.github.prospector:modmenu:${modmenu_version}") {
+        transitive = false
+    }
+    modRuntime ("io.github.prospector:modmenu:${modmenu_version}") {
+        transitive = false
+    }
     compile "org.lwjgl:lwjgl-jemalloc:3.2.1"
     compileOnly "com.google.code.findbugs:jsr305:3.0.2"
-    implementation 'org.jetbrains:annotations:15.0'
-    modRuntime ("com.lettuce.fudge:notenoughcrashes:1.0.12+1.15") {
+    compileOnly 'org.jetbrains:annotations:15.0'
+    modRuntime("com.lettuce.fudge:notenoughcrashes:1.0.12+1.15") {
         transitive = false
     }
 }

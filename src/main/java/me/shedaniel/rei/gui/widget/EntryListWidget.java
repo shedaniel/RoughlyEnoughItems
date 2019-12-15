@@ -21,6 +21,7 @@ import me.shedaniel.rei.gui.config.ItemListOrdering;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.SearchArgument;
 import me.shedaniel.rei.utils.CollectionUtils;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.DiffuseLighting;
@@ -43,12 +44,10 @@ import java.util.stream.Collectors;
 
 public class EntryListWidget extends WidgetWithBounds {
     
-    private static final boolean LAZY = true;
-    private static final String SPACE = " ", EMPTY = "";
-    private static final Supplier<Boolean> RENDER_EXTRA_CONFIG = ConfigObject.getInstance()::doesRenderEntryExtraOverlay;
+    static final Supplier<Boolean> RENDER_EXTRA_CONFIG = ConfigObject.getInstance()::doesRenderEntryExtraOverlay;
     @SuppressWarnings("deprecation")
-    private static final Comparator<? super EntryStack> ENTRY_NAME_COMPARER = Comparator.comparing(SearchArgument::tryGetEntryStackName);
-    private static final Comparator<? super EntryStack> ENTRY_GROUP_COMPARER = Comparator.comparingInt(stack -> {
+    static final Comparator<? super EntryStack> ENTRY_NAME_COMPARER = Comparator.comparing(SearchArgument::tryGetEntryStackName);
+    static final Comparator<? super EntryStack> ENTRY_GROUP_COMPARER = Comparator.comparingInt(stack -> {
         if (stack.getType() == EntryStack.Type.ITEM) {
             ItemGroup group = stack.getItem().getGroup();
             if (group != null)
@@ -56,6 +55,8 @@ public class EntryListWidget extends WidgetWithBounds {
         }
         return Integer.MAX_VALUE;
     });
+    private static final boolean LAZY = true;
+    private static final String SPACE = " ", EMPTY = "";
     private static int page;
     protected double target;
     protected double scroll;
@@ -71,6 +72,32 @@ public class EntryListWidget extends WidgetWithBounds {
     private List<SearchArgument.SearchArguments> lastSearchArguments = Collections.emptyList();
     private boolean draggingScrollBar = false;
     
+    @SuppressWarnings("rawtypes")
+    static boolean notSteppingOnExclusionZones(int left, int top, Rectangle listArea) {
+        MinecraftClient instance = MinecraftClient.getInstance();
+        for(DisplayHelper.DisplayBoundsHandler sortedBoundsHandler : DisplayHelper.getInstance().getSortedBoundsHandlers(instance.currentScreen.getClass())) {
+            ActionResult fit = sortedBoundsHandler.canItemSlotWidgetFit(!ConfigObject.getInstance().isLeftHandSidePanel(), left, top, instance.currentScreen, listArea);
+            if (fit != ActionResult.PASS)
+                return fit == ActionResult.SUCCESS;
+            fit = sortedBoundsHandler.canItemSlotWidgetFit(ConfigObject.getInstance().isLeftHandSidePanel(), left, top, instance.currentScreen, listArea);
+            if (fit != ActionResult.PASS)
+                return fit == ActionResult.SUCCESS;
+        }
+        return true;
+    }
+    
+    private static Rectangle updateInnerBounds(Rectangle bounds) {
+        if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
+            int width = Math.max(MathHelper.floor((bounds.width - 2 - 6) / 18f), 1);
+            if (ConfigObject.getInstance().isLeftHandSidePanel())
+                return new Rectangle(bounds.getCenterX() - width * 9 + 3, bounds.y, width * 18, bounds.height);
+            return new Rectangle(bounds.getCenterX() - width * 9 - 3, bounds.y, width * 18, bounds.height);
+        }
+        int width = Math.max(MathHelper.floor((bounds.width - 2) / 18f), 1);
+        int height = Math.max(MathHelper.floor((bounds.height - 2) / 18f), 1);
+        return new Rectangle(bounds.getCenterX() - width * 9, bounds.getCenterY() - height * 9, width * 18, height * 18);
+    }
+    
     protected final int getSlotsHeightNumberForFavorites() {
         if (favorites.isEmpty())
             return 0;
@@ -78,7 +105,8 @@ public class EntryListWidget extends WidgetWithBounds {
             return MathHelper.ceil(2 + favorites.size() / (innerBounds.width / 18f));
         int height = MathHelper.ceil(favorites.size() / (innerBounds.width / 18f));
         int pagesToFit = MathHelper.ceil(height / (innerBounds.height / 18f - 1));
-        if (height > (innerBounds.height / 18 - 1) && (height) % (innerBounds.height / 18) == (innerBounds.height / 18) - 2) height--;
+        if (height > (innerBounds.height / 18 - 1) && (height) % (innerBounds.height / 18) == (innerBounds.height / 18) - 2)
+            height--;
         return height + pagesToFit + 1;
     }
     
@@ -329,16 +357,19 @@ public class EntryListWidget extends WidgetWithBounds {
     
     public void updateArea(DisplayHelper.DisplayBoundsHandler<?> boundsHandler, @Nullable String searchTerm) {
         this.bounds = boundsHandler.getItemListArea(ScreenHelper.getLastOverlay().getBounds());
+        FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
+        if (favoritesListWidget != null)
+            favoritesListWidget.updateFavoritesBounds(boundsHandler, searchTerm);
         if (searchTerm != null)
             updateSearch(searchTerm);
-        else if (allStacks == null || favorites == null)
+        else if (allStacks == null || favorites == null || (favoritesListWidget != null && favoritesListWidget.favorites == null))
             updateSearch("");
         else
             updateEntriesPosition();
     }
     
     public void updateEntriesPosition() {
-        this.innerBounds = updateInnerBounds();
+        this.innerBounds = updateInnerBounds(bounds);
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
             page = Math.max(page, 0);
             List<EntryListEntry> entries = Lists.newLinkedList();
@@ -381,7 +412,7 @@ public class EntryListWidget extends WidgetWithBounds {
             int width = innerBounds.width / 18;
             int pageHeight = innerBounds.height / 18;
             int sizeForFavorites = getScrollNumberForFavorites();
-            int slotsToPrepare = allStacks.size() * 2 + sizeForFavorites * 2;
+            int slotsToPrepare = allStacks.size() * 3 + sizeForFavorites * 3;
             int currentX = 0;
             int currentY = 0;
             List<EntryListEntry> entries = Lists.newLinkedList();
@@ -398,33 +429,14 @@ public class EntryListWidget extends WidgetWithBounds {
             this.entries = entries;
             this.widgets = Collections.unmodifiableList(entries);
         }
+        FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
+        if (favoritesListWidget != null)
+            favoritesListWidget.updateEntriesPosition();
     }
     
     @Deprecated
     public List<EntryStack> getAllStacks() {
         return allStacks;
-    }
-    
-    private Rectangle updateInnerBounds() {
-        if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-            int width = Math.max(MathHelper.floor((bounds.width - 2 - 6) / 18f), 1);
-            if (ConfigObject.getInstance().isLeftHandSidePanel())
-                return new Rectangle(bounds.getCenterX() - width * 9 + 3, bounds.y, width * 18, bounds.height);
-            return new Rectangle(bounds.getCenterX() - width * 9 - 3, bounds.y, width * 18, bounds.height);
-        }
-        int width = Math.max(MathHelper.floor((bounds.width - 2) / 18f), 1);
-        int height = Math.max(MathHelper.floor((bounds.height - 2) / 18f), 1);
-        return new Rectangle(bounds.getCenterX() - width * 9, bounds.getCenterY() - height * 9, width * 18, height * 18);
-    }
-    
-    @SuppressWarnings("rawtypes")
-    private boolean notSteppingOnExclusionZones(int left, int top, Rectangle listArea) {
-        for(DisplayHelper.DisplayBoundsHandler sortedBoundsHandler : DisplayHelper.getInstance().getSortedBoundsHandlers(minecraft.currentScreen.getClass())) {
-            ActionResult fit = sortedBoundsHandler.canItemSlotWidgetFit(!ConfigObject.getInstance().isLeftHandSidePanel(), left, top, minecraft.currentScreen, listArea);
-            if (fit != ActionResult.PASS)
-                return fit == ActionResult.SUCCESS;
-        }
-        return true;
     }
     
     @SuppressWarnings("deprecation")
@@ -435,7 +447,7 @@ public class EntryListWidget extends WidgetWithBounds {
             boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
             List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
             for(EntryStack stack : EntryRegistry.getInstance().getStacksList()) {
-                if (lastSearchArguments.isEmpty() || canSearchTermsBeAppliedTo(stack, lastSearchArguments)) {
+                if (canLastSearchTermsBeAppliedTo(stack)) {
                     if (workingItems != null && CollectionUtils.findFirstOrNullEquals(workingItems, stack) == null)
                         continue;
                     list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_OVERLAY, RENDER_EXTRA_CONFIG));
@@ -455,7 +467,7 @@ public class EntryListWidget extends WidgetWithBounds {
             boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
             List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
             for(EntryStack stack : ConfigManager.getInstance().getFavorites()) {
-                if (lastSearchArguments.isEmpty() || canSearchTermsBeAppliedTo(stack, lastSearchArguments)) {
+                if (canLastSearchTermsBeAppliedTo(stack)) {
                     if (workingItems != null && CollectionUtils.findFirstOrNullEquals(workingItems, stack) == null)
                         continue;
                     list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_OVERLAY, RENDER_EXTRA_CONFIG));
@@ -471,12 +483,15 @@ public class EntryListWidget extends WidgetWithBounds {
             favorites = list;
         } else
             favorites = Collections.emptyList();
+        FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
+        if (favoritesListWidget != null)
+            favoritesListWidget.updateSearch(this, searchTerm);
         updateEntriesPosition();
     }
     
     @SuppressWarnings("deprecation")
     public boolean canLastSearchTermsBeAppliedTo(EntryStack stack) {
-        return canSearchTermsBeAppliedTo(stack, lastSearchArguments);
+        return lastSearchArguments.isEmpty() || canSearchTermsBeAppliedTo(stack, lastSearchArguments);
     }
     
     @SuppressWarnings("deprecation")
@@ -684,6 +699,7 @@ public class EntryListWidget extends WidgetWithBounds {
                             ConfigManager.getInstance().getFavorites().remove(getCurrentEntry());
                             ContainerScreenOverlay.getEntryListWidget().updateSearch(ScreenHelper.getSearchField().getText());
                         }
+                        ConfigManager.getInstance().saveConfig();
                         minecraft.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                         return true;
                     }
@@ -695,6 +711,7 @@ public class EntryListWidget extends WidgetWithBounds {
                         ConfigManager.getInstance().getFavorites().remove(getCurrentEntry());
                         ContainerScreenOverlay.getEntryListWidget().updateSearch(ScreenHelper.getSearchField().getText());
                     }
+                    ConfigManager.getInstance().saveConfig();
                     minecraft.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                     return true;
                 }

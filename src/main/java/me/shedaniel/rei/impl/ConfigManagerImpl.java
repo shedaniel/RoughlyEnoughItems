@@ -13,7 +13,9 @@ import me.sargunvohra.mcmods.autoconfig1u.gui.ConfigScreenProvider;
 import me.sargunvohra.mcmods.autoconfig1u.gui.registry.GuiRegistry;
 import me.sargunvohra.mcmods.autoconfig1u.serializer.JanksonConfigSerializer;
 import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.Jankson;
+import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.JsonObject;
 import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.JsonPrimitive;
+import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.impl.SyntaxError;
 import me.shedaniel.cloth.hooks.ScreenHooks;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
@@ -50,40 +52,26 @@ public class ConfigManagerImpl implements ConfigManager {
     public ConfigManagerImpl() {
         this.craftableOnly = false;
         AutoConfig.register(ConfigObjectImpl.class, (definition, configClass) -> {
-            return new JanksonConfigSerializer<ConfigObjectImpl>(definition, configClass, Jankson.builder()
-                    .registerPrimitiveTypeAdapter(InputUtil.KeyCode.class, it -> {
-                        return it instanceof String ? InputUtil.fromName((String) it) : null;
-                    })
-                    .registerSerializer(InputUtil.KeyCode.class, (it, marshaller) -> new JsonPrimitive(it.getName()))
-                    .build());
+            return new JanksonConfigSerializer<ConfigObjectImpl>(definition, configClass, Jankson.builder().registerPrimitiveTypeAdapter(InputUtil.KeyCode.class, it -> {
+                return it instanceof String ? InputUtil.fromName((String) it) : null;
+            }).registerSerializer(InputUtil.KeyCode.class, (it, marshaller) -> new JsonPrimitive(it.getName())).build());
         });
         GuiRegistry guiRegistry = AutoConfig.getGuiRegistry(ConfigObjectImpl.class);
         //noinspection rawtypes
-        guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> Collections.singletonList(
-                ConfigEntryBuilder.create().startEnumSelector(i13n, (Class) field.getType(), getUnsafely(field, config, null))
-                        .setDefaultValue(() -> getUnsafely(field, defaults))
-                        .setSaveConsumer(newValue -> setUnsafely(field, config, newValue))
-                        .build()
-        ), field -> field.getType().isEnum(), ConfigObject.UseEnumSelectorInstead.class);
+        guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> Collections.singletonList(ConfigEntryBuilder.create().startEnumSelector(i13n, (Class) field.getType(), getUnsafely(field, config, null)).setDefaultValue(() -> getUnsafely(field, defaults)).setSaveConsumer(newValue -> setUnsafely(field, config, newValue)).build()), field -> field.getType().isEnum(), ConfigObject.UseEnumSelectorInstead.class);
         loadFavoredEntries();
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> {
             @SuppressWarnings("rawtypes") List<AbstractConfigListEntry> entries = new ArrayList<>();
-            for (FabricKeyBinding binding : ClientHelper.getInstance().getREIKeyBindings()) {
+            for(FabricKeyBinding binding : ClientHelper.getInstance().getREIKeyBindings()) {
                 entries.add(ConfigEntryBuilder.create().fillKeybindingField(I18n.translate(binding.getId()) + ":", binding).build());
             }
-            KeyCodeEntry entry = ConfigEntryBuilder.create().startKeyCodeField(i13n, getUnsafely(field, config, InputUtil.UNKNOWN_KEYCODE))
-                    .setDefaultValue(() -> getUnsafely(field, defaults))
-                    .setSaveConsumer(newValue -> setUnsafely(field, config, newValue))
-                    .build();
+            KeyCodeEntry entry = ConfigEntryBuilder.create().startKeyCodeField(i13n, getUnsafely(field, config, InputUtil.UNKNOWN_KEYCODE)).setDefaultValue(() -> getUnsafely(field, defaults)).setSaveConsumer(newValue -> setUnsafely(field, config, newValue)).build();
             entry.setAllowMouse(false);
             entries.add(entry);
             return entries;
         }, field -> field.getType() == InputUtil.KeyCode.class, ConfigObject.AddInFrontKeyCode.class);
         guiRegistry.registerPredicateProvider((i13n, field, config, defaults, guiProvider) -> {
-            KeyCodeEntry entry = ConfigEntryBuilder.create().startKeyCodeField(i13n, getUnsafely(field, config, InputUtil.UNKNOWN_KEYCODE))
-                    .setDefaultValue(() -> getUnsafely(field, defaults))
-                    .setSaveConsumer(newValue -> setUnsafely(field, config, newValue))
-                    .build();
+            KeyCodeEntry entry = ConfigEntryBuilder.create().startKeyCodeField(i13n, getUnsafely(field, config, InputUtil.UNKNOWN_KEYCODE)).setDefaultValue(() -> getUnsafely(field, defaults)).setSaveConsumer(newValue -> setUnsafely(field, config, newValue)).build();
             entry.setAllowMouse(false);
             return Collections.singletonList(entry);
         }, field -> field.getType() == InputUtil.KeyCode.class);
@@ -155,7 +143,8 @@ public class ConfigManagerImpl implements ConfigManager {
                             public void render(int int_1, int int_2, float float_1) {
                                 if (RecipeHelper.getInstance().arePluginsLoading()) {
                                     MinecraftClient.getInstance().openScreen(new ConfigReloadingScreen(MinecraftClient.getInstance().currentScreen));
-                                } else super.render(int_1, int_2, float_1);
+                                } else
+                                    super.render(int_1, int_2, float_1);
                             }
                         });
                     }
@@ -180,7 +169,7 @@ public class ConfigManagerImpl implements ConfigManager {
                 renderDirtBackground(0);
                 List<String> list = minecraft.textRenderer.wrapStringToWidthAsList(I18n.translate("text.rei.config_api_failed"), width - 100);
                 int y = (int) (height / 2 - minecraft.textRenderer.fontHeight * 1.3f / 2 * list.size());
-                for (int i = 0; i < list.size(); i++) {
+                for(int i = 0; i < list.size(); i++) {
                     String s = list.get(i);
                     drawCenteredString(minecraft.textRenderer, s, width / 2, y, -1);
                     y += minecraft.textRenderer.fontHeight;
