@@ -216,7 +216,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     @Override
     public InputUtil.KeyCode getFavoriteKeybind() {
-        return general.favoriteKeybind;
+        return general.favoriteKeybind == null ? InputUtil.UNKNOWN_KEYCODE : general.favoriteKeybind;
     }
     
     public static class General {

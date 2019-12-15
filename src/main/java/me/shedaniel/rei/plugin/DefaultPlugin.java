@@ -94,21 +94,28 @@ public class DefaultPlugin implements REIPluginV0 {
             return;
         }
         for (Item item : Registry.ITEM) {
-            entryRegistry.registerEntry(EntryStack.create(item));
+            ItemStack[] stacks = null;
             try {
+                stacks = entryRegistry.getAllStacksFromItem(item);
                 for (ItemStack stack : entryRegistry.getAllStacksFromItem(item)) {
                     entryRegistry.registerEntry(EntryStack.create(stack));
                 }
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
+            if (stacks != null) {
+                for (ItemStack stack : entryRegistry.getAllStacksFromItem(item)) {
+                    entryRegistry.registerEntry(EntryStack.create(stack));
+                }
+            } else entryRegistry.registerEntry(EntryStack.create(item));
         }
+        EntryStack stack = EntryStack.create(Items.ENCHANTED_BOOK);
         for (Enchantment enchantment : Registry.ENCHANTMENT) {
             for (int i = enchantment.getMinimumLevel(); i <= enchantment.getMaximumLevel(); i++) {
                 Map<Enchantment, Integer> map = new HashMap<>();
                 map.put(enchantment, i);
                 ItemStack itemStack = new ItemStack(Items.ENCHANTED_BOOK);
                 EnchantmentHelper.set(map, itemStack);
-                entryRegistry.registerEntriesAfter(EntryStack.create(Items.ENCHANTED_BOOK), EntryStack.create(itemStack));
+                entryRegistry.registerEntriesAfter(stack, EntryStack.create(itemStack));
             }
         }
         for (Fluid fluid : Registry.FLUID) {

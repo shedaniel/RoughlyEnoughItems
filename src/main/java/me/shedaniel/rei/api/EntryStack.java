@@ -8,6 +8,7 @@ package me.shedaniel.rei.api;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.impl.EmptyEntryStack;
 import me.shedaniel.rei.impl.FluidEntryStack;
@@ -52,6 +53,8 @@ public interface EntryStack {
         return new ItemEntryStack(new ItemStack(item));
     }
     
+    @Internal
+    @Deprecated
     static EntryStack readFromJson(JsonElement jsonElement) {
         try {
             JsonObject obj = jsonElement.getAsJsonObject();
@@ -71,6 +74,8 @@ public interface EntryStack {
         }
     }
     
+    @Internal
+    @Deprecated
     @Nullable
     default JsonElement toJson() {
         try {
@@ -85,7 +90,6 @@ public interface EntryStack {
                     obj2.addProperty("type", "fluid");
                     obj2.addProperty("id", getIdentifier().get().toString());
                     return obj2;
-                case RENDER:
                 case EMPTY:
                     JsonObject obj3 = new JsonObject();
                     obj3.addProperty("type", "empty");
