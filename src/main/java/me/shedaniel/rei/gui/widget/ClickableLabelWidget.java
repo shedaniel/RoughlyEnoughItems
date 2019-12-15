@@ -58,10 +58,17 @@ public abstract class ClickableLabelWidget extends LabelWidget {
             color = getHoveredColor();
         Point pos = getPosition();
         int width = font.getStringWidth(getText());
-        if (isHasShadows())
-            font.drawWithShadow(getText(), pos.x - width / 2, pos.y, color);
-        else
-            font.draw(getText(), pos.x - width / 2, pos.y, color);
+        if (isCentered()) {
+            if (isHasShadows())
+                font.drawWithShadow(getText(), pos.x - width / 2, pos.y, color);
+            else
+                font.draw(getText(), pos.x - width / 2, pos.y, color);
+        } else {
+            if (isHasShadows())
+                font.drawWithShadow(getText(), pos.x, pos.y, color);
+            else
+                font.draw(getText(), pos.x, pos.y, color);
+        }
         if (isClickable() && getTooltips().isPresent())
             if (!focused && containsMouse(mouseX, mouseY))
                 ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltips().get().split("\n")));

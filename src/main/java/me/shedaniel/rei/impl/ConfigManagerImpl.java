@@ -71,7 +71,7 @@ public class ConfigManagerImpl implements ConfigManager {
             for (FabricKeyBinding binding : ClientHelper.getInstance().getREIKeyBindings()) {
                 entries.add(ConfigEntryBuilder.create().fillKeybindingField(I18n.translate(binding.getId()) + ":", binding).build());
             }
-            KeyCodeEntry entry = ConfigEntryBuilder.create().startKeyCodeField(i13n, getUnsafely(field, config, null))
+            KeyCodeEntry entry = ConfigEntryBuilder.create().startKeyCodeField(i13n, getUnsafely(field, config, InputUtil.UNKNOWN_KEYCODE))
                     .setDefaultValue(() -> getUnsafely(field, defaults))
                     .setSaveConsumer(newValue -> setUnsafely(field, config, newValue))
                     .build();
@@ -80,7 +80,7 @@ public class ConfigManagerImpl implements ConfigManager {
             return entries;
         }, field -> field.getType() == InputUtil.KeyCode.class, ConfigObject.AddInFrontKeyCode.class);
         guiRegistry.registerPredicateProvider((i13n, field, config, defaults, guiProvider) -> {
-            KeyCodeEntry entry = ConfigEntryBuilder.create().startKeyCodeField(i13n, getUnsafely(field, config, null))
+            KeyCodeEntry entry = ConfigEntryBuilder.create().startKeyCodeField(i13n, getUnsafely(field, config, InputUtil.UNKNOWN_KEYCODE))
                     .setDefaultValue(() -> getUnsafely(field, defaults))
                     .setSaveConsumer(newValue -> setUnsafely(field, config, newValue))
                     .build();

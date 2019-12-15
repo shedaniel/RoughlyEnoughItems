@@ -45,6 +45,11 @@ public class LabelWidget extends WidgetWithBounds {
         return this;
     }
     
+    public LabelWidget leftAligned() {
+        setCentered(false);
+        return this;
+    }
+    
     public boolean isHasShadows() {
         return hasShadows;
     }
@@ -93,7 +98,9 @@ public class LabelWidget extends WidgetWithBounds {
     public Rectangle getBounds() {
         int width = font.getStringWidth(text);
         Point pos = getPosition();
-        return new Rectangle(pos.x - width / 2 - 1, pos.y - 5, width + 2, 14);
+        if (isCentered())
+            return new Rectangle(pos.x - width / 2 - 1, pos.y - 5, width + 2, 14);
+        return new Rectangle(pos.x - 1, pos.y - 5, width + 2, 14);
     }
     
     @Override
@@ -105,9 +112,15 @@ public class LabelWidget extends WidgetWithBounds {
     public void render(int mouseX, int mouseY, float delta) {
         int width = font.getStringWidth(text);
         Point pos = getPosition();
-        if (hasShadows)
-            font.drawWithShadow(text, pos.x - width / 2, pos.y, defaultColor);
-        else font.draw(text, pos.x - width / 2, pos.y, defaultColor);
+        if (isCentered()) {
+            if (hasShadows)
+                font.drawWithShadow(text, pos.x - width / 2, pos.y, defaultColor);
+            else font.draw(text, pos.x - width / 2, pos.y, defaultColor);
+        } else {
+            if (hasShadows)
+                font.drawWithShadow(text, pos.x, pos.y, defaultColor);
+            else font.draw(text, pos.x, pos.y, defaultColor);
+        }
     }
     
 }

@@ -1,21 +1,19 @@
 import java.text.SimpleDateFormat
 
 plugins {
-    id 'fabric-loom' version '0.2.5-SNAPSHOT'
+    id 'fabric-loom' version '0.2.6-SNAPSHOT'
     id 'maven-publish'
     id 'net.minecrell.licenser' version '0.4.1'
 }
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = targetCompatibility = 1.8
 
 archivesBaseName = "RoughlyEnoughItems"
 group = "me.shedaniel"
 
-def ENV = System.getenv()
 def forceVersion = ""
 
-version = forceVersion != "" ? forceVersion : (((String) project.mod_version).contains("unstable") ? (project.mod_version + "." + buildTime()) : project.mod_version)
+version = forceVersion != "" ? forceVersion : ((project.mod_version as String).contains("unstable") ? (project.mod_version + "." + buildTime()) : project.mod_version)
 
 def includeDep = true
 
@@ -48,7 +46,7 @@ processResources {
 
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.yarn_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_version}:v2"
     modApi "net.fabricmc:fabric-loader:${project.fabricloader_version}"
     modApi "net.fabricmc.fabric-api:fabric-api:${project.fabric_api}"
     modApi("me.shedaniel.cloth:cloth-events:${cloth_events_version}") {
@@ -73,6 +71,9 @@ dependencies {
     compile "org.lwjgl:lwjgl-jemalloc:3.2.1"
     compileOnly "com.google.code.findbugs:jsr305:3.0.2"
     implementation 'org.jetbrains:annotations:15.0'
+    modRuntime ("com.lettuce.fudge:notenoughcrashes:1.0.12+1.15") {
+        transitive = false
+    }
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
