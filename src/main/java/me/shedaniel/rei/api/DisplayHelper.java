@@ -120,6 +120,11 @@ public interface DisplayHelper {
         default Rectangle getItemListArea(Rectangle rectangle) {
             return new Rectangle(rectangle.x + 1, rectangle.y + 2 + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + (ConfigObject.getInstance().isEntryListWidgetScrolled() ? 0 : 22), rectangle.width - 2, rectangle.height - (ConfigObject.getInstance().getSearchFieldLocation() != SearchFieldLocation.CENTER ? 27 + 22 : 27) + (!ConfigObject.getInstance().isEntryListWidgetScrolled() ? 0 : 22));
         }
+    
+        default Rectangle getFavoritesListArea(Rectangle rectangle) {
+            int offset = 31 + (ConfigObject.getInstance().doesShowUtilsButtons() ? 25 : 0);
+            return new Rectangle(rectangle.x + 1, rectangle.y + 2 + offset, rectangle.width - 2, rectangle.height - 5- offset);
+        }
         
         /**
          * Checks if REI should recalculate the overlay bounds
