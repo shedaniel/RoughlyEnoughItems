@@ -127,7 +127,7 @@ curseforge {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact(file("${project.buildDir}/libs/$archivesBaseName-${version}-maven.jar")) {
+            artifact(file("${project.buildDir}/libs/$archivesBaseName-${version}.jar")) {
                 builtBy remapMavenJar
             }
             artifact(sourcesJar) {
