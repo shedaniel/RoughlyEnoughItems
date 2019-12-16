@@ -4,7 +4,7 @@ plugins {
     id 'fabric-loom' version '0.2.6-SNAPSHOT'
     id 'maven-publish'
     id 'net.minecrell.licenser' version '0.4.1'
-//    id 'com.matthewprenger.cursegradle' version '1.4.0'
+    id 'com.matthewprenger.cursegradle' version '1.4.0'
 }
 
 sourceCompatibility = targetCompatibility = 1.8
@@ -96,33 +96,33 @@ task remapMavenJar(type: net.fabricmc.loom.task.RemapJarTask, dependsOn: jar) {
     }
 }
 
-//curseforge {
-//    if (project.hasProperty('cf_pass')) {
-//        apiKey = project.getProperty('cf_pass')
-//        project {
-//            id = '319057'
-//            releaseType = 'release'
-//            addGameVersion '1.15'
-//            addGameVersion '1.15-Snapshot'
-//            addGameVersion 'Java 8'
-//            relations {
-//                requiredDependency 'fabric-api'
-//                embeddedLibrary 'cloth'
-//                embeddedLibrary 'cloth-config'
-//            }
-//            mainArtifact(file("${project.buildDir}/libs/${project.archivesBaseName}-${project.version}.jar")) {
-//                displayName = "[Fabric ${project.minecraft_version}] v$project.version"
-//            }
-//            afterEvaluate {
-//                uploadTask.dependsOn("remapJar")
-//            }
-//        }
-//    }
-//    options {
-//        forgeGradleIntegration = false
-//        javaVersionAutoDetect = false
-//    }
-//}
+curseforge {
+    if (project.hasProperty('danielshe_curse_api_key')) {
+        apiKey = project.getProperty('danielshe_curse_api_key')
+        project {
+            id = '319057'
+            releaseType = 'release'
+            addGameVersion '1.15'
+            addGameVersion '1.15-Snapshot'
+            addGameVersion 'Java 8'
+            relations {
+                requiredDependency 'fabric-api'
+                embeddedLibrary 'cloth'
+                embeddedLibrary 'cloth-config'
+            }
+            mainArtifact(file("${project.buildDir}/libs/${project.archivesBaseName}-${project.version}.jar")) {
+                displayName = "[Fabric ${project.minecraft_version}] v$project.version"
+            }
+            afterEvaluate {
+                uploadTask.dependsOn("remapJar")
+            }
+        }
+    }
+    options {
+        forgeGradleIntegration = false
+        javaVersionAutoDetect = false
+    }
+}
 
 publishing {
     publications {
