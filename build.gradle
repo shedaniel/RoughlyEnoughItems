@@ -100,7 +100,7 @@ curseforge {
     if (project.hasProperty('danielshe_curse_api_key')) {
         apiKey = project.getProperty('danielshe_curse_api_key')
         project {
-            id = '319057'
+            id = '310111'
             releaseType = 'release'
             addGameVersion '1.15'
             addGameVersion '1.15-Snapshot'
