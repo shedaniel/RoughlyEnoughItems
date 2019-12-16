@@ -9,8 +9,9 @@ pipeline {
          steps {
             sh "rm -rf build/libs/"
             sh "chmod +x gradlew"
-            sh "./gradlew clean build curseforge --refresh-dependencies --stacktrace"
-            sh "./gradlew clean build publish --refresh-dependencies --stacktrace"
+            sh "./gradlew clean --stacktrace"
+            sh "./gradlew build curseforge --refresh-dependencies --stacktrace"
+            sh "./gradlew build publish --stacktrace"
 
             archiveArtifacts artifacts: '**/build/libs/*.jar', fingerprint: true
          }
