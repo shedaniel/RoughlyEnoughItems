@@ -102,6 +102,8 @@ curseforge {
         project {
             id = '310111'
             releaseType = 'release'
+            changelogType = "html"
+            changelog = "<a href=\"https://gist.github.com/shedaniel/b7593e692319976f3349263208792922\">Click here for changelog</a>"
             addGameVersion '1.15'
             addGameVersion '1.15-Snapshot'
             addGameVersion 'Java 8'
