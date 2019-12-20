@@ -107,7 +107,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
     
     @Override
     public void render(int mouseX, int mouseY, float delta) {
-        for(EntryListEntry entry : entries)
+        for (EntryListEntry entry : entries)
             entry.clearStacks();
         ScissorsHandler.INSTANCE.scissor(bounds);
         int skip = Math.max(0, MathHelper.floor(scroll / 18f));
@@ -115,7 +115,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
         int i = nextIndex;
         blockedCount = 0;
         back:
-        for(; i < favorites.size(); i++) {
+        for (; i < favorites.size(); i++) {
             EntryStack stack = favorites.get(i);
             while (true) {
                 EntryListEntry entry = entries.get(nextIndex);
@@ -229,7 +229,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (containsMouse(PointHelper.fromMouse()))
-            for(Widget widget : children())
+            for (Widget widget : children())
                 if (widget.keyPressed(int_1, int_2, int_3))
                     return true;
         return false;
@@ -246,11 +246,11 @@ public class FavoritesListWidget extends WidgetWithBounds {
             List<EntryStack> list = Lists.newLinkedList();
             boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
             List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
-            for(EntryStack stack : ConfigManager.getInstance().getFavorites()) {
+            for (EntryStack stack : ConfigManager.getInstance().getFavorites()) {
                 if (listWidget.canLastSearchTermsBeAppliedTo(stack)) {
                     if (workingItems != null && CollectionUtils.findFirstOrNullEquals(workingItems, stack) == null)
                         continue;
-                    list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_OVERLAY, RENDER_EXTRA_CONFIG));
+                    list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
                 }
             }
             ItemListOrdering ordering = ConfigObject.getInstance().getItemListOrdering();
@@ -273,7 +273,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
         int currentX = 0;
         int currentY = 0;
         List<EntryListEntry> entries = Lists.newLinkedList();
-        for(int i = 0; i < slotsToPrepare; i++) {
+        for (int i = 0; i < slotsToPrepare; i++) {
             int xPos = currentX * 18 + innerBounds.x;
             int yPos = currentY * 18 + innerBounds.y;
             entries.add((EntryListEntry) new EntryListEntry(xPos, yPos).noBackground());
@@ -312,7 +312,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
             }
             if (!player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
                 return false;
-            for(Widget widget : children())
+            for (Widget widget : children())
                 if (widget.mouseClicked(double_1, double_2, int_1))
                     return true;
         }

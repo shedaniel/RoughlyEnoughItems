@@ -167,7 +167,10 @@ public interface EntryStack {
     void render(Rectangle bounds, int mouseX, int mouseY, float delta);
     
     public static enum Type {
-        ITEM, FLUID, EMPTY, RENDER
+        ITEM,
+        FLUID,
+        EMPTY,
+        RENDER
     }
     
     public static class Settings<T> {
@@ -192,7 +195,8 @@ public interface EntryStack {
         }
         
         public static class Item {
-            public static final Settings<Supplier<Boolean>> RENDER_OVERLAY = new Settings(TRUE);
+            public static final Settings<Supplier<Boolean>> RENDER_ENCHANTMENT_GLINT = new Settings(TRUE);
+            @Deprecated public static final Settings<Supplier<Boolean>> RENDER_OVERLAY = RENDER_ENCHANTMENT_GLINT;
             
             private Item() {
             }

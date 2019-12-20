@@ -115,11 +115,13 @@ public class LabelWidget extends WidgetWithBounds {
         if (isCentered()) {
             if (hasShadows)
                 font.drawWithShadow(text, pos.x - width / 2, pos.y, defaultColor);
-            else font.draw(text, pos.x - width / 2, pos.y, defaultColor);
+            else
+                font.draw(text, pos.x - width / 2, pos.y, defaultColor);
         } else {
             if (hasShadows)
                 font.drawWithShadow(text, pos.x, pos.y, defaultColor);
-            else font.draw(text, pos.x, pos.y, defaultColor);
+            else
+                font.draw(text, pos.x, pos.y, defaultColor);
         }
     }
     

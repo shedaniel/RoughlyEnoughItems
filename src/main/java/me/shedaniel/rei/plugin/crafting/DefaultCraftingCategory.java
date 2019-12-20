@@ -15,13 +15,17 @@ import me.shedaniel.rei.api.TransferRecipeCategory;
 import me.shedaniel.rei.gui.widget.EntryWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.Widget;
+import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.plugin.DefaultPlugin;
+import me.shedaniel.rei.server.ContainerInfo;
+import me.shedaniel.rei.server.ContainerInfoHandler;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -88,12 +92,16 @@ public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCr
     
     @Override
     public void renderRedSlots(List<Widget> widgets, Rectangle bounds, DefaultCraftingDisplay display, IntList redSlots) {
-        Point startPoint = new Point(bounds.getCenterX() - 58, bounds.getCenterY() - 27);
+        ContainerInfo info = ContainerInfoHandler.getContainerInfo(getIdentifier(), ScreenHelper.getLastContainerScreen().getContainer().getClass());
+        if (info == null)
+            return;
         RenderSystem.translatef(0, 0, 400);
+        Point startPoint = new Point(bounds.getCenterX() - 58, bounds.getCenterY() - 27);
+        int width = info.getCraftingWidth(ScreenHelper.getLastContainerScreen().getContainer());
         for (Integer slot : redSlots) {
             int i = slot;
-            int x = i % 3;
-            int y = (i - x) / 3;
+            int x = i % width;
+            int y = MathHelper.floor(i / (float) width);
             DrawableHelper.fill(startPoint.x + 1 + x * 18, startPoint.y + 1 + y * 18, startPoint.x + 1 + x * 18 + 16, startPoint.y + 1 + y * 18 + 16, 0x60ff0000);
         }
         RenderSystem.translatef(0, 0, -400);

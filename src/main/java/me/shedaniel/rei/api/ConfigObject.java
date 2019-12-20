@@ -43,7 +43,12 @@ public interface ConfigObject {
     
     boolean isToastDisplayedOnCopyIdentifier();
     
-    boolean doesRenderEntryExtraOverlay();
+    @Deprecated
+    default boolean doesRenderEntryExtraOverlay() {
+        return doesRenderEntryEnchantmentGlint();
+    }
+    
+    boolean doesRenderEntryEnchantmentGlint();
     
     boolean isEntryListWidgetScrolled();
     
@@ -97,17 +102,14 @@ public interface ConfigObject {
     
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD})
-    public @interface AddInFrontKeyCode {
-    }
+    public @interface AddInFrontKeyCode {}
     
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD})
-    public @interface DontApplyFieldName {
-    }
+    public @interface DontApplyFieldName {}
     
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD})
-    public @interface UseEnumSelectorInstead {
-    }
+    public @interface UseEnumSelectorInstead {}
     
 }

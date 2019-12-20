@@ -8,7 +8,6 @@ package me.shedaniel.rei;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import me.shedaniel.cloth.hooks.ClothClientHooks;
-import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
@@ -58,14 +57,10 @@ import java.util.concurrent.atomic.AtomicLong;
 @Internal
 public class RoughlyEnoughItemsCore implements ClientModInitializer {
     
-    @Internal
-    public static final Logger LOGGER;
-    @SuppressWarnings("deprecation")
-    private static final RecipeHelper RECIPE_HELPER = new RecipeHelperImpl();
-    @SuppressWarnings("deprecation")
-    private static final EntryRegistry ENTRY_REGISTRY = new EntryRegistryImpl();
-    @SuppressWarnings("deprecation")
-    private static final DisplayHelper DISPLAY_HELPER = new DisplayHelperImpl();
+    @Internal public static final Logger LOGGER;
+    @SuppressWarnings("deprecation") private static final RecipeHelper RECIPE_HELPER = new RecipeHelperImpl();
+    @SuppressWarnings("deprecation") private static final EntryRegistry ENTRY_REGISTRY = new EntryRegistryImpl();
+    @SuppressWarnings("deprecation") private static final DisplayHelper DISPLAY_HELPER = new DisplayHelperImpl();
     private static final Map<Identifier, REIPluginEntry> plugins = Maps.newHashMap();
     private static final ExecutorService SYNC_RECIPES = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "REI-SyncRecipes"));
     private static ConfigManager configManager;

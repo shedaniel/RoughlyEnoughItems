@@ -22,22 +22,16 @@ import java.util.List;
 @Config(name = "roughlyenoughitems/config")
 public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
-    @ConfigEntry.Category("!general")
-    @ConfigEntry.Gui.TransitiveObject
-    @DontApplyFieldName
+    @ConfigEntry.Category("!general") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
     public General general = new General();
-    @ConfigEntry.Category("appearance")
-    @ConfigEntry.Gui.TransitiveObject
-    @DontApplyFieldName
+    @ConfigEntry.Category("appearance") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
     private Appearance appearance = new Appearance();
-    @ConfigEntry.Category("modules")
-    @ConfigEntry.Gui.TransitiveObject
-    @DontApplyFieldName
+    @ConfigEntry.Category("modules") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
     private Modules modules = new Modules();
-    @ConfigEntry.Category("technical")
-    @ConfigEntry.Gui.TransitiveObject
-    @DontApplyFieldName
+    @ConfigEntry.Category("technical") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
     private Technical technical = new Technical();
+    @ConfigEntry.Category("performance") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
+    private Performance performance = new Performance();
     
     @Override
     public boolean isLighterButtonHover() {
@@ -90,8 +84,8 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
-    public boolean doesRenderEntryExtraOverlay() {
-        return appearance.renderEntryExtraOverlay;
+    public boolean doesRenderEntryEnchantmentGlint() {
+        return performance.renderEntryEnchantmentGlint;
     }
     
     @Override
@@ -220,50 +214,33 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     public static class General {
-        @ConfigEntry.Gui.Excluded
-        public List<String> favorites = new ArrayList<>();
-        @Comment("Declares whether cheating mode is on.")
-        private boolean cheating = false;
-        @Comment("Declares whether REI is visible.")
-        @ConfigEntry.Gui.Excluded
-        private boolean overlayVisible = true;
+        @ConfigEntry.Gui.Excluded public List<String> favorites = new ArrayList<>();
+        @Comment("Declares whether cheating mode is on.") private boolean cheating = false;
+        @Comment("Declares whether REI is visible.") @ConfigEntry.Gui.Excluded private boolean overlayVisible = true;
         private boolean favoritesEnabled = true;
-        @AddInFrontKeyCode
-        private InputUtil.KeyCode favoriteKeybind = InputUtil.Type.KEYSYM.createFromCode(65);
+        @AddInFrontKeyCode private InputUtil.KeyCode favoriteKeybind = InputUtil.Type.KEYSYM.createFromCode(65);
     }
     
     public static class Appearance {
-        @Comment("The ordering of the items on the item panel.")
-        @UseEnumSelectorInstead
+        @Comment("The ordering of the items on the item panel.") @UseEnumSelectorInstead
         private ItemListOrderingConfig itemListOrdering = ItemListOrderingConfig.REGISTRY_ASCENDING;
-        @Comment("Declares the appearance of REI windows.")
-        private boolean darkTheme = false;
-        @Comment("Whether REI should render entry's overlay.\nExample: Enchantment Glint")
-        private boolean renderEntryExtraOverlay = true;
-        @Comment("The ordering of the items on the item panel.")
-        @UseEnumSelectorInstead
+        @Comment("Declares the appearance of REI windows.") private boolean darkTheme = false;
+        @Comment("The ordering of the items on the item panel.") @UseEnumSelectorInstead
         private RecipeScreenType recipeScreenType = RecipeScreenType.UNSET;
-        @Comment("Declares the position of the search field.")
-        @UseEnumSelectorInstead
+        @Comment("Declares the position of the search field.") @UseEnumSelectorInstead
         private SearchFieldLocation searchFieldLocation = SearchFieldLocation.CENTER;
-        @Comment("Declares the position of the item list panel.")
-        private boolean mirrorItemPanel = false;
+        @Comment("Declares the position of the item list panel.") private boolean mirrorItemPanel = false;
         @Comment("Declares the maximum amount of recipes displayed in a page if possible.")
-        @ConfigEntry.BoundedDiscrete(min = 2, max = 99)
-        private int maxRecipePerPage = 3;
+        @ConfigEntry.BoundedDiscrete(min = 2, max = 99) private int maxRecipePerPage = 3;
         @Comment("Declares whether REI should lighten the button if hovered.")
         private boolean lighterButtonHover = true;
         private boolean clickableRecipeArrows = true;
-        @UseEnumSelectorInstead
-        private ItemCheatingMode itemCheatingMode = ItemCheatingMode.REI_LIKE;
-        @Comment("Declares the appearance of recipe's border.")
-        private boolean lightGrayRecipeBorder = false;
-        @Comment("Declares whether REI should append mod names to item stacks.")
-        private boolean appendModNames = true;
+        @UseEnumSelectorInstead private ItemCheatingMode itemCheatingMode = ItemCheatingMode.REI_LIKE;
+        @Comment("Declares the appearance of recipe's border.") private boolean lightGrayRecipeBorder = false;
+        @Comment("Declares whether REI should append mod names to item stacks.") private boolean appendModNames = true;
         @Comment("Declares how the scrollbar in villager screen should act.")
         private boolean villagerScreenPermanentScrollBar = false;
-        @Comment("Declares whether if entry list widget is scrolled.")
-        private boolean scrollingEntryListWidget = false;
+        @Comment("Declares whether if entry list widget is scrolled.") private boolean scrollingEntryListWidget = false;
         private boolean snapToRows = false;
         private boolean displayFavoritesOnTheLeft = true;
         private boolean displayFavoritesTooltip = true;
@@ -276,8 +253,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         private String gamemodeCommand = "/gamemode {gamemode}";
         @Comment("Declares the command used in servers to cheat items.")
         private String giveCommand = "/give {player_name} {item_identifier}{nbt} {count}";
-        @Comment("Declares the command used to change weather.")
-        private String weatherCommand = "/weather {weather}";
+        @Comment("Declares the command used to change weather.") private String weatherCommand = "/weather {weather}";
         private boolean registerRecipesInAnotherThread = true;
     }
     
@@ -285,11 +261,14 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         @Comment("Declares whether the craftable filter button is enabled.")
         private boolean enableCraftableOnlyButton = true;
         private boolean toastDisplayedOnCopyIdentifier = true;
-        @Comment("Declares whether the utils buttons are shown.")
-        private boolean showUtilsButtons = false;
-        @Comment("Declares whether REI should remove the recipe book.")
-        private boolean disableRecipeBook = false;
+        @Comment("Declares whether the utils buttons are shown.") private boolean showUtilsButtons = false;
+        @Comment("Declares whether REI should remove the recipe book.") private boolean disableRecipeBook = false;
         @Comment("Declares whether REI should fix closing container with tab.")
         private boolean fixTabCloseContainer = false;
+    }
+    
+    public static class Performance {
+        @Comment("Whether REI should render entry's enchantment glint")
+        private boolean renderEntryEnchantmentGlint = true;
     }
 }

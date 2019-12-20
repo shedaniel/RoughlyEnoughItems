@@ -7,7 +7,6 @@ package me.shedaniel.rei.gui.entries;
 
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.ObjectHolder;
-import me.shedaniel.rei.impl.ObjectHolderImpl;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.util.Identifier;
 
@@ -107,7 +106,7 @@ public abstract class RecipeEntry extends DrawableHelper implements EntryStack {
     @SuppressWarnings("deprecation")
     @Override
     public <T> ObjectHolder<T> getSetting(Settings<T> settings) {
-        return new ObjectHolderImpl<>(settings.getDefaultValue());
+        return ObjectHolder.of(settings.getDefaultValue());
     }
     
     public abstract int getHeight();

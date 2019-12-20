@@ -156,7 +156,8 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
         if (errorTooltip == null) {
             if (IS_YOG.get())
                 str += I18n.translate("text.auto_craft.move_items.yog");
-            else str += I18n.translate("text.auto_craft.move_items");
+            else
+                str += I18n.translate("text.auto_craft.move_items");
         } else {
             if (errorTooltip.size() > 1)
                 str += Formatting.RED.toString() + I18n.translate("error.rei.multi.errors") + "\n";

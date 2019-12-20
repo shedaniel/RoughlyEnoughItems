@@ -25,11 +25,14 @@ public class ContainerInfoHandler {
     }
     
     public static ContainerInfo getContainerInfo(Identifier category, Class<?> containerClass) {
-        if (!isCategoryHandled(category)) return null;
+        if (!isCategoryHandled(category))
+            return null;
         Map<Class<? extends Container>, ContainerInfo> infoMap = containerInfoMap.get(category.toString());
-        if (infoMap.containsKey(containerClass)) return infoMap.get(containerClass);
+        if (infoMap.containsKey(containerClass))
+            return infoMap.get(containerClass);
         for (Map.Entry<Class<? extends Container>, ContainerInfo> entry : infoMap.entrySet())
-            if (entry.getKey().isAssignableFrom(containerClass)) return entry.getValue();
+            if (entry.getKey().isAssignableFrom(containerClass))
+                return entry.getValue();
         return null;
     }
 }

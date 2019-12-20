@@ -7,6 +7,7 @@ package me.shedaniel.rei.impl;
 
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.ObjectHolder;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import net.minecraft.util.Identifier;
 
@@ -14,10 +15,9 @@ import javax.annotation.Nullable;
 import java.util.Optional;
 
 @Deprecated
-public class EmptyEntryStack extends AbstractEntryStack {
+public class EmptyEntryStack implements EntryStack {
     
-    @Deprecated
-    public static final EntryStack EMPTY = new EmptyEntryStack();
+    @Deprecated public static final EntryStack EMPTY = new EmptyEntryStack();
     
     private EmptyEntryStack() {
     }
@@ -58,6 +58,11 @@ public class EmptyEntryStack extends AbstractEntryStack {
     }
     
     @Override
+    public boolean equals(EntryStack stack, boolean ignoreTags, boolean ignoreAmount) {
+        return stack.getType() == getType();
+    }
+    
+    @Override
     public boolean equalsIgnoreTagsAndAmount(EntryStack stack) {
         return stack.getType() == getType();
     }
@@ -75,6 +80,36 @@ public class EmptyEntryStack extends AbstractEntryStack {
     @Override
     public boolean equalsAll(EntryStack stack) {
         return stack.getType() == getType();
+    }
+    
+    @Override
+    public int getZ() {
+        return 0;
+    }
+    
+    @Override
+    public void setZ(int z) {
+    
+    }
+    
+    @Override
+    public <T> EntryStack setting(Settings<T> settings, T value) {
+        return this;
+    }
+    
+    @Override
+    public <T> EntryStack removeSetting(Settings<T> settings) {
+        return this;
+    }
+    
+    @Override
+    public EntryStack clearSettings() {
+        return this;
+    }
+    
+    @Override
+    public <T> ObjectHolder<T> getSetting(Settings<T> settings) {
+        return ObjectHolder.of(settings.getDefaultValue());
     }
     
     @Override

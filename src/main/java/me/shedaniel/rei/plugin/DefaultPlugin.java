@@ -106,7 +106,8 @@ public class DefaultPlugin implements REIPluginV0 {
                 for (ItemStack stack : entryRegistry.getAllStacksFromItem(item)) {
                     entryRegistry.registerEntry(EntryStack.create(stack));
                 }
-            } else entryRegistry.registerEntry(EntryStack.create(item));
+            } else
+                entryRegistry.registerEntry(EntryStack.create(item));
         }
         EntryStack stack = EntryStack.create(Items.ENCHANTED_BOOK);
         for (Enchantment enchantment : Registry.ENCHANTMENT) {
@@ -225,9 +226,10 @@ public class DefaultPlugin implements REIPluginV0 {
         }
         displayHelper.getBaseBoundsHandler().registerExclusionZones(AbstractInventoryScreen.class, new DefaultPotionEffectExclusionZones());
         displayHelper.getBaseBoundsHandler().registerExclusionZones(RecipeBookProvider.class, new DefaultRecipeBookExclusionZones());
-        displayHelper.getBaseBoundsHandler().registerExclusionZones(RecipeViewingScreen.class, isLeftSide -> {
+        displayHelper.getBaseBoundsHandler().registerExclusionZones(RecipeViewingScreen.class, () -> {
             CategoryBaseWidget widget = ((RecipeViewingScreen) MinecraftClient.getInstance().currentScreen).getWorkingStationsBaseWidget();
-            if (widget == null) return Collections.emptyList();
+            if (widget == null)
+                return Collections.emptyList();
             return Collections.singletonList(widget.getBounds().clone());
         });
         displayHelper.registerBoundsHandler(new DisplayHelper.DisplayBoundsHandler<AbstractContainerScreen<?>>() {

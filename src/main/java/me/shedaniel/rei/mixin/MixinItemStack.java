@@ -17,7 +17,7 @@ public class MixinItemStack implements ItemStackRenderOverlayHook {
     private boolean rei_dontRenderOverlay = false;
     
     @Override
-    public void rei_setRenderOverlay(boolean b) {
+    public void rei_setRenderEnchantmentGlint(boolean b) {
         rei_dontRenderOverlay = !b;
     }
     

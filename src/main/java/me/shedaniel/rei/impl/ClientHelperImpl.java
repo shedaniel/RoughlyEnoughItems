@@ -76,9 +76,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     @Override
     public FabricKeyBinding[] getREIKeyBindings() {
-        return new FabricKeyBinding[]{
-                recipe, usage, hide, previousPage, nextPage, focusSearchField, copyRecipeIdentifier
-        };
+        return new FabricKeyBinding[]{recipe, usage, hide, previousPage, nextPage, focusSearchField, copyRecipeIdentifier};
     }
     
     @Override

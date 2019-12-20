@@ -140,7 +140,8 @@ public class CollectionUtils {
         List<R> l = null;
         for (T t : list) {
             if (predicate.test(t)) {
-                if (l == null) l = new LinkedList<>();
+                if (l == null)
+                    l = new LinkedList<>();
                 l.add(function.apply(t));
             }
         }

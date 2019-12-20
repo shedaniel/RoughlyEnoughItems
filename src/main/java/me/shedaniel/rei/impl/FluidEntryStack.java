@@ -154,7 +154,9 @@ public class FluidEntryStack extends AbstractEntryStack {
         List<String> toolTip = Lists.newArrayList(SearchArgument.tryGetEntryStackName(this));
         if (amount >= 0) {
             String amountTooltip = getSetting(Settings.Fluid.AMOUNT_TOOLTIP).value().apply(this);
-            if (amountTooltip != null) for (String s : amountTooltip.split("\n")) toolTip.add(s);
+            if (amountTooltip != null)
+                for (String s : amountTooltip.split("\n"))
+                    toolTip.add(s);
         }
         toolTip.addAll(getSetting(Settings.TOOLTIP_APPEND_EXTRA).value().apply(this));
         if (getSetting(Settings.TOOLTIP_APPEND_MOD).value().get() && ConfigObject.getInstance().shouldAppendModNames()) {

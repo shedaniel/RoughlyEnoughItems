@@ -238,7 +238,6 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
         return int_1;
     }
     
-    public static class NotEnoughMaterialsException extends RuntimeException {
-    }
+    public static class NotEnoughMaterialsException extends RuntimeException {}
     
 }

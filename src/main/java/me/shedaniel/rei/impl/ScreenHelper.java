@@ -33,8 +33,7 @@ public class ScreenHelper implements ClientModInitializer {
     /**
      * @deprecated Use getters instead
      */
-    @Deprecated
-    public static OverlaySearchField searchField;
+    @Deprecated public static OverlaySearchField searchField;
     public static List<ItemStack> inventoryStacks = Lists.newArrayList();
     private static ContainerScreenOverlay overlay;
     private static AbstractContainerScreen<?> lastContainerScreen = null;

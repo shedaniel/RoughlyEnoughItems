@@ -42,8 +42,8 @@ public abstract class AbstractEntryStack extends DrawableHelper implements Entry
     public <T> ObjectHolder<T> getSetting(Settings<T> settings) {
         Object o = this.settings.get(settings);
         if (o == null)
-            return new ObjectHolderImpl(settings.getDefaultValue());
-        return new ObjectHolderImpl(o);
+            return ObjectHolder.of(settings.getDefaultValue());
+        return ObjectHolder.of((T) o);
     }
     
     @Override

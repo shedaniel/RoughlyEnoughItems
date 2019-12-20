@@ -17,7 +17,7 @@ import net.minecraft.util.Pair;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.Supplier;
 
 @Deprecated
 @Internal
@@ -26,7 +26,7 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
     private static final Comparator<? super Rectangle> RECTANGLE_COMPARER = Comparator.comparingLong(Rectangle::hashCode);
     
     private long lastArea = -1;
-    private List<Pair<Pair<Class<?>, Float>, Function<Boolean, List<Rectangle>>>> list = Lists.newArrayList();
+    private List<Pair<Pair<Class<?>, Float>, Supplier<List<Rectangle>>>> list = Lists.newArrayList();
     
     @Override
     public Class<?> getBaseSupportedClass() {
@@ -49,10 +49,14 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
     }
     
     @Override
-    public ActionResult isInZone(boolean isOnRightSide, double mouseX, double mouseY) {
-        for (Rectangle zone : getCurrentExclusionZones(MinecraftClient.getInstance().currentScreen.getClass(), isOnRightSide, false))
-            if (zone.contains(mouseX, mouseY))
-                return ActionResult.FAIL;
+    public ActionResult isInZone(double mouseX, double mouseY) {
+        Class<? extends Screen> screenClass = MinecraftClient.getInstance().currentScreen.getClass();
+        for (Pair<Pair<Class<?>, Float>, Supplier<List<Rectangle>>> pair : list) {
+            if (pair.getLeft().getLeft().isAssignableFrom(screenClass))
+                for (Rectangle zone : pair.getRight().get())
+                    if (zone.contains(mouseX, mouseY))
+                        return ActionResult.FAIL;
+        }
         return ActionResult.PASS;
     }
     
@@ -67,23 +71,28 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
     
     private long currentHashCode(boolean isOnRightSide) {
         DisplayHelper.DisplayBoundsHandler handler = DisplayHelper.getInstance().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
-        return areasHashCode(isOnRightSide ? handler.getRightBounds(MinecraftClient.getInstance().currentScreen) : handler.getLeftBounds(MinecraftClient.getInstance().currentScreen), getCurrentExclusionZones(MinecraftClient.getInstance().currentScreen.getClass(), isOnRightSide, false));
+        return areasHashCode(isOnRightSide ? handler.getRightBounds(MinecraftClient.getInstance().currentScreen) : handler.getLeftBounds(MinecraftClient.getInstance().currentScreen), getExclusionZones(MinecraftClient.getInstance().currentScreen.getClass(), false));
     }
     
     @Override
-    public ActionResult canItemSlotWidgetFit(boolean isOnRightSide, int left, int top, Screen screen, Rectangle fullBounds) {
-        for (Rectangle currentExclusionZone : getCurrentExclusionZones(MinecraftClient.getInstance().currentScreen.getClass(), isOnRightSide, false))
-            if (left + 18 >= currentExclusionZone.x && top + 18 >= currentExclusionZone.y && left <= currentExclusionZone.x + currentExclusionZone.width && top <= currentExclusionZone.y + currentExclusionZone.height)
-                return ActionResult.FAIL;
+    public ActionResult canItemSlotWidgetFit(int left, int top, Screen screen, Rectangle fullBounds) {
+        Class<? extends Screen> screenClass = screen.getClass();
+        for (Pair<Pair<Class<?>, Float>, Supplier<List<Rectangle>>> pair : list) {
+            if (pair.getLeft().getLeft().isAssignableFrom(screenClass))
+                for (Rectangle zone : pair.getRight().get()) {
+                    if (left + 18 >= zone.x && top + 18 >= zone.y && left <= zone.getMaxX() && top <= zone.getMaxY())
+                        return ActionResult.FAIL;
+                }
+        }
         return ActionResult.PASS;
     }
     
     @Override
-    public List<Rectangle> getCurrentExclusionZones(Class<?> currentScreenClass, boolean isOnRightSide, boolean sort) {
+    public List<Rectangle> getExclusionZones(Class<?> currentScreenClass, boolean sort) {
         List<Rectangle> rectangles = Lists.newArrayList();
-        for (Pair<Pair<Class<?>, Float>, Function<Boolean, List<Rectangle>>> pair : list) {
+        for (Pair<Pair<Class<?>, Float>, Supplier<List<Rectangle>>> pair : list) {
             if (pair.getLeft().getLeft().isAssignableFrom(currentScreenClass))
-                rectangles.addAll(pair.getRight().apply(isOnRightSide));
+                rectangles.addAll(pair.getRight().get());
         }
         if (sort)
             rectangles.sort(RECTANGLE_COMPARER);
@@ -91,7 +100,12 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
     }
     
     @Override
-    public void registerExclusionZones(Class<?> screenClass, Function<Boolean, List<Rectangle>> supplier) {
+    public int supplierSize() {
+        return list.size();
+    }
+    
+    @Override
+    public void registerExclusionZones(Class<?> screenClass, Supplier<List<Rectangle>> supplier) {
         list.add(new Pair<>(new Pair<>(screenClass, 0f), supplier));
     }
     
@@ -99,7 +113,6 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
         int hashCode = 31 + (rectangle == null ? 0 : rectangle.hashCode());
         for (Rectangle e : exclusionZones)
             hashCode = 31 * hashCode + (e == null ? 0 : e.hashCode());
-        // hashCode -= (e == null ? 0 : e.hashCode());
         return hashCode;
     }
     

@@ -30,6 +30,10 @@ import java.util.List;
 
 public class DefaultCategoryHandler implements AutoTransferHandler {
     
+    public static boolean canUseMovePackets() {
+        return ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.MOVE_ITEMS_PACKET);
+    }
+    
     @Override
     public Result handle(Context context) {
         if (!(context.getRecipe() instanceof TransferRecipeDisplay))
@@ -64,7 +68,8 @@ public class DefaultCategoryHandler implements AutoTransferHandler {
             for (EntryStack stack : stacks) {
                 if (stack.getItemStack() != null)
                     buf.writeItemStack(stack.getItemStack());
-                else buf.writeItemStack(ItemStack.EMPTY);
+                else
+                    buf.writeItemStack(ItemStack.EMPTY);
             }
         }
         ClientSidePacketRegistry.INSTANCE.sendToServer(RoughlyEnoughItemsNetwork.MOVE_ITEMS_PACKET, buf);
@@ -74,10 +79,6 @@ public class DefaultCategoryHandler implements AutoTransferHandler {
     @Override
     public double getPriority() {
         return -10;
-    }
-    
-    public static boolean canUseMovePackets() {
-        return ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.MOVE_ITEMS_PACKET);
     }
     
     public IntList hasItems(List<List<EntryStack>> inputs) {
