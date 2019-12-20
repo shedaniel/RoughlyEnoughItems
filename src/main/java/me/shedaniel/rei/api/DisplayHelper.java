@@ -87,16 +87,31 @@ public interface DisplayHelper {
         /**
          * Checks if item slot can fit the screen
          *
+         * @param left       the left x coordinates of the stack
+         * @param top        the top y coordinates for the stack
+         * @param screen     the current screen
+         * @param fullBounds the current bounds
+         * @return whether the item slot can fit
+         * @see BaseBoundsHandler#registerExclusionZones(Class, BaseBoundsHandler.ExclusionZoneSupplier) for easier api
+         */
+        default ActionResult canItemSlotWidgetFit(int left, int top, T screen, Rectangle fullBounds) {
+            return PASS;
+        }
+        
+        /**
+         * Checks if item slot can fit the screen
+         *
          * @param isOnRightSide whether the user has set the overlay to the right
          * @param left          the left x coordinates of the stack
          * @param top           the top y coordinates for the stack
          * @param screen        the current screen
          * @param fullBounds    the current bounds
          * @return whether the item slot can fit
-         * @see BaseBoundsHandler#registerExclusionZones(Class, BaseBoundsHandler.ExclusionZoneSupplier) for easier api
+         * @deprecated use {@link #canItemSlotWidgetFit(int, int, Object, Rectangle)}
          */
+        @Deprecated
         default ActionResult canItemSlotWidgetFit(boolean isOnRightSide, int left, int top, T screen, Rectangle fullBounds) {
-            return PASS;
+            return canItemSlotWidgetFit(left, top, screen, fullBounds);
         }
         
         /**
@@ -106,8 +121,21 @@ public interface DisplayHelper {
          * @param mouseX        mouse's x coordinates
          * @param mouseY        mouse's y coordinates
          * @return whether mouse is inside the overlay
+         * @deprecated use {@link #isInZone(double, double)}
          */
+        @Deprecated
         default ActionResult isInZone(boolean isOnRightSide, double mouseX, double mouseY) {
+            return isInZone(mouseX, mouseY);
+        }
+        
+        /**
+         * Checks if mouse is inside the overlay
+         *
+         * @param mouseX mouse's x coordinates
+         * @param mouseY mouse's y coordinates
+         * @return whether mouse is inside the overlay
+         */
+        default ActionResult isInZone(double mouseX, double mouseY) {
             return PASS;
         }
         
@@ -120,10 +148,10 @@ public interface DisplayHelper {
         default Rectangle getItemListArea(Rectangle rectangle) {
             return new Rectangle(rectangle.x + 1, rectangle.y + 2 + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + (ConfigObject.getInstance().isEntryListWidgetScrolled() ? 0 : 22), rectangle.width - 2, rectangle.height - (ConfigObject.getInstance().getSearchFieldLocation() != SearchFieldLocation.CENTER ? 27 + 22 : 27) + (!ConfigObject.getInstance().isEntryListWidgetScrolled() ? 0 : 22));
         }
-    
+        
         default Rectangle getFavoritesListArea(Rectangle rectangle) {
             int offset = 31 + (ConfigObject.getInstance().doesShowUtilsButtons() ? 25 : 0);
-            return new Rectangle(rectangle.x + 1, rectangle.y + 2 + offset, rectangle.width - 2, rectangle.height - 5- offset);
+            return new Rectangle(rectangle.x + 1, rectangle.y + 2 + offset, rectangle.width - 2, rectangle.height - 5 - offset);
         }
         
         /**

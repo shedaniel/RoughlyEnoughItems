@@ -14,6 +14,7 @@ import net.minecraft.container.Container;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.util.Identifier;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,7 +41,7 @@ public interface DefaultCraftingDisplay extends TransferRecipeDisplay {
     default List<List<EntryStack>> getOrganisedInputEntries(ContainerInfo<Container> containerInfo, Container container) {
         List<List<EntryStack>> list = Lists.newArrayListWithCapacity(containerInfo.getCraftingWidth(container) * containerInfo.getCraftingHeight(container));
         for (int i = 0; i < containerInfo.getCraftingWidth(container) * containerInfo.getCraftingHeight(container); i++) {
-            list.add(Lists.newArrayList());
+            list.add(Collections.emptyList());
         }
         for (int i = 0; i < getInputEntries().size(); i++) {
             List<EntryStack> stacks = getInputEntries().get(i);

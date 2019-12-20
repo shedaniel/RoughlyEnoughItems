@@ -16,13 +16,13 @@ import net.minecraft.container.CraftingContainer;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.Supplier;
 
-public class DefaultRecipeBookExclusionZones implements Function<Boolean, List<Rectangle>> {
+public class DefaultRecipeBookExclusionZones implements Supplier<List<Rectangle>> {
     
     @Override
-    public List<Rectangle> apply(Boolean isOnRightSide) {
-        if (isOnRightSide || !MinecraftClient.getInstance().player.getRecipeBook().isGuiOpen() || !(MinecraftClient.getInstance().currentScreen instanceof RecipeBookProvider) || !(ScreenHelper.getLastContainerScreen().getContainer() instanceof CraftingContainer))
+    public List<Rectangle> get() {
+        if (!MinecraftClient.getInstance().player.getRecipeBook().isGuiOpen() || !(MinecraftClient.getInstance().currentScreen instanceof RecipeBookProvider) || !(ScreenHelper.getLastContainerScreen().getContainer() instanceof CraftingContainer))
             return Collections.emptyList();
         ContainerScreenHooks screenHooks = ScreenHelper.getLastContainerScreenHooks();
         List<Rectangle> l = Lists.newArrayList(new Rectangle(screenHooks.rei_getContainerLeft() - 4 - 145, screenHooks.rei_getContainerTop(), 4 + 145 + 30, screenHooks.rei_getContainerHeight()));

@@ -27,8 +27,8 @@ public interface ConfigManager {
     /**
      * Gets the config instance
      *
-     * @deprecated Use {@link ConfigObject#getInstance()}
      * @return the config instance
+     * @deprecated Use {@link ConfigObject#getInstance()}
      */
     @Deprecated
     ConfigObject getConfig();

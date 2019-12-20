@@ -483,7 +483,8 @@ public class VillagerRecipeViewingScreen extends Screen {
         if (int_1 == 259) {
             if (ScreenHelper.hasLastRecipeScreen())
                 minecraft.openScreen(ScreenHelper.getLastRecipeScreen());
-            else minecraft.openScreen(ScreenHelper.getLastContainerScreen());
+            else
+                minecraft.openScreen(ScreenHelper.getLastContainerScreen());
             return true;
         }
         return super.keyPressed(int_1, int_2, int_3);

@@ -33,8 +33,7 @@ import java.util.stream.Collectors;
 public class RecipeHelperImpl implements RecipeHelper {
     
     private static final Comparator<DisplayVisibilityHandler> VISIBILITY_HANDLER_COMPARATOR;
-    @SuppressWarnings("rawtypes")
-    private static final Comparator<Recipe> RECIPE_COMPARATOR = (o1, o2) -> {
+    @SuppressWarnings("rawtypes") private static final Comparator<Recipe> RECIPE_COMPARATOR = (o1, o2) -> {
         int int_1 = o1.getId().getNamespace().compareTo(o2.getId().getNamespace());
         if (int_1 == 0)
             int_1 = o1.getId().getPath().compareTo(o2.getId().getPath());
@@ -251,46 +250,39 @@ public class RecipeHelperImpl implements RecipeHelper {
         Version reiVersion = FabricLoader.getInstance().getModContainer("roughlyenoughitems").get().getMetadata().getVersion();
         if (!(reiVersion instanceof SemanticVersion))
             RoughlyEnoughItemsCore.LOGGER.warn("[REI] Roughly Enough Items is not using semantic versioning, will be ignoring plugins' minimum versions!");
+        List<REIPluginV0> reiPluginV0s = new ArrayList<>();
         for (REIPluginEntry plugin : plugins) {
             try {
                 if (reiVersion instanceof SemanticVersion)
                     if (plugin.getMinimumVersion().compareTo((SemanticVersion) reiVersion) > 0) {
                         throw new IllegalStateException("Requires " + plugin.getMinimumVersion().getFriendlyString() + " version of REI!");
                     }
-                if (plugin instanceof REIPluginV0)
+                if (plugin instanceof REIPluginV0) {
                     ((REIPluginV0) plugin).preRegister();
+                    reiPluginV0s.add((REIPluginV0) plugin);
+                }
             } catch (Throwable e) {
                 RoughlyEnoughItemsCore.LOGGER.error("[REI] " + plugin.getPluginIdentifier().toString() + " plugin failed to pre register!", e);
             }
         }
-        for (REIPluginEntry plugin : plugins) {
+        for (REIPluginV0 plugin : reiPluginV0s) {
             Identifier identifier = plugin.getPluginIdentifier();
             try {
-                if (reiVersion instanceof SemanticVersion)
-                    if (plugin.getMinimumVersion().compareTo((SemanticVersion) reiVersion) > 0)
-                        return;
-                if (plugin instanceof REIPluginV0) {
-                    ((REIPluginV0) plugin).registerBounds(DisplayHelper.getInstance());
-                    ((REIPluginV0) plugin).registerEntries(EntryRegistry.getInstance());
-                    ((REIPluginV0) plugin).registerPluginCategories(this);
-                    ((REIPluginV0) plugin).registerRecipeDisplays(this);
-                    ((REIPluginV0) plugin).registerOthers(this);
-                } else {
-                    throw new IllegalStateException("Invaild Plugin Class!");
-                }
+                plugin.registerBounds(DisplayHelper.getInstance());
+                plugin.registerEntries(EntryRegistry.getInstance());
+                plugin.registerPluginCategories(this);
+                plugin.registerRecipeDisplays(this);
+                plugin.registerOthers(this);
             } catch (Throwable e) {
                 RoughlyEnoughItemsCore.LOGGER.error("[REI] " + identifier.toString() + " plugin failed to load!", e);
             }
         }
-        for (REIPluginEntry plugin : plugins) {
+        for (REIPluginV0 plugin : reiPluginV0s) {
+            Identifier identifier = plugin.getPluginIdentifier();
             try {
-                if (reiVersion instanceof SemanticVersion)
-                    if (plugin.getMinimumVersion().compareTo((SemanticVersion) reiVersion) > 0)
-                        return;
-                if (plugin instanceof REIPluginV0)
-                    ((REIPluginV0) plugin).postRegister();
+                plugin.postRegister();
             } catch (Throwable e) {
-                RoughlyEnoughItemsCore.LOGGER.error("[REI] " + plugin.getPluginIdentifier().toString() + " plugin failed to post register!", e);
+                RoughlyEnoughItemsCore.LOGGER.error("[REI] " + identifier.toString() + " plugin failed to post register!", e);
             }
         }
         if (!recipeFunctions.isEmpty()) {
@@ -323,7 +315,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         ScreenHelper.getOptionalOverlay().ifPresent(overlay -> overlay.shouldReInit = true);
         
         long usedTime = System.currentTimeMillis() - startTime;
-        RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered %d stack entries, %d recipes displays, %d bounds handler, %d visibility handlers and %d categories (%s) in %d ms.", EntryRegistry.getInstance().getStacksList().size(), recipeCount.get(), DisplayHelper.getInstance().getAllBoundsHandlers().size(), getDisplayVisibilityHandlers().size(), categories.size(), String.join(", ", categories.stream().map(RecipeCategory::getCategoryName).collect(Collectors.toList())), usedTime);
+        RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered {} stack entries, {} recipes displays, {} exclusion zones suppliers, {} bounds handler, {} visibility handlers and {} categories ({}) in {} ms.", EntryRegistry.getInstance().getStacksList().size(), recipeCount.get(), DisplayHelper.getInstance().getBaseBoundsHandler().supplierSize(), DisplayHelper.getInstance().getAllBoundsHandlers().size(), getDisplayVisibilityHandlers().size(), categories.size(), String.join(", ", categories.stream().map(RecipeCategory::getCategoryName).collect(Collectors.toList())), usedTime);
         arePluginsLoading = false;
     }
     
@@ -416,12 +408,14 @@ public class RecipeHelperImpl implements RecipeHelper {
     }
     
     @Override
-    public <T extends Recipe<?>> void registerRecipes(Identifier category, @SuppressWarnings("rawtypes") Function<Recipe, Boolean> recipeFilter, Function<T, RecipeDisplay> mappingFunction) {
+    public <T extends Recipe<?>> void registerRecipes(Identifier category, @SuppressWarnings("rawtypes")
+            Function<Recipe, Boolean> recipeFilter, Function<T, RecipeDisplay> mappingFunction) {
         recipeFunctions.add(new RecipeFunction(category, recipeFilter::apply, mappingFunction));
     }
     
     @Override
-    public <T extends Recipe<?>> void registerRecipes(Identifier category, @SuppressWarnings("rawtypes") Predicate<Recipe> recipeFilter, Function<T, RecipeDisplay> mappingFunction) {
+    public <T extends Recipe<?>> void registerRecipes(Identifier category,
+            @SuppressWarnings("rawtypes") Predicate<Recipe> recipeFilter, Function<T, RecipeDisplay> mappingFunction) {
         recipeFunctions.add(new RecipeFunction(category, recipeFilter, mappingFunction));
     }
     

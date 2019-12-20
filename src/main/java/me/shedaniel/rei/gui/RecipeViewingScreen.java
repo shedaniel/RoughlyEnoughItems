@@ -47,8 +47,7 @@ public class RecipeViewingScreen extends Screen {
     public boolean choosePageActivated;
     public RecipeChoosePageWidget recipeChoosePageWidget;
     private Rectangle bounds;
-    @Nullable
-    private CategoryBaseWidget workingStationsBaseWidget;
+    @Nullable private CategoryBaseWidget workingStationsBaseWidget;
     private RecipeCategory<RecipeDisplay> selectedCategory;
     private ButtonWidget recipeBack, recipeNext, categoryBack, categoryNext;
     
@@ -110,7 +109,8 @@ public class RecipeViewingScreen extends Screen {
         if (int_1 == 259) {
             if (ScreenHelper.hasLastRecipeScreen())
                 minecraft.openScreen(ScreenHelper.getLastRecipeScreen());
-            else minecraft.openScreen(ScreenHelper.getLastContainerScreen());
+            else
+                minecraft.openScreen(ScreenHelper.getLastContainerScreen());
             return true;
         }
         return super.keyPressed(int_1, int_2, int_3);
@@ -300,7 +300,7 @@ public class RecipeViewingScreen extends Screen {
             recipeChoosePageWidget = new RecipeChoosePageWidget(this, page, getTotalPages(selectedCategory));
         else
             recipeChoosePageWidget = null;
-    
+        
         workingStationsBaseWidget = null;
         List<List<EntryStack>> workingStations = RecipeHelper.getInstance().getWorkingStations(selectedCategory.getIdentifier());
         if (!workingStations.isEmpty()) {

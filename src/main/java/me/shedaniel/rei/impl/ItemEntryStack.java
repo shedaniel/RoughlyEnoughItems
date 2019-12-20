@@ -6,7 +6,6 @@
 package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.ConfigObject;
@@ -119,7 +118,7 @@ public class ItemEntryStack extends AbstractEntryStack {
     @Nullable
     @Override
     public QueuedTooltip getTooltip(int mouseX, int mouseY) {
-        if (!getSetting(Settings.TOOLTIP_ENABLED).value().get() || isEmpty())
+        if (isEmpty() || !getSetting(Settings.TOOLTIP_ENABLED).value().get())
             return null;
         List<String> toolTip = Lists.newArrayList(SearchArgument.tryGetItemStackToolTip(getItemStack(), true));
         toolTip.addAll(getSetting(Settings.TOOLTIP_APPEND_EXTRA).value().apply(this));
@@ -139,21 +138,17 @@ public class ItemEntryStack extends AbstractEntryStack {
     
     @Override
     public void render(Rectangle bounds, int mouseX, int mouseY, float delta) {
-        if (getSetting(Settings.RENDER).value().get()) {
-            ItemStack stack = getItemStack().copy();
-            ((ItemStackRenderOverlayHook) (Object) stack).rei_setRenderOverlay(getSetting(Settings.Item.RENDER_OVERLAY).value().get());
-            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        if (!isEmpty() && getSetting(Settings.RENDER).value().get()) {
+            ItemStack stack = getItemStack();
+            ((ItemStackRenderOverlayHook) (Object) stack).rei_setRenderEnchantmentGlint(getSetting(Settings.Item.RENDER_ENCHANTMENT_GLINT).value().get());
             ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
             itemRenderer.zOffset = getZ();
-            RenderSystem.colorMask(true, true, true, true);
-            RenderSystem.enableLighting();
-            RenderSystem.enableRescaleNormal();
-            RenderSystem.enableDepthTest();
             int i1 = bounds.getCenterX() - 8;
             int i2 = bounds.getCenterY() - 8;
-            itemRenderer.renderGuiItem(stack, i1, i2);
+            itemRenderer.renderGuiItemIcon(stack, i1, i2);
             itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, stack, i1, i2, getSetting(Settings.RENDER_COUNTS).value().get() ? getSetting(Settings.COUNTS).value().apply(this) : "");
             itemRenderer.zOffset = 0.0F;
+            ((ItemStackRenderOverlayHook) (Object) stack).rei_setRenderEnchantmentGlint(true);
         }
     }
 }

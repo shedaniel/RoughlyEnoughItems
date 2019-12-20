@@ -13,9 +13,7 @@ import me.sargunvohra.mcmods.autoconfig1u.gui.ConfigScreenProvider;
 import me.sargunvohra.mcmods.autoconfig1u.gui.registry.GuiRegistry;
 import me.sargunvohra.mcmods.autoconfig1u.serializer.JanksonConfigSerializer;
 import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.Jankson;
-import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.JsonObject;
 import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.JsonPrimitive;
-import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.impl.SyntaxError;
 import me.shedaniel.cloth.hooks.ScreenHooks;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
@@ -62,7 +60,7 @@ public class ConfigManagerImpl implements ConfigManager {
         loadFavoredEntries();
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> {
             @SuppressWarnings("rawtypes") List<AbstractConfigListEntry> entries = new ArrayList<>();
-            for(FabricKeyBinding binding : ClientHelper.getInstance().getREIKeyBindings()) {
+            for (FabricKeyBinding binding : ClientHelper.getInstance().getREIKeyBindings()) {
                 entries.add(ConfigEntryBuilder.create().fillKeybindingField(I18n.translate(binding.getId()) + ":", binding).build());
             }
             KeyCodeEntry entry = ConfigEntryBuilder.create().startKeyCodeField(i13n, getUnsafely(field, config, InputUtil.UNKNOWN_KEYCODE)).setDefaultValue(() -> getUnsafely(field, defaults)).setSaveConsumer(newValue -> setUnsafely(field, config, newValue)).build();
@@ -89,7 +87,8 @@ public class ConfigManagerImpl implements ConfigManager {
         Gson gson = new GsonBuilder().create();
         for (String entry : ((ConfigObjectImpl) getConfig()).general.favorites) {
             EntryStack stack = EntryStack.readFromJson(gson.fromJson(entry, JsonElement.class));
-            if (!stack.isEmpty()) favorites.add(stack);
+            if (!stack.isEmpty())
+                favorites.add(stack);
         }
         saveConfig();
     }
@@ -101,7 +100,8 @@ public class ConfigManagerImpl implements ConfigManager {
         object.general.favorites.clear();
         for (EntryStack stack : favorites) {
             JsonElement element = stack.toJson();
-            if (element != null) object.general.favorites.add(gson.toJson(element));
+            if (element != null)
+                object.general.favorites.add(gson.toJson(element));
         }
         ((me.sargunvohra.mcmods.autoconfig1u.ConfigManager<ConfigObjectImpl>) AutoConfig.getConfigHolder(ConfigObjectImpl.class)).save();
     }
@@ -156,7 +156,8 @@ public class ConfigManagerImpl implements ConfigManager {
                     });
                 }).setSavingRunnable(() -> {
                     saveConfig();
-                    ContainerScreenOverlay.getEntryListWidget().updateSearch(ScreenHelper.getSearchField().getText());
+                    if (ScreenHelper.getSearchField() != null)
+                        ContainerScreenOverlay.getEntryListWidget().updateSearch(ScreenHelper.getSearchField().getText());
                 }).build();
             });
             return provider.get();
@@ -169,7 +170,7 @@ public class ConfigManagerImpl implements ConfigManager {
                 renderDirtBackground(0);
                 List<String> list = minecraft.textRenderer.wrapStringToWidthAsList(I18n.translate("text.rei.config_api_failed"), width - 100);
                 int y = (int) (height / 2 - minecraft.textRenderer.fontHeight * 1.3f / 2 * list.size());
-                for(int i = 0; i < list.size(); i++) {
+                for (int i = 0; i < list.size(); i++) {
                     String s = list.get(i);
                     drawCenteredString(minecraft.textRenderer, s, width / 2, y, -1);
                     y += minecraft.textRenderer.fontHeight;

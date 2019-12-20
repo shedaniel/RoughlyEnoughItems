@@ -10,7 +10,9 @@ import net.minecraft.client.resource.language.I18n;
 import java.util.Locale;
 
 public enum SearchFieldLocation {
-    CENTER, BOTTOM_SIDE, TOP_SIDE;
+    CENTER,
+    BOTTOM_SIDE,
+    TOP_SIDE;
     
     @Override
     public String toString() {

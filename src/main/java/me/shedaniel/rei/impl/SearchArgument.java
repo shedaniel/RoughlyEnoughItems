@@ -31,8 +31,7 @@ import java.util.function.Function;
 public class SearchArgument {
     
     public static final SearchArgument ALWAYS = new SearchArgument(ArgumentType.ALWAYS, "", true);
-    @Deprecated
-    private static List<Item> searchBlacklisted = Lists.newArrayList();
+    @Deprecated private static List<Item> searchBlacklisted = Lists.newArrayList();
     private ArgumentType argumentType;
     private String text;
     public final Function<String, Boolean> INCLUDE = s -> s.contains(text);
@@ -61,7 +60,8 @@ public class SearchArgument {
     @Deprecated
     public static String tryGetEntryStackTooltip(EntryStack stack) {
         QueuedTooltip tooltip = stack.getTooltip(0, 0);
-        if (tooltip != null) return CollectionUtils.joinToString(tooltip.getText(), "\n");
+        if (tooltip != null)
+            return CollectionUtils.joinToString(tooltip.getText(), "\n");
         return "";
     }
     

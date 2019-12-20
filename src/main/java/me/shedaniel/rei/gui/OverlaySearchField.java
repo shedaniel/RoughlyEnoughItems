@@ -35,7 +35,8 @@ public class OverlaySearchField extends TextFieldWidget {
     
     @Override
     public void setFocused(boolean boolean_1) {
-        if (isFocused() != boolean_1) addToHistory(getText());
+        if (isFocused() != boolean_1)
+            addToHistory(getText());
         super.setFocused(boolean_1);
     }
     
@@ -45,7 +46,8 @@ public class OverlaySearchField extends TextFieldWidget {
         if (!text.isEmpty()) {
             history.removeIf(str -> str.equalsIgnoreCase(text));
             history.add(text);
-            if (history.size() > 100) history.remove(0);
+            if (history.size() > 100)
+                history.remove(0);
         }
     }
     
@@ -96,7 +98,8 @@ public class OverlaySearchField extends TextFieldWidget {
                 return true;
             } else if (int_1 == 265) {
                 int i = history.indexOf(getText()) - 1;
-                if (i < -1 && getText().isEmpty()) i = history.size() - 1;
+                if (i < -1 && getText().isEmpty())
+                    i = history.size() - 1;
                 else if (i < -1) {
                     addToHistory(getText());
                     i = history.size() - 2;
