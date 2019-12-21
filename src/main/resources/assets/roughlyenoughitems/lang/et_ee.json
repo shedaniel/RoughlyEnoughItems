@@ -112,6 +112,7 @@
   "config.roughlyenoughitems.mirrorItemPanel": "Esemete nimekirja asukoht:",
   "config.roughlyenoughitems.mirrorItemPanel.boolean.true": "Vasakul",
   "config.roughlyenoughitems.mirrorItemPanel.boolean.false": "Paremal",
+  "config.roughlyenoughitems.debugRenderTimeRequired": "Entry List Debug Mode:",
   "config.roughlyenoughitems.searchFieldLocation": "Otsingukasti asukoht:",
   "config.roughlyenoughitems.searchFieldLocation.bottom_side": "All vasakul/paremal",
   "config.roughlyenoughitems.searchFieldLocation.top_side": "Üleval vasakul/paremal",

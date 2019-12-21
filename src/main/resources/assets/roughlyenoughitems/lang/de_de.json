@@ -112,6 +112,7 @@
   "config.roughlyenoughitems.mirrorItemPanel": "Position der Gegenstandsliste:",
   "config.roughlyenoughitems.mirrorItemPanel.boolean.true": "Linke Seite",
   "config.roughlyenoughitems.mirrorItemPanel.boolean.false": "Rechte Seite",
+  "config.roughlyenoughitems.debugRenderTimeRequired": "Entry List Debug Mode:",
   "config.roughlyenoughitems.searchFieldLocation": "Position des Suchfelds:",
   "config.roughlyenoughitems.searchFieldLocation.bottom_side": "Unten Links / Rechts",
   "config.roughlyenoughitems.searchFieldLocation.top_side": "Oben Links / Rechts",
