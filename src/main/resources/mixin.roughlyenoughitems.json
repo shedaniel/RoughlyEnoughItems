@@ -6,7 +6,8 @@
   "mixins": [],
   "client": [
     "MixinBrewingRecipeRegistry",
-    "MixinItemStack"
+    "MixinItemStack",
+    "MixinItemRenderer"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -16,7 +16,6 @@ import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.sound.SoundEvents;
@@ -64,15 +63,14 @@ public class PreRecipeViewingScreen extends Screen {
         this.renderBackground();
         this.drawCenteredString(this.font, this.title.asFormattedString(), this.width / 2, 20, 16777215);
         int i = 30;
-        for (String s : this.font.wrapStringToWidthAsList(I18n.translate("text.rei.recipe_screen_type.selection.sub"), width - 30)) {
+        for(String s : this.font.wrapStringToWidthAsList(I18n.translate("text.rei.recipe_screen_type.selection.sub"), width - 30)) {
             this.drawCenteredString(this.font, Formatting.GRAY.toString() + s, width / 2, i, -1);
             i += 10;
         }
         super.render(int_1, int_2, float_1);
-        this.widgets.forEach(widget -> {
-            DiffuseLighting.disable();
+        for(Widget widget : widgets) {
             widget.render(int_1, int_2, float_1);
-        });
+        }
     }
     
     @Override

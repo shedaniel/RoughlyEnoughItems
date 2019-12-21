@@ -24,12 +24,14 @@ import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.client.util.math.Matrix4f;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ActionResult;
@@ -63,6 +65,7 @@ public class EntryListWidget extends WidgetWithBounds {
     protected long start;
     protected long duration;
     protected int blockedCount;
+    private boolean debugTime;
     private Rectangle bounds, innerBounds;
     private List<EntryStack> allStacks = null;
     private List<EntryStack> favorites = null;
@@ -75,7 +78,7 @@ public class EntryListWidget extends WidgetWithBounds {
     @SuppressWarnings("rawtypes")
     static boolean notSteppingOnExclusionZones(int left, int top, Rectangle listArea) {
         MinecraftClient instance = MinecraftClient.getInstance();
-        for (DisplayHelper.DisplayBoundsHandler sortedBoundsHandler : DisplayHelper.getInstance().getSortedBoundsHandlers(instance.currentScreen.getClass())) {
+        for(DisplayHelper.DisplayBoundsHandler sortedBoundsHandler : DisplayHelper.getInstance().getSortedBoundsHandlers(instance.currentScreen.getClass())) {
             ActionResult fit = sortedBoundsHandler.canItemSlotWidgetFit(left, top, instance.currentScreen, listArea);
             if (fit != ActionResult.PASS)
                 return fit == ActionResult.SUCCESS;
@@ -188,7 +191,7 @@ public class EntryListWidget extends WidgetWithBounds {
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-            for (EntryListEntry entry : entries)
+            for(EntryListEntry entry : entries)
                 entry.clearStacks();
             ScissorsHandler.INSTANCE.scissor(bounds);
             int sizeForFavorites = getSlotsHeightNumberForFavorites();
@@ -196,20 +199,110 @@ public class EntryListWidget extends WidgetWithBounds {
             int nextIndex = skip * innerBounds.width / 18;
             int i = nextIndex;
             blockedCount = 0;
-            if (sizeForFavorites > 0) {
-                drawString(font, I18n.translate("text.rei.favorites"), innerBounds.x + 2, (int) (innerBounds.y + 8 - scroll), -1);
-                nextIndex += innerBounds.width / 18;
-                for (int i1 = 0; i1 < favorites.size(); i1++) {
-                    EntryStack stack = favorites.get(i1);
-                    back1:
+            if (debugTime) {
+                int size = 0;
+                long time = 0;
+                if (sizeForFavorites > 0) {
+                    drawString(font, I18n.translate("text.rei.favorites"), innerBounds.x + 2, (int) (innerBounds.y + 8 - scroll), -1);
+                    nextIndex += innerBounds.width / 18;
+                    for(int i1 = 0; i1 < favorites.size(); i1++) {
+                        EntryStack stack = favorites.get(i1);
+                        back1:
+                        while (true) {
+                            EntryListEntry entry = entries.get(nextIndex);
+                            entry.getBounds().y = (int) (entry.backupY - scroll);
+                            if (entry.getBounds().y > bounds.getMaxY())
+                                break back1;
+                            if (notSteppingOnExclusionZones(entry.getBounds().x, entry.getBounds().y, innerBounds)) {
+                                entry.entry(stack);
+                                entry.isFavorites = true;
+                                size++;
+                                long l = System.currentTimeMillis();
+                                entry.render(mouseX, mouseY, delta);
+                                time += (System.currentTimeMillis() - l);
+                                nextIndex++;
+                                break;
+                            } else {
+                                blockedCount++;
+                                nextIndex++;
+                            }
+                        }
+                    }
+                    nextIndex += innerBounds.width / -18 + getScrollNumberForFavorites() - favorites.size();
+                }
+                int offset = sizeForFavorites > 0 ? -12 : 0;
+                back:
+                for(; i < allStacks.size(); i++) {
+                    EntryStack stack = allStacks.get(i);
                     while (true) {
                         EntryListEntry entry = entries.get(nextIndex);
-                        entry.getBounds().y = (int) (entry.backupY - scroll);
+                        entry.getBounds().y = (int) (entry.backupY - scroll + offset);
                         if (entry.getBounds().y > bounds.getMaxY())
-                            break back1;
+                            break back;
                         if (notSteppingOnExclusionZones(entry.getBounds().x, entry.getBounds().y, innerBounds)) {
                             entry.entry(stack);
-                            entry.isFavorites = true;
+                            entry.isFavorites = false;
+                            size++;
+                            long l = System.currentTimeMillis();
+                            entry.render(mouseX, mouseY, delta);
+                            time += (System.currentTimeMillis() - l);
+                            nextIndex++;
+                            break;
+                        } else {
+                            blockedCount++;
+                            nextIndex++;
+                        }
+                    }
+                }
+                int z = getZ();
+                setZ(500);
+                String str = String.format("%d entries, avg. %.2fms, %s fps", size, time / (double) size, minecraft.fpsDebugString.split(" ")[0]);
+                fillGradient(bounds.x, bounds.y, bounds.x + font.getStringWidth(str) + 2, bounds.y + font.fontHeight + 2, -16777216, -16777216);
+                MatrixStack matrixStack_1 = new MatrixStack();
+                VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
+                matrixStack_1.translate(0.0D, 0.0D, getZ());
+                Matrix4f matrix4f_1 = matrixStack_1.peek().getModel();
+                font.draw(str, bounds.x + 2, bounds.y + 2, -1, false, matrix4f_1, immediate, false, 0, 15728880);
+                immediate.draw();
+                setZ(z);
+            } else {
+                if (sizeForFavorites > 0) {
+                    drawString(font, I18n.translate("text.rei.favorites"), innerBounds.x + 2, (int) (innerBounds.y + 8 - scroll), -1);
+                    nextIndex += innerBounds.width / 18;
+                    for(int i1 = 0; i1 < favorites.size(); i1++) {
+                        EntryStack stack = favorites.get(i1);
+                        back1:
+                        while (true) {
+                            EntryListEntry entry = entries.get(nextIndex);
+                            entry.getBounds().y = (int) (entry.backupY - scroll);
+                            if (entry.getBounds().y > bounds.getMaxY())
+                                break back1;
+                            if (notSteppingOnExclusionZones(entry.getBounds().x, entry.getBounds().y, innerBounds)) {
+                                entry.entry(stack);
+                                entry.isFavorites = true;
+                                entry.render(mouseX, mouseY, delta);
+                                nextIndex++;
+                                break;
+                            } else {
+                                blockedCount++;
+                                nextIndex++;
+                            }
+                        }
+                    }
+                    nextIndex += innerBounds.width / -18 + getScrollNumberForFavorites() - favorites.size();
+                }
+                int offset = sizeForFavorites > 0 ? -12 : 0;
+                back:
+                for(; i < allStacks.size(); i++) {
+                    EntryStack stack = allStacks.get(i);
+                    while (true) {
+                        EntryListEntry entry = entries.get(nextIndex);
+                        entry.getBounds().y = (int) (entry.backupY - scroll + offset);
+                        if (entry.getBounds().y > bounds.getMaxY())
+                            break back;
+                        if (notSteppingOnExclusionZones(entry.getBounds().x, entry.getBounds().y, innerBounds)) {
+                            entry.entry(stack);
+                            entry.isFavorites = false;
                             entry.render(mouseX, mouseY, delta);
                             nextIndex++;
                             break;
@@ -219,38 +312,38 @@ public class EntryListWidget extends WidgetWithBounds {
                         }
                     }
                 }
-                nextIndex += innerBounds.width / -18 + getScrollNumberForFavorites() - favorites.size();
-            }
-            int offset = sizeForFavorites > 0 ? -12 : 0;
-            back:
-            for (; i < allStacks.size(); i++) {
-                EntryStack stack = allStacks.get(i);
-                while (true) {
-                    EntryListEntry entry = entries.get(nextIndex);
-                    entry.getBounds().y = (int) (entry.backupY - scroll + offset);
-                    if (entry.getBounds().y > bounds.getMaxY())
-                        break back;
-                    if (notSteppingOnExclusionZones(entry.getBounds().x, entry.getBounds().y, innerBounds)) {
-                        entry.entry(stack);
-                        entry.isFavorites = false;
-                        entry.render(mouseX, mouseY, delta);
-                        nextIndex++;
-                        break;
-                    } else {
-                        blockedCount++;
-                        nextIndex++;
-                    }
-                }
             }
             updatePosition(delta);
             ScissorsHandler.INSTANCE.removeLastScissor();
             renderScrollbar();
         } else {
-            for (EntryListEntry widget : entries) {
-                widget.render(mouseX, mouseY, delta);
-            }
-            for (Widget widget : widgets) {
-                widget.render(mouseX, mouseY, delta);
+            if (debugTime) {
+                int size = 0;
+                long time = 0;
+                for(Widget widget : widgets) {
+                    if (widget instanceof EntryListEntry) {
+                        size++;
+                        long l = System.currentTimeMillis();
+                        widget.render(mouseX, mouseY, delta);
+                        time += (System.currentTimeMillis() - l);
+                    } else
+                        widget.render(mouseX, mouseY, delta);
+                }
+                int z = getZ();
+                setZ(500);
+                String str = String.format("%d entries, avg. %.2fms, %s fps", size, time / (double) size, minecraft.fpsDebugString.split(" ")[0]);
+                fillGradient(bounds.x, bounds.y, bounds.x + font.getStringWidth(str) + 2, bounds.y + font.fontHeight + 2, -16777216, -16777216);
+                MatrixStack matrixStack_1 = new MatrixStack();
+                VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
+                matrixStack_1.translate(0.0D, 0.0D, getZ());
+                Matrix4f matrix4f_1 = matrixStack_1.peek().getModel();
+                font.draw(str, bounds.x + 2, bounds.y + 2, -1, false, matrix4f_1, immediate, false, 0, 15728880);
+                immediate.draw();
+                setZ(z);
+            } else {
+                for(Widget widget : widgets) {
+                    widget.render(mouseX, mouseY, delta);
+                }
             }
         }
     }
@@ -297,7 +390,6 @@ public class EntryListWidget extends WidgetWithBounds {
             float bottomC = (hovered ? .67f : .5f) * (ScreenHelper.isDarkModeEnabled() ? 0.8f : 1f);
             float topC = (hovered ? .87f : .67f) * (ScreenHelper.isDarkModeEnabled() ? 0.8f : 1f);
             
-            DiffuseLighting.disable();
             RenderSystem.disableTexture();
             RenderSystem.enableBlend();
             RenderSystem.disableAlphaTest();
@@ -346,7 +438,7 @@ public class EntryListWidget extends WidgetWithBounds {
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (containsMouse(PointHelper.fromMouse()))
-            for (Widget widget : widgets)
+            for(Widget widget : widgets)
                 if (widget.keyPressed(int_1, int_2, int_3))
                     return true;
         return false;
@@ -372,8 +464,8 @@ public class EntryListWidget extends WidgetWithBounds {
             List<EntryListEntry> entries = Lists.newLinkedList();
             int width = innerBounds.width / 18;
             int height = innerBounds.height / 18;
-            for (int currentY = 0; currentY < height; currentY++) {
-                for (int currentX = 0; currentX < width; currentX++) {
+            for(int currentY = 0; currentY < height; currentY++) {
+                for(int currentX = 0; currentX < width; currentX++) {
                     if (notSteppingOnExclusionZones(currentX * 18 + innerBounds.x, currentY * 18 + innerBounds.y, innerBounds)) {
                         entries.add((EntryListEntry) new EntryListEntry(currentX * 18 + innerBounds.x, currentY * 18 + innerBounds.y).noBackground());
                     }
@@ -382,7 +474,7 @@ public class EntryListWidget extends WidgetWithBounds {
             page = Math.max(Math.min(page, getTotalPages() - 1), 0);
             int numberForFavorites = getScrollNumberForFavorites();
             List<EntryStack> subList = allStacks.stream().skip(Math.max(0, page * entries.size() - numberForFavorites)).limit(Math.max(0, entries.size() - Math.max(0, numberForFavorites - page * entries.size()))).collect(Collectors.toList());
-            for (int i = 0; i < subList.size(); i++) {
+            for(int i = 0; i < subList.size(); i++) {
                 EntryStack stack = subList.get(i);
                 entries.get(i + Math.max(0, numberForFavorites - page * entries.size())).clearStacks().entry(stack);
                 entries.get(i + Math.max(0, numberForFavorites - page * entries.size())).isFavorites = false;
@@ -397,7 +489,7 @@ public class EntryListWidget extends WidgetWithBounds {
                     j += width;
                 }
                 List<EntryStack> subFavoritesList = favorites.stream().skip(skippedFavorites).limit(Math.max(0, entries.size() - width)).collect(Collectors.toList());
-                for (int i = 0; i < subFavoritesList.size(); i++) {
+                for(int i = 0; i < subFavoritesList.size(); i++) {
                     EntryStack stack = subFavoritesList.get(i);
                     entries.get(j).clearStacks().entry(stack);
                     entries.get(j).isFavorites = true;
@@ -413,7 +505,7 @@ public class EntryListWidget extends WidgetWithBounds {
             int currentX = 0;
             int currentY = 0;
             List<EntryListEntry> entries = Lists.newLinkedList();
-            for (int i = 0; i < slotsToPrepare; i++) {
+            for(int i = 0; i < slotsToPrepare; i++) {
                 int xPos = currentX * 18 + innerBounds.x;
                 int yPos = currentY * 18 + innerBounds.y;
                 entries.add((EntryListEntry) new EntryListEntry(xPos, yPos).noBackground());
@@ -443,7 +535,7 @@ public class EntryListWidget extends WidgetWithBounds {
             List<EntryStack> list = Lists.newLinkedList();
             boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
             List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
-            for (EntryStack stack : EntryRegistry.getInstance().getStacksList()) {
+            for(EntryStack stack : EntryRegistry.getInstance().getStacksList()) {
                 if (canLastSearchTermsBeAppliedTo(stack)) {
                     if (workingItems != null && CollectionUtils.findFirstOrNullEquals(workingItems, stack) == null)
                         continue;
@@ -463,7 +555,7 @@ public class EntryListWidget extends WidgetWithBounds {
             List<EntryStack> list = Lists.newLinkedList();
             boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
             List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
-            for (EntryStack stack : ConfigManager.getInstance().getFavorites()) {
+            for(EntryStack stack : ConfigManager.getInstance().getFavorites()) {
                 if (canLastSearchTermsBeAppliedTo(stack)) {
                     if (workingItems != null && CollectionUtils.findFirstOrNullEquals(workingItems, stack) == null)
                         continue;
@@ -480,6 +572,7 @@ public class EntryListWidget extends WidgetWithBounds {
             favorites = list;
         } else
             favorites = Collections.emptyList();
+        debugTime = ConfigObject.getInstance().doDebugRenderTimeRequired();
         FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
         if (favoritesListWidget != null)
             favoritesListWidget.updateSearch(this, searchTerm);
@@ -496,9 +589,9 @@ public class EntryListWidget extends WidgetWithBounds {
         if (searchArguments.isEmpty())
             return true;
         String mod = null, name = null, tooltip = null, tags[] = null;
-        for (SearchArgument.SearchArguments arguments : searchArguments) {
+        for(SearchArgument.SearchArguments arguments : searchArguments) {
             boolean applicable = true;
-            for (SearchArgument argument : arguments.getArguments()) {
+            for(SearchArgument argument : arguments.getArguments()) {
                 if (argument.getArgumentType() == SearchArgument.ArgumentType.ALWAYS)
                     return true;
                 else if (argument.getArgumentType() == SearchArgument.ArgumentType.MOD) {
@@ -527,19 +620,19 @@ public class EntryListWidget extends WidgetWithBounds {
                         if (stack.getType() == EntryStack.Type.ITEM) {
                             Identifier[] tagsFor = minecraft.getNetworkHandler().getTagManager().items().getTagsFor(stack.getItem()).toArray(new Identifier[0]);
                             tags = new String[tagsFor.length];
-                            for (int i = 0; i < tagsFor.length; i++)
+                            for(int i = 0; i < tagsFor.length; i++)
                                 tags[i] = tagsFor[i].toString();
                         } else if (stack.getType() == EntryStack.Type.FLUID) {
                             Identifier[] tagsFor = minecraft.getNetworkHandler().getTagManager().fluids().getTagsFor(stack.getFluid()).toArray(new Identifier[0]);
                             tags = new String[tagsFor.length];
-                            for (int i = 0; i < tagsFor.length; i++)
+                            for(int i = 0; i < tagsFor.length; i++)
                                 tags[i] = tagsFor[i].toString();
                         } else
                             tags = new String[0];
                     }
                     if (tags != null && tags.length > 0) {
                         boolean a = false;
-                        for (String tag : tags)
+                        for(String tag : tags)
                             if (argument.getFunction(argument.isInclude()).apply(tag))
                                 a = true;
                         if (!a) {
@@ -561,13 +654,13 @@ public class EntryListWidget extends WidgetWithBounds {
     @SuppressWarnings("deprecation")
     private List<SearchArgument.SearchArguments> processSearchTerm(String searchTerm) {
         List<SearchArgument.SearchArguments> searchArguments = Lists.newArrayList();
-        for (String split : StringUtils.splitByWholeSeparatorPreserveAllTokens(searchTerm.toLowerCase(Locale.ROOT), "|")) {
+        for(String split : StringUtils.splitByWholeSeparatorPreserveAllTokens(searchTerm.toLowerCase(Locale.ROOT), "|")) {
             String[] terms = StringUtils.split(split);
             if (terms.length == 0)
                 searchArguments.add(SearchArgument.SearchArguments.ALWAYS);
             else {
                 SearchArgument[] arguments = new SearchArgument[terms.length];
-                for (int i = 0; i < terms.length; i++) {
+                for(int i = 0; i < terms.length; i++) {
                     String term = terms[i];
                     if (term.startsWith("-@") || term.startsWith("@-")) {
                         arguments[i] = new SearchArgument(SearchArgument.ArgumentType.MOD, term.substring(2), false);
@@ -619,7 +712,7 @@ public class EntryListWidget extends WidgetWithBounds {
             }
             if (!player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
                 return false;
-            for (Widget widget : children())
+            for(Widget widget : children())
                 if (widget.mouseClicked(double_1, double_2, int_1))
                     return true;
         }

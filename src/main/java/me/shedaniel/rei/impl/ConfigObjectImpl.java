@@ -209,6 +209,16 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
+    public boolean doesFastEntryRendering() {
+        return performance.fastEntryRendering;
+    }
+    
+    @Override
+    public boolean doDebugRenderTimeRequired() {
+        return technical.debugRenderTimeRequired;
+    }
+    
+    @Override
     public InputUtil.KeyCode getFavoriteKeybind() {
         return general.favoriteKeybind == null ? InputUtil.UNKNOWN_KEYCODE : general.favoriteKeybind;
     }
@@ -255,6 +265,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         private String giveCommand = "/give {player_name} {item_identifier}{nbt} {count}";
         @Comment("Declares the command used to change weather.") private String weatherCommand = "/weather {weather}";
         private boolean registerRecipesInAnotherThread = true;
+        private boolean debugRenderTimeRequired = false;
     }
     
     public static class Modules {
@@ -270,5 +281,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     public static class Performance {
         @Comment("Whether REI should render entry's enchantment glint")
         private boolean renderEntryEnchantmentGlint = true;
+        @ConfigEntry.Gui.Excluded private boolean fastEntryRendering = false;
     }
 }

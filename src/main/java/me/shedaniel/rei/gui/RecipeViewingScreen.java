@@ -17,7 +17,6 @@ import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.Window;
@@ -372,10 +371,9 @@ public class RecipeViewingScreen extends Screen {
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         this.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
-        preWidgets.forEach(widget -> {
-            DiffuseLighting.disable();
+        for(Widget widget : preWidgets) {
             widget.render(mouseX, mouseY, delta);
-        });
+        }
         if (selectedCategory != null)
             selectedCategory.drawCategoryBackground(bounds, mouseX, mouseY, delta);
         else {
@@ -392,19 +390,15 @@ public class RecipeViewingScreen extends Screen {
             if (!tab.isSelected())
                 tab.render(mouseX, mouseY, delta);
         }
-        DiffuseLighting.disable();
         super.render(mouseX, mouseY, delta);
-        widgets.forEach(widget -> {
-            DiffuseLighting.disable();
+        for(Widget widget : widgets) {
             widget.render(mouseX, mouseY, delta);
-        });
+        }
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        DiffuseLighting.disable();
         for (TabWidget tab : tabs) {
             if (tab.isSelected())
                 tab.render(mouseX, mouseY, delta);
         }
-        DiffuseLighting.disable();
         ScreenHelper.getLastOverlay().render(mouseX, mouseY, delta);
         ScreenHelper.getLastOverlay().lateRender(mouseX, mouseY, delta);
         if (choosePageActivated) {
