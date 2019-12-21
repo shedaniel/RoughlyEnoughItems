@@ -112,6 +112,7 @@
   "config.roughlyenoughitems.mirrorItemPanel": "项目列表位置：",
   "config.roughlyenoughitems.mirrorItemPanel.boolean.true": "左侧",
   "config.roughlyenoughitems.mirrorItemPanel.boolean.false": "右侧",
+  "config.roughlyenoughitems.debugRenderTimeRequired": "Entry List Debug Mode:",
   "config.roughlyenoughitems.searchFieldLocation": "搜索框的位置:",
   "config.roughlyenoughitems.searchFieldLocation.bottom_side": "左/右下角",
   "config.roughlyenoughitems.searchFieldLocation.top_side": "左/右上角",
