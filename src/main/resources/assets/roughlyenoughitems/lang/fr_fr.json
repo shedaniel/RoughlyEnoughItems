@@ -112,6 +112,7 @@
   "config.roughlyenoughitems.mirrorItemPanel": "Item List Position:",
   "config.roughlyenoughitems.mirrorItemPanel.boolean.true": "Left Side",
   "config.roughlyenoughitems.mirrorItemPanel.boolean.false": "Right Side",
+  "config.roughlyenoughitems.debugRenderTimeRequired": "Entry List Debug Mode:",
   "config.roughlyenoughitems.searchFieldLocation": "Search Field Position:",
   "config.roughlyenoughitems.searchFieldLocation.bottom_side": "Bottom Left / Right",
   "config.roughlyenoughitems.searchFieldLocation.top_side": "Top Left / Right",
