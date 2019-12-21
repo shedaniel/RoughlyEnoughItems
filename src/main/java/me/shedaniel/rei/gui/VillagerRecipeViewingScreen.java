@@ -24,7 +24,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.resource.language.I18n;
@@ -349,11 +348,9 @@ public class VillagerRecipeViewingScreen extends Screen {
         updatePosition(delta);
         this.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
         int yOffset = 0;
-        this.widgets.forEach(widget -> {
-            DiffuseLighting.disable();
+        for(Widget widget : widgets) {
             widget.render(mouseX, mouseY, delta);
-        });
-        DiffuseLighting.disable();
+        }
         ScreenHelper.getLastOverlay().render(mouseX, mouseY, delta);
         RenderSystem.pushMatrix();
         ScissorsHandler.INSTANCE.scissor(new Rectangle(0, scrollListBounds.y + 1, width, scrollListBounds.height - 2));
@@ -361,14 +358,12 @@ public class VillagerRecipeViewingScreen extends Screen {
             ButtonWidget buttonWidget = buttonWidgets.get(i);
             buttonWidget.getBounds().y = scrollListBounds.y + 1 + yOffset - (int) scroll;
             if (buttonWidget.getBounds().getMaxY() > scrollListBounds.getMinY() && buttonWidget.getBounds().getMinY() < scrollListBounds.getMaxY()) {
-                DiffuseLighting.disable();
                 buttonWidget.render(mouseX, mouseY, delta);
             }
             yOffset += buttonWidget.getBounds().height;
         }
         for (int i = 0; i < buttonWidgets.size(); i++) {
             if (buttonWidgets.get(i).getBounds().getMaxY() > scrollListBounds.getMinY() && buttonWidgets.get(i).getBounds().getMinY() < scrollListBounds.getMaxY()) {
-                DiffuseLighting.disable();
                 recipeRenderers.get(i).setZ(1);
                 recipeRenderers.get(i).render(buttonWidgets.get(i).getBounds(), mouseX, mouseY, delta);
                 ScreenHelper.getLastOverlay().addTooltip(recipeRenderers.get(i).getTooltip(mouseX, mouseY));
@@ -387,7 +382,6 @@ public class VillagerRecipeViewingScreen extends Screen {
             boolean hovered = (new Rectangle(scrollbarPositionMinX, minY, scrollbarPositionMaxX - scrollbarPositionMinX, height)).contains(PointHelper.fromMouse());
             float bottomC = (hovered ? .67f : .5f) * (ScreenHelper.isDarkModeEnabled() ? 0.8f : 1f);
             float topC = (hovered ? .87f : .67f) * (ScreenHelper.isDarkModeEnabled() ? 0.8f : 1f);
-            DiffuseLighting.disable();
             RenderSystem.disableTexture();
             RenderSystem.enableBlend();
             RenderSystem.disableAlphaTest();

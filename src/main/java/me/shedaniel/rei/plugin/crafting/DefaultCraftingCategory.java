@@ -22,13 +22,11 @@ import me.shedaniel.rei.server.ContainerInfoHandler;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
-import java.util.Arrays;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -63,12 +61,10 @@ public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCr
     @Override
     public List<Widget> setupDisplay(Supplier<DefaultCraftingDisplay> recipeDisplaySupplier, Rectangle bounds) {
         Point startPoint = new Point(bounds.getCenterX() - 58, bounds.getCenterY() - 27);
-        List<Widget> widgets = new LinkedList<>(Arrays.asList(new RecipeBaseWidget(bounds) {
+        List<Widget> widgets = Lists.newLinkedList(Collections.singletonList(new RecipeBaseWidget(bounds) {
             @Override
             public void render(int mouseX, int mouseY, float delta) {
                 super.render(mouseX, mouseY, delta);
-                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-                DiffuseLighting.disable();
                 MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
                 blit(startPoint.x, startPoint.y, 0, 0, 116, 54);
             }

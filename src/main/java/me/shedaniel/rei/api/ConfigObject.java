@@ -98,6 +98,10 @@ public interface ConfigObject {
     
     boolean doDisplayFavoritesOnTheLeft();
     
+    boolean doesFastEntryRendering();
+    
+    boolean doDebugRenderTimeRequired();
+    
     InputUtil.KeyCode getFavoriteKeybind();
     
     @Retention(RetentionPolicy.RUNTIME)

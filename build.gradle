@@ -105,6 +105,7 @@ curseforge {
             changelogType = "html"
             changelog = "<a href=\"https://gist.github.com/shedaniel/b7593e692319976f3349263208792922\">Click here for changelog</a>"
             addGameVersion '1.15'
+            addGameVersion '1.15.1'
             addGameVersion '1.15-Snapshot'
             addGameVersion 'Java 8'
             relations {
@@ -113,7 +114,7 @@ curseforge {
                 embeddedLibrary 'cloth-config'
             }
             mainArtifact(file("${project.buildDir}/libs/${project.archivesBaseName}-${project.version}.jar")) {
-                displayName = "[Fabric ${project.minecraft_version}] v$project.version"
+                displayName = "[Fabric 1.15.x] v$project.version"
             }
             afterEvaluate {
                 uploadTask.dependsOn("remapJar")

@@ -109,7 +109,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     }
     
     public static Optional<Identifier> getPluginIdentifier(REIPluginEntry plugin) {
-        for (Identifier identifier : plugins.keySet())
+        for(Identifier identifier : plugins.keySet())
             if (identifier != null && plugins.get(identifier).equals(plugin))
                 return Optional.of(identifier);
         return Optional.empty();
@@ -161,7 +161,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         
         registerClothEvents();
         discoverPluginEntries();
-        for (ModContainer modContainer : FabricLoader.getInstance().getAllMods()) {
+        for(ModContainer modContainer : FabricLoader.getInstance().getAllMods()) {
             if (modContainer.getMetadata().containsCustomValue("roughlyenoughitems:plugins"))
                 RoughlyEnoughItemsCore.LOGGER.error("[REI] REI plugin from " + modContainer.getMetadata().getId() + " is not loaded because it is too old!");
         }
@@ -180,10 +180,10 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                 
                 List<List<ItemStack>> input = Lists.newArrayList();
                 int mapSize = packetByteBuf.readInt();
-                for (int i = 0; i < mapSize; i++) {
+                for(int i = 0; i < mapSize; i++) {
                     List<ItemStack> list = Lists.newArrayList();
                     int count = packetByteBuf.readInt();
-                    for (int j = 0; j < count; j++) {
+                    for(int j = 0; j < count; j++) {
                         list.add(packetByteBuf.readItemStack());
                     }
                     input.add(list);
@@ -191,7 +191,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                 
                 ghostSlots.addSlot(Ingredient.ofItems(Items.STONE), 381203812, 12738291);
                 CraftingTableContainer container = ((CraftingTableScreen) currentScreen).getContainer();
-                for (int i = 0; i < input.size(); i++) {
+                for(int i = 0; i < input.size(); i++) {
                     List<ItemStack> stacks = input.get(i);
                     if (!stacks.isEmpty()) {
                         Slot slot = container.getSlot(i + container.getCraftingResultSlotIndex() + 1);
@@ -204,7 +204,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     
     @SuppressWarnings("deprecation")
     private void discoverPluginEntries() {
-        for (REIPluginEntry reiPlugin : FabricLoader.getInstance().getEntrypoints("rei_plugins", REIPluginEntry.class)) {
+        for(REIPluginEntry reiPlugin : FabricLoader.getInstance().getEntrypoints("rei_plugins", REIPluginEntry.class)) {
             try {
                 if (!REIPluginV0.class.isAssignableFrom(reiPlugin.getClass()))
                     throw new IllegalArgumentException("REI plugin is too old!");
@@ -214,7 +214,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                 RoughlyEnoughItemsCore.LOGGER.error("[REI] Can't load REI plugins from %s: %s", reiPlugin.getClass(), e.getLocalizedMessage());
             }
         }
-        for (REIPluginV0 reiPlugin : FabricLoader.getInstance().getEntrypoints("rei_plugins_v0", REIPluginV0.class)) {
+        for(REIPluginV0 reiPlugin : FabricLoader.getInstance().getEntrypoints("rei_plugins_v0", REIPluginV0.class)) {
             try {
                 registerPlugin(reiPlugin);
             } catch (Exception e) {
@@ -251,7 +251,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                     return;
                 ScreenHelper.setLastContainerScreen((AbstractContainerScreen<?>) screen);
                 boolean alreadyAdded = false;
-                for (Element element : Lists.newArrayList(screenHooks.cloth_getInputListeners()))
+                for(Element element : Lists.newArrayList(screenHooks.cloth_getInputListeners()))
                     if (ContainerScreenOverlay.class.isAssignableFrom(element.getClass()))
                         if (alreadyAdded)
                             screenHooks.cloth_getInputListeners().remove(element);

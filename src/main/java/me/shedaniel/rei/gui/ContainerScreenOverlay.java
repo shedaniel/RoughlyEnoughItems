@@ -22,7 +22,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
-import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.resource.language.I18n;
@@ -71,7 +70,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
         matrixStack_1.translate(0.0D, 0.0D, getBlitOffset());
         Matrix4f matrix4f_1 = matrixStack_1.peek().getModel();
-        for (int lineIndex = 0; lineIndex < tooltipLines.size(); lineIndex++) {
+        for(int lineIndex = 0; lineIndex < tooltipLines.size(); lineIndex++) {
             font.draw(tooltipLines.get(lineIndex), x, currentY, -1, true, matrix4f_1, immediate, false, 0, 15728880);
             currentY += lineIndex == 0 ? 12 : 10;
         }
@@ -186,7 +185,6 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             @Override
             public void render(int mouseX, int mouseY, float delta) {
                 super.render(mouseX, mouseY, delta);
-                DiffuseLighting.disable();
                 Rectangle bounds = getBounds();
                 if (ClientHelper.getInstance().isCheating() && RoughlyEnoughItemsCore.hasOperatorPermission()) {
                     if (RoughlyEnoughItemsCore.hasPermissionToUsePackets())
@@ -253,7 +251,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                 }
             });
             int xxx = ConfigObject.getInstance().isLeftHandSidePanel() ? window.getScaledWidth() - 30 : 10;
-            for (Weather weather : Weather.values()) {
+            for(Weather weather : Weather.values()) {
                 widgets.add(new ButtonWidget(new Rectangle(xxx, 35, 20, 20), "") {
                     @Override
                     public void onPressed() {
@@ -263,7 +261,6 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                     @Override
                     public void render(int mouseX, int mouseY, float delta) {
                         super.render(mouseX, mouseY, delta);
-                        DiffuseLighting.disable();
                         MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
                         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                         blit(getBounds().x + 3, getBounds().y + 3, weather.getId() * 14, 14, 14, 14);
@@ -427,7 +424,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         if (shouldReInit)
             init();
         else {
-            for (DisplayHelper.DisplayBoundsHandler<?> handler : DisplayHelper.getInstance().getSortedBoundsHandlers(minecraft.currentScreen.getClass())) {
+            for(DisplayHelper.DisplayBoundsHandler<?> handler : DisplayHelper.getInstance().getSortedBoundsHandlers(minecraft.currentScreen.getClass())) {
                 if (handler != null && handler.shouldRecalculateArea(!ConfigObject.getInstance().isLeftHandSidePanel(), rectangle)) {
                     init();
                     break;
@@ -439,23 +436,21 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             ENTRY_LIST_WIDGET.updateSearch(ScreenHelper.getSearchField().getText());
         }
         if (OverlaySearchField.isSearching) {
-            DiffuseLighting.disable();
             setBlitOffset(200);
             if (MinecraftClient.getInstance().currentScreen instanceof AbstractContainerScreen) {
                 ContainerScreenHooks hooks = (ContainerScreenHooks) MinecraftClient.getInstance().currentScreen;
                 int left = hooks.rei_getContainerLeft(), top = hooks.rei_getContainerTop();
-                for (Slot slot : ((AbstractContainerScreen<?>) MinecraftClient.getInstance().currentScreen).getContainer().slotList)
+                for(Slot slot : ((AbstractContainerScreen<?>) MinecraftClient.getInstance().currentScreen).getContainer().slotList)
                     if (!slot.hasStack() || !ENTRY_LIST_WIDGET.canLastSearchTermsBeAppliedTo(EntryStack.create(slot.getStack())))
                         fillGradient(left + slot.xPosition, top + slot.yPosition, left + slot.xPosition + 16, top + slot.yPosition + 16, -601874400, -601874400);
             }
             setBlitOffset(0);
         }
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        DiffuseLighting.disable();
         this.renderWidgets(mouseX, mouseY, delta);
         if (MinecraftClient.getInstance().currentScreen instanceof AbstractContainerScreen && ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
             ContainerScreenHooks hooks = (ContainerScreenHooks) MinecraftClient.getInstance().currentScreen;
-            for (RecipeHelper.ScreenClickArea area : RecipeHelper.getInstance().getScreenClickAreas())
+            for(RecipeHelper.ScreenClickArea area : RecipeHelper.getInstance().getScreenClickAreas())
                 if (area.getScreenClass().equals(MinecraftClient.getInstance().currentScreen.getClass()))
                     if (area.getRectangle().contains(mouseX - hooks.rei_getContainerLeft(), mouseY - hooks.rei_getContainerTop())) {
                         String collect = CollectionUtils.mapAndJoinToString(area.getCategories(), identifier -> RecipeHelper.getInstance().getCategory(identifier).getCategoryName(), ", ");
@@ -473,7 +468,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         }
         Screen currentScreen = MinecraftClient.getInstance().currentScreen;
         if (!(currentScreen instanceof RecipeViewingScreen) || !((RecipeViewingScreen) currentScreen).choosePageActivated)
-            for (QueuedTooltip queuedTooltip : QUEUED_TOOLTIPS) {
+            for(QueuedTooltip queuedTooltip : QUEUED_TOOLTIPS) {
                 if (queuedTooltip != null)
                     renderTooltip(queuedTooltip);
             }
@@ -508,16 +503,15 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             QUEUED_TOOLTIPS.add(queuedTooltip);
     }
     
+    @SuppressWarnings("deprecation")
     public void renderWidgets(int int_1, int int_2, float float_1) {
         if (!ScreenHelper.isOverlayVisible())
             return;
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled())
             buttonLeft.enabled = buttonRight.enabled = ENTRY_LIST_WIDGET.getTotalPages() != 1;
-        widgets.forEach(widget -> {
-            DiffuseLighting.disable();
+        for(Widget widget : widgets) {
             widget.render(int_1, int_2, float_1);
-        });
-        DiffuseLighting.disable();
+        }
     }
     
     @Override
@@ -540,7 +534,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             if (favoritesListWidget != null && favoritesListWidget.mouseScrolled(i, j, amount))
                 return true;
         }
-        for (Widget widget : widgets)
+        for(Widget widget : widgets)
             if (widget != ENTRY_LIST_WIDGET && (favoritesListWidget == null || widget != favoritesListWidget) && widget.mouseScrolled(i, j, amount))
                 return true;
         return false;
@@ -551,7 +545,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         if (ScreenHelper.isOverlayVisible()) {
             if (ScreenHelper.getSearchField().keyPressed(int_1, int_2, int_3))
                 return true;
-            for (Element listener : widgets)
+            for(Element listener : widgets)
                 if (listener != ScreenHelper.getSearchField() && listener.keyPressed(int_1, int_2, int_3))
                     return true;
         }
@@ -587,7 +581,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             return false;
         if (ScreenHelper.getSearchField().charTyped(char_1, int_1))
             return true;
-        for (Element listener : widgets)
+        for(Element listener : widgets)
             if (listener != ScreenHelper.getSearchField() && listener.charTyped(char_1, int_1))
                 return true;
         return false;
@@ -604,7 +598,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             return false;
         if (MinecraftClient.getInstance().currentScreen instanceof AbstractContainerScreen && ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
             ContainerScreenHooks hooks = (ContainerScreenHooks) MinecraftClient.getInstance().currentScreen;
-            for (RecipeHelper.ScreenClickArea area : RecipeHelper.getInstance().getScreenClickAreas())
+            for(RecipeHelper.ScreenClickArea area : RecipeHelper.getInstance().getScreenClickAreas())
                 if (area.getScreenClass().equals(MinecraftClient.getInstance().currentScreen.getClass()))
                     if (area.getRectangle().contains(double_1 - hooks.rei_getContainerLeft(), double_2 - hooks.rei_getContainerTop())) {
                         ClientHelper.getInstance().executeViewAllRecipesFromCategories(Arrays.asList(area.getCategories()));
@@ -612,7 +606,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                         return true;
                     }
         }
-        for (Element element : widgets)
+        for(Element element : widgets)
             if (element.mouseClicked(double_1, double_2, int_1)) {
                 this.setFocused(element);
                 if (int_1 == 0)
@@ -634,7 +628,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
     }
     
     public boolean isNotInExclusionZones(double mouseX, double mouseY) {
-        for (DisplayHelper.DisplayBoundsHandler<?> handler : DisplayHelper.getInstance().getSortedBoundsHandlers(MinecraftClient.getInstance().currentScreen.getClass())) {
+        for(DisplayHelper.DisplayBoundsHandler<?> handler : DisplayHelper.getInstance().getSortedBoundsHandlers(MinecraftClient.getInstance().currentScreen.getClass())) {
             ActionResult in = handler.isInZone(mouseX, mouseY);
             if (in != ActionResult.PASS)
                 return in == ActionResult.SUCCESS;

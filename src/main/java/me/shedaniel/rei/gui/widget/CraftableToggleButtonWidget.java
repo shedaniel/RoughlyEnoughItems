@@ -10,7 +10,6 @@ import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.ConfigManager;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.ItemStack;
@@ -33,14 +32,12 @@ public abstract class CraftableToggleButtonWidget extends ButtonWidget {
     }
     
     public void lateRender(int mouseX, int mouseY, float delta) {
-        DiffuseLighting.disable();
         super.render(mouseX, mouseY, delta);
         
         this.itemRenderer.zOffset = getBlitOffset();
         Rectangle bounds = getBounds();
         this.itemRenderer.renderGuiItem(new ItemStack(Blocks.CRAFTING_TABLE), bounds.x + 2, bounds.y + 2);
         this.itemRenderer.zOffset = 0.0F;
-        DiffuseLighting.disable();
         MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         int color = ConfigManager.getInstance().isCraftableOnlyEnabled() ? 939579655 : 956235776;

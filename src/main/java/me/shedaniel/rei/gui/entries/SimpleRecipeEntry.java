@@ -12,7 +12,6 @@ import me.shedaniel.rei.gui.widget.EntryWidget;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.MathHelper;
@@ -34,7 +33,7 @@ public class SimpleRecipeEntry extends RecipeEntry {
     
     protected SimpleRecipeEntry(List<List<EntryStack>> input, List<EntryStack> output) {
         List<Pair<List<EntryStack>, AtomicInteger>> newList = Lists.newArrayList();
-        List<Pair<List<EntryStack>, Integer>> a = input.stream().map(stacks -> new Pair<>(stacks, stacks.stream().map(EntryStack::getAmount).max(Integer::compareTo).orElse(1))).collect(Collectors.toList());
+        List<Pair<List<EntryStack>, Integer>> a = CollectionUtils.map(input, stacks -> new Pair<>(stacks, stacks.stream().map(EntryStack::getAmount).max(Integer::compareTo).orElse(1)));
         for (Pair<List<EntryStack>, Integer> pair : a) {
             Optional<Pair<List<EntryStack>, AtomicInteger>> any = newList.stream().filter(pairr -> equalsList(pair.getLeft(), pairr.getLeft())).findAny();
             if (any.isPresent()) {
@@ -95,7 +94,6 @@ public class SimpleRecipeEntry extends RecipeEntry {
         }
         xx = bounds.x + 4 + 18 * (getItemsPerLine() - 2);
         yy = bounds.y + getHeight() / 2 - 8;
-        DiffuseLighting.disable();
         MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
         blit(xx, yy, 0, 28, 18, 18);
         xx += 18;

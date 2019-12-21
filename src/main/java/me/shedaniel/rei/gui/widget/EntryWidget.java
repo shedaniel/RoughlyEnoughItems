@@ -152,7 +152,6 @@ public class EntryWidget extends WidgetWithBounds {
     }
     
     protected void drawHighlighted(int mouseX, int mouseY, float delta) {
-        RenderSystem.disableLighting();
         RenderSystem.disableDepthTest();
         RenderSystem.colorMask(true, true, true, false);
         int color = ScreenHelper.isDarkModeEnabled() ? -1877929711 : -2130706433;
@@ -161,7 +160,6 @@ public class EntryWidget extends WidgetWithBounds {
         fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), color, color);
         setZ(0);
         RenderSystem.colorMask(true, true, true, true);
-        RenderSystem.enableLighting();
         RenderSystem.enableDepthTest();
     }
     

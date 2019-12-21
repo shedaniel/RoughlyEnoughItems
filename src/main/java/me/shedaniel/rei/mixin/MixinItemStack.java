@@ -5,7 +5,7 @@
 
 package me.shedaniel.rei.mixin;
 
-import me.shedaniel.rei.api.ItemStackRenderOverlayHook;
+import me.shedaniel.rei.api.ItemStackHook;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ItemStack.class)
-public class MixinItemStack implements ItemStackRenderOverlayHook {
+public class MixinItemStack implements ItemStackHook {
     private boolean rei_dontRenderOverlay = false;
     
     @Override

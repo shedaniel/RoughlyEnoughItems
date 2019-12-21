@@ -5,6 +5,10 @@
 
 package me.shedaniel.rei.api;
 
-public interface ItemStackRenderOverlayHook {
+import me.shedaniel.rei.api.annotations.Internal;
+
+@Internal
+@Deprecated
+public interface ItemStackHook {
     void rei_setRenderEnchantmentGlint(boolean b);
 }
