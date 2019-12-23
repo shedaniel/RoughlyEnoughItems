@@ -170,19 +170,23 @@ public class RecipeHelperImpl implements RecipeHelper {
         Map<Identifier, List<RecipeDisplay>> categoriesMap = new HashMap<>();
         categories.forEach(f -> categoriesMap.put(f.getIdentifier(), Lists.newArrayList()));
         for (Map.Entry<Identifier, List<RecipeDisplay>> entry : recipeCategoryListMap.entrySet()) {
-            RecipeCategory<?> category = getCategory(entry.getKey());
+            boolean isWorkstationCategory = getWorkingStations(entry.getKey()).stream().anyMatch(ws -> ws.contains(stack));
             for (RecipeDisplay recipeDisplay : entry.getValue()) {
-                boolean found = false;
-                for (List<EntryStack> input : recipeDisplay.getInputEntries()) {
-                    for (EntryStack otherEntry : input) {
-                        if (otherEntry.equals(stack)) {
-                            categoriesMap.get(recipeDisplay.getRecipeCategory()).add(recipeDisplay);
-                            found = true;
-                            break;
+                if (isWorkstationCategory) {
+                    categoriesMap.get(recipeDisplay.getRecipeCategory()).add(recipeDisplay);
+                } else {
+                    boolean found = false;
+                    for (List<EntryStack> input : recipeDisplay.getInputEntries()) {
+                        for (EntryStack otherEntry : input) {
+                            if (otherEntry.equals(stack)) {
+                                categoriesMap.get(recipeDisplay.getRecipeCategory()).add(recipeDisplay);
+                                found = true;
+                                break;
+                            }
                         }
+                        if (found)
+                            break;
                     }
-                    if (found)
-                        break;
                 }
             }
         }
