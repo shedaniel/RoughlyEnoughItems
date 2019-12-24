@@ -18,11 +18,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class DefaultShapedDisplay implements DefaultCraftingDisplay {
-    
+
     private ShapedRecipe display;
     private List<List<EntryStack>> input;
     private List<EntryStack> output;
-    
+
     public DefaultShapedDisplay(ShapedRecipe recipe) {
         this.display = recipe;
         this.input = recipe.getPreviewInputs().stream().map(i -> {
@@ -34,40 +34,40 @@ public class DefaultShapedDisplay implements DefaultCraftingDisplay {
         }).collect(Collectors.toList());
         this.output = Collections.singletonList(EntryStack.create(recipe.getOutput()));
     }
-    
+
     @Override
     public Optional<Identifier> getRecipeLocation() {
         return Optional.ofNullable(display).map(ShapedRecipe::getId);
     }
-    
+
     @Override
     public List<List<EntryStack>> getInputEntries() {
         return input;
     }
-    
+
     @Override
     public List<EntryStack> getOutputEntries() {
         return output;
     }
-    
+
     @Override
     public List<List<EntryStack>> getRequiredEntries() {
         return input;
     }
-    
+
     @Override
     public int getHeight() {
         return display.getHeight();
     }
-    
+
     @Override
     public Optional<Recipe<?>> getOptionalRecipe() {
         return Optional.ofNullable(display);
     }
-    
+
     @Override
     public int getWidth() {
         return display.getWidth();
     }
-    
+
 }

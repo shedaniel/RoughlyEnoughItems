@@ -24,22 +24,22 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class DefaultStoneCuttingCategory implements RecipeCategory<DefaultStoneCuttingDisplay> {
-    
+
     @Override
     public Identifier getIdentifier() {
         return DefaultPlugin.STONE_CUTTING;
     }
-    
+
     @Override
     public EntryStack getLogo() {
         return EntryStack.create(Blocks.STONECUTTER);
     }
-    
+
     @Override
     public String getCategoryName() {
         return I18n.translate("category.rei.stone_cutting");
     }
-    
+
     @Override
     public List<Widget> setupDisplay(Supplier<DefaultStoneCuttingDisplay> recipeDisplaySupplier, Rectangle bounds) {
         Point startPoint = new Point(bounds.getCenterX() - 41, bounds.getCenterY() - 13);
@@ -55,10 +55,10 @@ public class DefaultStoneCuttingCategory implements RecipeCategory<DefaultStoneC
         widgets.add(EntryWidget.create(startPoint.x + 61, startPoint.y + 5).entries(recipeDisplaySupplier.get().getOutputEntries()).noBackground());
         return widgets;
     }
-    
+
     @Override
     public int getDisplayHeight() {
         return 36;
     }
-    
+
 }

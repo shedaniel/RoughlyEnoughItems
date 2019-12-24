@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class RecipeChoosePageWidget extends DraggableWidget {
-    
+
     private int currentPage;
     private int maxPage;
     private Rectangle bounds, grabBounds, dragBounds;
@@ -30,7 +30,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     private TextFieldWidget textFieldWidget;
     private CategoryBaseWidget base1, base2;
     private ButtonWidget btnDone;
-    
+
     public RecipeChoosePageWidget(RecipeViewingScreen recipeViewingScreen, int currentPage, int maxPage) {
         super(getPointFromConfig());
         this.recipeViewingScreen = recipeViewingScreen;
@@ -38,32 +38,32 @@ public class RecipeChoosePageWidget extends DraggableWidget {
         this.maxPage = maxPage;
         initWidgets(getMidPoint());
     }
-    
+
     private static Point getPointFromConfig() {
         Window window = MinecraftClient.getInstance().getWindow();
         return new Point(window.getScaledWidth() * .5, window.getScaledHeight() * .5);
     }
-    
+
     @Override
     public Rectangle getBounds() {
         return bounds;
     }
-    
+
     @Override
     public Rectangle getGrabBounds() {
         return grabBounds;
     }
-    
+
     @Override
     public Rectangle getDragBounds() {
         return dragBounds;
     }
-    
+
     @Override
     public boolean containsMouse(double mouseX, double mouseY) {
         return getBounds().contains(mouseX, mouseY) || new Rectangle(bounds.x + bounds.width - 50, bounds.y + bounds.height - 3, 50, 36).contains(mouseX, mouseY);
     }
-    
+
     @Override
     public void updateWidgets(Point midPoint) {
         this.bounds = new Rectangle(midPoint.x - 50, midPoint.y - 20, 100, 40);
@@ -74,7 +74,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
         textFieldWidget.getBounds().setLocation(bounds.x + 7, bounds.y + 16);
         btnDone.getBounds().setLocation(bounds.x + bounds.width - 45, bounds.y + bounds.height + 3);
     }
-    
+
     @Override
     protected void initWidgets(Point midPoint) {
         this.bounds = new Rectangle(midPoint.x - 50, midPoint.y - 20, 100, 40);
@@ -88,7 +88,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
             public List<Widget> children() {
                 return Collections.emptyList();
             }
-            
+
             @Override
             public void render(int i, int i1, float v) {
                 font.draw(I18n.translate("text.rei.choose_page"), bounds.x + 5, bounds.y + 5, ScreenHelper.isDarkModeEnabled() ? 0xFFBBBBBB : 0xFF404040);
@@ -105,13 +105,13 @@ public class RecipeChoosePageWidget extends DraggableWidget {
             StringBuilder stringBuilder_1 = new StringBuilder();
             char[] var2 = s.toCharArray();
             int var3 = var2.length;
-            
+
             for (int var4 = 0; var4 < var3; ++var4) {
                 char char_1 = var2[var4];
                 if (Character.isDigit(char_1))
                     stringBuilder_1.append(char_1);
             }
-            
+
             return stringBuilder_1.toString();
         };
         textFieldWidget.setText(String.valueOf(currentPage + 1));
@@ -125,26 +125,26 @@ public class RecipeChoosePageWidget extends DraggableWidget {
         });
         textFieldWidget.setFocused(true);
     }
-    
+
     @Override
     public Point processMidPoint(Point midPoint, Point mouse, Point startPoint, Window window, int relateX, int relateY) {
         return new Point(MathHelper.clamp(mouse.x - relateX, getDragBounds().width / 2, window.getScaledWidth() - getDragBounds().width / 2), MathHelper.clamp(mouse.y - relateY, 20, window.getScaledHeight() - 50));
     }
-    
+
     @Override
     public List<Widget> children() {
         return widgets;
     }
-    
+
     @Override
     public void render(int i, int i1, float v) {
         RenderSystem.translatef(0, 0, 800);
-        for(Widget widget : widgets) {
+        for (Widget widget : widgets) {
             widget.render(i, i1, v);
         }
         RenderSystem.translatef(0, 0, -800);
     }
-    
+
     @Override
     public boolean charTyped(char char_1, int int_1) {
         for (Widget widget : widgets)
@@ -152,7 +152,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
                 return true;
         return false;
     }
-    
+
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (int_1 == 335 || int_1 == 257) {
@@ -166,7 +166,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
                 return true;
         return false;
     }
-    
+
     public Optional<Integer> getIntFromString(String s) {
         try {
             return Optional.of(Integer.valueOf(s));
@@ -174,9 +174,9 @@ public class RecipeChoosePageWidget extends DraggableWidget {
         }
         return Optional.empty();
     }
-    
+
     @Override
     public void onMouseReleaseMidPoint(Point midPoint) {
     }
-    
+
 }

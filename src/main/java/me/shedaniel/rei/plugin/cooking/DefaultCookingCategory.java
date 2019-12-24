@@ -33,13 +33,13 @@ public class DefaultCookingCategory implements TransferRecipeCategory<DefaultCoo
     private Identifier identifier;
     private EntryStack logo;
     private String categoryName;
-    
+
     public DefaultCookingCategory(Identifier identifier, EntryStack logo, String categoryName) {
         this.identifier = identifier;
         this.logo = logo;
         this.categoryName = categoryName;
     }
-    
+
     @Override
     public void renderRedSlots(List<Widget> widgets, Rectangle bounds, DefaultCookingDisplay display, IntList redSlots) {
         Point startPoint = new Point(bounds.getCenterX() - 41, bounds.getCenterY() - 27);
@@ -49,7 +49,7 @@ public class DefaultCookingCategory implements TransferRecipeCategory<DefaultCoo
         }
         RenderSystem.translatef(0, 0, -400);
     }
-    
+
     @Override
     public List<Widget> setupDisplay(Supplier<DefaultCookingDisplay> recipeDisplaySupplier, Rectangle bounds) {
         Point startPoint = new Point(bounds.getCenterX() - 41, bounds.getCenterY() - 27);
@@ -70,22 +70,22 @@ public class DefaultCookingCategory implements TransferRecipeCategory<DefaultCoo
         widgets.add(EntryWidget.create(startPoint.x + 61, startPoint.y + 19).entries(recipeDisplaySupplier.get().getOutputEntries()).noBackground());
         return widgets;
     }
-    
+
     @Override
     public RecipeEntry getSimpleRenderer(DefaultCookingDisplay recipe) {
         return SimpleRecipeEntry.create(Collections.singletonList(recipe.getInputEntries().get(0)), recipe.getOutputEntries());
     }
-    
+
     @Override
     public Identifier getIdentifier() {
         return identifier;
     }
-    
+
     @Override
     public EntryStack getLogo() {
         return logo;
     }
-    
+
     @Override
     public String getCategoryName() {
         return I18n.translate(categoryName);

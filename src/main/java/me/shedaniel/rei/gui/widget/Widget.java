@@ -16,7 +16,7 @@ import net.minecraft.client.gui.Drawable;
  * @see WidgetWithBounds for a widget with bounds
  */
 public abstract class Widget extends AbstractParentElement implements Drawable {
-    
+
     /**
      * The Minecraft Client instance
      */
@@ -25,13 +25,13 @@ public abstract class Widget extends AbstractParentElement implements Drawable {
      * The font for rendering text
      */
     protected final TextRenderer font = minecraft.textRenderer;
-    
+
     public int getZ() {
         return this.getBlitOffset();
     }
-    
+
     public void setZ(int z) {
         this.setBlitOffset(z);
     }
-    
+
 }

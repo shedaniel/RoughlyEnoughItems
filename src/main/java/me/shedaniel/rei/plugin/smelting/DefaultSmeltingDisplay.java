@@ -11,11 +11,11 @@ import net.minecraft.recipe.SmeltingRecipe;
 import net.minecraft.util.Identifier;
 
 public class DefaultSmeltingDisplay extends DefaultCookingDisplay {
-    
+
     public DefaultSmeltingDisplay(SmeltingRecipe recipe) {
         super(recipe);
     }
-    
+
     @Override
     public Identifier getRecipeCategory() {
         return DefaultPlugin.SMELTING;

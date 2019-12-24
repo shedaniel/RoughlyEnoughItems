@@ -17,22 +17,22 @@ import java.util.Collections;
 import java.util.List;
 
 public class TabWidget extends WidgetWithBounds {
-    
+
     public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     public static final Identifier CHEST_GUI_TEXTURE_DARK = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
-    
+
     public boolean shown = false, selected = false;
     public EntryStack logo;
     public int id;
     public String categoryName;
     public Rectangle bounds;
     public RecipeCategory category;
-    
+
     public TabWidget(int id, Rectangle bounds) {
         this.id = id;
         this.bounds = bounds;
     }
-    
+
     public void setRenderer(RecipeCategory category, EntryStack logo, String categoryName, boolean selected) {
         if (logo == null) {
             shown = false;
@@ -45,24 +45,24 @@ public class TabWidget extends WidgetWithBounds {
         this.selected = selected;
         this.categoryName = categoryName;
     }
-    
+
     public boolean isSelected() {
         return selected;
     }
-    
+
     public int getId() {
         return id;
     }
-    
+
     public boolean isShown() {
         return shown;
     }
-    
+
     @Override
     public List<Widget> children() {
         return Collections.emptyList();
     }
-    
+
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         if (shown) {
@@ -75,7 +75,7 @@ public class TabWidget extends WidgetWithBounds {
             }
         }
     }
-    
+
     @SuppressWarnings("deprecation")
     private void drawTooltip() {
         if (this.minecraft.options.advancedItemTooltips)
@@ -83,10 +83,10 @@ public class TabWidget extends WidgetWithBounds {
         else
             ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(categoryName, ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())));
     }
-    
+
     @Override
     public Rectangle getBounds() {
         return bounds;
     }
-    
+
 }

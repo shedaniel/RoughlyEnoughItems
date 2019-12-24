@@ -12,20 +12,20 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(AbstractContainerScreen.class)
 public interface ContainerScreenHooks {
-    
+
     @Accessor("x")
     int rei_getContainerLeft();
-    
+
     @Accessor("y")
     int rei_getContainerTop();
-    
+
     @Accessor("containerWidth")
     int rei_getContainerWidth();
-    
+
     @Accessor("containerHeight")
     int rei_getContainerHeight();
-    
+
     @Accessor("focusedSlot")
     Slot rei_getHoveredSlot();
-    
+
 }

@@ -24,22 +24,22 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class DefaultStrippingCategory implements RecipeCategory<DefaultStrippingDisplay> {
-    
+
     @Override
     public Identifier getIdentifier() {
         return DefaultPlugin.STRIPPING;
     }
-    
+
     @Override
     public EntryStack getLogo() {
         return EntryStack.create(Items.IRON_AXE);
     }
-    
+
     @Override
     public String getCategoryName() {
         return I18n.translate("category.rei.stripping");
     }
-    
+
     @Override
     public List<Widget> setupDisplay(Supplier<DefaultStrippingDisplay> recipeDisplaySupplier, Rectangle bounds) {
         Point startPoint = new Point(bounds.getCenterX() - 41, bounds.getCenterY() - 13);
@@ -55,10 +55,10 @@ public class DefaultStrippingCategory implements RecipeCategory<DefaultStripping
         widgets.add(EntryWidget.create(startPoint.x + 61, startPoint.y + 5).entry(recipeDisplaySupplier.get().getOut()).noBackground());
         return widgets;
     }
-    
+
     @Override
     public int getDisplayHeight() {
         return 36;
     }
-    
+
 }

@@ -29,11 +29,11 @@ import net.minecraft.util.PacketByteBuf;
 import java.util.List;
 
 public class DefaultCategoryHandler implements AutoTransferHandler {
-    
+
     public static boolean canUseMovePackets() {
         return ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.MOVE_ITEMS_PACKET);
     }
-    
+
     @Override
     public Result handle(Context context) {
         if (!(context.getRecipe() instanceof TransferRecipeDisplay))
@@ -54,14 +54,14 @@ public class DefaultCategoryHandler implements AutoTransferHandler {
             return Result.createFailed("error.rei.not.on.server");
         if (!context.isActuallyCrafting())
             return Result.createSuccessful();
-        
+
         context.getMinecraft().openScreen(containerScreen);
         if (containerScreen instanceof RecipeBookProvider)
             ((RecipeBookGuiHooks) ((RecipeBookProvider) containerScreen).getRecipeBookGui()).rei_getGhostSlots().reset();
         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
         buf.writeIdentifier(recipe.getRecipeCategory());
         buf.writeBoolean(Screen.hasShiftDown());
-        
+
         buf.writeInt(input.size());
         for (List<EntryStack> stacks : input) {
             buf.writeInt(stacks.size());
@@ -75,12 +75,12 @@ public class DefaultCategoryHandler implements AutoTransferHandler {
         ClientSidePacketRegistry.INSTANCE.sendToServer(RoughlyEnoughItemsNetwork.MOVE_ITEMS_PACKET, buf);
         return Result.createSuccessful();
     }
-    
+
     @Override
     public double getPriority() {
         return -10;
     }
-    
+
     public IntList hasItems(List<List<EntryStack>> inputs) {
         // Create a clone of player's inventory, and count
         DefaultedList<ItemStack> copyMain = DefaultedList.of();

@@ -18,11 +18,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class DefaultShapelessDisplay implements DefaultCraftingDisplay {
-    
+
     private ShapelessRecipe display;
     private List<List<EntryStack>> input;
     private List<EntryStack> output;
-    
+
     public DefaultShapelessDisplay(ShapelessRecipe recipe) {
         this.display = recipe;
         this.input = recipe.getPreviewInputs().stream().map(i -> {
@@ -34,44 +34,44 @@ public class DefaultShapelessDisplay implements DefaultCraftingDisplay {
         }).collect(Collectors.toList());
         this.output = Collections.singletonList(EntryStack.create(recipe.getOutput()));
     }
-    
+
     @Override
     public Optional<Recipe<?>> getOptionalRecipe() {
         return Optional.ofNullable(display);
     }
-    
+
     @Override
     public Optional<Identifier> getRecipeLocation() {
         return Optional.ofNullable(display).map(ShapelessRecipe::getId);
     }
-    
+
     @Override
     public List<List<EntryStack>> getInputEntries() {
         return input;
     }
-    
+
     @Override
     public List<EntryStack> getOutputEntries() {
         return output;
     }
-    
+
     @Override
     public List<List<EntryStack>> getRequiredEntries() {
         return input;
     }
-    
+
     @Override
     public int getWidth() {
         if (display.getPreviewInputs().size() > 4)
             return 3;
         return 2;
     }
-    
+
     @Override
     public int getHeight() {
         if (display.getPreviewInputs().size() > 4)
             return 3;
         return 2;
     }
-    
+
 }

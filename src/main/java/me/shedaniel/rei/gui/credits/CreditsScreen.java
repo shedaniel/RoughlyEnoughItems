@@ -20,16 +20,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class CreditsScreen extends Screen {
-    
+
     private Screen parent;
     private AbstractPressableButtonWidget buttonDone;
     private CreditsEntryListWidget entryListWidget;
-    
+
     public CreditsScreen(Screen parent) {
         super(new LiteralText(""));
         this.parent = parent;
     }
-    
+
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (int_1 == 256 && this.shouldCloseOnEsc()) {
@@ -40,7 +40,7 @@ public class CreditsScreen extends Screen {
         }
         return super.keyPressed(int_1, int_2, int_3);
     }
-    
+
     @Override
     protected void init() {
         children.add(entryListWidget = new CreditsEntryListWidget(minecraft, width, height, 32, height - 32));
@@ -80,14 +80,14 @@ public class CreditsScreen extends Screen {
             }
         });
     }
-    
+
     @Override
     public boolean mouseScrolled(double double_1, double double_2, double double_3) {
         if (entryListWidget.mouseScrolled(double_1, double_2, double_3))
             return true;
         return super.mouseScrolled(double_1, double_2, double_3);
     }
-    
+
     @Override
     public void render(int int_1, int int_2, float float_1) {
         this.renderDirtBackground(0);
@@ -96,5 +96,5 @@ public class CreditsScreen extends Screen {
         super.render(int_1, int_2, float_1);
         buttonDone.render(int_1, int_2, float_1);
     }
-    
+
 }

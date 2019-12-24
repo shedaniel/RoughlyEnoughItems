@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 public class ExecutorUtil {
     private ExecutorUtil() {
     }
-    
+
     public static void execute(Supplier<Runnable> runnableSupplier) {
         runnableSupplier.get().run();
     }

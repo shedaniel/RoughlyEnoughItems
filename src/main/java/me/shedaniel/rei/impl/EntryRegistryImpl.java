@@ -21,14 +21,14 @@ import java.util.stream.Collectors;
 @Deprecated
 @Internal
 public class EntryRegistryImpl implements EntryRegistry {
-    
+
     private final CopyOnWriteArrayList<EntryStack> entries = Lists.newCopyOnWriteArrayList();
-    
+
     @Override
     public List<EntryStack> getStacksList() {
         return entries;
     }
-    
+
     @Override
     public ItemStack[] getAllStacksFromItem(Item item) {
         DefaultedList<ItemStack> list = DefaultedList.of();
@@ -37,7 +37,7 @@ public class EntryRegistryImpl implements EntryRegistry {
         TreeSet<ItemStack> stackSet = list.stream().collect(Collectors.toCollection(() -> new TreeSet<ItemStack>((p1, p2) -> ItemStack.areEqualIgnoreDamage(p1, p2) ? 0 : 1)));
         return Lists.newArrayList(stackSet).toArray(new ItemStack[0]);
     }
-    
+
     @Override
     @Deprecated
     public void registerEntryAfter(EntryStack afterEntry, EntryStack stack, boolean checkAlreadyContains) {
@@ -52,5 +52,5 @@ public class EntryRegistryImpl implements EntryRegistry {
                 entries.add(last, stack);
             }
     }
-    
+
 }

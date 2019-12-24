@@ -29,25 +29,26 @@ import java.util.function.Function;
 @Deprecated
 @Internal
 public class SearchArgument {
-    
+
     public static final SearchArgument ALWAYS = new SearchArgument(ArgumentType.ALWAYS, "", true);
-    @Deprecated private static List<Item> searchBlacklisted = Lists.newArrayList();
+    @Deprecated
+    private static List<Item> searchBlacklisted = Lists.newArrayList();
     private ArgumentType argumentType;
     private String text;
     public final Function<String, Boolean> INCLUDE = s -> s.contains(text);
     public final Function<String, Boolean> NOT_INCLUDE = s -> !s.contains(text);
     private boolean include;
-    
+
     public SearchArgument(ArgumentType argumentType, String text, boolean include) {
         this(argumentType, text, include, true);
     }
-    
+
     public SearchArgument(ArgumentType argumentType, String text, boolean include, boolean autoLowerCase) {
         this.argumentType = argumentType;
         this.text = autoLowerCase ? text.toLowerCase(Locale.ROOT) : text;
         this.include = include;
     }
-    
+
     @Deprecated
     public static String tryGetEntryStackName(EntryStack stack) {
         if (stack.getType() == EntryStack.Type.ITEM)
@@ -56,7 +57,7 @@ public class SearchArgument {
             return tryGetFluidName(stack.getFluid());
         return "";
     }
-    
+
     @Deprecated
     public static String tryGetEntryStackTooltip(EntryStack stack) {
         QueuedTooltip tooltip = stack.getTooltip(0, 0);
@@ -64,7 +65,7 @@ public class SearchArgument {
             return CollectionUtils.joinToString(tooltip.getText(), "\n");
         return "";
     }
-    
+
     @Deprecated
     public static String tryGetFluidName(Fluid fluid) {
         Identifier id = Registry.FLUID.getId(fluid);
@@ -72,7 +73,7 @@ public class SearchArgument {
             return I18n.translate("block." + id.toString().replaceFirst(":", "."));
         return CollectionUtils.mapAndJoinToString(id.getPath().split("_"), StringUtils::capitalize, " ");
     }
-    
+
     @Deprecated
     public static List<String> tryGetItemStackToolTip(ItemStack itemStack, boolean careAboutAdvanced) {
         if (!searchBlacklisted.contains(itemStack.getItem()))
@@ -84,7 +85,7 @@ public class SearchArgument {
             }
         return Collections.singletonList(tryGetItemStackName(itemStack));
     }
-    
+
     @Deprecated
     public static String tryGetItemStackName(ItemStack stack) {
         if (!searchBlacklisted.contains(stack.getItem()))
@@ -101,28 +102,28 @@ public class SearchArgument {
         }
         return "ERROR";
     }
-    
+
     public Function<String, Boolean> getFunction(boolean include) {
         return include ? INCLUDE : NOT_INCLUDE;
     }
-    
+
     public ArgumentType getArgumentType() {
         return argumentType;
     }
-    
+
     public String getText() {
         return text;
     }
-    
+
     public boolean isInclude() {
         return include;
     }
-    
+
     @Override
     public String toString() {
         return String.format("Argument[%s]: name = %s, include = %b", argumentType.name(), text, include);
     }
-    
+
     public enum ArgumentType {
         TEXT,
         MOD,
@@ -130,20 +131,20 @@ public class SearchArgument {
         TAG,
         ALWAYS
     }
-    
+
     @Deprecated
     @Internal
     public static class SearchArguments {
         public static final SearchArguments ALWAYS = new SearchArguments(new SearchArgument[]{SearchArgument.ALWAYS});
         private SearchArgument[] arguments;
-        
+
         public SearchArguments(SearchArgument[] arguments) {
             this.arguments = arguments;
         }
-        
+
         public SearchArgument[] getArguments() {
             return arguments;
         }
     }
-    
+
 }

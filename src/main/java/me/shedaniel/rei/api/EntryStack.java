@@ -32,27 +32,27 @@ import java.util.function.Supplier;
 
 @SuppressWarnings("deprecation")
 public interface EntryStack {
-    
+
     static EntryStack empty() {
         return EmptyEntryStack.EMPTY;
     }
-    
+
     static EntryStack create(Fluid fluid) {
         return new FluidEntryStack(fluid);
     }
-    
+
     static EntryStack create(Fluid fluid, int amount) {
         return new FluidEntryStack(fluid, amount);
     }
-    
+
     static EntryStack create(ItemStack stack) {
         return new ItemEntryStack(stack);
     }
-    
+
     static EntryStack create(ItemConvertible item) {
         return new ItemEntryStack(new ItemStack(item));
     }
-    
+
     @Internal
     @Deprecated
     static EntryStack readFromJson(JsonElement jsonElement) {
@@ -73,7 +73,7 @@ public interface EntryStack {
             return EntryStack.empty();
         }
     }
-    
+
     @Internal
     @Deprecated
     @Nullable
@@ -102,77 +102,77 @@ public interface EntryStack {
             return null;
         }
     }
-    
+
     Optional<Identifier> getIdentifier();
-    
+
     EntryStack.Type getType();
-    
+
     int getAmount();
-    
+
     void setAmount(int amount);
-    
+
     boolean isEmpty();
-    
+
     EntryStack copy();
-    
+
     Object getObject();
-    
+
     boolean equals(EntryStack stack, boolean ignoreTags, boolean ignoreAmount);
-    
+
     boolean equalsIgnoreTagsAndAmount(EntryStack stack);
-    
+
     boolean equalsIgnoreTags(EntryStack stack);
-    
+
     boolean equalsIgnoreAmount(EntryStack stack);
-    
+
     boolean equalsAll(EntryStack stack);
-    
+
     int getZ();
-    
+
     void setZ(int z);
-    
+
     default ItemStack getItemStack() {
         if (getType() == Type.ITEM)
             return (ItemStack) getObject();
         return null;
     }
-    
+
     default Item getItem() {
         if (getType() == Type.ITEM)
             return ((ItemStack) getObject()).getItem();
         return null;
     }
-    
+
     default Fluid getFluid() {
         if (getType() == Type.FLUID)
             return (Fluid) getObject();
         return null;
     }
-    
+
     <T> EntryStack setting(Settings<T> settings, T value);
-    
+
     <T> EntryStack removeSetting(Settings<T> settings);
-    
+
     EntryStack clearSettings();
-    
+
     default <T> EntryStack addSetting(Settings<T> settings, T value) {
         return setting(settings, value);
     }
-    
+
     <T> ObjectHolder<T> getSetting(Settings<T> settings);
-    
+
     @Nullable
     QueuedTooltip getTooltip(int mouseX, int mouseY);
-    
+
     void render(Rectangle bounds, int mouseX, int mouseY, float delta);
-    
+
     public static enum Type {
         ITEM,
         FLUID,
         EMPTY,
         RENDER
     }
-    
+
     public static class Settings<T> {
         public static final Supplier<Boolean> TRUE = () -> true;
         public static final Supplier<Boolean> FALSE = () -> false;
@@ -183,29 +183,30 @@ public interface EntryStack {
         public static final Settings<Supplier<Boolean>> RENDER_COUNTS = new Settings(TRUE);
         public static final Settings<Function<EntryStack, List<String>>> TOOLTIP_APPEND_EXTRA = new Settings<Function<EntryStack, List<String>>>(stack -> Collections.emptyList());
         public static final Settings<Function<EntryStack, String>> COUNTS = new Settings<Function<EntryStack, String>>(stack -> null);
-        
+
         private T defaultValue;
-        
+
         public Settings(T defaultValue) {
             this.defaultValue = defaultValue;
         }
-        
+
         public T getDefaultValue() {
             return defaultValue;
         }
-        
+
         public static class Item {
             public static final Settings<Supplier<Boolean>> RENDER_ENCHANTMENT_GLINT = new Settings(TRUE);
-            @Deprecated public static final Settings<Supplier<Boolean>> RENDER_OVERLAY = RENDER_ENCHANTMENT_GLINT;
-            
+            @Deprecated
+            public static final Settings<Supplier<Boolean>> RENDER_OVERLAY = RENDER_ENCHANTMENT_GLINT;
+
             private Item() {
             }
         }
-        
+
         public static class Fluid {
             // Return null to disable
             public static final Settings<Function<EntryStack, String>> AMOUNT_TOOLTIP = new Settings<Function<EntryStack, String>>(stack -> I18n.translate("tooltip.rei.fluid_amount", stack.getAmount()));
-            
+
             private Fluid() {
             }
         }

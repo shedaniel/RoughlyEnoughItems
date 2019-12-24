@@ -15,21 +15,21 @@ import java.util.Collections;
 import java.util.List;
 
 public class RecipeArrowWidget extends WidgetWithBounds {
-    
+
     private int x, y;
     private boolean animated;
-    
+
     public RecipeArrowWidget(int x, int y, boolean animated) {
         this.x = x;
         this.y = y;
         this.animated = animated;
     }
-    
+
     @Override
     public Rectangle getBounds() {
         return new Rectangle(x, y, 24, 17);
     }
-    
+
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
@@ -39,7 +39,7 @@ public class RecipeArrowWidget extends WidgetWithBounds {
             blit(x, y, 82, 91, width, 17);
         }
     }
-    
+
     @Override
     public List<? extends Element> children() {
         return Collections.emptyList();

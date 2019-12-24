@@ -28,19 +28,19 @@ import java.util.List;
 import java.util.Map;
 
 public class PreRecipeViewingScreen extends Screen {
-    
+
     private static final Identifier IDENTIFIER = new Identifier("roughlyenoughitems", "textures/gui/screenshot.png");
     private final List<Widget> widgets;
     private boolean original;
     private Map<RecipeCategory<?>, List<RecipeDisplay>> map;
-    
+
     public PreRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map) {
         super(new TranslatableText("text.rei.recipe_screen_type.selection"));
         this.widgets = Lists.newArrayList();
         this.original = true;
         this.map = map;
     }
-    
+
     @Override
     protected void init() {
         this.children.clear();
@@ -57,22 +57,22 @@ public class PreRecipeViewingScreen extends Screen {
         this.widgets.add(new ScreenTypeSelection(width / 2 + 5, height / 2 - 112 / 2 - 10, 112));
         this.children.addAll(widgets);
     }
-    
+
     @Override
     public void render(int int_1, int int_2, float float_1) {
         this.renderBackground();
         this.drawCenteredString(this.font, this.title.asFormattedString(), this.width / 2, 20, 16777215);
         int i = 30;
-        for(String s : this.font.wrapStringToWidthAsList(I18n.translate("text.rei.recipe_screen_type.selection.sub"), width - 30)) {
+        for (String s : this.font.wrapStringToWidthAsList(I18n.translate("text.rei.recipe_screen_type.selection.sub"), width - 30)) {
             this.drawCenteredString(this.font, Formatting.GRAY.toString() + s, width / 2, i, -1);
             i += 10;
         }
         super.render(int_1, int_2, float_1);
-        for(Widget widget : widgets) {
+        for (Widget widget : widgets) {
             widget.render(int_1, int_2, float_1);
         }
     }
-    
+
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if ((int_1 == 256 || this.minecraft.options.keyInventory.matchesKey(int_1, int_2)) && this.shouldCloseOnEsc()) {
@@ -82,23 +82,23 @@ public class PreRecipeViewingScreen extends Screen {
         }
         return super.keyPressed(int_1, int_2, int_3);
     }
-    
+
     public class ScreenTypeSelection extends WidgetWithBounds {
-        
+
         private Rectangle bounds;
         private int u, v;
-        
+
         public ScreenTypeSelection(int x, int y, int v) {
             this.bounds = new Rectangle(x - 4, y - 4, 208, 120);
             this.u = 0;
             this.v = v;
         }
-        
+
         @Override
         public Rectangle getBounds() {
             return bounds;
         }
-        
+
         @Override
         public void render(int i, int i1, float delta) {
             MinecraftClient.getInstance().getTextureManager().bindTexture(IDENTIFIER);
@@ -110,7 +110,7 @@ public class PreRecipeViewingScreen extends Screen {
                 fillGradient(bounds.x + bounds.width - 2, bounds.y, bounds.x + bounds.width, bounds.y + bounds.height, 0xFFFFFFFF, 0xFFFFFFFF);
             }
         }
-        
+
         @Override
         public boolean mouseClicked(double double_1, double double_2, int int_1) {
             if (containsMouse(double_1, double_2)) {
@@ -120,7 +120,7 @@ public class PreRecipeViewingScreen extends Screen {
             }
             return false;
         }
-        
+
         @Override
         public List<? extends Element> children() {
             return Collections.emptyList();

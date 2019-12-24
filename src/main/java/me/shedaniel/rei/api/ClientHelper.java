@@ -22,14 +22,14 @@ public interface ClientHelper {
     static ClientHelper getInstance() {
         return ClientHelperImpl.instance;
     }
-    
+
     /**
      * Checks if cheating is enabled
      *
      * @return whether cheating is enabled
      */
     boolean isCheating();
-    
+
     /**
      * Sets current cheating mode
      * Should save the config in {@link ConfigManager}.
@@ -37,9 +37,9 @@ public interface ClientHelper {
      * @param cheating the new cheating mode
      */
     void setCheating(boolean cheating);
-    
+
     List<ItemStack> getInventoryItemsTypes();
-    
+
     /**
      * Opens a recipe viewing screen:
      * Opens {@link me.shedaniel.rei.gui.PreRecipeViewingScreen} if not set
@@ -49,12 +49,12 @@ public interface ClientHelper {
      * @param map the map of recipes
      */
     void openRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map);
-    
+
     /**
      * Registers REI's keybinds using Fabric API.
      */
     void registerFabricKeyBinds();
-    
+
     /**
      * Tries to cheat stack using either packets or commands.
      *
@@ -62,11 +62,11 @@ public interface ClientHelper {
      * @return whether it failed
      */
     boolean tryCheatingEntry(EntryStack stack);
-    
+
     default boolean tryCheatingStack(ItemStack stack) {
         return tryCheatingEntry(EntryStack.create(stack));
     }
-    
+
     /**
      * Finds recipe for the stack and opens the recipe screen.
      *
@@ -74,11 +74,11 @@ public interface ClientHelper {
      * @return whether the stack has any recipes to show
      */
     boolean executeRecipeKeyBind(EntryStack stack);
-    
+
     default boolean executeRecipeKeyBind(ItemStack stack) {
         return executeRecipeKeyBind(EntryStack.create(stack));
     }
-    
+
     /**
      * Finds usage for the stack and opens the recipe screen.
      *
@@ -86,15 +86,15 @@ public interface ClientHelper {
      * @return whether the stack has any usages to show
      */
     boolean executeUsageKeyBind(EntryStack stack);
-    
+
     default boolean executeUsageKeyBind(ItemStack stack) {
         return executeUsageKeyBind(EntryStack.create(stack));
     }
-    
+
     FabricKeyBinding getFocusSearchFieldKeyBinding();
-    
+
     FabricKeyBinding getCopyRecipeIdentifierKeyBinding();
-    
+
     /**
      * Gets the mod from an item
      *
@@ -102,12 +102,12 @@ public interface ClientHelper {
      * @return the mod name
      */
     String getModFromItem(Item item);
-    
+
     /**
      * Tries to delete the player's cursor item
      */
     void sendDeletePacket();
-    
+
     /**
      * Gets the formatted mod from an item
      *
@@ -115,7 +115,7 @@ public interface ClientHelper {
      * @return the mod name with blue and italic formatting
      */
     String getFormattedModFromItem(Item item);
-    
+
     /**
      * Gets the formatted mod from an identifier
      *
@@ -123,7 +123,7 @@ public interface ClientHelper {
      * @return the mod name with blue and italic formatting
      */
     String getFormattedModFromIdentifier(Identifier identifier);
-    
+
     /**
      * Gets the mod from an identifier
      *
@@ -131,42 +131,42 @@ public interface ClientHelper {
      * @return the mod name
      */
     String getModFromIdentifier(Identifier identifier);
-    
+
     FabricKeyBinding[] getREIKeyBindings();
-    
+
     /**
      * @return the recipe keybind, defaulted R
      */
     FabricKeyBinding getRecipeKeyBinding();
-    
+
     /**
      * @return the usage keybind, defaulted U
      */
     FabricKeyBinding getUsageKeyBinding();
-    
+
     /**
      * @return the hide keybind, defaulted O
      */
     FabricKeyBinding getHideKeyBinding();
-    
+
     /**
      * @return the previous page keybind, defaulted not set
      */
     FabricKeyBinding getPreviousPageKeyBinding();
-    
+
     /**
      * @return the next page keybind, defaulted not set
      */
     FabricKeyBinding getNextPageKeyBinding();
-    
+
     /**
      * Finds all recipes and open them in a recipe screen.
      *
      * @return whether there are any recipes to show
      */
     boolean executeViewAllRecipesKeyBind();
-    
+
     boolean executeViewAllRecipesFromCategory(Identifier category);
-    
+
     boolean executeViewAllRecipesFromCategories(List<Identifier> categories);
 }

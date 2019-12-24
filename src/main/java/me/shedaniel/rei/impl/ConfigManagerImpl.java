@@ -43,10 +43,10 @@ import static me.sargunvohra.mcmods.autoconfig1u.util.Utils.setUnsafely;
 @Deprecated
 @Internal
 public class ConfigManagerImpl implements ConfigManager {
-    
+
     private boolean craftableOnly;
     private List<EntryStack> favorites = new ArrayList<>();
-    
+
     public ConfigManagerImpl() {
         this.craftableOnly = false;
         AutoConfig.register(ConfigObjectImpl.class, (definition, configClass) -> {
@@ -76,12 +76,12 @@ public class ConfigManagerImpl implements ConfigManager {
         loadFavoredEntries();
         RoughlyEnoughItemsCore.LOGGER.info("[REI] Config is loaded.");
     }
-    
+
     @Override
     public List<EntryStack> getFavorites() {
         return favorites;
     }
-    
+
     public void loadFavoredEntries() {
         favorites.clear();
         Gson gson = new GsonBuilder().create();
@@ -92,7 +92,7 @@ public class ConfigManagerImpl implements ConfigManager {
         }
         saveConfig();
     }
-    
+
     @Override
     public void saveConfig() {
         Gson gson = new GsonBuilder().create();
@@ -105,27 +105,27 @@ public class ConfigManagerImpl implements ConfigManager {
         }
         ((me.sargunvohra.mcmods.autoconfig1u.ConfigManager<ConfigObjectImpl>) AutoConfig.getConfigHolder(ConfigObjectImpl.class)).save();
     }
-    
+
     @Override
     public ConfigObject getConfig() {
         return AutoConfig.getConfigHolder(ConfigObjectImpl.class).getConfig();
     }
-    
+
     @Override
     public boolean isCraftableOnlyEnabled() {
         return craftableOnly;
     }
-    
+
     @Override
     public void toggleCraftableOnly() {
         craftableOnly = !craftableOnly;
     }
-    
+
     @Override
     public void openConfigScreen(Screen parent) {
         MinecraftClient.getInstance().openScreen(getConfigScreen(parent));
     }
-    
+
     @Override
     public Screen getConfigScreen(Screen parent) {
         try {
@@ -177,7 +177,7 @@ public class ConfigManagerImpl implements ConfigManager {
                 }
                 super.render(int_1, int_2, float_1);
             }
-            
+
             @Override
             protected void init() {
                 super.init();
@@ -185,7 +185,7 @@ public class ConfigManagerImpl implements ConfigManager {
                     this.minecraft.openScreen(parent);
                 }));
             }
-            
+
             @Override
             public boolean keyPressed(int int_1, int int_2, int int_3) {
                 if (int_1 == 256 && this.shouldCloseOnEsc()) {
@@ -196,5 +196,5 @@ public class ConfigManagerImpl implements ConfigManager {
             }
         };
     }
-    
+
 }
