@@ -148,6 +148,7 @@
   "config.roughlyenoughitems.itemCheatingMode": "物品作弊数量:",
   "config.roughlyenoughitems.itemCheatingMode.rei_like": "标准",
   "config.roughlyenoughitems.itemCheatingMode.jei_like": "反转",
+  "config.roughlyenoughitems.searchFavorites": "Search Filter in Favorites:",
   "config.roughlyenoughitems.appendModNames": "附加模组名称：",
   "config.roughlyenoughitems.displayFavoritesOnTheLeft": "收藏夹位置：",
   "config.roughlyenoughitems.displayFavoritesOnTheLeft.boolean.true": "对面",
