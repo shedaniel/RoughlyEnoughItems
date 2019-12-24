@@ -148,6 +148,7 @@
   "config.roughlyenoughitems.itemCheatingMode": "物品作弊數量:",
   "config.roughlyenoughitems.itemCheatingMode.rei_like": "正常",
   "config.roughlyenoughitems.itemCheatingMode.jei_like": "倒置",
+  "config.roughlyenoughitems.searchFavorites": "Search Filter in Favorites:",
   "config.roughlyenoughitems.appendModNames": "附加模組名稱：",
   "config.roughlyenoughitems.displayFavoritesOnTheLeft": "我的最愛的位置：",
   "config.roughlyenoughitems.displayFavoritesOnTheLeft.boolean.true": "對面",

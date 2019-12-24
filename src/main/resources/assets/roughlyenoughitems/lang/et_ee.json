@@ -148,6 +148,7 @@
   "config.roughlyenoughitems.itemCheatingMode": "Esemete sohina andmise hulk:",
   "config.roughlyenoughitems.itemCheatingMode.rei_like": "Tavaline",
   "config.roughlyenoughitems.itemCheatingMode.jei_like": "Pööratud",
+  "config.roughlyenoughitems.searchFavorites": "Search Filter in Favorites:",
   "config.roughlyenoughitems.appendModNames": "Lisa juurde modinimed:",
   "config.roughlyenoughitems.displayFavoritesOnTheLeft": "Lemmikute asukoht:",
   "config.roughlyenoughitems.displayFavoritesOnTheLeft.boolean.true": "Vastasküljel",

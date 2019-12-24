@@ -148,6 +148,7 @@
   "config.roughlyenoughitems.itemCheatingMode": "Zahl der Gegenstände beim Schummeln:",
   "config.roughlyenoughitems.itemCheatingMode.rei_like": "Normal",
   "config.roughlyenoughitems.itemCheatingMode.jei_like": "Umgekehrt",
+  "config.roughlyenoughitems.searchFavorites": "Search Filter in Favorites:",
   "config.roughlyenoughitems.appendModNames": "Mod-Namen anhängen:",
   "config.roughlyenoughitems.displayFavoritesOnTheLeft": "Favorites Position:",
   "config.roughlyenoughitems.displayFavoritesOnTheLeft.boolean.true": "Opposite Side",

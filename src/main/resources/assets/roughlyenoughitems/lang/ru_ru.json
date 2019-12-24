@@ -148,6 +148,7 @@
   "config.roughlyenoughitems.itemCheatingMode": "Количество выдаваемых предметов:",
   "config.roughlyenoughitems.itemCheatingMode.rei_like": "x1",
   "config.roughlyenoughitems.itemCheatingMode.jei_like": "x64",
+  "config.roughlyenoughitems.searchFavorites": "Search Filter in Favorites:",
   "config.roughlyenoughitems.appendModNames": "Показывать название мода:",
   "config.roughlyenoughitems.displayFavoritesOnTheLeft": "Favorites Position:",
   "config.roughlyenoughitems.displayFavoritesOnTheLeft.boolean.true": "Opposite Side",
