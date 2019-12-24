@@ -148,6 +148,7 @@
   "config.roughlyenoughitems.itemCheatingMode": "Item Cheating Amownt:",
   "config.roughlyenoughitems.itemCheatingMode.rei_like": "Nowmal",
   "config.roughlyenoughitems.itemCheatingMode.jei_like": "Invewted",
+  "config.roughlyenoughitems.searchFavorites": "Search Filter in Favorites:",
   "config.roughlyenoughitems.appendModNames": "Appwend Mod Wames:",
   "config.roughlyenoughitems.displayFavoritesOnTheLeft": "Favorites Position:",
   "config.roughlyenoughitems.displayFavoritesOnTheLeft.boolean.true": "Opposite Side",
