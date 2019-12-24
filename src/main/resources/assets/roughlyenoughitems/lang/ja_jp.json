@@ -148,6 +148,7 @@
   "config.roughlyenoughitems.itemCheatingMode": "チートモードのアイテム量:",
   "config.roughlyenoughitems.itemCheatingMode.rei_like": "普通",
   "config.roughlyenoughitems.itemCheatingMode.jei_like": "反転",
+  "config.roughlyenoughitems.searchFavorites": "Search Filter in Favorites:",
   "config.roughlyenoughitems.appendModNames": "Mod名称の表示:",
   "config.roughlyenoughitems.displayFavoritesOnTheLeft": "Favorites Position:",
   "config.roughlyenoughitems.displayFavoritesOnTheLeft.boolean.true": "Opposite Side",
