@@ -29,59 +29,60 @@ import java.util.List;
 import java.util.Optional;
 
 public class ScreenHelper implements ClientModInitializer {
-    
+
     /**
      * @deprecated Use getters instead
      */
-    @Deprecated public static OverlaySearchField searchField;
+    @Deprecated
+    public static OverlaySearchField searchField;
     public static List<ItemStack> inventoryStacks = Lists.newArrayList();
     private static ContainerScreenOverlay overlay;
     private static AbstractContainerScreen<?> lastContainerScreen = null;
     private static LinkedHashSet<Screen> lastRecipeScreen = Sets.newLinkedHashSetWithExpectedSize(5);
-    
+
     @SuppressWarnings("deprecation")
     public static OverlaySearchField getSearchField() {
         return searchField;
     }
-    
+
     @Deprecated
     public static void setSearchField(OverlaySearchField searchField) {
         ScreenHelper.searchField = searchField;
     }
-    
+
     public static void storeRecipeScreen(Screen screen) {
         while (lastRecipeScreen.size() >= 5)
             lastRecipeScreen.remove(Iterables.get(lastRecipeScreen, 0));
         lastRecipeScreen.add(screen);
     }
-    
+
     public static boolean hasLastRecipeScreen() {
         return !lastRecipeScreen.isEmpty();
     }
-    
+
     public static Screen getLastRecipeScreen() {
         Screen screen = Iterables.getLast(lastRecipeScreen);
         lastRecipeScreen.remove(screen);
         return screen;
     }
-    
+
     public static void clearData() {
         lastRecipeScreen.clear();
     }
-    
+
     public static boolean isOverlayVisible() {
         return ConfigObject.getInstance().isOverlayVisible();
     }
-    
+
     public static void toggleOverlayVisible() {
         ConfigObject.getInstance().setOverlayVisible(!ConfigObject.getInstance().isOverlayVisible());
         ConfigManager.getInstance().saveConfig();
     }
-    
+
     public static Optional<ContainerScreenOverlay> getOptionalOverlay() {
         return Optional.ofNullable(overlay);
     }
-    
+
     public static ContainerScreenOverlay getLastOverlay(boolean reset, boolean setPage) {
         if (overlay == null || reset) {
             overlay = new ContainerScreenOverlay();
@@ -90,28 +91,28 @@ public class ScreenHelper implements ClientModInitializer {
         }
         return overlay;
     }
-    
+
     public static ContainerScreenOverlay getLastOverlay() {
         return getLastOverlay(false, false);
     }
-    
+
     public static AbstractContainerScreen<?> getLastContainerScreen() {
         return lastContainerScreen;
     }
-    
+
     public static void setLastContainerScreen(AbstractContainerScreen<?> lastContainerScreen) {
         ScreenHelper.lastContainerScreen = lastContainerScreen;
     }
-    
+
     public static ContainerScreenHooks getLastContainerScreenHooks() {
         return (ContainerScreenHooks) lastContainerScreen;
     }
-    
+
     public static void drawHoveringWidget(int x, int y, TriConsumer<Integer, Integer, Float> consumer, int width, int height, float delta) {
         Window window = MinecraftClient.getInstance().getWindow();
         drawHoveringWidget(window.getScaledWidth(), window.getScaledHeight(), x, y, consumer, width, height, delta);
     }
-    
+
     public static void drawHoveringWidget(int screenWidth, int screenHeight, int x, int y, TriConsumer<Integer, Integer, Float> consumer, int width, int height, float delta) {
         int actualX = Math.max(x + 12, 6);
         int actualY = Math.min(y - height / 2, screenHeight - height - 6);
@@ -121,11 +122,11 @@ public class ScreenHelper implements ClientModInitializer {
             actualY += 24;
         consumer.accept(actualX, actualY, delta);
     }
-    
+
     public static boolean isDarkModeEnabled() {
         return ConfigObject.getInstance().isUsingDarkTheme();
     }
-    
+
     @Override
     public void onInitializeClient() {
         ClothClientHooks.SCREEN_INIT_PRE.register((client, screen, screenHooks) -> {
@@ -138,5 +139,5 @@ public class ScreenHelper implements ClientModInitializer {
                 getSearchField().tick();
         });
     }
-    
+
 }

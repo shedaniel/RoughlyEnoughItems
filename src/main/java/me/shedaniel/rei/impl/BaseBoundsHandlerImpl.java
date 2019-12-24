@@ -22,32 +22,32 @@ import java.util.function.Supplier;
 @Deprecated
 @Internal
 public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
-    
+
     private static final Comparator<? super Rectangle> RECTANGLE_COMPARER = Comparator.comparingLong(Rectangle::hashCode);
-    
+
     private long lastArea = -1;
     private List<Pair<Pair<Class<?>, Float>, Supplier<List<Rectangle>>>> list = Lists.newArrayList();
-    
+
     @Override
     public Class<?> getBaseSupportedClass() {
         return Screen.class;
     }
-    
+
     @Override
     public Rectangle getLeftBounds(Screen screen) {
         return new Rectangle();
     }
-    
+
     @Override
     public Rectangle getRightBounds(Screen screen) {
         return new Rectangle();
     }
-    
+
     @Override
     public float getPriority() {
         return -5f;
     }
-    
+
     @Override
     public ActionResult isInZone(double mouseX, double mouseY) {
         Class<? extends Screen> screenClass = MinecraftClient.getInstance().currentScreen.getClass();
@@ -59,7 +59,7 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
         }
         return ActionResult.PASS;
     }
-    
+
     @Override
     public boolean shouldRecalculateArea(boolean isOnRightSide, Rectangle rectangle) {
         long current = currentHashCode(isOnRightSide);
@@ -68,12 +68,12 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
         lastArea = current;
         return true;
     }
-    
+
     private long currentHashCode(boolean isOnRightSide) {
         DisplayHelper.DisplayBoundsHandler handler = DisplayHelper.getInstance().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
         return areasHashCode(isOnRightSide ? handler.getRightBounds(MinecraftClient.getInstance().currentScreen) : handler.getLeftBounds(MinecraftClient.getInstance().currentScreen), getExclusionZones(MinecraftClient.getInstance().currentScreen.getClass(), false));
     }
-    
+
     @Override
     public ActionResult canItemSlotWidgetFit(int left, int top, Screen screen, Rectangle fullBounds) {
         Class<? extends Screen> screenClass = screen.getClass();
@@ -86,7 +86,7 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
         }
         return ActionResult.PASS;
     }
-    
+
     @Override
     public List<Rectangle> getExclusionZones(Class<?> currentScreenClass, boolean sort) {
         List<Rectangle> rectangles = Lists.newArrayList();
@@ -98,22 +98,22 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
             rectangles.sort(RECTANGLE_COMPARER);
         return rectangles;
     }
-    
+
     @Override
     public int supplierSize() {
         return list.size();
     }
-    
+
     @Override
     public void registerExclusionZones(Class<?> screenClass, Supplier<List<Rectangle>> supplier) {
         list.add(new Pair<>(new Pair<>(screenClass, 0f), supplier));
     }
-    
+
     private long areasHashCode(Rectangle rectangle, List<Rectangle> exclusionZones) {
         int hashCode = 31 + (rectangle == null ? 0 : rectangle.hashCode());
         for (Rectangle e : exclusionZones)
             hashCode = 31 * hashCode + (e == null ? 0 : e.hashCode());
         return hashCode;
     }
-    
+
 }

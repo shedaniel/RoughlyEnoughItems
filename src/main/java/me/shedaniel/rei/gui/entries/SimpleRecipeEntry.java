@@ -25,12 +25,12 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class SimpleRecipeEntry extends RecipeEntry {
-    
+
     private static final Comparator<EntryStack> ENTRY_COMPARATOR = Comparator.comparingLong(EntryStack::hashCode);
     private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private List<EntryWidget> inputWidgets;
     private EntryWidget outputWidget;
-    
+
     protected SimpleRecipeEntry(List<List<EntryStack>> input, List<EntryStack> output) {
         List<Pair<List<EntryStack>, AtomicInteger>> newList = Lists.newArrayList();
         List<Pair<List<EntryStack>, Integer>> a = CollectionUtils.map(input, stacks -> new Pair<>(stacks, stacks.stream().map(EntryStack::getAmount).max(Integer::compareTo).orElse(1)));
@@ -53,15 +53,15 @@ public class SimpleRecipeEntry extends RecipeEntry {
         }).collect(Collectors.toList());
         this.outputWidget = EntryWidget.create(0, 0).entries(CollectionUtils.filter(output, stack -> !stack.isEmpty())).noBackground().noHighlight().noTooltips();
     }
-    
+
     public static RecipeEntry create(Supplier<List<List<EntryStack>>> input, Supplier<List<EntryStack>> output) {
         return create(input.get(), output.get());
     }
-    
+
     public static RecipeEntry create(List<List<EntryStack>> input, List<EntryStack> output) {
         return new SimpleRecipeEntry(input, output);
     }
-    
+
     public static boolean equalsList(List<EntryStack> list_1, List<EntryStack> list_2) {
         List<EntryStack> stacks_1 = list_1.stream().distinct().sorted(ENTRY_COMPARATOR).collect(Collectors.toList());
         List<EntryStack> stacks_2 = list_2.stream().distinct().sorted(ENTRY_COMPARATOR).collect(Collectors.toList());
@@ -74,7 +74,7 @@ public class SimpleRecipeEntry extends RecipeEntry {
                 return false;
         return true;
     }
-    
+
     @Override
     public void render(Rectangle bounds, int mouseX, int mouseY, float delta) {
         int xx = bounds.x + 4, yy = bounds.y + 2;
@@ -101,7 +101,7 @@ public class SimpleRecipeEntry extends RecipeEntry {
         outputWidget.getBounds().setLocation(xx, yy);
         outputWidget.render(mouseX, mouseY, delta);
     }
-    
+
     @Nullable
     @Override
     public QueuedTooltip getTooltip(int mouseX, int mouseY) {
@@ -113,18 +113,18 @@ public class SimpleRecipeEntry extends RecipeEntry {
             return outputWidget.getCurrentTooltip(mouseX, mouseY);
         return null;
     }
-    
+
     @Override
     public int getHeight() {
         return 4 + getItemsHeight() * 18;
     }
-    
+
     public int getItemsHeight() {
         return MathHelper.ceil(((float) inputWidgets.size()) / (getItemsPerLine() - 2));
     }
-    
+
     public int getItemsPerLine() {
         return MathHelper.floor((getWidth() - 4f) / 18f);
     }
-    
+
 }

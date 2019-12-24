@@ -13,19 +13,19 @@ import net.minecraft.item.ItemStack;
 import java.util.List;
 
 public interface EntryRegistry {
-    
+
     @SuppressWarnings("deprecation")
     static EntryRegistry getInstance() {
         return RoughlyEnoughItemsCore.getEntryRegistry();
     }
-    
+
     /**
      * Gets the current modifiable stacks list
      *
      * @return a stacks list
      */
     List<EntryStack> getStacksList();
-    
+
     /**
      * Gets all possible stacks from an item
      *
@@ -33,11 +33,11 @@ public interface EntryRegistry {
      * @return the array of possible stacks
      */
     ItemStack[] getAllStacksFromItem(Item item);
-    
+
     default void registerEntry(EntryStack stack) {
         registerEntryAfter(null, stack);
     }
-    
+
     /**
      * Registers an new stack to the entry list
      *
@@ -47,7 +47,7 @@ public interface EntryRegistry {
     default void registerEntryAfter(EntryStack afterEntry, EntryStack stack) {
         registerEntryAfter(afterEntry, stack, true);
     }
-    
+
     /**
      * Registers an new stack to the entry list
      *
@@ -57,7 +57,7 @@ public interface EntryRegistry {
      */
     @Deprecated
     void registerEntryAfter(EntryStack afterEntry, EntryStack stack, boolean checkAlreadyContains);
-    
+
     /**
      * Registers multiple stacks to the item list
      *
@@ -71,7 +71,7 @@ public interface EntryRegistry {
                 registerEntryAfter(afterStack, stack);
         }
     }
-    
+
     /**
      * Registers multiple stacks to the item list
      *
@@ -80,7 +80,7 @@ public interface EntryRegistry {
     default void registerEntries(EntryStack... stacks) {
         registerEntriesAfter(null, stacks);
     }
-    
+
     /**
      * Checks if a stack is already registered
      *
@@ -90,5 +90,5 @@ public interface EntryRegistry {
     default boolean alreadyContain(EntryStack stack) {
         return CollectionUtils.anyMatchEqualsAll(getStacksList(), stack);
     }
-    
+
 }

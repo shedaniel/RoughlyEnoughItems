@@ -11,11 +11,11 @@ import net.minecraft.recipe.BlastingRecipe;
 import net.minecraft.util.Identifier;
 
 public class DefaultBlastingDisplay extends DefaultCookingDisplay {
-    
+
     public DefaultBlastingDisplay(BlastingRecipe recipe) {
         super(recipe);
     }
-    
+
     @Override
     public Identifier getRecipeCategory() {
         return DefaultPlugin.BLASTING;

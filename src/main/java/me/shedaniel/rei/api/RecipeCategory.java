@@ -22,14 +22,14 @@ import java.util.function.Supplier;
 
 
 public interface RecipeCategory<T extends RecipeDisplay> {
-    
+
     /**
      * Gets the identifier of the category, must be unique
      *
      * @return the unique identifier of the category
      */
     Identifier getIdentifier();
-    
+
     /**
      * Gets the renderer of the icon, allowing developers to render things other than items
      *
@@ -38,14 +38,14 @@ public interface RecipeCategory<T extends RecipeDisplay> {
     default EntryStack getLogo() {
         return EntryStack.empty();
     }
-    
+
     /**
      * Gets the category name
      *
      * @return the name
      */
     String getCategoryName();
-    
+
     /**
      * Gets the recipe renderer for the category, used in {@link me.shedaniel.rei.gui.VillagerRecipeViewingScreen} for rendering simple recipes
      *
@@ -56,7 +56,7 @@ public interface RecipeCategory<T extends RecipeDisplay> {
     default RecipeEntry getSimpleRenderer(T recipe) {
         return SimpleRecipeEntry.create(recipe::getInputEntries, recipe::getOutputEntries);
     }
-    
+
     /**
      * Setup the widgets for displaying the recipe
      *
@@ -67,7 +67,7 @@ public interface RecipeCategory<T extends RecipeDisplay> {
     default List<Widget> setupDisplay(Supplier<T> recipeDisplaySupplier, Rectangle bounds) {
         return Collections.singletonList(new RecipeBaseWidget(bounds));
     }
-    
+
     /**
      * Draws the category background, used in {@link RecipeViewingScreen}
      *
@@ -86,7 +86,7 @@ public interface RecipeCategory<T extends RecipeDisplay> {
             DrawableHelper.fill(bounds.x + 17, bounds.y + 21, bounds.x + bounds.width - 17, bounds.y + 33, 0xFF9E9E9E);
         }
     }
-    
+
     /**
      * Gets the recipe display height
      *
@@ -95,7 +95,7 @@ public interface RecipeCategory<T extends RecipeDisplay> {
     default int getDisplayHeight() {
         return 66;
     }
-    
+
     /**
      * Gets the recipe display width
      *
@@ -105,7 +105,7 @@ public interface RecipeCategory<T extends RecipeDisplay> {
     default int getDisplayWidth(T display) {
         return 150;
     }
-    
+
     /**
      * Gets the maximum recipe per page.
      *
@@ -114,7 +114,7 @@ public interface RecipeCategory<T extends RecipeDisplay> {
     default int getMaximumRecipePerPage() {
         return 99;
     }
-    
+
     /**
      * Gets the fixed amount of recipes per page.
      *
@@ -124,7 +124,7 @@ public interface RecipeCategory<T extends RecipeDisplay> {
     default int getFixedRecipesPerPage() {
         return -1;
     }
-    
+
     /**
      * Gets whether the category will check tags, useful for potions
      *
@@ -135,5 +135,5 @@ public interface RecipeCategory<T extends RecipeDisplay> {
     default boolean checkTags() {
         return false;
     }
-    
+
 }

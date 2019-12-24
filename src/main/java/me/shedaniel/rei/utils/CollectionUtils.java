@@ -21,7 +21,7 @@ public class CollectionUtils {
         }
         return null;
     }
-    
+
     public static final <T> T findFirstOrNull(List<T> list, Predicate<T> predicate) {
         for (T t : list) {
             if (predicate.test(t))
@@ -29,7 +29,7 @@ public class CollectionUtils {
         }
         return null;
     }
-    
+
     public static final <T> boolean anyMatch(List<T> list, Predicate<T> predicate) {
         for (T t : list) {
             if (predicate.test(t))
@@ -37,7 +37,7 @@ public class CollectionUtils {
         }
         return false;
     }
-    
+
     public static final boolean anyMatchEqualsAll(List<EntryStack> list, EntryStack stack) {
         for (EntryStack t : list) {
             if (t.equalsAll(stack))
@@ -45,7 +45,7 @@ public class CollectionUtils {
         }
         return false;
     }
-    
+
     public static final <T> List<T> filter(List<T> list, Predicate<T> predicate) {
         List<T> l = new LinkedList<>();
         for (T t : list) {
@@ -55,7 +55,7 @@ public class CollectionUtils {
         }
         return l;
     }
-    
+
     public static final <T, R> List<R> map(List<T> list, Function<T, R> function) {
         List<R> l = new LinkedList<>();
         for (T t : list) {
@@ -63,7 +63,7 @@ public class CollectionUtils {
         }
         return l;
     }
-    
+
     public static final <T, R> List<R> map(T[] list, Function<T, R> function) {
         List<R> l = new LinkedList<>();
         for (T t : list) {
@@ -71,7 +71,7 @@ public class CollectionUtils {
         }
         return l;
     }
-    
+
     public static final <T, R> Optional<R> mapAndMax(List<T> list, Function<T, R> function, Comparator<R> comparator) {
         if (list.isEmpty())
             return Optional.empty();
@@ -79,7 +79,7 @@ public class CollectionUtils {
         copyOf.sort(comparator);
         return Optional.ofNullable(copyOf.get(copyOf.size() - 1));
     }
-    
+
     public static final <T, R> Optional<R> mapAndMax(T[] list, Function<T, R> function, Comparator<R> comparator) {
         if (list.length <= 0)
             return Optional.empty();
@@ -87,7 +87,7 @@ public class CollectionUtils {
         copyOf.sort(comparator);
         return Optional.ofNullable(copyOf.get(copyOf.size() - 1));
     }
-    
+
     public static final <T> Optional<T> max(List<T> list, Comparator<T> comparator) {
         if (list.isEmpty())
             return Optional.empty();
@@ -95,7 +95,7 @@ public class CollectionUtils {
         ts.sort(comparator);
         return Optional.ofNullable(ts.get(ts.size() - 1));
     }
-    
+
     public static final <T> Optional<T> max(T[] list, Comparator<T> comparator) {
         if (list.length <= 0)
             return Optional.empty();
@@ -103,7 +103,7 @@ public class CollectionUtils {
         Arrays.sort(copyOf, comparator);
         return Optional.ofNullable(copyOf[copyOf.length - 1]);
     }
-    
+
     public static final String joinToString(List<String> list, String separator) {
         StringJoiner joiner = new StringJoiner(separator);
         for (String t : list) {
@@ -111,7 +111,7 @@ public class CollectionUtils {
         }
         return joiner.toString();
     }
-    
+
     public static final String joinToString(String[] list, String separator) {
         StringJoiner joiner = new StringJoiner(separator);
         for (String t : list) {
@@ -119,7 +119,7 @@ public class CollectionUtils {
         }
         return joiner.toString();
     }
-    
+
     public static final <T> String mapAndJoinToString(List<T> list, Function<T, String> function, String separator) {
         StringJoiner joiner = new StringJoiner(separator);
         for (T t : list) {
@@ -127,7 +127,7 @@ public class CollectionUtils {
         }
         return joiner.toString();
     }
-    
+
     public static final <T> String mapAndJoinToString(T[] list, Function<T, String> function, String separator) {
         StringJoiner joiner = new StringJoiner(separator);
         for (T t : list) {
@@ -135,7 +135,7 @@ public class CollectionUtils {
         }
         return joiner.toString();
     }
-    
+
     public static final <T, R> List<R> filterAndMap(List<T> list, Predicate<T> predicate, Function<T, R> function) {
         List<R> l = null;
         for (T t : list) {
@@ -147,7 +147,7 @@ public class CollectionUtils {
         }
         return l == null ? Collections.emptyList() : l;
     }
-    
+
     public static final <T> int sumInt(List<T> list, Function<T, Integer> function) {
         int sum = 0;
         for (T t : list) {
@@ -155,7 +155,7 @@ public class CollectionUtils {
         }
         return sum;
     }
-    
+
     public static final <T> int sumInt(List<Integer> list) {
         int sum = 0;
         for (int t : list) {
@@ -163,7 +163,7 @@ public class CollectionUtils {
         }
         return sum;
     }
-    
+
     public static final <T> double sumDouble(List<T> list, Function<T, Double> function) {
         double sum = 0;
         for (T t : list) {
@@ -171,7 +171,7 @@ public class CollectionUtils {
         }
         return sum;
     }
-    
+
     public static final <T> double sumDouble(List<Double> list) {
         double sum = 0;
         for (double t : list) {

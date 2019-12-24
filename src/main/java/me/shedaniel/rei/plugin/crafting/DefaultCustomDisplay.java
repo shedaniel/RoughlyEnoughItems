@@ -16,16 +16,16 @@ import java.util.List;
 import java.util.Optional;
 
 public class DefaultCustomDisplay implements DefaultCraftingDisplay {
-    
+
     private List<List<EntryStack>> input;
     private List<EntryStack> output;
     private Recipe<?> possibleRecipe;
     private int width, height;
-    
+
     public DefaultCustomDisplay(List<List<ItemStack>> input, List<ItemStack> output, Recipe<?> possibleRecipe) {
         this(possibleRecipe, CollectionUtils.map(input, i -> CollectionUtils.map(i, EntryStack::create)), CollectionUtils.map(output, EntryStack::create));
     }
-    
+
     public DefaultCustomDisplay(Recipe<?> possibleRecipe, List<List<EntryStack>> input, List<EntryStack> output) {
         this.input = input;
         this.output = output;
@@ -43,48 +43,48 @@ public class DefaultCustomDisplay implements DefaultCraftingDisplay {
         this.width = (int) column.stream().filter(Boolean::booleanValue).count();
         this.height = (int) row.stream().filter(Boolean::booleanValue).count();
     }
-    
+
     public DefaultCustomDisplay(List<List<ItemStack>> input, List<ItemStack> output) {
         this(input, output, null);
     }
-    
+
     public Recipe getPossibleRecipe() {
         return possibleRecipe;
     }
-    
+
     @Override
     public Optional<Identifier> getRecipeLocation() {
         return Optional.ofNullable(possibleRecipe).map(Recipe::getId);
     }
-    
+
     @Override
     public List<List<EntryStack>> getInputEntries() {
         return input;
     }
-    
+
     @Override
     public List<EntryStack> getOutputEntries() {
         return output;
     }
-    
+
     @Override
     public List<List<EntryStack>> getRequiredEntries() {
         return input;
     }
-    
+
     @Override
     public int getWidth() {
         return width;
     }
-    
+
     @Override
     public int getHeight() {
         return height;
     }
-    
+
     @Override
     public Optional<Recipe<?>> getOptionalRecipe() {
         return Optional.ofNullable(possibleRecipe);
     }
-    
+
 }

@@ -13,40 +13,40 @@ import net.minecraft.item.ItemStack;
 
 public class CraftingContainerInfoWrapper<T extends CraftingContainer<?>> implements ContainerInfo<T> {
     private Class<? extends CraftingContainer<?>> containerClass;
-    
+
     public <T extends CraftingContainer<?>> CraftingContainerInfoWrapper(Class<T> containerClass) {
         this.containerClass = containerClass;
     }
-    
+
     public static <T extends CraftingContainer<?>> ContainerInfo<T> create(Class<T> containerClass) {
         return new CraftingContainerInfoWrapper<T>(containerClass);
     }
-    
+
     @Override
     public Class<? extends Container> getContainerClass() {
         return containerClass;
     }
-    
+
     @Override
     public int getCraftingResultSlotIndex(T container) {
         return container.getCraftingResultSlotIndex();
     }
-    
+
     @Override
     public int getCraftingWidth(T container) {
         return container.getCraftingWidth();
     }
-    
+
     @Override
     public int getCraftingHeight(T container) {
         return container.getCraftingHeight();
     }
-    
+
     @Override
     public void clearCraftingSlots(T container) {
         container.clearCraftingSlots();
     }
-    
+
     @Override
     public void populateRecipeFinder(T container, RecipeFinder var1) {
         container.populateRecipeFinder(new net.minecraft.recipe.RecipeFinder() {

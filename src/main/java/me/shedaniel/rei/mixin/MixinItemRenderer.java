@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.Shadow;
 public abstract class MixinItemRenderer implements ItemRendererHooks {
     @Shadow
     protected abstract void renderBakedItemModel(BakedModel model, ItemStack stack, int light, int overlay, MatrixStack matrices, VertexConsumer vertices);
-    
+
     @Override
     public void rei_renderBakedItemModel(BakedModel model, ItemStack stack, int light, int overlay, MatrixStack matrices, VertexConsumer vertices) {
         this.renderBakedItemModel(model, stack, light, overlay, matrices, vertices);

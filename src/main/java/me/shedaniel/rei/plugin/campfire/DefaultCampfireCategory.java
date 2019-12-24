@@ -27,22 +27,22 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class DefaultCampfireCategory implements RecipeCategory<DefaultCampfireDisplay> {
-    
+
     @Override
     public Identifier getIdentifier() {
         return DefaultPlugin.CAMPFIRE;
     }
-    
+
     @Override
     public EntryStack getLogo() {
         return EntryStack.create(Blocks.CAMPFIRE);
     }
-    
+
     @Override
     public String getCategoryName() {
         return I18n.translate("category.rei.campfire");
     }
-    
+
     @Override
     public List<Widget> setupDisplay(Supplier<DefaultCampfireDisplay> recipeDisplaySupplier, Rectangle bounds) {
         Point startPoint = new Point(bounds.getCenterX() - 41, bounds.getCenterY() - 27);
@@ -64,5 +64,5 @@ public class DefaultCampfireCategory implements RecipeCategory<DefaultCampfireDi
         widgets.add(EntryWidget.create(startPoint.x + 61, startPoint.y + 19).entries(recipeDisplaySupplier.get().getOutputEntries()).noBackground());
         return widgets;
     }
-    
+
 }

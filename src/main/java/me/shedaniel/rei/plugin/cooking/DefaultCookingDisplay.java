@@ -28,7 +28,7 @@ public abstract class DefaultCookingDisplay implements TransferRecipeDisplay {
     private AbstractCookingRecipe recipe;
     private List<List<EntryStack>> input;
     private List<EntryStack> output;
-    
+
     public DefaultCookingDisplay(AbstractCookingRecipe recipe) {
         this.recipe = recipe;
         this.input = recipe.getPreviewInputs().stream().map(i -> {
@@ -41,49 +41,49 @@ public abstract class DefaultCookingDisplay implements TransferRecipeDisplay {
         this.input.add(FurnaceBlockEntity.createFuelTimeMap().keySet().stream().map(Item::getStackForRender).map(EntryStack::create).map(e -> e.setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, stack -> Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("category.rei.smelting.fuel")))).collect(Collectors.toList()));
         this.output = Collections.singletonList(EntryStack.create(recipe.getOutput()));
     }
-    
+
     @Override
     public Optional<Identifier> getRecipeLocation() {
         return Optional.ofNullable(recipe).map(AbstractCookingRecipe::getId);
     }
-    
+
     @Override
     public List<List<EntryStack>> getInputEntries() {
         return input;
     }
-    
+
     @Override
     public List<EntryStack> getOutputEntries() {
         return output;
     }
-    
+
     public List<EntryStack> getFuel() {
         return input.get(1);
     }
-    
+
     @Override
     public List<List<EntryStack>> getRequiredEntries() {
         return input;
     }
-    
+
     @Deprecated
     public Optional<AbstractCookingRecipe> getOptionalRecipe() {
         return Optional.ofNullable(recipe);
     }
-    
+
     @Override
     public int getWidth() {
         return 1;
     }
-    
+
     @Override
     public int getHeight() {
         return 1;
     }
-    
+
     @Override
     public List<List<EntryStack>> getOrganisedInputEntries(ContainerInfo<Container> containerInfo, Container container) {
         return CollectionUtils.map(recipe.getPreviewInputs(), i -> CollectionUtils.map(i.getMatchingStacksClient(), EntryStack::create));
     }
-    
+
 }

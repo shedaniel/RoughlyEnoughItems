@@ -18,17 +18,17 @@ import org.jetbrains.annotations.TestOnly;
 @TestOnly
 @Deprecated
 public class REITestPlugin implements REIPluginV0 {
-    
+
     @Override
     public void preRegister() {
         LogManager.getLogger().error("REI Test Plugin is enabled! If you see this unintentionally, please report this!");
     }
-    
+
     @Override
     public Identifier getPluginIdentifier() {
         return new Identifier("roughlyenoughitems:test_dev_plugin");
     }
-    
+
     @Override
     public void registerEntries(EntryRegistry entryRegistry) {
         for (Item item : Registry.ITEM) {

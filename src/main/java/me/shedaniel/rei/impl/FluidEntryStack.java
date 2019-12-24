@@ -38,21 +38,21 @@ public class FluidEntryStack extends AbstractEntryStack {
     private static final int EMPTY_AMOUNT = -1319182373;
     private Fluid fluid;
     private int amount;
-    
+
     public FluidEntryStack(Fluid fluid) {
         this(fluid, EMPTY_AMOUNT);
     }
-    
+
     public FluidEntryStack(Fluid fluid, int amount) {
         this.fluid = fluid;
         this.amount = amount;
     }
-    
+
     protected static Pair<Sprite, Integer> getOrLoadSprite(Fluid fluid) {
         Pair<Sprite, Integer> possibleCached = FLUID_SPRITE_CACHE.get(fluid);
         if (possibleCached != null)
             return possibleCached;
-        
+
         FluidRenderHandler fluidRenderHandler = FluidRenderHandlerRegistry.INSTANCE.get(fluid);
         if (fluidRenderHandler == null)
             return null;
@@ -64,22 +64,22 @@ public class FluidEntryStack extends AbstractEntryStack {
         FLUID_SPRITE_CACHE.put(fluid, pair);
         return pair;
     }
-    
+
     @Override
     public Optional<Identifier> getIdentifier() {
         return Optional.ofNullable(Registry.FLUID.getId(getFluid()));
     }
-    
+
     @Override
     public Type getType() {
         return Type.FLUID;
     }
-    
+
     @Override
     public int getAmount() {
         return amount;
     }
-    
+
     @Override
     public void setAmount(int amount) {
         this.amount = amount == EMPTY_AMOUNT ? EMPTY_AMOUNT : Math.max(amount, 0);
@@ -87,12 +87,12 @@ public class FluidEntryStack extends AbstractEntryStack {
             fluid = Fluids.EMPTY;
         }
     }
-    
+
     @Override
     public boolean isEmpty() {
         return (amount != EMPTY_AMOUNT && amount <= 0) || fluid == Fluids.EMPTY;
     }
-    
+
     @Override
     public EntryStack copy() {
         EntryStack stack = EntryStack.create(fluid, amount);
@@ -101,40 +101,40 @@ public class FluidEntryStack extends AbstractEntryStack {
         }
         return stack;
     }
-    
+
     @Override
     public Object getObject() {
         return fluid;
     }
-    
+
     @Override
     public boolean equalsIgnoreTagsAndAmount(EntryStack stack) {
         if (stack.getType() != Type.FLUID)
             return false;
         return fluid == stack.getFluid();
     }
-    
+
     @Override
     public boolean equalsIgnoreTags(EntryStack stack) {
         if (stack.getType() != Type.FLUID)
             return false;
         return fluid == stack.getFluid() && amount == stack.getAmount();
     }
-    
+
     @Override
     public boolean equalsIgnoreAmount(EntryStack stack) {
         if (stack.getType() != Type.FLUID)
             return false;
         return fluid == stack.getFluid();
     }
-    
+
     @Override
     public boolean equalsAll(EntryStack stack) {
         if (stack.getType() != Type.FLUID)
             return false;
         return fluid == stack.getFluid() && amount == stack.getAmount();
     }
-    
+
     @Override
     public int hashCode() {
         int result = 1;
@@ -144,7 +144,7 @@ public class FluidEntryStack extends AbstractEntryStack {
         result = 31 * result;
         return result;
     }
-    
+
     @Nullable
     @Override
     public QueuedTooltip getTooltip(int mouseX, int mouseY) {
@@ -171,7 +171,7 @@ public class FluidEntryStack extends AbstractEntryStack {
         }
         return QueuedTooltip.create(toolTip);
     }
-    
+
     @Override
     public void render(Rectangle bounds, int mouseX, int mouseY, float delta) {
         if (getSetting(Settings.RENDER).value().get()) {

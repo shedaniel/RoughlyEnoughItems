@@ -19,24 +19,24 @@ import java.util.List;
 import java.util.Optional;
 
 public interface DefaultCraftingDisplay extends TransferRecipeDisplay {
-    
+
     @Override
     default Identifier getRecipeCategory() {
         return DefaultPlugin.CRAFTING;
     }
-    
+
     @Override
     default public int getWidth() {
         return 2;
     }
-    
+
     @Override
     default public int getHeight() {
         return 2;
     }
-    
+
     Optional<Recipe<?>> getOptionalRecipe();
-    
+
     @Override
     default List<List<EntryStack>> getOrganisedInputEntries(ContainerInfo<Container> containerInfo, Container container) {
         List<List<EntryStack>> list = Lists.newArrayListWithCapacity(containerInfo.getCraftingWidth(container) * containerInfo.getCraftingHeight(container));

@@ -55,7 +55,7 @@ import net.minecraft.util.registry.Registry;
 import java.util.*;
 
 public class DefaultPlugin implements REIPluginV0 {
-    
+
     public static final Identifier CRAFTING = new Identifier("minecraft", "plugins/crafting");
     public static final Identifier SMELTING = new Identifier("minecraft", "plugins/smelting");
     public static final Identifier SMOKING = new Identifier("minecraft", "plugins/smoking");
@@ -69,25 +69,25 @@ public class DefaultPlugin implements REIPluginV0 {
     private static final Identifier DISPLAY_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/display.png");
     private static final Identifier DISPLAY_TEXTURE_DARK = new Identifier("roughlyenoughitems", "textures/gui/display_dark.png");
     private static final List<DefaultBrewingDisplay> BREWING_DISPLAYS = Lists.newArrayList();
-    
+
     public static Identifier getDisplayTexture() {
         return ScreenHelper.isDarkModeEnabled() ? DISPLAY_TEXTURE_DARK : DISPLAY_TEXTURE;
     }
-    
+
     public static void registerBrewingDisplay(DefaultBrewingDisplay display) {
         BREWING_DISPLAYS.add(display);
     }
-    
+
     @Override
     public Identifier getPluginIdentifier() {
         return PLUGIN;
     }
-    
+
     @Override
     public SemanticVersion getMinimumVersion() throws VersionParsingException {
         return SemanticVersion.parse("3.0-pre");
     }
-    
+
     @Override
     public void registerEntries(EntryRegistry entryRegistry) {
         if (!ConfigObject.getInstance().isLoadingDefaultPlugin()) {
@@ -124,7 +124,7 @@ public class DefaultPlugin implements REIPluginV0 {
                 entryRegistry.registerEntry(EntryStack.create(fluid));
         }
     }
-    
+
     @Override
     public void registerPluginCategories(RecipeHelper recipeHelper) {
         if (!ConfigObject.getInstance().isLoadingDefaultPlugin()) {
@@ -140,7 +140,7 @@ public class DefaultPlugin implements REIPluginV0 {
         recipeHelper.registerCategory(new DefaultCompostingCategory());
         recipeHelper.registerCategory(new DefaultStrippingCategory());
     }
-    
+
     @Override
     public void registerRecipeDisplays(RecipeHelper recipeHelper) {
         if (!ConfigObject.getInstance().isLoadingDefaultPlugin()) {
@@ -194,7 +194,7 @@ public class DefaultPlugin implements REIPluginV0 {
             recipeHelper.registerDisplay(STRIPPING, new DefaultStrippingDisplay(new ItemStack(set.getKey()), new ItemStack(set.getValue())));
         });
     }
-    
+
     @Override
     public void postRegister() {
         // Sit tight! This will be a fast journey!
@@ -213,12 +213,12 @@ public class DefaultPlugin implements REIPluginV0 {
         time = System.currentTimeMillis() - time;
         RoughlyEnoughItemsCore.LOGGER.info("[REI] Applied Check Tags for potion in %dms.", time);
     }
-    
+
     private void applyPotionTransformer(EntryStack stack) {
         if (stack.getItem() instanceof PotionItem)
             stack.addSetting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE);
     }
-    
+
     @Override
     public void registerBounds(DisplayHelper displayHelper) {
         if (!ConfigObject.getInstance().isLoadingDefaultPlugin()) {
@@ -237,18 +237,18 @@ public class DefaultPlugin implements REIPluginV0 {
             public Class<?> getBaseSupportedClass() {
                 return AbstractContainerScreen.class;
             }
-            
+
             @Override
             public Rectangle getLeftBounds(AbstractContainerScreen<?> screen) {
                 return new Rectangle(2, 0, ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() - 4, MinecraftClient.getInstance().getWindow().getScaledHeight());
             }
-            
+
             @Override
             public Rectangle getRightBounds(AbstractContainerScreen<?> screen) {
                 int startX = ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() + ScreenHelper.getLastContainerScreenHooks().rei_getContainerWidth() + 2;
                 return new Rectangle(startX, 0, MinecraftClient.getInstance().getWindow().getScaledWidth() - startX - 2, MinecraftClient.getInstance().getWindow().getScaledHeight());
             }
-            
+
             @Override
             public float getPriority() {
                 return -1.0f;
@@ -259,18 +259,18 @@ public class DefaultPlugin implements REIPluginV0 {
             public Class<?> getBaseSupportedClass() {
                 return RecipeViewingScreen.class;
             }
-            
+
             @Override
             public Rectangle getLeftBounds(RecipeViewingScreen screen) {
                 return new Rectangle(2, 0, ((RecipeViewingScreen) screen).getBounds().x - 4, MinecraftClient.getInstance().getWindow().getScaledHeight());
             }
-            
+
             @Override
             public Rectangle getRightBounds(RecipeViewingScreen screen) {
                 int startX = ((RecipeViewingScreen) screen).getBounds().x + ((RecipeViewingScreen) screen).getBounds().width + 2;
                 return new Rectangle(startX, 0, MinecraftClient.getInstance().getWindow().getScaledWidth() - startX - 2, MinecraftClient.getInstance().getWindow().getScaledHeight());
             }
-            
+
             @Override
             public float getPriority() {
                 return -1.0f;
@@ -281,25 +281,25 @@ public class DefaultPlugin implements REIPluginV0 {
             public Class<?> getBaseSupportedClass() {
                 return VillagerRecipeViewingScreen.class;
             }
-            
+
             @Override
             public Rectangle getLeftBounds(VillagerRecipeViewingScreen screen) {
                 return new Rectangle(2, 0, ((VillagerRecipeViewingScreen) screen).bounds.x - 4, MinecraftClient.getInstance().getWindow().getScaledHeight());
             }
-            
+
             @Override
             public Rectangle getRightBounds(VillagerRecipeViewingScreen screen) {
                 int startX = ((VillagerRecipeViewingScreen) screen).bounds.x + ((VillagerRecipeViewingScreen) screen).bounds.width + 2;
                 return new Rectangle(startX, 0, MinecraftClient.getInstance().getWindow().getScaledWidth() - startX - 2, MinecraftClient.getInstance().getWindow().getScaledHeight());
             }
-            
+
             @Override
             public float getPriority() {
                 return -1.0f;
             }
         });
     }
-    
+
     @Override
     public void registerOthers(RecipeHelper recipeHelper) {
         if (!ConfigObject.getInstance().isLoadingDefaultPlugin()) {
@@ -322,10 +322,10 @@ public class DefaultPlugin implements REIPluginV0 {
         recipeHelper.registerScreenClickArea(new Rectangle(78, 32, 28, 23), SmokerScreen.class, SMOKING);
         recipeHelper.registerScreenClickArea(new Rectangle(78, 32, 28, 23), BlastFurnaceScreen.class, BLASTING);
     }
-    
+
     @Override
     public int getPriority() {
         return -1;
     }
-    
+
 }

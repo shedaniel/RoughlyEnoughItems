@@ -48,48 +48,48 @@ public class FavoritesListWidget extends WidgetWithBounds {
     private Rectangle bounds, innerBounds;
     private List<EntryListEntry> entries = Collections.emptyList();
     private boolean draggingScrollBar = false;
-    
+
     private static Rectangle updateInnerBounds(Rectangle bounds) {
         int width = Math.max(MathHelper.floor((bounds.width - 2 - 6) / 18f), 1);
         if (!ConfigObject.getInstance().isLeftHandSidePanel())
             return new Rectangle(bounds.getCenterX() - width * 9 + 3, bounds.y, width * 18, bounds.height);
         return new Rectangle(bounds.getCenterX() - width * 9 - 3, bounds.y, width * 18, bounds.height);
     }
-    
+
     protected final int getMaxScrollPosition() {
         return MathHelper.ceil((favorites.size() + blockedCount) / (innerBounds.width / 18f)) * 18;
     }
-    
+
     protected final int getMaxScroll() {
         return Math.max(0, this.getMaxScrollPosition() - innerBounds.height);
     }
-    
+
     protected final double clamp(double v) {
         return this.clamp(v, 200.0D);
     }
-    
+
     protected final double clamp(double v, double clampExtension) {
         return MathHelper.clamp(v, -clampExtension, (double) this.getMaxScroll() + clampExtension);
     }
-    
+
     protected final void offset(double value, boolean animated) {
         scrollTo(target + value, animated);
     }
-    
+
     protected final void scrollTo(double value, boolean animated) {
         scrollTo(value, animated, ClothConfigInitializer.getScrollDuration());
     }
-    
+
     protected final void scrollTo(double value, boolean animated, long duration) {
         target = clamp(value);
-        
+
         if (animated) {
             start = System.currentTimeMillis();
             this.duration = duration;
         } else
             scroll = target;
     }
-    
+
     @Override
     public boolean mouseScrolled(double double_1, double double_2, double double_3) {
         if (ConfigObject.getInstance().isEntryListWidgetScrolled() && bounds.contains(double_1, double_2)) {
@@ -98,14 +98,15 @@ public class FavoritesListWidget extends WidgetWithBounds {
         }
         return super.mouseScrolled(double_1, double_2, double_3);
     }
-    
+
     @Override
     public Rectangle getBounds() {
         return bounds;
     }
-    
+
     @Override
     public void render(int mouseX, int mouseY, float delta) {
+        if (bounds.isEmpty()) return;
         for (EntryListEntry entry : entries)
             entry.clearStacks();
         ScissorsHandler.INSTANCE.scissor(bounds);
@@ -136,13 +137,13 @@ public class FavoritesListWidget extends WidgetWithBounds {
         ScissorsHandler.INSTANCE.removeLastScissor();
         renderScrollbar();
     }
-    
+
     private int getScrollbarMinX() {
         if (!ConfigObject.getInstance().isLeftHandSidePanel())
             return bounds.x + 1;
         return bounds.getMaxX() - 7;
     }
-    
+
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int int_1, double double_3, double double_4) {
         if (int_1 == 0 && draggingScrollBar) {
@@ -163,7 +164,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
         }
         return super.mouseDragged(mouseX, mouseY, int_1, double_3, double_4);
     }
-    
+
     private void renderScrollbar() {
         int maxScroll = getMaxScroll();
         if (maxScroll > 0) {
@@ -172,13 +173,13 @@ public class FavoritesListWidget extends WidgetWithBounds {
             height -= Math.min((scroll < 0 ? (int) -scroll : scroll > maxScroll ? (int) scroll - maxScroll : 0), height * .95);
             height = Math.max(10, height);
             int minY = Math.min(Math.max((int) scroll * (innerBounds.height - height) / maxScroll + innerBounds.y, innerBounds.y), innerBounds.getMaxY() - height);
-            
+
             int scrollbarPositionMinX = getScrollbarMinX();
             int scrollbarPositionMaxX = scrollbarPositionMinX + 6;
             boolean hovered = (new Rectangle(scrollbarPositionMinX, minY, scrollbarPositionMaxX - scrollbarPositionMinX, height)).contains(PointHelper.fromMouse());
             float bottomC = (hovered ? .67f : .5f) * (ScreenHelper.isDarkModeEnabled() ? 0.8f : 1f);
             float topC = (hovered ? .87f : .67f) * (ScreenHelper.isDarkModeEnabled() ? 0.8f : 1f);
-            
+
             RenderSystem.disableTexture();
             RenderSystem.enableBlend();
             RenderSystem.disableAlphaTest();
@@ -204,7 +205,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
             RenderSystem.enableTexture();
         }
     }
-    
+
     private void updatePosition(float delta) {
         target = clamp(target);
         if (target < 0) {
@@ -223,7 +224,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
         else
             scroll = target;
     }
-    
+
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (containsMouse(PointHelper.fromMouse()))
@@ -232,37 +233,56 @@ public class FavoritesListWidget extends WidgetWithBounds {
                     return true;
         return false;
     }
-    
+
     @SuppressWarnings("rawtypes")
     public void updateFavoritesBounds(DisplayHelper.DisplayBoundsHandler boundsHandler, @Nullable String searchTerm) {
         this.bounds = boundsHandler.getFavoritesListArea(!ConfigObject.getInstance().isLeftHandSidePanel() ? boundsHandler.getLeftBounds(MinecraftClient.getInstance().currentScreen) : boundsHandler.getRightBounds(MinecraftClient.getInstance().currentScreen));
     }
-    
+
     @SuppressWarnings("deprecation")
     public void updateSearch(EntryListWidget listWidget, String searchTerm) {
         if (ConfigObject.getInstance().isFavoritesEnabled() && ConfigObject.getInstance().doDisplayFavoritesOnTheLeft()) {
-            List<EntryStack> list = Lists.newLinkedList();
-            boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
-            List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
-            for (EntryStack stack : ConfigManager.getInstance().getFavorites()) {
-                if (listWidget.canLastSearchTermsBeAppliedTo(stack)) {
+            if (ConfigObject.getInstance().doSearchFavorites()) {
+                List<EntryStack> list = Lists.newLinkedList();
+                boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
+                List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
+                for (EntryStack stack : ConfigManager.getInstance().getFavorites()) {
+                    if (listWidget.canLastSearchTermsBeAppliedTo(stack)) {
+                        if (workingItems != null && CollectionUtils.findFirstOrNullEquals(workingItems, stack) == null)
+                            continue;
+                        list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
+                    }
+                }
+                ItemListOrdering ordering = ConfigObject.getInstance().getItemListOrdering();
+                if (ordering == ItemListOrdering.name)
+                    list.sort(ENTRY_NAME_COMPARER);
+                if (ordering == ItemListOrdering.item_groups)
+                    list.sort(ENTRY_GROUP_COMPARER);
+                if (!ConfigObject.getInstance().isItemListAscending())
+                    Collections.reverse(list);
+                favorites = list;
+            } else {
+                List<EntryStack> list = Lists.newLinkedList();
+                boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
+                List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
+                for (EntryStack stack : ConfigManager.getInstance().getFavorites()) {
                     if (workingItems != null && CollectionUtils.findFirstOrNullEquals(workingItems, stack) == null)
                         continue;
                     list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
                 }
+                ItemListOrdering ordering = ConfigObject.getInstance().getItemListOrdering();
+                if (ordering == ItemListOrdering.name)
+                    list.sort(ENTRY_NAME_COMPARER);
+                if (ordering == ItemListOrdering.item_groups)
+                    list.sort(ENTRY_GROUP_COMPARER);
+                if (!ConfigObject.getInstance().isItemListAscending())
+                    Collections.reverse(list);
+                favorites = list;
             }
-            ItemListOrdering ordering = ConfigObject.getInstance().getItemListOrdering();
-            if (ordering == ItemListOrdering.name)
-                list.sort(ENTRY_NAME_COMPARER);
-            if (ordering == ItemListOrdering.item_groups)
-                list.sort(ENTRY_GROUP_COMPARER);
-            if (!ConfigObject.getInstance().isItemListAscending())
-                Collections.reverse(list);
-            favorites = list;
         } else
             favorites = Collections.emptyList();
     }
-    
+
     public void updateEntriesPosition() {
         this.innerBounds = updateInnerBounds(bounds);
         int width = innerBounds.width / 18;
@@ -283,12 +303,12 @@ public class FavoritesListWidget extends WidgetWithBounds {
         }
         this.entries = entries;
     }
-    
+
     @Override
     public List<? extends Widget> children() {
         return entries;
     }
-    
+
     @Override
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
         double height = getMaxScroll();
@@ -301,7 +321,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
             }
         }
         this.draggingScrollBar = false;
-        
+
         if (containsMouse(double_1, double_2)) {
             ClientPlayerEntity player = minecraft.player;
             if (ClientHelper.getInstance().isCheating() && !player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets()) {
@@ -316,26 +336,26 @@ public class FavoritesListWidget extends WidgetWithBounds {
         }
         return false;
     }
-    
+
     private class EntryListEntry extends EntryWidget {
         private int backupY;
-        
+
         private EntryListEntry(int x, int y) {
             super(x, y);
             this.backupY = y;
         }
-        
+
         @Override
         public boolean containsMouse(double mouseX, double mouseY) {
             return super.containsMouse(mouseX, mouseY) && bounds.contains(mouseX, mouseY);
         }
-        
+
         @Override
         protected void drawHighlighted(int mouseX, int mouseY, float delta) {
             if (getCurrentEntry().getType() != EntryStack.Type.EMPTY)
                 super.drawHighlighted(mouseX, mouseY, delta);
         }
-        
+
         private String getLocalizedName(InputUtil.KeyCode value) {
             String string_1 = value.getName();
             int int_1 = value.getKeyCode();
@@ -351,10 +371,10 @@ public class FavoritesListWidget extends WidgetWithBounds {
                     String string_3 = I18n.translate(string_1, new Object[0]);
                     string_2 = Objects.equals(string_3, string_1) ? I18n.translate(InputUtil.Type.MOUSE.getName(), new Object[]{int_1 + 1}) : string_3;
             }
-            
+
             return string_2 == null ? I18n.translate(string_1, new Object[0]) : string_2;
         }
-        
+
         @Override
         protected void queueTooltip(int mouseX, int mouseY, float delta) {
             if (!ClientHelper.getInstance().isCheating() || minecraft.player.inventory.getCursorStack().isEmpty()) {
@@ -368,7 +388,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
                 }
             }
         }
-        
+
         @Override
         public boolean keyPressed(int int_1, int int_2, int int_3) {
             if (interactable && ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(PointHelper.fromMouse()) && !getCurrentEntry().isEmpty()) {
@@ -391,7 +411,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
             }
             return super.keyPressed(int_1, int_2, int_3);
         }
-        
+
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             if (!interactable)

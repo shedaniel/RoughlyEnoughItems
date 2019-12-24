@@ -31,33 +31,33 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCraftingDisplay> {
-    
+
     @Deprecated
     public static int getSlotWithSize(DefaultCraftingDisplay recipeDisplay, int num) {
         return getSlotWithSize(recipeDisplay, num, 3);
     }
-    
+
     public static int getSlotWithSize(DefaultCraftingDisplay recipeDisplay, int num, int craftingGridWidth) {
         int x = num % recipeDisplay.getWidth();
         int y = (num - x) / recipeDisplay.getWidth();
         return craftingGridWidth * y + x;
     }
-    
+
     @Override
     public Identifier getIdentifier() {
         return DefaultPlugin.CRAFTING;
     }
-    
+
     @Override
     public EntryStack getLogo() {
         return EntryStack.create(Blocks.CRAFTING_TABLE);
     }
-    
+
     @Override
     public String getCategoryName() {
         return I18n.translate("category.rei.crafting");
     }
-    
+
     @Override
     public List<Widget> setupDisplay(Supplier<DefaultCraftingDisplay> recipeDisplaySupplier, Rectangle bounds) {
         Point startPoint = new Point(bounds.getCenterX() - 58, bounds.getCenterY() - 27);
@@ -85,7 +85,7 @@ public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCr
         widgets.add(EntryWidget.create(startPoint.x + 95, startPoint.y + 19).entries(recipeDisplaySupplier.get().getOutputEntries()).noBackground());
         return widgets;
     }
-    
+
     @Override
     public void renderRedSlots(List<Widget> widgets, Rectangle bounds, DefaultCraftingDisplay display, IntList redSlots) {
         ContainerInfo info = ContainerInfoHandler.getContainerInfo(getIdentifier(), ScreenHelper.getLastContainerScreen().getContainer().getClass());

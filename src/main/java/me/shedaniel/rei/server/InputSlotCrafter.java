@@ -24,27 +24,27 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<Integer> {
-    
+
     protected Container craftingContainer;
     protected ContainerInfo containerInfo;
     protected PlayerInventory inventory;
-    
+
     private InputSlotCrafter(Container craftingContainer, ContainerInfo containerInfo) {
         this.craftingContainer = craftingContainer;
         this.containerInfo = containerInfo;
     }
-    
+
     public static <C extends Inventory> void start(Identifier category, Container craftingContainer_1, ServerPlayerEntity player, Map<Integer, List<ItemStack>> map, boolean hasShift) {
         ContainerInfo containerInfo = Objects.requireNonNull(ContainerInfoHandler.getContainerInfo(category, craftingContainer_1.getClass()), "Container Info does not exist on the server!");
         new InputSlotCrafter<C>(craftingContainer_1, containerInfo).fillInputSlots(player, map, hasShift);
     }
-    
+
     private void fillInputSlots(ServerPlayerEntity player, Map<Integer, List<ItemStack>> map, boolean hasShift) {
         this.inventory = player.inventory;
         if (this.canReturnInputs() || player.isCreative()) {
             // Return the already placed items on the grid
             this.returnInputs();
-            
+
             RecipeFinder recipeFinder = new RecipeFinder();
             recipeFinder.clear();
             for (ItemStack stack : player.inventory.main) {
@@ -62,11 +62,11 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
                 player.inventory.markDirty();
                 throw new NotEnoughMaterialsException();
             }
-            
+
             player.inventory.markDirty();
         }
     }
-    
+
     @Override
     public void acceptAlignedInput(Iterator<Integer> iterator_1, int int_1, int int_2, int int_3, int int_4) {
         Slot slot_1 = this.craftingContainer.getSlot(int_1);
@@ -77,7 +77,7 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
             }
         }
     }
-    
+
     protected void fillInputSlot(Slot slot_1, ItemStack itemStack_1) {
         int int_1 = this.inventory.method_7371(itemStack_1);
         if (int_1 != -1) {
@@ -88,18 +88,18 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
                 } else {
                     this.inventory.removeInvStack(int_1);
                 }
-                
+
                 itemStack_2.setCount(1);
                 if (slot_1.getStack().isEmpty()) {
                     slot_1.setStack(itemStack_2);
                 } else {
                     slot_1.getStack().increment(1);
                 }
-                
+
             }
         }
     }
-    
+
     @SuppressWarnings("deprecation")
     protected void fillInputSlots(RecipeFinder recipeFinder, DefaultedList<Ingredient> ingredients, boolean hasShift) {
         //        boolean boolean_2 = this.craftingContainer.matches(recipe_1);
@@ -116,13 +116,13 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
                 }
             }
         }
-        
+
         int_2 = this.getAmountToFill(hasShift, int_1, boolean_2);
         IntList intList_1 = new IntArrayList();
         if (recipeFinder.findRecipe(ingredients, intList_1, int_2)) {
             int int_4 = int_2;
             IntListIterator var8 = intList_1.iterator();
-            
+
             while (var8.hasNext()) {
                 int int_5 = (Integer) var8.next();
                 int int_6 = RecipeFinder.getStackFromId(int_5).getMaxCount();
@@ -130,15 +130,15 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
                     int_4 = int_6;
                 }
             }
-            
+
             if (recipeFinder.findRecipe(ingredients, intList_1, int_4)) {
                 this.returnInputs();
                 this.alignRecipeToGrid(this.containerInfo.getCraftingWidth(craftingContainer), this.containerInfo.getCraftingHeight(craftingContainer), this.containerInfo.getCraftingResultSlotIndex(craftingContainer), ingredients, intList_1.iterator(), int_4);
             }
         }
-        
+
     }
-    
+
     protected int getAmountToFill(boolean hasShift, int int_1, boolean boolean_2) {
         int int_2 = 1;
         if (hasShift) {
@@ -159,17 +159,17 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
         }
         return int_2;
     }
-    
+
     protected void returnInputs() {
         for (int int_1 = 0; int_1 < this.containerInfo.getCraftingWidth(craftingContainer) * this.containerInfo.getCraftingHeight(craftingContainer) + 1; ++int_1) {
             if (int_1 != this.containerInfo.getCraftingResultSlotIndex(craftingContainer)) {
                 this.returnSlot(int_1);
             }
         }
-        
+
         this.containerInfo.clearCraftingSlots(craftingContainer);
     }
-    
+
     protected void returnSlot(int int_1) {
         ItemStack itemStack_1 = this.craftingContainer.getSlot(int_1).getStack();
         if (!itemStack_1.isEmpty()) {
@@ -178,7 +178,7 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
                 if (int_2 == -1) {
                     int_2 = this.inventory.getEmptySlot();
                 }
-                
+
                 ItemStack itemStack_2 = itemStack_1.copy();
                 itemStack_2.setCount(1);
                 if (!this.inventory.insertStack(int_2, itemStack_2)) {
@@ -187,11 +187,11 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
             }
         }
     }
-    
+
     private boolean canReturnInputs() {
         List<ItemStack> list_1 = Lists.newArrayList();
         int int_1 = this.getFreeInventorySlots();
-        
+
         for (int int_2 = 0; int_2 < this.containerInfo.getCraftingWidth(craftingContainer) * this.containerInfo.getCraftingHeight(craftingContainer) + 1; ++int_2) {
             if (int_2 != this.containerInfo.getCraftingResultSlotIndex(craftingContainer)) {
                 ItemStack itemStack_1 = this.craftingContainer.getSlot(int_2).getStack().copy();
@@ -199,7 +199,7 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
                     int int_3 = this.inventory.getOccupiedSlotWithRoomForStack(itemStack_1);
                     if (int_3 == -1 && list_1.size() <= int_1) {
                         Iterator<ItemStack> var6 = list_1.iterator();
-                        
+
                         while (var6.hasNext()) {
                             ItemStack itemStack_2 = var6.next();
                             if (itemStack_2.isItemEqualIgnoreDamage(itemStack_1) && itemStack_2.getCount() != itemStack_2.getMaxCount() && itemStack_2.getCount() + itemStack_1.getCount() <= itemStack_2.getMaxCount()) {
@@ -208,12 +208,12 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
                                 break;
                             }
                         }
-                        
+
                         if (!itemStack_1.isEmpty()) {
                             if (list_1.size() >= int_1) {
                                 return false;
                             }
-                            
+
                             list_1.add(itemStack_1);
                         }
                     } else if (int_3 == -1) {
@@ -222,10 +222,10 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
                 }
             }
         }
-        
+
         return true;
     }
-    
+
     private int getFreeInventorySlots() {
         int int_1 = 0;
         Iterator<ItemStack> var2 = this.inventory.main.iterator();
@@ -237,7 +237,8 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
         }
         return int_1;
     }
-    
-    public static class NotEnoughMaterialsException extends RuntimeException {}
-    
+
+    public static class NotEnoughMaterialsException extends RuntimeException {
+    }
+
 }

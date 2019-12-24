@@ -73,7 +73,7 @@ public class DefaultRecipeBookHandler implements AutoTransferHandler {
         }
         return Result.createNotApplicable();
     }
-    
+
     @Override
     public double getPriority() {
         return -20;
