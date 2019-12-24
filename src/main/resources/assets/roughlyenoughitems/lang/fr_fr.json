@@ -148,6 +148,7 @@
   "config.roughlyenoughitems.itemCheatingMode": "Item Cheating Amount:",
   "config.roughlyenoughitems.itemCheatingMode.rei_like": "Normal",
   "config.roughlyenoughitems.itemCheatingMode.jei_like": "Inversé",
+  "config.roughlyenoughitems.searchFavorites": "Search Filter in Favorites:",
   "config.roughlyenoughitems.appendModNames": "Append Mod Names:",
   "config.roughlyenoughitems.displayFavoritesOnTheLeft": "Favorites Position:",
   "config.roughlyenoughitems.displayFavoritesOnTheLeft.boolean.true": "Opposite Side",
