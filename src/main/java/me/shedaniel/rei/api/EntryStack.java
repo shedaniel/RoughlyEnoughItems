@@ -127,6 +127,11 @@ public interface EntryStack {
 
     boolean equalsAll(EntryStack stack);
 
+    /** {@link #hashCode()} for {@link #equalsAll(EntryStack)}. */
+    default int hashOfAll() {
+        return hashCode();
+    }
+
     int getZ();
 
     void setZ(int z);

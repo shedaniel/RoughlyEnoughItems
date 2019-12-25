@@ -110,15 +110,17 @@ public class DefaultPlugin implements REIPluginV0 {
                 entryRegistry.registerEntry(EntryStack.create(item));
         }
         EntryStack stack = EntryStack.create(Items.ENCHANTED_BOOK);
+        List<EntryStack> enchantments = new ArrayList<>(); 
         for (Enchantment enchantment : Registry.ENCHANTMENT) {
             for (int i = enchantment.getMinimumLevel(); i <= enchantment.getMaximumLevel(); i++) {
                 Map<Enchantment, Integer> map = new HashMap<>();
                 map.put(enchantment, i);
                 ItemStack itemStack = new ItemStack(Items.ENCHANTED_BOOK);
                 EnchantmentHelper.set(map, itemStack);
-                entryRegistry.registerEntriesAfter(stack, EntryStack.create(itemStack));
+                enchantments.add(EntryStack.create(itemStack));
             }
         }
+        entryRegistry.registerEntriesAfter(stack, enchantments);
         for (Fluid fluid : Registry.FLUID) {
             if (!(fluid instanceof EmptyFluid))
                 entryRegistry.registerEntry(EntryStack.create(fluid));

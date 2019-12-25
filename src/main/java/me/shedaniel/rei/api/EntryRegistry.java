@@ -10,6 +10,7 @@ import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface EntryRegistry {
@@ -70,6 +71,16 @@ public interface EntryRegistry {
             if (stack != null && !stack.isEmpty())
                 registerEntryAfter(afterStack, stack);
         }
+    }
+
+    /**
+     * Registers multiple stacks to the item list
+     *
+     * @param afterStack the stack to put after
+     * @param stacks     the stacks to register
+     */
+    default void registerEntriesAfter(EntryStack afterStack, Collection<? extends EntryStack> stacks) {
+        registerEntriesAfter(afterStack, stacks.toArray(new EntryStack[0]));
     }
 
     /**

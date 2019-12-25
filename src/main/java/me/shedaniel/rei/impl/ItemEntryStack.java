@@ -34,6 +34,7 @@ import java.util.Optional;
 public class ItemEntryStack extends AbstractEntryStack {
 
     private ItemStack itemStack;
+    private int hash = -1;
 
     public ItemEntryStack(ItemStack itemStack) {
         this.itemStack = itemStack;
@@ -57,6 +58,7 @@ public class ItemEntryStack extends AbstractEntryStack {
     @Override
     public void setAmount(int amount) {
         itemStack.setCount(amount);
+        hash = -1;
     }
 
     @Override
@@ -114,12 +116,18 @@ public class ItemEntryStack extends AbstractEntryStack {
 
     @Override
     public int hashCode() {
-        int result = 1;
-        result = 31 * result + getType().ordinal();
-        result = 31 * result + itemStack.getItem().hashCode();
-        result = 31 * result + itemStack.getCount();
-        result = 31 * result + (itemStack.hasTag() ? itemStack.getTag().hashCode() : 0);
-        return result;
+        if (hash == -1) {
+            int result = 1;
+            result = 31 * result + getType().ordinal();
+            result = 31 * result + itemStack.getItem().hashCode();
+            result = 31 * result + itemStack.getCount();
+            result = 31 * result + (itemStack.hasTag() ? itemStack.getTag().hashCode() : 0);
+            hash = result;
+            if (hash == -1) {
+                hash = -2;
+            }
+        }
+        return hash;
     }
 
     @Nullable
