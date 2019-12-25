@@ -52,6 +52,11 @@ public class EntryRegistryImpl implements EntryRegistry {
         return entries;
     }
 
+    public void reset() {
+        entries.clear();
+        entrySet.clear();
+    }
+
     @Override
     public ItemStack[] getAllStacksFromItem(Item item) {
         DefaultedList<ItemStack> list = DefaultedList.of();

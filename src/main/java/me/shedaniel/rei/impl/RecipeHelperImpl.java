@@ -269,7 +269,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         plugins.sort(Comparator.comparingInt(REIPluginEntry::getPriority).reversed());
         RoughlyEnoughItemsCore.LOGGER.info("[REI] Loading %d plugins: %s", plugins.size(), plugins.stream().map(REIPluginEntry::getPluginIdentifier).map(Identifier::toString).collect(Collectors.joining(", ")));
         Collections.reverse(plugins);
-        EntryRegistry.getInstance().getStacksList().clear();
+        ((EntryRegistryImpl) EntryRegistry.getInstance()).reset();
         Version reiVersion = FabricLoader.getInstance().getModContainer("roughlyenoughitems").get().getMetadata().getVersion();
         if (!(reiVersion instanceof SemanticVersion))
             RoughlyEnoughItemsCore.LOGGER.warn("[REI] Roughly Enough Items is not using semantic versioning, will be ignoring plugins' minimum versions!");
