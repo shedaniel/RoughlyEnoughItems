@@ -10,6 +10,7 @@ import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -26,6 +27,8 @@ public interface EntryRegistry {
      * @return a stacks list
      */
     List<EntryStack> getStacksList();
+
+    List<ItemStack> appendStacksForItem(Item item);
 
     /**
      * Gets all possible stacks from an item
@@ -66,11 +69,7 @@ public interface EntryRegistry {
      * @param stacks     the stacks to register
      */
     default void registerEntriesAfter(EntryStack afterStack, EntryStack... stacks) {
-        for (int i = stacks.length - 1; i >= 0; i--) {
-            EntryStack stack = stacks[i];
-            if (stack != null && !stack.isEmpty())
-                registerEntryAfter(afterStack, stack);
-        }
+        registerEntriesAfter(afterStack, Arrays.asList(stacks));
     }
 
     /**
@@ -79,9 +78,7 @@ public interface EntryRegistry {
      * @param afterStack the stack to put after
      * @param stacks     the stacks to register
      */
-    default void registerEntriesAfter(EntryStack afterStack, Collection<? extends EntryStack> stacks) {
-        registerEntriesAfter(afterStack, stacks.toArray(new EntryStack[0]));
-    }
+    void registerEntriesAfter(EntryStack afterStack, Collection<? extends EntryStack> stacks);
 
     /**
      * Registers multiple stacks to the item list

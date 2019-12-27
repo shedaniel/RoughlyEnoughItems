@@ -15,9 +15,13 @@ import net.minecraft.util.registry.Registry;
 import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.TestOnly;
 
+import java.util.Random;
+
 @TestOnly
 @Deprecated
 public class REITestPlugin implements REIPluginV0 {
+
+    private Random random = new Random();
 
     @Override
     public void preRegister() {
@@ -32,17 +36,21 @@ public class REITestPlugin implements REIPluginV0 {
     @Override
     public void registerEntries(EntryRegistry entryRegistry) {
         for (Item item : Registry.ITEM) {
-            entryRegistry.registerEntryAfter(null, EntryStack.create(item), false);
-            entryRegistry.registerEntryAfter(null, EntryStack.create(item), false);
-            entryRegistry.registerEntryAfter(null, EntryStack.create(item), false);
+            for (int i = 0; i < 15; i++)
+                entryRegistry.registerEntry(transformStack(EntryStack.create(item)));
             try {
-                for (ItemStack stack : entryRegistry.getAllStacksFromItem(item)) {
-                    entryRegistry.registerEntryAfter(null, EntryStack.create(stack), false);
-                    entryRegistry.registerEntryAfter(null, EntryStack.create(stack), false);
-                    entryRegistry.registerEntryAfter(null, EntryStack.create(stack), false);
+                for (ItemStack stack : entryRegistry.appendStacksForItem(item)) {
+                    for (int i = 0; i < 15; i++)
+                        entryRegistry.registerEntry(transformStack(EntryStack.create(stack)));
                 }
             } catch (Exception e) {
             }
         }
     }
+
+    public EntryStack transformStack(EntryStack stack) {
+        stack.setAmount(random.nextInt(Integer.MAX_VALUE));
+        return stack;
+    }
+
 }

@@ -94,16 +94,13 @@ public class DefaultPlugin implements REIPluginV0 {
             return;
         }
         for (Item item : Registry.ITEM) {
-            ItemStack[] stacks = null;
+            List<ItemStack> stacks = null;
             try {
-                stacks = entryRegistry.getAllStacksFromItem(item);
-                for (ItemStack stack : entryRegistry.getAllStacksFromItem(item)) {
-                    entryRegistry.registerEntry(EntryStack.create(stack));
-                }
+                stacks = entryRegistry.appendStacksForItem(item);
             } catch (Exception ignored) {
             }
             if (stacks != null) {
-                for (ItemStack stack : entryRegistry.getAllStacksFromItem(item)) {
+                for (ItemStack stack : entryRegistry.appendStacksForItem(item)) {
                     entryRegistry.registerEntry(EntryStack.create(stack));
                 }
             } else
