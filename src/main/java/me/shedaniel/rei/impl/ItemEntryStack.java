@@ -116,17 +116,17 @@ public class ItemEntryStack extends AbstractEntryStack {
 
     @Override
     public int hashCode() {
-        if (hash == -1) {
+//        if (hash == -1) {
             int result = 1;
-            result = 31 * result + getType().ordinal();
+            result = 31 * result + getType().hashCode();
             result = 31 * result + itemStack.getItem().hashCode();
             result = 31 * result + itemStack.getCount();
             result = 31 * result + (itemStack.hasTag() ? itemStack.getTag().hashCode() : 0);
             hash = result;
-            if (hash == -1) {
-                hash = -2;
-            }
-        }
+//            if (hash == -1) {
+//                hash = -2;
+//            }
+//        }
         return hash;
     }
 

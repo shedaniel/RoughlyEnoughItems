@@ -47,16 +47,16 @@ public class RecipeHelperImpl implements RecipeHelper {
         VISIBILITY_HANDLER_COMPARATOR = comparator.reversed();
     }
 
-    private final List<AutoTransferHandler> autoTransferHandlers = Lists.newArrayList();
-    private final List<RecipeFunction> recipeFunctions = Lists.newArrayList();
-    private final List<ScreenClickArea> screenClickAreas = Lists.newArrayList();
-    private final AtomicInteger recipeCount = new AtomicInteger();
-    private final Map<Identifier, List<RecipeDisplay>> recipeCategoryListMap = Maps.newHashMap();
-    private final List<RecipeCategory<?>> categories = Lists.newArrayList();
-    private final Map<Identifier, ButtonAreaSupplier> autoCraftAreaSupplierMap = Maps.newHashMap();
-    private final Map<Identifier, List<List<EntryStack>>> categoryWorkingStations = Maps.newHashMap();
-    private final List<DisplayVisibilityHandler> displayVisibilityHandlers = Lists.newArrayList();
-    private final List<LiveRecipeGenerator<RecipeDisplay>> liveRecipeGenerators = Lists.newArrayList();
+    private final List<AutoTransferHandler> autoTransferHandlers = Lists.newLinkedList();
+    private final List<RecipeFunction> recipeFunctions = Lists.newLinkedList();
+    private final List<ScreenClickArea> screenClickAreas = Lists.newLinkedList();
+    private final int[] recipeCount = {0};
+    private final Map<Identifier, List<RecipeDisplay>> recipeCategoryListMap = Maps.newLinkedHashMap();
+    private final List<RecipeCategory<?>> categories = Lists.newLinkedList();
+    private final Map<Identifier, ButtonAreaSupplier> autoCraftAreaSupplierMap = Maps.newLinkedHashMap();
+    private final Map<Identifier, List<List<EntryStack>>> categoryWorkingStations = Maps.newLinkedHashMap();
+    private final List<DisplayVisibilityHandler> displayVisibilityHandlers = Lists.newLinkedList();
+    private final List<LiveRecipeGenerator<RecipeDisplay>> liveRecipeGenerators = Lists.newLinkedList();
     private RecipeManager recipeManager;
     private boolean arePluginsLoading = false;
 
@@ -118,14 +118,14 @@ public class RecipeHelperImpl implements RecipeHelper {
     public void registerDisplay(Identifier categoryIdentifier, RecipeDisplay display) {
         if (!recipeCategoryListMap.containsKey(categoryIdentifier))
             return;
-        recipeCount.incrementAndGet();
+        recipeCount[0]++;
         recipeCategoryListMap.get(categoryIdentifier).add(display);
     }
 
     private void registerDisplay(Identifier categoryIdentifier, RecipeDisplay display, int index) {
         if (!recipeCategoryListMap.containsKey(categoryIdentifier))
             return;
-        recipeCount.incrementAndGet();
+        recipeCount[0]++;
         recipeCategoryListMap.get(categoryIdentifier).add(index, display);
     }
 
@@ -249,7 +249,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         long startTime = System.currentTimeMillis();
         arePluginsLoading = true;
         ScreenHelper.clearData();
-        this.recipeCount.set(0);
+        recipeCount[0] = 0;
         this.recipeManager = recipeManager;
         this.recipeCategoryListMap.clear();
         this.categories.clear();
@@ -277,7 +277,9 @@ public class RecipeHelperImpl implements RecipeHelper {
         for (REIPluginEntry plugin : plugins) {
             try {
                 if (reiVersion instanceof SemanticVersion)
-                    if (plugin.getMinimumVersion().compareTo((SemanticVersion) reiVersion) > 0) {
+                    if (plugin.getMinimumVersion() == null) {
+                        RoughlyEnoughItemsCore.LOGGER.warn("[REI] Plugin " + plugin.getPluginIdentifier().toString() + " did not provide a minimum version, skipping version check!");
+                    } else if (plugin.getMinimumVersion().compareTo((SemanticVersion) reiVersion) > 0) {
                         throw new IllegalStateException("Requires " + plugin.getMinimumVersion().getFriendlyString() + " version of REI!");
                     }
                 if (plugin instanceof REIPluginV0) {
@@ -300,6 +302,9 @@ public class RecipeHelperImpl implements RecipeHelper {
                 RoughlyEnoughItemsCore.LOGGER.error("[REI] " + identifier.toString() + " plugin failed to load!", e);
             }
         }
+        // Remove duplicate entries
+        ((EntryRegistryImpl) EntryRegistry.getInstance()).distinct();
+
         for (REIPluginV0 plugin : reiPluginV0s) {
             Identifier identifier = plugin.getPluginIdentifier();
             try {
@@ -333,12 +338,13 @@ public class RecipeHelperImpl implements RecipeHelper {
                     return -1f;
                 }
             });
+
         // Clear Cache
         ((DisplayHelperImpl) DisplayHelper.getInstance()).resetCache();
         ScreenHelper.getOptionalOverlay().ifPresent(overlay -> overlay.shouldReInit = true);
 
         long usedTime = System.currentTimeMillis() - startTime;
-        RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered %d stack entries, %d recipes displays, %d exclusion zones suppliers, %d bounds handler, %d visibility handlers and %d categories (%s) in %d ms.", EntryRegistry.getInstance().getStacksList().size(), recipeCount.get(), DisplayHelper.getInstance().getBaseBoundsHandler().supplierSize(), DisplayHelper.getInstance().getAllBoundsHandlers().size(), getDisplayVisibilityHandlers().size(), categories.size(), String.join(", ", categories.stream().map(RecipeCategory::getCategoryName).collect(Collectors.toList())), usedTime);
+        RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered %d stack entries, %d recipes displays, %d exclusion zones suppliers, %d bounds handler, %d visibility handlers and %d categories (%s) in %d ms.", EntryRegistry.getInstance().getStacksList().size(), recipeCount[0], DisplayHelper.getInstance().getBaseBoundsHandler().supplierSize(), DisplayHelper.getInstance().getAllBoundsHandlers().size(), getDisplayVisibilityHandlers().size(), categories.size(), String.join(", ", categories.stream().map(RecipeCategory::getCategoryName).collect(Collectors.toList())), usedTime);
         arePluginsLoading = false;
     }
 
@@ -355,7 +361,7 @@ public class RecipeHelperImpl implements RecipeHelper {
 
     @Override
     public int getRecipeCount() {
-        return recipeCount.get();
+        return recipeCount[0];
     }
 
     @Override
