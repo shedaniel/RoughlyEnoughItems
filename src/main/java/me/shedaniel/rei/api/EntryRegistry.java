@@ -62,6 +62,9 @@ public interface EntryRegistry {
     @Deprecated
     void registerEntryAfter(EntryStack afterEntry, EntryStack stack, boolean checkAlreadyContains);
 
+
+    void queueRegisterEntryAfter(EntryStack afterEntry, Collection<? extends EntryStack> stacks);
+
     /**
      * Registers multiple stacks to the item list
      *

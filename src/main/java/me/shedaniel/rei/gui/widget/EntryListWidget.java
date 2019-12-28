@@ -41,6 +41,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -535,11 +536,14 @@ public class EntryListWidget extends WidgetWithBounds {
             List<EntryStack> list = Lists.newLinkedList();
             boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
             List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
-            for (EntryStack stack : EntryRegistry.getInstance().getStacksList()) {
-                if (canLastSearchTermsBeAppliedTo(stack)) {
-                    if (workingItems != null && CollectionUtils.findFirstOrNullEquals(workingItems, stack) == null)
-                        continue;
-                    list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
+            List<EntryStack> stacks = EntryRegistry.getInstance().getStacksList();
+            if (stacks instanceof CopyOnWriteArrayList) {
+                for (EntryStack stack : stacks) {
+                    if (canLastSearchTermsBeAppliedTo(stack)) {
+                        if (workingItems != null && CollectionUtils.findFirstOrNullEquals(workingItems, stack) == null)
+                            continue;
+                        list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
+                    }
                 }
             }
             ItemListOrdering ordering = ConfigObject.getInstance().getItemListOrdering();
