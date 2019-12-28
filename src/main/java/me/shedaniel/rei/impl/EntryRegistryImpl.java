@@ -6,6 +6,7 @@
 package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Queues;
 import me.shedaniel.rei.api.EntryRegistry;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeHelper;
@@ -13,6 +14,7 @@ import me.shedaniel.rei.api.annotations.Internal;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DefaultedList;
+import net.minecraft.util.Pair;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -23,24 +25,33 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class EntryRegistryImpl implements EntryRegistry {
 
     private final CopyOnWriteArrayList<EntryStack> entries = Lists.newCopyOnWriteArrayList();
-    private final LinkedList<EntryStack> linkedList = Lists.newLinkedList();
+    private final Queue<Pair<EntryStack, Collection<? extends EntryStack>>> queueRegisterEntryStackAfter = Queues.newConcurrentLinkedQueue();
+    private List<EntryStack> reloadList;
 
     public void distinct() {
         TreeSet<EntryStack> set = new TreeSet<>((i, j) -> i.equalsAll(j) ? 0 : 1);
-        set.addAll(linkedList);
+        set.addAll(reloadList);
         entries.clear();
         entries.addAll(set);
-        linkedList.clear();
+        entries.removeIf(EntryStack::isEmpty);
+        reloadList.clear();
+        while (true) {
+            Pair<EntryStack, Collection<? extends EntryStack>> pair = queueRegisterEntryStackAfter.poll();
+            if (pair == null) break;
+            registerEntriesAfter(pair.getLeft(), pair.getRight());
+        }
     }
 
     @Override
     public List<EntryStack> getStacksList() {
-        return RecipeHelper.getInstance().arePluginsLoading() && !linkedList.isEmpty() ? linkedList : entries;
+        return RecipeHelper.getInstance().arePluginsLoading() ? reloadList : entries;
     }
 
     public void reset() {
+        reloadList = Lists.newArrayList();
+        queueRegisterEntryStackAfter.clear();
         entries.clear();
-        linkedList.clear();
+        reloadList.clear();
     }
 
     @Override
@@ -64,30 +75,38 @@ public class EntryRegistryImpl implements EntryRegistry {
     public void registerEntryAfter(EntryStack afterEntry, EntryStack stack, boolean checkAlreadyContains) {
         if (stack.isEmpty()) return;
         if (afterEntry == null) {
-            linkedList.add(stack);
+            getStacksList().add(stack);
         } else {
-            int last = linkedList.size();
+            int last = getStacksList().size();
             for (int i = last - 1; i >= 0; i++)
-                if (linkedList.get(i).equalsAll(afterEntry)) {
+                if (getStacksList().get(i).equalsAll(afterEntry)) {
                     last = i + 1;
                     break;
                 }
-            linkedList.add(last, stack);
+            getStacksList().add(last, stack);
         }
+    }
+
+    @Override
+    public void queueRegisterEntryAfter(EntryStack afterEntry, Collection<? extends EntryStack> stacks) {
+        if (RecipeHelper.getInstance().arePluginsLoading()) {
+            queueRegisterEntryStackAfter.add(new Pair<>(afterEntry, stacks));
+        } else
+            registerEntriesAfter(afterEntry, stacks);
     }
 
     @Override
     public void registerEntriesAfter(EntryStack afterStack, Collection<? extends EntryStack> stacks) {
         if (afterStack != null) {
-            int index = linkedList.size();
+            int index = getStacksList().size();
             for (int i = index - 1; i >= 0; i--) {
-                if (linkedList.get(i).equalsAll(afterStack)) {
+                if (getStacksList().get(i).equalsAll(afterStack)) {
                     index = i + 1;
                     break;
                 }
             }
-            linkedList.addAll(index, stacks);
-        } else linkedList.addAll(stacks);
+            getStacksList().addAll(index, stacks);
+        } else getStacksList().addAll(stacks);
     }
 
     private class DefaultedLinkedList<E> extends DefaultedList<E> {

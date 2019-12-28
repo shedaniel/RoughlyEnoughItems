@@ -85,7 +85,7 @@ public class DefaultPlugin implements REIPluginV0 {
 
     @Override
     public SemanticVersion getMinimumVersion() throws VersionParsingException {
-        return SemanticVersion.parse("3.0-pre");
+        return SemanticVersion.parse("3.2.33");
     }
 
     @Override
@@ -117,7 +117,7 @@ public class DefaultPlugin implements REIPluginV0 {
                 enchantments.add(EntryStack.create(itemStack));
             }
         }
-        entryRegistry.registerEntriesAfter(stack, enchantments);
+        entryRegistry.queueRegisterEntryAfter(stack, enchantments);
         for (Fluid fluid : Registry.FLUID) {
             if (!(fluid instanceof EmptyFluid))
                 entryRegistry.registerEntry(EntryStack.create(fluid));

@@ -302,8 +302,6 @@ public class RecipeHelperImpl implements RecipeHelper {
                 RoughlyEnoughItemsCore.LOGGER.error("[REI] " + identifier.toString() + " plugin failed to load!", e);
             }
         }
-        // Remove duplicate entries
-        ((EntryRegistryImpl) EntryRegistry.getInstance()).distinct();
 
         for (REIPluginV0 plugin : reiPluginV0s) {
             Identifier identifier = plugin.getPluginIdentifier();
@@ -343,9 +341,16 @@ public class RecipeHelperImpl implements RecipeHelper {
         ((DisplayHelperImpl) DisplayHelper.getInstance()).resetCache();
         ScreenHelper.getOptionalOverlay().ifPresent(overlay -> overlay.shouldReInit = true);
 
+        arePluginsLoading = false;
+        // Remove duplicate entries
+        ((EntryRegistryImpl) EntryRegistry.getInstance()).distinct();
+
+        // Clear Cache Again!
+        ((DisplayHelperImpl) DisplayHelper.getInstance()).resetCache();
+        ScreenHelper.getOptionalOverlay().ifPresent(overlay -> overlay.shouldReInit = true);
+
         long usedTime = System.currentTimeMillis() - startTime;
         RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered %d stack entries, %d recipes displays, %d exclusion zones suppliers, %d bounds handler, %d visibility handlers and %d categories (%s) in %d ms.", EntryRegistry.getInstance().getStacksList().size(), recipeCount[0], DisplayHelper.getInstance().getBaseBoundsHandler().supplierSize(), DisplayHelper.getInstance().getAllBoundsHandlers().size(), getDisplayVisibilityHandlers().size(), categories.size(), String.join(", ", categories.stream().map(RecipeCategory::getCategoryName).collect(Collectors.toList())), usedTime);
-        arePluginsLoading = false;
     }
 
     @Override

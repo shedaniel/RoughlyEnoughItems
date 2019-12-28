@@ -15,6 +15,7 @@ import net.minecraft.util.registry.Registry;
 import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.TestOnly;
 
+import java.util.Collections;
 import java.util.Random;
 
 @TestOnly
@@ -36,8 +37,8 @@ public class REITestPlugin implements REIPluginV0 {
     @Override
     public void registerEntries(EntryRegistry entryRegistry) {
         for (Item item : Registry.ITEM) {
-            for (int i = 0; i < 15; i++)
-                entryRegistry.registerEntry(transformStack(EntryStack.create(item)));
+            for (int i = 0; i < 5; i++)
+                entryRegistry.queueRegisterEntryAfter(EntryStack.create(item), Collections.singleton(transformStack(EntryStack.create(item))));
             try {
                 for (ItemStack stack : entryRegistry.appendStacksForItem(item)) {
                     for (int i = 0; i < 15; i++)
