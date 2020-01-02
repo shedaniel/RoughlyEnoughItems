@@ -8,10 +8,7 @@ package me.shedaniel.rei.impl;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.math.api.Rectangle;
-import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.ConfigObject;
-import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.ItemRendererHooks;
+import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.*;
@@ -156,12 +153,14 @@ public class ItemEntryStack extends AbstractEntryStack {
     public void render(Rectangle bounds, int mouseX, int mouseY, float delta) {
         if (!isEmpty() && getSetting(Settings.RENDER).value().get()) {
             ItemStack stack = getItemStack();
-            //            if (true) {
-            ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
-            itemRenderer.zOffset = getZ();
-            BakedModel model = itemRenderer.getModels().getModel(stack);
-            model = model.getItemPropertyOverrides().apply(model, stack, null, null);
-            if (model != null) {
+            if (ConfigObject.getInstance().doesFastEntryRendering() || true) {
+                ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
+                itemRenderer.zOffset = getZ();
+                BakedModel model = itemRenderer.getModels().getModel(stack);
+                if (stack.getItem().hasPropertyGetters())
+                    model = model.getItemPropertyOverrides().apply(model, stack, null, null);
+                if (model == null)
+                    model = itemRenderer.getModels().getModelManager().getMissingModel();
                 MinecraftClient.getInstance().getTextureManager().bindTexture(SpriteAtlasTexture.BLOCK_ATLAS_TEX);
                 GlStateManager.enableRescaleNormal();
                 MatrixStack matrices = new MatrixStack();
@@ -171,35 +170,24 @@ public class ItemEntryStack extends AbstractEntryStack {
                 boolean bl = !model.hasDepthInGui();
                 if (bl)
                     GlStateManager.method_24221();
-                model.getTransformation().getTransformation(ModelTransformation.Type.GUI).apply(false, matrices);
-                matrices.translate(-0.5D, -0.5D, -0.5D);
-                if (!model.isBuiltin()) {
-                    RenderLayer renderLayer = RenderLayers.getItemLayer(stack);
-                    if (Objects.equals(renderLayer, TexturedRenderLayers.getEntityTranslucent()))
-                        renderLayer = TexturedRenderLayers.getEntityTranslucentCull();
-                    VertexConsumer vertexConsumer = stack.hasEnchantmentGlint() && getSetting(Settings.Item.RENDER_ENCHANTMENT_GLINT).value().get() ? VertexConsumers.dual(immediate.getBuffer(RenderLayer.getGlint()), immediate.getBuffer(renderLayer)) : immediate.getBuffer(renderLayer);
-                    ((ItemRendererHooks) itemRenderer).rei_renderBakedItemModel(model, stack, 15728880, OverlayTexture.DEFAULT_UV, matrices, vertexConsumer);
-                } else {
-                    BuiltinModelItemRenderer.INSTANCE.render(stack, matrices, immediate, 15728880, OverlayTexture.DEFAULT_UV);
-                }
+                itemRenderer.renderItem(stack, ModelTransformation.Type.GUI, false, matrices, immediate, 15728880, OverlayTexture.DEFAULT_UV, model);
                 immediate.draw();
                 if (bl)
                     GlStateManager.method_24222();
                 GlStateManager.disableRescaleNormal();
+                itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, stack, bounds.x, bounds.y, getSetting(Settings.RENDER_COUNTS).value().get() ? getSetting(Settings.COUNTS).value().apply(this) : "");
+                itemRenderer.zOffset = 0.0F;
+            } else {
+                ((ItemStackHook) (Object) stack).rei_setRenderEnchantmentGlint(getSetting(Settings.Item.RENDER_ENCHANTMENT_GLINT).value().get());
+                ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
+                itemRenderer.zOffset = getZ();
+                int i1 = bounds.x;
+                int i2 = bounds.y;
+                itemRenderer.renderGuiItemIcon(stack, i1, i2);
+                itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, stack, i1, i2, getSetting(Settings.RENDER_COUNTS).value().get() ? getSetting(Settings.COUNTS).value().apply(this) : "");
+                itemRenderer.zOffset = 0.0F;
+                ((ItemStackHook) (Object) stack).rei_setRenderEnchantmentGlint(true);
             }
-            itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, stack, bounds.x, bounds.y, getSetting(Settings.RENDER_COUNTS).value().get() ? getSetting(Settings.COUNTS).value().apply(this) : "");
-            itemRenderer.zOffset = 0.0F;
-            //            } else {
-            //                ((ItemStackHook) (Object) stack).rei_setRenderEnchantmentGlint(getSetting(Settings.Item.RENDER_ENCHANTMENT_GLINT).value().get());
-            //                ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
-            //                itemRenderer.zOffset = getZ();
-            //                int i1 = bounds.x + 1;
-            //                int i2 = bounds.y + 1;
-            //                itemRenderer.renderGuiItemIcon(stack, i1, i2);
-            //                itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, stack, i1, i2, getSetting(Settings.RENDER_COUNTS).value().get() ? getSetting(Settings.COUNTS).value().apply(this) : "");
-            //                itemRenderer.zOffset = 0.0F;
-            //                ((ItemStackHook) (Object) stack).rei_setRenderEnchantmentGlint(true);
-            //            }
         }
     }
 }

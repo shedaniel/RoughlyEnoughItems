@@ -68,10 +68,10 @@ dependencies {
             transitive = false
         }
     }
-    modCompileOnly ("io.github.prospector:modmenu:${modmenu_version}") {
+    modCompileOnly("io.github.prospector:modmenu:${modmenu_version}") {
         transitive = false
     }
-    modRuntime ("io.github.prospector:modmenu:${modmenu_version}") {
+    modRuntime("io.github.prospector:modmenu:${modmenu_version}") {
         transitive = false
     }
     compile "org.lwjgl:lwjgl-jemalloc:3.2.1"
