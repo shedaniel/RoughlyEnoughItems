@@ -13,11 +13,11 @@ import net.minecraft.util.Identifier;
  * Get base class of a REI plugin.
  */
 public interface REIPluginEntry {
-
+    
     default SemanticVersion getMinimumVersion() throws VersionParsingException {
         return null;
     }
-
+    
     /**
      * Gets the priority of the plugin.
      *
@@ -26,12 +26,12 @@ public interface REIPluginEntry {
     default int getPriority() {
         return 0;
     }
-
+    
     /**
      * Get the identifier of the plugin
      *
      * @return the identifier
      */
     Identifier getPluginIdentifier();
-
+    
 }

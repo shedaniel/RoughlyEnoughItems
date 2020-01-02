@@ -23,11 +23,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Deprecated
 @Internal
 public class EntryRegistryImpl implements EntryRegistry {
-
+    
     private final CopyOnWriteArrayList<EntryStack> entries = Lists.newCopyOnWriteArrayList();
     private final Queue<Pair<EntryStack, Collection<? extends EntryStack>>> queueRegisterEntryStackAfter = Queues.newConcurrentLinkedQueue();
     private List<EntryStack> reloadList;
-
+    
     public void distinct() {
         TreeSet<EntryStack> set = new TreeSet<>((i, j) -> i.equalsAll(j) ? 0 : 1);
         set.addAll(reloadList);
@@ -37,31 +37,33 @@ public class EntryRegistryImpl implements EntryRegistry {
         reloadList.clear();
         while (true) {
             Pair<EntryStack, Collection<? extends EntryStack>> pair = queueRegisterEntryStackAfter.poll();
-            if (pair == null) break;
+            if (pair == null)
+                break;
             registerEntriesAfter(pair.getLeft(), pair.getRight());
         }
     }
-
+    
     @Override
     public List<EntryStack> getStacksList() {
         return RecipeHelper.getInstance().arePluginsLoading() ? reloadList : entries;
     }
-
+    
     public void reset() {
         reloadList = Lists.newArrayList();
         queueRegisterEntryStackAfter.clear();
         entries.clear();
         reloadList.clear();
     }
-
+    
     @Override
     public List<ItemStack> appendStacksForItem(Item item) {
         DefaultedList<ItemStack> list = new DefaultedLinkedList(Lists.newLinkedList(), null);
         item.appendStacks(item.getGroup(), list);
-        if (list.isEmpty()) list.add(item.getStackForRender());
+        if (list.isEmpty())
+            list.add(item.getStackForRender());
         return list;
     }
-
+    
     @Override
     public ItemStack[] getAllStacksFromItem(Item item) {
         List<ItemStack> list = appendStacksForItem(item);
@@ -69,11 +71,12 @@ public class EntryRegistryImpl implements EntryRegistry {
         Arrays.sort(array, (a, b) -> ItemStack.areEqualIgnoreDamage(a, b) ? 0 : 1);
         return array;
     }
-
+    
     @Override
     @Deprecated
     public void registerEntryAfter(EntryStack afterEntry, EntryStack stack, boolean checkAlreadyContains) {
-        if (stack.isEmpty()) return;
+        if (stack.isEmpty())
+            return;
         if (afterEntry == null) {
             getStacksList().add(stack);
         } else {
@@ -86,7 +89,7 @@ public class EntryRegistryImpl implements EntryRegistry {
             getStacksList().add(last, stack);
         }
     }
-
+    
     @Override
     public void queueRegisterEntryAfter(EntryStack afterEntry, Collection<? extends EntryStack> stacks) {
         if (RecipeHelper.getInstance().arePluginsLoading()) {
@@ -94,7 +97,7 @@ public class EntryRegistryImpl implements EntryRegistry {
         } else
             registerEntriesAfter(afterEntry, stacks);
     }
-
+    
     @Override
     public void registerEntriesAfter(EntryStack afterStack, Collection<? extends EntryStack> stacks) {
         if (afterStack != null) {
@@ -106,9 +109,10 @@ public class EntryRegistryImpl implements EntryRegistry {
                 }
             }
             getStacksList().addAll(index, stacks);
-        } else getStacksList().addAll(stacks);
+        } else
+            getStacksList().addAll(stacks);
     }
-
+    
     private class DefaultedLinkedList<E> extends DefaultedList<E> {
         public DefaultedLinkedList(List<E> delegate, @Nullable E initialElement) {
             super(delegate, initialElement);

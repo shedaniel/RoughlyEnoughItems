@@ -12,17 +12,17 @@ import java.util.List;
 import java.util.Optional;
 
 public interface RecipeDisplay {
-
+    
     /**
      * @return a list of inputs
      */
     List<List<EntryStack>> getInputEntries();
-
+    
     /**
      * @return a list of outputs
      */
     List<EntryStack> getOutputEntries();
-
+    
     /**
      * Gets the required items used in craftable filters
      *
@@ -31,14 +31,14 @@ public interface RecipeDisplay {
     default List<List<EntryStack>> getRequiredEntries() {
         return Collections.emptyList();
     }
-
+    
     /**
      * Gets the recipe display category identifier
      *
      * @return the identifier of the category
      */
     Identifier getRecipeCategory();
-
+    
     /**
      * Gets the recipe location from datapack
      *
@@ -47,5 +47,5 @@ public interface RecipeDisplay {
     default Optional<Identifier> getRecipeLocation() {
         return Optional.empty();
     }
-
+    
 }

@@ -13,25 +13,31 @@ import me.sargunvohra.mcmods.autoconfig1u.gui.ConfigScreenProvider;
 import me.sargunvohra.mcmods.autoconfig1u.gui.registry.GuiRegistry;
 import me.sargunvohra.mcmods.autoconfig1u.serializer.JanksonConfigSerializer;
 import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.Jankson;
+import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.JsonObject;
 import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.JsonPrimitive;
+import me.sargunvohra.mcmods.autoconfig1u.util.Utils;
 import me.shedaniel.cloth.hooks.ScreenHooks;
-import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
+import me.shedaniel.clothconfig2.api.Modifier;
+import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.clothconfig2.gui.entries.KeyCodeEntry;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.ConfigManager;
+import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.gui.ConfigReloadingScreen;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.credits.CreditsScreen;
 import me.shedaniel.rei.gui.widget.ReloadConfigButtonWidget;
-import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.AbstractPressableButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.LiteralText;
+import net.minecraft.util.math.MathHelper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,45 +49,72 @@ import static me.sargunvohra.mcmods.autoconfig1u.util.Utils.setUnsafely;
 @Deprecated
 @Internal
 public class ConfigManagerImpl implements ConfigManager {
-
+    
     private boolean craftableOnly;
     private List<EntryStack> favorites = new ArrayList<>();
-
+    
     public ConfigManagerImpl() {
         this.craftableOnly = false;
-        AutoConfig.register(ConfigObjectImpl.class, (definition, configClass) -> {
-            return new JanksonConfigSerializer<ConfigObjectImpl>(definition, configClass, Jankson.builder().registerPrimitiveTypeAdapter(InputUtil.KeyCode.class, it -> {
-                return it instanceof String ? InputUtil.fromName((String) it) : null;
-            }).registerSerializer(InputUtil.KeyCode.class, (it, marshaller) -> new JsonPrimitive(it.getName())).build());
-        });
+        AutoConfig.register(ConfigObjectImpl.class, (definition, configClass) -> new JanksonConfigSerializer<>(definition, configClass, Jankson.builder().registerPrimitiveTypeAdapter(InputUtil.KeyCode.class, it -> {
+            return it instanceof String ? InputUtil.fromName((String) it) : null;
+        }).registerSerializer(InputUtil.KeyCode.class, (it, marshaller) -> new JsonPrimitive(it.getName())).registerTypeAdapter(ModifierKeyCode.class, o -> {
+            InputUtil.KeyCode keyCode = InputUtil.fromName(((JsonPrimitive) o.get("keyCode")).asString());
+            Modifier modifier = Modifier.of(((Number) ((JsonPrimitive) o.get("modifier")).getValue()).shortValue());
+            return ModifierKeyCode.of(keyCode, modifier);
+        }).registerSerializer(ModifierKeyCode.class, (keyCode, marshaller) -> {
+            JsonObject object = new JsonObject();
+            object.put("keyCode", new JsonPrimitive(keyCode.getKeyCode().getName()));
+            object.put("modifier", new JsonPrimitive(keyCode.getModifier().getValue()));
+            return object;
+        }).build()));
         GuiRegistry guiRegistry = AutoConfig.getGuiRegistry(ConfigObjectImpl.class);
         //noinspection rawtypes
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> Collections.singletonList(ConfigEntryBuilder.create().startEnumSelector(i13n, (Class) field.getType(), getUnsafely(field, config, null)).setDefaultValue(() -> getUnsafely(field, defaults)).setSaveConsumer(newValue -> setUnsafely(field, config, newValue)).build()), field -> field.getType().isEnum(), ConfigObject.UseEnumSelectorInstead.class);
         loadFavoredEntries();
-        guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> {
-            @SuppressWarnings("rawtypes") List<AbstractConfigListEntry> entries = new ArrayList<>();
-            for (FabricKeyBinding binding : ClientHelper.getInstance().getREIKeyBindings()) {
-                entries.add(ConfigEntryBuilder.create().fillKeybindingField(I18n.translate(binding.getId()) + ":", binding).build());
-            }
-            KeyCodeEntry entry = ConfigEntryBuilder.create().startKeyCodeField(i13n, getUnsafely(field, config, InputUtil.UNKNOWN_KEYCODE)).setDefaultValue(() -> getUnsafely(field, defaults)).setSaveConsumer(newValue -> setUnsafely(field, config, newValue)).build();
-            entry.setAllowMouse(false);
-            entries.add(entry);
-            return entries;
-        }, field -> field.getType() == InputUtil.KeyCode.class, ConfigObject.AddInFrontKeyCode.class);
+        //        guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> {
+        //            @SuppressWarnings("rawtypes") List<AbstractConfigListEntry> entries = new ArrayList<>();
+        //            for (FabricKeyBinding binding : ClientHelper.getInstance().getREIKeyBindings()) {
+        //                entries.add(ConfigEntryBuilder.create().fillKeybindingField(I18n.translate(binding.getId()) + ":", binding).build());
+        //            }
+        //            KeyCodeEntry entry = ConfigEntryBuilder.create().startKeyCodeField(i13n, getUnsafely(field, config, InputUtil.UNKNOWN_KEYCODE)).setDefaultValue(() -> getUnsafely(field, defaults)).setSaveConsumer(newValue -> setUnsafely(field, config, newValue)).build();
+        //            entry.setAllowMouse(false);
+        //            entries.add(entry);
+        //            return entries;
+        //        }, field -> field.getType() == InputUtil.KeyCode.class, ConfigObject.AddInFrontKeyCode.class);
+        //        guiRegistry.registerPredicateProvider((i13n, field, config, defaults, guiProvider) -> {
+        //            KeyCodeEntry entry = ConfigEntryBuilder.create().startKeyCodeField(i13n, getUnsafely(field, config, InputUtil.UNKNOWN_KEYCODE)).setDefaultValue(() -> getUnsafely(field, defaults)).setSaveConsumer(newValue -> setUnsafely(field, config, newValue)).build();
+        //            entry.setAllowMouse(false);
+        //            return Collections.singletonList(entry);
+        //        }, field -> field.getType() == InputUtil.KeyCode.class);
         guiRegistry.registerPredicateProvider((i13n, field, config, defaults, guiProvider) -> {
-            KeyCodeEntry entry = ConfigEntryBuilder.create().startKeyCodeField(i13n, getUnsafely(field, config, InputUtil.UNKNOWN_KEYCODE)).setDefaultValue(() -> getUnsafely(field, defaults)).setSaveConsumer(newValue -> setUnsafely(field, config, newValue)).build();
+            KeyCodeEntry entry = ConfigEntryBuilder.create().startModifierKeyCodeField(i13n, getUnsafely(field, config, ModifierKeyCode.unknown())).setModifierDefaultValue(() -> getUnsafely(field, defaults)).setModifierSaveConsumer(newValue -> setUnsafely(field, config, newValue)).build();
             entry.setAllowMouse(false);
             return Collections.singletonList(entry);
-        }, field -> field.getType() == InputUtil.KeyCode.class);
+        }, field -> field.getType() == ModifierKeyCode.class);
+        guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> {
+            KeyCodeEntry entry = ConfigEntryBuilder.create().startModifierKeyCodeField(i13n, getUnsafely(field, config, ModifierKeyCode.unknown())).setModifierDefaultValue(() -> getUnsafely(field, defaults)).setModifierSaveConsumer(newValue -> setUnsafely(field, config, newValue)).build();
+            entry.setAllowMouse(false);
+            return Collections.singletonList(entry);
+        }, field -> field.getType() == ModifierKeyCode.class, ConfigObject.UsePercentage.class);
+        guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> {
+            ConfigObject.UsePercentage bounds = field.getAnnotation(ConfigObject.UsePercentage.class);
+            return Collections.singletonList(ConfigEntryBuilder.create().startIntSlider(i13n, MathHelper.ceil(Utils.getUnsafely(field, config, 0.0) * 100), MathHelper.ceil(bounds.min() * 100), MathHelper.ceil(bounds.max() * 100)).setDefaultValue(() -> {
+                return MathHelper.ceil((double) Utils.getUnsafely(field, defaults) * 100);
+            }).setSaveConsumer((newValue) -> {
+                Utils.setUnsafely(field, config, newValue / 100d);
+            }).setTextGetter(integer -> String.format("Size: %d%%", integer)).build());
+        }, (field) -> {
+            return field.getType() == Double.TYPE || field.getType() == Double.class;
+        }, ConfigObject.UsePercentage.class);
         loadFavoredEntries();
         RoughlyEnoughItemsCore.LOGGER.info("[REI] Config is loaded.");
     }
-
+    
     @Override
     public List<EntryStack> getFavorites() {
         return favorites;
     }
-
+    
     public void loadFavoredEntries() {
         favorites.clear();
         Gson gson = new GsonBuilder().create();
@@ -92,7 +125,7 @@ public class ConfigManagerImpl implements ConfigManager {
         }
         saveConfig();
     }
-
+    
     @Override
     public void saveConfig() {
         Gson gson = new GsonBuilder().create();
@@ -105,27 +138,27 @@ public class ConfigManagerImpl implements ConfigManager {
         }
         ((me.sargunvohra.mcmods.autoconfig1u.ConfigManager<ConfigObjectImpl>) AutoConfig.getConfigHolder(ConfigObjectImpl.class)).save();
     }
-
+    
     @Override
     public ConfigObject getConfig() {
         return AutoConfig.getConfigHolder(ConfigObjectImpl.class).getConfig();
     }
-
+    
     @Override
     public boolean isCraftableOnlyEnabled() {
         return craftableOnly;
     }
-
+    
     @Override
     public void toggleCraftableOnly() {
         craftableOnly = !craftableOnly;
     }
-
+    
     @Override
     public void openConfigScreen(Screen parent) {
         MinecraftClient.getInstance().openScreen(getConfigScreen(parent));
     }
-
+    
     @Override
     public Screen getConfigScreen(Screen parent) {
         try {
@@ -177,7 +210,7 @@ public class ConfigManagerImpl implements ConfigManager {
                 }
                 super.render(int_1, int_2, float_1);
             }
-
+            
             @Override
             protected void init() {
                 super.init();
@@ -185,7 +218,7 @@ public class ConfigManagerImpl implements ConfigManager {
                     this.minecraft.openScreen(parent);
                 }));
             }
-
+            
             @Override
             public boolean keyPressed(int int_1, int int_2, int int_3) {
                 if (int_1 == 256 && this.shouldCloseOnEsc()) {
@@ -196,5 +229,5 @@ public class ConfigManagerImpl implements ConfigManager {
             }
         };
     }
-
+    
 }

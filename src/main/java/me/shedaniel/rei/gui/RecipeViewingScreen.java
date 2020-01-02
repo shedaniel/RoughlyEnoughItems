@@ -31,7 +31,7 @@ import java.util.*;
 import java.util.function.Supplier;
 
 public class RecipeViewingScreen extends Screen {
-
+    
     public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private static final int TABS_PER_PAGE = 5;
     private final List<Widget> preWidgets;
@@ -46,11 +46,10 @@ public class RecipeViewingScreen extends Screen {
     public boolean choosePageActivated;
     public RecipeChoosePageWidget recipeChoosePageWidget;
     private Rectangle bounds;
-    @Nullable
-    private CategoryBaseWidget workingStationsBaseWidget;
+    @Nullable private CategoryBaseWidget workingStationsBaseWidget;
     private RecipeCategory<RecipeDisplay> selectedCategory;
     private ButtonWidget recipeBack, recipeNext, categoryBack, categoryNext;
-
+    
     public RecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> categoriesMap) {
         super(new LiteralText(""));
         this.categoryPages = 0;
@@ -68,12 +67,12 @@ public class RecipeViewingScreen extends Screen {
         this.tabs = new ArrayList<>();
         this.choosePageActivated = false;
     }
-
+    
     @Nullable
     public CategoryBaseWidget getWorkingStationsBaseWidget() {
         return workingStationsBaseWidget;
     }
-
+    
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (int_1 == 256 && choosePageActivated) {
@@ -94,11 +93,11 @@ public class RecipeViewingScreen extends Screen {
         }
         if (choosePageActivated)
             return recipeChoosePageWidget.keyPressed(int_1, int_2, int_3);
-        else if (ClientHelper.getInstance().getNextPageKeyBinding().matchesKey(int_1, int_2)) {
+        else if (ConfigObject.getInstance().getNextPageKeybind().matchesKey(int_1, int_2)) {
             if (recipeNext.enabled)
                 recipeNext.onPressed();
             return recipeNext.enabled;
-        } else if (ClientHelper.getInstance().getPreviousPageKeyBinding().matchesKey(int_1, int_2)) {
+        } else if (ConfigObject.getInstance().getPreviousPageKeybind().matchesKey(int_1, int_2)) {
             if (recipeBack.enabled)
                 recipeBack.onPressed();
             return recipeBack.enabled;
@@ -115,12 +114,12 @@ public class RecipeViewingScreen extends Screen {
         }
         return super.keyPressed(int_1, int_2, int_3);
     }
-
+    
     @Override
     public boolean isPauseScreen() {
         return false;
     }
-
+    
     @Override
     public void init() {
         super.init();
@@ -130,12 +129,12 @@ public class RecipeViewingScreen extends Screen {
         this.widgets.clear();
         this.largestWidth = width - 100;
         this.largestHeight = height - 40;
-        int maxWidthDisplay = CollectionUtils.mapAndMax(getCurrentDisplayed(), display -> selectedCategory.getDisplayWidth((RecipeDisplay) display), (Comparator<Integer>) Comparator.naturalOrder()).orElse(150);
+        int maxWidthDisplay = CollectionUtils.mapAndMax(getCurrentDisplayed(), display -> selectedCategory.getDisplayWidth(display), (Comparator<Integer>) Comparator.naturalOrder()).orElse(150);
         this.guiWidth = MathHelper.clamp(maxWidthDisplay + 30, 0, largestWidth);
-        this.guiHeight = MathHelper.floor(MathHelper.clamp((selectedCategory.getDisplayHeight() + 7d) * (getRecipesPerPage() + 1d) + 40d, 186d, (double) largestHeight));
+        this.guiHeight = MathHelper.floor(MathHelper.clamp((selectedCategory.getDisplayHeight() + 7d) * (getRecipesPerPage() + 1d) + 40d, 186d, largestHeight));
         this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - guiHeight / 2, guiWidth, guiHeight);
         this.page = MathHelper.clamp(page, 0, getTotalPages(selectedCategory) - 1);
-
+        
         ButtonWidget w, w2;
         this.widgets.add(w = new ButtonWidget(new Rectangle(bounds.x + 2, bounds.y - 16, 10, 10), I18n.translate("text.rei.left_arrow")) {
             @Override
@@ -168,7 +167,7 @@ public class RecipeViewingScreen extends Screen {
                 page = 0;
                 RecipeViewingScreen.this.init();
             }
-
+            
             @Override
             public Optional<String> getTooltips() {
                 return Optional.ofNullable(I18n.translate("text.rei.previous_category"));
@@ -180,12 +179,12 @@ public class RecipeViewingScreen extends Screen {
                 setText(selectedCategory.getCategoryName());
                 super.render(mouseX, mouseY, delta);
             }
-
+            
             @Override
             public Optional<String> getTooltips() {
                 return Optional.ofNullable(I18n.translate("text.rei.view_all_categories"));
             }
-
+            
             @Override
             public void onLabelClicked() {
                 MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
@@ -204,7 +203,7 @@ public class RecipeViewingScreen extends Screen {
                 page = 0;
                 RecipeViewingScreen.this.init();
             }
-
+            
             @Override
             public Optional<String> getTooltips() {
                 return Optional.ofNullable(I18n.translate("text.rei.next_category"));
@@ -212,7 +211,7 @@ public class RecipeViewingScreen extends Screen {
         });
         categoryBack.enabled = categories.size() > 1;
         categoryNext.enabled = categories.size() > 1;
-
+        
         widgets.add(recipeBack = new ButtonWidget(new Rectangle(bounds.getX() + 5, bounds.getY() + 21, 12, 12), I18n.translate("text.rei.left_arrow")) {
             @Override
             public void onPressed() {
@@ -221,7 +220,7 @@ public class RecipeViewingScreen extends Screen {
                     page = getTotalPages(selectedCategory) - 1;
                 RecipeViewingScreen.this.init();
             }
-
+            
             @Override
             public Optional<String> getTooltips() {
                 return Optional.ofNullable(I18n.translate("text.rei.previous_page"));
@@ -233,12 +232,12 @@ public class RecipeViewingScreen extends Screen {
                 setText(String.format("%d/%d", page + 1, getTotalPages(selectedCategory)));
                 super.render(mouseX, mouseY, delta);
             }
-
+            
             @Override
             public Optional<String> getTooltips() {
                 return Optional.ofNullable(I18n.translate("text.rei.choose_page"));
             }
-
+            
             @Override
             public void onLabelClicked() {
                 MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
@@ -254,7 +253,7 @@ public class RecipeViewingScreen extends Screen {
                     page = 0;
                 RecipeViewingScreen.this.init();
             }
-
+            
             @Override
             public Optional<String> getTooltips() {
                 return Optional.ofNullable(I18n.translate("text.rei.next_page"));
@@ -300,7 +299,7 @@ public class RecipeViewingScreen extends Screen {
             recipeChoosePageWidget = new RecipeChoosePageWidget(this, page, getTotalPages(selectedCategory));
         else
             recipeChoosePageWidget = null;
-
+        
         workingStationsBaseWidget = null;
         List<List<EntryStack>> workingStations = RecipeHelper.getInstance().getWorkingStations(selectedCategory.getIdentifier());
         if (!workingStations.isEmpty()) {
@@ -324,17 +323,17 @@ public class RecipeViewingScreen extends Screen {
                 }
             }
         }
-
+        
         children.addAll(tabs);
         children.add(ScreenHelper.getLastOverlay(true, false));
         children.addAll(widgets);
         children.addAll(preWidgets);
     }
-
+    
     public List<Widget> getWidgets() {
         return widgets;
     }
-
+    
     public List<RecipeDisplay> getCurrentDisplayed() {
         List<RecipeDisplay> list = Lists.newArrayList();
         int recipesPerPage = getRecipesPerPage();
@@ -343,19 +342,19 @@ public class RecipeViewingScreen extends Screen {
                 list.add(categoriesMap.get(selectedCategory).get(page * (recipesPerPage + 1) + i));
         return list;
     }
-
-    public RecipeCategory<?> getSelectedCategory() {
+    
+    public RecipeCategory<RecipeDisplay> getSelectedCategory() {
         return selectedCategory;
     }
-
+    
     public int getPage() {
         return page;
     }
-
+    
     public int getCategoryPage() {
         return categoryPages;
     }
-
+    
     @SuppressWarnings("deprecation")
     private int getRecipesPerPage() {
         if (selectedCategory.getFixedRecipesPerPage() > 0)
@@ -363,12 +362,12 @@ public class RecipeViewingScreen extends Screen {
         int height = selectedCategory.getDisplayHeight();
         return MathHelper.clamp(MathHelper.floor(((double) largestHeight - 40d) / ((double) height + 7d)) - 1, 0, Math.min(ConfigObject.getInstance().getMaxRecipePerPage() - 1, selectedCategory.getMaximumRecipePerPage() - 1));
     }
-
+    
     private int getRecipesPerPageByHeight() {
         int height = selectedCategory.getDisplayHeight();
         return MathHelper.clamp(MathHelper.floor(((double) guiHeight - 40d) / ((double) height + 7d)), 0, Math.min(ConfigObject.getInstance().getMaxRecipePerPage() - 1, selectedCategory.getMaximumRecipePerPage() - 1));
     }
-
+    
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         this.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
@@ -409,15 +408,15 @@ public class RecipeViewingScreen extends Screen {
             recipeChoosePageWidget.render(mouseX, mouseY, delta);
         }
     }
-
-    public int getTotalPages(RecipeCategory category) {
+    
+    public int getTotalPages(RecipeCategory<RecipeDisplay> category) {
         return MathHelper.ceil(categoriesMap.get(category).size() / (double) (getRecipesPerPage() + 1));
     }
-
+    
     public Rectangle getBounds() {
         return bounds;
     }
-
+    
     @Override
     public boolean charTyped(char char_1, int int_1) {
         if (choosePageActivated) {
@@ -428,7 +427,7 @@ public class RecipeViewingScreen extends Screen {
                 return true;
         return super.charTyped(char_1, int_1);
     }
-
+    
     @Override
     public boolean mouseDragged(double double_1, double double_2, int int_1, double double_3, double double_4) {
         if (choosePageActivated) {
@@ -436,7 +435,7 @@ public class RecipeViewingScreen extends Screen {
         }
         return super.mouseDragged(double_1, double_2, int_1, double_3, double_4);
     }
-
+    
     @Override
     public boolean mouseReleased(double double_1, double double_2, int int_1) {
         if (choosePageActivated) {
@@ -444,7 +443,7 @@ public class RecipeViewingScreen extends Screen {
         }
         return super.mouseReleased(double_1, double_2, int_1);
     }
-
+    
     @Override
     public boolean mouseScrolled(double i, double j, double amount) {
         for (Element listener : children())
@@ -464,7 +463,7 @@ public class RecipeViewingScreen extends Screen {
         }
         return super.mouseScrolled(i, j, amount);
     }
-
+    
     @Override
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
         if (choosePageActivated)
@@ -484,12 +483,12 @@ public class RecipeViewingScreen extends Screen {
             }
         return false;
     }
-
+    
     @Override
     public Element getFocused() {
         if (choosePageActivated)
             return recipeChoosePageWidget;
         return super.getFocused();
     }
-
+    
 }

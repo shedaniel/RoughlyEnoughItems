@@ -11,11 +11,11 @@ import net.minecraft.container.Container;
 import java.util.List;
 
 public interface TransferRecipeDisplay extends RecipeDisplay {
-
+    
     int getWidth();
-
+    
     int getHeight();
-
+    
     List<List<EntryStack>> getOrganisedInputEntries(ContainerInfo<Container> containerInfo, Container container);
-
+    
 }

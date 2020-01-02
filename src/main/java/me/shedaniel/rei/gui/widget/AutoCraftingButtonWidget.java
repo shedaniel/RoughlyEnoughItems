@@ -28,7 +28,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class AutoCraftingButtonWidget extends ButtonWidget {
-
+    
     private static final Lazy<Boolean> IS_YOG = new Lazy(() -> {
         try {
             if (MinecraftClient.getInstance().getSession().getProfile().getId().equals(UUID.fromString("f9546389-9415-4358-9c29-2c26b25bff5b")))
@@ -47,7 +47,7 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
     private boolean visible = false;
     private RecipeCategory<?> category;
     private Rectangle displayBounds;
-
+    
     public AutoCraftingButtonWidget(Rectangle displayBounds, Rectangle rectangle, String text, Supplier<RecipeDisplay> displaySupplier, List<Widget> setupDisplay, RecipeCategory<?> recipeCategory) {
         super(rectangle, text);
         this.displayBounds = displayBounds;
@@ -58,7 +58,7 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
         this.setupDisplay = setupDisplay;
         this.category = recipeCategory;
     }
-
+    
     @Override
     public void onPressed() {
         AutoTransferHandler.Context context = AutoTransferHandler.Context.create(true, containerScreen, displaySupplier.get());
@@ -73,7 +73,7 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
         minecraft.openScreen(containerScreen);
         ScreenHelper.getLastOverlay().init();
     }
-
+    
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         this.enabled = false;
@@ -127,29 +127,29 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
         }
         int x = getBounds().x, y = getBounds().y, width = getBounds().width, height = getBounds().height;
         renderBackground(x, y, width, height, this.getTextureId(isHovered(mouseX, mouseY)));
-
+        
         int colour = 14737632;
         if (!this.visible) {
             colour = 10526880;
         } else if (enabled && isHovered(mouseX, mouseY)) {
             colour = 16777120;
         }
-
+        
         fillGradient(x, y, x + width, y + height, color, color);
         this.drawCenteredString(font, getText(), x + width / 2, y + (height - 8) / 2, colour);
-
+        
         if (getTooltips().isPresent())
             if (!focused && containsMouse(mouseX, mouseY))
                 ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltips().get().split("\n")));
             else if (focused)
                 ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(new Point(x + width / 2, y + height / 2), getTooltips().get().split("\n")));
     }
-
+    
     @Override
     protected int getTextureId(boolean boolean_1) {
         return !visible ? 0 : boolean_1 && enabled ? (ConfigObject.getInstance().isLighterButtonHover() ? 4 : 3) : 1;
     }
-
+    
     @Override
     public Optional<String> getTooltips() {
         String str = "";
@@ -168,10 +168,10 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
         }
         return Optional.of(str);
     }
-
+    
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
-        if (displaySupplier.get().getRecipeLocation().isPresent() && ClientHelper.getInstance().getCopyRecipeIdentifierKeyBinding().matchesKey(int_1, int_2) && containsMouse(PointHelper.fromMouse())) {
+        if (displaySupplier.get().getRecipeLocation().isPresent() && ConfigObject.getInstance().getCopyRecipeIdentifierKeybind().matchesKey(int_1, int_2) && containsMouse(PointHelper.fromMouse())) {
             minecraft.keyboard.setClipboard(displaySupplier.get().getRecipeLocation().get().toString());
             if (ConfigObject.getInstance().isToastDisplayedOnCopyIdentifier()) {
                 CopyRecipeIdentifierToast.addToast(I18n.translate("msg.rei.copied_recipe_id"), I18n.translate("msg.rei.recipe_id_details", displaySupplier.get().getRecipeLocation().get().toString()));

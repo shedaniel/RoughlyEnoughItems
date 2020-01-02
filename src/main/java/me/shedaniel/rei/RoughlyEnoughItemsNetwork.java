@@ -27,13 +27,13 @@ import java.util.List;
 import java.util.Map;
 
 public class RoughlyEnoughItemsNetwork implements ModInitializer {
-
+    
     public static final Identifier DELETE_ITEMS_PACKET = new Identifier("roughlyenoughitems", "delete_item");
     public static final Identifier CREATE_ITEMS_PACKET = new Identifier("roughlyenoughitems", "create_item");
     public static final Identifier CREATE_ITEMS_MESSAGE_PACKET = new Identifier("roughlyenoughitems", "ci_msg");
     public static final Identifier MOVE_ITEMS_PACKET = new Identifier("roughlyenoughitems", "move_items");
     public static final Identifier NOT_ENOUGH_ITEMS_PACKET = new Identifier("roughlyenoughitems", "og_not_enough");
-
+    
     @Override
     public void onInitialize() {
         FabricLoader.getInstance().getEntrypoints("rei_containers", Runnable.class).forEach(Runnable::run);
@@ -103,5 +103,5 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
             }
         });
     }
-
+    
 }

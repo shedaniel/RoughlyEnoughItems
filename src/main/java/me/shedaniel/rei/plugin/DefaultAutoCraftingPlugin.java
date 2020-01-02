@@ -15,19 +15,19 @@ import net.fabricmc.loader.util.version.VersionParsingException;
 import net.minecraft.util.Identifier;
 
 public class DefaultAutoCraftingPlugin implements REIPluginV0 {
-
+    
     public static final Identifier PLUGIN = new Identifier("roughlyenoughitems", "default_auto_crafting_plugin");
-
+    
     @Override
     public Identifier getPluginIdentifier() {
         return PLUGIN;
     }
-
+    
     @Override
     public SemanticVersion getMinimumVersion() throws VersionParsingException {
         return SemanticVersion.parse("3.0-pre");
     }
-
+    
     @Override
     public void registerOthers(RecipeHelper recipeHelper) {
         if (!ConfigObject.getInstance().isLoadingDefaultPlugin()) {

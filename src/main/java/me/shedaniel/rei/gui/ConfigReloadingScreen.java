@@ -15,19 +15,19 @@ import net.minecraft.util.Util;
 @Deprecated
 @Internal
 public class ConfigReloadingScreen extends Screen {
-
+    
     private Screen parent;
-
+    
     public ConfigReloadingScreen(Screen parent) {
         super(NarratorManager.EMPTY);
         this.parent = parent;
     }
-
+    
     @Override
     public boolean shouldCloseOnEsc() {
         return false;
     }
-
+    
     @Override
     public void render(int int_1, int int_2, float float_1) {
         this.renderDirtBackground(0);
@@ -50,7 +50,7 @@ public class ConfigReloadingScreen extends Screen {
         this.drawCenteredString(this.font, string_3, this.width / 2, this.height / 2 - 41, 8421504);
         super.render(int_1, int_2, float_1);
     }
-
+    
     @Override
     public boolean isPauseScreen() {
         return false;

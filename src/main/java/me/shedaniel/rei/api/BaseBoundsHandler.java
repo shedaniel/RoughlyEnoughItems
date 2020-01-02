@@ -26,16 +26,16 @@ public interface BaseBoundsHandler extends DisplayHelper.DisplayBoundsHandler<Sc
     default List<Rectangle> getCurrentExclusionZones(Class<?> currentScreenClass, boolean isOnRightSide) {
         return getExclusionZones(currentScreenClass, false);
     }
-
+    
     @Deprecated
     default List<Rectangle> getCurrentExclusionZones(Class<?> currentScreenClass, boolean isOnRightSide, boolean sort) {
         return getExclusionZones(currentScreenClass, sort);
     }
-
+    
     List<Rectangle> getExclusionZones(Class<?> currentScreenClass, boolean sort);
-
+    
     int supplierSize();
-
+    
     /**
      * Register an exclusion zone
      *
@@ -51,7 +51,7 @@ public interface BaseBoundsHandler extends DisplayHelper.DisplayBoundsHandler<Sc
             return zones;
         });
     }
-
+    
     void registerExclusionZones(Class<?> screenClass, Supplier<List<Rectangle>> supplier);
-
+    
 }
