@@ -42,7 +42,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 
 public class ContainerScreenOverlay extends WidgetWithBounds {
-
+    
     private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private static final List<QueuedTooltip> QUEUED_TOOLTIPS = Lists.newArrayList();
     private static final EntryListWidget ENTRY_LIST_WIDGET = new EntryListWidget();
@@ -83,20 +83,20 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
     private Window window;
     private CraftableToggleButtonWidget toggleButtonWidget;
     private ButtonWidget buttonLeft, buttonRight;
-
+    
     public static EntryListWidget getEntryListWidget() {
         return ENTRY_LIST_WIDGET;
     }
-
+    
     @Nullable
     public static FavoritesListWidget getFavoritesListWidget() {
         return favoritesListWidget;
     }
-
+    
     public void init(boolean useless) {
         init();
     }
-
+    
     @SuppressWarnings("deprecation")
     public void init() {
         this.shouldReInit = false;
@@ -130,17 +130,17 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                         ENTRY_LIST_WIDGET.setPage(ENTRY_LIST_WIDGET.getTotalPages() - 1);
                     ENTRY_LIST_WIDGET.updateSearch(ScreenHelper.getSearchField().getText());
                 }
-
+                
                 @Override
                 public Optional<String> getTooltips() {
                     return Optional.ofNullable(I18n.translate("text.rei.previous_page"));
                 }
-
+                
                 @Override
                 public boolean changeFocus(boolean boolean_1) {
                     return false;
                 }
-
+                
                 @Override
                 public boolean containsMouse(double mouseX, double mouseY) {
                     return isNotInExclusionZones(mouseX, mouseY) && super.containsMouse(mouseX, mouseY);
@@ -154,24 +154,24 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                         ENTRY_LIST_WIDGET.setPage(0);
                     ENTRY_LIST_WIDGET.updateSearch(ScreenHelper.getSearchField().getText());
                 }
-
+                
                 @Override
                 public Optional<String> getTooltips() {
                     return Optional.ofNullable(I18n.translate("text.rei.next_page"));
                 }
-
+                
                 @Override
                 public boolean changeFocus(boolean boolean_1) {
                     return false;
                 }
-
+                
                 @Override
                 public boolean containsMouse(double mouseX, double mouseY) {
                     return isNotInExclusionZones(mouseX, mouseY) && super.containsMouse(mouseX, mouseY);
                 }
             });
         }
-
+        
         widgets.add(new ButtonWidget(new Rectangle(ConfigObject.getInstance().isLeftHandSidePanel() ? window.getScaledWidth() - 30 : 10, 10, 20, 20), "") {
             @Override
             public void onPressed() {
@@ -181,7 +181,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                 }
                 ConfigManager.getInstance().openConfigScreen(ScreenHelper.getLastContainerScreen());
             }
-
+            
             @Override
             public void render(int mouseX, int mouseY, float delta) {
                 super.render(mouseX, mouseY, delta);
@@ -196,7 +196,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                 blit(bounds.x + 3, bounds.y + 3, 0, 0, 14, 14);
             }
-
+            
             @Override
             public Optional<String> getTooltips() {
                 String tooltips = I18n.translate("text.rei.config_tooltip");
@@ -211,12 +211,12 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                     tooltips += "\n" + I18n.translate("text.rei.cheating_limited_enabled");
                 return Optional.ofNullable(tooltips);
             }
-
+            
             @Override
             public boolean changeFocus(boolean boolean_1) {
                 return false;
             }
-
+            
             @Override
             public boolean containsMouse(double mouseX, double mouseY) {
                 return isNotInExclusionZones(mouseX, mouseY) && super.containsMouse(mouseX, mouseY);
@@ -228,23 +228,23 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                 public void onPressed() {
                     MinecraftClient.getInstance().player.sendChatMessage(ConfigObject.getInstance().getGamemodeCommand().replaceAll("\\{gamemode}", getNextGameMode(Screen.hasShiftDown()).getName()));
                 }
-
+                
                 @Override
                 public void render(int mouseX, int mouseY, float delta) {
                     setText(getGameModeShortText(getCurrentGameMode()));
                     super.render(mouseX, mouseY, delta);
                 }
-
+                
                 @Override
                 public Optional<String> getTooltips() {
                     return Optional.ofNullable(I18n.translate("text.rei.gamemode_button.tooltip", getGameModeText(getNextGameMode(Screen.hasShiftDown()))));
                 }
-
+                
                 @Override
                 public boolean changeFocus(boolean boolean_1) {
                     return false;
                 }
-
+                
                 @Override
                 public boolean containsMouse(double mouseX, double mouseY) {
                     return isNotInExclusionZones(mouseX, mouseY) && super.containsMouse(mouseX, mouseY);
@@ -257,7 +257,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                     public void onPressed() {
                         MinecraftClient.getInstance().player.sendChatMessage(ConfigObject.getInstance().getWeatherCommand().replaceAll("\\{weather}", weather.name().toLowerCase(Locale.ROOT)));
                     }
-
+                    
                     @Override
                     public void render(int mouseX, int mouseY, float delta) {
                         super.render(mouseX, mouseY, delta);
@@ -265,17 +265,17 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                         blit(getBounds().x + 3, getBounds().y + 3, weather.getId() * 14, 14, 14, 14);
                     }
-
+                    
                     @Override
                     public Optional<String> getTooltips() {
                         return Optional.ofNullable(I18n.translate("text.rei.weather_button.tooltip", I18n.translate(weather.getTranslateKey())));
                     }
-
+                    
                     @Override
                     public boolean changeFocus(boolean boolean_1) {
                         return false;
                     }
-
+                    
                     @Override
                     public boolean containsMouse(double mouseX, double mouseY) {
                         return isNotInExclusionZones(mouseX, mouseY) && super.containsMouse(mouseX, mouseY);
@@ -291,19 +291,19 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                     setText(String.format("%s/%s", ENTRY_LIST_WIDGET.getPage() + 1, ENTRY_LIST_WIDGET.getTotalPages()));
                     super.render(mouseX, mouseY, delta);
                 }
-
+                
                 @Override
                 public Optional<String> getTooltips() {
                     return Optional.ofNullable(I18n.translate("text.rei.go_back_first_page"));
                 }
-
+                
                 @Override
                 public void onLabelClicked() {
                     MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                     ENTRY_LIST_WIDGET.setPage(0);
                     ENTRY_LIST_WIDGET.updateSearch(ScreenHelper.getSearchField().getText());
                 }
-
+                
                 @Override
                 public boolean changeFocus(boolean boolean_1) {
                     return false;
@@ -318,14 +318,14 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                     ConfigManager.getInstance().toggleCraftableOnly();
                     ENTRY_LIST_WIDGET.updateSearch(ScreenHelper.getSearchField().getText());
                 }
-
+                
                 @Override
                 public void lateRender(int mouseX, int mouseY, float delta) {
                     setBlitOffset(300);
                     super.lateRender(mouseX, mouseY, delta);
                     setBlitOffset(0);
                 }
-
+                
                 @Override
                 public boolean containsMouse(double mouseX, double mouseY) {
                     return isNotInExclusionZones(mouseX, mouseY) && super.containsMouse(mouseX, mouseY);
@@ -334,7 +334,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         else
             toggleButtonWidget = null;
     }
-
+    
     private Weather getNextWeather() {
         try {
             Weather current = getCurrentWeather();
@@ -346,7 +346,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             return Weather.CLEAR;
         }
     }
-
+    
     private Weather getCurrentWeather() {
         ClientWorld world = MinecraftClient.getInstance().world;
         if (world.isThundering())
@@ -355,15 +355,15 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             return Weather.RAIN;
         return Weather.CLEAR;
     }
-
+    
     private String getGameModeShortText(GameMode gameMode) {
         return I18n.translate("text.rei.short_gamemode." + gameMode.getName());
     }
-
+    
     private String getGameModeText(GameMode gameMode) {
         return I18n.translate("selectWorld.gameMode." + gameMode.getName());
     }
-
+    
     private GameMode getNextGameMode(boolean reverse) {
         try {
             GameMode current = getCurrentGameMode();
@@ -379,11 +379,11 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             return GameMode.NOT_SET;
         }
     }
-
+    
     private GameMode getCurrentGameMode() {
         return MinecraftClient.getInstance().getNetworkHandler().getPlayerListEntry(MinecraftClient.getInstance().player.getGameProfile().getId()).getGameMode();
     }
-
+    
     private Rectangle getTextFieldArea() {
         int widthRemoved = ConfigObject.getInstance().isCraftableFilterEnabled() ? 22 : 2;
         SearchFieldLocation searchFieldLocation = ConfigObject.getInstance().getSearchFieldLocation();
@@ -401,23 +401,23 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         }
         return new Rectangle(ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft(), window.getScaledHeight() - 22, ScreenHelper.getLastContainerScreenHooks().rei_getContainerWidth() - widthRemoved, 18);
     }
-
+    
     private Rectangle getCraftableToggleArea() {
         Rectangle searchBoxArea = getTextFieldArea();
         searchBoxArea.setLocation(searchBoxArea.x + searchBoxArea.width + 4, searchBoxArea.y - 1);
         searchBoxArea.setSize(20, 20);
         return searchBoxArea;
     }
-
+    
     private String getCheatModeText() {
         return I18n.translate(String.format("%s%s", "text.rei.", ClientHelper.getInstance().isCheating() ? "cheat" : "nocheat"));
     }
-
+    
     @Override
     public Rectangle getBounds() {
         return rectangle;
     }
-
+    
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         List<ItemStack> currentStacks = ClientHelper.getInstance().getInventoryItemsTypes();
@@ -459,7 +459,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                     }
         }
     }
-
+    
     public void lateRender(int mouseX, int mouseY, float delta) {
         if (ScreenHelper.isOverlayVisible()) {
             ScreenHelper.getSearchField().laterRender(mouseX, mouseY, delta);
@@ -474,7 +474,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             }
         QUEUED_TOOLTIPS.clear();
     }
-
+    
     @SuppressWarnings("deprecation")
     public void renderTooltip(QueuedTooltip tooltip) {
         if (tooltip.getConsumer() == null)
@@ -482,7 +482,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         else
             tooltip.getConsumer().accept(tooltip);
     }
-
+    
     public void renderTooltip(List<String> lines, int mouseX, int mouseY) {
         if (lines.isEmpty())
             return;
@@ -491,18 +491,18 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         tooltipLines = lines;
         ScreenHelper.drawHoveringWidget(mouseX, mouseY, renderTooltipCallback, tooltipWidth, tooltipHeight, 0);
     }
-
+    
     private boolean hasSameListContent(List<ItemStack> list1, List<ItemStack> list2) {
         list1.sort(Comparator.comparing(Object::toString));
         list2.sort(Comparator.comparing(Object::toString));
         return CollectionUtils.mapAndJoinToString(list1, Object::toString, "").equals(CollectionUtils.mapAndJoinToString(list2, Object::toString, ""));
     }
-
+    
     public void addTooltip(@Nullable QueuedTooltip queuedTooltip) {
         if (queuedTooltip != null)
             QUEUED_TOOLTIPS.add(queuedTooltip);
     }
-
+    
     @SuppressWarnings("deprecation")
     public void renderWidgets(int int_1, int int_2, float float_1) {
         if (!ScreenHelper.isOverlayVisible())
@@ -513,7 +513,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             widget.render(int_1, int_2, float_1);
         }
     }
-
+    
     @Override
     public boolean mouseScrolled(double i, double j, double amount) {
         if (!ScreenHelper.isOverlayVisible())
@@ -539,7 +539,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                 return true;
         return false;
     }
-
+    
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (ScreenHelper.isOverlayVisible()) {
@@ -549,7 +549,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                 if (listener != ScreenHelper.getSearchField() && listener.keyPressed(int_1, int_2, int_3))
                     return true;
         }
-        if (ClientHelper.getInstance().getHideKeyBinding().matchesKey(int_1, int_2)) {
+        if (ConfigObject.getInstance().getHideKeybind().matchesKey(int_1, int_2)) {
             ScreenHelper.toggleOverlayVisible();
             return true;
         }
@@ -558,14 +558,14 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             if (ScreenHelper.getLastContainerScreenHooks().rei_getHoveredSlot() != null && !ScreenHelper.getLastContainerScreenHooks().rei_getHoveredSlot().getStack().isEmpty())
                 itemStack = ScreenHelper.getLastContainerScreenHooks().rei_getHoveredSlot().getStack();
         if (itemStack != null && !itemStack.isEmpty()) {
-            if (ClientHelper.getInstance().getRecipeKeyBinding().matchesKey(int_1, int_2))
+            if (ConfigObject.getInstance().getRecipeKeybind().matchesKey(int_1, int_2))
                 return ClientHelper.getInstance().executeRecipeKeyBind(itemStack);
-            else if (ClientHelper.getInstance().getUsageKeyBinding().matchesKey(int_1, int_2))
+            else if (ConfigObject.getInstance().getUsageKeybind().matchesKey(int_1, int_2))
                 return ClientHelper.getInstance().executeUsageKeyBind(itemStack);
         }
         if (!ScreenHelper.isOverlayVisible())
             return false;
-        if (ClientHelper.getInstance().getFocusSearchFieldKeyBinding().matchesKey(int_1, int_2)) {
+        if (ConfigObject.getInstance().getFocusSearchFieldKeybind().matchesKey(int_1, int_2)) {
             ScreenHelper.getSearchField().setFocused(true);
             setFocused(ScreenHelper.getSearchField());
             ScreenHelper.getSearchField().keybindFocusTime = System.currentTimeMillis();
@@ -574,7 +574,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         }
         return false;
     }
-
+    
     @Override
     public boolean charTyped(char char_1, int int_1) {
         if (!ScreenHelper.isOverlayVisible())
@@ -586,12 +586,12 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                 return true;
         return false;
     }
-
+    
     @Override
     public List<? extends Element> children() {
         return widgets;
     }
-
+    
     @Override
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
         if (!ScreenHelper.isOverlayVisible())
@@ -611,22 +611,24 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                 this.setFocused(element);
                 if (int_1 == 0)
                     this.setDragging(true);
+                if (!(element instanceof OverlaySearchField))
+                    ScreenHelper.getSearchField().setFocused(false);
                 return true;
             }
         return false;
     }
-
+    
     @Override
     public boolean mouseDragged(double double_1, double double_2, int int_1, double double_3, double double_4) {
         if (!ScreenHelper.isOverlayVisible())
             return false;
-        return this.getFocused() != null && this.isDragging() && int_1 == 0 ? this.getFocused().mouseDragged(double_1, double_2, int_1, double_3, double_4) : false;
+        return (this.getFocused() != null && this.isDragging() && int_1 == 0) && this.getFocused().mouseDragged(double_1, double_2, int_1, double_3, double_4);
     }
-
+    
     public boolean isInside(double mouseX, double mouseY) {
         return rectangle.contains(mouseX, mouseY) && isNotInExclusionZones(mouseX, mouseY);
     }
-
+    
     public boolean isNotInExclusionZones(double mouseX, double mouseY) {
         for (DisplayHelper.DisplayBoundsHandler<?> handler : DisplayHelper.getInstance().getSortedBoundsHandlers(MinecraftClient.getInstance().currentScreen.getClass())) {
             ActionResult in = handler.isInZone(mouseX, mouseY);
@@ -635,9 +637,9 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         }
         return true;
     }
-
+    
     public boolean isInside(Point point) {
         return isInside(point.getX(), point.getY());
     }
-
+    
 }

@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class DefaultRecipeBookExclusionZones implements Supplier<List<Rectangle>> {
-
+    
     @Override
     public List<Rectangle> get() {
         if (!MinecraftClient.getInstance().player.getRecipeBook().isGuiOpen() || !(MinecraftClient.getInstance().currentScreen instanceof RecipeBookProvider) || !(ScreenHelper.getLastContainerScreen().getContainer() instanceof CraftingContainer))
@@ -31,5 +31,5 @@ public class DefaultRecipeBookExclusionZones implements Supplier<List<Rectangle>
             l.add(new Rectangle(screenHooks.rei_getContainerLeft() - 4 - 145 - 30, screenHooks.rei_getContainerTop(), 30, size * 27));
         return l;
     }
-
+    
 }

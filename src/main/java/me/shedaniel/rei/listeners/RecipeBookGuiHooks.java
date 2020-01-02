@@ -16,14 +16,14 @@ import java.util.List;
 
 @Mixin(RecipeBookWidget.class)
 public interface RecipeBookGuiHooks {
-
+    
     @Accessor("ghostSlots")
     RecipeBookGhostSlots rei_getGhostSlots();
-
+    
     @Accessor("searchField")
     TextFieldWidget rei_getSearchField();
-
+    
     @Accessor("tabButtons")
     List<RecipeGroupButtonWidget> rei_getTabButtons();
-
+    
 }

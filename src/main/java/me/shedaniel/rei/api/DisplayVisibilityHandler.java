@@ -8,7 +8,7 @@ package me.shedaniel.rei.api;
 import net.minecraft.util.ActionResult;
 
 public interface DisplayVisibilityHandler {
-
+    
     /**
      * Gets the priority of the handler
      *
@@ -17,7 +17,7 @@ public interface DisplayVisibilityHandler {
     default float getPriority() {
         return 0f;
     }
-
+    
     /**
      * Handles the visibility of the display.
      * {@link ActionResult#PASS} to pass the handling to another handler
@@ -29,5 +29,5 @@ public interface DisplayVisibilityHandler {
      * @return the visibility
      */
     ActionResult handleDisplay(RecipeCategory<?> category, RecipeDisplay display);
-
+    
 }

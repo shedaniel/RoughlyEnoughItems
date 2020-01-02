@@ -13,17 +13,17 @@ import java.util.Map;
 
 public class ContainerInfoHandler {
     private static final Map<String, Map<Class<? extends Container>, ContainerInfo>> containerInfoMap = Maps.newLinkedHashMap();
-
+    
     public static void registerContainerInfo(Identifier category, ContainerInfo containerInfo) {
         if (!containerInfoMap.containsKey(category.toString()))
             containerInfoMap.put(category.toString(), Maps.newLinkedHashMap());
         containerInfoMap.get(category.toString()).put(containerInfo.getContainerClass(), containerInfo);
     }
-
+    
     public static boolean isCategoryHandled(Identifier category) {
         return containerInfoMap.containsKey(category.toString()) && !containerInfoMap.get(category.toString()).isEmpty();
     }
-
+    
     public static ContainerInfo getContainerInfo(Identifier category, Class<?> containerClass) {
         if (!isCategoryHandled(category))
             return null;

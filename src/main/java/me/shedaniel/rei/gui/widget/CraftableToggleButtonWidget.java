@@ -18,22 +18,22 @@ import net.minecraft.util.Identifier;
 import java.util.Optional;
 
 public abstract class CraftableToggleButtonWidget extends ButtonWidget {
-
+    
     public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private ItemRenderer itemRenderer;
-
+    
     public CraftableToggleButtonWidget(Rectangle rectangle) {
         super(rectangle, "");
         this.itemRenderer = minecraft.getItemRenderer();
     }
-
+    
     public CraftableToggleButtonWidget(int x, int y, int width, int height) {
         this(new Rectangle(x, y, width, height));
     }
-
+    
     public void lateRender(int mouseX, int mouseY, float delta) {
         super.render(mouseX, mouseY, delta);
-
+        
         this.itemRenderer.zOffset = getBlitOffset();
         Rectangle bounds = getBounds();
         this.itemRenderer.renderGuiItem(new ItemStack(Blocks.CRAFTING_TABLE), bounds.x + 2, bounds.y + 2);
@@ -45,16 +45,16 @@ public abstract class CraftableToggleButtonWidget extends ButtonWidget {
         this.fillGradient(bounds.x + 1, bounds.y + 1, bounds.getMaxX() - 1, bounds.getMaxY() - 1, color, color);
         setBlitOffset(0);
     }
-
+    
     @Override
     public void render(int mouseX, int mouseY, float delta) {
     }
-
+    
     @Override
     public boolean changeFocus(boolean boolean_1) {
         return false;
     }
-
+    
     @Override
     public Optional<String> getTooltips() {
         return Optional.ofNullable(I18n.translate(ConfigManager.getInstance().isCraftableOnlyEnabled() ? "text.rei.showing_craftable" : "text.rei.showing_all"));

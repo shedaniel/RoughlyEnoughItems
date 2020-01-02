@@ -21,19 +21,19 @@ import java.util.Random;
 @TestOnly
 @Deprecated
 public class REITestPlugin implements REIPluginV0 {
-
+    
     private Random random = new Random();
-
+    
     @Override
     public void preRegister() {
         LogManager.getLogger().error("REI Test Plugin is enabled! If you see this unintentionally, please report this!");
     }
-
+    
     @Override
     public Identifier getPluginIdentifier() {
         return new Identifier("roughlyenoughitems:test_dev_plugin");
     }
-
+    
     @Override
     public void registerEntries(EntryRegistry entryRegistry) {
         for (Item item : Registry.ITEM) {
@@ -48,10 +48,10 @@ public class REITestPlugin implements REIPluginV0 {
             }
         }
     }
-
+    
     public EntryStack transformStack(EntryStack stack) {
         stack.setAmount(random.nextInt(Integer.MAX_VALUE));
         return stack;
     }
-
+    
 }

@@ -20,10 +20,10 @@ import java.util.Collections;
 import java.util.List;
 
 public class DefaultBrewingDisplay implements RecipeDisplay {
-
+    
     private EntryStack input, output;
     private List<EntryStack> reactant;
-
+    
     public DefaultBrewingDisplay(ItemStack input, Ingredient reactant, ItemStack output) {
         this.input = EntryStack.create(input).setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, stack -> Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("category.rei.brewing.input")));
         this.reactant = new ArrayList<>();
@@ -34,22 +34,22 @@ public class DefaultBrewingDisplay implements RecipeDisplay {
         }
         this.output = EntryStack.create(output).setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, stack -> Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("category.rei.brewing.result")));
     }
-
+    
     @Override
     public List<List<EntryStack>> getInputEntries() {
         return Lists.newArrayList(Collections.singletonList(input), reactant);
     }
-
+    
     @Override
     public List<EntryStack> getOutputEntries() {
         return Collections.singletonList(output);
     }
-
+    
     @Override
     public Identifier getRecipeCategory() {
         return DefaultPlugin.BREWING;
     }
-
+    
     public List<EntryStack> getOutput(int slot) {
         List<EntryStack> stack = new ArrayList<>();
         for (int i = 0; i < slot * 2; i++)
@@ -58,7 +58,7 @@ public class DefaultBrewingDisplay implements RecipeDisplay {
             stack.addAll(getOutputEntries());
         return stack;
     }
-
+    
     @Override
     public List<List<EntryStack>> getRequiredEntries() {
         return getInputEntries();

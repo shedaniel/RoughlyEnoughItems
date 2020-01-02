@@ -11,7 +11,7 @@ import me.shedaniel.rei.api.REIPluginEntry;
 import me.shedaniel.rei.api.RecipeHelper;
 
 public interface REIPluginV0 extends REIPluginEntry {
-
+    
     /**
      * Registers entries on the item panel
      *
@@ -19,7 +19,7 @@ public interface REIPluginV0 extends REIPluginEntry {
      */
     default void registerEntries(EntryRegistry entryRegistry) {
     }
-
+    
     /**
      * Registers categories
      *
@@ -27,7 +27,7 @@ public interface REIPluginV0 extends REIPluginEntry {
      */
     default void registerPluginCategories(RecipeHelper recipeHelper) {
     }
-
+    
     /**
      * Registers displays for categories
      *
@@ -35,7 +35,7 @@ public interface REIPluginV0 extends REIPluginEntry {
      */
     default void registerRecipeDisplays(RecipeHelper recipeHelper) {
     }
-
+    
     /**
      * Registers bounds handlers
      *
@@ -43,7 +43,7 @@ public interface REIPluginV0 extends REIPluginEntry {
      */
     default void registerBounds(DisplayHelper displayHelper) {
     }
-
+    
     /**
      * Register other stuff
      *
@@ -51,11 +51,11 @@ public interface REIPluginV0 extends REIPluginEntry {
      */
     default void registerOthers(RecipeHelper recipeHelper) {
     }
-
+    
     default void preRegister() {
     }
-
+    
     default void postRegister() {
     }
-
+    
 }

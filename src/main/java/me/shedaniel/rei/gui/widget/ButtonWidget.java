@@ -23,36 +23,36 @@ import java.util.Objects;
 import java.util.Optional;
 
 public abstract class ButtonWidget extends WidgetWithBounds {
-
+    
     protected static final Identifier BUTTON_LOCATION = new Identifier("roughlyenoughitems", "textures/gui/button.png");
     protected static final Identifier BUTTON_LOCATION_DARK = new Identifier("roughlyenoughitems", "textures/gui/button_dark.png");
     public boolean enabled;
     public boolean focused;
     private String text;
     private Rectangle bounds;
-
+    
     public ButtonWidget(Rectangle rectangle, Text text) {
         this(rectangle, Objects.requireNonNull(text).asFormattedString());
     }
-
+    
     public ButtonWidget(Rectangle rectangle, String text) {
         this.bounds = Objects.requireNonNull(rectangle);
         this.enabled = true;
         this.text = Objects.requireNonNull(text);
     }
-
+    
     public Rectangle getBounds() {
         return bounds;
     }
-
+    
     public String getText() {
         return text;
     }
-
+    
     public void setText(String text) {
         this.text = text;
     }
-
+    
     protected int getTextureId(boolean boolean_1) {
         int int_1 = 1;
         if (!this.enabled) {
@@ -60,10 +60,10 @@ public abstract class ButtonWidget extends WidgetWithBounds {
         } else if (boolean_1) {
             int_1 = ConfigObject.getInstance().isLighterButtonHover() ? 4 : 3; // 2 is the old blue highlight, 3 is the 1.15 outline, 4 is the 1.15 online + light hover
         }
-
+        
         return int_1;
     }
-
+    
     protected void renderBackground(int x, int y, int width, int height, int textureOffset) {
         minecraft.getTextureManager().bindTexture(ScreenHelper.isDarkModeEnabled() ? BUTTON_LOCATION_DARK : BUTTON_LOCATION);
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
@@ -75,7 +75,7 @@ public abstract class ButtonWidget extends WidgetWithBounds {
         blit(x + width - 4, y, getBlitOffset(), 252, textureOffset * 80, 4, 4, 512, 256);
         blit(x, y + height - 4, getBlitOffset(), 0, textureOffset * 80 + 76, 4, 4, 512, 256);
         blit(x + width - 4, y + height - 4, getBlitOffset(), 252, textureOffset * 80 + 76, 4, 4, 512, 256);
-
+        
         //Sides
         blit(x + 4, y, getBlitOffset(), 4, textureOffset * 80, MathHelper.ceil((width - 8) / 2f), 4, 512, 256);
         blit(x + 4, y + height - 4, getBlitOffset(), 4, textureOffset * 80 + 76, MathHelper.ceil((width - 8) / 2f), 4, 512, 256);
@@ -86,32 +86,32 @@ public abstract class ButtonWidget extends WidgetWithBounds {
             blit(x + MathHelper.ceil(width / 2f), i, getBlitOffset(), 256 - MathHelper.floor(width / 2f), 4 + textureOffset * 80, MathHelper.floor(width / 2f), MathHelper.clamp(y + height - 4 - i, 0, 76), 512, 256);
         }
     }
-
+    
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;
         renderBackground(x, y, width, height, this.getTextureId(isHovered(mouseX, mouseY)));
-
+        
         int color = 14737632;
         if (!this.enabled) {
             color = 10526880;
         } else if (isHovered(mouseX, mouseY)) {
             color = 16777120;
         }
-
+        
         this.drawCenteredString(font, getText(), x + width / 2, y + (height - 8) / 2, color);
-
+        
         if (getTooltips().isPresent())
             if (!focused && containsMouse(mouseX, mouseY))
                 ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltips().get().split("\n")));
             else if (focused)
                 ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(new Point(x + width / 2, y + height / 2), getTooltips().get().split("\n")));
     }
-
+    
     public boolean isHovered(int mouseX, int mouseY) {
         return isMouseOver(mouseX, mouseY) || focused;
     }
-
+    
     @Override
     public boolean changeFocus(boolean boolean_1) {
         if (!enabled)
@@ -119,12 +119,12 @@ public abstract class ButtonWidget extends WidgetWithBounds {
         this.focused = !this.focused;
         return true;
     }
-
+    
     @Override
     public List<? extends Element> children() {
         return Collections.emptyList();
     }
-
+    
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (isMouseOver(mouseX, mouseY) && enabled && button == 0) {
@@ -134,7 +134,7 @@ public abstract class ButtonWidget extends WidgetWithBounds {
         }
         return false;
     }
-
+    
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (this.enabled && focused) {
@@ -148,11 +148,11 @@ public abstract class ButtonWidget extends WidgetWithBounds {
         }
         return false;
     }
-
+    
     public abstract void onPressed();
-
+    
     public Optional<String> getTooltips() {
         return Optional.empty();
     }
-
+    
 }

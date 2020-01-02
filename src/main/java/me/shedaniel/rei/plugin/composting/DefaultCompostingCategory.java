@@ -31,22 +31,22 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public class DefaultCompostingCategory implements RecipeCategory<DefaultCompostingDisplay> {
-
+    
     @Override
     public Identifier getIdentifier() {
         return DefaultPlugin.COMPOSTING;
     }
-
+    
     @Override
     public EntryStack getLogo() {
         return EntryStack.create(Blocks.COMPOSTER);
     }
-
+    
     @Override
     public String getCategoryName() {
         return I18n.translate("category.rei.composting");
     }
-
+    
     @Override
     public RecipeEntry getSimpleRenderer(DefaultCompostingDisplay recipe) {
         return new RecipeEntry() {
@@ -54,20 +54,20 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
             public int getHeight() {
                 return 10 + MinecraftClient.getInstance().textRenderer.fontHeight;
             }
-
+            
             @Nullable
             @Override
             public QueuedTooltip getTooltip(int mouseX, int mouseY) {
                 return null;
             }
-
+            
             @Override
             public void render(Rectangle rectangle, int mouseX, int mouseY, float delta) {
                 MinecraftClient.getInstance().textRenderer.draw(I18n.translate("text.rei.composting.page", recipe.getPage() + 1), rectangle.x + 5, rectangle.y + 6, -1);
             }
         };
     }
-
+    
     @Override
     public List<Widget> setupDisplay(Supplier<DefaultCompostingDisplay> recipeDisplaySupplier, Rectangle bounds) {
         List<Widget> widgets = Lists.newArrayList();
@@ -98,12 +98,12 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
         widgets.add(EntryWidget.create(startingPoint.x + 34, startingPoint.y + 5).entries(recipeDisplaySupplier.get().getOutputEntries()).noBackground());
         return widgets;
     }
-
+    
     @Override
     public int getDisplayHeight() {
         return 140;
     }
-
+    
     @SuppressWarnings("deprecation")
     @Override
     public int getFixedRecipesPerPage() {

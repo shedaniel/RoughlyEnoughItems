@@ -8,7 +8,7 @@ package me.shedaniel.rei.api;
 import me.shedaniel.math.api.Rectangle;
 
 public interface ButtonAreaSupplier {
-
+    
     /**
      * Declares the button bounds
      *
@@ -16,7 +16,7 @@ public interface ButtonAreaSupplier {
      * @return the bounds of the button
      */
     Rectangle get(Rectangle bounds);
-
+    
     /**
      * Declares the button text
      *
@@ -25,5 +25,5 @@ public interface ButtonAreaSupplier {
     default String getButtonText() {
         return "+";
     }
-
+    
 }

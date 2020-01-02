@@ -26,22 +26,22 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class DefaultBrewingCategory implements RecipeCategory<DefaultBrewingDisplay> {
-
+    
     @Override
     public Identifier getIdentifier() {
         return DefaultPlugin.BREWING;
     }
-
+    
     @Override
     public EntryStack getLogo() {
         return EntryStack.create(Blocks.BREWING_STAND);
     }
-
+    
     @Override
     public String getCategoryName() {
         return I18n.translate("category.rei.brewing");
     }
-
+    
     @Override
     public List<Widget> setupDisplay(Supplier<DefaultBrewingDisplay> recipeDisplaySupplier, Rectangle bounds) {
         final DefaultBrewingDisplay recipeDisplay = recipeDisplaySupplier.get();
@@ -64,5 +64,5 @@ public class DefaultBrewingCategory implements RecipeCategory<DefaultBrewingDisp
         widgets.add(EntryWidget.create(startPoint.x + 86, startPoint.y + 35).entries(recipeDisplay.getOutput(2)).noBackground());
         return widgets;
     }
-
+    
 }

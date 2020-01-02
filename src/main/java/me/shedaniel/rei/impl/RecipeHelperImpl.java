@@ -24,7 +24,6 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -32,21 +31,20 @@ import java.util.stream.Collectors;
 @Deprecated
 @Internal
 public class RecipeHelperImpl implements RecipeHelper {
-
+    
     private static final Comparator<DisplayVisibilityHandler> VISIBILITY_HANDLER_COMPARATOR;
-    @SuppressWarnings("rawtypes")
-    private static final Comparator<Recipe> RECIPE_COMPARATOR = (o1, o2) -> {
+    @SuppressWarnings("rawtypes") private static final Comparator<Recipe> RECIPE_COMPARATOR = (o1, o2) -> {
         int int_1 = o1.getId().getNamespace().compareTo(o2.getId().getNamespace());
         if (int_1 == 0)
             int_1 = o1.getId().getPath().compareTo(o2.getId().getPath());
         return int_1;
     };
-
+    
     static {
         Comparator<DisplayVisibilityHandler> comparator = Comparator.comparingDouble(DisplayVisibilityHandler::getPriority);
         VISIBILITY_HANDLER_COMPARATOR = comparator.reversed();
     }
-
+    
     private final List<AutoTransferHandler> autoTransferHandlers = Lists.newLinkedList();
     private final List<RecipeFunction> recipeFunctions = Lists.newLinkedList();
     private final List<ScreenClickArea> screenClickAreas = Lists.newLinkedList();
@@ -59,14 +57,14 @@ public class RecipeHelperImpl implements RecipeHelper {
     private final List<LiveRecipeGenerator<RecipeDisplay>> liveRecipeGenerators = Lists.newLinkedList();
     private RecipeManager recipeManager;
     private boolean arePluginsLoading = false;
-
+    
     @Override
     public List<EntryStack> findCraftableEntriesByItems(List<EntryStack> inventoryItems) {
         List<EntryStack> craftables = new ArrayList<>();
         for (List<RecipeDisplay> value : recipeCategoryListMap.values())
             for (RecipeDisplay recipeDisplay : value) {
                 int slotsCraftable = 0;
-                List<List<EntryStack>> requiredInput = (List<List<EntryStack>>) recipeDisplay.getRequiredEntries();
+                List<List<EntryStack>> requiredInput = recipeDisplay.getRequiredEntries();
                 for (List<EntryStack> slot : requiredInput) {
                     if (slot.isEmpty()) {
                         slotsCraftable++;
@@ -82,38 +80,38 @@ public class RecipeHelperImpl implements RecipeHelper {
                     }
                 }
                 if (slotsCraftable == recipeDisplay.getRequiredEntries().size())
-                    craftables.addAll((List<EntryStack>) recipeDisplay.getOutputEntries());
+                    craftables.addAll(recipeDisplay.getOutputEntries());
             }
         return craftables.stream().distinct().collect(Collectors.toList());
     }
-
+    
     @Override
     public boolean arePluginsLoading() {
         return arePluginsLoading;
     }
-
+    
     @Override
     public void registerCategory(RecipeCategory<?> category) {
         categories.add(category);
         recipeCategoryListMap.put(category.getIdentifier(), Lists.newLinkedList());
         categoryWorkingStations.put(category.getIdentifier(), Lists.newLinkedList());
     }
-
+    
     @Override
     public void registerWorkingStations(Identifier category, List<EntryStack>... workingStations) {
         categoryWorkingStations.get(category).addAll(Arrays.asList(workingStations));
     }
-
+    
     @Override
     public void registerWorkingStations(Identifier category, EntryStack... workingStations) {
         categoryWorkingStations.get(category).addAll(Arrays.asList(workingStations).stream().map(Collections::singletonList).collect(Collectors.toList()));
     }
-
+    
     @Override
     public List<List<EntryStack>> getWorkingStations(Identifier category) {
         return categoryWorkingStations.get(category);
     }
-
+    
     @Override
     public void registerDisplay(Identifier categoryIdentifier, RecipeDisplay display) {
         if (!recipeCategoryListMap.containsKey(categoryIdentifier))
@@ -121,14 +119,14 @@ public class RecipeHelperImpl implements RecipeHelper {
         recipeCount[0]++;
         recipeCategoryListMap.get(categoryIdentifier).add(display);
     }
-
+    
     private void registerDisplay(Identifier categoryIdentifier, RecipeDisplay display, int index) {
         if (!recipeCategoryListMap.containsKey(categoryIdentifier))
             return;
         recipeCount[0]++;
         recipeCategoryListMap.get(categoryIdentifier).add(index, display);
     }
-
+    
     @Override
     public Map<RecipeCategory<?>, List<RecipeDisplay>> getRecipesFor(EntryStack stack) {
         Map<Identifier, List<RecipeDisplay>> categoriesMap = new HashMap<>();
@@ -153,17 +151,17 @@ public class RecipeHelperImpl implements RecipeHelper {
                 recipeCategoryListMap.remove(category);
         return recipeCategoryListMap;
     }
-
+    
     @Override
     public RecipeCategory<?> getCategory(Identifier identifier) {
         return CollectionUtils.findFirstOrNull(categories, category -> category.getIdentifier().equals(identifier));
     }
-
+    
     @Override
     public RecipeManager getRecipeManager() {
         return recipeManager;
     }
-
+    
     private boolean isStackWorkStationOfCategory(Identifier category, EntryStack stack) {
         for (List<EntryStack> stacks : getWorkingStations(category)) {
             for (EntryStack entryStack : stacks) {
@@ -173,7 +171,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         }
         return false;
     }
-
+    
     @Override
     public Map<RecipeCategory<?>, List<RecipeDisplay>> getUsagesFor(EntryStack stack) {
         Map<Identifier, Set<RecipeDisplay>> categoriesMap = new HashMap<>();
@@ -222,28 +220,27 @@ public class RecipeHelperImpl implements RecipeHelper {
                 recipeCategoryListMap.remove(category);
         return recipeCategoryListMap;
     }
-
+    
     @Override
     public List<RecipeCategory<?>> getAllCategories() {
         return Collections.unmodifiableList(categories);
     }
-
+    
     @Override
     public Optional<ButtonAreaSupplier> getAutoCraftButtonArea(RecipeCategory<?> category) {
         if (!autoCraftAreaSupplierMap.containsKey(category.getIdentifier()))
             return Optional.ofNullable(bounds -> new Rectangle(bounds.getMaxX() - 16, bounds.getMaxY() - 16, 10, 10));
         return Optional.ofNullable(autoCraftAreaSupplierMap.get(category.getIdentifier()));
     }
-
+    
     @Override
     public void registerAutoCraftButtonArea(Identifier category, ButtonAreaSupplier rectangle) {
         if (rectangle == null) {
-            if (autoCraftAreaSupplierMap.containsKey(category))
-                autoCraftAreaSupplierMap.remove(category);
+            autoCraftAreaSupplierMap.remove(category);
         } else
             autoCraftAreaSupplierMap.put(category, rectangle);
     }
-
+    
     @SuppressWarnings("deprecation")
     public void recipesLoaded(RecipeManager recipeManager) {
         long startTime = System.currentTimeMillis();
@@ -302,7 +299,7 @@ public class RecipeHelperImpl implements RecipeHelper {
                 RoughlyEnoughItemsCore.LOGGER.error("[REI] " + identifier.toString() + " plugin failed to load!", e);
             }
         }
-
+        
         for (REIPluginV0 plugin : reiPluginV0s) {
             Identifier identifier = plugin.getPluginIdentifier();
             try {
@@ -330,51 +327,51 @@ public class RecipeHelperImpl implements RecipeHelper {
                 public ActionResult handleDisplay(RecipeCategory<?> category, RecipeDisplay display) {
                     return ActionResult.SUCCESS;
                 }
-
+                
                 @Override
                 public float getPriority() {
                     return -1f;
                 }
             });
-
+        
         // Clear Cache
         ((DisplayHelperImpl) DisplayHelper.getInstance()).resetCache();
         ScreenHelper.getOptionalOverlay().ifPresent(overlay -> overlay.shouldReInit = true);
-
+        
         arePluginsLoading = false;
         // Remove duplicate entries
         ((EntryRegistryImpl) EntryRegistry.getInstance()).distinct();
-
+        
         // Clear Cache Again!
         ((DisplayHelperImpl) DisplayHelper.getInstance()).resetCache();
         ScreenHelper.getOptionalOverlay().ifPresent(overlay -> overlay.shouldReInit = true);
-
+        
         long usedTime = System.currentTimeMillis() - startTime;
         RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered %d stack entries, %d recipes displays, %d exclusion zones suppliers, %d bounds handler, %d visibility handlers and %d categories (%s) in %d ms.", EntryRegistry.getInstance().getStacksList().size(), recipeCount[0], DisplayHelper.getInstance().getBaseBoundsHandler().supplierSize(), DisplayHelper.getInstance().getAllBoundsHandlers().size(), getDisplayVisibilityHandlers().size(), categories.size(), String.join(", ", categories.stream().map(RecipeCategory::getCategoryName).collect(Collectors.toList())), usedTime);
     }
-
+    
     @Override
     public AutoTransferHandler registerAutoCraftingHandler(AutoTransferHandler handler) {
         autoTransferHandlers.add(handler);
         return handler;
     }
-
+    
     @Override
     public List<AutoTransferHandler> getSortedAutoCraftingHandler() {
         return autoTransferHandlers.stream().sorted(Comparator.comparingDouble(AutoTransferHandler::getPriority).reversed()).collect(Collectors.toList());
     }
-
+    
     @Override
     public int getRecipeCount() {
         return recipeCount[0];
     }
-
+    
     @Override
     @SuppressWarnings("rawtypes")
     public List<Recipe> getAllSortedRecipes() {
         return getRecipeManager().values().stream().sorted(RECIPE_COMPARATOR).collect(Collectors.toList());
     }
-
+    
     @Override
     public Map<RecipeCategory<?>, List<RecipeDisplay>> getAllRecipes() {
         Map<RecipeCategory<?>, List<RecipeDisplay>> map = Maps.newLinkedHashMap();
@@ -387,33 +384,33 @@ public class RecipeHelperImpl implements RecipeHelper {
         }
         return map;
     }
-
+    
     @Override
     public List<RecipeDisplay> getAllRecipesFromCategory(RecipeCategory<?> category) {
         return recipeCategoryListMap.get(category.getIdentifier());
     }
-
+    
     @Override
     public void registerRecipeVisibilityHandler(DisplayVisibilityHandler visibilityHandler) {
         displayVisibilityHandlers.add(visibilityHandler);
     }
-
+    
     @Override
     public void unregisterRecipeVisibilityHandler(DisplayVisibilityHandler visibilityHandler) {
         displayVisibilityHandlers.remove(visibilityHandler);
     }
-
+    
     @Override
     public List<DisplayVisibilityHandler> getDisplayVisibilityHandlers() {
         return Collections.unmodifiableList(displayVisibilityHandlers);
     }
-
+    
     @SuppressWarnings("deprecation")
     @Override
     public boolean isDisplayVisible(RecipeDisplay display, boolean respectConfig) {
         return isDisplayVisible(display);
     }
-
+    
     @SuppressWarnings("deprecation")
     @Override
     public boolean isDisplayVisible(RecipeDisplay display) {
@@ -430,74 +427,74 @@ public class RecipeHelperImpl implements RecipeHelper {
         }
         return true;
     }
-
+    
     @Override
     public void registerScreenClickArea(Rectangle rectangle, Class<? extends AbstractContainerScreen<?>> screenClass, Identifier... categories) {
         this.screenClickAreas.add(new ScreenClickAreaImpl(screenClass, rectangle, categories));
     }
-
+    
     @Override
     public <T extends Recipe<?>> void registerRecipes(Identifier category, Class<T> recipeClass, Function<T, RecipeDisplay> mappingFunction) {
         recipeFunctions.add(new RecipeFunction(category, recipe -> recipeClass.isAssignableFrom(recipe.getClass()), mappingFunction));
     }
-
-    @Override
-    public <T extends Recipe<?>> void registerRecipes(Identifier category, @SuppressWarnings("rawtypes")
-            Function<Recipe, Boolean> recipeFilter, Function<T, RecipeDisplay> mappingFunction) {
-        recipeFunctions.add(new RecipeFunction(category, recipeFilter::apply, mappingFunction));
-    }
-
+    
     @Override
     public <T extends Recipe<?>> void registerRecipes(Identifier category,
-                                                      @SuppressWarnings("rawtypes") Predicate<Recipe> recipeFilter, Function<T, RecipeDisplay> mappingFunction) {
+            @SuppressWarnings("rawtypes") Function<Recipe, Boolean> recipeFilter, Function<T, RecipeDisplay> mappingFunction) {
+        recipeFunctions.add(new RecipeFunction(category, recipeFilter::apply, mappingFunction));
+    }
+    
+    @Override
+    public <T extends Recipe<?>> void registerRecipes(Identifier category,
+            @SuppressWarnings("rawtypes") Predicate<Recipe> recipeFilter, Function<T, RecipeDisplay> mappingFunction) {
         recipeFunctions.add(new RecipeFunction(category, recipeFilter, mappingFunction));
     }
-
+    
     @Override
     public void registerLiveRecipeGenerator(LiveRecipeGenerator<?> liveRecipeGenerator) {
         liveRecipeGenerators.add((LiveRecipeGenerator<RecipeDisplay>) liveRecipeGenerator);
     }
-
+    
     @Override
     public List<ScreenClickArea> getScreenClickAreas() {
         return screenClickAreas;
     }
-
+    
     private class ScreenClickAreaImpl implements ScreenClickArea {
         Class<? extends AbstractContainerScreen<?>> screenClass;
         Rectangle rectangle;
         Identifier[] categories;
-
+        
         private ScreenClickAreaImpl(Class<? extends AbstractContainerScreen<?>> screenClass, Rectangle rectangle, Identifier[] categories) {
             this.screenClass = screenClass;
             this.rectangle = rectangle;
             this.categories = categories;
         }
-
+        
         public Class<? extends AbstractContainerScreen<?>> getScreenClass() {
             return screenClass;
         }
-
+        
         public Rectangle getRectangle() {
             return rectangle;
         }
-
+        
         public Identifier[] getCategories() {
             return categories;
         }
     }
-
+    
     @SuppressWarnings("rawtypes")
     private class RecipeFunction {
         Identifier category;
         Predicate<Recipe> recipeFilter;
         Function mappingFunction;
-
+        
         public RecipeFunction(Identifier category, Predicate<Recipe> recipeFilter, Function<?, RecipeDisplay> mappingFunction) {
             this.category = category;
             this.recipeFilter = recipeFilter;
             this.mappingFunction = mappingFunction;
         }
     }
-
+    
 }

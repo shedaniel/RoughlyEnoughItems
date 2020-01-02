@@ -19,28 +19,28 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public interface RecipeHelper {
-
+    
     @SuppressWarnings("deprecation")
     static RecipeHelper getInstance() {
         return RoughlyEnoughItemsCore.getRecipeHelper();
     }
-
+    
     AutoTransferHandler registerAutoCraftingHandler(AutoTransferHandler handler);
-
+    
     List<AutoTransferHandler> getSortedAutoCraftingHandler();
-
+    
     /**
      * Gets the total recipe count registered
      *
      * @return the recipe count
      */
     int getRecipeCount();
-
+    
     /**
      * @return a list of sorted recipes
      */
     List<Recipe> getAllSortedRecipes();
-
+    
     /**
      * Gets all craftable items from materials.
      *
@@ -48,14 +48,14 @@ public interface RecipeHelper {
      * @return the list of craftable entries
      */
     List<EntryStack> findCraftableEntriesByItems(List<EntryStack> inventoryItems);
-
+    
     /**
      * Registers a category
      *
      * @param category the category to register
      */
     void registerCategory(RecipeCategory<?> category);
-
+    
     /**
      * Registers the working stations of a category
      *
@@ -63,7 +63,7 @@ public interface RecipeHelper {
      * @param workingStations the working stations
      */
     void registerWorkingStations(Identifier category, List<EntryStack>... workingStations);
-
+    
     /**
      * Registers the working stations of a category
      *
@@ -71,9 +71,9 @@ public interface RecipeHelper {
      * @param workingStations the working stations
      */
     void registerWorkingStations(Identifier category, EntryStack... workingStations);
-
+    
     List<List<EntryStack>> getWorkingStations(Identifier category);
-
+    
     /**
      * Registers a recipe display
      *
@@ -81,7 +81,7 @@ public interface RecipeHelper {
      * @param display            the recipe display
      */
     void registerDisplay(Identifier categoryIdentifier, RecipeDisplay display);
-
+    
     /**
      * Gets a map of recipes for an entry
      *
@@ -89,23 +89,23 @@ public interface RecipeHelper {
      * @return the map of recipes
      */
     Map<RecipeCategory<?>, List<RecipeDisplay>> getRecipesFor(EntryStack stack);
-
+    
     RecipeCategory getCategory(Identifier identifier);
-
+    
     /**
      * Gets the vanilla recipe manager
      *
      * @return the recipe manager
      */
     RecipeManager getRecipeManager();
-
+    
     /**
      * Gets all registered categories
      *
      * @return the list of categories
      */
     List<RecipeCategory<?>> getAllCategories();
-
+    
     /**
      * Gets a map of usages for an entry
      *
@@ -113,7 +113,7 @@ public interface RecipeHelper {
      * @return the map of recipes
      */
     Map<RecipeCategory<?>, List<RecipeDisplay>> getUsagesFor(EntryStack stack);
-
+    
     /**
      * Gets the optional of the auto crafting button area from a category
      *
@@ -121,7 +121,7 @@ public interface RecipeHelper {
      * @return the optional of auto crafting button area
      */
     Optional<ButtonAreaSupplier> getAutoCraftButtonArea(RecipeCategory<?> category);
-
+    
     /**
      * Registers a auto crafting button area
      *
@@ -129,7 +129,7 @@ public interface RecipeHelper {
      * @param rectangle the button area
      */
     void registerAutoCraftButtonArea(Identifier category, ButtonAreaSupplier rectangle);
-
+    
     /**
      * Removes the auto crafting button
      *
@@ -138,37 +138,37 @@ public interface RecipeHelper {
     default void removeAutoCraftButton(Identifier category) {
         registerAutoCraftButtonArea(category, bounds -> null);
     }
-
+    
     /**
      * Gets the map of all recipes visible to the player
      *
      * @return the map of recipes
      */
     Map<RecipeCategory<?>, List<RecipeDisplay>> getAllRecipes();
-
+    
     List<RecipeDisplay> getAllRecipesFromCategory(RecipeCategory<?> category);
-
+    
     /**
      * Registers a recipe visibility handler
      *
      * @param visibilityHandler the handler to be registered
      */
     void registerRecipeVisibilityHandler(DisplayVisibilityHandler visibilityHandler);
-
+    
     /**
      * Unregisters a recipe visibility handler
      *
      * @param visibilityHandler the handler to be unregistered
      */
     void unregisterRecipeVisibilityHandler(DisplayVisibilityHandler visibilityHandler);
-
+    
     /**
      * Gets an unmodifiable list of recipe visibility handlers
      *
      * @return the unmodifiable list of handlers
      */
     List<DisplayVisibilityHandler> getDisplayVisibilityHandlers();
-
+    
     /**
      * Checks if the display is visible by asking recipe visibility handlers
      *
@@ -179,7 +179,7 @@ public interface RecipeHelper {
      */
     @Deprecated
     boolean isDisplayVisible(RecipeDisplay display, boolean respectConfig);
-
+    
     /**
      * Checks if the display is visible by asking recipe visibility handlers
      *
@@ -187,9 +187,9 @@ public interface RecipeHelper {
      * @return whether the display should be visible
      */
     boolean isDisplayVisible(RecipeDisplay display);
-
+    
     <T extends Recipe<?>> void registerRecipes(Identifier category, Predicate<Recipe> recipeFilter, Function<T, RecipeDisplay> mappingFunction);
-
+    
     /**
      * Registers a live recipe generator.
      *
@@ -197,24 +197,24 @@ public interface RecipeHelper {
      * @apiNote Still work in progress
      */
     void registerLiveRecipeGenerator(LiveRecipeGenerator<?> liveRecipeGenerator);
-
+    
     void registerScreenClickArea(Rectangle rectangle, Class<? extends AbstractContainerScreen<?>> screenClass, Identifier... categories);
-
+    
     <T extends Recipe<?>> void registerRecipes(Identifier category, Class<T> recipeClass, Function<T, RecipeDisplay> mappingFunction);
-
+    
     <T extends Recipe<?>> void registerRecipes(Identifier category, Function<Recipe, Boolean> recipeFilter, Function<T, RecipeDisplay> mappingFunction);
-
+    
     List<RecipeHelper.ScreenClickArea> getScreenClickAreas();
-
+    
     boolean arePluginsLoading();
-
+    
     interface ScreenClickArea {
         Class<? extends AbstractContainerScreen> getScreenClass();
-
+        
         Rectangle getRectangle();
-
+        
         Identifier[] getCategories();
     }
-
+    
 }
 

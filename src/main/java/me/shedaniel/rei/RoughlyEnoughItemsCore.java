@@ -56,48 +56,43 @@ import java.util.concurrent.atomic.AtomicLong;
 
 @Internal
 public class RoughlyEnoughItemsCore implements ClientModInitializer {
-
-    @Internal
-    public static final Logger LOGGER;
-    @SuppressWarnings("deprecation")
-    private static final RecipeHelper RECIPE_HELPER = new RecipeHelperImpl();
-    @SuppressWarnings("deprecation")
-    private static final EntryRegistry ENTRY_REGISTRY = new EntryRegistryImpl();
-    @SuppressWarnings("deprecation")
-    private static final DisplayHelper DISPLAY_HELPER = new DisplayHelperImpl();
+    
+    @Internal public static final Logger LOGGER;
+    @SuppressWarnings("deprecation") private static final RecipeHelper RECIPE_HELPER = new RecipeHelperImpl();
+    @SuppressWarnings("deprecation") private static final EntryRegistry ENTRY_REGISTRY = new EntryRegistryImpl();
+    @SuppressWarnings("deprecation") private static final DisplayHelper DISPLAY_HELPER = new DisplayHelperImpl();
     private static final Map<Identifier, REIPluginEntry> plugins = Maps.newHashMap();
     private static final ExecutorService SYNC_RECIPES = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "REI-SyncRecipes"));
     private static ConfigManager configManager;
-
+    
     static {
         LOGGER = LogManager.getFormatterLogger("REI");
     }
-
+    
     @Deprecated
     public static RecipeHelper getRecipeHelper() {
         return RECIPE_HELPER;
     }
-
+    
     @Deprecated
     public static ConfigManager getConfigManager() {
         return configManager;
     }
-
+    
     @Deprecated
     public static EntryRegistry getEntryRegistry() {
         return ENTRY_REGISTRY;
     }
-
+    
     @Deprecated
     public static DisplayHelper getDisplayHelper() {
         return DISPLAY_HELPER;
     }
-
+    
     /**
      * Registers a REI plugin
      *
-     * @param identifier the identifier of the plugin
-     * @param plugin     the plugin instance
+     * @param plugin the plugin instance
      * @return the plugin itself
      * @deprecated Check REI wiki
      */
@@ -107,18 +102,18 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         RoughlyEnoughItemsCore.LOGGER.debug("[REI] Registered plugin %s from %s", plugin.getPluginIdentifier().toString(), plugin.getClass().getSimpleName());
         return plugin;
     }
-
+    
     public static List<REIPluginEntry> getPlugins() {
         return new LinkedList<>(plugins.values());
     }
-
+    
     public static Optional<Identifier> getPluginIdentifier(REIPluginEntry plugin) {
         for (Identifier identifier : plugins.keySet())
             if (identifier != null && plugins.get(identifier).equals(plugin))
                 return Optional.of(identifier);
         return Optional.empty();
     }
-
+    
     public static boolean hasPermissionToUsePackets() {
         try {
             MinecraftClient.getInstance().getNetworkHandler().getCommandSource().hasPermissionLevel(0);
@@ -127,7 +122,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             return true;
         }
     }
-
+    
     public static boolean hasOperatorPermission() {
         try {
             return MinecraftClient.getInstance().getNetworkHandler().getCommandSource().hasPermissionLevel(1);
@@ -135,11 +130,11 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             return true;
         }
     }
-
+    
     public static boolean canUsePackets() {
         return ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET) && ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.DELETE_ITEMS_PACKET);
     }
-
+    
     @Internal
     @Deprecated
     public static void syncRecipes(AtomicLong lastSync) {
@@ -157,19 +152,19 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             ((RecipeHelperImpl) RecipeHelper.getInstance()).recipesLoaded(recipeManager);
         }
     }
-
+    
     @SuppressWarnings("deprecation")
     @Override
     public void onInitializeClient() {
         configManager = new ConfigManagerImpl();
-
+        
         registerClothEvents();
         discoverPluginEntries();
         for (ModContainer modContainer : FabricLoader.getInstance().getAllMods()) {
             if (modContainer.getMetadata().containsCustomValue("roughlyenoughitems:plugins"))
                 RoughlyEnoughItemsCore.LOGGER.error("[REI] REI plugin from " + modContainer.getMetadata().getId() + " is not loaded because it is too old!");
         }
-
+        
         ClientSidePacketRegistry.INSTANCE.register(RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, (packetContext, packetByteBuf) -> {
             ItemStack stack = packetByteBuf.readItemStack();
             String player = packetByteBuf.readString(32767);
@@ -181,7 +176,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                 RecipeBookWidget recipeBookGui = ((RecipeBookProvider) currentScreen).getRecipeBookGui();
                 RecipeBookGhostSlots ghostSlots = ((RecipeBookGuiHooks) recipeBookGui).rei_getGhostSlots();
                 ghostSlots.reset();
-
+                
                 List<List<ItemStack>> input = Lists.newArrayList();
                 int mapSize = packetByteBuf.readInt();
                 for (int i = 0; i < mapSize; i++) {
@@ -192,7 +187,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                     }
                     input.add(list);
                 }
-
+                
                 ghostSlots.addSlot(Ingredient.ofItems(Items.STONE), 381203812, 12738291);
                 CraftingTableContainer container = ((CraftingTableScreen) currentScreen).getContainer();
                 for (int i = 0; i < input.size(); i++) {
@@ -205,7 +200,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             }
         });
     }
-
+    
     @SuppressWarnings("deprecation")
     private void discoverPluginEntries() {
         for (REIPluginEntry reiPlugin : FabricLoader.getInstance().getEntrypoints("rei_plugins", REIPluginEntry.class)) {
@@ -226,18 +221,18 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                 RoughlyEnoughItemsCore.LOGGER.error("[REI] Can't load REI plugins from %s: %s", reiPlugin.getClass(), e.getLocalizedMessage());
             }
         }
-
+        
         // Test Only
         loadTestPlugins();
     }
-
+    
     @SuppressWarnings("deprecation")
     private void loadTestPlugins() {
         if (System.getProperty("rei.test", "false").equals("true")) {
             registerPlugin(new REITestPlugin());
         }
     }
-
+    
     @SuppressWarnings("deprecation")
     private void registerClothEvents() {
         final Identifier recipeButtonTex = new Identifier("textures/gui/recipe_button.png");
@@ -317,5 +312,5 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             return ActionResult.PASS;
         });
     }
-
+    
 }

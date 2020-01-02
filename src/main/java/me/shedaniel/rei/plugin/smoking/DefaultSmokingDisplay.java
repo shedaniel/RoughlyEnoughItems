@@ -11,11 +11,11 @@ import net.minecraft.recipe.SmokingRecipe;
 import net.minecraft.util.Identifier;
 
 public class DefaultSmokingDisplay extends DefaultCookingDisplay {
-
+    
     public DefaultSmokingDisplay(SmokingRecipe recipe) {
         super(recipe);
     }
-
+    
     @Override
     public Identifier getRecipeCategory() {
         return DefaultPlugin.SMOKING;

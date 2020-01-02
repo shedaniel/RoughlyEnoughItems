@@ -12,15 +12,15 @@ import net.minecraft.client.gui.screen.Screen;
 import java.util.function.Function;
 
 public class REIModMenuEntryPoint implements ModMenuApi {
-
+    
     @Override
     public String getModId() {
         return "roughlyenoughitems";
     }
-
+    
     @Override
     public Function<Screen, ? extends Screen> getConfigScreenFactory() {
         return parent -> ConfigManager.getInstance().getConfigScreen(parent);
     }
-
+    
 }
