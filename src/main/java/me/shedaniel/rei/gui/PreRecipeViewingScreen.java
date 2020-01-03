@@ -12,6 +12,7 @@ import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.gui.widget.ButtonWidget;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
+import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
@@ -33,12 +34,17 @@ public class PreRecipeViewingScreen extends Screen {
     private final List<Widget> widgets;
     private boolean original;
     private Map<RecipeCategory<?>, List<RecipeDisplay>> map;
+    private EntryStack mainStackToNotice = EntryStack.empty();
     
     public PreRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map) {
         super(new TranslatableText("text.rei.recipe_screen_type.selection"));
         this.widgets = Lists.newArrayList();
         this.original = true;
         this.map = map;
+    }
+    
+    public void addMainStackToNotice(EntryStack mainStackToNotice) {
+        this.mainStackToNotice = mainStackToNotice;
     }
     
     @Override
@@ -50,7 +56,7 @@ public class PreRecipeViewingScreen extends Screen {
             public void onPressed() {
                 ConfigObject.getInstance().setRecipeScreenType(original ? RecipeScreenType.ORIGINAL : RecipeScreenType.VILLAGER);
                 ConfigManager.getInstance().saveConfig();
-                ClientHelper.getInstance().openRecipeViewingScreen(map);
+                ((ClientHelperImpl) ClientHelper.getInstance()).openRecipeViewingScreen(map, mainStackToNotice);
             }
         });
         this.widgets.add(new ScreenTypeSelection(width / 2 - 200 - 5, height / 2 - 112 / 2 - 10, 0));

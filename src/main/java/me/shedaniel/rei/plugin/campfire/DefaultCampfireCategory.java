@@ -45,24 +45,28 @@ public class DefaultCampfireCategory implements RecipeCategory<DefaultCampfireDi
 
     @Override
     public List<Widget> setupDisplay(Supplier<DefaultCampfireDisplay> recipeDisplaySupplier, Rectangle bounds) {
-        Point startPoint = new Point(bounds.getCenterX() - 41, bounds.getCenterY() - 27);
+        Point startPoint = new Point(bounds.getCenterX() - 41, bounds.y + 10);
         List<Widget> widgets = new LinkedList<>(Collections.singletonList(new RecipeBaseWidget(bounds) {
             @Override
             public void render(int mouseX, int mouseY, float delta) {
                 super.render(mouseX, mouseY, delta);
                 MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
-                blit(startPoint.x, startPoint.y, 0, 167, 82, 54);
+                blit(startPoint.x, startPoint.y, 0, 177, 82, 34);
                 int height = MathHelper.ceil((System.currentTimeMillis() / 250 % 14d) / 1f);
-                blit(startPoint.x + 2, startPoint.y + 31 + (14 - height), 82, 77 + (14 - height), 14, height);
+                blit(startPoint.x + 1, startPoint.y + 31 + (3 - height), 82, 77 + (14 - height), 14, height);
                 String text = I18n.translate("category.rei.campfire.time", MathHelper.floor(recipeDisplaySupplier.get().getCookTime() / 20d));
                 int length = MinecraftClient.getInstance().textRenderer.getStringWidth(text);
-                MinecraftClient.getInstance().textRenderer.draw(text, bounds.x + bounds.width - length - 5, startPoint.y + 54 - 8, ScreenHelper.isDarkModeEnabled() ? 0xFFBBBBBB : 0xFF404040);
+                MinecraftClient.getInstance().textRenderer.draw(text, bounds.x + bounds.width - length - 5, bounds.y + 5, ScreenHelper.isDarkModeEnabled() ? 0xFFBBBBBB : 0xFF404040);
             }
         }));
-        widgets.add(new RecipeArrowWidget(startPoint.x + 24, startPoint.y + 18, true));
-        widgets.add(EntryWidget.create(startPoint.x + 1, startPoint.y + 11).entries(recipeDisplaySupplier.get().getInputEntries().get(0)));
-        widgets.add(EntryWidget.create(startPoint.x + 61, startPoint.y + 19).entries(recipeDisplaySupplier.get().getOutputEntries()).noBackground());
+        widgets.add(new RecipeArrowWidget(startPoint.x + 24, startPoint.y + 8, true));
+        widgets.add(EntryWidget.create(startPoint.x + 1, startPoint.y + 1).entries(recipeDisplaySupplier.get().getInputEntries().get(0)));
+        widgets.add(EntryWidget.create(startPoint.x + 61, startPoint.y + 9).entries(recipeDisplaySupplier.get().getOutputEntries()).noBackground());
         return widgets;
     }
-
+    
+    @Override
+    public int getDisplayHeight() {
+        return 49;
+    }
 }

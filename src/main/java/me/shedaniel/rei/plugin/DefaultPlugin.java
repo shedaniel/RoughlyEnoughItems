@@ -28,6 +28,8 @@ import me.shedaniel.rei.plugin.crafting.DefaultCraftingCategory;
 import me.shedaniel.rei.plugin.crafting.DefaultCustomDisplay;
 import me.shedaniel.rei.plugin.crafting.DefaultShapedDisplay;
 import me.shedaniel.rei.plugin.crafting.DefaultShapelessDisplay;
+import me.shedaniel.rei.plugin.fuel.DefaultFuelCategory;
+import me.shedaniel.rei.plugin.fuel.DefaultFuelDisplay;
 import me.shedaniel.rei.plugin.smelting.DefaultSmeltingDisplay;
 import me.shedaniel.rei.plugin.smoking.DefaultSmokingDisplay;
 import me.shedaniel.rei.plugin.stonecutting.DefaultStoneCuttingCategory;
@@ -38,12 +40,12 @@ import me.shedaniel.rei.plugin.stripping.DummyAxeItem;
 import net.fabricmc.loader.api.SemanticVersion;
 import net.fabricmc.loader.util.version.VersionParsingException;
 import net.minecraft.block.ComposterBlock;
+import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.*;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.fluid.EmptyFluid;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.*;
 import net.minecraft.potion.PotionUtil;
@@ -66,6 +68,7 @@ public class DefaultPlugin implements REIPluginV0 {
     public static final Identifier BREWING = new Identifier("minecraft", "plugins/brewing");
     public static final Identifier PLUGIN = new Identifier("roughlyenoughitems", "default_plugin");
     public static final Identifier COMPOSTING = new Identifier("minecraft", "plugins/composting");
+    public static final Identifier FUEL = new Identifier("minecraft", "plugins/fuel");
     private static final Identifier DISPLAY_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/display.png");
     private static final Identifier DISPLAY_TEXTURE_DARK = new Identifier("roughlyenoughitems", "textures/gui/display_dark.png");
     private static final List<DefaultBrewingDisplay> BREWING_DISPLAYS = Lists.newArrayList();
@@ -119,7 +122,7 @@ public class DefaultPlugin implements REIPluginV0 {
         }
         entryRegistry.queueRegisterEntryAfter(stack, enchantments);
         for (Fluid fluid : Registry.FLUID) {
-            if (!(fluid instanceof EmptyFluid))
+            if (!fluid.getDefaultState().isEmpty() && fluid.getDefaultState().isStill())
                 entryRegistry.registerEntry(EntryStack.create(fluid));
         }
     }
@@ -135,6 +138,7 @@ public class DefaultPlugin implements REIPluginV0 {
         recipeHelper.registerCategory(new DefaultCookingCategory(BLASTING, EntryStack.create(Items.BLAST_FURNACE), "category.rei.blasting"));
         recipeHelper.registerCategory(new DefaultCampfireCategory());
         recipeHelper.registerCategory(new DefaultStoneCuttingCategory());
+        recipeHelper.registerCategory(new DefaultFuelCategory());
         recipeHelper.registerCategory(new DefaultBrewingCategory());
         recipeHelper.registerCategory(new DefaultCompostingCategory());
         recipeHelper.registerCategory(new DefaultStrippingCategory());
@@ -154,6 +158,9 @@ public class DefaultPlugin implements REIPluginV0 {
         recipeHelper.registerRecipes(STONE_CUTTING, StonecuttingRecipe.class, DefaultStoneCuttingDisplay::new);
         for (DefaultBrewingDisplay display : BREWING_DISPLAYS) {
             recipeHelper.registerDisplay(BREWING, display);
+        }
+        for (Map.Entry<Item, Integer> entry : AbstractFurnaceBlockEntity.createFuelTimeMap().entrySet()) {
+            recipeHelper.registerDisplay(FUEL, new DefaultFuelDisplay(EntryStack.create(entry.getKey()), entry.getValue()));
         }
         List<EntryStack> arrowStack = Collections.singletonList(EntryStack.create(Items.ARROW));
         for (EntryStack entry : EntryRegistry.getInstance().getStacksList()) {
@@ -312,7 +319,7 @@ public class DefaultPlugin implements REIPluginV0 {
         recipeHelper.registerWorkingStations(BREWING, EntryStack.create(Items.BREWING_STAND));
         recipeHelper.registerWorkingStations(STONE_CUTTING, EntryStack.create(Items.STONECUTTER));
         recipeHelper.registerWorkingStations(COMPOSTING, EntryStack.create(Items.COMPOSTER));
-        recipeHelper.registerAutoCraftButtonArea(CAMPFIRE, bounds -> new Rectangle(bounds.x + 6, bounds.y + 6, 10, 10));
+        recipeHelper.removeAutoCraftButton(FUEL);
         recipeHelper.removeAutoCraftButton(COMPOSTING);
         recipeHelper.registerScreenClickArea(new Rectangle(88, 32, 28, 23), CraftingTableScreen.class, CRAFTING);
         recipeHelper.registerScreenClickArea(new Rectangle(137, 29, 10, 13), InventoryScreen.class, CRAFTING);

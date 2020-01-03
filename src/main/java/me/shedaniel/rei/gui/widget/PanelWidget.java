@@ -20,6 +20,7 @@ public class PanelWidget extends WidgetWithBounds {
     private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private static final Identifier CHEST_GUI_TEXTURE_DARK = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
     
+    private static final PanelWidget TEMP = new PanelWidget(new Rectangle());
     private Rectangle bounds;
     private int color = -1;
     
@@ -35,6 +36,12 @@ public class PanelWidget extends WidgetWithBounds {
     @Override
     public List<Widget> children() {
         return Collections.emptyList();
+    }
+    
+    public static void render(Rectangle bounds, int color) {
+        TEMP.bounds = bounds;
+        TEMP.color = color;
+        TEMP.render();
     }
     
     public void render() {

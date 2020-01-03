@@ -74,13 +74,12 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     }
     
     @Override
-    public String getModFromIdentifier(Identifier identifier) {
-        if (identifier == null)
+    public String getModFromModId(String modid) {
+        if (modid == null)
             return "";
-        Optional<String> any = Optional.ofNullable(modNameCache.getOrDefault(identifier.getNamespace(), null));
-        if (any.isPresent())
-            return any.get();
-        String modid = identifier.getNamespace();
+        String any = modNameCache.getOrDefault(modid, null);
+        if (any != null)
+            return any;
         String s = FabricLoader.getInstance().getModContainer(modid).map(ModContainer::getMetadata).map(ModMetadata::getName).orElse(modid);
         modNameCache.put(modid, s);
         return s;
@@ -138,7 +137,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     public boolean executeRecipeKeyBind(EntryStack stack) {
         Map<RecipeCategory<?>, List<RecipeDisplay>> map = RecipeHelper.getInstance().getRecipesFor(stack);
         if (map.keySet().size() > 0)
-            openRecipeViewingScreen(map);
+            openRecipeViewingScreen(map, stack);
         return map.keySet().size() > 0;
     }
     
@@ -146,7 +145,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     public boolean executeUsageKeyBind(EntryStack stack) {
         Map<RecipeCategory<?>, List<RecipeDisplay>> map = RecipeHelper.getInstance().getUsagesFor(stack);
         if (map.keySet().size() > 0)
-            openRecipeViewingScreen(map);
+            openRecipeViewingScreen(map, stack);
         return map.keySet().size() > 0;
     }
     
@@ -199,13 +198,24 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     @Override
     public void openRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map) {
-        Screen screen = null;
-        if (ConfigObject.getInstance().getRecipeScreenType() == RecipeScreenType.VILLAGER)
+        openRecipeViewingScreen(map, null);
+    }
+    
+    public void openRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map, EntryStack notice) {
+        Screen screen;
+        if (ConfigObject.getInstance().getRecipeScreenType() == RecipeScreenType.VILLAGER) {
             screen = new VillagerRecipeViewingScreen(map);
-        else if (ConfigObject.getInstance().getRecipeScreenType() == RecipeScreenType.UNSET)
+            if (notice != null)
+                ((VillagerRecipeViewingScreen) screen).addMainStackToNotice(notice);
+        } else if (ConfigObject.getInstance().getRecipeScreenType() == RecipeScreenType.UNSET) {
             screen = new PreRecipeViewingScreen(map);
-        else
+            if (notice != null)
+                ((PreRecipeViewingScreen) screen).addMainStackToNotice(notice);
+        } else {
             screen = new RecipeViewingScreen(map);
+            if (notice != null)
+                ((RecipeViewingScreen) screen).addMainStackToNotice(notice);
+        }
         ScreenHelper.storeRecipeScreen(MinecraftClient.getInstance().currentScreen);
         MinecraftClient.getInstance().openScreen(screen);
     }

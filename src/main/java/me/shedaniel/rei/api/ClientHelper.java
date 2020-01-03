@@ -6,7 +6,6 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.impl.ClientHelperImpl;
-import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
@@ -126,7 +125,19 @@ public interface ClientHelper {
      * @param identifier the identifier to find
      * @return the mod name
      */
-    String getModFromIdentifier(Identifier identifier);
+    default String getModFromIdentifier(Identifier identifier) {
+        if (identifier == null)
+            return "";
+        return getModFromModId(identifier.getNamespace());
+    }
+    
+    /**
+     * Gets the mod from a modid
+     *
+     * @param modid the modid of the mod
+     * @return the mod name
+     */
+    String getModFromModId(String modid);
     
     /**
      * Finds all recipes and open them in a recipe screen.

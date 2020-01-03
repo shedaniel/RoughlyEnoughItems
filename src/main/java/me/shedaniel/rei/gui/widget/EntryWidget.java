@@ -6,20 +6,24 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.ClientHelper;
+import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.impl.ScreenHelper;
+import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.gui.Element;
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class EntryWidget extends WidgetWithBounds {
     
@@ -30,6 +34,7 @@ public class EntryWidget extends WidgetWithBounds {
     protected boolean tooltips = true;
     protected boolean background = true;
     protected boolean interactable = true;
+    protected boolean interactableFavorites = true;
     private Rectangle bounds;
     private List<EntryStack> entryStacks;
     
@@ -48,6 +53,16 @@ public class EntryWidget extends WidgetWithBounds {
     
     public EntryWidget interactable(boolean b) {
         interactable = b;
+        interactableFavorites = interactableFavorites && interactable;
+        return this;
+    }
+    
+    public EntryWidget disableFavoritesInteractions() {
+        return interactableFavorites(false);
+    }
+    
+    public EntryWidget interactableFavorites(boolean b) {
+        interactableFavorites = b && interactable;
         return this;
     }
     
@@ -144,6 +159,13 @@ public class EntryWidget extends WidgetWithBounds {
     protected void queueTooltip(int mouseX, int mouseY, float delta) {
         QueuedTooltip tooltip = getCurrentTooltip(mouseX, mouseY);
         if (tooltip != null) {
+            if (interactableFavorites && ConfigObject.getInstance().doDisplayFavoritesTooltip() && !ConfigObject.getInstance().getFavoriteKeyCode().isUnknown()) {
+                String name = ConfigObject.getInstance().getFavoriteKeyCode().getLocalizedName();
+                if (reverseFavoritesAction())
+                    tooltip.getText().addAll(Arrays.asList(I18n.translate("text.rei.remove_favorites_tooltip", name).split("\n")));
+                else
+                    tooltip.getText().addAll(Arrays.asList(I18n.translate("text.rei.favorites_tooltip", name).split("\n")));
+            }
             ScreenHelper.getLastOverlay().addTooltip(tooltip);
         }
     }
@@ -173,11 +195,16 @@ public class EntryWidget extends WidgetWithBounds {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (!interactable)
             return false;
-        if (containsMouse(mouseX, mouseY))
+        if (containsMouse(mouseX, mouseY)) {
             if (button == 0)
                 return ClientHelper.getInstance().executeRecipeKeyBind(getCurrentEntry());
             else if (button == 1)
                 return ClientHelper.getInstance().executeUsageKeyBind(getCurrentEntry());
+        }
+        return false;
+    }
+    
+    protected boolean reverseFavoritesAction() {
         return false;
     }
     
@@ -185,11 +212,25 @@ public class EntryWidget extends WidgetWithBounds {
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (!interactable)
             return false;
-        if (containsMouse(PointHelper.fromMouse()))
+        if (containsMouse(PointHelper.fromMouse())) {
+            if (interactableFavorites && ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(PointHelper.fromMouse()) && !getCurrentEntry().isEmpty()) {
+                ModifierKeyCode keyCode = ConfigObject.getInstance().getFavoriteKeyCode();
+                if (keyCode.matchesKey(int_1, int_2)) {
+                    if (reverseFavoritesAction())
+                        ConfigManager.getInstance().getFavorites().remove(getCurrentEntry());
+                    else if (!CollectionUtils.anyMatchEqualsAll(ConfigManager.getInstance().getFavorites(), getCurrentEntry()))
+                        ConfigManager.getInstance().getFavorites().add(getCurrentEntry());
+                    ContainerScreenOverlay.getEntryListWidget().updateSearch(ScreenHelper.getSearchField().getText());
+                    ConfigManager.getInstance().saveConfig();
+                    minecraft.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                    return true;
+                }
+            }
             if (ConfigObject.getInstance().getRecipeKeybind().matchesKey(int_1, int_2))
                 return ClientHelper.getInstance().executeRecipeKeyBind(getCurrentEntry());
             else if (ConfigObject.getInstance().getUsageKeybind().matchesKey(int_1, int_2))
                 return ClientHelper.getInstance().executeUsageKeyBind(getCurrentEntry());
+        }
         return false;
     }
 }
