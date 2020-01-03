@@ -8,7 +8,6 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
-import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
 import me.shedaniel.math.api.Point;
@@ -29,19 +28,19 @@ import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.Matrix4f;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemGroup;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -350,6 +349,8 @@ public class EntryListWidget extends WidgetWithBounds {
                 }
             }
         }
+        if (containsMouse(mouseX, mouseY) && ClientHelper.getInstance().isCheating() && !minecraft.player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
+            ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.delete_items")));
     }
     
     private int getScrollbarMinX() {
@@ -593,6 +594,7 @@ public class EntryListWidget extends WidgetWithBounds {
         if (searchArguments.isEmpty())
             return true;
         String mod = null;
+        String modName = null;
         String name = null;
         String tooltip = null;
         String[] tags = null;
@@ -604,9 +606,17 @@ public class EntryListWidget extends WidgetWithBounds {
                 else if (argument.getArgumentType() == SearchArgument.ArgumentType.MOD) {
                     if (mod == null)
                         mod = stack.getIdentifier().map(Identifier::getNamespace).orElse("").replace(SPACE, EMPTY).toLowerCase(Locale.ROOT);
-                    if (mod != null && !mod.isEmpty() && argument.getFunction(!argument.isInclude()).apply(mod)) {
-                        applicable = false;
-                        break;
+                    if (mod != null && !mod.isEmpty()) {
+                        if (argument.getFunction(!argument.isInclude()).apply(mod)) {
+                            applicable = false;
+                            break;
+                        }
+                        if (modName == null)
+                            modName = ClientHelper.getInstance().getModFromModId(mod).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT);
+                        if (modName != null && !modName.isEmpty() && argument.getFunction(!argument.isInclude()).apply(modName)) {
+                            applicable = false;
+                            break;
+                        }
                     }
                 } else if (argument.getArgumentType() == SearchArgument.ArgumentType.TEXT) {
                     if (name == null)
@@ -717,7 +727,7 @@ public class EntryListWidget extends WidgetWithBounds {
             ClientPlayerEntity player = minecraft.player;
             if (ClientHelper.getInstance().isCheating() && !player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets()) {
                 ClientHelper.getInstance().sendDeletePacket();
-                return false;
+                return true;
             }
             if (!player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
                 return false;
@@ -749,60 +759,16 @@ public class EntryListWidget extends WidgetWithBounds {
                 super.drawHighlighted(mouseX, mouseY, delta);
         }
         
-        private String getLocalizedName(InputUtil.KeyCode value) {
-            String string_1 = value.getName();
-            int int_1 = value.getKeyCode();
-            String string_2 = null;
-            switch (value.getCategory()) {
-                case KEYSYM:
-                    string_2 = InputUtil.getKeycodeName(int_1);
-                    break;
-                case SCANCODE:
-                    string_2 = InputUtil.getScancodeName(int_1);
-                    break;
-                case MOUSE:
-                    String string_3 = I18n.translate(string_1);
-                    string_2 = Objects.equals(string_3, string_1) ? I18n.translate(InputUtil.Type.MOUSE.getName(), int_1 + 1) : string_3;
-            }
-            
-            return string_2 == null ? I18n.translate(string_1) : string_2;
-        }
-        
         @Override
         protected void queueTooltip(int mouseX, int mouseY, float delta) {
             if (!ClientHelper.getInstance().isCheating() || minecraft.player.inventory.getCursorStack().isEmpty()) {
-                QueuedTooltip tooltip = getCurrentTooltip(mouseX, mouseY);
-                if (tooltip != null) {
-                    if (ConfigObject.getInstance().doDisplayFavoritesTooltip() && !ConfigObject.getInstance().getFavoriteKeyCode().isUnknown()) {
-                        String name = ConfigObject.getInstance().getFavoriteKeyCode().getLocalizedName();
-                        if (!isFavorites)
-                            tooltip.getText().addAll(Arrays.asList(I18n.translate("text.rei.favorites_tooltip", name).split("\n")));
-                        else
-                            tooltip.getText().addAll(Arrays.asList(I18n.translate("text.rei.remove_favorites_tooltip", name).split("\n")));
-                    }
-                    ScreenHelper.getLastOverlay().addTooltip(tooltip);
-                }
+                super.queueTooltip(mouseX, mouseY, delta);
             }
         }
         
         @Override
-        public boolean keyPressed(int int_1, int int_2, int int_3) {
-            if (interactable && ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(PointHelper.fromMouse()) && !getCurrentEntry().isEmpty()) {
-                ModifierKeyCode keyCode = ConfigObject.getInstance().getFavoriteKeyCode();
-                if (keyCode.matchesKey(int_1, int_2)) {
-                    if (!isFavorites) {
-                        if (!CollectionUtils.anyMatchEqualsAll(ConfigManager.getInstance().getFavorites(), getCurrentEntry()))
-                            ConfigManager.getInstance().getFavorites().add(getCurrentEntry().copy());
-                    } else {
-                        ConfigManager.getInstance().getFavorites().remove(getCurrentEntry());
-                    }
-                    ContainerScreenOverlay.getEntryListWidget().updateSearch(ScreenHelper.getSearchField().getText());
-                    ConfigManager.getInstance().saveConfig();
-                    minecraft.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-                    return true;
-                }
-            }
-            return super.keyPressed(int_1, int_2, int_3);
+        protected boolean reverseFavoritesAction() {
+            return isFavorites;
         }
         
         @Override

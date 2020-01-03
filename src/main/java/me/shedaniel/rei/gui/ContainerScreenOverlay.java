@@ -288,7 +288,8 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             widgets.add(new ClickableLabelWidget(new Point(rectangle.x + (rectangle.width / 2), rectangle.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 10), "") {
                 @Override
                 public void render(int mouseX, int mouseY, float delta) {
-                    setText(String.format("%s/%s", ENTRY_LIST_WIDGET.getPage() + 1, ENTRY_LIST_WIDGET.getTotalPages()));
+                    clickable(ENTRY_LIST_WIDGET.getTotalPages() > 1);
+                    setText(String.format("%s/%s", ENTRY_LIST_WIDGET.getPage() + 1, Math.max(ENTRY_LIST_WIDGET.getTotalPages(), 1)));
                     super.render(mouseX, mouseY, delta);
                 }
                 
@@ -308,8 +309,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                 public boolean changeFocus(boolean boolean_1) {
                     return false;
                 }
-            }.clickable(ENTRY_LIST_WIDGET.getTotalPages() != 1));
-            buttonLeft.enabled = buttonRight.enabled = ENTRY_LIST_WIDGET.getTotalPages() != 1;
+            });
         }
         if (ConfigObject.getInstance().isCraftableFilterEnabled())
             this.widgets.add(toggleButtonWidget = new CraftableToggleButtonWidget(getCraftableToggleArea()) {
@@ -508,7 +508,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         if (!ScreenHelper.isOverlayVisible())
             return;
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled())
-            buttonLeft.enabled = buttonRight.enabled = ENTRY_LIST_WIDGET.getTotalPages() != 1;
+            buttonLeft.enabled = buttonRight.enabled = ENTRY_LIST_WIDGET.getTotalPages() > 1;
         for (Widget widget : widgets) {
             widget.render(int_1, int_2, float_1);
         }

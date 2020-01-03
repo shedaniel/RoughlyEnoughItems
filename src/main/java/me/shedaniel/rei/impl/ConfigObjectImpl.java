@@ -305,7 +305,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         @Comment("Declares whether entry list widget is scrolled.") private boolean scrollingEntryListWidget = false;
         private boolean snapToRows = false;
         private boolean displayFavoritesOnTheLeft = true;
-        private boolean displayFavoritesTooltip = true;
+        private boolean displayFavoritesTooltip = false;
         @Comment("Declares whether favorites will be searched.") private boolean searchFavorites = true;
         @UsePercentage(min = 0.5, max = 4.0) private double entrySize = 1.0;
     }

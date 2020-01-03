@@ -54,11 +54,12 @@ public class VillagerRecipeViewingScreen extends Screen {
     private double target;
     private long start;
     private long duration;
-    private float scrollBarAlpha = 0;
-    private float scrollBarAlphaFuture = 0;
+    private float scrollBarAlpha;
+    private float scrollBarAlphaFuture;
     private long scrollBarAlphaFutureTime = -1;
-    private boolean draggingScrollBar = false;
+    private boolean draggingScrollBar;
     private int tabsPage;
+    private EntryStack mainStackToNotice = EntryStack.empty();
     
     public VillagerRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map) {
         super(new LiteralText(""));
@@ -81,6 +82,10 @@ public class VillagerRecipeViewingScreen extends Screen {
                 categoryMap.put(category, map.get(category));
             }
         });
+    }
+    
+    public void addMainStackToNotice(EntryStack stack) {
+        this.mainStackToNotice = stack;
     }
     
     @Override
@@ -106,18 +111,19 @@ public class VillagerRecipeViewingScreen extends Screen {
             int w = Math.min(ww, workingStations.size());
             int h = MathHelper.ceil(workingStations.size() / ((float) ww));
             int xx = bounds.x + 16;
-            int yy = bounds.y + bounds.height + 5;
-            widgets.add(new CategoryBaseWidget(new Rectangle(xx - 6, bounds.y + bounds.height - 5, 11 + w * 18, 15 + h * 18)));
+            int yy = bounds.y + bounds.height + 2;
+            widgets.add(new CategoryBaseWidget(new Rectangle(xx - 5, bounds.y + bounds.height - 5, 10 + w * 16, 12 + h * 16)));
+            widgets.add(new SlotBaseWidget(new Rectangle(xx - 1, yy - 1, 2 + w * 16, 2 + h * 16)));
             int index = 0;
             List<String> list = Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("text.rei.working_station"));
             for (List<EntryStack> workingStation : workingStations) {
-                widgets.add(EntryWidget.create(xx, yy).entries(CollectionUtils.map(workingStation, stack -> stack.copy().setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> list))));
+                widgets.add(new RecipeViewingScreen.WorkstationSlotWidget(xx, yy, CollectionUtils.map(workingStation, stack -> stack.copy().setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> list))));
                 index++;
-                xx += 18;
+                xx += 16;
                 if (index >= ww) {
                     index = 0;
                     xx = bounds.x + 16;
-                    yy += 18;
+                    yy += 16;
                 }
             }
         }
@@ -128,6 +134,7 @@ public class VillagerRecipeViewingScreen extends Screen {
         
         Rectangle recipeBounds = new Rectangle(bounds.x + 100 + (guiWidth - 100) / 2 - category.getDisplayWidth(display) / 2, bounds.y + bounds.height / 2 - category.getDisplayHeight() / 2, category.getDisplayWidth(display), category.getDisplayHeight());
         List<Widget> setupDisplay = category.setupDisplay(() -> display, recipeBounds);
+        RecipeViewingScreen.transformNotice(setupDisplay, mainStackToNotice);
         this.widgets.addAll(setupDisplay);
         Optional<ButtonAreaSupplier> supplier = RecipeHelper.getInstance().getAutoCraftButtonArea(category);
         if (supplier.isPresent() && supplier.get().get(recipeBounds) != null)

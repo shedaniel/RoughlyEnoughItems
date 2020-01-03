@@ -46,6 +46,14 @@ public class CollectionUtils {
         return false;
     }
     
+    public static EntryStack firstOrNullEqualsAll(List<EntryStack> list, EntryStack stack) {
+        for (EntryStack t : list) {
+            if (t.equalsAll(stack))
+                return t;
+        }
+        return null;
+    }
+    
     public static <T> List<T> filter(List<T> list, Predicate<T> predicate) {
         List<T> l = new LinkedList<>();
         for (T t : list) {
