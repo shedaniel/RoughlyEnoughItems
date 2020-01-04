@@ -60,6 +60,14 @@ public class OverlaySearchField extends TextFieldWidget {
     }
     
     @Override
+    protected void renderSuggestion(int x, int y) {
+        if (containsMouse(PointHelper.fromMouse()) || isFocused())
+            this.font.drawWithShadow(this.font.trimToWidth(this.getSuggestion(), this.getWidth()), x, y, ScreenHelper.isDarkModeEnabled() ? 0xccddaa3d : 0xddeaeaea);
+        else
+            this.font.drawWithShadow(this.font.trimToWidth(this.getSuggestion(), this.getWidth()), x, y, -6250336);
+    }
+    
+    @Override
     public void renderBorder() {
         if (!isSearching)
             super.renderBorder();

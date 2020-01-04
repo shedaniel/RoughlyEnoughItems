@@ -61,7 +61,7 @@ public class DefaultCookingCategory implements TransferRecipeCategory<DefaultCoo
                 MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
                 blit(startPoint.x, startPoint.y, 0, 177, 82, 34);
                 int height = MathHelper.ceil((System.currentTimeMillis() / 250 % 14d) / 1f);
-                blit(startPoint.x + 1, startPoint.y + 31 + (3 - height), 82, 77 + (14 - height), 14, height);
+                blit(startPoint.x + 2, startPoint.y + 31 + (3 - height), 82, 77 + (14 - height), 14, height);
                 String text = I18n.translate("category.rei.cooking.xp", recipeDisplaySupplier.get().getXp());
                 int length = MinecraftClient.getInstance().textRenderer.getStringWidth(text);
                 MinecraftClient.getInstance().textRenderer.draw(text, bounds.x + bounds.width - length - 5, bounds.y + 5, ScreenHelper.isDarkModeEnabled() ? 0xFFBBBBBB : 0xFF404040);

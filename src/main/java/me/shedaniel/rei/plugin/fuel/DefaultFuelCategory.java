@@ -59,7 +59,7 @@ public class DefaultFuelCategory implements RecipeCategory<DefaultFuelDisplay> {
                 MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
                 blit(bounds.x + 5, startPoint.y, 0, 73, 18, 34);
                 int height = MathHelper.ceil((System.currentTimeMillis() / 250 % 14d) / 1f);
-                blit(bounds.x + 6, startPoint.y + 12 + (3 - height), 82, 77 + (14 - height), 14, height);
+                blit(bounds.x + 7, startPoint.y + 12 + (3 - height), 82, 77 + (14 - height), 14, height);
                 minecraft.textRenderer.draw(I18n.translate("category.rei.fuel.time", recipeDisplaySupplier.get().getFuelTime()), bounds.x + 26, bounds.getMaxY() - 15, ScreenHelper.isDarkModeEnabled() ? 0xFFBBBBBB : 0xFF404040);
             }
         }));
