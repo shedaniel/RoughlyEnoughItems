@@ -6,7 +6,6 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
-import me.shedaniel.rei.gui.config.ItemCheatingMode;
 import me.shedaniel.rei.gui.config.ItemListOrdering;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.gui.config.SearchFieldLocation;
@@ -26,8 +25,6 @@ public interface ConfigObject {
     }
     
     boolean isLighterButtonHover();
-    
-    void setLighterButtonHover(boolean lighterButtonHover);
     
     boolean isOverlayVisible();
     
@@ -83,8 +80,6 @@ public interface ConfigObject {
     boolean doesFixTabCloseContainer();
     
     boolean areClickableRecipeArrowsEnabled();
-    
-    ItemCheatingMode getItemCheatingMode();
     
     boolean isUsingLightGrayRecipeBorder();
     

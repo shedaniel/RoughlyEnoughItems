@@ -215,11 +215,13 @@ public class EntryWidget extends WidgetWithBounds {
         if (containsMouse(PointHelper.fromMouse())) {
             if (interactableFavorites && ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(PointHelper.fromMouse()) && !getCurrentEntry().isEmpty()) {
                 ModifierKeyCode keyCode = ConfigObject.getInstance().getFavoriteKeyCode();
+                EntryStack entry = getCurrentEntry().copy();
+                entry.setAmount(1000);
                 if (keyCode.matchesKey(int_1, int_2)) {
                     if (reverseFavoritesAction())
-                        ConfigManager.getInstance().getFavorites().remove(getCurrentEntry());
-                    else if (!CollectionUtils.anyMatchEqualsAll(ConfigManager.getInstance().getFavorites(), getCurrentEntry()))
-                        ConfigManager.getInstance().getFavorites().add(getCurrentEntry());
+                        ConfigManager.getInstance().getFavorites().remove(entry);
+                    else if (!CollectionUtils.anyMatchEqualsAll(ConfigManager.getInstance().getFavorites(), entry))
+                        ConfigManager.getInstance().getFavorites().add(entry);
                     ContainerScreenOverlay.getEntryListWidget().updateSearch(ScreenHelper.getSearchField().getText());
                     ConfigManager.getInstance().saveConfig();
                     minecraft.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));

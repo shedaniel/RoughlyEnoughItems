@@ -13,7 +13,10 @@ import me.shedaniel.clothconfig2.api.Modifier;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.annotations.Internal;
-import me.shedaniel.rei.gui.config.*;
+import me.shedaniel.rei.gui.config.ItemListOrdering;
+import me.shedaniel.rei.gui.config.ItemListOrderingConfig;
+import me.shedaniel.rei.gui.config.RecipeScreenType;
+import me.shedaniel.rei.gui.config.SearchFieldLocation;
 import net.minecraft.client.util.InputUtil;
 
 import java.util.ArrayList;
@@ -32,12 +35,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     @Override
     public boolean isLighterButtonHover() {
-        return appearance.lighterButtonHover;
-    }
-    
-    @Override
-    public void setLighterButtonHover(boolean lighterButtonHover) {
-        appearance.lighterButtonHover = lighterButtonHover;
+        return true;
     }
     
     @Override
@@ -166,11 +164,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
-    public ItemCheatingMode getItemCheatingMode() {
-        return appearance.itemCheatingMode;
-    }
-    
-    @Override
     public boolean isUsingLightGrayRecipeBorder() {
         return appearance.lightGrayRecipeBorder;
     }
@@ -296,9 +289,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         @Comment("Declares the position of the item list panel.") private boolean mirrorItemPanel = false;
         @Comment("Declares the maximum amount of recipes displayed in a page if possible.") @ConfigEntry.BoundedDiscrete(min = 2, max = 99)
         private int maxRecipePerPage = 3;
-        @Comment("Declares whether REI should lighten the button if hovered.") private boolean lighterButtonHover = true;
         private boolean clickableRecipeArrows = true;
-        @UseEnumSelectorInstead private ItemCheatingMode itemCheatingMode = ItemCheatingMode.REI_LIKE;
         @Comment("Declares the appearance of recipe's border.") private boolean lightGrayRecipeBorder = false;
         @Comment("Declares whether REI should append mod names to item stacks.") private boolean appendModNames = true;
         @Comment("Declares how the scrollbar in villager screen should act.") private boolean villagerScreenPermanentScrollBar = false;

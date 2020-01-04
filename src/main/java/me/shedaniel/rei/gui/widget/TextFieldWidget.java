@@ -433,7 +433,7 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
             }
             
             if (!boolean_3 && text.isEmpty() && this.suggestion != null) {
-                this.font.drawWithShadow(this.font.trimToWidth(this.suggestion, this.getWidth()), (float) int_6, (float) int_7, -8355712);
+                renderSuggestion(int_6, int_7);
             }
             
             int var10002;
@@ -458,6 +458,10 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
                 this.method_1886(int_9, var10002, var10003, var10004 + 9);
             }
         }
+    }
+    
+    protected void renderSuggestion(int x, int y) {
+        this.font.drawWithShadow(this.font.trimToWidth(this.suggestion, this.getWidth()), x, y, -8355712);
     }
     
     protected void method_1886(int int_1, int int_2, int int_3, int int_4) {

@@ -16,12 +16,12 @@ import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
-import me.shedaniel.rei.gui.config.ItemCheatingMode;
 import me.shedaniel.rei.gui.config.ItemListOrdering;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.SearchArgument;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
@@ -778,14 +778,8 @@ public class EntryListWidget extends WidgetWithBounds {
             if (containsMouse(mouseX, mouseY) && ClientHelper.getInstance().isCheating()) {
                 EntryStack entry = getCurrentEntry().copy();
                 if (!entry.isEmpty()) {
-                    if (entry.getType() == EntryStack.Type.ITEM) {
-                        if (ConfigObject.getInstance().getItemCheatingMode() == ItemCheatingMode.REI_LIKE)
-                            entry.setAmount(button != 1 ? 1 : entry.getItemStack().getMaxCount());
-                        else if (ConfigObject.getInstance().getItemCheatingMode() == ItemCheatingMode.JEI_LIKE)
-                            entry.setAmount(button != 0 ? 1 : entry.getItemStack().getMaxCount());
-                        else
-                            entry.setAmount(1);
-                    }
+                    if (entry.getType() == EntryStack.Type.ITEM)
+                        entry.setAmount(button != 1 && !Screen.hasShiftDown() ? 1 : entry.getItemStack().getMaxCount());
                     ClientHelper.getInstance().tryCheatingEntry(entry);
                     return true;
                 }
