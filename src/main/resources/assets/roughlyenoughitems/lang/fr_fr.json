@@ -99,7 +99,7 @@
   "config.roughlyenoughitems.nextPageKeybind": "Page suivante :",
   "config.roughlyenoughitems.previousPageKeybind": "Page précédente :",
   "config.roughlyenoughitems.focusSearchFieldKeybind": "Focus Search Field:",
-  "config.roughlyenoughitems.copyRecipeIdentifierKeybind": "Copier l'ID de la recette :",
+  "config.roughlyenoughitems.copyRecipeIdentifierKeybind": "Copier l'identifiant de la recette :",
   "config.roughlyenoughitems.favoriteKeybind": "Favorite Entry:",
   "config.roughlyenoughitems.favoritesEnabled": "Favoris activés :",
   "config.roughlyenoughitems.clickableRecipeArrows": "Flèches de recette cliquables :",
