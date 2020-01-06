@@ -19,7 +19,6 @@ import net.minecraft.util.math.MathHelper;
 import javax.annotation.Nullable;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -35,9 +34,9 @@ public class SimpleRecipeEntry extends RecipeEntry {
         List<Pair<List<EntryStack>, AtomicInteger>> newList = Lists.newArrayList();
         List<Pair<List<EntryStack>, Integer>> a = CollectionUtils.map(input, stacks -> new Pair<>(stacks, stacks.stream().map(EntryStack::getAmount).max(Integer::compareTo).orElse(1)));
         for (Pair<List<EntryStack>, Integer> pair : a) {
-            Optional<Pair<List<EntryStack>, AtomicInteger>> any = newList.stream().filter(pairr -> equalsList(pair.getLeft(), pairr.getLeft())).findAny();
-            if (any.isPresent()) {
-                any.get().getRight().addAndGet(pair.getRight());
+            Pair<List<EntryStack>, AtomicInteger> any = CollectionUtils.findFirstOrNull(newList, pairr -> equalsList(pair.getLeft(), pairr.getLeft()));
+            if (any != null) {
+                any.getRight().addAndGet(pair.getRight());
             } else
                 newList.add(new Pair<>(pair.getLeft(), new AtomicInteger(pair.getRight())));
         }
@@ -48,9 +47,7 @@ public class SimpleRecipeEntry extends RecipeEntry {
                 s.setAmount(pair.getRight().get());
                 return s;
             }).collect(Collectors.toList()));
-        this.inputWidgets = b.stream().filter(stacks -> !stacks.isEmpty()).map(stacks -> {
-            return EntryWidget.create(0, 0).entries(stacks).noBackground().noHighlight().noTooltips();
-        }).collect(Collectors.toList());
+        this.inputWidgets = b.stream().filter(stacks -> !stacks.isEmpty()).map(stacks -> EntryWidget.create(0, 0).entries(stacks).noBackground().noHighlight().noTooltips()).collect(Collectors.toList());
         this.outputWidget = EntryWidget.create(0, 0).entries(CollectionUtils.filter(output, stack -> !stack.isEmpty())).noBackground().noHighlight().noTooltips();
     }
     

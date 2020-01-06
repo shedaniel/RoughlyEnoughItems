@@ -33,12 +33,8 @@ import java.util.stream.Collectors;
 public class RecipeHelperImpl implements RecipeHelper {
     
     private static final Comparator<DisplayVisibilityHandler> VISIBILITY_HANDLER_COMPARATOR;
-    @SuppressWarnings("rawtypes") private static final Comparator<Recipe> RECIPE_COMPARATOR = (o1, o2) -> {
-        int int_1 = o1.getId().getNamespace().compareTo(o2.getId().getNamespace());
-        if (int_1 == 0)
-            int_1 = o1.getId().getPath().compareTo(o2.getId().getPath());
-        return int_1;
-    };
+    @SuppressWarnings("rawtypes")
+    private static final Comparator<Recipe> RECIPE_COMPARATOR = Comparator.comparing((Recipe o) -> o.getId().getNamespace()).thenComparing(o -> o.getId().getPath());
     
     static {
         Comparator<DisplayVisibilityHandler> comparator = Comparator.comparingDouble(DisplayVisibilityHandler::getPriority);
@@ -97,14 +93,15 @@ public class RecipeHelperImpl implements RecipeHelper {
         categoryWorkingStations.put(category.getIdentifier(), Lists.newLinkedList());
     }
     
+    @SafeVarargs
     @Override
-    public void registerWorkingStations(Identifier category, List<EntryStack>... workingStations) {
+    public final void registerWorkingStations(Identifier category, List<EntryStack>... workingStations) {
         categoryWorkingStations.get(category).addAll(Arrays.asList(workingStations));
     }
     
     @Override
     public void registerWorkingStations(Identifier category, EntryStack... workingStations) {
-        categoryWorkingStations.get(category).addAll(Arrays.asList(workingStations).stream().map(Collections::singletonList).collect(Collectors.toList()));
+        categoryWorkingStations.get(category).addAll(Arrays.stream(workingStations).map(Collections::singletonList).collect(Collectors.toList()));
     }
     
     @Override
@@ -144,7 +141,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         Map<RecipeCategory<?>, List<RecipeDisplay>> recipeCategoryListMap = Maps.newLinkedHashMap();
         categories.forEach(category -> {
             if (categoriesMap.containsKey(category.getIdentifier()) && !categoriesMap.get(category.getIdentifier()).isEmpty())
-                recipeCategoryListMap.put(category, categoriesMap.get(category.getIdentifier()).stream().filter(display -> isDisplayVisible(display)).collect(Collectors.toList()));
+                recipeCategoryListMap.put(category, categoriesMap.get(category.getIdentifier()).stream().filter(this::isDisplayVisible).collect(Collectors.toList()));
         });
         for (RecipeCategory<?> category : Lists.newArrayList(recipeCategoryListMap.keySet()))
             if (recipeCategoryListMap.get(category).isEmpty())
@@ -178,32 +175,20 @@ public class RecipeHelperImpl implements RecipeHelper {
         categories.forEach(f -> categoriesMap.put(f.getIdentifier(), Sets.newLinkedHashSet()));
         for (Map.Entry<Identifier, List<RecipeDisplay>> entry : recipeCategoryListMap.entrySet()) {
             boolean isWorkstationCategory = isStackWorkStationOfCategory(entry.getKey(), stack);
+            for (RecipeDisplay recipeDisplay : entry.getValue()) {
+                back:
+                for (List<EntryStack> input : recipeDisplay.getInputEntries()) {
+                    for (EntryStack otherEntry : input) {
+                        if (otherEntry.equals(stack)) {
+                            categoriesMap.get(recipeDisplay.getRecipeCategory()).add(recipeDisplay);
+                            break back;
+                        }
+                    }
+                }
+            }
             if (isWorkstationCategory) {
                 for (RecipeDisplay recipeDisplay : entry.getValue()) {
-                    back:
-                    for (List<EntryStack> input : recipeDisplay.getInputEntries()) {
-                        for (EntryStack otherEntry : input) {
-                            if (otherEntry.equals(stack)) {
-                                categoriesMap.get(recipeDisplay.getRecipeCategory()).add(recipeDisplay);
-                                break back;
-                            }
-                        }
-                    }
-                }
-                for (RecipeDisplay recipeDisplay : entry.getValue()) {
                     categoriesMap.get(recipeDisplay.getRecipeCategory()).add(recipeDisplay);
-                }
-            } else {
-                for (RecipeDisplay recipeDisplay : entry.getValue()) {
-                    back:
-                    for (List<EntryStack> input : recipeDisplay.getInputEntries()) {
-                        for (EntryStack otherEntry : input) {
-                            if (otherEntry.equals(stack)) {
-                                categoriesMap.get(recipeDisplay.getRecipeCategory()).add(recipeDisplay);
-                                break back;
-                            }
-                        }
-                    }
                 }
             }
         }
@@ -213,7 +198,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         Map<RecipeCategory<?>, List<RecipeDisplay>> recipeCategoryListMap = Maps.newLinkedHashMap();
         for (RecipeCategory<?> category : categories) {
             if (categoriesMap.containsKey(category.getIdentifier()) && !categoriesMap.get(category.getIdentifier()).isEmpty())
-                recipeCategoryListMap.put(category, categoriesMap.get(category.getIdentifier()).stream().filter(display -> isDisplayVisible(display)).collect(Collectors.toList()));
+                recipeCategoryListMap.put(category, CollectionUtils.filterSetToList(categoriesMap.get(category.getIdentifier()), this::isDisplayVisible));
         }
         for (RecipeCategory<?> category : Lists.newArrayList(recipeCategoryListMap.keySet()))
             if (recipeCategoryListMap.get(category).isEmpty())
@@ -241,7 +226,6 @@ public class RecipeHelperImpl implements RecipeHelper {
             autoCraftAreaSupplierMap.put(category, rectangle);
     }
     
-    @SuppressWarnings("deprecation")
     public void recipesLoaded(RecipeManager recipeManager) {
         long startTime = System.currentTimeMillis();
         arePluginsLoading = true;
@@ -262,11 +246,12 @@ public class RecipeHelperImpl implements RecipeHelper {
         BaseBoundsHandler baseBoundsHandler = new BaseBoundsHandlerImpl();
         DisplayHelper.getInstance().registerBoundsHandler(baseBoundsHandler);
         ((DisplayHelperImpl) DisplayHelper.getInstance()).setBaseBoundsHandler(baseBoundsHandler);
-        List<REIPluginEntry> plugins = Lists.newLinkedList(RoughlyEnoughItemsCore.getPlugins());
+        List<REIPluginEntry> plugins = RoughlyEnoughItemsCore.getPlugins();
         plugins.sort(Comparator.comparingInt(REIPluginEntry::getPriority).reversed());
         RoughlyEnoughItemsCore.LOGGER.info("[REI] Loading %d plugins: %s", plugins.size(), plugins.stream().map(REIPluginEntry::getPluginIdentifier).map(Identifier::toString).collect(Collectors.joining(", ")));
         Collections.reverse(plugins);
         ((EntryRegistryImpl) EntryRegistry.getInstance()).reset();
+        @SuppressWarnings("OptionalGetWithoutIsPresent")
         Version reiVersion = FabricLoader.getInstance().getModContainer("roughlyenoughitems").get().getMetadata().getVersion();
         if (!(reiVersion instanceof SemanticVersion))
             RoughlyEnoughItemsCore.LOGGER.warn("[REI] Roughly Enough Items is not using semantic versioning, will be ignoring plugins' minimum versions!");
@@ -347,7 +332,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         ScreenHelper.getOptionalOverlay().ifPresent(overlay -> overlay.shouldReInit = true);
         
         long usedTime = System.currentTimeMillis() - startTime;
-        RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered %d stack entries, %d recipes displays, %d exclusion zones suppliers, %d bounds handler, %d visibility handlers and %d categories (%s) in %d ms.", EntryRegistry.getInstance().getStacksList().size(), recipeCount[0], DisplayHelper.getInstance().getBaseBoundsHandler().supplierSize(), DisplayHelper.getInstance().getAllBoundsHandlers().size(), getDisplayVisibilityHandlers().size(), categories.size(), String.join(", ", categories.stream().map(RecipeCategory::getCategoryName).collect(Collectors.toList())), usedTime);
+        RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered %d stack entries, %d recipes displays, %d exclusion zones suppliers, %d bounds handler, %d visibility handlers and %d categories (%s) in %d ms.", EntryRegistry.getInstance().getStacksList().size(), recipeCount[0], DisplayHelper.getInstance().getBaseBoundsHandler().supplierSize(), DisplayHelper.getInstance().getAllBoundsHandlers().size(), getDisplayVisibilityHandlers().size(), categories.size(), categories.stream().map(RecipeCategory::getCategoryName).collect(Collectors.joining(", ")), usedTime);
     }
     
     @Override
@@ -405,13 +390,11 @@ public class RecipeHelperImpl implements RecipeHelper {
         return Collections.unmodifiableList(displayVisibilityHandlers);
     }
     
-    @SuppressWarnings("deprecation")
     @Override
     public boolean isDisplayVisible(RecipeDisplay display, boolean respectConfig) {
         return isDisplayVisible(display);
     }
     
-    @SuppressWarnings("deprecation")
     @Override
     public boolean isDisplayVisible(RecipeDisplay display) {
         RecipeCategory<?> category = getCategory(display.getRecipeCategory());
@@ -460,7 +443,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         return screenClickAreas;
     }
     
-    private class ScreenClickAreaImpl implements ScreenClickArea {
+    private static class ScreenClickAreaImpl implements ScreenClickArea {
         Class<? extends AbstractContainerScreen<?>> screenClass;
         Rectangle rectangle;
         Identifier[] categories;
@@ -485,7 +468,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     }
     
     @SuppressWarnings("rawtypes")
-    private class RecipeFunction {
+    private static class RecipeFunction {
         Identifier category;
         Predicate<Recipe> recipeFilter;
         Function mappingFunction;

@@ -5,6 +5,8 @@
 
 package me.shedaniel.rei.utils;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.annotations.Internal;
 
@@ -55,7 +57,27 @@ public class CollectionUtils {
     }
     
     public static <T> List<T> filter(List<T> list, Predicate<T> predicate) {
-        List<T> l = new LinkedList<>();
+        List<T> l = Lists.newArrayList();
+        for (T t : list) {
+            if (predicate.test(t)) {
+                l.add(t);
+            }
+        }
+        return l;
+    }
+    
+    public static <T> Set<T> filter(Set<T> list, Predicate<T> predicate) {
+        Set<T> l = Sets.newLinkedHashSet();
+        for (T t : list) {
+            if (predicate.test(t)) {
+                l.add(t);
+            }
+        }
+        return l;
+    }
+    
+    public static <T> List<T> filterSetToList(Set<T> list, Predicate<T> predicate) {
+        List<T> l = Lists.newArrayList();
         for (T t : list) {
             if (predicate.test(t)) {
                 l.add(t);
@@ -65,7 +87,7 @@ public class CollectionUtils {
     }
     
     public static <T, R> List<R> map(List<T> list, Function<T, R> function) {
-        List<R> l = new LinkedList<>();
+        List<R> l = Lists.newArrayList();
         for (T t : list) {
             l.add(function.apply(t));
         }
@@ -73,7 +95,7 @@ public class CollectionUtils {
     }
     
     public static <T, R> List<R> map(T[] list, Function<T, R> function) {
-        List<R> l = new LinkedList<>();
+        List<R> l = Lists.newArrayList();
         for (T t : list) {
             l.add(function.apply(t));
         }
@@ -149,7 +171,7 @@ public class CollectionUtils {
         for (T t : list) {
             if (predicate.test(t)) {
                 if (l == null)
-                    l = new LinkedList<>();
+                    l = Lists.newArrayList();
                 l.add(function.apply(t));
             }
         }
