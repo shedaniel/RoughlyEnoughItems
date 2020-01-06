@@ -18,6 +18,7 @@ import me.shedaniel.rei.gui.PreRecipeViewingScreen;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
+import me.shedaniel.rei.utils.CollectionUtils;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.fabricmc.fabric.impl.client.keybinding.KeyBindingRegistryImpl;
@@ -171,10 +172,9 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     @Override
     public boolean executeViewAllRecipesFromCategory(Identifier category) {
         Map<RecipeCategory<?>, List<RecipeDisplay>> map = Maps.newLinkedHashMap();
-        Optional<RecipeCategory<?>> any = RecipeHelper.getInstance().getAllCategories().stream().filter(c -> c.getIdentifier().equals(category)).findAny();
-        if (!any.isPresent())
+        RecipeCategory<?> recipeCategory = CollectionUtils.findFirstOrNull(RecipeHelper.getInstance().getAllCategories(), c -> c.getIdentifier().equals(category));
+        if (recipeCategory == null)
             return false;
-        RecipeCategory<?> recipeCategory = any.get();
         map.put(recipeCategory, RecipeHelper.getInstance().getAllRecipesFromCategory(recipeCategory));
         if (map.keySet().size() > 0)
             openRecipeViewingScreen(map);
@@ -185,10 +185,9 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     public boolean executeViewAllRecipesFromCategories(List<Identifier> categories) {
         Map<RecipeCategory<?>, List<RecipeDisplay>> map = Maps.newLinkedHashMap();
         for (Identifier category : categories) {
-            Optional<RecipeCategory<?>> any = RecipeHelper.getInstance().getAllCategories().stream().filter(c -> c.getIdentifier().equals(category)).findAny();
-            if (!any.isPresent())
+            RecipeCategory<?> recipeCategory = CollectionUtils.findFirstOrNull(RecipeHelper.getInstance().getAllCategories(), c -> c.getIdentifier().equals(category));
+            if (recipeCategory == null)
                 continue;
-            RecipeCategory<?> recipeCategory = any.get();
             map.put(recipeCategory, RecipeHelper.getInstance().getAllRecipesFromCategory(recipeCategory));
         }
         if (map.keySet().size() > 0)
