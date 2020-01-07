@@ -205,6 +205,7 @@ public class EntryListWidget extends WidgetWithBounds {
             int i = nextIndex;
             blockedCount = 0;
             if (debugTime) {
+                long totalTimeStart = System.nanoTime();
                 int size = 0;
                 long time = 0;
                 if (sizeForFavorites > 0) {
@@ -258,9 +259,10 @@ public class EntryListWidget extends WidgetWithBounds {
                         }
                     }
                 }
+                long totalTime = System.nanoTime() - totalTimeStart;
                 int z = getZ();
                 setZ(500);
-                String str = String.format("%d entries, avg. %.0fns, %s fps", size, time / (double) size, minecraft.fpsDebugString.split(" ")[0]);
+                String str = String.format("%d entries, avg. %.0fns, ttl. %.0fms, %s fps", size, time / (double) size, totalTime / 1000000d, minecraft.fpsDebugString.split(" ")[0]);
                 fillGradient(bounds.x, bounds.y, bounds.x + font.getStringWidth(str) + 2, bounds.y + font.fontHeight + 2, -16777216, -16777216);
                 MatrixStack matrixStack_1 = new MatrixStack();
                 VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
@@ -322,6 +324,7 @@ public class EntryListWidget extends WidgetWithBounds {
         } else {
             if (debugTime) {
                 int size = 0;
+                long totalTimeStart = System.nanoTime();
                 long time = 0;
                 for (Widget widget : widgets) {
                     if (widget instanceof EntryListEntry) {
@@ -332,15 +335,17 @@ public class EntryListWidget extends WidgetWithBounds {
                     } else
                         widget.render(mouseX, mouseY, delta);
                 }
+                long totalTime = System.nanoTime() - totalTimeStart;
                 int z = getZ();
                 setZ(500);
-                String str = String.format("%d entries, avg. %.0fns, %s fps", size, time / (double) size, minecraft.fpsDebugString.split(" ")[0]);
-                fillGradient(bounds.x, bounds.y, bounds.x + font.getStringWidth(str) + 2, bounds.y + font.fontHeight + 2, -16777216, -16777216);
+                String str = String.format("%d entries, avg. %.0fns, ttl. %.0fms, %s fps", size, time / (double) size, totalTime / 1000000d, minecraft.fpsDebugString.split(" ")[0]);
+                int stringWidth = font.getStringWidth(str);
+                fillGradient(Math.min(bounds.x, minecraft.currentScreen.width - stringWidth - 2), bounds.y, bounds.x + stringWidth + 2, bounds.y + font.fontHeight + 2, -16777216, -16777216);
                 MatrixStack matrixStack_1 = new MatrixStack();
                 VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
                 matrixStack_1.translate(0.0D, 0.0D, getZ());
                 Matrix4f matrix4f_1 = matrixStack_1.peek().getModel();
-                font.draw(str, bounds.x + 2, bounds.y + 2, -1, false, matrix4f_1, immediate, false, 0, 15728880);
+                font.draw(str, Math.min(bounds.x + 2, minecraft.currentScreen.width - stringWidth), bounds.y + 2, -1, false, matrix4f_1, immediate, false, 0, 15728880);
                 immediate.draw();
                 setZ(z);
             } else {
@@ -466,7 +471,7 @@ public class EntryListWidget extends WidgetWithBounds {
         this.innerBounds = updateInnerBounds(bounds);
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
             page = Math.max(page, 0);
-            List<EntryListEntry> entries = Lists.newLinkedList();
+            List<EntryListEntry> entries = Lists.newArrayList();
             int width = innerBounds.width / entrySize();
             int height = innerBounds.height / entrySize();
             for (int currentY = 0; currentY < height; currentY++) {
@@ -485,7 +490,7 @@ public class EntryListWidget extends WidgetWithBounds {
                 entries.get(i + Math.max(0, numberForFavorites - page * entries.size())).isFavorites = false;
             }
             this.entries = entries;
-            this.widgets = Lists.newLinkedList(entries);
+            this.widgets = Lists.newArrayList(entries);
             if (numberForFavorites > 0) {
                 int skippedFavorites = page * (entries.size() - width);
                 int j = 0;
@@ -508,7 +513,7 @@ public class EntryListWidget extends WidgetWithBounds {
             int slotsToPrepare = Math.max(allStacks.size() * 3 + sizeForFavorites * 3, width * pageHeight * 3);
             int currentX = 0;
             int currentY = 0;
-            List<EntryListEntry> entries = Lists.newLinkedList();
+            List<EntryListEntry> entries = Lists.newArrayList();
             for (int i = 0; i < slotsToPrepare; i++) {
                 int xPos = currentX * entrySize() + innerBounds.x;
                 int yPos = currentY * entrySize() + innerBounds.y;
@@ -535,7 +540,7 @@ public class EntryListWidget extends WidgetWithBounds {
     public void updateSearch(String searchTerm) {
         lastSearchArguments = processSearchTerm(searchTerm);
         {
-            List<EntryStack> list = Lists.newLinkedList();
+            List<EntryStack> list = Lists.newArrayList();
             boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
             List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
             List<EntryStack> stacks = EntryRegistry.getInstance().getStacksList();
@@ -558,7 +563,7 @@ public class EntryListWidget extends WidgetWithBounds {
             allStacks = list;
         }
         if (ConfigObject.getInstance().isFavoritesEnabled() && !ConfigObject.getInstance().doDisplayFavoritesOnTheLeft()) {
-            List<EntryStack> list = Lists.newLinkedList();
+            List<EntryStack> list = Lists.newArrayList();
             boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
             List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
             for (EntryStack stack : ConfigManager.getInstance().getFavorites()) {
