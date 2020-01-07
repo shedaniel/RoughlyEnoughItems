@@ -234,7 +234,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
     public void updateSearch(EntryListWidget listWidget, String searchTerm) {
         if (ConfigObject.getInstance().isFavoritesEnabled() && ConfigObject.getInstance().doDisplayFavoritesOnTheLeft()) {
             if (ConfigObject.getInstance().doSearchFavorites()) {
-                List<EntryStack> list = Lists.newLinkedList();
+                List<EntryStack> list = Lists.newArrayList();
                 boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
                 List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
                 for (EntryStack stack : ConfigManager.getInstance().getFavorites()) {
@@ -253,7 +253,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
                     Collections.reverse(list);
                 favorites = list;
             } else {
-                List<EntryStack> list = Lists.newLinkedList();
+                List<EntryStack> list = Lists.newArrayList();
                 boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
                 List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
                 for (EntryStack stack : ConfigManager.getInstance().getFavorites()) {
@@ -281,7 +281,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
         int slotsToPrepare = Math.max(favorites.size() * 3, width * pageHeight * 3);
         int currentX = 0;
         int currentY = 0;
-        List<EntryListEntry> entries = Lists.newLinkedList();
+        List<EntryListEntry> entries = Lists.newArrayList();
         for (int i = 0; i < slotsToPrepare; i++) {
             int xPos = currentX * entrySize() + innerBounds.x;
             int yPos = currentY * entrySize() + innerBounds.y;
