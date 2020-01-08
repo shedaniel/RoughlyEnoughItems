@@ -129,7 +129,7 @@
   "config.roughlyenoughitems.disableRecipeBook.boolean.true": "Выключено",
   "config.roughlyenoughitems.disableRecipeBook.boolean.false": "Включено",
   "config.roughlyenoughitems.fixTabCloseContainer": "Восстановление стандартной вкладки контейнера (когда книга рецептов отключена):",
-  "config.roughlyenoughitems.lighterButtonHover": "Подвсеченная кнопка при наведении:",
+  "config.roughlyenoughitems.lighterButtonHover": "Подсвеченная кнопка при наведении:",
   "config.roughlyenoughitems.enableCraftableOnlyButton": "Фильтр по создаваемым предметам:",
   "config.roughlyenoughitems.enableCraftableOnlyButton.boolean.true": "Включено",
   "config.roughlyenoughitems.enableCraftableOnlyButton.boolean.false": "Выключено",
