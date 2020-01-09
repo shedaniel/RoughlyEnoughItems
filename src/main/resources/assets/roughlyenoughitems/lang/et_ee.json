@@ -107,6 +107,7 @@
   "config.roughlyenoughitems.clickableRecipeArrows.boolean.false": "Keelatud",
   "config.roughlyenoughitems.renderEntryEnchantmentGlint": "Render Enchantment Glint:",
   "config.roughlyenoughitems.entrySize": "Entry Size:",
+  "config.roughlyenoughitems.useCompactTabs": "Compact Tabs:",
   "config.roughlyenoughitems.darkTheme": "Välimuse teema:",
   "config.roughlyenoughitems.darkTheme.boolean.true": "Tume teema",
   "config.roughlyenoughitems.darkTheme.boolean.false": "Hele teema",
