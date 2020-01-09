@@ -264,6 +264,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         return general;
     }
     
+    @Override
+    public boolean isUsingCompactTabs() {
+        return appearance.useCompactTabs;
+    }
+    
     public static class General {
         @ConfigEntry.Gui.Excluded public List<String> favorites = new ArrayList<>();
         @Comment("Declares whether cheating mode is on.") private boolean cheating = false;
@@ -299,6 +304,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         private boolean displayFavoritesTooltip = false;
         @Comment("Declares whether favorites will be searched.") private boolean searchFavorites = true;
         @UsePercentage(min = 0.5, max = 4.0) private double entrySize = 1.0;
+        private boolean useCompactTabs = true;
     }
     
     public static class Technical {

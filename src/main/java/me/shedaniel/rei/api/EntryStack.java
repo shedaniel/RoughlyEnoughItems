@@ -166,7 +166,12 @@ public interface EntryStack {
         return setting(settings, value);
     }
     
-    <T> ObjectHolder<T> getSetting(Settings<T> settings);
+    @Deprecated
+    default <T> ObjectHolder<T> getSetting(Settings<T> settings) {
+        return ObjectHolder.of(get(settings));
+    }
+    
+    <T> T get(Settings<T> settings);
     
     @Nullable
     QueuedTooltip getTooltip(int mouseX, int mouseY);
@@ -183,11 +188,11 @@ public interface EntryStack {
     class Settings<T> {
         public static final Supplier<Boolean> TRUE = () -> true;
         public static final Supplier<Boolean> FALSE = () -> false;
-        public static final Settings<Supplier<Boolean>> RENDER = new Settings(TRUE);
-        public static final Settings<Supplier<Boolean>> CHECK_TAGS = new Settings(FALSE);
-        public static final Settings<Supplier<Boolean>> TOOLTIP_ENABLED = new Settings(TRUE);
-        public static final Settings<Supplier<Boolean>> TOOLTIP_APPEND_MOD = new Settings(TRUE);
-        public static final Settings<Supplier<Boolean>> RENDER_COUNTS = new Settings(TRUE);
+        public static final Settings<Supplier<Boolean>> RENDER = new Settings<>(TRUE);
+        public static final Settings<Supplier<Boolean>> CHECK_TAGS = new Settings<>(FALSE);
+        public static final Settings<Supplier<Boolean>> TOOLTIP_ENABLED = new Settings<>(TRUE);
+        public static final Settings<Supplier<Boolean>> TOOLTIP_APPEND_MOD = new Settings<>(TRUE);
+        public static final Settings<Supplier<Boolean>> RENDER_COUNTS = new Settings<>(TRUE);
         public static final Settings<Function<EntryStack, List<String>>> TOOLTIP_APPEND_EXTRA = new Settings<Function<EntryStack, List<String>>>(stack -> Collections.emptyList());
         public static final Settings<Function<EntryStack, String>> COUNTS = new Settings<Function<EntryStack, String>>(stack -> null);
         
@@ -202,7 +207,7 @@ public interface EntryStack {
         }
         
         public static class Item {
-            public static final Settings<Supplier<Boolean>> RENDER_ENCHANTMENT_GLINT = new Settings(TRUE);
+            public static final Settings<Supplier<Boolean>> RENDER_ENCHANTMENT_GLINT = new Settings<>(TRUE);
             @Deprecated public static final Settings<Supplier<Boolean>> RENDER_OVERLAY = RENDER_ENCHANTMENT_GLINT;
             
             private Item() {

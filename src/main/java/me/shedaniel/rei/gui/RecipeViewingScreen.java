@@ -33,7 +33,7 @@ import java.util.function.Supplier;
 public class RecipeViewingScreen extends Screen {
     
     public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
-    private static final int TABS_PER_PAGE = 5;
+    private int tabsPerPage = 5;
     private final List<Widget> preWidgets;
     private final List<Widget> widgets;
     private final List<TabWidget> tabs;
@@ -128,6 +128,8 @@ public class RecipeViewingScreen extends Screen {
     @Override
     public void init() {
         super.init();
+        boolean isCompactTabs = ConfigObject.getInstance().isUsingCompactTabs();
+        int tabSize = isCompactTabs ? 24 : 28;
         this.children.clear();
         this.tabs.clear();
         this.preWidgets.clear();
@@ -137,16 +139,16 @@ public class RecipeViewingScreen extends Screen {
         int maxWidthDisplay = CollectionUtils.mapAndMax(getCurrentDisplayed(), display -> selectedCategory.getDisplayWidth(display), (Comparator<Integer>) Comparator.naturalOrder()).orElse(150);
         this.guiWidth = maxWidthDisplay + 20;
         this.guiHeight = MathHelper.floor(MathHelper.clamp((double) (selectedCategory.getDisplayHeight() + 4) * (getRecipesPerPage() + 1) + 36, 100, largestHeight));
+        this.tabsPerPage = Math.max(5, MathHelper.floor((guiWidth - 20d) / tabSize));
         this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - guiHeight / 2, guiWidth, guiHeight);
         this.page = MathHelper.clamp(page, 0, getTotalPages(selectedCategory) - 1);
-        
         ButtonWidget w, w2;
         this.widgets.add(w = new ButtonWidget(new Rectangle(bounds.x + 2, bounds.y - 16, 10, 10), I18n.translate("text.rei.left_arrow")) {
             @Override
             public void onPressed() {
                 categoryPages--;
                 if (categoryPages < 0)
-                    categoryPages = MathHelper.ceil(categories.size() / (float) TABS_PER_PAGE) - 1;
+                    categoryPages = MathHelper.ceil(categories.size() / (float) tabsPerPage) - 1;
                 RecipeViewingScreen.this.init();
             }
         });
@@ -154,12 +156,12 @@ public class RecipeViewingScreen extends Screen {
             @Override
             public void onPressed() {
                 categoryPages++;
-                if (categoryPages > MathHelper.ceil(categories.size() / (float) TABS_PER_PAGE) - 1)
+                if (categoryPages > MathHelper.ceil(categories.size() / (float) tabsPerPage) - 1)
                     categoryPages = 0;
                 RecipeViewingScreen.this.init();
             }
         });
-        w.enabled = w2.enabled = categories.size() > TABS_PER_PAGE;
+        w.enabled = w2.enabled = categories.size() > tabsPerPage;
         widgets.add(categoryBack = new ButtonWidget(new Rectangle(bounds.getX() + 5, bounds.getY() + 5, 12, 12), I18n.translate("text.rei.left_arrow")) {
             @Override
             public void onPressed() {
@@ -168,7 +170,7 @@ public class RecipeViewingScreen extends Screen {
                 if (currentCategoryIndex < 0)
                     currentCategoryIndex = categories.size() - 1;
                 selectedCategory = (RecipeCategory<RecipeDisplay>) categories.get(currentCategoryIndex);
-                categoryPages = MathHelper.floor(currentCategoryIndex / (double) TABS_PER_PAGE);
+                categoryPages = MathHelper.floor(currentCategoryIndex / (double) tabsPerPage);
                 page = 0;
                 RecipeViewingScreen.this.init();
             }
@@ -204,7 +206,7 @@ public class RecipeViewingScreen extends Screen {
                 if (currentCategoryIndex >= categories.size())
                     currentCategoryIndex = 0;
                 selectedCategory = (RecipeCategory<RecipeDisplay>) categories.get(currentCategoryIndex);
-                categoryPages = MathHelper.floor(currentCategoryIndex / (double) TABS_PER_PAGE);
+                categoryPages = MathHelper.floor(currentCategoryIndex / (double) tabsPerPage);
                 page = 0;
                 RecipeViewingScreen.this.init();
             }
@@ -265,18 +267,19 @@ public class RecipeViewingScreen extends Screen {
             }
         });
         recipeBack.enabled = recipeNext.enabled = categoriesMap.get(selectedCategory).size() > getRecipesPerPageByHeight();
-        for (int i = 0; i < TABS_PER_PAGE; i++) {
-            int j = i + categoryPages * TABS_PER_PAGE;
+        int tabV = isCompactTabs ? 166 : 192;
+        for (int i = 0; i < tabsPerPage; i++) {
+            int j = i + categoryPages * tabsPerPage;
             if (categories.size() > j) {
                 TabWidget tab;
-                tabs.add(tab = new TabWidget(i, new Rectangle(bounds.x + bounds.width / 2 - Math.min(categories.size() - categoryPages * TABS_PER_PAGE, TABS_PER_PAGE) * 14 + i * 28, bounds.y - 28, 28, 28)) {
+                tabs.add(tab = new TabWidget(i, tabSize, bounds.x + bounds.width / 2 - Math.min(categories.size() - categoryPages * tabsPerPage, tabsPerPage) * tabSize / 2, bounds.y, 0, tabV) {
                     @Override
                     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                        if (getBounds().contains(mouseX, mouseY)) {
+                        if (containsMouse(mouseX, mouseY)) {
                             MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-                            if (getId() + categoryPages * TABS_PER_PAGE == categories.indexOf(selectedCategory))
+                            if (getId() + categoryPages * tabsPerPage == categories.indexOf(selectedCategory))
                                 return false;
-                            selectedCategory = (RecipeCategory<RecipeDisplay>) categories.get(getId() + categoryPages * TABS_PER_PAGE);
+                            selectedCategory = (RecipeCategory<RecipeDisplay>) categories.get(getId() + categoryPages * tabsPerPage);
                             page = 0;
                             RecipeViewingScreen.this.init();
                             return true;
@@ -284,7 +287,7 @@ public class RecipeViewingScreen extends Screen {
                         return false;
                     }
                 });
-                tab.setRenderer(categories.get(j), categories.get(j).getLogo(), categories.get(j).getCategoryName(), tab.getId() + categoryPages * TABS_PER_PAGE == categories.indexOf(selectedCategory));
+                tab.setRenderer(categories.get(j), categories.get(j).getLogo(), categories.get(j).getCategoryName(), tab.getId() + categoryPages * tabsPerPage == categories.indexOf(selectedCategory));
             }
         }
         Optional<ButtonAreaSupplier> supplier = RecipeHelper.getInstance().getAutoCraftButtonArea(selectedCategory);

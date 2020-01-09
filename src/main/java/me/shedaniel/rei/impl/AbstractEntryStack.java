@@ -6,7 +6,6 @@
 package me.shedaniel.rei.impl;
 
 import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.ObjectHolder;
 import net.minecraft.client.gui.DrawableHelper;
 
 import java.util.HashMap;
@@ -39,11 +38,11 @@ public abstract class AbstractEntryStack extends DrawableHelper implements Entry
     }
     
     @Override
-    public <T> ObjectHolder<T> getSetting(Settings<T> settings) {
+    public <T> T get(Settings<T> settings) {
         Object o = this.settings.get(settings);
         if (o == null)
-            return ObjectHolder.of(settings.getDefaultValue());
-        return ObjectHolder.of((T) o);
+            return settings.getDefaultValue();
+        return (T) o;
     }
     
     @Override
@@ -62,7 +61,7 @@ public abstract class AbstractEntryStack extends DrawableHelper implements Entry
         if (!(obj instanceof EntryStack))
             return false;
         EntryStack stack = (EntryStack) obj;
-        boolean checkTags = getSetting(Settings.CHECK_TAGS).value().get() || stack.getSetting(Settings.CHECK_TAGS).value().get();
+        boolean checkTags = get(Settings.CHECK_TAGS).get() || stack.get(Settings.CHECK_TAGS).get();
         return equals(stack, !checkTags, true);
     }
     

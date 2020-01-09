@@ -7,7 +7,6 @@ package me.shedaniel.rei.impl;
 
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.ObjectHolder;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import net.minecraft.util.Identifier;
 
@@ -108,8 +107,8 @@ public class EmptyEntryStack implements EntryStack {
     }
     
     @Override
-    public <T> ObjectHolder<T> getSetting(Settings<T> settings) {
-        return ObjectHolder.of(settings.getDefaultValue());
+    public <T> T get(Settings<T> settings) {
+        return settings.getDefaultValue();
     }
     
     @Override

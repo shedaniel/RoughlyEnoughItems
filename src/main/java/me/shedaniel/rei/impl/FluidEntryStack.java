@@ -145,16 +145,16 @@ public class FluidEntryStack extends AbstractEntryStack {
     @Nullable
     @Override
     public QueuedTooltip getTooltip(int mouseX, int mouseY) {
-        if (!getSetting(Settings.TOOLTIP_ENABLED).value().get() || isEmpty())
+        if (!get(Settings.TOOLTIP_ENABLED).get() || isEmpty())
             return null;
         List<String> toolTip = Lists.newArrayList(SearchArgument.tryGetEntryStackName(this));
         if (amount >= 0) {
-            String amountTooltip = getSetting(Settings.Fluid.AMOUNT_TOOLTIP).value().apply(this);
+            String amountTooltip = get(Settings.Fluid.AMOUNT_TOOLTIP).apply(this);
             if (amountTooltip != null)
                 toolTip.addAll(Arrays.asList(amountTooltip.split("\n")));
         }
-        toolTip.addAll(getSetting(Settings.TOOLTIP_APPEND_EXTRA).value().apply(this));
-        if (getSetting(Settings.TOOLTIP_APPEND_MOD).value().get() && ConfigObject.getInstance().shouldAppendModNames()) {
+        toolTip.addAll(get(Settings.TOOLTIP_APPEND_EXTRA).apply(this));
+        if (get(Settings.TOOLTIP_APPEND_MOD).get() && ConfigObject.getInstance().shouldAppendModNames()) {
             final String modString = ClientHelper.getInstance().getFormattedModFromIdentifier(Registry.FLUID.getId(fluid));
             boolean alreadyHasMod = false;
             for (String s : toolTip)
@@ -170,7 +170,7 @@ public class FluidEntryStack extends AbstractEntryStack {
     
     @Override
     public void render(Rectangle bounds, int mouseX, int mouseY, float delta) {
-        if (getSetting(Settings.RENDER).value().get()) {
+        if (get(Settings.RENDER).get()) {
             Pair<Sprite, Integer> pair = getOrLoadSprite(getFluid());
             if (pair != null) {
                 Sprite sprite = pair.getLeft();
