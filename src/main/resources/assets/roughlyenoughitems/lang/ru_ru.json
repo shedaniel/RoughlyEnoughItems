@@ -107,6 +107,7 @@
   "config.roughlyenoughitems.clickableRecipeArrows.boolean.false": "Выключено",
   "config.roughlyenoughitems.renderEntryEnchantmentGlint": "Рендерить блески зачарования:",
   "config.roughlyenoughitems.entrySize": "Размер предметов:",
+  "config.roughlyenoughitems.useCompactTabs": "Compact Tabs:",
   "config.roughlyenoughitems.darkTheme": "Тема внешнего вида REI:",
   "config.roughlyenoughitems.darkTheme.boolean.true": "Тёмная тема",
   "config.roughlyenoughitems.darkTheme.boolean.false": "Светлая тема",
