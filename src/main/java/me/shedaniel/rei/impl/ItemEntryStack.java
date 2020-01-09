@@ -8,11 +8,14 @@ package me.shedaniel.rei.impl;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.shedaniel.math.api.Rectangle;
-import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.ClientHelper;
+import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.ItemStackHook;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.*;
-import net.minecraft.client.render.item.BuiltinModelItemRenderer;
+import net.minecraft.client.render.OverlayTexture;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.json.ModelTransformation;
@@ -25,7 +28,6 @@ import net.minecraft.util.registry.Registry;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 @Deprecated
@@ -64,6 +66,7 @@ public class ItemEntryStack extends AbstractEntryStack {
         return itemStack.isEmpty();
     }
     
+    @SuppressWarnings("rawtypes")
     @Override
     public EntryStack copy() {
         EntryStack stack = EntryStack.create(getItemStack().copy());
@@ -131,11 +134,11 @@ public class ItemEntryStack extends AbstractEntryStack {
     @Nullable
     @Override
     public QueuedTooltip getTooltip(int mouseX, int mouseY) {
-        if (isEmpty() || !getSetting(Settings.TOOLTIP_ENABLED).value().get())
+        if (isEmpty() || !get(Settings.TOOLTIP_ENABLED).get())
             return null;
         List<String> toolTip = Lists.newArrayList(SearchArgument.tryGetItemStackToolTip(getItemStack(), true));
-        toolTip.addAll(getSetting(Settings.TOOLTIP_APPEND_EXTRA).value().apply(this));
-        if (getSetting(Settings.TOOLTIP_APPEND_MOD).value().get() && ConfigObject.getInstance().shouldAppendModNames()) {
+        toolTip.addAll(get(Settings.TOOLTIP_APPEND_EXTRA).apply(this));
+        if (get(Settings.TOOLTIP_APPEND_MOD).get() && ConfigObject.getInstance().shouldAppendModNames()) {
             final String modString = ClientHelper.getInstance().getFormattedModFromItem(getItem());
             boolean alreadyHasMod = false;
             for (String s : toolTip)
@@ -149,9 +152,10 @@ public class ItemEntryStack extends AbstractEntryStack {
         return QueuedTooltip.create(toolTip);
     }
     
+    @SuppressWarnings("PointlessBooleanExpression")
     @Override
     public void render(Rectangle bounds, int mouseX, int mouseY, float delta) {
-        if (!isEmpty() && getSetting(Settings.RENDER).value().get()) {
+        if (!isEmpty() && get(Settings.RENDER).get()) {
             ItemStack stack = getItemStack();
             if (ConfigObject.getInstance().doesFastEntryRendering() || true) {
                 ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
@@ -175,16 +179,16 @@ public class ItemEntryStack extends AbstractEntryStack {
                 if (bl)
                     GlStateManager.method_24222();
                 GlStateManager.disableRescaleNormal();
-                itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, stack, bounds.x, bounds.y, getSetting(Settings.RENDER_COUNTS).value().get() ? getSetting(Settings.COUNTS).value().apply(this) : "");
+                itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, stack, bounds.x, bounds.y, get(Settings.RENDER_COUNTS).get() ? get(Settings.COUNTS).apply(this) : "");
                 itemRenderer.zOffset = 0.0F;
             } else {
-                ((ItemStackHook) (Object) stack).rei_setRenderEnchantmentGlint(getSetting(Settings.Item.RENDER_ENCHANTMENT_GLINT).value().get());
+                ((ItemStackHook) (Object) stack).rei_setRenderEnchantmentGlint(get(Settings.Item.RENDER_ENCHANTMENT_GLINT).get());
                 ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
                 itemRenderer.zOffset = getZ();
                 int i1 = bounds.x;
                 int i2 = bounds.y;
                 itemRenderer.renderGuiItemIcon(stack, i1, i2);
-                itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, stack, i1, i2, getSetting(Settings.RENDER_COUNTS).value().get() ? getSetting(Settings.COUNTS).value().apply(this) : "");
+                itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, stack, i1, i2, get(Settings.RENDER_COUNTS).get() ? get(Settings.COUNTS).apply(this) : "");
                 itemRenderer.zOffset = 0.0F;
                 ((ItemStackHook) (Object) stack).rei_setRenderEnchantmentGlint(true);
             }

@@ -41,7 +41,7 @@ import java.util.Optional;
 
 public class VillagerRecipeViewingScreen extends Screen {
     
-    private static final int TABS_PER_PAGE = 8;
+    private int tabsPerPage = 8;
     private final Map<RecipeCategory<?>, List<RecipeDisplay>> categoryMap;
     private final List<RecipeCategory<?>> categories;
     private final List<Widget> widgets;
@@ -91,6 +91,8 @@ public class VillagerRecipeViewingScreen extends Screen {
     @Override
     protected void init() {
         super.init();
+        boolean isCompactTabs = ConfigObject.getInstance().isUsingCompactTabs();
+        int tabSize = isCompactTabs ? 24 : 28;
         this.draggingScrollBar = false;
         this.children.clear();
         this.widgets.clear();
@@ -103,6 +105,7 @@ public class VillagerRecipeViewingScreen extends Screen {
         RecipeDisplay display = categoryMap.get(category).get(selectedRecipeIndex);
         int guiWidth = MathHelper.clamp(category.getDisplayWidth(display) + 30, 0, largestWidth) + 100;
         int guiHeight = MathHelper.clamp(category.getDisplayHeight() + 40, 166, largestHeight);
+        this.tabsPerPage = Math.max(5, MathHelper.floor((guiWidth - 20d) / tabSize));
         this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - guiHeight / 2, guiWidth, guiHeight);
         
         List<List<EntryStack>> workingStations = RecipeHelper.getInstance().getWorkingStations(category.getIdentifier());
@@ -175,18 +178,19 @@ public class VillagerRecipeViewingScreen extends Screen {
             });
             index++;
         }
-        for (int i = 0; i < TABS_PER_PAGE; i++) {
-            int j = i + tabsPage * TABS_PER_PAGE;
+        int tabV = isCompactTabs ? 166 : 192;
+        for (int i = 0; i < tabsPerPage; i++) {
+            int j = i + tabsPage * tabsPerPage;
             if (categories.size() > j) {
                 TabWidget tab;
-                tabs.add(tab = new TabWidget(i, new Rectangle(bounds.x + bounds.width / 2 - Math.min(categories.size() - tabsPage * TABS_PER_PAGE, TABS_PER_PAGE) * 14 + i * 28, bounds.y - 28, 28, 28)) {
+                tabs.add(tab = new TabWidget(i, tabSize, bounds.x + bounds.width / 2 - Math.min(categories.size() - tabsPage * tabsPerPage, tabsPerPage) * tabSize / 2, bounds.y, 0, tabV) {
                     @Override
                     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                        if (getBounds().contains(mouseX, mouseY)) {
+                        if (containsMouse(mouseX, mouseY)) {
                             MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-                            if (getId() + tabsPage * TABS_PER_PAGE == selectedCategoryIndex)
+                            if (getId() + tabsPage * tabsPerPage == selectedCategoryIndex)
                                 return false;
-                            selectedCategoryIndex = getId() + tabsPage * TABS_PER_PAGE;
+                            selectedCategoryIndex = getId() + tabsPage * tabsPerPage;
                             scroll = 0;
                             selectedRecipeIndex = 0;
                             VillagerRecipeViewingScreen.this.init();
@@ -195,7 +199,7 @@ public class VillagerRecipeViewingScreen extends Screen {
                         return false;
                     }
                 });
-                tab.setRenderer(categories.get(j), categories.get(j).getLogo(), categories.get(j).getCategoryName(), tab.getId() + tabsPage * TABS_PER_PAGE == selectedCategoryIndex);
+                tab.setRenderer(categories.get(j), categories.get(j).getLogo(), categories.get(j).getCategoryName(), tab.getId() + tabsPage * tabsPerPage == selectedCategoryIndex);
             }
         }
         ButtonWidget w, w2;
@@ -204,7 +208,7 @@ public class VillagerRecipeViewingScreen extends Screen {
             public void onPressed() {
                 tabsPage--;
                 if (tabsPage < 0)
-                    tabsPage = MathHelper.ceil(categories.size() / (float) TABS_PER_PAGE) - 1;
+                    tabsPage = MathHelper.ceil(categories.size() / (float) tabsPerPage) - 1;
                 VillagerRecipeViewingScreen.this.init();
             }
         });
@@ -212,12 +216,12 @@ public class VillagerRecipeViewingScreen extends Screen {
             @Override
             public void onPressed() {
                 tabsPage++;
-                if (tabsPage > MathHelper.ceil(categories.size() / (float) TABS_PER_PAGE) - 1)
+                if (tabsPage > MathHelper.ceil(categories.size() / (float) tabsPerPage) - 1)
                     tabsPage = 0;
                 VillagerRecipeViewingScreen.this.init();
             }
         });
-        w.enabled = w2.enabled = categories.size() > TABS_PER_PAGE;
+        w.enabled = w2.enabled = categories.size() > tabsPerPage;
         
         this.widgets.add(new ClickableLabelWidget(new Point(bounds.x + 4 + scrollListBounds.width / 2, bounds.y + 6), categories.get(selectedCategoryIndex).getCategoryName()) {
             @Override

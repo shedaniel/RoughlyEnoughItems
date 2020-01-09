@@ -27,10 +27,25 @@ public class TabWidget extends WidgetWithBounds {
     public String categoryName;
     public Rectangle bounds;
     public RecipeCategory category;
+    public int u, v;
     
     public TabWidget(int id, Rectangle bounds) {
+        this(id, bounds, 0, 192);
+    }
+    
+    public TabWidget(int id, Rectangle bounds, int u, int v) {
         this.id = id;
         this.bounds = bounds;
+        this.u = u;
+        this.v = v;
+    }
+    
+    public TabWidget(int id, int tabSize, int leftX, int bottomY) {
+        this(id, new Rectangle(leftX + id * tabSize, bottomY - tabSize, tabSize, tabSize));
+    }
+    
+    public TabWidget(int id, int tabSize, int leftX, int bottomY, int u, int v) {
+        this(id, new Rectangle(leftX + id * tabSize, bottomY - tabSize, tabSize, tabSize), u, v);
     }
     
     public void setRenderer(RecipeCategory category, EntryStack logo, String categoryName, boolean selected) {
@@ -67,9 +82,9 @@ public class TabWidget extends WidgetWithBounds {
     public void render(int mouseX, int mouseY, float delta) {
         if (shown) {
             minecraft.getTextureManager().bindTexture(ScreenHelper.isDarkModeEnabled() ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
-            this.blit(bounds.x, bounds.y + 2, selected ? 28 : 0, 192, 28, (selected ? 30 : 27));
+            this.blit(bounds.x, bounds.y + 2, u + (selected ? bounds.width : 0), v, bounds.width, (selected ? bounds.height + 2 : bounds.height - 1));
             logo.setZ(100);
-            logo.render(new Rectangle(bounds.getCenterX() - 8, bounds.getCenterY() - 6, 16, 16), mouseX, mouseY, delta);
+            logo.render(new Rectangle(bounds.getCenterX() - 8, bounds.getCenterY() - 5, 16, 16), mouseX, mouseY, delta);
             if (containsMouse(mouseX, mouseY)) {
                 drawTooltip();
             }

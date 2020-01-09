@@ -127,6 +127,8 @@ public interface ConfigObject {
     @Deprecated
     abstract ConfigObjectImpl.General getGeneral();
     
+    boolean isUsingCompactTabs();
+    
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD})
     @interface AddInFrontKeyCode {}
