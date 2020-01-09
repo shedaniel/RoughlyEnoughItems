@@ -107,6 +107,7 @@
   "config.roughlyenoughitems.clickableRecipeArrows.boolean.false": "無効",
   "config.roughlyenoughitems.renderEntryEnchantmentGlint": "Render Enchantment Glint:",
   "config.roughlyenoughitems.entrySize": "Entry Size:",
+  "config.roughlyenoughitems.useCompactTabs": "Compact Tabs:",
   "config.roughlyenoughitems.darkTheme": "外観テーマ:",
   "config.roughlyenoughitems.darkTheme.boolean.true": "暗いテーマ",
   "config.roughlyenoughitems.darkTheme.boolean.false": "明るいテーマ",
