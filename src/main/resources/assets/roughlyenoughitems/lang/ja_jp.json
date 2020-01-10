@@ -25,6 +25,7 @@
   "category.rei.brewing.result": "得られたポーション",
   "category.rei.composting": "コンポスター",
   "category.rei.stripping": "剥ぎ取る",
+  "category.rei.information": "Information",
   "text.rei.composting.chance": "§e%d%%の確率",
   "text.rei.composting.page": "%dページ",
   "text.rei.config": "設定",
