@@ -5,7 +5,7 @@
   "description": "To allow players to view items and recipes.",
   "version": "${version}",
   "authors": [
-    "Danielshe"
+    "shedaniel"
   ],
   "contact": {
     "homepage": "https://minecraft.curseforge.com/projects/roughly-enough-items",
@@ -45,19 +45,19 @@
   ],
   "custom": {
     "rei:translators": {
-      "English": "Danielshe",
+      "English": "shedaniel",
       "Japanese": ["swordglowsblue", "hinataaki"],
-      "Simplified Chinese": ["XuyuEre", "Danielshe"],
-      "Traditional Chinese": ["hugoalh", "gxy17886", "Danielshe"],
-      "French": "Yanis48",
-      "German": "MelanX",
-      "Estonian": "Madis0",
-      "Portuguese": "thiagokenis",
-      "LOLCAT": "Danielshe",
-      "Upside Down English": "Danielshe",
+      "Simplified Chinese": ["XuyuEre", "shedaniel", "SciUniv_Moring", "Takakura-Anri"],
+      "Traditional Chinese": ["hugoalh", "gxy17886", "shedaniel"],
+      "French": ["Yanis48", "Koockies"],
+      "German": ["MelanX", "guntram7"],
+      "Estonian": ["Madis0"],
+      "Portuguese": ["thiagokenis"],
+      "LOLCAT": ["shedaniel", "RaxedMC"],
+      "Upside Down English": ["shedaniel"],
       "Brazilian Portuguese": ["thiagokenis", "joaoh1"],
-      "Bulgarian": "geniiii",
-      "Russian": "MrYonter"
+      "Bulgarian": ["geniiii"],
+      "Russian": ["MrYonter", "kwmika1girl", "LimyChitou", "Great_Manalal", "s3rbug", "TheByKotik", "ebogish"]
     }
   }
 }

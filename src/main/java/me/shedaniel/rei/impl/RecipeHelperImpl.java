@@ -46,7 +46,8 @@ public class RecipeHelperImpl implements RecipeHelper {
     private final List<ScreenClickArea> screenClickAreas = Lists.newLinkedList();
     private final int[] recipeCount = {0};
     private final Map<Identifier, List<RecipeDisplay>> recipeCategoryListMap = Maps.newLinkedHashMap();
-    private final List<RecipeCategory<?>> categories = Lists.newLinkedList();
+    private final Map<RecipeCategory<?>, Identifier> categories = Maps.newLinkedHashMap();
+    private final Map<Identifier, RecipeCategory<?>> reversedCategories = Maps.newHashMap();
     private final Map<Identifier, ButtonAreaSupplier> autoCraftAreaSupplierMap = Maps.newLinkedHashMap();
     private final Map<Identifier, List<List<EntryStack>>> categoryWorkingStations = Maps.newLinkedHashMap();
     private final List<DisplayVisibilityHandler> displayVisibilityHandlers = Lists.newLinkedList();
@@ -88,9 +89,10 @@ public class RecipeHelperImpl implements RecipeHelper {
     
     @Override
     public void registerCategory(RecipeCategory<?> category) {
-        categories.add(category);
-        recipeCategoryListMap.put(category.getIdentifier(), Lists.newLinkedList());
-        categoryWorkingStations.put(category.getIdentifier(), Lists.newLinkedList());
+        categories.put(category, category.getIdentifier());
+        reversedCategories.put(category.getIdentifier(), category);
+        recipeCategoryListMap.put(category.getIdentifier(), Lists.newArrayList());
+        categoryWorkingStations.put(category.getIdentifier(), Lists.newArrayList());
     }
     
     @SafeVarargs
@@ -126,32 +128,40 @@ public class RecipeHelperImpl implements RecipeHelper {
     
     @Override
     public Map<RecipeCategory<?>, List<RecipeDisplay>> getRecipesFor(EntryStack stack) {
-        Map<Identifier, List<RecipeDisplay>> categoriesMap = new HashMap<>();
-        categories.forEach(f -> categoriesMap.put(f.getIdentifier(), Lists.newArrayList()));
-        for (Map.Entry<Identifier, List<RecipeDisplay>> entry : recipeCategoryListMap.entrySet()) {
-            RecipeCategory<?> category = getCategory(entry.getKey());
-            for (RecipeDisplay recipeDisplay : entry.getValue())
-                for (EntryStack outputStack : recipeDisplay.getOutputEntries())
-                    if (stack.equals(outputStack))
-                        categoriesMap.get(recipeDisplay.getRecipeCategory()).add(recipeDisplay);
+        Map<RecipeCategory<?>, List<RecipeDisplay>> result = Maps.newLinkedHashMap();
+        for (Map.Entry<RecipeCategory<?>, Identifier> entry : categories.entrySet()) {
+            RecipeCategory<?> category = entry.getKey();
+            Identifier categoryId = entry.getValue();
+            Set<RecipeDisplay> set = Sets.newLinkedHashSet();
+            for (RecipeDisplay display : recipeCategoryListMap.get(categoryId)) {
+                for (EntryStack outputStack : display.getOutputEntries())
+                    if (stack.equals(outputStack) && isDisplayVisible(display)) {
+                        set.add(display);
+                        break;
+                    }
+            }
+            if (!set.isEmpty())
+                CollectionUtils.getOrPutEmptyList(result, category).addAll(set);
         }
         for (LiveRecipeGenerator<RecipeDisplay> liveRecipeGenerator : liveRecipeGenerators) {
-            liveRecipeGenerator.getRecipeFor(stack).ifPresent(o -> categoriesMap.get(liveRecipeGenerator.getCategoryIdentifier()).addAll(o));
+            RecipeCategory<?> category = getCategory(liveRecipeGenerator.getCategoryIdentifier());
+            Optional<List<RecipeDisplay>> recipeFor = liveRecipeGenerator.getRecipeFor(stack);
+            if (recipeFor.isPresent()) {
+                Set<RecipeDisplay> set = Sets.newLinkedHashSet();
+                for (RecipeDisplay display : recipeFor.get()) {
+                    if (isDisplayVisible(display))
+                        set.add(display);
+                }
+                if (!set.isEmpty())
+                    CollectionUtils.getOrPutEmptyList(result, category).addAll(set);
+            }
         }
-        Map<RecipeCategory<?>, List<RecipeDisplay>> recipeCategoryListMap = Maps.newLinkedHashMap();
-        categories.forEach(category -> {
-            if (categoriesMap.containsKey(category.getIdentifier()) && !categoriesMap.get(category.getIdentifier()).isEmpty())
-                recipeCategoryListMap.put(category, categoriesMap.get(category.getIdentifier()).stream().filter(this::isDisplayVisible).collect(Collectors.toList()));
-        });
-        for (RecipeCategory<?> category : Lists.newArrayList(recipeCategoryListMap.keySet()))
-            if (recipeCategoryListMap.get(category).isEmpty())
-                recipeCategoryListMap.remove(category);
-        return recipeCategoryListMap;
+        return result;
     }
     
     @Override
     public RecipeCategory<?> getCategory(Identifier identifier) {
-        return CollectionUtils.findFirstOrNull(categories, category -> category.getIdentifier().equals(identifier));
+        return reversedCategories.get(identifier);
     }
     
     @Override
@@ -171,44 +181,48 @@ public class RecipeHelperImpl implements RecipeHelper {
     
     @Override
     public Map<RecipeCategory<?>, List<RecipeDisplay>> getUsagesFor(EntryStack stack) {
-        Map<Identifier, Set<RecipeDisplay>> categoriesMap = new HashMap<>();
-        categories.forEach(f -> categoriesMap.put(f.getIdentifier(), Sets.newLinkedHashSet()));
-        for (Map.Entry<Identifier, List<RecipeDisplay>> entry : recipeCategoryListMap.entrySet()) {
-            boolean isWorkstationCategory = isStackWorkStationOfCategory(entry.getKey(), stack);
-            for (RecipeDisplay recipeDisplay : entry.getValue()) {
+        Map<RecipeCategory<?>, List<RecipeDisplay>> result = Maps.newLinkedHashMap();
+        for (Map.Entry<RecipeCategory<?>, Identifier> entry : categories.entrySet()) {
+            Set<RecipeDisplay> set = Sets.newLinkedHashSet();
+            RecipeCategory<?> category = entry.getKey();
+            Identifier categoryId = entry.getValue();
+            for (RecipeDisplay display : recipeCategoryListMap.get(categoryId)) {
                 back:
-                for (List<EntryStack> input : recipeDisplay.getInputEntries()) {
+                for (List<EntryStack> input : display.getInputEntries()) {
                     for (EntryStack otherEntry : input) {
                         if (otherEntry.equals(stack)) {
-                            categoriesMap.get(recipeDisplay.getRecipeCategory()).add(recipeDisplay);
+                            if (isDisplayVisible(display))
+                                set.add(display);
                             break back;
                         }
                     }
                 }
             }
-            if (isWorkstationCategory) {
-                for (RecipeDisplay recipeDisplay : entry.getValue()) {
-                    categoriesMap.get(recipeDisplay.getRecipeCategory()).add(recipeDisplay);
-                }
+            if (isStackWorkStationOfCategory(categoryId, stack)) {
+                set.addAll(recipeCategoryListMap.get(categoryId));
             }
+            if (!set.isEmpty())
+                CollectionUtils.getOrPutEmptyList(result, category).addAll(set);
         }
         for (LiveRecipeGenerator<RecipeDisplay> liveRecipeGenerator : liveRecipeGenerators) {
-            liveRecipeGenerator.getUsageFor(stack).ifPresent(o -> categoriesMap.get(liveRecipeGenerator.getCategoryIdentifier()).addAll(o));
+            RecipeCategory<?> category = getCategory(liveRecipeGenerator.getCategoryIdentifier());
+            Optional<List<RecipeDisplay>> recipeFor = liveRecipeGenerator.getUsageFor(stack);
+            if (recipeFor.isPresent()) {
+                Set<RecipeDisplay> set = Sets.newLinkedHashSet();
+                for (RecipeDisplay display : recipeFor.get()) {
+                    if (isDisplayVisible(display))
+                        set.add(display);
+                }
+                if (!set.isEmpty())
+                    CollectionUtils.getOrPutEmptyList(result, category).addAll(set);
+            }
         }
-        Map<RecipeCategory<?>, List<RecipeDisplay>> recipeCategoryListMap = Maps.newLinkedHashMap();
-        for (RecipeCategory<?> category : categories) {
-            if (categoriesMap.containsKey(category.getIdentifier()) && !categoriesMap.get(category.getIdentifier()).isEmpty())
-                recipeCategoryListMap.put(category, CollectionUtils.filterSetToList(categoriesMap.get(category.getIdentifier()), this::isDisplayVisible));
-        }
-        for (RecipeCategory<?> category : Lists.newArrayList(recipeCategoryListMap.keySet()))
-            if (recipeCategoryListMap.get(category).isEmpty())
-                recipeCategoryListMap.remove(category);
-        return recipeCategoryListMap;
+        return result;
     }
     
     @Override
     public List<RecipeCategory<?>> getAllCategories() {
-        return Collections.unmodifiableList(categories);
+        return Lists.newArrayList(categories.keySet());
     }
     
     @Override
@@ -234,6 +248,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         this.recipeManager = recipeManager;
         this.recipeCategoryListMap.clear();
         this.categories.clear();
+        this.reversedCategories.clear();
         this.autoCraftAreaSupplierMap.clear();
         this.screenClickAreas.clear();
         this.categoryWorkingStations.clear();
@@ -331,8 +346,9 @@ public class RecipeHelperImpl implements RecipeHelper {
         ((DisplayHelperImpl) DisplayHelper.getInstance()).resetCache();
         ScreenHelper.getOptionalOverlay().ifPresent(overlay -> overlay.shouldReInit = true);
         
+        displayVisibilityHandlers.sort(VISIBILITY_HANDLER_COMPARATOR);
         long usedTime = System.currentTimeMillis() - startTime;
-        RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered %d stack entries, %d recipes displays, %d exclusion zones suppliers, %d bounds handler, %d visibility handlers and %d categories (%s) in %d ms.", EntryRegistry.getInstance().getStacksList().size(), recipeCount[0], DisplayHelper.getInstance().getBaseBoundsHandler().supplierSize(), DisplayHelper.getInstance().getAllBoundsHandlers().size(), getDisplayVisibilityHandlers().size(), categories.size(), categories.stream().map(RecipeCategory::getCategoryName).collect(Collectors.joining(", ")), usedTime);
+        RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered %d stack entries, %d recipes displays, %d exclusion zones suppliers, %d bounds handler, %d visibility handlers and %d categories (%s) in %d ms.", EntryRegistry.getInstance().getStacksList().size(), recipeCount[0], DisplayHelper.getInstance().getBaseBoundsHandler().supplierSize(), DisplayHelper.getInstance().getAllBoundsHandlers().size(), getDisplayVisibilityHandlers().size(), categories.size(), categories.keySet().stream().map(RecipeCategory::getCategoryName).collect(Collectors.joining(", ")), usedTime);
     }
     
     @Override
@@ -359,15 +375,18 @@ public class RecipeHelperImpl implements RecipeHelper {
     
     @Override
     public Map<RecipeCategory<?>, List<RecipeDisplay>> getAllRecipes() {
-        Map<RecipeCategory<?>, List<RecipeDisplay>> map = Maps.newLinkedHashMap();
-        for (RecipeCategory<?> recipeCategory : categories) {
-            if (recipeCategoryListMap.containsKey(recipeCategory.getIdentifier())) {
-                List<RecipeDisplay> list = CollectionUtils.filter(recipeCategoryListMap.get(recipeCategory.getIdentifier()), this::isDisplayVisible);
-                if (!list.isEmpty())
-                    map.put(recipeCategory, list);
+        Map<RecipeCategory<?>, List<RecipeDisplay>> result = Maps.newLinkedHashMap();
+        for (Map.Entry<RecipeCategory<?>, Identifier> entry : categories.entrySet()) {
+            RecipeCategory<?> category = entry.getKey();
+            Identifier categoryId = entry.getValue();
+            List<RecipeDisplay> displays = recipeCategoryListMap.get(categoryId);
+            if (displays != null) {
+                displays.removeIf(this::isDisplayNotVisible);
+                if (!displays.isEmpty())
+                    result.put(category, Lists.newArrayList(displays));
             }
         }
-        return map;
+        return result;
     }
     
     @Override
@@ -391,22 +410,21 @@ public class RecipeHelperImpl implements RecipeHelper {
     }
     
     @Override
-    public boolean isDisplayVisible(RecipeDisplay display, boolean respectConfig) {
-        return isDisplayVisible(display);
+    public boolean isDisplayNotVisible(RecipeDisplay display) {
+        return !isDisplayVisible(display);
     }
     
     @Override
     public boolean isDisplayVisible(RecipeDisplay display) {
         RecipeCategory<?> category = getCategory(display.getRecipeCategory());
-        List<DisplayVisibilityHandler> list = getDisplayVisibilityHandlers().stream().sorted(VISIBILITY_HANDLER_COMPARATOR).collect(Collectors.toList());
-        for (DisplayVisibilityHandler displayVisibilityHandler : list) {
-            try {
+        try {
+            for (DisplayVisibilityHandler displayVisibilityHandler : displayVisibilityHandlers) {
                 ActionResult visibility = displayVisibilityHandler.handleDisplay(category, display);
                 if (visibility != ActionResult.PASS)
                     return visibility == ActionResult.SUCCESS;
-            } catch (Throwable throwable) {
-                RoughlyEnoughItemsCore.LOGGER.error("[REI] Failed to check if the recipe is visible!", throwable);
             }
+        } catch (Throwable throwable) {
+            RoughlyEnoughItemsCore.LOGGER.error("[REI] Failed to check if the recipe is visible!", throwable);
         }
         return true;
     }

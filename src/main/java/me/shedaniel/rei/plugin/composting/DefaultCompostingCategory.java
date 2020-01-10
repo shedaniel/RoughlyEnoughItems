@@ -104,7 +104,6 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
         return 140;
     }
     
-    @SuppressWarnings("deprecation")
     @Override
     public int getFixedRecipesPerPage() {
         return 1;
