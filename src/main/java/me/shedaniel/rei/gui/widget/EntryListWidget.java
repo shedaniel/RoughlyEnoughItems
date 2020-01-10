@@ -615,12 +615,13 @@ public class EntryListWidget extends WidgetWithBounds {
                         if (argument.getFunction(!argument.isInclude()).apply(mod)) {
                             applicable = false;
                             break;
-                        }
-                        if (modName == null)
-                            modName = ClientHelper.getInstance().getModFromModId(mod).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT);
-                        if (modName != null && !modName.isEmpty() && argument.getFunction(!argument.isInclude()).apply(modName)) {
-                            applicable = false;
-                            break;
+                        } else {
+                            if (modName == null)
+                                modName = ClientHelper.getInstance().getModFromModId(mod).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT);
+                            if (modName != null && !modName.isEmpty() && argument.getFunction(!argument.isInclude()).apply(modName)) {
+                                applicable = false;
+                                break;
+                            }
                         }
                     }
                 } else if (argument.getArgumentType() == SearchArgument.ArgumentType.TEXT) {
