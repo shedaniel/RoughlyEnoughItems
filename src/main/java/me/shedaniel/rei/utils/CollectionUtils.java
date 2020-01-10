@@ -16,6 +16,14 @@ import java.util.function.Predicate;
 
 @Internal
 public class CollectionUtils {
+    public static <A, B> List<B> getOrPutEmptyList(Map<A, List<B>> map, A key) {
+        List<B> b = map.get(key);
+        if (b != null)
+            return b;
+        map.put(key, Lists.newArrayList());
+        return map.get(key);
+    }
+    
     public static <T> T findFirstOrNullEquals(List<T> list, T obj) {
         for (T t : list) {
             if (t.equals(obj))

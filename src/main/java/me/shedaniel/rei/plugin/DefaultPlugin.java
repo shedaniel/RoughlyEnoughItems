@@ -30,6 +30,8 @@ import me.shedaniel.rei.plugin.crafting.DefaultShapedDisplay;
 import me.shedaniel.rei.plugin.crafting.DefaultShapelessDisplay;
 import me.shedaniel.rei.plugin.fuel.DefaultFuelCategory;
 import me.shedaniel.rei.plugin.fuel.DefaultFuelDisplay;
+import me.shedaniel.rei.plugin.information.DefaultInformationCategory;
+import me.shedaniel.rei.plugin.information.DefaultInformationDisplay;
 import me.shedaniel.rei.plugin.smelting.DefaultSmeltingDisplay;
 import me.shedaniel.rei.plugin.smoking.DefaultSmokingDisplay;
 import me.shedaniel.rei.plugin.stonecutting.DefaultStoneCuttingCategory;
@@ -69,9 +71,11 @@ public class DefaultPlugin implements REIPluginV0 {
     public static final Identifier PLUGIN = new Identifier("roughlyenoughitems", "default_plugin");
     public static final Identifier COMPOSTING = new Identifier("minecraft", "plugins/composting");
     public static final Identifier FUEL = new Identifier("minecraft", "plugins/fuel");
+    public static final Identifier INFO = new Identifier("roughlyenoughitems", "plugins/information");
     private static final Identifier DISPLAY_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/display.png");
     private static final Identifier DISPLAY_TEXTURE_DARK = new Identifier("roughlyenoughitems", "textures/gui/display_dark.png");
     private static final List<DefaultBrewingDisplay> BREWING_DISPLAYS = Lists.newArrayList();
+    private static final List<DefaultInformationDisplay> INFO_DISPLAYS = Lists.newArrayList();
     
     public static Identifier getDisplayTexture() {
         return ScreenHelper.isDarkModeEnabled() ? DISPLAY_TEXTURE_DARK : DISPLAY_TEXTURE;
@@ -79,6 +83,10 @@ public class DefaultPlugin implements REIPluginV0 {
     
     public static void registerBrewingDisplay(DefaultBrewingDisplay display) {
         BREWING_DISPLAYS.add(display);
+    }
+    
+    public static void registerInfoDisplay(DefaultInformationDisplay display) {
+        INFO_DISPLAYS.add(display);
     }
     
     @Override
@@ -89,6 +97,11 @@ public class DefaultPlugin implements REIPluginV0 {
     @Override
     public SemanticVersion getMinimumVersion() throws VersionParsingException {
         return SemanticVersion.parse("3.2.33");
+    }
+    
+    @Override
+    public void preRegister() {
+        INFO_DISPLAYS.clear();
     }
     
     @Override
@@ -149,6 +162,13 @@ public class DefaultPlugin implements REIPluginV0 {
         if (!ConfigObject.getInstance().isLoadingDefaultPlugin()) {
             return;
         }
+        //        DefaultPlugin.registerInfoDisplay(DefaultInformationDisplay.createFromEntry(EntryStack.create(Items.FURNACE), new LiteralText("Furnace Info"))
+        //                .lines(new LiteralText("Furnace is a nice block, crafted using 8 cobblestone."),
+        //                        new LiteralText("An amazing tool to burn lil taters."),
+        //                        new LiteralText("Now available in a store next to you."),
+        //                        new LiteralText("Now with 60% off for an limited time!"),
+        //                        new LiteralText("Get it with coupon code: ").append(new LiteralText("TATERS").formatted(Formatting.BOLD))
+        //                        ));
         recipeHelper.registerRecipes(CRAFTING, ShapelessRecipe.class, DefaultShapelessDisplay::new);
         recipeHelper.registerRecipes(CRAFTING, ShapedRecipe.class, DefaultShapedDisplay::new);
         recipeHelper.registerRecipes(SMELTING, SmeltingRecipe.class, DefaultSmeltingDisplay::new);
@@ -186,9 +206,7 @@ public class DefaultPlugin implements REIPluginV0 {
                 map.put(entry.getKey(), entry.getFloatValue());
         }
         List<ItemConvertible> stacks = new LinkedList<>(map.keySet());
-        stacks.sort((first, second) -> {
-            return (int) ((map.get(first) - map.get(second)) * 100);
-        });
+        stacks.sort((first, second) -> (int) ((map.get(first) - map.get(second)) * 100));
         for (int i = 0; i < stacks.size(); i += MathHelper.clamp(48, 1, stacks.size() - i)) {
             List<ItemConvertible> thisStacks = Lists.newArrayList();
             for (int j = i; j < i + 48; j++)
@@ -203,6 +221,10 @@ public class DefaultPlugin implements REIPluginV0 {
     
     @Override
     public void postRegister() {
+        RecipeHelper.getInstance().registerCategory(new DefaultInformationCategory());
+        for (DefaultInformationDisplay display : INFO_DISPLAYS) {
+            RecipeHelper.getInstance().registerDisplay(INFO, display);
+        }
         // Sit tight! This will be a fast journey!
         long time = System.currentTimeMillis();
         for (EntryStack stack : EntryRegistry.getInstance().getStacksList())
@@ -321,6 +343,7 @@ public class DefaultPlugin implements REIPluginV0 {
         recipeHelper.registerWorkingStations(COMPOSTING, EntryStack.create(Items.COMPOSTER));
         recipeHelper.removeAutoCraftButton(FUEL);
         recipeHelper.removeAutoCraftButton(COMPOSTING);
+        recipeHelper.removeAutoCraftButton(INFO);
         recipeHelper.registerScreenClickArea(new Rectangle(88, 32, 28, 23), CraftingTableScreen.class, CRAFTING);
         recipeHelper.registerScreenClickArea(new Rectangle(137, 29, 10, 13), InventoryScreen.class, CRAFTING);
         recipeHelper.registerScreenClickArea(new Rectangle(97, 16, 14, 30), BrewingStandScreen.class, BREWING);

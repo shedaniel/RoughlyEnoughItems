@@ -178,7 +178,11 @@ public interface RecipeHelper {
      * @deprecated {@link RecipeHelper#isDisplayVisible(RecipeDisplay)} )}
      */
     @Deprecated
-    boolean isDisplayVisible(RecipeDisplay display, boolean respectConfig);
+    default boolean isDisplayVisible(RecipeDisplay display, boolean respectConfig) {
+        return isDisplayVisible(display);
+    }
+    
+    boolean isDisplayNotVisible(RecipeDisplay display);
     
     /**
      * Checks if the display is visible by asking recipe visibility handlers
