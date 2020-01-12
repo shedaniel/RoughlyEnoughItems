@@ -149,6 +149,7 @@
   "config.roughlyenoughitems.itemListOrdering": "Entwy Wist Owdewing:",
   "config.roughlyenoughitems.list_ordering_button": "%s [%s]",
   "config.roughlyenoughitems.recipeScreenType": "Wecipe Scween Type:",
+  "config.roughlyenoughitems.recipeScreenType.config": "Recipe Screen Type: %s",
   "config.roughlyenoughitems.recipeScreenType.unset": "Not Set",
   "config.roughlyenoughitems.recipeScreenType.original": "Owiginal",
   "config.roughlyenoughitems.recipeScreenType.villager": "Viwwager Wike",

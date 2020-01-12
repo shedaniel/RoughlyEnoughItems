@@ -149,6 +149,7 @@
   "config.roughlyenoughitems.itemListOrdering": "アイテムリストの整理:",
   "config.roughlyenoughitems.list_ordering_button": "%s [%s]",
   "config.roughlyenoughitems.recipeScreenType": "レシピ画面のタイプ:",
+  "config.roughlyenoughitems.recipeScreenType.config": "Recipe Screen Type: %s",
   "config.roughlyenoughitems.recipeScreenType.unset": "設定されていません",
   "config.roughlyenoughitems.recipeScreenType.original": "オリジナル",
   "config.roughlyenoughitems.recipeScreenType.villager": "村人の",

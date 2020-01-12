@@ -149,6 +149,7 @@
   "config.roughlyenoughitems.itemListOrdering": "Entry List Ordering:",
   "config.roughlyenoughitems.list_ordering_button": "%s [%s]",
   "config.roughlyenoughitems.recipeScreenType": "Recipe Screen Type:",
+  "config.roughlyenoughitems.recipeScreenType.config": "Recipe Screen Type: %s",
   "config.roughlyenoughitems.recipeScreenType.unset": "Not Set",
   "config.roughlyenoughitems.recipeScreenType.original": "Original",
   "config.roughlyenoughitems.recipeScreenType.villager": "Villager Like",

@@ -149,6 +149,7 @@
   "config.roughlyenoughitems.itemListOrdering": "Classement de la liste des entrées :",
   "config.roughlyenoughitems.list_ordering_button": "%s [%s]",
   "config.roughlyenoughitems.recipeScreenType": "Type d'affichage des recettes :",
+  "config.roughlyenoughitems.recipeScreenType.config": "Recipe Screen Type: %s",
   "config.roughlyenoughitems.recipeScreenType.unset": "Non défini",
   "config.roughlyenoughitems.recipeScreenType.original": "Original",
   "config.roughlyenoughitems.recipeScreenType.villager": "Menu de villageois",

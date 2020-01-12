@@ -149,6 +149,7 @@
   "config.roughlyenoughitems.itemListOrdering": "条目列表排序：",
   "config.roughlyenoughitems.list_ordering_button": "%s [%s]",
   "config.roughlyenoughitems.recipeScreenType": "配方屏幕类型：",
+  "config.roughlyenoughitems.recipeScreenType.config": "Recipe Screen Type: %s",
   "config.roughlyenoughitems.recipeScreenType.unset": "未设定",
   "config.roughlyenoughitems.recipeScreenType.original": "默认",
   "config.roughlyenoughitems.recipeScreenType.villager": "像村民交易介面",

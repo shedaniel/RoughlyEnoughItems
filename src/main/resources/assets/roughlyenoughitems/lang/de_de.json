@@ -149,6 +149,7 @@
   "config.roughlyenoughitems.itemListOrdering": "Reihenfolge der Itemlisten:",
   "config.roughlyenoughitems.list_ordering_button": "%s [%s]",
   "config.roughlyenoughitems.recipeScreenType": "Art des Rezept-Bildschirms:",
+  "config.roughlyenoughitems.recipeScreenType.config": "Recipe Screen Type: %s",
   "config.roughlyenoughitems.recipeScreenType.unset": "Nicht Gesetzt",
   "config.roughlyenoughitems.recipeScreenType.original": "Original",
   "config.roughlyenoughitems.recipeScreenType.villager": "Dorfbewohner-Artig",

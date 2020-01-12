@@ -149,6 +149,7 @@
   "config.roughlyenoughitems.itemListOrdering": ":ƃuᴉɹǝpɹO ʇsᴉ˥ ʎɹʇuƎ",
   "config.roughlyenoughitems.list_ordering_button": "%s [%s]",
   "config.roughlyenoughitems.recipeScreenType": ":ǝdʎ┴ uǝǝɹɔS ǝdᴉɔǝɹ",
+  "config.roughlyenoughitems.recipeScreenType.config": "Recipe Screen Type: %s",
   "config.roughlyenoughitems.recipeScreenType.unset": "ʇǝS ʇoN",
   "config.roughlyenoughitems.recipeScreenType.original": "lɐuᴉƃᴉɹO",
   "config.roughlyenoughitems.recipeScreenType.villager": "ǝʞᴉ˥ ɹǝƃɐllᴉΛ",

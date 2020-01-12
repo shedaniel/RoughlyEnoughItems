@@ -149,6 +149,7 @@
   "config.roughlyenoughitems.itemListOrdering": "Esemenimekirja järjestus",
   "config.roughlyenoughitems.list_ordering_button": "%s (%s)",
   "config.roughlyenoughitems.recipeScreenType": "Retseptikuva tüüp:",
+  "config.roughlyenoughitems.recipeScreenType.config": "Recipe Screen Type: %s",
   "config.roughlyenoughitems.recipeScreenType.unset": "Määramata",
   "config.roughlyenoughitems.recipeScreenType.original": "Originaalne",
   "config.roughlyenoughitems.recipeScreenType.villager": "Külaelaniku sarnane",
