@@ -30,7 +30,7 @@
   "text.rei.composting.page": "Page %d",
   "text.rei.config": "Configuration",
   "text.rei.config_tooltip": "Ouvrir le menu de configuration \n§7Maj. + Clic pour activer le mode triche",
-  "text.rei.cheat_items": "Don de {item_count} [{item_name}§f] à {player_name}.",
+  "text.rei.cheat_items": "Don de {item_count} [{item_name}§f] à {player_name}",
   "text.rei.failed_cheat_items": "§cImpossible de donner les objets.",
   "ordering.rei.ascending": "Croissant",
   "ordering.rei.descending": "Décroissant",
