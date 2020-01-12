@@ -143,6 +143,10 @@ public interface ConfigObject {
     
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD})
+    @interface UseSpecialRecipeTypeScreen {}
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD})
     @interface UsePercentage {
         double min();
         

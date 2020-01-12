@@ -58,14 +58,27 @@ dependencies {
     }
     modApi("me.sargunvohra.mcmods:autoconfig1u:${project.autoconfig1u}")
     if (includeDep) {
-        include("me.shedaniel.cloth:cloth-events:${cloth_events_version}") {
-            transitive = false
-        }
-        include("me.shedaniel.cloth:config-2:${cloth_config_version}") {
-            transitive = false
-        }
-        include("me.sargunvohra.mcmods:autoconfig1u:${project.autoconfig1u}") {
-            transitive = false
+        afterEvaluate {
+            def listAdded = []
+            def eachDep = { dep ->
+                for (apiIncludeDepStr in (api_include as String).split(',')) {
+                    def apiIncludeGroup = apiIncludeDepStr.split(':')[0]
+                    def apiIncludeDep = apiIncludeDepStr.split(':')[1]
+                    if (dep.module.id.group == apiIncludeGroup && dep.module.id.name.startsWith(apiIncludeDep)) {
+                        def version = dep.module.id.version.indexOf('@') >= 0 ? dep.module.id.version.substring(0, dep.module.id.version.indexOf('@')) : dep.module.id.version
+                        def mavenDep = "${dep.module.id.group}:${dep.module.id.name}:$version"
+                        if (!(mavenDep in listAdded)) {
+                            include(mavenDep) {
+                                transitive = false
+                            }
+                            listAdded.add(mavenDep)
+                        }
+                        break
+                    }
+                }
+            }
+            configurations.compile.resolvedConfiguration.firstLevelModuleDependencies.each eachDep
+            configurations.runtimeClasspath.resolvedConfiguration.firstLevelModuleDependencies.each eachDep
         }
     }
     modCompileOnly("io.github.prospector:modmenu:${modmenu_version}") {

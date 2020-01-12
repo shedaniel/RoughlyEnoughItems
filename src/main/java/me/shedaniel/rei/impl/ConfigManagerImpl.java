@@ -5,6 +5,7 @@
 
 package me.shedaniel.rei.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -21,6 +22,8 @@ import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import me.shedaniel.clothconfig2.api.Modifier;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.clothconfig2.gui.entries.KeyCodeEntry;
+import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
+import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.api.ConfigObject;
@@ -29,19 +32,25 @@ import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.gui.ConfigReloadingScreen;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
+import me.shedaniel.rei.gui.PreRecipeViewingScreen;
+import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.gui.credits.CreditsScreen;
+import me.shedaniel.rei.gui.widget.ButtonWidget;
 import me.shedaniel.rei.gui.widget.ReloadConfigButtonWidget;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.AbstractPressableButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.client.util.Window;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static me.sargunvohra.mcmods.autoconfig1u.util.Utils.getUnsafely;
 import static me.sargunvohra.mcmods.autoconfig1u.util.Utils.setUnsafely;
@@ -98,14 +107,66 @@ public class ConfigManagerImpl implements ConfigManager {
         }, field -> field.getType() == ModifierKeyCode.class, ConfigObject.UsePercentage.class);
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> {
             ConfigObject.UsePercentage bounds = field.getAnnotation(ConfigObject.UsePercentage.class);
-            return Collections.singletonList(ConfigEntryBuilder.create().startIntSlider(i13n, MathHelper.ceil(Utils.getUnsafely(field, config, 0.0) * 100), MathHelper.ceil(bounds.min() * 100), MathHelper.ceil(bounds.max() * 100)).setDefaultValue(() -> {
-                return MathHelper.ceil((double) Utils.getUnsafely(field, defaults) * 100);
-            }).setSaveConsumer((newValue) -> {
+            return Collections.singletonList(ConfigEntryBuilder.create().startIntSlider(i13n, MathHelper.ceil(Utils.getUnsafely(field, config, 0.0) * 100), MathHelper.ceil(bounds.min() * 100), MathHelper.ceil(bounds.max() * 100)).setDefaultValue(() -> MathHelper.ceil((double) Utils.getUnsafely(field, defaults) * 100)).setSaveConsumer((newValue) -> {
                 Utils.setUnsafely(field, config, newValue / 100d);
             }).setTextGetter(integer -> String.format("Size: %d%%", integer)).build());
-        }, (field) -> {
-            return field.getType() == Double.TYPE || field.getType() == Double.class;
-        }, ConfigObject.UsePercentage.class);
+        }, (field) -> field.getType() == Double.TYPE || field.getType() == Double.class, ConfigObject.UsePercentage.class);
+        
+        
+        guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> {
+            int width = 220;
+            return Collections.singletonList(new TooltipListEntry<RecipeScreenType>(i13n, null) {
+                private RecipeScreenType type = getUnsafely(field, config, RecipeScreenType.UNSET);
+                private ButtonWidget buttonWidget = new ButtonWidget(new Rectangle(0, 0, 0, 20), "") {
+                    @Override
+                    public void onPressed() {
+                        MinecraftClient.getInstance().openScreen(new PreRecipeViewingScreen(getScreen(), type, false, original -> {
+                            MinecraftClient.getInstance().openScreen(getScreen());
+                            type = original ? RecipeScreenType.ORIGINAL : RecipeScreenType.VILLAGER;
+                            getScreen().setEdited(true, isRequiresRestart());
+                        }));
+                    }
+                    
+                    @Override
+                    public void render(int mouseX, int mouseY, float delta) {
+                        setText(I18n.translate("config.roughlyenoughitems.recipeScreenType.config", type.toString()));
+                        super.render(mouseX, mouseY, delta);
+                    }
+                };
+                private List<ButtonWidget> children = ImmutableList.of(buttonWidget);
+                
+                @Override
+                public RecipeScreenType getValue() {
+                    return type;
+                }
+                
+                @Override
+                public Optional<RecipeScreenType> getDefaultValue() {
+                    return Optional.ofNullable(getUnsafely(field, defaults));
+                }
+                
+                @Override
+                public void save() {
+                    Utils.setUnsafely(field, config, type);
+                }
+                
+                @Override
+                public List<? extends Element> children() {
+                    return children;
+                }
+                
+                @Override
+                public void render(int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+                    super.render(index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
+                    Window window = MinecraftClient.getInstance().getWindow();
+                    this.buttonWidget.enabled = this.isEditable();
+                    this.buttonWidget.getBounds().y = y;
+                    this.buttonWidget.getBounds().x = x + entryWidth / 2 - width / 2;
+                    this.buttonWidget.getBounds().width = width;
+                    this.buttonWidget.render(mouseX, mouseY, delta);
+                }
+            });
+        }, (field) -> field.getType() == RecipeScreenType.class, ConfigObject.UseSpecialRecipeTypeScreen.class);
         loadFavoredEntries();
         RoughlyEnoughItemsCore.LOGGER.info("[REI] Config is loaded.");
     }
@@ -203,8 +264,7 @@ public class ConfigManagerImpl implements ConfigManager {
                 renderDirtBackground(0);
                 List<String> list = minecraft.textRenderer.wrapStringToWidthAsList(I18n.translate("text.rei.config_api_failed"), width - 100);
                 int y = (int) (height / 2 - minecraft.textRenderer.fontHeight * 1.3f / 2 * list.size());
-                for (int i = 0; i < list.size(); i++) {
-                    String s = list.get(i);
+                for (String s : list) {
                     drawCenteredString(minecraft.textRenderer, s, width / 2, y, -1);
                     y += minecraft.textRenderer.fontHeight;
                 }

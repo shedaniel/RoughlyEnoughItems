@@ -42,7 +42,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Deprecated
 @Internal
@@ -207,9 +206,11 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
             if (notice != null)
                 ((VillagerRecipeViewingScreen) screen).addMainStackToNotice(notice);
         } else if (ConfigObject.getInstance().getRecipeScreenType() == RecipeScreenType.UNSET) {
-            screen = new PreRecipeViewingScreen(map);
-            if (notice != null)
-                ((PreRecipeViewingScreen) screen).addMainStackToNotice(notice);
+            screen = new PreRecipeViewingScreen(ScreenHelper.getLastContainerScreen(), RecipeScreenType.UNSET, true, original -> {
+                ConfigObject.getInstance().setRecipeScreenType(original ? RecipeScreenType.ORIGINAL : RecipeScreenType.VILLAGER);
+                ConfigManager.getInstance().saveConfig();
+                openRecipeViewingScreen(map, notice);
+            });
         } else {
             screen = new RecipeViewingScreen(map);
             if (notice != null)
