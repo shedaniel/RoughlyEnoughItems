@@ -149,6 +149,7 @@
   "config.roughlyenoughitems.itemListOrdering": "Порядок списка предметов:",
   "config.roughlyenoughitems.list_ordering_button": "%s [%s]",
   "config.roughlyenoughitems.recipeScreenType": "Тип окна рецепта:",
+  "config.roughlyenoughitems.recipeScreenType.config": "Recipe Screen Type: %s",
   "config.roughlyenoughitems.recipeScreenType.unset": "Не установлено",
   "config.roughlyenoughitems.recipeScreenType.original": "Оригинальный",
   "config.roughlyenoughitems.recipeScreenType.villager": "Крестьянский",
