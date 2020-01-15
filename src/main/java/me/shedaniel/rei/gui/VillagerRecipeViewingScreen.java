@@ -10,8 +10,6 @@ import com.google.common.collect.Maps;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
-import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget.Interpolation;
-import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget.Precision;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
@@ -421,16 +419,9 @@ public class VillagerRecipeViewingScreen extends Screen {
     }
     
     private void updatePosition(float delta) {
-        target = clamp(target);
-        if (target < 0) {
-            target -= target * (1 - ClothConfigInitializer.getBounceBackMultiplier()) * delta / 3;
-        } else if (target > getMaxScroll()) {
-            target = (target - getMaxScroll()) * (1 - (1 - ClothConfigInitializer.getBounceBackMultiplier()) * delta / 3) + getMaxScroll();
-        }
-        if (!Precision.almostEquals(scroll, target, Precision.FLOAT_EPSILON))
-            scroll = (float) Interpolation.expoEase(scroll, target, Math.min((System.currentTimeMillis() - start) / ((double) duration), 1));
-        else
-            scroll = target;
+        double[] target = new double[]{this.target};
+        this.scroll = ClothConfigInitializer.handleScrollingPosition(target, this.scroll, this.getMaxScroll(), delta, this.start, this.duration);
+        this.target = target[0];
     }
     
     @Override
