@@ -10,7 +10,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.gui.widget.DynamicEntryListWidget;
-import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
@@ -227,8 +226,8 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
                 height = MathHelper.clamp(height, 32, this.getBounds().height - 2);
                 height -= Math.min((scroll < 0 ? (int) -scroll : scroll > maxScroll ? (int) scroll - maxScroll : 0), height * .95);
                 height = Math.max(10, height);
-                int minY = Math.min(Math.max((int) scroll * (this.getBounds().height - 2 - height) / maxScroll + getBounds().y + 1, getBounds().y + 1), getBounds().getMaxY() -1 - height);
-    
+                int minY = Math.min(Math.max((int) scroll * (this.getBounds().height - 2 - height) / maxScroll + getBounds().y + 1, getBounds().y + 1), getBounds().getMaxY() - 1 - height);
+                
                 boolean hovered = new Rectangle(scrollbarPositionMinX, minY, scrollbarPositionMaxX - scrollbarPositionMinX, height).contains(PointHelper.fromMouse());
                 int bottomC = hovered ? 168 : 128;
                 int topC = hovered ? 222 : 172;
@@ -260,16 +259,9 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
         }
         
         private void updatePosition(float delta) {
-            target = clamp(target);
-            if (target < 0) {
-                target -= target * (1 - ClothConfigInitializer.getBounceBackMultiplier()) * delta / 3;
-            } else if (target > getMaxScroll()) {
-                target = (target - getMaxScroll()) * (1 - (1 - ClothConfigInitializer.getBounceBackMultiplier()) * delta / 3) + getMaxScroll();
-            }
-            if (!DynamicNewSmoothScrollingEntryListWidget.Precision.almostEquals(scroll, target, DynamicNewSmoothScrollingEntryListWidget.Precision.FLOAT_EPSILON))
-                scroll = (float) DynamicNewSmoothScrollingEntryListWidget.Interpolation.expoEase(scroll, target, Math.min((System.currentTimeMillis() - start) / ((double) duration), 1));
-            else
-                scroll = target;
+            double[] target = new double[]{this.target};
+            this.scroll = ClothConfigInitializer.handleScrollingPosition(target, this.scroll, this.getMaxScroll(), delta, this.start, this.duration);
+            this.target = target[0];
         }
         
         @Override

@@ -198,22 +198,16 @@ public class FavoritesListWidget extends WidgetWithBounds {
     }
     
     private void updatePosition(float delta) {
-        target = clamp(target);
-        if (target < 0) {
-            target -= target * (1 - ClothConfigInitializer.getBounceBackMultiplier()) * delta / 3;
-        } else if (target > getMaxScroll()) {
-            target = (target - getMaxScroll()) * (1 - (1 - ClothConfigInitializer.getBounceBackMultiplier()) * delta / 3) + getMaxScroll();
-        } else if (ConfigObject.getInstance().doesSnapToRows()) {
+        if (ConfigObject.getInstance().doesSnapToRows() && target >= 0 && target <= getMaxScroll()) {
             double nearestRow = Math.round(target / (double) entrySize()) * (double) entrySize();
             if (!DynamicNewSmoothScrollingEntryListWidget.Precision.almostEquals(target, nearestRow, DynamicNewSmoothScrollingEntryListWidget.Precision.FLOAT_EPSILON))
                 target += (nearestRow - target) * Math.min(delta / 2.0, 1.0);
             else
                 target = nearestRow;
         }
-        if (!DynamicNewSmoothScrollingEntryListWidget.Precision.almostEquals(scroll, target, DynamicNewSmoothScrollingEntryListWidget.Precision.FLOAT_EPSILON))
-            scroll = (float) DynamicNewSmoothScrollingEntryListWidget.Interpolation.expoEase(scroll, target, Math.min((System.currentTimeMillis() - start) / ((double) duration), 1));
-        else
-            scroll = target;
+        double[] targetD = new double[]{this.target};
+        this.scroll = ClothConfigInitializer.handleScrollingPosition(targetD, this.scroll, this.getMaxScroll(), delta, this.start, this.duration);
+        this.target = targetD[0];
     }
     
     @Override
@@ -230,7 +224,6 @@ public class FavoritesListWidget extends WidgetWithBounds {
         this.bounds = boundsHandler.getFavoritesListArea(!ConfigObject.getInstance().isLeftHandSidePanel() ? boundsHandler.getLeftBounds(MinecraftClient.getInstance().currentScreen) : boundsHandler.getRightBounds(MinecraftClient.getInstance().currentScreen));
     }
     
-    @SuppressWarnings("deprecation")
     public void updateSearch(EntryListWidget listWidget, String searchTerm) {
         if (ConfigObject.getInstance().isFavoritesEnabled() && ConfigObject.getInstance().doDisplayFavoritesOnTheLeft()) {
             if (ConfigObject.getInstance().doSearchFavorites()) {
