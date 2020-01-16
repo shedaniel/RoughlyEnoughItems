@@ -149,7 +149,7 @@
   "config.roughlyenoughitems.weatherCommand": "Commande pour la météo :",
   "config.roughlyenoughitems.itemListOrdering": "Classement de la liste des entrées :",
   "config.roughlyenoughitems.list_ordering_button": "%s [%s]",
-  "config.roughlyenoughitems.newFastEntryRendering": "Faster Entry Rendering:",
+  "config.roughlyenoughitems.newFastEntryRendering": "Rendu plus rapide des entrées :",
   "config.roughlyenoughitems.recipeScreenType": "Type d'affichage des recettes :",
   "config.roughlyenoughitems.recipeScreenType.config": "Type d'affichage des recettes : %s",
   "config.roughlyenoughitems.recipeScreenType.unset": "Non défini",
