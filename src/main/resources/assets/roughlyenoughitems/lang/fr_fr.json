@@ -37,7 +37,7 @@
   "ordering.rei.registry": "Registre",
   "ordering.rei.name": "Nom",
   "ordering.rei.item_groups": "Thème",
-  "text.auto_craft.move_items": "Déplacer les objets",
+  "text.auto_craft.move_items": "Transférer les objets",
   "text.auto_craft.move_items.yog": "NullPointerException générée !",
   "error.rei.transfer.too_small": "Impossible de déplacer les objets vers une grille de %dx%d.",
   "error.rei.not.on.server": "REI n'est pas installé sur le serveur.",
