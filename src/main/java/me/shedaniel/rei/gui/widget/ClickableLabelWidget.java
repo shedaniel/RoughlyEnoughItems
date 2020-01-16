@@ -8,8 +8,6 @@ package me.shedaniel.rei.gui.widget;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.rei.impl.ScreenHelper;
 
-import java.util.Optional;
-
 public abstract class ClickableLabelWidget extends LabelWidget {
     
     public boolean focused;
@@ -32,6 +30,7 @@ public abstract class ClickableLabelWidget extends LabelWidget {
         clickable(clickable);
     }
     
+    @Deprecated
     public ClickableLabelWidget(Point point, String text) {
         super(point, text);
         this.hoveredColor = ScreenHelper.isDarkModeEnabled() ? -1 : 0xFF66FFCC;
@@ -69,11 +68,16 @@ public abstract class ClickableLabelWidget extends LabelWidget {
             else
                 font.draw(getText(), pos.x, pos.y, color);
         }
-        if (isClickable() && getTooltips().isPresent())
+        drawTooltips(mouseX, mouseY);
+    }
+    
+    @Override
+    protected void drawTooltips(int mouseX, int mouseY) {
+        if (getTooltips().isPresent())
             if (!focused && containsMouse(mouseX, mouseY))
                 ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltips().get().split("\n")));
             else if (focused)
-                ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(pos, getTooltips().get().split("\n")));
+                ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getPosition(), getTooltips().get().split("\n")));
     }
     
     public int getHoveredColor() {
@@ -87,10 +91,6 @@ public abstract class ClickableLabelWidget extends LabelWidget {
             return true;
         }
         return false;
-    }
-    
-    public Optional<String> getTooltips() {
-        return Optional.empty();
     }
     
     @Override

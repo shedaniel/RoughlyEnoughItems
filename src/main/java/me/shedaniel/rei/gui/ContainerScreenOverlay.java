@@ -294,11 +294,6 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                 }
                 
                 @Override
-                public Optional<String> getTooltips() {
-                    return Optional.ofNullable(I18n.translate("text.rei.go_back_first_page"));
-                }
-                
-                @Override
                 public void onLabelClicked() {
                     MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                     ENTRY_LIST_WIDGET.setPage(0);
@@ -309,7 +304,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                 public boolean changeFocus(boolean boolean_1) {
                     return false;
                 }
-            });
+            }.tooltip(() -> I18n.translate("text.rei.go_back_first_page")));
         }
         if (ConfigObject.getInstance().isCraftableFilterEnabled())
             this.widgets.add(toggleButtonWidget = new CraftableToggleButtonWidget(getCraftableToggleArea()) {

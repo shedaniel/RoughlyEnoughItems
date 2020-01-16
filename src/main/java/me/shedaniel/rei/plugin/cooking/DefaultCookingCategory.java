@@ -34,13 +34,13 @@ public class DefaultCookingCategory implements TransferRecipeCategory<DefaultCoo
     private Identifier identifier;
     private EntryStack logo;
     private String categoryName;
-
+    
     public DefaultCookingCategory(Identifier identifier, EntryStack logo, String categoryName) {
         this.identifier = identifier;
         this.logo = logo;
         this.categoryName = categoryName;
     }
-
+    
     @Override
     public void renderRedSlots(List<Widget> widgets, Rectangle bounds, DefaultCookingDisplay display, IntList redSlots) {
         Point startPoint = new Point(bounds.getCenterX() - 41, bounds.getCenterY() - 27);
@@ -50,7 +50,7 @@ public class DefaultCookingCategory implements TransferRecipeCategory<DefaultCoo
         }
         RenderSystem.translatef(0, 0, -400);
     }
-
+    
     @Override
     public List<Widget> setupDisplay(Supplier<DefaultCookingDisplay> recipeDisplaySupplier, Rectangle bounds) {
         Point startPoint = new Point(bounds.getCenterX() - 41, bounds.y + 10);
@@ -65,15 +65,15 @@ public class DefaultCookingCategory implements TransferRecipeCategory<DefaultCoo
                 String text = I18n.translate("category.rei.cooking.xp", recipeDisplaySupplier.get().getXp());
                 int length = MinecraftClient.getInstance().textRenderer.getStringWidth(text);
                 MinecraftClient.getInstance().textRenderer.draw(text, bounds.x + bounds.width - length - 5, bounds.y + 5, ScreenHelper.isDarkModeEnabled() ? 0xFFBBBBBB : 0xFF404040);
-    
+                
             }
         }));
-        widgets.add(new RecipeArrowWidget(startPoint.x + 24, startPoint.y + 8, true));
+        widgets.add(RecipeArrowWidget.create(new Point(startPoint.x + 24, startPoint.y + 8), true));
         widgets.add(EntryWidget.create(startPoint.x + 1, startPoint.y + 1).entries(recipeDisplaySupplier.get().getInputEntries().get(0)));
         widgets.add(EntryWidget.create(startPoint.x + 61, startPoint.y + 9).entries(recipeDisplaySupplier.get().getOutputEntries()).noBackground());
         return widgets;
     }
-
+    
     @Override
     public RecipeEntry getSimpleRenderer(DefaultCookingDisplay recipe) {
         return SimpleRecipeEntry.create(Collections.singletonList(recipe.getInputEntries().get(0)), recipe.getOutputEntries());
@@ -88,12 +88,12 @@ public class DefaultCookingCategory implements TransferRecipeCategory<DefaultCoo
     public Identifier getIdentifier() {
         return identifier;
     }
-
+    
     @Override
     public EntryStack getLogo() {
         return logo;
     }
-
+    
     @Override
     public String getCategoryName() {
         return I18n.translate(categoryName);

@@ -11,6 +11,7 @@ import com.google.common.collect.Sets;
 import me.shedaniel.cloth.hooks.ClothClientHooks;
 import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.OverlaySearchField;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
@@ -34,7 +35,7 @@ public class ScreenHelper implements ClientModInitializer {
      * @deprecated Use getters instead
      */
     @Deprecated public static OverlaySearchField searchField;
-    public static List<ItemStack> inventoryStacks = Lists.newArrayList();
+    @Deprecated @Internal public static List<ItemStack> inventoryStacks = Lists.newArrayList();
     private static ContainerScreenOverlay overlay;
     private static AbstractContainerScreen<?> lastContainerScreen = null;
     private static LinkedHashSet<Screen> lastRecipeScreen = Sets.newLinkedHashSetWithExpectedSize(5);

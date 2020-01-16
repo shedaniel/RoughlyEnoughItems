@@ -8,6 +8,7 @@ package me.shedaniel.rei.gui.widget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.ConfigManager;
+import me.shedaniel.rei.api.annotations.Internal;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.item.ItemRenderer;
@@ -17,6 +18,8 @@ import net.minecraft.util.Identifier;
 
 import java.util.Optional;
 
+@Deprecated
+@Internal
 public abstract class CraftableToggleButtonWidget extends ButtonWidget {
     
     public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");

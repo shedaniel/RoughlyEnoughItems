@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import io.github.prospector.modmenu.ModMenu;
 import me.sargunvohra.mcmods.autoconfig1u.AutoConfig;
 import me.sargunvohra.mcmods.autoconfig1u.gui.ConfigScreenProvider;
 import me.sargunvohra.mcmods.autoconfig1u.gui.registry.GuiRegistry;
@@ -23,7 +24,6 @@ import me.shedaniel.clothconfig2.api.Modifier;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.clothconfig2.gui.entries.KeyCodeEntry;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
-import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.api.ConfigObject;
@@ -35,11 +35,12 @@ import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.PreRecipeViewingScreen;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.gui.credits.CreditsScreen;
-import me.shedaniel.rei.gui.widget.ButtonWidget;
 import me.shedaniel.rei.gui.widget.ReloadConfigButtonWidget;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.client.gui.widget.AbstractPressableButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.InputUtil;
@@ -117,9 +118,9 @@ public class ConfigManagerImpl implements ConfigManager {
             int width = 220;
             return Collections.singletonList(new TooltipListEntry<RecipeScreenType>(i13n, null) {
                 private RecipeScreenType type = getUnsafely(field, config, RecipeScreenType.UNSET);
-                private ButtonWidget buttonWidget = new ButtonWidget(new Rectangle(0, 0, 0, 20), "") {
+                private AbstractButtonWidget buttonWidget = new AbstractPressableButtonWidget(0, 0, 0, 20, "") {
                     @Override
-                    public void onPressed() {
+                    public void onPress() {
                         MinecraftClient.getInstance().openScreen(new PreRecipeViewingScreen(getScreen(), type, false, original -> {
                             MinecraftClient.getInstance().openScreen(getScreen());
                             type = original ? RecipeScreenType.ORIGINAL : RecipeScreenType.VILLAGER;
@@ -129,11 +130,11 @@ public class ConfigManagerImpl implements ConfigManager {
                     
                     @Override
                     public void render(int mouseX, int mouseY, float delta) {
-                        setText(I18n.translate("config.roughlyenoughitems.recipeScreenType.config", type.toString()));
+                        setMessage(I18n.translate("config.roughlyenoughitems.recipeScreenType.config", type.toString()));
                         super.render(mouseX, mouseY, delta);
                     }
                 };
-                private List<ButtonWidget> children = ImmutableList.of(buttonWidget);
+                private List<Element> children = ImmutableList.of(buttonWidget);
                 
                 @Override
                 public RecipeScreenType getValue() {
@@ -159,10 +160,10 @@ public class ConfigManagerImpl implements ConfigManager {
                 public void render(int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
                     super.render(index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
                     Window window = MinecraftClient.getInstance().getWindow();
-                    this.buttonWidget.enabled = this.isEditable();
-                    this.buttonWidget.getBounds().y = y;
-                    this.buttonWidget.getBounds().x = x + entryWidth / 2 - width / 2;
-                    this.buttonWidget.getBounds().width = width;
+                    this.buttonWidget.active = this.isEditable();
+                    this.buttonWidget.y = y;
+                    this.buttonWidget.x = x + entryWidth / 2 - width / 2;
+                    this.buttonWidget.setWidth(width);
                     this.buttonWidget.render(mouseX, mouseY, delta);
                 }
             });
@@ -228,6 +229,46 @@ public class ConfigManagerImpl implements ConfigManager {
             provider.setOptionFunction((baseI13n, field) -> field.isAnnotationPresent(ConfigObject.DontApplyFieldName.class) ? baseI13n : String.format("%s.%s", baseI13n, field.getName()));
             provider.setCategoryFunction((baseI13n, categoryName) -> String.format("%s.%s", baseI13n, categoryName));
             provider.setBuildFunction(builder -> {
+                if (FabricLoader.getInstance().isModLoaded("modmenu")) {
+                    builder.getOrCreateCategory("config.roughlyenoughitems.!general").addEntry(new TooltipListEntry<Object>(I18n.translate("config.roughlyenoughitems.smooth_scrolling"), null) {
+                        int width = 220;
+                        private AbstractButtonWidget buttonWidget = new AbstractPressableButtonWidget(0, 0, 0, 20, this.getFieldName()) {
+                            public void onPress() {
+                                Screen screen = ModMenu.getConfigScreen("cloth-config2", parent);
+                                if (screen != null) {
+                                    MinecraftClient.getInstance().openScreen(screen);
+                                } else
+                                    ModMenu.openConfigScreen("cloth-config2");
+                            }
+                        };
+                        private List<Element> children = ImmutableList.of(this.buttonWidget);
+                        
+                        public Object getValue() {
+                            return null;
+                        }
+                        
+                        public Optional<Object> getDefaultValue() {
+                            return Optional.empty();
+                        }
+                        
+                        public void save() {
+                        }
+                        
+                        public List<? extends Element> children() {
+                            return this.children;
+                        }
+                        
+                        public void render(int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+                            super.render(index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
+                            Window window = MinecraftClient.getInstance().getWindow();
+                            this.buttonWidget.active = this.isEditable();
+                            this.buttonWidget.y = y;
+                            this.buttonWidget.x = x + entryWidth / 2 - this.width / 2;
+                            this.buttonWidget.setWidth(this.width);
+                            this.buttonWidget.render(mouseX, mouseY, delta);
+                        }
+                    });
+                }
                 return builder.setAfterInitConsumer(screen -> {
                     if (MinecraftClient.getInstance().getNetworkHandler() != null && MinecraftClient.getInstance().getNetworkHandler().getRecipeManager() != null) {
                         ((ScreenHooks) screen).cloth_addButton(new ReloadConfigButtonWidget(4, 4, 100, 20, I18n.translate("text.rei.reload_config"), buttonWidget -> {

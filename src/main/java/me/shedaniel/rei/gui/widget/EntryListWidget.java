@@ -15,6 +15,7 @@ import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.config.ItemListOrdering;
 import me.shedaniel.rei.impl.ScreenHelper;
@@ -37,14 +38,12 @@ import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+@Internal
 public class EntryListWidget extends WidgetWithBounds {
     
     static final Supplier<Boolean> RENDER_ENCHANTMENT_GLINT = ConfigObject.getInstance()::doesRenderEntryEnchantmentGlint;
@@ -72,6 +71,7 @@ public class EntryListWidget extends WidgetWithBounds {
     private List<EntryStack> allStacks = null;
     private List<EntryStack> favorites = null;
     private List<EntryListEntry> entries = Collections.emptyList();
+    private List<Widget> renders = Collections.emptyList();
     private List<Widget> widgets = Collections.emptyList();
     @SuppressWarnings("deprecation") private List<SearchArgument.SearchArguments> lastSearchArguments = Collections.emptyList();
     private boolean draggingScrollBar = false;
@@ -324,16 +324,55 @@ public class EntryListWidget extends WidgetWithBounds {
         } else {
             if (debugTime) {
                 int size = 0;
-                long totalTimeStart = System.nanoTime();
                 long time = 0;
-                for (Widget widget : widgets) {
-                    if (widget instanceof EntryListEntry) {
+                for (Widget widget : renders) {
+                    widget.render(mouseX, mouseY, delta);
+                }
+                long totalTimeStart = System.nanoTime();
+                if (ConfigObject.getInstance().doesFastEntryRendering()) {
+                    for (Map.Entry<? extends Class<? extends EntryStack>, List<EntryListEntry>> entry : entries.stream().collect(Collectors.groupingBy(entryListEntry -> entryListEntry.getCurrentEntry().getClass())).entrySet()) {
+                        List<EntryListEntry> list = entry.getValue();
+                        if (list.isEmpty())
+                            continue;
+                        EntryListEntry firstWidget = list.get(0);
+                        EntryStack first = firstWidget.getCurrentEntry();
+                        if (first instanceof OptimalEntryStack) {
+                            OptimalEntryStack firstStack = (OptimalEntryStack) first;
+                            firstStack.optimisedRenderStart(delta);
+                            size += list.size();
+                            long l = System.nanoTime();
+                            for (EntryListEntry listEntry : list) {
+                                EntryStack currentEntry = listEntry.getCurrentEntry();
+                                currentEntry.setZ(100);
+                                listEntry.drawBackground(mouseX, mouseY, delta);
+                                ((OptimalEntryStack) currentEntry).optimisedRenderBase(listEntry.getInnerBounds(), mouseX, mouseY, delta);
+                            }
+                            for (EntryListEntry listEntry : list) {
+                                EntryStack currentEntry = listEntry.getCurrentEntry();
+                                ((OptimalEntryStack) currentEntry).optimisedRenderOverlay(listEntry.getInnerBounds(), mouseX, mouseY, delta);
+                                if (listEntry.containsMouse(mouseX, mouseY)) {
+                                    listEntry.queueTooltip(mouseX, mouseY, delta);
+                                    listEntry.drawHighlighted(mouseX, mouseY, delta);
+                                }
+                            }
+                            time += (System.nanoTime() - l);
+                            firstStack.optimisedRenderEnd(delta);
+                        } else {
+                            for (EntryListEntry listEntry : list) {
+                                size++;
+                                long l = System.nanoTime();
+                                listEntry.render(mouseX, mouseY, delta);
+                                time += (System.nanoTime() - l);
+                            }
+                        }
+                    }
+                } else {
+                    for (EntryListEntry entry : entries) {
                         size++;
                         long l = System.nanoTime();
-                        widget.render(mouseX, mouseY, delta);
+                        entry.render(mouseX, mouseY, delta);
                         time += (System.nanoTime() - l);
-                    } else
-                        widget.render(mouseX, mouseY, delta);
+                    }
                 }
                 long totalTime = System.nanoTime() - totalTimeStart;
                 int z = getZ();
@@ -349,8 +388,44 @@ public class EntryListWidget extends WidgetWithBounds {
                 immediate.draw();
                 setZ(z);
             } else {
-                for (Widget widget : widgets) {
+                for (Widget widget : renders) {
                     widget.render(mouseX, mouseY, delta);
+                }
+                if (ConfigObject.getInstance().doesFastEntryRendering()) {
+                    for (Map.Entry<? extends Class<? extends EntryStack>, List<EntryListEntry>> entry : entries.stream().collect(Collectors.groupingBy(entryListEntry -> entryListEntry.getCurrentEntry().getClass())).entrySet()) {
+                        List<EntryListEntry> list = entry.getValue();
+                        if (list.isEmpty())
+                            continue;
+                        EntryListEntry firstWidget = list.get(0);
+                        EntryStack first = firstWidget.getCurrentEntry();
+                        if (first instanceof OptimalEntryStack) {
+                            OptimalEntryStack firstStack = (OptimalEntryStack) first;
+                            firstStack.optimisedRenderStart(delta);
+                            for (EntryListEntry listEntry : list) {
+                                EntryStack currentEntry = listEntry.getCurrentEntry();
+                                currentEntry.setZ(100);
+                                listEntry.drawBackground(mouseX, mouseY, delta);
+                                ((OptimalEntryStack) currentEntry).optimisedRenderBase(listEntry.getInnerBounds(), mouseX, mouseY, delta);
+                            }
+                            for (EntryListEntry listEntry : list) {
+                                EntryStack currentEntry = listEntry.getCurrentEntry();
+                                ((OptimalEntryStack) currentEntry).optimisedRenderOverlay(listEntry.getInnerBounds(), mouseX, mouseY, delta);
+                                if (listEntry.containsMouse(mouseX, mouseY)) {
+                                    listEntry.queueTooltip(mouseX, mouseY, delta);
+                                    listEntry.drawHighlighted(mouseX, mouseY, delta);
+                                }
+                            }
+                            firstStack.optimisedRenderEnd(delta);
+                        } else {
+                            for (EntryListEntry listEntry : list) {
+                                listEntry.render(mouseX, mouseY, delta);
+                            }
+                        }
+                    }
+                } else {
+                    for (EntryListEntry listEntry : entries) {
+                        listEntry.render(mouseX, mouseY, delta);
+                    }
                 }
             }
         }
@@ -464,6 +539,7 @@ public class EntryListWidget extends WidgetWithBounds {
     public void updateEntriesPosition() {
         this.innerBounds = updateInnerBounds(bounds);
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
+            this.renders = Lists.newArrayList();
             page = Math.max(page, 0);
             List<EntryListEntry> entries = Lists.newArrayList();
             int width = innerBounds.width / entrySize();
@@ -484,12 +560,11 @@ public class EntryListWidget extends WidgetWithBounds {
                 entries.get(i + Math.max(0, numberForFavorites - page * entries.size())).isFavorites = false;
             }
             this.entries = entries;
-            this.widgets = Lists.newArrayList(entries);
             if (numberForFavorites > 0) {
                 int skippedFavorites = page * (entries.size() - width);
                 int j = 0;
                 if (skippedFavorites < favorites.size()) {
-                    widgets.add(new LabelWidget(new Point(innerBounds.x + 2, innerBounds.y + 6), I18n.translate("text.rei.favorites")).leftAligned());
+                    renders.add(LabelWidget.create(new Point(innerBounds.x + 2, innerBounds.y + 6), I18n.translate("text.rei.favorites")).leftAligned());
                     j += width;
                 }
                 List<EntryStack> subFavoritesList = favorites.stream().skip(skippedFavorites).limit(Math.max(0, entries.size() - width)).collect(Collectors.toList());
@@ -499,6 +574,8 @@ public class EntryListWidget extends WidgetWithBounds {
                     j++;
                 }
             }
+            this.widgets = Lists.newArrayList(renders);
+            this.widgets.addAll(entries);
         } else {
             page = 0;
             int width = innerBounds.width / entrySize();
@@ -519,7 +596,8 @@ public class EntryListWidget extends WidgetWithBounds {
                 }
             }
             this.entries = entries;
-            this.widgets = Collections.unmodifiableList(entries);
+            this.widgets = Lists.newArrayList(renders);
+            this.widgets.addAll(entries);
         }
         FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
         if (favoritesListWidget != null)
@@ -741,9 +819,14 @@ public class EntryListWidget extends WidgetWithBounds {
         private boolean isFavorites;
         
         private EntryListEntry(int x, int y) {
-            super(x, y);
+            super(new Point(x, y));
             this.backupY = y;
             getBounds().width = getBounds().height = entrySize();
+        }
+        
+        @Override
+        public void drawBackground(int mouseX, int mouseY, float delta) {
+            super.drawBackground(mouseX, mouseY, delta);
         }
         
         @Override
@@ -752,13 +835,13 @@ public class EntryListWidget extends WidgetWithBounds {
         }
         
         @Override
-        protected void drawHighlighted(int mouseX, int mouseY, float delta) {
+        public void drawHighlighted(int mouseX, int mouseY, float delta) {
             if (getCurrentEntry().getType() != EntryStack.Type.EMPTY)
                 super.drawHighlighted(mouseX, mouseY, delta);
         }
         
         @Override
-        protected void queueTooltip(int mouseX, int mouseY, float delta) {
+        public void queueTooltip(int mouseX, int mouseY, float delta) {
             if (!ClientHelper.getInstance().isCheating() || minecraft.player.inventory.getCursorStack().isEmpty()) {
                 super.queueTooltip(mouseX, mouseY, delta);
             }

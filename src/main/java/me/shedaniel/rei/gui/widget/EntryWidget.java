@@ -7,6 +7,7 @@ package me.shedaniel.rei.gui.widget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
+import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.ClientHelper;
@@ -39,12 +40,20 @@ public class EntryWidget extends WidgetWithBounds {
     private List<EntryStack> entryStacks;
     
     protected EntryWidget(int x, int y) {
-        this.bounds = new Rectangle(x - 1, y - 1, 18, 18);
+        this(new Point(x, y));
+    }
+    
+    protected EntryWidget(Point point) {
+        this.bounds = new Rectangle(point.x - 1, point.y - 1, 18, 18);
         this.entryStacks = new ArrayList<>();
     }
     
     public static EntryWidget create(int x, int y) {
-        return new EntryWidget(x, y);
+        return create(new Point(x, y));
+    }
+    
+    public static EntryWidget create(Point point) {
+        return new EntryWidget(point);
     }
     
     public EntryWidget disableInteractions() {
@@ -131,23 +140,31 @@ public class EntryWidget extends WidgetWithBounds {
     
     @Override
     public void render(int mouseX, int mouseY, float delta) {
-        if (background) {
-            drawBackground(mouseX, mouseY, delta);
-        }
+        drawBackground(mouseX, mouseY, delta);
         drawCurrentEntry(mouseX, mouseY, delta);
         
         boolean highlighted = containsMouse(mouseX, mouseY);
-        if (tooltips && highlighted) {
+        if (hasTooltips() && highlighted) {
             queueTooltip(mouseX, mouseY, delta);
         }
-        if (highlight && highlighted) {
+        if (hasHighlight() && highlighted) {
             drawHighlighted(mouseX, mouseY, delta);
         }
     }
     
+    public final boolean hasTooltips() {
+        return tooltips;
+    }
+    
+    public final boolean hasHighlight() {
+        return highlight;
+    }
+    
     protected void drawBackground(int mouseX, int mouseY, float delta) {
-        minecraft.getTextureManager().bindTexture(ScreenHelper.isDarkModeEnabled() ? RECIPE_GUI_DARK : RECIPE_GUI);
-        blit(bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
+        if (background) {
+            minecraft.getTextureManager().bindTexture(ScreenHelper.isDarkModeEnabled() ? RECIPE_GUI_DARK : RECIPE_GUI);
+            blit(bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
+        }
     }
     
     protected void drawCurrentEntry(int mouseX, int mouseY, float delta) {

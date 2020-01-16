@@ -8,10 +8,13 @@ package me.shedaniel.rei.gui.widget;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
+import me.shedaniel.rei.api.annotations.Internal;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.Window;
 
+@Deprecated
+@Internal
 public abstract class DraggableWidget extends WidgetWithBounds {
     
     public boolean dragged = false;

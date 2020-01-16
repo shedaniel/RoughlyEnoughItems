@@ -5,6 +5,9 @@
 
 package me.shedaniel.rei.impl;
 
+import me.shedaniel.rei.api.annotations.Internal;
+
+@Internal
 public enum Weather {
     CLEAR(0, "text.rei.weather.clear"),
     RAIN(1, "text.rei.weather.rain"),
@@ -18,20 +21,16 @@ public enum Weather {
         this.translateKey = translateKey;
     }
     
-    public static Weather byId(int int_1) {
-        return byId(int_1, CLEAR);
+    public static Weather byId(int id) {
+        return byId(id, CLEAR);
     }
     
-    public static Weather byId(int int_1, Weather gameMode_1) {
-        Weather[] var2 = values();
-        int var3 = var2.length;
-        
-        for (int var4 = 0; var4 < var3; ++var4) {
-            Weather gameMode_2 = var2[var4];
-            if (gameMode_2.id == int_1)
-                return gameMode_2;
+    public static Weather byId(int id, Weather defaultWeather) {
+        for (Weather weather : values()) {
+            if (weather.id == id)
+                return weather;
         }
-        return gameMode_1;
+        return defaultWeather;
     }
     
     public int getId() {

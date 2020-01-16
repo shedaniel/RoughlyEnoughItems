@@ -9,6 +9,7 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
@@ -20,6 +21,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+@Deprecated
+@Internal
 public class RecipeChoosePageWidget extends DraggableWidget {
     
     private int currentPage;
@@ -101,13 +104,12 @@ public class RecipeChoosePageWidget extends DraggableWidget {
         int width = font.getStringWidth(endString);
         this.widgets.add(textFieldWidget = new TextFieldWidget(bounds.x + 7, bounds.y + 16, bounds.width - width - 12, 18));
         textFieldWidget.setMaxLength(10000);
-        textFieldWidget.stripInvaild = s -> {
+        textFieldWidget.stripInvalid = s -> {
             StringBuilder stringBuilder_1 = new StringBuilder();
             char[] var2 = s.toCharArray();
             int var3 = var2.length;
             
-            for (int var4 = 0; var4 < var3; ++var4) {
-                char char_1 = var2[var4];
+            for (char char_1 : var2) {
                 if (Character.isDigit(char_1))
                     stringBuilder_1.append(char_1);
             }
@@ -170,7 +172,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     public Optional<Integer> getIntFromString(String s) {
         try {
             return Optional.of(Integer.valueOf(s));
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
         return Optional.empty();
     }
