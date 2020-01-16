@@ -12,6 +12,9 @@ import net.minecraft.client.gui.Element;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class LabelWidget extends WidgetWithBounds {
     
@@ -20,16 +23,31 @@ public class LabelWidget extends WidgetWithBounds {
     private int defaultColor;
     private boolean hasShadows = true;
     private boolean centered = true;
+    private Supplier<String> tooltipSupplier;
     
     @Deprecated
     public LabelWidget(int x, int y, String text) {
         this(new Point(x, y), text);
     }
     
+    @Deprecated
     public LabelWidget(Point point, String text) {
         this.pos = point;
         this.text = text;
         this.defaultColor = ScreenHelper.isDarkModeEnabled() ? 0xFFBBBBBB : -1;
+    }
+    
+    public static LabelWidget create(Point point, String text) {
+        return new LabelWidget(point, text);
+    }
+    
+    public static ClickableLabelWidget createClickable(Point point, String text, Consumer<ClickableLabelWidget> onClicked) {
+        return new ClickableActionedLabelWidget(point, text, onClicked);
+    }
+    
+    public LabelWidget tooltip(Supplier<String> tooltipSupplier) {
+        this.tooltipSupplier = tooltipSupplier;
+        return this;
     }
     
     public boolean isCentered() {
@@ -94,6 +112,10 @@ public class LabelWidget extends WidgetWithBounds {
         return this;
     }
     
+    public Optional<String> getTooltips() {
+        return Optional.ofNullable(tooltipSupplier).map(Supplier::get);
+    }
+    
     @Override
     public Rectangle getBounds() {
         int width = font.getStringWidth(text);
@@ -125,4 +147,9 @@ public class LabelWidget extends WidgetWithBounds {
         }
     }
     
+    protected void drawTooltips(int mouseX, int mouseY) {
+        if (getTooltips().isPresent())
+            if (containsMouse(mouseX, mouseY))
+                ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltips().get().split("\n")));
+    }
 }

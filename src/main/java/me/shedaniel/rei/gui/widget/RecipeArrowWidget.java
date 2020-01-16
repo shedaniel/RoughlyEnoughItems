@@ -5,6 +5,7 @@
 
 package me.shedaniel.rei.gui.widget;
 
+import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.client.MinecraftClient;
@@ -19,10 +20,15 @@ public class RecipeArrowWidget extends WidgetWithBounds {
     private int x, y;
     private boolean animated;
     
+    @Deprecated
     public RecipeArrowWidget(int x, int y, boolean animated) {
         this.x = x;
         this.y = y;
         this.animated = animated;
+    }
+    
+    public static RecipeArrowWidget create(Point point, boolean animated) {
+        return new RecipeArrowWidget(point.x, point.y, animated);
     }
     
     @Override

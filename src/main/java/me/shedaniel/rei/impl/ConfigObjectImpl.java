@@ -200,7 +200,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     @Override
     public boolean doesFastEntryRendering() {
-        return performance.fastEntryRendering;
+        return performance.newFastEntryRendering;
     }
     
     @Override
@@ -326,6 +326,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     public static class Performance {
         @Comment("Whether REI should render entry's enchantment glint") private boolean renderEntryEnchantmentGlint = true;
-        @ConfigEntry.Gui.Excluded private boolean fastEntryRendering = false;
+        private boolean newFastEntryRendering = true;
     }
 }

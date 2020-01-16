@@ -10,9 +10,11 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
+import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.gui.config.ItemListOrdering;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.CollectionUtils;
@@ -28,6 +30,7 @@ import java.util.List;
 
 import static me.shedaniel.rei.gui.widget.EntryListWidget.*;
 
+@Internal
 public class FavoritesListWidget extends WidgetWithBounds {
     protected double target;
     protected double scroll;
@@ -318,7 +321,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
         private int backupY;
         
         private EntryListEntry(int x, int y) {
-            super(x, y);
+            super(new Point(x, y));
             this.backupY = y;
             getBounds().width = getBounds().height = entrySize();
         }

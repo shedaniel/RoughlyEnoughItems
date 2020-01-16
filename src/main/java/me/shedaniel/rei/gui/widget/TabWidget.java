@@ -9,6 +9,7 @@ import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeCategory;
+import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -16,6 +17,8 @@ import net.minecraft.util.Identifier;
 import java.util.Collections;
 import java.util.List;
 
+@Deprecated
+@Internal
 public class TabWidget extends WidgetWithBounds {
     
     public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
@@ -26,7 +29,7 @@ public class TabWidget extends WidgetWithBounds {
     public int id;
     public String categoryName;
     public Rectangle bounds;
-    public RecipeCategory category;
+    public RecipeCategory<?> category;
     public int u, v;
     
     public TabWidget(int id, Rectangle bounds) {
@@ -48,7 +51,7 @@ public class TabWidget extends WidgetWithBounds {
         this(id, new Rectangle(leftX + id * tabSize, bottomY - tabSize, tabSize, tabSize), u, v);
     }
     
-    public void setRenderer(RecipeCategory category, EntryStack logo, String categoryName, boolean selected) {
+    public void setRenderer(RecipeCategory<?> category, EntryStack logo, String categoryName, boolean selected) {
         if (logo == null) {
             shown = false;
             this.logo = null;
@@ -91,7 +94,6 @@ public class TabWidget extends WidgetWithBounds {
         }
     }
     
-    @SuppressWarnings("deprecation")
     private void drawTooltip() {
         if (this.minecraft.options.advancedItemTooltips)
             ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(categoryName, Formatting.DARK_GRAY.toString() + category.getIdentifier().toString(), ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())));

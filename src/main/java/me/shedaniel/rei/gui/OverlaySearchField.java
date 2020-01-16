@@ -7,6 +7,7 @@ package me.shedaniel.rei.gui;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
+import me.shedaniel.math.api.Point;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
@@ -16,15 +17,18 @@ import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.Pair;
 
 import java.util.List;
 
+@Internal
+@Deprecated
 public class OverlaySearchField extends TextFieldWidget {
     
     public static boolean isSearching = false;
     public long keybindFocusTime = -1;
     public int keybindFocusKey = -1;
-    protected long lastClickedTime = -1;
+    protected Pair<Long, Point> lastClickedDetails = null;
     private List<String> history = Lists.newArrayListWithCapacity(100);
     
     OverlaySearchField(int x, int y, int width, int height) {
@@ -67,14 +71,25 @@ public class OverlaySearchField extends TextFieldWidget {
             this.font.drawWithShadow(this.font.trimToWidth(this.getSuggestion(), this.getWidth()), x, y, -6250336);
     }
     
+    @SuppressWarnings("deprecation")
     @Override
     public void renderBorder() {
-        if (!isSearching)
-            super.renderBorder();
-        else if (this.hasBorder()) {
+        boolean hasError = ContainerScreenOverlay.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty();
+        if (isSearching) {
             fill(this.getBounds().x - 1, this.getBounds().y - 1, this.getBounds().x + this.getBounds().width + 1, this.getBounds().y + this.getBounds().height + 1, -852212);
-            fill(this.getBounds().x, this.getBounds().y, this.getBounds().x + this.getBounds().width, this.getBounds().y + this.getBounds().height, -16777216);
+        } else if (hasError) {
+            fill(this.getBounds().x - 1, this.getBounds().y - 1, this.getBounds().x + this.getBounds().width + 1, this.getBounds().y + this.getBounds().height + 1, -43691);
+        } else {
+            super.renderBorder();
+            return;
         }
+        fill(this.getBounds().x, this.getBounds().y, this.getBounds().x + this.getBounds().width, this.getBounds().y + this.getBounds().height, -16777216);
+    }
+    
+    public int getManhattanDistance(Point point1, Point point2) {
+        int e = Math.abs(point1.getX() - point2.getX());
+        int f = Math.abs(point1.getY() - point2.getY());
+        return e + f;
     }
     
     @Override
@@ -83,14 +98,16 @@ public class OverlaySearchField extends TextFieldWidget {
         if (isVisible() && contains && int_1 == 1)
             setText("");
         if (contains && int_1 == 0)
-            if (lastClickedTime == -1)
-                lastClickedTime = System.currentTimeMillis();
-            else if (System.currentTimeMillis() - lastClickedTime > 700)
-                lastClickedTime = -1;
-            else {
-                lastClickedTime = -1;
+            if (lastClickedDetails == null)
+                lastClickedDetails = new Pair<>(System.currentTimeMillis(), new Point(double_1, double_2));
+            else if (System.currentTimeMillis() - lastClickedDetails.getLeft() > 1500)
+                lastClickedDetails = null;
+            else if (getManhattanDistance(lastClickedDetails.getRight(), new Point(double_1, double_2)) <= 25) {
+                lastClickedDetails = null;
                 isSearching = !isSearching;
                 minecraft.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            } else {
+                lastClickedDetails = new Pair<>(System.currentTimeMillis(), new Point(double_1, double_2));
             }
         return super.mouseClicked(double_1, double_2, int_1);
     }
@@ -140,7 +157,7 @@ public class OverlaySearchField extends TextFieldWidget {
     }
     
     @Override
-    public void render(int int_1, int int_2, float float_1) {
+    public void render(int mouseX, int mouseY, float delta) {
     }
     
 }

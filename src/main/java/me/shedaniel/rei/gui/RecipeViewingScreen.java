@@ -11,6 +11,7 @@ import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.gui.widget.*;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.CollectionUtils;
@@ -30,6 +31,8 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Supplier;
 
+@Deprecated
+@Internal
 public class RecipeViewingScreen extends Screen {
     
     public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
@@ -359,7 +362,7 @@ public class RecipeViewingScreen extends Screen {
     
     public static class WorkstationSlotWidget extends EntryWidget {
         public WorkstationSlotWidget(int x, int y, List<EntryStack> widgets) {
-            super(x, y);
+            super(new Point(x, y));
             entries(widgets);
             noBackground();
         }

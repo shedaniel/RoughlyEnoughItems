@@ -14,6 +14,7 @@ import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.gui.entries.RecipeEntry;
 import me.shedaniel.rei.gui.widget.*;
 import me.shedaniel.rei.impl.ScreenHelper;
@@ -37,6 +38,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@Deprecated
+@Internal
 public class VillagerRecipeViewingScreen extends Screen {
     
     private int tabsPerPage = 8;

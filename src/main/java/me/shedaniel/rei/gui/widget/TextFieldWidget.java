@@ -5,8 +5,6 @@
 
 package me.shedaniel.rei.gui.widget;
 
-import com.google.common.base.Predicates;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
@@ -28,7 +26,7 @@ import java.util.function.Predicate;
 
 public class TextFieldWidget extends WidgetWithBounds implements Tickable {
     
-    public Function<String, String> stripInvaild;
+    public Function<String, String> stripInvalid;
     protected int focusedTicks;
     protected boolean editable;
     protected int field_2103;
@@ -43,7 +41,6 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
     private boolean hasBorder;
     private boolean field_2096;
     private boolean focused;
-    private boolean field_17037;
     private boolean visible;
     private String suggestion;
     private Consumer<String> changedListener;
@@ -58,12 +55,12 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
         this.editableColor = 14737632;
         this.notEditableColor = 7368816;
         this.visible = true;
-        this.textPredicate = Predicates.alwaysTrue();
+        this.textPredicate = s -> true;
         this.renderTextProvider = (string_1, integer_1) -> {
             return string_1;
         };
         this.bounds = rectangle;
-        this.stripInvaild = s -> SharedConstants.stripInvalidChars(s);
+        this.stripInvalid = SharedConstants::stripInvalidChars;
     }
     
     public TextFieldWidget(int x, int y, int width, int height) {
@@ -109,13 +106,13 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
             }
             
             this.onChanged(string_1);
-            this.method_1872();
+            this.moveCursorToEnd();
         }
     }
     
     public String getSelectedText() {
-        int int_1 = this.cursorMax < this.cursorMin ? this.cursorMax : this.cursorMin;
-        int int_2 = this.cursorMax < this.cursorMin ? this.cursorMin : this.cursorMax;
+        int int_1 = Math.min(this.cursorMax, this.cursorMin);
+        int int_2 = Math.max(this.cursorMax, this.cursorMin);
         return this.text.substring(int_1, int_2);
     }
     
@@ -125,9 +122,9 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
     
     public void addText(String string_1) {
         String string_2 = "";
-        String string_3 = stripInvaild.apply(string_1);
-        int int_1 = this.cursorMax < this.cursorMin ? this.cursorMax : this.cursorMin;
-        int int_2 = this.cursorMax < this.cursorMin ? this.cursorMin : this.cursorMax;
+        String string_3 = stripInvalid.apply(string_1);
+        int int_1 = Math.min(this.cursorMax, this.cursorMin);
+        int int_2 = Math.max(this.cursorMax, this.cursorMin);
         int int_3 = this.maxLength - this.text.length() - (int_1 - int_2);
         if (!this.text.isEmpty()) {
             string_2 = string_2 + this.text.substring(0, int_1);
@@ -200,7 +197,7 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
                 if (this.textPredicate.test(string_1)) {
                     this.text = string_1;
                     if (boolean_1) {
-                        this.moveCursor(int_1);
+                        this.moveCursor(int_1, true);
                     }
                     
                     this.onChanged(this.text);
@@ -247,32 +244,32 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
         return int_3;
     }
     
-    public void moveCursor(int int_1) {
-        this.method_1883(this.cursorMax + int_1);
+    public void moveCursor(int int_1, boolean resetSelect) {
+        this.moveCursorTo(this.cursorMax + int_1, resetSelect);
     }
     
-    public void method_1883(int int_1) {
+    public void moveCursorTo(int int_1, boolean resetSelect) {
         this.setCursor(int_1);
-        if (!this.field_17037) {
+        //        if (!this.field_17037) {
+        if (resetSelect) {
             this.method_1884(this.cursorMax);
         }
         
         this.onChanged(this.text);
     }
     
-    public void method_1870() {
-        this.method_1883(0);
+    public void moveCursorToHead() {
+        this.moveCursorTo(0, true);
     }
     
-    public void method_1872() {
-        this.method_1883(this.text.length());
+    public void moveCursorToEnd() {
+        this.moveCursorTo(this.text.length(), true);
     }
     
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (this.isVisible() && this.isFocused()) {
-            this.field_17037 = Screen.hasShiftDown();
             if (Screen.isSelectAll(int_1)) {
-                this.method_1872();
+                this.moveCursorToEnd();
                 this.method_1884(0);
                 return true;
             } else if (Screen.isCopy(int_1)) {
@@ -314,25 +311,25 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
                         return true;
                     case 262:
                         if (Screen.hasControlDown()) {
-                            this.method_1883(this.method_1853(1));
+                            this.moveCursorTo(this.method_1853(1), !Screen.hasShiftDown());
                         } else {
-                            this.moveCursor(1);
+                            this.moveCursor(1, !Screen.hasShiftDown());
                         }
                         
                         return true;
                     case 263:
                         if (Screen.hasControlDown()) {
-                            this.method_1883(this.method_1853(-1));
+                            this.moveCursorTo(this.method_1853(-1), !Screen.hasShiftDown());
                         } else {
-                            this.moveCursor(-1);
+                            this.moveCursor(-1, !Screen.hasShiftDown());
                         }
                         
                         return true;
                     case 268:
-                        this.method_1870();
+                        this.moveCursorToHead();
                         return true;
                     case 269:
-                        this.method_1872();
+                        this.moveCursorToEnd();
                         return true;
                 }
             }
@@ -379,7 +376,7 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
                 }
                 
                 String string_1 = this.font.trimToWidth(this.text.substring(this.field_2103), this.getWidth());
-                this.method_1883(this.font.trimToWidth(string_1, int_2).length() + this.field_2103);
+                this.moveCursorTo(this.font.trimToWidth(string_1, int_2).length() + this.field_2103, true);
                 return true;
             } else {
                 return false;
@@ -397,7 +394,7 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
         }
     }
     
-    public void render(int int_1, int int_2, float float_1) {
+    public void render(int mouseX, int mouseY, float delta) {
         if (this.isVisible()) {
             renderBorder();
             
@@ -407,55 +404,50 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
             String string_1 = this.font.trimToWidth(this.text.substring(this.field_2103), this.getWidth());
             boolean boolean_1 = int_4 >= 0 && int_4 <= string_1.length();
             boolean boolean_2 = this.focused && this.focusedTicks / 6 % 2 == 0 && boolean_1;
-            int int_6 = this.hasBorder ? this.bounds.x + 4 : this.bounds.x;
-            int int_7 = this.hasBorder ? this.bounds.y + (this.bounds.height - 8) / 2 : this.bounds.y;
-            int int_8 = int_6;
+            int x = this.hasBorder ? this.bounds.x + 4 : this.bounds.x;
+            int y = this.hasBorder ? this.bounds.y + (this.bounds.height - 8) / 2 : this.bounds.y;
+            int int_8 = x;
             if (int_5 > string_1.length()) {
                 int_5 = string_1.length();
             }
             
             if (!string_1.isEmpty()) {
                 String string_2 = boolean_1 ? string_1.substring(0, int_4) : string_1;
-                int_8 = this.font.drawWithShadow(this.renderTextProvider.apply(string_2, this.field_2103), (float) int_6, (float) int_7, color);
+                int_8 = this.font.drawWithShadow(this.renderTextProvider.apply(string_2, this.field_2103), (float) x, (float) y, color);
             }
             
-            boolean boolean_3 = this.cursorMax < this.text.length() || this.text.length() >= this.getMaxLength();
+            boolean isCursorInsideText = this.cursorMax < this.text.length() || this.text.length() >= this.getMaxLength();
             int int_9 = int_8;
             if (!boolean_1) {
-                int_9 = int_4 > 0 ? int_6 + this.bounds.width : int_6;
-            } else if (boolean_3) {
-                int_9 = int_8 - 1;
+                int_9 = int_4 > 0 ? x + this.bounds.width : x;
+            } else if (isCursorInsideText) {
                 --int_8;
             }
+            int_9--;
             
             if (!string_1.isEmpty() && boolean_1 && int_4 < string_1.length()) {
-                this.font.drawWithShadow(this.renderTextProvider.apply(string_1.substring(int_4), this.cursorMax), (float) int_8, (float) int_7, color);
+                this.font.drawWithShadow(this.renderTextProvider.apply(string_1.substring(int_4), this.cursorMax), (float) int_8, (float) y, color);
             }
             
-            if (!boolean_3 && text.isEmpty() && this.suggestion != null) {
-                renderSuggestion(int_6, int_7);
+            if (!isCursorInsideText && text.isEmpty() && this.suggestion != null) {
+                renderSuggestion(x, y);
             }
             
-            int var10002;
-            int var10003;
             if (boolean_2) {
-                if (boolean_3) {
-                    int var10001 = int_7 - 1;
-                    var10002 = int_9 + 1;
-                    var10003 = int_7 + 1;
-                    this.font.getClass();
-                    fill(int_9, var10001, var10002, var10003 + 9, -3092272);
-                } else {
-                    this.font.drawWithShadow("_", (float) int_9, (float) int_7, color);
-                }
+                //                if (isCursorInsideText) {
+                fill(int_9 + 1, y, int_9 + 2, y + 9, ((0xFF) << 24) | ((((color >> 16 & 255) / 4) & 0xFF) << 16) | ((((color >> 8 & 255) / 4) & 0xFF) << 8) | ((((color & 255) / 4) & 0xFF)));
+                //                fill(int_9, y, int_9 + 1, y + 9, 0xff343434);
+                fill(int_9, y - 1, int_9 + 1, y + 8, ((0xFF) << 24) | color);
+                //                fill(int_9 - 1, y - 1, int_9, y + 8, 0xffd0d0d0);
+                //                } else {
+                //                                    this.font.drawWithShadow("|", (float) int_9 - 2, (float) y, 0xffd0d0d0);
+                //                }
             }
             
+            // Render selection overlay
             if (int_5 != int_4) {
-                int int_10 = int_6 + this.font.getStringWidth(string_1.substring(0, int_5));
-                var10002 = int_7 - 1;
-                var10003 = int_10 - 1;
-                int var10004 = int_7 + 1;
-                this.method_1886(int_9, var10002, var10003, var10004 + 9);
+                int int_10 = x + this.font.getStringWidth(string_1.substring(0, int_5));
+                this.method_1886(int_9, y - 1, int_10 - 1, y + 9, color);
             }
         }
     }
@@ -464,41 +456,59 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
         this.font.drawWithShadow(this.font.trimToWidth(this.suggestion, this.getWidth()), x, y, -8355712);
     }
     
-    protected void method_1886(int int_1, int int_2, int int_3, int int_4) {
-        int int_6;
-        if (int_1 < int_3) {
-            int_6 = int_1;
-            int_1 = int_3;
-            int_3 = int_6;
+    protected void method_1886(int x1, int y1, int x2, int y2, int color) {
+        int tmp;
+        if (x1 < x2) {
+            tmp = x1;
+            x1 = x2;
+            x2 = tmp;
         }
         
-        if (int_2 < int_4) {
-            int_6 = int_2;
-            int_2 = int_4;
-            int_4 = int_6;
+        if (y1 < y2) {
+            tmp = y1;
+            y1 = y2;
+            y2 = tmp;
         }
         
-        if (int_3 > this.bounds.x + this.bounds.width) {
-            int_3 = this.bounds.x + this.bounds.width;
+        if (x2 > this.bounds.x + this.bounds.width) {
+            x2 = this.bounds.x + this.bounds.width;
         }
         
-        if (int_1 > this.bounds.x + this.bounds.width) {
-            int_1 = this.bounds.x + this.bounds.width;
+        if (x1 > this.bounds.x + this.bounds.width) {
+            x1 = this.bounds.x + this.bounds.width;
         }
         
-        Tessellator tessellator_1 = Tessellator.getInstance();
-        BufferBuilder bufferBuilder_1 = tessellator_1.getBuffer();
-        RenderSystem.color4f(0.0F, 0.0F, 255.0F, 255.0F);
+        int r = (color >> 16 & 255);
+        int g = (color >> 8 & 255);
+        int b = (color & 255);
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder buffer = tessellator.getBuffer();
+        //        RenderSystem.color4f(0.0F, 0.0F, 255.0F, 255.0F);
+        //        RenderSystem.disableTexture();
+        //        RenderSystem.enableColorLogicOp();
+        //        RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
+        //        buffer.begin(7, VertexFormats.POSITION);
+        //        buffer.vertex(x1, y2, getBlitOffset() + 50d).next();
+        //        buffer.vertex(x2, y2, getBlitOffset() + 50d).next();
+        //        buffer.vertex(x2, y1, getBlitOffset() + 50d).next();
+        //        buffer.vertex(x1, y1, getBlitOffset() + 50d).next();
+        //        tessellator.draw();
+        //        RenderSystem.disableColorLogicOp();
+        //        RenderSystem.enableTexture();
         RenderSystem.disableTexture();
-        RenderSystem.enableColorLogicOp();
-        RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
-        bufferBuilder_1.begin(7, VertexFormats.POSITION);
-        bufferBuilder_1.vertex(int_1, int_4, getBlitOffset() + 50d).next();
-        bufferBuilder_1.vertex(int_3, int_4, getBlitOffset() + 50d).next();
-        bufferBuilder_1.vertex(int_3, int_2, getBlitOffset() + 50d).next();
-        bufferBuilder_1.vertex(int_1, int_2, getBlitOffset() + 50d).next();
-        tessellator_1.draw();
-        RenderSystem.disableColorLogicOp();
+        RenderSystem.enableBlend();
+        RenderSystem.disableAlphaTest();
+        RenderSystem.blendFuncSeparate(770, 771, 1, 0);
+        RenderSystem.shadeModel(7425);
+        buffer.begin(7, VertexFormats.POSITION_COLOR);
+        buffer.vertex(x1, y2, getBlitOffset() + 50d).color(r, g, b, 120).next();
+        buffer.vertex(x2, y2, getBlitOffset() + 50d).color(r, g, b, 120).next();
+        buffer.vertex(x2, y1, getBlitOffset() + 50d).color(r, g, b, 120).next();
+        buffer.vertex(x1, y1, getBlitOffset() + 50d).color(r, g, b, 120).next();
+        tessellator.draw();
+        RenderSystem.shadeModel(7424);
+        RenderSystem.disableBlend();
+        RenderSystem.enableAlphaTest();
         RenderSystem.enableTexture();
     }
     

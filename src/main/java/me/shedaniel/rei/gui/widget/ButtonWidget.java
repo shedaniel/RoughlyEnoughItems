@@ -9,6 +9,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.sound.PositionedSoundInstance;
@@ -22,6 +23,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+@Internal
+@Deprecated
 public abstract class ButtonWidget extends WidgetWithBounds {
     
     protected static final Identifier BUTTON_LOCATION = new Identifier("roughlyenoughitems", "textures/gui/button.png");

@@ -27,22 +27,22 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class DefaultCampfireCategory implements RecipeCategory<DefaultCampfireDisplay> {
-
+    
     @Override
     public Identifier getIdentifier() {
         return DefaultPlugin.CAMPFIRE;
     }
-
+    
     @Override
     public EntryStack getLogo() {
         return EntryStack.create(Blocks.CAMPFIRE);
     }
-
+    
     @Override
     public String getCategoryName() {
         return I18n.translate("category.rei.campfire");
     }
-
+    
     @Override
     public List<Widget> setupDisplay(Supplier<DefaultCampfireDisplay> recipeDisplaySupplier, Rectangle bounds) {
         Point startPoint = new Point(bounds.getCenterX() - 41, bounds.y + 10);
@@ -59,7 +59,7 @@ public class DefaultCampfireCategory implements RecipeCategory<DefaultCampfireDi
                 MinecraftClient.getInstance().textRenderer.draw(text, bounds.x + bounds.width - length - 5, bounds.y + 5, ScreenHelper.isDarkModeEnabled() ? 0xFFBBBBBB : 0xFF404040);
             }
         }));
-        widgets.add(new RecipeArrowWidget(startPoint.x + 24, startPoint.y + 8, true));
+        widgets.add(RecipeArrowWidget.create(new Point(startPoint.x + 24, startPoint.y + 8), true));
         widgets.add(EntryWidget.create(startPoint.x + 1, startPoint.y + 1).entries(recipeDisplaySupplier.get().getInputEntries().get(0)));
         widgets.add(EntryWidget.create(startPoint.x + 61, startPoint.y + 9).entries(recipeDisplaySupplier.get().getOutputEntries()).noBackground());
         return widgets;

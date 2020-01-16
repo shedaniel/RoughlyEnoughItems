@@ -11,6 +11,7 @@ import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWi
 import me.shedaniel.clothconfig2.impl.EasingMethod;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.gui.widget.ButtonWidget;
 import me.shedaniel.rei.gui.widget.LabelWidget;
@@ -30,6 +31,8 @@ import net.minecraft.util.math.MathHelper;
 import java.util.Collections;
 import java.util.List;
 
+@Internal
+@Deprecated
 public class PreRecipeViewingScreen extends Screen {
     
     private static final Identifier IDENTIFIER = new Identifier("roughlyenoughitems", "textures/gui/screenshot.png");
@@ -96,9 +99,9 @@ public class PreRecipeViewingScreen extends Screen {
             }
         });
         this.widgets.add(new ScreenTypeSelection(width / 2 - 200 - 5, height / 2 - 112 / 2 - 10, 0));
-        this.widgets.add(new LabelWidget(new Point(width / 2 - 200 - 5 + 104, height / 2 - 112 / 2 + 115), I18n.translate("config.roughlyenoughitems.recipeScreenType.original")).noShadow().color(-1124073473));
+        this.widgets.add(LabelWidget.create(new Point(width / 2 - 200 - 5 + 104, height / 2 - 112 / 2 + 115), I18n.translate("config.roughlyenoughitems.recipeScreenType.original")).noShadow().color(-1124073473));
         this.widgets.add(new ScreenTypeSelection(width / 2 + 5, height / 2 - 112 / 2 - 10, 112));
-        this.widgets.add(new LabelWidget(new Point(width / 2 + 5 + 104, height / 2 - 112 / 2 + 115), I18n.translate("config.roughlyenoughitems.recipeScreenType.villager")).noShadow().color(-1124073473));
+        this.widgets.add(LabelWidget.create(new Point(width / 2 + 5 + 104, height / 2 - 112 / 2 + 115), I18n.translate("config.roughlyenoughitems.recipeScreenType.villager")).noShadow().color(-1124073473));
         this.children.addAll(widgets);
     }
     

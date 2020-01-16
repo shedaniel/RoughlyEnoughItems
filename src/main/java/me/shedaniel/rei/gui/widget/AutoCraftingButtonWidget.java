@@ -11,6 +11,7 @@ import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.gui.toast.CopyRecipeIdentifierToast;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
@@ -27,6 +28,8 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+@Internal
+@Deprecated
 public class AutoCraftingButtonWidget extends ButtonWidget {
     
     private static final Lazy<Boolean> IS_YOG = new Lazy(() -> {

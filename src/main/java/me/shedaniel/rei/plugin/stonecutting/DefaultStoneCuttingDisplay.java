@@ -22,16 +22,16 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class DefaultStoneCuttingDisplay implements RecipeDisplay {
-
+    
     private List<List<EntryStack>> inputs;
     private List<EntryStack> output;
     private StonecuttingRecipe display;
-
+    
     public DefaultStoneCuttingDisplay(StonecuttingRecipe recipe) {
         this(recipe.getPreviewInputs(), recipe.getOutput());
         this.display = recipe;
     }
-
+    
     public DefaultStoneCuttingDisplay(DefaultedList<Ingredient> ingredients, ItemStack output) {
         this.inputs = ingredients.stream().map(i -> {
             List<EntryStack> entries = new ArrayList<>();
@@ -42,27 +42,27 @@ public class DefaultStoneCuttingDisplay implements RecipeDisplay {
         }).collect(Collectors.toList());
         this.output = Collections.singletonList(EntryStack.create(output));
     }
-
+    
     @Override
     public Optional<Identifier> getRecipeLocation() {
         return Optional.ofNullable(display).map(CuttingRecipe::getId);
     }
-
+    
     @Override
     public List<List<EntryStack>> getInputEntries() {
         return inputs;
     }
-
+    
     @Override
     public List<EntryStack> getOutputEntries() {
         return output;
     }
-
+    
     @Override
     public Identifier getRecipeCategory() {
         return DefaultPlugin.STONE_CUTTING;
     }
-
+    
     @Override
     public List<List<EntryStack>> getRequiredEntries() {
         return getInputEntries();
