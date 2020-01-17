@@ -10,18 +10,17 @@ import com.google.common.collect.Queues;
 import me.shedaniel.rei.api.EntryRegistry;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeHelper;
-import me.shedaniel.rei.api.annotations.Internal;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DefaultedList;
 import net.minecraft.util.Pair;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-@Deprecated
-@Internal
+@ApiStatus.Internal
 public class EntryRegistryImpl implements EntryRegistry {
     
     private final CopyOnWriteArrayList<EntryStack> entries = Lists.newCopyOnWriteArrayList();
@@ -57,7 +56,7 @@ public class EntryRegistryImpl implements EntryRegistry {
     
     @Override
     public List<ItemStack> appendStacksForItem(Item item) {
-        DefaultedList<ItemStack> list = new DefaultedLinkedList(Lists.newLinkedList(), null);
+        DefaultedList<ItemStack> list = new DefaultedLinkedList<>(Lists.newLinkedList(), null);
         item.appendStacks(item.getGroup(), list);
         if (list.isEmpty())
             list.add(item.getStackForRender());
@@ -81,7 +80,7 @@ public class EntryRegistryImpl implements EntryRegistry {
             getStacksList().add(stack);
         } else {
             int last = getStacksList().size();
-            for (int i = last - 1; i >= 0; i++)
+            for (int i = last - 1; i >= 0; i--)
                 if (getStacksList().get(i).equalsAll(afterEntry)) {
                     last = i + 1;
                     break;
@@ -113,7 +112,7 @@ public class EntryRegistryImpl implements EntryRegistry {
             getStacksList().addAll(stacks);
     }
     
-    private class DefaultedLinkedList<E> extends DefaultedList<E> {
+    private static class DefaultedLinkedList<E> extends DefaultedList<E> {
         public DefaultedLinkedList(List<E> delegate, @Nullable E initialElement) {
             super(delegate, initialElement);
         }

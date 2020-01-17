@@ -40,7 +40,7 @@ public interface RecipeDisplay {
     Identifier getRecipeCategory();
     
     /**
-     * Gets the recipe location from datapack
+     * Gets the recipe location from datapack.
      *
      * @return the recipe location
      */

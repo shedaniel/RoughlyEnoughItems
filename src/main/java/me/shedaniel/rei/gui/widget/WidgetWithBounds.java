@@ -11,6 +11,7 @@ public abstract class WidgetWithBounds extends Widget {
     
     public abstract Rectangle getBounds();
     
+    @Override
     public boolean containsMouse(double mouseX, double mouseY) {
         return getBounds().contains(mouseX, mouseY);
     }

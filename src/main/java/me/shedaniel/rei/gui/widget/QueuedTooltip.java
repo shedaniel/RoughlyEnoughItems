@@ -9,6 +9,7 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.collect.Lists;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.impl.PointHelper;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -40,13 +41,13 @@ public class QueuedTooltip {
         return QueuedTooltip.create(PointHelper.fromMouse(), text);
     }
     
-    @Deprecated
+    @ApiStatus.Internal
     public QueuedTooltip setSpecialRenderer(Consumer<QueuedTooltip> consumer) {
         this.consumer = consumer;
         return this;
     }
     
-    @Deprecated
+    @ApiStatus.Internal
     public Consumer<QueuedTooltip> getConsumer() {
         return consumer;
     }

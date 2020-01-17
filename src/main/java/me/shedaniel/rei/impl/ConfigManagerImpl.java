@@ -29,7 +29,6 @@ import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeHelper;
-import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.gui.ConfigReloadingScreen;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.PreRecipeViewingScreen;
@@ -47,6 +46,7 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.Window;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.math.MathHelper;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -56,8 +56,7 @@ import java.util.Optional;
 import static me.sargunvohra.mcmods.autoconfig1u.util.Utils.getUnsafely;
 import static me.sargunvohra.mcmods.autoconfig1u.util.Utils.setUnsafely;
 
-@Deprecated
-@Internal
+@ApiStatus.Internal
 public class ConfigManagerImpl implements ConfigManager {
     
     private boolean craftableOnly;
@@ -216,11 +215,7 @@ public class ConfigManagerImpl implements ConfigManager {
         craftableOnly = !craftableOnly;
     }
     
-    @Override
-    public void openConfigScreen(Screen parent) {
-        MinecraftClient.getInstance().openScreen(getConfigScreen(parent));
-    }
-    
+    @SuppressWarnings("deprecation")
     @Override
     public Screen getConfigScreen(Screen parent) {
         try {

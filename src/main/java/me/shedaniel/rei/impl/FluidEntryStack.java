@@ -25,11 +25,12 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.*;
 
-@Deprecated
+@ApiStatus.Internal
 public class FluidEntryStack extends AbstractEntryStack {
     private static final Map<Fluid, Pair<Sprite, Integer>> FLUID_SPRITE_CACHE = new HashMap<>();
     private static final int EMPTY_AMOUNT = -1319182373;
@@ -93,8 +94,8 @@ public class FluidEntryStack extends AbstractEntryStack {
     @Override
     public EntryStack copy() {
         EntryStack stack = EntryStack.create(fluid, amount);
-        for (Map.Entry<Settings, Object> entry : getSettings().entrySet()) {
-            stack.setting(entry.getKey(), entry.getValue());
+        for (Map.Entry<Settings<?>, Object> entry : getSettings().entrySet()) {
+            stack.setting((Settings<? super Object>) entry.getKey(), entry.getValue());
         }
         return stack;
     }

@@ -21,15 +21,18 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@Deprecated
+@ApiStatus.Internal
 public class ItemEntryStack extends AbstractEntryStack implements OptimalEntryStack {
     
+    private static final MatrixStack matrices = new MatrixStack();
+    private final ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
     private ItemStack itemStack;
     private int hash = -1;
     
@@ -63,12 +66,11 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
         return itemStack.isEmpty();
     }
     
-    @SuppressWarnings("rawtypes")
     @Override
     public EntryStack copy() {
         EntryStack stack = EntryStack.create(getItemStack().copy());
-        for (Map.Entry<Settings, Object> entry : getSettings().entrySet()) {
-            stack.setting(entry.getKey(), entry.getValue());
+        for (Map.Entry<Settings<?>, Object> entry : getSettings().entrySet()) {
+            stack.setting((Settings<? super Object>) entry.getKey(), entry.getValue());
         }
         return stack;
     }
@@ -127,7 +129,7 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
         //        }
         return hash;
     }
-    
+
     @Nullable
     @Override
     public QueuedTooltip getTooltip(int mouseX, int mouseY) {
@@ -148,9 +150,6 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
         }
         return QueuedTooltip.create(toolTip);
     }
-    
-    private static final MatrixStack matrices = new MatrixStack();
-    private final ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
     
     @Override
     public void render(Rectangle bounds, int mouseX, int mouseY, float delta) {

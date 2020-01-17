@@ -17,6 +17,9 @@ import java.util.function.Supplier;
 
 public interface AutoTransferHandler {
     
+    /**
+     * @return the priority of this handler, higher priorities will be called first.
+     */
     default double getPriority() {
         return 0d;
     }

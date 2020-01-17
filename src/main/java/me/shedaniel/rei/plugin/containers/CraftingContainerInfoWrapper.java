@@ -14,12 +14,12 @@ import net.minecraft.item.ItemStack;
 public class CraftingContainerInfoWrapper<T extends CraftingContainer<?>> implements ContainerInfo<T> {
     private Class<? extends CraftingContainer<?>> containerClass;
     
-    public <T extends CraftingContainer<?>> CraftingContainerInfoWrapper(Class<T> containerClass) {
+    public CraftingContainerInfoWrapper(Class<T> containerClass) {
         this.containerClass = containerClass;
     }
     
-    public static <T extends CraftingContainer<?>> ContainerInfo<T> create(Class<T> containerClass) {
-        return new CraftingContainerInfoWrapper<T>(containerClass);
+    public static <R extends CraftingContainer<?>> ContainerInfo<R> create(Class<R> containerClass) {
+        return new CraftingContainerInfoWrapper<>(containerClass);
     }
     
     @Override

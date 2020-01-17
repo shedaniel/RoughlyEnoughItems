@@ -5,9 +5,9 @@
 
 package me.shedaniel.rei.impl;
 
-import me.shedaniel.rei.api.annotations.Internal;
+import org.jetbrains.annotations.ApiStatus;
 
-@Internal
+@ApiStatus.Internal
 public enum Weather {
     CLEAR(0, "text.rei.weather.clear"),
     RAIN(1, "text.rei.weather.rain"),

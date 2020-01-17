@@ -9,11 +9,12 @@ import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
 
-@Deprecated
+@ApiStatus.Internal
 public class EmptyEntryStack implements EntryStack {
     
     @Deprecated public static final EntryStack EMPTY = new EmptyEntryStack();

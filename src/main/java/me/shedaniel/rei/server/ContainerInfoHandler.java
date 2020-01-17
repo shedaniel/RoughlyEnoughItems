@@ -12,9 +12,9 @@ import net.minecraft.util.Identifier;
 import java.util.Map;
 
 public class ContainerInfoHandler {
-    private static final Map<String, Map<Class<? extends Container>, ContainerInfo>> containerInfoMap = Maps.newLinkedHashMap();
+    private static final Map<String, Map<Class<? extends Container>, ContainerInfo<? extends Container>>> containerInfoMap = Maps.newLinkedHashMap();
     
-    public static void registerContainerInfo(Identifier category, ContainerInfo containerInfo) {
+    public static void registerContainerInfo(Identifier category, ContainerInfo<? extends Container> containerInfo) {
         if (!containerInfoMap.containsKey(category.toString()))
             containerInfoMap.put(category.toString(), Maps.newLinkedHashMap());
         containerInfoMap.get(category.toString()).put(containerInfo.getContainerClass(), containerInfo);
@@ -24,13 +24,13 @@ public class ContainerInfoHandler {
         return containerInfoMap.containsKey(category.toString()) && !containerInfoMap.get(category.toString()).isEmpty();
     }
     
-    public static ContainerInfo getContainerInfo(Identifier category, Class<?> containerClass) {
+    public static ContainerInfo<? extends Container> getContainerInfo(Identifier category, Class<?> containerClass) {
         if (!isCategoryHandled(category))
             return null;
-        Map<Class<? extends Container>, ContainerInfo> infoMap = containerInfoMap.get(category.toString());
+        Map<Class<? extends Container>, ContainerInfo<? extends Container>> infoMap = containerInfoMap.get(category.toString());
         if (infoMap.containsKey(containerClass))
             return infoMap.get(containerClass);
-        for (Map.Entry<Class<? extends Container>, ContainerInfo> entry : infoMap.entrySet())
+        for (Map.Entry<Class<? extends Container>, ContainerInfo<? extends Container>> entry : infoMap.entrySet())
             if (entry.getKey().isAssignableFrom(containerClass))
                 return entry.getValue();
         return null;

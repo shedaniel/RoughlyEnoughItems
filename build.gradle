@@ -88,8 +88,7 @@ dependencies {
         transitive = false
     }
     compile "org.lwjgl:lwjgl-jemalloc:3.2.1"
-    compileOnly "com.google.code.findbugs:jsr305:3.0.2"
-    compileOnly 'org.jetbrains:annotations:15.0'
+    compileOnly 'org.jetbrains:annotations:18.0.0'
     modRuntime("com.lettuce.fudge:notenoughcrashes:1.1.5+1.15.1") {
         transitive = false
     }

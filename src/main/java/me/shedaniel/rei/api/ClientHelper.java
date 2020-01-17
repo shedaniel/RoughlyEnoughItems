@@ -9,6 +9,7 @@ import me.shedaniel.rei.impl.ClientHelperImpl;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 import java.util.Map;
@@ -52,6 +53,7 @@ public interface ClientHelper {
     /**
      * Registers REI's keybinds using Fabric API.
      */
+    @ApiStatus.Internal
     void registerFabricKeyBinds();
     
     /**

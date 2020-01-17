@@ -12,18 +12,17 @@ import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.Comment;
 import me.shedaniel.clothconfig2.api.Modifier;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.rei.api.ConfigObject;
-import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.gui.config.ItemListOrdering;
 import me.shedaniel.rei.gui.config.ItemListOrderingConfig;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.gui.config.SearchFieldLocation;
 import net.minecraft.client.util.InputUtil;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Deprecated
-@Internal
+@ApiStatus.Internal
 @Config(name = "roughlyenoughitems/config")
 public class ConfigObjectImpl implements ConfigObject, ConfigData {
     

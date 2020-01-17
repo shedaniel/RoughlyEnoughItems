@@ -6,8 +6,9 @@
 package me.shedaniel.rei.impl;
 
 import me.shedaniel.rei.api.ObjectHolder;
+import org.jetbrains.annotations.ApiStatus;
 
-@Deprecated
+@ApiStatus.Internal
 public class ObjectHolderImpl<T> implements ObjectHolder<T> {
     private Object o;
     

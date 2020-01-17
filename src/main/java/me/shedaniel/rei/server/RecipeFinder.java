@@ -12,13 +12,15 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.util.DefaultedList;
 import net.minecraft.util.registry.Registry;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.BitSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@ApiStatus.Internal
 public class RecipeFinder {
     public final Int2IntMap idToAmountMap = new Int2IntOpenHashMap();
     

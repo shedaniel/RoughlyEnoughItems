@@ -7,13 +7,14 @@ package me.shedaniel.rei.impl;
 
 import me.shedaniel.rei.api.EntryStack;
 import net.minecraft.client.gui.DrawableHelper;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@Deprecated
+@ApiStatus.Internal
 public abstract class AbstractEntryStack extends DrawableHelper implements EntryStack {
-    private Map<Settings, Object> settings = new HashMap<>();
+    private Map<Settings<?>, Object> settings = new HashMap<>();
     
     @Override
     public <T> EntryStack setting(Settings<T> settings, T value) {
@@ -33,7 +34,7 @@ public abstract class AbstractEntryStack extends DrawableHelper implements Entry
         return this;
     }
     
-    protected Map<Settings, Object> getSettings() {
+    protected Map<Settings<?>, Object> getSettings() {
         return settings;
     }
     

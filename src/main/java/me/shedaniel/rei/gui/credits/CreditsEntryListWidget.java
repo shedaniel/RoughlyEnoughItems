@@ -9,7 +9,9 @@ import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWi
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.ApiStatus;
 
+@ApiStatus.Internal
 public class CreditsEntryListWidget extends DynamicNewSmoothScrollingEntryListWidget<CreditsEntryListWidget.CreditsItem> {
     
     private boolean inFocus;

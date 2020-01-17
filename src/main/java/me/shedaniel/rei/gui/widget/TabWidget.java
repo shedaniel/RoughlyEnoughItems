@@ -9,16 +9,15 @@ import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeCategory;
-import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collections;
 import java.util.List;
 
-@Deprecated
-@Internal
+@ApiStatus.Internal
 public class TabWidget extends WidgetWithBounds {
     
     public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");

@@ -11,7 +11,6 @@ import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWi
 import me.shedaniel.clothconfig2.impl.EasingMethod;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
-import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.gui.widget.ButtonWidget;
 import me.shedaniel.rei.gui.widget.LabelWidget;
@@ -27,16 +26,18 @@ import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collections;
 import java.util.List;
 
-@Internal
-@Deprecated
+@ApiStatus.Internal
 public class PreRecipeViewingScreen extends Screen {
     
     private static final Identifier IDENTIFIER = new Identifier("roughlyenoughitems", "textures/gui/screenshot.png");
     private final List<Widget> widgets;
+    protected long start;
+    protected long duration;
     private boolean isSet;
     private boolean original;
     private double frame = 0;
@@ -44,8 +45,6 @@ public class PreRecipeViewingScreen extends Screen {
     private BooleanConsumer callback;
     private Screen parent;
     private boolean showTips;
-    protected long start;
-    protected long duration;
     
     public PreRecipeViewingScreen(Screen parent, RecipeScreenType type, boolean showTips, BooleanConsumer callback) {
         super(new TranslatableText("text.rei.recipe_screen_type.selection"));

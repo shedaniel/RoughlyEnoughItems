@@ -23,6 +23,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.container.Container;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
@@ -88,7 +89,7 @@ public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCr
     
     @Override
     public void renderRedSlots(List<Widget> widgets, Rectangle bounds, DefaultCraftingDisplay display, IntList redSlots) {
-        ContainerInfo info = ContainerInfoHandler.getContainerInfo(getIdentifier(), ScreenHelper.getLastContainerScreen().getContainer().getClass());
+        ContainerInfo<Container> info = (ContainerInfo<Container>) ContainerInfoHandler.getContainerInfo(getIdentifier(), ScreenHelper.getLastContainerScreen().getContainer().getClass());
         if (info == null)
             return;
         RenderSystem.translatef(0, 0, 400);

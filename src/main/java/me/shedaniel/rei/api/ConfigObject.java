@@ -11,6 +11,7 @@ import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.impl.ConfigObjectImpl;
 import net.minecraft.client.util.InputUtil;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -24,6 +25,8 @@ public interface ConfigObject {
         return ConfigManager.getInstance().getConfig();
     }
     
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     boolean isLighterButtonHover();
     
     boolean isOverlayVisible();
@@ -125,7 +128,7 @@ public interface ConfigObject {
     double getEntrySize();
     
     @Deprecated
-    abstract ConfigObjectImpl.General getGeneral();
+    ConfigObjectImpl.General getGeneral();
     
     boolean isUsingCompactTabs();
     

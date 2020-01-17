@@ -11,6 +11,7 @@ import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.util.math.MathHelper;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collections;
 import java.util.List;
@@ -18,9 +19,10 @@ import java.util.List;
 public class RecipeArrowWidget extends WidgetWithBounds {
     
     private int x, y;
+    private double time = 250d;
     private boolean animated;
     
-    @Deprecated
+    @ApiStatus.Internal
     public RecipeArrowWidget(int x, int y, boolean animated) {
         this.x = x;
         this.y = y;
@@ -29,6 +31,11 @@ public class RecipeArrowWidget extends WidgetWithBounds {
     
     public static RecipeArrowWidget create(Point point, boolean animated) {
         return new RecipeArrowWidget(point.x, point.y, animated);
+    }
+    
+    public RecipeArrowWidget time(double time) {
+        this.time = time;
+        return this;
     }
     
     @Override
@@ -41,7 +48,7 @@ public class RecipeArrowWidget extends WidgetWithBounds {
         MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
         blit(x, y, 106, 91, 24, 17);
         if (animated) {
-            int width = MathHelper.ceil((System.currentTimeMillis() / 250 % 24d) / 1f);
+            int width = MathHelper.ceil((System.currentTimeMillis() / (time / 24) % 24d) / 1f);
             blit(x, y, 82, 91, width, 17);
         }
     }

@@ -7,6 +7,7 @@ package me.shedaniel.rei.gui.widget;
 
 import me.shedaniel.math.api.Point;
 import me.shedaniel.rei.impl.ScreenHelper;
+import org.jetbrains.annotations.ApiStatus;
 
 public abstract class ClickableLabelWidget extends LabelWidget {
     
@@ -14,23 +15,23 @@ public abstract class ClickableLabelWidget extends LabelWidget {
     private boolean clickable = true;
     private int hoveredColor;
     
-    @Deprecated
+    @ApiStatus.Internal
     public ClickableLabelWidget(int x, int y, String text, boolean clickable) {
         this(new Point(x, y), text, clickable);
     }
     
-    @Deprecated
+    @ApiStatus.Internal
     public ClickableLabelWidget(int x, int y, String text) {
         this(new Point(x, y), text, true);
     }
     
-    @Deprecated
+    @ApiStatus.Internal
     public ClickableLabelWidget(Point point, String text, boolean clickable) {
         this(point, text);
         clickable(clickable);
     }
     
-    @Deprecated
+    @ApiStatus.Internal
     public ClickableLabelWidget(Point point, String text) {
         super(point, text);
         this.hoveredColor = ScreenHelper.isDarkModeEnabled() ? -1 : 0xFF66FFCC;

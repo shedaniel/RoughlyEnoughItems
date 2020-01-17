@@ -6,7 +6,9 @@
 package me.shedaniel.rei.gui.config;
 
 import net.minecraft.client.resource.language.I18n;
+import org.jetbrains.annotations.ApiStatus;
 
+@ApiStatus.Internal
 public enum ItemListOrderingConfig {
     REGISTRY_ASCENDING(ItemListOrdering.registry, true),
     NAME_ASCENDING(ItemListOrdering.name, true),

@@ -6,12 +6,11 @@
 package me.shedaniel.rei.gui.widget;
 
 import me.shedaniel.math.api.Point;
-import me.shedaniel.rei.api.annotations.Internal;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.function.Consumer;
 
-@Deprecated
-@Internal
+@ApiStatus.Internal
 public class ClickableActionedLabelWidget extends ClickableLabelWidget {
     private Consumer<ClickableLabelWidget> onClicked;
     

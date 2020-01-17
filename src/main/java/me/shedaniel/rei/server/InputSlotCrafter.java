@@ -8,7 +8,6 @@ package me.shedaniel.rei.server;
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import it.unimi.dsi.fastutil.ints.IntListIterator;
 import net.minecraft.container.Container;
 import net.minecraft.container.Slot;
 import net.minecraft.entity.player.PlayerInventory;
@@ -21,7 +20,6 @@ import net.minecraft.util.DefaultedList;
 import net.minecraft.util.Identifier;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<Integer> {
     
@@ -29,13 +27,13 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
     protected ContainerInfo containerInfo;
     protected PlayerInventory inventory;
     
-    private InputSlotCrafter(Container craftingContainer, ContainerInfo containerInfo) {
+    private InputSlotCrafter(Container craftingContainer, ContainerInfo<? extends Container> containerInfo) {
         this.craftingContainer = craftingContainer;
         this.containerInfo = containerInfo;
     }
     
     public static <C extends Inventory> void start(Identifier category, Container craftingContainer_1, ServerPlayerEntity player, Map<Integer, List<ItemStack>> map, boolean hasShift) {
-        ContainerInfo containerInfo = Objects.requireNonNull(ContainerInfoHandler.getContainerInfo(category, craftingContainer_1.getClass()), "Container Info does not exist on the server!");
+        ContainerInfo<? extends Container> containerInfo = Objects.requireNonNull(ContainerInfoHandler.getContainerInfo(category, craftingContainer_1.getClass()), "Container Info does not exist on the server!");
         new InputSlotCrafter<C>(craftingContainer_1, containerInfo).fillInputSlots(player, map, hasShift);
     }
     
@@ -53,7 +51,7 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
             this.containerInfo.populateRecipeFinder(craftingContainer, recipeFinder);
             DefaultedList<Ingredient> ingredients = DefaultedList.of();
             map.entrySet().stream().sorted(Comparator.comparingInt(Map.Entry::getKey)).forEach(entry -> {
-                ingredients.add(Ingredient.ofItems(entry.getValue().stream().map(ItemStack::getItem).collect(Collectors.toList()).toArray(new Item[0])));
+                ingredients.add(Ingredient.ofItems(entry.getValue().stream().map(ItemStack::getItem).toArray(Item[]::new)));
             });
             if (recipeFinder.findRecipe(ingredients, null)) {
                 this.fillInputSlots(recipeFinder, ingredients, hasShift);
@@ -121,10 +119,8 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
         IntList intList_1 = new IntArrayList();
         if (recipeFinder.findRecipe(ingredients, intList_1, int_2)) {
             int int_4 = int_2;
-            IntListIterator var8 = intList_1.iterator();
             
-            while (var8.hasNext()) {
-                int int_5 = var8.next();
+            for (int int_5 : intList_1) {
                 int int_6 = RecipeFinder.getStackFromId(int_5).getMaxCount();
                 if (int_6 < int_4) {
                     int_4 = int_6;
@@ -198,10 +194,8 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
                 if (!itemStack_1.isEmpty()) {
                     int int_3 = this.inventory.getOccupiedSlotWithRoomForStack(itemStack_1);
                     if (int_3 == -1 && list_1.size() <= int_1) {
-                        Iterator<ItemStack> var6 = list_1.iterator();
                         
-                        while (var6.hasNext()) {
-                            ItemStack itemStack_2 = var6.next();
+                        for (ItemStack itemStack_2 : list_1) {
                             if (itemStack_2.isItemEqualIgnoreDamage(itemStack_1) && itemStack_2.getCount() != itemStack_2.getMaxCount() && itemStack_2.getCount() + itemStack_1.getCount() <= itemStack_2.getMaxCount()) {
                                 itemStack_2.increment(itemStack_1.getCount());
                                 itemStack_1.setCount(0);
@@ -228,9 +222,7 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
     
     private int getFreeInventorySlots() {
         int int_1 = 0;
-        Iterator<ItemStack> var2 = this.inventory.main.iterator();
-        while (var2.hasNext()) {
-            ItemStack itemStack_1 = var2.next();
+        for (ItemStack itemStack_1 : this.inventory.main) {
             if (itemStack_1.isEmpty()) {
                 ++int_1;
             }

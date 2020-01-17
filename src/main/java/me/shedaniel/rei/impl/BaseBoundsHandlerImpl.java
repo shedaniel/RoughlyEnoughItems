@@ -9,18 +9,17 @@ import com.google.common.collect.Lists;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.BaseBoundsHandler;
 import me.shedaniel.rei.api.DisplayHelper;
-import me.shedaniel.rei.api.annotations.Internal;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Pair;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Supplier;
 
-@Deprecated
-@Internal
+@ApiStatus.Internal
 public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
     
     private static final Comparator<? super Rectangle> RECTANGLE_COMPARER = Comparator.comparingLong(Rectangle::hashCode);
@@ -70,7 +69,7 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
     }
     
     private long currentHashCode(boolean isOnRightSide) {
-        DisplayHelper.DisplayBoundsHandler handler = DisplayHelper.getInstance().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
+        DisplayHelper.DisplayBoundsHandler<Screen> handler = (DisplayHelper.DisplayBoundsHandler<Screen>) DisplayHelper.getInstance().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
         return areasHashCode(isOnRightSide ? handler.getRightBounds(MinecraftClient.getInstance().currentScreen) : handler.getLeftBounds(MinecraftClient.getInstance().currentScreen), getExclusionZones(MinecraftClient.getInstance().currentScreen.getClass(), false));
     }
     

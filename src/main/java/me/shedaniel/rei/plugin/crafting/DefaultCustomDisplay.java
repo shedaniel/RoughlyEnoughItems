@@ -11,6 +11,7 @@ import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,7 +36,7 @@ public class DefaultCustomDisplay implements DefaultCraftingDisplay {
         for (int i = 0; i < 9; i++)
             if (i < this.input.size()) {
                 List<EntryStack> stacks = this.input.get(i);
-                if (stacks.stream().filter(stack -> !stack.isEmpty()).count() > 0) {
+                if (stacks.stream().anyMatch(stack -> !stack.isEmpty())) {
                     row.set((i - (i % 3)) / 3, true);
                     column.set(i % 3, true);
                 }
@@ -48,6 +49,8 @@ public class DefaultCustomDisplay implements DefaultCraftingDisplay {
         this(input, output, null);
     }
     
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     public Recipe getPossibleRecipe() {
         return possibleRecipe;
     }

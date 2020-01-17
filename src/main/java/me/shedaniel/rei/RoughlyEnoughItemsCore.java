@@ -9,7 +9,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import me.shedaniel.cloth.hooks.ClothClientHooks;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.impl.*;
@@ -44,6 +43,7 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -54,37 +54,33 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 
-@Internal
+@ApiStatus.Internal
 public class RoughlyEnoughItemsCore implements ClientModInitializer {
     
-    @Internal public static final Logger LOGGER;
-    @SuppressWarnings("deprecation") private static final RecipeHelper RECIPE_HELPER = new RecipeHelperImpl();
-    @SuppressWarnings("deprecation") private static final EntryRegistry ENTRY_REGISTRY = new EntryRegistryImpl();
-    @SuppressWarnings("deprecation") private static final DisplayHelper DISPLAY_HELPER = new DisplayHelperImpl();
+    @ApiStatus.Internal public static final Logger LOGGER = LogManager.getFormatterLogger("REI");
+    private static final RecipeHelper RECIPE_HELPER = new RecipeHelperImpl();
+    private static final EntryRegistry ENTRY_REGISTRY = new EntryRegistryImpl();
+    private static final DisplayHelper DISPLAY_HELPER = new DisplayHelperImpl();
     private static final Map<Identifier, REIPluginEntry> plugins = Maps.newHashMap();
     private static final ExecutorService SYNC_RECIPES = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "REI-SyncRecipes"));
     private static ConfigManager configManager;
     
-    static {
-        LOGGER = LogManager.getFormatterLogger("REI");
-    }
-    
-    @Deprecated
+    @ApiStatus.Internal
     public static RecipeHelper getRecipeHelper() {
         return RECIPE_HELPER;
     }
     
-    @Deprecated
+    @ApiStatus.Internal
     public static ConfigManager getConfigManager() {
         return configManager;
     }
     
-    @Deprecated
+    @ApiStatus.Internal
     public static EntryRegistry getEntryRegistry() {
         return ENTRY_REGISTRY;
     }
     
-    @Deprecated
+    @ApiStatus.Internal
     public static DisplayHelper getDisplayHelper() {
         return DISPLAY_HELPER;
     }
@@ -135,8 +131,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         return ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET) && ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.DELETE_ITEMS_PACKET);
     }
     
-    @Internal
-    @Deprecated
+    @ApiStatus.Internal
     public static void syncRecipes(AtomicLong lastSync) {
         if (lastSync != null) {
             if (lastSync.get() > 0 && System.currentTimeMillis() - lastSync.get() <= 5000) {
@@ -153,7 +148,6 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         }
     }
     
-    @SuppressWarnings("deprecation")
     @Override
     public void onInitializeClient() {
         configManager = new ConfigManagerImpl();
@@ -161,7 +155,8 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         registerClothEvents();
         discoverPluginEntries();
         for (ModContainer modContainer : FabricLoader.getInstance().getAllMods()) {
-            if (modContainer.getMetadata().containsCustomValue("roughlyenoughitems:plugins"))
+            //noinspection deprecation
+            if (modContainer.getMetadata().containsCustomElement("roughlyenoughitems:plugins"))
                 RoughlyEnoughItemsCore.LOGGER.error("[REI] REI plugin from " + modContainer.getMetadata().getId() + " is not loaded because it is too old!");
         }
         
@@ -201,7 +196,6 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         });
     }
     
-    @SuppressWarnings("deprecation")
     private void discoverPluginEntries() {
         for (REIPluginEntry reiPlugin : FabricLoader.getInstance().getEntrypoints("rei_plugins", REIPluginEntry.class)) {
             try {
@@ -226,7 +220,6 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         loadTestPlugins();
     }
     
-    @SuppressWarnings("deprecation")
     private void loadTestPlugins() {
         if (System.getProperty("rei.test", "false").equals("true")) {
             registerPlugin(new REITestPlugin());

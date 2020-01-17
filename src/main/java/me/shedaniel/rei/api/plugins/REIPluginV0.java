@@ -9,7 +9,9 @@ import me.shedaniel.rei.api.DisplayHelper;
 import me.shedaniel.rei.api.EntryRegistry;
 import me.shedaniel.rei.api.REIPluginEntry;
 import me.shedaniel.rei.api.RecipeHelper;
+import org.jetbrains.annotations.ApiStatus;
 
+@ApiStatus.OverrideOnly
 public interface REIPluginV0 extends REIPluginEntry {
     
     /**
@@ -17,6 +19,7 @@ public interface REIPluginV0 extends REIPluginEntry {
      *
      * @param entryRegistry the helper class
      */
+    @ApiStatus.OverrideOnly
     default void registerEntries(EntryRegistry entryRegistry) {
     }
     
@@ -25,6 +28,7 @@ public interface REIPluginV0 extends REIPluginEntry {
      *
      * @param recipeHelper the helper class
      */
+    @ApiStatus.OverrideOnly
     default void registerPluginCategories(RecipeHelper recipeHelper) {
     }
     
@@ -33,6 +37,7 @@ public interface REIPluginV0 extends REIPluginEntry {
      *
      * @param recipeHelper the helper class
      */
+    @ApiStatus.OverrideOnly
     default void registerRecipeDisplays(RecipeHelper recipeHelper) {
     }
     
@@ -41,6 +46,7 @@ public interface REIPluginV0 extends REIPluginEntry {
      *
      * @param displayHelper the helper class
      */
+    @ApiStatus.OverrideOnly
     default void registerBounds(DisplayHelper displayHelper) {
     }
     
@@ -49,12 +55,15 @@ public interface REIPluginV0 extends REIPluginEntry {
      *
      * @param recipeHelper the helper class
      */
+    @ApiStatus.OverrideOnly
     default void registerOthers(RecipeHelper recipeHelper) {
     }
     
+    @ApiStatus.OverrideOnly
     default void preRegister() {
     }
     
+    @ApiStatus.OverrideOnly
     default void postRegister() {
     }
     
