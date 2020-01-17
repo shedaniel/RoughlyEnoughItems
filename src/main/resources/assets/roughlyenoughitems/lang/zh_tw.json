@@ -14,6 +14,7 @@
   "category.rei.fuel.time": "燃燒時間：%d 刻",
   "category.rei.fuel.time_short": "%d 刻",
   "category.rei.cooking.xp": "%f XP",
+  "category.rei.cooking.time&xp": "%s XP in %s sec",
   "category.rei.smoking": "煙熏",
   "category.rei.blasting": "熔煉",
   "category.rei.campfire": "營火",
