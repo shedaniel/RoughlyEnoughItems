@@ -5,10 +5,9 @@
 
 package me.shedaniel.rei.api;
 
-import me.shedaniel.rei.api.annotations.Internal;
+import org.jetbrains.annotations.ApiStatus;
 
-@Internal
-@Deprecated
+@ApiStatus.Internal
 public interface ItemStackHook {
     void rei_setRenderEnchantmentGlint(boolean b);
 }

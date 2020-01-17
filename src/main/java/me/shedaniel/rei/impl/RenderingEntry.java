@@ -9,10 +9,12 @@ import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
 
+@ApiStatus.Internal
 public abstract class RenderingEntry extends DrawableHelper implements EntryStack {
     @Override
     public Optional<Identifier> getIdentifier() {

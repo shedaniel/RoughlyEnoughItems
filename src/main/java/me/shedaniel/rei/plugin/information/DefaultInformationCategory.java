@@ -32,13 +32,25 @@ import net.minecraft.client.util.math.Matrix4f;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
 public class DefaultInformationCategory implements RecipeCategory<DefaultInformationDisplay> {
+    protected static void innerBlit(Matrix4f matrix4f, int xStart, int xEnd, int yStart, int yEnd, int z, float uStart, float uEnd, float vStart, float vEnd) {
+        BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+        bufferBuilder.begin(7, VertexFormats.POSITION_TEXTURE);
+        bufferBuilder.vertex(matrix4f, xStart, yEnd, z).texture(uStart, vEnd).next();
+        bufferBuilder.vertex(matrix4f, xEnd, yEnd, z).texture(uEnd, vEnd).next();
+        bufferBuilder.vertex(matrix4f, xEnd, yStart, z).texture(uEnd, vStart).next();
+        bufferBuilder.vertex(matrix4f, xStart, yStart, z).texture(uStart, vStart).next();
+        bufferBuilder.end();
+        RenderSystem.enableAlphaTest();
+        BufferRenderer.draw(bufferBuilder);
+    }
+    
     @Override
     public Identifier getIdentifier() {
         return DefaultPlugin.INFO;
@@ -81,18 +93,6 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
                 DefaultInformationCategory.innerBlit(matrix4f, bounds.getCenterX() - 8, bounds.getCenterX() + 8, bounds.getCenterY() - 8, bounds.getCenterY() + 8, 0, 116f / 256f, (116f + 16f) / 256f, 0f, 16f / 256f);
             }
         };
-    }
-    
-    protected static void innerBlit(Matrix4f matrix4f, int xStart, int xEnd, int yStart, int yEnd, int z, float uStart, float uEnd, float vStart, float vEnd) {
-        BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
-        bufferBuilder.begin(7, VertexFormats.POSITION_TEXTURE);
-        bufferBuilder.vertex(matrix4f, xStart, yEnd, z).texture(uStart, vEnd).next();
-        bufferBuilder.vertex(matrix4f, xEnd, yEnd, z).texture(uEnd, vEnd).next();
-        bufferBuilder.vertex(matrix4f, xEnd, yStart, z).texture(uEnd, vStart).next();
-        bufferBuilder.vertex(matrix4f, xStart, yStart, z).texture(uStart, vStart).next();
-        bufferBuilder.end();
-        RenderSystem.enableAlphaTest();
-        BufferRenderer.draw(bufferBuilder);
     }
     
     @Override

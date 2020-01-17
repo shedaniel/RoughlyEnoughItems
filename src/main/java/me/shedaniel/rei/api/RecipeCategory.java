@@ -15,6 +15,7 @@ import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collections;
 import java.util.List;
@@ -52,7 +53,7 @@ public interface RecipeCategory<T extends RecipeDisplay> {
      * @param recipe the recipe to render
      * @return the recipe renderer
      */
-    @SuppressWarnings("unchecked")
+    @ApiStatus.OverrideOnly
     default RecipeEntry getSimpleRenderer(T recipe) {
         return SimpleRecipeEntry.create(recipe::getInputEntries, recipe::getOutputEntries);
     }
@@ -61,9 +62,10 @@ public interface RecipeCategory<T extends RecipeDisplay> {
      * Setup the widgets for displaying the recipe
      *
      * @param recipeDisplaySupplier the supplier for getting the recipe
-     * @param bounds                the bounds of the display, configurable with overriding {@link RecipeCategory#getDisplaySettings()}
+     * @param bounds                the bounds of the display, configurable with overriding the width, height methods.
      * @return the list of widgets
      */
+    @ApiStatus.OverrideOnly
     default List<Widget> setupDisplay(Supplier<T> recipeDisplaySupplier, Rectangle bounds) {
         return Collections.singletonList(new RecipeBaseWidget(bounds));
     }
@@ -76,6 +78,7 @@ public interface RecipeCategory<T extends RecipeDisplay> {
      * @param mouseY the y coordinates for the mouse
      * @param delta  the delta
      */
+    @ApiStatus.OverrideOnly
     default void drawCategoryBackground(Rectangle bounds, int mouseX, int mouseY, float delta) {
         PanelWidget.render(bounds, -1);
         if (ScreenHelper.isDarkModeEnabled()) {
@@ -131,6 +134,7 @@ public interface RecipeCategory<T extends RecipeDisplay> {
      * @deprecated no longer used
      */
     @Deprecated
+    @ApiStatus.ScheduledForRemoval
     default boolean checkTags() {
         return false;
     }

@@ -15,8 +15,9 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.MathHelper;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -30,6 +31,7 @@ public class SimpleRecipeEntry extends RecipeEntry {
     private List<EntryWidget> inputWidgets;
     private EntryWidget outputWidget;
     
+    @ApiStatus.Internal
     protected SimpleRecipeEntry(List<List<EntryStack>> input, List<EntryStack> output) {
         List<Pair<List<EntryStack>, AtomicInteger>> newList = Lists.newArrayList();
         List<Pair<List<EntryStack>, Integer>> a = CollectionUtils.map(input, stacks -> new Pair<>(stacks, stacks.stream().map(EntryStack::getAmount).max(Integer::compareTo).orElse(1)));

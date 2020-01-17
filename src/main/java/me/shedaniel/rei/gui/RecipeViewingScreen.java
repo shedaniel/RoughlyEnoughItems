@@ -11,7 +11,6 @@ import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.gui.widget.*;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.CollectionUtils;
@@ -26,17 +25,16 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Supplier;
 
-@Deprecated
-@Internal
+@ApiStatus.Internal
 public class RecipeViewingScreen extends Screen {
     
     public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
-    private int tabsPerPage = 5;
     private final List<Widget> preWidgets;
     private final List<Widget> widgets;
     private final List<TabWidget> tabs;
@@ -48,6 +46,7 @@ public class RecipeViewingScreen extends Screen {
     public int largestWidth, largestHeight;
     public boolean choosePageActivated;
     public RecipeChoosePageWidget recipeChoosePageWidget;
+    private int tabsPerPage = 5;
     private Rectangle bounds;
     @Nullable private CategoryBaseWidget workingStationsBaseWidget;
     private RecipeCategory<RecipeDisplay> selectedCategory;
@@ -70,6 +69,23 @@ public class RecipeViewingScreen extends Screen {
         this.selectedCategory = (RecipeCategory<RecipeDisplay>) categories.get(0);
         this.tabs = new ArrayList<>();
         this.choosePageActivated = false;
+    }
+    
+    static void transformNotice(List<Widget> setupDisplay, EntryStack mainStackToNotice) {
+        if (mainStackToNotice.isEmpty())
+            return;
+        for (Widget widget : setupDisplay) {
+            if (widget instanceof EntryWidget) {
+                EntryWidget entry = (EntryWidget) widget;
+                if (entry.entries().size() > 1) {
+                    EntryStack stack = CollectionUtils.firstOrNullEqualsAll(entry.entries(), mainStackToNotice);
+                    if (stack != null) {
+                        entry.clearStacks();
+                        entry.entry(stack);
+                    }
+                }
+            }
+        }
     }
     
     public void addMainStackToNotice(EntryStack stack) {
@@ -343,36 +359,6 @@ public class RecipeViewingScreen extends Screen {
         children.addAll(preWidgets);
     }
     
-    static void transformNotice(List<Widget> setupDisplay, EntryStack mainStackToNotice) {
-        if (mainStackToNotice.isEmpty())
-            return;
-        for (Widget widget : setupDisplay) {
-            if (widget instanceof EntryWidget) {
-                EntryWidget entry = (EntryWidget) widget;
-                if (entry.entries().size() > 1) {
-                    EntryStack stack = CollectionUtils.firstOrNullEqualsAll(entry.entries(), mainStackToNotice);
-                    if (stack != null) {
-                        entry.clearStacks();
-                        entry.entry(stack);
-                    }
-                }
-            }
-        }
-    }
-    
-    public static class WorkstationSlotWidget extends EntryWidget {
-        public WorkstationSlotWidget(int x, int y, List<EntryStack> widgets) {
-            super(new Point(x, y));
-            entries(widgets);
-            noBackground();
-        }
-        
-        @Override
-        public boolean containsMouse(double mouseX, double mouseY) {
-            return getInnerBounds().contains(mouseX, mouseY);
-        }
-    }
-    
     public List<Widget> getWidgets() {
         return widgets;
     }
@@ -398,7 +384,6 @@ public class RecipeViewingScreen extends Screen {
         return categoryPages;
     }
     
-    @SuppressWarnings("deprecation")
     private int getRecipesPerPage() {
         if (selectedCategory.getFixedRecipesPerPage() > 0)
             return selectedCategory.getFixedRecipesPerPage() - 1;
@@ -532,6 +517,19 @@ public class RecipeViewingScreen extends Screen {
         if (choosePageActivated)
             return recipeChoosePageWidget;
         return super.getFocused();
+    }
+    
+    public static class WorkstationSlotWidget extends EntryWidget {
+        public WorkstationSlotWidget(int x, int y, List<EntryStack> widgets) {
+            super(new Point(x, y));
+            entries(widgets);
+            noBackground();
+        }
+        
+        @Override
+        public boolean containsMouse(double mouseX, double mouseY) {
+            return getInnerBounds().contains(mouseX, mouseY);
+        }
     }
     
 }

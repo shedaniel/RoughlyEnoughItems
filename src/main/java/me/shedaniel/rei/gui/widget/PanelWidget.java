@@ -28,6 +28,12 @@ public class PanelWidget extends WidgetWithBounds {
         this.bounds = bounds;
     }
     
+    public static void render(Rectangle bounds, int color) {
+        TEMP.bounds = bounds;
+        TEMP.color = color;
+        TEMP.render();
+    }
+    
     @Override
     public Rectangle getBounds() {
         return bounds;
@@ -36,12 +42,6 @@ public class PanelWidget extends WidgetWithBounds {
     @Override
     public List<Widget> children() {
         return Collections.emptyList();
-    }
-    
-    public static void render(Rectangle bounds, int color) {
-        TEMP.bounds = bounds;
-        TEMP.color = color;
-        TEMP.render();
     }
     
     public void render() {
@@ -60,10 +60,10 @@ public class PanelWidget extends WidgetWithBounds {
     public void render(int mouseX, int mouseY, float delta) {
         if (!isRendering())
             return;
+        float alpha = ((color >> 24) & 0xFF) / 255f;
         float red = ((color >> 16) & 0xFF) / 255f;
         float green = ((color >> 8) & 0xFF) / 255f;
-        float blue = ((color >> 0) & 0xFF) / 255f;
-        float alpha = ((color >> 32) & 0xFF) / 255f;
+        float blue = (color & 0xFF) / 255f;
         RenderSystem.color4f(red, green, blue, alpha);
         minecraft.getTextureManager().bindTexture(ScreenHelper.isDarkModeEnabled() ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
         int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;

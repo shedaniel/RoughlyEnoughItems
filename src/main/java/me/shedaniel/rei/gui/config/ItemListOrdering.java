@@ -5,6 +5,9 @@
 
 package me.shedaniel.rei.gui.config;
 
+import org.jetbrains.annotations.ApiStatus;
+
+@ApiStatus.Internal
 public enum ItemListOrdering {
     
     registry("ordering.rei.registry"),

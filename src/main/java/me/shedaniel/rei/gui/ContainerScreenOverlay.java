@@ -37,10 +37,12 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.GameMode;
 import org.apache.logging.log4j.util.TriConsumer;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.*;
 
+@ApiStatus.Internal
 public class ContainerScreenOverlay extends WidgetWithBounds {
     
     private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
@@ -118,9 +120,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         }
         ScreenHelper.getSearchField().getBounds().setBounds(getTextFieldArea());
         this.widgets.add(ScreenHelper.getSearchField());
-        ScreenHelper.getSearchField().setChangedListener(s -> {
-            ENTRY_LIST_WIDGET.updateSearch(s);
-        });
+        ScreenHelper.getSearchField().setChangedListener(ENTRY_LIST_WIDGET::updateSearch);
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
             widgets.add(buttonLeft = new ButtonWidget(new Rectangle(rectangle.x, rectangle.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), I18n.translate("text.rei.left_arrow")) {
                 @Override

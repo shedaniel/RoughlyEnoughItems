@@ -15,7 +15,6 @@ import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.config.ItemListOrdering;
 import me.shedaniel.rei.impl.ScreenHelper;
@@ -36,14 +35,15 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-@Internal
+@ApiStatus.Internal
 public class EntryListWidget extends WidgetWithBounds {
     
     static final Supplier<Boolean> RENDER_ENCHANTMENT_GLINT = ConfigObject.getInstance()::doesRenderEntryEnchantmentGlint;
@@ -604,7 +604,7 @@ public class EntryListWidget extends WidgetWithBounds {
             favoritesListWidget.updateEntriesPosition();
     }
     
-    @Deprecated
+    @ApiStatus.Internal
     public List<EntryStack> getAllStacks() {
         return allStacks;
     }

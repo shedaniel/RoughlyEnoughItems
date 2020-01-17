@@ -10,9 +10,10 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.toast.Toast;
 import net.minecraft.client.toast.ToastManager;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
-
+@ApiStatus.Internal
 public class CopyRecipeIdentifierToast implements Toast {
     
     protected static final Identifier TOASTS_TEX = new Identifier("roughlyenoughitems", "textures/gui/toasts.png");

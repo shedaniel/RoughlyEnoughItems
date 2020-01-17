@@ -15,10 +15,12 @@ import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.client.gui.widget.AbstractPressableButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.LiteralText;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@ApiStatus.Internal
 public class CreditsScreen extends Screen {
     
     private Screen parent;

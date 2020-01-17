@@ -9,7 +9,6 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
@@ -18,11 +17,11 @@ import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Pair;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 
-@Internal
-@Deprecated
+@ApiStatus.Internal
 public class OverlaySearchField extends TextFieldWidget {
     
     public static boolean isSearching = false;
@@ -43,8 +42,7 @@ public class OverlaySearchField extends TextFieldWidget {
         super.setFocused(boolean_1);
     }
     
-    @Deprecated
-    @Internal
+    @ApiStatus.Internal
     public void addToHistory(String text) {
         if (!text.isEmpty()) {
             history.removeIf(str -> str.equalsIgnoreCase(text));
@@ -54,7 +52,6 @@ public class OverlaySearchField extends TextFieldWidget {
         }
     }
     
-    @SuppressWarnings("deprecation")
     public void laterRender(int int_1, int int_2, float float_1) {
         RenderSystem.disableDepthTest();
         setEditableColor(ContainerScreenOverlay.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty() ? 16733525 : isSearching ? -852212 : (containsMouse(PointHelper.fromMouse()) || isFocused()) ? (ScreenHelper.isDarkModeEnabled() ? -17587 : -1) : -6250336);
@@ -71,7 +68,6 @@ public class OverlaySearchField extends TextFieldWidget {
             this.font.drawWithShadow(this.font.trimToWidth(this.getSuggestion(), this.getWidth()), x, y, -6250336);
     }
     
-    @SuppressWarnings("deprecation")
     @Override
     public void renderBorder() {
         boolean hasError = ContainerScreenOverlay.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty();

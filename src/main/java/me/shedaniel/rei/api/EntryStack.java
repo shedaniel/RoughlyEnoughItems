@@ -8,7 +8,6 @@ package me.shedaniel.rei.api;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import me.shedaniel.math.api.Rectangle;
-import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.impl.EmptyEntryStack;
 import me.shedaniel.rei.impl.FluidEntryStack;
@@ -22,8 +21,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -53,8 +53,7 @@ public interface EntryStack {
         return new ItemEntryStack(new ItemStack(item));
     }
     
-    @Internal
-    @Deprecated
+    @ApiStatus.Internal
     static EntryStack readFromJson(JsonElement jsonElement) {
         try {
             JsonObject obj = jsonElement.getAsJsonObject();
@@ -74,8 +73,7 @@ public interface EntryStack {
         }
     }
     
-    @Internal
-    @Deprecated
+    @ApiStatus.Internal
     @Nullable
     default JsonElement toJson() {
         try {
@@ -86,9 +84,12 @@ public interface EntryStack {
                     obj1.addProperty("nbt", getItemStack().toTag(new CompoundTag()).toString());
                     return obj1;
                 case FLUID:
+                    Optional<Identifier> optionalIdentifier = getIdentifier();
+                    if (!optionalIdentifier.isPresent())
+                        throw new NullPointerException("Invalid Fluid: " + toString());
                     JsonObject obj2 = new JsonObject();
                     obj2.addProperty("type", "fluid");
-                    obj2.addProperty("id", getIdentifier().get().toString());
+                    obj2.addProperty("id", optionalIdentifier.get().toString());
                     return obj2;
                 case EMPTY:
                     JsonObject obj3 = new JsonObject();
@@ -173,8 +174,7 @@ public interface EntryStack {
     
     <T> T get(Settings<T> settings);
     
-    @Nullable
-    QueuedTooltip getTooltip(int mouseX, int mouseY);
+    @Nullable QueuedTooltip getTooltip(int mouseX, int mouseY);
     
     void render(Rectangle bounds, int mouseX, int mouseY, float delta);
     
@@ -193,8 +193,8 @@ public interface EntryStack {
         public static final Settings<Supplier<Boolean>> TOOLTIP_ENABLED = new Settings<>(TRUE);
         public static final Settings<Supplier<Boolean>> TOOLTIP_APPEND_MOD = new Settings<>(TRUE);
         public static final Settings<Supplier<Boolean>> RENDER_COUNTS = new Settings<>(TRUE);
-        public static final Settings<Function<EntryStack, List<String>>> TOOLTIP_APPEND_EXTRA = new Settings<Function<EntryStack, List<String>>>(stack -> Collections.emptyList());
-        public static final Settings<Function<EntryStack, String>> COUNTS = new Settings<Function<EntryStack, String>>(stack -> null);
+        public static final Settings<Function<EntryStack, List<String>>> TOOLTIP_APPEND_EXTRA = new Settings<>(stack -> Collections.emptyList());
+        public static final Settings<Function<EntryStack, String>> COUNTS = new Settings<>(stack -> null);
         
         private T defaultValue;
         
@@ -208,7 +208,7 @@ public interface EntryStack {
         
         public static class Item {
             public static final Settings<Supplier<Boolean>> RENDER_ENCHANTMENT_GLINT = new Settings<>(TRUE);
-            @Deprecated public static final Settings<Supplier<Boolean>> RENDER_OVERLAY = RENDER_ENCHANTMENT_GLINT;
+            @Deprecated @ApiStatus.ScheduledForRemoval public static final Settings<Supplier<Boolean>> RENDER_OVERLAY = RENDER_ENCHANTMENT_GLINT;
             
             private Item() {
             }
@@ -216,7 +216,7 @@ public interface EntryStack {
         
         public static class Fluid {
             // Return null to disable
-            public static final Settings<Function<EntryStack, String>> AMOUNT_TOOLTIP = new Settings<Function<EntryStack, String>>(stack -> I18n.translate("tooltip.rei.fluid_amount", stack.getAmount()));
+            public static final Settings<Function<EntryStack, String>> AMOUNT_TOOLTIP = new Settings<>(stack -> I18n.translate("tooltip.rei.fluid_amount", stack.getAmount()));
             
             private Fluid() {
             }

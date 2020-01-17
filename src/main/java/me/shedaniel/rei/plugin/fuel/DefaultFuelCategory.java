@@ -21,8 +21,8 @@ import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -58,7 +58,7 @@ public class DefaultFuelCategory implements RecipeCategory<DefaultFuelDisplay> {
                 super.render(mouseX, mouseY, delta);
                 MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
                 blit(bounds.x + 5, startPoint.y, 0, 73, 18, 34);
-                int height = MathHelper.ceil((System.currentTimeMillis() / 250 % 14d) / 1f);
+                int height = MathHelper.ceil(System.currentTimeMillis() / 250d % 14d);
                 blit(bounds.x + 7, startPoint.y + 12 + (3 - height), 82, 77 + (14 - height), 14, height);
                 minecraft.textRenderer.draw(I18n.translate("category.rei.fuel.time", recipeDisplaySupplier.get().getFuelTime()), bounds.x + 26, bounds.getMaxY() - 15, ScreenHelper.isDarkModeEnabled() ? 0xFFBBBBBB : 0xFF404040);
             }

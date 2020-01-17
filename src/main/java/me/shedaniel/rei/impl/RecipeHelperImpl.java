@@ -11,7 +11,6 @@ import com.google.common.collect.Sets;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.fabricmc.loader.api.FabricLoader;
@@ -22,14 +21,14 @@ import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-@Deprecated
-@Internal
+@ApiStatus.Internal
 public class RecipeHelperImpl implements RecipeHelper {
     
     private static final Comparator<DisplayVisibilityHandler> VISIBILITY_HANDLER_COMPARATOR;

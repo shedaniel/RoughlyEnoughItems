@@ -9,20 +9,19 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
-import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.Window;
 import net.minecraft.util.math.MathHelper;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-@Deprecated
-@Internal
+@ApiStatus.Internal
 public class RecipeChoosePageWidget extends DraggableWidget {
     
     private int currentPage;

@@ -6,7 +6,9 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 
@@ -31,6 +33,7 @@ public interface ConfigManager {
      * @deprecated Use {@link ConfigObject#getInstance()}
      */
     @Deprecated
+    @ApiStatus.ScheduledForRemoval
     ConfigObject getConfig();
     
     /**
@@ -50,7 +53,9 @@ public interface ConfigManager {
      *
      * @param parent the screen shown before
      */
-    void openConfigScreen(Screen parent);
+    default void openConfigScreen(Screen parent) {
+        MinecraftClient.getInstance().openScreen(getConfigScreen(parent));
+    }
     
     /**
      * Gets the config screen

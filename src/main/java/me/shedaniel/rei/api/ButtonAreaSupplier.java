@@ -7,6 +7,9 @@ package me.shedaniel.rei.api;
 
 import me.shedaniel.math.api.Rectangle;
 
+/**
+ * The supplier for the + button area.
+ */
 public interface ButtonAreaSupplier {
     
     /**

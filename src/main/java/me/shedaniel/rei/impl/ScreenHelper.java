@@ -11,7 +11,6 @@ import com.google.common.collect.Sets;
 import me.shedaniel.cloth.hooks.ClothClientHooks;
 import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.api.ConfigObject;
-import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.OverlaySearchField;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
@@ -24,6 +23,7 @@ import net.minecraft.client.util.Window;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import org.apache.logging.log4j.util.TriConsumer;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -34,13 +34,12 @@ public class ScreenHelper implements ClientModInitializer {
     /**
      * @deprecated Use getters instead
      */
-    @Deprecated public static OverlaySearchField searchField;
-    @Deprecated @Internal public static List<ItemStack> inventoryStacks = Lists.newArrayList();
+    @Deprecated @ApiStatus.ScheduledForRemoval public static OverlaySearchField searchField;
+    @ApiStatus.Internal public static List<ItemStack> inventoryStacks = Lists.newArrayList();
     private static ContainerScreenOverlay overlay;
     private static AbstractContainerScreen<?> lastContainerScreen = null;
     private static LinkedHashSet<Screen> lastRecipeScreen = Sets.newLinkedHashSetWithExpectedSize(5);
     
-    @SuppressWarnings("deprecation")
     public static OverlaySearchField getSearchField() {
         return searchField;
     }

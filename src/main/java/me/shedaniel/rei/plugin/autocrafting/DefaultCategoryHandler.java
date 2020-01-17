@@ -41,7 +41,7 @@ public class DefaultCategoryHandler implements AutoTransferHandler {
         TransferRecipeDisplay recipe = (TransferRecipeDisplay) context.getRecipe();
         AbstractContainerScreen<?> containerScreen = context.getContainerScreen();
         Container container = containerScreen.getContainer();
-        ContainerInfo containerInfo = ContainerInfoHandler.getContainerInfo(recipe.getRecipeCategory(), container.getClass());
+        ContainerInfo<Container> containerInfo = (ContainerInfo<Container>) ContainerInfoHandler.getContainerInfo(recipe.getRecipeCategory(), container.getClass());
         if (containerInfo == null)
             return Result.createNotApplicable();
         if (recipe.getHeight() > containerInfo.getCraftingHeight(container) || recipe.getWidth() > containerInfo.getCraftingWidth(container))

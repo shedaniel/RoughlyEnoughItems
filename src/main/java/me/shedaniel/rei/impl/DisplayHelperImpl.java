@@ -10,21 +10,20 @@ import com.google.common.collect.Maps;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.BaseBoundsHandler;
 import me.shedaniel.rei.api.DisplayHelper;
-import me.shedaniel.rei.api.annotations.Internal;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Deprecated
-@Internal
+@ApiStatus.Internal
 public class DisplayHelperImpl implements DisplayHelper {
     
     private static final Comparator<DisplayBoundsHandler<?>> BOUNDS_HANDLER_COMPARATOR;
-    private static final DisplayBoundsHandler<Object> EMPTY = new DisplayBoundsHandler() {
+    private static final DisplayBoundsHandler<Object> EMPTY = new DisplayBoundsHandler<Object>() {
         @Override
-        public Class getBaseSupportedClass() {
+        public Class<Object> getBaseSupportedClass() {
             return null;
         }
         
@@ -51,7 +50,7 @@ public class DisplayHelperImpl implements DisplayHelper {
     
     private List<DisplayBoundsHandler<?>> screenDisplayBoundsHandlers = Lists.newArrayList();
     private Map<Class<?>, DisplayBoundsHandler<?>> handlerCache = Maps.newHashMap();
-    private Map<Class, List<DisplayBoundsHandler<?>>> handlerSortedCache = Maps.newHashMap();
+    private Map<Class<?>, List<DisplayBoundsHandler<?>>> handlerSortedCache = Maps.newHashMap();
     private BaseBoundsHandler baseBoundsHandler;
     private Class<?> tempScreen;
     
@@ -95,17 +94,17 @@ public class DisplayHelperImpl implements DisplayHelper {
         return baseBoundsHandler;
     }
     
-    @Deprecated
+    @ApiStatus.Internal
     public void setBaseBoundsHandler(BaseBoundsHandler baseBoundsHandler) {
         this.baseBoundsHandler = baseBoundsHandler;
     }
     
-    @Deprecated
+    @ApiStatus.Internal
     public void resetData() {
         screenDisplayBoundsHandlers.clear();
     }
     
-    @Deprecated
+    @ApiStatus.Internal
     public void resetCache() {
         handlerCache.clear();
         handlerSortedCache.clear();

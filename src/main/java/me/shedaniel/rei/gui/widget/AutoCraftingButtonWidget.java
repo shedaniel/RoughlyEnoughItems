@@ -11,7 +11,6 @@ import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.gui.toast.CopyRecipeIdentifierToast;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
@@ -20,6 +19,7 @@ import net.minecraft.client.resource.language.I18n;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Lazy;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,11 +28,10 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-@Internal
-@Deprecated
+@ApiStatus.Internal
 public class AutoCraftingButtonWidget extends ButtonWidget {
     
-    private static final Lazy<Boolean> IS_YOG = new Lazy(() -> {
+    private static final Lazy<Boolean> IS_YOG = new Lazy<>(() -> {
         try {
             if (MinecraftClient.getInstance().getSession().getProfile().getId().equals(UUID.fromString("f9546389-9415-4358-9c29-2c26b25bff5b")))
                 return true;
@@ -54,7 +53,7 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
     public AutoCraftingButtonWidget(Rectangle displayBounds, Rectangle rectangle, String text, Supplier<RecipeDisplay> displaySupplier, List<Widget> setupDisplay, RecipeCategory<?> recipeCategory) {
         super(rectangle, text);
         this.displayBounds = displayBounds;
-        this.displaySupplier = () -> displaySupplier.get();
+        this.displaySupplier = displaySupplier;
         Optional<Identifier> recipe = displaySupplier.get().getRecipeLocation();
         extraTooltip = recipe.isPresent() ? I18n.translate("text.rei.recipe_id", Formatting.GRAY.toString(), recipe.get().toString()) : "";
         this.containerScreen = ScreenHelper.getLastContainerScreen();
@@ -124,7 +123,7 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
         errorTooltip = error == null || error.isEmpty() ? null : Lists.newArrayList();
         if (errorTooltip != null) {
             for (String s : error) {
-                if (!errorTooltip.stream().anyMatch(ss -> ss.equalsIgnoreCase(s)))
+                if (errorTooltip.stream().noneMatch(ss -> ss.equalsIgnoreCase(s)))
                     errorTooltip.add(s);
             }
         }
@@ -150,7 +149,7 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
     
     @Override
     protected int getTextureId(boolean boolean_1) {
-        return !visible ? 0 : boolean_1 && enabled ? (ConfigObject.getInstance().isLighterButtonHover() ? 4 : 3) : 1;
+        return !visible ? 0 : boolean_1 && enabled ? 4 : 1;
     }
     
     @Override

@@ -6,9 +6,11 @@
 package me.shedaniel.rei.gui.config;
 
 import net.minecraft.client.resource.language.I18n;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Locale;
 
+@ApiStatus.Internal
 public enum RecipeScreenType {
     UNSET,
     ORIGINAL,

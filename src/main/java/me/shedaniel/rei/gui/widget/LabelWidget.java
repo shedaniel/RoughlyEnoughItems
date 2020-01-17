@@ -9,6 +9,7 @@ import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.gui.Element;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collections;
 import java.util.List;
@@ -25,12 +26,12 @@ public class LabelWidget extends WidgetWithBounds {
     private boolean centered = true;
     private Supplier<String> tooltipSupplier;
     
-    @Deprecated
+    @ApiStatus.Internal
     public LabelWidget(int x, int y, String text) {
         this(new Point(x, y), text);
     }
     
-    @Deprecated
+    @ApiStatus.Internal
     public LabelWidget(Point point, String text) {
         this.pos = point;
         this.text = text;
@@ -136,9 +137,9 @@ public class LabelWidget extends WidgetWithBounds {
         Point pos = getPosition();
         if (isCentered()) {
             if (hasShadows)
-                font.drawWithShadow(text, pos.x - width / 2, pos.y, defaultColor);
+                font.drawWithShadow(text, pos.x - width / 2f, pos.y, defaultColor);
             else
-                font.draw(text, pos.x - width / 2, pos.y, defaultColor);
+                font.draw(text, pos.x - width / 2f, pos.y, defaultColor);
         } else {
             if (hasShadows)
                 font.drawWithShadow(text, pos.x, pos.y, defaultColor);

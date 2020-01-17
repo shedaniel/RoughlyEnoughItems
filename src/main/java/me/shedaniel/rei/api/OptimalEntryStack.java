@@ -6,10 +6,9 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.math.api.Rectangle;
-import me.shedaniel.rei.api.annotations.Internal;
+import org.jetbrains.annotations.ApiStatus;
 
-@Internal
-@Deprecated
+@ApiStatus.Internal
 public interface OptimalEntryStack {
     default void optimisedRenderStart(float delta) {
     }

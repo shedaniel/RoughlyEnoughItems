@@ -52,7 +52,7 @@ public class DefaultBrewingCategory implements RecipeCategory<DefaultBrewingDisp
                 super.render(mouseX, mouseY, delta);
                 MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
                 blit(startPoint.x, startPoint.y, 0, 108, 103, 59);
-                int width = MathHelper.ceil((System.currentTimeMillis() / 250 % 18d) / 1f);
+                int width = MathHelper.ceil(System.currentTimeMillis() / 250d % 18d);
                 blit(startPoint.x + 44, startPoint.y + 28, 103, 163, width, 4);
             }
         }));

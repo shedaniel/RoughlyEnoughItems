@@ -17,6 +17,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.AbstractCookingRecipe;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,15 +26,17 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public abstract class DefaultCookingDisplay implements TransferRecipeDisplay {
-    private AbstractCookingRecipe recipe;
-    private List<List<EntryStack>> input;
     private static List<EntryStack> fuel;
-    private List<EntryStack> output;
-    private float xp;
     
     static {
         fuel = FurnaceBlockEntity.createFuelTimeMap().keySet().stream().map(Item::getStackForRender).map(EntryStack::create).map(e -> e.setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, stack -> Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("category.rei.smelting.fuel")))).collect(Collectors.toList());
     }
+    
+    private AbstractCookingRecipe recipe;
+    private List<List<EntryStack>> input;
+    private List<EntryStack> output;
+    private float xp;
+    private double cookTime;
     
     public DefaultCookingDisplay(AbstractCookingRecipe recipe) {
         this.recipe = recipe;
@@ -46,7 +49,8 @@ public abstract class DefaultCookingDisplay implements TransferRecipeDisplay {
         }).collect(Collectors.toList());
         this.input.add(fuel);
         this.output = Collections.singletonList(EntryStack.create(recipe.getOutput()));
-        xp = recipe.getExperience();
+        this.xp = recipe.getExperience();
+        this.cookTime = recipe.getCookTime();
     }
     
     @Override
@@ -73,7 +77,11 @@ public abstract class DefaultCookingDisplay implements TransferRecipeDisplay {
         return xp;
     }
     
-    @Deprecated
+    public double getCookingTime() {
+        return cookTime;
+    }
+    
+    @ApiStatus.Internal
     public Optional<AbstractCookingRecipe> getOptionalRecipe() {
         return Optional.ofNullable(recipe);
     }

@@ -11,6 +11,7 @@ import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 import java.util.Map;
@@ -90,7 +91,7 @@ public interface RecipeHelper {
      */
     Map<RecipeCategory<?>, List<RecipeDisplay>> getRecipesFor(EntryStack stack);
     
-    RecipeCategory getCategory(Identifier identifier);
+    RecipeCategory<?> getCategory(Identifier identifier);
     
     /**
      * Gets the vanilla recipe manager
@@ -210,6 +211,7 @@ public interface RecipeHelper {
     
     List<RecipeHelper.ScreenClickArea> getScreenClickAreas();
     
+    @ApiStatus.Internal
     boolean arePluginsLoading();
     
     interface ScreenClickArea {

@@ -45,7 +45,7 @@ public class DefaultCampfireDisplay implements RecipeDisplay {
         this.cookTime = cookTime;
     }
     
-    public int getCookTime() {
+    public double getCookTime() {
         return cookTime;
     }
     

@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.Random;
 
 @TestOnly
-@Deprecated
 public class REITestPlugin implements REIPluginV0 {
     
     private Random random = new Random();
@@ -44,7 +43,7 @@ public class REITestPlugin implements REIPluginV0 {
                     for (int i = 0; i < 15; i++)
                         entryRegistry.registerEntry(transformStack(EntryStack.create(stack)));
                 }
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
         }
     }

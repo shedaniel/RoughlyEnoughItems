@@ -10,7 +10,7 @@ import net.minecraft.util.ActionResult;
 public interface DisplayVisibilityHandler {
     
     /**
-     * Gets the priority of the handler
+     * Gets the priority of the handler, the higher the priority, the earlier this is called.
      *
      * @return the priority
      */

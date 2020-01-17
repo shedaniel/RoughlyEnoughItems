@@ -7,7 +7,6 @@ package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
@@ -20,14 +19,14 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Function;
 
-@Deprecated
-@Internal
+@ApiStatus.Internal
 public class SearchArgument {
     
     public static final SearchArgument ALWAYS = new SearchArgument(ArgumentType.ALWAYS, "", true);
@@ -48,7 +47,7 @@ public class SearchArgument {
         this.include = include;
     }
     
-    @Deprecated
+    @ApiStatus.Internal
     public static String tryGetEntryStackName(EntryStack stack) {
         if (stack.getType() == EntryStack.Type.ITEM)
             return tryGetItemStackName(stack.getItemStack());
@@ -57,7 +56,7 @@ public class SearchArgument {
         return "";
     }
     
-    @Deprecated
+    @ApiStatus.Internal
     public static String tryGetEntryStackTooltip(EntryStack stack) {
         QueuedTooltip tooltip = stack.getTooltip(0, 0);
         if (tooltip != null)
@@ -65,7 +64,7 @@ public class SearchArgument {
         return "";
     }
     
-    @Deprecated
+    @ApiStatus.Internal
     public static String tryGetFluidName(Fluid fluid) {
         Identifier id = Registry.FLUID.getId(fluid);
         if (I18n.hasTranslation("block." + id.toString().replaceFirst(":", ".")))
@@ -73,7 +72,7 @@ public class SearchArgument {
         return CollectionUtils.mapAndJoinToString(id.getPath().split("_"), StringUtils::capitalize, " ");
     }
     
-    @Deprecated
+    @ApiStatus.Internal
     public static List<String> tryGetItemStackToolTip(ItemStack itemStack, boolean careAboutAdvanced) {
         if (!searchBlacklisted.contains(itemStack.getItem()))
             try {
@@ -85,7 +84,7 @@ public class SearchArgument {
         return Collections.singletonList(tryGetItemStackName(itemStack));
     }
     
-    @Deprecated
+    @ApiStatus.Internal
     public static String tryGetItemStackName(ItemStack stack) {
         if (!searchBlacklisted.contains(stack.getItem()))
             try {
@@ -131,8 +130,7 @@ public class SearchArgument {
         ALWAYS
     }
     
-    @Deprecated
-    @Internal
+    @ApiStatus.Internal
     public static class SearchArguments {
         public static final SearchArguments ALWAYS = new SearchArguments(new SearchArgument[]{SearchArgument.ALWAYS});
         private SearchArgument[] arguments;

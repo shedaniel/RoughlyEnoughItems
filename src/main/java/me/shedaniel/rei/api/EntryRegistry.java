@@ -9,6 +9,7 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -60,6 +61,7 @@ public interface EntryRegistry {
      * @param checkAlreadyContains whether the list should check if it is already on the list
      */
     @Deprecated
+    @ApiStatus.Internal
     void registerEntryAfter(EntryStack afterEntry, EntryStack stack, boolean checkAlreadyContains);
     
     

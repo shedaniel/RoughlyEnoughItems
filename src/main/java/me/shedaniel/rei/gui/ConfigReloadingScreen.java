@@ -6,14 +6,13 @@
 package me.shedaniel.rei.gui;
 
 import me.shedaniel.rei.api.RecipeHelper;
-import me.shedaniel.rei.api.annotations.Internal;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.NarratorManager;
 import net.minecraft.util.Util;
+import org.jetbrains.annotations.ApiStatus;
 
-@Deprecated
-@Internal
+@ApiStatus.Internal
 public class ConfigReloadingScreen extends Screen {
     
     private Screen parent;

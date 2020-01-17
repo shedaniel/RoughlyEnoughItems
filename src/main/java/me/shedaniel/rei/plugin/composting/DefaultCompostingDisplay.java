@@ -26,7 +26,7 @@ public class DefaultCompostingDisplay implements RecipeDisplay {
         this.page = page;
         this.order = order.stream().map(EntryStack::create).collect(Collectors.toList());
         this.inputMap = inputMap;
-        this.output = Arrays.asList(output).stream().map(EntryStack::create).collect(Collectors.toList());
+        this.output = Arrays.stream(output).map(EntryStack::create).collect(Collectors.toList());
         this.allItems = allItems.stream().map(EntryStack::create).collect(Collectors.toList());
     }
     

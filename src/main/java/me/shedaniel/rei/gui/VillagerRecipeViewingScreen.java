@@ -14,7 +14,6 @@ import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.api.annotations.Internal;
 import me.shedaniel.rei.gui.entries.RecipeEntry;
 import me.shedaniel.rei.gui.widget.*;
 import me.shedaniel.rei.impl.ScreenHelper;
@@ -32,17 +31,16 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@Deprecated
-@Internal
+@ApiStatus.Internal
 public class VillagerRecipeViewingScreen extends Screen {
     
-    private int tabsPerPage = 8;
     private final Map<RecipeCategory<?>, List<RecipeDisplay>> categoryMap;
     private final List<RecipeCategory<?>> categories;
     private final List<Widget> widgets;
@@ -50,6 +48,7 @@ public class VillagerRecipeViewingScreen extends Screen {
     private final List<RecipeEntry> recipeRenderers;
     private final List<TabWidget> tabs;
     public Rectangle bounds, scrollListBounds;
+    private int tabsPerPage = 8;
     private int selectedCategoryIndex, selectedRecipeIndex;
     private double scroll;
     private double target;
@@ -244,14 +243,6 @@ public class VillagerRecipeViewingScreen extends Screen {
         ScreenHelper.getLastOverlay().init();
     }
     
-    private final double clamp(double v) {
-        return clamp(v, 200);
-    }
-    
-    private final double clamp(double v, double clampExtension) {
-        return MathHelper.clamp(v, -clampExtension, getMaxScroll() + clampExtension);
-    }
-    
     private double getMaxScroll() {
         return Math.max(0, this.getMaxScrollPosition() - (scrollListBounds.height - 2));
     }
@@ -289,7 +280,7 @@ public class VillagerRecipeViewingScreen extends Screen {
     }
     
     public void scrollTo(double value, boolean animated, long duration) {
-        target = clamp(value);
+        target = ClothConfigInitializer.clamp(value, getMaxScroll());
         
         if (animated) {
             start = System.currentTimeMillis();
@@ -366,8 +357,7 @@ public class VillagerRecipeViewingScreen extends Screen {
         ScreenHelper.getLastOverlay().render(mouseX, mouseY, delta);
         RenderSystem.pushMatrix();
         ScissorsHandler.INSTANCE.scissor(new Rectangle(0, scrollListBounds.y + 1, width, scrollListBounds.height - 2));
-        for (int i = 0; i < buttonWidgets.size(); i++) {
-            ButtonWidget buttonWidget = buttonWidgets.get(i);
+        for (ButtonWidget buttonWidget : buttonWidgets) {
             buttonWidget.getBounds().y = scrollListBounds.y + 1 + yOffset - (int) scroll;
             if (buttonWidget.getBounds().getMaxY() > scrollListBounds.getMinY() && buttonWidget.getBounds().getMinY() < scrollListBounds.getMaxY()) {
                 buttonWidget.render(mouseX, mouseY, delta);
