@@ -14,7 +14,7 @@
   "category.rei.fuel.time": "Durée de cuisson : %d ticks",
   "category.rei.fuel.time_short": "%d ticks",
   "category.rei.cooking.xp": "%f XP",
-  "category.rei.cooking.time&xp": "%s XP in %s sec",
+  "category.rei.cooking.time&xp": "%s XP en %ss",
   "category.rei.smoking": "Fumage",
   "category.rei.blasting": "Fonte",
   "category.rei.campfire": "Feu de camp",
