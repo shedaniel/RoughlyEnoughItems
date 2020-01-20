@@ -11,6 +11,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import io.github.prospector.modmenu.ModMenu;
 import me.sargunvohra.mcmods.autoconfig1u.AutoConfig;
+import me.sargunvohra.mcmods.autoconfig1u.annotation.ConfigEntry;
 import me.sargunvohra.mcmods.autoconfig1u.gui.ConfigScreenProvider;
 import me.sargunvohra.mcmods.autoconfig1u.gui.registry.GuiRegistry;
 import me.sargunvohra.mcmods.autoconfig1u.serializer.JanksonConfigSerializer;
@@ -96,22 +97,18 @@ public class ConfigManagerImpl implements ConfigManager {
         //            return Collections.singletonList(entry);
         //        }, field -> field.getType() == InputUtil.KeyCode.class);
         guiRegistry.registerPredicateProvider((i13n, field, config, defaults, guiProvider) -> {
+            if (field.isAnnotationPresent(ConfigEntry.Gui.Excluded.class))
+                return Collections.emptyList();
             KeyCodeEntry entry = ConfigEntryBuilder.create().startModifierKeyCodeField(i13n, getUnsafely(field, config, ModifierKeyCode.unknown())).setModifierDefaultValue(() -> getUnsafely(field, defaults)).setModifierSaveConsumer(newValue -> setUnsafely(field, config, newValue)).build();
             entry.setAllowMouse(false);
             return Collections.singletonList(entry);
         }, field -> field.getType() == ModifierKeyCode.class);
-        guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> {
-            KeyCodeEntry entry = ConfigEntryBuilder.create().startModifierKeyCodeField(i13n, getUnsafely(field, config, ModifierKeyCode.unknown())).setModifierDefaultValue(() -> getUnsafely(field, defaults)).setModifierSaveConsumer(newValue -> setUnsafely(field, config, newValue)).build();
-            entry.setAllowMouse(false);
-            return Collections.singletonList(entry);
-        }, field -> field.getType() == ModifierKeyCode.class, ConfigObject.UsePercentage.class);
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> {
             ConfigObject.UsePercentage bounds = field.getAnnotation(ConfigObject.UsePercentage.class);
             return Collections.singletonList(ConfigEntryBuilder.create().startIntSlider(i13n, MathHelper.ceil(Utils.getUnsafely(field, config, 0.0) * 100), MathHelper.ceil(bounds.min() * 100), MathHelper.ceil(bounds.max() * 100)).setDefaultValue(() -> MathHelper.ceil((double) Utils.getUnsafely(field, defaults) * 100)).setSaveConsumer((newValue) -> {
                 Utils.setUnsafely(field, config, newValue / 100d);
             }).setTextGetter(integer -> String.format("Size: %d%%", integer)).build());
         }, (field) -> field.getType() == Double.TYPE || field.getType() == Double.class, ConfigObject.UsePercentage.class);
-        
         
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> {
             int width = 220;

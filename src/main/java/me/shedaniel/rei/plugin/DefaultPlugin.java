@@ -15,6 +15,9 @@ import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
 import me.shedaniel.rei.gui.widget.CategoryBaseWidget;
+import me.shedaniel.rei.gui.widget.QueuedTooltip;
+import me.shedaniel.rei.impl.ClientHelperImpl;
+import me.shedaniel.rei.impl.RenderingEntry;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.plugin.blasting.DefaultBlastingDisplay;
 import me.shedaniel.rei.plugin.brewing.DefaultBrewingCategory;
@@ -55,6 +58,7 @@ import net.minecraft.recipe.*;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -138,6 +142,25 @@ public class DefaultPlugin implements REIPluginV0 {
             if (!fluid.getDefaultState().isEmpty() && fluid.getDefaultState().isStill())
                 entryRegistry.registerEntry(EntryStack.create(fluid));
         }
+        entryRegistry.registerEntry(new RenderingEntry() {
+            private Identifier id = new Identifier("roughlyenoughitems", "textures/gui/kirb.png");
+            
+            @Override
+            public void render(Rectangle bounds, int mouseX, int mouseY, float delta) {
+                MinecraftClient.getInstance().getTextureManager().bindTexture(id);
+                innerBlit(bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), getBlitOffset(), 0, 1, 0, 1);
+            }
+            
+            @Override
+            public boolean isEmpty() {
+                return !((ClientHelperImpl) ClientHelper.getInstance()).ok.get();
+            }
+            
+            @Override
+            public @Nullable QueuedTooltip getTooltip(int mouseX, int mouseY) {
+                return QueuedTooltip.create("Kibby");
+            }
+        });
     }
     
     @Override

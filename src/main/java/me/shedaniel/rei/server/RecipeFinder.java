@@ -15,6 +15,7 @@ import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Iterator;
 import java.util.List;
@@ -106,7 +107,7 @@ public class RecipeFinder {
         
         public Filter(DefaultedList<Ingredient> ingredientsInput) {
             this.ingredientsInput = ingredientsInput;
-            this.ingredients.addAll(ingredientsInput.stream().collect(Collectors.toList()));
+            this.ingredients.addAll(new ArrayList<>(ingredientsInput));
             this.ingredients.removeIf(Ingredient::isEmpty);
             this.ingredientCount = this.ingredients.size();
             this.usableIngredientItemIds = this.getUsableIngredientItemIds();

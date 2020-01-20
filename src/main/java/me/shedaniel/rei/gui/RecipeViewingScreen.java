@@ -6,7 +6,9 @@
 package me.shedaniel.rei.gui;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.mojang.blaze3d.systems.RenderSystem;
+import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
@@ -17,9 +19,14 @@ import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.Window;
+import net.minecraft.client.util.math.Matrix4f;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
@@ -37,6 +44,7 @@ public class RecipeViewingScreen extends Screen {
     public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private final List<Widget> preWidgets;
     private final List<Widget> widgets;
+    private final Map<Rectangle, List<Widget>> recipeBounds;
     private final List<TabWidget> tabs;
     private final Map<RecipeCategory<?>, List<RecipeDisplay>> categoriesMap;
     private final List<RecipeCategory<?>> categories;
@@ -58,6 +66,7 @@ public class RecipeViewingScreen extends Screen {
         this.categoryPages = 0;
         this.preWidgets = Lists.newArrayList();
         this.widgets = Lists.newArrayList();
+        this.recipeBounds = Maps.newHashMap();
         Window window = MinecraftClient.getInstance().getWindow();
         this.bounds = new Rectangle(window.getScaledWidth() / 2 - guiWidth / 2, window.getScaledHeight() / 2 - guiHeight / 2, 176, 150);
         this.categoriesMap = categoriesMap;
@@ -150,6 +159,7 @@ public class RecipeViewingScreen extends Screen {
         boolean isCompactTabs = ConfigObject.getInstance().isUsingCompactTabs();
         int tabSize = isCompactTabs ? 24 : 28;
         this.children.clear();
+        this.recipeBounds.clear();
         this.tabs.clear();
         this.preWidgets.clear();
         this.widgets.clear();
@@ -313,12 +323,13 @@ public class RecipeViewingScreen extends Screen {
         int recipeHeight = selectedCategory.getDisplayHeight();
         List<RecipeDisplay> currentDisplayed = getCurrentDisplayed();
         for (int i = 0; i < currentDisplayed.size(); i++) {
-            int finalI = i;
-            final Supplier<RecipeDisplay> displaySupplier = () -> currentDisplayed.get(finalI);
+            final RecipeDisplay display = currentDisplayed.get(i);
+            final Supplier<RecipeDisplay> displaySupplier = () -> display;
             int displayWidth = selectedCategory.getDisplayWidth(displaySupplier.get());
             final Rectangle displayBounds = new Rectangle(getBounds().getCenterX() - displayWidth / 2, getBounds().y - 2 + 36 + recipeHeight * i + 4 * i, displayWidth, recipeHeight);
             List<Widget> setupDisplay = selectedCategory.setupDisplay(displaySupplier, displayBounds);
             transformNotice(setupDisplay, mainStackToNotice);
+            recipeBounds.put(displayBounds, setupDisplay);
             this.widgets.addAll(setupDisplay);
             if (supplier.isPresent() && supplier.get().get(displayBounds) != null)
                 this.widgets.add(new AutoCraftingButtonWidget(displayBounds, supplier.get().get(displayBounds), supplier.get().getButtonText(), displaySupplier, setupDisplay, selectedCategory));
@@ -429,12 +440,49 @@ public class RecipeViewingScreen extends Screen {
         }
         ScreenHelper.getLastOverlay().render(mouseX, mouseY, delta);
         ScreenHelper.getLastOverlay().lateRender(mouseX, mouseY, delta);
+        {
+            ModifierKeyCode export = ConfigObject.getInstance().getExportImageKeybind();
+            if (export.matchesCurrentKey()) {
+                for (Map.Entry<Rectangle, List<Widget>> entry : recipeBounds.entrySet()) {
+                    Rectangle bounds = entry.getKey();
+                    setBlitOffset(470);
+                    if (bounds.contains(mouseX, mouseY)) {
+                        fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 1744822402, 1744822402);
+                        String s = I18n.translate("text.rei.release_export", export.getLocalizedName());
+                        MatrixStack matrixStack_1 = new MatrixStack();
+                        VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
+                        matrixStack_1.translate(0.0D, 0.0D, 480);
+                        Matrix4f matrix4f_1 = matrixStack_1.peek().getModel();
+                        font.draw(s, bounds.getCenterX() - font.getStringWidth(s) / 2f, bounds.getCenterY() - 4.5f, 0xff000000, false, matrix4f_1, immediate, false, 0, 15728880);
+                        immediate.draw();
+                    } else {
+                        fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 1744830463, 1744830463);
+                    }
+                    setBlitOffset(0);
+                }
+            }
+        }
         if (choosePageActivated) {
             setBlitOffset(500);
             this.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
             setBlitOffset(0);
             recipeChoosePageWidget.render(mouseX, mouseY, delta);
         }
+    }
+    
+    @Override
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+        ModifierKeyCode export = ConfigObject.getInstance().getExportImageKeybind();
+        if (export.matchesKey(keyCode, scanCode)) {
+            for (Map.Entry<Rectangle, List<Widget>> entry : recipeBounds.entrySet()) {
+                Rectangle bounds = entry.getKey();
+                if (bounds.contains(PointHelper.fromMouse())) {
+                    RecipeDisplayExporter.exportRecipeDisplay(bounds, entry.getValue());
+                    break;
+                }
+            }
+        }
+        return super.keyReleased(keyCode, scanCode, modifiers);
     }
     
     public int getTotalPages(RecipeCategory<RecipeDisplay> category) {

@@ -125,9 +125,11 @@ public interface ConfigObject {
     
     ModifierKeyCode getCopyRecipeIdentifierKeybind();
     
+    ModifierKeyCode getExportImageKeybind();
+    
     double getEntrySize();
     
-    @Deprecated
+    @ApiStatus.Internal
     ConfigObjectImpl.General getGeneral();
     
     boolean isUsingCompactTabs();

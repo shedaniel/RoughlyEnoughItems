@@ -54,9 +54,10 @@ dependencies {
         transitive = false
     }
     modImplementation("me.shedaniel.cloth:config-2:${cloth_config_version}") {
-        transitive = false
+//        include group: "me.shedaniel.cloth", name: "basic-math"
     }
     modApi("me.sargunvohra.mcmods:autoconfig1u:${project.autoconfig1u}")
+    modApi ("org.jetbrains:annotations:18.0.0")
     if (includeDep) {
         afterEvaluate {
             def listAdded = []
@@ -87,8 +88,6 @@ dependencies {
     modRuntime("io.github.prospector:modmenu:${modmenu_version}") {
         transitive = false
     }
-    compile "org.lwjgl:lwjgl-jemalloc:3.2.1"
-    compileOnly 'org.jetbrains:annotations:18.0.0'
     modRuntime("com.lettuce.fudge:notenoughcrashes:1.1.5+1.15.1") {
         transitive = false
     }

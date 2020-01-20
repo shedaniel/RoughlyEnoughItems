@@ -13,7 +13,6 @@ import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.texture.SpriteAtlasTexture;
@@ -31,8 +30,7 @@ import java.util.Optional;
 @ApiStatus.Internal
 public class ItemEntryStack extends AbstractEntryStack implements OptimalEntryStack {
     
-    private static final MatrixStack matrices = new MatrixStack();
-    private final ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
+    private static final MatrixStack MATRICES = new MatrixStack();
     private ItemStack itemStack;
     private int hash = -1;
     
@@ -129,7 +127,7 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
         //        }
         return hash;
     }
-
+    
     @Nullable
     @Override
     public QueuedTooltip getTooltip(int mouseX, int mouseY) {
@@ -171,12 +169,12 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     }
     
     private BakedModel getModelFromStack(ItemStack stack) {
-        BakedModel model = itemRenderer.getModels().getModel(stack);
+        BakedModel model = MinecraftClient.getInstance().getItemRenderer().getModels().getModel(stack);
         if (stack.getItem().hasPropertyGetters())
             model = model.getItemPropertyOverrides().apply(model, stack, null, null);
         if (model != null)
             return model;
-        return itemRenderer.getModels().getModelManager().getMissingModel();
+        return MinecraftClient.getInstance().getItemRenderer().getModels().getModelManager().getMissingModel();
     }
     
     @Override
@@ -184,21 +182,19 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
         if (!isEmpty() && get(Settings.RENDER).get()) {
             ItemStack stack = getItemStack();
             ((ItemStackHook) (Object) stack).rei_setRenderEnchantmentGlint(get(Settings.Item.RENDER_ENCHANTMENT_GLINT).get());
-            itemRenderer.zOffset = getZ();
-            matrices.push();
-            matrices.translate(bounds.getCenterX(), bounds.getCenterY(), 100.0F + getZ());
-            matrices.scale(bounds.getWidth(), (bounds.getWidth() + bounds.getHeight()) / -2f, bounds.getHeight());
+            MATRICES.push();
+            MATRICES.translate(bounds.getCenterX(), bounds.getCenterY(), 100.0F + getZ());
+            MATRICES.scale(bounds.getWidth(), (bounds.getWidth() + bounds.getHeight()) / -2f, bounds.getHeight());
             VertexConsumerProvider.Immediate immediate = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
             BakedModel model = getModelFromStack(stack);
             boolean bl = !model.hasDepthInGui();
             if (bl)
                 GlStateManager.method_24221();
-            itemRenderer.renderItem(stack, ModelTransformation.Type.GUI, false, matrices, immediate, 15728880, OverlayTexture.DEFAULT_UV, model);
+            MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformation.Type.GUI, false, MATRICES, immediate, 15728880, OverlayTexture.DEFAULT_UV, model);
             immediate.draw();
             if (bl)
                 GlStateManager.method_24222();
-            itemRenderer.zOffset = 0.0F;
-            matrices.pop();
+            MATRICES.pop();
             ((ItemStackHook) (Object) stack).rei_setRenderEnchantmentGlint(false);
         }
     }
@@ -206,9 +202,9 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     @Override
     public void optimisedRenderOverlay(Rectangle bounds, int mouseX, int mouseY, float delta) {
         if (!isEmpty() && get(Settings.RENDER).get()) {
-            itemRenderer.zOffset = getZ();
-            itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, getItemStack(), bounds.x, bounds.y, get(Settings.RENDER_COUNTS).get() ? get(Settings.COUNTS).apply(this) : "");
-            itemRenderer.zOffset = 0.0F;
+            MinecraftClient.getInstance().getItemRenderer().zOffset = getZ();
+            MinecraftClient.getInstance().getItemRenderer().renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, getItemStack(), bounds.x, bounds.y, get(Settings.RENDER_COUNTS).get() ? get(Settings.COUNTS).apply(this) : "");
+            MinecraftClient.getInstance().getItemRenderer().zOffset = 0.0F;
         }
     }
 }
