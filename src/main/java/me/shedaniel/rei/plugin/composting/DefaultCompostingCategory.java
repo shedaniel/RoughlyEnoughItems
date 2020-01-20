@@ -75,8 +75,9 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
         widgets.add(new RecipeBaseWidget(bounds) {
             @Override
             public void render(int mouseX, int mouseY, float partialTicks) {
+                fillGradient(getBounds().x, getBounds().y, getBounds().getMaxX(), getBounds().getMaxY(), getInnerColor(), getInnerColor());
                 MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
-                this.blit(startingPoint.x, startingPoint.y, 28, 221, 55, 26);
+                this.blit(startingPoint.x, startingPoint.y + 3, 28, 221, 55, 26);
             }
         });
         List<EntryStack> stacks = new LinkedList<>(recipeDisplaySupplier.get().getItemsByOrder());
@@ -92,10 +93,10 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
                             break;
                         }
                     }
-                widgets.add(EntryWidget.create(bounds.getCenterX() - 72 + x * 18, bounds.y + y * 18).entry(entryStack));
+                widgets.add(EntryWidget.create(bounds.getCenterX() - 72 + x * 18, bounds.y + 3 + y * 18).entry(entryStack));
                 i++;
             }
-        widgets.add(EntryWidget.create(startingPoint.x + 34, startingPoint.y + 5).entries(recipeDisplaySupplier.get().getOutputEntries()).noBackground());
+        widgets.add(EntryWidget.create(startingPoint.x + 33, startingPoint.y + 8).entries(recipeDisplaySupplier.get().getOutputEntries()).noBackground());
         return widgets;
     }
     

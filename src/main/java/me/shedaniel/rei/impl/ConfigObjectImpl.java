@@ -253,6 +253,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
+    public ModifierKeyCode getExportImageKeybind() {
+        return general.exportImageKeybind == null ? ModifierKeyCode.unknown() : general.exportImageKeybind;
+    }
+    
+    @Override
     public double getEntrySize() {
         return appearance.entrySize;
     }
@@ -281,6 +286,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         private ModifierKeyCode focusSearchFieldKeybind = ModifierKeyCode.unknown();
         private ModifierKeyCode copyRecipeIdentifierKeybind = ModifierKeyCode.unknown();
         private ModifierKeyCode favoriteKeybind = ModifierKeyCode.of(InputUtil.Type.KEYSYM.createFromCode(65), Modifier.none());
+        @ConfigEntry.Gui.Excluded private ModifierKeyCode exportImageKeybind = ModifierKeyCode.unknown();
     }
     
     public static class Appearance {

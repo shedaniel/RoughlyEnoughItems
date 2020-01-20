@@ -247,10 +247,12 @@ public class EntryListWidget extends WidgetWithBounds {
                         if (notSteppingOnExclusionZones(entry.getBounds().x, entry.getBounds().y, innerBounds)) {
                             entry.entry(stack);
                             entry.isFavorites = false;
-                            size++;
-                            long l = System.nanoTime();
-                            entry.render(mouseX, mouseY, delta);
-                            time += (System.nanoTime() - l);
+                            if (!entry.getCurrentEntry().isEmpty()) {
+                                size++;
+                                long l = System.nanoTime();
+                                entry.render(mouseX, mouseY, delta);
+                                time += (System.nanoTime() - l);
+                            }
                             nextIndex++;
                             break;
                         } else {
@@ -339,13 +341,14 @@ public class EntryListWidget extends WidgetWithBounds {
                         if (first instanceof OptimalEntryStack) {
                             OptimalEntryStack firstStack = (OptimalEntryStack) first;
                             firstStack.optimisedRenderStart(delta);
-                            size += list.size();
                             long l = System.nanoTime();
                             for (EntryListEntry listEntry : list) {
                                 EntryStack currentEntry = listEntry.getCurrentEntry();
                                 currentEntry.setZ(100);
                                 listEntry.drawBackground(mouseX, mouseY, delta);
                                 ((OptimalEntryStack) currentEntry).optimisedRenderBase(listEntry.getInnerBounds(), mouseX, mouseY, delta);
+                                if (!currentEntry.isEmpty())
+                                    size++;
                             }
                             for (EntryListEntry listEntry : list) {
                                 EntryStack currentEntry = listEntry.getCurrentEntry();
@@ -359,6 +362,8 @@ public class EntryListWidget extends WidgetWithBounds {
                             firstStack.optimisedRenderEnd(delta);
                         } else {
                             for (EntryListEntry listEntry : list) {
+                                if (listEntry.getCurrentEntry().isEmpty())
+                                    continue;
                                 size++;
                                 long l = System.nanoTime();
                                 listEntry.render(mouseX, mouseY, delta);
@@ -368,6 +373,8 @@ public class EntryListWidget extends WidgetWithBounds {
                     }
                 } else {
                     for (EntryListEntry entry : entries) {
+                        if (entry.getCurrentEntry().isEmpty())
+                            continue;
                         size++;
                         long l = System.nanoTime();
                         entry.render(mouseX, mouseY, delta);
@@ -418,12 +425,16 @@ public class EntryListWidget extends WidgetWithBounds {
                             firstStack.optimisedRenderEnd(delta);
                         } else {
                             for (EntryListEntry listEntry : list) {
+                                if (listEntry.getCurrentEntry().isEmpty())
+                                    continue;
                                 listEntry.render(mouseX, mouseY, delta);
                             }
                         }
                     }
                 } else {
                     for (EntryListEntry listEntry : entries) {
+                        if (listEntry.getCurrentEntry().isEmpty())
+                            continue;
                         listEntry.render(mouseX, mouseY, delta);
                     }
                 }

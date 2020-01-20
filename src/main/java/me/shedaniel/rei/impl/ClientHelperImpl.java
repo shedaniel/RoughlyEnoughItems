@@ -5,9 +5,9 @@
 
 package me.shedaniel.rei.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import io.netty.buffer.Unpooled;
+import me.sargunvohra.mcmods.autoconfig1u.annotation.ConfigEntry;
 import me.shedaniel.clothconfig2.api.FakeModifierKeyCodeAdder;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
@@ -31,21 +31,41 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.text.TranslatableText;
-import net.minecraft.util.DefaultedList;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Lazy;
 import net.minecraft.util.PacketByteBuf;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.reflect.Field;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @ApiStatus.Internal
 public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
+    @ApiStatus.Internal public final Lazy<Boolean> isYog = new Lazy<>(() -> {
+        try {
+            if (MinecraftClient.getInstance().getSession().getProfile().getId().equals(UUID.fromString("f9546389-9415-4358-9c29-2c26b25bff5b")))
+                return true;
+        } catch (Throwable ignored) {
+        }
+        return false;
+    });
+    @ApiStatus.Internal public final Lazy<Boolean> ok = new Lazy<>(() -> {
+        try {
+            if (isYog.get())
+                return true;
+            LocalDateTime now = LocalDateTime.now();
+            return now.getMonthValue() == 4 && now.getDayOfMonth() == 1;
+        } catch (Throwable ignored) {
+        }
+        return false;
+    });
     public static ClientHelperImpl instance;
     private final Map<String, String> modNameCache = Maps.newHashMap();
     
@@ -150,12 +170,9 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     @Override
     public List<ItemStack> getInventoryItemsTypes() {
-        List<DefaultedList<ItemStack>> field_7543 = ImmutableList.of(MinecraftClient.getInstance().player.inventory.main, MinecraftClient.getInstance().player.inventory.armor, MinecraftClient.getInstance().player.inventory.offHand);
-        List<ItemStack> inventoryStacks = new ArrayList<>();
-        field_7543.forEach(itemStacks -> itemStacks.forEach(itemStack -> {
-            if (!itemStack.isEmpty())
-                inventoryStacks.add(itemStack);
-        }));
+        List<ItemStack> inventoryStacks = new ArrayList<>(MinecraftClient.getInstance().player.inventory.main);
+        inventoryStacks.addAll(MinecraftClient.getInstance().player.inventory.armor);
+        inventoryStacks.addAll(MinecraftClient.getInstance().player.inventory.offHand);
         return inventoryStacks;
     }
     
@@ -233,9 +250,9 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         if (!FabricLoader.getInstance().isModLoaded("amecs")) {
             try {
                 ConfigObjectImpl.General general = ConfigObject.getInstance().getGeneral();
-                ConfigObjectImpl.General instance = general.getClass().newInstance();
+                ConfigObjectImpl.General instance = general.getClass().getConstructor().newInstance();
                 for (Field declaredField : general.getClass().getDeclaredFields()) {
-                    if (declaredField.getType() == ModifierKeyCode.class) {
+                    if (declaredField.getType() == ModifierKeyCode.class && !declaredField.isAnnotationPresent(ConfigEntry.Gui.Excluded.class)) {
                         declaredField.setAccessible(true);
                         FakeModifierKeyCodeAdder.INSTANCE.registerModifierKeyCode(category, "config.roughlyenoughitems." + declaredField.getName(), () -> {
                             try {
