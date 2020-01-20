@@ -18,7 +18,7 @@
   "category.rei.smoking": "Smoking",
   "category.rei.blasting": "Blasting",
   "category.rei.campfire": "Campfire",
-  "category.rei.campfire.time": "%d Seconds",
+  "category.rei.campfire.time": "%s sec",
   "category.rei.stone_cutting": "Stone Cutting",
   "category.rei.brewing": "Brewing",
   "category.rei.brewing.input": "Original Potion",

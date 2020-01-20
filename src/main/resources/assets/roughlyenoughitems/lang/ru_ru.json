@@ -14,6 +14,7 @@
   "category.rei.fuel.time": "Время горения: %d тактов",
   "category.rei.fuel.time_short": "%d тактов",
   "category.rei.cooking.xp": "%f опыта",
+  "category.rei.cooking.time&xp": "%s XP in %s sec",
   "category.rei.smoking": "Копчение",
   "category.rei.blasting": "Выплавка",
   "category.rei.campfire": "Прожарка",
