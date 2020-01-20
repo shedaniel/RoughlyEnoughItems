@@ -14,6 +14,7 @@
   "category.rei.fuel.time": "Burn Time: %d ticks",
   "category.rei.fuel.time_short": "%d ticks",
   "category.rei.cooking.xp": "%f XP",
+  "category.rei.cooking.time&xp": "%s XP in %s sec",
   "category.rei.smoking": "Defumação",
   "category.rei.blasting": "Explosão",
   "category.rei.campfire": "Fogueira",
