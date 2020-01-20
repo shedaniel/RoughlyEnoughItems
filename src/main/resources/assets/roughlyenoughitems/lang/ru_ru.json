@@ -80,6 +80,7 @@
   "text.rei.favorites_tooltip": " §7Нажмите %s что-бы добавить в избранное.",
   "text.rei.remove_favorites_tooltip": " §7Нажмите %s что-бы убрать это из избранного.",
   "text.rei.working_station": "Рабочее место",
+  "text.rei.release_export": "§lRelease %s to export",
   "text.rei.recipe_id": "\n%sID рецепта: %s",
   "text.rei.recipe_screen_type.selection": "Выбор типа экрана рецепта",
   "text.rei.recipe_screen_type.selection.sub": "Вы всегда можете изменить эту настройку через окно конфигурации.",
