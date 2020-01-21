@@ -168,7 +168,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         ClientSidePacketRegistry.INSTANCE.register(RoughlyEnoughItemsNetwork.NOT_ENOUGH_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
             Screen currentScreen = MinecraftClient.getInstance().currentScreen;
             if (currentScreen instanceof CraftingTableScreen) {
-                RecipeBookWidget recipeBookGui = ((RecipeBookProvider) currentScreen).getRecipeBookGui();
+                RecipeBookWidget recipeBookGui = ((RecipeBookProvider) currentScreen).getRecipeBookWidget();
                 RecipeBookGhostSlots ghostSlots = ((RecipeBookGuiHooks) recipeBookGui).rei_getGhostSlots();
                 ghostSlots.reset();
                 

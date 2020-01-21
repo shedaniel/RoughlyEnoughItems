@@ -108,13 +108,13 @@ public final class RecipeDisplayExporter extends Widget {
             matrixStack.translate(rectangle.x + 8, rectangle.y + 8, 0);
             matrixStack.scale(16, -16, 1F);
             
-            boolean disableGuiLight = !model.hasDepthInGui();
+            boolean disableGuiLight = !model.isSideLit();
             if (disableGuiLight) {
                 DiffuseLighting.disableGuiDepthLighting();
             }
             
             VertexConsumerProvider.Immediate immediate = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
-            minecraft.getItemRenderer().renderItem(stack, ModelTransformation.Type.GUI, false, matrixStack, immediate, 15728880, OverlayTexture.DEFAULT_UV, model);
+            minecraft.getItemRenderer().renderItem(stack, ModelTransformation.Mode.GUI, false, matrixStack, immediate, 15728880, OverlayTexture.DEFAULT_UV, model);
             immediate.draw();
             
             RenderSystem.enableDepthTest();
