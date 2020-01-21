@@ -80,6 +80,7 @@
   "text.rei.favorites_tooltip": " \n§7Press %s to add this to favorites.",
   "text.rei.remove_favorites_tooltip": " \n§7Press %s to remove this from favorites.",
   "text.rei.working_station": "Arbeitsstation",
+  "text.rei.release_export": "§lRelease %s to export",
   "text.rei.recipe_id": "\n%sRezept-Id: %s",
   "text.rei.recipe_screen_type.selection": "Darstellung Rezept-Bildschirm",
   "text.rei.recipe_screen_type.selection.sub": "Du kannst diese Einstellung jederzeit über den Konfigurationsbildschirm wieder bearbeiten.",

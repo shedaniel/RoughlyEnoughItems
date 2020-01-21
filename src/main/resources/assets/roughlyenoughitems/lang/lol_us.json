@@ -80,6 +80,7 @@
   "text.rei.favorites_tooltip": " \n§7Press %s to add this to favorites.",
   "text.rei.remove_favorites_tooltip": " \n§7Press %s to remove this from favorites.",
   "text.rei.working_station": "Wowking Station",
+  "text.rei.release_export": "§lRelease %s to export",
   "text.rei.recipe_id": "\n%sWecipe Id: %s",
   "text.rei.recipe_screen_type.selection": "Wecipe Scween Type Sewection",
   "text.rei.recipe_screen_type.selection.sub": "You can awways edit dis setting again via de config scween.",
