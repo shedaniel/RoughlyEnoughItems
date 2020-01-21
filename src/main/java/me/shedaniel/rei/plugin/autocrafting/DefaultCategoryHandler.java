@@ -57,7 +57,7 @@ public class DefaultCategoryHandler implements AutoTransferHandler {
         
         context.getMinecraft().openScreen(containerScreen);
         if (containerScreen instanceof RecipeBookProvider)
-            ((RecipeBookGuiHooks) ((RecipeBookProvider) containerScreen).getRecipeBookGui()).rei_getGhostSlots().reset();
+            ((RecipeBookGuiHooks) ((RecipeBookProvider) containerScreen).getRecipeBookWidget()).rei_getGhostSlots().reset();
         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
         buf.writeIdentifier(recipe.getRecipeCategory());
         buf.writeBoolean(Screen.hasShiftDown());

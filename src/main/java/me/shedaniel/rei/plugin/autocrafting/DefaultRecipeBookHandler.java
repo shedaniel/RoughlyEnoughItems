@@ -51,7 +51,7 @@ public class DefaultRecipeBookHandler implements AutoTransferHandler {
                     return Result.createSuccessful();
                 context.getMinecraft().openScreen(context.getContainerScreen());
                 if (context.getContainerScreen() instanceof RecipeBookProvider)
-                    ((RecipeBookGuiHooks) ((RecipeBookProvider) context.getContainerScreen()).getRecipeBookGui()).rei_getGhostSlots().reset();
+                    ((RecipeBookGuiHooks) ((RecipeBookProvider) context.getContainerScreen()).getRecipeBookWidget()).rei_getGhostSlots().reset();
                 context.getMinecraft().interactionManager.clickRecipe(container.syncId, recipe, Screen.hasShiftDown());
                 ScreenHelper.getLastOverlay().init();
             }
@@ -65,7 +65,7 @@ public class DefaultRecipeBookHandler implements AutoTransferHandler {
                     return Result.createSuccessful();
                 context.getMinecraft().openScreen(context.getContainerScreen());
                 if (context.getContainerScreen() instanceof RecipeBookProvider)
-                    ((RecipeBookGuiHooks) ((RecipeBookProvider) context.getContainerScreen()).getRecipeBookGui()).rei_getGhostSlots().reset();
+                    ((RecipeBookGuiHooks) ((RecipeBookProvider) context.getContainerScreen()).getRecipeBookWidget()).rei_getGhostSlots().reset();
                 context.getMinecraft().interactionManager.clickRecipe(container.syncId, recipe, Screen.hasShiftDown());
                 ScreenHelper.getLastOverlay().init();
             }

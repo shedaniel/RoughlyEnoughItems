@@ -187,10 +187,10 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
             MATRICES.scale(bounds.getWidth(), (bounds.getWidth() + bounds.getHeight()) / -2f, bounds.getHeight());
             VertexConsumerProvider.Immediate immediate = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
             BakedModel model = getModelFromStack(stack);
-            boolean bl = !model.hasDepthInGui();
+            boolean bl = !model.isSideLit();
             if (bl)
                 GlStateManager.method_24221();
-            MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformation.Type.GUI, false, MATRICES, immediate, 15728880, OverlayTexture.DEFAULT_UV, model);
+            MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformation.Mode.GUI, false, MATRICES, immediate, 15728880, OverlayTexture.DEFAULT_UV, model);
             immediate.draw();
             if (bl)
                 GlStateManager.method_24222();

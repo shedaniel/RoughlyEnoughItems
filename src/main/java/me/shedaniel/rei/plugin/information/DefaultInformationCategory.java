@@ -89,7 +89,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
             @Override
             public void render(Rectangle bounds, int mouseX, int mouseY, float delta) {
                 MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
-                Matrix4f matrix4f = Matrix4f.method_24021(-1.2f, -1, 0);
+                Matrix4f matrix4f = Matrix4f.translate(-1.2f, -1, 0);
                 DefaultInformationCategory.innerBlit(matrix4f, bounds.getCenterX() - 8, bounds.getCenterX() + 8, bounds.getCenterY() - 8, bounds.getCenterY() + 8, 0, 116f / 256f, (116f + 16f) / 256f, 0f, 16f / 256f);
             }
         };
