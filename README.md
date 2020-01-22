@@ -15,5 +15,5 @@ This mod is both client sided and server sided.
 
 ### License
 Roughly Enough Items was a fork of Almost Enough Items by ZenDarva until v2.0 rewrite. This fork is permitted under the MIT license.  
-Roughly Enough Items is licensed under [MIT license](https://github.com/shedaniel/RoughlyEnoughItems/blob/1.14/LICENSE).  
+Roughly Enough Items is licensed under [MIT license](https://github.com/shedaniel/RoughlyEnoughItems/blob/3.x/LICENSE).  
 Cloth, which is Roughly Enough Items's depenency, is licensed under [The Unlicense](https://github.com/shedaniel/Cloth/blob/master/LICENSE).
