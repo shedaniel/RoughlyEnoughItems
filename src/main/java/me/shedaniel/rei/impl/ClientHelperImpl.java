@@ -256,7 +256,8 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
                         declaredField.setAccessible(true);
                         FakeModifierKeyCodeAdder.INSTANCE.registerModifierKeyCode(category, "config.roughlyenoughitems." + declaredField.getName(), () -> {
                             try {
-                                return (ModifierKeyCode) declaredField.get(general);
+                                ModifierKeyCode code = (ModifierKeyCode) declaredField.get(general);
+                                return code == null ? ModifierKeyCode.unknown() : code;
                             } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }
