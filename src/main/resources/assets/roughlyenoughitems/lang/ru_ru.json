@@ -112,7 +112,7 @@
   "config.roughlyenoughitems.renderEntryEnchantmentGlint": "Рендерить блески зачарования:",
   "config.roughlyenoughitems.lowerConfigButton": "Config Button Position:",
   "config.roughlyenoughitems.lowerConfigButton.boolean.false": "Top",
-  "config.roughlyenoughitems.lowerConfigButton.boolean.true": "Next to Search",
+  "config.roughlyenoughitems.lowerConfigButton.boolean.true": "Следующий к поиску",
   "config.roughlyenoughitems.entrySize": "Размер предметов:",
   "config.roughlyenoughitems.useCompactTabs": "Компактные вкладки:",
   "config.roughlyenoughitems.darkTheme": "Тема внешнего вида REI:",
