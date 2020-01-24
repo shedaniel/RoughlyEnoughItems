@@ -134,6 +134,8 @@ public interface ConfigObject {
     
     boolean isUsingCompactTabs();
     
+    boolean isLowerConfigButton();
+    
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD})
     @interface AddInFrontKeyCode {}

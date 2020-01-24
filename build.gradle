@@ -120,6 +120,7 @@ curseforge {
             addGameVersion '1.15.2'
             addGameVersion '1.15-Snapshot'
             addGameVersion 'Java 8'
+            addGameVersion 'Fabric'
             relations {
                 requiredDependency 'fabric-api'
                 embeddedLibrary 'cloth'
