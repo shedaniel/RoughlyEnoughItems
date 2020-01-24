@@ -7,9 +7,13 @@ package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
+import me.shedaniel.math.api.Executor;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
+import me.shedaniel.rei.impl.compat.ModelHasDepth1151Compat;
+import me.shedaniel.rei.impl.compat.ModelSideLit1152Compat;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -26,13 +30,27 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 @ApiStatus.Internal
 public class ItemEntryStack extends AbstractEntryStack implements OptimalEntryStack {
     
+    private static final Predicate<BakedModel> IS_SIDE_LIT;
     private static final MatrixStack MATRICES = new MatrixStack();
     private ItemStack itemStack;
     private int hash = -1;
+    
+    static {
+        boolean isOn1_15_2 = false;
+        String isSideLit = FabricLoader.getInstance().getMappingResolver().mapMethodName("intermediary", "net.minecraft.class_1087", "method_24304", "()Z");
+        try {
+            BakedModel.class.getDeclaredMethod(isSideLit);
+            isOn1_15_2 = true;
+        } catch (NoSuchMethodException ignored) {
+        }
+        //noinspection Convert2MethodRef
+        IS_SIDE_LIT = isOn1_15_2 ? Executor.call(() -> () -> new ModelSideLit1152Compat()) : Executor.call(() -> () -> new ModelHasDepth1151Compat());
+    }
     
     public ItemEntryStack(ItemStack itemStack) {
         this.itemStack = itemStack;
@@ -187,7 +205,7 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
             MATRICES.scale(bounds.getWidth(), (bounds.getWidth() + bounds.getHeight()) / -2f, bounds.getHeight());
             VertexConsumerProvider.Immediate immediate = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
             BakedModel model = getModelFromStack(stack);
-            boolean bl = !model.isSideLit();
+            boolean bl = !IS_SIDE_LIT.test(model);
             if (bl)
                 GlStateManager.method_24221();
             MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformation.Mode.GUI, false, MATRICES, immediate, 15728880, OverlayTexture.DEFAULT_UV, model);

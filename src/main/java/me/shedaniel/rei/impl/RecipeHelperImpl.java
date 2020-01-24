@@ -58,7 +58,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     public List<EntryStack> findCraftableEntriesByItems(List<EntryStack> inventoryItems) {
         List<EntryStack> craftables = new ArrayList<>();
         for (List<RecipeDisplay> value : recipeCategoryListMap.values())
-            for (RecipeDisplay recipeDisplay : value) {
+            for (RecipeDisplay recipeDisplay : Lists.newArrayList(value)) {
                 int slotsCraftable = 0;
                 List<List<EntryStack>> requiredInput = recipeDisplay.getRequiredEntries();
                 for (List<EntryStack> slot : requiredInput) {
@@ -132,7 +132,7 @@ public class RecipeHelperImpl implements RecipeHelper {
             RecipeCategory<?> category = entry.getKey();
             Identifier categoryId = entry.getValue();
             Set<RecipeDisplay> set = Sets.newLinkedHashSet();
-            for (RecipeDisplay display : recipeCategoryListMap.get(categoryId)) {
+            for (RecipeDisplay display : Lists.newArrayList(recipeCategoryListMap.get(categoryId))) {
                 for (EntryStack outputStack : display.getOutputEntries())
                     if (stack.equals(outputStack) && isDisplayVisible(display)) {
                         set.add(display);
@@ -185,7 +185,7 @@ public class RecipeHelperImpl implements RecipeHelper {
             Set<RecipeDisplay> set = Sets.newLinkedHashSet();
             RecipeCategory<?> category = entry.getKey();
             Identifier categoryId = entry.getValue();
-            for (RecipeDisplay display : recipeCategoryListMap.get(categoryId)) {
+            for (RecipeDisplay display : Lists.newArrayList(recipeCategoryListMap.get(categoryId))) {
                 back:
                 for (List<EntryStack> input : display.getInputEntries()) {
                     for (EntryStack otherEntry : input) {
@@ -198,7 +198,7 @@ public class RecipeHelperImpl implements RecipeHelper {
                 }
             }
             if (isStackWorkStationOfCategory(categoryId, stack)) {
-                set.addAll(recipeCategoryListMap.get(categoryId));
+                set.addAll(Lists.newArrayList(recipeCategoryListMap.get(categoryId)));
             }
             if (!set.isEmpty())
                 CollectionUtils.getOrPutEmptyList(result, category).addAll(set);
@@ -378,11 +378,11 @@ public class RecipeHelperImpl implements RecipeHelper {
         for (Map.Entry<RecipeCategory<?>, Identifier> entry : categories.entrySet()) {
             RecipeCategory<?> category = entry.getKey();
             Identifier categoryId = entry.getValue();
-            List<RecipeDisplay> displays = recipeCategoryListMap.get(categoryId);
+            List<RecipeDisplay> displays = Lists.newArrayList(recipeCategoryListMap.get(categoryId));
             if (displays != null) {
                 displays.removeIf(this::isDisplayNotVisible);
                 if (!displays.isEmpty())
-                    result.put(category, Lists.newArrayList(displays));
+                    result.put(category, displays);
             }
         }
         return result;
@@ -390,7 +390,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     
     @Override
     public List<RecipeDisplay> getAllRecipesFromCategory(RecipeCategory<?> category) {
-        return recipeCategoryListMap.get(category.getIdentifier());
+        return Lists.newArrayList(recipeCategoryListMap.get(category.getIdentifier()));
     }
     
     @Override
