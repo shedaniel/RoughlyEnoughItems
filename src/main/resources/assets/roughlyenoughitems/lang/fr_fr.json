@@ -112,7 +112,7 @@
   "config.roughlyenoughitems.renderEntryEnchantmentGlint": "Afficher l'aura des enchantements :",
   "config.roughlyenoughitems.lowerConfigButton": "Position du bouton de configuration :",
   "config.roughlyenoughitems.lowerConfigButton.boolean.false": "En haut",
-  "config.roughlyenoughitems.lowerConfigButton.boolean.true": "Next to Search",
+  "config.roughlyenoughitems.lowerConfigButton.boolean.true": "À côté de la recherche",
   "config.roughlyenoughitems.entrySize": "Taille des entrées :",
   "config.roughlyenoughitems.useCompactTabs": "Onglets compacts :",
   "config.roughlyenoughitems.darkTheme": "Thème d'apparence :",
