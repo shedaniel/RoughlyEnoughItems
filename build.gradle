@@ -1,3 +1,5 @@
+import net.fabricmc.loom.task.RemapJarTask
+
 import java.text.SimpleDateFormat
 
 plugins {
@@ -33,9 +35,6 @@ license {
 }
 
 repositories {
-    maven { url "https://tehnut.info/maven/" }
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
-    maven { url "https://dl.bintray.com/shedaniel/autoconfig1u/" }
 }
 
 processResources {
@@ -46,18 +45,25 @@ processResources {
 }
 
 dependencies {
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.yarn_version}:v2"
-    modApi "net.fabricmc:fabric-loader:${project.fabricloader_version}"
-    modApi "net.fabricmc.fabric-api:fabric-api:${project.fabric_api}"
+    minecraft("com.mojang:minecraft:${project.minecraft_version}")
+    mappings("net.fabricmc:yarn:${project.yarn_version}:v2")
+    modApi("net.fabricmc:fabric-loader:${project.fabricloader_version}")
+    modApi("net.fabricmc.fabric-api:fabric-api:${project.fabric_api}")
     modApi("me.shedaniel.cloth:cloth-events:${cloth_events_version}") {
         transitive = false
     }
-    modImplementation("me.shedaniel.cloth:config-2:${cloth_config_version}") {
-//        include group: "me.shedaniel.cloth", name: "basic-math"
-    }
+    modImplementation("me.shedaniel.cloth:config-2:${cloth_config_version}")
     modApi("me.sargunvohra.mcmods:autoconfig1u:${project.autoconfig1u}")
-    modApi ("org.jetbrains:annotations:18.0.0")
+    modApi("org.jetbrains:annotations:18.0.0")
+    modCompileOnly("io.github.prospector:modmenu:${modmenu_version}") {
+        transitive = false
+    }
+    modRuntime("io.github.prospector:modmenu:${modmenu_version}") {
+        transitive = false
+    }
+    modRuntime("com.lettuce.fudge:notenoughcrashes:1.1.5+1.15.1") {
+        transitive = false
+    }
     if (includeDep) {
         afterEvaluate {
             def listAdded = []
@@ -82,15 +88,6 @@ dependencies {
             configurations.runtimeClasspath.resolvedConfiguration.firstLevelModuleDependencies.each eachDep
         }
     }
-    modCompileOnly("io.github.prospector:modmenu:${modmenu_version}") {
-        transitive = false
-    }
-    modRuntime("io.github.prospector:modmenu:${modmenu_version}") {
-        transitive = false
-    }
-    modRuntime("com.lettuce.fudge:notenoughcrashes:1.1.5+1.15.1") {
-        transitive = false
-    }
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
@@ -98,11 +95,13 @@ task sourcesJar(type: Jar, dependsOn: classes) {
     from sourceSets.main.allSource
 }
 
-task remapMavenJar(type: net.fabricmc.loom.task.RemapJarTask, dependsOn: jar) {
+task remapMavenJar(type: RemapJarTask, dependsOn: jar) {
 //    classifier = "maven"
     afterEvaluate {
+        //noinspection GroovyAccessibility
         input = file("${project.buildDir}/libs/${archivesBaseName}-${version}-dev.jar")
         archiveName = "${archivesBaseName}-${version}.jar"
+        //noinspection GroovyAccessibility
         addNestedDependencies = false
     }
 }
@@ -114,7 +113,10 @@ curseforge {
             id = '310111'
             releaseType = 'release'
             changelogType = "html"
-            changelog = "<a href=\"https://gist.github.com/shedaniel/b7593e692319976f3349263208792922\">Click here for changelog</a>"
+            def df = new SimpleDateFormat("yyyy-MM-dd HH:mm")
+            df.setTimeZone(TimeZone.getTimeZone("UTC"))
+            def time = df.format(new Date())
+            changelog = "<h2>REI v$project.version</h2>Updated at <b>$time</b>.<br><a href=\"https://gist.github.com/shedaniel/b7593e692319976f3349263208792922\">Click here for full changelog</a>"
             addGameVersion '1.15'
             addGameVersion '1.15.1'
             addGameVersion '1.15.2'

@@ -12,6 +12,7 @@ import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.Comment;
 import me.shedaniel.clothconfig2.api.Modifier;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.gui.config.ItemListOrdering;
 import me.shedaniel.rei.gui.config.ItemListOrderingConfig;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
@@ -31,6 +32,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @ConfigEntry.Category("modules") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName private Modules modules = new Modules();
     @ConfigEntry.Category("technical") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName private Technical technical = new Technical();
     @ConfigEntry.Category("performance") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName private Performance performance = new Performance();
+    //    @ConfigEntry.Category("filtering") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName private Filtering filtering = new Filtering();
     
     @Override
     public boolean isLighterButtonHover() {
@@ -279,7 +281,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     public static class General {
-        @ConfigEntry.Gui.Excluded public List<String> favorites = new ArrayList<>();
+        @ConfigEntry.Gui.Excluded public List<EntryStack> favorites = new ArrayList<>();
         @Comment("Declares whether cheating mode is on.") private boolean cheating = false;
         @Comment("Declares whether REI is visible.") @ConfigEntry.Gui.Excluded private boolean overlayVisible = true;
         private boolean favoritesEnabled = true;
@@ -338,5 +340,9 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     public static class Performance {
         @Comment("Whether REI should render entry's enchantment glint") private boolean renderEntryEnchantmentGlint = true;
         private boolean newFastEntryRendering = true;
+    }
+    
+    public static class Filtering {
+        private List<EntryStack> filteredStacks = new ArrayList<>();
     }
 }

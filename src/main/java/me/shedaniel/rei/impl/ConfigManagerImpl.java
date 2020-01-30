@@ -49,7 +49,6 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -61,7 +60,8 @@ import static me.sargunvohra.mcmods.autoconfig1u.util.Utils.setUnsafely;
 public class ConfigManagerImpl implements ConfigManager {
     
     private boolean craftableOnly;
-    private List<EntryStack> favorites = new ArrayList<>();
+    //    private List<EntryStack> favorites = new ArrayList<>();
+    private Gson gson = new GsonBuilder().create();
     
     public ConfigManagerImpl() {
         this.craftableOnly = false;
@@ -76,11 +76,14 @@ public class ConfigManagerImpl implements ConfigManager {
             object.put("keyCode", new JsonPrimitive(keyCode.getKeyCode().getName()));
             object.put("modifier", new JsonPrimitive(keyCode.getModifier().getValue()));
             return object;
+        }).registerSerializer(EntryStack.class, (stack, marshaller) -> {
+            return new JsonPrimitive(gson.toJson(stack.toJson()));
+        }).registerPrimitiveTypeAdapter(EntryStack.class, it -> {
+            return it instanceof String ? EntryStack.readFromJson(gson.fromJson((String) it, JsonElement.class)) : null;
         }).build()));
         GuiRegistry guiRegistry = AutoConfig.getGuiRegistry(ConfigObjectImpl.class);
         //noinspection rawtypes
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> Collections.singletonList(ConfigEntryBuilder.create().startEnumSelector(i13n, (Class) field.getType(), getUnsafely(field, config, null)).setDefaultValue(() -> getUnsafely(field, defaults)).setSaveConsumer(newValue -> setUnsafely(field, config, newValue)).build()), field -> field.getType().isEnum(), ConfigObject.UseEnumSelectorInstead.class);
-        loadFavoredEntries();
         //        guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> {
         //            @SuppressWarnings("rawtypes") List<AbstractConfigListEntry> entries = new ArrayList<>();
         //            for (FabricKeyBinding binding : ClientHelper.getInstance().getREIKeyBindings()) {
@@ -164,36 +167,24 @@ public class ConfigManagerImpl implements ConfigManager {
                 }
             });
         }, (field) -> field.getType() == RecipeScreenType.class, ConfigObject.UseSpecialRecipeTypeScreen.class);
-        loadFavoredEntries();
+        saveConfig();
         RoughlyEnoughItemsCore.LOGGER.info("[REI] Config is loaded.");
     }
     
     @Override
     public List<EntryStack> getFavorites() {
-        return favorites;
-    }
-    
-    public void loadFavoredEntries() {
-        favorites.clear();
-        Gson gson = new GsonBuilder().create();
-        for (String entry : ((ConfigObjectImpl) getConfig()).general.favorites) {
-            EntryStack stack = EntryStack.readFromJson(gson.fromJson(entry, JsonElement.class));
-            if (!stack.isEmpty())
-                favorites.add(stack);
-        }
-        saveConfig();
+        return ((ConfigObjectImpl) getConfig()).general.favorites;
     }
     
     @Override
     public void saveConfig() {
-        Gson gson = new GsonBuilder().create();
-        ConfigObjectImpl object = (ConfigObjectImpl) getConfig();
-        object.general.favorites.clear();
-        for (EntryStack stack : favorites) {
-            JsonElement element = stack.toJson();
-            if (element != null)
-                object.general.favorites.add(gson.toJson(element));
-        }
+        //        ConfigObjectImpl object = (ConfigObjectImpl) getConfig();
+        //        object.general.favorites.clear();
+        //        for (EntryStack stack : favorites) {
+        //            JsonElement element = stack.toJson();
+        //            if (element != null)
+        //                object.general.favorites.add(gson.toJson(element));
+        //        }
         ((me.sargunvohra.mcmods.autoconfig1u.ConfigManager<ConfigObjectImpl>) AutoConfig.getConfigHolder(ConfigObjectImpl.class)).save();
     }
     
