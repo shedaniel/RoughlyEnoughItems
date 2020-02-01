@@ -1,6 +1,6 @@
 /*
- * Roughly Enough Items by Danielshe.
- * Licensed under the MIT License.
+ * Copyright (c) 2018, 2019, 2020 shedaniel
+ * Licensed under the MIT License (the "License").
  */
 
 package me.shedaniel.rei.impl;
@@ -311,9 +311,9 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         @Comment("Declares whether REI should append mod names to item stacks.") private boolean appendModNames = true;
         @Comment("Declares how the scrollbar in villager screen should act.") private boolean villagerScreenPermanentScrollBar = false;
         @Comment("Declares whether entry list widget is scrolled.") private boolean scrollingEntryListWidget = false;
-        private boolean snapToRows = false;
-        private boolean displayFavoritesOnTheLeft = true;
-        private boolean displayFavoritesTooltip = false;
+        @Comment("Declares whether scrolled entry list widget should snap to rows.") private boolean snapToRows = false;
+        @Comment("Declares the location of the favorites list.") private boolean displayFavoritesOnTheLeft = true;
+        @Comment("Declares whether favorites tooltip should be displayed.") private boolean displayFavoritesTooltip = false;
         @Comment("Declares whether favorites will be searched.") private boolean searchFavorites = true;
         @UsePercentage(min = 0.5, max = 4.0) private double entrySize = 1.0;
         private boolean useCompactTabs = true;

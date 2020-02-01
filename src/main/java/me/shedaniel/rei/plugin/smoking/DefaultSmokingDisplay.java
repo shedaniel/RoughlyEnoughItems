@@ -1,6 +1,6 @@
 /*
- * Roughly Enough Items by Danielshe.
- * Licensed under the MIT License.
+ * Copyright (c) 2018, 2019, 2020 shedaniel
+ * Licensed under the MIT License (the "License").
  */
 
 package me.shedaniel.rei.plugin.smoking;
