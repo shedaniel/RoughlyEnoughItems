@@ -16,23 +16,7 @@ public abstract class ClickableLabelWidget extends LabelWidget {
     private int hoveredColor;
     
     @ApiStatus.Internal
-    public ClickableLabelWidget(int x, int y, String text, boolean clickable) {
-        this(new Point(x, y), text, clickable);
-    }
-    
-    @ApiStatus.Internal
-    public ClickableLabelWidget(int x, int y, String text) {
-        this(new Point(x, y), text, true);
-    }
-    
-    @ApiStatus.Internal
-    public ClickableLabelWidget(Point point, String text, boolean clickable) {
-        this(point, text);
-        clickable(clickable);
-    }
-    
-    @ApiStatus.Internal
-    public ClickableLabelWidget(Point point, String text) {
+    protected ClickableLabelWidget(Point point, String text) {
         super(point, text);
         this.hoveredColor = ScreenHelper.isDarkModeEnabled() ? -1 : 0xFF66FFCC;
     }
@@ -60,9 +44,9 @@ public abstract class ClickableLabelWidget extends LabelWidget {
         int width = font.getStringWidth(getText());
         if (isCentered()) {
             if (isHasShadows())
-                font.drawWithShadow(getText(), pos.x - width / 2, pos.y, color);
+                font.drawWithShadow(getText(), pos.x - width / 2f, pos.y, color);
             else
-                font.draw(getText(), pos.x - width / 2, pos.y, color);
+                font.draw(getText(), pos.x - width / 2f, pos.y, color);
         } else {
             if (isHasShadows())
                 font.drawWithShadow(getText(), pos.x, pos.y, color);
@@ -74,7 +58,7 @@ public abstract class ClickableLabelWidget extends LabelWidget {
     
     @Override
     protected void drawTooltips(int mouseX, int mouseY) {
-        if (getTooltips().isPresent())
+        if (isClickable() && getTooltips().isPresent())
             if (!focused && containsMouse(mouseX, mouseY))
                 ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltips().get().split("\n")));
             else if (focused)

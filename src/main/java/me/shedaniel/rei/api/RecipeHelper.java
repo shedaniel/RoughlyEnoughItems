@@ -7,7 +7,7 @@ package me.shedaniel.rei.api;
 
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
+import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.util.Identifier;
@@ -21,7 +21,6 @@ import java.util.function.Predicate;
 
 public interface RecipeHelper {
     
-    @SuppressWarnings("deprecation")
     static RecipeHelper getInstance() {
         return RoughlyEnoughItemsCore.getRecipeHelper();
     }
@@ -170,19 +169,6 @@ public interface RecipeHelper {
      */
     List<DisplayVisibilityHandler> getDisplayVisibilityHandlers();
     
-    /**
-     * Checks if the display is visible by asking recipe visibility handlers
-     *
-     * @param display       the display to be checked
-     * @param respectConfig whether it should respect the user's config
-     * @return whether the display should be visible
-     * @deprecated {@link RecipeHelper#isDisplayVisible(RecipeDisplay)} )}
-     */
-    @Deprecated
-    default boolean isDisplayVisible(RecipeDisplay display, boolean respectConfig) {
-        return isDisplayVisible(display);
-    }
-    
     boolean isDisplayNotVisible(RecipeDisplay display);
     
     /**
@@ -203,7 +189,7 @@ public interface RecipeHelper {
      */
     void registerLiveRecipeGenerator(LiveRecipeGenerator<?> liveRecipeGenerator);
     
-    void registerScreenClickArea(Rectangle rectangle, Class<? extends AbstractContainerScreen<?>> screenClass, Identifier... categories);
+    void registerScreenClickArea(Rectangle rectangle, Class<? extends ContainerScreen<?>> screenClass, Identifier... categories);
     
     <T extends Recipe<?>> void registerRecipes(Identifier category, Class<T> recipeClass, Function<T, RecipeDisplay> mappingFunction);
     
@@ -215,7 +201,7 @@ public interface RecipeHelper {
     boolean arePluginsLoading();
     
     interface ScreenClickArea {
-        Class<? extends AbstractContainerScreen> getScreenClass();
+        Class<? extends ContainerScreen> getScreenClass();
         
         Rectangle getRectangle();
         

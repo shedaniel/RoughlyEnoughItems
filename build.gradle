@@ -61,12 +61,12 @@ dependencies {
     modRuntime("io.github.prospector:modmenu:${modmenu_version}") {
         transitive = false
     }
-    modRuntime("com.lettuce.fudge:notenoughcrashes:1.1.5+1.15.1") {
-        transitive = false
-    }
+//    modRuntime("com.lettuce.fudge:notenoughcrashes:1.1.5+1.15.1") {
+//        transitive = false
+//    }
     if (includeDep) {
         afterEvaluate {
-            def listAdded = []
+            def listAdded = new ArrayList(Arrays.asList((api_exculde as String).split(',')))
             def eachDep = { dep ->
                 for (apiIncludeDepStr in (api_include as String).split(',')) {
                     def apiIncludeGroup = apiIncludeDepStr.split(':')[0]
@@ -111,15 +111,12 @@ curseforge {
         apiKey = project.getProperty('danielshe_curse_api_key')
         project {
             id = '310111'
-            releaseType = 'release'
+            releaseType = 'beta'
             changelogType = "html"
             def df = new SimpleDateFormat("yyyy-MM-dd HH:mm")
             df.setTimeZone(TimeZone.getTimeZone("UTC"))
             def time = df.format(new Date())
             changelog = "<h2>REI v$project.version</h2>Updated at <b>$time</b>.<br><a href=\"https://gist.github.com/shedaniel/b7593e692319976f3349263208792922\">Click here for full changelog</a>"
-            addGameVersion '1.15'
-            addGameVersion '1.15.1'
-            addGameVersion '1.15.2'
             addGameVersion '1.15-Snapshot'
             addGameVersion 'Java 8'
             addGameVersion 'Fabric'
@@ -129,7 +126,7 @@ curseforge {
                 embeddedLibrary 'cloth-config'
             }
             mainArtifact(file("${project.buildDir}/libs/${project.archivesBaseName}-${project.version}.jar")) {
-                displayName = "[Fabric 1.15.x] v$project.version"
+                displayName = "[Fabric 20w06a] v$project.version"
             }
             afterEvaluate {
                 uploadTask.dependsOn("remapJar")

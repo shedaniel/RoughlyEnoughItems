@@ -20,8 +20,9 @@ import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
+import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.util.NarratorManager;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -84,7 +85,7 @@ public class PreRecipeViewingScreen extends Screen {
     protected void init() {
         this.children.clear();
         this.widgets.clear();
-        this.widgets.add(new ButtonWidget(new Rectangle(width / 2 - 100, height - 40, 200, 20), "") {
+        this.widgets.add(new ButtonWidget(new Rectangle(width / 2 - 100, height - 40, 200, 20), NarratorManager.EMPTY) {
             @Override
             public void render(int mouseX, int mouseY, float delta) {
                 enabled = isSet;
@@ -150,7 +151,7 @@ public class PreRecipeViewingScreen extends Screen {
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (int_1 == 256 || this.minecraft.options.keyInventory.matchesKey(int_1, int_2)) {
             MinecraftClient.getInstance().openScreen(parent);
-            if (parent instanceof AbstractContainerScreen)
+            if (parent instanceof ContainerScreen)
                 ScreenHelper.getLastOverlay().init();
             return true;
         }

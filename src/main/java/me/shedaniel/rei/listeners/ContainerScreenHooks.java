@@ -5,14 +5,14 @@
 
 package me.shedaniel.rei.listeners;
 
-import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
+import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.container.Slot;
 import org.jetbrains.annotations.ApiStatus;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @ApiStatus.Internal
-@Mixin(AbstractContainerScreen.class)
+@Mixin(ContainerScreen.class)
 public interface ContainerScreenHooks {
     
     @Accessor("x")

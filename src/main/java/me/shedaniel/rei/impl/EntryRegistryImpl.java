@@ -73,6 +73,7 @@ public class EntryRegistryImpl implements EntryRegistry {
     
     @Override
     @Deprecated
+    @ApiStatus.Internal
     public void registerEntryAfter(EntryStack afterEntry, EntryStack stack, boolean checkAlreadyContains) {
         if (stack.isEmpty())
             return;

@@ -29,12 +29,12 @@ import java.util.function.Function;
 @ApiStatus.Internal
 public class SearchArgument {
     
-    public static final SearchArgument ALWAYS = new SearchArgument(ArgumentType.ALWAYS, "", true);
-    @Deprecated private static List<Item> searchBlacklisted = Lists.newArrayList();
+    private static final SearchArgument ALWAYS = new SearchArgument(ArgumentType.ALWAYS, "", true);
+    private static List<Item> searchBlacklisted = Lists.newArrayList();
     private ArgumentType argumentType;
     private String text;
-    public final Function<String, Boolean> INCLUDE = s -> s.contains(text);
-    public final Function<String, Boolean> NOT_INCLUDE = s -> !s.contains(text);
+    private final Function<String, Boolean> INCLUDE = s -> s.contains(text);
+    private final Function<String, Boolean> NOT_INCLUDE = s -> !s.contains(text);
     private boolean include;
     
     public SearchArgument(ArgumentType argumentType, String text, boolean include) {

@@ -17,7 +17,6 @@ import java.util.List;
 
 public interface EntryRegistry {
     
-    @SuppressWarnings("deprecation")
     static EntryRegistry getInstance() {
         return RoughlyEnoughItemsCore.getEntryRegistry();
     }
@@ -59,6 +58,7 @@ public interface EntryRegistry {
      * @param afterEntry           the stack to put after
      * @param stack                the stack to register
      * @param checkAlreadyContains whether the list should check if it is already on the list
+     * @see #queueRegisterEntryAfter(EntryStack, Collection) for a faster method
      */
     @Deprecated
     @ApiStatus.Internal

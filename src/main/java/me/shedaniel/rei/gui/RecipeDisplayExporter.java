@@ -43,6 +43,7 @@ public final class RecipeDisplayExporter extends Widget {
         INSTANCE.exportRecipe(rectangle, widgets);
     }
     
+    @SuppressWarnings("deprecation")
     private void exportRecipe(Rectangle rectangle, List<Widget> widgets) {
         Framebuffer framebuffer = new Framebuffer(rectangle.width * 8, rectangle.height * 8, true, MinecraftClient.IS_SYSTEM_MAC);
         framebuffer.setClearColor(0, 0, 0, 0);

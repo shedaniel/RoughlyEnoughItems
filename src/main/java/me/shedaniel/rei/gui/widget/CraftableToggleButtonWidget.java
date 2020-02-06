@@ -10,6 +10,7 @@ import me.shedaniel.rei.api.ConfigManager;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.util.NarratorManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
@@ -24,7 +25,7 @@ public abstract class CraftableToggleButtonWidget extends LateRenderedButton {
     private static final ItemStack ICON = new ItemStack(Blocks.CRAFTING_TABLE);
     
     public CraftableToggleButtonWidget(Rectangle rectangle) {
-        super(rectangle, "");
+        super(rectangle, NarratorManager.EMPTY);
         this.itemRenderer = minecraft.getItemRenderer();
     }
     

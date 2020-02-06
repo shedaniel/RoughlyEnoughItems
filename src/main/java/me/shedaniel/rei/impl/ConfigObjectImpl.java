@@ -35,11 +35,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     //    @ConfigEntry.Category("filtering") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName private Filtering filtering = new Filtering();
     
     @Override
-    public boolean isLighterButtonHover() {
-        return true;
-    }
-    
-    @Override
     public boolean isOverlayVisible() {
         return general.overlayVisible;
     }

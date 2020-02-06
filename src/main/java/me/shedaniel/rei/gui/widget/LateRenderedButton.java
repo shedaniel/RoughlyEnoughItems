@@ -14,8 +14,4 @@ public abstract class LateRenderedButton extends ButtonWidget implements LateRen
     protected LateRenderedButton(Rectangle rectangle, Text text) {
         super(rectangle, text);
     }
-    
-    protected LateRenderedButton(Rectangle rectangle, String text) {
-        super(rectangle, text);
-    }
 }

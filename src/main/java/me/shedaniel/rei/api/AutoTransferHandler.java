@@ -10,7 +10,7 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
+import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.container.Container;
 
 import java.util.function.Supplier;
@@ -63,7 +63,7 @@ public interface AutoTransferHandler {
     }
     
     interface Context {
-        static Context create(boolean actuallyCrafting, AbstractContainerScreen<?> containerScreen, RecipeDisplay recipeDisplay) {
+        static Context create(boolean actuallyCrafting, ContainerScreen<?> containerScreen, RecipeDisplay recipeDisplay) {
             return new ContextImpl(actuallyCrafting, containerScreen, () -> recipeDisplay);
         }
         
@@ -73,7 +73,7 @@ public interface AutoTransferHandler {
         
         boolean isActuallyCrafting();
         
-        AbstractContainerScreen<?> getContainerScreen();
+        ContainerScreen<?> getContainerScreen();
         
         RecipeDisplay getRecipe();
         
@@ -139,10 +139,10 @@ public interface AutoTransferHandler {
     
     final class ContextImpl implements Context {
         boolean actuallyCrafting;
-        AbstractContainerScreen<?> containerScreen;
+        ContainerScreen<?> containerScreen;
         Supplier<RecipeDisplay> recipeDisplaySupplier;
         
-        private ContextImpl(boolean actuallyCrafting, AbstractContainerScreen<?> containerScreen, Supplier<RecipeDisplay> recipeDisplaySupplier) {
+        private ContextImpl(boolean actuallyCrafting, ContainerScreen<?> containerScreen, Supplier<RecipeDisplay> recipeDisplaySupplier) {
             this.actuallyCrafting = actuallyCrafting;
             this.containerScreen = containerScreen;
             this.recipeDisplaySupplier = recipeDisplaySupplier;
@@ -154,7 +154,7 @@ public interface AutoTransferHandler {
         }
         
         @Override
-        public AbstractContainerScreen<?> getContainerScreen() {
+        public ContainerScreen<?> getContainerScreen() {
             return containerScreen;
         }
         

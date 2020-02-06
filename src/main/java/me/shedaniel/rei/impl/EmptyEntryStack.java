@@ -17,7 +17,7 @@ import java.util.Optional;
 @ApiStatus.Internal
 public class EmptyEntryStack implements EntryStack {
     
-    @Deprecated public static final EntryStack EMPTY = new EmptyEntryStack();
+    @Deprecated @ApiStatus.Internal public static final EntryStack EMPTY = new EmptyEntryStack();
     
     private EmptyEntryStack() {
     }

@@ -8,13 +8,11 @@ package me.shedaniel.rei.api;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 
 public interface ConfigManager {
     
-    @SuppressWarnings("deprecation")
     static ConfigManager getInstance() {
         return RoughlyEnoughItemsCore.getConfigManager();
     }
@@ -25,16 +23,6 @@ public interface ConfigManager {
      * Saves the config.
      */
     void saveConfig();
-    
-    /**
-     * Gets the config instance
-     *
-     * @return the config instance
-     * @deprecated Use {@link ConfigObject#getInstance()}
-     */
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    ConfigObject getConfig();
     
     /**
      * Gets if craftable only filter is enabled

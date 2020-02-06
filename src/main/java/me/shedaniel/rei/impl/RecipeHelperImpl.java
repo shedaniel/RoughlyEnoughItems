@@ -13,10 +13,7 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.SemanticVersion;
-import net.fabricmc.loader.api.Version;
-import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
+import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.util.ActionResult;
@@ -242,7 +239,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     public void recipesLoaded(RecipeManager recipeManager) {
         long startTime = System.currentTimeMillis();
         arePluginsLoading = true;
-        ScreenHelper.clearData();
+        ScreenHelper.clearLastRecipeScreenData();
         recipeCount[0] = 0;
         this.recipeManager = recipeManager;
         this.recipeCategoryListMap.clear();
@@ -265,19 +262,9 @@ public class RecipeHelperImpl implements RecipeHelper {
         RoughlyEnoughItemsCore.LOGGER.info("[REI] Loading %d plugins: %s", plugins.size(), plugins.stream().map(REIPluginEntry::getPluginIdentifier).map(Identifier::toString).collect(Collectors.joining(", ")));
         Collections.reverse(plugins);
         ((EntryRegistryImpl) EntryRegistry.getInstance()).reset();
-        @SuppressWarnings("OptionalGetWithoutIsPresent")
-        Version reiVersion = FabricLoader.getInstance().getModContainer("roughlyenoughitems").get().getMetadata().getVersion();
-        if (!(reiVersion instanceof SemanticVersion))
-            RoughlyEnoughItemsCore.LOGGER.warn("[REI] Roughly Enough Items is not using semantic versioning, will be ignoring plugins' minimum versions!");
         List<REIPluginV0> reiPluginV0s = new ArrayList<>();
         for (REIPluginEntry plugin : plugins) {
             try {
-                if (reiVersion instanceof SemanticVersion)
-                    if (plugin.getMinimumVersion() == null) {
-                        RoughlyEnoughItemsCore.LOGGER.warn("[REI] Plugin " + plugin.getPluginIdentifier().toString() + " did not provide a minimum version, skipping version check!");
-                    } else if (plugin.getMinimumVersion().compareTo((SemanticVersion) reiVersion) > 0) {
-                        throw new IllegalStateException("Requires " + plugin.getMinimumVersion().getFriendlyString() + " version of REI!");
-                    }
                 if (plugin instanceof REIPluginV0) {
                     ((REIPluginV0) plugin).preRegister();
                     reiPluginV0s.add((REIPluginV0) plugin);
@@ -429,7 +416,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     }
     
     @Override
-    public void registerScreenClickArea(Rectangle rectangle, Class<? extends AbstractContainerScreen<?>> screenClass, Identifier... categories) {
+    public void registerScreenClickArea(Rectangle rectangle, Class<? extends ContainerScreen<?>> screenClass, Identifier... categories) {
         this.screenClickAreas.add(new ScreenClickAreaImpl(screenClass, rectangle, categories));
     }
     
@@ -461,17 +448,17 @@ public class RecipeHelperImpl implements RecipeHelper {
     }
     
     private static class ScreenClickAreaImpl implements ScreenClickArea {
-        Class<? extends AbstractContainerScreen<?>> screenClass;
+        Class<? extends ContainerScreen<?>> screenClass;
         Rectangle rectangle;
         Identifier[] categories;
         
-        private ScreenClickAreaImpl(Class<? extends AbstractContainerScreen<?>> screenClass, Rectangle rectangle, Identifier[] categories) {
+        private ScreenClickAreaImpl(Class<? extends ContainerScreen<?>> screenClass, Rectangle rectangle, Identifier[] categories) {
             this.screenClass = screenClass;
             this.rectangle = rectangle;
             this.categories = categories;
         }
         
-        public Class<? extends AbstractContainerScreen<?>> getScreenClass() {
+        public Class<? extends ContainerScreen<?>> getScreenClass() {
             return screenClass;
         }
         
