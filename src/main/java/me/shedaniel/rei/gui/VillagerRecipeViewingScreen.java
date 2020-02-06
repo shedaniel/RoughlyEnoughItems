@@ -26,6 +26,7 @@ import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.client.util.NarratorManager;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
@@ -148,7 +149,7 @@ public class VillagerRecipeViewingScreen extends Screen {
             int finalIndex = index;
             RecipeEntry recipeEntry;
             recipeRenderers.add(recipeEntry = category.getSimpleRenderer(recipeDisplay));
-            buttonWidgets.add(new ButtonWidget(new Rectangle(bounds.x + 5, 0, recipeEntry.getWidth(), recipeEntry.getHeight()), "") {
+            buttonWidgets.add(new ButtonWidget(new Rectangle(bounds.x + 5, 0, recipeEntry.getWidth(), recipeEntry.getHeight()), NarratorManager.EMPTY) {
                 @Override
                 public void onPressed() {
                     selectedRecipeIndex = finalIndex;
@@ -203,24 +204,18 @@ public class VillagerRecipeViewingScreen extends Screen {
             }
         }
         ButtonWidget w, w2;
-        this.widgets.add(w = new ButtonWidget(new Rectangle(bounds.x + 2, bounds.y - 16, 10, 10), new TranslatableText("text.rei.left_arrow")) {
-            @Override
-            public void onPressed() {
-                tabsPage--;
-                if (tabsPage < 0)
-                    tabsPage = MathHelper.ceil(categories.size() / (float) tabsPerPage) - 1;
-                VillagerRecipeViewingScreen.this.init();
-            }
-        });
-        this.widgets.add(w2 = new ButtonWidget(new Rectangle(bounds.x + bounds.width - 12, bounds.y - 16, 10, 10), new TranslatableText("text.rei.right_arrow")) {
-            @Override
-            public void onPressed() {
-                tabsPage++;
-                if (tabsPage > MathHelper.ceil(categories.size() / (float) tabsPerPage) - 1)
-                    tabsPage = 0;
-                VillagerRecipeViewingScreen.this.init();
-            }
-        });
+        this.widgets.add(w = ButtonWidget.create(new Rectangle(bounds.x + 2, bounds.y - 16, 10, 10), new TranslatableText("text.rei.left_arrow"), buttonWidget -> {
+            tabsPage--;
+            if (tabsPage < 0)
+                tabsPage = MathHelper.ceil(categories.size() / (float) tabsPerPage) - 1;
+            VillagerRecipeViewingScreen.this.init();
+        }));
+        this.widgets.add(w2 = ButtonWidget.create(new Rectangle(bounds.x + bounds.width - 12, bounds.y - 16, 10, 10), new TranslatableText("text.rei.right_arrow"), buttonWidget -> {
+            tabsPage++;
+            if (tabsPage > MathHelper.ceil(categories.size() / (float) tabsPerPage) - 1)
+                tabsPage = 0;
+            VillagerRecipeViewingScreen.this.init();
+        }));
         w.enabled = w2.enabled = categories.size() > tabsPerPage;
         
         this.widgets.add(new ClickableLabelWidget(new Point(bounds.x + 4 + scrollListBounds.width / 2, bounds.y + 6), categories.get(selectedCategoryIndex).getCategoryName()) {

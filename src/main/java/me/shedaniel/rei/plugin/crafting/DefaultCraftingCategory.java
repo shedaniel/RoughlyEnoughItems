@@ -33,11 +33,6 @@ import java.util.function.Supplier;
 
 public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCraftingDisplay> {
     
-    @Deprecated
-    public static int getSlotWithSize(DefaultCraftingDisplay recipeDisplay, int num) {
-        return getSlotWithSize(recipeDisplay, num, 3);
-    }
-    
     public static int getSlotWithSize(DefaultCraftingDisplay recipeDisplay, int num, int craftingGridWidth) {
         int x = num % recipeDisplay.getWidth();
         int y = (num - x) / recipeDisplay.getWidth();

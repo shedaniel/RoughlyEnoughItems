@@ -14,6 +14,7 @@ import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.Window;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -116,14 +117,11 @@ public class RecipeChoosePageWidget extends DraggableWidget {
             return stringBuilder_1.toString();
         };
         textFieldWidget.setText(String.valueOf(currentPage + 1));
-        widgets.add(btnDone = new ButtonWidget(new Rectangle(bounds.x + bounds.width - 45, bounds.y + bounds.height + 3, 40, 20), I18n.translate("gui.done")) {
-            @Override
-            public void onPressed() {
-                recipeViewingScreen.page = MathHelper.clamp(getIntFromString(textFieldWidget.getText()).orElse(0) - 1, 0, recipeViewingScreen.getTotalPages(recipeViewingScreen.getSelectedCategory()) - 1);
-                recipeViewingScreen.choosePageActivated = false;
-                recipeViewingScreen.init();
-            }
-        });
+        widgets.add(btnDone = ButtonWidget.create(new Rectangle(bounds.x + bounds.width - 45, bounds.y + bounds.height + 3, 40, 20), new TranslatableText("gui.done"), buttonWidget -> {
+            recipeViewingScreen.page = MathHelper.clamp(getIntFromString(textFieldWidget.getText()).orElse(0) - 1, 0, recipeViewingScreen.getTotalPages(recipeViewingScreen.getSelectedCategory()) - 1);
+            recipeViewingScreen.choosePageActivated = false;
+            recipeViewingScreen.init();
+        }));
         textFieldWidget.setFocused(true);
     }
     

@@ -11,7 +11,6 @@ import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.util.Identifier;
-import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 import java.util.Optional;
@@ -49,15 +48,13 @@ public class DefaultCustomDisplay implements DefaultCraftingDisplay {
         this(input, output, null);
     }
     
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    public Recipe getPossibleRecipe() {
-        return possibleRecipe;
+    protected Optional<Recipe<?>> getRecipe() {
+        return Optional.ofNullable(possibleRecipe);
     }
     
     @Override
     public Optional<Identifier> getRecipeLocation() {
-        return Optional.ofNullable(possibleRecipe).map(Recipe::getId);
+        return getRecipe().map(Recipe::getId);
     }
     
     @Override

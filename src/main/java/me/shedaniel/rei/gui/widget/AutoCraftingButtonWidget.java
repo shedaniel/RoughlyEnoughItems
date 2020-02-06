@@ -15,8 +15,9 @@ import me.shedaniel.rei.gui.toast.CopyRecipeIdentifierToast;
 import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
+import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
@@ -32,13 +33,13 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
     private String extraTooltip;
     private List<String> errorTooltip;
     private List<Widget> setupDisplay;
-    private AbstractContainerScreen<?> containerScreen;
+    private ContainerScreen<?> containerScreen;
     private boolean visible = false;
     private RecipeCategory<?> category;
     private Rectangle displayBounds;
     
     public AutoCraftingButtonWidget(Rectangle displayBounds, Rectangle rectangle, String text, Supplier<RecipeDisplay> displaySupplier, List<Widget> setupDisplay, RecipeCategory<?> recipeCategory) {
-        super(rectangle, text);
+        super(rectangle, new LiteralText(text));
         this.displayBounds = displayBounds;
         this.displaySupplier = displaySupplier;
         Optional<Identifier> recipe = displaySupplier.get().getRecipeLocation();

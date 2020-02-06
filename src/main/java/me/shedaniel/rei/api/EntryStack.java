@@ -167,11 +167,6 @@ public interface EntryStack {
         return setting(settings, value);
     }
     
-    @Deprecated
-    default <T> ObjectHolder<T> getSetting(Settings<T> settings) {
-        return ObjectHolder.of(get(settings));
-    }
-    
     <T> T get(Settings<T> settings);
     
     @Nullable QueuedTooltip getTooltip(int mouseX, int mouseY);
@@ -208,7 +203,6 @@ public interface EntryStack {
         
         public static class Item {
             public static final Settings<Supplier<Boolean>> RENDER_ENCHANTMENT_GLINT = new Settings<>(TRUE);
-            @Deprecated @ApiStatus.ScheduledForRemoval public static final Settings<Supplier<Boolean>> RENDER_OVERLAY = RENDER_ENCHANTMENT_GLINT;
             
             private Item() {
             }

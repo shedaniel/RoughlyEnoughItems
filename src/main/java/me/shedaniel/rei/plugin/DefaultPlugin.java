@@ -42,8 +42,6 @@ import me.shedaniel.rei.plugin.stonecutting.DefaultStoneCuttingDisplay;
 import me.shedaniel.rei.plugin.stripping.DefaultStrippingCategory;
 import me.shedaniel.rei.plugin.stripping.DefaultStrippingDisplay;
 import me.shedaniel.rei.plugin.stripping.DummyAxeItem;
-import net.fabricmc.loader.api.SemanticVersion;
-import net.fabricmc.loader.util.version.VersionParsingException;
 import net.minecraft.block.ComposterBlock;
 import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.client.MinecraftClient;
@@ -96,11 +94,6 @@ public class DefaultPlugin implements REIPluginV0 {
     @Override
     public Identifier getPluginIdentifier() {
         return PLUGIN;
-    }
-    
-    @Override
-    public SemanticVersion getMinimumVersion() throws VersionParsingException {
-        return SemanticVersion.parse("3.2.33");
     }
     
     @Override
@@ -283,19 +276,19 @@ public class DefaultPlugin implements REIPluginV0 {
                 return Collections.emptyList();
             return Collections.singletonList(widget.getBounds().clone());
         });
-        displayHelper.registerBoundsHandler(new DisplayHelper.DisplayBoundsHandler<AbstractContainerScreen<?>>() {
+        displayHelper.registerBoundsHandler(new DisplayHelper.DisplayBoundsHandler<ContainerScreen<?>>() {
             @Override
             public Class<?> getBaseSupportedClass() {
-                return AbstractContainerScreen.class;
+                return ContainerScreen.class;
             }
             
             @Override
-            public Rectangle getLeftBounds(AbstractContainerScreen<?> screen) {
+            public Rectangle getLeftBounds(ContainerScreen<?> screen) {
                 return new Rectangle(2, 0, ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() - 4, MinecraftClient.getInstance().getWindow().getScaledHeight());
             }
             
             @Override
-            public Rectangle getRightBounds(AbstractContainerScreen<?> screen) {
+            public Rectangle getRightBounds(ContainerScreen<?> screen) {
                 int startX = ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() + ScreenHelper.getLastContainerScreenHooks().rei_getContainerWidth() + 2;
                 return new Rectangle(startX, 0, MinecraftClient.getInstance().getWindow().getScaledWidth() - startX - 2, MinecraftClient.getInstance().getWindow().getScaledHeight());
             }

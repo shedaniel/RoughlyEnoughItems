@@ -11,7 +11,7 @@ import me.shedaniel.rei.impl.ScreenHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.CustomValue;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
+import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.client.gui.widget.AbstractPressableButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.LiteralText;
@@ -36,7 +36,7 @@ public class CreditsScreen extends Screen {
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (int_1 == 256 && this.shouldCloseOnEsc()) {
             this.minecraft.openScreen(parent);
-            if (parent instanceof AbstractContainerScreen)
+            if (parent instanceof ContainerScreen)
                 ScreenHelper.getLastOverlay().init();
             return true;
         }
@@ -54,7 +54,7 @@ public class CreditsScreen extends Screen {
                     CustomValue.CvObject jsonObject = rei.getMetadata().getCustomValue("rei:translators").getAsObject();
                     jsonObject.forEach(entry -> {
                         CustomValue value = entry.getValue();
-                        String behind = value.getType() == CustomValue.CvType.ARRAY ? Lists.newArrayList(value.getAsArray().iterator()).stream().map(json -> json.getAsString()).sorted(String::compareToIgnoreCase).collect(Collectors.joining(", ")) : value.getAsString();
+                        String behind = value.getType() == CustomValue.CvType.ARRAY ? Lists.newArrayList(value.getAsArray().iterator()).stream().map(CustomValue::getAsString).sorted(String::compareToIgnoreCase).collect(Collectors.joining(", ")) : value.getAsString();
                         translators.add(String.format("  %s - %s", entry.getKey(), behind));
                     });
                 }
@@ -77,7 +77,7 @@ public class CreditsScreen extends Screen {
             @Override
             public void onPress() {
                 CreditsScreen.this.minecraft.openScreen(parent);
-                if (parent instanceof AbstractContainerScreen)
+                if (parent instanceof ContainerScreen)
                     ScreenHelper.getLastOverlay().init();
             }
         });

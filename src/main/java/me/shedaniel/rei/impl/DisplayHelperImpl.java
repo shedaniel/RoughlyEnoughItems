@@ -79,8 +79,7 @@ public class DisplayHelperImpl implements DisplayHelper {
         return handlerCache.get(screenClass);
     }
     
-    @Deprecated
-    public boolean filterResponsible(DisplayBoundsHandler<?> handler) {
+    private boolean filterResponsible(DisplayBoundsHandler<?> handler) {
         return handler.getBaseSupportedClass().isAssignableFrom(tempScreen);
     }
     

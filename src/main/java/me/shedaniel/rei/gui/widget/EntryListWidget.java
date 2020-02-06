@@ -47,7 +47,6 @@ import java.util.stream.Collectors;
 public class EntryListWidget extends WidgetWithBounds {
     
     static final Supplier<Boolean> RENDER_ENCHANTMENT_GLINT = ConfigObject.getInstance()::doesRenderEntryEnchantmentGlint;
-    @SuppressWarnings("deprecation")
     static final Comparator<? super EntryStack> ENTRY_NAME_COMPARER = Comparator.comparing(SearchArgument::tryGetEntryStackName);
     static final Comparator<? super EntryStack> ENTRY_GROUP_COMPARER = Comparator.comparingInt(stack -> {
         if (stack.getType() == EntryStack.Type.ITEM) {
@@ -73,7 +72,7 @@ public class EntryListWidget extends WidgetWithBounds {
     private List<EntryListEntry> entries = Collections.emptyList();
     private List<Widget> renders = Collections.emptyList();
     private List<Widget> widgets = Collections.emptyList();
-    @SuppressWarnings("deprecation") private List<SearchArgument.SearchArguments> lastSearchArguments = Collections.emptyList();
+    private List<SearchArgument.SearchArguments> lastSearchArguments = Collections.emptyList();
     private boolean draggingScrollBar = false;
     
     public static int entrySize() {
@@ -677,7 +676,6 @@ public class EntryListWidget extends WidgetWithBounds {
         return lastSearchArguments.isEmpty() || canSearchTermsBeAppliedTo(stack, lastSearchArguments);
     }
     
-    @SuppressWarnings("deprecation")
     private boolean canSearchTermsBeAppliedTo(EntryStack stack, List<SearchArgument.SearchArguments> searchArguments) {
         if (searchArguments.isEmpty())
             return true;
@@ -755,7 +753,6 @@ public class EntryListWidget extends WidgetWithBounds {
         return false;
     }
     
-    @SuppressWarnings("deprecation")
     private List<SearchArgument.SearchArguments> processSearchTerm(String searchTerm) {
         List<SearchArgument.SearchArguments> searchArguments = Lists.newArrayList();
         for (String split : StringUtils.splitByWholeSeparatorPreserveAllTokens(searchTerm.toLowerCase(Locale.ROOT), "|")) {

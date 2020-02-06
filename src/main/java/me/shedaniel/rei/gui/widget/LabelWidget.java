@@ -27,11 +27,6 @@ public class LabelWidget extends WidgetWithBounds {
     private Supplier<String> tooltipSupplier;
     
     @ApiStatus.Internal
-    public LabelWidget(int x, int y, String text) {
-        this(new Point(x, y), text);
-    }
-    
-    @ApiStatus.Internal
     public LabelWidget(Point point, String text) {
         this.pos = point;
         this.text = text;
@@ -43,7 +38,14 @@ public class LabelWidget extends WidgetWithBounds {
     }
     
     public static ClickableLabelWidget createClickable(Point point, String text, Consumer<ClickableLabelWidget> onClicked) {
-        return new ClickableActionedLabelWidget(point, text, onClicked);
+        ClickableLabelWidget[] widget = {null};
+        widget[0] = new ClickableLabelWidget(point, text) {
+            @Override
+            public void onLabelClicked() {
+                onClicked.accept(widget[0]);
+            }
+        };
+        return widget[0];
     }
     
     public LabelWidget tooltip(Supplier<String> tooltipSupplier) {

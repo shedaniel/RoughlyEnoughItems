@@ -17,7 +17,6 @@ import static net.minecraft.util.ActionResult.PASS;
 
 public interface DisplayHelper {
     
-    @SuppressWarnings("deprecation")
     static DisplayHelper getInstance() {
         return RoughlyEnoughItemsCore.getDisplayHelper();
     }
@@ -97,36 +96,6 @@ public interface DisplayHelper {
          */
         default ActionResult canItemSlotWidgetFit(int left, int top, T screen, Rectangle fullBounds) {
             return PASS;
-        }
-        
-        /**
-         * Checks if item slot can fit the screen
-         *
-         * @param isOnRightSide whether the user has set the overlay to the right
-         * @param left          the left x coordinates of the stack
-         * @param top           the top y coordinates for the stack
-         * @param screen        the current screen
-         * @param fullBounds    the current bounds
-         * @return whether the item slot can fit
-         * @deprecated use {@link #canItemSlotWidgetFit(int, int, Object, Rectangle)}
-         */
-        @Deprecated
-        default ActionResult canItemSlotWidgetFit(boolean isOnRightSide, int left, int top, T screen, Rectangle fullBounds) {
-            return canItemSlotWidgetFit(left, top, screen, fullBounds);
-        }
-        
-        /**
-         * Checks if mouse is inside the overlay
-         *
-         * @param isOnRightSide whether the user has set the overlay to the right
-         * @param mouseX        mouse's x coordinates
-         * @param mouseY        mouse's y coordinates
-         * @return whether mouse is inside the overlay
-         * @deprecated use {@link #isInZone(double, double)}
-         */
-        @Deprecated
-        default ActionResult isInZone(boolean isOnRightSide, double mouseX, double mouseY) {
-            return isInZone(mouseX, mouseY);
         }
         
         /**

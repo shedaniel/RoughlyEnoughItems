@@ -15,7 +15,8 @@ import org.jetbrains.annotations.ApiStatus;
  */
 public interface REIPluginEntry {
     
-    @ApiStatus.OverrideOnly
+    @ApiStatus.ScheduledForRemoval
+    @Deprecated
     default SemanticVersion getMinimumVersion() throws VersionParsingException {
         return null;
     }

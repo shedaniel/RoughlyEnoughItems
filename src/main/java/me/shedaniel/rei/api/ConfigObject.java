@@ -9,8 +9,8 @@ import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.rei.gui.config.ItemListOrdering;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.gui.config.SearchFieldLocation;
+import me.shedaniel.rei.impl.ConfigManagerImpl;
 import me.shedaniel.rei.impl.ConfigObjectImpl;
-import net.minecraft.client.util.InputUtil;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.annotation.ElementType;
@@ -20,14 +20,9 @@ import java.lang.annotation.Target;
 
 public interface ConfigObject {
     
-    @SuppressWarnings("deprecation")
     static ConfigObject getInstance() {
-        return ConfigManager.getInstance().getConfig();
+        return ((ConfigManagerImpl) ConfigManager.getInstance()).getConfig();
     }
-    
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    boolean isLighterButtonHover();
     
     boolean isOverlayVisible();
     
@@ -44,11 +39,6 @@ public interface ConfigObject {
     boolean isUsingDarkTheme();
     
     boolean isToastDisplayedOnCopyIdentifier();
-    
-    @Deprecated
-    default boolean doesRenderEntryExtraOverlay() {
-        return doesRenderEntryEnchantmentGlint();
-    }
     
     boolean doesRenderEntryEnchantmentGlint();
     
@@ -103,11 +93,6 @@ public interface ConfigObject {
     boolean doDebugRenderTimeRequired();
     
     boolean doSearchFavorites();
-    
-    @Deprecated
-    default InputUtil.KeyCode getFavoriteKeybind() {
-        return getFavoriteKeyCode().getKeyCode();
-    }
     
     ModifierKeyCode getFavoriteKeyCode();
     

@@ -35,7 +35,6 @@ import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.PreRecipeViewingScreen;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.gui.credits.CreditsScreen;
-import me.shedaniel.rei.gui.widget.ReloadConfigButtonWidget;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
@@ -61,7 +60,7 @@ public class ConfigManagerImpl implements ConfigManager {
     
     private boolean craftableOnly;
     //    private List<EntryStack> favorites = new ArrayList<>();
-    private Gson gson = new GsonBuilder().create();
+    private final Gson gson = new GsonBuilder().create();
     
     public ConfigManagerImpl() {
         this.craftableOnly = false;
@@ -115,9 +114,10 @@ public class ConfigManagerImpl implements ConfigManager {
         
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> {
             int width = 220;
+            //noinspection deprecation
             return Collections.singletonList(new TooltipListEntry<RecipeScreenType>(i13n, null) {
                 private RecipeScreenType type = getUnsafely(field, config, RecipeScreenType.UNSET);
-                private AbstractButtonWidget buttonWidget = new AbstractPressableButtonWidget(0, 0, 0, 20, "") {
+                private final AbstractButtonWidget buttonWidget = new AbstractPressableButtonWidget(0, 0, 0, 20, "") {
                     @Override
                     public void onPress() {
                         MinecraftClient.getInstance().openScreen(new PreRecipeViewingScreen(getScreen(), type, false, original -> {
@@ -133,7 +133,7 @@ public class ConfigManagerImpl implements ConfigManager {
                         super.render(mouseX, mouseY, delta);
                     }
                 };
-                private List<Element> children = ImmutableList.of(buttonWidget);
+                private final List<Element> children = ImmutableList.of(buttonWidget);
                 
                 @Override
                 public RecipeScreenType getValue() {
@@ -188,7 +188,6 @@ public class ConfigManagerImpl implements ConfigManager {
         ((me.sargunvohra.mcmods.autoconfig1u.ConfigManager<ConfigObjectImpl>) AutoConfig.getConfigHolder(ConfigObjectImpl.class)).save();
     }
     
-    @Override
     public ConfigObject getConfig() {
         return AutoConfig.getConfigHolder(ConfigObjectImpl.class).getConfig();
     }
@@ -214,8 +213,8 @@ public class ConfigManagerImpl implements ConfigManager {
             provider.setBuildFunction(builder -> {
                 if (FabricLoader.getInstance().isModLoaded("modmenu")) {
                     builder.getOrCreateCategory("config.roughlyenoughitems.!general").addEntry(new TooltipListEntry<Object>(I18n.translate("config.roughlyenoughitems.smooth_scrolling"), null) {
-                        int width = 220;
-                        private AbstractButtonWidget buttonWidget = new AbstractPressableButtonWidget(0, 0, 0, 20, this.getFieldName()) {
+                        final int width = 220;
+                        private final AbstractButtonWidget buttonWidget = new AbstractPressableButtonWidget(0, 0, 0, 20, this.getFieldName()) {
                             public void onPress() {
                                 Screen screen = ModMenu.getConfigScreen("cloth-config2", parent);
                                 if (screen != null) {
@@ -224,7 +223,7 @@ public class ConfigManagerImpl implements ConfigManager {
                                     ModMenu.openConfigScreen("cloth-config2");
                             }
                         };
-                        private List<Element> children = ImmutableList.of(this.buttonWidget);
+                        private final List<Element> children = ImmutableList.of(this.buttonWidget);
                         
                         public Object getValue() {
                             return null;
@@ -254,7 +253,7 @@ public class ConfigManagerImpl implements ConfigManager {
                 }
                 return builder.setAfterInitConsumer(screen -> {
                     if (MinecraftClient.getInstance().getNetworkHandler() != null && MinecraftClient.getInstance().getNetworkHandler().getRecipeManager() != null) {
-                        ((ScreenHooks) screen).cloth_addButton(new ReloadConfigButtonWidget(4, 4, 100, 20, I18n.translate("text.rei.reload_config"), buttonWidget -> {
+                        ((ScreenHooks) screen).cloth_addButton(new net.minecraft.client.gui.widget.ButtonWidget(4, 4, 100, 20, I18n.translate("text.rei.reload_config"), buttonWidget -> {
                             RoughlyEnoughItemsCore.syncRecipes(null);
                         }) {
                             @Override

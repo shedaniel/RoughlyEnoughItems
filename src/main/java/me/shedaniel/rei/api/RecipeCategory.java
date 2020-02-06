@@ -127,16 +127,4 @@ public interface RecipeCategory<T extends RecipeDisplay> {
         return -1;
     }
     
-    /**
-     * Gets whether the category will check tags, useful for potions
-     *
-     * @return whether the category will check tags
-     * @deprecated no longer used
-     */
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    default boolean checkTags() {
-        return false;
-    }
-    
 }

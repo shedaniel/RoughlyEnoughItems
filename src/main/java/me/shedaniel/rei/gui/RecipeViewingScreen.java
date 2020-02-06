@@ -23,12 +23,12 @@ import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.util.math.Matrix4f;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
@@ -172,96 +172,52 @@ public class RecipeViewingScreen extends Screen {
         this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - guiHeight / 2, guiWidth, guiHeight);
         this.page = MathHelper.clamp(page, 0, getTotalPages(selectedCategory) - 1);
         ButtonWidget w, w2;
-        this.widgets.add(w = new ButtonWidget(new Rectangle(bounds.x + 2, bounds.y - 16, 10, 10), I18n.translate("text.rei.left_arrow")) {
-            @Override
-            public void onPressed() {
-                categoryPages--;
-                if (categoryPages < 0)
-                    categoryPages = MathHelper.ceil(categories.size() / (float) tabsPerPage) - 1;
-                RecipeViewingScreen.this.init();
-            }
-        });
-        this.widgets.add(w2 = new ButtonWidget(new Rectangle(bounds.x + bounds.width - 12, bounds.y - 16, 10, 10), I18n.translate("text.rei.right_arrow")) {
-            @Override
-            public void onPressed() {
-                categoryPages++;
-                if (categoryPages > MathHelper.ceil(categories.size() / (float) tabsPerPage) - 1)
-                    categoryPages = 0;
-                RecipeViewingScreen.this.init();
-            }
-        });
+        this.widgets.add(w = ButtonWidget.create(new Rectangle(bounds.x + 2, bounds.y - 16, 10, 10), new TranslatableText("text.rei.left_arrow"), buttonWidget -> {
+            categoryPages--;
+            if (categoryPages < 0)
+                categoryPages = MathHelper.ceil(categories.size() / (float) tabsPerPage) - 1;
+            RecipeViewingScreen.this.init();
+        }));
+        this.widgets.add(w2 = ButtonWidget.create(new Rectangle(bounds.x + bounds.width - 12, bounds.y - 16, 10, 10), new TranslatableText("text.rei.right_arrow"), buttonWidget -> {
+            categoryPages++;
+            if (categoryPages > MathHelper.ceil(categories.size() / (float) tabsPerPage) - 1)
+                categoryPages = 0;
+            RecipeViewingScreen.this.init();
+        }));
         w.enabled = w2.enabled = categories.size() > tabsPerPage;
-        widgets.add(categoryBack = new ButtonWidget(new Rectangle(bounds.getX() + 5, bounds.getY() + 5, 12, 12), I18n.translate("text.rei.left_arrow")) {
-            @Override
-            public void onPressed() {
-                int currentCategoryIndex = categories.indexOf(selectedCategory);
-                currentCategoryIndex--;
-                if (currentCategoryIndex < 0)
-                    currentCategoryIndex = categories.size() - 1;
-                selectedCategory = (RecipeCategory<RecipeDisplay>) categories.get(currentCategoryIndex);
-                categoryPages = MathHelper.floor(currentCategoryIndex / (double) tabsPerPage);
-                page = 0;
-                RecipeViewingScreen.this.init();
-            }
-            
-            @Override
-            public Optional<String> getTooltips() {
-                return Optional.ofNullable(I18n.translate("text.rei.previous_category"));
-            }
-        });
-        widgets.add(new ClickableLabelWidget(new Point(bounds.getCenterX(), bounds.getY() + 7), "") {
-            @Override
-            public void render(int mouseX, int mouseY, float delta) {
-                setText(selectedCategory.getCategoryName());
-                super.render(mouseX, mouseY, delta);
-            }
-            
-            @Override
-            public Optional<String> getTooltips() {
-                return Optional.ofNullable(I18n.translate("text.rei.view_all_categories"));
-            }
-            
-            @Override
-            public void onLabelClicked() {
-                MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-                ClientHelper.getInstance().executeViewAllRecipesKeyBind();
-            }
-        });
-        widgets.add(categoryNext = new ButtonWidget(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 5, 12, 12), I18n.translate("text.rei.right_arrow")) {
-            @Override
-            public void onPressed() {
-                int currentCategoryIndex = categories.indexOf(selectedCategory);
-                currentCategoryIndex++;
-                if (currentCategoryIndex >= categories.size())
-                    currentCategoryIndex = 0;
-                selectedCategory = (RecipeCategory<RecipeDisplay>) categories.get(currentCategoryIndex);
-                categoryPages = MathHelper.floor(currentCategoryIndex / (double) tabsPerPage);
-                page = 0;
-                RecipeViewingScreen.this.init();
-            }
-            
-            @Override
-            public Optional<String> getTooltips() {
-                return Optional.ofNullable(I18n.translate("text.rei.next_category"));
-            }
-        });
+        widgets.add(categoryBack = ButtonWidget.create(new Rectangle(bounds.getX() + 5, bounds.getY() + 5, 12, 12), new TranslatableText("text.rei.left_arrow"), buttonWidget -> {
+            int currentCategoryIndex = categories.indexOf(selectedCategory);
+            currentCategoryIndex--;
+            if (currentCategoryIndex < 0)
+                currentCategoryIndex = categories.size() - 1;
+            selectedCategory = (RecipeCategory<RecipeDisplay>) categories.get(currentCategoryIndex);
+            categoryPages = MathHelper.floor(currentCategoryIndex / (double) tabsPerPage);
+            page = 0;
+            RecipeViewingScreen.this.init();
+        }).tooltip(() -> I18n.translate("text.rei.previous_category")));
+        widgets.add(LabelWidget.createClickable(new Point(bounds.getCenterX(), bounds.getY() + 7), selectedCategory.getCategoryName(), clickableLabelWidget -> {
+            MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            ClientHelper.getInstance().executeViewAllRecipesKeyBind();
+        }).tooltip(() -> I18n.translate("text.rei.view_all_categories")));
+        widgets.add(categoryNext = ButtonWidget.create(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 5, 12, 12), new TranslatableText("text.rei.right_arrow"), buttonWidget -> {
+            int currentCategoryIndex = categories.indexOf(selectedCategory);
+            currentCategoryIndex++;
+            if (currentCategoryIndex >= categories.size())
+                currentCategoryIndex = 0;
+            selectedCategory = (RecipeCategory<RecipeDisplay>) categories.get(currentCategoryIndex);
+            categoryPages = MathHelper.floor(currentCategoryIndex / (double) tabsPerPage);
+            page = 0;
+            RecipeViewingScreen.this.init();
+        }).tooltip(() -> I18n.translate("text.rei.next_category")));
         categoryBack.enabled = categories.size() > 1;
         categoryNext.enabled = categories.size() > 1;
         
-        widgets.add(recipeBack = new ButtonWidget(new Rectangle(bounds.getX() + 5, bounds.getY() + 19, 12, 12), I18n.translate("text.rei.left_arrow")) {
-            @Override
-            public void onPressed() {
-                page--;
-                if (page < 0)
-                    page = getTotalPages(selectedCategory) - 1;
-                RecipeViewingScreen.this.init();
-            }
-            
-            @Override
-            public Optional<String> getTooltips() {
-                return Optional.ofNullable(I18n.translate("text.rei.previous_page"));
-            }
-        });
+        widgets.add(recipeBack = ButtonWidget.create(new Rectangle(bounds.getX() + 5, bounds.getY() + 19, 12, 12), new TranslatableText("text.rei.left_arrow"), buttonWidget -> {
+            page--;
+            if (page < 0)
+                page = getTotalPages(selectedCategory) - 1;
+            RecipeViewingScreen.this.init();
+        }).tooltip(() -> I18n.translate("text.rei.previous_page")));
         widgets.add(new ClickableLabelWidget(new Point(bounds.getCenterX(), bounds.getY() + 21), "") {
             @Override
             public void render(int mouseX, int mouseY, float delta) {
@@ -270,31 +226,18 @@ public class RecipeViewingScreen extends Screen {
             }
             
             @Override
-            public Optional<String> getTooltips() {
-                return Optional.ofNullable(I18n.translate("text.rei.choose_page"));
-            }
-            
-            @Override
             public void onLabelClicked() {
                 MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 RecipeViewingScreen.this.choosePageActivated = true;
                 RecipeViewingScreen.this.init();
             }
-        }.clickable(categoriesMap.get(selectedCategory).size() > getRecipesPerPageByHeight()));
-        widgets.add(recipeNext = new ButtonWidget(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 19, 12, 12), I18n.translate("text.rei.right_arrow")) {
-            @Override
-            public void onPressed() {
-                page++;
-                if (page >= getTotalPages(selectedCategory))
-                    page = 0;
-                RecipeViewingScreen.this.init();
-            }
-            
-            @Override
-            public Optional<String> getTooltips() {
-                return Optional.ofNullable(I18n.translate("text.rei.next_page"));
-            }
-        });
+        }.clickable(categoriesMap.get(selectedCategory).size() > getRecipesPerPageByHeight()).tooltip(() -> I18n.translate("text.rei.choose_page")));
+        widgets.add(recipeNext = ButtonWidget.create(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 19, 12, 12), new TranslatableText("text.rei.right_arrow"), buttonWidget -> {
+            page++;
+            if (page >= getTotalPages(selectedCategory))
+                page = 0;
+            RecipeViewingScreen.this.init();
+        }).tooltip(() -> I18n.translate("text.rei.next_page")));
         recipeBack.enabled = recipeNext.enabled = categoriesMap.get(selectedCategory).size() > getRecipesPerPageByHeight();
         int tabV = isCompactTabs ? 166 : 192;
         for (int i = 0; i < tabsPerPage; i++) {

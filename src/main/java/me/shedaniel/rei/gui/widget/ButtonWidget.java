@@ -12,6 +12,7 @@ import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
@@ -20,24 +21,57 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public abstract class ButtonWidget extends WidgetWithBounds {
     
     protected static final Identifier BUTTON_LOCATION = new Identifier("roughlyenoughitems", "textures/gui/button.png");
     protected static final Identifier BUTTON_LOCATION_DARK = new Identifier("roughlyenoughitems", "textures/gui/button_dark.png");
-    public boolean enabled;
-    public boolean focused;
+    public boolean enabled = true;
+    public boolean focused = false;
+    private boolean canChangeFocuses = true;
     private String text;
     private Rectangle bounds;
+    private Supplier<String> tooltipSupplier;
     
-    public ButtonWidget(Rectangle rectangle, Text text) {
-        this(rectangle, Objects.requireNonNull(text).asFormattedString());
+    protected ButtonWidget(Rectangle rectangle, Text text) {
+        this.bounds = Objects.requireNonNull(rectangle);
+        this.text = Objects.requireNonNull(text).asFormattedString();
     }
     
-    public ButtonWidget(Rectangle rectangle, String text) {
-        this.bounds = Objects.requireNonNull(rectangle);
-        this.enabled = true;
-        this.text = Objects.requireNonNull(text);
+    public static ButtonWidget create(Rectangle point, String text, Consumer<ButtonWidget> onClick) {
+        return create(point, new LiteralText(text), onClick);
+    }
+    
+    public static ButtonWidget create(Rectangle point, Text text, Consumer<ButtonWidget> onClick) {
+        ButtonWidget[] widget = {null};
+        widget[0] = new ButtonWidget(point, text) {
+            @Override
+            public void onPressed() {
+                onClick.accept(widget[0]);
+            }
+        };
+        return widget[0];
+    }
+    
+    public ButtonWidget tooltip(Supplier<String> tooltipSupplier) {
+        this.tooltipSupplier = tooltipSupplier;
+        return this;
+    }
+    
+    public ButtonWidget enabled(boolean enabled) {
+        this.enabled = enabled;
+        return this;
+    }
+    
+    public ButtonWidget canChangeFocuses(boolean canChangeFocuses) {
+        this.canChangeFocuses = canChangeFocuses;
+        return this;
+    }
+    
+    public boolean canChangeFocuses() {
+        return canChangeFocuses;
     }
     
     public Rectangle getBounds() {
@@ -113,7 +147,7 @@ public abstract class ButtonWidget extends WidgetWithBounds {
     
     @Override
     public boolean changeFocus(boolean boolean_1) {
-        if (!enabled)
+        if (!enabled || !canChangeFocuses)
             return false;
         this.focused = !this.focused;
         return true;
@@ -151,7 +185,7 @@ public abstract class ButtonWidget extends WidgetWithBounds {
     public abstract void onPressed();
     
     public Optional<String> getTooltips() {
-        return Optional.empty();
+        return Optional.ofNullable(tooltipSupplier).map(Supplier::get);
     }
     
 }

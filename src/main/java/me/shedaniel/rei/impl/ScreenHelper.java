@@ -18,7 +18,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.event.client.ClientTickCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
+import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.client.util.Window;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
@@ -34,17 +34,17 @@ public class ScreenHelper implements ClientModInitializer {
     /**
      * @deprecated Use getters instead
      */
-    @Deprecated @ApiStatus.ScheduledForRemoval public static OverlaySearchField searchField;
+    private static OverlaySearchField searchField;
     @ApiStatus.Internal public static List<ItemStack> inventoryStacks = Lists.newArrayList();
     private static ContainerScreenOverlay overlay;
-    private static AbstractContainerScreen<?> lastContainerScreen = null;
+    private static ContainerScreen<?> lastContainerScreen = null;
     private static LinkedHashSet<Screen> lastRecipeScreen = Sets.newLinkedHashSetWithExpectedSize(5);
     
     public static OverlaySearchField getSearchField() {
         return searchField;
     }
     
-    @Deprecated
+    @ApiStatus.Internal
     public static void setSearchField(OverlaySearchField searchField) {
         ScreenHelper.searchField = searchField;
     }
@@ -65,7 +65,7 @@ public class ScreenHelper implements ClientModInitializer {
         return screen;
     }
     
-    public static void clearData() {
+    public static void clearLastRecipeScreenData() {
         lastRecipeScreen.clear();
     }
     
@@ -95,11 +95,11 @@ public class ScreenHelper implements ClientModInitializer {
         return getLastOverlay(false, false);
     }
     
-    public static AbstractContainerScreen<?> getLastContainerScreen() {
+    public static ContainerScreen<?> getLastContainerScreen() {
         return lastContainerScreen;
     }
     
-    public static void setLastContainerScreen(AbstractContainerScreen<?> lastContainerScreen) {
+    public static void setLastContainerScreen(ContainerScreen<?> lastContainerScreen) {
         ScreenHelper.lastContainerScreen = lastContainerScreen;
     }
     
@@ -129,8 +129,8 @@ public class ScreenHelper implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ClothClientHooks.SCREEN_INIT_PRE.register((client, screen, screenHooks) -> {
-            if (lastContainerScreen != screen && screen instanceof AbstractContainerScreen)
-                lastContainerScreen = (AbstractContainerScreen<?>) screen;
+            if (lastContainerScreen != screen && screen instanceof ContainerScreen)
+                lastContainerScreen = (ContainerScreen<?>) screen;
             return ActionResult.PASS;
         });
         ClientTickCallback.EVENT.register(minecraftClient -> {
