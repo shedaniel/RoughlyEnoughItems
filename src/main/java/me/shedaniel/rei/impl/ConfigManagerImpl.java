@@ -42,6 +42,7 @@ import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.client.gui.widget.AbstractPressableButtonWidget;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.Window;
@@ -173,18 +174,11 @@ public class ConfigManagerImpl implements ConfigManager {
     
     @Override
     public List<EntryStack> getFavorites() {
-        return ((ConfigObjectImpl) getConfig()).general.favorites;
+        return getConfig().getFavorites();
     }
     
     @Override
     public void saveConfig() {
-        //        ConfigObjectImpl object = (ConfigObjectImpl) getConfig();
-        //        object.general.favorites.clear();
-        //        for (EntryStack stack : favorites) {
-        //            JsonElement element = stack.toJson();
-        //            if (element != null)
-        //                object.general.favorites.add(gson.toJson(element));
-        //        }
         ((me.sargunvohra.mcmods.autoconfig1u.ConfigManager<ConfigObjectImpl>) AutoConfig.getConfigHolder(ConfigObjectImpl.class)).save();
     }
     
@@ -266,12 +260,9 @@ public class ConfigManagerImpl implements ConfigManager {
                             }
                         });
                     }
-                    ((ScreenHooks) screen).cloth_addButton(new AbstractPressableButtonWidget(screen.width - 104, 4, 100, 20, I18n.translate("text.rei.credits")) {
-                        @Override
-                        public void onPress() {
-                            MinecraftClient.getInstance().openScreen(new CreditsScreen(screen));
-                        }
-                    });
+                    ((ScreenHooks) screen).cloth_addButton(new ButtonWidget(screen.width - 104, 4, 100, 20, I18n.translate("text.rei.credits"), button -> {
+                        MinecraftClient.getInstance().openScreen(new CreditsScreen(screen));
+                    }));
                 }).setSavingRunnable(() -> {
                     saveConfig();
                     if (ScreenHelper.getSearchField() != null)
@@ -282,36 +273,7 @@ public class ConfigManagerImpl implements ConfigManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return new Screen(new LiteralText("")) {
-            @Override
-            public void render(int int_1, int int_2, float float_1) {
-                renderDirtBackground(0);
-                List<String> list = minecraft.textRenderer.wrapStringToWidthAsList(I18n.translate("text.rei.config_api_failed"), width - 100);
-                int y = (int) (height / 2 - minecraft.textRenderer.fontHeight * 1.3f / 2 * list.size());
-                for (String s : list) {
-                    drawCenteredString(minecraft.textRenderer, s, width / 2, y, -1);
-                    y += minecraft.textRenderer.fontHeight;
-                }
-                super.render(int_1, int_2, float_1);
-            }
-            
-            @Override
-            protected void init() {
-                super.init();
-                addButton(new net.minecraft.client.gui.widget.ButtonWidget(width / 2 - 100, height - 26, 200, 20, I18n.translate("text.rei.back"), buttonWidget -> {
-                    this.minecraft.openScreen(parent);
-                }));
-            }
-            
-            @Override
-            public boolean keyPressed(int int_1, int int_2, int int_3) {
-                if (int_1 == 256 && this.shouldCloseOnEsc()) {
-                    this.minecraft.openScreen(parent);
-                    return true;
-                }
-                return super.keyPressed(int_1, int_2, int_3);
-            }
-        };
+        return null;
     }
     
 }
