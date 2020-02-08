@@ -17,6 +17,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.List;
 
 public interface ConfigObject {
     
@@ -135,6 +136,8 @@ public interface ConfigObject {
     boolean isUsingCompactTabs();
     
     boolean isLowerConfigButton();
+    
+    List<EntryStack> getFavorites();
     
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD})
