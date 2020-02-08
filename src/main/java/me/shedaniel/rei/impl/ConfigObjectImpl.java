@@ -275,6 +275,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         return appearance.lowerConfigButton;
     }
     
+    @Override
+    public List<EntryStack> getFavorites() {
+        return general.favorites;
+    }
+    
     public static class General {
         @ConfigEntry.Gui.Excluded public List<EntryStack> favorites = new ArrayList<>();
         @Comment("Declares whether cheating mode is on.") private boolean cheating = false;
