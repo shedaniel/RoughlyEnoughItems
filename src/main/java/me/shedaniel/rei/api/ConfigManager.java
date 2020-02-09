@@ -19,6 +19,7 @@ public interface ConfigManager {
         return RoughlyEnoughItemsCore.getConfigManager();
     }
     
+    @Deprecated
     List<EntryStack> getFavorites();
     
     /**
