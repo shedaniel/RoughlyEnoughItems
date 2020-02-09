@@ -235,7 +235,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
                 List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
                 for (EntryStack stack : ConfigManager.getInstance().getFavorites()) {
                     if (listWidget.canLastSearchTermsBeAppliedTo(stack)) {
-                        if (workingItems != null && CollectionUtils.findFirstOrNullEquals(workingItems, stack) == null)
+                        if (checkCraftable && CollectionUtils.findFirstOrNullEquals(workingItems, stack) == null)
                             continue;
                         list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
                     }
@@ -253,7 +253,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
                 boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
                 List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
                 for (EntryStack stack : ConfigManager.getInstance().getFavorites()) {
-                    if (workingItems != null && CollectionUtils.findFirstOrNullEquals(workingItems, stack) == null)
+                    if (checkCraftable && CollectionUtils.findFirstOrNullEquals(workingItems, stack) == null)
                         continue;
                     list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
                 }

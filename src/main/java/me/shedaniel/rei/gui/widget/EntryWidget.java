@@ -239,8 +239,10 @@ public class EntryWidget extends WidgetWithBounds {
                         ConfigManager.getInstance().getFavorites().remove(entry);
                     else if (!CollectionUtils.anyMatchEqualsAll(ConfigManager.getInstance().getFavorites(), entry))
                         ConfigManager.getInstance().getFavorites().add(entry);
-                    ContainerScreenOverlay.getEntryListWidget().updateSearch(ScreenHelper.getSearchField().getText());
                     ConfigManager.getInstance().saveConfig();
+                    FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
+                    if (favoritesListWidget != null)
+                        favoritesListWidget.updateSearch(ContainerScreenOverlay.getEntryListWidget(), ScreenHelper.getSearchField().getText());
                     minecraft.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                     return true;
                 }

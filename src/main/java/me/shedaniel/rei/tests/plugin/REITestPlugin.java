@@ -35,12 +35,13 @@ public class REITestPlugin implements REIPluginV0 {
     
     @Override
     public void registerEntries(EntryRegistry entryRegistry) {
+        int times = 100;
         for (Item item : Registry.ITEM) {
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < times; i++)
                 entryRegistry.queueRegisterEntryAfter(EntryStack.create(item), Collections.singleton(transformStack(EntryStack.create(item))));
             try {
                 for (ItemStack stack : entryRegistry.appendStacksForItem(item)) {
-                    for (int i = 0; i < 15; i++)
+                    for (int i = 0; i < times; i++)
                         entryRegistry.registerEntry(transformStack(EntryStack.create(stack)));
                 }
             } catch (Exception ignored) {

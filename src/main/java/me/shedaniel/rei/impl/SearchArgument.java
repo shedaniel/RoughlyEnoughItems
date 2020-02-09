@@ -47,7 +47,6 @@ public class SearchArgument {
         this.include = include;
     }
     
-    @ApiStatus.Internal
     public static String tryGetEntryStackName(EntryStack stack) {
         if (stack.getType() == EntryStack.Type.ITEM)
             return tryGetItemStackName(stack.getItemStack());
@@ -56,7 +55,14 @@ public class SearchArgument {
         return "";
     }
     
-    @ApiStatus.Internal
+    public static String tryGetEntryStackNameNoFormatting(EntryStack stack) {
+        if (stack.getType() == EntryStack.Type.ITEM)
+            return tryGetItemStackNameNoFormatting(stack.getItemStack());
+        else if (stack.getType() == EntryStack.Type.FLUID)
+            return tryGetFluidName(stack.getFluid());
+        return "";
+    }
+    
     public static String tryGetEntryStackTooltip(EntryStack stack) {
         QueuedTooltip tooltip = stack.getTooltip(0, 0);
         if (tooltip != null)
@@ -64,7 +70,6 @@ public class SearchArgument {
         return "";
     }
     
-    @ApiStatus.Internal
     public static String tryGetFluidName(Fluid fluid) {
         Identifier id = Registry.FLUID.getId(fluid);
         if (I18n.hasTranslation("block." + id.toString().replaceFirst(":", ".")))
@@ -72,7 +77,6 @@ public class SearchArgument {
         return CollectionUtils.mapAndJoinToString(id.getPath().split("_"), StringUtils::capitalize, " ");
     }
     
-    @ApiStatus.Internal
     public static List<String> tryGetItemStackToolTip(ItemStack itemStack, boolean careAboutAdvanced) {
         if (!searchBlacklisted.contains(itemStack.getItem()))
             try {
@@ -84,11 +88,26 @@ public class SearchArgument {
         return Collections.singletonList(tryGetItemStackName(itemStack));
     }
     
-    @ApiStatus.Internal
     public static String tryGetItemStackName(ItemStack stack) {
         if (!searchBlacklisted.contains(stack.getItem()))
             try {
                 return stack.getName().asFormattedString();
+            } catch (Throwable e) {
+                e.printStackTrace();
+                searchBlacklisted.add(stack.getItem());
+            }
+        try {
+            return I18n.translate("item." + Registry.ITEM.getId(stack.getItem()).toString().replace(":", "."));
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+        return "ERROR";
+    }
+    
+    public static String tryGetItemStackNameNoFormatting(ItemStack stack) {
+        if (!searchBlacklisted.contains(stack.getItem()))
+            try {
+                return stack.getName().asString();
             } catch (Throwable e) {
                 e.printStackTrace();
                 searchBlacklisted.add(stack.getItem());
@@ -130,7 +149,6 @@ public class SearchArgument {
         ALWAYS
     }
     
-    @ApiStatus.Internal
     public static class SearchArguments {
         public static final SearchArguments ALWAYS = new SearchArguments(new SearchArgument[]{SearchArgument.ALWAYS});
         private SearchArgument[] arguments;

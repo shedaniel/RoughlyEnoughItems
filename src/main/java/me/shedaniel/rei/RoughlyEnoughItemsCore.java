@@ -220,8 +220,13 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         loadTestPlugins();
     }
     
+    @ApiStatus.Internal
+    public static boolean isDebugModeEnabled() {
+        return System.getProperty("rei.test", "false").equals("true");
+    }
+    
     private void loadTestPlugins() {
-        if (System.getProperty("rei.test", "false").equals("true")) {
+        if (isDebugModeEnabled()) {
             registerPlugin(new REITestPlugin());
         }
     }
