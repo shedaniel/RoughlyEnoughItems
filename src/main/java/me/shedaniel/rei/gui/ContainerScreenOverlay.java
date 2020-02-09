@@ -130,7 +130,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                     ENTRY_LIST_WIDGET.previousPage();
                     if (ENTRY_LIST_WIDGET.getPage() < 0)
                         ENTRY_LIST_WIDGET.setPage(ENTRY_LIST_WIDGET.getTotalPages() - 1);
-                    ENTRY_LIST_WIDGET.updateSearch(ScreenHelper.getSearchField().getText());
+                    ENTRY_LIST_WIDGET.updateEntriesPosition();
                 }
                 
                 @Override
@@ -144,7 +144,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                     ENTRY_LIST_WIDGET.nextPage();
                     if (ENTRY_LIST_WIDGET.getPage() >= ENTRY_LIST_WIDGET.getTotalPages())
                         ENTRY_LIST_WIDGET.setPage(0);
-                    ENTRY_LIST_WIDGET.updateSearch(ScreenHelper.getSearchField().getText());
+                    ENTRY_LIST_WIDGET.updateEntriesPosition();
                 }
                 
                 @Override
@@ -265,7 +265,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                 public void onLabelClicked() {
                     MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                     ENTRY_LIST_WIDGET.setPage(0);
-                    ENTRY_LIST_WIDGET.updateSearch(ScreenHelper.getSearchField().getText());
+                    ENTRY_LIST_WIDGET.updateEntriesPosition();
                 }
                 
                 @Override
