@@ -47,8 +47,7 @@ import java.util.stream.Collectors;
 public class EntryListWidget extends WidgetWithBounds {
     
     static final Supplier<Boolean> RENDER_ENCHANTMENT_GLINT = ConfigObject.getInstance()::doesRenderEntryEnchantmentGlint;
-    @SuppressWarnings("deprecation")
-    static final Comparator<? super EntryStack> ENTRY_NAME_COMPARER = Comparator.comparing(SearchArgument::tryGetEntryStackName);
+    static final Comparator<? super EntryStack> ENTRY_NAME_COMPARER = Comparator.comparing(SearchArgument::tryGetEntryStackNameNoFormatting);
     static final Comparator<? super EntryStack> ENTRY_GROUP_COMPARER = Comparator.comparingInt(stack -> {
         if (stack.getType() == EntryStack.Type.ITEM) {
             ItemGroup group = stack.getItem().getGroup();
@@ -73,7 +72,7 @@ public class EntryListWidget extends WidgetWithBounds {
     private List<EntryListEntry> entries = Collections.emptyList();
     private List<Widget> renders = Collections.emptyList();
     private List<Widget> widgets = Collections.emptyList();
-    @SuppressWarnings("deprecation") private List<SearchArgument.SearchArguments> lastSearchArguments = Collections.emptyList();
+    private List<SearchArgument.SearchArguments> lastSearchArguments = Collections.emptyList();
     private boolean draggingScrollBar = false;
     
     public static int entrySize() {
@@ -621,6 +620,7 @@ public class EntryListWidget extends WidgetWithBounds {
     }
     
     public void updateSearch(String searchTerm) {
+        long started = System.nanoTime();
         lastSearchArguments = processSearchTerm(searchTerm);
         {
             List<EntryStack> list = Lists.newArrayList();
@@ -630,7 +630,7 @@ public class EntryListWidget extends WidgetWithBounds {
             if (stacks instanceof CopyOnWriteArrayList) {
                 for (EntryStack stack : stacks) {
                     if (canLastSearchTermsBeAppliedTo(stack)) {
-                        if (workingItems != null && CollectionUtils.findFirstOrNullEquals(workingItems, stack) == null)
+                        if (checkCraftable && CollectionUtils.findFirstOrNullEquals(workingItems, stack) == null)
                             continue;
                         list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
                     }
@@ -651,7 +651,7 @@ public class EntryListWidget extends WidgetWithBounds {
             List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
             for (EntryStack stack : ConfigManager.getInstance().getFavorites()) {
                 if (canLastSearchTermsBeAppliedTo(stack)) {
-                    if (workingItems != null && CollectionUtils.findFirstOrNullEquals(workingItems, stack) == null)
+                    if (checkCraftable && CollectionUtils.findFirstOrNullEquals(workingItems, stack) == null)
                         continue;
                     list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
                 }
@@ -670,15 +670,20 @@ public class EntryListWidget extends WidgetWithBounds {
         FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
         if (favoritesListWidget != null)
             favoritesListWidget.updateSearch(this, searchTerm);
+        long ended = System.nanoTime();
+        long time = ended - started;
+        if (RoughlyEnoughItemsCore.isDebugModeEnabled())
+            System.out.printf("Search Used: %.2fms%n", time * 1e-6);
         updateEntriesPosition();
     }
     
+    @ApiStatus.Internal
     public boolean canLastSearchTermsBeAppliedTo(EntryStack stack) {
         return lastSearchArguments.isEmpty() || canSearchTermsBeAppliedTo(stack, lastSearchArguments);
     }
     
-    @SuppressWarnings("deprecation")
-    private boolean canSearchTermsBeAppliedTo(EntryStack stack, List<SearchArgument.SearchArguments> searchArguments) {
+    @ApiStatus.Internal
+    public boolean canSearchTermsBeAppliedTo(EntryStack stack, List<SearchArgument.SearchArguments> searchArguments) {
         if (searchArguments.isEmpty())
             return true;
         String mod = null;
@@ -694,7 +699,7 @@ public class EntryListWidget extends WidgetWithBounds {
                 else if (argument.getArgumentType() == SearchArgument.ArgumentType.MOD) {
                     if (mod == null)
                         mod = stack.getIdentifier().map(Identifier::getNamespace).orElse("").replace(SPACE, EMPTY).toLowerCase(Locale.ROOT);
-                    if (mod != null && !mod.isEmpty()) {
+                    if (!StringUtils.isEmpty(mod)) {
                         if (argument.getFunction(!argument.isInclude()).apply(mod)) {
                             if (modName == null)
                                 modName = ClientHelper.getInstance().getModFromModId(mod).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT);
@@ -707,15 +712,15 @@ public class EntryListWidget extends WidgetWithBounds {
                     }
                 } else if (argument.getArgumentType() == SearchArgument.ArgumentType.TEXT) {
                     if (name == null)
-                        name = SearchArgument.tryGetEntryStackName(stack).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT);
-                    if (name != null && !name.isEmpty() && argument.getFunction(!argument.isInclude()).apply(name)) {
+                        name = SearchArgument.tryGetEntryStackNameNoFormatting(stack).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT);
+                    if (!StringUtils.isEmpty(name) && argument.getFunction(!argument.isInclude()).apply(name)) {
                         applicable = false;
                         break;
                     }
                 } else if (argument.getArgumentType() == SearchArgument.ArgumentType.TOOLTIP) {
-                    if (name == null)
-                        name = SearchArgument.tryGetEntryStackTooltip(stack).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT);
-                    if (name != null && !name.isEmpty() && argument.getFunction(!argument.isInclude()).apply(name)) {
+                    if (tooltip == null)
+                        tooltip = SearchArgument.tryGetEntryStackTooltip(stack).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT);
+                    if (!StringUtils.isEmpty(tooltip) && argument.getFunction(!argument.isInclude()).apply(tooltip)) {
                         applicable = false;
                         break;
                     }
@@ -755,7 +760,6 @@ public class EntryListWidget extends WidgetWithBounds {
         return false;
     }
     
-    @SuppressWarnings("deprecation")
     private List<SearchArgument.SearchArguments> processSearchTerm(String searchTerm) {
         List<SearchArgument.SearchArguments> searchArguments = Lists.newArrayList();
         for (String split : StringUtils.splitByWholeSeparatorPreserveAllTokens(searchTerm.toLowerCase(Locale.ROOT), "|")) {
