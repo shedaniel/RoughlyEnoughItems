@@ -45,7 +45,6 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.Window;
-import net.minecraft.text.LiteralText;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -179,6 +178,8 @@ public class ConfigManagerImpl implements ConfigManager {
     
     @Override
     public void saveConfig() {
+        if (getFavorites() != null)
+            getFavorites().removeIf(EntryStack::isEmpty);
         ((me.sargunvohra.mcmods.autoconfig1u.ConfigManager<ConfigObjectImpl>) AutoConfig.getConfigHolder(ConfigObjectImpl.class)).save();
     }
     
