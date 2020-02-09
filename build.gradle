@@ -117,7 +117,7 @@ curseforge {
             df.setTimeZone(TimeZone.getTimeZone("UTC"))
             def time = df.format(new Date())
             changelog = "<h2>REI v$project.version</h2>Updated at <b>$time</b>.<br><a href=\"https://gist.github.com/shedaniel/b7593e692319976f3349263208792922\">Click here for full changelog</a>"
-            addGameVersion '1.15-Snapshot'
+            addGameVersion '1.16-Snapshot'
             addGameVersion 'Java 8'
             addGameVersion 'Fabric'
             relations {
