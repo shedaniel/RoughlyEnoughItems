@@ -178,7 +178,8 @@ public class ConfigManagerImpl implements ConfigManager {
     
     @Override
     public void saveConfig() {
-        ConfigObject.getInstance().getFavorites().removeIf(EntryStack::isEmpty);
+        if (getFavorites() != null)
+            getFavorites().removeIf(EntryStack::isEmpty);
         ((me.sargunvohra.mcmods.autoconfig1u.ConfigManager<ConfigObjectImpl>) AutoConfig.getConfigHolder(ConfigObjectImpl.class)).save();
     }
     
