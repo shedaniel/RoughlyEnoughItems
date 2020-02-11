@@ -324,9 +324,9 @@ public class RecipeHelperImpl implements RecipeHelper {
         ((DisplayHelperImpl) DisplayHelper.getInstance()).resetCache();
         ScreenHelper.getOptionalOverlay().ifPresent(overlay -> overlay.shouldReInit = true);
         
-        arePluginsLoading = false;
         // Remove duplicate entries
         ((EntryRegistryImpl) EntryRegistry.getInstance()).distinct();
+        arePluginsLoading = false;
         
         // Clear Cache Again!
         ((DisplayHelperImpl) DisplayHelper.getInstance()).resetCache();

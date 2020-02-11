@@ -7,6 +7,7 @@ package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Queues;
+import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryRegistry;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeHelper;
@@ -26,8 +27,10 @@ public class EntryRegistryImpl implements EntryRegistry {
     private final CopyOnWriteArrayList<EntryStack> entries = Lists.newCopyOnWriteArrayList();
     private final Queue<Pair<EntryStack, Collection<? extends EntryStack>>> queueRegisterEntryStackAfter = Queues.newConcurrentLinkedQueue();
     private List<EntryStack> reloadList;
+    private boolean doingDistinct = false;
     
     public void distinct() {
+        doingDistinct = true;
         TreeSet<EntryStack> set = new TreeSet<>((i, j) -> i.equalsAll(j) ? 0 : 1);
         set.addAll(reloadList);
         entries.clear();
@@ -40,14 +43,25 @@ public class EntryRegistryImpl implements EntryRegistry {
                 break;
             registerEntriesAfter(pair.getLeft(), pair.getRight());
         }
+        set.clear();
+        set.addAll(entries);
+        set.removeIf(EntryStack::isEmpty);
+        entries.clear();
+        entries.addAll(set);
+        set.clear();
+        for (EntryStack stack : ConfigObject.getInstance().getFilteredStacks()) {
+            entries.remove(stack);
+        }
+        doingDistinct = false;
     }
     
     @Override
     public List<EntryStack> getStacksList() {
-        return RecipeHelper.getInstance().arePluginsLoading() ? reloadList : entries;
+        return RecipeHelper.getInstance().arePluginsLoading() && !doingDistinct ? reloadList : entries;
     }
     
     public void reset() {
+        doingDistinct = false;
         reloadList = Lists.newArrayList();
         queueRegisterEntryStackAfter.clear();
         entries.clear();
@@ -94,8 +108,9 @@ public class EntryRegistryImpl implements EntryRegistry {
     public void queueRegisterEntryAfter(EntryStack afterEntry, Collection<? extends EntryStack> stacks) {
         if (RecipeHelper.getInstance().arePluginsLoading()) {
             queueRegisterEntryStackAfter.add(new Pair<>(afterEntry, stacks));
-        } else
+        } else {
             registerEntriesAfter(afterEntry, stacks);
+        }
     }
     
     @Override

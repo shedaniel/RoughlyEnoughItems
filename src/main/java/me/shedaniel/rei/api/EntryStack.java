@@ -50,7 +50,7 @@ public interface EntryStack {
     }
     
     static EntryStack create(ItemConvertible item) {
-        return new ItemEntryStack(new ItemStack(item));
+        return create(new ItemStack(item));
     }
     
     @ApiStatus.Internal
@@ -185,6 +185,7 @@ public interface EntryStack {
         public static final Supplier<Boolean> FALSE = () -> false;
         public static final Settings<Supplier<Boolean>> RENDER = new Settings<>(TRUE);
         public static final Settings<Supplier<Boolean>> CHECK_TAGS = new Settings<>(FALSE);
+        public static final Settings<Supplier<Boolean>> CHECK_AMOUNT = new Settings<>(FALSE);
         public static final Settings<Supplier<Boolean>> TOOLTIP_ENABLED = new Settings<>(TRUE);
         public static final Settings<Supplier<Boolean>> TOOLTIP_APPEND_MOD = new Settings<>(TRUE);
         public static final Settings<Supplier<Boolean>> RENDER_COUNTS = new Settings<>(TRUE);

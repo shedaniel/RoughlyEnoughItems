@@ -13,10 +13,6 @@ import me.shedaniel.rei.impl.ConfigManagerImpl;
 import me.shedaniel.rei.impl.ConfigObjectImpl;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.util.List;
 
 public interface ConfigObject {
@@ -124,28 +120,6 @@ public interface ConfigObject {
     
     List<EntryStack> getFavorites();
     
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.FIELD})
-    @interface AddInFrontKeyCode {}
-    
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.FIELD})
-    @interface DontApplyFieldName {}
-    
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.FIELD})
-    @interface UseEnumSelectorInstead {}
-    
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.FIELD})
-    @interface UseSpecialRecipeTypeScreen {}
-    
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.FIELD})
-    @interface UsePercentage {
-        double min();
-        
-        double max();
-    }
+    List<EntryStack> getFilteredStacks();
     
 }

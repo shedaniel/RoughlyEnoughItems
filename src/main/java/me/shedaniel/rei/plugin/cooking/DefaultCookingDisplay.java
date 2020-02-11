@@ -40,14 +40,7 @@ public abstract class DefaultCookingDisplay implements TransferRecipeDisplay {
     
     public DefaultCookingDisplay(AbstractCookingRecipe recipe) {
         this.recipe = recipe;
-        this.input = recipe.getPreviewInputs().stream().map(i -> {
-            List<EntryStack> entries = new ArrayList<>();
-            for (ItemStack stack : i.getMatchingStacksClient()) {
-                entries.add(EntryStack.create(stack));
-            }
-            return entries;
-        }).collect(Collectors.toList());
-        this.input.add(fuel);
+        this.input = CollectionUtils.map(recipe.getPreviewInputs(), i -> CollectionUtils.map(i.getMatchingStacksClient(), EntryStack::create));
         this.output = Collections.singletonList(EntryStack.create(recipe.getOutput()));
         this.xp = recipe.getExperience();
         this.cookTime = recipe.getCookTime();
@@ -81,6 +74,10 @@ public abstract class DefaultCookingDisplay implements TransferRecipeDisplay {
         return cookTime;
     }
     
+    public static List<EntryStack> getFuel() {
+        return fuel;
+    }
+    
     @ApiStatus.Internal
     public Optional<AbstractCookingRecipe> getOptionalRecipe() {
         return Optional.ofNullable(recipe);
@@ -98,7 +95,7 @@ public abstract class DefaultCookingDisplay implements TransferRecipeDisplay {
     
     @Override
     public List<List<EntryStack>> getOrganisedInputEntries(ContainerInfo<Container> containerInfo, Container container) {
-        return CollectionUtils.map(recipe.getPreviewInputs(), i -> CollectionUtils.map(i.getMatchingStacksClient(), EntryStack::create));
+        return input;
     }
     
 }
