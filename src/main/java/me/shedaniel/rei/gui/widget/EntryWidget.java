@@ -233,7 +233,7 @@ public class EntryWidget extends WidgetWithBounds {
             if (interactableFavorites && ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(PointHelper.fromMouse()) && !getCurrentEntry().isEmpty()) {
                 ModifierKeyCode keyCode = ConfigObject.getInstance().getFavoriteKeyCode();
                 EntryStack entry = getCurrentEntry().copy();
-                entry.setAmount(1000);
+                entry.setAmount(127);
                 if (keyCode.matchesKey(int_1, int_2)) {
                     if (reverseFavoritesAction())
                         ConfigManager.getInstance().getFavorites().remove(entry);

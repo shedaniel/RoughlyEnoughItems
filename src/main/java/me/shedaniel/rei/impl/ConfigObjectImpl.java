@@ -20,6 +20,10 @@ import me.shedaniel.rei.gui.config.SearchFieldLocation;
 import net.minecraft.client.util.InputUtil;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,12 +31,36 @@ import java.util.List;
 @Config(name = "roughlyenoughitems/config")
 public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD})
+    @interface DontApplyFieldName {}
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD})
+    @interface UseEnumSelectorInstead {}
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD})
+    @interface UseSpecialRecipeTypeScreen {}
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD})
+    @interface UseFilteringScreen {}
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD})
+    @interface UsePercentage {
+        double min();
+        
+        double max();
+    }
+    
     @ConfigEntry.Category("!general") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName public General general = new General();
     @ConfigEntry.Category("appearance") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName private Appearance appearance = new Appearance();
     @ConfigEntry.Category("modules") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName private Modules modules = new Modules();
     @ConfigEntry.Category("technical") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName private Technical technical = new Technical();
     @ConfigEntry.Category("performance") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName private Performance performance = new Performance();
-    //    @ConfigEntry.Category("filtering") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName private Filtering filtering = new Filtering();
+    @ConfigEntry.Category("filtering") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName private Filtering filtering = new Filtering();
     
     @Override
     public boolean isLighterButtonHover() {
@@ -285,6 +313,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         return general.favorites;
     }
     
+    @Override
+    public List<EntryStack> getFilteredStacks() {
+        return filtering.filteredStacks;
+    }
+    
     public static class General {
         @ConfigEntry.Gui.Excluded public List<EntryStack> favorites = new ArrayList<>();
         @Comment("Declares whether cheating mode is on.") private boolean cheating = false;
@@ -348,6 +381,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     public static class Filtering {
-        private List<EntryStack> filteredStacks = new ArrayList<>();
+        @UseFilteringScreen private List<EntryStack> filteredStacks = new ArrayList<>();
     }
 }
