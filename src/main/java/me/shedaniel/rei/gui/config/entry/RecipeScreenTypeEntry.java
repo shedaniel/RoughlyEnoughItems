@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2018, 2019, 2020 shedaniel
+ * Licensed under the MIT License (the "License").
+ */
+
 package me.shedaniel.rei.gui.config.entry;
 
 import com.google.common.collect.ImmutableList;
