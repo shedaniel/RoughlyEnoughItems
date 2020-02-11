@@ -32,8 +32,8 @@ import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.gui.ConfigReloadingScreen;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
-import me.shedaniel.rei.gui.PreRecipeViewingScreen;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
+import me.shedaniel.rei.gui.config.entry.RecipeScreenTypeEntry;
 import me.shedaniel.rei.gui.credits.CreditsScreen;
 import me.shedaniel.rei.gui.widget.ReloadConfigButtonWidget;
 import net.fabricmc.loader.api.FabricLoader;
@@ -60,7 +60,6 @@ import static me.sargunvohra.mcmods.autoconfig1u.util.Utils.setUnsafely;
 public class ConfigManagerImpl implements ConfigManager {
     
     private boolean craftableOnly;
-    //    private List<EntryStack> favorites = new ArrayList<>();
     private Gson gson = new GsonBuilder().create();
     
     public ConfigManagerImpl() {
@@ -79,26 +78,12 @@ public class ConfigManagerImpl implements ConfigManager {
         }).registerSerializer(EntryStack.class, (stack, marshaller) -> {
             return new JsonPrimitive(gson.toJson(stack.toJson()));
         }).registerPrimitiveTypeAdapter(EntryStack.class, it -> {
-            return it instanceof String ? EntryStack.readFromJson(gson.fromJson((String) it, JsonElement.class)) : null;
+            System.out.println(it);
+            return it instanceof String ? EntryStack.readFromJson(gson.fromJson((String) it, JsonElement.class)) : EntryStack.empty();
         }).build()));
         GuiRegistry guiRegistry = AutoConfig.getGuiRegistry(ConfigObjectImpl.class);
         //noinspection rawtypes
-        guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> Collections.singletonList(ConfigEntryBuilder.create().startEnumSelector(i13n, (Class) field.getType(), getUnsafely(field, config, null)).setDefaultValue(() -> getUnsafely(field, defaults)).setSaveConsumer(newValue -> setUnsafely(field, config, newValue)).build()), field -> field.getType().isEnum(), ConfigObject.UseEnumSelectorInstead.class);
-        //        guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> {
-        //            @SuppressWarnings("rawtypes") List<AbstractConfigListEntry> entries = new ArrayList<>();
-        //            for (FabricKeyBinding binding : ClientHelper.getInstance().getREIKeyBindings()) {
-        //                entries.add(ConfigEntryBuilder.create().fillKeybindingField(I18n.translate(binding.getId()) + ":", binding).build());
-        //            }
-        //            KeyCodeEntry entry = ConfigEntryBuilder.create().startKeyCodeField(i13n, getUnsafely(field, config, InputUtil.UNKNOWN_KEYCODE)).setDefaultValue(() -> getUnsafely(field, defaults)).setSaveConsumer(newValue -> setUnsafely(field, config, newValue)).build();
-        //            entry.setAllowMouse(false);
-        //            entries.add(entry);
-        //            return entries;
-        //        }, field -> field.getType() == InputUtil.KeyCode.class, ConfigObject.AddInFrontKeyCode.class);
-        //        guiRegistry.registerPredicateProvider((i13n, field, config, defaults, guiProvider) -> {
-        //            KeyCodeEntry entry = ConfigEntryBuilder.create().startKeyCodeField(i13n, getUnsafely(field, config, InputUtil.UNKNOWN_KEYCODE)).setDefaultValue(() -> getUnsafely(field, defaults)).setSaveConsumer(newValue -> setUnsafely(field, config, newValue)).build();
-        //            entry.setAllowMouse(false);
-        //            return Collections.singletonList(entry);
-        //        }, field -> field.getType() == InputUtil.KeyCode.class);
+        guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> Collections.singletonList(ConfigEntryBuilder.create().startEnumSelector(i13n, (Class) field.getType(), getUnsafely(field, config, null)).setDefaultValue(() -> getUnsafely(field, defaults)).setSaveConsumer(newValue -> setUnsafely(field, config, newValue)).build()), field -> field.getType().isEnum(), ConfigObjectImpl.UseEnumSelectorInstead.class);
         guiRegistry.registerPredicateProvider((i13n, field, config, defaults, guiProvider) -> {
             if (field.isAnnotationPresent(ConfigEntry.Gui.Excluded.class))
                 return Collections.emptyList();
@@ -107,66 +92,15 @@ public class ConfigManagerImpl implements ConfigManager {
             return Collections.singletonList(entry);
         }, field -> field.getType() == ModifierKeyCode.class);
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> {
-            ConfigObject.UsePercentage bounds = field.getAnnotation(ConfigObject.UsePercentage.class);
+            ConfigObjectImpl.UsePercentage bounds = field.getAnnotation(ConfigObjectImpl.UsePercentage.class);
             return Collections.singletonList(ConfigEntryBuilder.create().startIntSlider(i13n, MathHelper.ceil(Utils.getUnsafely(field, config, 0.0) * 100), MathHelper.ceil(bounds.min() * 100), MathHelper.ceil(bounds.max() * 100)).setDefaultValue(() -> MathHelper.ceil((double) Utils.getUnsafely(field, defaults) * 100)).setSaveConsumer((newValue) -> {
                 Utils.setUnsafely(field, config, newValue / 100d);
             }).setTextGetter(integer -> String.format("Size: %d%%", integer)).build());
-        }, (field) -> field.getType() == Double.TYPE || field.getType() == Double.class, ConfigObject.UsePercentage.class);
+        }, (field) -> field.getType() == Double.TYPE || field.getType() == Double.class, ConfigObjectImpl.UsePercentage.class);
         
-        guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> {
-            int width = 220;
-            return Collections.singletonList(new TooltipListEntry<RecipeScreenType>(i13n, null) {
-                private RecipeScreenType type = getUnsafely(field, config, RecipeScreenType.UNSET);
-                private AbstractButtonWidget buttonWidget = new AbstractPressableButtonWidget(0, 0, 0, 20, "") {
-                    @Override
-                    public void onPress() {
-                        MinecraftClient.getInstance().openScreen(new PreRecipeViewingScreen(getScreen(), type, false, original -> {
-                            MinecraftClient.getInstance().openScreen(getScreen());
-                            type = original ? RecipeScreenType.ORIGINAL : RecipeScreenType.VILLAGER;
-                            getScreen().setEdited(true, isRequiresRestart());
-                        }));
-                    }
-                    
-                    @Override
-                    public void render(int mouseX, int mouseY, float delta) {
-                        setMessage(I18n.translate("config.roughlyenoughitems.recipeScreenType.config", type.toString()));
-                        super.render(mouseX, mouseY, delta);
-                    }
-                };
-                private List<Element> children = ImmutableList.of(buttonWidget);
-                
-                @Override
-                public RecipeScreenType getValue() {
-                    return type;
-                }
-                
-                @Override
-                public Optional<RecipeScreenType> getDefaultValue() {
-                    return Optional.ofNullable(getUnsafely(field, defaults));
-                }
-                
-                @Override
-                public void save() {
-                    Utils.setUnsafely(field, config, type);
-                }
-                
-                @Override
-                public List<? extends Element> children() {
-                    return children;
-                }
-                
-                @Override
-                public void render(int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-                    super.render(index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
-                    Window window = MinecraftClient.getInstance().getWindow();
-                    this.buttonWidget.active = this.isEditable();
-                    this.buttonWidget.y = y;
-                    this.buttonWidget.x = x + entryWidth / 2 - width / 2;
-                    this.buttonWidget.setWidth(width);
-                    this.buttonWidget.render(mouseX, mouseY, delta);
-                }
-            });
-        }, (field) -> field.getType() == RecipeScreenType.class, ConfigObject.UseSpecialRecipeTypeScreen.class);
+        guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) ->
+                        Collections.singletonList(new RecipeScreenTypeEntry(220, i13n, getUnsafely(field, config, RecipeScreenType.UNSET), getUnsafely(field, defaults), type -> setUnsafely(field, config, type)))
+                , (field) -> field.getType() == RecipeScreenType.class, ConfigObjectImpl.UseSpecialRecipeTypeScreen.class);
         saveConfig();
         RoughlyEnoughItemsCore.LOGGER.info("[REI] Config is loaded.");
     }
@@ -180,6 +114,8 @@ public class ConfigManagerImpl implements ConfigManager {
     public void saveConfig() {
         if (getFavorites() != null)
             getFavorites().removeIf(EntryStack::isEmpty);
+        if (getConfig().getFilteredStacks() != null)
+            getConfig().getFilteredStacks().removeIf(EntryStack::isEmpty);
         ((me.sargunvohra.mcmods.autoconfig1u.ConfigManager<ConfigObjectImpl>) AutoConfig.getConfigHolder(ConfigObjectImpl.class)).save();
     }
     
@@ -204,7 +140,7 @@ public class ConfigManagerImpl implements ConfigManager {
         try {
             ConfigScreenProvider<ConfigObjectImpl> provider = (ConfigScreenProvider<ConfigObjectImpl>) AutoConfig.getConfigScreen(ConfigObjectImpl.class, parent);
             provider.setI13nFunction(manager -> "config.roughlyenoughitems");
-            provider.setOptionFunction((baseI13n, field) -> field.isAnnotationPresent(ConfigObject.DontApplyFieldName.class) ? baseI13n : String.format("%s.%s", baseI13n, field.getName()));
+            provider.setOptionFunction((baseI13n, field) -> field.isAnnotationPresent(ConfigObjectImpl.DontApplyFieldName.class) ? baseI13n : String.format("%s.%s", baseI13n, field.getName()));
             provider.setCategoryFunction((baseI13n, categoryName) -> String.format("%s.%s", baseI13n, categoryName));
             provider.setBuildFunction(builder -> {
                 if (FabricLoader.getInstance().isModLoaded("modmenu")) {

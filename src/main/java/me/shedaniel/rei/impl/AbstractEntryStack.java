@@ -63,7 +63,8 @@ public abstract class AbstractEntryStack extends DrawableHelper implements Entry
             return false;
         EntryStack stack = (EntryStack) obj;
         boolean checkTags = get(Settings.CHECK_TAGS).get() || stack.get(Settings.CHECK_TAGS).get();
-        return equals(stack, !checkTags, true);
+        boolean checkAmount = get(Settings.CHECK_AMOUNT).get() || stack.get(Settings.CHECK_AMOUNT).get();
+        return equals(stack, !checkTags, !checkAmount);
     }
     
     @Override
