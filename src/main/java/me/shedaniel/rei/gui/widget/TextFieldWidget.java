@@ -483,18 +483,6 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
         int b = (color & 255);
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
-        //        RenderSystem.color4f(0.0F, 0.0F, 255.0F, 255.0F);
-        //        RenderSystem.disableTexture();
-        //        RenderSystem.enableColorLogicOp();
-        //        RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
-        //        buffer.begin(7, VertexFormats.POSITION);
-        //        buffer.vertex(x1, y2, getBlitOffset() + 50d).next();
-        //        buffer.vertex(x2, y2, getBlitOffset() + 50d).next();
-        //        buffer.vertex(x2, y1, getBlitOffset() + 50d).next();
-        //        buffer.vertex(x1, y1, getBlitOffset() + 50d).next();
-        //        tessellator.draw();
-        //        RenderSystem.disableColorLogicOp();
-        //        RenderSystem.enableTexture();
         RenderSystem.disableTexture();
         RenderSystem.enableBlend();
         RenderSystem.disableAlphaTest();
