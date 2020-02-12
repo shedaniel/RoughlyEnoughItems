@@ -32,13 +32,14 @@ import net.minecraft.client.util.math.Matrix4f;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -58,7 +59,6 @@ public class EntryListWidget extends WidgetWithBounds {
     });
     private static final int SIZE = 18;
     private static final boolean LAZY = true;
-    private static final String SPACE = " ", EMPTY = "";
     private static int page;
     protected double target;
     protected double scroll;
@@ -620,7 +620,7 @@ public class EntryListWidget extends WidgetWithBounds {
     }
     
     public void updateSearch(String searchTerm) {
-        lastSearchArguments = processSearchTerm(searchTerm);
+        lastSearchArguments = SearchArgument.processSearchTerm(searchTerm);
         {
             List<EntryStack> list = Lists.newArrayList();
             boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
@@ -631,7 +631,8 @@ public class EntryListWidget extends WidgetWithBounds {
                     if (canLastSearchTermsBeAppliedTo(stack)) {
                         if (workingItems != null && CollectionUtils.findFirstOrNullEquals(workingItems, stack) == null)
                             continue;
-                        list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
+                        if (CollectionUtils.findFirstOrNullEquals(ConfigObject.getInstance().getFilteredStacks(), stack) == null)
+                            list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
                     }
                 }
             }
@@ -673,118 +674,7 @@ public class EntryListWidget extends WidgetWithBounds {
     }
     
     public boolean canLastSearchTermsBeAppliedTo(EntryStack stack) {
-        return lastSearchArguments.isEmpty() || canSearchTermsBeAppliedTo(stack, lastSearchArguments);
-    }
-    
-    private boolean canSearchTermsBeAppliedTo(EntryStack stack, List<SearchArgument.SearchArguments> searchArguments) {
-        if (searchArguments.isEmpty())
-            return true;
-        String mod = null;
-        String modName = null;
-        String name = null;
-        String tooltip = null;
-        String[] tags = null;
-        for (SearchArgument.SearchArguments arguments : searchArguments) {
-            boolean applicable = true;
-            for (SearchArgument argument : arguments.getArguments()) {
-                if (argument.getArgumentType() == SearchArgument.ArgumentType.ALWAYS)
-                    return true;
-                else if (argument.getArgumentType() == SearchArgument.ArgumentType.MOD) {
-                    if (mod == null)
-                        mod = stack.getIdentifier().map(Identifier::getNamespace).orElse("").replace(SPACE, EMPTY).toLowerCase(Locale.ROOT);
-                    if (mod != null && !mod.isEmpty()) {
-                        if (argument.getFunction(!argument.isInclude()).apply(mod)) {
-                            if (modName == null)
-                                modName = ClientHelper.getInstance().getModFromModId(mod).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT);
-                            if (modName == null || modName.isEmpty() || argument.getFunction(!argument.isInclude()).apply(modName)) {
-                                applicable = false;
-                                break;
-                            }
-                            break;
-                        }
-                    }
-                } else if (argument.getArgumentType() == SearchArgument.ArgumentType.TEXT) {
-                    if (name == null)
-                        name = SearchArgument.tryGetEntryStackName(stack).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT);
-                    if (name != null && !name.isEmpty() && argument.getFunction(!argument.isInclude()).apply(name)) {
-                        applicable = false;
-                        break;
-                    }
-                } else if (argument.getArgumentType() == SearchArgument.ArgumentType.TOOLTIP) {
-                    if (name == null)
-                        name = SearchArgument.tryGetEntryStackTooltip(stack).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT);
-                    if (name != null && !name.isEmpty() && argument.getFunction(!argument.isInclude()).apply(name)) {
-                        applicable = false;
-                        break;
-                    }
-                } else if (argument.getArgumentType() == SearchArgument.ArgumentType.TAG) {
-                    if (tags == null) {
-                        if (stack.getType() == EntryStack.Type.ITEM) {
-                            Identifier[] tagsFor = minecraft.getNetworkHandler().getTagManager().items().getTagsFor(stack.getItem()).toArray(new Identifier[0]);
-                            tags = new String[tagsFor.length];
-                            for (int i = 0; i < tagsFor.length; i++)
-                                tags[i] = tagsFor[i].toString();
-                        } else if (stack.getType() == EntryStack.Type.FLUID) {
-                            Identifier[] tagsFor = minecraft.getNetworkHandler().getTagManager().fluids().getTagsFor(stack.getFluid()).toArray(new Identifier[0]);
-                            tags = new String[tagsFor.length];
-                            for (int i = 0; i < tagsFor.length; i++)
-                                tags[i] = tagsFor[i].toString();
-                        } else
-                            tags = new String[0];
-                    }
-                    if (tags != null && tags.length > 0) {
-                        boolean a = false;
-                        for (String tag : tags)
-                            if (argument.getFunction(argument.isInclude()).apply(tag))
-                                a = true;
-                        if (!a) {
-                            applicable = false;
-                            break;
-                        }
-                    } else {
-                        applicable = false;
-                        break;
-                    }
-                }
-            }
-            if (applicable)
-                return true;
-        }
-        return false;
-    }
-    
-    private List<SearchArgument.SearchArguments> processSearchTerm(String searchTerm) {
-        List<SearchArgument.SearchArguments> searchArguments = Lists.newArrayList();
-        for (String split : StringUtils.splitByWholeSeparatorPreserveAllTokens(searchTerm.toLowerCase(Locale.ROOT), "|")) {
-            String[] terms = StringUtils.split(split);
-            if (terms.length == 0)
-                searchArguments.add(SearchArgument.SearchArguments.ALWAYS);
-            else {
-                SearchArgument[] arguments = new SearchArgument[terms.length];
-                for (int i = 0; i < terms.length; i++) {
-                    String term = terms[i];
-                    if (term.startsWith("-@") || term.startsWith("@-")) {
-                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.MOD, term.substring(2), false);
-                    } else if (term.startsWith("@")) {
-                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.MOD, term.substring(1), true);
-                    } else if (term.startsWith("-$") || term.startsWith("$-")) {
-                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TAG, term.substring(2), false);
-                    } else if (term.startsWith("$")) {
-                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TAG, term.substring(1), true);
-                    } else if (term.startsWith("-#") || term.startsWith("#-")) {
-                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, term.substring(2), false);
-                    } else if (term.startsWith("#")) {
-                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, term.substring(1), true);
-                    } else if (term.startsWith("-")) {
-                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TEXT, term.substring(1), false);
-                    } else {
-                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TEXT, term, true);
-                    }
-                }
-                searchArguments.add(new SearchArgument.SearchArguments(arguments));
-            }
-        }
-        return searchArguments;
+        return lastSearchArguments.isEmpty() || SearchArgument.canSearchTermsBeAppliedTo(stack, lastSearchArguments);
     }
     
     @Override

@@ -85,7 +85,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
     
     @Override
     public boolean mouseScrolled(double double_1, double double_2, double double_3) {
-        if (ConfigObject.getInstance().isEntryListWidgetScrolled() && bounds.contains(double_1, double_2)) {
+        if (bounds.contains(double_1, double_2)) {
             offset(ClothConfigInitializer.getScrollStep() * -double_3, true);
             return true;
         }
