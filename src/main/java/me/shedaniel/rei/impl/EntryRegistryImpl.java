@@ -24,6 +24,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @ApiStatus.Internal
 public class EntryRegistryImpl implements EntryRegistry {
     
+    private final CopyOnWriteArrayList<EntryStack> allEntries = Lists.newCopyOnWriteArrayList();
     private final CopyOnWriteArrayList<EntryStack> entries = Lists.newCopyOnWriteArrayList();
     private final Queue<Pair<EntryStack, Collection<? extends EntryStack>>> queueRegisterEntryStackAfter = Queues.newConcurrentLinkedQueue();
     private List<EntryStack> reloadList;
@@ -49,9 +50,6 @@ public class EntryRegistryImpl implements EntryRegistry {
         entries.clear();
         entries.addAll(set);
         set.clear();
-        for (EntryStack stack : ConfigObject.getInstance().getFilteredStacks()) {
-            entries.remove(stack);
-        }
         doingDistinct = false;
     }
     
