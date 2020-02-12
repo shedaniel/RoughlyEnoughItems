@@ -168,7 +168,7 @@
   "config.roughlyenoughitems.searchFavorites": "Szukaj w Ulubionych:",
   "config.roughlyenoughitems.appendModNames": "Wyświetlaj nazwy modów przy przedmiotach:",
   "config.roughlyenoughitems.displayFavoritesOnTheLeft": "Pozycja Ulubionych przedmiotów:",
-  "config.roughlyenoughitems.displayFavoritesOnTheLeft.boolean.true": "Przeciwna strona",
+  "config.roughlyenoughitems.displayFavoritesOnTheLeft.boolean.true": "Po przeciwnej stronie",
   "config.roughlyenoughitems.displayFavoritesOnTheLeft.boolean.false": "U góry listy",
   "config.roughlyenoughitems.displayFavoritesTooltip": "Wyświetlaj etykiety Ulubionych przedmiotów:",
   "config.roughlyenoughitems.snapToRows": "Lista przylega do wierszy:",
