@@ -121,9 +121,9 @@ public class SearchArgument {
                         break;
                     }
                 } else if (argument.getArgumentType() == SearchArgument.ArgumentType.TOOLTIP) {
-                    if (name == null)
-                        name = SearchArgument.tryGetEntryStackTooltip(stack).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT);
-                    if (name != null && !name.isEmpty() && argument.getFunction(!argument.isInclude()).apply(name)) {
+                    if (tooltip == null)
+                        tooltip = SearchArgument.tryGetEntryStackTooltip(stack).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT);
+                    if (tooltip != null && !tooltip.isEmpty() && argument.getFunction(!argument.isInclude()).apply(tooltip)) {
                         applicable = false;
                         break;
                     }
