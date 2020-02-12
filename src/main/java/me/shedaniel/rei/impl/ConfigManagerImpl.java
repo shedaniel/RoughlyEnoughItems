@@ -33,6 +33,8 @@ import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.gui.ConfigReloadingScreen;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
+import me.shedaniel.rei.gui.config.entry.FilteringEntry;
+import me.shedaniel.rei.gui.config.entry.NoFilteringEntry;
 import me.shedaniel.rei.gui.config.entry.RecipeScreenTypeEntry;
 import me.shedaniel.rei.gui.credits.CreditsScreen;
 import net.fabricmc.loader.api.FabricLoader;
@@ -48,6 +50,7 @@ import net.minecraft.client.util.Window;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -99,6 +102,12 @@ public class ConfigManagerImpl implements ConfigManager {
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) ->
                         Collections.singletonList(new RecipeScreenTypeEntry(220, i13n, getUnsafely(field, config, RecipeScreenType.UNSET), getUnsafely(field, defaults), type -> setUnsafely(field, config, type)))
                 , (field) -> field.getType() == RecipeScreenType.class, ConfigObjectImpl.UseSpecialRecipeTypeScreen.class);
+        guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) ->
+                        ScreenHelper.getLastContainerScreenHooks() == null || MinecraftClient.getInstance().getNetworkHandler() == null || MinecraftClient.getInstance().getNetworkHandler().getRecipeManager() == null ?
+                                Collections.singletonList(new NoFilteringEntry(getUnsafely(field, config, new ArrayList<>()), getUnsafely(field, defaults), list -> setUnsafely(field, config, list)))
+                                :
+                                Collections.singletonList(new FilteringEntry(getUnsafely(field, config, new ArrayList<>()), getUnsafely(field, defaults), list -> setUnsafely(field, config, list)))
+                , (field) -> field.getType() == List.class, ConfigObjectImpl.UseFilteringScreen.class);
         saveConfig();
         RoughlyEnoughItemsCore.LOGGER.info("[REI] Config is loaded.");
     }

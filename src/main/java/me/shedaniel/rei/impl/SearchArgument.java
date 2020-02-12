@@ -6,6 +6,7 @@
 package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
+import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.utils.CollectionUtils;
@@ -29,6 +30,7 @@ import java.util.function.Function;
 @ApiStatus.Internal
 public class SearchArgument {
     
+    private static final String SPACE = " ", EMPTY = "";
     private static final SearchArgument ALWAYS = new SearchArgument(ArgumentType.ALWAYS, "", true);
     private static List<Item> searchBlacklisted = Lists.newArrayList();
     private ArgumentType argumentType;
@@ -45,6 +47,120 @@ public class SearchArgument {
         this.argumentType = argumentType;
         this.text = autoLowerCase ? text.toLowerCase(Locale.ROOT) : text;
         this.include = include;
+    }
+    
+    @ApiStatus.Internal
+    public static List<SearchArgument.SearchArguments> processSearchTerm(String searchTerm) {
+        List<SearchArgument.SearchArguments> searchArguments = Lists.newArrayList();
+        for (String split : StringUtils.splitByWholeSeparatorPreserveAllTokens(searchTerm.toLowerCase(Locale.ROOT), "|")) {
+            String[] terms = StringUtils.split(split);
+            if (terms.length == 0)
+                searchArguments.add(SearchArgument.SearchArguments.ALWAYS);
+            else {
+                SearchArgument[] arguments = new SearchArgument[terms.length];
+                for (int i = 0; i < terms.length; i++) {
+                    String term = terms[i];
+                    if (term.startsWith("-@") || term.startsWith("@-")) {
+                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.MOD, term.substring(2), false);
+                    } else if (term.startsWith("@")) {
+                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.MOD, term.substring(1), true);
+                    } else if (term.startsWith("-$") || term.startsWith("$-")) {
+                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TAG, term.substring(2), false);
+                    } else if (term.startsWith("$")) {
+                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TAG, term.substring(1), true);
+                    } else if (term.startsWith("-#") || term.startsWith("#-")) {
+                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, term.substring(2), false);
+                    } else if (term.startsWith("#")) {
+                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, term.substring(1), true);
+                    } else if (term.startsWith("-")) {
+                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TEXT, term.substring(1), false);
+                    } else {
+                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TEXT, term, true);
+                    }
+                }
+                searchArguments.add(new SearchArgument.SearchArguments(arguments));
+            }
+        }
+        return searchArguments;
+    }
+    
+    @ApiStatus.Internal
+    public static boolean canSearchTermsBeAppliedTo(EntryStack stack, List<SearchArgument.SearchArguments> searchArguments) {
+        if (searchArguments.isEmpty())
+            return true;
+        MinecraftClient minecraft = MinecraftClient.getInstance();
+        String mod = null;
+        String modName = null;
+        String name = null;
+        String tooltip = null;
+        String[] tags = null;
+        for (SearchArgument.SearchArguments arguments : searchArguments) {
+            boolean applicable = true;
+            for (SearchArgument argument : arguments.getArguments()) {
+                if (argument.getArgumentType() == SearchArgument.ArgumentType.ALWAYS)
+                    return true;
+                else if (argument.getArgumentType() == SearchArgument.ArgumentType.MOD) {
+                    if (mod == null)
+                        mod = stack.getIdentifier().map(Identifier::getNamespace).orElse("").replace(SPACE, EMPTY).toLowerCase(Locale.ROOT);
+                    if (mod != null && !mod.isEmpty()) {
+                        if (argument.getFunction(!argument.isInclude()).apply(mod)) {
+                            if (modName == null)
+                                modName = ClientHelper.getInstance().getModFromModId(mod).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT);
+                            if (modName == null || modName.isEmpty() || argument.getFunction(!argument.isInclude()).apply(modName)) {
+                                applicable = false;
+                                break;
+                            }
+                            break;
+                        }
+                    }
+                } else if (argument.getArgumentType() == SearchArgument.ArgumentType.TEXT) {
+                    if (name == null)
+                        name = SearchArgument.tryGetEntryStackName(stack).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT);
+                    if (name != null && !name.isEmpty() && argument.getFunction(!argument.isInclude()).apply(name)) {
+                        applicable = false;
+                        break;
+                    }
+                } else if (argument.getArgumentType() == SearchArgument.ArgumentType.TOOLTIP) {
+                    if (name == null)
+                        name = SearchArgument.tryGetEntryStackTooltip(stack).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT);
+                    if (name != null && !name.isEmpty() && argument.getFunction(!argument.isInclude()).apply(name)) {
+                        applicable = false;
+                        break;
+                    }
+                } else if (argument.getArgumentType() == SearchArgument.ArgumentType.TAG) {
+                    if (tags == null) {
+                        if (stack.getType() == EntryStack.Type.ITEM) {
+                            Identifier[] tagsFor = minecraft.getNetworkHandler().getTagManager().items().getTagsFor(stack.getItem()).toArray(new Identifier[0]);
+                            tags = new String[tagsFor.length];
+                            for (int i = 0; i < tagsFor.length; i++)
+                                tags[i] = tagsFor[i].toString();
+                        } else if (stack.getType() == EntryStack.Type.FLUID) {
+                            Identifier[] tagsFor = minecraft.getNetworkHandler().getTagManager().fluids().getTagsFor(stack.getFluid()).toArray(new Identifier[0]);
+                            tags = new String[tagsFor.length];
+                            for (int i = 0; i < tagsFor.length; i++)
+                                tags[i] = tagsFor[i].toString();
+                        } else
+                            tags = new String[0];
+                    }
+                    if (tags != null && tags.length > 0) {
+                        boolean a = false;
+                        for (String tag : tags)
+                            if (argument.getFunction(argument.isInclude()).apply(tag))
+                                a = true;
+                        if (!a) {
+                            applicable = false;
+                            break;
+                        }
+                    } else {
+                        applicable = false;
+                        break;
+                    }
+                }
+            }
+            if (applicable)
+                return true;
+        }
+        return false;
     }
     
     public static String tryGetEntryStackName(EntryStack stack) {

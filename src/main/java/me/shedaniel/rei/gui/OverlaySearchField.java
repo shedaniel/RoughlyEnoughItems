@@ -29,15 +29,16 @@ public class OverlaySearchField extends TextFieldWidget {
     public int keybindFocusKey = -1;
     protected Pair<Long, Point> lastClickedDetails = null;
     private List<String> history = Lists.newArrayListWithCapacity(100);
+    public boolean isMain = true;
     
-    OverlaySearchField(int x, int y, int width, int height) {
+    public OverlaySearchField(int x, int y, int width, int height) {
         super(x, y, width, height);
         setMaxLength(10000);
     }
     
     @Override
     public void setFocused(boolean boolean_1) {
-        if (isFocused() != boolean_1)
+        if (isFocused() != boolean_1 && isMain)
             addToHistory(getText());
         super.setFocused(boolean_1);
     }
@@ -54,7 +55,7 @@ public class OverlaySearchField extends TextFieldWidget {
     
     public void laterRender(int int_1, int int_2, float float_1) {
         RenderSystem.disableDepthTest();
-        setEditableColor(ContainerScreenOverlay.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty() ? 16733525 : isSearching ? -852212 : (containsMouse(PointHelper.fromMouse()) || isFocused()) ? (ScreenHelper.isDarkModeEnabled() ? -17587 : -1) : -6250336);
+        setEditableColor(isMain && ContainerScreenOverlay.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty() ? 16733525 : isSearching && isMain ? -852212 : (containsMouse(PointHelper.fromMouse()) || isFocused()) ? (ScreenHelper.isDarkModeEnabled() ? -17587 : -1) : -6250336);
         setSuggestion(!isFocused() && getText().isEmpty() ? I18n.translate("text.rei.search.field.suggestion") : null);
         super.render(int_1, int_2, float_1);
         RenderSystem.enableDepthTest();
@@ -70,10 +71,9 @@ public class OverlaySearchField extends TextFieldWidget {
     
     @Override
     public void renderBorder() {
-        boolean hasError = ContainerScreenOverlay.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty();
-        if (isSearching) {
+        if (isMain && isSearching) {
             fill(this.getBounds().x - 1, this.getBounds().y - 1, this.getBounds().x + this.getBounds().width + 1, this.getBounds().y + this.getBounds().height + 1, -852212);
-        } else if (hasError) {
+        } else if (isMain && ContainerScreenOverlay.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty()) {
             fill(this.getBounds().x - 1, this.getBounds().y - 1, this.getBounds().x + this.getBounds().width + 1, this.getBounds().y + this.getBounds().height + 1, -43691);
         } else {
             super.renderBorder();
@@ -93,7 +93,7 @@ public class OverlaySearchField extends TextFieldWidget {
         boolean contains = containsMouse(double_1, double_2);
         if (isVisible() && contains && int_1 == 1)
             setText("");
-        if (contains && int_1 == 0)
+        if (contains && int_1 == 0 && isMain)
             if (lastClickedDetails == null)
                 lastClickedDetails = new Pair<>(System.currentTimeMillis(), new Point(double_1, double_2));
             else if (System.currentTimeMillis() - lastClickedDetails.getLeft() > 1500)
@@ -110,7 +110,7 @@ public class OverlaySearchField extends TextFieldWidget {
     
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
-        if (this.isVisible() && this.isFocused())
+        if (this.isVisible() && this.isFocused() && isMain)
             if (int_1 == 257 || int_1 == 335) {
                 addToHistory(getText());
                 setFocused(false);
@@ -149,7 +149,7 @@ public class OverlaySearchField extends TextFieldWidget {
     
     @Override
     public boolean containsMouse(double mouseX, double mouseY) {
-        return ScreenHelper.getLastOverlay().isNotInExclusionZones(mouseX, mouseY) && super.containsMouse(mouseX, mouseY);
+        return (!isMain || ScreenHelper.getLastOverlay().isNotInExclusionZones(mouseX, mouseY)) && super.containsMouse(mouseX, mouseY);
     }
     
     @Override
