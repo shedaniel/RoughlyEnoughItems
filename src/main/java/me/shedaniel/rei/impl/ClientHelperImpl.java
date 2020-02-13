@@ -48,6 +48,7 @@ import java.util.UUID;
 @ApiStatus.Internal
 public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
+    public static ClientHelperImpl instance;
     @ApiStatus.Internal public final Lazy<Boolean> isYog = new Lazy<>(() -> {
         try {
             if (MinecraftClient.getInstance().getSession().getProfile().getId().equals(UUID.fromString("f9546389-9415-4358-9c29-2c26b25bff5b")))
@@ -66,7 +67,6 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         }
         return false;
     });
-    public static ClientHelperImpl instance;
     private final Map<String, String> modNameCache = Maps.newHashMap();
     
     @Override

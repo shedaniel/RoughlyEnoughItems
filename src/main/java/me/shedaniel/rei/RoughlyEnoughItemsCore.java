@@ -148,6 +148,11 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         }
     }
     
+    @ApiStatus.Internal
+    public static boolean isDebugModeEnabled() {
+        return System.getProperty("rei.test", "false").equals("true");
+    }
+    
     @Override
     public void onInitializeClient() {
         configManager = new ConfigManagerImpl();
@@ -218,11 +223,6 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         
         // Test Only
         loadTestPlugins();
-    }
-    
-    @ApiStatus.Internal
-    public static boolean isDebugModeEnabled() {
-        return System.getProperty("rei.test", "false").equals("true");
     }
     
     private void loadTestPlugins() {

@@ -68,6 +68,19 @@ public abstract class AbstractEntryStack extends DrawableHelper implements Entry
     }
     
     @Override
+    public int hashCode() {
+        boolean checkTags = get(Settings.CHECK_TAGS).get();
+        boolean checkAmount = get(Settings.CHECK_AMOUNT).get();
+        if (!checkAmount && !checkTags)
+            return hashIgnoreAmountAndTags();
+        if (!checkAmount)
+            return hashIgnoreAmount();
+        if (!checkTags)
+            return hashIgnoreTags();
+        return hashOfAll();
+    }
+    
+    @Override
     public int getZ() {
         return getBlitOffset();
     }

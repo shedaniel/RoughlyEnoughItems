@@ -50,7 +50,7 @@ public class REITestPlugin implements REIPluginV0 {
     }
     
     public EntryStack transformStack(EntryStack stack) {
-        stack.setAmount(random.nextInt(Integer.MAX_VALUE));
+        stack.setAmount(random.nextInt(Byte.MAX_VALUE));
         return stack;
     }
     

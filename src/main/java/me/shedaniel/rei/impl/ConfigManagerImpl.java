@@ -9,7 +9,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
-import io.github.prospector.modmenu.ModMenu;
 import me.sargunvohra.mcmods.autoconfig1u.AutoConfig;
 import me.sargunvohra.mcmods.autoconfig1u.annotation.ConfigEntry;
 import me.sargunvohra.mcmods.autoconfig1u.gui.ConfigScreenProvider;
@@ -20,16 +19,14 @@ import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.JsonObje
 import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.JsonPrimitive;
 import me.sargunvohra.mcmods.autoconfig1u.util.Utils;
 import me.shedaniel.cloth.hooks.ScreenHooks;
+import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import me.shedaniel.clothconfig2.api.Modifier;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.clothconfig2.gui.entries.KeyCodeEntry;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.ConfigManager;
-import me.shedaniel.rei.api.ConfigObject;
-import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.RecipeHelper;
+import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.gui.ConfigReloadingScreen;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
@@ -38,7 +35,6 @@ import me.shedaniel.rei.gui.config.entry.NoFilteringEntry;
 import me.shedaniel.rei.gui.config.entry.RecipeScreenTypeEntry;
 import me.shedaniel.rei.gui.credits.CreditsScreen;
 import me.shedaniel.rei.gui.widget.ReloadConfigButtonWidget;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
@@ -151,46 +147,41 @@ public class ConfigManagerImpl implements ConfigManager {
             provider.setOptionFunction((baseI13n, field) -> field.isAnnotationPresent(ConfigObjectImpl.DontApplyFieldName.class) ? baseI13n : String.format("%s.%s", baseI13n, field.getName()));
             provider.setCategoryFunction((baseI13n, categoryName) -> String.format("%s.%s", baseI13n, categoryName));
             provider.setBuildFunction(builder -> {
-                if (FabricLoader.getInstance().isModLoaded("modmenu")) {
-                    builder.getOrCreateCategory("config.roughlyenoughitems.!general").addEntry(new TooltipListEntry<Object>(I18n.translate("config.roughlyenoughitems.smooth_scrolling"), null) {
-                        int width = 220;
-                        private AbstractButtonWidget buttonWidget = new AbstractPressableButtonWidget(0, 0, 0, 20, this.getFieldName()) {
-                            public void onPress() {
-                                Screen screen = ModMenu.getConfigScreen("cloth-config2", parent);
-                                if (screen != null) {
-                                    MinecraftClient.getInstance().openScreen(screen);
-                                } else
-                                    ModMenu.openConfigScreen("cloth-config2");
-                            }
-                        };
-                        private List<Element> children = ImmutableList.of(this.buttonWidget);
-                        
-                        public Object getValue() {
-                            return null;
+                builder.getOrCreateCategory("config.roughlyenoughitems.!general").addEntry(new TooltipListEntry<Object>(I18n.translate("config.roughlyenoughitems.smooth_scrolling"), null) {
+                    int width = 220;
+                    private AbstractButtonWidget buttonWidget = new AbstractPressableButtonWidget(0, 0, 0, 20, this.getFieldName()) {
+                        public void onPress() {
+                            Screen screen = ClothConfigInitializer.getConfigBuilder().build();
+                            MinecraftClient.getInstance().openScreen(screen);
                         }
-                        
-                        public Optional<Object> getDefaultValue() {
-                            return Optional.empty();
-                        }
-                        
-                        public void save() {
-                        }
-                        
-                        public List<? extends Element> children() {
-                            return this.children;
-                        }
-                        
-                        public void render(int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-                            super.render(index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
-                            Window window = MinecraftClient.getInstance().getWindow();
-                            this.buttonWidget.active = this.isEditable();
-                            this.buttonWidget.y = y;
-                            this.buttonWidget.x = x + entryWidth / 2 - this.width / 2;
-                            this.buttonWidget.setWidth(this.width);
-                            this.buttonWidget.render(mouseX, mouseY, delta);
-                        }
-                    });
-                }
+                    };
+                    private List<Element> children = ImmutableList.of(this.buttonWidget);
+                    
+                    public Object getValue() {
+                        return null;
+                    }
+                    
+                    public Optional<Object> getDefaultValue() {
+                        return Optional.empty();
+                    }
+                    
+                    public void save() {
+                    }
+                    
+                    public List<? extends Element> children() {
+                        return this.children;
+                    }
+                    
+                    public void render(int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+                        super.render(index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
+                        Window window = MinecraftClient.getInstance().getWindow();
+                        this.buttonWidget.active = this.isEditable();
+                        this.buttonWidget.y = y;
+                        this.buttonWidget.x = x + entryWidth / 2 - this.width / 2;
+                        this.buttonWidget.setWidth(this.width);
+                        this.buttonWidget.render(mouseX, mouseY, delta);
+                    }
+                });
                 return builder.setAfterInitConsumer(screen -> {
                     if (MinecraftClient.getInstance().getNetworkHandler() != null && MinecraftClient.getInstance().getNetworkHandler().getRecipeManager() != null) {
                         ((ScreenHooks) screen).cloth_addButton(new ReloadConfigButtonWidget(4, 4, 100, 20, I18n.translate("text.rei.reload_config"), buttonWidget -> {
@@ -210,8 +201,9 @@ public class ConfigManagerImpl implements ConfigManager {
                     }));
                 }).setSavingRunnable(() -> {
                     saveConfig();
+                    ((EntryRegistryImpl) EntryRegistry.getInstance()).refilter();
                     if (ScreenHelper.getSearchField() != null)
-                        ContainerScreenOverlay.getEntryListWidget().updateSearch(ScreenHelper.getSearchField().getText());
+                        ContainerScreenOverlay.getEntryListWidget().updateSearch(ScreenHelper.getSearchField().getText(), true);
                 }).build();
             });
             return provider.get();

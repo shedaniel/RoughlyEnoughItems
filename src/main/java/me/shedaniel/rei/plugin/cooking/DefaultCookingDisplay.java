@@ -13,13 +13,11 @@ import net.minecraft.block.entity.FurnaceBlockEntity;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.container.Container;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.AbstractCookingRecipe;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -44,6 +42,10 @@ public abstract class DefaultCookingDisplay implements TransferRecipeDisplay {
         this.output = Collections.singletonList(EntryStack.create(recipe.getOutput()));
         this.xp = recipe.getExperience();
         this.cookTime = recipe.getCookTime();
+    }
+    
+    public static List<EntryStack> getFuel() {
+        return fuel;
     }
     
     @Override
@@ -72,10 +74,6 @@ public abstract class DefaultCookingDisplay implements TransferRecipeDisplay {
     
     public double getCookingTime() {
         return cookTime;
-    }
-    
-    public static List<EntryStack> getFuel() {
-        return fuel;
     }
     
     @ApiStatus.Internal

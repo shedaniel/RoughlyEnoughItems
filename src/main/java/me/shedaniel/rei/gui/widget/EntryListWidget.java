@@ -32,9 +32,7 @@ import net.minecraft.client.util.math.Matrix4f;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -75,6 +73,7 @@ public class EntryListWidget extends WidgetWithBounds {
     private List<Widget> renders = Collections.emptyList();
     private List<Widget> widgets = Collections.emptyList();
     private List<SearchArgument.SearchArguments> lastSearchArguments = Collections.emptyList();
+    private String lastSearchTerm = null;
     private boolean draggingScrollBar = false;
     
     public static int entrySize() {
@@ -541,9 +540,9 @@ public class EntryListWidget extends WidgetWithBounds {
         if (favoritesListWidget != null)
             favoritesListWidget.updateFavoritesBounds(boundsHandler, searchTerm);
         if (searchTerm != null)
-            updateSearch(searchTerm);
+            updateSearch(searchTerm, true);
         else if (allStacks == null || favorites == null || (favoritesListWidget != null && favoritesListWidget.favorites == null))
-            updateSearch("");
+            updateSearch("", true);
         else
             updateEntriesPosition();
     }
@@ -622,20 +621,24 @@ public class EntryListWidget extends WidgetWithBounds {
     }
     
     public void updateSearch(String searchTerm) {
+        updateSearch(searchTerm, true);
+    }
+    
+    public void updateSearch(String searchTerm, boolean ignoreLastSearch) {
         long started = System.nanoTime();
-        lastSearchArguments = SearchArgument.processSearchTerm(searchTerm);
-        {
+        if (ignoreLastSearch || this.lastSearchTerm == null || !this.lastSearchTerm.equals(searchTerm)) {
+            this.lastSearchTerm = searchTerm;
+            this.lastSearchArguments = SearchArgument.processSearchTerm(searchTerm);
             List<EntryStack> list = Lists.newArrayList();
             boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
             List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
-            List<EntryStack> stacks = EntryRegistry.getInstance().getStacksList();
+            List<EntryStack> stacks = EntryRegistry.getInstance().getPreFilteredList();
             if (stacks instanceof CopyOnWriteArrayList) {
                 for (EntryStack stack : stacks) {
                     if (canLastSearchTermsBeAppliedTo(stack)) {
                         if (checkCraftable && CollectionUtils.findFirstOrNullEquals(workingItems, stack) == null)
                             continue;
-                        if (CollectionUtils.findFirstOrNullEquals(ConfigObject.getInstance().getFilteredStacks(), stack) == null)
-                            list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
+                        list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
                     }
                 }
             }
@@ -676,7 +679,7 @@ public class EntryListWidget extends WidgetWithBounds {
         long ended = System.nanoTime();
         long time = ended - started;
         if (RoughlyEnoughItemsCore.isDebugModeEnabled())
-            System.out.printf("Search Used: %.2fms%n", time * 1e-6);
+            RoughlyEnoughItemsCore.LOGGER.info("[REI] Search Used: %.2fms", time * 1e-6);
         updateEntriesPosition();
     }
     
