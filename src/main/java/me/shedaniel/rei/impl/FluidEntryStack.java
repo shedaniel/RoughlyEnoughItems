@@ -134,13 +134,28 @@ public class FluidEntryStack extends AbstractEntryStack {
     }
     
     @Override
-    public int hashCode() {
+    public int hashOfAll() {
+        int result = hashIgnoreAmountAndTags();
+        result = 31 * result + amount;
+        return result;
+    }
+    
+    @Override
+    public int hashIgnoreAmountAndTags() {
         int result = 1;
         result = 31 * result + getType().ordinal();
         result = 31 * result + fluid.hashCode();
-        result = 31 * result + amount;
-        result = 31 * result;
         return result;
+    }
+    
+    @Override
+    public int hashIgnoreTags() {
+        return hashOfAll();
+    }
+    
+    @Override
+    public int hashIgnoreAmount() {
+        return hashIgnoreAmountAndTags();
     }
     
     @Nullable

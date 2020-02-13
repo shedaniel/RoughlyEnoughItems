@@ -22,6 +22,9 @@ import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.ApiStatus;
@@ -37,8 +40,6 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     
     private static final Predicate<BakedModel> IS_SIDE_LIT;
     private static final MatrixStack MATRICES = new MatrixStack();
-    private ItemStack itemStack;
-    private int hash = -1;
     
     static {
         boolean isOn1_15_2 = false;
@@ -51,6 +52,8 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
         //noinspection Convert2MethodRef
         IS_SIDE_LIT = isOn1_15_2 ? Executor.call(() -> () -> new ModelSideLit1152Compat()) : Executor.call(() -> () -> new ModelHasDepth1151Compat());
     }
+    
+    private ItemStack itemStack;
     
     public ItemEntryStack(ItemStack itemStack) {
         this.itemStack = itemStack;
@@ -74,7 +77,6 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     @Override
     public void setAmount(int amount) {
         itemStack.setCount(amount);
-        hash = -1;
     }
     
     @Override
@@ -116,9 +118,65 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     public boolean equalsIgnoreAmount(EntryStack stack) {
         if (stack.getType() != Type.ITEM)
             return false;
+        if (itemStack.getItem() == Items.GRASS_BLOCK) {
+//            System.out.println(itemStack.toTag(new CompoundTag()).toString() + " " + stack.getItemStack().toTag(new CompoundTag()).toString());
+        }
         if (itemStack.getItem() != stack.getItem())
             return false;
-        return ItemStack.areTagsEqual(itemStack, stack.getItemStack());
+        if (itemStack.getItem() == Items.GRASS_BLOCK) {
+            ItemStack otherStack = stack.getItemStack();
+            CompoundTag o1 = itemStack.getTag();
+            CompoundTag o2 = otherStack.getTag();
+            boolean b = o1 == o2 || ((o1 != null && o2 != null) && equals(o1, o2));
+//            System.out.println(itemStack.toTag(new CompoundTag()).toString() + " " + stack.getItemStack().toTag(new CompoundTag()).toString() + " " + b);
+            return b;
+        }
+        ItemStack otherStack = stack.getItemStack();
+        CompoundTag o1 = itemStack.getTag();
+        CompoundTag o2 = otherStack.getTag();
+        return o1 == o2 || ((o1 != null && o2 != null) && equals(o1, o2));
+    }
+    
+    public boolean equals(CompoundTag o1, CompoundTag o2) {
+        int o1Size = 0;
+        int o2Size = 0;
+        for (String key : o1.getKeys()) {
+            if (key.equals("Count"))
+                continue;
+            o1Size++;
+        }
+        for (String key : o2.getKeys()) {
+            if (key.equals("Count"))
+                continue;
+            o2Size++;
+            if (o2Size > o1Size)
+                return false;
+        }
+        if (o1Size != o2Size)
+            return false;
+        
+        try {
+            for (String key : o1.getKeys()) {
+                if (key.equals("Count"))
+                    continue;
+                Tag value = o1.get(key);
+                Tag otherValue = o2.get(key);
+                if (value == null) {
+                    if (!(otherValue == null && o2.contains(key)))
+                        return false;
+                } else if (value instanceof CompoundTag && otherValue instanceof CompoundTag) {
+                    if (!(value == otherValue || (value != null && otherValue != null) && equals((CompoundTag) value, (CompoundTag) otherValue)))
+                        return false;
+                } else {
+                    if (!value.asString().equals(otherValue.asString()))
+                        return false;
+                }
+            }
+        } catch (ClassCastException | NullPointerException unused) {
+            return false;
+        }
+        
+        return true;
     }
     
     @Override
@@ -131,19 +189,38 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     }
     
     @Override
-    public int hashCode() {
-        //        if (hash == -1) {
+    public int hashOfAll() {
+        int result = hashIgnoreAmount();
+        result = 31 * result + itemStack.getCount();
+        return result;
+    }
+    
+    @Override
+    public int hashIgnoreTags() {
+        int result = hashIgnoreAmountAndTags();
+        result = 31 * result + itemStack.getCount();
+        return result;
+    }
+    
+    @Override
+    public int hashIgnoreAmount() {
         int result = 1;
         result = 31 * result + getType().hashCode();
         result = 31 * result + itemStack.getItem().hashCode();
-        result = 31 * result + itemStack.getCount();
-        result = 31 * result + (itemStack.hasTag() ? itemStack.getTag().hashCode() : 0);
-        hash = result;
-        //            if (hash == -1) {
-        //                hash = -2;
-        //            }
-        //        }
-        return hash;
+        if (itemStack.hasTag()) {
+            result = 31 * result + itemStack.getTag().asString().hashCode();
+        } else {
+            result = 31 * result;
+        }
+        return result;
+    }
+    
+    @Override
+    public int hashIgnoreAmountAndTags() {
+        int result = 1;
+        result = 31 * result + getType().hashCode();
+        result = 31 * result + itemStack.getItem().hashCode();
+        return result;
     }
     
     @Nullable

@@ -43,6 +43,20 @@ public final class RecipeDisplayExporter extends Widget {
         INSTANCE.exportRecipe(rectangle, widgets);
     }
     
+    private static File getExportFilename(File directory) {
+        String string = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss").format(new Date());
+        int i = 1;
+        
+        while (true) {
+            File file = new File(directory, "REI_" + string + (i == 1 ? "" : "_" + i) + ".png");
+            if (!file.exists()) {
+                return file;
+            }
+            
+            ++i;
+        }
+    }
+    
     private void exportRecipe(Rectangle rectangle, List<Widget> widgets) {
         Framebuffer framebuffer = new Framebuffer(rectangle.width * 8, rectangle.height * 8, true, MinecraftClient.IS_SYSTEM_MAC);
         framebuffer.setClearColor(0, 0, 0, 0);
@@ -173,20 +187,6 @@ public final class RecipeDisplayExporter extends Widget {
                 RenderSystem.recordRenderCall(framebuffer::delete);
             }
         });
-    }
-    
-    private static File getExportFilename(File directory) {
-        String string = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss").format(new Date());
-        int i = 1;
-        
-        while (true) {
-            File file = new File(directory, "REI_" + string + (i == 1 ? "" : "_" + i) + ".png");
-            if (!file.exists()) {
-                return file;
-            }
-            
-            ++i;
-        }
     }
     
     @Override

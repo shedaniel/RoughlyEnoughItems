@@ -31,57 +31,33 @@ import java.util.List;
 @Config(name = "roughlyenoughitems/config")
 public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.FIELD})
-    @interface DontApplyFieldName {}
-    
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.FIELD})
-    @interface UseEnumSelectorInstead {}
-    
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.FIELD})
-    @interface UseSpecialRecipeTypeScreen {}
-    
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.FIELD})
-    @interface UseFilteringScreen {}
-    
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.FIELD})
-    @interface UsePercentage {
-        double min();
-        
-        double max();
-    }
-    
     @ConfigEntry.Category("!general") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName public General general = new General();
     @ConfigEntry.Category("appearance") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName private Appearance appearance = new Appearance();
     @ConfigEntry.Category("modules") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName private Modules modules = new Modules();
     @ConfigEntry.Category("technical") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName private Technical technical = new Technical();
     @ConfigEntry.Category("performance") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName private Performance performance = new Performance();
     @ConfigEntry.Category("filtering") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName private Filtering filtering = new Filtering();
-    
+
     @Override
     public boolean isLighterButtonHover() {
         return true;
     }
-    
+
     @Override
     public boolean isOverlayVisible() {
         return general.overlayVisible;
     }
-    
+
     @Override
     public void setOverlayVisible(boolean overlayVisible) {
         general.overlayVisible = overlayVisible;
     }
-    
+
     @Override
     public boolean isCheating() {
         return general.cheating;
     }
-    
+
     @Override
     public void setCheating(boolean cheating) {
         general.cheating = cheating;
@@ -316,6 +292,30 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @Override
     public List<EntryStack> getFilteredStacks() {
         return filtering.filteredStacks;
+    }
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD})
+    @interface DontApplyFieldName {}
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD})
+    @interface UseEnumSelectorInstead {}
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD})
+    @interface UseSpecialRecipeTypeScreen {}
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD})
+    @interface UseFilteringScreen {}
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD})
+    @interface UsePercentage {
+        double min();
+        
+        double max();
     }
     
     public static class General {

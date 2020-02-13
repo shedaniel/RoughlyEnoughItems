@@ -28,6 +28,8 @@ public interface EntryRegistry {
      */
     List<EntryStack> getStacksList();
     
+    List<EntryStack> getPreFilteredList();
+    
     List<ItemStack> appendStacksForItem(Item item);
     
     /**
