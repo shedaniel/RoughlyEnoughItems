@@ -327,6 +327,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         // Remove duplicate entries
         ((EntryRegistryImpl) EntryRegistry.getInstance()).distinct();
         arePluginsLoading = false;
+        ((EntryRegistryImpl) EntryRegistry.getInstance()).refilter();
         
         // Clear Cache Again!
         ((DisplayHelperImpl) DisplayHelper.getInstance()).resetCache();

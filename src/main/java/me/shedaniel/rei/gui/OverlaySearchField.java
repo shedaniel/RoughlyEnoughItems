@@ -27,9 +27,9 @@ public class OverlaySearchField extends TextFieldWidget {
     public static boolean isSearching = false;
     public long keybindFocusTime = -1;
     public int keybindFocusKey = -1;
+    public boolean isMain = true;
     protected Pair<Long, Point> lastClickedDetails = null;
     private List<String> history = Lists.newArrayListWithCapacity(100);
-    public boolean isMain = true;
     
     public OverlaySearchField(int x, int y, int width, int height) {
         super(x, y, width, height);
