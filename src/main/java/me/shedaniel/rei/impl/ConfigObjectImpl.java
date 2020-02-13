@@ -31,30 +31,6 @@ import java.util.List;
 @Config(name = "roughlyenoughitems/config")
 public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.FIELD})
-    @interface DontApplyFieldName {}
-    
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.FIELD})
-    @interface UseEnumSelectorInstead {}
-    
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.FIELD})
-    @interface UseSpecialRecipeTypeScreen {}
-    
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.FIELD})
-    @interface UseFilteringScreen {}
-    
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.FIELD})
-    @interface UsePercentage {
-        double min();
-        
-        double max();
-    }
-    
     @ConfigEntry.Category("!general") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName public General general = new General();
     @ConfigEntry.Category("appearance") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName private Appearance appearance = new Appearance();
     @ConfigEntry.Category("modules") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName private Modules modules = new Modules();
@@ -311,6 +287,30 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @Override
     public List<EntryStack> getFilteredStacks() {
         return filtering.filteredStacks;
+    }
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD})
+    @interface DontApplyFieldName {}
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD})
+    @interface UseEnumSelectorInstead {}
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD})
+    @interface UseSpecialRecipeTypeScreen {}
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD})
+    @interface UseFilteringScreen {}
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD})
+    @interface UsePercentage {
+        double min();
+        
+        double max();
     }
     
     public static class General {

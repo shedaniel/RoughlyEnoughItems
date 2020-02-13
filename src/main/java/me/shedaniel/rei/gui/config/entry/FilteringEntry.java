@@ -6,6 +6,7 @@
 package me.shedaniel.rei.gui.config.entry;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
@@ -38,26 +39,23 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import static me.shedaniel.rei.gui.widget.EntryListWidget.entrySize;
 
 @ApiStatus.Internal
 public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
-    private Consumer<List<EntryStack>> saveConsumer;
-    private List<EntryStack> defaultValue;
-    private List<EntryStack> configFiltered;
-    
-    private QueuedTooltip tooltip = null;
-    
-    @SuppressWarnings("rawtypes") private ClothConfigScreen.ListWidget lastList = null;
-    
     protected List<EntryStack> selected = Lists.newArrayList();
-    
     protected double target;
     protected double scroll;
     protected long start;
     protected long duration;
+    private Consumer<List<EntryStack>> saveConsumer;
+    private List<EntryStack> defaultValue;
+    private List<EntryStack> configFiltered;
+    private QueuedTooltip tooltip = null;
+    @SuppressWarnings("rawtypes") private ClothConfigScreen.ListWidget lastList = null;
     private List<EntryStack> entryStacks = null;
     private Rectangle innerBounds;
     private List<EntryListEntry> entries = Collections.emptyList();
@@ -123,6 +121,11 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
             });
         }
         this.searchField.isMain = false;
+    }
+    
+    private static Rectangle updateInnerBounds(Rectangle bounds) {
+        int width = Math.max(MathHelper.floor((bounds.width - 2 - 6) / (float) entrySize()), 1);
+        return new Rectangle((int) (bounds.getCenterX() - width * entrySize() / 2f), bounds.y + 5, width * entrySize(), bounds.height);
     }
     
     @SuppressWarnings("rawtypes")
@@ -295,13 +298,14 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
     
     public void updateSearch(String searchTerm) {
         lastSearchArguments = SearchArgument.processSearchTerm(searchTerm);
-        List<EntryStack> list = Lists.newArrayList();
+        Set<EntryStack> list = Sets.newLinkedHashSet();
         for (EntryStack stack : EntryRegistry.getInstance().getStacksList()) {
             if (canLastSearchTermsBeAppliedTo(stack)) {
-                list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE));
+                list.add(stack.copy().setting(EntryStack.Settings.CHECK_AMOUNT, EntryStack.Settings.FALSE).setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE));
             }
         }
-        entryStacks = list;
+        
+        entryStacks = Lists.newArrayList(list);
         updateEntriesPosition();
     }
     
@@ -416,11 +420,6 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
             updateEntriesPosition();
     }
     
-    private static Rectangle updateInnerBounds(Rectangle bounds) {
-        int width = Math.max(MathHelper.floor((bounds.width - 2 - 6) / (float) entrySize()), 1);
-        return new Rectangle((int) (bounds.getCenterX() - width * entrySize() / 2f), bounds.y + 5, width * entrySize(), bounds.height);
-    }
-    
     protected final int getMaxScrollPosition() {
         return MathHelper.ceil(entryStacks.size() / (innerBounds.width / (float) entrySize())) * entrySize() + 28;
     }
@@ -529,6 +528,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
             if (tooltip != null) {
                 FilteringEntry.this.tooltip = tooltip;
             }
+//            System.out.println(getCurrentEntry().getItemStack().toTag(new CompoundTag()).toString());
         }
     }
 }

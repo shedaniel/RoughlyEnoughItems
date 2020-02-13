@@ -135,6 +135,27 @@ public interface EntryStack {
         return hashCode();
     }
     
+    /**
+     * {@link #hashCode()} for {@link #equalsIgnoreAmount(EntryStack)}
+     */
+    default int hashIgnoreAmount() {
+        return hashCode();
+    }
+    
+    /**
+     * {@link #hashCode()} for {@link #equalsIgnoreTags(EntryStack)}
+     */
+    default int hashIgnoreTags() {
+        return hashCode();
+    }
+    
+    /**
+     * {@link #hashCode()} for {@link #equalsIgnoreTagsAndAmount(EntryStack)}
+     */
+    default int hashIgnoreAmountAndTags() {
+        return hashCode();
+    }
+    
     int getZ();
     
     void setZ(int z);

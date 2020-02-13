@@ -122,7 +122,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         }
         ScreenHelper.getSearchField().getBounds().setBounds(getSearchFieldArea());
         this.widgets.add(ScreenHelper.getSearchField());
-        ScreenHelper.getSearchField().setChangedListener(ENTRY_LIST_WIDGET::updateSearch);
+        ScreenHelper.getSearchField().setChangedListener(s -> ENTRY_LIST_WIDGET.updateSearch(s, false));
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
             widgets.add(leftButton = new ButtonWidget(new Rectangle(bounds.x, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TranslatableText("text.rei.left_arrow")) {
                 @Override
@@ -279,7 +279,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                 @Override
                 public void onPressed() {
                     ConfigManager.getInstance().toggleCraftableOnly();
-                    ENTRY_LIST_WIDGET.updateSearch(ScreenHelper.getSearchField().getText());
+                    ENTRY_LIST_WIDGET.updateSearch(ScreenHelper.getSearchField().getText(), true);
                 }
                 
                 @Override
@@ -388,9 +388,9 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         List<ItemStack> currentStacks = ClientHelper.getInstance().getInventoryItemsTypes();
-        if (shouldReInit)
+        if (shouldReInit) {
             init();
-        else {
+        } else {
             for (DisplayHelper.DisplayBoundsHandler<?> handler : DisplayHelper.getInstance().getSortedBoundsHandlers(minecraft.currentScreen.getClass())) {
                 if (handler != null && handler.shouldRecalculateArea(!ConfigObject.getInstance().isLeftHandSidePanel(), bounds)) {
                     init();
@@ -400,7 +400,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         }
         if (ConfigManager.getInstance().isCraftableOnlyEnabled() && ((currentStacks.size() != ScreenHelper.inventoryStacks.size()) || !hasSameListContent(new LinkedList<>(ScreenHelper.inventoryStacks), currentStacks))) {
             ScreenHelper.inventoryStacks = currentStacks;
-            ENTRY_LIST_WIDGET.updateSearch(ScreenHelper.getSearchField().getText());
+            ENTRY_LIST_WIDGET.updateSearch(ScreenHelper.getSearchField().getText(), true);
         }
         if (OverlaySearchField.isSearching) {
             setBlitOffset(200);

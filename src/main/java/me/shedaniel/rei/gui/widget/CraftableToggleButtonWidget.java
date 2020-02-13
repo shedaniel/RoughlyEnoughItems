@@ -21,8 +21,8 @@ import java.util.Optional;
 public abstract class CraftableToggleButtonWidget extends LateRenderedButton {
     
     public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
-    private ItemRenderer itemRenderer;
     private static final ItemStack ICON = new ItemStack(Blocks.CRAFTING_TABLE);
+    private ItemRenderer itemRenderer;
     
     public CraftableToggleButtonWidget(Rectangle rectangle) {
         super(rectangle, NarratorManager.EMPTY);

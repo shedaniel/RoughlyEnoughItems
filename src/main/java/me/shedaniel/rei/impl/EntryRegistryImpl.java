@@ -7,6 +7,8 @@ package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Queues;
+import com.google.common.collect.Sets;
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryRegistry;
 import me.shedaniel.rei.api.EntryStack;
@@ -24,15 +26,24 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @ApiStatus.Internal
 public class EntryRegistryImpl implements EntryRegistry {
     
-    private final CopyOnWriteArrayList<EntryStack> allEntries = Lists.newCopyOnWriteArrayList();
+    private final CopyOnWriteArrayList<EntryStack> preFilteredList = Lists.newCopyOnWriteArrayList();
     private final CopyOnWriteArrayList<EntryStack> entries = Lists.newCopyOnWriteArrayList();
     private final Queue<Pair<EntryStack, Collection<? extends EntryStack>>> queueRegisterEntryStackAfter = Queues.newConcurrentLinkedQueue();
     private List<EntryStack> reloadList;
     private boolean doingDistinct = false;
     
+    private static EntryStack findFirstOrNullEqualsEntryIgnoreAmount(Collection<EntryStack> list, EntryStack obj) {
+        for (EntryStack t : list) {
+            if (t.equalsIgnoreAmount(obj))
+                return t;
+        }
+        return null;
+    }
+    
     public void distinct() {
+        preFilteredList.clear();
         doingDistinct = true;
-        TreeSet<EntryStack> set = new TreeSet<>((i, j) -> i.equalsAll(j) ? 0 : 1);
+        Set<EntryStack> set = Sets.newLinkedHashSet();
         set.addAll(reloadList);
         entries.clear();
         entries.addAll(set);
@@ -58,12 +69,31 @@ public class EntryRegistryImpl implements EntryRegistry {
         return RecipeHelper.getInstance().arePluginsLoading() && !doingDistinct ? reloadList : entries;
     }
     
+    @Override
+    public List<EntryStack> getPreFilteredList() {
+        return preFilteredList;
+    }
+    
+    public void refilter() {
+        long started = System.currentTimeMillis();
+        Set<EntryStack> set = Sets.newLinkedHashSet();
+        set.addAll(ConfigObject.getInstance().getFilteredStacks());
+        preFilteredList.clear();
+        for (EntryStack stack : getStacksList()) {
+            if (findFirstOrNullEqualsEntryIgnoreAmount(set, stack) == null)
+                preFilteredList.add(stack);
+        }
+        long time = System.currentTimeMillis() - started;
+        RoughlyEnoughItemsCore.LOGGER.info("[REI] Refiltered %d entries in %dms.", set.size(), time);
+    }
+    
     public void reset() {
         doingDistinct = false;
         reloadList = Lists.newArrayList();
         queueRegisterEntryStackAfter.clear();
         entries.clear();
         reloadList.clear();
+        preFilteredList.clear();
     }
     
     @Override
