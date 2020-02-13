@@ -116,10 +116,14 @@ public class ConfigManagerImpl implements ConfigManager {
     
     @Override
     public void saveConfig() {
-        if (getFavorites() != null)
-            getFavorites().removeIf(EntryStack::isEmpty);
-        if (getConfig().getFilteredStacks() != null)
+        if (getConfig().getFavorites() != null)
+            getConfig().getFavorites().removeIf(EntryStack::isEmpty);
+        if (getConfig().getFilteredStacks() != null) {
             getConfig().getFilteredStacks().removeIf(EntryStack::isEmpty);
+            for (EntryStack stack : getConfig().getFilteredStacks()) {
+                stack.setting(EntryStack.Settings.CHECK_AMOUNT, EntryStack.Settings.FALSE).setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE);
+            }
+        }
         ((me.sargunvohra.mcmods.autoconfig1u.ConfigManager<ConfigObjectImpl>) AutoConfig.getConfigHolder(ConfigObjectImpl.class)).save();
     }
     
