@@ -56,9 +56,25 @@ public class CollectionUtils {
         return false;
     }
     
+    public static boolean anyMatchEqualsEntryIgnoreAmount(List<EntryStack> list, EntryStack stack) {
+        for (EntryStack t : list) {
+            if (t.equalsIgnoreAmount(stack))
+                return true;
+        }
+        return false;
+    }
+    
     public static EntryStack firstOrNullEqualsAll(List<EntryStack> list, EntryStack stack) {
         for (EntryStack t : list) {
             if (t.equalsAll(stack))
+                return t;
+        }
+        return null;
+    }
+    
+    public static EntryStack findFirstOrNullEqualsEntryIgnoreAmount(Collection<EntryStack> list, EntryStack stack) {
+        for (EntryStack t : list) {
+            if (t.equalsIgnoreAmount(stack))
                 return t;
         }
         return null;

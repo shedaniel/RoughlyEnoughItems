@@ -87,7 +87,7 @@ public class RecipeViewingScreen extends Screen {
             if (widget instanceof EntryWidget) {
                 EntryWidget entry = (EntryWidget) widget;
                 if (entry.entries().size() > 1) {
-                    EntryStack stack = CollectionUtils.firstOrNullEqualsAll(entry.entries(), mainStackToNotice);
+                    EntryStack stack = CollectionUtils.findFirstOrNullEqualsEntryIgnoreAmount(entry.entries(), mainStackToNotice);
                     if (stack != null) {
                         entry.clearStacks();
                         entry.entry(stack);

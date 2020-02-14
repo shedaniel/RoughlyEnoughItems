@@ -115,6 +115,15 @@ public class RecipeHelperImpl implements RecipeHelper {
         recipeCategoryListMap.get(categoryIdentifier).add(display);
     }
     
+    @Override
+    public void registerDisplay(RecipeDisplay display) {
+        Identifier identifier = Objects.requireNonNull(display.getRecipeCategory());
+        if (!recipeCategoryListMap.containsKey(identifier))
+            return;
+        recipeCount[0]++;
+        recipeCategoryListMap.get(identifier).add(display);
+    }
+    
     private void registerDisplay(Identifier categoryIdentifier, RecipeDisplay display, int index) {
         if (!recipeCategoryListMap.containsKey(categoryIdentifier))
             return;
