@@ -19,6 +19,8 @@ import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.impl.RenderingEntry;
 import me.shedaniel.rei.impl.ScreenHelper;
+import me.shedaniel.rei.plugin.beacon.DefaultBeaconBaseCategory;
+import me.shedaniel.rei.plugin.beacon.DefaultBeaconBaseDisplay;
 import me.shedaniel.rei.plugin.blasting.DefaultBlastingDisplay;
 import me.shedaniel.rei.plugin.brewing.DefaultBrewingCategory;
 import me.shedaniel.rei.plugin.brewing.DefaultBrewingDisplay;
@@ -42,6 +44,7 @@ import me.shedaniel.rei.plugin.stonecutting.DefaultStoneCuttingDisplay;
 import me.shedaniel.rei.plugin.stripping.DefaultStrippingCategory;
 import me.shedaniel.rei.plugin.stripping.DefaultStrippingDisplay;
 import me.shedaniel.rei.plugin.stripping.DummyAxeItem;
+import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.block.ComposterBlock;
 import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.client.MinecraftClient;
@@ -53,6 +56,7 @@ import net.minecraft.fluid.Fluid;
 import net.minecraft.item.*;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.recipe.*;
+import net.minecraft.tag.BlockTags;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
@@ -73,6 +77,7 @@ public class DefaultPlugin implements REIPluginV0 {
     public static final Identifier PLUGIN = new Identifier("roughlyenoughitems", "default_plugin");
     public static final Identifier COMPOSTING = new Identifier("minecraft", "plugins/composting");
     public static final Identifier FUEL = new Identifier("minecraft", "plugins/fuel");
+    public static final Identifier BEACON = new Identifier("roughlyenoughitems", "plugins/beacon");
     public static final Identifier INFO = new Identifier("roughlyenoughitems", "plugins/information");
     private static final Identifier DISPLAY_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/display.png");
     private static final Identifier DISPLAY_TEXTURE_DARK = new Identifier("roughlyenoughitems", "textures/gui/display_dark.png");
@@ -171,6 +176,7 @@ public class DefaultPlugin implements REIPluginV0 {
         recipeHelper.registerCategory(new DefaultBrewingCategory());
         recipeHelper.registerCategory(new DefaultCompostingCategory());
         recipeHelper.registerCategory(new DefaultStrippingCategory());
+        recipeHelper.registerCategory(new DefaultBeaconBaseCategory());
     }
     
     @Override
@@ -178,13 +184,6 @@ public class DefaultPlugin implements REIPluginV0 {
         if (!ConfigObject.getInstance().isLoadingDefaultPlugin()) {
             return;
         }
-        //        DefaultPlugin.registerInfoDisplay(DefaultInformationDisplay.createFromEntry(EntryStack.create(Items.FURNACE), new LiteralText("Furnace Info"))
-        //                .lines(new LiteralText("Furnace is a nice block, crafted using 8 cobblestone."),
-        //                        new LiteralText("An amazing tool to burn lil taters."),
-        //                        new LiteralText("Now available in a store next to you."),
-        //                        new LiteralText("Now with 60% off for an limited time!"),
-        //                        new LiteralText("Get it with coupon code: ").append(new LiteralText("TATERS").formatted(Formatting.BOLD))
-        //                        ));
         recipeHelper.registerRecipes(CRAFTING, ShapelessRecipe.class, DefaultShapelessDisplay::new);
         recipeHelper.registerRecipes(CRAFTING, ShapedRecipe.class, DefaultShapedDisplay::new);
         recipeHelper.registerRecipes(SMELTING, SmeltingRecipe.class, DefaultSmeltingDisplay::new);
@@ -193,10 +192,10 @@ public class DefaultPlugin implements REIPluginV0 {
         recipeHelper.registerRecipes(CAMPFIRE, CampfireCookingRecipe.class, DefaultCampfireDisplay::new);
         recipeHelper.registerRecipes(STONE_CUTTING, StonecuttingRecipe.class, DefaultStoneCuttingDisplay::new);
         for (DefaultBrewingDisplay display : BREWING_DISPLAYS) {
-            recipeHelper.registerDisplay(BREWING, display);
+            recipeHelper.registerDisplay(display);
         }
         for (Map.Entry<Item, Integer> entry : AbstractFurnaceBlockEntity.createFuelTimeMap().entrySet()) {
-            recipeHelper.registerDisplay(FUEL, new DefaultFuelDisplay(EntryStack.create(entry.getKey()), entry.getValue()));
+            recipeHelper.registerDisplay(new DefaultFuelDisplay(EntryStack.create(entry.getKey()), entry.getValue()));
         }
         List<EntryStack> arrowStack = Collections.singletonList(EntryStack.create(Items.ARROW));
         for (EntryStack entry : EntryRegistry.getInstance().getStacksList()) {
@@ -211,7 +210,7 @@ public class DefaultPlugin implements REIPluginV0 {
                 PotionUtil.setPotion(outputStack, PotionUtil.getPotion(entry.getItemStack()));
                 PotionUtil.setCustomPotionEffects(outputStack, PotionUtil.getCustomPotionEffects(entry.getItemStack()));
                 List<EntryStack> output = Collections.singletonList(EntryStack.create(outputStack).addSetting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE));
-                recipeHelper.registerDisplay(CRAFTING, new DefaultCustomDisplay(null, input, output));
+                recipeHelper.registerDisplay(new DefaultCustomDisplay(null, input, output));
             }
         }
         Map<ItemConvertible, Float> map = Maps.newLinkedHashMap();
@@ -228,19 +227,19 @@ public class DefaultPlugin implements REIPluginV0 {
             for (int j = i; j < i + 48; j++)
                 if (j < stacks.size())
                     thisStacks.add(stacks.get(j));
-            recipeHelper.registerDisplay(COMPOSTING, new DefaultCompostingDisplay(MathHelper.floor(i / 48f), thisStacks, map, Lists.newArrayList(map.keySet()), new ItemStack[]{new ItemStack(Items.BONE_MEAL)}));
+            recipeHelper.registerDisplay(new DefaultCompostingDisplay(MathHelper.floor(i / 48f), thisStacks, map, Lists.newArrayList(map.keySet()), new ItemStack[]{new ItemStack(Items.BONE_MEAL)}));
         }
         DummyAxeItem.getStrippedBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getId(b.getKey()))).forEach(set -> {
-            recipeHelper.registerDisplay(STRIPPING, new DefaultStrippingDisplay(new ItemStack(set.getKey()), new ItemStack(set.getValue())));
+            recipeHelper.registerDisplay(new DefaultStrippingDisplay(new ItemStack(set.getKey()), new ItemStack(set.getValue())));
         });
+        recipeHelper.registerDisplay(new DefaultBeaconBaseDisplay(CollectionUtils.map(Lists.newArrayList(BlockTags.BEACON_BASE_BLOCKS.values()), ItemStack::new)));
     }
     
     @Override
     public void postRegister() {
         RecipeHelper.getInstance().registerCategory(new DefaultInformationCategory());
-        for (DefaultInformationDisplay display : INFO_DISPLAYS) {
-            RecipeHelper.getInstance().registerDisplay(INFO, display);
-        }
+        for (DefaultInformationDisplay display : INFO_DISPLAYS)
+            RecipeHelper.getInstance().registerDisplay(display);
         // Sit tight! This will be a fast journey!
         long time = System.currentTimeMillis();
         for (EntryStack stack : EntryRegistry.getInstance().getStacksList())
@@ -357,8 +356,10 @@ public class DefaultPlugin implements REIPluginV0 {
         recipeHelper.registerWorkingStations(BREWING, EntryStack.create(Items.BREWING_STAND));
         recipeHelper.registerWorkingStations(STONE_CUTTING, EntryStack.create(Items.STONECUTTER));
         recipeHelper.registerWorkingStations(COMPOSTING, EntryStack.create(Items.COMPOSTER));
+        recipeHelper.registerWorkingStations(BEACON, EntryStack.create(Items.BEACON));
         recipeHelper.removeAutoCraftButton(FUEL);
         recipeHelper.removeAutoCraftButton(COMPOSTING);
+        recipeHelper.removeAutoCraftButton(BEACON);
         recipeHelper.removeAutoCraftButton(INFO);
         recipeHelper.registerScreenClickArea(new Rectangle(88, 32, 28, 23), CraftingTableScreen.class, CRAFTING);
         recipeHelper.registerScreenClickArea(new Rectangle(137, 29, 10, 13), InventoryScreen.class, CRAFTING);

@@ -75,11 +75,21 @@ public interface RecipeHelper {
     List<List<EntryStack>> getWorkingStations(Identifier category);
     
     /**
-     * Registers a recipe display
+     * Registers a recipe display.
+     *
+     * @param display the recipe display
+     */
+    void registerDisplay(RecipeDisplay display);
+    
+    /**
+     * Registers a recipe display.
      *
      * @param categoryIdentifier the category to display in
      * @param display            the recipe display
      */
+    @ApiStatus.Internal
+    @ApiStatus.ScheduledForRemoval
+    @Deprecated
     void registerDisplay(Identifier categoryIdentifier, RecipeDisplay display);
     
     /**

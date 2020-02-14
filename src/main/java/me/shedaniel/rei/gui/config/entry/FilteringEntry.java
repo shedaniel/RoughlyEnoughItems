@@ -507,7 +507,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
         }
         
         public boolean isFiltered() {
-            return CollectionUtils.findFirstOrNullEquals(configFiltered, getCurrentEntry()) != null;
+            return CollectionUtils.findFirstOrNullEqualsEntryIgnoreAmount(configFiltered, getCurrentEntry()) != null;
         }
         
         @Override
