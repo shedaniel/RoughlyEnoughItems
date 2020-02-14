@@ -126,7 +126,7 @@ curseforge {
                 embeddedLibrary 'cloth-config'
             }
             mainArtifact(file("${project.buildDir}/libs/${project.archivesBaseName}-${project.version}.jar")) {
-                displayName = "[Fabric 20w06a] v$project.version"
+                displayName = "[Fabric 20w07a] v$project.version"
             }
             afterEvaluate {
                 uploadTask.dependsOn("remapJar")
