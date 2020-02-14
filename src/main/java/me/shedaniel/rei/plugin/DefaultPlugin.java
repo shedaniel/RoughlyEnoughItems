@@ -185,13 +185,6 @@ public class DefaultPlugin implements REIPluginV0 {
         if (!ConfigObject.getInstance().isLoadingDefaultPlugin()) {
             return;
         }
-        //        DefaultPlugin.registerInfoDisplay(DefaultInformationDisplay.createFromEntry(EntryStack.create(Items.FURNACE), new LiteralText("Furnace Info"))
-        //                .lines(new LiteralText("Furnace is a nice block, crafted using 8 cobblestone."),
-        //                        new LiteralText("An amazing tool to burn lil taters."),
-        //                        new LiteralText("Now available in a store next to you."),
-        //                        new LiteralText("Now with 60% off for an limited time!"),
-        //                        new LiteralText("Get it with coupon code: ").append(new LiteralText("TATERS").formatted(Formatting.BOLD))
-        //                        ));
         recipeHelper.registerRecipes(CRAFTING, ShapelessRecipe.class, DefaultShapelessDisplay::new);
         recipeHelper.registerRecipes(CRAFTING, ShapedRecipe.class, DefaultShapedDisplay::new);
         recipeHelper.registerRecipes(SMELTING, SmeltingRecipe.class, DefaultSmeltingDisplay::new);
@@ -200,10 +193,10 @@ public class DefaultPlugin implements REIPluginV0 {
         recipeHelper.registerRecipes(CAMPFIRE, CampfireCookingRecipe.class, DefaultCampfireDisplay::new);
         recipeHelper.registerRecipes(STONE_CUTTING, StonecuttingRecipe.class, DefaultStoneCuttingDisplay::new);
         for (DefaultBrewingDisplay display : BREWING_DISPLAYS) {
-            recipeHelper.registerDisplay(BREWING, display);
+            recipeHelper.registerDisplay(display);
         }
         for (Map.Entry<Item, Integer> entry : AbstractFurnaceBlockEntity.createFuelTimeMap().entrySet()) {
-            recipeHelper.registerDisplay(FUEL, new DefaultFuelDisplay(EntryStack.create(entry.getKey()), entry.getValue()));
+            recipeHelper.registerDisplay(new DefaultFuelDisplay(EntryStack.create(entry.getKey()), entry.getValue()));
         }
         List<EntryStack> arrowStack = Collections.singletonList(EntryStack.create(Items.ARROW));
         for (EntryStack entry : EntryRegistry.getInstance().getStacksList()) {
@@ -218,7 +211,7 @@ public class DefaultPlugin implements REIPluginV0 {
                 PotionUtil.setPotion(outputStack, PotionUtil.getPotion(entry.getItemStack()));
                 PotionUtil.setCustomPotionEffects(outputStack, PotionUtil.getCustomPotionEffects(entry.getItemStack()));
                 List<EntryStack> output = Collections.singletonList(EntryStack.create(outputStack).addSetting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE));
-                recipeHelper.registerDisplay(CRAFTING, new DefaultCustomDisplay(null, input, output));
+                recipeHelper.registerDisplay(new DefaultCustomDisplay(null, input, output));
             }
         }
         Map<ItemConvertible, Float> map = Maps.newLinkedHashMap();
@@ -235,19 +228,18 @@ public class DefaultPlugin implements REIPluginV0 {
             for (int j = i; j < i + 48; j++)
                 if (j < stacks.size())
                     thisStacks.add(stacks.get(j));
-            recipeHelper.registerDisplay(COMPOSTING, new DefaultCompostingDisplay(MathHelper.floor(i / 48f), thisStacks, map, Lists.newArrayList(map.keySet()), new ItemStack[]{new ItemStack(Items.BONE_MEAL)}));
+            recipeHelper.registerDisplay(new DefaultCompostingDisplay(MathHelper.floor(i / 48f), thisStacks, map, Lists.newArrayList(map.keySet()), new ItemStack[]{new ItemStack(Items.BONE_MEAL)}));
         }
         DummyAxeItem.getStrippedBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getId(b.getKey()))).forEach(set -> {
-            recipeHelper.registerDisplay(STRIPPING, new DefaultStrippingDisplay(new ItemStack(set.getKey()), new ItemStack(set.getValue())));
+            recipeHelper.registerDisplay(new DefaultStrippingDisplay(new ItemStack(set.getKey()), new ItemStack(set.getValue())));
         });
     }
     
     @Override
     public void postRegister() {
         RecipeHelper.getInstance().registerCategory(new DefaultInformationCategory());
-        for (DefaultInformationDisplay display : INFO_DISPLAYS) {
-            RecipeHelper.getInstance().registerDisplay(INFO, display);
-        }
+        for (DefaultInformationDisplay display : INFO_DISPLAYS)
+            RecipeHelper.getInstance().registerDisplay(display);
         // Sit tight! This will be a fast journey!
         long time = System.currentTimeMillis();
         for (EntryStack stack : EntryRegistry.getInstance().getStacksList())

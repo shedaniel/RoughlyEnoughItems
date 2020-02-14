@@ -636,7 +636,7 @@ public class EntryListWidget extends WidgetWithBounds {
             if (stacks instanceof CopyOnWriteArrayList) {
                 for (EntryStack stack : stacks) {
                     if (canLastSearchTermsBeAppliedTo(stack)) {
-                        if (checkCraftable && CollectionUtils.findFirstOrNullEquals(workingItems, stack) == null)
+                        if (checkCraftable && CollectionUtils.findFirstOrNullEqualsEntryIgnoreAmount(workingItems, stack) == null)
                             continue;
                         list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
                     }
@@ -657,7 +657,7 @@ public class EntryListWidget extends WidgetWithBounds {
             List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
             for (EntryStack stack : ConfigObject.getInstance().getFavorites()) {
                 if (canLastSearchTermsBeAppliedTo(stack)) {
-                    if (checkCraftable && CollectionUtils.findFirstOrNullEquals(workingItems, stack) == null)
+                    if (checkCraftable && CollectionUtils.findFirstOrNullEqualsEntryIgnoreAmount(workingItems, stack) == null)
                         continue;
                     list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
                 }

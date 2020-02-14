@@ -236,9 +236,9 @@ public class EntryWidget extends WidgetWithBounds {
                 entry.setAmount(127);
                 if (keyCode.matchesKey(int_1, int_2)) {
                     if (reverseFavoritesAction())
-                        ConfigManager.getInstance().getFavorites().remove(entry);
-                    else if (!CollectionUtils.anyMatchEqualsAll(ConfigManager.getInstance().getFavorites(), entry))
-                        ConfigManager.getInstance().getFavorites().add(entry);
+                        ConfigObject.getInstance().getFavorites().remove(entry);
+                    else if (!CollectionUtils.anyMatchEqualsEntryIgnoreAmount(ConfigObject.getInstance().getFavorites(), entry))
+                        ConfigObject.getInstance().getFavorites().add(entry);
                     ConfigManager.getInstance().saveConfig();
                     FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
                     if (favoritesListWidget != null)
