@@ -175,9 +175,9 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                 Rectangle bounds = getBounds();
                 if (ClientHelper.getInstance().isCheating() && RoughlyEnoughItemsCore.hasOperatorPermission()) {
                     if (RoughlyEnoughItemsCore.hasPermissionToUsePackets())
-                        fill(bounds.x + 1, bounds.y + 1, bounds.getMaxX() - 1, bounds.getMaxY() - 1, 721354752);
+                        fillGradient(bounds.x + 1, bounds.y + 1, bounds.getMaxX() - 1, bounds.getMaxY() - 1, 721354752, 721354752);
                     else
-                        fill(bounds.x + 1, bounds.y + 1, bounds.getMaxX() - 1, bounds.getMaxY() - 1, 1476440063);
+                        fillGradient(bounds.x + 1, bounds.y + 1, bounds.getMaxX() - 1, bounds.getMaxY() - 1, 1476440063, 1476440063);
                 }
                 MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);

@@ -655,7 +655,7 @@ public class EntryListWidget extends WidgetWithBounds {
             List<EntryStack> list = Lists.newArrayList();
             boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
             List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
-            for (EntryStack stack : ConfigManager.getInstance().getFavorites()) {
+            for (EntryStack stack : ConfigObject.getInstance().getFavorites()) {
                 if (canLastSearchTermsBeAppliedTo(stack)) {
                     if (workingItems != null && CollectionUtils.findFirstOrNullEquals(workingItems, stack) == null)
                         continue;
