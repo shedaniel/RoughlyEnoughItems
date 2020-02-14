@@ -13,14 +13,18 @@ import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWi
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.gui.config.ItemListOrdering;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -130,6 +134,8 @@ public class FavoritesListWidget extends WidgetWithBounds {
         updatePosition(delta);
         ScissorsHandler.INSTANCE.removeLastScissor();
         renderScrollbar();
+        if (containsMouse(mouseX, mouseY) && ClientHelper.getInstance().isCheating() && !minecraft.player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
+            ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.delete_items")));
     }
     
     private int getScrollbarMinX() {
@@ -233,7 +239,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
                 List<EntryStack> list = Lists.newArrayList();
                 boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
                 List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
-                for (EntryStack stack : ConfigManager.getInstance().getFavorites()) {
+                for (EntryStack stack : ConfigObject.getInstance().getFavorites()) {
                     if (listWidget.canLastSearchTermsBeAppliedTo(stack)) {
                         if (checkCraftable && CollectionUtils.findFirstOrNullEquals(workingItems, stack) == null)
                             continue;
@@ -252,7 +258,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
                 List<EntryStack> list = Lists.newArrayList();
                 boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
                 List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
-                for (EntryStack stack : ConfigManager.getInstance().getFavorites()) {
+                for (EntryStack stack : ConfigObject.getInstance().getFavorites()) {
                     if (checkCraftable && CollectionUtils.findFirstOrNullEquals(workingItems, stack) == null)
                         continue;
                     list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
@@ -310,6 +316,13 @@ public class FavoritesListWidget extends WidgetWithBounds {
         this.draggingScrollBar = false;
         
         if (containsMouse(double_1, double_2)) {
+            ClientPlayerEntity player = minecraft.player;
+            if (ClientHelper.getInstance().isCheating() && !player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets()) {
+                ClientHelper.getInstance().sendDeletePacket();
+                return true;
+            }
+            if (!player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
+                return false;
             for (Widget widget : children())
                 if (widget.mouseClicked(double_1, double_2, int_1))
                     return true;
@@ -340,6 +353,29 @@ public class FavoritesListWidget extends WidgetWithBounds {
         @Override
         protected boolean reverseFavoritesAction() {
             return true;
+        }
+    
+        @Override
+        public void queueTooltip(int mouseX, int mouseY, float delta) {
+            if (!ClientHelper.getInstance().isCheating() || minecraft.player.inventory.getCursorStack().isEmpty()) {
+                super.queueTooltip(mouseX, mouseY, delta);
+            }
+        }
+    
+        @Override
+        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            if (!interactable)
+                return super.mouseClicked(mouseX, mouseY, button);
+            if (containsMouse(mouseX, mouseY) && ClientHelper.getInstance().isCheating()) {
+                EntryStack entry = getCurrentEntry().copy();
+                if (!entry.isEmpty()) {
+                    if (entry.getType() == EntryStack.Type.ITEM)
+                        entry.setAmount(button != 1 && !Screen.hasShiftDown() ? 1 : entry.getItemStack().getMaxCount());
+                    ClientHelper.getInstance().tryCheatingEntry(entry);
+                    return true;
+                }
+            }
+            return super.mouseClicked(mouseX, mouseY, button);
         }
     }
 }
