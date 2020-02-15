@@ -10,7 +10,7 @@
   "category.rei.crafting": "Fabricação",
   "category.rei.smelting": "Fundição",
   "category.rei.smelting.fuel": "Combustível",
-  "category.rei.fuel": "Fuel",
+  "category.rei.fuel": "Combustível",
   "category.rei.fuel.time": "Burn Time: %d ticks",
   "category.rei.fuel.time.items": "Burn Time: %s item(s)",
   "category.rei.fuel.time_short": "%d ticks",
