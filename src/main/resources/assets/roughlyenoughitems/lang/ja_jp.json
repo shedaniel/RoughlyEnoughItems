@@ -10,7 +10,7 @@
   "category.rei.crafting": "クラフト",
   "category.rei.smelting": "製錬",
   "category.rei.smelting.fuel": "燃料",
-  "category.rei.fuel": "Fuel",
+  "category.rei.fuel": "燃料",
   "category.rei.fuel.time": "Burn Time: %d ticks",
   "category.rei.fuel.time.items": "Burn Time: %s item(s)",
   "category.rei.fuel.time_short": "%d ticks",
