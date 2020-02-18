@@ -399,7 +399,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         private boolean newFastEntryRendering = true;
         @Comment("Experimental: Declares whether REI should search async.") private boolean asyncSearch = true;
         @Comment("Experimental: Declares how many entries should be grouped one async search.") @ConfigEntry.BoundedDiscrete(min = 25, max = 400)
-        private int numberAsyncSearch = 75;
+        private int numberAsyncSearch = 50;
     }
     
     public static class Filtering {
