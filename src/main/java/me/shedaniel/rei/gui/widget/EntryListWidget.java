@@ -40,7 +40,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -633,12 +633,43 @@ public class EntryListWidget extends WidgetWithBounds {
             boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
             List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
             List<EntryStack> stacks = EntryRegistry.getInstance().getPreFilteredList();
-            if (stacks instanceof CopyOnWriteArrayList) {
-                for (EntryStack stack : stacks) {
-                    if (canLastSearchTermsBeAppliedTo(stack)) {
-                        if (checkCraftable && CollectionUtils.findFirstOrNullEqualsEntryIgnoreAmount(workingItems, stack) == null)
-                            continue;
-                        list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
+            if (stacks instanceof CopyOnWriteArrayList && !stacks.isEmpty()) {
+                if (ConfigObject.getInstance().shouldAsyncSearch()) {
+                    int size = ConfigObject.getInstance().getNumberAsyncSearch();
+                    List<CompletableFuture<List<EntryStack>>> completableFutures = Lists.newArrayList();
+                    for (int i = 0; i < stacks.size(); i += size) {
+                        int[] start = {i};
+                        completableFutures.add(CompletableFuture.supplyAsync(() -> {
+                            int end = Math.min(stacks.size() - 1, start[0] + size);
+                            List<EntryStack> filtered = Lists.newArrayList();
+                            for (; start[0] < end; start[0]++) {
+                                EntryStack stack = stacks.get(start[0]);
+                                if (canLastSearchTermsBeAppliedTo(stack)) {
+                                    if (checkCraftable && CollectionUtils.findFirstOrNullEqualsEntryIgnoreAmount(workingItems, stack) == null)
+                                        continue;
+                                    filtered.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
+                                }
+                            }
+                            return filtered;
+                        }));
+                    }
+                    try {
+                        CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0])).get(30, TimeUnit.SECONDS);
+                    } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                        e.printStackTrace();
+                    }
+                    for (CompletableFuture<List<EntryStack>> future : completableFutures) {
+                        List<EntryStack> now = future.getNow(null);
+                        if (now != null)
+                            list.addAll(now);
+                    }
+                } else {
+                    for (EntryStack stack : stacks) {
+                        if (canLastSearchTermsBeAppliedTo(stack)) {
+                            if (checkCraftable && CollectionUtils.findFirstOrNullEqualsEntryIgnoreAmount(workingItems, stack) == null)
+                                continue;
+                            list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
+                        }
                     }
                 }
             }
@@ -678,7 +709,7 @@ public class EntryListWidget extends WidgetWithBounds {
             favoritesListWidget.updateSearch(this, searchTerm);
         long ended = System.nanoTime();
         long time = ended - started;
-        if (RoughlyEnoughItemsCore.isDebugModeEnabled())
+        if (ConfigObject.getInstance().doDebugSearchTimeRequired())
             RoughlyEnoughItemsCore.LOGGER.info("[REI] Search Used: %.2fms", time * 1e-6);
         updateEntriesPosition();
     }
