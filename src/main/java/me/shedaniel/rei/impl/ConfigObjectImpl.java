@@ -294,6 +294,24 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         return filtering.filteredStacks;
     }
     
+    @Override
+    @ApiStatus.Experimental
+    public boolean shouldAsyncSearch() {
+        return performance.asyncSearch;
+    }
+    
+    @Override
+    @ApiStatus.Experimental
+    public int getNumberAsyncSearch() {
+        return performance.numberAsyncSearch;
+    }
+    
+    @Override
+    @ApiStatus.Experimental
+    public boolean doDebugSearchTimeRequired() {
+        return technical.debugSearchTimeRequired;
+    }
+    
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD})
     @interface DontApplyFieldName {}
@@ -353,7 +371,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         @Comment("Declares the location of the favorites list.") private boolean displayFavoritesOnTheLeft = true;
         @Comment("Declares whether favorites tooltip should be displayed.") private boolean displayFavoritesTooltip = false;
         @Comment("Declares whether favorites will be searched.") private boolean searchFavorites = true;
-        @UsePercentage(min = 0.5, max = 4.0) private double entrySize = 1.0;
+        @UsePercentage(min = 0.25, max = 4.0) private double entrySize = 1.0;
         private boolean useCompactTabs = true;
         private boolean lowerConfigButton = false;
     }
@@ -365,6 +383,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         @Comment("Declares the command used to change weather.") private String weatherCommand = "/weather {weather}";
         private boolean registerRecipesInAnotherThread = true;
         private boolean debugRenderTimeRequired = false;
+        @Comment("Experimental: Declares whether search time should be debugged.") private boolean debugSearchTimeRequired = false;
     }
     
     public static class Modules {
@@ -378,6 +397,9 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     public static class Performance {
         @Comment("Whether REI should render entry's enchantment glint") private boolean renderEntryEnchantmentGlint = true;
         private boolean newFastEntryRendering = true;
+        @Comment("Experimental: Declares whether REI should search async.") private boolean asyncSearch = true;
+        @Comment("Experimental: Declares how many entries should be grouped one async search.") @ConfigEntry.BoundedDiscrete(min = 25, max = 400)
+        private int numberAsyncSearch = 75;
     }
     
     public static class Filtering {
