@@ -241,7 +241,8 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         ClientHelperImpl.instance = this;
         registerFabricKeyBinds();
         modNameCache.put("minecraft", "Minecraft");
-        modNameCache.put("c", "Common");
+        modNameCache.put("c", "Global");
+        modNameCache.put("global", "Global");
     }
     
     @Override
