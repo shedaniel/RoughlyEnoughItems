@@ -122,4 +122,12 @@ public interface ConfigObject {
     
     List<EntryStack> getFilteredStacks();
     
+    @ApiStatus.Experimental
+    boolean shouldAsyncSearch();
+    
+    @ApiStatus.Experimental
+    int getNumberAsyncSearch();
+    
+    @ApiStatus.Experimental
+    boolean doDebugSearchTimeRequired();
 }
