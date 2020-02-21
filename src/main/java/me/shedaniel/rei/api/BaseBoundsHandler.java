@@ -16,6 +16,11 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public interface BaseBoundsHandler extends DisplayHelper.DisplayBoundsHandler<Screen> {
+    
+    static BaseBoundsHandler getInstance() {
+        return DisplayHelper.getInstance().getBaseBoundsHandler();
+    }
+    
     /**
      * Gets the exclusion zones by the screen class
      *
