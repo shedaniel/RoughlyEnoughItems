@@ -277,22 +277,22 @@ public class DefaultPlugin implements REIPluginV0 {
                 return Collections.emptyList();
             return Collections.singletonList(widget.getBounds().clone());
         });
-        displayHelper.registerHandler(new OverlayDecider() {
-            @Override
-            public boolean isHandingScreen(Class<?> screen) {
-                return InventoryScreen.class.isAssignableFrom(screen);
-            }
-            
-            @Override
-            public ActionResult shouldScreenBeOverlayed(Class<?> screen) {
-                return isHandingScreen(screen) ? ActionResult.FAIL : ActionResult.PASS;
-            }
-    
-            @Override
-            public float getPriority() {
-                return 10f;
-            }
-        });
+//        displayHelper.registerHandler(new OverlayDecider() {
+//            @Override
+//            public boolean isHandingScreen(Class<?> screen) {
+//                return InventoryScreen.class.isAssignableFrom(screen);
+//            }
+//
+//            @Override
+//            public ActionResult shouldScreenBeOverlayed(Class<?> screen) {
+//                return isHandingScreen(screen) ? ActionResult.FAIL : ActionResult.PASS;
+//            }
+//
+//            @Override
+//            public float getPriority() {
+//                return 10f;
+//            }
+//        });
         displayHelper.registerHandler(new DisplayHelper.DisplayBoundsHandler<ContainerScreen<?>>() {
             @Override
             public Class<?> getBaseSupportedClass() {
