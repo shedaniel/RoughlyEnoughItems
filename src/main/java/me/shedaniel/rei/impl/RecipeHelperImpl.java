@@ -264,7 +264,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         ((DisplayHelperImpl) DisplayHelper.getInstance()).resetData();
         ((DisplayHelperImpl) DisplayHelper.getInstance()).resetCache();
         BaseBoundsHandler baseBoundsHandler = new BaseBoundsHandlerImpl();
-        DisplayHelper.getInstance().registerBoundsHandler(baseBoundsHandler);
+        DisplayHelper.getInstance().registerHandler(baseBoundsHandler);
         ((DisplayHelperImpl) DisplayHelper.getInstance()).setBaseBoundsHandler(baseBoundsHandler);
         List<REIPluginEntry> plugins = RoughlyEnoughItemsCore.getPlugins();
         plugins.sort(Comparator.comparingInt(REIPluginEntry::getPriority).reversed());
@@ -328,6 +328,22 @@ public class RecipeHelperImpl implements RecipeHelper {
                     return -1f;
                 }
             });
+        DisplayHelper.getInstance().registerHandler(new OverlayDecider() {
+            @Override
+            public boolean isHandingScreen(Class<?> screen) {
+                return true;
+            }
+    
+            @Override
+            public ActionResult shouldScreenBeOverlayed(Class<?> screen) {
+                return ContainerScreen.class.isAssignableFrom(screen) ? ActionResult.SUCCESS : ActionResult.PASS;
+            }
+    
+            @Override
+            public float getPriority() {
+                return -10;
+            }
+        });
         
         // Clear Cache
         ((DisplayHelperImpl) DisplayHelper.getInstance()).resetCache();
@@ -344,7 +360,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         
         displayVisibilityHandlers.sort(VISIBILITY_HANDLER_COMPARATOR);
         long usedTime = System.currentTimeMillis() - startTime;
-        RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered %d stack entries, %d recipes displays, %d exclusion zones suppliers, %d bounds handler, %d visibility handlers and %d categories (%s) in %d ms.", EntryRegistry.getInstance().getStacksList().size(), recipeCount[0], DisplayHelper.getInstance().getBaseBoundsHandler().supplierSize(), DisplayHelper.getInstance().getAllBoundsHandlers().size(), getDisplayVisibilityHandlers().size(), categories.size(), categories.keySet().stream().map(RecipeCategory::getCategoryName).collect(Collectors.joining(", ")), usedTime);
+        RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered %d stack entries, %d recipes displays, %d exclusion zones suppliers, %d overlay decider, %d visibility handlers and %d categories (%s) in %d ms.", EntryRegistry.getInstance().getStacksList().size(), recipeCount[0], BaseBoundsHandler.getInstance().supplierSize(), DisplayHelper.getInstance().getAllOverlayDeciders().size(), getDisplayVisibilityHandlers().size(), categories.size(), categories.keySet().stream().map(RecipeCategory::getCategoryName).collect(Collectors.joining(", ")), usedTime);
     }
     
     @Override

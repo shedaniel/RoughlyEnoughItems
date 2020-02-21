@@ -52,7 +52,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicLong;
 
 @ApiStatus.Internal
 public class RoughlyEnoughItemsCore implements ClientModInitializer {
@@ -131,13 +130,13 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     }
     
     @ApiStatus.Internal
-    public static void syncRecipes(AtomicLong lastSync) {
+    public static void syncRecipes(long[] lastSync) {
         if (lastSync != null) {
-            if (lastSync.get() > 0 && System.currentTimeMillis() - lastSync.get() <= 5000) {
+            if (lastSync[0] > 0 && System.currentTimeMillis() - lastSync[0] <= 5000) {
                 RoughlyEnoughItemsCore.LOGGER.warn("[REI] Suppressing Sync Recipes!");
                 return;
             }
-            lastSync.set(System.currentTimeMillis());
+            lastSync[0] = System.currentTimeMillis();
         }
         RecipeManager recipeManager = MinecraftClient.getInstance().getNetworkHandler().getRecipeManager();
         if (ConfigObject.getInstance().doesRegisterRecipesInAnotherThread()) {
@@ -230,9 +229,20 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         }
     }
     
+    private boolean shouldReturn(Class<?> screen) {
+        for (OverlayDecider decider : DisplayHelper.getInstance().getAllOverlayDeciders()) {
+            if (!decider.isHandingScreen(screen))
+                continue;
+            ActionResult result = decider.shouldScreenBeOverlayed(screen);
+            if (result != ActionResult.PASS)
+                return result == ActionResult.FAIL || ScreenHelper.getLastContainerScreenHooks() == null;
+        }
+        return true;
+    }
+    
     private void registerClothEvents() {
         final Identifier recipeButtonTex = new Identifier("textures/gui/recipe_button.png");
-        AtomicLong lastSync = new AtomicLong(-1);
+        long[] lastSync = {-1};
         ClothClientHooks.SYNC_RECIPES.register((minecraftClient, recipeManager, synchronizeRecipesS2CPacket) -> syncRecipes(lastSync));
         ClothClientHooks.SCREEN_ADD_BUTTON.register((minecraftClient, screen, abstractButtonWidget) -> {
             if (ConfigObject.getInstance().doesDisableRecipeBook() && screen instanceof ContainerScreen && abstractButtonWidget instanceof TexturedButtonWidget)
@@ -241,29 +251,32 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             return ActionResult.PASS;
         });
         ClothClientHooks.SCREEN_INIT_POST.register((minecraftClient, screen, screenHooks) -> {
-            if (screen instanceof ContainerScreen) {
-                if (screen instanceof InventoryScreen && minecraftClient.interactionManager.hasCreativeInventory())
-                    return;
+            if (screen instanceof InventoryScreen && minecraftClient.interactionManager.hasCreativeInventory())
+                return;
+            if (shouldReturn(screen.getClass()))
+                return;
+            if (screen instanceof ContainerScreen)
                 ScreenHelper.setLastContainerScreen((ContainerScreen<?>) screen);
-                boolean alreadyAdded = false;
-                for (Element element : Lists.newArrayList(screenHooks.cloth_getInputListeners()))
-                    if (ContainerScreenOverlay.class.isAssignableFrom(element.getClass()))
-                        if (alreadyAdded)
-                            screenHooks.cloth_getInputListeners().remove(element);
-                        else
-                            alreadyAdded = true;
-                if (!alreadyAdded)
-                    screenHooks.cloth_getInputListeners().add(ScreenHelper.getLastOverlay(true, false));
-            }
+            boolean alreadyAdded = false;
+            for (Element element : Lists.newArrayList(screenHooks.cloth_getInputListeners()))
+                if (ContainerScreenOverlay.class.isAssignableFrom(element.getClass()))
+                    if (alreadyAdded)
+                        screenHooks.cloth_getInputListeners().remove(element);
+                    else
+                        alreadyAdded = true;
+            if (!alreadyAdded)
+                screenHooks.cloth_getInputListeners().add(ScreenHelper.getLastOverlay(true, false));
         });
         ClothClientHooks.SCREEN_RENDER_POST.register((minecraftClient, screen, i, i1, v) -> {
-            if (screen instanceof ContainerScreen)
-                ScreenHelper.getLastOverlay().render(i, i1, v);
+            if (shouldReturn(screen.getClass()))
+                return;
+            ScreenHelper.getLastOverlay().render(i, i1, v);
         });
         ClothClientHooks.SCREEN_MOUSE_DRAGGED.register((minecraftClient, screen, v, v1, i, v2, v3) -> {
-            if (screen instanceof ContainerScreen)
-                if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().mouseDragged(v, v1, i, v2, v3))
-                    return ActionResult.SUCCESS;
+            if (shouldReturn(screen.getClass()))
+                return ActionResult.PASS;
+            if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().mouseDragged(v, v1, i, v2, v3))
+                return ActionResult.SUCCESS;
             return ActionResult.PASS;
         });
         ClothClientHooks.SCREEN_MOUSE_CLICKED.register((minecraftClient, screen, v, v1, i) -> {
@@ -277,29 +290,33 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             return ActionResult.PASS;
         });
         ClothClientHooks.SCREEN_MOUSE_SCROLLED.register((minecraftClient, screen, v, v1, v2) -> {
-            if (screen instanceof ContainerScreen)
-                if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().mouseScrolled(v, v1, v2))
-                    return ActionResult.SUCCESS;
+            if (shouldReturn(screen.getClass()))
+                return ActionResult.PASS;
+            if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().mouseScrolled(v, v1, v2))
+                return ActionResult.SUCCESS;
             return ActionResult.PASS;
         });
         ClothClientHooks.SCREEN_CHAR_TYPED.register((minecraftClient, screen, character, keyCode) -> {
-            if (screen instanceof ContainerScreen)
-                if (ScreenHelper.getLastOverlay().charTyped(character, keyCode))
-                    return ActionResult.SUCCESS;
+            if (shouldReturn(screen.getClass()))
+                return ActionResult.PASS;
+            if (ScreenHelper.getLastOverlay().charTyped(character, keyCode))
+                return ActionResult.SUCCESS;
             return ActionResult.PASS;
         });
         ClothClientHooks.SCREEN_LATE_RENDER.register((minecraftClient, screen, i, i1, v) -> {
             if (!ScreenHelper.isOverlayVisible())
                 return;
-            if (screen instanceof ContainerScreen)
-                ScreenHelper.getLastOverlay().lateRender(i, i1, v);
+            if (shouldReturn(screen.getClass()))
+                return;
+            ScreenHelper.getLastOverlay().lateRender(i, i1, v);
         });
         ClothClientHooks.SCREEN_KEY_PRESSED.register((minecraftClient, screen, i, i1, i2) -> {
             if (screen.getFocused() != null && screen.getFocused() instanceof TextFieldWidget || (screen.getFocused() instanceof RecipeBookWidget && ((RecipeBookGuiHooks) screen.getFocused()).rei_getSearchField() != null && ((RecipeBookGuiHooks) screen.getFocused()).rei_getSearchField().isFocused()))
                 return ActionResult.PASS;
-            if (screen instanceof ContainerScreen)
-                if (ScreenHelper.getLastOverlay().keyPressed(i, i1, i2))
-                    return ActionResult.SUCCESS;
+            if (shouldReturn(screen.getClass()))
+                return ActionResult.PASS;
+            if (ScreenHelper.getLastOverlay().keyPressed(i, i1, i2))
+                return ActionResult.SUCCESS;
             if (screen instanceof ContainerScreen && ConfigObject.getInstance().doesDisableRecipeBook() && ConfigObject.getInstance().doesFixTabCloseContainer())
                 if (i == 258 && minecraftClient.options.keyInventory.matchesKey(i, i1)) {
                     minecraftClient.player.closeContainer();

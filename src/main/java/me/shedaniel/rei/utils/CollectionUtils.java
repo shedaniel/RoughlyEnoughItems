@@ -32,6 +32,15 @@ public class CollectionUtils {
         return null;
     }
     
+    public static <T,R> List<R> castAndMap(List<T> list, Class<R> castClass) {
+        List<R> l = new ArrayList<>();
+        for (T t : list) {
+            if (castClass.isAssignableFrom(t.getClass()))
+                l.add((R) t);
+        }
+        return l;
+    }
+    
     public static <T> T findFirstOrNull(List<T> list, Predicate<T> predicate) {
         for (T t : list) {
             if (predicate.test(t))

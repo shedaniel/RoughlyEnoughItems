@@ -10,8 +10,11 @@ import com.google.common.collect.Maps;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.BaseBoundsHandler;
 import me.shedaniel.rei.api.DisplayHelper;
+import me.shedaniel.rei.api.OverlayDecider;
+import me.shedaniel.rei.utils.CollectionUtils;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +23,7 @@ import java.util.stream.Collectors;
 @ApiStatus.Internal
 public class DisplayHelperImpl implements DisplayHelper {
     
-    private static final Comparator<DisplayBoundsHandler<?>> BOUNDS_HANDLER_COMPARATOR;
+    private static final Comparator<OverlayDecider> BOUNDS_HANDLER_COMPARATOR;
     private static final DisplayBoundsHandler<Object> EMPTY = new DisplayBoundsHandler<Object>() {
         @Override
         public Class<Object> getBaseSupportedClass() {
@@ -44,29 +47,30 @@ public class DisplayHelperImpl implements DisplayHelper {
     };
     
     static {
-        Comparator<DisplayBoundsHandler<?>> comparator = Comparator.comparingDouble(DisplayBoundsHandler::getPriority);
+        Comparator<OverlayDecider> comparator = Comparator.comparingDouble(OverlayDecider::getPriority);
         BOUNDS_HANDLER_COMPARATOR = comparator.reversed();
     }
     
-    private List<DisplayBoundsHandler<?>> screenDisplayBoundsHandlers = Lists.newArrayList();
+    private List<OverlayDecider> screenDisplayBoundsHandlers = Lists.newArrayList();
     private Map<Class<?>, DisplayBoundsHandler<?>> handlerCache = Maps.newHashMap();
     private Map<Class<?>, List<DisplayBoundsHandler<?>>> handlerSortedCache = Maps.newHashMap();
     private BaseBoundsHandler baseBoundsHandler;
     private Class<?> tempScreen;
     
+    @SuppressWarnings("rawtypes")
     @Override
     public List<DisplayBoundsHandler<?>> getSortedBoundsHandlers(Class<?> screenClass) {
         List<DisplayBoundsHandler<?>> possibleCached = handlerSortedCache.get(screenClass);
         if (possibleCached != null)
             return possibleCached;
         tempScreen = screenClass;
-        handlerSortedCache.put(screenClass, screenDisplayBoundsHandlers.stream().filter(this::filterResponsible).sorted(BOUNDS_HANDLER_COMPARATOR).collect(Collectors.toList()));
+        handlerSortedCache.put(screenClass, (List) CollectionUtils.castAndMap(CollectionUtils.filter(screenDisplayBoundsHandlers, this::filterResponsible), DisplayBoundsHandler.class));
         return handlerSortedCache.get(screenClass);
     }
     
     @Override
-    public List<DisplayBoundsHandler<?>> getAllBoundsHandlers() {
-        return screenDisplayBoundsHandlers;
+    public List<OverlayDecider> getAllOverlayDeciders() {
+        return Collections.unmodifiableList(screenDisplayBoundsHandlers);
     }
     
     @Override
@@ -79,13 +83,14 @@ public class DisplayHelperImpl implements DisplayHelper {
         return handlerCache.get(screenClass);
     }
     
-    private boolean filterResponsible(DisplayBoundsHandler<?> handler) {
-        return handler.getBaseSupportedClass().isAssignableFrom(tempScreen);
+    private boolean filterResponsible(OverlayDecider handler) {
+        return handler.isHandingScreen(tempScreen);
     }
     
     @Override
-    public void registerBoundsHandler(DisplayBoundsHandler<?> handler) {
-        screenDisplayBoundsHandlers.add(handler);
+    public void registerHandler(OverlayDecider decider) {
+        screenDisplayBoundsHandlers.add(decider);
+        screenDisplayBoundsHandlers.sort(BOUNDS_HANDLER_COMPARATOR);
     }
     
     @Override
