@@ -8,7 +8,9 @@ package me.shedaniel.rei.api;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.gui.config.SearchFieldLocation;
+import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.util.ActionResult;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -34,8 +36,20 @@ public interface DisplayHelper {
      * Gets all registered bounds handlers
      *
      * @return the list of registered bounds handlers
+     * @deprecated see {@link #getAllOverlayDeciders()}
      */
-    List<DisplayBoundsHandler<?>> getAllBoundsHandlers();
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
+    default List<DisplayBoundsHandler<?>> getAllBoundsHandlers() {
+        return (List) CollectionUtils.castAndMap(getAllOverlayDeciders(), DisplayBoundsHandler.class);
+    }
+    
+    /**
+     * Gets all registered overlay deciders
+     *
+     * @return the list of registered overlay deciders
+     */
+    List<OverlayDecider> getAllOverlayDeciders();
     
     /**
      * Gets all responsible bounds handlers
@@ -50,23 +64,42 @@ public interface DisplayHelper {
      * Registers a bounds handler
      *
      * @param handler the handler to register
+     * @deprecated see {@link #registerHandler(OverlayDecider)}
      */
-    void registerBoundsHandler(DisplayBoundsHandler<?> handler);
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
+    default void registerBoundsHandler(DisplayBoundsHandler<?> handler) {
+        registerHandler(handler);
+    }
+    
+    /**
+     * Registers a bounds decider
+     *
+     * @param decider the decider to register
+     */
+    void registerHandler(OverlayDecider decider);
     
     /**
      * Gets the base bounds handler api for exclusion zones
      *
      * @return the base bounds handler
+     * @see BaseBoundsHandler#getInstance()
      */
+    @ApiStatus.Internal
     BaseBoundsHandler getBaseBoundsHandler();
     
-    interface DisplayBoundsHandler<T> {
+    interface DisplayBoundsHandler<T> extends OverlayDecider {
         /**
          * Gets the base supported class for the bounds handler
          *
          * @return the base class
          */
         Class<?> getBaseSupportedClass();
+        
+        @Override
+        default boolean isHandingScreen(Class<?> screen) {
+            return getBaseSupportedClass().isAssignableFrom(screen);
+        }
         
         /**
          * Gets the left bounds of the overlay
@@ -140,6 +173,7 @@ public interface DisplayHelper {
          *
          * @return the priority in float
          */
+        @Override
         default float getPriority() {
             return 0f;
         }

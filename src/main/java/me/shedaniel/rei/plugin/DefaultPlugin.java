@@ -57,6 +57,7 @@ import net.minecraft.item.*;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.recipe.*;
 import net.minecraft.tag.BlockTags;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
@@ -267,15 +268,32 @@ public class DefaultPlugin implements REIPluginV0 {
         if (!ConfigObject.getInstance().isLoadingDefaultPlugin()) {
             return;
         }
-        displayHelper.getBaseBoundsHandler().registerExclusionZones(AbstractInventoryScreen.class, new DefaultPotionEffectExclusionZones());
-        displayHelper.getBaseBoundsHandler().registerExclusionZones(RecipeBookProvider.class, new DefaultRecipeBookExclusionZones());
-        displayHelper.getBaseBoundsHandler().registerExclusionZones(RecipeViewingScreen.class, () -> {
+        BaseBoundsHandler baseBoundsHandler = BaseBoundsHandler.getInstance();
+        baseBoundsHandler.registerExclusionZones(AbstractInventoryScreen.class, new DefaultPotionEffectExclusionZones());
+        baseBoundsHandler.registerExclusionZones(RecipeBookProvider.class, new DefaultRecipeBookExclusionZones());
+        baseBoundsHandler.registerExclusionZones(RecipeViewingScreen.class, () -> {
             CategoryBaseWidget widget = ((RecipeViewingScreen) MinecraftClient.getInstance().currentScreen).getWorkingStationsBaseWidget();
             if (widget == null)
                 return Collections.emptyList();
             return Collections.singletonList(widget.getBounds().clone());
         });
-        displayHelper.registerBoundsHandler(new DisplayHelper.DisplayBoundsHandler<ContainerScreen<?>>() {
+        displayHelper.registerHandler(new OverlayDecider() {
+            @Override
+            public boolean isHandingScreen(Class<?> screen) {
+                return InventoryScreen.class.isAssignableFrom(screen);
+            }
+            
+            @Override
+            public ActionResult shouldScreenBeOverlayed(Class<?> screen) {
+                return isHandingScreen(screen) ? ActionResult.FAIL : ActionResult.PASS;
+            }
+    
+            @Override
+            public float getPriority() {
+                return 10f;
+            }
+        });
+        displayHelper.registerHandler(new DisplayHelper.DisplayBoundsHandler<ContainerScreen<?>>() {
             @Override
             public Class<?> getBaseSupportedClass() {
                 return ContainerScreen.class;
@@ -297,7 +315,7 @@ public class DefaultPlugin implements REIPluginV0 {
                 return -1.0f;
             }
         });
-        displayHelper.registerBoundsHandler(new DisplayHelper.DisplayBoundsHandler<RecipeViewingScreen>() {
+        displayHelper.registerHandler(new DisplayHelper.DisplayBoundsHandler<RecipeViewingScreen>() {
             @Override
             public Class<?> getBaseSupportedClass() {
                 return RecipeViewingScreen.class;
@@ -319,7 +337,7 @@ public class DefaultPlugin implements REIPluginV0 {
                 return -1.0f;
             }
         });
-        displayHelper.registerBoundsHandler(new DisplayHelper.DisplayBoundsHandler<VillagerRecipeViewingScreen>() {
+        displayHelper.registerHandler(new DisplayHelper.DisplayBoundsHandler<VillagerRecipeViewingScreen>() {
             @Override
             public Class<?> getBaseSupportedClass() {
                 return VillagerRecipeViewingScreen.class;
