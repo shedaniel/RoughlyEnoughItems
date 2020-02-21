@@ -84,7 +84,7 @@ public class DisplayHelperImpl implements DisplayHelper {
     }
     
     @Deprecated
-    public boolean filterResponsible(DisplayBoundsHandler<?> handler) {
+    public boolean filterResponsible(OverlayDecider handler) {
         return handler.isHandingScreen(tempScreen);
     }
     
