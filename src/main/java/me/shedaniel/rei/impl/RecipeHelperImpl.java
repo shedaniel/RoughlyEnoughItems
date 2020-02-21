@@ -349,7 +349,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     
             @Override
             public ActionResult shouldScreenBeOverlayed(Class<?> screen) {
-                return ContainerScreen.class.isAssignableFrom(screen) ? ActionResult.SUCCESS : ActionResult.PASS;
+                return AbstractContainerScreen.class.isAssignableFrom(screen) ? ActionResult.SUCCESS : ActionResult.PASS;
             }
     
             @Override
