@@ -75,7 +75,6 @@ public class DefaultPlugin implements REIPluginV0 {
     public static final Identifier PLUGIN = new Identifier("roughlyenoughitems", "default_plugin");
     public static final Identifier COMPOSTING = new Identifier("minecraft", "plugins/composting");
     public static final Identifier FUEL = new Identifier("minecraft", "plugins/fuel");
-    public static final Identifier BEACON = new Identifier("roughlyenoughitems", "plugins/beacon");
     public static final Identifier INFO = new Identifier("roughlyenoughitems", "plugins/information");
     private static final Identifier DISPLAY_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/display.png");
     private static final Identifier DISPLAY_TEXTURE_DARK = new Identifier("roughlyenoughitems", "textures/gui/display_dark.png");
@@ -358,10 +357,8 @@ public class DefaultPlugin implements REIPluginV0 {
         recipeHelper.registerWorkingStations(BREWING, EntryStack.create(Items.BREWING_STAND));
         recipeHelper.registerWorkingStations(STONE_CUTTING, EntryStack.create(Items.STONECUTTER));
         recipeHelper.registerWorkingStations(COMPOSTING, EntryStack.create(Items.COMPOSTER));
-        recipeHelper.registerWorkingStations(BEACON, EntryStack.create(Items.BEACON));
         recipeHelper.removeAutoCraftButton(FUEL);
         recipeHelper.removeAutoCraftButton(COMPOSTING);
-        recipeHelper.removeAutoCraftButton(BEACON);
         recipeHelper.removeAutoCraftButton(INFO);
         recipeHelper.registerScreenClickArea(new Rectangle(88, 32, 28, 23), CraftingTableScreen.class, CRAFTING);
         recipeHelper.registerScreenClickArea(new Rectangle(137, 29, 10, 13), InventoryScreen.class, CRAFTING);
