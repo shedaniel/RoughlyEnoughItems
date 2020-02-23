@@ -153,7 +153,7 @@ public class ConfigManagerImpl implements ConfigManager {
                     int width = 220;
                     private AbstractButtonWidget buttonWidget = new AbstractPressableButtonWidget(0, 0, 0, 20, this.getFieldName()) {
                         public void onPress() {
-                            Screen screen = ClothConfigInitializer.getConfigBuilder().build();
+                            Screen screen = ClothConfigInitializer.getConfigBuilder().setTitle("Smooth Scrolling Settings").build();
                             MinecraftClient.getInstance().openScreen(screen);
                         }
                     };
