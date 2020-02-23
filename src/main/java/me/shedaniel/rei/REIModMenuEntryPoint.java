@@ -5,11 +5,9 @@
 
 package me.shedaniel.rei;
 
+import io.github.prospector.modmenu.api.ConfigScreenFactory;
 import io.github.prospector.modmenu.api.ModMenuApi;
 import me.shedaniel.rei.api.ConfigManager;
-import net.minecraft.client.gui.screen.Screen;
-
-import java.util.function.Function;
 
 public class REIModMenuEntryPoint implements ModMenuApi {
     
@@ -19,8 +17,7 @@ public class REIModMenuEntryPoint implements ModMenuApi {
     }
     
     @Override
-    public Function<Screen, ? extends Screen> getConfigScreenFactory() {
+    public ConfigScreenFactory<?> getModConfigScreenFactory() {
         return parent -> ConfigManager.getInstance().getConfigScreen(parent);
     }
-    
 }
