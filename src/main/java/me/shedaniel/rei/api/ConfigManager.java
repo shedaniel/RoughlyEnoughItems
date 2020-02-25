@@ -8,6 +8,7 @@ package me.shedaniel.rei.api;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 
@@ -17,8 +18,11 @@ public interface ConfigManager {
         return RoughlyEnoughItemsCore.getConfigManager();
     }
     
+    @ApiStatus.ScheduledForRemoval
     @Deprecated
-    List<EntryStack> getFavorites();
+    default List<EntryStack> getFavorites() {
+        return ConfigObject.getInstance().getFavorites();
+    }
     
     /**
      * Saves the config.

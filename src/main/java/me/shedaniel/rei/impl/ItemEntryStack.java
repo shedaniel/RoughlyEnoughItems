@@ -252,12 +252,14 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
         optimisedRenderEnd(delta);
     }
     
+    @SuppressWarnings("deprecation")
     @Override
     public void optimisedRenderStart(float delta) {
         MinecraftClient.getInstance().getTextureManager().bindTexture(SpriteAtlasTexture.BLOCK_ATLAS_TEX);
         GlStateManager.enableRescaleNormal();
     }
     
+    @SuppressWarnings("deprecation")
     @Override
     public void optimisedRenderEnd(float delta) {
         GlStateManager.disableRescaleNormal();

@@ -184,6 +184,7 @@ public class FluidEntryStack extends AbstractEntryStack {
         return QueuedTooltip.create(toolTip);
     }
     
+    @SuppressWarnings("deprecation")
     @Override
     public void render(Rectangle bounds, int mouseX, int mouseY, float delta) {
         if (get(Settings.RENDER).get()) {
