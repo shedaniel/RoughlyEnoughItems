@@ -640,7 +640,7 @@ public class EntryListWidget extends WidgetWithBounds {
                     for (int i = 0; i < stacks.size(); i += size) {
                         int[] start = {i};
                         completableFutures.add(CompletableFuture.supplyAsync(() -> {
-                            int end = Math.min(stacks.size() - 1, start[0] + size);
+                            int end = Math.min(stacks.size(), start[0] + size);
                             List<EntryStack> filtered = Lists.newArrayList();
                             for (; start[0] < end; start[0]++) {
                                 EntryStack stack = stacks.get(start[0]);
