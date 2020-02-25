@@ -15,6 +15,7 @@ import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.gui.PreRecipeViewingScreen;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
+import me.shedaniel.rei.gui.StackToNoticeScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.utils.CollectionUtils;
@@ -37,6 +38,7 @@ import net.minecraft.util.Lazy;
 import net.minecraft.util.PacketByteBuf;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
@@ -156,7 +158,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     public boolean executeRecipeKeyBind(EntryStack stack) {
         Map<RecipeCategory<?>, List<RecipeDisplay>> map = RecipeHelper.getInstance().getRecipesFor(stack);
         if (map.keySet().size() > 0)
-            openRecipeViewingScreen(map, stack);
+            openRecipeViewingScreen(map, null, stack);
         return map.keySet().size() > 0;
     }
     
@@ -164,7 +166,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     public boolean executeUsageKeyBind(EntryStack stack) {
         Map<RecipeCategory<?>, List<RecipeDisplay>> map = RecipeHelper.getInstance().getUsagesFor(stack);
         if (map.keySet().size() > 0)
-            openRecipeViewingScreen(map, stack);
+            openRecipeViewingScreen(map, stack, null);
         return map.keySet().size() > 0;
     }
     
@@ -212,25 +214,28 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     @Override
     public void openRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map) {
-        openRecipeViewingScreen(map, null);
+        openRecipeViewingScreen(map, null, null);
     }
     
-    public void openRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map, EntryStack notice) {
+    @ApiStatus.Internal
+    public void openRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map, @Nullable EntryStack ingredientNotice, @Nullable EntryStack resultNotice) {
         Screen screen;
         if (ConfigObject.getInstance().getRecipeScreenType() == RecipeScreenType.VILLAGER) {
             screen = new VillagerRecipeViewingScreen(map);
-            if (notice != null)
-                ((VillagerRecipeViewingScreen) screen).addMainStackToNotice(notice);
         } else if (ConfigObject.getInstance().getRecipeScreenType() == RecipeScreenType.UNSET) {
             screen = new PreRecipeViewingScreen(ScreenHelper.getLastContainerScreen(), RecipeScreenType.UNSET, true, original -> {
                 ConfigObject.getInstance().setRecipeScreenType(original ? RecipeScreenType.ORIGINAL : RecipeScreenType.VILLAGER);
                 ConfigManager.getInstance().saveConfig();
-                openRecipeViewingScreen(map, notice);
+                openRecipeViewingScreen(map, ingredientNotice, resultNotice);
             });
         } else {
             screen = new RecipeViewingScreen(map);
-            if (notice != null)
-                ((RecipeViewingScreen) screen).addMainStackToNotice(notice);
+        }
+        if (screen instanceof StackToNoticeScreen) {
+            if (ingredientNotice != null)
+                ((StackToNoticeScreen) screen).addIngredientStackToNotice(ingredientNotice);
+            if (resultNotice != null)
+                ((StackToNoticeScreen) screen).addResultStackToNotice(resultNotice);
         }
         ScreenHelper.storeRecipeScreen(MinecraftClient.getInstance().currentScreen);
         MinecraftClient.getInstance().openScreen(screen);

@@ -39,7 +39,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @ApiStatus.Internal
-public class VillagerRecipeViewingScreen extends Screen {
+public class VillagerRecipeViewingScreen extends Screen implements StackToNoticeScreen {
     
     private final Map<RecipeCategory<?>, List<RecipeDisplay>> categoryMap;
     private final List<RecipeCategory<?>> categories;
@@ -59,7 +59,8 @@ public class VillagerRecipeViewingScreen extends Screen {
     private long scrollBarAlphaFutureTime = -1;
     private boolean draggingScrollBar;
     private int tabsPage;
-    private EntryStack mainStackToNotice = EntryStack.empty();
+    private EntryStack ingredientStackToNotice = EntryStack.empty();
+    private EntryStack resultStackToNotice = EntryStack.empty();
     
     public VillagerRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map) {
         super(new LiteralText(""));
@@ -84,8 +85,14 @@ public class VillagerRecipeViewingScreen extends Screen {
         });
     }
     
-    public void addMainStackToNotice(EntryStack stack) {
-        this.mainStackToNotice = stack;
+    @Override
+    public void addIngredientStackToNotice(EntryStack stack) {
+        ingredientStackToNotice = stack;
+    }
+    
+    @Override
+    public void addResultStackToNotice(EntryStack stack) {
+        resultStackToNotice = stack;
     }
     
     @Override
@@ -137,7 +144,8 @@ public class VillagerRecipeViewingScreen extends Screen {
         
         Rectangle recipeBounds = new Rectangle(bounds.x + 100 + (guiWidth - 100) / 2 - category.getDisplayWidth(display) / 2, bounds.y + bounds.height / 2 - category.getDisplayHeight() / 2, category.getDisplayWidth(display), category.getDisplayHeight());
         List<Widget> setupDisplay = category.setupDisplay(() -> display, recipeBounds);
-        RecipeViewingScreen.transformNotice(setupDisplay, mainStackToNotice);
+        RecipeViewingScreen.transformIngredientNotice(setupDisplay, ingredientStackToNotice);
+        RecipeViewingScreen.transformResultNotice(setupDisplay, resultStackToNotice);
         this.widgets.addAll(setupDisplay);
         Optional<ButtonAreaSupplier> supplier = RecipeHelper.getInstance().getAutoCraftButtonArea(category);
         if (supplier.isPresent() && supplier.get().get(recipeBounds) != null)
