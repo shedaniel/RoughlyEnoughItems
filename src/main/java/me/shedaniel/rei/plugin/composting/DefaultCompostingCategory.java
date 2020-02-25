@@ -93,10 +93,10 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
                             break;
                         }
                     }
-                widgets.add(EntryWidget.create(bounds.getCenterX() - 72 + x * 18, bounds.y + 3 + y * 18).entry(entryStack));
+                widgets.add(EntryWidget.create(bounds.getCenterX() - 72 + x * 18, bounds.y + 3 + y * 18).entry(entryStack).markIsInput());
                 i++;
             }
-        widgets.add(EntryWidget.create(startingPoint.x + 33, startingPoint.y + 8).entries(recipeDisplaySupplier.get().getOutputEntries()).noBackground());
+        widgets.add(EntryWidget.create(startingPoint.x + 33, startingPoint.y + 8).entries(recipeDisplaySupplier.get().getOutputEntries()).noBackground().markIsOutput());
         return widgets;
     }
     

@@ -100,7 +100,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
         DefaultInformationDisplay display = recipeDisplaySupplier.get();
         List<Widget> widgets = Lists.newArrayList();
         widgets.add(LabelWidget.create(new Point(bounds.getCenterX(), bounds.y + 3), display.getName().asFormattedString()).noShadow().color(ScreenHelper.isDarkModeEnabled() ? 0xFFBBBBBB : 0xFF404040));
-        widgets.add(EntryWidget.create(bounds.getCenterX() - 8, bounds.y + 15).entries(display.getEntryStacks()));
+        widgets.add(EntryWidget.create(bounds.getCenterX() - 8, bounds.y + 15).entries(display.getEntryStacks()).markIsInput());
         Rectangle rectangle = new Rectangle(bounds.getCenterX() - (bounds.width / 2), bounds.y + 35, bounds.width, bounds.height - 40);
         widgets.add(new SlotBaseWidget(rectangle));
         widgets.add(new ScrollableTextWidget(rectangle, display.getTexts()));
