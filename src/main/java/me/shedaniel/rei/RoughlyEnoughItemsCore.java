@@ -151,6 +151,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         return System.getProperty("rei.test", "false").equals("true");
     }
     
+    @SuppressWarnings("deprecation")
     @Override
     public void onInitializeClient() {
         configManager = new ConfigManagerImpl();
@@ -158,7 +159,6 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         registerClothEvents();
         discoverPluginEntries();
         for (ModContainer modContainer : FabricLoader.getInstance().getAllMods()) {
-            //noinspection deprecation
             if (modContainer.getMetadata().containsCustomElement("roughlyenoughitems:plugins"))
                 RoughlyEnoughItemsCore.LOGGER.error("[REI] REI plugin from " + modContainer.getMetadata().getId() + " is not loaded because it is too old!");
         }
@@ -166,7 +166,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         ClientSidePacketRegistry.INSTANCE.register(RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, (packetContext, packetByteBuf) -> {
             ItemStack stack = packetByteBuf.readItemStack();
             String player = packetByteBuf.readString(32767);
-            packetContext.getPlayer().addChatMessage(new LiteralText(I18n.translate("text.rei.cheat_items").replaceAll("\\{item_name}", SearchArgument.tryGetItemStackName(stack.copy())).replaceAll("\\{item_count}", stack.copy().getCount() + "").replaceAll("\\{player_name}", player)), false);
+            packetContext.getPlayer().addMessage(new LiteralText(I18n.translate("text.rei.cheat_items").replaceAll("\\{item_name}", SearchArgument.tryGetItemStackName(stack.copy())).replaceAll("\\{item_count}", stack.copy().getCount() + "").replaceAll("\\{player_name}", player)), false);
         });
         ClientSidePacketRegistry.INSTANCE.register(RoughlyEnoughItemsNetwork.NOT_ENOUGH_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
             Screen currentScreen = MinecraftClient.getInstance().currentScreen;

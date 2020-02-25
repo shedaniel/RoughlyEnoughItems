@@ -107,6 +107,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         return categoryWorkingStations.get(category);
     }
     
+    @Deprecated
     @Override
     public void registerDisplay(Identifier categoryIdentifier, RecipeDisplay display) {
         if (!recipeCategoryListMap.containsKey(categoryIdentifier))

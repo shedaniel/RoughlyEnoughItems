@@ -109,11 +109,6 @@ public class ConfigManagerImpl implements ConfigManager {
     }
     
     @Override
-    public List<EntryStack> getFavorites() {
-        return getConfig().getFavorites();
-    }
-    
-    @Override
     public void saveConfig() {
         if (getConfig().getFavorites() != null)
             getConfig().getFavorites().removeIf(EntryStack::isEmpty);

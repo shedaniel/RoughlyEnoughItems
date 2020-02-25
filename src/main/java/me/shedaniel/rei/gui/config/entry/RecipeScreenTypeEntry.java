@@ -43,6 +43,7 @@ public class RecipeScreenTypeEntry extends TooltipListEntry<RecipeScreenType> {
     };
     private List<Element> children = ImmutableList.of(buttonWidget);
     
+    @SuppressWarnings("deprecation")
     public RecipeScreenTypeEntry(int width, String fieldName, RecipeScreenType type, RecipeScreenType defaultValue, Consumer<RecipeScreenType> save) {
         super(fieldName, null);
         this.width = width;
