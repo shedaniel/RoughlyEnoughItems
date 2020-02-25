@@ -38,7 +38,7 @@ import java.util.*;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
-public class RecipeViewingScreen extends Screen {
+public class RecipeViewingScreen extends Screen implements StackToNoticeScreen {
     
     public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private final List<Widget> preWidgets;
@@ -58,7 +58,8 @@ public class RecipeViewingScreen extends Screen {
     @Nullable private CategoryBaseWidget workingStationsBaseWidget;
     private RecipeCategory<RecipeDisplay> selectedCategory;
     private ButtonWidget recipeBack, recipeNext, categoryBack, categoryNext;
-    private EntryStack mainStackToNotice = EntryStack.empty();
+    private EntryStack ingredientStackToNotice = EntryStack.empty();
+    private EntryStack resultStackToNotice = EntryStack.empty();
     
     public RecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> categoriesMap) {
         super(new LiteralText(""));
@@ -79,14 +80,24 @@ public class RecipeViewingScreen extends Screen {
         this.choosePageActivated = false;
     }
     
-    static void transformNotice(List<Widget> setupDisplay, EntryStack mainStackToNotice) {
-        if (mainStackToNotice.isEmpty())
+    @ApiStatus.Internal
+    static void transformIngredientNotice(List<Widget> setupDisplay, EntryStack noticeStack) {
+        transformNotice(1, setupDisplay, noticeStack);
+    }
+    
+    @ApiStatus.Internal
+    static void transformResultNotice(List<Widget> setupDisplay, EntryStack noticeStack) {
+        transformNotice(2, setupDisplay, noticeStack);
+    }
+    
+    private static void transformNotice(int marker, List<Widget> setupDisplay, EntryStack noticeStack) {
+        if (noticeStack.isEmpty())
             return;
         for (Widget widget : setupDisplay) {
             if (widget instanceof EntryWidget) {
                 EntryWidget entry = (EntryWidget) widget;
-                if (entry.entries().size() > 1) {
-                    EntryStack stack = CollectionUtils.findFirstOrNullEqualsEntryIgnoreAmount(entry.entries(), mainStackToNotice);
+                if (entry.getNoticeMark() == marker && entry.entries().size() > 1) {
+                    EntryStack stack = CollectionUtils.findFirstOrNullEqualsEntryIgnoreAmount(entry.entries(), noticeStack);
                     if (stack != null) {
                         entry.clearStacks();
                         entry.entry(stack);
@@ -96,8 +107,16 @@ public class RecipeViewingScreen extends Screen {
         }
     }
     
-    public void addMainStackToNotice(EntryStack stack) {
-        this.mainStackToNotice = stack;
+    @ApiStatus.Internal
+    @Override
+    public void addIngredientStackToNotice(EntryStack stack) {
+        this.ingredientStackToNotice = stack;
+    }
+    
+    @ApiStatus.Internal
+    @Override
+    public void addResultStackToNotice(EntryStack stack) {
+        this.resultStackToNotice = stack;
     }
     
     @Nullable
@@ -327,7 +346,8 @@ public class RecipeViewingScreen extends Screen {
             int displayWidth = selectedCategory.getDisplayWidth(displaySupplier.get());
             final Rectangle displayBounds = new Rectangle(getBounds().getCenterX() - displayWidth / 2, getBounds().y - 2 + 36 + recipeHeight * i + 4 * i, displayWidth, recipeHeight);
             List<Widget> setupDisplay = selectedCategory.setupDisplay(displaySupplier, displayBounds);
-            transformNotice(setupDisplay, mainStackToNotice);
+            transformIngredientNotice(setupDisplay, ingredientStackToNotice);
+            transformResultNotice(setupDisplay, resultStackToNotice);
             recipeBounds.put(displayBounds, setupDisplay);
             this.widgets.addAll(setupDisplay);
             if (supplier.isPresent() && supplier.get().get(displayBounds) != null)

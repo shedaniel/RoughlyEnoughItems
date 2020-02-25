@@ -74,7 +74,7 @@ public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCr
         List<EntryWidget> slots = Lists.newArrayList();
         for (int y = 0; y < 3; y++)
             for (int x = 0; x < 3; x++)
-                slots.add(EntryWidget.create(startPoint.x + 1 + x * 18, startPoint.y + 1 + y * 18));
+                slots.add(EntryWidget.create(startPoint.x + 1 + x * 18, startPoint.y + 1 + y * 18).markIsInput());
         for (int i = 0; i < input.size(); i++) {
             if (recipeDisplaySupplier.get() instanceof DefaultShapedDisplay) {
                 if (!input.get(i).isEmpty())
@@ -83,7 +83,7 @@ public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCr
                 slots.get(i).entries(input.get(i));
         }
         widgets.addAll(slots);
-        widgets.add(EntryWidget.create(startPoint.x + 95, startPoint.y + 19).entries(recipeDisplaySupplier.get().getOutputEntries()).noBackground());
+        widgets.add(EntryWidget.create(startPoint.x + 95, startPoint.y + 19).entries(recipeDisplaySupplier.get().getOutputEntries()).noBackground().markIsOutput());
         return widgets;
     }
     
