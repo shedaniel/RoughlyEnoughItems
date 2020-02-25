@@ -51,8 +51,8 @@ public class DefaultStoneCuttingCategory implements RecipeCategory<DefaultStoneC
                 blit(startPoint.x, startPoint.y, 0, 221, 82, 26);
             }
         }));
-        widgets.add(EntryWidget.create(startPoint.x + 4, startPoint.y + 5).entries(recipeDisplaySupplier.get().getInputEntries().get(0)).noBackground());
-        widgets.add(EntryWidget.create(startPoint.x + 61, startPoint.y + 5).entries(recipeDisplaySupplier.get().getOutputEntries()).noBackground());
+        widgets.add(EntryWidget.create(startPoint.x + 4, startPoint.y + 5).entries(recipeDisplaySupplier.get().getInputEntries().get(0)).noBackground().markIsInput());
+        widgets.add(EntryWidget.create(startPoint.x + 61, startPoint.y + 5).entries(recipeDisplaySupplier.get().getOutputEntries()).noBackground().markIsOutput());
         return widgets;
     }
     

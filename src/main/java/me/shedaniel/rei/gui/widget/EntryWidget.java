@@ -23,6 +23,7 @@ import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
 
@@ -31,6 +32,8 @@ public class EntryWidget extends WidgetWithBounds {
     protected static final Identifier RECIPE_GUI = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     protected static final Identifier RECIPE_GUI_DARK = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
     
+    @ApiStatus.Internal
+    private byte noticeMark = 0;
     protected boolean highlight = true;
     protected boolean tooltips = true;
     protected boolean background = true;
@@ -54,6 +57,26 @@ public class EntryWidget extends WidgetWithBounds {
     
     public static EntryWidget create(Point point) {
         return new EntryWidget(point);
+    }
+    
+    public EntryWidget unmarkInputOrOutput() {
+        noticeMark = 0;
+        return this;
+    }
+    
+    public EntryWidget markIsInput() {
+        noticeMark = 1;
+        return this;
+    }
+    
+    public EntryWidget markIsOutput() {
+        noticeMark = 2;
+        return this;
+    }
+    
+    @ApiStatus.Internal
+    public byte getNoticeMark() {
+        return noticeMark;
     }
     
     public EntryWidget disableInteractions() {

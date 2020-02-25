@@ -72,8 +72,8 @@ public class DefaultCookingCategory implements TransferRecipeCategory<DefaultCoo
             }
         }));
         widgets.add(RecipeArrowWidget.create(new Point(startPoint.x + 24, startPoint.y + 8), true).time(cookingTime * 50));
-        widgets.add(EntryWidget.create(startPoint.x + 1, startPoint.y + 1).entries(recipeDisplaySupplier.get().getInputEntries().get(0)));
-        widgets.add(EntryWidget.create(startPoint.x + 61, startPoint.y + 9).entries(recipeDisplaySupplier.get().getOutputEntries()).noBackground());
+        widgets.add(EntryWidget.create(startPoint.x + 1, startPoint.y + 1).entries(recipeDisplaySupplier.get().getInputEntries().get(0)).markIsInput());
+        widgets.add(EntryWidget.create(startPoint.x + 61, startPoint.y + 9).entries(recipeDisplaySupplier.get().getOutputEntries()).noBackground().markIsOutput());
         return widgets;
     }
     

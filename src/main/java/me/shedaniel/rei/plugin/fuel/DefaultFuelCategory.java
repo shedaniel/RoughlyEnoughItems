@@ -68,7 +68,7 @@ public class DefaultFuelCategory implements RecipeCategory<DefaultFuelDisplay> {
                 minecraft.textRenderer.draw(I18n.translate("category.rei.fuel.time.items", burnItems), bounds.x + 26, bounds.getMaxY() - 15, ScreenHelper.isDarkModeEnabled() ? 0xFFBBBBBB : 0xFF404040);
             }
         }));
-        widgets.add(EntryWidget.create(bounds.x + 6, startPoint.y + 18).entries(recipeDisplaySupplier.get().getInputEntries().get(0)));
+        widgets.add(EntryWidget.create(bounds.x + 6, startPoint.y + 18).entries(recipeDisplaySupplier.get().getInputEntries().get(0)).markIsInput());
         return widgets;
     }
     

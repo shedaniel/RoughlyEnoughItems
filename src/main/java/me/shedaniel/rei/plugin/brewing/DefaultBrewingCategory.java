@@ -56,12 +56,12 @@ public class DefaultBrewingCategory implements RecipeCategory<DefaultBrewingDisp
                 blit(startPoint.x + 44, startPoint.y + 28, 103, 163, width, 4);
             }
         }));
-        widgets.add(EntryWidget.create(startPoint.x + 1, startPoint.y + 1).entry(EntryStack.create(Items.BLAZE_POWDER)).noBackground());
-        widgets.add(EntryWidget.create(startPoint.x + 40, startPoint.y + 1).entries(recipeDisplay.getInputEntries().get(0)).noBackground());
-        widgets.add(EntryWidget.create(startPoint.x + 63, startPoint.y + 1).entries(recipeDisplay.getInputEntries().get(1)).noBackground());
-        widgets.add(EntryWidget.create(startPoint.x + 40, startPoint.y + 35).entries(recipeDisplay.getOutput(0)).noBackground());
-        widgets.add(EntryWidget.create(startPoint.x + 63, startPoint.y + 42).entries(recipeDisplay.getOutput(1)).noBackground());
-        widgets.add(EntryWidget.create(startPoint.x + 86, startPoint.y + 35).entries(recipeDisplay.getOutput(2)).noBackground());
+        widgets.add(EntryWidget.create(startPoint.x + 1, startPoint.y + 1).entry(EntryStack.create(Items.BLAZE_POWDER)).noBackground().markIsInput());
+        widgets.add(EntryWidget.create(startPoint.x + 40, startPoint.y + 1).entries(recipeDisplay.getInputEntries().get(0)).noBackground().markIsInput());
+        widgets.add(EntryWidget.create(startPoint.x + 63, startPoint.y + 1).entries(recipeDisplay.getInputEntries().get(1)).noBackground().markIsInput());
+        widgets.add(EntryWidget.create(startPoint.x + 40, startPoint.y + 35).entries(recipeDisplay.getOutput(0)).noBackground().markIsOutput());
+        widgets.add(EntryWidget.create(startPoint.x + 63, startPoint.y + 42).entries(recipeDisplay.getOutput(1)).noBackground().markIsOutput());
+        widgets.add(EntryWidget.create(startPoint.x + 86, startPoint.y + 35).entries(recipeDisplay.getOutput(2)).noBackground().markIsOutput());
         return widgets;
     }
     
