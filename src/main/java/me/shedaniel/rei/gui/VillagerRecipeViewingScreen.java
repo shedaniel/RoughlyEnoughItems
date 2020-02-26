@@ -105,6 +105,11 @@ public class VillagerRecipeViewingScreen extends Screen implements StackToNotice
     }
     
     @Override
+    public boolean isPauseScreen() {
+        return false;
+    }
+    
+    @Override
     public void addIngredientStackToNotice(EntryStack stack) {
         ingredientStackToNotice = stack;
     }
@@ -457,11 +462,6 @@ public class VillagerRecipeViewingScreen extends Screen implements StackToNotice
     
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
-        if ((int_1 == 256 || this.minecraft.options.keyInventory.matchesKey(int_1, int_2)) && this.shouldCloseOnEsc()) {
-            MinecraftClient.getInstance().openScreen(ScreenHelper.getLastContainerScreen());
-            ScreenHelper.getLastOverlay().init();
-            return true;
-        }
         if (int_1 == 258) {
             boolean boolean_1 = !hasShiftDown();
             if (!this.changeFocus(boolean_1))
@@ -490,6 +490,11 @@ public class VillagerRecipeViewingScreen extends Screen implements StackToNotice
         for (Element element : children())
             if (element.keyPressed(int_1, int_2, int_3))
                 return true;
+        if (int_1 == 256 || this.minecraft.options.keyInventory.matchesKey(int_1, int_2)) {
+            MinecraftClient.getInstance().openScreen(ScreenHelper.getLastContainerScreen());
+            ScreenHelper.getLastOverlay().init();
+            return true;
+        }
         if (int_1 == 259) {
             if (ScreenHelper.hasLastRecipeScreen())
                 minecraft.openScreen(ScreenHelper.getLastRecipeScreen());

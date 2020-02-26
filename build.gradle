@@ -52,12 +52,18 @@ dependencies {
     minecraft("com.mojang:minecraft:${project.minecraft_version}")
     mappings("net.fabricmc:yarn:${project.yarn_version}:v2")
     modApi("net.fabricmc:fabric-loader:${project.fabricloader_version}")
-    modApi("net.fabricmc.fabric-api:fabric-api:${project.fabric_api}")
+    modApi("net.fabricmc.fabric-api:fabric-api:${project.fabric_api}") {
+        exclude module: "fabric-renderer-indigo"
+    }
     modApi("me.shedaniel.cloth:cloth-events:${cloth_events_version}") {
         transitive = false
     }
-    modImplementation("me.shedaniel.cloth:config-2:${cloth_config_version}")
-    modApi("me.sargunvohra.mcmods:autoconfig1u:${project.autoconfig1u}")
+    modImplementation("me.shedaniel.cloth:config-2:${cloth_config_version}") {
+        exclude module: "fabric-api"
+    }
+    modApi("me.sargunvohra.mcmods:autoconfig1u:${project.autoconfig1u}") {
+        exclude module: "fabric-api"
+    }
     modApi("org.jetbrains:annotations:18.0.0")
     modCompileOnly("io.github.prospector:modmenu:${modmenu_version}") {
         transitive = false
@@ -65,9 +71,6 @@ dependencies {
     modRuntime("io.github.prospector:modmenu:${modmenu_version}") {
         transitive = false
     }
-//    modRuntime("com.lettuce.fudge:notenoughcrashes:1.1.5+1.15.1") {
-//        transitive = false
-//    }
     if (includeDep) {
         afterEvaluate {
             def listAdded = new ArrayList(Arrays.asList((api_exculde as String).split(',')))
@@ -130,7 +133,7 @@ curseforge {
                 embeddedLibrary 'cloth-config'
             }
             mainArtifact(file("${project.buildDir}/libs/${project.archivesBaseName}-${project.version}.jar")) {
-                displayName = "[Fabric 20w08a] v$project.version"
+                displayName = "[Fabric 20w09a] v$project.version"
             }
             afterEvaluate {
                 uploadTask.dependsOn("remapJar")
