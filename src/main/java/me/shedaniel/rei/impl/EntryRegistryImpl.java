@@ -94,15 +94,14 @@ public class EntryRegistryImpl implements EntryRegistry {
     
     public void refilter() {
         long started = System.currentTimeMillis();
-        Set<EntryStack> set = Sets.newLinkedHashSet();
-        set.addAll(ConfigObject.getInstance().getFilteredStacks());
+        Collection<EntryStack> filteredStacks = ConfigObject.getInstance().getFilteredStacks();
         preFilteredList.clear();
         for (EntryStack stack : getStacksList()) {
-            if (findFirstOrNullEqualsEntryIgnoreAmount(set, stack) == null)
+            if (findFirstOrNullEqualsEntryIgnoreAmount(filteredStacks, stack) == null)
                 preFilteredList.add(stack);
         }
         long time = System.currentTimeMillis() - started;
-        RoughlyEnoughItemsCore.LOGGER.info("[REI] Refiltered %d entries in %dms.", set.size(), time);
+        RoughlyEnoughItemsCore.LOGGER.info("[REI] Refiltered %d entries in %dms.", filteredStacks.size(), time);
     }
     
     public void reset() {
