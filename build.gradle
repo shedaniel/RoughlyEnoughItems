@@ -37,6 +37,10 @@ license {
 repositories {
 }
 
+jar {
+    from "LICENSE"
+}
+
 processResources {
     filesMatching('fabric.mod.json') {
         expand 'version': project.version
