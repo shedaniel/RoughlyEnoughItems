@@ -1,4 +1,6 @@
 # Roughly Enough Items
+![Lines of Code](https://tokei.rs/b1/github/shedaniel/RoughlyEnoughItems?category=code)
+
 https://minecraft.curseforge.com/projects/roughly-enough-items <br>
 Roughly Enough Items is a mod to view Items and Recipes for Minecraft 1.13 - 1.15, supporting mod loaders from Forge, Rift to Fabric.
 
