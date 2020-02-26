@@ -155,7 +155,7 @@ public class PreRecipeViewingScreen extends Screen {
     private void updateFramePosition(float delta) {
         target = clamp(target);
         if (!DynamicNewSmoothScrollingEntryListWidget.Precision.almostEquals(frame, target, DynamicNewSmoothScrollingEntryListWidget.Precision.FLOAT_EPSILON))
-            frame = ease(frame, target, Math.min((System.currentTimeMillis() - start) / ((double) duration), 1));
+            frame = ease(frame, target, Math.min((System.currentTimeMillis() - start) / (double) duration * delta * 3.0D, 1));
         else
             frame = target;
     }
