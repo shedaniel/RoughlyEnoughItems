@@ -34,7 +34,11 @@ public class RecipeBaseWidget extends PanelWidget {
     
     @Override
     protected int getYTextureOffset() {
-        return ConfigObject.getInstance().isUsingLightGrayRecipeBorder() ? 0 : 66;
+        return ConfigObject.getInstance().getRecipeBorderType().getYOffset();
     }
     
+    @Override
+    protected boolean isRendering() {
+        return super.isRendering() && ConfigObject.getInstance().getRecipeBorderType().isRendering();
+    }
 }
