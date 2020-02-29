@@ -177,7 +177,7 @@
   "config.roughlyenoughitems.itemCheatingMode.jei_like": "Invertido",
   "config.roughlyenoughitems.searchFavorites": "Filtro de Busca em Favoritos:",
   "config.roughlyenoughitems.appendModNames": "Mostrar Nome do Mod:",
-  "config.roughlyenoughitems.displayFavoritesOnTheLeft": "Favorites Position:",
+  "config.roughlyenoughitems.displayFavoritesOnTheLeft": "Posição dos Favoritos:",
   "config.roughlyenoughitems.displayFavoritesOnTheLeft.boolean.true": "Lado Oposto",
   "config.roughlyenoughitems.displayFavoritesOnTheLeft.boolean.false": "No topo da lista",
   "config.roughlyenoughitems.displayFavoritesTooltip": "Exibir Tooltips nos Favoritos:",
