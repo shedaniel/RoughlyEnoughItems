@@ -26,6 +26,7 @@ package me.shedaniel.rei.gui.widget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.gui.config.RecipeBorderType;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.util.Identifier;
@@ -121,7 +122,7 @@ public class PanelWidget extends WidgetWithBounds {
     }
     
     protected int getYTextureOffset() {
-        return ConfigObject.getInstance().isUsingLightGrayRecipeBorder() ? 0 : 66;
+        return RecipeBorderType.DEFAULT.getYOffset();
     }
     
 }
