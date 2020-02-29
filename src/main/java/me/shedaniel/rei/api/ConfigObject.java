@@ -25,6 +25,7 @@ package me.shedaniel.rei.api;
 
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.rei.gui.config.ItemListOrdering;
+import me.shedaniel.rei.gui.config.RecipeBorderType;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.impl.ConfigManagerImpl;
@@ -89,7 +90,11 @@ public interface ConfigObject {
     
     boolean areClickableRecipeArrowsEnabled();
     
+    @ApiStatus.ScheduledForRemoval
+    @Deprecated
     boolean isUsingLightGrayRecipeBorder();
+    
+    RecipeBorderType getRecipeBorderType();
     
     boolean doesVillagerScreenHavePermanentScrollBar();
     

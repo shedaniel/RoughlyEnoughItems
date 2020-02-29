@@ -31,10 +31,7 @@ import me.shedaniel.clothconfig2.api.Modifier;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.gui.config.ItemListOrdering;
-import me.shedaniel.rei.gui.config.ItemListOrderingConfig;
-import me.shedaniel.rei.gui.config.RecipeScreenType;
-import me.shedaniel.rei.gui.config.SearchFieldLocation;
+import me.shedaniel.rei.gui.config.*;
 import net.minecraft.client.util.InputUtil;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -182,8 +179,15 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
+    @ApiStatus.ScheduledForRemoval
+    @Deprecated
     public boolean isUsingLightGrayRecipeBorder() {
-        return appearance.lightGrayRecipeBorder;
+        return appearance.recipeBorder == RecipeBorderType.LIGHTER;
+    }
+    
+    @Override
+    public RecipeBorderType getRecipeBorderType() {
+        return appearance.recipeBorder;
     }
     
     @Override
@@ -376,7 +380,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         @Comment("Declares the maximum amount of recipes displayed in a page if possible.") @ConfigEntry.BoundedDiscrete(min = 2, max = 99)
         private int maxRecipePerPage = 3;
         private boolean clickableRecipeArrows = true;
-        @Comment("Declares the appearance of recipe's border.") private boolean lightGrayRecipeBorder = false;
+        @Comment("Declares the appearance of recipe's border.") @UseEnumSelectorInstead private RecipeBorderType recipeBorder = RecipeBorderType.DEFAULT;
         @Comment("Declares whether REI should append mod names to item stacks.") private boolean appendModNames = true;
         @Comment("Declares how the scrollbar in villager screen should act.") private boolean villagerScreenPermanentScrollBar = false;
         @Comment("Declares whether entry list widget is scrolled.") private boolean scrollingEntryListWidget = false;
