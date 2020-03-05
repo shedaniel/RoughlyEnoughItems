@@ -136,19 +136,8 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     public boolean equalsIgnoreAmount(EntryStack stack) {
         if (stack.getType() != Type.ITEM)
             return false;
-        if (itemStack.getItem() == Items.GRASS_BLOCK) {
-//            System.out.println(itemStack.toTag(new CompoundTag()).toString() + " " + stack.getItemStack().toTag(new CompoundTag()).toString());
-        }
         if (itemStack.getItem() != stack.getItem())
             return false;
-        if (itemStack.getItem() == Items.GRASS_BLOCK) {
-            ItemStack otherStack = stack.getItemStack();
-            CompoundTag o1 = itemStack.getTag();
-            CompoundTag o2 = otherStack.getTag();
-            boolean b = o1 == o2 || ((o1 != null && o2 != null) && equals(o1, o2));
-//            System.out.println(itemStack.toTag(new CompoundTag()).toString() + " " + stack.getItemStack().toTag(new CompoundTag()).toString() + " " + b);
-            return b;
-        }
         ItemStack otherStack = stack.getItemStack();
         CompoundTag o1 = itemStack.getTag();
         CompoundTag o2 = otherStack.getTag();
