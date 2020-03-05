@@ -187,5 +187,19 @@
   "config.roughlyenoughitems.scrollingEntryListWidget": "Режим списка предметов:",
   "config.roughlyenoughitems.scrollingEntryListWidget.boolean.true": "Прокрутка",
   "config.roughlyenoughitems.scrollingEntryListWidget.boolean.false": "Кнопки",
-  "text.rei.credit.text": "§lRoughly Enough Items (v%s)\n§7Первоначально форк Almost Enough Items.\n\n§lРазработчики\n  Автор мода ZenDarva\n  Мод переписал Danielshe\n  Поддержка старого плагина от TehNut\n\n§lЯзыковой перевод\n%s\n\n§lЛицензия\n§7Roughly Enough Items лицензируется с MIT."
+  "text.rei.credit.text": "§lRoughly Enough Items (v%s)\n§7Первоначально форк Almost Enough Items.\n\n§lРазработчики\n  Автор мода ZenDarva\n  Мод переписал Danielshe\n  Поддержка старого плагина от TehNut\n\n§lЯзыковой перевод\n%s\n\n§lЛицензия\n§7Roughly Enough Items лицензируется с MIT.",
+  "language.roughlyenoughitems.english": "English",
+  "language.roughlyenoughitems.japanese": "Japanese",
+  "language.roughlyenoughitems.chinese_simplified": "Chinese Simplified",
+  "language.roughlyenoughitems.chinese_traditional": "Chinese Traditional",
+  "language.roughlyenoughitems.french": "French",
+  "language.roughlyenoughitems.german": "German",
+  "language.roughlyenoughitems.estonian": "Estonian",
+  "language.roughlyenoughitems.portuguese": "Portuguese",
+  "language.roughlyenoughitems.portuguese_brazilian": "Portuguese, Brazilian",
+  "language.roughlyenoughitems.lolcat": "LOLCAT",
+  "language.roughlyenoughitems.upside_down_english": "Upside Down English",
+  "language.roughlyenoughitems.bulgarian": "Bulgarian",
+  "language.roughlyenoughitems.russian": "Russian",
+  "language.roughlyenoughitems.polish": "Polish"
 }
