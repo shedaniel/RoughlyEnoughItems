@@ -36,7 +36,8 @@
   },
   "depends": {
     "fabricloader": "*",
-    "cloth": ">=1.2.0",
+    "cloth": "~2-",
+    "cloth-basic-math": "*",
     "cloth-config2": "~3-",
     "minecraft": "~1.16-Snapshot.20.10.a"
   },
@@ -48,17 +49,18 @@
     "rei:translators": {
       "English": "shedaniel",
       "Japanese": ["swordglowsblue", "hinataaki"],
-      "Simplified Chinese": ["XuyuEre", "shedaniel", "SciUniv_Moring", "Takakura-Anri"],
-      "Traditional Chinese": ["hugoalh", "gxy17886", "shedaniel"],
+      "Chinese Simplified": ["XuyuEre", "shedaniel", "SciUniv_Moring", "Takakura-Anri", "liushuyu"],
+      "Chinese Traditional": ["hugoalh", "gxy17886", "shedaniel", "961111ray"],
       "French": ["Yanis48", "Koockies"],
-      "German": ["MelanX", "guntram7"],
+      "German": ["MelanX", "guntram7", "tabmeier12"],
       "Estonian": ["Madis0"],
-      "Portuguese": ["thiagokenis"],
+      "Portuguese": ["thiagokenis", "KewaiiGamer"],
+      "Portuguese Brazilian": ["thiagokenis", "joaoh1", "yuriob262", "Pinkstyles"],
       "LOLCAT": ["shedaniel", "RaxedMC"],
-      "Upside Down English": ["shedaniel"],
-      "Brazilian Portuguese": ["thiagokenis", "joaoh1"],
+      "Upside Down English": ["shedaniel", "magnusk28", "scarzdz"],
       "Bulgarian": ["geniiii"],
-      "Russian": ["MrYonter", "kwmika1girl", "LimyChitou", "Great_Manalal", "s3rbug", "TheByKotik", "ebogish"]
+      "Russian": ["MrYonter", "kwmika1girl", "LimyChitou", "Great_Manalal", "s3rbug", "TheByKotik", "ebogish", "xqr.", "scarzdz"],
+      "Polish": ["mikolajkazmierczak", "Piteriuz"]
     }
   }
 }

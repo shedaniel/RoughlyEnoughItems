@@ -25,6 +25,7 @@ package me.shedaniel.rei.gui.widget;
 
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.gui.Element;
 import org.jetbrains.annotations.ApiStatus;
@@ -48,7 +49,7 @@ public class LabelWidget extends WidgetWithBounds {
     public LabelWidget(Point point, String text) {
         this.pos = point;
         this.text = text;
-        this.defaultColor = ScreenHelper.isDarkModeEnabled() ? 0xFFBBBBBB : -1;
+        this.defaultColor = REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : -1;
     }
     
     public static LabelWidget create(Point point, String text) {

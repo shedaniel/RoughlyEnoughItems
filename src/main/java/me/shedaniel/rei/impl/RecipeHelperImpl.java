@@ -352,12 +352,12 @@ public class RecipeHelperImpl implements RecipeHelper {
             public boolean isHandingScreen(Class<?> screen) {
                 return true;
             }
-    
+            
             @Override
             public ActionResult shouldScreenBeOverlayed(Class<?> screen) {
                 return ContainerScreen.class.isAssignableFrom(screen) ? ActionResult.SUCCESS : ActionResult.PASS;
             }
-    
+            
             @Override
             public float getPriority() {
                 return -10;

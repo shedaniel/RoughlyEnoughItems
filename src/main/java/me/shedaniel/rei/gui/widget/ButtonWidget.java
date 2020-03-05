@@ -26,6 +26,7 @@ package me.shedaniel.rei.gui.widget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.sound.PositionedSoundInstance;
@@ -116,7 +117,7 @@ public abstract class ButtonWidget extends WidgetWithBounds {
     }
     
     protected void renderBackground(int x, int y, int width, int height, int textureOffset) {
-        minecraft.getTextureManager().bindTexture(ScreenHelper.isDarkModeEnabled() ? BUTTON_LOCATION_DARK : BUTTON_LOCATION);
+        minecraft.getTextureManager().bindTexture(REIHelper.getInstance().isDarkThemeEnabled() ? BUTTON_LOCATION_DARK : BUTTON_LOCATION);
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(770, 771, 1, 0);

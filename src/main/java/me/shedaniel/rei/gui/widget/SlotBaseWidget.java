@@ -24,7 +24,7 @@
 package me.shedaniel.rei.gui.widget;
 
 import me.shedaniel.math.api.Rectangle;
-import me.shedaniel.rei.impl.ScreenHelper;
+import me.shedaniel.rei.api.REIHelper;
 
 public class SlotBaseWidget extends RecipeBaseWidget {
     
@@ -34,7 +34,7 @@ public class SlotBaseWidget extends RecipeBaseWidget {
     
     @Override
     public int getInnerColor() {
-        return ScreenHelper.isDarkModeEnabled() ? -13619152 : -7631989;
+        return REIHelper.getInstance().isDarkThemeEnabled() ? -13619152 : -7631989;
     }
     
     @Override

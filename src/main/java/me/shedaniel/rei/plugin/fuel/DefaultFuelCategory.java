@@ -26,13 +26,13 @@ package me.shedaniel.rei.plugin.fuel;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.gui.entries.RecipeEntry;
 import me.shedaniel.rei.gui.widget.EntryWidget;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.Widget;
-import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.resource.language.I18n;
@@ -83,7 +83,7 @@ public class DefaultFuelCategory implements RecipeCategory<DefaultFuelDisplay> {
                 blit(bounds.x + 5, startPoint.y, 0, 73, 18, 34);
                 int height = MathHelper.ceil(System.currentTimeMillis() / 250d % 14d);
                 blit(bounds.x + 7, startPoint.y + 12 + (3 - height), 82, 77 + (14 - height), 14, height);
-                minecraft.textRenderer.draw(I18n.translate("category.rei.fuel.time.items", burnItems), bounds.x + 26, bounds.getMaxY() - 15, ScreenHelper.isDarkModeEnabled() ? 0xFFBBBBBB : 0xFF404040);
+                minecraft.textRenderer.draw(I18n.translate("category.rei.fuel.time.items", burnItems), bounds.x + 26, bounds.getMaxY() - 15, REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF404040);
             }
         }));
         widgets.add(EntryWidget.create(bounds.x + 6, startPoint.y + 18).entries(recipeDisplaySupplier.get().getInputEntries().get(0)).markIsInput());

@@ -29,8 +29,11 @@ import com.google.common.collect.Sets;
 import me.shedaniel.cloth.hooks.ClothClientHooks;
 import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.OverlaySearchField;
+import me.shedaniel.rei.gui.RecipeScreen;
+import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.event.client.ClientTickCallback;
@@ -47,27 +50,41 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 
-public class ScreenHelper implements ClientModInitializer {
+@ApiStatus.Internal
+public class ScreenHelper implements ClientModInitializer, REIHelper {
     
-    /**
-     * @deprecated Use getters instead
-     */
-    private static OverlaySearchField searchField;
-    @ApiStatus.Internal public static List<ItemStack> inventoryStacks = Lists.newArrayList();
+    private OverlaySearchField searchField;
+    @ApiStatus.Internal
+    public static List<ItemStack> inventoryStacks = Lists.newArrayList();
     private static ContainerScreenOverlay overlay;
     private static ContainerScreen<?> lastContainerScreen = null;
-    private static LinkedHashSet<Screen> lastRecipeScreen = Sets.newLinkedHashSetWithExpectedSize(5);
+    private static LinkedHashSet<RecipeScreen> lastRecipeScreen = Sets.newLinkedHashSetWithExpectedSize(5);
+    private static ScreenHelper instance;
+    
+    public static ScreenHelper getInstance() {
+        return instance;
+    }
+    
+    @Override
+    public TextFieldWidget getSearchTextField() {
+        return searchField;
+    }
+    
+    @Override
+    public List<ItemStack> getInventoryStacks() {
+        return inventoryStacks;
+    }
     
     public static OverlaySearchField getSearchField() {
-        return searchField;
+        return (OverlaySearchField) getInstance().getSearchTextField();
     }
     
     @ApiStatus.Internal
     public static void setSearchField(OverlaySearchField searchField) {
-        ScreenHelper.searchField = searchField;
+        getInstance().searchField = searchField;
     }
     
-    public static void storeRecipeScreen(Screen screen) {
+    public static void storeRecipeScreen(RecipeScreen screen) {
         while (lastRecipeScreen.size() >= 5)
             lastRecipeScreen.remove(Iterables.get(lastRecipeScreen, 0));
         lastRecipeScreen.add(screen);
@@ -78,11 +95,13 @@ public class ScreenHelper implements ClientModInitializer {
     }
     
     public static Screen getLastRecipeScreen() {
-        Screen screen = Iterables.getLast(lastRecipeScreen);
+        RecipeScreen screen = Iterables.getLast(lastRecipeScreen);
         lastRecipeScreen.remove(screen);
-        return screen;
+        screen.recalculateCategoryPage();
+        return (Screen) screen;
     }
     
+    @ApiStatus.Internal
     public static void clearLastRecipeScreenData() {
         lastRecipeScreen.clear();
     }
@@ -140,8 +159,20 @@ public class ScreenHelper implements ClientModInitializer {
         consumer.accept(actualX, actualY, delta);
     }
     
+    @Deprecated
+    @ApiStatus.Internal
+    @ApiStatus.ScheduledForRemoval
     public static boolean isDarkModeEnabled() {
         return ConfigObject.getInstance().isUsingDarkTheme();
+    }
+    
+    @Override
+    public boolean isDarkThemeEnabled() {
+        return isDarkModeEnabled();
+    }
+    
+    public ScreenHelper() {
+        ScreenHelper.instance = this;
     }
     
     @Override
@@ -156,5 +187,4 @@ public class ScreenHelper implements ClientModInitializer {
                 getSearchField().tick();
         });
     }
-    
 }

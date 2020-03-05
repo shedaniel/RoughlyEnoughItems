@@ -79,7 +79,7 @@ public final class RecipeDisplayExporter extends Widget {
     private void exportRecipe(Rectangle rectangle, List<Widget> widgets) {
         Framebuffer framebuffer = new Framebuffer(rectangle.width * 8, rectangle.height * 8, true, MinecraftClient.IS_SYSTEM_MAC);
         framebuffer.setClearColor(0, 0, 0, 0);
-        //        int color = ScreenHelper.isDarkModeEnabled() ? -13750738 : -3750202;
+        //        int color = REIHelper.getInstance().isDarkThemeEnabled() ? -13750738 : -3750202;
         //        framebuffer.setClearColor(((color >> 16) & 0xFF) / 255f, ((color >> 8) & 0xFF) / 255f, (color & 0xFF) / 255f, ((color >> 24) & 0xFF) / 255f);
         framebuffer.clear(MinecraftClient.IS_SYSTEM_MAC);
         RenderSystem.pushMatrix();

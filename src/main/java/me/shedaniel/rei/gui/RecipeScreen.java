@@ -24,13 +24,20 @@
 package me.shedaniel.rei.gui;
 
 import me.shedaniel.rei.api.EntryStack;
+import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
-public interface StackToNoticeScreen {
+public interface RecipeScreen {
     @ApiStatus.Internal
     void addIngredientStackToNotice(EntryStack stack);
     
     @ApiStatus.Internal
     void addResultStackToNotice(EntryStack stack);
+    
+    @ApiStatus.Internal
+    Identifier getCurrentCategory();
+    
+    @ApiStatus.Internal
+    void recalculateCategoryPage();
 }

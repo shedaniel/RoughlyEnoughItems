@@ -28,6 +28,7 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.TransferRecipeCategory;
 import me.shedaniel.rei.gui.entries.RecipeEntry;
 import me.shedaniel.rei.gui.entries.SimpleRecipeEntry;
@@ -35,7 +36,6 @@ import me.shedaniel.rei.gui.widget.EntryWidget;
 import me.shedaniel.rei.gui.widget.RecipeArrowWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.Widget;
-import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
@@ -85,7 +85,7 @@ public class DefaultCookingCategory implements TransferRecipeCategory<DefaultCoo
                 blit(startPoint.x + 2, startPoint.y + 31 + (3 - height), 82, 77 + (14 - height), 14, height);
                 String text = I18n.translate("category.rei.cooking.time&xp", df.format(recipeDisplaySupplier.get().getXp()), df.format(cookingTime / 20d));
                 int length = MinecraftClient.getInstance().textRenderer.getStringWidth(text);
-                MinecraftClient.getInstance().textRenderer.draw(text, bounds.x + bounds.width - length - 5, bounds.y + 5, ScreenHelper.isDarkModeEnabled() ? 0xFFBBBBBB : 0xFF404040);
+                MinecraftClient.getInstance().textRenderer.draw(text, bounds.x + bounds.width - length - 5, bounds.y + 5, REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF404040);
                 
             }
         }));

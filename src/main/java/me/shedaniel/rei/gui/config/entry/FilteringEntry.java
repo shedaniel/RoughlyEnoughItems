@@ -36,6 +36,7 @@ import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryRegistry;
 import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.gui.OverlaySearchField;
 import me.shedaniel.rei.gui.widget.EntryWidget;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
@@ -272,8 +273,8 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
             int scrollbarPositionMinX = getScrollbarMinX();
             int scrollbarPositionMaxX = scrollbarPositionMinX + 6;
             boolean hovered = (new Rectangle(scrollbarPositionMinX, minY, scrollbarPositionMaxX - scrollbarPositionMinX, height)).contains(PointHelper.fromMouse());
-            float bottomC = (hovered ? .67f : .5f) * (ScreenHelper.isDarkModeEnabled() ? 0.8f : 1f);
-            float topC = (hovered ? .87f : .67f) * (ScreenHelper.isDarkModeEnabled() ? 0.8f : 1f);
+            float bottomC = (hovered ? .67f : .5f) * (REIHelper.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
+            float topC = (hovered ? .87f : .67f) * (REIHelper.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
             
             RenderSystem.disableTexture();
             RenderSystem.enableBlend();

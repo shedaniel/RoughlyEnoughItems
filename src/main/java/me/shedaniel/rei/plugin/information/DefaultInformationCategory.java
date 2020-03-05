@@ -32,11 +32,11 @@ import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.gui.entries.RecipeEntry;
 import me.shedaniel.rei.gui.widget.*;
 import me.shedaniel.rei.impl.RenderingEntry;
-import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
@@ -117,7 +117,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
     public List<Widget> setupDisplay(Supplier<DefaultInformationDisplay> recipeDisplaySupplier, Rectangle bounds) {
         DefaultInformationDisplay display = recipeDisplaySupplier.get();
         List<Widget> widgets = Lists.newArrayList();
-        widgets.add(LabelWidget.create(new Point(bounds.getCenterX(), bounds.y + 3), display.getName().asFormattedString()).noShadow().color(ScreenHelper.isDarkModeEnabled() ? 0xFFBBBBBB : 0xFF404040));
+        widgets.add(LabelWidget.create(new Point(bounds.getCenterX(), bounds.y + 3), display.getName().asFormattedString()).noShadow().color(REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF404040));
         widgets.add(EntryWidget.create(bounds.getCenterX() - 8, bounds.y + 15).entries(display.getEntryStacks()).markIsInput());
         Rectangle rectangle = new Rectangle(bounds.getCenterX() - (bounds.width / 2), bounds.y + 35, bounds.width, bounds.height - 40);
         widgets.add(new SlotBaseWidget(rectangle));
@@ -213,7 +213,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
             int currentY = (int) -scroll + innerBounds.y;
             for (Text text : texts) {
                 if (text != null && currentY + font.fontHeight >= innerBounds.y && currentY <= innerBounds.getMaxY()) {
-                    font.draw(text.asFormattedString(), innerBounds.x + 2, currentY + 2, ScreenHelper.isDarkModeEnabled() ? 0xFFBBBBBB : 0xFF090909);
+                    font.draw(text.asFormattedString(), innerBounds.x + 2, currentY + 2, REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF090909);
                 }
                 currentY += text == null ? 4 : font.fontHeight;
             }

@@ -21,42 +21,22 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.plugin.beacon;
+package me.shedaniel.rei.api;
 
-import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.RecipeDisplay;
-import me.shedaniel.rei.plugin.DefaultPlugin;
-import me.shedaniel.rei.utils.CollectionUtils;
+import me.shedaniel.rei.gui.widget.TextFieldWidget;
+import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
 
-import java.util.Collections;
 import java.util.List;
 
-public class DefaultBeaconBaseDisplay implements RecipeDisplay {
-    
-    private List<EntryStack> entries;
-    
-    public DefaultBeaconBaseDisplay(List<ItemStack> entries) {
-        this.entries = CollectionUtils.map(entries, EntryStack::create);
+public interface REIHelper {
+    static REIHelper getInstance() {
+        return ScreenHelper.getInstance();
     }
     
-    @Override
-    public List<List<EntryStack>> getInputEntries() {
-        return Collections.singletonList(entries);
-    }
+    boolean isDarkThemeEnabled();
     
-    public List<EntryStack> getEntries() {
-        return entries;
-    }
+    TextFieldWidget getSearchTextField();
     
-    @Override
-    public List<EntryStack> getOutputEntries() {
-        return Collections.emptyList();
-    }
-    
-    @Override
-    public Identifier getRecipeCategory() {
-        return DefaultPlugin.BEACON;
-    }
+    List<ItemStack> getInventoryStacks();
 }

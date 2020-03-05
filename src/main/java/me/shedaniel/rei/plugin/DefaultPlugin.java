@@ -75,7 +75,6 @@ import net.minecraft.item.*;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.recipe.*;
 import net.minecraft.tag.BlockTags;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
@@ -104,7 +103,7 @@ public class DefaultPlugin implements REIPluginV0 {
     private static final List<DefaultInformationDisplay> INFO_DISPLAYS = Lists.newArrayList();
     
     public static Identifier getDisplayTexture() {
-        return ScreenHelper.isDarkModeEnabled() ? DISPLAY_TEXTURE_DARK : DISPLAY_TEXTURE;
+        return REIHelper.getInstance().isDarkThemeEnabled() ? DISPLAY_TEXTURE_DARK : DISPLAY_TEXTURE;
     }
     
     public static void registerBrewingDisplay(DefaultBrewingDisplay display) {
