@@ -546,7 +546,6 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
             if (tooltip != null) {
                 FilteringEntry.this.tooltip = tooltip;
             }
-//            System.out.println(getCurrentEntry().getItemStack().toTag(new CompoundTag()).toString());
         }
     }
 }

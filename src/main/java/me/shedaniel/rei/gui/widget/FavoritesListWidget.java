@@ -387,6 +387,8 @@ public class FavoritesListWidget extends WidgetWithBounds {
             if (containsMouse(mouseX, mouseY) && ClientHelper.getInstance().isCheating()) {
                 EntryStack entry = getCurrentEntry().copy();
                 if (!entry.isEmpty()) {
+                    if (entry.getType() == EntryStack.Type.FLUID)
+                        entry = EntryStack.copyFluidToBucket(entry);
                     if (entry.getType() == EntryStack.Type.ITEM)
                         entry.setAmount(button != 1 && !Screen.hasShiftDown() ? 1 : entry.getItemStack().getMaxCount());
                     ClientHelper.getInstance().tryCheatingEntry(entry);
