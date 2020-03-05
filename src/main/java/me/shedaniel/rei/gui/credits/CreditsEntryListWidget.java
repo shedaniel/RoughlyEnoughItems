@@ -29,6 +29,8 @@ import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.List;
+
 @ApiStatus.Internal
 public class CreditsEntryListWidget extends DynamicNewSmoothScrollingEntryListWidget<CreditsEntryListWidget.CreditsItem> {
     
@@ -76,14 +78,18 @@ public class CreditsEntryListWidget extends DynamicNewSmoothScrollingEntryListWi
         return width - 40;
     }
     
-    public static class CreditsItem extends DynamicNewSmoothScrollingEntryListWidget.Entry<CreditsItem> {
+    public static abstract class CreditsItem extends DynamicNewSmoothScrollingEntryListWidget.Entry<CreditsItem> {
+    
+    }
+    
+    public static class TextCreditsItem extends CreditsItem {
         private String text;
         
-        public CreditsItem(Text textComponent) {
+        public TextCreditsItem(Text textComponent) {
             this(textComponent.asFormattedString());
         }
         
-        public CreditsItem(String text) {
+        public TextCreditsItem(String text) {
             this.text = text;
         }
         
@@ -95,6 +101,38 @@ public class CreditsEntryListWidget extends DynamicNewSmoothScrollingEntryListWi
         @Override
         public int getItemHeight() {
             return 12;
+        }
+        
+        @Override
+        public boolean changeFocus(boolean boolean_1) {
+            return false;
+        }
+    }
+    
+    public static class TranslationCreditsItem extends CreditsItem {
+        private String language;
+        private List<String> translators;
+        private int maxWidth;
+        
+        public TranslationCreditsItem(String language, String translators, int width, int maxWidth) {
+            this.language = language;
+            this.translators = MinecraftClient.getInstance().textRenderer.wrapStringToWidthAsList(translators, width);
+            this.maxWidth = maxWidth;
+        }
+        
+        @Override
+        public void render(int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+            MinecraftClient.getInstance().textRenderer.drawWithShadow(language, x + 5, y + 5, -1);
+            int yy = y + 5;
+            for (String translator : translators) {
+                MinecraftClient.getInstance().textRenderer.drawWithShadow(translator, x + 5 + maxWidth, yy, -1);
+                yy += 12;
+            }
+        }
+        
+        @Override
+        public int getItemHeight() {
+            return 12 * translators.size();
         }
         
         @Override

@@ -276,14 +276,14 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             if (screen instanceof ContainerScreen)
                 ScreenHelper.setLastContainerScreen((ContainerScreen<?>) screen);
             boolean alreadyAdded = false;
-            for (Element element : Lists.newArrayList(screenHooks.cloth_getInputListeners()))
+            for (Element element : Lists.newArrayList(screenHooks.cloth_getChildren()))
                 if (ContainerScreenOverlay.class.isAssignableFrom(element.getClass()))
                     if (alreadyAdded)
-                        screenHooks.cloth_getInputListeners().remove(element);
+                        screenHooks.cloth_getChildren().remove(element);
                     else
                         alreadyAdded = true;
             if (!alreadyAdded)
-                screenHooks.cloth_getInputListeners().add(ScreenHelper.getLastOverlay(true, false));
+                screenHooks.cloth_getChildren().add(ScreenHelper.getLastOverlay(true, false));
         });
         ClothClientHooks.SCREEN_RENDER_POST.register((minecraftClient, screen, i, i1, v) -> {
             if (shouldReturn(screen.getClass()))

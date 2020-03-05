@@ -50,7 +50,7 @@ public class CollectionUtils {
         return null;
     }
     
-    public static <T,R> List<R> castAndMap(List<T> list, Class<R> castClass) {
+    public static <T, R> List<R> castAndMap(List<T> list, Class<R> castClass) {
         List<R> l = new ArrayList<>();
         for (T t : list) {
             if (castClass.isAssignableFrom(t.getClass()))

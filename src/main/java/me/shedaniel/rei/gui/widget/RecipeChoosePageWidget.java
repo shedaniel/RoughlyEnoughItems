@@ -27,8 +27,8 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
-import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.Window;
@@ -112,10 +112,10 @@ public class RecipeChoosePageWidget extends DraggableWidget {
             
             @Override
             public void render(int i, int i1, float v) {
-                font.draw(I18n.translate("text.rei.choose_page"), bounds.x + 5, bounds.y + 5, ScreenHelper.isDarkModeEnabled() ? 0xFFBBBBBB : 0xFF404040);
+                font.draw(I18n.translate("text.rei.choose_page"), bounds.x + 5, bounds.y + 5, REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF404040);
                 String endString = String.format(" /%d", maxPage);
                 int width = font.getStringWidth(endString);
-                font.draw(endString, bounds.x + bounds.width - 5 - width, bounds.y + 22, ScreenHelper.isDarkModeEnabled() ? 0xFFBBBBBB : 0xFF404040);
+                font.draw(endString, bounds.x + bounds.width - 5 - width, bounds.y + 22, REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF404040);
             }
         });
         String endString = String.format(" /%d", maxPage);

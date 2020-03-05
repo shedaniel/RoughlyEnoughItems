@@ -32,6 +32,7 @@ import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.gui.widget.*;
+import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
@@ -41,11 +42,11 @@ import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.client.util.NarratorManager;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.util.math.Matrix4f;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -57,46 +58,47 @@ import java.util.*;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
-public class RecipeViewingScreen extends Screen implements StackToNoticeScreen {
+public class RecipeViewingScreen extends Screen implements RecipeScreen {
     
     public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
-    private final List<Widget> preWidgets;
-    private final List<Widget> widgets;
-    private final Map<Rectangle, List<Widget>> recipeBounds;
-    private final List<TabWidget> tabs;
+    private final List<Widget> preWidgets = Lists.newArrayList();
+    private final List<Widget> widgets = Lists.newArrayList();
+    private final Map<Rectangle, List<Widget>> recipeBounds = Maps.newHashMap();
+    private final List<TabWidget> tabs = Lists.newArrayList();
     private final Map<RecipeCategory<?>, List<RecipeDisplay>> categoriesMap;
     private final List<RecipeCategory<?>> categories;
+    private final RecipeCategory<RecipeDisplay> selectedCategory;
     public int guiWidth;
     public int guiHeight;
-    public int page, categoryPages;
+    public int page;
+    public int categoryPages = -1;
     public int largestWidth, largestHeight;
-    public boolean choosePageActivated;
+    public boolean choosePageActivated = false;
     public RecipeChoosePageWidget recipeChoosePageWidget;
     private int tabsPerPage = 5;
     private Rectangle bounds;
-    @Nullable private CategoryBaseWidget workingStationsBaseWidget;
-    private RecipeCategory<RecipeDisplay> selectedCategory;
+    @Nullable
+    private CategoryBaseWidget workingStationsBaseWidget;
     private ButtonWidget recipeBack, recipeNext, categoryBack, categoryNext;
     private EntryStack ingredientStackToNotice = EntryStack.empty();
     private EntryStack resultStackToNotice = EntryStack.empty();
     
-    public RecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> categoriesMap) {
-        super(new LiteralText(""));
-        this.categoryPages = 0;
-        this.preWidgets = Lists.newArrayList();
-        this.widgets = Lists.newArrayList();
-        this.recipeBounds = Maps.newHashMap();
+    public RecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> categoriesMap, @Nullable Identifier category) {
+        super(NarratorManager.EMPTY);
         Window window = MinecraftClient.getInstance().getWindow();
         this.bounds = new Rectangle(window.getScaledWidth() / 2 - guiWidth / 2, window.getScaledHeight() / 2 - guiHeight / 2, 176, 150);
         this.categoriesMap = categoriesMap;
-        this.categories = Lists.newArrayList();
-        for (RecipeCategory<?> category : RecipeHelper.getInstance().getAllCategories()) {
-            if (categoriesMap.containsKey(category))
-                categories.add(category);
+        this.categories = Lists.newArrayList(categoriesMap.keySet());
+        RecipeCategory<?> selected = categories.get(0);
+        if (category != null) {
+            for (RecipeCategory<?> recipeCategory : categories) {
+                if (recipeCategory.getIdentifier().equals(category)) {
+                    selected = recipeCategory;
+                    break;
+                }
+            }
         }
-        this.selectedCategory = (RecipeCategory<RecipeDisplay>) categories.get(0);
-        this.tabs = new ArrayList<>();
-        this.choosePageActivated = false;
+        this.selectedCategory = (RecipeCategory<RecipeDisplay>) selected;
     }
     
     @ApiStatus.Internal
@@ -136,6 +138,16 @@ public class RecipeViewingScreen extends Screen implements StackToNoticeScreen {
     @Override
     public void addResultStackToNotice(EntryStack stack) {
         this.resultStackToNotice = stack;
+    }
+    
+    @Override
+    public Identifier getCurrentCategory() {
+        return selectedCategory.getIdentifier();
+    }
+    
+    @Override
+    public void recalculateCategoryPage() {
+        this.categoryPages = -1;
     }
     
     @Nullable
@@ -202,10 +214,13 @@ public class RecipeViewingScreen extends Screen implements StackToNoticeScreen {
         this.widgets.clear();
         this.largestWidth = width - 100;
         this.largestHeight = Math.max(height - 36, 100);
-        int maxWidthDisplay = CollectionUtils.mapAndMax(getCurrentDisplayed(), display -> selectedCategory.getDisplayWidth(display), (Comparator<Integer>) Comparator.naturalOrder()).orElse(150);
+        int maxWidthDisplay = CollectionUtils.mapAndMax(getCurrentDisplayed(), selectedCategory::getDisplayWidth, Comparator.naturalOrder()).orElse(150);
         this.guiWidth = maxWidthDisplay + 20;
         this.guiHeight = MathHelper.floor(MathHelper.clamp((double) (selectedCategory.getDisplayHeight() + 4) * (getRecipesPerPage() + 1) + 36, 100, largestHeight));
         this.tabsPerPage = Math.max(5, MathHelper.floor((guiWidth - 20d) / tabSize));
+        if (this.categoryPages == -1) {
+            this.categoryPages = Math.max(0, categories.indexOf(selectedCategory) / tabsPerPage);
+        }
         this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - guiHeight / 2, guiWidth, guiHeight);
         this.page = MathHelper.clamp(page, 0, getTotalPages(selectedCategory) - 1);
         ButtonWidget w, w2;
@@ -227,10 +242,7 @@ public class RecipeViewingScreen extends Screen implements StackToNoticeScreen {
             currentCategoryIndex--;
             if (currentCategoryIndex < 0)
                 currentCategoryIndex = categories.size() - 1;
-            selectedCategory = (RecipeCategory<RecipeDisplay>) categories.get(currentCategoryIndex);
-            categoryPages = MathHelper.floor(currentCategoryIndex / (double) tabsPerPage);
-            page = 0;
-            RecipeViewingScreen.this.init();
+            ClientHelperImpl.getInstance().openRecipeViewingScreen(categoriesMap, categories.get(currentCategoryIndex).getIdentifier(), ingredientStackToNotice, resultStackToNotice);
         }).tooltip(() -> I18n.translate("text.rei.previous_category")));
         widgets.add(LabelWidget.createClickable(new Point(bounds.getCenterX(), bounds.getY() + 7), selectedCategory.getCategoryName(), clickableLabelWidget -> {
             MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
@@ -241,10 +253,7 @@ public class RecipeViewingScreen extends Screen implements StackToNoticeScreen {
             currentCategoryIndex++;
             if (currentCategoryIndex >= categories.size())
                 currentCategoryIndex = 0;
-            selectedCategory = (RecipeCategory<RecipeDisplay>) categories.get(currentCategoryIndex);
-            categoryPages = MathHelper.floor(currentCategoryIndex / (double) tabsPerPage);
-            page = 0;
-            RecipeViewingScreen.this.init();
+            ClientHelperImpl.getInstance().openRecipeViewingScreen(categoriesMap, categories.get(currentCategoryIndex).getIdentifier(), ingredientStackToNotice, resultStackToNotice);
         }).tooltip(() -> I18n.translate("text.rei.next_category")));
         categoryBack.enabled = categories.size() > 1;
         categoryNext.enabled = categories.size() > 1;
@@ -281,21 +290,13 @@ public class RecipeViewingScreen extends Screen implements StackToNoticeScreen {
             int j = i + categoryPages * tabsPerPage;
             if (categories.size() > j) {
                 TabWidget tab;
-                tabs.add(tab = new TabWidget(i, tabSize, bounds.x + bounds.width / 2 - Math.min(categories.size() - categoryPages * tabsPerPage, tabsPerPage) * tabSize / 2, bounds.y, 0, tabV) {
-                    @Override
-                    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                        if (containsMouse(mouseX, mouseY)) {
-                            MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-                            if (getId() + categoryPages * tabsPerPage == categories.indexOf(selectedCategory))
-                                return false;
-                            selectedCategory = (RecipeCategory<RecipeDisplay>) categories.get(getId() + categoryPages * tabsPerPage);
-                            page = 0;
-                            RecipeViewingScreen.this.init();
-                            return true;
-                        }
+                tabs.add(tab = TabWidget.create(i, tabSize, bounds.x + bounds.width / 2 - Math.min(categories.size() - categoryPages * tabsPerPage, tabsPerPage) * tabSize / 2, bounds.y, 0, tabV, widget -> {
+                    MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                    if (widget.getId() + categoryPages * tabsPerPage == categories.indexOf(selectedCategory))
                         return false;
-                    }
-                });
+                    ClientHelperImpl.getInstance().openRecipeViewingScreen(categoriesMap, categories.get(widget.getId() + categoryPages * tabsPerPage).getIdentifier(), ingredientStackToNotice, resultStackToNotice);
+                    return true;
+                }));
                 tab.setRenderer(categories.get(j), categories.get(j).getLogo(), categories.get(j).getCategoryName(), tab.getId() + categoryPages * tabsPerPage == categories.indexOf(selectedCategory));
             }
         }
@@ -398,7 +399,7 @@ public class RecipeViewingScreen extends Screen implements StackToNoticeScreen {
             selectedCategory.drawCategoryBackground(bounds, mouseX, mouseY, delta);
         else {
             PanelWidget.render(bounds, -1);
-            if (ScreenHelper.isDarkModeEnabled()) {
+            if (REIHelper.getInstance().isDarkThemeEnabled()) {
                 fill(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, 0xFF404040);
                 fill(bounds.x + 17, bounds.y + 19, bounds.x + bounds.width - 17, bounds.y + 30, 0xFF404040);
             } else {

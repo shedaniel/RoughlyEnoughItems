@@ -26,9 +26,9 @@ package me.shedaniel.rei.gui.widget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.gui.config.RecipeBorderType;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
-import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.util.Identifier;
 
 import java.util.Collections;
@@ -84,7 +84,7 @@ public class PanelWidget extends WidgetWithBounds {
         float green = ((color >> 8) & 0xFF) / 255f;
         float blue = (color & 0xFF) / 255f;
         RenderSystem.color4f(red, green, blue, alpha);
-        minecraft.getTextureManager().bindTexture(ScreenHelper.isDarkModeEnabled() ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
+        minecraft.getTextureManager().bindTexture(REIHelper.getInstance().isDarkThemeEnabled() ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
         int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;
         int xTextureOffset = getXTextureOffset();
         int yTextureOffset = getYTextureOffset();
@@ -114,7 +114,7 @@ public class PanelWidget extends WidgetWithBounds {
     }
     
     protected int getInnerColor() {
-        return ScreenHelper.isDarkModeEnabled() ? -13750738 : -3750202;
+        return REIHelper.getInstance().isDarkThemeEnabled() ? -13750738 : -3750202;
     }
     
     protected int getXTextureOffset() {

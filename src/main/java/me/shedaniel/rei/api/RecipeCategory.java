@@ -30,7 +30,6 @@ import me.shedaniel.rei.gui.entries.SimpleRecipeEntry;
 import me.shedaniel.rei.gui.widget.PanelWidget;
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.Widget;
-import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
@@ -99,7 +98,7 @@ public interface RecipeCategory<T extends RecipeDisplay> {
     @ApiStatus.OverrideOnly
     default void drawCategoryBackground(Rectangle bounds, int mouseX, int mouseY, float delta) {
         PanelWidget.render(bounds, -1);
-        if (ScreenHelper.isDarkModeEnabled()) {
+        if (REIHelper.getInstance().isDarkThemeEnabled()) {
             DrawableHelper.fill(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, 0xFF404040);
             DrawableHelper.fill(bounds.x + 17, bounds.y + 19, bounds.x + bounds.width - 17, bounds.y + 31, 0xFF404040);
         } else {

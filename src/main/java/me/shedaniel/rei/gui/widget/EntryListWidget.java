@@ -501,8 +501,8 @@ public class EntryListWidget extends WidgetWithBounds {
             int scrollbarPositionMinX = getScrollbarMinX();
             int scrollbarPositionMaxX = scrollbarPositionMinX + 6;
             boolean hovered = (new Rectangle(scrollbarPositionMinX, minY, scrollbarPositionMaxX - scrollbarPositionMinX, height)).contains(PointHelper.fromMouse());
-            float bottomC = (hovered ? .67f : .5f) * (ScreenHelper.isDarkModeEnabled() ? 0.8f : 1f);
-            float topC = (hovered ? .87f : .67f) * (ScreenHelper.isDarkModeEnabled() ? 0.8f : 1f);
+            float bottomC = (hovered ? .67f : .5f) * (REIHelper.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
+            float topC = (hovered ? .87f : .67f) * (REIHelper.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
             
             RenderSystem.disableTexture();
             RenderSystem.enableBlend();

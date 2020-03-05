@@ -24,7 +24,8 @@
 package me.shedaniel.rei.gui.credits;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.rei.gui.credits.CreditsEntryListWidget.CreditsItem;
+import me.shedaniel.rei.gui.credits.CreditsEntryListWidget.TextCreditsItem;
+import me.shedaniel.rei.gui.credits.CreditsEntryListWidget.TranslationCreditsItem;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.CustomValue;
@@ -33,9 +34,12 @@ import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.client.gui.widget.AbstractPressableButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.LiteralText;
+import net.minecraft.util.Pair;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @ApiStatus.Internal
@@ -65,7 +69,8 @@ public class CreditsScreen extends Screen {
     protected void init() {
         children.add(entryListWidget = new CreditsEntryListWidget(minecraft, width, height, 32, height - 32));
         entryListWidget.creditsClearEntries();
-        List<String> translators = Lists.newArrayList();
+        List<Pair<String, String>> translators = Lists.newArrayList();
+        Exception[] exception = {null};
         FabricLoader.getInstance().getModContainer("roughlyenoughitems").ifPresent(rei -> {
             try {
                 if (rei.getMetadata().containsCustomValue("rei:translators")) {
@@ -73,24 +78,36 @@ public class CreditsScreen extends Screen {
                     jsonObject.forEach(entry -> {
                         CustomValue value = entry.getValue();
                         String behind = value.getType() == CustomValue.CvType.ARRAY ? Lists.newArrayList(value.getAsArray().iterator()).stream().map(CustomValue::getAsString).sorted(String::compareToIgnoreCase).collect(Collectors.joining(", ")) : value.getAsString();
-                        translators.add(String.format("  %s - %s", entry.getKey(), behind));
+                        translators.add(new Pair<>(entry.getKey(), behind));
                     });
                 }
-                translators.sort(String::compareToIgnoreCase);
+                translators.sort(Comparator.comparing(Pair::getLeft, String::compareToIgnoreCase));
             } catch (Exception e) {
-                translators.clear();
-                translators.add("Failed to get translators: " + e.toString());
-                for (StackTraceElement traceElement : e.getStackTrace())
-                    translators.add("  at " + traceElement);
+                exception[0] = e;
                 e.printStackTrace();
             }
         });
-        List<String> actualTranslators = Lists.newArrayList();
+        List<Pair<String, String>> translatorsMapped = translators.stream().map(pair -> {
+            return new Pair<>(
+                    "  " + (I18n.hasTranslation("language.roughlyenoughitems." + pair.getLeft().toLowerCase(Locale.ROOT).replace(' ', '_')) ? I18n.translate("language.roughlyenoughitems." + pair.getLeft().toLowerCase(Locale.ROOT).replace(' ', '_')) : pair.getLeft()),
+                    pair.getRight()
+            );
+        }).collect(Collectors.toList());
         int i = width - 80 - 6;
-        translators.forEach(s -> font.wrapStringToWidthAsList(s, i).forEach(actualTranslators::add));
-        for (String line : I18n.translate("text.rei.credit.text", FabricLoader.getInstance().getModContainer("roughlyenoughitems").map(mod -> mod.getMetadata().getVersion().getFriendlyString()).orElse("Unknown"), String.join("\n", actualTranslators)).split("\n"))
-            entryListWidget.creditsAddEntry(new CreditsItem(new LiteralText(line)));
-        entryListWidget.creditsAddEntry(new CreditsItem(new LiteralText("")));
+        for (String line : I18n.translate("text.rei.credit.text", FabricLoader.getInstance().getModContainer("roughlyenoughitems").map(mod -> mod.getMetadata().getVersion().getFriendlyString()).orElse("Unknown"), "%translators%").split("\n"))
+            if (line.equalsIgnoreCase("%translators%")) {
+                if (exception[0] != null) {
+                    entryListWidget.creditsAddEntry(new TextCreditsItem(new LiteralText("Failed to get translators: " + exception[0].toString())));
+                    for (StackTraceElement traceElement : exception[0].getStackTrace())
+                        entryListWidget.creditsAddEntry(new TextCreditsItem(new LiteralText("  at " + traceElement)));
+                } else {
+                    int maxWidth = translatorsMapped.stream().mapToInt(pair -> font.getStringWidth(pair.getLeft())).max().orElse(0) + 5;
+                    for (Pair<String, String> pair : translatorsMapped) {
+                        entryListWidget.creditsAddEntry(new TranslationCreditsItem(pair.getLeft(), pair.getRight(), i - maxWidth - 10, maxWidth));
+                    }
+                }
+            } else entryListWidget.creditsAddEntry(new TextCreditsItem(new LiteralText(line)));
+        entryListWidget.creditsAddEntry(new TextCreditsItem(new LiteralText("")));
         children.add(buttonDone = new AbstractPressableButtonWidget(width / 2 - 100, height - 26, 200, 20, I18n.translate("gui.done")) {
             @Override
             public void onPress() {

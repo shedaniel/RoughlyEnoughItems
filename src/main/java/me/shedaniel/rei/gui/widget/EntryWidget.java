@@ -28,10 +28,7 @@ import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.ConfigManager;
-import me.shedaniel.rei.api.ConfigObject;
-import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.CollectionUtils;
@@ -203,7 +200,7 @@ public class EntryWidget extends WidgetWithBounds {
     
     protected void drawBackground(int mouseX, int mouseY, float delta) {
         if (background) {
-            minecraft.getTextureManager().bindTexture(ScreenHelper.isDarkModeEnabled() ? RECIPE_GUI_DARK : RECIPE_GUI);
+            minecraft.getTextureManager().bindTexture(REIHelper.getInstance().isDarkThemeEnabled() ? RECIPE_GUI_DARK : RECIPE_GUI);
             blit(bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
         }
     }
@@ -235,7 +232,7 @@ public class EntryWidget extends WidgetWithBounds {
     protected void drawHighlighted(int mouseX, int mouseY, float delta) {
         RenderSystem.disableDepthTest();
         RenderSystem.colorMask(true, true, true, false);
-        int color = ScreenHelper.isDarkModeEnabled() ? -1877929711 : -2130706433;
+        int color = REIHelper.getInstance().isDarkThemeEnabled() ? -1877929711 : -2130706433;
         setZ(300);
         Rectangle bounds = getInnerBounds();
         fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), color, color);

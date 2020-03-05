@@ -24,6 +24,7 @@
 package me.shedaniel.rei.gui.widget;
 
 import me.shedaniel.math.api.Point;
+import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.impl.ScreenHelper;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -36,7 +37,7 @@ public abstract class ClickableLabelWidget extends LabelWidget {
     @ApiStatus.Internal
     protected ClickableLabelWidget(Point point, String text) {
         super(point, text);
-        this.hoveredColor = ScreenHelper.isDarkModeEnabled() ? -1 : 0xFF66FFCC;
+        this.hoveredColor = REIHelper.getInstance().isDarkThemeEnabled() ? -1 : 0xFF66FFCC;
     }
     
     public LabelWidget hoveredColor(int hoveredColor) {

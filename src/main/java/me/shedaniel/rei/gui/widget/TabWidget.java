@@ -26,14 +26,17 @@ package me.shedaniel.rei.gui.widget;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 
 @ApiStatus.Internal
 public class TabWidget extends WidgetWithBounds {
@@ -48,24 +51,25 @@ public class TabWidget extends WidgetWithBounds {
     public Rectangle bounds;
     public RecipeCategory<?> category;
     public int u, v;
+    @Nullable
+    private Predicate<TabWidget> onClick;
     
-    public TabWidget(int id, Rectangle bounds) {
-        this(id, bounds, 0, 192);
-    }
-    
-    public TabWidget(int id, Rectangle bounds, int u, int v) {
+    private TabWidget(int id, Rectangle bounds, int u, int v, @Nullable Predicate<TabWidget> onClick) {
         this.id = id;
         this.bounds = bounds;
         this.u = u;
         this.v = v;
+        this.onClick = onClick;
     }
     
-    public TabWidget(int id, int tabSize, int leftX, int bottomY) {
-        this(id, new Rectangle(leftX + id * tabSize, bottomY - tabSize, tabSize, tabSize));
+    @ApiStatus.Internal
+    public static TabWidget create(int id, int tabSize, int leftX, int bottomY, int u, int v, @Nullable Predicate<TabWidget> onClick) {
+        return new TabWidget(id, new Rectangle(leftX + id * tabSize, bottomY - tabSize, tabSize, tabSize), u, v, onClick);
     }
     
-    public TabWidget(int id, int tabSize, int leftX, int bottomY, int u, int v) {
-        this(id, new Rectangle(leftX + id * tabSize, bottomY - tabSize, tabSize, tabSize), u, v);
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        return button == 0 && containsMouse(mouseX, mouseY) && onClick.test(this);
     }
     
     public void setRenderer(RecipeCategory<?> category, EntryStack logo, String categoryName, boolean selected) {
@@ -101,7 +105,7 @@ public class TabWidget extends WidgetWithBounds {
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         if (shown) {
-            minecraft.getTextureManager().bindTexture(ScreenHelper.isDarkModeEnabled() ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
+            minecraft.getTextureManager().bindTexture(REIHelper.getInstance().isDarkThemeEnabled() ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
             this.blit(bounds.x, bounds.y + 2, u + (selected ? bounds.width : 0), v, bounds.width, (selected ? bounds.height + 2 : bounds.height - 1));
             logo.setZ(100);
             logo.render(new Rectangle(bounds.getCenterX() - 8, bounds.getCenterY() - 5, 16, 16), mouseX, mouseY, delta);
