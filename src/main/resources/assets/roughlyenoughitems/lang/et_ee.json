@@ -187,5 +187,19 @@
   "config.roughlyenoughitems.scrollingEntryListWidget": "Esemenimekirja tegevus:",
   "config.roughlyenoughitems.scrollingEntryListWidget.boolean.true": "Keritav",
   "config.roughlyenoughitems.scrollingEntryListWidget.boolean.false": "Lehekülgedega",
-  "text.rei.credit.text": "§lRoughly Enough Items (v%s)\n§7Originaalselt Almost Enough Items'i koodi jätk.\n\n§lArendajad\n  Originaal ZenDarva poolt\n  Ümber kirjutanud Danielshe\n  Vana plugina tugi TehNut poolt\n\n§lKeelte tõlked\n%s\n\n§lLitsents\n§7Roughly Enough Items on litsenseeritud MIT-i alusel."
+  "text.rei.credit.text": "§lRoughly Enough Items (v%s)\n§7Originaalselt Almost Enough Items'i koodi jätk.\n\n§lArendajad\n  Originaal ZenDarva poolt\n  Ümber kirjutanud Danielshe\n  Vana plugina tugi TehNut poolt\n\n§lKeelte tõlked\n%s\n\n§lLitsents\n§7Roughly Enough Items on litsenseeritud MIT-i alusel.",
+  "language.roughlyenoughitems.english": "English",
+  "language.roughlyenoughitems.japanese": "Japanese",
+  "language.roughlyenoughitems.chinese_simplified": "Chinese Simplified",
+  "language.roughlyenoughitems.chinese_traditional": "Chinese Traditional",
+  "language.roughlyenoughitems.french": "French",
+  "language.roughlyenoughitems.german": "German",
+  "language.roughlyenoughitems.estonian": "Estonian",
+  "language.roughlyenoughitems.portuguese": "Portuguese",
+  "language.roughlyenoughitems.portuguese_brazilian": "Portuguese, Brazilian",
+  "language.roughlyenoughitems.lolcat": "LOLCAT",
+  "language.roughlyenoughitems.upside_down_english": "Upside Down English",
+  "language.roughlyenoughitems.bulgarian": "Bulgarian",
+  "language.roughlyenoughitems.russian": "Russian",
+  "language.roughlyenoughitems.polish": "Polish"
 }
