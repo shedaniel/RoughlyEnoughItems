@@ -30,8 +30,10 @@ import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.impl.EmptyEntryStack;
 import me.shedaniel.rei.impl.FluidEntryStack;
 import me.shedaniel.rei.impl.ItemEntryStack;
+import me.shedaniel.rei.listeners.BucketItemHooks;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.fluid.Fluid;
+import net.minecraft.item.BucketItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
@@ -120,6 +122,25 @@ public interface EntryStack {
             e.printStackTrace();
             return null;
         }
+    }
+    
+    static EntryStack copyFluidToBucket(EntryStack stack) {
+        if (stack.getType() != Type.FLUID)
+            throw new IllegalArgumentException("EntryStack must be fluid!");
+        Fluid fluid = stack.getFluid();
+        Item item = fluid.getBucketItem();
+        if (item == null)
+            return EntryStack.empty();
+        return EntryStack.create(item);
+    }
+    
+    static EntryStack copyBucketToFluid(EntryStack stack) {
+        if (stack.getType() != Type.ITEM)
+            throw new IllegalArgumentException("EntryStack must be item!");
+        Item item = stack.getItem();
+        if (item instanceof BucketItem)
+            return EntryStack.create(((BucketItemHooks) item).getFluid(), 1000);
+        return EntryStack.empty();
     }
     
     Optional<Identifier> getIdentifier();

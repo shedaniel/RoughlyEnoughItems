@@ -56,20 +56,8 @@ import java.util.function.Predicate;
 @ApiStatus.Internal
 public class ItemEntryStack extends AbstractEntryStack implements OptimalEntryStack {
     
-    private static final Predicate<BakedModel> IS_SIDE_LIT;
+    private static final Predicate<BakedModel> IS_SIDE_LIT = BakedModel::isSideLit;
     private static final MatrixStack MATRICES = new MatrixStack();
-    
-    static {
-        boolean isOn1_15_2 = false;
-        String isSideLit = FabricLoader.getInstance().getMappingResolver().mapMethodName("intermediary", "net.minecraft.class_1087", "method_24304", "()Z");
-        try {
-            BakedModel.class.getDeclaredMethod(isSideLit);
-            isOn1_15_2 = true;
-        } catch (NoSuchMethodException ignored) {
-        }
-        //noinspection Convert2MethodRef
-        IS_SIDE_LIT = isOn1_15_2 ? Executor.call(() -> () -> new ModelSideLit1152Compat()) : Executor.call(() -> () -> new ModelHasDepth1151Compat());
-    }
     
     private ItemStack itemStack;
     
@@ -136,19 +124,8 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     public boolean equalsIgnoreAmount(EntryStack stack) {
         if (stack.getType() != Type.ITEM)
             return false;
-        if (itemStack.getItem() == Items.GRASS_BLOCK) {
-//            System.out.println(itemStack.toTag(new CompoundTag()).toString() + " " + stack.getItemStack().toTag(new CompoundTag()).toString());
-        }
         if (itemStack.getItem() != stack.getItem())
             return false;
-        if (itemStack.getItem() == Items.GRASS_BLOCK) {
-            ItemStack otherStack = stack.getItemStack();
-            CompoundTag o1 = itemStack.getTag();
-            CompoundTag o2 = otherStack.getTag();
-            boolean b = o1 == o2 || ((o1 != null && o2 != null) && equals(o1, o2));
-//            System.out.println(itemStack.toTag(new CompoundTag()).toString() + " " + stack.getItemStack().toTag(new CompoundTag()).toString() + " " + b);
-            return b;
-        }
         ItemStack otherStack = stack.getItemStack();
         CompoundTag o1 = itemStack.getTag();
         CompoundTag o2 = otherStack.getTag();
