@@ -36,9 +36,9 @@
   },
   "depends": {
     "fabricloader": "*",
-    "cloth": ">=1.1.0",
-    "cloth-config2": ">=2.6.6",
-    "minecraft": "~1.16-Snapshot.20.6.a"
+    "cloth": ">=1.2.0",
+    "cloth-config2": "~3-",
+    "minecraft": "~1.16-Snapshot.20.10.a"
   },
   "mixins": [
     "mixin.roughlyenoughitems.json",
