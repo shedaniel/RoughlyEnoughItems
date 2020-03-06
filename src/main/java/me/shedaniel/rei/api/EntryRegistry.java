@@ -35,6 +35,9 @@ import java.util.List;
 
 public interface EntryRegistry {
     
+    /**
+     * @return the api instance of {@link me.shedaniel.rei.impl.EntryRegistryImpl}
+     */
     static EntryRegistry getInstance() {
         return RoughlyEnoughItemsCore.getEntryRegistry();
     }

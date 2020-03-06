@@ -27,6 +27,7 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.collect.Lists;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.impl.PointHelper;
+import me.shedaniel.rei.api.REIHelper;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
@@ -52,11 +53,11 @@ public class QueuedTooltip {
     }
     
     public static QueuedTooltip create(List<String> text) {
-        return QueuedTooltip.create(PointHelper.fromMouse(), text);
+        return QueuedTooltip.create(PointHelper.ofMouse(), text);
     }
     
     public static QueuedTooltip create(String... text) {
-        return QueuedTooltip.create(PointHelper.fromMouse(), text);
+        return QueuedTooltip.create(PointHelper.ofMouse(), text);
     }
     
     @ApiStatus.Internal
@@ -84,6 +85,10 @@ public class QueuedTooltip {
     
     public List<String> getText() {
         return text;
+    }
+    
+    public void queue() {
+        REIHelper.getInstance().addTooltip(this);
     }
     
 }

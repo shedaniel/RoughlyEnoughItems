@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface ClientHelper {
+    
     /**
      * @return the api instance of {@link ClientHelperImpl}
      */

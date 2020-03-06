@@ -148,9 +148,9 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
         
         if (getTooltips().isPresent())
             if (!focused && containsMouse(mouseX, mouseY))
-                ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltips().get().split("\n")));
+                REIHelper.getInstance().addTooltip(QueuedTooltip.create(getTooltips().get().split("\n")));
             else if (focused)
-                ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(new Point(x + width / 2, y + height / 2), getTooltips().get().split("\n")));
+                REIHelper.getInstance().addTooltip(QueuedTooltip.create(new Point(x + width / 2, y + height / 2), getTooltips().get().split("\n")));
     }
     
     @Override
@@ -179,7 +179,7 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
     
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
-        if (displaySupplier.get().getRecipeLocation().isPresent() && ConfigObject.getInstance().getCopyRecipeIdentifierKeybind().matchesKey(int_1, int_2) && containsMouse(PointHelper.fromMouse())) {
+        if (displaySupplier.get().getRecipeLocation().isPresent() && ConfigObject.getInstance().getCopyRecipeIdentifierKeybind().matchesKey(int_1, int_2) && containsMouse(PointHelper.ofMouse())) {
             minecraft.keyboard.setClipboard(displaySupplier.get().getRecipeLocation().get().toString());
             if (ConfigObject.getInstance().isToastDisplayedOnCopyIdentifier()) {
                 CopyRecipeIdentifierToast.addToast(I18n.translate("msg.rei.copied_recipe_id"), I18n.translate("msg.rei.recipe_id_details", displaySupplier.get().getRecipeLocation().get().toString()));

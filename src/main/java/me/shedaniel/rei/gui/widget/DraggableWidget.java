@@ -60,7 +60,7 @@ public abstract class DraggableWidget extends WidgetWithBounds {
     
     @Override
     public boolean mouseDragged(double double_1, double double_2, int int_1, double double_3, double double_4) {
-        Point mouse = PointHelper.fromMouse();
+        Point mouse = PointHelper.ofMouse();
         if (int_1 == 0) {
             if (!dragged) {
                 if (getGrabBounds().contains(mouse)) {

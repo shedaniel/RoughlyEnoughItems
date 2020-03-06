@@ -214,7 +214,7 @@ public class DefaultBeaconBaseCategory implements RecipeCategory<DefaultBeaconBa
                 height = Math.max(10, height);
                 int minY = Math.min(Math.max((int) scroll * (this.getBounds().height - 2 - height) / maxScroll + getBounds().y + 1, getBounds().y + 1), getBounds().getMaxY() - 1 - height);
                 
-                boolean hovered = new Rectangle(scrollbarPositionMinX, minY, scrollbarPositionMaxX - scrollbarPositionMinX, height).contains(PointHelper.fromMouse());
+                boolean hovered = new Rectangle(scrollbarPositionMinX, minY, scrollbarPositionMaxX - scrollbarPositionMinX, height).contains(PointHelper.ofMouse());
                 int bottomC = hovered ? 168 : 128;
                 int topC = hovered ? 222 : 172;
                 

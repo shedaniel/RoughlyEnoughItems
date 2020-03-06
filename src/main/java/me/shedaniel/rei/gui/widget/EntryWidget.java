@@ -221,7 +221,7 @@ public class EntryWidget extends WidgetWithBounds {
                 else
                     tooltip.getText().addAll(Arrays.asList(I18n.translate("text.rei.favorites_tooltip", name).split("\n")));
             }
-            ScreenHelper.getLastOverlay().addTooltip(tooltip);
+            REIHelper.getInstance().addTooltip(tooltip);
         }
     }
     
@@ -267,8 +267,8 @@ public class EntryWidget extends WidgetWithBounds {
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (!interactable)
             return false;
-        if (containsMouse(PointHelper.fromMouse())) {
-            if (interactableFavorites && ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(PointHelper.fromMouse()) && !getCurrentEntry().isEmpty()) {
+        if (containsMouse(PointHelper.ofMouse())) {
+            if (interactableFavorites && ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(PointHelper.ofMouse()) && !getCurrentEntry().isEmpty()) {
                 ModifierKeyCode keyCode = ConfigObject.getInstance().getFavoriteKeyCode();
                 EntryStack entry = getCurrentEntry().copy();
                 entry.setAmount(127);

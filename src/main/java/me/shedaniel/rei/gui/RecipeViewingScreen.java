@@ -458,7 +458,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
         if (export.matchesKey(keyCode, scanCode)) {
             for (Map.Entry<Rectangle, List<Widget>> entry : recipeBounds.entrySet()) {
                 Rectangle bounds = entry.getKey();
-                if (bounds.contains(PointHelper.fromMouse())) {
+                if (bounds.contains(PointHelper.ofMouse())) {
                     RecipeDisplayExporter.exportRecipeDisplay(bounds, entry.getValue());
                     break;
                 }
@@ -507,13 +507,13 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
         for (Element listener : children())
             if (listener.mouseScrolled(i, j, amount))
                 return true;
-        if (getBounds().contains(PointHelper.fromMouse())) {
+        if (getBounds().contains(PointHelper.ofMouse())) {
             if (amount > 0 && recipeBack.enabled)
                 recipeBack.onPressed();
             else if (amount < 0 && recipeNext.enabled)
                 recipeNext.onPressed();
         }
-        if ((new Rectangle(bounds.x, bounds.y - 28, bounds.width, 28)).contains(PointHelper.fromMouse())) {
+        if ((new Rectangle(bounds.x, bounds.y - 28, bounds.width, 28)).contains(PointHelper.ofMouse())) {
             if (amount > 0 && categoryBack.enabled)
                 categoryBack.onPressed();
             else if (amount < 0 && categoryNext.enabled)

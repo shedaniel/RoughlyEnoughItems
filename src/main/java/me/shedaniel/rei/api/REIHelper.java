@@ -23,13 +23,19 @@
 
 package me.shedaniel.rei.api;
 
+import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public interface REIHelper {
+    
+    /**
+     * @return the instance of {@link REIHelper}
+     */
     static REIHelper getInstance() {
         return ScreenHelper.getInstance();
     }
@@ -39,4 +45,7 @@ public interface REIHelper {
     TextFieldWidget getSearchTextField();
     
     List<ItemStack> getInventoryStacks();
+    
+    void addTooltip(@Nullable QueuedTooltip tooltip);
+    
 }

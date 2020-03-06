@@ -37,6 +37,9 @@ import static net.minecraft.util.ActionResult.PASS;
 
 public interface DisplayHelper {
     
+    /**
+     * @return the api instance of {@link me.shedaniel.rei.impl.DisplayHelperImpl}
+     */
     static DisplayHelper getInstance() {
         return RoughlyEnoughItemsCore.getDisplayHelper();
     }
@@ -101,9 +104,11 @@ public interface DisplayHelper {
      * Gets the base bounds handler api for exclusion zones
      *
      * @return the base bounds handler
-     * @see BaseBoundsHandler#getInstance()
+     * @deprecated {@link BaseBoundsHandler#getInstance()}
      */
     @ApiStatus.Internal
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     BaseBoundsHandler getBaseBoundsHandler();
     
     interface DisplayBoundsHandler<T> extends OverlayDecider {

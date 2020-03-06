@@ -74,7 +74,7 @@ public class OverlaySearchField extends TextFieldWidget {
     
     public void laterRender(int int_1, int int_2, float float_1) {
         RenderSystem.disableDepthTest();
-        setEditableColor(isMain && ContainerScreenOverlay.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty() ? 16733525 : isSearching && isMain ? -852212 : (containsMouse(PointHelper.fromMouse()) || isFocused()) ? (REIHelper.getInstance().isDarkThemeEnabled() ? -17587 : -1) : -6250336);
+        setEditableColor(isMain && ContainerScreenOverlay.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty() ? 16733525 : isSearching && isMain ? -852212 : (containsMouse(PointHelper.ofMouse()) || isFocused()) ? (REIHelper.getInstance().isDarkThemeEnabled() ? -17587 : -1) : -6250336);
         setSuggestion(!isFocused() && getText().isEmpty() ? I18n.translate("text.rei.search.field.suggestion") : null);
         super.render(int_1, int_2, float_1);
         RenderSystem.enableDepthTest();
@@ -82,7 +82,7 @@ public class OverlaySearchField extends TextFieldWidget {
     
     @Override
     protected void renderSuggestion(int x, int y) {
-        if (containsMouse(PointHelper.fromMouse()) || isFocused())
+        if (containsMouse(PointHelper.ofMouse()) || isFocused())
             this.font.drawWithShadow(this.font.trimToWidth(this.getSuggestion(), this.getWidth()), x, y, REIHelper.getInstance().isDarkThemeEnabled() ? 0xccddaa3d : 0xddeaeaea);
         else
             this.font.drawWithShadow(this.font.trimToWidth(this.getSuggestion(), this.getWidth()), x, y, -6250336);
