@@ -187,5 +187,19 @@
   "config.roughlyenoughitems.scrollingEntryListWidget": "Type de navigation dans la liste :",
   "config.roughlyenoughitems.scrollingEntryListWidget.boolean.true": "Défilement",
   "config.roughlyenoughitems.scrollingEntryListWidget.boolean.false": "Pagination",
-  "text.rei.credit.text": "§lRoughly Enough Items (v%s)\n§7Initialement un fork du mod Almost Enough Items.\n\n§lDéveloppeurs\n  Mod de base par ZenDarva\n  Réécrit par Danielshe\n  Prise en charge sur d'anciens plugins par TehNut\n\n§lTraductions\n%s\n\n§lLicence\n§7Roughly Enough Items est sous licence MIT."
+  "text.rei.credit.text": "§lRoughly Enough Items (v%s)\n§7Initialement un fork du mod Almost Enough Items.\n\n§lDéveloppeurs\n  Mod de base par ZenDarva\n  Réécrit par Danielshe\n  Prise en charge sur d'anciens plugins par TehNut\n\n§lTraductions\n%s\n\n§lLicence\n§7Roughly Enough Items est sous licence MIT.",
+  "language.roughlyenoughitems.english": "English",
+  "language.roughlyenoughitems.japanese": "Japanese",
+  "language.roughlyenoughitems.chinese_simplified": "Chinese Simplified",
+  "language.roughlyenoughitems.chinese_traditional": "Chinese Traditional",
+  "language.roughlyenoughitems.french": "French",
+  "language.roughlyenoughitems.german": "German",
+  "language.roughlyenoughitems.estonian": "Estonian",
+  "language.roughlyenoughitems.portuguese": "Portuguese",
+  "language.roughlyenoughitems.portuguese_brazilian": "Portuguese, Brazilian",
+  "language.roughlyenoughitems.lolcat": "LOLCAT",
+  "language.roughlyenoughitems.upside_down_english": "Upside Down English",
+  "language.roughlyenoughitems.bulgarian": "Bulgarian",
+  "language.roughlyenoughitems.russian": "Russian",
+  "language.roughlyenoughitems.polish": "Polish"
 }
