@@ -30,6 +30,8 @@ import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.container.Container;
+import org.jetbrains.annotations.ApiStatus;
+import org.spongepowered.asm.mixin.injection.Inject;
 
 import java.util.function.Supplier;
 
@@ -104,6 +106,7 @@ public interface AutoTransferHandler {
         }
     }
     
+    @ApiStatus.Internal
     final class ResultImpl implements Result {
         private boolean successful, applicable;
         private String errorKey;
@@ -155,6 +158,7 @@ public interface AutoTransferHandler {
         }
     }
     
+    @ApiStatus.Internal
     final class ContextImpl implements Context {
         boolean actuallyCrafting;
         ContainerScreen<?> containerScreen;

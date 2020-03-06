@@ -1,4 +1,4 @@
-name: Java CI
+name: CF CI
 
 on:
   push:
@@ -18,4 +18,4 @@ jobs:
       - name: Upload to CurseForge
         run: ./gradlew clean build curseforge --refresh-dependencies --stacktrace
         env:
-          CF_API_KEY: ${{ secrets.CF_API_KEY }}
+          danielshe_curse_api_key: ${{ secrets.CF_API_KEY }}

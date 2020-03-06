@@ -32,10 +32,17 @@ import java.util.List;
 
 public interface ConfigManager {
     
+    /**
+     * @return the api instance of {@link me.shedaniel.rei.impl.ConfigManagerImpl}
+     */
     static ConfigManager getInstance() {
         return RoughlyEnoughItemsCore.getConfigManager();
     }
     
+    /**
+     * @return the list of favourites
+     * @deprecated {@link ConfigObject#getFavorites()}
+     */
     @ApiStatus.ScheduledForRemoval
     @Deprecated
     default List<EntryStack> getFavorites() {

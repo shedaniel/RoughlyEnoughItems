@@ -153,7 +153,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
         ScissorsHandler.INSTANCE.removeLastScissor();
         renderScrollbar();
         if (containsMouse(mouseX, mouseY) && ClientHelper.getInstance().isCheating() && !minecraft.player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
-            ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.delete_items")));
+            REIHelper.getInstance().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.delete_items")));
     }
     
     private int getScrollbarMinX() {
@@ -194,7 +194,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
             
             int scrollbarPositionMinX = getScrollbarMinX();
             int scrollbarPositionMaxX = scrollbarPositionMinX + 6;
-            boolean hovered = (new Rectangle(scrollbarPositionMinX, minY, scrollbarPositionMaxX - scrollbarPositionMinX, height)).contains(PointHelper.fromMouse());
+            boolean hovered = (new Rectangle(scrollbarPositionMinX, minY, scrollbarPositionMaxX - scrollbarPositionMinX, height)).contains(PointHelper.ofMouse());
             float bottomC = (hovered ? .67f : .5f) * (REIHelper.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
             float topC = (hovered ? .87f : .67f) * (REIHelper.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
             
@@ -239,7 +239,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
     
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
-        if (containsMouse(PointHelper.fromMouse()))
+        if (containsMouse(PointHelper.ofMouse()))
             for (Widget widget : children())
                 if (widget.keyPressed(int_1, int_2, int_3))
                     return true;

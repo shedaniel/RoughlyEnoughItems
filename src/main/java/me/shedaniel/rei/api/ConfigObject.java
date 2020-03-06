@@ -36,6 +36,9 @@ import java.util.List;
 
 public interface ConfigObject {
     
+    /**
+     * @return the api instance of {@link me.shedaniel.rei.impl.ConfigObjectImpl}
+     */
     static ConfigObject getInstance() {
         return ((ConfigManagerImpl) ConfigManager.getInstance()).getConfig();
     }

@@ -33,6 +33,10 @@ import org.jetbrains.annotations.ApiStatus;
  */
 public interface REIPluginEntry {
     
+    /**
+     * @return the minimum version for the REI plugin to load
+     * @deprecated deprecated due to the lack of need of this method, please declare conflicts with fabric.mod.json
+     */
     @ApiStatus.ScheduledForRemoval
     @Deprecated
     default SemanticVersion getMinimumVersion() throws VersionParsingException {
@@ -40,18 +44,14 @@ public interface REIPluginEntry {
     }
     
     /**
-     * Gets the priority of the plugin.
-     *
-     * @return the priority
+     * @return the priority of the plugin, the smaller the number, the earlier it is called.
      */
     default int getPriority() {
         return 0;
     }
     
     /**
-     * Get the identifier of the plugin
-     *
-     * @return the identifier
+     * @return the unique identifier of the plugin.
      */
     Identifier getPluginIdentifier();
     

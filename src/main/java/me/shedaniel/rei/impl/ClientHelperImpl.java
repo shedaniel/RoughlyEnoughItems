@@ -89,6 +89,10 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     });
     private final Map<String, String> modNameCache = Maps.newHashMap();
     
+    /**
+     * @return the instance of {@link ClientHelperImpl}
+     * @see ClientHelper#getInstance()
+     */
     @ApiStatus.Internal
     public static ClientHelperImpl getInstance() {
         return instance;

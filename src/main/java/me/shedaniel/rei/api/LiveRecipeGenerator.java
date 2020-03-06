@@ -30,6 +30,9 @@ import java.util.Optional;
 
 public interface LiveRecipeGenerator<T extends RecipeDisplay> {
     
+    /**
+     * @return the identifier of the category the recipes goes to.
+     */
     Identifier getCategoryIdentifier();
     
     default Optional<List<T>> getRecipeFor(EntryStack entry) {

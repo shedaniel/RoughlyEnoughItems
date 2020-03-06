@@ -33,6 +33,7 @@ import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.OverlaySearchField;
 import me.shedaniel.rei.gui.RecipeScreen;
+import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import net.fabricmc.api.ClientModInitializer;
@@ -45,6 +46,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -61,8 +63,20 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
     private static LinkedHashSet<RecipeScreen> lastRecipeScreen = Sets.newLinkedHashSetWithExpectedSize(5);
     private static ScreenHelper instance;
     
+    /**
+     * @return the instance of screen helper
+     * @see REIHelper#getInstance()
+     */
+    @ApiStatus.Internal
     public static ScreenHelper getInstance() {
         return instance;
+    }
+    
+    @Override
+    public void addTooltip(@Nullable QueuedTooltip tooltip) {
+        if (overlay != null && tooltip != null) {
+            overlay.addTooltip(tooltip);
+        }
     }
     
     @Override

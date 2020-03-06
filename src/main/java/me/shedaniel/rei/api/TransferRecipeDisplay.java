@@ -30,8 +30,14 @@ import java.util.List;
 
 public interface TransferRecipeDisplay extends RecipeDisplay {
     
+    /**
+     * @return the width of the crafting grid.
+     */
     int getWidth();
     
+    /**
+     * @return the height of the crafting grid.
+     */
     int getHeight();
     
     List<List<EntryStack>> getOrganisedInputEntries(ContainerInfo<Container> containerInfo, Container container);

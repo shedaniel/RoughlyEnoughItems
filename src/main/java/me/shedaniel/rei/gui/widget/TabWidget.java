@@ -28,7 +28,6 @@ import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.RecipeCategory;
-import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
@@ -117,9 +116,9 @@ public class TabWidget extends WidgetWithBounds {
     
     private void drawTooltip() {
         if (this.minecraft.options.advancedItemTooltips)
-            ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(categoryName, Formatting.DARK_GRAY.toString() + category.getIdentifier().toString(), ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())));
+            REIHelper.getInstance().addTooltip(QueuedTooltip.create(categoryName, Formatting.DARK_GRAY.toString() + category.getIdentifier().toString(), ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())));
         else
-            ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(categoryName, ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())));
+            REIHelper.getInstance().addTooltip(QueuedTooltip.create(categoryName, ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())));
     }
     
     @Override

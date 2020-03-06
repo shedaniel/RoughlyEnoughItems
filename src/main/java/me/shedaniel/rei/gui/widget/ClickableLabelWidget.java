@@ -25,7 +25,6 @@ package me.shedaniel.rei.gui.widget;
 
 import me.shedaniel.math.api.Point;
 import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.impl.ScreenHelper;
 import org.jetbrains.annotations.ApiStatus;
 
 public abstract class ClickableLabelWidget extends LabelWidget {
@@ -79,9 +78,9 @@ public abstract class ClickableLabelWidget extends LabelWidget {
     protected void drawTooltips(int mouseX, int mouseY) {
         if (isClickable() && getTooltips().isPresent())
             if (!focused && containsMouse(mouseX, mouseY))
-                ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltips().get().split("\n")));
+                REIHelper.getInstance().addTooltip(QueuedTooltip.create(getTooltips().get().split("\n")));
             else if (focused)
-                ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getPosition(), getTooltips().get().split("\n")));
+                REIHelper.getInstance().addTooltip(QueuedTooltip.create(getPosition(), getTooltips().get().split("\n")));
     }
     
     public int getHoveredColor() {

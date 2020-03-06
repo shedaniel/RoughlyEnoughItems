@@ -503,7 +503,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
     public boolean mouseScrolled(double i, double j, double amount) {
         if (!ScreenHelper.isOverlayVisible())
             return false;
-        if (isInside(PointHelper.fromMouse())) {
+        if (isInside(PointHelper.ofMouse())) {
             if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
                 if (amount > 0 && leftButton.enabled)
                     leftButton.onPressed();

@@ -327,7 +327,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
         for (Element listener : children())
             if (listener.mouseScrolled(double_1, double_2, double_3))
                 return true;
-        if (bounds.contains(PointHelper.fromMouse())) {
+        if (bounds.contains(PointHelper.ofMouse())) {
             if (double_3 < 0 && categoryMap.get(categories.get(selectedCategoryIndex)).size() > 1) {
                 selectedRecipeIndex++;
                 if (selectedRecipeIndex >= categoryMap.get(categories.get(selectedCategoryIndex)).size())
@@ -392,7 +392,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
             if (buttonWidgets.get(i).getBounds().getMaxY() > scrollListBounds.getMinY() && buttonWidgets.get(i).getBounds().getMinY() < scrollListBounds.getMaxY()) {
                 recipeRenderers.get(i).setZ(1);
                 recipeRenderers.get(i).render(buttonWidgets.get(i).getBounds(), mouseX, mouseY, delta);
-                ScreenHelper.getLastOverlay().addTooltip(recipeRenderers.get(i).getTooltip(mouseX, mouseY));
+                REIHelper.getInstance().addTooltip(recipeRenderers.get(i).getTooltip(mouseX, mouseY));
             }
         }
         double maxScroll = getMaxScrollPosition();
@@ -405,7 +405,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
             height = Math.max(10, height);
             int minY = (int) Math.min(Math.max((int) scrollAmount * (scrollListBounds.height - 2 - height) / getMaxScroll() + scrollListBounds.y + 1, scrollListBounds.y + 1), scrollListBounds.getMaxY() - 1 - height);
             int scrollbarPositionMinX = scrollListBounds.getMaxX() - 6, scrollbarPositionMaxX = scrollListBounds.getMaxX() - 1;
-            boolean hovered = (new Rectangle(scrollbarPositionMinX, minY, scrollbarPositionMaxX - scrollbarPositionMinX, height)).contains(PointHelper.fromMouse());
+            boolean hovered = (new Rectangle(scrollbarPositionMinX, minY, scrollbarPositionMaxX - scrollbarPositionMinX, height)).contains(PointHelper.ofMouse());
             float bottomC = (hovered ? .67f : .5f) * (REIHelper.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
             float topC = (hovered ? .87f : .67f) * (REIHelper.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
             RenderSystem.disableTexture();

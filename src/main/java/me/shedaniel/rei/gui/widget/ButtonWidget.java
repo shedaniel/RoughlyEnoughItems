@@ -27,7 +27,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.sound.SoundEvents;
@@ -155,9 +154,9 @@ public abstract class ButtonWidget extends WidgetWithBounds {
         
         if (getTooltips().isPresent())
             if (!focused && containsMouse(mouseX, mouseY))
-                ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(getTooltips().get().split("\n")));
+                REIHelper.getInstance().addTooltip(QueuedTooltip.create(getTooltips().get().split("\n")));
             else if (focused)
-                ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(new Point(x + width / 2, y + height / 2), getTooltips().get().split("\n")));
+                REIHelper.getInstance().addTooltip(QueuedTooltip.create(new Point(x + width / 2, y + height / 2), getTooltips().get().split("\n")));
     }
     
     public boolean isHovered(int mouseX, int mouseY) {

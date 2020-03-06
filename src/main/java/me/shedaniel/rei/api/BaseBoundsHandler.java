@@ -31,6 +31,7 @@ import java.util.function.Supplier;
 
 public interface BaseBoundsHandler extends DisplayHelper.DisplayBoundsHandler<Screen> {
     
+    @SuppressWarnings("deprecation")
     static BaseBoundsHandler getInstance() {
         return DisplayHelper.getInstance().getBaseBoundsHandler();
     }
