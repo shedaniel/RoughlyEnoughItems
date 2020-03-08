@@ -152,7 +152,7 @@ public class DefaultPlugin implements REIPluginV0 {
                 map.put(enchantment, i);
                 ItemStack itemStack = new ItemStack(Items.ENCHANTED_BOOK);
                 EnchantmentHelper.set(map, itemStack);
-                enchantments.add(EntryStack.create(itemStack));
+                enchantments.add(EntryStack.create(itemStack).setting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE));
             }
         }
         entryRegistry.queueRegisterEntryAfter(stack, enchantments);
