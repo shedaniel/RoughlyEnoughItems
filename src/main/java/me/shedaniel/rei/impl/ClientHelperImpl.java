@@ -32,8 +32,8 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.gui.PreRecipeViewingScreen;
+import me.shedaniel.rei.gui.RecipeScreen;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
-import me.shedaniel.rei.gui.StackToNoticeScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.utils.CollectionUtils;
@@ -68,6 +68,8 @@ import java.util.UUID;
 @ApiStatus.Internal
 public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
+    @ApiStatus.ScheduledForRemoval
+    @Deprecated
     public static ClientHelperImpl instance;
     @ApiStatus.Internal public final Lazy<Boolean> isYog = new Lazy<>(() -> {
         try {
@@ -88,6 +90,11 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         return false;
     });
     private final Map<String, String> modNameCache = Maps.newHashMap();
+    
+    @ApiStatus.Internal
+    public static ClientHelperImpl getInstance() {
+        return instance;
+    }
     
     @Override
     public String getFormattedModFromItem(Item item) {
@@ -176,7 +183,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     public boolean executeRecipeKeyBind(EntryStack stack) {
         Map<RecipeCategory<?>, List<RecipeDisplay>> map = RecipeHelper.getInstance().getRecipesFor(stack);
         if (map.keySet().size() > 0)
-            openRecipeViewingScreen(map, null, stack);
+            openRecipeViewingScreen(map, null, null, stack);
         return map.keySet().size() > 0;
     }
     
@@ -184,7 +191,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     public boolean executeUsageKeyBind(EntryStack stack) {
         Map<RecipeCategory<?>, List<RecipeDisplay>> map = RecipeHelper.getInstance().getUsagesFor(stack);
         if (map.keySet().size() > 0)
-            openRecipeViewingScreen(map, stack, null);
+            openRecipeViewingScreen(map, null, stack, null);
         return map.keySet().size() > 0;
     }
     
@@ -232,30 +239,38 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     @Override
     public void openRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map) {
-        openRecipeViewingScreen(map, null, null);
+        openRecipeViewingScreen(map, null, null, null);
     }
     
     @ApiStatus.Internal
-    public void openRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map, @Nullable EntryStack ingredientNotice, @Nullable EntryStack resultNotice) {
+    public void openRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map, @Nullable Identifier category, @Nullable EntryStack ingredientNotice, @Nullable EntryStack resultNotice) {
+        if (category == null) {
+            Screen currentScreen = MinecraftClient.getInstance().currentScreen;
+            if (currentScreen instanceof RecipeScreen) {
+                category = ((RecipeScreen) currentScreen).getCurrentCategory();
+            }
+        }
         Screen screen;
         if (ConfigObject.getInstance().getRecipeScreenType() == RecipeScreenType.VILLAGER) {
-            screen = new VillagerRecipeViewingScreen(map);
+            screen = new VillagerRecipeViewingScreen(map, category);
         } else if (ConfigObject.getInstance().getRecipeScreenType() == RecipeScreenType.UNSET) {
+            @Nullable Identifier finalCategory = category;
             screen = new PreRecipeViewingScreen(ScreenHelper.getLastContainerScreen(), RecipeScreenType.UNSET, true, original -> {
                 ConfigObject.getInstance().setRecipeScreenType(original ? RecipeScreenType.ORIGINAL : RecipeScreenType.VILLAGER);
                 ConfigManager.getInstance().saveConfig();
-                openRecipeViewingScreen(map, ingredientNotice, resultNotice);
+                openRecipeViewingScreen(map, finalCategory, ingredientNotice, resultNotice);
             });
         } else {
-            screen = new RecipeViewingScreen(map);
+            screen = new RecipeViewingScreen(map, category);
         }
-        if (screen instanceof StackToNoticeScreen) {
+        if (screen instanceof RecipeScreen) {
             if (ingredientNotice != null)
-                ((StackToNoticeScreen) screen).addIngredientStackToNotice(ingredientNotice);
+                ((RecipeScreen) screen).addIngredientStackToNotice(ingredientNotice);
             if (resultNotice != null)
-                ((StackToNoticeScreen) screen).addResultStackToNotice(resultNotice);
+                ((RecipeScreen) screen).addResultStackToNotice(resultNotice);
         }
-        ScreenHelper.storeRecipeScreen(MinecraftClient.getInstance().currentScreen);
+        if (MinecraftClient.getInstance().currentScreen instanceof RecipeScreen)
+            ScreenHelper.storeRecipeScreen(MinecraftClient.getInstance().currentScreen);
         MinecraftClient.getInstance().openScreen(screen);
     }
     

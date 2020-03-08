@@ -24,7 +24,6 @@
 package me.shedaniel.rei.gui;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
@@ -34,6 +33,7 @@ import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.gui.entries.RecipeEntry;
 import me.shedaniel.rei.gui.widget.*;
+import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
@@ -44,12 +44,14 @@ import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.client.util.NarratorManager;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -57,50 +59,42 @@ import java.util.Map;
 import java.util.Optional;
 
 @ApiStatus.Internal
-public class VillagerRecipeViewingScreen extends Screen implements StackToNoticeScreen {
+public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen {
     
     private final Map<RecipeCategory<?>, List<RecipeDisplay>> categoryMap;
     private final List<RecipeCategory<?>> categories;
-    private final List<Widget> widgets;
-    private final List<ButtonWidget> buttonWidgets;
-    private final List<RecipeEntry> recipeRenderers;
-    private final List<TabWidget> tabs;
+    private final List<Widget> widgets = Lists.newArrayList();
+    private final List<ButtonWidget> buttonWidgets = Lists.newArrayList();
+    private final List<RecipeEntry> recipeRenderers = Lists.newArrayList();
+    private final List<TabWidget> tabs = Lists.newArrayList();
     public Rectangle bounds, scrollListBounds;
     private int tabsPerPage = 8;
-    private int selectedCategoryIndex, selectedRecipeIndex;
-    private double scroll;
+    private int selectedCategoryIndex = 0;
+    private int selectedRecipeIndex = 0;
+    private double scrollAmount = 0;
     private double target;
     private long start;
     private long duration;
-    private float scrollBarAlpha;
-    private float scrollBarAlphaFuture;
+    private float scrollBarAlpha  = 0;
+    private float scrollBarAlphaFuture = 0;
     private long scrollBarAlphaFutureTime = -1;
-    private boolean draggingScrollBar;
-    private int tabsPage;
+    private boolean draggingScrollBar = false;
+    private int tabsPage = -1;
     private EntryStack ingredientStackToNotice = EntryStack.empty();
     private EntryStack resultStackToNotice = EntryStack.empty();
     
-    public VillagerRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map) {
-        super(new LiteralText(""));
-        this.widgets = Lists.newArrayList();
-        this.categoryMap = Maps.newLinkedHashMap();
-        this.selectedCategoryIndex = 0;
-        this.selectedRecipeIndex = 0;
-        this.scrollBarAlpha = 0;
-        this.scrollBarAlphaFuture = 0;
-        this.scroll = 0;
-        this.draggingScrollBar = false;
-        this.tabsPage = 0;
-        this.categories = Lists.newArrayList();
-        this.buttonWidgets = Lists.newArrayList();
-        this.tabs = Lists.newArrayList();
-        this.recipeRenderers = Lists.newArrayList();
-        RecipeHelper.getInstance().getAllCategories().forEach(category -> {
-            if (map.containsKey(category)) {
-                categories.add(category);
-                categoryMap.put(category, map.get(category));
+    public VillagerRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> categoryMap, @Nullable Identifier category) {
+        super(NarratorManager.EMPTY);
+        this.categoryMap = categoryMap;
+        this.categories = Lists.newArrayList(categoryMap.keySet());
+        if (category != null) {
+            for (int i = 0; i < categories.size(); i++) {
+                if (categories.get(i).getIdentifier().equals(category)) {
+                    this.selectedCategoryIndex = i;
+                    break;
+                }
             }
-        });
+        }
     }
     
     @Override
@@ -116,6 +110,16 @@ public class VillagerRecipeViewingScreen extends Screen implements StackToNotice
     @Override
     public void addResultStackToNotice(EntryStack stack) {
         resultStackToNotice = stack;
+    }
+    
+    @Override
+    public Identifier getCurrentCategory() {
+        return categories.get(selectedCategoryIndex).getIdentifier();
+    }
+    
+    @Override
+    public void recalculateCategoryPage() {
+        this.tabsPage = -1;
     }
     
     @Override
@@ -136,6 +140,9 @@ public class VillagerRecipeViewingScreen extends Screen implements StackToNotice
         int guiWidth = MathHelper.clamp(category.getDisplayWidth(display) + 30, 0, largestWidth) + 100;
         int guiHeight = MathHelper.clamp(category.getDisplayHeight() + 40, 166, largestHeight);
         this.tabsPerPage = Math.max(5, MathHelper.floor((guiWidth - 20d) / tabSize));
+        if (this.tabsPage == -1) {
+            this.tabsPage = selectedCategoryIndex / tabsPerPage;
+        }
         this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - guiHeight / 2, guiWidth, guiHeight);
         
         List<List<EntryStack>> workingStations = RecipeHelper.getInstance().getWorkingStations(category.getIdentifier());
@@ -213,24 +220,22 @@ public class VillagerRecipeViewingScreen extends Screen implements StackToNotice
         for (int i = 0; i < tabsPerPage; i++) {
             int j = i + tabsPage * tabsPerPage;
             if (categories.size() > j) {
+                RecipeCategory<?> tabCategory = categories.get(j);
                 TabWidget tab;
                 tabs.add(tab = new TabWidget(i, tabSize, bounds.x + bounds.width / 2 - Math.min(categories.size() - tabsPage * tabsPerPage, tabsPerPage) * tabSize / 2, bounds.y, 0, tabV) {
                     @Override
                     public boolean mouseClicked(double mouseX, double mouseY, int button) {
                         if (containsMouse(mouseX, mouseY)) {
                             MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-                            if (getId() + tabsPage * tabsPerPage == selectedCategoryIndex)
+                            if (selected)
                                 return false;
-                            selectedCategoryIndex = getId() + tabsPage * tabsPerPage;
-                            scroll = 0;
-                            selectedRecipeIndex = 0;
-                            VillagerRecipeViewingScreen.this.init();
+                            ClientHelperImpl.getInstance().openRecipeViewingScreen(categoryMap, tabCategory.getIdentifier(), ingredientStackToNotice, resultStackToNotice);
                             return true;
                         }
                         return false;
                     }
                 });
-                tab.setRenderer(categories.get(j), categories.get(j).getLogo(), categories.get(j).getCategoryName(), tab.getId() + tabsPage * tabsPerPage == selectedCategoryIndex);
+                tab.setRenderer(categories.get(j), categories.get(j).getLogo(), categories.get(j).getCategoryName(), j == selectedCategoryIndex);
             }
         }
         ButtonWidget w, w2;
@@ -317,7 +322,7 @@ public class VillagerRecipeViewingScreen extends Screen implements StackToNotice
             start = System.currentTimeMillis();
             this.duration = duration;
         } else
-            scroll = target;
+            scrollAmount = target;
     }
     
     @Override
@@ -389,7 +394,7 @@ public class VillagerRecipeViewingScreen extends Screen implements StackToNotice
         RenderSystem.pushMatrix();
         ScissorsHandler.INSTANCE.scissor(new Rectangle(0, scrollListBounds.y + 1, width, scrollListBounds.height - 2));
         for (ButtonWidget buttonWidget : buttonWidgets) {
-            buttonWidget.getBounds().y = scrollListBounds.y + 1 + yOffset - (int) scroll;
+            buttonWidget.getBounds().y = scrollListBounds.y + 1 + yOffset - (int) scrollAmount;
             if (buttonWidget.getBounds().getMaxY() > scrollListBounds.getMinY() && buttonWidget.getBounds().getMinY() < scrollListBounds.getMaxY()) {
                 buttonWidget.render(mouseX, mouseY, delta);
             }
@@ -408,9 +413,9 @@ public class VillagerRecipeViewingScreen extends Screen implements StackToNotice
             BufferBuilder buffer = tessellator.getBuffer();
             int height = (int) (((scrollListBounds.height - 2) * (scrollListBounds.height - 2)) / this.getMaxScrollPosition());
             height = MathHelper.clamp(height, 32, scrollListBounds.height - 2 - 8);
-            height -= Math.min((scroll < 0 ? (int) -scroll : scroll > getMaxScroll() ? (int) scroll - getMaxScroll() : 0), height * .95);
+            height -= Math.min((scrollAmount < 0 ? (int) -scrollAmount : scrollAmount > getMaxScroll() ? (int) scrollAmount - getMaxScroll() : 0), height * .95);
             height = Math.max(10, height);
-            int minY = (int) Math.min(Math.max((int) scroll * (scrollListBounds.height - 2 - height) / getMaxScroll() + scrollListBounds.y + 1, scrollListBounds.y + 1), scrollListBounds.getMaxY() - 1 - height);
+            int minY = (int) Math.min(Math.max((int) scrollAmount * (scrollListBounds.height - 2 - height) / getMaxScroll() + scrollListBounds.y + 1, scrollListBounds.y + 1), scrollListBounds.getMaxY() - 1 - height);
             int scrollbarPositionMinX = scrollListBounds.getMaxX() - 6, scrollbarPositionMaxX = scrollListBounds.getMaxX() - 1;
             boolean hovered = (new Rectangle(scrollbarPositionMinX, minY, scrollbarPositionMaxX - scrollbarPositionMinX, height)).contains(PointHelper.fromMouse());
             float bottomC = (hovered ? .67f : .5f) * (ScreenHelper.isDarkModeEnabled() ? 0.8f : 1f);
@@ -444,7 +449,7 @@ public class VillagerRecipeViewingScreen extends Screen implements StackToNotice
     
     private void updatePosition(float delta) {
         double[] target = new double[]{this.target};
-        this.scroll = ClothConfigInitializer.handleScrollingPosition(target, this.scroll, this.getMaxScroll(), delta, this.start, this.duration);
+        this.scrollAmount = ClothConfigInitializer.handleScrollingPosition(target, this.scrollAmount, this.getMaxScroll(), delta, this.start, this.duration);
         this.target = target[0];
     }
     
@@ -458,7 +463,7 @@ public class VillagerRecipeViewingScreen extends Screen implements StackToNotice
                 double double_6 = Math.max(1.0D, Math.max(1d, height) / (double) (actualHeight - int_3));
                 scrollBarAlphaFutureTime = System.currentTimeMillis();
                 scrollBarAlphaFuture = 1f;
-                scroll = target = MathHelper.clamp(scroll + double_4 * double_6, 0, height - scrollListBounds.height + 2);
+                scrollAmount = target = MathHelper.clamp(scrollAmount + double_4 * double_6, 0, height - scrollListBounds.height + 2);
                 return true;
             }
         }

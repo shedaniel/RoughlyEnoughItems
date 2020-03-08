@@ -16,7 +16,7 @@ group = "me.shedaniel"
 
 def forceVersion = ""
 
-version = forceVersion != "" ? forceVersion : ((project.mod_version as String).contains("unstable") ? (project.mod_version + "." + buildTime()) : project.mod_version)
+version = forceVersion != "" ? forceVersion : project.mod_version
 
 def includeDep = true
 
