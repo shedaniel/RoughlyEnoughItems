@@ -31,6 +31,7 @@ import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.OverlaySearchField;
+import me.shedaniel.rei.gui.RecipeScreen;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.event.client.ClientTickCallback;
@@ -80,6 +81,8 @@ public class ScreenHelper implements ClientModInitializer {
     public static Screen getLastRecipeScreen() {
         Screen screen = Iterables.getLast(lastRecipeScreen);
         lastRecipeScreen.remove(screen);
+        if (screen instanceof RecipeScreen)
+            ((RecipeScreen) screen).recalculateCategoryPage();
         return screen;
     }
     
