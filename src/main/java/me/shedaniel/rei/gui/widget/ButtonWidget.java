@@ -122,19 +122,19 @@ public abstract class ButtonWidget extends WidgetWithBounds {
         RenderSystem.blendFuncSeparate(770, 771, 1, 0);
         RenderSystem.blendFunc(770, 771);
         //Four Corners
-        blit(x, y, getBlitOffset(), 0, textureOffset * 80, 4, 4, 512, 256);
-        blit(x + width - 4, y, getBlitOffset(), 252, textureOffset * 80, 4, 4, 512, 256);
-        blit(x, y + height - 4, getBlitOffset(), 0, textureOffset * 80 + 76, 4, 4, 512, 256);
-        blit(x + width - 4, y + height - 4, getBlitOffset(), 252, textureOffset * 80 + 76, 4, 4, 512, 256);
+        blit(x, y, getZOffset(), 0, textureOffset * 80, 4, 4, 512, 256);
+        blit(x + width - 4, y, getZOffset(), 252, textureOffset * 80, 4, 4, 512, 256);
+        blit(x, y + height - 4, getZOffset(), 0, textureOffset * 80 + 76, 4, 4, 512, 256);
+        blit(x + width - 4, y + height - 4, getZOffset(), 252, textureOffset * 80 + 76, 4, 4, 512, 256);
         
         //Sides
-        blit(x + 4, y, getBlitOffset(), 4, textureOffset * 80, MathHelper.ceil((width - 8) / 2f), 4, 512, 256);
-        blit(x + 4, y + height - 4, getBlitOffset(), 4, textureOffset * 80 + 76, MathHelper.ceil((width - 8) / 2f), 4, 512, 256);
-        blit(x + 4 + MathHelper.ceil((width - 8) / 2f), y + height - 4, getBlitOffset(), 252 - MathHelper.floor((width - 8) / 2f), textureOffset * 80 + 76, MathHelper.floor((width - 8) / 2f), 4, 512, 256);
-        blit(x + 4 + MathHelper.ceil((width - 8) / 2f), y, getBlitOffset(), 252 - MathHelper.floor((width - 8) / 2f), textureOffset * 80, MathHelper.floor((width - 8) / 2f), 4, 512, 256);
+        blit(x + 4, y, getZOffset(), 4, textureOffset * 80, MathHelper.ceil((width - 8) / 2f), 4, 512, 256);
+        blit(x + 4, y + height - 4, getZOffset(), 4, textureOffset * 80 + 76, MathHelper.ceil((width - 8) / 2f), 4, 512, 256);
+        blit(x + 4 + MathHelper.ceil((width - 8) / 2f), y + height - 4, getZOffset(), 252 - MathHelper.floor((width - 8) / 2f), textureOffset * 80 + 76, MathHelper.floor((width - 8) / 2f), 4, 512, 256);
+        blit(x + 4 + MathHelper.ceil((width - 8) / 2f), y, getZOffset(), 252 - MathHelper.floor((width - 8) / 2f), textureOffset * 80, MathHelper.floor((width - 8) / 2f), 4, 512, 256);
         for (int i = y + 4; i < y + height - 4; i += 76) {
-            blit(x, i, getBlitOffset(), 0, 4 + textureOffset * 80, MathHelper.ceil(width / 2f), MathHelper.clamp(y + height - 4 - i, 0, 76), 512, 256);
-            blit(x + MathHelper.ceil(width / 2f), i, getBlitOffset(), 256 - MathHelper.floor(width / 2f), 4 + textureOffset * 80, MathHelper.floor(width / 2f), MathHelper.clamp(y + height - 4 - i, 0, 76), 512, 256);
+            blit(x, i, getZOffset(), 0, 4 + textureOffset * 80, MathHelper.ceil(width / 2f), MathHelper.clamp(y + height - 4 - i, 0, 76), 512, 256);
+            blit(x + MathHelper.ceil(width / 2f), i, getZOffset(), 256 - MathHelper.floor(width / 2f), 4 + textureOffset * 80, MathHelper.floor(width / 2f), MathHelper.clamp(y + height - 4 - i, 0, 76), 512, 256);
         }
     }
     

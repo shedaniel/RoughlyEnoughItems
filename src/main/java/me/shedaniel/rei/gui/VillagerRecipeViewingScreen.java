@@ -480,16 +480,16 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
         for (Element element : children())
             if (element.keyPressed(int_1, int_2, int_3))
                 return true;
-        if (int_1 == 256 || this.minecraft.options.keyInventory.matchesKey(int_1, int_2)) {
-            MinecraftClient.getInstance().openScreen(ScreenHelper.getLastContainerScreen());
+        if (int_1 == 256 || this.client.options.keyInventory.matchesKey(int_1, int_2)) {
+            MinecraftClient.getInstance().openScreen(ScreenHelper.getLastScreenWithHandler());
             ScreenHelper.getLastOverlay().init();
             return true;
         }
         if (int_1 == 259) {
             if (ScreenHelper.hasLastRecipeScreen())
-                minecraft.openScreen(ScreenHelper.getLastRecipeScreen());
+                client.openScreen(ScreenHelper.getLastRecipeScreen());
             else
-                minecraft.openScreen(ScreenHelper.getLastContainerScreen());
+                client.openScreen(ScreenHelper.getLastScreenWithHandler());
             return true;
         }
         return super.keyPressed(int_1, int_2, int_3);

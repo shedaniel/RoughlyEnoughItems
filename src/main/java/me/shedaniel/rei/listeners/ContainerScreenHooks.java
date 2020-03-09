@@ -23,14 +23,14 @@
 
 package me.shedaniel.rei.listeners;
 
-import net.minecraft.client.gui.screen.ingame.ContainerScreen;
-import net.minecraft.container.Slot;
+import net.minecraft.client.gui.screen.ingame.ScreenWithHandler;
+import net.minecraft.screen.slot.Slot;
 import org.jetbrains.annotations.ApiStatus;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @ApiStatus.Internal
-@Mixin(ContainerScreen.class)
+@Mixin(ScreenWithHandler.class)
 public interface ContainerScreenHooks {
     
     @Accessor("x")
@@ -39,10 +39,10 @@ public interface ContainerScreenHooks {
     @Accessor("y")
     int rei_getContainerTop();
     
-    @Accessor("containerWidth")
+    @Accessor("backgroundWidth")
     int rei_getContainerWidth();
     
-    @Accessor("containerHeight")
+    @Accessor("backgroundHeight")
     int rei_getContainerHeight();
     
     @Accessor("focusedSlot")

@@ -30,10 +30,10 @@ import me.shedaniel.rei.server.InputSlotCrafter;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.container.Container;
-import net.minecraft.container.CraftingContainer;
-import net.minecraft.container.PlayerContainer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.screen.CraftingScreenHandler;
+import net.minecraft.screen.PlayerScreenHandler;
+import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
@@ -79,8 +79,8 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
         ServerSidePacketRegistry.INSTANCE.register(MOVE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
             Identifier category = packetByteBuf.readIdentifier();
             ServerPlayerEntity player = (ServerPlayerEntity) packetContext.getPlayer();
-            Container container = player.container;
-            PlayerContainer playerContainer = player.playerContainer;
+            ScreenHandler screenHandler = player.currentScreenHandler;
+            PlayerScreenHandler playerScreenHandler = player.playerScreenHandler;
             try {
                 boolean shift = packetByteBuf.readBoolean();
                 Map<Integer, List<ItemStack>> input = Maps.newHashMap();
@@ -94,9 +94,9 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
                     input.put(i, list);
                 }
                 try {
-                    InputSlotCrafter.start(category, container, player, input, shift);
+                    InputSlotCrafter.start(category, screenHandler, player, input, shift);
                 } catch (InputSlotCrafter.NotEnoughMaterialsException e) {
-                    if (!(container instanceof CraftingContainer))
+                    if (!(screenHandler instanceof CraftingScreenHandler))
                         return;
                     PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
                     buf.writeInt(input.size());

@@ -46,11 +46,11 @@ public abstract class Widget extends AbstractParentElement implements Drawable {
     protected final TextRenderer font = minecraft.textRenderer;
     
     public int getZ() {
-        return this.getBlitOffset();
+        return this.getZOffset();
     }
     
     public void setZ(int z) {
-        this.setBlitOffset(z);
+        this.setZOffset(z);
     }
     
     public boolean containsMouse(double mouseX, double mouseY) {

@@ -146,7 +146,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     @Override
     public void sendDeletePacket() {
-        if (ScreenHelper.getLastContainerScreen() instanceof CreativeInventoryScreen) {
+        if (ScreenHelper.getLastScreenWithHandler() instanceof CreativeInventoryScreen) {
             MinecraftClient.getInstance().player.inventory.setCursorStack(ItemStack.EMPTY);
             return;
         }
@@ -257,7 +257,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
             screen = new VillagerRecipeViewingScreen(map, category);
         } else if (ConfigObject.getInstance().getRecipeScreenType() == RecipeScreenType.UNSET) {
             @Nullable Identifier finalCategory = category;
-            screen = new PreRecipeViewingScreen(ScreenHelper.getLastContainerScreen(), RecipeScreenType.UNSET, true, original -> {
+            screen = new PreRecipeViewingScreen(ScreenHelper.getLastScreenWithHandler(), RecipeScreenType.UNSET, true, original -> {
                 ConfigObject.getInstance().setRecipeScreenType(original ? RecipeScreenType.ORIGINAL : RecipeScreenType.VILLAGER);
                 ConfigManager.getInstance().saveConfig();
                 openRecipeViewingScreen(map, finalCategory, ingredientNotice, resultNotice);

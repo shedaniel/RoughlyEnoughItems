@@ -183,16 +183,16 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
         for (Element element : children())
             if (element.keyPressed(int_1, int_2, int_3))
                 return true;
-        if (int_1 == 256 || this.minecraft.options.keyInventory.matchesKey(int_1, int_2)) {
-            MinecraftClient.getInstance().openScreen(ScreenHelper.getLastContainerScreen());
+        if (int_1 == 256 || this.client.options.keyInventory.matchesKey(int_1, int_2)) {
+            MinecraftClient.getInstance().openScreen(ScreenHelper.getLastScreenWithHandler());
             ScreenHelper.getLastOverlay().init();
             return true;
         }
         if (int_1 == 259) {
             if (ScreenHelper.hasLastRecipeScreen())
-                minecraft.openScreen(ScreenHelper.getLastRecipeScreen());
+                client.openScreen(ScreenHelper.getLastRecipeScreen());
             else
-                minecraft.openScreen(ScreenHelper.getLastContainerScreen());
+                client.openScreen(ScreenHelper.getLastScreenWithHandler());
             return true;
         }
         return super.keyPressed(int_1, int_2, int_3);
@@ -420,7 +420,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
             if (export.matchesCurrentKey()) {
                 for (Map.Entry<Rectangle, List<Widget>> entry : recipeBounds.entrySet()) {
                     Rectangle bounds = entry.getKey();
-                    setBlitOffset(470);
+                    setZOffset(470);
                     if (bounds.contains(mouseX, mouseY)) {
                         fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 1744822402, 1744822402);
                         String s = I18n.translate("text.rei.release_export", export.getLocalizedName());
@@ -428,19 +428,19 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
                         VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
                         matrixStack_1.translate(0.0D, 0.0D, 480);
                         Matrix4f matrix4f_1 = matrixStack_1.peek().getModel();
-                        font.draw(s, bounds.getCenterX() - font.getStringWidth(s) / 2f, bounds.getCenterY() - 4.5f, 0xff000000, false, matrix4f_1, immediate, false, 0, 15728880);
+                        textRenderer.draw(s, bounds.getCenterX() - textRenderer.getStringWidth(s) / 2f, bounds.getCenterY() - 4.5f, 0xff000000, false, matrix4f_1, immediate, false, 0, 15728880);
                         immediate.draw();
                     } else {
                         fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 1744830463, 1744830463);
                     }
-                    setBlitOffset(0);
+                    setZOffset(0);
                 }
             }
         }
         if (choosePageActivated) {
-            setBlitOffset(500);
+            setZOffset(500);
             this.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
-            setBlitOffset(0);
+            setZOffset(0);
             recipeChoosePageWidget.render(mouseX, mouseY, delta);
         }
     }
