@@ -25,9 +25,19 @@ package me.shedaniel.rei.gui.widget;
 
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.ConfigObject;
+import org.jetbrains.annotations.ApiStatus;
 
 public class RecipeBaseWidget extends PanelWidget {
     
+    /**
+     * Creates a recipe base drawable
+     *
+     * @param bounds the bounds of the base
+     * @see me.shedaniel.rei.api.widgets.Widgets#createRecipeBase(me.shedaniel.math.Rectangle)
+     * @see me.shedaniel.rei.api.widgets.Widgets#createRecipeBase(me.shedaniel.math.Rectangle, int)
+     */
+    @ApiStatus.Internal
+    @Deprecated
     public RecipeBaseWidget(Rectangle bounds) {
         super(bounds);
     }

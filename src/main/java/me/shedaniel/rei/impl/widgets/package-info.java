@@ -21,40 +21,7 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.gui.widget;
+@ApiStatus.Internal
+package me.shedaniel.rei.impl.widgets;
 
-import me.shedaniel.math.api.Rectangle;
-import me.shedaniel.rei.api.REIHelper;
 import org.jetbrains.annotations.ApiStatus;
-
-public class SlotBaseWidget extends RecipeBaseWidget {
-    
-    /**
-     * Creates a recipe base drawable
-     *
-     * @param bounds the bounds of the base
-     * @see me.shedaniel.rei.api.widgets.Widgets#createSlotBase(me.shedaniel.math.Rectangle)
-     * @see me.shedaniel.rei.api.widgets.Widgets#createSlotBase(me.shedaniel.math.Rectangle, int)
-     */
-    @ApiStatus.Internal
-    @Deprecated
-    public SlotBaseWidget(Rectangle bounds) {
-        super(bounds);
-    }
-    
-    @Override
-    public int getInnerColor() {
-        return REIHelper.getInstance().isDarkThemeEnabled() ? -13619152 : -7631989;
-    }
-    
-    @Override
-    protected int getYTextureOffset() {
-        return -66;
-    }
-    
-    @Override
-    protected boolean isRendering() {
-        return true;
-    }
-    
-}

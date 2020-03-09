@@ -23,23 +23,19 @@
 
 package me.shedaniel.rei.plugin.stripping;
 
-import me.shedaniel.math.api.Point;
-import me.shedaniel.math.api.Rectangle;
+import com.google.common.collect.Lists;
+import me.shedaniel.math.Point;
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeCategory;
-import me.shedaniel.rei.gui.widget.EntryWidget;
-import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
+import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
 
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Supplier;
 
 public class DefaultStrippingCategory implements RecipeCategory<DefaultStrippingDisplay> {
     
@@ -59,18 +55,14 @@ public class DefaultStrippingCategory implements RecipeCategory<DefaultStripping
     }
     
     @Override
-    public List<Widget> setupDisplay(Supplier<DefaultStrippingDisplay> recipeDisplaySupplier, Rectangle bounds) {
+    public List<Widget> setupDisplay(DefaultStrippingDisplay recipeDisplay, Rectangle bounds) {
         Point startPoint = new Point(bounds.getCenterX() - 41, bounds.getCenterY() - 13);
-        List<Widget> widgets = new LinkedList<>(Collections.singletonList(new RecipeBaseWidget(bounds) {
-            @Override
-            public void render(int mouseX, int mouseY, float delta) {
-                super.render(mouseX, mouseY, delta);
-                MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
-                blit(startPoint.x, startPoint.y, 0, 221, 82, 26);
-            }
-        }));
-        widgets.add(EntryWidget.create(startPoint.x + 4, startPoint.y + 5).entry(recipeDisplaySupplier.get().getIn()).markIsInput());
-        widgets.add(EntryWidget.create(startPoint.x + 61, startPoint.y + 5).entry(recipeDisplaySupplier.get().getOut()).noBackground().markIsOutput());
+        List<Widget> widgets = Lists.newArrayList();
+        widgets.add(Widgets.createRecipeBase(bounds));
+        widgets.add(Widgets.createArrow(new Point(startPoint.x + 27, startPoint.y + 4)));
+        widgets.add(Widgets.createResultSlotBackground(new Point(startPoint.x + 61, startPoint.y + 5)));
+        widgets.add(Widgets.createSlot(new Point(startPoint.x + 4, startPoint.y + 5)).entry(recipeDisplay.getIn()).markInput());
+        widgets.add(Widgets.createSlot(new Point(startPoint.x + 61, startPoint.y + 5)).entry(recipeDisplay.getOut()).disableBackground().markInput());
         return widgets;
     }
     

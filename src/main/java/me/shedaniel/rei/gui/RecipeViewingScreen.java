@@ -31,6 +31,7 @@ import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.widget.*;
 import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.impl.ScreenHelper;
@@ -244,10 +245,9 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
                 currentCategoryIndex = categories.size() - 1;
             ClientHelperImpl.getInstance().openRecipeViewingScreen(categoriesMap, categories.get(currentCategoryIndex).getIdentifier(), ingredientStackToNotice, resultStackToNotice);
         }).tooltip(() -> I18n.translate("text.rei.previous_category")));
-        widgets.add(LabelWidget.createClickable(new Point(bounds.getCenterX(), bounds.getY() + 7), selectedCategory.getCategoryName(), clickableLabelWidget -> {
-            MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+        widgets.add(Widgets.createClickableLabel(new Point(bounds.getCenterX(), bounds.getY() + 7), selectedCategory.getCategoryName(), clickableLabelWidget -> {
             ClientHelper.getInstance().executeViewAllRecipesKeyBind();
-        }).tooltip(() -> I18n.translate("text.rei.view_all_categories")));
+        }).tooltipLine(I18n.translate("text.rei.view_all_categories")));
         widgets.add(categoryNext = ButtonWidget.create(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 5, 12, 12), new TranslatableText("text.rei.right_arrow"), buttonWidget -> {
             int currentCategoryIndex = categories.indexOf(selectedCategory);
             currentCategoryIndex++;
@@ -264,20 +264,13 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
                 page = getTotalPages(selectedCategory) - 1;
             RecipeViewingScreen.this.init();
         }).tooltip(() -> I18n.translate("text.rei.previous_page")));
-        widgets.add(new ClickableLabelWidget(new Point(bounds.getCenterX(), bounds.getY() + 21), "") {
-            @Override
-            public void render(int mouseX, int mouseY, float delta) {
-                setText(String.format("%d/%d", page + 1, getTotalPages(selectedCategory)));
-                super.render(mouseX, mouseY, delta);
-            }
-            
-            @Override
-            public void onLabelClicked() {
-                MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-                RecipeViewingScreen.this.choosePageActivated = true;
-                RecipeViewingScreen.this.init();
-            }
-        }.clickable(categoriesMap.get(selectedCategory).size() > getRecipesPerPageByHeight()).tooltip(() -> I18n.translate("text.rei.choose_page")));
+        widgets.add(Widgets.createClickableLabel(new Point(bounds.getCenterX(), bounds.getY() + 21), "", label -> {
+            RecipeViewingScreen.this.choosePageActivated = true;
+            RecipeViewingScreen.this.init();
+        }).onRender(label -> {
+            label.setText(String.format("%d/%d", page + 1, getTotalPages(selectedCategory)));
+            label.setClickable(categoriesMap.get(selectedCategory).size() > getRecipesPerPageByHeight());
+        }).tooltipSupplier(label -> label.isClickable() ? I18n.translate("text.rei.choose_page") : null));
         widgets.add(recipeNext = ButtonWidget.create(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 19, 12, 12), new TranslatableText("text.rei.right_arrow"), buttonWidget -> {
             page++;
             if (page >= getTotalPages(selectedCategory))
@@ -308,7 +301,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
             final Supplier<RecipeDisplay> displaySupplier = () -> display;
             int displayWidth = selectedCategory.getDisplayWidth(displaySupplier.get());
             final Rectangle displayBounds = new Rectangle(getBounds().getCenterX() - displayWidth / 2, getBounds().y - 2 + 36 + recipeHeight * i + 4 * i, displayWidth, recipeHeight);
-            List<Widget> setupDisplay = selectedCategory.setupDisplay(displaySupplier, displayBounds);
+            List<Widget> setupDisplay = selectedCategory.setupDisplay(display, displayBounds);
             transformIngredientNotice(setupDisplay, ingredientStackToNotice);
             transformResultNotice(setupDisplay, resultStackToNotice);
             recipeBounds.put(displayBounds, setupDisplay);

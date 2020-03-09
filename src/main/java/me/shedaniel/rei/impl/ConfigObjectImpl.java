@@ -371,9 +371,9 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     public static class Appearance {
         @UseSpecialRecipeTypeScreen private RecipeScreenType recipeScreenType = RecipeScreenType.UNSET;
+        @Comment("Declares the appearance of REI windows.") private boolean darkTheme = false;
         @Comment("The ordering of the items on the item panel.") @UseEnumSelectorInstead
         private ItemListOrderingConfig itemListOrdering = ItemListOrderingConfig.REGISTRY_ASCENDING;
-        @Comment("Declares the appearance of REI windows.") private boolean darkTheme = false;
         @Comment("Declares the position of the search field.") @UseEnumSelectorInstead
         private SearchFieldLocation searchFieldLocation = SearchFieldLocation.CENTER;
         @Comment("Declares the position of the item list panel.") private boolean mirrorItemPanel = false;

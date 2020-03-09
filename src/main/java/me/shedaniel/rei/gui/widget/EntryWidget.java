@@ -29,6 +29,7 @@ import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.widgets.Slot;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.CollectionUtils;
@@ -42,7 +43,7 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
 
-public class EntryWidget extends WidgetWithBounds {
+public class EntryWidget extends Slot {
     
     protected static final Identifier RECIPE_GUI = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     protected static final Identifier RECIPE_GUI_DARK = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
@@ -66,14 +67,25 @@ public class EntryWidget extends WidgetWithBounds {
         this.entryStacks = new ArrayList<>();
     }
     
+    /**
+     * @see me.shedaniel.rei.api.widgets.Widgets#createSlot(me.shedaniel.math.Point)
+     */
+    @ApiStatus.ScheduledForRemoval
+    @Deprecated
     public static EntryWidget create(int x, int y) {
         return create(new Point(x, y));
     }
     
+    /**
+     * @see me.shedaniel.rei.api.widgets.Widgets#createSlot(me.shedaniel.math.Point)
+     */
+    @ApiStatus.ScheduledForRemoval
+    @Deprecated
     public static EntryWidget create(Point point) {
         return new EntryWidget(point);
     }
     
+    @Override
     public EntryWidget unmarkInputOrOutput() {
         noticeMark = 0;
         return this;
@@ -89,15 +101,41 @@ public class EntryWidget extends WidgetWithBounds {
         return this;
     }
     
-    @ApiStatus.Internal
+    @Override
     public byte getNoticeMark() {
         return noticeMark;
+    }
+    
+    @Override
+    public void setNoticeMark(byte noticeMark) {
+        this.noticeMark = noticeMark;
+    }
+    
+    @Override
+    public void setInteractable(boolean interactable) {
+        interactable(interactable);
+    }
+    
+    @Override
+    public boolean isInteractable() {
+        return this.interactable;
+    }
+    
+    @Override
+    public void setInteractableFavorites(boolean interactableFavorites) {
+        interactableFavorites(interactableFavorites);
+    }
+    
+    @Override
+    public boolean isInteractableFavorites() {
+        return interactableFavorites;
     }
     
     public EntryWidget disableInteractions() {
         return interactable(false);
     }
     
+    @Override
     public EntryWidget interactable(boolean b) {
         interactable = b;
         interactableFavorites = interactableFavorites && interactable;
@@ -108,6 +146,7 @@ public class EntryWidget extends WidgetWithBounds {
         return interactableFavorites(false);
     }
     
+    @Override
     public EntryWidget interactableFavorites(boolean b) {
         interactableFavorites = b && interactable;
         return this;
@@ -122,6 +161,16 @@ public class EntryWidget extends WidgetWithBounds {
         return this;
     }
     
+    @Override
+    public boolean isHighlightEnabled() {
+        return highlight;
+    }
+    
+    @Override
+    public void setHighlightEnabled(boolean highlights) {
+        highlight(highlights);
+    }
+    
     public EntryWidget noTooltips() {
         return tooltips(false);
     }
@@ -129,6 +178,16 @@ public class EntryWidget extends WidgetWithBounds {
     public EntryWidget tooltips(boolean b) {
         tooltips = b;
         return this;
+    }
+    
+    @Override
+    public void setTooltipsEnabled(boolean tooltipsEnabled) {
+        tooltips(tooltipsEnabled);
+    }
+    
+    @Override
+    public boolean isTooltipsEnabled() {
+        return tooltips;
     }
     
     public EntryWidget noBackground() {
@@ -140,16 +199,33 @@ public class EntryWidget extends WidgetWithBounds {
         return this;
     }
     
+    @Override
+    public void setBackgroundEnabled(boolean backgroundEnabled) {
+        background(backgroundEnabled);
+    }
+    
+    @Override
+    public boolean isBackgroundEnabled() {
+        return background;
+    }
+    
     public EntryWidget clearStacks() {
         entryStacks.clear();
         return this;
     }
     
+    @Override
+    public Slot clearEntries() {
+        return clearStacks();
+    }
+    
+    @Override
     public EntryWidget entry(EntryStack stack) {
         entryStacks.add(stack);
         return this;
     }
     
+    @Override
     public EntryWidget entries(Collection<EntryStack> stacks) {
         entryStacks.addAll(stacks);
         return this;
@@ -161,6 +237,11 @@ public class EntryWidget extends WidgetWithBounds {
         if (entryStacks.size() == 1)
             return entryStacks.get(0);
         return entryStacks.get(MathHelper.floor((System.currentTimeMillis() / 500 % (double) entryStacks.size()) / 1f));
+    }
+    
+    @Override
+    public List<EntryStack> getEntries() {
+        return entryStacks;
     }
     
     public List<EntryStack> entries() {
@@ -225,6 +306,7 @@ public class EntryWidget extends WidgetWithBounds {
         }
     }
     
+    @Override
     public QueuedTooltip getCurrentTooltip(int mouseX, int mouseY) {
         return getCurrentEntry().getTooltip(mouseX, mouseY);
     }

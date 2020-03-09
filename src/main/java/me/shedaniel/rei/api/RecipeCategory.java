@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.api;
 
-import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.entries.RecipeEntry;
 import me.shedaniel.rei.gui.entries.SimpleRecipeEntry;
@@ -81,10 +81,25 @@ public interface RecipeCategory<T extends RecipeDisplay> {
      * @param recipeDisplaySupplier the supplier for getting the recipe
      * @param bounds                the bounds of the display, configurable with overriding the width, height methods.
      * @return the list of widgets
+     * @deprecated use {@link #setupDisplay(RecipeDisplay, me.shedaniel.math.Rectangle)}
      */
     @ApiStatus.OverrideOnly
-    default List<Widget> setupDisplay(Supplier<T> recipeDisplaySupplier, Rectangle bounds) {
+    @ApiStatus.ScheduledForRemoval
+    @Deprecated
+    default List<Widget> setupDisplay(Supplier<T> recipeDisplaySupplier, me.shedaniel.math.api.Rectangle bounds) {
         return Collections.singletonList(new RecipeBaseWidget(bounds));
+    }
+    
+    /**
+     * Setup the widgets for displaying the recipe
+     *
+     * @param recipeDisplay the recipe
+     * @param bounds        the bounds of the display, configurable with overriding the width, height methods.
+     * @return the list of widgets
+     */
+    @ApiStatus.OverrideOnly
+    default List<Widget> setupDisplay(T recipeDisplay, Rectangle bounds) {
+        return setupDisplay(() -> recipeDisplay, new me.shedaniel.math.api.Rectangle(bounds));
     }
     
     /**
@@ -94,9 +109,12 @@ public interface RecipeCategory<T extends RecipeDisplay> {
      * @param mouseX the x coordinates for the mouse
      * @param mouseY the y coordinates for the mouse
      * @param delta  the delta
+     * @deprecated there is no replacement for this as this is just a dumb idea, please contact me if you want to change my mind
      */
     @ApiStatus.OverrideOnly
-    default void drawCategoryBackground(Rectangle bounds, int mouseX, int mouseY, float delta) {
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
+    default void drawCategoryBackground(me.shedaniel.math.api.Rectangle bounds, int mouseX, int mouseY, float delta) {
         PanelWidget.render(bounds, -1);
         if (REIHelper.getInstance().isDarkThemeEnabled()) {
             DrawableHelper.fill(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, 0xFF404040);
