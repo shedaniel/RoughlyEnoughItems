@@ -24,15 +24,22 @@
 package me.shedaniel.rei.server;
 
 import com.google.common.collect.Maps;
-import net.minecraft.container.Container;
+import net.minecraft.screen.ScreenHandler;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Map;
 
 public class ContainerInfoHandler {
-    private static final Map<String, Map<Class<? extends Container>, ContainerInfo<? extends Container>>> containerInfoMap = Maps.newLinkedHashMap();
+    private static final Map<String, Map<Class<? extends ScreenHandler>, ContainerInfo<? extends ScreenHandler>>> containerInfoMap = Maps.newLinkedHashMap();
     
-    public static void registerContainerInfo(Identifier category, ContainerInfo<? extends Container> containerInfo) {
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
+    public static void registerContainerInfo(Identifier category, ContainerInfo<? extends ScreenHandler> containerInfo) {
+        registerScreenWithHandlerInfo(category, containerInfo);
+    }
+    
+    public static void registerScreenWithHandlerInfo(Identifier category, ContainerInfo<? extends ScreenHandler> containerInfo) {
         if (!containerInfoMap.containsKey(category.toString()))
             containerInfoMap.put(category.toString(), Maps.newLinkedHashMap());
         containerInfoMap.get(category.toString()).put(containerInfo.getContainerClass(), containerInfo);
@@ -42,13 +49,13 @@ public class ContainerInfoHandler {
         return containerInfoMap.containsKey(category.toString()) && !containerInfoMap.get(category.toString()).isEmpty();
     }
     
-    public static ContainerInfo<? extends Container> getContainerInfo(Identifier category, Class<?> containerClass) {
+    public static ContainerInfo<? extends ScreenHandler> getContainerInfo(Identifier category, Class<?> containerClass) {
         if (!isCategoryHandled(category))
             return null;
-        Map<Class<? extends Container>, ContainerInfo<? extends Container>> infoMap = containerInfoMap.get(category.toString());
+        Map<Class<? extends ScreenHandler>, ContainerInfo<? extends ScreenHandler>> infoMap = containerInfoMap.get(category.toString());
         if (infoMap.containsKey(containerClass))
             return infoMap.get(containerClass);
-        for (Map.Entry<Class<? extends Container>, ContainerInfo<? extends Container>> entry : infoMap.entrySet())
+        for (Map.Entry<Class<? extends ScreenHandler>, ContainerInfo<? extends ScreenHandler>> entry : infoMap.entrySet())
             if (entry.getKey().isAssignableFrom(containerClass))
                 return entry.getValue();
         return null;

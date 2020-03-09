@@ -49,8 +49,8 @@ public class ConfigReloadingScreen extends Screen {
     public void render(int int_1, int int_2, float float_1) {
         this.renderDirtBackground(0);
         if (!RecipeHelper.getInstance().arePluginsLoading())
-            minecraft.openScreen(parent);
-        this.drawCenteredString(this.font, I18n.translate("text.rei.config.is.reloading"), this.width / 2, this.height / 2 - 50, 16777215);
+            client.openScreen(parent);
+        this.drawCenteredString(this.textRenderer, I18n.translate("text.rei.config.is.reloading"), this.width / 2, this.height / 2 - 50, 16777215);
         String string_3;
         switch ((int) (Util.getMeasuringTimeMs() / 300L % 4L)) {
             case 0:
@@ -64,7 +64,7 @@ public class ConfigReloadingScreen extends Screen {
             case 2:
                 string_3 = "o o O";
         }
-        this.drawCenteredString(this.font, string_3, this.width / 2, this.height / 2 - 41, 8421504);
+        this.drawCenteredString(this.textRenderer, string_3, this.width / 2, this.height / 2 - 41, 8421504);
         super.render(int_1, int_2, float_1);
     }
     

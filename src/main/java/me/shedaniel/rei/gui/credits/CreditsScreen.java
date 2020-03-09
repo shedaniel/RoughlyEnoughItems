@@ -30,7 +30,7 @@ import me.shedaniel.rei.impl.ScreenHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.CustomValue;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.ContainerScreen;
+import net.minecraft.client.gui.screen.ingame.ScreenWithHandler;
 import net.minecraft.client.gui.widget.AbstractPressableButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.LiteralText;
@@ -57,8 +57,8 @@ public class CreditsScreen extends Screen {
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (int_1 == 256 && this.shouldCloseOnEsc()) {
-            this.minecraft.openScreen(parent);
-            if (parent instanceof ContainerScreen)
+            this.client.openScreen(parent);
+            if (parent instanceof ScreenWithHandler)
                 ScreenHelper.getLastOverlay().init();
             return true;
         }
@@ -67,7 +67,7 @@ public class CreditsScreen extends Screen {
     
     @Override
     protected void init() {
-        children.add(entryListWidget = new CreditsEntryListWidget(minecraft, width, height, 32, height - 32));
+        children.add(entryListWidget = new CreditsEntryListWidget(client, width, height, 32, height - 32));
         entryListWidget.creditsClearEntries();
         List<Pair<String, String>> translators = Lists.newArrayList();
         Exception[] exception = {null};
@@ -101,7 +101,7 @@ public class CreditsScreen extends Screen {
                     for (StackTraceElement traceElement : exception[0].getStackTrace())
                         entryListWidget.creditsAddEntry(new TextCreditsItem(new LiteralText("  at " + traceElement)));
                 } else {
-                    int maxWidth = translatorsMapped.stream().mapToInt(pair -> font.getStringWidth(pair.getLeft())).max().orElse(0) + 5;
+                    int maxWidth = translatorsMapped.stream().mapToInt(pair -> textRenderer.getStringWidth(pair.getLeft())).max().orElse(0) + 5;
                     for (Pair<String, String> pair : translatorsMapped) {
                         entryListWidget.creditsAddEntry(new TranslationCreditsItem(pair.getLeft(), pair.getRight(), i - maxWidth - 10, maxWidth));
                     }
@@ -111,8 +111,8 @@ public class CreditsScreen extends Screen {
         children.add(buttonDone = new AbstractPressableButtonWidget(width / 2 - 100, height - 26, 200, 20, I18n.translate("gui.done")) {
             @Override
             public void onPress() {
-                CreditsScreen.this.minecraft.openScreen(parent);
-                if (parent instanceof ContainerScreen)
+                CreditsScreen.this.client.openScreen(parent);
+                if (parent instanceof ScreenWithHandler)
                     ScreenHelper.getLastOverlay().init();
             }
         });
@@ -129,7 +129,7 @@ public class CreditsScreen extends Screen {
     public void render(int int_1, int int_2, float float_1) {
         this.renderDirtBackground(0);
         this.entryListWidget.render(int_1, int_2, float_1);
-        this.drawCenteredString(this.font, I18n.translate("text.rei.credits"), this.width / 2, 16, 16777215);
+        this.drawCenteredString(this.textRenderer, I18n.translate("text.rei.credits"), this.width / 2, 16, 16777215);
         super.render(int_1, int_2, float_1);
         buttonDone.render(int_1, int_2, float_1);
     }

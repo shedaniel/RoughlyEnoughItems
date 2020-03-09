@@ -28,10 +28,9 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.ContainerScreen;
-import net.minecraft.container.Container;
+import net.minecraft.client.gui.screen.ingame.ScreenWithHandler;
+import net.minecraft.screen.ScreenHandler;
 import org.jetbrains.annotations.ApiStatus;
-import org.spongepowered.asm.mixin.injection.Inject;
 
 import java.util.function.Supplier;
 
@@ -83,7 +82,7 @@ public interface AutoTransferHandler {
     }
     
     interface Context {
-        static Context create(boolean actuallyCrafting, ContainerScreen<?> containerScreen, RecipeDisplay recipeDisplay) {
+        static Context create(boolean actuallyCrafting, ScreenWithHandler<?> containerScreen, RecipeDisplay recipeDisplay) {
             return new ContextImpl(actuallyCrafting, containerScreen, () -> recipeDisplay);
         }
         
@@ -93,14 +92,28 @@ public interface AutoTransferHandler {
         
         boolean isActuallyCrafting();
         
-        ContainerScreen<?> getContainerScreen();
+        ScreenWithHandler<?> getScreenWithHandler();
+        
+        @Deprecated
+        @ApiStatus.ScheduledForRemoval
+        default ScreenWithHandler<?> getContainerScreen() {
+            return getScreenWithHandler();
+        }
         
         RecipeDisplay getRecipe();
         
-        default Container getContainer() {
-            return getContainerScreen().getContainer();
+        @Deprecated
+        @ApiStatus.ScheduledForRemoval
+        default ScreenHandler getContainer() {
+            return getScreenHandler();
         }
         
+        default ScreenHandler getScreenHandler() {
+            return getScreenWithHandler().getScreenHandler();
+        }
+        
+        @Deprecated
+        @ApiStatus.ScheduledForRemoval
         default ContainerScreenOverlay getOverlay() {
             return ScreenHelper.getLastOverlay();
         }
@@ -161,12 +174,12 @@ public interface AutoTransferHandler {
     @ApiStatus.Internal
     final class ContextImpl implements Context {
         boolean actuallyCrafting;
-        ContainerScreen<?> containerScreen;
+        ScreenWithHandler<?> screenWithHandler;
         Supplier<RecipeDisplay> recipeDisplaySupplier;
         
-        private ContextImpl(boolean actuallyCrafting, ContainerScreen<?> containerScreen, Supplier<RecipeDisplay> recipeDisplaySupplier) {
+        private ContextImpl(boolean actuallyCrafting, ScreenWithHandler<?> screenWithHandler, Supplier<RecipeDisplay> recipeDisplaySupplier) {
             this.actuallyCrafting = actuallyCrafting;
-            this.containerScreen = containerScreen;
+            this.screenWithHandler = screenWithHandler;
             this.recipeDisplaySupplier = recipeDisplaySupplier;
         }
         
@@ -176,8 +189,8 @@ public interface AutoTransferHandler {
         }
         
         @Override
-        public ContainerScreen<?> getContainerScreen() {
-            return containerScreen;
+        public ScreenWithHandler<?> getScreenWithHandler() {
+            return screenWithHandler;
         }
         
         @Override

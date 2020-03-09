@@ -53,17 +53,17 @@ public abstract class CraftableToggleButtonWidget extends LateRenderedButton {
     
     @Override
     public void lateRender(int mouseX, int mouseY, float delta) {
-        setBlitOffset(600);
+        setZOffset(600);
         super.render(mouseX, mouseY, delta);
         
-        this.itemRenderer.zOffset = getBlitOffset() - 98;
+        this.itemRenderer.zOffset = getZOffset() - 98;
         Rectangle bounds = getBounds();
         this.itemRenderer.renderGuiItemIcon(ICON, bounds.x + 2, bounds.y + 2);
         this.itemRenderer.zOffset = 0.0F;
         int color = ConfigManager.getInstance().isCraftableOnlyEnabled() ? 939579655 : 956235776;
-        setBlitOffset(getBlitOffset() + 1);
+        setZOffset(getZOffset() + 1);
         this.fillGradient(bounds.x + 1, bounds.y + 1, bounds.getMaxX() - 1, bounds.getMaxY() - 1, color, color);
-        setBlitOffset(0);
+        setZOffset(0);
     }
     
     @Override

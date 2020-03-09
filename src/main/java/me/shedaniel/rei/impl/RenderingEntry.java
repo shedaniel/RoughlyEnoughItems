@@ -96,12 +96,12 @@ public abstract class RenderingEntry extends DrawableHelper implements EntryStac
     
     @Override
     public int getZ() {
-        return getBlitOffset();
+        return getZOffset();
     }
     
     @Override
     public void setZ(int z) {
-        setBlitOffset(z);
+        setZOffset(z);
     }
     
     @Override

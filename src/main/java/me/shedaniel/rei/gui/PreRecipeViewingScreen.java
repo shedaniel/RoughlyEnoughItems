@@ -38,7 +38,7 @@ import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.ContainerScreen;
+import net.minecraft.client.gui.screen.ingame.ScreenWithHandler;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.NarratorManager;
 import net.minecraft.text.TranslatableText;
@@ -125,16 +125,16 @@ public class PreRecipeViewingScreen extends Screen {
     
     @Override
     public void render(int int_1, int int_2, float float_1) {
-        if (this.minecraft.world != null) {
+        if (this.client.world != null) {
             this.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
         } else {
             this.fillGradient(0, 0, this.width, this.height, -16777216, -16777216);
         }
-        this.drawCenteredString(this.font, this.title.asFormattedString(), this.width / 2, 20, 16777215);
+        this.drawCenteredString(this.textRenderer, this.title.asFormattedString(), this.width / 2, 20, 16777215);
         if (showTips) {
             int i = 30;
-            for (String s : this.font.wrapStringToWidthAsList(I18n.translate("text.rei.recipe_screen_type.selection.sub"), width - 30)) {
-                this.drawCenteredString(this.font, Formatting.GRAY.toString() + s, width / 2, i, -1);
+            for (String s : this.textRenderer.wrapStringToWidthAsList(I18n.translate("text.rei.recipe_screen_type.selection.sub"), width - 30)) {
+                this.drawCenteredString(this.textRenderer, Formatting.GRAY.toString() + s, width / 2, i, -1);
                 i += 10;
             }
         }
@@ -167,9 +167,9 @@ public class PreRecipeViewingScreen extends Screen {
     
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
-        if (int_1 == 256 || this.minecraft.options.keyInventory.matchesKey(int_1, int_2)) {
+        if (int_1 == 256 || this.client.options.keyInventory.matchesKey(int_1, int_2)) {
             MinecraftClient.getInstance().openScreen(parent);
-            if (parent instanceof ContainerScreen)
+            if (parent instanceof ScreenWithHandler)
                 ScreenHelper.getLastOverlay().init();
             return true;
         }

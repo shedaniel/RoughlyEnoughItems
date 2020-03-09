@@ -36,11 +36,11 @@ import me.shedaniel.rei.server.ContainerInfoHandler;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.ContainerScreen;
+import net.minecraft.client.gui.screen.ingame.ScreenWithHandler;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.container.Container;
 import net.minecraft.item.ItemStack;
+import net.minecraft.screen.ScreenHandler;
 import net.minecraft.util.DefaultedList;
 import net.minecraft.util.PacketByteBuf;
 
@@ -57,14 +57,14 @@ public class DefaultCategoryHandler implements AutoTransferHandler {
         if (!(context.getRecipe() instanceof TransferRecipeDisplay))
             return Result.createNotApplicable();
         TransferRecipeDisplay recipe = (TransferRecipeDisplay) context.getRecipe();
-        ContainerScreen<?> containerScreen = context.getContainerScreen();
-        Container container = containerScreen.getContainer();
-        ContainerInfo<Container> containerInfo = (ContainerInfo<Container>) ContainerInfoHandler.getContainerInfo(recipe.getRecipeCategory(), container.getClass());
+        ScreenWithHandler<?> screenWithHandler = context.getScreenWithHandler();
+        ScreenHandler screenHandler = context.getScreenHandler();
+        ContainerInfo<ScreenHandler> containerInfo = (ContainerInfo<ScreenHandler>) ContainerInfoHandler.getContainerInfo(recipe.getRecipeCategory(), screenHandler.getClass());
         if (containerInfo == null)
             return Result.createNotApplicable();
-        if (recipe.getHeight() > containerInfo.getCraftingHeight(container) || recipe.getWidth() > containerInfo.getCraftingWidth(container))
-            return Result.createFailed(I18n.translate("error.rei.transfer.too_small", containerInfo.getCraftingWidth(container), containerInfo.getCraftingHeight(container)));
-        List<List<EntryStack>> input = recipe.getOrganisedInputEntries(containerInfo, container);
+        if (recipe.getHeight() > containerInfo.getCraftingHeight(screenHandler) || recipe.getWidth() > containerInfo.getCraftingWidth(screenHandler))
+            return Result.createFailed(I18n.translate("error.rei.transfer.too_small", containerInfo.getCraftingWidth(screenHandler), containerInfo.getCraftingHeight(screenHandler)));
+        List<List<EntryStack>> input = recipe.getOrganisedInputEntries(containerInfo, screenHandler);
         IntList intList = hasItems(input);
         if (!intList.isEmpty())
             return Result.createFailed("error.rei.not.enough.materials", intList);
@@ -73,9 +73,9 @@ public class DefaultCategoryHandler implements AutoTransferHandler {
         if (!context.isActuallyCrafting())
             return Result.createSuccessful();
         
-        context.getMinecraft().openScreen(containerScreen);
-        if (containerScreen instanceof RecipeBookProvider)
-            ((RecipeBookGuiHooks) ((RecipeBookProvider) containerScreen).getRecipeBookWidget()).rei_getGhostSlots().reset();
+        context.getMinecraft().openScreen(screenWithHandler);
+        if (screenWithHandler instanceof RecipeBookProvider)
+            ((RecipeBookGuiHooks) ((RecipeBookProvider) screenWithHandler).getRecipeBookWidget()).rei_getGhostSlots().reset();
         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
         buf.writeIdentifier(recipe.getRecipeCategory());
         buf.writeBoolean(Screen.hasShiftDown());

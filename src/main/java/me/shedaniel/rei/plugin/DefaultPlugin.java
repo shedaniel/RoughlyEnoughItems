@@ -164,7 +164,7 @@ public class DefaultPlugin implements REIPluginV0 {
             @Override
             public void render(Rectangle bounds, int mouseX, int mouseY, float delta) {
                 MinecraftClient.getInstance().getTextureManager().bindTexture(id);
-                innerBlit(bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), getBlitOffset(), 0, 1, 0, 1);
+                innerBlit(bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), getZOffset(), 0, 1, 0, 1);
             }
             
             @Override
@@ -310,20 +310,20 @@ public class DefaultPlugin implements REIPluginV0 {
 //                return 10f;
 //            }
 //        });
-        displayHelper.registerHandler(new DisplayHelper.DisplayBoundsHandler<ContainerScreen<?>>() {
+        displayHelper.registerHandler(new DisplayHelper.DisplayBoundsHandler<ScreenWithHandler<?>>() {
             @Override
             public Class<?> getBaseSupportedClass() {
-                return ContainerScreen.class;
+                return ScreenWithHandler.class;
             }
             
             @Override
-            public Rectangle getLeftBounds(ContainerScreen<?> screen) {
-                return new Rectangle(2, 0, ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() - 4, MinecraftClient.getInstance().getWindow().getScaledHeight());
+            public Rectangle getLeftBounds(ScreenWithHandler<?> screen) {
+                return new Rectangle(2, 0, ScreenHelper.getLastScreenWithHandlerHooks().rei_getContainerLeft() - 4, MinecraftClient.getInstance().getWindow().getScaledHeight());
             }
             
             @Override
-            public Rectangle getRightBounds(ContainerScreen<?> screen) {
-                int startX = ScreenHelper.getLastContainerScreenHooks().rei_getContainerLeft() + ScreenHelper.getLastContainerScreenHooks().rei_getContainerWidth() + 2;
+            public Rectangle getRightBounds(ScreenWithHandler<?> screen) {
+                int startX = ScreenHelper.getLastScreenWithHandlerHooks().rei_getContainerLeft() + ScreenHelper.getLastScreenWithHandlerHooks().rei_getContainerWidth() + 2;
                 return new Rectangle(startX, 0, MinecraftClient.getInstance().getWindow().getScaledWidth() - startX - 2, MinecraftClient.getInstance().getWindow().getScaledHeight());
             }
             

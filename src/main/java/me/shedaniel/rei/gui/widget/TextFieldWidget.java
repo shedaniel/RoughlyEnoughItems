@@ -507,10 +507,10 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
         RenderSystem.blendFuncSeparate(770, 771, 1, 0);
         RenderSystem.shadeModel(7425);
         buffer.begin(7, VertexFormats.POSITION_COLOR);
-        buffer.vertex(x1, y2, getBlitOffset() + 50d).color(r, g, b, 120).next();
-        buffer.vertex(x2, y2, getBlitOffset() + 50d).color(r, g, b, 120).next();
-        buffer.vertex(x2, y1, getBlitOffset() + 50d).color(r, g, b, 120).next();
-        buffer.vertex(x1, y1, getBlitOffset() + 50d).color(r, g, b, 120).next();
+        buffer.vertex(x1, y2, getZOffset() + 50d).color(r, g, b, 120).next();
+        buffer.vertex(x2, y2, getZOffset() + 50d).color(r, g, b, 120).next();
+        buffer.vertex(x2, y1, getZOffset() + 50d).color(r, g, b, 120).next();
+        buffer.vertex(x1, y1, getZOffset() + 50d).color(r, g, b, 120).next();
         tessellator.draw();
         RenderSystem.shadeModel(7424);
         RenderSystem.disableBlend();

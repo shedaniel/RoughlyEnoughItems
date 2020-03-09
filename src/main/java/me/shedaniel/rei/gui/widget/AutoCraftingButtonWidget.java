@@ -33,7 +33,7 @@ import me.shedaniel.rei.gui.toast.CopyRecipeIdentifierToast;
 import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.minecraft.client.gui.screen.ingame.ContainerScreen;
+import net.minecraft.client.gui.screen.ingame.ScreenWithHandler;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
@@ -51,7 +51,7 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
     private String extraTooltip;
     private List<String> errorTooltip;
     private List<Widget> setupDisplay;
-    private ContainerScreen<?> containerScreen;
+    private ScreenWithHandler<?> screenWithHandler;
     private boolean visible = false;
     private RecipeCategory<?> category;
     private Rectangle displayBounds;
@@ -62,14 +62,14 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
         this.displaySupplier = displaySupplier;
         Optional<Identifier> recipe = displaySupplier.get().getRecipeLocation();
         extraTooltip = recipe.isPresent() ? I18n.translate("text.rei.recipe_id", Formatting.GRAY.toString(), recipe.get().toString()) : "";
-        this.containerScreen = ScreenHelper.getLastContainerScreen();
+        this.screenWithHandler = ScreenHelper.getLastScreenWithHandler();
         this.setupDisplay = setupDisplay;
         this.category = recipeCategory;
     }
     
     @Override
     public void onPressed() {
-        AutoTransferHandler.Context context = AutoTransferHandler.Context.create(true, containerScreen, displaySupplier.get());
+        AutoTransferHandler.Context context = AutoTransferHandler.Context.create(true, screenWithHandler, displaySupplier.get());
         for (AutoTransferHandler autoTransferHandler : RecipeHelper.getInstance().getSortedAutoCraftingHandler())
             try {
                 AutoTransferHandler.Result result = autoTransferHandler.handle(context);
@@ -78,7 +78,7 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        minecraft.openScreen(containerScreen);
+        minecraft.openScreen(screenWithHandler);
         ScreenHelper.getLastOverlay().init();
     }
     
@@ -89,7 +89,7 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
         int color = 0;
         visible = false;
         IntList redSlots = null;
-        AutoTransferHandler.Context context = AutoTransferHandler.Context.create(false, containerScreen, displaySupplier.get());
+        AutoTransferHandler.Context context = AutoTransferHandler.Context.create(false, screenWithHandler, displaySupplier.get());
         for (AutoTransferHandler autoTransferHandler : RecipeHelper.getInstance().getSortedAutoCraftingHandler()) {
             try {
                 AutoTransferHandler.Result result = autoTransferHandler.handle(context);

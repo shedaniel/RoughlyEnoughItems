@@ -54,10 +54,10 @@ public class FillRectangleDrawableConsumer implements DrawableConsumer {
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bufferBuilder = tessellator.getBuffer();
         bufferBuilder.begin(7, VertexFormats.POSITION_COLOR);
-        bufferBuilder.vertex(rectangle.getMaxX(), rectangle.getMinY(), helper.getBlitOffset()).color(r, g, b, a).next();
-        bufferBuilder.vertex(rectangle.getMinX(), rectangle.getMinY(), helper.getBlitOffset()).color(r, g, b, a).next();
-        bufferBuilder.vertex(rectangle.getMinX(), rectangle.getMaxY(), helper.getBlitOffset()).color(r, g, b, a).next();
-        bufferBuilder.vertex(rectangle.getMaxX(), rectangle.getMaxY(), helper.getBlitOffset()).color(r, g, b, a).next();
+        bufferBuilder.vertex(rectangle.getMaxX(), rectangle.getMinY(), helper.getZOffset()).color(r, g, b, a).next();
+        bufferBuilder.vertex(rectangle.getMinX(), rectangle.getMinY(), helper.getZOffset()).color(r, g, b, a).next();
+        bufferBuilder.vertex(rectangle.getMinX(), rectangle.getMaxY(), helper.getZOffset()).color(r, g, b, a).next();
+        bufferBuilder.vertex(rectangle.getMaxX(), rectangle.getMaxY(), helper.getZOffset()).color(r, g, b, a).next();
         tessellator.draw();
         RenderSystem.shadeModel(7424);
         RenderSystem.disableBlend();

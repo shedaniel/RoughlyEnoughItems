@@ -29,9 +29,9 @@ import me.shedaniel.rei.server.ContainerInfo;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.block.entity.FurnaceBlockEntity;
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.container.Container;
 import net.minecraft.item.Item;
 import net.minecraft.recipe.AbstractCookingRecipe;
+import net.minecraft.screen.ScreenHandler;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
@@ -110,7 +110,7 @@ public abstract class DefaultCookingDisplay implements TransferRecipeDisplay {
     }
     
     @Override
-    public List<List<EntryStack>> getOrganisedInputEntries(ContainerInfo<Container> containerInfo, Container container) {
+    public List<List<EntryStack>> getOrganisedInputEntries(ContainerInfo<ScreenHandler> containerInfo, ScreenHandler container) {
         return input;
     }
     

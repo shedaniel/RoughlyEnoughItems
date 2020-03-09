@@ -55,7 +55,7 @@ public class TexturedDrawableConsumer implements DrawableConsumer {
     @Override
     public void render(DrawableHelper helper, int mouseX, int mouseY, float delta) {
         MinecraftClient.getInstance().getTextureManager().bindTexture(identifier);
-        innerBlit(x, x + width, y, y + height, helper.getBlitOffset(), uWidth, vHeight, u, v, textureWidth, textureHeight);
+        innerBlit(x, x + width, y, y + height, helper.getZOffset(), uWidth, vHeight, u, v, textureWidth, textureHeight);
     }
     
     private static void innerBlit(int xStart, int xEnd, int yStart, int yEnd, int z, int width, int height, float u, float v, int texWidth, int texHeight) {
