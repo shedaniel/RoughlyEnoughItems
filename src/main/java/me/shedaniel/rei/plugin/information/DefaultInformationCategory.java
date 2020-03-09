@@ -28,14 +28,17 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.gui.widget.DynamicEntryListWidget;
-import me.shedaniel.math.api.Point;
-import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.Point;
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.RecipeCategory;
+import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.entries.RecipeEntry;
-import me.shedaniel.rei.gui.widget.*;
+import me.shedaniel.rei.gui.widget.QueuedTooltip;
+import me.shedaniel.rei.gui.widget.Widget;
+import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import me.shedaniel.rei.impl.RenderingEntry;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.client.MinecraftClient;
@@ -54,7 +57,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Supplier;
 
 public class DefaultInformationCategory implements RecipeCategory<DefaultInformationDisplay> {
     protected static void innerBlit(Matrix4f matrix4f, int xStart, int xEnd, int yStart, int yEnd, int z, float uStart, float uEnd, float vStart, float vEnd) {
@@ -95,7 +97,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
             }
             
             @Override
-            public void render(Rectangle rectangle, int mouseX, int mouseY, float delta) {
+            public void render(me.shedaniel.math.api.Rectangle rectangle, int mouseX, int mouseY, float delta) {
                 MinecraftClient.getInstance().textRenderer.draw(name.asFormattedString(), rectangle.x + 5, rectangle.y + 6, -1);
             }
         };
@@ -105,7 +107,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
     public EntryStack getLogo() {
         return new RenderingEntry() {
             @Override
-            public void render(Rectangle bounds, int mouseX, int mouseY, float delta) {
+            public void render(me.shedaniel.math.api.Rectangle bounds, int mouseX, int mouseY, float delta) {
                 MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
                 Matrix4f matrix4f = Matrix4f.translate(-1.2f, -1, 0);
                 DefaultInformationCategory.innerBlit(matrix4f, bounds.getCenterX() - 8, bounds.getCenterX() + 8, bounds.getCenterY() - 8, bounds.getCenterY() + 8, 0, 116f / 256f, (116f + 16f) / 256f, 0f, 16f / 256f);
@@ -114,14 +116,13 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
     }
     
     @Override
-    public List<Widget> setupDisplay(Supplier<DefaultInformationDisplay> recipeDisplaySupplier, Rectangle bounds) {
-        DefaultInformationDisplay display = recipeDisplaySupplier.get();
+    public List<Widget> setupDisplay(DefaultInformationDisplay recipeDisplay, me.shedaniel.math.Rectangle bounds) {
         List<Widget> widgets = Lists.newArrayList();
-        widgets.add(LabelWidget.create(new Point(bounds.getCenterX(), bounds.y + 3), display.getName().asFormattedString()).noShadow().color(REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF404040));
-        widgets.add(EntryWidget.create(bounds.getCenterX() - 8, bounds.y + 15).entries(display.getEntryStacks()).markIsInput());
+        widgets.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.y + 3), recipeDisplay.getName().asFormattedString()).noShadow().color(0xFF404040, 0xFFBBBBBB));
+        widgets.add(Widgets.createSlot(new Point(bounds.getCenterX() - 8, bounds.y + 15)).entries(recipeDisplay.getEntryStacks()).markInput());
         Rectangle rectangle = new Rectangle(bounds.getCenterX() - (bounds.width / 2), bounds.y + 35, bounds.width, bounds.height - 40);
-        widgets.add(new SlotBaseWidget(rectangle));
-        widgets.add(new ScrollableTextWidget(rectangle, display.getTexts()));
+        widgets.add(Widgets.createSlotBase(rectangle));
+        widgets.add(new ScrollableTextWidget(rectangle, recipeDisplay.getTexts()));
         return widgets;
     }
     
@@ -136,7 +137,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
     }
     
     private static class ScrollableTextWidget extends WidgetWithBounds {
-        private Rectangle bounds;
+        private me.shedaniel.math.api.Rectangle bounds;
         private List<Text> texts;
         private double target;
         private double scroll;
@@ -144,7 +145,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
         private long duration;
         
         public ScrollableTextWidget(Rectangle bounds, List<Text> texts) {
-            this.bounds = bounds;
+            this.bounds = new me.shedaniel.math.api.Rectangle(bounds);
             this.texts = Lists.newArrayList();
             for (Text text : texts) {
                 if (!this.texts.isEmpty())
@@ -201,7 +202,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
         }
         
         @Override
-        public Rectangle getBounds() {
+        public me.shedaniel.math.api.Rectangle getBounds() {
             return bounds;
         }
         

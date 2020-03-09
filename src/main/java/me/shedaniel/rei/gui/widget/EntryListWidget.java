@@ -33,6 +33,7 @@ import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.config.ItemListOrdering;
 import me.shedaniel.rei.impl.ScreenHelper;
@@ -593,7 +594,7 @@ public class EntryListWidget extends WidgetWithBounds {
                 int skippedFavorites = page * (entries.size() - width);
                 int j = 0;
                 if (skippedFavorites < favorites.size()) {
-                    renders.add(LabelWidget.create(new Point(innerBounds.x + 2, innerBounds.y + 6), I18n.translate("text.rei.favorites")).leftAligned());
+                    renders.add(Widgets.createLabel(new Point(innerBounds.x + 2, innerBounds.y + 6), I18n.translate("text.rei.favorites")).leftAligned());
                     j += width;
                 }
                 List<EntryStack> subFavoritesList = favorites.stream().skip(skippedFavorites).limit(Math.max(0, entries.size() - width)).collect(Collectors.toList());

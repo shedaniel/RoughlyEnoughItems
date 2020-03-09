@@ -21,58 +21,53 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.gui.widget;
+package me.shedaniel.rei.impl.widgets;
 
-import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.rei.api.widgets.Arrow;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.util.math.MathHelper;
-import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
-/**
- * @see me.shedaniel.rei.api.widgets.Widgets#createArrow(me.shedaniel.math.Point)
- */
-@ApiStatus.ScheduledForRemoval
-@Deprecated
-public class RecipeArrowWidget extends WidgetWithBounds {
+public class ArrowWidget extends Arrow {
+    @NotNull
+    private Rectangle bounds;
+    private double animationDuration = -1;
     
-    private int x, y;
-    private double time = 250d;
-    private boolean animated;
-    
-    @ApiStatus.Internal
-    public RecipeArrowWidget(int x, int y, boolean animated) {
-        this.x = x;
-        this.y = y;
-        this.animated = animated;
-    }
-    
-    public static RecipeArrowWidget create(Point point, boolean animated) {
-        return new RecipeArrowWidget(point.x, point.y, animated);
-    }
-    
-    public RecipeArrowWidget time(double time) {
-        this.time = time;
-        return this;
+    public ArrowWidget(@NotNull me.shedaniel.math.Rectangle bounds) {
+        this.bounds = new Rectangle(Objects.requireNonNull(bounds));
     }
     
     @Override
-    public Rectangle getBounds() {
-        return new Rectangle(x, y, 24, 17);
+    public double getAnimationDuration() {
+        return animationDuration;
+    }
+    
+    @Override
+    public void setAnimationDuration(double animationDurationMS) {
+        this.animationDuration = animationDurationMS;
+        if (this.animationDuration <= 0)
+            this.animationDuration = -1;
+    }
+    
+    @Override
+    public @NotNull Rectangle getBounds() {
+        return bounds;
     }
     
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
-        blit(x, y, 106, 91, 24, 17);
-        if (animated) {
-            int width = MathHelper.ceil((System.currentTimeMillis() / (time / 24) % 24d) / 1f);
-            blit(x, y, 82, 91, width, 17);
+        blit(getX(), getY(), 106, 91, 24, 17);
+        if (getAnimationDuration() > 0) {
+            int width = MathHelper.ceil((System.currentTimeMillis() / (animationDuration / 24) % 24d) / 1f);
+            blit(getX(), getY(), 82, 91, width, 17);
         }
     }
     

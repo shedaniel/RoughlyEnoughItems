@@ -26,13 +26,11 @@ package me.shedaniel.rei.utils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import me.shedaniel.rei.api.EntryStack;
-import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-@ApiStatus.Internal
 public class CollectionUtils {
     public static <A, B> List<B> getOrPutEmptyList(Map<A, List<B>> map, A key) {
         List<B> b = map.get(key);

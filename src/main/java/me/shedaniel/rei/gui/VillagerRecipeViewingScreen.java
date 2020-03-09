@@ -31,6 +31,7 @@ import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.entries.RecipeEntry;
 import me.shedaniel.rei.gui.widget.*;
 import me.shedaniel.rei.impl.ClientHelperImpl;
@@ -173,7 +174,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
         this.widgets.add(new SlotBaseWidget(scrollListBounds));
         
         Rectangle recipeBounds = new Rectangle(bounds.x + 100 + (guiWidth - 100) / 2 - category.getDisplayWidth(display) / 2, bounds.y + bounds.height / 2 - category.getDisplayHeight() / 2, category.getDisplayWidth(display), category.getDisplayHeight());
-        List<Widget> setupDisplay = category.setupDisplay(() -> display, recipeBounds);
+        List<Widget> setupDisplay = category.setupDisplay(display, recipeBounds);
         RecipeViewingScreen.transformIngredientNotice(setupDisplay, ingredientStackToNotice);
         RecipeViewingScreen.transformResultNotice(setupDisplay, resultStackToNotice);
         this.widgets.addAll(setupDisplay);
@@ -247,18 +248,9 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
         }));
         w.enabled = w2.enabled = categories.size() > tabsPerPage;
         
-        this.widgets.add(new ClickableLabelWidget(new Point(bounds.x + 4 + scrollListBounds.width / 2, bounds.y + 6), categories.get(selectedCategoryIndex).getCategoryName()) {
-            @Override
-            public void onLabelClicked() {
-                MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-                ClientHelper.getInstance().executeViewAllRecipesKeyBind();
-            }
-            
-            @Override
-            public Optional<String> getTooltips() {
-                return Optional.ofNullable(I18n.translate("text.rei.view_all_categories"));
-            }
-        });
+        this.widgets.add(Widgets.createClickableLabel(new Point(bounds.x + 4 + scrollListBounds.width / 2, bounds.y + 6), categories.get(selectedCategoryIndex).getCategoryName(), label -> {
+            ClientHelper.getInstance().executeViewAllRecipesKeyBind();
+        }).tooltipLine(I18n.translate("text.rei.view_all_categories")).noShadow().color(0xFF404040, 0xFFBBBBBB).hoveredColor(0xFF0041FF, 0xFFFFBD4D));
         
         this.children.addAll(buttonWidgets);
         this.widgets.addAll(tabs);

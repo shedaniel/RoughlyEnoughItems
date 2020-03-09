@@ -23,31 +23,24 @@
 
 package me.shedaniel.rei.plugin.cooking;
 
+import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.ints.IntList;
-import me.shedaniel.math.api.Point;
-import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.Point;
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.TransferRecipeCategory;
+import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.entries.RecipeEntry;
 import me.shedaniel.rei.gui.entries.SimpleRecipeEntry;
-import me.shedaniel.rei.gui.widget.EntryWidget;
-import me.shedaniel.rei.gui.widget.RecipeArrowWidget;
-import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.Widget;
-import me.shedaniel.rei.plugin.DefaultPlugin;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
 
 import java.text.DecimalFormat;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Supplier;
 
 public class DefaultCookingCategory implements TransferRecipeCategory<DefaultCookingDisplay> {
     private Identifier identifier;
@@ -61,7 +54,7 @@ public class DefaultCookingCategory implements TransferRecipeCategory<DefaultCoo
     }
     
     @Override
-    public void renderRedSlots(List<Widget> widgets, Rectangle bounds, DefaultCookingDisplay display, IntList redSlots) {
+    public void renderRedSlots(List<Widget> widgets, me.shedaniel.math.api.Rectangle bounds, DefaultCookingDisplay display, IntList redSlots) {
         Point startPoint = new Point(bounds.getCenterX() - 41, bounds.getCenterY() - 27);
         RenderSystem.translatef(0, 0, 400);
         if (redSlots.contains(0)) {
@@ -71,27 +64,19 @@ public class DefaultCookingCategory implements TransferRecipeCategory<DefaultCoo
     }
     
     @Override
-    public List<Widget> setupDisplay(Supplier<DefaultCookingDisplay> recipeDisplaySupplier, Rectangle bounds) {
+    public List<Widget> setupDisplay(DefaultCookingDisplay display, Rectangle bounds) {
         Point startPoint = new Point(bounds.getCenterX() - 41, bounds.y + 10);
-        double cookingTime = recipeDisplaySupplier.get().getCookingTime();
+        double cookingTime = display.getCookingTime();
         DecimalFormat df = new DecimalFormat("###.##");
-        List<Widget> widgets = new LinkedList<>(Collections.singletonList(new RecipeBaseWidget(bounds) {
-            @Override
-            public void render(int mouseX, int mouseY, float delta) {
-                super.render(mouseX, mouseY, delta);
-                MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
-                blit(startPoint.x, startPoint.y, 0, 177, 82, 34);
-                int height = 14 - MathHelper.ceil((System.currentTimeMillis() / 250d % 14d) / 1f);
-                blit(startPoint.x + 2, startPoint.y + 31 + (3 - height), 82, 77 + (14 - height), 14, height);
-                String text = I18n.translate("category.rei.cooking.time&xp", df.format(recipeDisplaySupplier.get().getXp()), df.format(cookingTime / 20d));
-                int length = MinecraftClient.getInstance().textRenderer.getStringWidth(text);
-                MinecraftClient.getInstance().textRenderer.draw(text, bounds.x + bounds.width - length - 5, bounds.y + 5, REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF404040);
-                
-            }
-        }));
-        widgets.add(RecipeArrowWidget.create(new Point(startPoint.x + 24, startPoint.y + 8), true).time(cookingTime * 50));
-        widgets.add(EntryWidget.create(startPoint.x + 1, startPoint.y + 1).entries(recipeDisplaySupplier.get().getInputEntries().get(0)).markIsInput());
-        widgets.add(EntryWidget.create(startPoint.x + 61, startPoint.y + 9).entries(recipeDisplaySupplier.get().getOutputEntries()).noBackground().markIsOutput());
+        List<Widget> widgets = Lists.newArrayList();
+        widgets.add(Widgets.createRecipeBase(bounds));
+        widgets.add(Widgets.createResultSlotBackground(new Point(startPoint.x + 61, startPoint.y + 9)));
+        widgets.add(Widgets.createBurningFire(new Point(startPoint.x + 1, startPoint.y + 20)).animationDurationMS(10000));
+        widgets.add(Widgets.createLabel(new Point(bounds.x + bounds.width - 5, bounds.y + 5),
+                I18n.translate("category.rei.cooking.time&xp", df.format(display.getXp()), df.format(cookingTime / 20d))).noShadow().rightAligned().color(0xFF404040, 0xFFBBBBBB));
+        widgets.add(Widgets.createArrow(new Point(startPoint.x + 24, startPoint.y + 8)).animationDurationTicks(cookingTime));
+        widgets.add(Widgets.createSlot(new Point(startPoint.x + 1, startPoint.y + 1)).entries(display.getInputEntries().get(0)).markInput());
+        widgets.add(Widgets.createSlot(new Point(startPoint.x + 61, startPoint.y + 9)).entries(display.getOutputEntries()).disableBackground().markOutput());
         return widgets;
     }
     

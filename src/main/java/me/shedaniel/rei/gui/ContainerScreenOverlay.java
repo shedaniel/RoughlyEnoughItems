@@ -30,6 +30,7 @@ import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.gui.widget.*;
 import me.shedaniel.rei.impl.ScreenHelper;
@@ -271,26 +272,13 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             }
         }
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-            widgets.add(new ClickableLabelWidget(new Point(bounds.x + (bounds.width / 2), bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 10), "") {
-                @Override
-                public void render(int mouseX, int mouseY, float delta) {
-                    clickable(ENTRY_LIST_WIDGET.getTotalPages() > 1);
-                    setText(String.format("%s/%s", ENTRY_LIST_WIDGET.getPage() + 1, Math.max(ENTRY_LIST_WIDGET.getTotalPages(), 1)));
-                    super.render(mouseX, mouseY, delta);
-                }
-                
-                @Override
-                public void onLabelClicked() {
-                    MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-                    ENTRY_LIST_WIDGET.setPage(0);
-                    ENTRY_LIST_WIDGET.updateEntriesPosition();
-                }
-                
-                @Override
-                public boolean changeFocus(boolean boolean_1) {
-                    return false;
-                }
-            }.tooltip(() -> I18n.translate("text.rei.go_back_first_page")));
+            widgets.add(Widgets.createClickableLabel(new Point(bounds.x + (bounds.width / 2), bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 10), "", label -> {
+                ENTRY_LIST_WIDGET.setPage(0);
+                ENTRY_LIST_WIDGET.updateEntriesPosition();
+            }).tooltipLine(I18n.translate("text.rei.go_back_first_page")).focusable(false).onRender(label -> {
+                label.setClickable(ENTRY_LIST_WIDGET.getTotalPages() > 1);
+                label.setText(String.format("%s/%s", ENTRY_LIST_WIDGET.getPage() + 1, Math.max(ENTRY_LIST_WIDGET.getTotalPages(), 1)));
+            }));
         }
         if (ConfigObject.getInstance().isCraftableFilterEnabled()) {
             this.widgets.add(craftableToggleButton = new CraftableToggleButtonWidget(getCraftableToggleArea()) {

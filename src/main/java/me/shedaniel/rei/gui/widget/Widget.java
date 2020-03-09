@@ -57,6 +57,7 @@ public abstract class Widget extends AbstractParentElement implements Drawable {
         return false;
     }
     
+    @SuppressWarnings("RedundantCast")
     public final boolean containsMouse(int mouseX, int mouseY) {
         return containsMouse((double) mouseX, (double) mouseY);
     }

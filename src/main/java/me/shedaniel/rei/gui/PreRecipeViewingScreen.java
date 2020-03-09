@@ -29,9 +29,9 @@ import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWi
 import me.shedaniel.clothconfig2.impl.EasingMethod;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.gui.widget.ButtonWidget;
-import me.shedaniel.rei.gui.widget.LabelWidget;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import me.shedaniel.rei.impl.ScreenHelper;
@@ -117,9 +117,9 @@ public class PreRecipeViewingScreen extends Screen {
             }
         });
         this.widgets.add(new ScreenTypeSelection(width / 2 - 200 - 5, height / 2 - 112 / 2 - 10, 0));
-        this.widgets.add(LabelWidget.create(new Point(width / 2 - 200 - 5 + 104, height / 2 - 112 / 2 + 115), I18n.translate("config.roughlyenoughitems.recipeScreenType.original")).noShadow().color(-1124073473));
+        this.widgets.add(Widgets.createLabel(new Point(width / 2 - 200 - 5 + 104, height / 2 - 112 / 2 + 115), I18n.translate("config.roughlyenoughitems.recipeScreenType.original")).noShadow().color(-1124073473));
         this.widgets.add(new ScreenTypeSelection(width / 2 + 5, height / 2 - 112 / 2 - 10, 112));
-        this.widgets.add(LabelWidget.create(new Point(width / 2 + 5 + 104, height / 2 - 112 / 2 + 115), I18n.translate("config.roughlyenoughitems.recipeScreenType.villager")).noShadow().color(-1124073473));
+        this.widgets.add(Widgets.createLabel(new Point(width / 2 + 5 + 104, height / 2 - 112 / 2 + 115), I18n.translate("config.roughlyenoughitems.recipeScreenType.villager")).noShadow().color(-1124073473));
         this.children.addAll(widgets);
     }
     

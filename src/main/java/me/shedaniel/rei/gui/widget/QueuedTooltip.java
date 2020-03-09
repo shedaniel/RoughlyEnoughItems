@@ -25,7 +25,7 @@ package me.shedaniel.rei.gui.widget;
 
 
 import com.google.common.collect.Lists;
-import me.shedaniel.math.api.Point;
+import me.shedaniel.math.Point;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.REIHelper;
 import org.jetbrains.annotations.ApiStatus;
@@ -42,6 +42,14 @@ public class QueuedTooltip {
     private QueuedTooltip(Point location, List<String> text) {
         this.location = location;
         this.text = Lists.newArrayList(text);
+    }
+    
+    public static QueuedTooltip create(me.shedaniel.math.api.Point location, List<String> text) {
+        return new QueuedTooltip(location, text);
+    }
+    
+    public static QueuedTooltip create(me.shedaniel.math.api.Point location, String... text) {
+        return QueuedTooltip.create(location, Lists.newArrayList(text));
     }
     
     public static QueuedTooltip create(Point location, List<String> text) {
@@ -71,16 +79,22 @@ public class QueuedTooltip {
         return consumer;
     }
     
-    public Point getLocation() {
-        return location;
+    /**
+     * @return the absolute location of the tooltip.
+     * @deprecated Use {@link #getX()} and {@link #getY()} instead.
+     */
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
+    public me.shedaniel.math.api.Point getLocation() {
+        return new me.shedaniel.math.api.Point(location);
     }
     
     public int getX() {
-        return getLocation().x;
+        return location.x;
     }
     
     public int getY() {
-        return getLocation().y;
+        return location.y;
     }
     
     public List<String> getText() {

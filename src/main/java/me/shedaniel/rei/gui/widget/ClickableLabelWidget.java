@@ -23,10 +23,18 @@
 
 package me.shedaniel.rei.gui.widget;
 
-import me.shedaniel.math.api.Point;
+import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.REIHelper;
+import me.shedaniel.rei.api.widgets.Widgets;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.function.Consumer;
+
+/**
+ * @see Widgets#createClickableLabel(Point, String, Consumer)
+ */
+@Deprecated
+@ApiStatus.ScheduledForRemoval
 public abstract class ClickableLabelWidget extends LabelWidget {
     
     public boolean focused;
@@ -35,6 +43,12 @@ public abstract class ClickableLabelWidget extends LabelWidget {
     
     @ApiStatus.Internal
     protected ClickableLabelWidget(Point point, String text) {
+        super(point, text);
+        this.hoveredColor = REIHelper.getInstance().isDarkThemeEnabled() ? -1 : 0xFF66FFCC;
+    }
+    
+    @ApiStatus.Internal
+    protected ClickableLabelWidget(me.shedaniel.math.api.Point point, String text) {
         super(point, text);
         this.hoveredColor = REIHelper.getInstance().isDarkThemeEnabled() ? -1 : 0xFF66FFCC;
     }
@@ -58,7 +72,7 @@ public abstract class ClickableLabelWidget extends LabelWidget {
         int color = getDefaultColor();
         if (isClickable() && isHovered(mouseX, mouseY))
             color = getHoveredColor();
-        Point pos = getPosition();
+        Point pos = getLocation();
         int width = font.getStringWidth(getText());
         if (isCentered()) {
             if (isHasShadows())
