@@ -30,10 +30,19 @@ import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.gui.config.RecipeBorderType;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * @see me.shedaniel.rei.api.widgets.Widgets#createRecipeBase(me.shedaniel.math.Rectangle)
+ * @see me.shedaniel.rei.api.widgets.Widgets#createRecipeBase(me.shedaniel.math.Rectangle, int)
+ * @see me.shedaniel.rei.api.widgets.Widgets#createSlotBase(me.shedaniel.math.Rectangle)
+ * @see me.shedaniel.rei.api.widgets.Widgets#createSlotBase(me.shedaniel.math.Rectangle, int)
+ */
+@ApiStatus.ScheduledForRemoval
+@Deprecated
 public class PanelWidget extends WidgetWithBounds {
     
     private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
