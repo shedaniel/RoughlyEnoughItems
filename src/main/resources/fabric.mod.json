@@ -39,7 +39,7 @@
     "cloth": "~2-",
     "cloth-basic-math": "*",
     "cloth-config2": "~3-",
-    "minecraft": "~1.16-Snapshot.20.10.a"
+    "minecraft": "~1.16-Snapshot.20.11.a"
   },
   "mixins": [
     "mixin.roughlyenoughitems.json",
