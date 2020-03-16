@@ -33,6 +33,7 @@ import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.config.ItemListOrdering;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.CollectionUtils;
@@ -153,7 +154,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
         ScissorsHandler.INSTANCE.removeLastScissor();
         renderScrollbar();
         if (containsMouse(mouseX, mouseY) && ClientHelper.getInstance().isCheating() && !minecraft.player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
-            REIHelper.getInstance().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.delete_items")));
+            Tooltip.create(I18n.translate("text.rei.delete_items")).queue();
     }
     
     private int getScrollbarMinX() {

@@ -31,7 +31,7 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.minecraft.client.gui.screen.ingame.ScreenWithHandler;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.util.ActionResult;
@@ -355,7 +355,7 @@ public class RecipeHelperImpl implements RecipeHelper {
             
             @Override
             public ActionResult shouldScreenBeOverlayed(Class<?> screen) {
-                return ScreenWithHandler.class.isAssignableFrom(screen) ? ActionResult.SUCCESS : ActionResult.PASS;
+                return HandledScreen.class.isAssignableFrom(screen) ? ActionResult.SUCCESS : ActionResult.PASS;
             }
             
             @Override
@@ -461,7 +461,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     }
     
     @Override
-    public void registerScreenClickArea(Rectangle rectangle, Class<? extends ScreenWithHandler<?>> screenClass, Identifier... categories) {
+    public void registerScreenClickArea(Rectangle rectangle, Class<? extends HandledScreen<?>> screenClass, Identifier... categories) {
         this.screenClickAreas.add(new ScreenClickAreaImpl(screenClass, rectangle, categories));
     }
     
@@ -493,17 +493,17 @@ public class RecipeHelperImpl implements RecipeHelper {
     }
     
     private static class ScreenClickAreaImpl implements ScreenClickArea {
-        Class<? extends ScreenWithHandler<?>> screenClass;
+        Class<? extends HandledScreen<?>> screenClass;
         Rectangle rectangle;
         Identifier[] categories;
         
-        private ScreenClickAreaImpl(Class<? extends ScreenWithHandler<?>> screenClass, Rectangle rectangle, Identifier[] categories) {
+        private ScreenClickAreaImpl(Class<? extends HandledScreen<?>> screenClass, Rectangle rectangle, Identifier[] categories) {
             this.screenClass = screenClass;
             this.rectangle = rectangle;
             this.categories = categories;
         }
         
-        public Class<? extends ScreenWithHandler<?>> getScreenClass() {
+        public Class<? extends HandledScreen<?>> getScreenClass() {
             return screenClass;
         }
         

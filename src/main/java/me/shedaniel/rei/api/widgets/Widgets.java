@@ -43,96 +43,127 @@ import java.util.function.Consumer;
 public final class Widgets {
     private Widgets() {}
     
-    public static Widget createDrawableWidget(DrawableConsumer drawable) {
+    @NotNull
+    public static Widget createDrawableWidget(@NotNull DrawableConsumer drawable) {
         return new DrawableWidget(drawable);
     }
     
-    public static Widget createTexturedWidget(Identifier identifier, Rectangle bounds) {
+    @NotNull
+    public static Widget createTexturedWidget(@NotNull Identifier identifier, @NotNull Rectangle bounds) {
         return createTexturedWidget(identifier, bounds, 0, 0);
     }
     
-    public static Widget createTexturedWidget(Identifier identifier, int x, int y, int width, int height) {
+    @NotNull
+    public static Widget createTexturedWidget(@NotNull Identifier identifier, int x, int y, int width, int height) {
         return createTexturedWidget(identifier, x, y, 0, 0, width, height);
     }
     
-    public static Widget createTexturedWidget(Identifier identifier, Rectangle bounds, float u, float v) {
+    @NotNull
+    public static Widget createTexturedWidget(@NotNull Identifier identifier, @NotNull Rectangle bounds, float u, float v) {
         return createTexturedWidget(identifier, bounds, u, v, 256, 256);
     }
     
-    public static Widget createTexturedWidget(Identifier identifier, int x, int y, float u, float v, int width, int height) {
+    @NotNull
+    public static Widget createTexturedWidget(@NotNull Identifier identifier, int x, int y, float u, float v, int width, int height) {
         return createTexturedWidget(identifier, x, y, u, v, width, height, 256, 256);
     }
     
-    public static Widget createTexturedWidget(Identifier identifier, Rectangle bounds, float u, float v, int textureWidth, int textureHeight) {
+    @NotNull
+    public static Widget createTexturedWidget(@NotNull Identifier identifier, @NotNull Rectangle bounds, float u, float v, int textureWidth, int textureHeight) {
         return createTexturedWidget(identifier, bounds.x, bounds.y, u, v, bounds.width, bounds.height, bounds.width, bounds.height, textureWidth, textureHeight);
     }
     
-    public static Widget createTexturedWidget(Identifier identifier, int x, int y, float u, float v, int width, int height, int textureWidth, int textureHeight) {
+    @NotNull
+    public static Widget createTexturedWidget(@NotNull Identifier identifier, int x, int y, float u, float v, int width, int height, int textureWidth, int textureHeight) {
         return createTexturedWidget(identifier, x, y, u, v, width, height, width, height, textureWidth, textureHeight);
     }
     
-    public static Widget createTexturedWidget(Identifier identifier, Rectangle bounds, float u, float v, int uWidth, int vHeight, int textureWidth, int textureHeight) {
+    @NotNull
+    public static Widget createTexturedWidget(@NotNull Identifier identifier, @NotNull Rectangle bounds, float u, float v, int uWidth, int vHeight, int textureWidth, int textureHeight) {
         return createTexturedWidget(identifier, bounds.x, bounds.y, u, v, bounds.width, bounds.height, uWidth, vHeight, textureWidth, textureHeight);
     }
     
-    public static Widget createTexturedWidget(Identifier identifier, int x, int y, float u, float v, int width, int height, int uWidth, int vHeight, int textureWidth, int textureHeight) {
+    @NotNull
+    public static Widget createTexturedWidget(@NotNull Identifier identifier, int x, int y, float u, float v, int width, int height, int uWidth, int vHeight, int textureWidth, int textureHeight) {
         return createDrawableWidget(new TexturedDrawableConsumer(identifier, x, y, width, height, u, v, uWidth, vHeight, textureWidth, textureHeight));
     }
     
-    public static Widget createFilledRectangle(Rectangle rectangle, int color) {
+    @NotNull
+    public static Widget createFilledRectangle(@NotNull Rectangle rectangle, int color) {
         return createDrawableWidget(new FillRectangleDrawableConsumer(rectangle, color));
     }
     
-    public static Label createLabel(Point point, @NotNull String text) {
+    @NotNull
+    public static Label createLabel(@NotNull Point point, @NotNull String text) {
         return new LabelWidget(point, text);
     }
     
-    public static Label createClickableLabel(Point point, @NotNull String text, @Nullable Consumer<Label> onClick) {
+    @NotNull
+    public static Label createClickableLabel(@NotNull Point point, @NotNull String text, @Nullable Consumer<Label> onClick) {
         return new LabelWidget(point, text).clickable().onClick(onClick);
     }
     
-    public static Arrow createArrow(Point point) {
+    @NotNull
+    public static Arrow createArrow(@NotNull Point point) {
         return new ArrowWidget(new Rectangle(point, new Dimension(24, 17)));
     }
     
-    public static BurningFire createBurningFire(Point point) {
+    @NotNull
+    public static BurningFire createBurningFire(@NotNull Point point) {
         return new BurningFireWidget(new Rectangle(point, new Dimension(14, 14)));
     }
     
-    public static Widget createSlotBackground(Point point) {
+    @NotNull
+    public static Widget createSlotBackground(@NotNull Point point) {
         return createSlotBase(new Rectangle(point.x - 1, point.y - 1, 18, 18));
     }
     
-    public static Widget createResultSlotBackground(Point point) {
+    @NotNull
+    public static Widget createResultSlotBackground(@NotNull Point point) {
         return createSlotBase(new Rectangle(point.x - 5, point.y - 5, 26, 26));
     }
     
-    public static Panel createRecipeBase(Rectangle rectangle) {
+    @NotNull
+    public static Panel createRecipeBase(@NotNull Rectangle rectangle) {
         return new PanelWidget(rectangle).yTextureOffset(ConfigObject.getInstance().getRecipeBorderType().getYOffset()).rendering(Widgets::shouldRecipeBaseRender);
     }
     
-    private static boolean shouldRecipeBaseRender(Panel panel) {
+    @NotNull
+    public static Panel createCategoryBase(@NotNull Rectangle rectangle) {
+        return new PanelWidget(rectangle).yTextureOffset(ConfigObject.getInstance().getRecipeBorderType().getYOffset()).rendering(Widgets::shouldSlotBaseRender);
+    }
+    
+    private static boolean shouldRecipeBaseRender(@NotNull Panel panel) {
         return ConfigObject.getInstance().getRecipeBorderType().isRendering() && PanelWidget.isRendering(panel);
     }
     
-    public static Panel createRecipeBase(Rectangle rectangle, int color) {
+    @NotNull
+    public static Panel createRecipeBase(@NotNull Rectangle rectangle, int color) {
         return createRecipeBase(rectangle).color(color);
     }
     
-    public static Panel createSlotBase(Rectangle rectangle) {
+    @NotNull
+    public static Panel createCategoryBase(@NotNull Rectangle rectangle, int color) {
+        return createCategoryBase(rectangle).color(color);
+    }
+    
+    @NotNull
+    public static Panel createSlotBase(@NotNull Rectangle rectangle) {
         return new PanelWidget(rectangle).yTextureOffset(-66).rendering(Widgets::shouldSlotBaseRender).innerColor(-7631989, -13619152);
     }
     
-    private static boolean shouldSlotBaseRender(Panel panel) {
+    private static boolean shouldSlotBaseRender(@NotNull Panel panel) {
         return true;
     }
     
-    public static Panel createSlotBase(Rectangle rectangle, int color) {
+    @NotNull
+    public static Panel createSlotBase(@NotNull Rectangle rectangle, int color) {
         return createSlotBase(rectangle).color(color);
     }
     
     @SuppressWarnings("deprecation")
-    public static Slot createSlot(Point point) {
+    @NotNull
+    public static Slot createSlot(@NotNull Point point) {
         return EntryWidget.create(point.x, point.y);
     }
     

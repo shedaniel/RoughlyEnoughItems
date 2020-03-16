@@ -26,17 +26,19 @@ package me.shedaniel.rei.plugin;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
+import me.shedaniel.math.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
+import me.shedaniel.rei.api.widgets.Panel;
+import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
-import me.shedaniel.rei.gui.widget.CategoryBaseWidget;
-import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.impl.RenderingEntry;
 import me.shedaniel.rei.impl.ScreenHelper;
+import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import me.shedaniel.rei.plugin.beacon.DefaultBeaconBaseCategory;
 import me.shedaniel.rei.plugin.beacon.DefaultBeaconBaseDisplay;
 import me.shedaniel.rei.plugin.blasting.DefaultBlastingDisplay;
@@ -173,8 +175,8 @@ public class DefaultPlugin implements REIPluginV0 {
             }
             
             @Override
-            public @Nullable QueuedTooltip getTooltip(int mouseX, int mouseY) {
-                return QueuedTooltip.create("Kibby");
+            public @Nullable Tooltip getTooltip(Point point) {
+                return Tooltip.create("Kibby");
             }
         });
     }
@@ -289,7 +291,7 @@ public class DefaultPlugin implements REIPluginV0 {
         baseBoundsHandler.registerExclusionZones(AbstractInventoryScreen.class, new DefaultPotionEffectExclusionZones());
         baseBoundsHandler.registerExclusionZones(RecipeBookProvider.class, new DefaultRecipeBookExclusionZones());
         baseBoundsHandler.registerExclusionZones(RecipeViewingScreen.class, () -> {
-            CategoryBaseWidget widget = ((RecipeViewingScreen) MinecraftClient.getInstance().currentScreen).getWorkingStationsBaseWidget();
+            Panel widget = ((RecipeViewingScreen) MinecraftClient.getInstance().currentScreen).getWorkingStationsBaseWidget();
             if (widget == null)
                 return Collections.emptyList();
             return Collections.singletonList(widget.getBounds().clone());
@@ -310,20 +312,20 @@ public class DefaultPlugin implements REIPluginV0 {
 //                return 10f;
 //            }
 //        });
-        displayHelper.registerHandler(new DisplayHelper.DisplayBoundsHandler<ScreenWithHandler<?>>() {
+        displayHelper.registerHandler(new DisplayHelper.DisplayBoundsHandler<HandledScreen<?>>() {
             @Override
             public Class<?> getBaseSupportedClass() {
-                return ScreenWithHandler.class;
+                return HandledScreen.class;
             }
             
             @Override
-            public Rectangle getLeftBounds(ScreenWithHandler<?> screen) {
-                return new Rectangle(2, 0, ScreenHelper.getLastScreenWithHandlerHooks().rei_getContainerLeft() - 4, MinecraftClient.getInstance().getWindow().getScaledHeight());
+            public Rectangle getLeftBounds(HandledScreen<?> screen) {
+                return new Rectangle(2, 0, ((ContainerScreenHooks) ScreenHelper.getLastHandledScreen()).rei_getContainerLeft() - 4, MinecraftClient.getInstance().getWindow().getScaledHeight());
             }
             
             @Override
-            public Rectangle getRightBounds(ScreenWithHandler<?> screen) {
-                int startX = ScreenHelper.getLastScreenWithHandlerHooks().rei_getContainerLeft() + ScreenHelper.getLastScreenWithHandlerHooks().rei_getContainerWidth() + 2;
+            public Rectangle getRightBounds(HandledScreen<?> screen) {
+                int startX = ((ContainerScreenHooks) ScreenHelper.getLastHandledScreen()).rei_getContainerLeft() + ((ContainerScreenHooks) ScreenHelper.getLastHandledScreen()).rei_getContainerWidth() + 2;
                 return new Rectangle(startX, 0, MinecraftClient.getInstance().getWindow().getScaledWidth() - startX - 2, MinecraftClient.getInstance().getWindow().getScaledHeight());
             }
             
@@ -396,7 +398,7 @@ public class DefaultPlugin implements REIPluginV0 {
         recipeHelper.removeAutoCraftButton(COMPOSTING);
         recipeHelper.removeAutoCraftButton(BEACON);
         recipeHelper.removeAutoCraftButton(INFO);
-        recipeHelper.registerScreenClickArea(new Rectangle(88, 32, 28, 23), CraftingTableScreen.class, CRAFTING);
+        recipeHelper.registerScreenClickArea(new Rectangle(88, 32, 28, 23), CraftingScreen.class, CRAFTING);
         recipeHelper.registerScreenClickArea(new Rectangle(137, 29, 10, 13), InventoryScreen.class, CRAFTING);
         recipeHelper.registerScreenClickArea(new Rectangle(97, 16, 14, 30), BrewingStandScreen.class, BREWING);
         recipeHelper.registerScreenClickArea(new Rectangle(78, 32, 28, 23), FurnaceScreen.class, SMELTING);

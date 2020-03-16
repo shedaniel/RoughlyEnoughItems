@@ -25,9 +25,10 @@ package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
+import me.shedaniel.math.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.gui.widget.QueuedTooltip;
+import me.shedaniel.rei.api.widgets.Tooltip;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -215,7 +216,7 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     
     @Nullable
     @Override
-    public QueuedTooltip getTooltip(int mouseX, int mouseY) {
+    public Tooltip getTooltip(Point point) {
         if (isEmpty() || !get(Settings.TOOLTIP_ENABLED).get())
             return null;
         List<String> toolTip = Lists.newArrayList(SearchArgument.tryGetItemStackToolTip(getItemStack(), true));
@@ -231,7 +232,7 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
             if (!alreadyHasMod)
                 toolTip.add(modString);
         }
-        return QueuedTooltip.create(toolTip);
+        return Tooltip.create(toolTip);
     }
     
     @Override

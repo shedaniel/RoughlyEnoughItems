@@ -30,18 +30,20 @@ import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
+import org.jetbrains.annotations.NotNull;
 
 public class FillRectangleDrawableConsumer implements DrawableConsumer {
+    @NotNull
     private Rectangle rectangle;
     private int color;
     
-    public FillRectangleDrawableConsumer(Rectangle rectangle, int color) {
+    public FillRectangleDrawableConsumer(@NotNull Rectangle rectangle, int color) {
         this.rectangle = rectangle;
         this.color = color;
     }
     
     @Override
-    public void render(DrawableHelper helper, int mouseX, int mouseY, float delta) {
+    public void render(@NotNull DrawableHelper helper, int mouseX, int mouseY, float delta) {
         float a = (color >> 24 & 255) / 255.0F;
         float r = (color >> 16 & 255) / 255.0F;
         float g = (color >> 8 & 255) / 255.0F;

@@ -27,19 +27,22 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.collect.Lists;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.REIHelper;
+import me.shedaniel.rei.api.widgets.Tooltip;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.function.Consumer;
 
-public class QueuedTooltip {
+/**
+ * @see Tooltip
+ */
+@ApiStatus.Internal
+public class QueuedTooltip implements Tooltip {
     
     private Point location;
     private List<String> text;
-    private Consumer<QueuedTooltip> consumer = null;
     
-    private QueuedTooltip(Point location, List<String> text) {
+    private QueuedTooltip(Point location, Collection<String> text) {
         this.location = location;
         this.text = Lists.newArrayList(text);
     }
@@ -56,6 +59,10 @@ public class QueuedTooltip {
         return new QueuedTooltip(location, text);
     }
     
+    public static QueuedTooltip create(Point location, Collection<String> text) {
+        return new QueuedTooltip(location, text);
+    }
+    
     public static QueuedTooltip create(Point location, String... text) {
         return QueuedTooltip.create(location, Lists.newArrayList(text));
     }
@@ -64,19 +71,12 @@ public class QueuedTooltip {
         return QueuedTooltip.create(PointHelper.ofMouse(), text);
     }
     
-    public static QueuedTooltip create(String... text) {
+    public static QueuedTooltip create(Collection<String> text) {
         return QueuedTooltip.create(PointHelper.ofMouse(), text);
     }
     
-    @ApiStatus.Internal
-    public QueuedTooltip setSpecialRenderer(Consumer<QueuedTooltip> consumer) {
-        this.consumer = consumer;
-        return this;
-    }
-    
-    @ApiStatus.Internal
-    public Consumer<QueuedTooltip> getConsumer() {
-        return consumer;
+    public static QueuedTooltip create(String... text) {
+        return QueuedTooltip.create(PointHelper.ofMouse(), text);
     }
     
     /**
@@ -89,20 +89,23 @@ public class QueuedTooltip {
         return new me.shedaniel.math.api.Point(location);
     }
     
+    @Override
     public int getX() {
         return location.x;
     }
     
+    @Override
     public int getY() {
         return location.y;
     }
     
+    @Override
     public List<String> getText() {
         return text;
     }
     
+    @Override
     public void queue() {
-        REIHelper.getInstance().addTooltip(this);
+        Tooltip.super.queue();
     }
-    
 }

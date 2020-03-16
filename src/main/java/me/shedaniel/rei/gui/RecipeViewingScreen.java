@@ -31,10 +31,12 @@ import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.widgets.Panel;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.widget.*;
 import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.impl.ScreenHelper;
+import me.shedaniel.rei.impl.widgets.PanelWidget;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
@@ -79,7 +81,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
     private int tabsPerPage = 5;
     private Rectangle bounds;
     @Nullable
-    private CategoryBaseWidget workingStationsBaseWidget;
+    private Panel workingStationsBaseWidget;
     private ButtonWidget recipeBack, recipeNext, categoryBack, categoryNext;
     private EntryStack ingredientStackToNotice = EntryStack.empty();
     private EntryStack resultStackToNotice = EntryStack.empty();
@@ -152,7 +154,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
     }
     
     @Nullable
-    public CategoryBaseWidget getWorkingStationsBaseWidget() {
+    public Panel getWorkingStationsBaseWidget() {
         return workingStationsBaseWidget;
     }
     
@@ -184,7 +186,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
             if (element.keyPressed(int_1, int_2, int_3))
                 return true;
         if (int_1 == 256 || this.client.options.keyInventory.matchesKey(int_1, int_2)) {
-            MinecraftClient.getInstance().openScreen(ScreenHelper.getLastScreenWithHandler());
+            MinecraftClient.getInstance().openScreen(ScreenHelper.getLastHandledScreen());
             ScreenHelper.getLastOverlay().init();
             return true;
         }
@@ -192,7 +194,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
             if (ScreenHelper.hasLastRecipeScreen())
                 client.openScreen(ScreenHelper.getLastRecipeScreen());
             else
-                client.openScreen(ScreenHelper.getLastScreenWithHandler());
+                client.openScreen(ScreenHelper.getLastHandledScreen());
             return true;
         }
         return super.keyPressed(int_1, int_2, int_3);
@@ -322,8 +324,8 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
             int innerWidth = MathHelper.ceil(workingStations.size() / ((float) hh));
             int xx = bounds.x - (8 + innerWidth * 16) + 6;
             int yy = bounds.y + 16;
-            preWidgets.add(workingStationsBaseWidget = new CategoryBaseWidget(new Rectangle(xx - 5, yy - 5, 15 + innerWidth * 16, 10 + actualHeight * 16)));
-            preWidgets.add(new SlotBaseWidget(new Rectangle(xx - 1, yy - 1, innerWidth * 16 + 2, actualHeight * 16 + 2)));
+            preWidgets.add(workingStationsBaseWidget = Widgets.createCategoryBase(new Rectangle(xx - 5, yy - 5, 15 + innerWidth * 16, 10 + actualHeight * 16)));
+            preWidgets.add(Widgets.createSlotBase(new Rectangle(xx - 1, yy - 1, innerWidth * 16 + 2, actualHeight * 16 + 2)));
             int index = 0;
             List<String> list = Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("text.rei.working_station"));
             xx += (innerWidth - 1) * 16;
@@ -388,17 +390,13 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
         for (Widget widget : preWidgets) {
             widget.render(mouseX, mouseY, delta);
         }
-        if (selectedCategory != null)
-            selectedCategory.drawCategoryBackground(bounds, mouseX, mouseY, delta);
-        else {
-            PanelWidget.render(bounds, -1);
-            if (REIHelper.getInstance().isDarkThemeEnabled()) {
-                fill(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, 0xFF404040);
-                fill(bounds.x + 17, bounds.y + 19, bounds.x + bounds.width - 17, bounds.y + 30, 0xFF404040);
-            } else {
-                fill(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, 0xFF9E9E9E);
-                fill(bounds.x + 17, bounds.y + 19, bounds.x + bounds.width - 17, bounds.y + 31, 0xFF9E9E9E);
-            }
+        PanelWidget.render(bounds, -1);
+        if (REIHelper.getInstance().isDarkThemeEnabled()) {
+            fill(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, 0xFF404040);
+            fill(bounds.x + 17, bounds.y + 19, bounds.x + bounds.width - 17, bounds.y + 30, 0xFF404040);
+        } else {
+            fill(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, 0xFF9E9E9E);
+            fill(bounds.x + 17, bounds.y + 19, bounds.x + bounds.width - 17, bounds.y + 31, 0xFF9E9E9E);
         }
         for (TabWidget tab : tabs) {
             if (!tab.isSelected())

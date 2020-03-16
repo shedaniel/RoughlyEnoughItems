@@ -24,12 +24,12 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.entries.RecipeEntry;
 import me.shedaniel.rei.gui.entries.SimpleRecipeEntry;
-import me.shedaniel.rei.gui.widget.PanelWidget;
-import me.shedaniel.rei.gui.widget.RecipeBaseWidget;
 import me.shedaniel.rei.gui.widget.Widget;
+import me.shedaniel.rei.impl.widgets.PanelWidget;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
@@ -87,7 +87,7 @@ public interface RecipeCategory<T extends RecipeDisplay> {
     @ApiStatus.ScheduledForRemoval
     @Deprecated
     default List<Widget> setupDisplay(Supplier<T> recipeDisplaySupplier, me.shedaniel.math.api.Rectangle bounds) {
-        return Collections.singletonList(new RecipeBaseWidget(bounds));
+        return Collections.singletonList(Widgets.createCategoryBase(bounds));
     }
     
     /**

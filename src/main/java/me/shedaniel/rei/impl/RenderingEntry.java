@@ -131,7 +131,9 @@ public abstract class RenderingEntry extends DrawableHelper implements EntryStac
     
     @Nullable
     @Override
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     public QueuedTooltip getTooltip(int mouseX, int mouseY) {
-        return null;
+        return EntryStack.super.getTooltip(mouseX, mouseY);
     }
 }

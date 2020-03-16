@@ -36,7 +36,7 @@ import me.shedaniel.rei.server.ContainerInfoHandler;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.ScreenWithHandler;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.ItemStack;
@@ -57,7 +57,7 @@ public class DefaultCategoryHandler implements AutoTransferHandler {
         if (!(context.getRecipe() instanceof TransferRecipeDisplay))
             return Result.createNotApplicable();
         TransferRecipeDisplay recipe = (TransferRecipeDisplay) context.getRecipe();
-        ScreenWithHandler<?> screenWithHandler = context.getScreenWithHandler();
+        HandledScreen<?> screenWithHandler = context.getHandledScreen();
         ScreenHandler screenHandler = context.getScreenHandler();
         ContainerInfo<ScreenHandler> containerInfo = (ContainerInfo<ScreenHandler>) ContainerInfoHandler.getContainerInfo(recipe.getRecipeCategory(), screenHandler.getClass());
         if (containerInfo == null)

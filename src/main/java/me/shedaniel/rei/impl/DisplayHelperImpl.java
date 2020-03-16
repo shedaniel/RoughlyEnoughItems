@@ -110,6 +110,7 @@ public class DisplayHelperImpl implements DisplayHelper {
         screenDisplayBoundsHandlers.sort(BOUNDS_HANDLER_COMPARATOR);
     }
     
+    @Deprecated
     @Override
     public BaseBoundsHandler getBaseBoundsHandler() {
         return baseBoundsHandler;

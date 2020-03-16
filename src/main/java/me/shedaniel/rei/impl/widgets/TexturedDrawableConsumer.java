@@ -30,15 +30,17 @@ import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.NotNull;
 import org.lwjgl.opengl.GL11;
 
 public class TexturedDrawableConsumer implements DrawableConsumer {
     
+    @NotNull
     private Identifier identifier;
     private int x, y, width, height, uWidth, vHeight, textureWidth, textureHeight;
     private float u, v;
     
-    public TexturedDrawableConsumer(Identifier identifier, int x, int y, int width, int height, float u, float v, int uWidth, int vHeight, int textureWidth, int textureHeight) {
+    public TexturedDrawableConsumer(@NotNull Identifier identifier, int x, int y, int width, int height, float u, float v, int uWidth, int vHeight, int textureWidth, int textureHeight) {
         this.identifier = identifier;
         this.x = x;
         this.y = y;
@@ -53,7 +55,7 @@ public class TexturedDrawableConsumer implements DrawableConsumer {
     }
     
     @Override
-    public void render(DrawableHelper helper, int mouseX, int mouseY, float delta) {
+    public void render(@NotNull DrawableHelper helper, int mouseX, int mouseY, float delta) {
         MinecraftClient.getInstance().getTextureManager().bindTexture(identifier);
         innerBlit(x, x + width, y, y + height, helper.getZOffset(), uWidth, vHeight, u, v, textureWidth, textureHeight);
     }

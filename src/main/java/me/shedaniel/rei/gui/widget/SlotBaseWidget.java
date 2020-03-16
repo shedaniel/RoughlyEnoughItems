@@ -27,6 +27,12 @@ import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
 import org.jetbrains.annotations.ApiStatus;
 
+/**
+ * @see me.shedaniel.rei.api.widgets.Widgets#createSlotBase(me.shedaniel.math.Rectangle)
+ * @see me.shedaniel.rei.api.widgets.Widgets#createSlotBase(me.shedaniel.math.Rectangle, int)
+ */
+@ApiStatus.ScheduledForRemoval
+@Deprecated
 public class SlotBaseWidget extends RecipeBaseWidget {
     
     /**
@@ -58,3 +64,4 @@ public class SlotBaseWidget extends RecipeBaseWidget {
     }
     
 }
+

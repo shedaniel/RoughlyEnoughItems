@@ -27,8 +27,8 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.widgets.Label;
+import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
-import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import net.minecraft.client.gui.Element;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -48,14 +48,14 @@ public final class LabelWidget extends Label {
     private boolean focusable = true;
     private int color = REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : -1;
     private int hoveredColor = REIHelper.getInstance().isDarkThemeEnabled() ? -1 : 0xFF66FFCC;
-    private Point point;
+    @NotNull private Point point;
     @Nullable private Function<Label, @Nullable String> tooltip;
     @Nullable private Consumer<Label> onClick;
     @Nullable private Consumer<Label> onRender;
     @NotNull private String text;
     
-    public LabelWidget(Point point, @NotNull String text) {
-        this.point = point;
+    public LabelWidget(@NotNull Point point, @NotNull String text) {
+        Objects.requireNonNull(this.point = point);
         Objects.requireNonNull(this.text = text);
     }
     
@@ -219,9 +219,9 @@ public final class LabelWidget extends Label {
             String tooltip = getTooltip();
             if (tooltip != null) {
                 if (!focused && containsMouse(mouseX, mouseY))
-                    QueuedTooltip.create(tooltip.split("\n")).queue();
+                    Tooltip.create(tooltip.split("\n")).queue();
                 else if (focused)
-                    QueuedTooltip.create(point, tooltip.split("\n")).queue();
+                    Tooltip.create(point, tooltip.split("\n")).queue();
             }
         }
     }

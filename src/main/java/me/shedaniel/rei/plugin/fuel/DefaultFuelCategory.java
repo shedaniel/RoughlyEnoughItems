@@ -28,9 +28,9 @@ import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.widgets.Slot;
+import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.entries.RecipeEntry;
-import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.client.MinecraftClient;
@@ -91,9 +91,9 @@ public class DefaultFuelCategory implements RecipeCategory<DefaultFuelDisplay> {
             
             @Nullable
             @Override
-            public QueuedTooltip getTooltip(int mouseX, int mouseY) {
-                if (slot.containsMouse(mouseX, mouseY))
-                    return slot.getCurrentTooltip(mouseX, mouseY);
+            public Tooltip getTooltip(Point point) {
+                if (slot.containsMouse(point))
+                    return slot.getCurrentTooltip(point);
                 return null;
             }
             

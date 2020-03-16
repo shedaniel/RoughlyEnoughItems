@@ -28,7 +28,7 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.ScreenWithHandler;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.screen.ScreenHandler;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -82,8 +82,8 @@ public interface AutoTransferHandler {
     }
     
     interface Context {
-        static Context create(boolean actuallyCrafting, ScreenWithHandler<?> containerScreen, RecipeDisplay recipeDisplay) {
-            return new ContextImpl(actuallyCrafting, containerScreen, () -> recipeDisplay);
+        static Context create(boolean actuallyCrafting, HandledScreen<?> handledScreen, RecipeDisplay recipeDisplay) {
+            return new ContextImpl(actuallyCrafting, handledScreen, () -> recipeDisplay);
         }
         
         default MinecraftClient getMinecraft() {
@@ -92,12 +92,18 @@ public interface AutoTransferHandler {
         
         boolean isActuallyCrafting();
         
-        ScreenWithHandler<?> getScreenWithHandler();
+        HandledScreen<?> getHandledScreen();
         
         @Deprecated
         @ApiStatus.ScheduledForRemoval
-        default ScreenWithHandler<?> getContainerScreen() {
-            return getScreenWithHandler();
+        default HandledScreen<?> getScreenWithHandler() {
+            return getHandledScreen();
+        }
+        
+        @Deprecated
+        @ApiStatus.ScheduledForRemoval
+        default HandledScreen<?> getContainerScreen() {
+            return getHandledScreen();
         }
         
         RecipeDisplay getRecipe();
@@ -174,12 +180,12 @@ public interface AutoTransferHandler {
     @ApiStatus.Internal
     final class ContextImpl implements Context {
         boolean actuallyCrafting;
-        ScreenWithHandler<?> screenWithHandler;
+        HandledScreen<?> handledScreen;
         Supplier<RecipeDisplay> recipeDisplaySupplier;
         
-        private ContextImpl(boolean actuallyCrafting, ScreenWithHandler<?> screenWithHandler, Supplier<RecipeDisplay> recipeDisplaySupplier) {
+        private ContextImpl(boolean actuallyCrafting, HandledScreen<?> handledScreen, Supplier<RecipeDisplay> recipeDisplaySupplier) {
             this.actuallyCrafting = actuallyCrafting;
-            this.screenWithHandler = screenWithHandler;
+            this.handledScreen = handledScreen;
             this.recipeDisplaySupplier = recipeDisplaySupplier;
         }
         
@@ -189,8 +195,8 @@ public interface AutoTransferHandler {
         }
         
         @Override
-        public ScreenWithHandler<?> getScreenWithHandler() {
-            return screenWithHandler;
+        public HandledScreen<?> getHandledScreen() {
+            return handledScreen;
         }
         
         @Override

@@ -26,6 +26,7 @@ package me.shedaniel.rei.gui.widget;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
+import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
 import net.minecraft.client.gui.Element;
 import org.jetbrains.annotations.ApiStatus;
@@ -205,6 +206,6 @@ public class LabelWidget extends WidgetWithBounds {
     protected void drawTooltips(int mouseX, int mouseY) {
         if (getTooltips().isPresent())
             if (containsMouse(mouseX, mouseY))
-                REIHelper.getInstance().addTooltip(QueuedTooltip.create(getTooltips().get().split("\n")));
+                Tooltip.create(getTooltips().get().split("\n")).queue();
     }
 }

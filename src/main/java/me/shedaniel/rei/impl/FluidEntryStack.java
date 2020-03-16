@@ -24,11 +24,12 @@
 package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
+import me.shedaniel.math.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.gui.widget.QueuedTooltip;
+import me.shedaniel.rei.api.widgets.Tooltip;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.minecraft.client.MinecraftClient;
@@ -178,7 +179,7 @@ public class FluidEntryStack extends AbstractEntryStack {
     
     @Nullable
     @Override
-    public QueuedTooltip getTooltip(int mouseX, int mouseY) {
+    public Tooltip getTooltip(Point point) {
         if (!get(Settings.TOOLTIP_ENABLED).get() || isEmpty())
             return null;
         List<String> toolTip = Lists.newArrayList(SearchArgument.tryGetEntryStackName(this));
@@ -199,7 +200,7 @@ public class FluidEntryStack extends AbstractEntryStack {
             if (!alreadyHasMod)
                 toolTip.add(modString);
         }
-        return QueuedTooltip.create(toolTip);
+        return Tooltip.create(toolTip);
     }
     
     @SuppressWarnings("deprecation")

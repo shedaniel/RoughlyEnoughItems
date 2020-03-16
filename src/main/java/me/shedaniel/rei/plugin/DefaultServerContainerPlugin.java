@@ -31,7 +31,7 @@ import net.minecraft.util.Identifier;
 public class DefaultServerContainerPlugin implements Runnable {
     @Override
     public void run() {
-        ContainerInfoHandler.registerScreenWithHandlerInfo(new Identifier("minecraft", "plugins/crafting"), CraftingContainerInfoWrapper.create(CraftingTableScreenHandler.class));
+        ContainerInfoHandler.registerScreenWithHandlerInfo(new Identifier("minecraft", "plugins/crafting"), CraftingContainerInfoWrapper.create(CraftingScreenHandler.class));
         ContainerInfoHandler.registerScreenWithHandlerInfo(new Identifier("minecraft", "plugins/crafting"), CraftingContainerInfoWrapper.create(PlayerScreenHandler.class));
         ContainerInfoHandler.registerScreenWithHandlerInfo(new Identifier("minecraft", "plugins/smelting"), CraftingContainerInfoWrapper.create(FurnaceScreenHandler.class));
         ContainerInfoHandler.registerScreenWithHandlerInfo(new Identifier("minecraft", "plugins/smoking"), CraftingContainerInfoWrapper.create(SmokerScreenHandler.class));

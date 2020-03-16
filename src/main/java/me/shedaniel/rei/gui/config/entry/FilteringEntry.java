@@ -37,9 +37,9 @@ import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryRegistry;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.REIHelper;
+import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.OverlaySearchField;
 import me.shedaniel.rei.gui.widget.EntryWidget;
-import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.SearchArgument;
 import me.shedaniel.rei.utils.CollectionUtils;
@@ -73,7 +73,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
     private Consumer<List<EntryStack>> saveConsumer;
     private List<EntryStack> defaultValue;
     private List<EntryStack> configFiltered;
-    private QueuedTooltip tooltip = null;
+    private Tooltip tooltip = null;
     @SuppressWarnings("rawtypes") private ClothConfigScreen.ListWidget lastList = null;
     private List<EntryStack> entryStacks = null;
     private Rectangle innerBounds;
@@ -543,7 +543,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
         protected void queueTooltip(int mouseX, int mouseY, float delta) {
             if (searchField.containsMouse(mouseX, mouseY))
                 return;
-            QueuedTooltip tooltip = getCurrentTooltip(mouseX, mouseY);
+            Tooltip tooltip = getCurrentTooltip(new Point(mouseX, mouseY));
             if (tooltip != null) {
                 FilteringEntry.this.tooltip = tooltip;
             }

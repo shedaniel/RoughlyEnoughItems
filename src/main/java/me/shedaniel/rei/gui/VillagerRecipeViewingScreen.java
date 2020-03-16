@@ -33,7 +33,10 @@ import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.entries.RecipeEntry;
-import me.shedaniel.rei.gui.widget.*;
+import me.shedaniel.rei.gui.widget.AutoCraftingButtonWidget;
+import me.shedaniel.rei.gui.widget.ButtonWidget;
+import me.shedaniel.rei.gui.widget.TabWidget;
+import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.CollectionUtils;
@@ -153,8 +156,8 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
             int h = MathHelper.ceil(workingStations.size() / ((float) ww));
             int xx = bounds.x + 16;
             int yy = bounds.y + bounds.height + 2;
-            widgets.add(new CategoryBaseWidget(new Rectangle(xx - 5, bounds.y + bounds.height - 5, 10 + w * 16, 12 + h * 16)));
-            widgets.add(new SlotBaseWidget(new Rectangle(xx - 1, yy - 1, 2 + w * 16, 2 + h * 16)));
+            widgets.add(Widgets.createCategoryBase(new Rectangle(xx - 5, bounds.y + bounds.height - 5, 10 + w * 16, 12 + h * 16)));
+            widgets.add(Widgets.createSlotBase(new Rectangle(xx - 1, yy - 1, 2 + w * 16, 2 + h * 16)));
             int index = 0;
             List<String> list = Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("text.rei.working_station"));
             for (List<EntryStack> workingStation : workingStations) {
@@ -169,9 +172,9 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
             }
         }
         
-        this.widgets.add(new CategoryBaseWidget(bounds));
+        this.widgets.add(Widgets.createCategoryBase(bounds));
         this.scrollListBounds = new Rectangle(bounds.x + 4, bounds.y + 17, 97 + 5, guiHeight - 17 - 7);
-        this.widgets.add(new SlotBaseWidget(scrollListBounds));
+        this.widgets.add(Widgets.createSlotBase(scrollListBounds));
         
         Rectangle recipeBounds = new Rectangle(bounds.x + 100 + (guiWidth - 100) / 2 - category.getDisplayWidth(display) / 2, bounds.y + bounds.height / 2 - category.getDisplayHeight() / 2, category.getDisplayWidth(display), category.getDisplayHeight());
         List<Widget> setupDisplay = category.setupDisplay(display, recipeBounds);
@@ -384,7 +387,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
             if (buttonWidgets.get(i).getBounds().getMaxY() > scrollListBounds.getMinY() && buttonWidgets.get(i).getBounds().getMinY() < scrollListBounds.getMaxY()) {
                 recipeRenderers.get(i).setZ(1);
                 recipeRenderers.get(i).render(buttonWidgets.get(i).getBounds(), mouseX, mouseY, delta);
-                REIHelper.getInstance().addTooltip(recipeRenderers.get(i).getTooltip(mouseX, mouseY));
+                recipeRenderers.get(i).getTooltip(new Point(mouseX, mouseY)).queue();
             }
         }
         double maxScroll = getMaxScrollPosition();
@@ -481,7 +484,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
             if (element.keyPressed(int_1, int_2, int_3))
                 return true;
         if (int_1 == 256 || this.client.options.keyInventory.matchesKey(int_1, int_2)) {
-            MinecraftClient.getInstance().openScreen(ScreenHelper.getLastScreenWithHandler());
+            MinecraftClient.getInstance().openScreen(ScreenHelper.getLastHandledScreen());
             ScreenHelper.getLastOverlay().init();
             return true;
         }
@@ -489,7 +492,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
             if (ScreenHelper.hasLastRecipeScreen())
                 client.openScreen(ScreenHelper.getLastRecipeScreen());
             else
-                client.openScreen(ScreenHelper.getLastScreenWithHandler());
+                client.openScreen(ScreenHelper.getLastHandledScreen());
             return true;
         }
         return super.keyPressed(int_1, int_2, int_3);

@@ -34,8 +34,8 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.recipe.Recipe;
+import net.minecraft.screen.AbstractRecipeScreenHandler;
 import net.minecraft.screen.CraftingScreenHandler;
-import net.minecraft.screen.CraftingTableScreenHandler;
 import net.minecraft.screen.PlayerScreenHandler;
 
 public class DefaultRecipeBookHandler implements AutoTransferHandler {
@@ -44,14 +44,14 @@ public class DefaultRecipeBookHandler implements AutoTransferHandler {
         if (context.getRecipe() instanceof TransferRecipeDisplay && DefaultCategoryHandler.canUseMovePackets())
             return Result.createNotApplicable();
         RecipeDisplay display = context.getRecipe();
-        if (!(context.getScreenHandler() instanceof CraftingScreenHandler))
+        if (!(context.getScreenHandler() instanceof AbstractRecipeScreenHandler))
             return Result.createNotApplicable();
-        CraftingScreenHandler<?> container = (CraftingScreenHandler<?>) context.getScreenHandler();
+        AbstractRecipeScreenHandler<?> container = (AbstractRecipeScreenHandler<?>) context.getScreenHandler();
         if (display instanceof DefaultCraftingDisplay) {
             DefaultCraftingDisplay craftingDisplay = (DefaultCraftingDisplay) display;
             if (craftingDisplay.getOptionalRecipe().isPresent()) {
                 int h = -1, w = -1;
-                if (container instanceof CraftingTableScreenHandler) {
+                if (container instanceof CraftingScreenHandler) {
                     h = 3;
                     w = 3;
                 } else if (container instanceof PlayerScreenHandler) {
@@ -67,9 +67,9 @@ public class DefaultRecipeBookHandler implements AutoTransferHandler {
                     return Result.createFailed(I18n.translate("error.rei.recipe.not.unlocked"));
                 if (!context.isActuallyCrafting())
                     return Result.createSuccessful();
-                context.getMinecraft().openScreen(context.getScreenWithHandler());
-                if (context.getScreenWithHandler() instanceof RecipeBookProvider)
-                    ((RecipeBookGuiHooks) ((RecipeBookProvider) context.getScreenWithHandler()).getRecipeBookWidget()).rei_getGhostSlots().reset();
+                context.getMinecraft().openScreen(context.getHandledScreen());
+                if (context.getHandledScreen() instanceof RecipeBookProvider)
+                    ((RecipeBookGuiHooks) ((RecipeBookProvider) context.getHandledScreen()).getRecipeBookWidget()).rei_getGhostSlots().reset();
                 context.getMinecraft().interactionManager.clickRecipe(container.syncId, recipe, Screen.hasShiftDown());
                 ScreenHelper.getLastOverlay().init();
             }
@@ -81,9 +81,9 @@ public class DefaultRecipeBookHandler implements AutoTransferHandler {
                     return Result.createFailed(I18n.translate("error.rei.recipe.not.unlocked"));
                 if (!context.isActuallyCrafting())
                     return Result.createSuccessful();
-                context.getMinecraft().openScreen(context.getScreenWithHandler());
-                if (context.getScreenWithHandler() instanceof RecipeBookProvider)
-                    ((RecipeBookGuiHooks) ((RecipeBookProvider) context.getScreenWithHandler()).getRecipeBookWidget()).rei_getGhostSlots().reset();
+                context.getMinecraft().openScreen(context.getHandledScreen());
+                if (context.getHandledScreen() instanceof RecipeBookProvider)
+                    ((RecipeBookGuiHooks) ((RecipeBookProvider) context.getHandledScreen()).getRecipeBookWidget()).rei_getGhostSlots().reset();
                 context.getMinecraft().interactionManager.clickRecipe(container.syncId, recipe, Screen.hasShiftDown());
                 ScreenHelper.getLastOverlay().init();
             }

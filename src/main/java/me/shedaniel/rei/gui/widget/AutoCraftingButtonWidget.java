@@ -29,11 +29,12 @@ import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.toast.CopyRecipeIdentifierToast;
 import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.minecraft.client.gui.screen.ingame.ScreenWithHandler;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
@@ -51,7 +52,7 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
     private String extraTooltip;
     private List<String> errorTooltip;
     private List<Widget> setupDisplay;
-    private ScreenWithHandler<?> screenWithHandler;
+    private HandledScreen<?> handledScreen;
     private boolean visible = false;
     private RecipeCategory<?> category;
     private Rectangle displayBounds;
@@ -62,14 +63,14 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
         this.displaySupplier = displaySupplier;
         Optional<Identifier> recipe = displaySupplier.get().getRecipeLocation();
         extraTooltip = recipe.isPresent() ? I18n.translate("text.rei.recipe_id", Formatting.GRAY.toString(), recipe.get().toString()) : "";
-        this.screenWithHandler = ScreenHelper.getLastScreenWithHandler();
+        this.handledScreen = ScreenHelper.getLastHandledScreen();
         this.setupDisplay = setupDisplay;
         this.category = recipeCategory;
     }
     
     @Override
     public void onPressed() {
-        AutoTransferHandler.Context context = AutoTransferHandler.Context.create(true, screenWithHandler, displaySupplier.get());
+        AutoTransferHandler.Context context = AutoTransferHandler.Context.create(true, handledScreen, displaySupplier.get());
         for (AutoTransferHandler autoTransferHandler : RecipeHelper.getInstance().getSortedAutoCraftingHandler())
             try {
                 AutoTransferHandler.Result result = autoTransferHandler.handle(context);
@@ -78,7 +79,7 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        minecraft.openScreen(screenWithHandler);
+        minecraft.openScreen(handledScreen);
         ScreenHelper.getLastOverlay().init();
     }
     
@@ -89,7 +90,7 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
         int color = 0;
         visible = false;
         IntList redSlots = null;
-        AutoTransferHandler.Context context = AutoTransferHandler.Context.create(false, screenWithHandler, displaySupplier.get());
+        AutoTransferHandler.Context context = AutoTransferHandler.Context.create(false, handledScreen, displaySupplier.get());
         for (AutoTransferHandler autoTransferHandler : RecipeHelper.getInstance().getSortedAutoCraftingHandler()) {
             try {
                 AutoTransferHandler.Result result = autoTransferHandler.handle(context);
@@ -148,9 +149,9 @@ public class AutoCraftingButtonWidget extends ButtonWidget {
         
         if (getTooltips().isPresent())
             if (!focused && containsMouse(mouseX, mouseY))
-                REIHelper.getInstance().addTooltip(QueuedTooltip.create(getTooltips().get().split("\n")));
+                Tooltip.create(getTooltips().get().split("\n")).queue();
             else if (focused)
-                REIHelper.getInstance().addTooltip(QueuedTooltip.create(new Point(x + width / 2, y + height / 2), getTooltips().get().split("\n")));
+                Tooltip.create(new Point(x + width / 2, y + height / 2), getTooltips().get().split("\n")).queue();
     }
     
     @Override

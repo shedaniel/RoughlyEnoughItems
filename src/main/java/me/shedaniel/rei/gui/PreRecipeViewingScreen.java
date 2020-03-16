@@ -38,7 +38,7 @@ import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.ScreenWithHandler;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.NarratorManager;
 import net.minecraft.text.TranslatableText;
@@ -169,7 +169,7 @@ public class PreRecipeViewingScreen extends Screen {
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (int_1 == 256 || this.client.options.keyInventory.matchesKey(int_1, int_2)) {
             MinecraftClient.getInstance().openScreen(parent);
-            if (parent instanceof ScreenWithHandler)
+            if (parent instanceof HandledScreen)
                 ScreenHelper.getLastOverlay().init();
             return true;
         }
@@ -203,10 +203,10 @@ public class PreRecipeViewingScreen extends Screen {
             if (containsMouse(double_1, double_2)) {
                 original = (v == 0);
                 if (!isSet) {
-                    moveFrameTo(!original ? 0 : 1, false, 0);
+                    moveFrameTo(original ? 0 : 1, false, 0);
                 }
                 isSet = true;
-                moveFrameTo(original ? 0 : 1, true, 1000);
+                moveFrameTo(original ? 0 : 1, true, 500);
                 return true;
             }
             return false;

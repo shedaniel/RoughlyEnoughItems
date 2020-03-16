@@ -41,12 +41,12 @@ import java.util.function.Supplier;
 public class DefaultPotionEffectExclusionZones implements Supplier<List<Rectangle>> {
     @Override
     public List<Rectangle> get() {
-        if (!(ScreenHelper.getLastScreenWithHandler() instanceof AbstractInventoryScreen) || !((AbstractInventoryScreenHooks) ScreenHelper.getLastScreenWithHandler()).rei_doesOffsetGuiForEffects())
+        if (!(ScreenHelper.getLastHandledScreen() instanceof AbstractInventoryScreen) || !((AbstractInventoryScreenHooks) ScreenHelper.getLastHandledScreen()).rei_doesOffsetGuiForEffects())
             return Collections.emptyList();
         Collection<StatusEffectInstance> activePotionEffects = MinecraftClient.getInstance().player.getStatusEffects();
         if (activePotionEffects.isEmpty())
             return Collections.emptyList();
-        ContainerScreenHooks hooks = ScreenHelper.getLastScreenWithHandlerHooks();
+        ContainerScreenHooks hooks = ((ContainerScreenHooks) ScreenHelper.getLastHandledScreen());
         List<Rectangle> list = new ArrayList<>();
         int x = hooks.rei_getContainerLeft() - 124;
         int y = hooks.rei_getContainerTop();

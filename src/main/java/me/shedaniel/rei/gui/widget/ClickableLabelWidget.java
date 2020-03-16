@@ -25,6 +25,7 @@ package me.shedaniel.rei.gui.widget;
 
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.REIHelper;
+import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -92,9 +93,9 @@ public abstract class ClickableLabelWidget extends LabelWidget {
     protected void drawTooltips(int mouseX, int mouseY) {
         if (isClickable() && getTooltips().isPresent())
             if (!focused && containsMouse(mouseX, mouseY))
-                REIHelper.getInstance().addTooltip(QueuedTooltip.create(getTooltips().get().split("\n")));
+                Tooltip.create(getTooltips().get().split("\n")).queue();
             else if (focused)
-                REIHelper.getInstance().addTooltip(QueuedTooltip.create(getPosition(), getTooltips().get().split("\n")));
+                Tooltip.create(getPosition(), getTooltips().get().split("\n")).queue();
     }
     
     public int getHoveredColor() {
