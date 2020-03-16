@@ -24,10 +24,12 @@
 package me.shedaniel.rei.gui.entries;
 
 import com.google.common.collect.Lists;
+import me.shedaniel.math.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.gui.widget.EntryWidget;
-import me.shedaniel.rei.gui.widget.QueuedTooltip;
+import me.shedaniel.rei.api.widgets.Slot;
+import me.shedaniel.rei.api.widgets.Tooltip;
+import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.Identifier;
@@ -46,8 +48,8 @@ public class SimpleRecipeEntry extends RecipeEntry {
     
     private static final Comparator<EntryStack> ENTRY_COMPARATOR = Comparator.comparingLong(EntryStack::hashCode);
     private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
-    private List<EntryWidget> inputWidgets;
-    private EntryWidget outputWidget;
+    private List<Slot> inputWidgets;
+    private Slot outputWidget;
     
     @ApiStatus.Internal
     protected SimpleRecipeEntry(List<List<EntryStack>> input, List<EntryStack> output) {
@@ -67,8 +69,8 @@ public class SimpleRecipeEntry extends RecipeEntry {
                 s.setAmount(pair.getRight().get());
                 return s;
             }).collect(Collectors.toList()));
-        this.inputWidgets = b.stream().filter(stacks -> !stacks.isEmpty()).map(stacks -> EntryWidget.create(0, 0).entries(stacks).noBackground().noHighlight().noTooltips()).collect(Collectors.toList());
-        this.outputWidget = EntryWidget.create(0, 0).entries(CollectionUtils.filter(output, stack -> !stack.isEmpty())).noBackground().noHighlight().noTooltips();
+        this.inputWidgets = b.stream().filter(stacks -> !stacks.isEmpty()).map(stacks -> Widgets.createSlot(new Point(0, 0)).entries(stacks).disableBackground().disableHighlight().disableTooltips()).collect(Collectors.toList());
+        this.outputWidget = Widgets.createSlot(new Point(0, 0)).entries(CollectionUtils.filter(output, stack -> !stack.isEmpty())).disableBackground().disableHighlight().disableTooltips();
     }
     
     public static RecipeEntry create(Supplier<List<List<EntryStack>>> input, Supplier<List<EntryStack>> output) {
@@ -97,7 +99,7 @@ public class SimpleRecipeEntry extends RecipeEntry {
         int xx = bounds.x + 4, yy = bounds.y + 2;
         int j = 0;
         int itemsPerLine = getItemsPerLine();
-        for (EntryWidget entryWidget : inputWidgets) {
+        for (Slot entryWidget : inputWidgets) {
             entryWidget.setZ(getZ() + 50);
             entryWidget.getBounds().setLocation(xx, yy);
             entryWidget.render(mouseX, mouseY, delta);
@@ -121,13 +123,13 @@ public class SimpleRecipeEntry extends RecipeEntry {
     
     @Nullable
     @Override
-    public QueuedTooltip getTooltip(int mouseX, int mouseY) {
-        for (EntryWidget widget : inputWidgets) {
-            if (widget.containsMouse(mouseX, mouseY))
-                return widget.getCurrentTooltip(mouseX, mouseY);
+    public Tooltip getTooltip(Point point) {
+        for (Slot widget : inputWidgets) {
+            if (widget.containsMouse(point))
+                return widget.getCurrentTooltip(point);
         }
-        if (outputWidget.containsMouse(mouseX, mouseY))
-            return outputWidget.getCurrentTooltip(mouseX, mouseY);
+        if (outputWidget.containsMouse(point))
+            return outputWidget.getCurrentTooltip(point);
         return null;
     }
     

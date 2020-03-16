@@ -66,6 +66,10 @@ public abstract class Widget extends AbstractParentElement implements Drawable {
         return containsMouse(point.x, point.y);
     }
     
+    public final boolean containsMouse(me.shedaniel.math.Point point) {
+        return containsMouse(point.x, point.y);
+    }
+    
     @Override
     public final boolean isMouseOver(double double_1, double double_2) {
         return containsMouse(double_1, double_2);

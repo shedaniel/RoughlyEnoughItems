@@ -30,6 +30,7 @@ import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.gui.widget.*;
@@ -40,7 +41,7 @@ import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.ScreenWithHandler;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.resource.language.I18n;
@@ -67,7 +68,7 @@ import java.util.*;
 public class ContainerScreenOverlay extends WidgetWithBounds {
     
     private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
-    private static final List<QueuedTooltip> QUEUED_TOOLTIPS = Lists.newArrayList();
+    private static final List<Tooltip> TOOLTIPS = Lists.newArrayList();
     private static final EntryListWidget ENTRY_LIST_WIDGET = new EntryListWidget();
     private static FavoritesListWidget favoritesListWidget = null;
     private final List<Widget> widgets = Lists.newLinkedList();
@@ -180,7 +181,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                     ClientHelper.getInstance().setCheating(!ClientHelper.getInstance().isCheating());
                     return;
                 }
-                ConfigManager.getInstance().openConfigScreen(ScreenHelper.getLastScreenWithHandler());
+                ConfigManager.getInstance().openConfigScreen(ScreenHelper.getLastHandledScreen());
             }
             
             @Override
@@ -362,7 +363,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             VillagerRecipeViewingScreen widget = (VillagerRecipeViewingScreen) MinecraftClient.getInstance().currentScreen;
             return new Rectangle(widget.bounds.x, window.getScaledHeight() - 22, widget.bounds.width - widthRemoved, 18);
         }
-        return new Rectangle(ScreenHelper.getLastScreenWithHandlerHooks().rei_getContainerLeft(), window.getScaledHeight() - 22, ScreenHelper.getLastScreenWithHandlerHooks().rei_getContainerWidth() - widthRemoved, 18);
+        return new Rectangle(((ContainerScreenHooks) ScreenHelper.getLastHandledScreen()).rei_getContainerLeft(), window.getScaledHeight() - 22, ((ContainerScreenHooks) ScreenHelper.getLastHandledScreen()).rei_getContainerWidth() - widthRemoved, 18);
     }
     
     private Rectangle getCraftableToggleArea() {
@@ -411,24 +412,24 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         }
         if (OverlaySearchField.isSearching) {
             setZOffset(200);
-            if (MinecraftClient.getInstance().currentScreen instanceof ScreenWithHandler) {
+            if (MinecraftClient.getInstance().currentScreen instanceof HandledScreen) {
                 ContainerScreenHooks hooks = (ContainerScreenHooks) MinecraftClient.getInstance().currentScreen;
                 int left = hooks.rei_getContainerLeft(), top = hooks.rei_getContainerTop();
-                for (Slot slot : ((ScreenWithHandler<?>) MinecraftClient.getInstance().currentScreen).getScreenHandler().slots)
+                for (Slot slot : ((HandledScreen<?>) MinecraftClient.getInstance().currentScreen).getScreenHandler().slots)
                     if (!slot.hasStack() || !ENTRY_LIST_WIDGET.canLastSearchTermsBeAppliedTo(EntryStack.create(slot.getStack())))
-                        fillGradient(left + slot.xPosition, top + slot.yPosition, left + slot.xPosition + 16, top + slot.yPosition + 16, -601874400, -601874400);
+                        fillGradient(left + slot.x, top + slot.y, left + slot.x + 16, top + slot.y + 16, -601874400, -601874400);
             }
             setZOffset(0);
         }
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.renderWidgets(mouseX, mouseY, delta);
-        if (MinecraftClient.getInstance().currentScreen instanceof ScreenWithHandler && ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
+        if (MinecraftClient.getInstance().currentScreen instanceof HandledScreen && ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
             ContainerScreenHooks hooks = (ContainerScreenHooks) MinecraftClient.getInstance().currentScreen;
             for (RecipeHelper.ScreenClickArea area : RecipeHelper.getInstance().getScreenClickAreas())
                 if (area.getScreenClass().equals(MinecraftClient.getInstance().currentScreen.getClass()))
                     if (area.getRectangle().contains(mouseX - hooks.rei_getContainerLeft(), mouseY - hooks.rei_getContainerTop())) {
                         String collect = CollectionUtils.mapAndJoinToString(area.getCategories(), identifier -> RecipeHelper.getInstance().getCategory(identifier).getCategoryName(), ", ");
-                        QUEUED_TOOLTIPS.add(QueuedTooltip.create(I18n.translate("text.rei.view_recipes_for", collect)));
+                        TOOLTIPS.add(Tooltip.create(I18n.translate("text.rei.view_recipes_for", collect)));
                         break;
                     }
         }
@@ -443,18 +444,15 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         }
         Screen currentScreen = MinecraftClient.getInstance().currentScreen;
         if (!(currentScreen instanceof RecipeViewingScreen) || !((RecipeViewingScreen) currentScreen).choosePageActivated)
-            for (QueuedTooltip queuedTooltip : QUEUED_TOOLTIPS) {
-                if (queuedTooltip != null)
-                    renderTooltip(queuedTooltip);
+            for (Tooltip tooltip : TOOLTIPS) {
+                if (tooltip != null)
+                    renderTooltip(tooltip);
             }
-        QUEUED_TOOLTIPS.clear();
+        TOOLTIPS.clear();
     }
     
-    public void renderTooltip(QueuedTooltip tooltip) {
-        if (tooltip.getConsumer() == null)
-            renderTooltip(tooltip.getText(), tooltip.getX(), tooltip.getY());
-        else
-            tooltip.getConsumer().accept(tooltip);
+    public void renderTooltip(Tooltip tooltip) {
+        renderTooltip(tooltip.getText(), tooltip.getX(), tooltip.getY());
     }
     
     public void renderTooltip(List<String> lines, int mouseX, int mouseY) {
@@ -472,9 +470,9 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         return CollectionUtils.mapAndJoinToString(list1, Object::toString, "").equals(CollectionUtils.mapAndJoinToString(list2, Object::toString, ""));
     }
     
-    public void addTooltip(@Nullable QueuedTooltip queuedTooltip) {
-        if (queuedTooltip != null)
-            QUEUED_TOOLTIPS.add(queuedTooltip);
+    public void addTooltip(@Nullable Tooltip tooltip) {
+        if (tooltip != null)
+            TOOLTIPS.add(tooltip);
     }
     
     public void renderWidgets(int int_1, int int_2, float float_1) {
@@ -527,9 +525,9 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             return true;
         }
         ItemStack itemStack = null;
-        if (MinecraftClient.getInstance().currentScreen instanceof ScreenWithHandler)
-            if (ScreenHelper.getLastScreenWithHandlerHooks().rei_getHoveredSlot() != null && !ScreenHelper.getLastScreenWithHandlerHooks().rei_getHoveredSlot().getStack().isEmpty())
-                itemStack = ScreenHelper.getLastScreenWithHandlerHooks().rei_getHoveredSlot().getStack();
+        if (MinecraftClient.getInstance().currentScreen instanceof HandledScreen)
+            if (((ContainerScreenHooks) ScreenHelper.getLastHandledScreen()).rei_getHoveredSlot() != null && !((ContainerScreenHooks) ScreenHelper.getLastHandledScreen()).rei_getHoveredSlot().getStack().isEmpty())
+                itemStack = ((ContainerScreenHooks) ScreenHelper.getLastHandledScreen()).rei_getHoveredSlot().getStack();
         if (itemStack != null && !itemStack.isEmpty()) {
             if (ConfigObject.getInstance().getRecipeKeybind().matchesKey(int_1, int_2))
                 return ClientHelper.getInstance().executeRecipeKeyBind(itemStack);
@@ -569,7 +567,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
         if (!ScreenHelper.isOverlayVisible())
             return false;
-        if (MinecraftClient.getInstance().currentScreen instanceof ScreenWithHandler && ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
+        if (MinecraftClient.getInstance().currentScreen instanceof HandledScreen && ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
             ContainerScreenHooks hooks = (ContainerScreenHooks) MinecraftClient.getInstance().currentScreen;
             for (RecipeHelper.ScreenClickArea area : RecipeHelper.getInstance().getScreenClickAreas())
                 if (area.getScreenClass().equals(MinecraftClient.getInstance().currentScreen.getClass()))

@@ -95,12 +95,12 @@ public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCr
     
     @Override
     public void renderRedSlots(List<Widget> widgets, me.shedaniel.math.api.Rectangle bounds, DefaultCraftingDisplay display, IntList redSlots) {
-        ContainerInfo<ScreenHandler> info = (ContainerInfo<ScreenHandler>) ContainerInfoHandler.getContainerInfo(getIdentifier(), ScreenHelper.getLastScreenWithHandler().getScreenHandler().getClass());
+        ContainerInfo<ScreenHandler> info = (ContainerInfo<ScreenHandler>) ContainerInfoHandler.getContainerInfo(getIdentifier(), ScreenHelper.getLastHandledScreen().getScreenHandler().getClass());
         if (info == null)
             return;
         RenderSystem.translatef(0, 0, 400);
         Point startPoint = new Point(bounds.getCenterX() - 58, bounds.getCenterY() - 27);
-        int width = info.getCraftingWidth(ScreenHelper.getLastScreenWithHandler().getScreenHandler());
+        int width = info.getCraftingWidth(ScreenHelper.getLastHandledScreen().getScreenHandler());
         for (Integer slot : redSlots) {
             int i = slot;
             int x = i % width;

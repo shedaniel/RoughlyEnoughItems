@@ -31,6 +31,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @ApiStatus.Internal
 @Mixin(AbstractInventoryScreen.class)
 public interface AbstractInventoryScreenHooks {
-    @Accessor("offsetGuiForEffects")
+    @Accessor("drawStatusEffects")
     boolean rei_doesOffsetGuiForEffects();
 }

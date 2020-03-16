@@ -31,7 +31,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.item.ItemStack;
-import net.minecraft.screen.CraftingScreenHandler;
+import net.minecraft.screen.AbstractRecipeScreenHandler;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -96,7 +96,7 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
                 try {
                     InputSlotCrafter.start(category, screenHandler, player, input, shift);
                 } catch (InputSlotCrafter.NotEnoughMaterialsException e) {
-                    if (!(screenHandler instanceof CraftingScreenHandler))
+                    if (!(screenHandler instanceof AbstractRecipeScreenHandler))
                         return;
                     PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
                     buf.writeInt(input.size());

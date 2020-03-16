@@ -30,6 +30,7 @@ import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.widgets.Slot;
+import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.CollectionUtils;
@@ -40,6 +41,8 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -72,6 +75,7 @@ public class EntryWidget extends Slot {
      */
     @ApiStatus.ScheduledForRemoval
     @Deprecated
+    @NotNull
     public static EntryWidget create(int x, int y) {
         return create(new Point(x, y));
     }
@@ -81,6 +85,7 @@ public class EntryWidget extends Slot {
      */
     @ApiStatus.ScheduledForRemoval
     @Deprecated
+    @NotNull
     public static EntryWidget create(Point point) {
         return new EntryWidget(point);
     }
@@ -293,7 +298,7 @@ public class EntryWidget extends Slot {
     }
     
     protected void queueTooltip(int mouseX, int mouseY, float delta) {
-        QueuedTooltip tooltip = getCurrentTooltip(mouseX, mouseY);
+        Tooltip tooltip = getCurrentTooltip(new Point(mouseX, mouseY));
         if (tooltip != null) {
             if (interactableFavorites && ConfigObject.getInstance().doDisplayFavoritesTooltip() && !ConfigObject.getInstance().getFavoriteKeyCode().isUnknown()) {
                 String name = ConfigObject.getInstance().getFavoriteKeyCode().getLocalizedName();
@@ -302,13 +307,13 @@ public class EntryWidget extends Slot {
                 else
                     tooltip.getText().addAll(Arrays.asList(I18n.translate("text.rei.favorites_tooltip", name).split("\n")));
             }
-            REIHelper.getInstance().addTooltip(tooltip);
+            tooltip.queue();
         }
     }
     
     @Override
-    public QueuedTooltip getCurrentTooltip(int mouseX, int mouseY) {
-        return getCurrentEntry().getTooltip(mouseX, mouseY);
+    public @Nullable Tooltip getCurrentTooltip(me.shedaniel.math.Point point) {
+        return getCurrentEntry().getTooltip(point);
     }
     
     protected void drawHighlighted(int mouseX, int mouseY, float delta) {

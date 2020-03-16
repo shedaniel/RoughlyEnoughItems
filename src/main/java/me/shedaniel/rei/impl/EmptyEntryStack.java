@@ -23,9 +23,10 @@
 
 package me.shedaniel.rei.impl;
 
+import me.shedaniel.math.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.gui.widget.QueuedTooltip;
+import me.shedaniel.rei.api.widgets.Tooltip;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -131,8 +132,7 @@ public class EmptyEntryStack implements EntryStack {
     }
     
     @Override
-    @Nullable
-    public QueuedTooltip getTooltip(int mouseX, int mouseY) {
+    public @Nullable Tooltip getTooltip(Point point) {
         return null;
     }
     

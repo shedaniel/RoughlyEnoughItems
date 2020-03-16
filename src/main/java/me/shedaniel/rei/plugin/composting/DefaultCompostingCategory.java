@@ -31,7 +31,6 @@ import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.entries.RecipeEntry;
-import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.block.Blocks;
@@ -40,7 +39,6 @@ import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -70,12 +68,6 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
             @Override
             public int getHeight() {
                 return 10 + MinecraftClient.getInstance().textRenderer.fontHeight;
-            }
-            
-            @Nullable
-            @Override
-            public QueuedTooltip getTooltip(int mouseX, int mouseY) {
-                return null;
             }
             
             @Override

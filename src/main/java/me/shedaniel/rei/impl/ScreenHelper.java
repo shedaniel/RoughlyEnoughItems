@@ -30,17 +30,17 @@ import me.shedaniel.cloth.hooks.ClothClientHooks;
 import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.REIHelper;
+import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.OverlaySearchField;
 import me.shedaniel.rei.gui.RecipeScreen;
-import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.event.client.ClientTickCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.ScreenWithHandler;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.util.Window;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
@@ -59,7 +59,7 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
     @ApiStatus.Internal
     public static List<ItemStack> inventoryStacks = Lists.newArrayList();
     private static ContainerScreenOverlay overlay;
-    private static ScreenWithHandler<?> lastScreenWithHandler = null;
+    private static HandledScreen<?> lastHandledScreen = null;
     private static LinkedHashSet<RecipeScreen> lastRecipeScreen = Sets.newLinkedHashSetWithExpectedSize(5);
     private static ScreenHelper instance;
     
@@ -73,7 +73,7 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
     }
     
     @Override
-    public void addTooltip(@Nullable QueuedTooltip tooltip) {
+    public void queueTooltip(@Nullable Tooltip tooltip) {
         if (overlay != null && tooltip != null) {
             overlay.addTooltip(tooltip);
         }
@@ -148,32 +148,52 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
     
     @Deprecated
     @ApiStatus.ScheduledForRemoval
-    public static ScreenWithHandler<?> getLastContainerScreen() {
-        return getLastScreenWithHandler();
-    }
-    
-    public static ScreenWithHandler<?> getLastScreenWithHandler() {
-        return lastScreenWithHandler;
+    public static HandledScreen<?> getLastContainerScreen() {
+        return getLastHandledScreen();
     }
     
     @Deprecated
     @ApiStatus.ScheduledForRemoval
-    public static void setLastContainerScreen(ScreenWithHandler<?> lastScreenWithHandler) {
-        setLastScreenWithHandler(lastScreenWithHandler);
+    public static HandledScreen<?> getLastScreenWithHandler() {
+        return getLastHandledScreen();
     }
     
-    public static void setLastScreenWithHandler(ScreenWithHandler<?> lastScreenWithHandler) {
-        ScreenHelper.lastScreenWithHandler = lastScreenWithHandler;
+    public static HandledScreen<?> getLastHandledScreen() {
+        return lastHandledScreen;
     }
     
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
+    public static void setLastContainerScreen(HandledScreen<?> lastScreenWithHandler) {
+        setLastHandledScreen(lastScreenWithHandler);
+    }
+    
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
+    public static void setLastScreenWithHandler(HandledScreen<?> lastScreenWithHandler) {
+        setLastHandledScreen(lastScreenWithHandler);
+    }
+    
+    public static void setLastHandledScreen(HandledScreen<?> lastScreenWithHandler) {
+        ScreenHelper.lastHandledScreen = lastScreenWithHandler;
+    }
+    
+    /**
+     * @deprecated Please create your own mixin hooks
+     */
     @Deprecated
     @ApiStatus.ScheduledForRemoval
     public static ContainerScreenHooks getLastContainerScreenHooks() {
         return getLastScreenWithHandlerHooks();
     }
     
+    /**
+     * @deprecated Please create your own mixin hooks
+     */
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     public static ContainerScreenHooks getLastScreenWithHandlerHooks() {
-        return (ContainerScreenHooks) lastScreenWithHandler;
+        return (ContainerScreenHooks) lastHandledScreen;
     }
     
     public static void drawHoveringWidget(int x, int y, TriConsumer<Integer, Integer, Float> consumer, int width, int height, float delta) {
@@ -210,8 +230,8 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
     @Override
     public void onInitializeClient() {
         ClothClientHooks.SCREEN_INIT_PRE.register((client, screen, screenHooks) -> {
-            if (lastScreenWithHandler != screen && screen instanceof ScreenWithHandler)
-                lastScreenWithHandler = (ScreenWithHandler<?>) screen;
+            if (lastHandledScreen != screen && screen instanceof HandledScreen)
+                lastHandledScreen = (HandledScreen<?>) screen;
             return ActionResult.PASS;
         });
         ClientTickCallback.EVENT.register(minecraftClient -> {

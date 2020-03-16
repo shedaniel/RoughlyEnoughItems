@@ -57,7 +57,8 @@ public class BurningFireWidget extends BurningFire {
     }
     
     @Override
-    public @NotNull Rectangle getBounds() {
+    @NotNull
+    public Rectangle getBounds() {
         return bounds;
     }
     

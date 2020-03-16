@@ -21,31 +21,39 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.widgets;
+package me.shedaniel.rei.api.widgets;
 
-import me.shedaniel.rei.api.DrawableConsumer;
-import me.shedaniel.rei.gui.widget.Widget;
-import net.minecraft.client.gui.Element;
-import org.jetbrains.annotations.NotNull;
+import me.shedaniel.math.Point;
+import me.shedaniel.rei.api.REIHelper;
+import me.shedaniel.rei.gui.widget.QueuedTooltip;
 
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
 
-public final class DrawableWidget extends Widget {
-    @NotNull
-    private DrawableConsumer drawable;
-    
-    public DrawableWidget(@NotNull DrawableConsumer drawable) {
-        this.drawable = drawable;
+public interface Tooltip {
+    static Tooltip create(Point point, Collection<String> texts) {
+        return QueuedTooltip.create(point, texts);
     }
     
-    @Override
-    public void render(int mouseX, int mouseY, float delta) {
-        this.drawable.render(this, mouseX, mouseY, delta);
+    static Tooltip create(Point point, String... texts) {
+        return QueuedTooltip.create(point, texts);
     }
     
-    @Override
-    public List<? extends Element> children() {
-        return Collections.emptyList();
+    static Tooltip create(Collection<String> texts) {
+        return QueuedTooltip.create(texts);
+    }
+    
+    static Tooltip create(String... texts) {
+        return QueuedTooltip.create(texts);
+    }
+    
+    int getX();
+    
+    int getY();
+    
+    List<String> getText();
+    
+    default void queue() {
+        REIHelper.getInstance().queueTooltip(this);
     }
 }

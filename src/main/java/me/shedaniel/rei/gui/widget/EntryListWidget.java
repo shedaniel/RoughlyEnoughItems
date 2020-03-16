@@ -33,6 +33,7 @@ import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.config.ItemListOrdering;
@@ -460,7 +461,7 @@ public class EntryListWidget extends WidgetWithBounds {
             }
         }
         if (containsMouse(mouseX, mouseY) && ClientHelper.getInstance().isCheating() && !minecraft.player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
-            REIHelper.getInstance().addTooltip(QueuedTooltip.create(I18n.translate("text.rei.delete_items")));
+            Tooltip.create(I18n.translate("text.rei.delete_items")).queue();
     }
     
     private int getScrollbarMinX() {

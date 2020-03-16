@@ -28,6 +28,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
+import me.shedaniel.rei.api.widgets.Panel;
+import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.resource.language.I18n;
@@ -49,7 +51,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     private List<Widget> widgets;
     private RecipeViewingScreen recipeViewingScreen;
     private TextFieldWidget textFieldWidget;
-    private CategoryBaseWidget base1, base2;
+    private Panel base1, base2;
     private ButtonWidget btnDone;
     
     public RecipeChoosePageWidget(RecipeViewingScreen recipeViewingScreen, int currentPage, int maxPage) {
@@ -102,8 +104,8 @@ public class RecipeChoosePageWidget extends DraggableWidget {
         this.grabBounds = new Rectangle(midPoint.x - 50, midPoint.y - 20, 100, 16);
         this.dragBounds = new Rectangle(midPoint.x - 50, midPoint.y - 20, 100, 70);
         this.widgets = Lists.newArrayList();
-        this.widgets.add(base1 = new CategoryBaseWidget(new Rectangle(bounds.x + bounds.width - 50, bounds.y + bounds.height - 6, 50, 36)));
-        this.widgets.add(base2 = new CategoryBaseWidget(bounds));
+        this.widgets.add(base1 = Widgets.createCategoryBase(new Rectangle(bounds.x + bounds.width - 50, bounds.y + bounds.height - 6, 50, 36)));
+        this.widgets.add(base2 = Widgets.createCategoryBase(bounds));
         this.widgets.add(new Widget() {
             @Override
             public List<Widget> children() {

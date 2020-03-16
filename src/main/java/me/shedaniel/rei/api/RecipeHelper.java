@@ -25,7 +25,7 @@ package me.shedaniel.rei.api;
 
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import net.minecraft.client.gui.screen.ingame.ScreenWithHandler;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.util.Identifier;
@@ -220,7 +220,7 @@ public interface RecipeHelper {
      */
     void registerLiveRecipeGenerator(LiveRecipeGenerator<?> liveRecipeGenerator);
     
-    void registerScreenClickArea(Rectangle rectangle, Class<? extends ScreenWithHandler<?>> screenClass, Identifier... categories);
+    void registerScreenClickArea(Rectangle rectangle, Class<? extends HandledScreen<?>> screenClass, Identifier... categories);
     
     <T extends Recipe<?>> void registerRecipes(Identifier category, Class<T> recipeClass, Function<T, RecipeDisplay> mappingFunction);
     
@@ -232,7 +232,7 @@ public interface RecipeHelper {
     boolean arePluginsLoading();
     
     interface ScreenClickArea {
-        Class<? extends ScreenWithHandler> getScreenClass();
+        Class<? extends HandledScreen> getScreenClass();
         
         Rectangle getRectangle();
         

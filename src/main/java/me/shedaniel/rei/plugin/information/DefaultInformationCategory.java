@@ -36,7 +36,6 @@ import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.entries.RecipeEntry;
-import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import me.shedaniel.rei.impl.RenderingEntry;
@@ -53,7 +52,6 @@ import net.minecraft.client.util.math.Matrix4f;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -88,12 +86,6 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
             @Override
             public int getHeight() {
                 return 10 + MinecraftClient.getInstance().textRenderer.fontHeight;
-            }
-            
-            @Nullable
-            @Override
-            public QueuedTooltip getTooltip(int mouseX, int mouseY) {
-                return null;
             }
             
             @Override

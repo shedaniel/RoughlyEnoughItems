@@ -24,7 +24,14 @@
 package me.shedaniel.rei.gui.widget;
 
 import me.shedaniel.math.api.Rectangle;
+import org.jetbrains.annotations.ApiStatus;
 
+/**
+ * @see me.shedaniel.rei.api.widgets.Widgets#createCategoryBase(me.shedaniel.math.Rectangle)
+ * @see me.shedaniel.rei.api.widgets.Widgets#createCategoryBase(me.shedaniel.math.Rectangle, int)
+ */
+@Deprecated
+@ApiStatus.ScheduledForRemoval
 public class CategoryBaseWidget extends RecipeBaseWidget {
     
     public CategoryBaseWidget(Rectangle bounds) {
@@ -40,5 +47,4 @@ public class CategoryBaseWidget extends RecipeBaseWidget {
     protected boolean isRendering() {
         return true;
     }
-    
 }

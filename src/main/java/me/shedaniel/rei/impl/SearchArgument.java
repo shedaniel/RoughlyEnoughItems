@@ -24,9 +24,10 @@
 package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
+import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.gui.widget.QueuedTooltip;
+import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipContext;
@@ -198,7 +199,7 @@ public class SearchArgument {
     }
     
     public static String tryGetEntryStackTooltip(EntryStack stack) {
-        QueuedTooltip tooltip = stack.getTooltip(0, 0);
+        Tooltip tooltip = stack.getTooltip(new Point());
         if (tooltip != null)
             return CollectionUtils.joinToString(tooltip.getText(), "\n");
         return "";

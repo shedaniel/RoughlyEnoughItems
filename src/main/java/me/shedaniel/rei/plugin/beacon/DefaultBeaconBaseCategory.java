@@ -33,10 +33,9 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeCategory;
+import me.shedaniel.rei.api.widgets.Slot;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.entries.RecipeEntry;
-import me.shedaniel.rei.gui.widget.EntryWidget;
-import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import me.shedaniel.rei.plugin.DefaultPlugin;
@@ -50,7 +49,6 @@ import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -79,12 +77,6 @@ public class DefaultBeaconBaseCategory implements RecipeCategory<DefaultBeaconBa
                 return 10 + MinecraftClient.getInstance().textRenderer.fontHeight;
             }
             
-            @Nullable
-            @Override
-            public QueuedTooltip getTooltip(int mouseX, int mouseY) {
-                return null;
-            }
-            
             @Override
             public void render(me.shedaniel.math.api.Rectangle rectangle, int mouseX, int mouseY, float delta) {
                 MinecraftClient.getInstance().textRenderer.draw(name, rectangle.x + 5, rectangle.y + 6, -1);
@@ -98,7 +90,7 @@ public class DefaultBeaconBaseCategory implements RecipeCategory<DefaultBeaconBa
         widgets.add(Widgets.createSlot(new Point(bounds.getCenterX() - 8, bounds.y + 3)).entry(getLogo()));
         Rectangle rectangle = new Rectangle(bounds.getCenterX() - (bounds.width / 2) - 1, bounds.y + 23, bounds.width + 2, bounds.height - 28);
         widgets.add(Widgets.createSlotBase(rectangle));
-        widgets.add(new ScrollableSlotsWidget(rectangle, CollectionUtils.map(display.getEntries(), t -> EntryWidget.create(0, 0).noBackground().entry(t))));
+        widgets.add(new ScrollableSlotsWidget(rectangle, CollectionUtils.map(display.getEntries(), t -> Widgets.createSlot(new Point(0, 0)).disableBackground().entry(t))));
         return widgets;
     }
     
@@ -114,13 +106,13 @@ public class DefaultBeaconBaseCategory implements RecipeCategory<DefaultBeaconBa
     
     private static class ScrollableSlotsWidget extends WidgetWithBounds {
         private me.shedaniel.math.api.Rectangle bounds;
-        private List<EntryWidget> widgets;
+        private List<Slot> widgets;
         private double target;
         private double scroll;
         private long start;
         private long duration;
         
-        public ScrollableSlotsWidget(Rectangle bounds, List<EntryWidget> widgets) {
+        public ScrollableSlotsWidget(Rectangle bounds, List<Slot> widgets) {
             this.bounds = new me.shedaniel.math.api.Rectangle(bounds);
             this.widgets = Lists.newArrayList(widgets);
         }
@@ -183,7 +175,7 @@ public class DefaultBeaconBaseCategory implements RecipeCategory<DefaultBeaconBa
                     int index = y * 8 + x;
                     if (widgets.size() <= index)
                         break;
-                    EntryWidget widget = widgets.get(index);
+                    Slot widget = widgets.get(index);
                     widget.getBounds().setLocation(bounds.x + 1 + x * 18, (int) (bounds.y + 1 + y * 18 - scroll));
                     widget.render(mouseX, mouseY, delta);
                 }
