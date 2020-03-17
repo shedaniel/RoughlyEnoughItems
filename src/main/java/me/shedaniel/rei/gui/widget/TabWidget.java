@@ -32,6 +32,7 @@ import me.shedaniel.rei.api.widgets.Tooltip;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
@@ -122,6 +123,7 @@ public class TabWidget extends WidgetWithBounds {
             Tooltip.create(categoryName, ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())).queue();
     }
     
+    @NotNull
     @Override
     public Rectangle getBounds() {
         return bounds;

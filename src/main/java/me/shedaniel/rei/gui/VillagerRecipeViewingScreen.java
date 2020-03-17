@@ -31,13 +31,14 @@ import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.widgets.Button;
+import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.entries.RecipeEntry;
-import me.shedaniel.rei.gui.widget.AutoCraftingButtonWidget;
-import me.shedaniel.rei.gui.widget.ButtonWidget;
 import me.shedaniel.rei.gui.widget.TabWidget;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.impl.ClientHelperImpl;
+import me.shedaniel.rei.impl.InternalWidgets;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
@@ -68,7 +69,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
     private final Map<RecipeCategory<?>, List<RecipeDisplay>> categoryMap;
     private final List<RecipeCategory<?>> categories;
     private final List<Widget> widgets = Lists.newArrayList();
-    private final List<ButtonWidget> buttonWidgets = Lists.newArrayList();
+    private final List<Button> buttonList = Lists.newArrayList();
     private final List<RecipeEntry> recipeRenderers = Lists.newArrayList();
     private final List<TabWidget> tabs = Lists.newArrayList();
     public Rectangle bounds, scrollListBounds;
@@ -134,7 +135,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
         this.draggingScrollBar = false;
         this.children.clear();
         this.widgets.clear();
-        this.buttonWidgets.clear();
+        this.buttonList.clear();
         this.recipeRenderers.clear();
         this.tabs.clear();
         int largestWidth = width - 100;
@@ -183,41 +184,22 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
         this.widgets.addAll(setupDisplay);
         Optional<ButtonAreaSupplier> supplier = RecipeHelper.getInstance().getAutoCraftButtonArea(category);
         if (supplier.isPresent() && supplier.get().get(recipeBounds) != null)
-            this.widgets.add(new AutoCraftingButtonWidget(recipeBounds, supplier.get().get(recipeBounds), supplier.get().getButtonText(), () -> display, setupDisplay, category));
+            this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(recipeBounds, supplier.get().get(recipeBounds), supplier.get().getButtonText(), () -> display, setupDisplay, category));
         
         int index = 0;
         for (RecipeDisplay recipeDisplay : categoryMap.get(category)) {
             int finalIndex = index;
             RecipeEntry recipeEntry;
             recipeRenderers.add(recipeEntry = category.getSimpleRenderer(recipeDisplay));
-            buttonWidgets.add(new ButtonWidget(new Rectangle(bounds.x + 5, 0, recipeEntry.getWidth(), recipeEntry.getHeight()), NarratorManager.EMPTY) {
-                @Override
-                public void onPressed() {
-                    selectedRecipeIndex = finalIndex;
-                    VillagerRecipeViewingScreen.this.init();
-                }
-                
-                @Override
-                public boolean isHovered(int mouseX, int mouseY) {
-                    return (isMouseOver(mouseX, mouseY) && scrollListBounds.contains(mouseX, mouseY)) || focused;
-                }
-                
-                @Override
-                protected int getTextureId(boolean boolean_1) {
-                    enabled = selectedRecipeIndex != finalIndex;
-                    return super.getTextureId(boolean_1);
-                }
-                
-                @Override
-                public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                    if ((isMouseOver(mouseX, mouseY) && scrollListBounds.contains(mouseX, mouseY)) && enabled && button == 0) {
-                        minecraft.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-                        onPressed();
-                        return true;
-                    }
-                    return false;
-                }
-            });
+            buttonList.add(Widgets.createButton(new Rectangle(bounds.x + 5, 0, recipeEntry.getWidth(), recipeEntry.getHeight()), NarratorManager.EMPTY)
+                    .onClick(button -> {
+                        selectedRecipeIndex = finalIndex;
+                        VillagerRecipeViewingScreen.this.init();
+                    })
+                    .containsMousePredicate((button, point) -> {
+                        return (button.getBounds().contains(point) && scrollListBounds.contains(point)) || button.isFocused();
+                    })
+                    .onRender(button -> button.setEnabled(selectedRecipeIndex != finalIndex)));
             index++;
         }
         int tabV = isCompactTabs ? 166 : 192;
@@ -236,26 +218,28 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
                 tab.setRenderer(tabCategory, tabCategory.getLogo(), tabCategory.getCategoryName(), j == selectedCategoryIndex);
             }
         }
-        ButtonWidget w, w2;
-        this.widgets.add(w = ButtonWidget.create(new Rectangle(bounds.x + 2, bounds.y - 16, 10, 10), new TranslatableText("text.rei.left_arrow"), buttonWidget -> {
-            tabsPage--;
-            if (tabsPage < 0)
-                tabsPage = MathHelper.ceil(categories.size() / (float) tabsPerPage) - 1;
-            VillagerRecipeViewingScreen.this.init();
-        }));
-        this.widgets.add(w2 = ButtonWidget.create(new Rectangle(bounds.x + bounds.width - 12, bounds.y - 16, 10, 10), new TranslatableText("text.rei.right_arrow"), buttonWidget -> {
-            tabsPage++;
-            if (tabsPage > MathHelper.ceil(categories.size() / (float) tabsPerPage) - 1)
-                tabsPage = 0;
-            VillagerRecipeViewingScreen.this.init();
-        }));
-        w.enabled = w2.enabled = categories.size() > tabsPerPage;
+        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x + 2, bounds.y - 16, 10, 10), new TranslatableText("text.rei.left_arrow"))
+                .onClick(button -> {
+                    tabsPage--;
+                    if (tabsPage < 0)
+                        tabsPage = MathHelper.ceil(categories.size() / (float) tabsPerPage) - 1;
+                    VillagerRecipeViewingScreen.this.init();
+                })
+                .enabled(categories.size() > tabsPerPage));
+        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x + bounds.width - 12, bounds.y - 16, 10, 10), new TranslatableText("text.rei.right_arrow"))
+                .onClick(button -> {
+                    tabsPage++;
+                    if (tabsPage > MathHelper.ceil(categories.size() / (float) tabsPerPage) - 1)
+                        tabsPage = 0;
+                    VillagerRecipeViewingScreen.this.init();
+                })
+                .enabled(categories.size() > tabsPerPage));
         
         this.widgets.add(Widgets.createClickableLabel(new Point(bounds.x + 4 + scrollListBounds.width / 2, bounds.y + 6), categories.get(selectedCategoryIndex).getCategoryName(), label -> {
             ClientHelper.getInstance().executeViewAllRecipesKeyBind();
         }).tooltipLine(I18n.translate("text.rei.view_all_categories")).noShadow().color(0xFF404040, 0xFFBBBBBB).hoveredColor(0xFF0041FF, 0xFFFFBD4D));
         
-        this.children.addAll(buttonWidgets);
+        this.children.addAll(buttonList);
         this.widgets.addAll(tabs);
         this.children.addAll(widgets);
         this.children.add(ScreenHelper.getLastOverlay(true, false));
@@ -310,7 +294,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
     
     @Override
     public boolean mouseScrolled(double double_1, double double_2, double double_3) {
-        double height = CollectionUtils.sumInt(buttonWidgets, b -> b.getBounds().getHeight());
+        double height = CollectionUtils.sumInt(buttonList, b -> b.getBounds().getHeight());
         if (scrollListBounds.contains(double_1, double_2) && height > scrollListBounds.height - 2) {
             offset(ClothConfigInitializer.getScrollStep() * -double_3, true);
             if (scrollBarAlphaFuture == 0)
@@ -340,7 +324,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
     }
     
     private double getMaxScrollPosition() {
-        return CollectionUtils.sumInt(buttonWidgets, b -> b.getBounds().getHeight());
+        return CollectionUtils.sumInt(buttonList, b -> b.getBounds().getHeight());
     }
     
     @Override
@@ -376,18 +360,18 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
         ScreenHelper.getLastOverlay().render(mouseX, mouseY, delta);
         RenderSystem.pushMatrix();
         ScissorsHandler.INSTANCE.scissor(new Rectangle(0, scrollListBounds.y + 1, width, scrollListBounds.height - 2));
-        for (ButtonWidget buttonWidget : buttonWidgets) {
-            buttonWidget.getBounds().y = scrollListBounds.y + 1 + yOffset - (int) scrollAmount;
-            if (buttonWidget.getBounds().getMaxY() > scrollListBounds.getMinY() && buttonWidget.getBounds().getMinY() < scrollListBounds.getMaxY()) {
-                buttonWidget.render(mouseX, mouseY, delta);
+        for (Button button : buttonList) {
+            button.getBounds().y = scrollListBounds.y + 1 + yOffset - (int) scrollAmount;
+            if (button.getBounds().getMaxY() > scrollListBounds.getMinY() && button.getBounds().getMinY() < scrollListBounds.getMaxY()) {
+                button.render(mouseX, mouseY, delta);
             }
-            yOffset += buttonWidget.getBounds().height;
+            yOffset += button.getBounds().height;
         }
-        for (int i = 0; i < buttonWidgets.size(); i++) {
-            if (buttonWidgets.get(i).getBounds().getMaxY() > scrollListBounds.getMinY() && buttonWidgets.get(i).getBounds().getMinY() < scrollListBounds.getMaxY()) {
+        for (int i = 0; i < buttonList.size(); i++) {
+            if (buttonList.get(i).getBounds().getMaxY() > scrollListBounds.getMinY() && buttonList.get(i).getBounds().getMinY() < scrollListBounds.getMaxY()) {
                 recipeRenderers.get(i).setZ(1);
-                recipeRenderers.get(i).render(buttonWidgets.get(i).getBounds(), mouseX, mouseY, delta);
-                recipeRenderers.get(i).getTooltip(new Point(mouseX, mouseY)).queue();
+                recipeRenderers.get(i).render(buttonList.get(i).getBounds(), mouseX, mouseY, delta);
+                Optional.ofNullable(recipeRenderers.get(i).getTooltip(new Point(mouseX, mouseY))).ifPresent(Tooltip::queue);
             }
         }
         double maxScroll = getMaxScrollPosition();
@@ -439,7 +423,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int int_1, double double_3, double double_4) {
         if (int_1 == 0 && scrollBarAlpha > 0 && draggingScrollBar) {
-            double height = CollectionUtils.sumInt(buttonWidgets, b -> b.getBounds().getHeight());
+            double height = CollectionUtils.sumInt(buttonList, b -> b.getBounds().getHeight());
             int actualHeight = scrollListBounds.height - 2;
             if (height > actualHeight && mouseY >= scrollListBounds.y + 1 && mouseY <= scrollListBounds.getMaxY() - 1) {
                 int int_3 = MathHelper.clamp((int) ((actualHeight * actualHeight) / height), 32, actualHeight - 8);

@@ -211,6 +211,9 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
         consumer.accept(actualX, actualY, delta);
     }
     
+    /**
+     * @deprecated Please switch to {@link REIHelper#isDarkThemeEnabled()}
+     */
     @Deprecated
     @ApiStatus.Internal
     @ApiStatus.ScheduledForRemoval

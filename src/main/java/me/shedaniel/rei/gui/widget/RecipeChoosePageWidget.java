@@ -28,6 +28,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
+import me.shedaniel.rei.api.widgets.Button;
 import me.shedaniel.rei.api.widgets.Panel;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
@@ -37,6 +38,7 @@ import net.minecraft.client.util.Window;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
@@ -52,7 +54,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     private RecipeViewingScreen recipeViewingScreen;
     private TextFieldWidget textFieldWidget;
     private Panel base1, base2;
-    private ButtonWidget btnDone;
+    private Button btnDone;
     
     public RecipeChoosePageWidget(RecipeViewingScreen recipeViewingScreen, int currentPage, int maxPage) {
         super(getPointFromConfig());
@@ -67,6 +69,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
         return new Point(window.getScaledWidth() * .5, window.getScaledHeight() * .5);
     }
     
+    @NotNull
     @Override
     public Rectangle getBounds() {
         return bounds;
@@ -137,11 +140,12 @@ public class RecipeChoosePageWidget extends DraggableWidget {
             return stringBuilder_1.toString();
         };
         textFieldWidget.setText(String.valueOf(currentPage + 1));
-        widgets.add(btnDone = ButtonWidget.create(new Rectangle(bounds.x + bounds.width - 45, bounds.y + bounds.height + 3, 40, 20), new TranslatableText("gui.done"), buttonWidget -> {
-            recipeViewingScreen.page = MathHelper.clamp(getIntFromString(textFieldWidget.getText()).orElse(0) - 1, 0, recipeViewingScreen.getTotalPages(recipeViewingScreen.getSelectedCategory()) - 1);
-            recipeViewingScreen.choosePageActivated = false;
-            recipeViewingScreen.init();
-        }));
+        widgets.add(btnDone = Widgets.createButton(new Rectangle(bounds.x + bounds.width - 45, bounds.y + bounds.height + 3, 40, 20), new TranslatableText("gui.done"))
+                .onClick(button -> {
+                    recipeViewingScreen.page = MathHelper.clamp(getIntFromString(textFieldWidget.getText()).orElse(0) - 1, 0, recipeViewingScreen.getTotalPages(recipeViewingScreen.getSelectedCategory()) - 1);
+                    recipeViewingScreen.choosePageActivated = false;
+                    recipeViewingScreen.init();
+                }));
         textFieldWidget.setFocused(true);
     }
     

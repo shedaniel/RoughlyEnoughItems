@@ -24,12 +24,19 @@
 package me.shedaniel.rei.api.widgets;
 
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
+import org.jetbrains.annotations.NotNull;
 
 public abstract class Arrow extends WidgetWithBounds {
+    /**
+     * @return the x coordinate for the top left corner of this widget.
+     */
     public final int getX() {
         return getBounds().getX();
     }
     
+    /**
+     * @return the y coordinate for the top left corner of this widget.
+     */
     public final int getY() {
         return getBounds().getY();
     }
@@ -42,16 +49,17 @@ public abstract class Arrow extends WidgetWithBounds {
     /**
      * Sets the animation duration in milliseconds.
      *
-     * @param animationDurationMS animation duration in milliseconds, animation is disabled when below or equals to 0
+     * @param animationDurationMS animation duration in milliseconds, animation is disabled when below or equals to 0.
      */
     public abstract void setAnimationDuration(double animationDurationMS);
     
     /**
      * Sets the animation duration in milliseconds.
      *
-     * @param animationDurationMS animation duration in milliseconds, animation is disabled when below or equals to 0
-     * @return the arrow itself
+     * @param animationDurationMS animation duration in milliseconds, animation is disabled when below or equals to 0.
+     * @return the arrow itself.
      */
+    @NotNull
     public final Arrow animationDurationMS(double animationDurationMS) {
         setAnimationDuration(animationDurationMS);
         return this;
@@ -60,9 +68,10 @@ public abstract class Arrow extends WidgetWithBounds {
     /**
      * Sets the animation duration in ticks.
      *
-     * @param animationDurationTicks animation duration in ticks, animation is disabled when below or equals to 0
-     * @return the arrow itself
+     * @param animationDurationTicks animation duration in ticks, animation is disabled when below or equals to 0.
+     * @return the arrow itself.
      */
+    @NotNull
     public final Arrow animationDurationTicks(double animationDurationTicks) {
         return animationDurationMS(animationDurationTicks * 50);
     }
@@ -70,8 +79,9 @@ public abstract class Arrow extends WidgetWithBounds {
     /**
      * Disables the animation.
      *
-     * @return the arrow itself
+     * @return the arrow itself.
      */
+    @NotNull
     public final Arrow disableAnimation() {
         return animationDurationMS(-1);
     }

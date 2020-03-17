@@ -30,6 +30,7 @@ import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
 import net.minecraft.client.gui.Element;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
@@ -172,6 +173,7 @@ public class LabelWidget extends WidgetWithBounds {
         return Optional.ofNullable(tooltipSupplier).map(Supplier::get);
     }
     
+    @NotNull
     @Override
     public Rectangle getBounds() {
         int width = font.getStringWidth(text);

@@ -37,76 +37,179 @@ public abstract class Label extends WidgetWithBounds {
     public static final int CENTER = 0;
     public static final int RIGHT_ALIGNED = 1;
     
+    /**
+     * @return whether the label is clickable, ignores if onClick is set.
+     */
     public abstract boolean isClickable();
     
+    /**
+     * Sets whether the label is clickable, ignores if onClick is set.
+     *
+     * @param clickable whether the label is clickable.
+     */
     public abstract void setClickable(boolean clickable);
     
+    /**
+     * Sets the label as clickable, ignores if onClick is set.
+     *
+     * @return the label itself.
+     */
+    @NotNull
     public final Label clickable() {
         return clickable(true);
     }
     
+    /**
+     * Sets whether the label is clickable, ignores if onClick is set.
+     *
+     * @param clickable whether the label is clickable.
+     * @return the label itself.
+     */
+    @NotNull
     public final Label clickable(boolean clickable) {
         setClickable(clickable);
         return this;
     }
     
+    /**
+     * @return the consumer on click, only applicable if the label is clickable, null if not set.
+     */
     @Nullable
     public abstract Consumer<Label> getOnClick();
     
+    /**
+     * Sets the on click consumer, only applicable if the label is clickable.
+     *
+     * @param onClick the on click consumer, only applicable if the label is clickable.
+     */
     public abstract void setOnClick(@Nullable Consumer<Label> onClick);
     
+    /**
+     * Sets the on click consumer, only applicable if the label is clickable.
+     *
+     * @param onClick the on click consumer, only applicable if the label is clickable.
+     * @return the label itself.
+     */
+    @NotNull
     public final Label onClick(@Nullable Consumer<Label> onClick) {
         setOnClick(onClick);
         return this;
     }
     
+    /**
+     * @return the consumer before render, null if not set.
+     */
     @Nullable
     public abstract Consumer<Label> getOnRender();
     
+    /**
+     * Sets the consumer before render.
+     *
+     * @param onRender the consumer before render.
+     */
     public abstract void setOnRender(@Nullable Consumer<Label> onRender);
     
+    /**
+     * Sets the consumer before render.
+     *
+     * @param onRender the consumer before render.
+     * @return the label itself.
+     */
+    @NotNull
     public final Label onRender(@Nullable Consumer<Label> onRender) {
         setOnRender(onRender);
         return this;
     }
     
+    /**
+     * @return whether the label is focusable by pressing tab, ignored if not clickable.
+     */
     public abstract boolean isFocusable();
     
+    /**
+     * Sets whether the label is focusable by pressing tab, ignored if not clickable.
+     *
+     * @param focusable whether the label is focusable by pressing tab, ignored if not clickable.
+     */
     public abstract void setFocusable(boolean focusable);
     
+    /**
+     * Sets whether the label is focusable by pressing tab, ignored if not clickable.
+     *
+     * @param focusable whether the label is focusable by pressing tab, ignored if not clickable.
+     * @return the label itself.
+     */
+    @NotNull
     public final Label focusable(boolean focusable) {
         setFocusable(focusable);
         return this;
     }
     
+    /**
+     * @return the tooltip from the current tooltip function, null if no tooltip.
+     */
     @Nullable
     public abstract String getTooltip();
     
+    /**
+     * Sets the tooltip function used to get the tooltip.
+     *
+     * @param tooltip the tooltip function used to get the tooltip.
+     */
     public abstract void setTooltip(@Nullable Function<Label, @Nullable String> tooltip);
     
+    /**
+     * Sets the tooltip.
+     *
+     * @param tooltip the lines of tooltip.
+     * @return the label itself.
+     */
+    @NotNull
     public final Label tooltipLines(@NotNull String... tooltip) {
         return tooltipLine(String.join("\n", tooltip));
     }
     
+    /**
+     * Sets the tooltip.
+     *
+     * @param tooltip the line of tooltip.
+     * @return the label itself.
+     */
+    @NotNull
     public final Label tooltipLine(@Nullable String tooltip) {
         return tooltipSupplier(label -> tooltip);
     }
     
+    /**
+     * Sets the tooltip function.
+     *
+     * @param tooltip the tooltip function used to get the tooltip.
+     * @return the label itself.
+     */
+    @NotNull
     public final Label tooltipSupplier(@Nullable Function<Label, @Nullable String> tooltip) {
         setTooltip(tooltip);
         return this;
     }
     
+    /**
+     * Gets the horizontal alignment of the label, defaulted as centered.
+     *
+     * @return {@link Label#LEFT_ALIGNED} if left aligned, {@link Label#CENTER} if centered or {@link Label#RIGHT_ALIGNED} if right aligned}.
+     */
     public abstract int getHorizontalAlignment();
     
+    @NotNull
     public final Label centered() {
         return horizontalAlignment(CENTER);
     }
     
+    @NotNull
     public final Label leftAligned() {
         return horizontalAlignment(LEFT_ALIGNED);
     }
     
+    @NotNull
     public final Label rightAligned() {
         return horizontalAlignment(RIGHT_ALIGNED);
     }
@@ -120,16 +223,19 @@ public abstract class Label extends WidgetWithBounds {
     
     public abstract boolean hasShadow();
     
+    @NotNull
     public final Label noShadow() {
         return shadow(false);
     }
     
+    @NotNull
     public final Label shadow() {
         return shadow(true);
     }
     
     public abstract void setShadow(boolean hasShadow);
     
+    @NotNull
     public final Label shadow(boolean hasShadow) {
         setShadow(hasShadow);
         return this;
@@ -139,10 +245,12 @@ public abstract class Label extends WidgetWithBounds {
     
     public abstract void setColor(int color);
     
+    @NotNull
     public final Label color(int lightModeColor, int darkModeColor) {
         return color(REIHelper.getInstance().isDarkThemeEnabled() ? darkModeColor : lightModeColor);
     }
     
+    @NotNull
     public final Label color(int color) {
         setColor(color);
         return this;
@@ -152,10 +260,12 @@ public abstract class Label extends WidgetWithBounds {
     
     public abstract void setHoveredColor(int hoveredColor);
     
+    @NotNull
     public final Label hoveredColor(int lightModeColor, int darkModeColor) {
         return hoveredColor(REIHelper.getInstance().isDarkThemeEnabled() ? darkModeColor : lightModeColor);
     }
     
+    @NotNull
     public final Label hoveredColor(int color) {
         setHoveredColor(color);
         return this;
@@ -174,6 +284,7 @@ public abstract class Label extends WidgetWithBounds {
     
     public abstract void setPoint(@NotNull Point point);
     
+    @NotNull
     public final Label point(@NotNull Point point) {
         setPoint(point);
         return this;
@@ -184,6 +295,7 @@ public abstract class Label extends WidgetWithBounds {
     
     public abstract void setText(@NotNull String text);
     
+    @NotNull
     public final Label text(@NotNull String text) {
         setText(text);
         return this;

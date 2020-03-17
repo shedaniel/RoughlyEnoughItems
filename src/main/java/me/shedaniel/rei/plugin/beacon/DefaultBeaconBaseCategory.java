@@ -49,6 +49,7 @@ import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -160,6 +161,7 @@ public class DefaultBeaconBaseCategory implements RecipeCategory<DefaultBeaconBa
             return MathHelper.ceil(widgets.size() / 8f) * 18;
         }
         
+        @NotNull
         @Override
         public me.shedaniel.math.api.Rectangle getBounds() {
             return bounds;

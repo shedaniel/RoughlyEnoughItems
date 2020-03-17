@@ -31,7 +31,6 @@ import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
-import me.shedaniel.rei.gui.widget.ButtonWidget;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import me.shedaniel.rei.impl.ScreenHelper;
@@ -46,6 +45,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
@@ -103,19 +103,12 @@ public class PreRecipeViewingScreen extends Screen {
     protected void init() {
         this.children.clear();
         this.widgets.clear();
-        this.widgets.add(new ButtonWidget(new Rectangle(width / 2 - 100, height - 40, 200, 20), NarratorManager.EMPTY) {
-            @Override
-            public void render(int mouseX, int mouseY, float delta) {
-                enabled = isSet;
-                setText(enabled ? I18n.translate("text.rei.select") : I18n.translate("config.roughlyenoughitems.recipeScreenType.unset"));
-                super.render(mouseX, mouseY, delta);
-            }
-            
-            @Override
-            public void onPressed() {
-                callback.accept(original);
-            }
-        });
+        this.widgets.add(Widgets.createButton(new Rectangle(width / 2 - 100, height - 40, 200, 20), NarratorManager.EMPTY)
+                .onRender(button -> {
+                    button.setEnabled(isSet);
+                    button.setText(isSet ? I18n.translate("text.rei.select") : I18n.translate("config.roughlyenoughitems.recipeScreenType.unset"));
+                })
+                .onClick(button -> callback.accept(original)));
         this.widgets.add(new ScreenTypeSelection(width / 2 - 200 - 5, height / 2 - 112 / 2 - 10, 0));
         this.widgets.add(Widgets.createLabel(new Point(width / 2 - 200 - 5 + 104, height / 2 - 112 / 2 + 115), I18n.translate("config.roughlyenoughitems.recipeScreenType.original")).noShadow().color(-1124073473));
         this.widgets.add(new ScreenTypeSelection(width / 2 + 5, height / 2 - 112 / 2 - 10, 112));
@@ -187,6 +180,7 @@ public class PreRecipeViewingScreen extends Screen {
             this.v = v;
         }
         
+        @NotNull
         @Override
         public Rectangle getBounds() {
             return bounds;

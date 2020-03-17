@@ -34,11 +34,13 @@ public abstract class Panel extends WidgetWithBounds {
     
     public abstract void setInnerColor(int innerColor);
     
+    @NotNull
     public final Panel innerColor(int innerColor) {
         setInnerColor(innerColor);
         return this;
     }
     
+    @NotNull
     public final Panel innerColor(int lightColor, int darkColor) {
         return innerColor(REIHelper.getInstance().isDarkThemeEnabled() ? darkColor : lightColor);
     }
@@ -47,6 +49,7 @@ public abstract class Panel extends WidgetWithBounds {
     
     public abstract void setXTextureOffset(int xTextureOffset);
     
+    @NotNull
     public final Panel xTextureOffset(int xTextureOffset) {
         setXTextureOffset(xTextureOffset);
         return this;
@@ -56,6 +59,7 @@ public abstract class Panel extends WidgetWithBounds {
     
     public abstract void setYTextureOffset(int yTextureOffset);
     
+    @NotNull
     public final Panel yTextureOffset(int yTextureOffset) {
         setYTextureOffset(yTextureOffset);
         return this;
@@ -65,11 +69,13 @@ public abstract class Panel extends WidgetWithBounds {
     
     public abstract void setColor(int color);
     
+    @NotNull
     public final Panel color(int color) {
         setColor(color);
         return this;
     }
     
+    @NotNull
     public final Panel color(int lightColor, int darkColor) {
         return color(REIHelper.getInstance().isDarkThemeEnabled() ? darkColor : lightColor);
     }
@@ -79,6 +85,7 @@ public abstract class Panel extends WidgetWithBounds {
     
     public abstract void setRendering(@NotNull Predicate<Panel> rendering);
     
+    @NotNull
     public final Panel rendering(@NotNull Predicate<Panel> rendering) {
         setRendering(rendering);
         return this;

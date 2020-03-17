@@ -30,6 +30,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
@@ -61,6 +62,7 @@ public class RecipeArrowWidget extends WidgetWithBounds {
         return this;
     }
     
+    @NotNull
     @Override
     public Rectangle getBounds() {
         return new Rectangle(x, y, 24, 17);

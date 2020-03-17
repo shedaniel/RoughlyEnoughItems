@@ -32,12 +32,19 @@ import me.shedaniel.rei.gui.widget.EntryWidget;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.impl.widgets.*;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Drawable;
+import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.Element;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public final class Widgets {
@@ -46,6 +53,32 @@ public final class Widgets {
     @NotNull
     public static Widget createDrawableWidget(@NotNull DrawableConsumer drawable) {
         return new DrawableWidget(drawable);
+    }
+    
+    @NotNull
+    public static Widget wrapVanillaWidget(@NotNull Element element) {
+        return new VanillaWrappedWidget(element);
+    }
+    
+    private static class VanillaWrappedWidget extends Widget {
+        private Element element;
+        
+        public VanillaWrappedWidget(Element element) {
+            this.element = Objects.requireNonNull(element);
+        }
+        
+        @Override
+        public void render(int mouseX, int mouseY, float delta) {
+            if (element instanceof DrawableHelper)
+                ((DrawableHelper) element).setZOffset(getZ());
+            if (element instanceof Drawable)
+                ((Drawable) element).render(mouseX, mouseY, delta);
+        }
+        
+        @Override
+        public List<? extends Element> children() {
+            return Collections.singletonList(element);
+        }
     }
     
     @NotNull
@@ -165,6 +198,16 @@ public final class Widgets {
     @NotNull
     public static Slot createSlot(@NotNull Point point) {
         return EntryWidget.create(point.x, point.y);
+    }
+    
+    @NotNull
+    public static Button createButton(@NotNull Rectangle bounds, @NotNull String text) {
+        return new ButtonWidget(bounds, text);
+    }
+    
+    @NotNull
+    public static Button createButton(@NotNull Rectangle bounds, @NotNull Text text) {
+        return new ButtonWidget(bounds, text);
     }
     
     public static void produceClickSound() {

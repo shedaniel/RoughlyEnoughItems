@@ -35,6 +35,8 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
@@ -43,6 +45,12 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+/**
+ * @see me.shedaniel.rei.api.widgets.Widgets#createButton(me.shedaniel.math.Rectangle, Text)
+ * @see me.shedaniel.rei.api.widgets.Widgets#createButton(me.shedaniel.math.Rectangle, String)
+ */
+@Deprecated
+@ApiStatus.ScheduledForRemoval
 public abstract class ButtonWidget extends WidgetWithBounds {
     
     protected static final Identifier BUTTON_LOCATION = new Identifier("roughlyenoughitems", "textures/gui/button.png");
@@ -93,6 +101,7 @@ public abstract class ButtonWidget extends WidgetWithBounds {
         return canChangeFocuses;
     }
     
+    @NotNull
     public Rectangle getBounds() {
         return bounds;
     }

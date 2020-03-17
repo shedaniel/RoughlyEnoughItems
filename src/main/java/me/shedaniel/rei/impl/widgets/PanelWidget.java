@@ -116,6 +116,7 @@ public final class PanelWidget extends Panel {
         this.rendering = Objects.requireNonNull(rendering);
     }
     
+    @NotNull
     @Override
     public me.shedaniel.math.api.Rectangle getBounds() {
         return bounds;

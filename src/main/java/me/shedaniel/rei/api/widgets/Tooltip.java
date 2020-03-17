@@ -26,23 +26,28 @@ package me.shedaniel.rei.api.widgets;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
 
 public interface Tooltip {
+    @NotNull
     static Tooltip create(Point point, Collection<String> texts) {
         return QueuedTooltip.create(point, texts);
     }
     
+    @NotNull
     static Tooltip create(Point point, String... texts) {
         return QueuedTooltip.create(point, texts);
     }
     
+    @NotNull
     static Tooltip create(Collection<String> texts) {
         return QueuedTooltip.create(texts);
     }
     
+    @NotNull
     static Tooltip create(String... texts) {
         return QueuedTooltip.create(texts);
     }

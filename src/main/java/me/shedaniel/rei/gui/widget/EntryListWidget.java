@@ -54,6 +54,7 @@ import net.minecraft.item.ItemGroup;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
@@ -186,6 +187,7 @@ public class EntryListWidget extends WidgetWithBounds {
         return super.mouseScrolled(double_1, double_2, double_3);
     }
     
+    @NotNull
     @Override
     public Rectangle getBounds() {
         return bounds;

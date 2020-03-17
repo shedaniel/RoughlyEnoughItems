@@ -32,7 +32,7 @@ import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
 import org.jetbrains.annotations.NotNull;
 
-public class FillRectangleDrawableConsumer implements DrawableConsumer {
+public final class FillRectangleDrawableConsumer implements DrawableConsumer {
     @NotNull
     private Rectangle rectangle;
     private int color;

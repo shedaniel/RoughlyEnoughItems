@@ -29,6 +29,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
@@ -47,34 +48,42 @@ public class QueuedTooltip implements Tooltip {
         this.text = Lists.newArrayList(text);
     }
     
+    @NotNull
     public static QueuedTooltip create(me.shedaniel.math.api.Point location, List<String> text) {
         return new QueuedTooltip(location, text);
     }
     
+    @NotNull
     public static QueuedTooltip create(me.shedaniel.math.api.Point location, String... text) {
         return QueuedTooltip.create(location, Lists.newArrayList(text));
     }
     
+    @NotNull
     public static QueuedTooltip create(Point location, List<String> text) {
         return new QueuedTooltip(location, text);
     }
     
+    @NotNull
     public static QueuedTooltip create(Point location, Collection<String> text) {
         return new QueuedTooltip(location, text);
     }
     
+    @NotNull
     public static QueuedTooltip create(Point location, String... text) {
         return QueuedTooltip.create(location, Lists.newArrayList(text));
     }
     
+    @NotNull
     public static QueuedTooltip create(List<String> text) {
         return QueuedTooltip.create(PointHelper.ofMouse(), text);
     }
     
+    @NotNull
     public static QueuedTooltip create(Collection<String> text) {
         return QueuedTooltip.create(PointHelper.ofMouse(), text);
     }
     
+    @NotNull
     public static QueuedTooltip create(String... text) {
         return QueuedTooltip.create(PointHelper.ofMouse(), text);
     }
@@ -85,6 +94,7 @@ public class QueuedTooltip implements Tooltip {
      */
     @Deprecated
     @ApiStatus.ScheduledForRemoval
+    @NotNull
     public me.shedaniel.math.api.Point getLocation() {
         return new me.shedaniel.math.api.Point(location);
     }

@@ -35,7 +35,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-public class BurningFireWidget extends BurningFire {
+public final class BurningFireWidget extends BurningFire {
     @NotNull
     private Rectangle bounds;
     private double animationDuration = -1;

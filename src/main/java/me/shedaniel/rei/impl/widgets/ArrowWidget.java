@@ -35,7 +35,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-public class ArrowWidget extends Arrow {
+public final class ArrowWidget extends Arrow {
     @NotNull
     private Rectangle bounds;
     private double animationDuration = -1;
@@ -56,8 +56,9 @@ public class ArrowWidget extends Arrow {
             this.animationDuration = -1;
     }
     
+    @NotNull
     @Override
-    public @NotNull Rectangle getBounds() {
+    public Rectangle getBounds() {
         return bounds;
     }
     
