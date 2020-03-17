@@ -30,20 +30,24 @@ import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.widgets.Button;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.gui.widget.*;
+import me.shedaniel.rei.impl.InternalWidgets;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.Weather;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import me.shedaniel.rei.utils.CollectionUtils;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.NarratorManager;
@@ -60,6 +64,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.world.GameMode;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -105,9 +110,8 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
     };
     private Rectangle bounds;
     private Window window;
-    @Nullable private LateRenderedButton craftableToggleButton;
-    private LateRenderedButton configButton;
-    private ButtonWidget leftButton, rightButton;
+    private List<LateRenderable> lateRenderables = Lists.newArrayList();
+    private Button leftButton, rightButton;
     
     public static EntryListWidget getEntryListWidget() {
         return ENTRY_LIST_WIDGET;
@@ -144,131 +148,98 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         this.widgets.add(ScreenHelper.getSearchField());
         ScreenHelper.getSearchField().setChangedListener(s -> ENTRY_LIST_WIDGET.updateSearch(s, false));
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-            widgets.add(leftButton = new ButtonWidget(new Rectangle(bounds.x, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TranslatableText("text.rei.left_arrow")) {
-                @Override
-                public void onPressed() {
-                    ENTRY_LIST_WIDGET.previousPage();
-                    if (ENTRY_LIST_WIDGET.getPage() < 0)
-                        ENTRY_LIST_WIDGET.setPage(ENTRY_LIST_WIDGET.getTotalPages() - 1);
-                    ENTRY_LIST_WIDGET.updateEntriesPosition();
-                }
-                
-                @Override
-                public boolean containsMouse(double mouseX, double mouseY) {
-                    return isNotInExclusionZones(mouseX, mouseY) && super.containsMouse(mouseX, mouseY);
-                }
-            }.tooltip(() -> I18n.translate("text.rei.previous_page")).canChangeFocuses(false));
-            widgets.add(rightButton = new ButtonWidget(new Rectangle(bounds.x + bounds.width - 18, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TranslatableText("text.rei.right_arrow")) {
-                @Override
-                public void onPressed() {
-                    ENTRY_LIST_WIDGET.nextPage();
-                    if (ENTRY_LIST_WIDGET.getPage() >= ENTRY_LIST_WIDGET.getTotalPages())
-                        ENTRY_LIST_WIDGET.setPage(0);
-                    ENTRY_LIST_WIDGET.updateEntriesPosition();
-                }
-                
-                @Override
-                public boolean containsMouse(double mouseX, double mouseY) {
-                    return isNotInExclusionZones(mouseX, mouseY) && super.containsMouse(mouseX, mouseY);
-                }
-            }.tooltip(() -> I18n.translate("text.rei.next_page")).canChangeFocuses(false));
+            widgets.add(leftButton = Widgets.createButton(new Rectangle(bounds.x, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TranslatableText("text.rei.left_arrow"))
+                    .onClick(button -> {
+                        ENTRY_LIST_WIDGET.previousPage();
+                        if (ENTRY_LIST_WIDGET.getPage() < 0)
+                            ENTRY_LIST_WIDGET.setPage(ENTRY_LIST_WIDGET.getTotalPages() - 1);
+                        ENTRY_LIST_WIDGET.updateEntriesPosition();
+                    })
+                    .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y))
+                    .tooltipLine(I18n.translate("text.rei.previous_page"))
+                    .focusable(false));
+            widgets.add(rightButton = Widgets.createButton(new Rectangle(bounds.x + bounds.width - 18, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TranslatableText("text.rei.right_arrow"))
+                    .onClick(button -> {
+                        ENTRY_LIST_WIDGET.nextPage();
+                        if (ENTRY_LIST_WIDGET.getPage() >= ENTRY_LIST_WIDGET.getTotalPages())
+                            ENTRY_LIST_WIDGET.setPage(0);
+                        ENTRY_LIST_WIDGET.updateEntriesPosition();
+                    })
+                    .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y))
+                    .tooltipLine(I18n.translate("text.rei.next_page"))
+                    .focusable(false));
         }
         
-        widgets.add(configButton = new LateRenderedButton(getConfigButtonArea(), NarratorManager.EMPTY) {
-            @Override
-            public void onPressed() {
-                if (Screen.hasShiftDown()) {
-                    ClientHelper.getInstance().setCheating(!ClientHelper.getInstance().isCheating());
-                    return;
-                }
-                ConfigManager.getInstance().openConfigScreen(ScreenHelper.getLastHandledScreen());
-            }
-            
-            @Override
-            public void render(int mouseX, int mouseY, float delta) {
-            }
-            
-            @Override
-            public void lateRender(int mouseX, int mouseY, float delta) {
-                setZOffset(600);
-                super.render(mouseX, mouseY, delta);
-                Rectangle bounds = getBounds();
-                if (ClientHelper.getInstance().isCheating() && RoughlyEnoughItemsCore.hasOperatorPermission()) {
-                    if (RoughlyEnoughItemsCore.hasPermissionToUsePackets())
-                        fillGradient(bounds.x + 1, bounds.y + 1, bounds.getMaxX() - 1, bounds.getMaxY() - 1, 721354752, 721354752);
-                    else
-                        fillGradient(bounds.x + 1, bounds.y + 1, bounds.getMaxX() - 1, bounds.getMaxY() - 1, 1476440063, 1476440063);
-                }
-                MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
-                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-                blit(bounds.x + 3, bounds.y + 3, 0, 0, 14, 14);
-                setZOffset(0);
-            }
-            
-            @Override
-            public Optional<String> getTooltips() {
-                String tooltips = I18n.translate("text.rei.config_tooltip");
-                tooltips += "\n  ";
-                if (!ClientHelper.getInstance().isCheating())
-                    tooltips += "\n" + I18n.translate("text.rei.cheating_disabled");
-                else if (!RoughlyEnoughItemsCore.hasOperatorPermission())
-                    tooltips += "\n" + I18n.translate("text.rei.cheating_enabled_no_perms");
-                else if (RoughlyEnoughItemsCore.hasPermissionToUsePackets())
-                    tooltips += "\n" + I18n.translate("text.rei.cheating_enabled");
-                else
-                    tooltips += "\n" + I18n.translate("text.rei.cheating_limited_enabled");
-                return Optional.ofNullable(tooltips);
-            }
-            
-            @Override
-            public boolean changeFocus(boolean boolean_1) {
-                return false;
-            }
-            
-            @Override
-            public boolean containsMouse(double mouseX, double mouseY) {
-                return isNotInExclusionZones(mouseX, mouseY) && super.containsMouse(mouseX, mouseY);
-            }
-        });
+        final Rectangle configButtonArea = getConfigButtonArea();
+        LateRenderable tmp;
+        widgets.add((Widget) (tmp = InternalWidgets.wrapLateRenderable(InternalWidgets.mergeWidgets(
+                Widgets.createButton(configButtonArea, NarratorManager.EMPTY)
+                        .onClick(button -> {
+                            if (Screen.hasShiftDown()) {
+                                ClientHelper.getInstance().setCheating(!ClientHelper.getInstance().isCheating());
+                                return;
+                            }
+                            ConfigManager.getInstance().openConfigScreen(ScreenHelper.getLastHandledScreen());
+                        })
+                        .onRender(button -> {
+                            if (ClientHelper.getInstance().isCheating() && RoughlyEnoughItemsCore.hasOperatorPermission()) {
+                                button.setTint(RoughlyEnoughItemsCore.hasPermissionToUsePackets() ? 721354752 : 1476440063);
+                            } else {
+                                button.removeTint();
+                            }
+                        })
+                        .focusable(false)
+                        .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y))
+                        .tooltipSupplier(button -> {
+                            String tooltips = I18n.translate("text.rei.config_tooltip");
+                            tooltips += "\n  ";
+                            if (!ClientHelper.getInstance().isCheating())
+                                tooltips += "\n" + I18n.translate("text.rei.cheating_disabled");
+                            else if (!RoughlyEnoughItemsCore.hasOperatorPermission())
+                                tooltips += "\n" + I18n.translate("text.rei.cheating_enabled_no_perms");
+                            else if (RoughlyEnoughItemsCore.hasPermissionToUsePackets())
+                                tooltips += "\n" + I18n.translate("text.rei.cheating_enabled");
+                            else
+                                tooltips += "\n" + I18n.translate("text.rei.cheating_limited_enabled");
+                            return tooltips;
+                        }),
+                Widgets.createDrawableWidget((helper, mouseX, mouseY, delta) -> {
+                    helper.setZOffset(helper.getZOffset() + 1);
+                    MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
+                    helper.blit(configButtonArea.x + 3, configButtonArea.y + 3, 0, 0, 14, 14);
+                })
+                )
+        )));
+        ((Widget) tmp).setZ(600);
+        lateRenderables.add(tmp);
+//        widgets.add((Widget) (tmp = InternalWidgets.wrapLateRenderable(Widgets.createTexturedWidget(CHEST_GUI_TEXTURE, configButtonArea.x + 3, configButtonArea.y + 3, 0, 0, 14, 14))));
+//        widgets.add((Widget) (tmp = InternalWidgets.wrapLateRenderable(Widgets.createDrawableWidget((helper, mouseX, mouseY, delta) -> {
+//            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+//            MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
+//            helper.blit(configButtonArea.x + 3, configButtonArea.y + 3, 0, 0, 14, 14);
+//        }))));
+//        ((Widget) tmp).setZ(600);
+//        lateRenderables.add(tmp);
         if (ConfigObject.getInstance().doesShowUtilsButtons()) {
-            widgets.add(new ButtonWidget(ConfigObject.getInstance().isLowerConfigButton() ? new Rectangle(ConfigObject.getInstance().isLeftHandSidePanel() ? window.getScaledWidth() - 30 : 10, 10, 20, 20) : new Rectangle(ConfigObject.getInstance().isLeftHandSidePanel() ? window.getScaledWidth() - 55 : 35, 10, 20, 20), NarratorManager.EMPTY) {
-                @Override
-                public void onPressed() {
-                    MinecraftClient.getInstance().player.sendChatMessage(ConfigObject.getInstance().getGamemodeCommand().replaceAll("\\{gamemode}", getNextGameMode(Screen.hasShiftDown()).getName()));
-                }
-                
-                @Override
-                public void render(int mouseX, int mouseY, float delta) {
-                    setText(getGameModeShortText(getCurrentGameMode()));
-                    super.render(mouseX, mouseY, delta);
-                }
-                
-                @Override
-                public boolean containsMouse(double mouseX, double mouseY) {
-                    return isNotInExclusionZones(mouseX, mouseY) && super.containsMouse(mouseX, mouseY);
-                }
-            }.tooltip(() -> I18n.translate("text.rei.gamemode_button.tooltip", getGameModeText(getNextGameMode(Screen.hasShiftDown())))).canChangeFocuses(false));
+            widgets.add(Widgets.createButton(ConfigObject.getInstance().isLowerConfigButton() ? new Rectangle(ConfigObject.getInstance().isLeftHandSidePanel() ? window.getScaledWidth() - 30 : 10, 10, 20, 20) : new Rectangle(ConfigObject.getInstance().isLeftHandSidePanel() ? window.getScaledWidth() - 55 : 35, 10, 20, 20), NarratorManager.EMPTY)
+                    .onClick(button -> MinecraftClient.getInstance().player.sendChatMessage(ConfigObject.getInstance().getGamemodeCommand().replaceAll("\\{gamemode}", getNextGameMode(Screen.hasShiftDown()).getName())))
+                    .onRender(button -> button.setText(getGameModeShortText(getCurrentGameMode())))
+                    .focusable(false)
+                    .tooltipLine(I18n.translate("text.rei.gamemode_button.tooltip", getGameModeText(getNextGameMode(Screen.hasShiftDown()))))
+                    .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y)));
             int xxx = ConfigObject.getInstance().isLeftHandSidePanel() ? window.getScaledWidth() - 30 : 10;
             for (Weather weather : Weather.values()) {
-                widgets.add(new ButtonWidget(new Rectangle(xxx, 35, 20, 20), NarratorManager.EMPTY) {
-                    @Override
-                    public void onPressed() {
-                        MinecraftClient.getInstance().player.sendChatMessage(ConfigObject.getInstance().getWeatherCommand().replaceAll("\\{weather}", weather.name().toLowerCase(Locale.ROOT)));
-                    }
-                    
-                    @Override
-                    public void render(int mouseX, int mouseY, float delta) {
-                        super.render(mouseX, mouseY, delta);
-                        MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
-                        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-                        blit(getBounds().x + 3, getBounds().y + 3, weather.getId() * 14, 14, 14, 14);
-                    }
-                    
-                    @Override
-                    public boolean containsMouse(double mouseX, double mouseY) {
-                        return isNotInExclusionZones(mouseX, mouseY) && super.containsMouse(mouseX, mouseY);
-                    }
-                }.tooltip(() -> I18n.translate("text.rei.weather_button.tooltip", I18n.translate(weather.getTranslateKey()))).canChangeFocuses(false));
+                Button weatherButton;
+                widgets.add(weatherButton = Widgets.createButton(new Rectangle(xxx, 35, 20, 20), NarratorManager.EMPTY)
+                        .onClick(button -> MinecraftClient.getInstance().player.sendChatMessage(ConfigObject.getInstance().getWeatherCommand().replaceAll("\\{weather}", weather.name().toLowerCase(Locale.ROOT))))
+                        .tooltipLine(I18n.translate("text.rei.weather_button.tooltip", I18n.translate(weather.getTranslateKey())))
+                        .focusable(false)
+                        .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y)));
+                widgets.add(Widgets.createDrawableWidget((helper, mouseX, mouseY, delta) -> {
+                    MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
+                    RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+                    helper.blit(weatherButton.getBounds().x + 3, weatherButton.getBounds().y + 3, weather.getId() * 14, 14, 14, 14);
+                }));
                 xxx += ConfigObject.getInstance().isLeftHandSidePanel() ? -25 : 25;
             }
         }
@@ -282,20 +253,27 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             }));
         }
         if (ConfigObject.getInstance().isCraftableFilterEnabled()) {
-            this.widgets.add(craftableToggleButton = new CraftableToggleButtonWidget(getCraftableToggleArea()) {
-                @Override
-                public void onPressed() {
-                    ConfigManager.getInstance().toggleCraftableOnly();
-                    ENTRY_LIST_WIDGET.updateSearch(ScreenHelper.getSearchField().getText(), true);
-                }
-                
-                @Override
-                public boolean containsMouse(double mouseX, double mouseY) {
-                    return isNotInExclusionZones(mouseX, mouseY) && super.containsMouse(mouseX, mouseY);
-                }
-            });
-        } else {
-            craftableToggleButton = null;
+            Rectangle area = getCraftableToggleArea();
+            ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
+            ItemStack icon = new ItemStack(Blocks.CRAFTING_TABLE);
+            this.widgets.add((Widget) (tmp = InternalWidgets.wrapLateRenderable(InternalWidgets.mergeWidgets(
+                    Widgets.createButton(area, NarratorManager.EMPTY)
+                            .focusable(false)
+                            .onClick(button -> {
+                                ConfigManager.getInstance().toggleCraftableOnly();
+                                ENTRY_LIST_WIDGET.updateSearch(ScreenHelper.getSearchField().getText(), true);
+                            })
+                            .onRender(button -> button.setTint(ConfigManager.getInstance().isCraftableOnlyEnabled() ? 939579655 : 956235776))
+                            .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y))
+                            .tooltipSupplier(button -> I18n.translate(ConfigManager.getInstance().isCraftableOnlyEnabled() ? "text.rei.showing_craftable" : "text.rei.showing_all")),
+                    Widgets.createDrawableWidget((helper, mouseX, mouseY, delta) -> {
+                        itemRenderer.zOffset = helper.getZOffset();
+                        itemRenderer.renderGuiItemIcon(icon, area.x + 2, area.y + 2);
+                        itemRenderer.zOffset = 0.0F;
+                    }))
+            )));
+            ((Widget) tmp).setZ(600);
+            lateRenderables.add(tmp);
         }
     }
     
@@ -387,6 +365,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         return I18n.translate(String.format("%s%s", "text.rei.", ClientHelper.getInstance().isCheating() ? "cheat" : "nocheat"));
     }
     
+    @NotNull
     @Override
     public Rectangle getBounds() {
         return bounds;
@@ -438,9 +417,9 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
     public void lateRender(int mouseX, int mouseY, float delta) {
         if (ScreenHelper.isOverlayVisible()) {
             ScreenHelper.getSearchField().laterRender(mouseX, mouseY, delta);
-            if (craftableToggleButton != null)
-                craftableToggleButton.lateRender(mouseX, mouseY, delta);
-            configButton.lateRender(mouseX, mouseY, delta);
+            for (LateRenderable lateRenderable : lateRenderables) {
+                lateRenderable.lateRender(mouseX, mouseY, delta);
+            }
         }
         Screen currentScreen = MinecraftClient.getInstance().currentScreen;
         if (!(currentScreen instanceof RecipeViewingScreen) || !((RecipeViewingScreen) currentScreen).choosePageActivated)
@@ -478,8 +457,10 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
     public void renderWidgets(int int_1, int int_2, float float_1) {
         if (!ScreenHelper.isOverlayVisible())
             return;
-        if (!ConfigObject.getInstance().isEntryListWidgetScrolled())
-            leftButton.enabled = rightButton.enabled = ENTRY_LIST_WIDGET.getTotalPages() > 1;
+        if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
+            leftButton.setEnabled(ENTRY_LIST_WIDGET.getTotalPages() > 1);
+            rightButton.setEnabled(ENTRY_LIST_WIDGET.getTotalPages() > 1);
+        }
         for (Widget widget : widgets) {
             widget.render(int_1, int_2, float_1);
         }
@@ -491,10 +472,10 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             return false;
         if (isInside(PointHelper.ofMouse())) {
             if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-                if (amount > 0 && leftButton.enabled)
-                    leftButton.onPressed();
-                else if (amount < 0 && rightButton.enabled)
-                    rightButton.onPressed();
+                if (amount > 0 && leftButton.isEnabled())
+                    leftButton.onClick();
+                else if (amount < 0 && rightButton.isEnabled())
+                    rightButton.onClick();
                 else
                     return false;
                 return true;

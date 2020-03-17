@@ -52,6 +52,7 @@ import net.minecraft.client.util.math.Matrix4f;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
@@ -193,6 +194,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
             return i;
         }
         
+        @NotNull
         @Override
         public me.shedaniel.math.api.Rectangle getBounds() {
             return bounds;

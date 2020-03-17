@@ -31,6 +31,7 @@ import me.shedaniel.rei.gui.config.RecipeBorderType;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
@@ -62,6 +63,7 @@ public class PanelWidget extends WidgetWithBounds {
         TEMP.render();
     }
     
+    @NotNull
     @Override
     public Rectangle getBounds() {
         return bounds;

@@ -34,6 +34,8 @@ import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.util.Tickable;
 import net.minecraft.util.math.MathHelper;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
@@ -42,6 +44,10 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+/**
+ * @see net.minecraft.client.gui.widget.TextFieldWidget
+ */
+@ApiStatus.Internal
 public class TextFieldWidget extends WidgetWithBounds implements Tickable {
     
     public Function<String, String> stripInvalid;
@@ -93,6 +99,7 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
         this.suggestion = string_1;
     }
     
+    @NotNull
     @Override
     public Rectangle getBounds() {
         return bounds;

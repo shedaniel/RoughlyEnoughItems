@@ -27,22 +27,26 @@ import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
 
 public abstract class Slot extends WidgetWithBounds {
+    @NotNull
     public Slot unmarkInputOrOutput() {
         setNoticeMark((byte) 0);
         return this;
     }
     
+    @NotNull
     public final Slot markInput() {
         setNoticeMark((byte) 1);
         return this;
     }
     
+    @NotNull
     public final Slot markOutput() {
         setNoticeMark((byte) 2);
         return this;
@@ -56,12 +60,19 @@ public abstract class Slot extends WidgetWithBounds {
     
     public abstract boolean isInteractable();
     
+    @NotNull
     public Slot interactable(boolean interactable) {
         setInteractable(interactable);
         return this;
     }
     
-    public Slot noInteractable() {
+    @NotNull
+    public final Slot noInteractable() {
+        return interactable(false);
+    }
+    
+    @NotNull
+    public final Slot notInteractable() {
         return interactable(false);
     }
     
@@ -69,12 +80,19 @@ public abstract class Slot extends WidgetWithBounds {
     
     public abstract boolean isInteractableFavorites();
     
+    @NotNull
     public Slot interactableFavorites(boolean interactableFavorites) {
         setInteractableFavorites(interactableFavorites);
         return this;
     }
     
-    public Slot noFavoritesInteractable() {
+    @NotNull
+    public final Slot noFavoritesInteractable() {
+        return interactableFavorites(false);
+    }
+    
+    @NotNull
+    public final Slot notFavoritesInteractable() {
         return interactableFavorites(false);
     }
     
@@ -82,11 +100,13 @@ public abstract class Slot extends WidgetWithBounds {
     
     public abstract boolean isHighlightEnabled();
     
+    @NotNull
     public final Slot highlightEnabled(boolean highlight) {
         setHighlightEnabled(highlight);
         return this;
     }
     
+    @NotNull
     public final Slot disableHighlight() {
         return highlightEnabled(false);
     }
@@ -95,11 +115,13 @@ public abstract class Slot extends WidgetWithBounds {
     
     public abstract boolean isTooltipsEnabled();
     
+    @NotNull
     public final Slot tooltipsEnabled(boolean tooltipsEnabled) {
         setTooltipsEnabled(tooltipsEnabled);
         return this;
     }
     
+    @NotNull
     public final Slot disableTooltips() {
         return tooltipsEnabled(false);
     }
@@ -108,21 +130,27 @@ public abstract class Slot extends WidgetWithBounds {
     
     public abstract boolean isBackgroundEnabled();
     
+    @NotNull
     public final Slot backgroundEnabled(boolean backgroundEnabled) {
         setBackgroundEnabled(backgroundEnabled);
         return this;
     }
     
+    @NotNull
     public final Slot disableBackground() {
         return backgroundEnabled(false);
     }
     
+    @NotNull
     public abstract Slot clearEntries();
     
+    @NotNull
     public abstract Slot entry(EntryStack stack);
     
+    @NotNull
     public abstract Slot entries(Collection<EntryStack> stacks);
     
+    @NotNull
     public abstract List<EntryStack> getEntries();
     
     /**

@@ -33,7 +33,7 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.opengl.GL11;
 
-public class TexturedDrawableConsumer implements DrawableConsumer {
+public final class TexturedDrawableConsumer implements DrawableConsumer {
     
     @NotNull
     private Identifier identifier;

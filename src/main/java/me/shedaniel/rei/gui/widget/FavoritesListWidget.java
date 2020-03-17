@@ -46,6 +46,7 @@ import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
@@ -115,6 +116,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
         return super.mouseScrolled(double_1, double_2, double_3);
     }
     
+    @NotNull
     @Override
     public Rectangle getBounds() {
         return bounds;

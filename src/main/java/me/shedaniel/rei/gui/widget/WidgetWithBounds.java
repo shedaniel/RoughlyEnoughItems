@@ -24,9 +24,11 @@
 package me.shedaniel.rei.gui.widget;
 
 import me.shedaniel.math.api.Rectangle;
+import org.jetbrains.annotations.NotNull;
 
 public abstract class WidgetWithBounds extends Widget {
     
+    @NotNull
     public abstract Rectangle getBounds();
     
     @Override

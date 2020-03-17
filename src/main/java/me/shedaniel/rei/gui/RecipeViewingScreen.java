@@ -31,10 +31,15 @@ import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.widgets.Button;
 import me.shedaniel.rei.api.widgets.Panel;
 import me.shedaniel.rei.api.widgets.Widgets;
-import me.shedaniel.rei.gui.widget.*;
+import me.shedaniel.rei.gui.widget.EntryWidget;
+import me.shedaniel.rei.gui.widget.RecipeChoosePageWidget;
+import me.shedaniel.rei.gui.widget.TabWidget;
+import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.impl.ClientHelperImpl;
+import me.shedaniel.rei.impl.InternalWidgets;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.widgets.PanelWidget;
 import me.shedaniel.rei.utils.CollectionUtils;
@@ -82,7 +87,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
     private Rectangle bounds;
     @Nullable
     private Panel workingStationsBaseWidget;
-    private ButtonWidget recipeBack, recipeNext, categoryBack, categoryNext;
+    private Button recipeBack, recipeNext, categoryBack, categoryNext;
     private EntryStack ingredientStackToNotice = EntryStack.empty();
     private EntryStack resultStackToNotice = EntryStack.empty();
     
@@ -174,13 +179,13 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
         if (choosePageActivated)
             return recipeChoosePageWidget.keyPressed(int_1, int_2, int_3);
         else if (ConfigObject.getInstance().getNextPageKeybind().matchesKey(int_1, int_2)) {
-            if (recipeNext.enabled)
-                recipeNext.onPressed();
-            return recipeNext.enabled;
+            if (recipeNext.isEnabled())
+                recipeNext.onClick();
+            return recipeNext.isEnabled();
         } else if (ConfigObject.getInstance().getPreviousPageKeybind().matchesKey(int_1, int_2)) {
-            if (recipeBack.enabled)
-                recipeBack.onPressed();
-            return recipeBack.enabled;
+            if (recipeBack.isEnabled())
+                recipeBack.onClick();
+            return recipeBack.isEnabled();
         }
         for (Element element : children())
             if (element.keyPressed(int_1, int_2, int_3))
@@ -226,46 +231,51 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
         }
         this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - guiHeight / 2, guiWidth, guiHeight);
         this.page = MathHelper.clamp(page, 0, getTotalPages(selectedCategory) - 1);
-        ButtonWidget w, w2;
-        this.widgets.add(w = ButtonWidget.create(new Rectangle(bounds.x + 2, bounds.y - 16, 10, 10), new TranslatableText("text.rei.left_arrow"), buttonWidget -> {
-            categoryPages--;
-            if (categoryPages < 0)
-                categoryPages = MathHelper.ceil(categories.size() / (float) tabsPerPage) - 1;
-            RecipeViewingScreen.this.init();
-        }));
-        this.widgets.add(w2 = ButtonWidget.create(new Rectangle(bounds.x + bounds.width - 12, bounds.y - 16, 10, 10), new TranslatableText("text.rei.right_arrow"), buttonWidget -> {
-            categoryPages++;
-            if (categoryPages > MathHelper.ceil(categories.size() / (float) tabsPerPage) - 1)
-                categoryPages = 0;
-            RecipeViewingScreen.this.init();
-        }));
-        w.enabled = w2.enabled = categories.size() > tabsPerPage;
-        widgets.add(categoryBack = ButtonWidget.create(new Rectangle(bounds.getX() + 5, bounds.getY() + 5, 12, 12), new TranslatableText("text.rei.left_arrow"), buttonWidget -> {
-            int currentCategoryIndex = categories.indexOf(selectedCategory);
-            currentCategoryIndex--;
-            if (currentCategoryIndex < 0)
-                currentCategoryIndex = categories.size() - 1;
-            ClientHelperImpl.getInstance().openRecipeViewingScreen(categoriesMap, categories.get(currentCategoryIndex).getIdentifier(), ingredientStackToNotice, resultStackToNotice);
-        }).tooltip(() -> I18n.translate("text.rei.previous_category")));
+        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x + 2, bounds.y - 16, 10, 10), new TranslatableText("text.rei.left_arrow"))
+                .onClick(button -> {
+                    categoryPages--;
+                    if (categoryPages < 0)
+                        categoryPages = MathHelper.ceil(categories.size() / (float) tabsPerPage) - 1;
+                    RecipeViewingScreen.this.init();
+                })
+                .enabled(categories.size() > tabsPerPage));
+        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x + bounds.width - 12, bounds.y - 16, 10, 10), new TranslatableText("text.rei.right_arrow"))
+                .onClick(button -> {
+                    categoryPages++;
+                    if (categoryPages > MathHelper.ceil(categories.size() / (float) tabsPerPage) - 1)
+                        categoryPages = 0;
+                    RecipeViewingScreen.this.init();
+                })
+                .enabled(categories.size() > tabsPerPage));
+        widgets.add(categoryBack = Widgets.createButton(new Rectangle(bounds.getX() + 5, bounds.getY() + 5, 12, 12), new TranslatableText("text.rei.left_arrow"))
+                .onClick(button -> {
+                    int currentCategoryIndex = categories.indexOf(selectedCategory);
+                    currentCategoryIndex--;
+                    if (currentCategoryIndex < 0)
+                        currentCategoryIndex = categories.size() - 1;
+                    ClientHelperImpl.getInstance().openRecipeViewingScreen(categoriesMap, categories.get(currentCategoryIndex).getIdentifier(), ingredientStackToNotice, resultStackToNotice);
+                }).tooltipLine(I18n.translate("text.rei.previous_category")));
         widgets.add(Widgets.createClickableLabel(new Point(bounds.getCenterX(), bounds.getY() + 7), selectedCategory.getCategoryName(), clickableLabelWidget -> {
             ClientHelper.getInstance().executeViewAllRecipesKeyBind();
         }).tooltipLine(I18n.translate("text.rei.view_all_categories")));
-        widgets.add(categoryNext = ButtonWidget.create(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 5, 12, 12), new TranslatableText("text.rei.right_arrow"), buttonWidget -> {
-            int currentCategoryIndex = categories.indexOf(selectedCategory);
-            currentCategoryIndex++;
-            if (currentCategoryIndex >= categories.size())
-                currentCategoryIndex = 0;
-            ClientHelperImpl.getInstance().openRecipeViewingScreen(categoriesMap, categories.get(currentCategoryIndex).getIdentifier(), ingredientStackToNotice, resultStackToNotice);
-        }).tooltip(() -> I18n.translate("text.rei.next_category")));
-        categoryBack.enabled = categories.size() > 1;
-        categoryNext.enabled = categories.size() > 1;
+        widgets.add(categoryNext = Widgets.createButton(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 5, 12, 12), new TranslatableText("text.rei.right_arrow"))
+                .onClick(button -> {
+                    int currentCategoryIndex = categories.indexOf(selectedCategory);
+                    currentCategoryIndex++;
+                    if (currentCategoryIndex >= categories.size())
+                        currentCategoryIndex = 0;
+                    ClientHelperImpl.getInstance().openRecipeViewingScreen(categoriesMap, categories.get(currentCategoryIndex).getIdentifier(), ingredientStackToNotice, resultStackToNotice);
+                }).tooltipLine(I18n.translate("text.rei.next_category")));
+        categoryBack.setEnabled(categories.size() > 1);
+        categoryNext.setEnabled(categories.size() > 1);
         
-        widgets.add(recipeBack = ButtonWidget.create(new Rectangle(bounds.getX() + 5, bounds.getY() + 19, 12, 12), new TranslatableText("text.rei.left_arrow"), buttonWidget -> {
-            page--;
-            if (page < 0)
-                page = getTotalPages(selectedCategory) - 1;
-            RecipeViewingScreen.this.init();
-        }).tooltip(() -> I18n.translate("text.rei.previous_page")));
+        widgets.add(recipeBack = Widgets.createButton(new Rectangle(bounds.getX() + 5, bounds.getY() + 19, 12, 12), new TranslatableText("text.rei.left_arrow"))
+                .onClick(button -> {
+                    page--;
+                    if (page < 0)
+                        page = getTotalPages(selectedCategory) - 1;
+                    RecipeViewingScreen.this.init();
+                }).tooltipLine(I18n.translate("text.rei.previous_page")));
         widgets.add(Widgets.createClickableLabel(new Point(bounds.getCenterX(), bounds.getY() + 21), "", label -> {
             RecipeViewingScreen.this.choosePageActivated = true;
             RecipeViewingScreen.this.init();
@@ -273,13 +283,15 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
             label.setText(String.format("%d/%d", page + 1, getTotalPages(selectedCategory)));
             label.setClickable(categoriesMap.get(selectedCategory).size() > getRecipesPerPageByHeight());
         }).tooltipSupplier(label -> label.isClickable() ? I18n.translate("text.rei.choose_page") : null));
-        widgets.add(recipeNext = ButtonWidget.create(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 19, 12, 12), new TranslatableText("text.rei.right_arrow"), buttonWidget -> {
-            page++;
-            if (page >= getTotalPages(selectedCategory))
-                page = 0;
-            RecipeViewingScreen.this.init();
-        }).tooltip(() -> I18n.translate("text.rei.next_page")));
-        recipeBack.enabled = recipeNext.enabled = categoriesMap.get(selectedCategory).size() > getRecipesPerPageByHeight();
+        widgets.add(recipeNext = Widgets.createButton(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 19, 12, 12), new TranslatableText("text.rei.right_arrow"))
+                .onClick(button -> {
+                    page++;
+                    if (page >= getTotalPages(selectedCategory))
+                        page = 0;
+                    RecipeViewingScreen.this.init();
+                }).tooltipLine(I18n.translate("text.rei.next_page")));
+        recipeBack.setEnabled(categoriesMap.get(selectedCategory).size() > getRecipesPerPageByHeight());
+        recipeNext.setEnabled(categoriesMap.get(selectedCategory).size() > getRecipesPerPageByHeight());
         int tabV = isCompactTabs ? 166 : 192;
         for (int i = 0; i < tabsPerPage; i++) {
             int j = i + categoryPages * tabsPerPage;
@@ -309,7 +321,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
             recipeBounds.put(displayBounds, setupDisplay);
             this.widgets.addAll(setupDisplay);
             if (supplier.isPresent() && supplier.get().get(displayBounds) != null)
-                this.widgets.add(new AutoCraftingButtonWidget(displayBounds, supplier.get().get(displayBounds), supplier.get().getButtonText(), displaySupplier, setupDisplay, selectedCategory));
+                this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(displayBounds, supplier.get().get(displayBounds), supplier.get().getButtonText(), displaySupplier, setupDisplay, selectedCategory));
         }
         if (choosePageActivated)
             recipeChoosePageWidget = new RecipeChoosePageWidget(this, page, getTotalPages(selectedCategory));
@@ -499,16 +511,16 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
             if (listener.mouseScrolled(i, j, amount))
                 return true;
         if (getBounds().contains(PointHelper.ofMouse())) {
-            if (amount > 0 && recipeBack.enabled)
-                recipeBack.onPressed();
-            else if (amount < 0 && recipeNext.enabled)
-                recipeNext.onPressed();
+            if (amount > 0 && recipeBack.isEnabled())
+                recipeBack.onClick();
+            else if (amount < 0 && recipeNext.isEnabled())
+                recipeNext.onClick();
         }
         if ((new Rectangle(bounds.x, bounds.y - 28, bounds.width, 28)).contains(PointHelper.ofMouse())) {
-            if (amount > 0 && categoryBack.enabled)
-                categoryBack.onPressed();
-            else if (amount < 0 && categoryNext.enabled)
-                categoryNext.onPressed();
+            if (amount > 0 && categoryBack.isEnabled())
+                categoryBack.onClick();
+            else if (amount < 0 && categoryNext.isEnabled())
+                categoryNext.onClick();
         }
         return super.mouseScrolled(i, j, amount);
     }

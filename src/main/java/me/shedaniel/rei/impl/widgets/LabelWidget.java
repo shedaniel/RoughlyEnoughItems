@@ -174,6 +174,7 @@ public final class LabelWidget extends Label {
         this.text = Objects.requireNonNull(text);
     }
     
+    @NotNull
     @Override
     public Rectangle getBounds() {
         int width = font.getStringWidth(text);

@@ -91,6 +91,7 @@ public class EntryWidget extends Slot {
     }
     
     @Override
+    @NotNull
     public EntryWidget unmarkInputOrOutput() {
         noticeMark = 0;
         return this;
@@ -140,6 +141,7 @@ public class EntryWidget extends Slot {
         return interactable(false);
     }
     
+    @NotNull
     @Override
     public EntryWidget interactable(boolean b) {
         interactable = b;
@@ -151,6 +153,7 @@ public class EntryWidget extends Slot {
         return interactableFavorites(false);
     }
     
+    @NotNull
     @Override
     public EntryWidget interactableFavorites(boolean b) {
         interactableFavorites = b && interactable;
@@ -219,17 +222,20 @@ public class EntryWidget extends Slot {
         return this;
     }
     
+    @NotNull
     @Override
     public Slot clearEntries() {
         return clearStacks();
     }
     
+    @NotNull
     @Override
     public EntryWidget entry(EntryStack stack) {
         entryStacks.add(stack);
         return this;
     }
     
+    @NotNull
     @Override
     public EntryWidget entries(Collection<EntryStack> stacks) {
         entryStacks.addAll(stacks);
@@ -244,6 +250,7 @@ public class EntryWidget extends Slot {
         return entryStacks.get(MathHelper.floor((System.currentTimeMillis() / 500 % (double) entryStacks.size()) / 1f));
     }
     
+    @NotNull
     @Override
     public List<EntryStack> getEntries() {
         return entryStacks;
@@ -253,6 +260,7 @@ public class EntryWidget extends Slot {
         return entryStacks;
     }
     
+    @NotNull
     @Override
     public Rectangle getBounds() {
         return bounds;
