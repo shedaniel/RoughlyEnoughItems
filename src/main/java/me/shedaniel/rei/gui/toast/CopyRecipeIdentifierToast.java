@@ -52,7 +52,7 @@ public class CopyRecipeIdentifierToast implements Toast {
     public Visibility draw(ToastManager toastManager, long var2) {
         toastManager.getGame().getTextureManager().bindTexture(TOASTS_TEX);
         RenderSystem.color3f(1.0F, 1.0F, 1.0F);
-        toastManager.blit(0, 0, 0, 0, 160, 32);
+        toastManager.drawTexture(0, 0, 0, 0, 160, 32);
         if (this.subtitle == null) {
             toastManager.getGame().textRenderer.draw(this.title, 18.0F, 12.0F, 11141120);
         } else {

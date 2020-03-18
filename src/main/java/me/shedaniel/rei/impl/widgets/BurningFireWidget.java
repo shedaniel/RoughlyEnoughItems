@@ -65,10 +65,10 @@ public final class BurningFireWidget extends BurningFire {
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
-        blit(getX(), getY(), 1, 74, 14, 14);
+        drawTexture(getX(), getY(), 1, 74, 14, 14);
         if (getAnimationDuration() > 0) {
             int height = 14 - MathHelper.ceil((System.currentTimeMillis() / (animationDuration / 14) % 14d) / 1f);
-            blit(getX(), getY() + 14 - height, 82, 77 + (14 - height), 14, height);
+            drawTexture(getX(), getY() + 14 - height, 82, 77 + (14 - height), 14, height);
         }
     }
     

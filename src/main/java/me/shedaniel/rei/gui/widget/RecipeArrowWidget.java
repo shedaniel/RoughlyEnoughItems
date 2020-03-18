@@ -71,10 +71,10 @@ public class RecipeArrowWidget extends WidgetWithBounds {
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
-        blit(x, y, 106, 91, 24, 17);
+        drawTexture(x, y, 106, 91, 24, 17);
         if (animated) {
             int width = MathHelper.ceil((System.currentTimeMillis() / (time / 24) % 24d) / 1f);
-            blit(x, y, 82, 91, width, 17);
+            drawTexture(x, y, 82, 91, width, 17);
         }
     }
     

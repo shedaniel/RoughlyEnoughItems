@@ -189,7 +189,7 @@ public class PreRecipeViewingScreen extends Screen {
         @Override
         public void render(int i, int i1, float delta) {
             MinecraftClient.getInstance().getTextureManager().bindTexture(IDENTIFIER);
-            blit(bounds.x + 4, bounds.y + 4, u, v, 200, 112);
+            drawTexture(bounds.x + 4, bounds.y + 4, u, v, 200, 112);
         }
         
         @Override

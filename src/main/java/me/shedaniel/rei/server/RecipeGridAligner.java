@@ -24,7 +24,7 @@
 package me.shedaniel.rei.server;
 
 import net.minecraft.recipe.Ingredient;
-import net.minecraft.util.DefaultedList;
+import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
 

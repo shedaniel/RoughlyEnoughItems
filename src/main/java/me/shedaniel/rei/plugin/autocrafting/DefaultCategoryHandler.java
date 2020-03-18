@@ -40,10 +40,9 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.ScreenHandler;
-import net.minecraft.util.DefaultedList;
-import net.minecraft.util.PacketByteBuf;
-
+import net.minecraft.util.collection.DefaultedList;
 import java.util.List;
 
 public class DefaultCategoryHandler implements AutoTransferHandler {

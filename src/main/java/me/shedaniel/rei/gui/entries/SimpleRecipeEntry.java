@@ -114,7 +114,7 @@ public class SimpleRecipeEntry extends RecipeEntry {
         xx = bounds.x + 4 + 18 * (getItemsPerLine() - 2);
         yy = bounds.y + getHeight() / 2 - 8;
         MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
-        blit(xx, yy, 0, 28, 18, 18);
+        drawTexture(xx, yy, 0, 28, 18, 18);
         xx += 18;
         outputWidget.setZ(getZ() + 50);
         outputWidget.getBounds().setLocation(xx, yy);

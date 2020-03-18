@@ -166,7 +166,7 @@ public class DefaultPlugin implements REIPluginV0 {
             @Override
             public void render(Rectangle bounds, int mouseX, int mouseY, float delta) {
                 MinecraftClient.getInstance().getTextureManager().bindTexture(id);
-                innerBlit(bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), getZOffset(), 0, 1, 0, 1);
+                drawTexturedQuad(bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), getZOffset(), 0, 1, 0, 1);
             }
             
             @Override

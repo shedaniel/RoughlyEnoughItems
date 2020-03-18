@@ -64,9 +64,9 @@ public class DefaultBrewingCategory implements RecipeCategory<DefaultBrewingDisp
         widgets.add(Widgets.createRecipeBase(bounds));
         widgets.add(Widgets.createDrawableWidget((helper, mouseX, mouseY, delta) -> {
             MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
-            helper.blit(startPoint.x, startPoint.y, 0, 108, 103, 59);
+            helper.drawTexture(startPoint.x, startPoint.y, 0, 108, 103, 59);
             int width = MathHelper.ceil(System.currentTimeMillis() / 250d % 18d);
-            helper.blit(startPoint.x + 44, startPoint.y + 28, 103, 163, width, 4);
+            helper.drawTexture(startPoint.x + 44, startPoint.y + 28, 103, 163, width, 4);
         }));
         widgets.add(Widgets.createSlot(new Point(startPoint.x + 1, startPoint.y + 1)).entry(EntryStack.create(Items.BLAZE_POWDER)).disableBackground().markInput());
         widgets.add(Widgets.createSlot(new Point(startPoint.x + 40, startPoint.y + 1)).entries(display.getInputEntries().get(0)).disableBackground().markInput());

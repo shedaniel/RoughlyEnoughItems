@@ -34,9 +34,8 @@ import net.minecraft.recipe.Ingredient;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.DefaultedList;
 import net.minecraft.util.Identifier;
-
+import net.minecraft.util.collection.DefaultedList;
 import java.util.*;
 
 public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<Integer> {
