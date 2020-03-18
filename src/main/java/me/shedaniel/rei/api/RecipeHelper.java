@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.api;
 
-import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.recipe.Recipe;
@@ -107,6 +107,7 @@ public interface RecipeHelper {
      *
      * @param categoryIdentifier the category to display in
      * @param display            the recipe display
+     * @deprecated Use {@link RecipeHelper#registerDisplay(RecipeDisplay)}
      */
     @ApiStatus.Internal
     @ApiStatus.ScheduledForRemoval

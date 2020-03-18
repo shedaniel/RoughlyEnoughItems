@@ -71,7 +71,7 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
             }
             
             @Override
-            public void render(me.shedaniel.math.api.Rectangle rectangle, int mouseX, int mouseY, float delta) {
+            public void render(Rectangle rectangle, int mouseX, int mouseY, float delta) {
                 MinecraftClient.getInstance().textRenderer.draw(I18n.translate("text.rei.composting.page", recipe.getPage() + 1), rectangle.x + 5, rectangle.y + 6, -1);
             }
         };

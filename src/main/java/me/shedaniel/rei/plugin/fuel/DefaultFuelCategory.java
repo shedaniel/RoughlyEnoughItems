@@ -25,6 +25,7 @@ package me.shedaniel.rei.plugin.fuel;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.math.Point;
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.widgets.Slot;
@@ -98,7 +99,7 @@ public class DefaultFuelCategory implements RecipeCategory<DefaultFuelDisplay> {
             }
             
             @Override
-            public void render(me.shedaniel.math.api.Rectangle bounds, int mouseX, int mouseY, float delta) {
+            public void render(Rectangle bounds, int mouseX, int mouseY, float delta) {
                 slot.setZ(getZ() + 50);
                 slot.getBounds().setLocation(bounds.x + 4, bounds.y + 2);
                 slot.render(mouseX, mouseY, delta);

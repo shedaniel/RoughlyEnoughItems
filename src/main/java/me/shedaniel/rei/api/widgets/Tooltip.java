@@ -32,21 +32,25 @@ import java.util.Collection;
 import java.util.List;
 
 public interface Tooltip {
+    @SuppressWarnings("deprecation")
     @NotNull
     static Tooltip create(Point point, Collection<String> texts) {
         return QueuedTooltip.create(point, texts);
     }
     
+    @SuppressWarnings("deprecation")
     @NotNull
     static Tooltip create(Point point, String... texts) {
         return QueuedTooltip.create(point, texts);
     }
     
+    @SuppressWarnings("deprecation")
     @NotNull
     static Tooltip create(Collection<String> texts) {
         return QueuedTooltip.create(texts);
     }
     
+    @SuppressWarnings("deprecation")
     @NotNull
     static Tooltip create(String... texts) {
         return QueuedTooltip.create(texts);

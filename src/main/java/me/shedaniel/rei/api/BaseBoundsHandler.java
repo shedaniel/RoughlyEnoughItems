@@ -23,7 +23,8 @@
 
 package me.shedaniel.rei.api;
 
-import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.impl.DisplayHelperImpl;
 import net.minecraft.client.gui.screen.Screen;
 
 import java.util.List;
@@ -31,9 +32,8 @@ import java.util.function.Supplier;
 
 public interface BaseBoundsHandler extends DisplayHelper.DisplayBoundsHandler<Screen> {
     
-    @SuppressWarnings("deprecation")
     static BaseBoundsHandler getInstance() {
-        return DisplayHelper.getInstance().getBaseBoundsHandler();
+        return ((DisplayHelperImpl) DisplayHelper.getInstance()).getBaseBoundsHandler();
     }
     
     /**

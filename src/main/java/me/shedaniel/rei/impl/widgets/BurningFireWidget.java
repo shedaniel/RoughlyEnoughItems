@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.impl.widgets;
 
-import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.widgets.BurningFire;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.client.MinecraftClient;

@@ -38,6 +38,8 @@ import java.util.List;
  * @see Tooltip
  */
 @ApiStatus.Internal
+@Deprecated
+@ApiStatus.ScheduledForRemoval
 public class QueuedTooltip implements Tooltip {
     
     private Point location;
@@ -46,16 +48,6 @@ public class QueuedTooltip implements Tooltip {
     private QueuedTooltip(Point location, Collection<String> text) {
         this.location = location;
         this.text = Lists.newArrayList(text);
-    }
-    
-    @NotNull
-    public static QueuedTooltip create(me.shedaniel.math.api.Point location, List<String> text) {
-        return new QueuedTooltip(location, text);
-    }
-    
-    @NotNull
-    public static QueuedTooltip create(me.shedaniel.math.api.Point location, String... text) {
-        return QueuedTooltip.create(location, Lists.newArrayList(text));
     }
     
     @NotNull
@@ -86,17 +78,6 @@ public class QueuedTooltip implements Tooltip {
     @NotNull
     public static QueuedTooltip create(String... text) {
         return QueuedTooltip.create(PointHelper.ofMouse(), text);
-    }
-    
-    /**
-     * @return the absolute location of the tooltip.
-     * @deprecated Use {@link #getX()} and {@link #getY()} instead.
-     */
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    @NotNull
-    public me.shedaniel.math.api.Point getLocation() {
-        return new me.shedaniel.math.api.Point(location);
     }
     
     @Override

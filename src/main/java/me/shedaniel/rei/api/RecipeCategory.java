@@ -25,18 +25,14 @@ package me.shedaniel.rei.api;
 
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.widgets.Widgets;
-import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.entries.RecipeEntry;
 import me.shedaniel.rei.gui.entries.SimpleRecipeEntry;
 import me.shedaniel.rei.gui.widget.Widget;
-import me.shedaniel.rei.impl.widgets.PanelWidget;
-import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Supplier;
 
 
 public interface RecipeCategory<T extends RecipeDisplay> {
@@ -78,51 +74,13 @@ public interface RecipeCategory<T extends RecipeDisplay> {
     /**
      * Setup the widgets for displaying the recipe
      *
-     * @param recipeDisplaySupplier the supplier for getting the recipe
-     * @param bounds                the bounds of the display, configurable with overriding the width, height methods.
-     * @return the list of widgets
-     * @deprecated use {@link #setupDisplay(RecipeDisplay, me.shedaniel.math.Rectangle)}
-     */
-    @ApiStatus.OverrideOnly
-    @ApiStatus.ScheduledForRemoval
-    @Deprecated
-    default List<Widget> setupDisplay(Supplier<T> recipeDisplaySupplier, me.shedaniel.math.api.Rectangle bounds) {
-        return Collections.singletonList(Widgets.createCategoryBase(bounds));
-    }
-    
-    /**
-     * Setup the widgets for displaying the recipe
-     *
      * @param recipeDisplay the recipe
      * @param bounds        the bounds of the display, configurable with overriding the width, height methods.
      * @return the list of widgets
      */
     @ApiStatus.OverrideOnly
     default List<Widget> setupDisplay(T recipeDisplay, Rectangle bounds) {
-        return setupDisplay(() -> recipeDisplay, new me.shedaniel.math.api.Rectangle(bounds));
-    }
-    
-    /**
-     * Draws the category background, used in {@link RecipeViewingScreen}
-     *
-     * @param bounds the bounds of the whole recipe viewing screen
-     * @param mouseX the x coordinates for the mouse
-     * @param mouseY the y coordinates for the mouse
-     * @param delta  the delta
-     * @deprecated there is no replacement for this as this is just a dumb idea, please contact me if you want to change my mind
-     */
-    @ApiStatus.OverrideOnly
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    default void drawCategoryBackground(me.shedaniel.math.api.Rectangle bounds, int mouseX, int mouseY, float delta) {
-        PanelWidget.render(bounds, -1);
-        if (REIHelper.getInstance().isDarkThemeEnabled()) {
-            DrawableHelper.fill(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, 0xFF404040);
-            DrawableHelper.fill(bounds.x + 17, bounds.y + 19, bounds.x + bounds.width - 17, bounds.y + 31, 0xFF404040);
-        } else {
-            DrawableHelper.fill(bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, 0xFF9E9E9E);
-            DrawableHelper.fill(bounds.x + 17, bounds.y + 19, bounds.x + bounds.width - 17, bounds.y + 31, 0xFF9E9E9E);
-        }
+        return Collections.singletonList(Widgets.createCategoryBase(bounds));
     }
     
     /**

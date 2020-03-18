@@ -44,7 +44,7 @@ public final class PanelWidget extends Panel {
     private static final Identifier CHEST_GUI_TEXTURE_DARK = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
     
     private static final PanelWidget TEMP = new PanelWidget(new Rectangle());
-    private me.shedaniel.math.api.Rectangle bounds;
+    private Rectangle bounds;
     private int color = -1;
     private int innerColor = REIHelper.getInstance().isDarkThemeEnabled() ? -13750738 : -3750202;
     private int xTextureOffset = 0;
@@ -57,11 +57,11 @@ public final class PanelWidget extends Panel {
     }
     
     public PanelWidget(@NotNull Rectangle bounds) {
-        this.bounds = new me.shedaniel.math.api.Rectangle(bounds);
+        this.bounds = Objects.requireNonNull(bounds);
     }
     
     public static void render(@NotNull Rectangle bounds, int color) {
-        TEMP.bounds.setBounds(bounds);
+        TEMP.bounds.setBounds(Objects.requireNonNull(bounds));
         TEMP.color = color;
         TEMP.render(0, 0, 0);
     }
@@ -118,7 +118,7 @@ public final class PanelWidget extends Panel {
     
     @NotNull
     @Override
-    public me.shedaniel.math.api.Rectangle getBounds() {
+    public Rectangle getBounds() {
         return bounds;
     }
     

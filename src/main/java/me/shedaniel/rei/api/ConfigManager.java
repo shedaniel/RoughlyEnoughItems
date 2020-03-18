@@ -26,9 +26,6 @@ package me.shedaniel.rei.api;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import org.jetbrains.annotations.ApiStatus;
-
-import java.util.List;
 
 public interface ConfigManager {
     
@@ -37,16 +34,6 @@ public interface ConfigManager {
      */
     static ConfigManager getInstance() {
         return RoughlyEnoughItemsCore.getConfigManager();
-    }
-    
-    /**
-     * @return the list of favourites
-     * @deprecated {@link ConfigObject#getFavorites()}
-     */
-    @ApiStatus.ScheduledForRemoval
-    @Deprecated
-    default List<EntryStack> getFavorites() {
-        return ConfigObject.getInstance().getFavorites();
     }
     
     /**

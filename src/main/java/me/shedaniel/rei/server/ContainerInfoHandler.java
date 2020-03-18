@@ -33,6 +33,9 @@ import java.util.Map;
 public class ContainerInfoHandler {
     private static final Map<String, Map<Class<? extends ScreenHandler>, ContainerInfo<? extends ScreenHandler>>> containerInfoMap = Maps.newLinkedHashMap();
     
+    /**
+     * @deprecated Use {@link #registerScreenWithHandlerInfo(Identifier, ContainerInfo)}
+     */
     @Deprecated
     @ApiStatus.ScheduledForRemoval
     public static void registerContainerInfo(Identifier category, ContainerInfo<? extends ScreenHandler> containerInfo) {

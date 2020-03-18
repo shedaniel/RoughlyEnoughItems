@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.api;
 
-import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.Rectangle;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal

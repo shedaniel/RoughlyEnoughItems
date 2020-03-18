@@ -24,11 +24,9 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.api.widgets.Tooltip;
-import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.item.ItemStack;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -47,15 +45,6 @@ public interface REIHelper {
     TextFieldWidget getSearchTextField();
     
     List<ItemStack> getInventoryStacks();
-    
-    /**
-     * @deprecated Use {@link #queueTooltip(Tooltip)} or {@link Tooltip#queue()}
-     */
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    default void addTooltip(@Nullable QueuedTooltip tooltip) {
-        queueTooltip(tooltip);
-    }
     
     void queueTooltip(@Nullable Tooltip tooltip);
     

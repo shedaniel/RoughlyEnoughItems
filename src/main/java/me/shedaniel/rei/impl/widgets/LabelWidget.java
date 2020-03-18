@@ -24,7 +24,7 @@
 package me.shedaniel.rei.impl.widgets;
 
 import me.shedaniel.math.Point;
-import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.widgets.Label;
 import me.shedaniel.rei.api.widgets.Tooltip;

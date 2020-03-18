@@ -54,7 +54,7 @@ public class DefaultCookingCategory implements TransferRecipeCategory<DefaultCoo
     }
     
     @Override
-    public void renderRedSlots(List<Widget> widgets, me.shedaniel.math.api.Rectangle bounds, DefaultCookingDisplay display, IntList redSlots) {
+    public void renderRedSlots(List<Widget> widgets, Rectangle bounds, DefaultCookingDisplay display, IntList redSlots) {
         Point startPoint = new Point(bounds.getCenterX() - 41, bounds.getCenterY() - 27);
         RenderSystem.translatef(0, 0, 400);
         if (redSlots.contains(0)) {
