@@ -24,7 +24,7 @@
 package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Ordering;
-import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.listeners.AbstractInventoryScreenHooks;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;

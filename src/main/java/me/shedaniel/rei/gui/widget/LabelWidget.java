@@ -24,7 +24,7 @@
 package me.shedaniel.rei.gui.widget;
 
 import me.shedaniel.math.Point;
-import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
@@ -54,11 +54,6 @@ public class LabelWidget extends WidgetWithBounds {
     private Supplier<String> tooltipSupplier;
     
     @ApiStatus.Internal
-    public LabelWidget(me.shedaniel.math.api.Point point, String text) {
-        this((Point) point, text);
-    }
-    
-    @ApiStatus.Internal
     public LabelWidget(Point point, String text) {
         this.pos = point;
         this.text = text;
@@ -67,14 +62,6 @@ public class LabelWidget extends WidgetWithBounds {
     
     public static LabelWidget create(Point point, String text) {
         return new LabelWidget(point, text);
-    }
-    
-    public static LabelWidget create(me.shedaniel.math.api.Point point, String text) {
-        return new LabelWidget(point, text);
-    }
-    
-    public static ClickableLabelWidget createClickable(me.shedaniel.math.api.Point point, String text, Consumer<ClickableLabelWidget> onClicked) {
-        return createClickable((Point) point, text, onClicked);
     }
     
     public static ClickableLabelWidget createClickable(Point point, String text, Consumer<ClickableLabelWidget> onClicked) {
@@ -134,20 +121,9 @@ public class LabelWidget extends WidgetWithBounds {
     
     /**
      * @return the position of this label
-     * @deprecated Use {@link #getLocation()}
      */
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    public me.shedaniel.math.api.Point getPosition() {
-        return new me.shedaniel.math.api.Point(getLocation());
-    }
-    
     public Point getLocation() {
         return pos;
-    }
-    
-    public LabelWidget setPosition(me.shedaniel.math.api.Point position) {
-        return setLocation(position);
     }
     
     public LabelWidget setLocation(Point position) {
@@ -177,7 +153,7 @@ public class LabelWidget extends WidgetWithBounds {
     @Override
     public Rectangle getBounds() {
         int width = font.getStringWidth(text);
-        Point pos = getPosition();
+        Point pos = getLocation();
         if (isCentered())
             return new Rectangle(pos.x - width / 2 - 1, pos.y - 5, width + 2, 14);
         return new Rectangle(pos.x - 1, pos.y - 5, width + 2, 14);
@@ -191,7 +167,7 @@ public class LabelWidget extends WidgetWithBounds {
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         int width = font.getStringWidth(text);
-        Point pos = getPosition();
+        Point pos = getLocation();
         if (isCentered()) {
             if (hasShadows)
                 font.drawWithShadow(text, pos.x - width / 2f, pos.y, defaultColor);

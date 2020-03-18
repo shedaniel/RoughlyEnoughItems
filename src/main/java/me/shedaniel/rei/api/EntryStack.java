@@ -26,9 +26,8 @@ package me.shedaniel.rei.api;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import me.shedaniel.math.Point;
-import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.widgets.Tooltip;
-import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.impl.EmptyEntryStack;
 import me.shedaniel.rei.impl.FluidEntryStack;
 import me.shedaniel.rei.impl.ItemEntryStack;
@@ -231,21 +230,9 @@ public interface EntryStack {
     
     <T> T get(Settings<T> settings);
     
-    /**
-     * @deprecated Use {@link #getTooltip(Point)}
-     */
     @Nullable
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    default QueuedTooltip getTooltip(int mouseX, int mouseY) {
+    default Tooltip getTooltip(Point mouse) {
         return null;
-    }
-    
-    @Nullable
-    default Tooltip getTooltip(Point point) {
-        QueuedTooltip tooltip = getTooltip(point.x, point.y);
-        if (tooltip == null) return null;
-        return Tooltip.create(new Point(tooltip.getX(), tooltip.getY()), tooltip.getText());
     }
     
     void render(Rectangle bounds, int mouseX, int mouseY, float delta);

@@ -25,7 +25,6 @@ package me.shedaniel.rei.api.widgets;
 
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -153,17 +152,8 @@ public abstract class Slot extends WidgetWithBounds {
     @NotNull
     public abstract List<EntryStack> getEntries();
     
-    /**
-     * @deprecated use {@link #getCurrentTooltip(Point)}
-     */
-    @Nullable
-    @Deprecated
-    public QueuedTooltip getCurrentTooltip(int mouseX, int mouseY) {
-        return null;
-    }
-    
     @Nullable
     public Tooltip getCurrentTooltip(Point point) {
-        return getCurrentTooltip(point.x, point.y);
+        return null;
     }
 }

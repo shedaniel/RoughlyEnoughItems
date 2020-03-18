@@ -25,7 +25,7 @@ package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.BaseBoundsHandler;
 import me.shedaniel.rei.api.DisplayHelper;
 import me.shedaniel.rei.api.OverlayDecider;
@@ -110,8 +110,7 @@ public class DisplayHelperImpl implements DisplayHelper {
         screenDisplayBoundsHandlers.sort(BOUNDS_HANDLER_COMPARATOR);
     }
     
-    @Deprecated
-    @Override
+    @ApiStatus.Internal
     public BaseBoundsHandler getBaseBoundsHandler() {
         return baseBoundsHandler;
     }

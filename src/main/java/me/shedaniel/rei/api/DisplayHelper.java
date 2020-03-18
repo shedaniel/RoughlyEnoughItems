@@ -23,12 +23,10 @@
 
 package me.shedaniel.rei.api;
 
-import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.gui.config.SearchFieldLocation;
-import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.util.ActionResult;
-import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -54,18 +52,6 @@ public interface DisplayHelper {
     List<DisplayBoundsHandler<?>> getSortedBoundsHandlers(Class<?> screenClass);
     
     /**
-     * Gets all registered bounds handlers
-     *
-     * @return the list of registered bounds handlers
-     * @deprecated see {@link #getAllOverlayDeciders()}
-     */
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    default List<DisplayBoundsHandler<?>> getAllBoundsHandlers() {
-        return (List) CollectionUtils.castAndMap(getAllOverlayDeciders(), DisplayBoundsHandler.class);
-    }
-    
-    /**
      * Gets all registered overlay deciders
      *
      * @return the list of registered overlay deciders
@@ -82,34 +68,11 @@ public interface DisplayHelper {
     DisplayBoundsHandler<?> getResponsibleBoundsHandler(Class<?> screenClass);
     
     /**
-     * Registers a bounds handler
-     *
-     * @param handler the handler to register
-     * @deprecated see {@link #registerHandler(OverlayDecider)}
-     */
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    default void registerBoundsHandler(DisplayBoundsHandler<?> handler) {
-        registerHandler(handler);
-    }
-    
-    /**
      * Registers a bounds decider
      *
      * @param decider the decider to register
      */
     void registerHandler(OverlayDecider decider);
-    
-    /**
-     * Gets the base bounds handler api for exclusion zones
-     *
-     * @return the base bounds handler
-     * @deprecated {@link BaseBoundsHandler#getInstance()}
-     */
-    @ApiStatus.Internal
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    BaseBoundsHandler getBaseBoundsHandler();
     
     interface DisplayBoundsHandler<T> extends OverlayDecider {
         /**

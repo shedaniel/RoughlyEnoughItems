@@ -93,10 +93,6 @@ public interface ConfigObject {
     
     boolean areClickableRecipeArrowsEnabled();
     
-    @ApiStatus.ScheduledForRemoval
-    @Deprecated
-    boolean isUsingLightGrayRecipeBorder();
-    
     RecipeBorderType getRecipeBorderType();
     
     boolean doesVillagerScreenHavePermanentScrollBar();

@@ -24,7 +24,7 @@
 package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.BaseBoundsHandler;
 import me.shedaniel.rei.api.DisplayHelper;
 import net.minecraft.client.MinecraftClient;

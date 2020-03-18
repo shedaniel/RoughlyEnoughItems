@@ -24,11 +24,9 @@
 package me.shedaniel.rei.impl;
 
 import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -127,13 +125,5 @@ public abstract class RenderingEntry extends DrawableHelper implements EntryStac
     @Override
     public <T> T get(Settings<T> settings) {
         return settings.getDefaultValue();
-    }
-    
-    @Nullable
-    @Override
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    public QueuedTooltip getTooltip(int mouseX, int mouseY) {
-        return EntryStack.super.getTooltip(mouseX, mouseY);
     }
 }

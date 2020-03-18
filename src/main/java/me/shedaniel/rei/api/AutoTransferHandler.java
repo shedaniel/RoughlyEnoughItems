@@ -25,8 +25,6 @@ package me.shedaniel.rei.api;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import me.shedaniel.rei.gui.ContainerScreenOverlay;
-import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.screen.ScreenHandler;
@@ -94,34 +92,10 @@ public interface AutoTransferHandler {
         
         HandledScreen<?> getHandledScreen();
         
-        @Deprecated
-        @ApiStatus.ScheduledForRemoval
-        default HandledScreen<?> getScreenWithHandler() {
-            return getHandledScreen();
-        }
-        
-        @Deprecated
-        @ApiStatus.ScheduledForRemoval
-        default HandledScreen<?> getContainerScreen() {
-            return getHandledScreen();
-        }
-        
         RecipeDisplay getRecipe();
         
-        @Deprecated
-        @ApiStatus.ScheduledForRemoval
-        default ScreenHandler getContainer() {
-            return getScreenHandler();
-        }
-        
         default ScreenHandler getScreenHandler() {
-            return getScreenWithHandler().getScreenHandler();
-        }
-        
-        @Deprecated
-        @ApiStatus.ScheduledForRemoval
-        default ContainerScreenOverlay getOverlay() {
-            return ScreenHelper.getLastOverlay();
+            return getHandledScreen().getScreenHandler();
         }
     }
     

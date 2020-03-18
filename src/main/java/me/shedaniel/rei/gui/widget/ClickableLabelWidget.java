@@ -48,12 +48,6 @@ public abstract class ClickableLabelWidget extends LabelWidget {
         this.hoveredColor = REIHelper.getInstance().isDarkThemeEnabled() ? -1 : 0xFF66FFCC;
     }
     
-    @ApiStatus.Internal
-    protected ClickableLabelWidget(me.shedaniel.math.api.Point point, String text) {
-        super(point, text);
-        this.hoveredColor = REIHelper.getInstance().isDarkThemeEnabled() ? -1 : 0xFF66FFCC;
-    }
-    
     public LabelWidget hoveredColor(int hoveredColor) {
         this.hoveredColor = hoveredColor;
         return this;
@@ -95,7 +89,7 @@ public abstract class ClickableLabelWidget extends LabelWidget {
             if (!focused && containsMouse(mouseX, mouseY))
                 Tooltip.create(getTooltips().get().split("\n")).queue();
             else if (focused)
-                Tooltip.create(getPosition(), getTooltips().get().split("\n")).queue();
+                Tooltip.create(getLocation(), getTooltips().get().split("\n")).queue();
     }
     
     public int getHoveredColor() {

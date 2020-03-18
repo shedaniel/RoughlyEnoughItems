@@ -56,6 +56,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class DefaultInformationCategory implements RecipeCategory<DefaultInformationDisplay> {
     protected static void innerBlit(Matrix4f matrix4f, int xStart, int xEnd, int yStart, int yEnd, int z, float uStart, float uEnd, float vStart, float vEnd) {
@@ -90,7 +91,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
             }
             
             @Override
-            public void render(me.shedaniel.math.api.Rectangle rectangle, int mouseX, int mouseY, float delta) {
+            public void render(Rectangle rectangle, int mouseX, int mouseY, float delta) {
                 MinecraftClient.getInstance().textRenderer.draw(name.asFormattedString(), rectangle.x + 5, rectangle.y + 6, -1);
             }
         };
@@ -100,7 +101,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
     public EntryStack getLogo() {
         return new RenderingEntry() {
             @Override
-            public void render(me.shedaniel.math.api.Rectangle bounds, int mouseX, int mouseY, float delta) {
+            public void render(Rectangle bounds, int mouseX, int mouseY, float delta) {
                 MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
                 Matrix4f matrix4f = Matrix4f.translate(-1.2f, -1, 0);
                 DefaultInformationCategory.innerBlit(matrix4f, bounds.getCenterX() - 8, bounds.getCenterX() + 8, bounds.getCenterY() - 8, bounds.getCenterY() + 8, 0, 116f / 256f, (116f + 16f) / 256f, 0f, 16f / 256f);
@@ -130,7 +131,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
     }
     
     private static class ScrollableTextWidget extends WidgetWithBounds {
-        private me.shedaniel.math.api.Rectangle bounds;
+        private Rectangle bounds;
         private List<Text> texts;
         private double target;
         private double scroll;
@@ -138,7 +139,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
         private long duration;
         
         public ScrollableTextWidget(Rectangle bounds, List<Text> texts) {
-            this.bounds = new me.shedaniel.math.api.Rectangle(bounds);
+            this.bounds = Objects.requireNonNull(bounds);
             this.texts = Lists.newArrayList();
             for (Text text : texts) {
                 if (!this.texts.isEmpty())
@@ -196,7 +197,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
         
         @NotNull
         @Override
-        public me.shedaniel.math.api.Rectangle getBounds() {
+        public Rectangle getBounds() {
             return bounds;
         }
         

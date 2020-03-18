@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.gui.widget;
 
-import me.shedaniel.math.api.Point;
+import me.shedaniel.math.Point;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.AbstractParentElement;
@@ -62,12 +62,9 @@ public abstract class Widget extends AbstractParentElement implements Drawable {
         return containsMouse((double) mouseX, (double) mouseY);
     }
     
+    @SuppressWarnings("RedundantCast")
     public final boolean containsMouse(Point point) {
-        return containsMouse(point.x, point.y);
-    }
-    
-    public final boolean containsMouse(me.shedaniel.math.Point point) {
-        return containsMouse(point.x, point.y);
+        return containsMouse((double) point.x, (double) point.y);
     }
     
     @Override

@@ -35,7 +35,6 @@ import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.OverlaySearchField;
 import me.shedaniel.rei.gui.RecipeScreen;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
-import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.event.client.ClientTickCallback;
 import net.minecraft.client.MinecraftClient;
@@ -146,54 +145,12 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
         return getLastOverlay(false, false);
     }
     
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    public static HandledScreen<?> getLastContainerScreen() {
-        return getLastHandledScreen();
-    }
-    
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    public static HandledScreen<?> getLastScreenWithHandler() {
-        return getLastHandledScreen();
-    }
-    
     public static HandledScreen<?> getLastHandledScreen() {
         return lastHandledScreen;
     }
     
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    public static void setLastContainerScreen(HandledScreen<?> lastScreenWithHandler) {
-        setLastHandledScreen(lastScreenWithHandler);
-    }
-    
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    public static void setLastScreenWithHandler(HandledScreen<?> lastScreenWithHandler) {
-        setLastHandledScreen(lastScreenWithHandler);
-    }
-    
     public static void setLastHandledScreen(HandledScreen<?> lastScreenWithHandler) {
         ScreenHelper.lastHandledScreen = lastScreenWithHandler;
-    }
-    
-    /**
-     * @deprecated Please create your own mixin hooks
-     */
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    public static ContainerScreenHooks getLastContainerScreenHooks() {
-        return getLastScreenWithHandlerHooks();
-    }
-    
-    /**
-     * @deprecated Please create your own mixin hooks
-     */
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    public static ContainerScreenHooks getLastScreenWithHandlerHooks() {
-        return (ContainerScreenHooks) lastHandledScreen;
     }
     
     public static void drawHoveringWidget(int x, int y, TriConsumer<Integer, Integer, Float> consumer, int width, int height, float delta) {

@@ -94,7 +94,7 @@ public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCr
     }
     
     @Override
-    public void renderRedSlots(List<Widget> widgets, me.shedaniel.math.api.Rectangle bounds, DefaultCraftingDisplay display, IntList redSlots) {
+    public void renderRedSlots(List<Widget> widgets, Rectangle bounds, DefaultCraftingDisplay display, IntList redSlots) {
         ContainerInfo<ScreenHandler> info = (ContainerInfo<ScreenHandler>) ContainerInfoHandler.getContainerInfo(getIdentifier(), ScreenHelper.getLastHandledScreen().getScreenHandler().getClass());
         if (info == null)
             return;

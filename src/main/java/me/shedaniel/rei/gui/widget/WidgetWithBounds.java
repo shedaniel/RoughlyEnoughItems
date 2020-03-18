@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.gui.widget;
 
-import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.Rectangle;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class WidgetWithBounds extends Widget {

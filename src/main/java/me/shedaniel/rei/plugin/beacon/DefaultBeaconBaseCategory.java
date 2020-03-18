@@ -52,6 +52,7 @@ import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Objects;
 
 public class DefaultBeaconBaseCategory implements RecipeCategory<DefaultBeaconBaseDisplay> {
     @Override
@@ -79,7 +80,7 @@ public class DefaultBeaconBaseCategory implements RecipeCategory<DefaultBeaconBa
             }
             
             @Override
-            public void render(me.shedaniel.math.api.Rectangle rectangle, int mouseX, int mouseY, float delta) {
+            public void render(Rectangle rectangle, int mouseX, int mouseY, float delta) {
                 MinecraftClient.getInstance().textRenderer.draw(name, rectangle.x + 5, rectangle.y + 6, -1);
             }
         };
@@ -106,7 +107,7 @@ public class DefaultBeaconBaseCategory implements RecipeCategory<DefaultBeaconBa
     }
     
     private static class ScrollableSlotsWidget extends WidgetWithBounds {
-        private me.shedaniel.math.api.Rectangle bounds;
+        private Rectangle bounds;
         private List<Slot> widgets;
         private double target;
         private double scroll;
@@ -114,7 +115,7 @@ public class DefaultBeaconBaseCategory implements RecipeCategory<DefaultBeaconBa
         private long duration;
         
         public ScrollableSlotsWidget(Rectangle bounds, List<Slot> widgets) {
-            this.bounds = new me.shedaniel.math.api.Rectangle(bounds);
+            this.bounds = Objects.requireNonNull(bounds);
             this.widgets = Lists.newArrayList(widgets);
         }
         
@@ -163,7 +164,7 @@ public class DefaultBeaconBaseCategory implements RecipeCategory<DefaultBeaconBa
         
         @NotNull
         @Override
-        public me.shedaniel.math.api.Rectangle getBounds() {
+        public Rectangle getBounds() {
             return bounds;
         }
         

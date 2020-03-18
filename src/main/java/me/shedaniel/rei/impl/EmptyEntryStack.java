@@ -24,7 +24,7 @@
 package me.shedaniel.rei.impl;
 
 import me.shedaniel.math.Point;
-import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import net.minecraft.util.Identifier;

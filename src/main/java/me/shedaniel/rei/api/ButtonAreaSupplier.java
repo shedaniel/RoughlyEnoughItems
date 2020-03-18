@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.api;
 
-import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.Rectangle;
 
 /**
  * The supplier for the + button area.

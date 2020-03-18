@@ -24,7 +24,7 @@
 package me.shedaniel.rei.api;
 
 import it.unimi.dsi.fastutil.ints.IntList;
-import me.shedaniel.math.api.Rectangle;
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.gui.widget.Widget;
 import org.jetbrains.annotations.ApiStatus;
 
