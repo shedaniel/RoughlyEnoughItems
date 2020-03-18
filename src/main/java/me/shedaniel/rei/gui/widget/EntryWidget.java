@@ -295,7 +295,7 @@ public class EntryWidget extends Slot {
     protected void drawBackground(int mouseX, int mouseY, float delta) {
         if (background) {
             minecraft.getTextureManager().bindTexture(REIHelper.getInstance().isDarkThemeEnabled() ? RECIPE_GUI_DARK : RECIPE_GUI);
-            blit(bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
+            drawTexture(bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
         }
     }
     

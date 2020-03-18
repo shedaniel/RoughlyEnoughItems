@@ -32,6 +32,10 @@ import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.gui.config.*;
+import me.shedaniel.rei.impl.ConfigObjectImpl.DontApplyFieldName;
+import me.shedaniel.rei.impl.ConfigObjectImpl.UseEnumSelectorInstead;
+import me.shedaniel.rei.impl.ConfigObjectImpl.UseFilteringScreen;
+import me.shedaniel.rei.impl.ConfigObjectImpl.UseSpecialRecipeTypeScreen;
 import net.minecraft.client.util.InputUtil;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -176,13 +180,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @Override
     public boolean areClickableRecipeArrowsEnabled() {
         return appearance.clickableRecipeArrows;
-    }
-    
-    @Override
-    @ApiStatus.ScheduledForRemoval
-    @Deprecated
-    public boolean isUsingLightGrayRecipeBorder() {
-        return appearance.recipeBorder == RecipeBorderType.LIGHTER;
     }
     
     @Override

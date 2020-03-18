@@ -37,7 +37,7 @@ public class CreditsEntryListWidget extends DynamicNewSmoothScrollingEntryListWi
     private boolean inFocus;
     
     public CreditsEntryListWidget(MinecraftClient client, int width, int height, int startY, int endY) {
-        super(client, width, height, startY, endY, DrawableHelper.BACKGROUND_LOCATION);
+        super(client, width, height, startY, endY, DrawableHelper.BACKGROUND_TEXTURE);
     }
     
     @Override

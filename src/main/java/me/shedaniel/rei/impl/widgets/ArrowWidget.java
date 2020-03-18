@@ -65,10 +65,10 @@ public final class ArrowWidget extends Arrow {
     @Override
     public void render(int mouseX, int mouseY, float delta) {
         MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
-        blit(getX(), getY(), 106, 91, 24, 17);
+        drawTexture(getX(), getY(), 106, 91, 24, 17);
         if (getAnimationDuration() > 0) {
             int width = MathHelper.ceil((System.currentTimeMillis() / (animationDuration / 24) % 24d) / 1f);
-            blit(getX(), getY(), 82, 91, width, 17);
+            drawTexture(getX(), getY(), 82, 91, width, 17);
         }
     }
     

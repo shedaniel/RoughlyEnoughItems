@@ -206,7 +206,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                 Widgets.createDrawableWidget((helper, mouseX, mouseY, delta) -> {
                     helper.setZOffset(helper.getZOffset() + 1);
                     MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
-                    helper.blit(configButtonArea.x + 3, configButtonArea.y + 3, 0, 0, 14, 14);
+                    helper.drawTexture(configButtonArea.x + 3, configButtonArea.y + 3, 0, 0, 14, 14);
                 })
                 )
         )));
@@ -238,7 +238,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                 widgets.add(Widgets.createDrawableWidget((helper, mouseX, mouseY, delta) -> {
                     MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
                     RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-                    helper.blit(weatherButton.getBounds().x + 3, weatherButton.getBounds().y + 3, weather.getId() * 14, 14, 14, 14);
+                    helper.drawTexture(weatherButton.getBounds().x + 3, weatherButton.getBounds().y + 3, weather.getId() * 14, 14, 14, 14);
                 }));
                 xxx += ConfigObject.getInstance().isLeftHandSidePanel() ? -25 : 25;
             }

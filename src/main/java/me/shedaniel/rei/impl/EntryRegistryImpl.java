@@ -33,8 +33,8 @@ import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.DefaultedList;
 import net.minecraft.util.Pair;
+import net.minecraft.util.collection.DefaultedList;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -126,7 +126,7 @@ public class EntryRegistryImpl implements EntryRegistry {
     public ItemStack[] getAllStacksFromItem(Item item) {
         List<ItemStack> list = appendStacksForItem(item);
         ItemStack[] array = list.toArray(new ItemStack[0]);
-        Arrays.sort(array, (a, b) -> ItemStack.areEqualIgnoreDamage(a, b) ? 0 : 1);
+        Arrays.sort(array, (a, b) -> ItemStack.areEqual(a, b) ? 0 : 1);
         return array;
     }
     

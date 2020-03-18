@@ -107,7 +107,7 @@ public class TabWidget extends WidgetWithBounds {
     public void render(int mouseX, int mouseY, float delta) {
         if (shown) {
             minecraft.getTextureManager().bindTexture(REIHelper.getInstance().isDarkThemeEnabled() ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
-            this.blit(bounds.x, bounds.y + 2, u + (selected ? bounds.width : 0), v, bounds.width, (selected ? bounds.height + 2 : bounds.height - 1));
+            this.drawTexture(bounds.x, bounds.y + 2, u + (selected ? bounds.width : 0), v, bounds.width, (selected ? bounds.height + 2 : bounds.height - 1));
             logo.setZ(100);
             logo.render(new Rectangle(bounds.getCenterX() - 8, bounds.getCenterY() - 5, 16, 16), mouseX, mouseY, delta);
             if (containsMouse(mouseX, mouseY)) {

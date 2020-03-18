@@ -36,10 +36,10 @@
   },
   "depends": {
     "fabricloader": "*",
-    "cloth": "~2-",
+    "cloth": ">=2-",
     "cloth-basic-math": "*",
-    "cloth-config2": "~3-",
-    "minecraft": "~1.16-Snapshot.20.11.a"
+    "cloth-config2": ">=3-",
+    "minecraft": "~1.16-Snapshot.20.12.a"
   },
   "mixins": [
     "mixin.roughlyenoughitems.json",

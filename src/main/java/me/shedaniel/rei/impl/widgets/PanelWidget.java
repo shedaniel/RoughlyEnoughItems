@@ -137,21 +137,21 @@ public final class PanelWidget extends Panel {
         int yTextureOffset = getYTextureOffset();
         
         //Four Corners
-        this.blit(x, y, 106 + xTextureOffset, 124 + yTextureOffset, 4, 4);
-        this.blit(x + width - 4, y, 252 + xTextureOffset, 124 + yTextureOffset, 4, 4);
-        this.blit(x, y + height - 4, 106 + xTextureOffset, 186 + yTextureOffset, 4, 4);
-        this.blit(x + width - 4, y + height - 4, 252 + xTextureOffset, 186 + yTextureOffset, 4, 4);
+        this.drawTexture(x, y, 106 + xTextureOffset, 124 + yTextureOffset, 4, 4);
+        this.drawTexture(x + width - 4, y, 252 + xTextureOffset, 124 + yTextureOffset, 4, 4);
+        this.drawTexture(x, y + height - 4, 106 + xTextureOffset, 186 + yTextureOffset, 4, 4);
+        this.drawTexture(x + width - 4, y + height - 4, 252 + xTextureOffset, 186 + yTextureOffset, 4, 4);
         
         //Sides
         for (int xx = 4; xx < width - 4; xx += 128) {
             int thisWidth = Math.min(128, width - 4 - xx);
-            this.blit(x + xx, y, 110 + xTextureOffset, 124 + yTextureOffset, thisWidth, 4);
-            this.blit(x + xx, y + height - 4, 110 + xTextureOffset, 186 + yTextureOffset, thisWidth, 4);
+            this.drawTexture(x + xx, y, 110 + xTextureOffset, 124 + yTextureOffset, thisWidth, 4);
+            this.drawTexture(x + xx, y + height - 4, 110 + xTextureOffset, 186 + yTextureOffset, thisWidth, 4);
         }
         for (int yy = 4; yy < height - 4; yy += 50) {
             int thisHeight = Math.min(50, height - 4 - yy);
-            this.blit(x, y + yy, 106 + xTextureOffset, 128 + yTextureOffset, 4, thisHeight);
-            this.blit(x + width - 4, y + yy, 252 + xTextureOffset, 128 + yTextureOffset, 4, thisHeight);
+            this.drawTexture(x, y + yy, 106 + xTextureOffset, 128 + yTextureOffset, 4, thisHeight);
+            this.drawTexture(x + width - 4, y + yy, 252 + xTextureOffset, 128 + yTextureOffset, 4, thisHeight);
         }
         fillGradient(x + 4, y + 4, x + width - 4, y + height - 4, getInnerColor(), getInnerColor());
     }
