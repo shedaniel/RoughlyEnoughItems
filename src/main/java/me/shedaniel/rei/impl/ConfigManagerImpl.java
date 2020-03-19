@@ -123,7 +123,7 @@ public class ConfigManagerImpl implements ConfigManager {
                                 Collections.singletonList(new FilteringEntry(getUnsafely(field, config, new ArrayList<>()), getUnsafely(field, defaults), list -> setUnsafely(field, config, list)))
                 , (field) -> field.getType() == List.class, ConfigObjectImpl.UseFilteringScreen.class);
         saveConfig();
-        RoughlyEnoughItemsCore.LOGGER.info("[REI] Config is loaded.");
+        RoughlyEnoughItemsCore.LOGGER.info("[REI] Config loaded.");
     }
     
     @Override
