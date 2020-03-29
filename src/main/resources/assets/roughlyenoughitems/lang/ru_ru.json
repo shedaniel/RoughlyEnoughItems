@@ -188,7 +188,7 @@
   "config.roughlyenoughitems.scrollingEntryListWidget.boolean.true": "Прокрутка",
   "config.roughlyenoughitems.scrollingEntryListWidget.boolean.false": "Кнопки",
   "text.rei.credit.text": "§lRoughly Enough Items (v%s)\n§7Первоначально форк Almost Enough Items.\n\n§lРазработчики\n  Автор мода ZenDarva\n  Мод переписал Danielshe\n  Поддержка старого плагина от TehNut\n\n§lЯзыковой перевод\n%s\n\n§lЛицензия\n§7Roughly Enough Items лицензируется с MIT.",
-  "language.roughlyenoughitems.english": "English",
+  "language.roughlyenoughitems.english": "Английский",
   "language.roughlyenoughitems.japanese": "Японский",
   "language.roughlyenoughitems.chinese_simplified": "Китайский (упрощенный)",
   "language.roughlyenoughitems.chinese_traditional": "Китайский (традиционный)",
@@ -198,7 +198,7 @@
   "language.roughlyenoughitems.portuguese": "Португальский",
   "language.roughlyenoughitems.portuguese_brazilian": "Португальский (Бразилия)",
   "language.roughlyenoughitems.lolcat": "LOLCAT",
-  "language.roughlyenoughitems.upside_down_english": "Upside Down English",
+  "language.roughlyenoughitems.upside_down_english": "Перевёрнутый Английский",
   "language.roughlyenoughitems.bulgarian": "Болгарский",
   "language.roughlyenoughitems.russian": "Русский",
   "language.roughlyenoughitems.polish": "Польский"
