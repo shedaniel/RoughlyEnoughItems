@@ -123,7 +123,7 @@
   "config.roughlyenoughitems.filteredEntries.loadWorldFirst": "Сперва загрузите мир!",
   "config.roughlyenoughitems.entrySize": "Размер предметов:",
   "config.roughlyenoughitems.asyncSearch": "Асинхронный поиск:",
-  "config.roughlyenoughitems.numberAsyncSearch": "Async Entry Group Size:",
+  "config.roughlyenoughitems.numberAsyncSearch": "Размер группы асинхронного поиска",
   "config.roughlyenoughitems.useCompactTabs": "Компактные вкладки:",
   "config.roughlyenoughitems.darkTheme": "Тема оформления:",
   "config.roughlyenoughitems.darkTheme.boolean.true": "Тёмная тема",
