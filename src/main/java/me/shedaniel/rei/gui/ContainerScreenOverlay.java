@@ -31,7 +31,9 @@ import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.gui.config.SearchFieldLocation;
+import me.shedaniel.rei.gui.subsets.SubsetsMenu;
 import me.shedaniel.rei.gui.widget.*;
+import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.Weather;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
@@ -103,7 +105,16 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
     private Window window;
     @Nullable private LateRenderedButton craftableToggleButton;
     private LateRenderedButton configButton;
+    private LateRenderedButton subsetsButton;
     private ButtonWidget leftButton, rightButton;
+    @ApiStatus.Experimental
+    private Rectangle subsetsButtonBounds;
+    @ApiStatus.Experimental
+    @Nullable
+    private SubsetsMenu subsetsMenu = null;
+    @ApiStatus.Experimental
+    @Nullable
+    private LateRenderedSubsetsMenu wrappedSubsetsMenu = null;
     
     public static EntryListWidget getEntryListWidget() {
         return ENTRY_LIST_WIDGET;
@@ -112,6 +123,12 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
     @Nullable
     public static FavoritesListWidget getFavoritesListWidget() {
         return favoritesListWidget;
+    }
+    
+    @ApiStatus.Experimental
+    @Nullable
+    public SubsetsMenu getSubsetsMenu() {
+        return subsetsMenu;
     }
     
     public void init(boolean useless) {
@@ -123,6 +140,8 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         this.shouldReInit = false;
         //Update Variables
         this.children().clear();
+        this.subsetsMenu = null;
+        this.wrappedSubsetsMenu = null;
         this.window = MinecraftClient.getInstance().getWindow();
         @SuppressWarnings({"RawTypeCanBeGeneric", "rawtypes"})
         DisplayHelper.DisplayBoundsHandler boundsHandler = DisplayHelper.getInstance().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
@@ -309,6 +328,28 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                 xxx += ConfigObject.getInstance().isLeftHandSidePanel() ? -25 : 25;
             }
         }
+        subsetsButtonBounds = getSubsetsButtonBounds();
+        if (ConfigObject.getInstance().isSubsetsEnabled()) {
+            widgets.add(subsetsButton = new LateRenderedButton(subsetsButtonBounds, ((ClientHelperImpl) ClientHelper.getInstance()).isAprilFools.get() ? I18n.translate("text.rei.tiny_potato") : I18n.translate("text.rei.subsets")) {
+                @Override
+                public void onPressed() {
+                    if (subsetsMenu == null) {
+                        ContainerScreenOverlay.this.subsetsMenu = SubsetsMenu.createFromRegistry(new Point(ContainerScreenOverlay.this.subsetsButtonBounds.x, ContainerScreenOverlay.this.subsetsButtonBounds.getMaxY()));
+                        ContainerScreenOverlay.this.wrappedSubsetsMenu = new LateRenderedSubsetsMenu();
+                        ContainerScreenOverlay.this.widgets.add(ContainerScreenOverlay.this.wrappedSubsetsMenu);
+                    } else {
+                        ContainerScreenOverlay.this.widgets.remove(ContainerScreenOverlay.this.wrappedSubsetsMenu);
+                        ContainerScreenOverlay.this.subsetsMenu = null;
+                        ContainerScreenOverlay.this.wrappedSubsetsMenu = null;
+                    }
+                }
+                
+                @Override
+                public void lateRender(int mouseX, int mouseY, float delta) {
+                    super.render(mouseX, mouseY, delta);
+                }
+            });
+        } else subsetsButton = null;
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
             widgets.add(new ClickableLabelWidget(new Point(bounds.x + (bounds.width / 2), bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 10), "") {
                 @Override
@@ -347,6 +388,57 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         } else {
             craftableToggleButton = null;
         }
+    }
+    
+    private class LateRenderedSubsetsMenu extends WidgetWithBounds implements LateRenderable {
+        @Override
+        public void lateRender(int mouseX, int mouseY, float delta) {
+            RenderSystem.pushMatrix();
+            RenderSystem.translatef(0, 0, 500);
+            ContainerScreenOverlay.this.subsetsMenu.setZ(getZ());
+            ContainerScreenOverlay.this.subsetsMenu.render(mouseX, mouseY, delta);
+            RenderSystem.popMatrix();
+        }
+        
+        @Override
+        public Rectangle getBounds() {
+            return ContainerScreenOverlay.this.subsetsMenu.getBounds();
+        }
+        
+        @Override
+        public void render(int mouseX, int mouseY, float delta) {
+        }
+        
+        @Override
+        public boolean containsMouse(double mouseX, double mouseY) {
+            return ContainerScreenOverlay.this.subsetsMenu.containsMouse(mouseX, mouseY);
+        }
+        
+        @Override
+        public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+            return ContainerScreenOverlay.this.subsetsMenu.mouseScrolled(mouseX, mouseY, amount);
+        }
+        
+        @Override
+        public List<? extends Element> children() {
+            return Collections.singletonList(ContainerScreenOverlay.this.subsetsMenu);
+        }
+    }
+    
+    @ApiStatus.Experimental
+    private Rectangle getSubsetsButtonBounds() {
+        if (ConfigObject.getInstance().isSubsetsEnabled()) {
+            if (MinecraftClient.getInstance().currentScreen instanceof RecipeViewingScreen) {
+                RecipeViewingScreen widget = (RecipeViewingScreen) MinecraftClient.getInstance().currentScreen;
+                return new Rectangle(widget.getBounds().x, 3, widget.getBounds().width, 18);
+            }
+            if (MinecraftClient.getInstance().currentScreen instanceof VillagerRecipeViewingScreen) {
+                VillagerRecipeViewingScreen widget = (VillagerRecipeViewingScreen) MinecraftClient.getInstance().currentScreen;
+                return new Rectangle(widget.bounds.x, 3, widget.bounds.width, 18);
+            }
+            return new Rectangle(((ContainerScreenHooks) ScreenHelper.getLastContainerScreen()).rei_getContainerLeft(), 3, ((ContainerScreenHooks) ScreenHelper.getLastContainerScreen()).rei_getContainerWidth(), 18);
+        }
+        return null;
     }
     
     private Weather getNextWeather() {
@@ -491,6 +583,12 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             if (craftableToggleButton != null)
                 craftableToggleButton.lateRender(mouseX, mouseY, delta);
             configButton.lateRender(mouseX, mouseY, delta);
+            if (subsetsButton != null)
+                subsetsButton.lateRender(mouseX, mouseY, delta);
+        }
+        if (wrappedSubsetsMenu != null) {
+            QUEUED_TOOLTIPS.clear();
+            wrappedSubsetsMenu.lateRender(mouseX, mouseY, delta);
         }
         Screen currentScreen = MinecraftClient.getInstance().currentScreen;
         if (!(currentScreen instanceof RecipeViewingScreen) || !((RecipeViewingScreen) currentScreen).choosePageActivated)
@@ -542,6 +640,8 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
     public boolean mouseScrolled(double i, double j, double amount) {
         if (!ScreenHelper.isOverlayVisible())
             return false;
+        if (wrappedSubsetsMenu != null && wrappedSubsetsMenu.mouseScrolled(i, j, amount))
+            return true;
         if (isInside(PointHelper.fromMouse())) {
             if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
                 if (amount > 0 && leftButton.enabled)
@@ -559,7 +659,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                 return true;
         }
         for (Widget widget : widgets)
-            if (widget != ENTRY_LIST_WIDGET && (favoritesListWidget == null || widget != favoritesListWidget) && widget.mouseScrolled(i, j, amount))
+            if (widget != ENTRY_LIST_WIDGET && (favoritesListWidget == null || widget != favoritesListWidget) && (wrappedSubsetsMenu == null || widget != wrappedSubsetsMenu) && widget.mouseScrolled(i, j, amount))
                 return true;
         return false;
     }
@@ -612,7 +712,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
     }
     
     @Override
-    public List<? extends Element> children() {
+    public List<Widget> children() {
         return widgets;
     }
     
@@ -620,6 +720,13 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
         if (!ScreenHelper.isOverlayVisible())
             return false;
+        if (wrappedSubsetsMenu != null && wrappedSubsetsMenu.mouseClicked(double_1, double_2, int_1)) {
+            this.setFocused(wrappedSubsetsMenu);
+            if (int_1 == 0)
+                this.setDragging(true);
+            ScreenHelper.getSearchField().setFocused(false);
+            return true;
+        }
         if (MinecraftClient.getInstance().currentScreen instanceof AbstractContainerScreen && ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
             ContainerScreenHooks hooks = (ContainerScreenHooks) MinecraftClient.getInstance().currentScreen;
             for (RecipeHelper.ScreenClickArea area : RecipeHelper.getInstance().getScreenClickAreas())
@@ -631,7 +738,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                     }
         }
         for (Element element : widgets)
-            if (element.mouseClicked(double_1, double_2, int_1)) {
+            if (element != wrappedSubsetsMenu && element.mouseClicked(double_1, double_2, int_1)) {
                 this.setFocused(element);
                 if (int_1 == 0)
                     this.setDragging(true);

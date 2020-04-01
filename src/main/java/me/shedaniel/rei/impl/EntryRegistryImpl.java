@@ -172,7 +172,8 @@ public class EntryRegistryImpl implements EntryRegistry {
             getStacksList().addAll(stacks);
     }
     
-    private static class DefaultedLinkedList<E> extends DefaultedList<E> {
+    @ApiStatus.Internal
+    public static class DefaultedLinkedList<E> extends DefaultedList<E> {
         public DefaultedLinkedList(List<E> delegate, @Nullable E initialElement) {
             super(delegate, initialElement);
         }

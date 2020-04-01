@@ -39,9 +39,6 @@ import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.NarratorManager;
@@ -71,14 +68,24 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
     private int tabsPerPage = 8;
     private int selectedCategoryIndex = 0;
     private int selectedRecipeIndex = 0;
-    private double scrollAmount = 0;
-    private double target;
-    private long start;
-    private long duration;
-    private float scrollBarAlpha  = 0;
+    private final ScrollingContainer scrolling = new ScrollingContainer() {
+        @Override
+        public Rectangle getBounds() {
+            return new Rectangle(scrollListBounds.x + 1, scrollListBounds.y + 1, scrollListBounds.width - 2, scrollListBounds.height - 2);
+        }
+        
+        @Override
+        public int getMaxScrollHeight() {
+            int i = 0;
+            for (ButtonWidget button : buttonWidgets) {
+                i += button.getBounds().height;
+            }
+            return i;
+        }
+    };
+    private float scrollBarAlpha = 0;
     private float scrollBarAlphaFuture = 0;
     private long scrollBarAlphaFutureTime = -1;
-    private boolean draggingScrollBar = false;
     private int tabsPage = -1;
     private EntryStack ingredientStackToNotice = EntryStack.empty();
     private EntryStack resultStackToNotice = EntryStack.empty();
@@ -127,7 +134,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
         super.init();
         boolean isCompactTabs = ConfigObject.getInstance().isUsingCompactTabs();
         int tabSize = isCompactTabs ? 24 : 28;
-        this.draggingScrollBar = false;
+        scrolling.draggingScrollBar = false;
         this.children.clear();
         this.widgets.clear();
         this.buttonWidgets.clear();
@@ -279,23 +286,12 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
         ScreenHelper.getLastOverlay().init();
     }
     
-    private double getMaxScroll() {
-        return Math.max(0, this.getMaxScrollPosition() - (scrollListBounds.height - 2));
-    }
-    
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int int_1) {
-        double height = getMaxScrollPosition();
-        int actualHeight = scrollListBounds.height - 2;
-        if (height > actualHeight && scrollBarAlpha > 0 && mouseY >= scrollListBounds.y + 1 && mouseY <= scrollListBounds.getMaxY() - 1) {
-            double scrollbarPositionMinX = scrollListBounds.getMaxX() - 6;
-            if (mouseX >= scrollbarPositionMinX & mouseX <= scrollbarPositionMinX + 8) {
-                this.draggingScrollBar = true;
-                scrollBarAlpha = 1;
-                return false;
-            }
+        if (scrolling.updateDraggingState(mouseX, mouseY, int_1)) {
+            scrollBarAlpha = 1;
+            return true;
         }
-        this.draggingScrollBar = false;
         return super.mouseClicked(mouseX, mouseY, int_1);
     }
     
@@ -307,29 +303,11 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
         return super.charTyped(char_1, int_1);
     }
     
-    public void offset(double value, boolean animated) {
-        scrollTo(target + value, animated);
-    }
-    
-    public void scrollTo(double value, boolean animated) {
-        scrollTo(value, animated, ClothConfigInitializer.getScrollDuration());
-    }
-    
-    public void scrollTo(double value, boolean animated, long duration) {
-        target = ClothConfigInitializer.clamp(value, getMaxScroll());
-        
-        if (animated) {
-            start = System.currentTimeMillis();
-            this.duration = duration;
-        } else
-            scrollAmount = target;
-    }
-    
     @Override
     public boolean mouseScrolled(double double_1, double double_2, double double_3) {
-        double height = CollectionUtils.sumInt(buttonWidgets, b -> b.getBounds().getHeight());
+        double height = scrolling.getMaxScrollHeight();
         if (scrollListBounds.contains(double_1, double_2) && height > scrollListBounds.height - 2) {
-            offset(ClothConfigInitializer.getScrollStep() * -double_3, true);
+            scrolling.offset(ClothConfigInitializer.getScrollStep() * -double_3, true);
             if (scrollBarAlphaFuture == 0)
                 scrollBarAlphaFuture = 1f;
             if (System.currentTimeMillis() - scrollBarAlphaFutureTime > 300f)
@@ -339,7 +317,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
         for (Element listener : children())
             if (listener.mouseScrolled(double_1, double_2, double_3))
                 return true;
-        if (bounds.contains(PointHelper.fromMouse())) {
+        if (bounds.contains(PointHelper.ofMouse())) {
             if (double_3 < 0 && categoryMap.get(categories.get(selectedCategoryIndex)).size() > 1) {
                 selectedRecipeIndex++;
                 if (selectedRecipeIndex >= categoryMap.get(categories.get(selectedCategoryIndex)).size())
@@ -354,10 +332,6 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
             }
         }
         return super.mouseScrolled(double_1, double_2, double_3);
-    }
-    
-    private double getMaxScrollPosition() {
-        return CollectionUtils.sumInt(buttonWidgets, b -> b.getBounds().getHeight());
     }
     
     @Override
@@ -384,7 +358,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
                     scrollBarAlpha = Math.max(Math.min(1f, l / 300f), scrollBarAlpha);
             }
         }
-        updatePosition(delta);
+        scrolling.updatePosition(delta);
         this.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
         int yOffset = 0;
         for (Widget widget : widgets) {
@@ -392,13 +366,13 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
         }
         ScreenHelper.getLastOverlay().render(mouseX, mouseY, delta);
         RenderSystem.pushMatrix();
-        ScissorsHandler.INSTANCE.scissor(new Rectangle(0, scrollListBounds.y + 1, width, scrollListBounds.height - 2));
-        for (ButtonWidget buttonWidget : buttonWidgets) {
-            buttonWidget.getBounds().y = scrollListBounds.y + 1 + yOffset - (int) scrollAmount;
-            if (buttonWidget.getBounds().getMaxY() > scrollListBounds.getMinY() && buttonWidget.getBounds().getMinY() < scrollListBounds.getMaxY()) {
-                buttonWidget.render(mouseX, mouseY, delta);
+        ScissorsHandler.INSTANCE.scissor(scrolling.getBounds());
+        for (ButtonWidget button : buttonWidgets) {
+            button.getBounds().y = scrollListBounds.y + 1 + yOffset - (int) scrolling.scrollAmount;
+            if (button.getBounds().getMaxY() > scrollListBounds.getMinY() && button.getBounds().getMinY() < scrollListBounds.getMaxY()) {
+                button.render(mouseX, mouseY, delta);
             }
-            yOffset += buttonWidget.getBounds().height;
+            yOffset += button.getBounds().height;
         }
         for (int i = 0; i < buttonWidgets.size(); i++) {
             if (buttonWidgets.get(i).getBounds().getMaxY() > scrollListBounds.getMinY() && buttonWidgets.get(i).getBounds().getMinY() < scrollListBounds.getMaxY()) {
@@ -407,65 +381,18 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
                 ScreenHelper.getLastOverlay().addTooltip(recipeRenderers.get(i).getTooltip(mouseX, mouseY));
             }
         }
-        double maxScroll = getMaxScrollPosition();
-        if (maxScroll > scrollListBounds.height - 2) {
-            Tessellator tessellator = Tessellator.getInstance();
-            BufferBuilder buffer = tessellator.getBuffer();
-            int height = (int) (((scrollListBounds.height - 2) * (scrollListBounds.height - 2)) / this.getMaxScrollPosition());
-            height = MathHelper.clamp(height, 32, scrollListBounds.height - 2 - 8);
-            height -= Math.min((scrollAmount < 0 ? (int) -scrollAmount : scrollAmount > getMaxScroll() ? (int) scrollAmount - getMaxScroll() : 0), height * .95);
-            height = Math.max(10, height);
-            int minY = (int) Math.min(Math.max((int) scrollAmount * (scrollListBounds.height - 2 - height) / getMaxScroll() + scrollListBounds.y + 1, scrollListBounds.y + 1), scrollListBounds.getMaxY() - 1 - height);
-            int scrollbarPositionMinX = scrollListBounds.getMaxX() - 6, scrollbarPositionMaxX = scrollListBounds.getMaxX() - 1;
-            boolean hovered = (new Rectangle(scrollbarPositionMinX, minY, scrollbarPositionMaxX - scrollbarPositionMinX, height)).contains(PointHelper.fromMouse());
-            float bottomC = (hovered ? .67f : .5f) * (ScreenHelper.isDarkModeEnabled() ? 0.8f : 1f);
-            float topC = (hovered ? .87f : .67f) * (ScreenHelper.isDarkModeEnabled() ? 0.8f : 1f);
-            RenderSystem.disableTexture();
-            RenderSystem.enableBlend();
-            RenderSystem.disableAlphaTest();
-            RenderSystem.blendFuncSeparate(770, 771, 1, 0);
-            RenderSystem.shadeModel(7425);
-            buffer.begin(7, VertexFormats.POSITION_COLOR);
-            buffer.vertex(scrollbarPositionMinX, minY + height, 800).color(bottomC, bottomC, bottomC, scrollBarAlpha).next();
-            buffer.vertex(scrollbarPositionMaxX, minY + height, 800).color(bottomC, bottomC, bottomC, scrollBarAlpha).next();
-            buffer.vertex(scrollbarPositionMaxX, minY, 800).color(bottomC, bottomC, bottomC, scrollBarAlpha).next();
-            buffer.vertex(scrollbarPositionMinX, minY, 800).color(bottomC, bottomC, bottomC, scrollBarAlpha).next();
-            tessellator.draw();
-            buffer.begin(7, VertexFormats.POSITION_COLOR);
-            buffer.vertex(scrollbarPositionMinX, minY + height - 1, 800).color(topC, topC, topC, scrollBarAlpha).next();
-            buffer.vertex(scrollbarPositionMaxX - 1, minY + height - 1, 800).color(topC, topC, topC, scrollBarAlpha).next();
-            buffer.vertex(scrollbarPositionMaxX - 1, minY, 800).color(topC, topC, topC, scrollBarAlpha).next();
-            buffer.vertex(scrollbarPositionMinX, minY, 800).color(topC, topC, topC, scrollBarAlpha).next();
-            tessellator.draw();
-            RenderSystem.shadeModel(7424);
-            RenderSystem.disableBlend();
-            RenderSystem.enableAlphaTest();
-            RenderSystem.enableTexture();
-        }
+        scrolling.renderScrollBar(0, scrollBarAlpha);
         ScissorsHandler.INSTANCE.removeLastScissor();
         RenderSystem.popMatrix();
         ScreenHelper.getLastOverlay().lateRender(mouseX, mouseY, delta);
     }
     
-    private void updatePosition(float delta) {
-        double[] target = new double[]{this.target};
-        this.scrollAmount = ClothConfigInitializer.handleScrollingPosition(target, this.scrollAmount, this.getMaxScroll(), delta, this.start, this.duration);
-        this.target = target[0];
-    }
-    
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int int_1, double double_3, double double_4) {
-        if (int_1 == 0 && scrollBarAlpha > 0 && draggingScrollBar) {
-            double height = CollectionUtils.sumInt(buttonWidgets, b -> b.getBounds().getHeight());
-            int actualHeight = scrollListBounds.height - 2;
-            if (height > actualHeight && mouseY >= scrollListBounds.y + 1 && mouseY <= scrollListBounds.getMaxY() - 1) {
-                int int_3 = MathHelper.clamp((int) ((actualHeight * actualHeight) / height), 32, actualHeight - 8);
-                double double_6 = Math.max(1.0D, Math.max(1d, height) / (double) (actualHeight - int_3));
-                scrollBarAlphaFutureTime = System.currentTimeMillis();
-                scrollBarAlphaFuture = 1f;
-                scrollAmount = target = MathHelper.clamp(scrollAmount + double_4 * double_6, 0, height - scrollListBounds.height + 2);
-                return true;
-            }
+        if (scrolling.mouseDragged(mouseX, mouseY, int_1, double_3, double_4)) {
+            scrollBarAlphaFutureTime = System.currentTimeMillis();
+            scrollBarAlphaFuture = 1f;
+            return true;
         }
         return super.mouseDragged(mouseX, mouseY, int_1, double_3, double_4);
     }
