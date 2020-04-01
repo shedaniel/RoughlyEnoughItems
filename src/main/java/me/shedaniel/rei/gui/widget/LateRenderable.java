@@ -27,5 +27,4 @@ import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
 public interface LateRenderable {
-    void lateRender(int mouseX, int mouseY, float delta);
 }

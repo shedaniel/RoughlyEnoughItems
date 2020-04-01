@@ -30,6 +30,8 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
+import me.shedaniel.rei.api.subsets.SubsetsRegistry;
+import me.shedaniel.rei.impl.subsets.SubsetsRegistryImpl;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.recipe.Recipe;
@@ -280,6 +282,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         this.displayVisibilityHandlers.clear();
         this.liveRecipeGenerators.clear();
         this.autoTransferHandlers.clear();
+        ((SubsetsRegistryImpl) SubsetsRegistry.INSTANCE).reset();
         ((DisplayHelperImpl) DisplayHelper.getInstance()).resetData();
         ((DisplayHelperImpl) DisplayHelper.getInstance()).resetCache();
         BaseBoundsHandler baseBoundsHandler = new BaseBoundsHandlerImpl();

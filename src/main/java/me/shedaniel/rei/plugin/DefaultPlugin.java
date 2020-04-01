@@ -31,6 +31,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
+import me.shedaniel.rei.api.subsets.SubsetsRegistry;
 import me.shedaniel.rei.api.widgets.Panel;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
@@ -171,7 +172,7 @@ public class DefaultPlugin implements REIPluginV0 {
             
             @Override
             public boolean isEmpty() {
-                return !((ClientHelperImpl) ClientHelper.getInstance()).ok.get();
+                return !((ClientHelperImpl) ClientHelper.getInstance()).isAprilFools.get();
             }
             
             @Override
@@ -296,22 +297,6 @@ public class DefaultPlugin implements REIPluginV0 {
                 return Collections.emptyList();
             return Collections.singletonList(widget.getBounds().clone());
         });
-//        displayHelper.registerHandler(new OverlayDecider() {
-//            @Override
-//            public boolean isHandingScreen(Class<?> screen) {
-//                return InventoryScreen.class.isAssignableFrom(screen);
-//            }
-//
-//            @Override
-//            public ActionResult shouldScreenBeOverlayed(Class<?> screen) {
-//                return isHandingScreen(screen) ? ActionResult.FAIL : ActionResult.PASS;
-//            }
-//
-//            @Override
-//            public float getPriority() {
-//                return 10f;
-//            }
-//        });
         displayHelper.registerHandler(new DisplayHelper.DisplayBoundsHandler<HandledScreen<?>>() {
             @Override
             public Class<?> getBaseSupportedClass() {
@@ -404,6 +389,9 @@ public class DefaultPlugin implements REIPluginV0 {
         recipeHelper.registerScreenClickArea(new Rectangle(78, 32, 28, 23), FurnaceScreen.class, SMELTING);
         recipeHelper.registerScreenClickArea(new Rectangle(78, 32, 28, 23), SmokerScreen.class, SMOKING);
         recipeHelper.registerScreenClickArea(new Rectangle(78, 32, 28, 23), BlastFurnaceScreen.class, BLASTING);
+//        SubsetsRegistry subsetsRegistry = SubsetsRegistry.INSTANCE;
+//        subsetsRegistry.registerPathEntry("roughlyenoughitems:food", EntryStack.create(Items.MILK_BUCKET));
+//        subsetsRegistry.registerPathEntry("roughlyenoughitems:food/roughlyenoughitems:cookies", EntryStack.create(Items.COOKIE));
     }
     
     @Override

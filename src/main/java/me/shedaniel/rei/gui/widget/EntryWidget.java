@@ -373,9 +373,13 @@ public class EntryWidget extends Slot {
                     else if (!CollectionUtils.anyMatchEqualsEntryIgnoreAmount(ConfigObject.getInstance().getFavorites(), entry))
                         ConfigObject.getInstance().getFavorites().add(entry);
                     ConfigManager.getInstance().saveConfig();
-                    FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
-                    if (favoritesListWidget != null)
-                        favoritesListWidget.updateSearch(ContainerScreenOverlay.getEntryListWidget(), ScreenHelper.getSearchField().getText());
+                    if (ConfigObject.getInstance().doDisplayFavoritesOnTheLeft()) {
+                        FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
+                        if (favoritesListWidget != null)
+                            favoritesListWidget.updateSearch(ContainerScreenOverlay.getEntryListWidget(), ScreenHelper.getSearchField().getText());
+                    } else {
+                        ContainerScreenOverlay.getEntryListWidget().updateSearch(ScreenHelper.getSearchField().getText());
+                    }
                     minecraft.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                     return true;
                 }

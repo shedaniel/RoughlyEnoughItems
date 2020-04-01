@@ -34,7 +34,9 @@ import me.shedaniel.rei.api.widgets.Button;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.config.SearchFieldLocation;
+import me.shedaniel.rei.gui.subsets.SubsetsMenu;
 import me.shedaniel.rei.gui.widget.*;
+import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.impl.InternalWidgets;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.Weather;
@@ -110,8 +112,13 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
     };
     private Rectangle bounds;
     private Window window;
-    private List<LateRenderable> lateRenderables = Lists.newArrayList();
     private Button leftButton, rightButton;
+    @ApiStatus.Experimental
+    private Rectangle subsetsButtonBounds;
+    @ApiStatus.Experimental
+    @Nullable
+    private SubsetsMenu subsetsMenu = null;
+    private Widget wrappedSubsetsMenu = null;
     
     public static EntryListWidget getEntryListWidget() {
         return ENTRY_LIST_WIDGET;
@@ -122,6 +129,12 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         return favoritesListWidget;
     }
     
+    @ApiStatus.Experimental
+    @Nullable
+    public SubsetsMenu getSubsetsMenu() {
+        return subsetsMenu;
+    }
+    
     public void init(boolean useless) {
         init();
     }
@@ -130,6 +143,8 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         this.shouldReInit = false;
         //Update Variables
         this.children().clear();
+        this.wrappedSubsetsMenu = null;
+        this.subsetsMenu = null;
         this.window = MinecraftClient.getInstance().getWindow();
         @SuppressWarnings({"RawTypeCanBeGeneric", "rawtypes"})
         DisplayHelper.DisplayBoundsHandler boundsHandler = DisplayHelper.getInstance().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
@@ -171,8 +186,8 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         }
         
         final Rectangle configButtonArea = getConfigButtonArea();
-        LateRenderable tmp;
-        widgets.add((Widget) (tmp = InternalWidgets.wrapLateRenderable(InternalWidgets.mergeWidgets(
+        Widget tmp;
+        widgets.add(tmp = InternalWidgets.wrapLateRenderable(InternalWidgets.mergeWidgets(
                 Widgets.createButton(configButtonArea, NarratorManager.EMPTY)
                         .onClick(button -> {
                             if (Screen.hasShiftDown()) {
@@ -209,17 +224,8 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                     helper.drawTexture(configButtonArea.x + 3, configButtonArea.y + 3, 0, 0, 14, 14);
                 })
                 )
-        )));
-        ((Widget) tmp).setZ(600);
-        lateRenderables.add(tmp);
-//        widgets.add((Widget) (tmp = InternalWidgets.wrapLateRenderable(Widgets.createTexturedWidget(CHEST_GUI_TEXTURE, configButtonArea.x + 3, configButtonArea.y + 3, 0, 0, 14, 14))));
-//        widgets.add((Widget) (tmp = InternalWidgets.wrapLateRenderable(Widgets.createDrawableWidget((helper, mouseX, mouseY, delta) -> {
-//            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-//            MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
-//            helper.blit(configButtonArea.x + 3, configButtonArea.y + 3, 0, 0, 14, 14);
-//        }))));
-//        ((Widget) tmp).setZ(600);
-//        lateRenderables.add(tmp);
+        ));
+        tmp.setZ(600);
         if (ConfigObject.getInstance().doesShowUtilsButtons()) {
             widgets.add(Widgets.createButton(ConfigObject.getInstance().isLowerConfigButton() ? new Rectangle(ConfigObject.getInstance().isLeftHandSidePanel() ? window.getScaledWidth() - 30 : 10, 10, 20, 20) : new Rectangle(ConfigObject.getInstance().isLeftHandSidePanel() ? window.getScaledWidth() - 55 : 35, 10, 20, 20), NarratorManager.EMPTY)
                     .onClick(button -> MinecraftClient.getInstance().player.sendChatMessage(ConfigObject.getInstance().getGamemodeCommand().replaceAll("\\{gamemode}", getNextGameMode(Screen.hasShiftDown()).getName())))
@@ -243,6 +249,20 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                 xxx += ConfigObject.getInstance().isLeftHandSidePanel() ? -25 : 25;
             }
         }
+        subsetsButtonBounds = getSubsetsButtonBounds();
+        if (ConfigObject.getInstance().isSubsetsEnabled()) {
+            widgets.add(InternalWidgets.wrapLateRenderable(Widgets.createButton(subsetsButtonBounds, ((ClientHelperImpl) ClientHelper.getInstance()).isAprilFools.get() ? I18n.translate("text.rei.tiny_potato") : I18n.translate("text.rei.subsets"))
+                    .onClick(button -> {
+                        if (subsetsMenu == null) {
+                            wrappedSubsetsMenu = InternalWidgets.wrapTranslate(InternalWidgets.wrapLateRenderable(this.subsetsMenu = SubsetsMenu.createFromRegistry(new Point(this.subsetsButtonBounds.x, this.subsetsButtonBounds.getMaxY()))), 0, 0, 400);
+                            this.widgets.add(this.wrappedSubsetsMenu);
+                        } else {
+                            this.widgets.remove(this.wrappedSubsetsMenu);
+                            this.subsetsMenu = null;
+                            this.wrappedSubsetsMenu = null;
+                        }
+                    })));
+        }
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
             widgets.add(Widgets.createClickableLabel(new Point(bounds.x + (bounds.width / 2), bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 10), "", label -> {
                 ENTRY_LIST_WIDGET.setPage(0);
@@ -256,7 +276,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             Rectangle area = getCraftableToggleArea();
             ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
             ItemStack icon = new ItemStack(Blocks.CRAFTING_TABLE);
-            this.widgets.add((Widget) (tmp = InternalWidgets.wrapLateRenderable(InternalWidgets.mergeWidgets(
+            this.widgets.add(tmp = InternalWidgets.wrapLateRenderable(InternalWidgets.mergeWidgets(
                     Widgets.createButton(area, NarratorManager.EMPTY)
                             .focusable(false)
                             .onClick(button -> {
@@ -271,10 +291,25 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                         itemRenderer.renderGuiItemIcon(icon, area.x + 2, area.y + 2);
                         itemRenderer.zOffset = 0.0F;
                     }))
-            )));
-            ((Widget) tmp).setZ(600);
-            lateRenderables.add(tmp);
+            ));
+            tmp.setZ(600);
         }
+    }
+    
+    @ApiStatus.Experimental
+    private Rectangle getSubsetsButtonBounds() {
+        if (ConfigObject.getInstance().isSubsetsEnabled()) {
+            if (MinecraftClient.getInstance().currentScreen instanceof RecipeViewingScreen) {
+                RecipeViewingScreen widget = (RecipeViewingScreen) MinecraftClient.getInstance().currentScreen;
+                return new Rectangle(widget.getBounds().x, 3, widget.getBounds().width, 18);
+            }
+            if (MinecraftClient.getInstance().currentScreen instanceof VillagerRecipeViewingScreen) {
+                VillagerRecipeViewingScreen widget = (VillagerRecipeViewingScreen) MinecraftClient.getInstance().currentScreen;
+                return new Rectangle(widget.bounds.x, 3, widget.bounds.width, 18);
+            }
+            return new Rectangle(((ContainerScreenHooks) ScreenHelper.getLastHandledScreen()).rei_getContainerLeft(), 3, ((ContainerScreenHooks) ScreenHelper.getLastHandledScreen()).rei_getContainerWidth(), 18);
+        }
+        return null;
     }
     
     private Weather getNextWeather() {
@@ -417,9 +452,14 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
     public void lateRender(int mouseX, int mouseY, float delta) {
         if (ScreenHelper.isOverlayVisible()) {
             ScreenHelper.getSearchField().laterRender(mouseX, mouseY, delta);
-            for (LateRenderable lateRenderable : lateRenderables) {
-                lateRenderable.lateRender(mouseX, mouseY, delta);
+            for (Widget widget : widgets) {
+                if (widget instanceof LateRenderable && wrappedSubsetsMenu != widget)
+                    widget.render(mouseX, mouseY, delta);
             }
+        }
+        if (wrappedSubsetsMenu != null) {
+            TOOLTIPS.clear();
+            wrappedSubsetsMenu.render(mouseX, mouseY, delta);
         }
         Screen currentScreen = MinecraftClient.getInstance().currentScreen;
         if (!(currentScreen instanceof RecipeViewingScreen) || !((RecipeViewingScreen) currentScreen).choosePageActivated)
@@ -462,7 +502,8 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             rightButton.setEnabled(ENTRY_LIST_WIDGET.getTotalPages() > 1);
         }
         for (Widget widget : widgets) {
-            widget.render(int_1, int_2, float_1);
+            if (!(widget instanceof LateRenderable))
+                widget.render(int_1, int_2, float_1);
         }
     }
     
@@ -470,6 +511,8 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
     public boolean mouseScrolled(double i, double j, double amount) {
         if (!ScreenHelper.isOverlayVisible())
             return false;
+        if (wrappedSubsetsMenu != null && wrappedSubsetsMenu.mouseScrolled(i, j, amount))
+            return true;
         if (isInside(PointHelper.ofMouse())) {
             if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
                 if (amount > 0 && leftButton.isEnabled())
@@ -487,7 +530,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                 return true;
         }
         for (Widget widget : widgets)
-            if (widget != ENTRY_LIST_WIDGET && (favoritesListWidget == null || widget != favoritesListWidget) && widget.mouseScrolled(i, j, amount))
+            if (widget != ENTRY_LIST_WIDGET && (favoritesListWidget == null || widget != favoritesListWidget) && (wrappedSubsetsMenu == null || widget != wrappedSubsetsMenu) && widget.mouseScrolled(i, j, amount))
                 return true;
         return false;
     }
@@ -540,7 +583,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
     }
     
     @Override
-    public List<? extends Element> children() {
+    public List<Widget> children() {
         return widgets;
     }
     
@@ -548,6 +591,13 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
         if (!ScreenHelper.isOverlayVisible())
             return false;
+        if (wrappedSubsetsMenu != null && wrappedSubsetsMenu.mouseClicked(double_1, double_2, int_1)) {
+            this.setFocused(wrappedSubsetsMenu);
+            if (int_1 == 0)
+                this.setDragging(true);
+            ScreenHelper.getSearchField().setFocused(false);
+            return true;
+        }
         if (MinecraftClient.getInstance().currentScreen instanceof HandledScreen && ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
             ContainerScreenHooks hooks = (ContainerScreenHooks) MinecraftClient.getInstance().currentScreen;
             for (RecipeHelper.ScreenClickArea area : RecipeHelper.getInstance().getScreenClickAreas())
@@ -559,7 +609,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                     }
         }
         for (Element element : widgets)
-            if (element.mouseClicked(double_1, double_2, int_1)) {
+            if (element != wrappedSubsetsMenu && element.mouseClicked(double_1, double_2, int_1)) {
                 this.setFocused(element);
                 if (int_1 == 0)
                     this.setDragging(true);

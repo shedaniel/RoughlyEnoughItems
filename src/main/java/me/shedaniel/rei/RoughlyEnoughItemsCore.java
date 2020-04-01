@@ -63,10 +63,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -81,6 +78,8 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     private static final Map<Identifier, REIPluginEntry> plugins = Maps.newHashMap();
     private static final ExecutorService SYNC_RECIPES = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "REI-SyncRecipes"));
     private static ConfigManager configManager;
+    @ApiStatus.Experimental
+    public static boolean isLeftModePressed = false;
     
     @ApiStatus.Internal
     public static RecipeHelper getRecipeHelper() {
@@ -248,12 +247,15 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     }
     
     private boolean shouldReturn(Class<?> screen) {
-        for (OverlayDecider decider : DisplayHelper.getInstance().getAllOverlayDeciders()) {
-            if (!decider.isHandingScreen(screen))
-                continue;
-            ActionResult result = decider.shouldScreenBeOverlayed(screen);
-            if (result != ActionResult.PASS)
-                return result == ActionResult.FAIL || ScreenHelper.getLastHandledScreen() == null;
+        try {
+            for (OverlayDecider decider : DisplayHelper.getInstance().getAllOverlayDeciders()) {
+                if (!decider.isHandingScreen(screen))
+                    continue;
+                ActionResult result = decider.shouldScreenBeOverlayed(screen);
+                if (result != ActionResult.PASS)
+                    return result == ActionResult.FAIL || ScreenHelper.getLastHandledScreen() == null;
+            }
+        } catch (ConcurrentModificationException ignored) {
         }
         return true;
     }
@@ -298,6 +300,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             return ActionResult.PASS;
         });
         ClothClientHooks.SCREEN_MOUSE_CLICKED.register((minecraftClient, screen, v, v1, i) -> {
+            isLeftModePressed = true;
             if (screen instanceof CreativeInventoryScreen)
                 if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().mouseClicked(v, v1, i)) {
                     screen.setFocused(ScreenHelper.getLastOverlay());
@@ -305,6 +308,10 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                         screen.setDragging(true);
                     return ActionResult.SUCCESS;
                 }
+            return ActionResult.PASS;
+        });
+        ClothClientHooks.SCREEN_MOUSE_RELEASED.register((minecraftClient, screen, v, v1, i) -> {
+            isLeftModePressed = false;
             return ActionResult.PASS;
         });
         ClothClientHooks.SCREEN_MOUSE_SCROLLED.register((minecraftClient, screen, v, v1, v2) -> {
