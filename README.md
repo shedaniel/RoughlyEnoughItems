@@ -1,17 +1,15 @@
 # Roughly Enough Items
-![Lines of Code](https://tokei.rs/b1/github/shedaniel/RoughlyEnoughItems?category=code)
-
 https://minecraft.curseforge.com/projects/roughly-enough-items <br>
-Roughly Enough Items is a mod to view Items and Recipes for Minecraft 1.13 - 1.15, supporting mod loaders from Forge, Rift to Fabric.
+Roughly Enough Items is a mod to view Items and Recipes for Minecraft 1.13 - 1.16, supporting mod loaders from Forge, Rift to Fabric.
 
 [Help translate REI on Crowdin!](https://crowdin.com/project/roughly-enough-items)
 
 ### Dependencies
 1.13 version requires [Rift](https://minecraft.curseforge.com/projects/rift).  
 1.13.2 version requires [Chocohead's Rift Fork](https://github.com/Chocohead/Rift) or [Forge 1.13.2](https://files.minecraftforge.net/maven/net/minecraftforge/forge/index_1.13.2.html).  
-1.14 and 1.15 version requires [Fabric Mod Loader](https://fabricmc.net/) and [Fabric API](https://minecraft.curseforge.com/projects/fabric).
+1.14, 1.15 and 1.16 version requires [Fabric Mod Loader](https://fabricmc.net/) and [Fabric API](https://minecraft.curseforge.com/projects/fabric).
 
-![](https://cdn.discordapp.com/attachments/472670263234920449/536198766118830081/unknown.png)
+![](https://i.imgur.com/OcOQLip.png)
 
 This mod is both client sided and server sided.
 

@@ -30,6 +30,8 @@ import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
+import me.shedaniel.rei.api.subsets.SubsetsRegistry;
+import me.shedaniel.rei.impl.subsets.SubsetsRegistryImpl;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.SemanticVersion;
@@ -128,6 +130,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         return categoryWorkingStations.get(category);
     }
     
+    @Deprecated
     @Override
     public void registerDisplay(Identifier categoryIdentifier, RecipeDisplay display) {
         if (!recipeCategoryListMap.containsKey(categoryIdentifier))
@@ -282,6 +285,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         this.displayVisibilityHandlers.clear();
         this.liveRecipeGenerators.clear();
         this.autoTransferHandlers.clear();
+        ((SubsetsRegistryImpl) SubsetsRegistry.INSTANCE).reset();
         ((DisplayHelperImpl) DisplayHelper.getInstance()).resetData();
         ((DisplayHelperImpl) DisplayHelper.getInstance()).resetCache();
         BaseBoundsHandler baseBoundsHandler = new BaseBoundsHandlerImpl();
@@ -364,12 +368,12 @@ public class RecipeHelperImpl implements RecipeHelper {
             public boolean isHandingScreen(Class<?> screen) {
                 return true;
             }
-    
+            
             @Override
             public ActionResult shouldScreenBeOverlayed(Class<?> screen) {
                 return AbstractContainerScreen.class.isAssignableFrom(screen) ? ActionResult.SUCCESS : ActionResult.PASS;
             }
-    
+            
             @Override
             public float getPriority() {
                 return -10;

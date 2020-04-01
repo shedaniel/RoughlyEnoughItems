@@ -46,33 +46,42 @@ import java.util.List;
 @Config(name = "roughlyenoughitems/config")
 public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
-    @ConfigEntry.Category("!general") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName public General general = new General();
-    @ConfigEntry.Category("appearance") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName private Appearance appearance = new Appearance();
-    @ConfigEntry.Category("modules") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName private Modules modules = new Modules();
-    @ConfigEntry.Category("technical") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName private Technical technical = new Technical();
-    @ConfigEntry.Category("performance") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName private Performance performance = new Performance();
-    @ConfigEntry.Category("filtering") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName private Filtering filtering = new Filtering();
-
+    @ConfigEntry.Category("!general") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
+    public General general = new General();
+    @ConfigEntry.Category("appearance") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
+    private Appearance appearance = new Appearance();
+    @ConfigEntry.Category("modules") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
+    private Modules modules = new Modules();
+    @ConfigEntry.Category("technical") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
+    private Technical technical = new Technical();
+    @ConfigEntry.Category("performance") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
+    private Performance performance = new Performance();
+    @ConfigEntry.Category("filtering") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
+    private Filtering filtering = new Filtering();
+    @ConfigEntry.Category("experimental") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName @ApiStatus.Experimental
+    private Experimental experimental = new Experimental();
+    
+    @Deprecated
     @Override
     public boolean isLighterButtonHover() {
-        return true;
+        return appearance.recipeBorder == RecipeBorderType.LIGHTER;
     }
-
+    
     @Override
     public boolean isOverlayVisible() {
         return general.overlayVisible;
     }
-
+    
     @Override
     public void setOverlayVisible(boolean overlayVisible) {
         general.overlayVisible = overlayVisible;
     }
-
+    
     @Override
     public boolean isCheating() {
         return general.cheating;
     }
-
+    
     @Override
     public void setCheating(boolean cheating) {
         general.cheating = cheating;
@@ -334,6 +343,12 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         return technical.debugSearchTimeRequired;
     }
     
+    @Override
+    @ApiStatus.Experimental
+    public boolean isSubsetsEnabled() {
+        return experimental.isSubsetsEnabled;
+    }
+    
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD})
     @interface DontApplyFieldName {}
@@ -376,9 +391,9 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     public static class Appearance {
         @UseSpecialRecipeTypeScreen private RecipeScreenType recipeScreenType = RecipeScreenType.UNSET;
+        @Comment("Declares the appearance of REI windows.") private boolean darkTheme = false;
         @Comment("The ordering of the items on the item panel.") @UseEnumSelectorInstead
         private ItemListOrderingConfig itemListOrdering = ItemListOrderingConfig.REGISTRY_ASCENDING;
-        @Comment("Declares the appearance of REI windows.") private boolean darkTheme = false;
         @Comment("Declares the position of the search field.") @UseEnumSelectorInstead
         private SearchFieldLocation searchFieldLocation = SearchFieldLocation.CENTER;
         @Comment("Declares the position of the item list panel.") private boolean mirrorItemPanel = false;
@@ -426,5 +441,10 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     public static class Filtering {
         @UseFilteringScreen private List<EntryStack> filteredStacks = new ArrayList<>();
+    }
+    
+    @ApiStatus.Experimental
+    public static class Experimental {
+        private boolean isSubsetsEnabled = false;
     }
 }

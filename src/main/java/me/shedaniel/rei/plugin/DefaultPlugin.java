@@ -60,8 +60,6 @@ import me.shedaniel.rei.plugin.stonecutting.DefaultStoneCuttingDisplay;
 import me.shedaniel.rei.plugin.stripping.DefaultStrippingCategory;
 import me.shedaniel.rei.plugin.stripping.DefaultStrippingDisplay;
 import me.shedaniel.rei.plugin.stripping.DummyAxeItem;
-import net.fabricmc.loader.api.SemanticVersion;
-import net.fabricmc.loader.util.version.VersionParsingException;
 import net.minecraft.block.ComposterBlock;
 import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.client.MinecraftClient;
@@ -117,11 +115,6 @@ public class DefaultPlugin implements REIPluginV0 {
     }
     
     @Override
-    public SemanticVersion getMinimumVersion() throws VersionParsingException {
-        return SemanticVersion.parse("3.2.33");
-    }
-    
-    @Override
     public void preRegister() {
         INFO_DISPLAYS.clear();
     }
@@ -171,7 +164,7 @@ public class DefaultPlugin implements REIPluginV0 {
             
             @Override
             public boolean isEmpty() {
-                return !((ClientHelperImpl) ClientHelper.getInstance()).ok.get();
+                return !((ClientHelperImpl) ClientHelper.getInstance()).isAprilFools.get();
             }
             
             @Override
@@ -384,6 +377,9 @@ public class DefaultPlugin implements REIPluginV0 {
         recipeHelper.registerScreenClickArea(new Rectangle(78, 32, 28, 23), FurnaceScreen.class, SMELTING);
         recipeHelper.registerScreenClickArea(new Rectangle(78, 32, 28, 23), SmokerScreen.class, SMOKING);
         recipeHelper.registerScreenClickArea(new Rectangle(78, 32, 28, 23), BlastFurnaceScreen.class, BLASTING);
+//        SubsetsRegistry subsetsRegistry = SubsetsRegistry.INSTANCE;
+//        subsetsRegistry.registerPathEntry("roughlyenoughitems:food", EntryStack.create(Items.MILK_BUCKET));
+//        subsetsRegistry.registerPathEntry("roughlyenoughitems:food/roughlyenoughitems:cookies", EntryStack.create(Items.COOKIE));
     }
     
     @Override

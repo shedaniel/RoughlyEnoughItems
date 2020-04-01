@@ -39,6 +39,7 @@ import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.gui.OverlaySearchField;
 import me.shedaniel.rei.gui.widget.EntryWidget;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
+import me.shedaniel.rei.gui.widget.ScrollingContainer;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.SearchArgument;
 import me.shedaniel.rei.utils.CollectionUtils;
@@ -46,9 +47,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
@@ -65,10 +63,22 @@ import static me.shedaniel.rei.gui.widget.EntryListWidget.entrySize;
 @ApiStatus.Internal
 public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
     protected List<EntryStack> selected = Lists.newArrayList();
-    protected double target;
-    protected double scroll;
-    protected long start;
-    protected long duration;
+    protected final ScrollingContainer scrolling = new ScrollingContainer() {
+        @Override
+        public int getMaxScrollHeight() {
+            return MathHelper.ceil(entryStacks.size() / (innerBounds.width / (float) entrySize())) * entrySize() + 28;
+        }
+        
+        @Override
+        public Rectangle getBounds() {
+            return FilteringEntry.this.getBounds();
+        }
+        
+        @Override
+        public int getScrollBarX() {
+            return getParent().right - 7;
+        }
+    };
     private Consumer<List<EntryStack>> saveConsumer;
     private List<EntryStack> defaultValue;
     private List<EntryStack> configFiltered;
@@ -78,7 +88,6 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
     private Rectangle innerBounds;
     private List<EntryListEntry> entries = Collections.emptyList();
     private List<Element> elements = Collections.emptyList();
-    private boolean draggingScrollBar = false;
     
     private Point selectionPoint = null;
     private Point secondPoint = null;
@@ -117,7 +126,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
                 for (int i = 0; i < entryStacks.size(); i++) {
                     EntryStack stack = entryStacks.get(i);
                     EntryListEntry entry = entries.get(i);
-                    entry.getBounds().y = (int) (entry.backupY - scroll);
+                    entry.getBounds().y = (int) (entry.backupY - scrolling.scrollAmount);
                     if (entry.isSelected() && !entry.isFiltered()) {
                         configFiltered.add(stack);
                         getScreen().setEdited(true, false);
@@ -131,7 +140,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
                 for (int i = 0; i < entryStacks.size(); i++) {
                     EntryStack stack = entryStacks.get(i);
                     EntryListEntry entry = entries.get(i);
-                    entry.getBounds().y = (int) (entry.backupY - scroll);
+                    entry.getBounds().y = (int) (entry.backupY - scrolling.scrollAmount);
                     if (entry.isSelected() && configFiltered.remove(stack)) {
                         getScreen().setEdited(true, false);
                     }
@@ -191,13 +200,13 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
             return;
         for (EntryListEntry entry : entries)
             entry.clearStacks();
-        int skip = Math.max(0, MathHelper.floor(scroll / (float) entrySize()));
+        int skip = Math.max(0, MathHelper.floor(scrolling.scrollAmount / (float) entrySize()));
         int nextIndex = skip * innerBounds.width / entrySize();
         int i = nextIndex;
         for (; i < entryStacks.size(); i++) {
             EntryStack stack = entryStacks.get(i);
             EntryListEntry entry = entries.get(nextIndex);
-            entry.getBounds().y = (int) (entry.backupY - scroll);
+            entry.getBounds().y = (int) (entry.backupY - scrolling.scrollAmount);
             if (entry.getBounds().y > bounds.getMaxY())
                 break;
             entry.entry(stack);
@@ -205,7 +214,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
             nextIndex++;
         }
         updatePosition(delta);
-        renderScrollbar();
+        scrolling.renderScrollBar(0xff000000, 1);
         RenderSystem.translatef(0, 0, 300);
         this.searchField.laterRender(mouseX, mouseY, delta);
         this.selectAllButton.render(mouseX, mouseY, delta);
@@ -223,95 +232,33 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
             Point p = secondPoint;
             if (p == null) {
                 p = PointHelper.fromMouse();
-                p.translate(0, (int) scroll);
+                p.translate(0, (int) scrolling.scrollAmount);
             }
             int left = Math.min(p.x, selectionPoint.x);
             int top = Math.min(p.y, selectionPoint.y);
             int right = Math.max(p.x, selectionPoint.x);
             int bottom = Math.max(p.y, selectionPoint.y);
-            return new Rectangle(left, (int) (top - scroll), right - left, bottom - top);
+            return new Rectangle(left, (int) (top - scrolling.scrollAmount), right - left, bottom - top);
         }
         return new Rectangle(0, 0, 0, 0);
     }
     
-    private int getScrollbarMinX() {
-        return getParent().right - 7;
-    }
-    
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int int_1, double double_3, double double_4) {
-        if (int_1 == 0 && draggingScrollBar) {
-            float height = getMaxScrollPosition();
-            int actualHeight = innerBounds.height;
-            if (height > actualHeight && mouseY >= innerBounds.y && mouseY <= innerBounds.getMaxY()) {
-                double double_5 = Math.max(1, this.getMaxScroll());
-                int int_2 = innerBounds.height;
-                int int_3 = MathHelper.clamp((int) ((float) (int_2 * int_2) / (float) getMaxScrollPosition()), 32, int_2 - 8);
-                double double_6 = Math.max(1.0D, double_5 / (double) (int_2 - int_3));
-                float to = MathHelper.clamp((float) (scroll + double_4 * double_6), 0, height - innerBounds.height);
-                if (ConfigObject.getInstance().doesSnapToRows()) {
-                    double nearestRow = Math.round(to / (double) entrySize()) * (double) entrySize();
-                    scrollTo(nearestRow, false);
-                } else
-                    scrollTo(to, false);
-            }
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dx, double dy) {
+        if (scrolling.mouseDragged(mouseX, mouseY, button, dx, dy, true))
             return true;
-        }
-        return super.mouseDragged(mouseX, mouseY, int_1, double_3, double_4);
-    }
-    
-    private void renderScrollbar() {
-        int maxScroll = getMaxScroll();
-        if (maxScroll > 0) {
-            int height = innerBounds.height * innerBounds.height / getMaxScrollPosition();
-            height = MathHelper.clamp(height, 32, innerBounds.height - 8);
-            height -= Math.min((scroll < 0 ? (int) -scroll : scroll > maxScroll ? (int) scroll - maxScroll : 0), height * .95);
-            height = Math.max(10, height);
-            int minY = Math.min(Math.max((int) scroll * (innerBounds.height - height) / maxScroll + innerBounds.y, innerBounds.y), innerBounds.getMaxY() - height);
-            
-            int scrollbarPositionMinX = getScrollbarMinX();
-            int scrollbarPositionMaxX = scrollbarPositionMinX + 6;
-            boolean hovered = (new Rectangle(scrollbarPositionMinX, minY, scrollbarPositionMaxX - scrollbarPositionMinX, height)).contains(PointHelper.fromMouse());
-            float bottomC = (hovered ? .67f : .5f) * (ScreenHelper.isDarkModeEnabled() ? 0.8f : 1f);
-            float topC = (hovered ? .87f : .67f) * (ScreenHelper.isDarkModeEnabled() ? 0.8f : 1f);
-            
-            RenderSystem.disableTexture();
-            RenderSystem.enableBlend();
-            RenderSystem.disableAlphaTest();
-            RenderSystem.blendFuncSeparate(770, 771, 1, 0);
-            RenderSystem.shadeModel(7425);
-            Tessellator tessellator = Tessellator.getInstance();
-            BufferBuilder buffer = tessellator.getBuffer();
-            buffer.begin(7, VertexFormats.POSITION_COLOR);
-            buffer.vertex(scrollbarPositionMinX, minY + height, 0.0D).color(bottomC, bottomC, bottomC, 1).next();
-            buffer.vertex(scrollbarPositionMaxX, minY + height, 0.0D).color(bottomC, bottomC, bottomC, 1).next();
-            buffer.vertex(scrollbarPositionMaxX, minY, 0.0D).color(bottomC, bottomC, bottomC, 1).next();
-            buffer.vertex(scrollbarPositionMinX, minY, 0.0D).color(bottomC, bottomC, bottomC, 1).next();
-            tessellator.draw();
-            buffer.begin(7, VertexFormats.POSITION_COLOR);
-            buffer.vertex(scrollbarPositionMinX, (minY + height - 1), 0.0D).color(topC, topC, topC, 1).next();
-            buffer.vertex((scrollbarPositionMaxX - 1), (minY + height - 1), 0.0D).color(topC, topC, topC, 1).next();
-            buffer.vertex((scrollbarPositionMaxX - 1), minY, 0.0D).color(topC, topC, topC, 1).next();
-            buffer.vertex(scrollbarPositionMinX, minY, 0.0D).color(topC, topC, topC, 1).next();
-            tessellator.draw();
-            RenderSystem.shadeModel(7424);
-            RenderSystem.disableBlend();
-            RenderSystem.enableAlphaTest();
-            RenderSystem.enableTexture();
-        }
+        return super.mouseDragged(mouseX, mouseY, button, dx, dy);
     }
     
     private void updatePosition(float delta) {
-        if (ConfigObject.getInstance().doesSnapToRows() && target >= 0 && target <= getMaxScroll()) {
-            double nearestRow = Math.round(target / (double) entrySize()) * (double) entrySize();
-            if (!DynamicNewSmoothScrollingEntryListWidget.Precision.almostEquals(target, nearestRow, DynamicNewSmoothScrollingEntryListWidget.Precision.FLOAT_EPSILON))
-                target += (nearestRow - target) * Math.min(delta / 2.0, 1.0);
+        if (ConfigObject.getInstance().doesSnapToRows() && scrolling.scrollTarget >= 0 && scrolling.scrollTarget <= scrolling.getMaxScroll()) {
+            double nearestRow = Math.round(scrolling.scrollTarget / (double) entrySize()) * (double) entrySize();
+            if (!DynamicNewSmoothScrollingEntryListWidget.Precision.almostEquals(scrolling.scrollTarget, nearestRow, DynamicNewSmoothScrollingEntryListWidget.Precision.FLOAT_EPSILON))
+                scrolling.scrollTarget += (nearestRow - scrolling.scrollTarget) * Math.min(delta / 2.0, 1.0);
             else
-                target = nearestRow;
+                scrolling.scrollTarget = nearestRow;
         }
-        double[] targetD = new double[]{this.target};
-        this.scroll = ClothConfigInitializer.handleScrollingPosition(targetD, this.scroll, this.getMaxScroll(), delta, this.start, this.duration);
-        this.target = targetD[0];
+        scrolling.updatePosition(delta);
     }
     
     public void updateSearch(String searchTerm) {
@@ -361,19 +308,10 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
     
     @Override
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
-        double height = getMaxScroll();
-        Rectangle bounds = getBounds();
-        int actualHeight = bounds.height;
-        if (height > actualHeight && double_2 >= bounds.y && double_2 <= bounds.getMaxY()) {
-            double scrollbarPositionMinX = getScrollbarMinX();
-            if (double_1 >= scrollbarPositionMinX - 1 & double_1 <= scrollbarPositionMinX + 8) {
-                this.draggingScrollBar = true;
-                return true;
-            }
-        }
-        this.draggingScrollBar = false;
+        if (scrolling.updateDraggingState(double_1, double_2, int_1))
+            return true;
         
-        if (bounds.contains(double_1, double_2)) {
+        if (getBounds().contains(double_1, double_2)) {
             if (searchField.mouseClicked(double_1, double_2, int_1)) {
                 this.selectionPoint = null;
                 this.secondPoint = null;
@@ -388,7 +326,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
                 return true;
             }
             if (int_1 == 0) {
-                this.selectionPoint = new Point(double_1, double_2 + scroll);
+                this.selectionPoint = new Point(double_1, double_2 + scrolling.scrollAmount);
                 this.secondPoint = null;
                 return true;
             }
@@ -399,7 +337,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (selectionPoint != null && button == 0 && secondPoint == null) {
-            this.secondPoint = new Point(mouseX, mouseY + scroll);
+            this.secondPoint = new Point(mouseX, mouseY + scrolling.scrollAmount);
             if (secondPoint.equals(selectionPoint)) {
                 secondPoint.translate(1, 1);
             }
@@ -438,44 +376,10 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
             updateEntriesPosition();
     }
     
-    protected final int getMaxScrollPosition() {
-        return MathHelper.ceil(entryStacks.size() / (innerBounds.width / (float) entrySize())) * entrySize() + 28;
-    }
-    
-    protected final int getMaxScroll() {
-        return Math.max(0, this.getMaxScrollPosition() - innerBounds.height);
-    }
-    
-    protected final double clamp(double v) {
-        return this.clamp(v, 200.0D);
-    }
-    
-    protected final double clamp(double v, double clampExtension) {
-        return MathHelper.clamp(v, -clampExtension, (double) this.getMaxScroll() + clampExtension);
-    }
-    
-    protected final void offset(double value, boolean animated) {
-        scrollTo(target + value, animated);
-    }
-    
-    protected final void scrollTo(double value, boolean animated) {
-        scrollTo(value, animated, ClothConfigInitializer.getScrollDuration());
-    }
-    
-    protected final void scrollTo(double value, boolean animated, long duration) {
-        target = clamp(value);
-        
-        if (animated) {
-            start = System.currentTimeMillis();
-            this.duration = duration;
-        } else
-            scroll = target;
-    }
-    
     @Override
     public boolean mouseScrolled(double double_1, double double_2, double double_3) {
         if (getBounds().contains(double_1, double_2)) {
-            offset(ClothConfigInitializer.getScrollStep() * -double_3, true);
+            scrolling.offset(ClothConfigInitializer.getScrollStep() * -double_3, true);
             return true;
         }
         super.mouseScrolled(double_1, double_2, double_3);

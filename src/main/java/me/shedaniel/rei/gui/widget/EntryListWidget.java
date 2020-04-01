@@ -24,7 +24,6 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
@@ -41,10 +40,8 @@ import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.math.Matrix4f;
 import net.minecraft.client.util.math.MatrixStack;
@@ -78,10 +75,19 @@ public class EntryListWidget extends WidgetWithBounds {
     private static final int SIZE = 18;
     private static final boolean LAZY = true;
     private static int page;
-    protected double target;
-    protected double scroll;
-    protected long start;
-    protected long duration;
+    protected final ScrollingContainer scrolling = new ScrollingContainer() {
+        @Override
+        public Rectangle getBounds() {
+            return EntryListWidget.this.getBounds();
+        }
+        
+        @Override
+        public int getMaxScrollHeight() {
+            if (favorites.isEmpty())
+                return MathHelper.ceil((allStacks.size() + blockedCount) / (innerBounds.width / (float) entrySize())) * entrySize();
+            return MathHelper.ceil((allStacks.size() + blockedCount + getScrollNumberForFavorites()) / (innerBounds.width / (float) entrySize())) * entrySize() - 12;
+        }
+    };
     protected int blockedCount;
     private boolean debugTime;
     private Rectangle bounds, innerBounds;
@@ -92,7 +98,6 @@ public class EntryListWidget extends WidgetWithBounds {
     private List<Widget> widgets = Collections.emptyList();
     private List<SearchArgument.SearchArguments> lastSearchArguments = Collections.emptyList();
     private String lastSearchTerm = null;
-    private boolean draggingScrollBar = false;
     
     public static int entrySize() {
         return MathHelper.ceil(SIZE * ConfigObject.getInstance().getEntrySize());
@@ -139,46 +144,10 @@ public class EntryListWidget extends WidgetWithBounds {
         return (innerBounds.width / entrySize()) * getSlotsHeightNumberForFavorites();
     }
     
-    protected final int getMaxScrollPosition() {
-        if (favorites.isEmpty())
-            return MathHelper.ceil((allStacks.size() + blockedCount) / (innerBounds.width / (float) entrySize())) * entrySize();
-        return MathHelper.ceil((allStacks.size() + blockedCount + getScrollNumberForFavorites()) / (innerBounds.width / (float) entrySize())) * entrySize() - 12;
-    }
-    
-    protected final int getMaxScroll() {
-        return Math.max(0, this.getMaxScrollPosition() - innerBounds.height);
-    }
-    
-    protected final double clamp(double v) {
-        return this.clamp(v, 200.0D);
-    }
-    
-    protected final double clamp(double v, double clampExtension) {
-        return MathHelper.clamp(v, -clampExtension, (double) this.getMaxScroll() + clampExtension);
-    }
-    
-    protected final void offset(double value, boolean animated) {
-        scrollTo(target + value, animated);
-    }
-    
-    protected final void scrollTo(double value, boolean animated) {
-        scrollTo(value, animated, ClothConfigInitializer.getScrollDuration());
-    }
-    
-    protected final void scrollTo(double value, boolean animated, long duration) {
-        target = clamp(value);
-        
-        if (animated) {
-            start = System.currentTimeMillis();
-            this.duration = duration;
-        } else
-            scroll = target;
-    }
-    
     @Override
     public boolean mouseScrolled(double double_1, double double_2, double double_3) {
         if (ConfigObject.getInstance().isEntryListWidgetScrolled() && bounds.contains(double_1, double_2)) {
-            offset(ClothConfigInitializer.getScrollStep() * -double_3, true);
+            scrolling.offset(ClothConfigInitializer.getScrollStep() * -double_3, true);
             return true;
         }
         return super.mouseScrolled(double_1, double_2, double_3);
@@ -218,7 +187,7 @@ public class EntryListWidget extends WidgetWithBounds {
                 entry.clearStacks();
             ScissorsHandler.INSTANCE.scissor(bounds);
             int sizeForFavorites = getSlotsHeightNumberForFavorites();
-            int skip = Math.max(0, MathHelper.floor(scroll / (float) entrySize()) - sizeForFavorites);
+            int skip = Math.max(0, MathHelper.floor(scrolling.scrollAmount / (float) entrySize()) - sizeForFavorites);
             int nextIndex = skip * innerBounds.width / entrySize();
             int i = nextIndex;
             blockedCount = 0;
@@ -227,13 +196,13 @@ public class EntryListWidget extends WidgetWithBounds {
                 int size = 0;
                 long time = 0;
                 if (sizeForFavorites > 0) {
-                    drawString(font, I18n.translate("text.rei.favorites"), innerBounds.x + 2, (int) (innerBounds.y + 8 - scroll), -1);
+                    drawString(font, I18n.translate("text.rei.favorites"), innerBounds.x + 2, (int) (innerBounds.y + 8 - scrolling.scrollAmount), -1);
                     nextIndex += innerBounds.width / entrySize();
                     back1:
                     for (EntryStack stack : favorites) {
                         while (true) {
                             EntryListEntry entry = entries.get(nextIndex);
-                            entry.getBounds().y = (int) (entry.backupY - scroll);
+                            entry.getBounds().y = (int) (entry.backupY - scrolling.scrollAmount);
                             if (entry.getBounds().y > bounds.getMaxY())
                                 break back1;
                             if (notSteppingOnExclusionZones(entry.getBounds().x, entry.getBounds().y, innerBounds)) {
@@ -259,7 +228,7 @@ public class EntryListWidget extends WidgetWithBounds {
                     EntryStack stack = allStacks.get(i);
                     while (true) {
                         EntryListEntry entry = entries.get(nextIndex);
-                        entry.getBounds().y = (int) (entry.backupY - scroll + offset);
+                        entry.getBounds().y = (int) (entry.backupY - scrolling.scrollAmount + offset);
                         if (entry.getBounds().y > bounds.getMaxY())
                             break back;
                         if (notSteppingOnExclusionZones(entry.getBounds().x, entry.getBounds().y, innerBounds)) {
@@ -293,13 +262,13 @@ public class EntryListWidget extends WidgetWithBounds {
                 setZ(z);
             } else {
                 if (sizeForFavorites > 0) {
-                    drawString(font, I18n.translate("text.rei.favorites"), innerBounds.x + 2, (int) (innerBounds.y + 8 - scroll), -1);
+                    drawString(font, I18n.translate("text.rei.favorites"), innerBounds.x + 2, (int) (innerBounds.y + 8 - scrolling.scrollAmount), -1);
                     nextIndex += innerBounds.width / entrySize();
                     back1:
                     for (EntryStack stack : favorites) {
                         while (true) {
                             EntryListEntry entry = entries.get(nextIndex);
-                            entry.getBounds().y = (int) (entry.backupY - scroll);
+                            entry.getBounds().y = (int) (entry.backupY - scrolling.scrollAmount);
                             if (entry.getBounds().y > bounds.getMaxY())
                                 break back1;
                             if (notSteppingOnExclusionZones(entry.getBounds().x, entry.getBounds().y, innerBounds)) {
@@ -322,7 +291,7 @@ public class EntryListWidget extends WidgetWithBounds {
                     EntryStack stack = allStacks.get(i);
                     while (true) {
                         EntryListEntry entry = entries.get(nextIndex);
-                        entry.getBounds().y = (int) (entry.backupY - scroll + offset);
+                        entry.getBounds().y = (int) (entry.backupY - scrolling.scrollAmount + offset);
                         if (entry.getBounds().y > bounds.getMaxY())
                             break back;
                         if (notSteppingOnExclusionZones(entry.getBounds().x, entry.getBounds().y, innerBounds)) {
@@ -340,7 +309,7 @@ public class EntryListWidget extends WidgetWithBounds {
             }
             updatePosition(delta);
             ScissorsHandler.INSTANCE.removeLastScissor();
-            renderScrollbar();
+            scrolling.renderScrollBar();
         } else {
             if (debugTime) {
                 int size = 0;
@@ -469,78 +438,21 @@ public class EntryListWidget extends WidgetWithBounds {
     }
     
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int int_1, double double_3, double double_4) {
-        if (int_1 == 0 && draggingScrollBar) {
-            float height = getMaxScrollPosition();
-            int actualHeight = innerBounds.height;
-            if (height > actualHeight && mouseY >= innerBounds.y && mouseY <= innerBounds.getMaxY()) {
-                double double_5 = Math.max(1, this.getMaxScroll());
-                int int_2 = innerBounds.height;
-                int int_3 = MathHelper.clamp((int) ((float) (int_2 * int_2) / (float) getMaxScrollPosition()), 32, int_2 - 8);
-                double double_6 = Math.max(1.0D, double_5 / (double) (int_2 - int_3));
-                float to = MathHelper.clamp((float) (scroll + double_4 * double_6), 0, height - innerBounds.height);
-                if (ConfigObject.getInstance().doesSnapToRows()) {
-                    double nearestRow = Math.round(to / (double) entrySize()) * (double) entrySize();
-                    scrollTo(nearestRow, false);
-                } else
-                    scrollTo(to, false);
-            }
-        }
-        return super.mouseDragged(mouseX, mouseY, int_1, double_3, double_4);
-    }
-    
-    private void renderScrollbar() {
-        int maxScroll = getMaxScroll();
-        if (maxScroll > 0) {
-            int height = innerBounds.height * innerBounds.height / getMaxScrollPosition();
-            height = MathHelper.clamp(height, 32, innerBounds.height - 8);
-            height -= Math.min((scroll < 0 ? (int) -scroll : scroll > maxScroll ? (int) scroll - maxScroll : 0), height * .95);
-            height = Math.max(10, height);
-            int minY = Math.min(Math.max((int) scroll * (innerBounds.height - height) / maxScroll + innerBounds.y, innerBounds.y), innerBounds.getMaxY() - height);
-            
-            int scrollbarPositionMinX = getScrollbarMinX();
-            int scrollbarPositionMaxX = scrollbarPositionMinX + 6;
-            boolean hovered = (new Rectangle(scrollbarPositionMinX, minY, scrollbarPositionMaxX - scrollbarPositionMinX, height)).contains(PointHelper.fromMouse());
-            float bottomC = (hovered ? .67f : .5f) * (ScreenHelper.isDarkModeEnabled() ? 0.8f : 1f);
-            float topC = (hovered ? .87f : .67f) * (ScreenHelper.isDarkModeEnabled() ? 0.8f : 1f);
-            
-            RenderSystem.disableTexture();
-            RenderSystem.enableBlend();
-            RenderSystem.disableAlphaTest();
-            RenderSystem.blendFuncSeparate(770, 771, 1, 0);
-            RenderSystem.shadeModel(7425);
-            Tessellator tessellator = Tessellator.getInstance();
-            BufferBuilder buffer = tessellator.getBuffer();
-            buffer.begin(7, VertexFormats.POSITION_COLOR);
-            buffer.vertex(scrollbarPositionMinX, minY + height, 0.0D).color(bottomC, bottomC, bottomC, 1).next();
-            buffer.vertex(scrollbarPositionMaxX, minY + height, 0.0D).color(bottomC, bottomC, bottomC, 1).next();
-            buffer.vertex(scrollbarPositionMaxX, minY, 0.0D).color(bottomC, bottomC, bottomC, 1).next();
-            buffer.vertex(scrollbarPositionMinX, minY, 0.0D).color(bottomC, bottomC, bottomC, 1).next();
-            tessellator.draw();
-            buffer.begin(7, VertexFormats.POSITION_COLOR);
-            buffer.vertex(scrollbarPositionMinX, (minY + height - 1), 0.0D).color(topC, topC, topC, 1).next();
-            buffer.vertex((scrollbarPositionMaxX - 1), (minY + height - 1), 0.0D).color(topC, topC, topC, 1).next();
-            buffer.vertex((scrollbarPositionMaxX - 1), minY, 0.0D).color(topC, topC, topC, 1).next();
-            buffer.vertex(scrollbarPositionMinX, minY, 0.0D).color(topC, topC, topC, 1).next();
-            tessellator.draw();
-            RenderSystem.shadeModel(7424);
-            RenderSystem.disableBlend();
-            RenderSystem.enableAlphaTest();
-            RenderSystem.enableTexture();
-        }
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dx, double dy) {
+        if (scrolling.mouseDragged(mouseX, mouseY, button, dx, dy, true))
+            return true;
+        return super.mouseDragged(mouseX, mouseY, button, dx, dy);
     }
     
     private void updatePosition(float delta) {
-        if (ConfigObject.getInstance().doesSnapToRows() && target >= 0 && target <= getMaxScroll()) {
-            double nearestRow = Math.round(target / (double) entrySize()) * (double) entrySize();
-            if (!DynamicNewSmoothScrollingEntryListWidget.Precision.almostEquals(target, nearestRow, DynamicNewSmoothScrollingEntryListWidget.Precision.FLOAT_EPSILON))
-                target += (nearestRow - target) * Math.min(delta / 2.0, 1.0);
+        if (ConfigObject.getInstance().doesSnapToRows() && scrolling.scrollTarget >= 0 && scrolling.scrollTarget <= scrolling.getMaxScroll()) {
+            double nearestRow = Math.round(scrolling.scrollTarget / (double) entrySize()) * (double) entrySize();
+            if (!DynamicNewSmoothScrollingEntryListWidget.Precision.almostEquals(scrolling.scrollTarget, nearestRow, DynamicNewSmoothScrollingEntryListWidget.Precision.FLOAT_EPSILON))
+                scrolling.scrollTarget += (nearestRow - scrolling.scrollTarget) * Math.min(delta / 2.0, 1.0);
             else
-                target = nearestRow;
+                scrolling.scrollTarget = nearestRow;
         }
-        double[] targetD = new double[]{this.target};
-        this.scroll = ClothConfigInitializer.handleScrollingPosition(targetD, this.scroll, this.getMaxScroll(), delta, this.start, this.duration);
-        this.target = targetD[0];
+        scrolling.updatePosition(delta);
     }
     
     @Override
@@ -745,16 +657,8 @@ public class EntryListWidget extends WidgetWithBounds {
     @Override
     public boolean mouseClicked(double double_1, double double_2, int int_1) {
         if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-            double height = getMaxScroll();
-            int actualHeight = bounds.height;
-            if (height > actualHeight && double_2 >= bounds.y && double_2 <= bounds.getMaxY()) {
-                double scrollbarPositionMinX = getScrollbarMinX();
-                if (double_1 >= scrollbarPositionMinX - 1 & double_1 <= scrollbarPositionMinX + 8) {
-                    this.draggingScrollBar = true;
-                    return true;
-                }
-            }
-            this.draggingScrollBar = false;
+            if (scrolling.updateDraggingState(double_1, double_2, int_1))
+                return true;
         }
         
         if (containsMouse(double_1, double_2)) {
