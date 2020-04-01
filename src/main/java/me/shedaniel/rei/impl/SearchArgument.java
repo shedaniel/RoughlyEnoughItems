@@ -25,6 +25,7 @@ package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.math.Point;
+import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.widgets.Tooltip;
@@ -187,6 +188,9 @@ public class SearchArgument {
             return tryGetItemStackName(stack.getItemStack());
         else if (stack.getType() == EntryStack.Type.FLUID)
             return tryGetFluidName(stack.getFluid());
+        Tooltip tooltip = stack.getTooltip(PointHelper.ofMouse());
+        if (tooltip != null)
+            return tooltip.getText().isEmpty() ? "" : tooltip.getText().get(0);
         return "";
     }
     
@@ -195,6 +199,9 @@ public class SearchArgument {
             return tryGetItemStackNameNoFormatting(stack.getItemStack());
         else if (stack.getType() == EntryStack.Type.FLUID)
             return tryGetFluidName(stack.getFluid());
+        Tooltip tooltip = stack.getTooltip(PointHelper.ofMouse());
+        if (tooltip != null)
+            return tooltip.getText().isEmpty() ? "" : tooltip.getText().get(0);
         return "";
     }
     

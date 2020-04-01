@@ -77,10 +77,8 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         }
         return false;
     });
-    @ApiStatus.Internal public final Lazy<Boolean> ok = new Lazy<>(() -> {
+    @ApiStatus.Internal public final Lazy<Boolean> isAprilFools = new Lazy<>(() -> {
         try {
-            if (isYog.get())
-                return true;
             LocalDateTime now = LocalDateTime.now();
             return now.getMonthValue() == 4 && now.getDayOfMonth() == 1;
         } catch (Throwable ignored) {

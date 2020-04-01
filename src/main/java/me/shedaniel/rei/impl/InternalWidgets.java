@@ -24,6 +24,7 @@
 package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
@@ -179,11 +180,15 @@ public final class InternalWidgets {
         };
     }
     
-    public static LateRenderable wrapLateRenderable(WidgetWithBounds widget) {
+    public static WidgetWithBounds wrapLateRenderable(WidgetWithBounds widget) {
         return new LateRenderableWidgetWithBounds(widget);
     }
     
-    public static LateRenderable wrapLateRenderable(Widget widget) {
+    public static WidgetWithBounds wrapTranslate(WidgetWithBounds widget, float x, float y, float z) {
+        return new WidgetWithBoundsWithTranslate(widget, x, y, z);
+    }
+    
+    public static Widget wrapLateRenderable(Widget widget) {
         return new LateRenderableWidget(widget);
     }
     
@@ -210,6 +215,15 @@ public final class InternalWidgets {
         public List<? extends Element> children() {
             return widgets;
         }
+    
+        @Override
+        public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+            for (Widget widget : this.widgets) {
+                if (widget.mouseScrolled(mouseX, mouseY, amount))
+                    return true;
+            }
+            return false;
+        }
     }
     
     private static class LateRenderableWidget extends Widget implements LateRenderable {
@@ -219,19 +233,20 @@ public final class InternalWidgets {
             this.widget = widget;
         }
         
-        
         @Override
-        public void lateRender(int mouseX, int mouseY, float delta) {
+        public void render(int mouseX, int mouseY, float delta) {
             this.widget.setZ(getZ());
             this.widget.render(mouseX, mouseY, delta);
         }
         
         @Override
-        public void render(int mouseX, int mouseY, float delta) {}
-        
-        @Override
         public List<? extends Element> children() {
             return Collections.singletonList(this.widget);
+        }
+    
+        @Override
+        public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+            return this.widget.mouseScrolled(mouseX, mouseY, amount);
         }
     }
     
@@ -242,11 +257,42 @@ public final class InternalWidgets {
             this.widget = widget;
         }
         
+        @Override
+        public @NotNull Rectangle getBounds() {
+            return this.widget.getBounds();
+        }
         
         @Override
-        public void lateRender(int mouseX, int mouseY, float delta) {
+        public void render(int mouseX, int mouseY, float delta) {
             this.widget.setZ(getZ());
             this.widget.render(mouseX, mouseY, delta);
+        }
+        
+        @Override
+        public boolean containsMouse(double mouseX, double mouseY) {
+            return this.widget.containsMouse(mouseX, mouseY);
+        }
+        
+        @Override
+        public List<? extends Element> children() {
+            return Collections.singletonList(this.widget);
+        }
+    
+        @Override
+        public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+            return this.widget.mouseScrolled(mouseX, mouseY, amount);
+        }
+    }
+    
+    private static class WidgetWithBoundsWithTranslate extends WidgetWithBounds implements LateRenderable {
+        private final WidgetWithBounds widget;
+        private final float x, y, z;
+        
+        public WidgetWithBoundsWithTranslate(WidgetWithBounds widget, float x, float y, float z) {
+            this.widget = widget;
+            this.x = x;
+            this.y = y;
+            this.z = z;
         }
         
         @Override
@@ -255,11 +301,27 @@ public final class InternalWidgets {
         }
         
         @Override
-        public void render(int mouseX, int mouseY, float delta) {}
+        public void render(int mouseX, int mouseY, float delta) {
+            RenderSystem.pushMatrix();
+            RenderSystem.translatef(x, y, z);
+            this.widget.setZ(getZ());
+            this.widget.render(mouseX, mouseY, delta);
+            RenderSystem.popMatrix();
+        }
+        
+        @Override
+        public boolean containsMouse(double mouseX, double mouseY) {
+            return this.widget.containsMouse(mouseX, mouseY);
+        }
         
         @Override
         public List<? extends Element> children() {
             return Collections.singletonList(this.widget);
+        }
+    
+        @Override
+        public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+            return this.widget.mouseScrolled(mouseX, mouseY, amount);
         }
     }
 }

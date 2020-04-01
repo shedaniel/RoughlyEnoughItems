@@ -32,10 +32,6 @@ import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.gui.config.*;
-import me.shedaniel.rei.impl.ConfigObjectImpl.DontApplyFieldName;
-import me.shedaniel.rei.impl.ConfigObjectImpl.UseEnumSelectorInstead;
-import me.shedaniel.rei.impl.ConfigObjectImpl.UseFilteringScreen;
-import me.shedaniel.rei.impl.ConfigObjectImpl.UseSpecialRecipeTypeScreen;
 import net.minecraft.client.util.InputUtil;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -50,12 +46,20 @@ import java.util.List;
 @Config(name = "roughlyenoughitems/config")
 public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
-    @ConfigEntry.Category("!general") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName public General general = new General();
-    @ConfigEntry.Category("appearance") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName private Appearance appearance = new Appearance();
-    @ConfigEntry.Category("modules") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName private Modules modules = new Modules();
-    @ConfigEntry.Category("technical") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName private Technical technical = new Technical();
-    @ConfigEntry.Category("performance") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName private Performance performance = new Performance();
-    @ConfigEntry.Category("filtering") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName private Filtering filtering = new Filtering();
+    @ConfigEntry.Category("!general") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
+    public General general = new General();
+    @ConfigEntry.Category("appearance") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
+    private Appearance appearance = new Appearance();
+    @ConfigEntry.Category("modules") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
+    private Modules modules = new Modules();
+    @ConfigEntry.Category("technical") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
+    private Technical technical = new Technical();
+    @ConfigEntry.Category("performance") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
+    private Performance performance = new Performance();
+    @ConfigEntry.Category("filtering") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
+    private Filtering filtering = new Filtering();
+    @ConfigEntry.Category("experimental") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName @ApiStatus.Experimental
+    private Experimental experimental = new Experimental();
     
     @Override
     public boolean isOverlayVisible() {
@@ -326,6 +330,12 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         return technical.debugSearchTimeRequired;
     }
     
+    @Override
+    @ApiStatus.Experimental
+    public boolean isSubsetsEnabled() {
+        return experimental.isSubsetsEnabled;
+    }
+    
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD})
     @interface DontApplyFieldName {}
@@ -418,5 +428,10 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     public static class Filtering {
         @UseFilteringScreen private List<EntryStack> filteredStacks = new ArrayList<>();
+    }
+    
+    @ApiStatus.Experimental
+    public static class Experimental {
+        private boolean isSubsetsEnabled = false;
     }
 }
