@@ -38,7 +38,8 @@
     "fabricloader": "*",
     "cloth": ">=2-",
     "cloth-basic-math": "*",
-    "cloth-config2": ">=3-"
+    "cloth-config2": ">=3-",
+    "minecraft": "~1.16-Snapshot.20.14.a"
   },
   "mixins": [
     "mixin.roughlyenoughitems.json",

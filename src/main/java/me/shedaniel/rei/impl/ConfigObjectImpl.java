@@ -342,10 +342,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD})
-    @interface UseEnumSelectorInstead {}
-    
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.FIELD})
     @interface UseSpecialRecipeTypeScreen {}
     
     @Retention(RetentionPolicy.RUNTIME)
@@ -379,15 +375,16 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     public static class Appearance {
         @UseSpecialRecipeTypeScreen private RecipeScreenType recipeScreenType = RecipeScreenType.UNSET;
         @Comment("Declares the appearance of REI windows.") private boolean darkTheme = false;
-        @Comment("The ordering of the items on the item panel.") @UseEnumSelectorInstead
+        @Comment("The ordering of the items on the item panel.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
         private ItemListOrderingConfig itemListOrdering = ItemListOrderingConfig.REGISTRY_ASCENDING;
-        @Comment("Declares the position of the search field.") @UseEnumSelectorInstead
+        @Comment("Declares the position of the search field.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
         private SearchFieldLocation searchFieldLocation = SearchFieldLocation.CENTER;
         @Comment("Declares the position of the item list panel.") private boolean mirrorItemPanel = false;
         @Comment("Declares the maximum amount of recipes displayed in a page if possible.") @ConfigEntry.BoundedDiscrete(min = 2, max = 99)
         private int maxRecipePerPage = 3;
         private boolean clickableRecipeArrows = true;
-        @Comment("Declares the appearance of recipe's border.") @UseEnumSelectorInstead private RecipeBorderType recipeBorder = RecipeBorderType.DEFAULT;
+        @Comment("Declares the appearance of recipe's border.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+        private RecipeBorderType recipeBorder = RecipeBorderType.DEFAULT;
         @Comment("Declares whether REI should append mod names to item stacks.") private boolean appendModNames = true;
         @Comment("Declares how the scrollbar in villager screen should act.") private boolean villagerScreenPermanentScrollBar = false;
         @Comment("Declares whether entry list widget is scrolled.") private boolean scrollingEntryListWidget = false;

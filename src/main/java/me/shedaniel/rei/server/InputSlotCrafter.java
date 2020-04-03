@@ -36,6 +36,7 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
+
 import java.util.*;
 
 public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<Integer> {
@@ -96,12 +97,12 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
     protected void fillInputSlot(Slot slot_1, ItemStack itemStack_1) {
         int int_1 = this.inventory.method_7371(itemStack_1);
         if (int_1 != -1) {
-            ItemStack itemStack_2 = this.inventory.getInvStack(int_1).copy();
+            ItemStack itemStack_2 = this.inventory.getStack(int_1).copy();
             if (!itemStack_2.isEmpty()) {
                 if (itemStack_2.getCount() > 1) {
-                    this.inventory.takeInvStack(int_1, 1);
+                    this.inventory.removeStack(int_1, 1);
                 } else {
-                    this.inventory.removeInvStack(int_1);
+                    this.inventory.removeStack(int_1);
                 }
                 
                 itemStack_2.setCount(1);
