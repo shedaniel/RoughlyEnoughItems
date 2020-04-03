@@ -277,11 +277,11 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
             BakedModel model = getModelFromStack(stack);
             boolean bl = !IS_SIDE_LIT.test(model);
             if (bl)
-                GlStateManager.method_24221();
+                GlStateManager.setupGuiFlatDiffuseLighting();
             MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformation.Mode.GUI, false, MATRICES, immediate, 15728880, OverlayTexture.DEFAULT_UV, model);
             immediate.draw();
             if (bl)
-                GlStateManager.method_24222();
+                GlStateManager.setupGui3dDiffuseLighting();
             MATRICES.pop();
             ((ItemStackHook) (Object) stack).rei_setRenderEnchantmentGlint(false);
         }

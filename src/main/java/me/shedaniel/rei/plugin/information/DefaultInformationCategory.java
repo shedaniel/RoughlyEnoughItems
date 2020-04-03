@@ -47,9 +47,9 @@ import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.Texts;
-import net.minecraft.client.util.math.Matrix4f;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Matrix4f;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -166,14 +166,14 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
             }
             return false;
         }
-    
+        
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             if (scrolling.updateDraggingState(mouseX, mouseY, button))
                 return true;
             return super.mouseClicked(mouseX, mouseY, button);
         }
-    
+        
         @Override
         public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
             if (scrolling.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))

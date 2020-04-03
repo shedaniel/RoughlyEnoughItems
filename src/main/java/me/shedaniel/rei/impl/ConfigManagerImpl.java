@@ -97,8 +97,6 @@ public class ConfigManagerImpl implements ConfigManager {
             return it instanceof String ? EntryStack.readFromJson(gson.fromJson((String) it, JsonElement.class)) : null;
         }).build()));
         GuiRegistry guiRegistry = AutoConfig.getGuiRegistry(ConfigObjectImpl.class);
-        //noinspection rawtypes
-        guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> Collections.singletonList(ConfigEntryBuilder.create().startEnumSelector(i13n, (Class) field.getType(), getUnsafely(field, config, null)).setDefaultValue(() -> getUnsafely(field, defaults)).setSaveConsumer(newValue -> setUnsafely(field, config, newValue)).build()), field -> field.getType().isEnum(), ConfigObjectImpl.UseEnumSelectorInstead.class);
         guiRegistry.registerPredicateProvider((i13n, field, config, defaults, guiProvider) -> {
             if (field.isAnnotationPresent(ConfigEntry.Gui.Excluded.class))
                 return Collections.emptyList();
