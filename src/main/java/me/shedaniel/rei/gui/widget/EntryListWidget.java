@@ -640,7 +640,7 @@ public class EntryListWidget extends WidgetWithBounds {
         long ended = System.nanoTime();
         long time = ended - started;
         if (ConfigObject.getInstance().doDebugSearchTimeRequired())
-            RoughlyEnoughItemsCore.LOGGER.info("[REI] Search Used: %.2fms", time * 1e-6);
+            RoughlyEnoughItemsCore.LOGGER.info("Search Used: %.2fms", time * 1e-6);
         updateEntriesPosition();
     }
     

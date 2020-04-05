@@ -101,7 +101,7 @@ public class EntryRegistryImpl implements EntryRegistry {
                 preFilteredList.add(stack);
         }
         long time = System.currentTimeMillis() - started;
-        RoughlyEnoughItemsCore.LOGGER.info("[REI] Refiltered %d entries in %dms.", filteredStacks.size(), time);
+        RoughlyEnoughItemsCore.LOGGER.info("Refiltered %d entries in %dms.", filteredStacks.size(), time);
     }
     
     public void reset() {

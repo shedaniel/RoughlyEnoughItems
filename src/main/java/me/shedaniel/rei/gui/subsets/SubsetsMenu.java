@@ -166,7 +166,7 @@ public class SubsetsMenu extends WidgetWithBounds {
                 } else {
                     String translationKey = "subsets.rei." + entry.getKey().replace(':', '.');
                     if (!I18n.hasTranslation(translationKey))
-                        RoughlyEnoughItemsCore.LOGGER.warn("[REI] Subsets menu " + translationKey + " does not have a translation");
+                        RoughlyEnoughItemsCore.LOGGER.warn("Subsets menu " + translationKey + " does not have a translation");
                     entries.add(new SubMenuEntry(I18n.translate(translationKey), buildEntries(entryMap)));
                 }
             }
