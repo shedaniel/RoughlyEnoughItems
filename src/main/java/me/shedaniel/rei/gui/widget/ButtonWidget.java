@@ -27,6 +27,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.api.Point;
 import me.shedaniel.math.api.Rectangle;
 import me.shedaniel.rei.impl.ScreenHelper;
+import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.sound.SoundEvents;
@@ -87,21 +88,22 @@ public abstract class ButtonWidget extends WidgetWithBounds {
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(770, 771, 1, 0);
         RenderSystem.blendFunc(770, 771);
-        //Four Corners
-        blit(x, y, getBlitOffset(), 0, textureOffset * 80, 4, 4, 512, 256);
-        blit(x + width - 4, y, getBlitOffset(), 252, textureOffset * 80, 4, 4, 512, 256);
-        blit(x, y + height - 4, getBlitOffset(), 0, textureOffset * 80 + 76, 4, 4, 512, 256);
-        blit(x + width - 4, y + height - 4, getBlitOffset(), 252, textureOffset * 80 + 76, 4, 4, 512, 256);
-        
-        //Sides
-        blit(x + 4, y, getBlitOffset(), 4, textureOffset * 80, MathHelper.ceil((width - 8) / 2f), 4, 512, 256);
-        blit(x + 4, y + height - 4, getBlitOffset(), 4, textureOffset * 80 + 76, MathHelper.ceil((width - 8) / 2f), 4, 512, 256);
-        blit(x + 4 + MathHelper.ceil((width - 8) / 2f), y + height - 4, getBlitOffset(), 252 - MathHelper.floor((width - 8) / 2f), textureOffset * 80 + 76, MathHelper.floor((width - 8) / 2f), 4, 512, 256);
-        blit(x + 4 + MathHelper.ceil((width - 8) / 2f), y, getBlitOffset(), 252 - MathHelper.floor((width - 8) / 2f), textureOffset * 80, MathHelper.floor((width - 8) / 2f), 4, 512, 256);
-        for (int i = y + 4; i < y + height - 4; i += 76) {
-            blit(x, i, getBlitOffset(), 0, 4 + textureOffset * 80, MathHelper.ceil(width / 2f), MathHelper.clamp(y + height - 4 - i, 0, 76), 512, 256);
-            blit(x + MathHelper.ceil(width / 2f), i, getBlitOffset(), 256 - MathHelper.floor(width / 2f), 4 + textureOffset * 80, MathHelper.floor(width / 2f), MathHelper.clamp(y + height - 4 - i, 0, 76), 512, 256);
-        }
+        // 9 Patch Texture
+    
+        // Four Corners
+        blit(x, y, getZ(), 0, textureOffset * 80, 8, 8, 512, 256);
+        blit(x + width - 8, y, getZ(), 248, textureOffset * 80, 8, 8, 512, 256);
+        blit(x, y + height - 8, getZ(), 0, textureOffset * 80 + 72, 8, 8, 512, 256);
+        blit(x + width - 8, y + height - 8, getZ(), 248, textureOffset * 80 + 72, 8, 8, 512, 256);
+    
+        // Sides
+        DrawableHelper.innerBlit(x + 8, x + width - 8, y, y + 8, getZ(), (8) / 256f, (248) / 256f, (textureOffset * 80) / 512f, (textureOffset * 80 + 8) / 512f);
+        DrawableHelper.innerBlit(x + 8, x + width - 8, y + height - 8, y + height, getZ(), (8) / 256f, (248) / 256f, (textureOffset * 80 + 72) / 512f, (textureOffset * 80 + 80) / 512f);
+        DrawableHelper.innerBlit(x, x + 8, y + 8, y + height - 8, getZ(), (0) / 256f, (8) / 256f, (textureOffset * 80 + 8) / 512f, (textureOffset * 80 + 72) / 512f);
+        DrawableHelper.innerBlit(x + width - 8, x + width, y + 8, y + height - 8, getZ(), (248) / 256f, (256) / 256f, (textureOffset * 80 + 8) / 512f, (textureOffset * 80 + 72) / 512f);
+    
+        // Center
+        DrawableHelper.innerBlit(x + 8, x + width - 8, y + 8, y + height - 8, getZ(), (8) / 256f, (248) / 256f, (textureOffset * 80 + 8) / 512f, (textureOffset * 80 + 72) / 512f);
     }
     
     @Override

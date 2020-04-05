@@ -111,7 +111,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     @Deprecated
     public static REIPluginEntry registerPlugin(REIPluginEntry plugin) {
         plugins.put(plugin.getPluginIdentifier(), plugin);
-        RoughlyEnoughItemsCore.LOGGER.debug("[REI] Registered plugin %s from %s", plugin.getPluginIdentifier().toString(), plugin.getClass().getSimpleName());
+        RoughlyEnoughItemsCore.LOGGER.debug("Registered plugin %s from %s", plugin.getPluginIdentifier().toString(), plugin.getClass().getSimpleName());
         return plugin;
     }
     
@@ -151,7 +151,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     public static void syncRecipes(long[] lastSync) {
         if (lastSync != null) {
             if (lastSync[0] > 0 && System.currentTimeMillis() - lastSync[0] <= 5000) {
-                RoughlyEnoughItemsCore.LOGGER.warn("[REI] Suppressing Sync Recipes!");
+                RoughlyEnoughItemsCore.LOGGER.warn("Suppressing Sync Recipes!");
                 return;
             }
             lastSync[0] = System.currentTimeMillis();
@@ -178,7 +178,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         for (ModContainer modContainer : FabricLoader.getInstance().getAllMods()) {
             //noinspection deprecation
             if (modContainer.getMetadata().containsCustomElement("roughlyenoughitems:plugins"))
-                RoughlyEnoughItemsCore.LOGGER.error("[REI] REI plugin from " + modContainer.getMetadata().getId() + " is not loaded because it is too old!");
+                RoughlyEnoughItemsCore.LOGGER.error("REI plugin from " + modContainer.getMetadata().getId() + " is not loaded because it is too old!");
         }
         
         ClientSidePacketRegistry.INSTANCE.register(RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, (packetContext, packetByteBuf) -> {
@@ -225,7 +225,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                 registerPlugin(reiPlugin);
             } catch (Exception e) {
                 e.printStackTrace();
-                RoughlyEnoughItemsCore.LOGGER.error("[REI] Can't load REI plugins from %s: %s", reiPlugin.getClass(), e.getLocalizedMessage());
+                RoughlyEnoughItemsCore.LOGGER.error("Can't load REI plugins from %s: %s", reiPlugin.getClass(), e.getLocalizedMessage());
             }
         }
         for (REIPluginV0 reiPlugin : FabricLoader.getInstance().getEntrypoints("rei_plugins_v0", REIPluginV0.class)) {
@@ -233,7 +233,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                 registerPlugin(reiPlugin);
             } catch (Exception e) {
                 e.printStackTrace();
-                RoughlyEnoughItemsCore.LOGGER.error("[REI] Can't load REI plugins from %s: %s", reiPlugin.getClass(), e.getLocalizedMessage());
+                RoughlyEnoughItemsCore.LOGGER.error("Can't load REI plugins from %s: %s", reiPlugin.getClass(), e.getLocalizedMessage());
             }
         }
         

@@ -29,7 +29,9 @@ import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.gui.config.RecipeBorderType;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.impl.ScreenHelper;
+import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collections;
 import java.util.List;
@@ -89,30 +91,30 @@ public class PanelWidget extends WidgetWithBounds {
         int xTextureOffset = getXTextureOffset();
         int yTextureOffset = getYTextureOffset();
         
-        //Four Corners
-        this.blit(x, y, 106 + xTextureOffset, 124 + yTextureOffset, 4, 4);
-        this.blit(x + width - 4, y, 252 + xTextureOffset, 124 + yTextureOffset, 4, 4);
-        this.blit(x, y + height - 4, 106 + xTextureOffset, 186 + yTextureOffset, 4, 4);
-        this.blit(x + width - 4, y + height - 4, 252 + xTextureOffset, 186 + yTextureOffset, 4, 4);
+        // 9 Patch Texture
         
-        //Sides
-        for (int xx = 4; xx < width - 4; xx += 128) {
-            int thisWidth = Math.min(128, width - 4 - xx);
-            this.blit(x + xx, y, 110 + xTextureOffset, 124 + yTextureOffset, thisWidth, 4);
-            this.blit(x + xx, y + height - 4, 110 + xTextureOffset, 186 + yTextureOffset, thisWidth, 4);
-        }
-        for (int yy = 4; yy < height - 4; yy += 50) {
-            int thisHeight = Math.min(50, height - 4 - yy);
-            this.blit(x, y + yy, 106 + xTextureOffset, 128 + yTextureOffset, 4, thisHeight);
-            this.blit(x + width - 4, y + yy, 252 + xTextureOffset, 128 + yTextureOffset, 4, thisHeight);
-        }
-        fillGradient(x + 4, y + 4, x + width - 4, y + height - 4, getInnerColor(), getInnerColor());
+        // Four Corners
+        this.blit(x, y, 106 + xTextureOffset, 124 + yTextureOffset, 8, 8);
+        this.blit(x + width - 8, y, 248 + xTextureOffset, 124 + yTextureOffset, 8, 8);
+        this.blit(x, y + height - 8, 106 + xTextureOffset, 182 + yTextureOffset, 8, 8);
+        this.blit(x + width - 8, y + height - 8, 248 + xTextureOffset, 182 + yTextureOffset, 8, 8);
+        
+        // Sides
+        DrawableHelper.innerBlit(x + 8, x + width - 8, y, y + 8, getZ(), (114 + xTextureOffset) / 256f, (248 + xTextureOffset) / 256f, (124 + yTextureOffset) / 256f, (132 + yTextureOffset) / 256f);
+        DrawableHelper.innerBlit(x + 8, x + width - 8, y + height - 8, y + height, getZ(), (114 + xTextureOffset) / 256f, (248 + xTextureOffset) / 256f, (182 + yTextureOffset) / 256f, (190 + yTextureOffset) / 256f);
+        DrawableHelper.innerBlit(x, x + 8, y + 8, y + height - 8, getZ(), (106 + xTextureOffset) / 256f, (114 + xTextureOffset) / 256f, (132 + yTextureOffset) / 256f, (182 + yTextureOffset) / 256f);
+        DrawableHelper.innerBlit(x + width - 8, x + width, y + 8, y + height - 8, getZ(), (248 + xTextureOffset) / 256f, (256 + xTextureOffset) / 256f, (132 + yTextureOffset) / 256f, (182 + yTextureOffset) / 256f);
+        
+        // Center
+        DrawableHelper.innerBlit(x + 8, x + width - 8, y + 8, y + height - 8, getZ(), (114 + xTextureOffset) / 256f, (248 + xTextureOffset) / 256f, (132 + yTextureOffset) / 256f, (182 + yTextureOffset) / 256f);
     }
     
     protected boolean isRendering() {
         return ConfigObject.getInstance().getRecipeScreenType() != RecipeScreenType.VILLAGER;
     }
     
+    @ApiStatus.ScheduledForRemoval
+    @Deprecated
     protected int getInnerColor() {
         return ScreenHelper.isDarkModeEnabled() ? -13750738 : -3750202;
     }
