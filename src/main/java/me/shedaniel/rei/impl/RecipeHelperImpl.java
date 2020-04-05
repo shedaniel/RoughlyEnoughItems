@@ -290,7 +290,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         ((DisplayHelperImpl) DisplayHelper.getInstance()).setBaseBoundsHandler(baseBoundsHandler);
         List<REIPluginEntry> plugins = RoughlyEnoughItemsCore.getPlugins();
         plugins.sort(Comparator.comparingInt(REIPluginEntry::getPriority).reversed());
-        RoughlyEnoughItemsCore.LOGGER.info("[REI] Loading %d plugins: %s", plugins.size(), plugins.stream().map(REIPluginEntry::getPluginIdentifier).map(Identifier::toString).collect(Collectors.joining(", ")));
+        RoughlyEnoughItemsCore.LOGGER.info("Loading %d plugins: %s", plugins.size(), plugins.stream().map(REIPluginEntry::getPluginIdentifier).map(Identifier::toString).collect(Collectors.joining(", ")));
         Collections.reverse(plugins);
         ((EntryRegistryImpl) EntryRegistry.getInstance()).reset();
         List<REIPluginV0> reiPluginV0s = new ArrayList<>();
@@ -301,7 +301,7 @@ public class RecipeHelperImpl implements RecipeHelper {
                     reiPluginV0s.add((REIPluginV0) plugin);
                 }
             } catch (Throwable e) {
-                RoughlyEnoughItemsCore.LOGGER.error("[REI] " + plugin.getPluginIdentifier().toString() + " plugin failed to pre register!", e);
+                RoughlyEnoughItemsCore.LOGGER.error(plugin.getPluginIdentifier().toString() + " plugin failed to pre register!", e);
             }
         }
         for (REIPluginV0 plugin : reiPluginV0s) {
@@ -313,7 +313,7 @@ public class RecipeHelperImpl implements RecipeHelper {
                 plugin.registerRecipeDisplays(this);
                 plugin.registerOthers(this);
             } catch (Throwable e) {
-                RoughlyEnoughItemsCore.LOGGER.error("[REI] " + identifier.toString() + " plugin failed to load!", e);
+                RoughlyEnoughItemsCore.LOGGER.error(identifier.toString() + " plugin failed to load!", e);
             }
         }
         
@@ -322,7 +322,7 @@ public class RecipeHelperImpl implements RecipeHelper {
             try {
                 plugin.postRegister();
             } catch (Throwable e) {
-                RoughlyEnoughItemsCore.LOGGER.error("[REI] " + identifier.toString() + " plugin failed to post register!", e);
+                RoughlyEnoughItemsCore.LOGGER.error(identifier.toString() + " plugin failed to post register!", e);
             }
         }
         if (!recipeFunctions.isEmpty()) {
@@ -334,7 +334,7 @@ public class RecipeHelperImpl implements RecipeHelper {
                         registerDisplay(recipeFunction.category, (RecipeDisplay) recipeFunction.mappingFunction.apply(recipe), 0);
                     }
                 } catch (Exception e) {
-                    RoughlyEnoughItemsCore.LOGGER.error("[REI] Failed to add recipes!", e);
+                    RoughlyEnoughItemsCore.LOGGER.error("Failed to add recipes!", e);
                 }
             }
         }
@@ -382,7 +382,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         
         displayVisibilityHandlers.sort(VISIBILITY_HANDLER_COMPARATOR);
         long usedTime = System.currentTimeMillis() - startTime;
-        RoughlyEnoughItemsCore.LOGGER.info("[REI] Registered %d stack entries, %d recipes displays, %d exclusion zones suppliers, %d overlay decider, %d visibility handlers and %d categories (%s) in %d ms.", EntryRegistry.getInstance().getStacksList().size(), recipeCount[0], BaseBoundsHandler.getInstance().supplierSize(), DisplayHelper.getInstance().getAllOverlayDeciders().size(), getDisplayVisibilityHandlers().size(), categories.size(), categories.keySet().stream().map(RecipeCategory::getCategoryName).collect(Collectors.joining(", ")), usedTime);
+        RoughlyEnoughItemsCore.LOGGER.info("Registered %d stack entries, %d recipes displays, %d exclusion zones suppliers, %d overlay decider, %d visibility handlers and %d categories (%s) in %d ms.", EntryRegistry.getInstance().getStacksList().size(), recipeCount[0], BaseBoundsHandler.getInstance().supplierSize(), DisplayHelper.getInstance().getAllOverlayDeciders().size(), getDisplayVisibilityHandlers().size(), categories.size(), categories.keySet().stream().map(RecipeCategory::getCategoryName).collect(Collectors.joining(", ")), usedTime);
     }
     
     @Override
@@ -458,7 +458,7 @@ public class RecipeHelperImpl implements RecipeHelper {
                     return visibility == ActionResult.SUCCESS;
             }
         } catch (Throwable throwable) {
-            RoughlyEnoughItemsCore.LOGGER.error("[REI] Failed to check if the recipe is visible!", throwable);
+            RoughlyEnoughItemsCore.LOGGER.error("Failed to check if the recipe is visible!", throwable);
         }
         return true;
     }

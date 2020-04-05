@@ -182,7 +182,7 @@ public final class Widgets {
     
     @NotNull
     public static Panel createSlotBase(@NotNull Rectangle rectangle) {
-        return new PanelWidget(rectangle).yTextureOffset(-66).rendering(Widgets::shouldSlotBaseRender).innerColor(-7631989, -13619152);
+        return new PanelWidget(rectangle).yTextureOffset(-66).rendering(Widgets::shouldSlotBaseRender);
     }
     
     private static boolean shouldSlotBaseRender(@NotNull Panel panel) {

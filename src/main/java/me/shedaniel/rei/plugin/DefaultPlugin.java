@@ -275,7 +275,7 @@ public class DefaultPlugin implements REIPluginV0 {
             }
         }
         time = System.currentTimeMillis() - time;
-        RoughlyEnoughItemsCore.LOGGER.info("[REI] Applied Check Tags for potion in %dms.", time);
+        RoughlyEnoughItemsCore.LOGGER.info("Applied Check Tags for potion in %dms.", time);
     }
     
     private void applyPotionTransformer(EntryStack stack) {

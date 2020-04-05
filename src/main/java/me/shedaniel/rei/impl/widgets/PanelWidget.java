@@ -30,8 +30,10 @@ import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.widgets.Panel;
 import me.shedaniel.rei.gui.config.RecipeBorderType;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
+import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.Element;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -46,7 +48,6 @@ public final class PanelWidget extends Panel {
     private static final PanelWidget TEMP = new PanelWidget(new Rectangle());
     private Rectangle bounds;
     private int color = -1;
-    private int innerColor = REIHelper.getInstance().isDarkThemeEnabled() ? -13750738 : -3750202;
     private int xTextureOffset = 0;
     private int yTextureOffset = RecipeBorderType.DEFAULT.getYOffset();
     @NotNull
@@ -66,15 +67,17 @@ public final class PanelWidget extends Panel {
         TEMP.render(0, 0, 0);
     }
     
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     @Override
     public int getInnerColor() {
-        return innerColor;
+        return REIHelper.getInstance().isDarkThemeEnabled() ? -13750738 : -3750202;
     }
     
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     @Override
-    public void setInnerColor(int innerColor) {
-        this.innerColor = innerColor;
-    }
+    public void setInnerColor(int innerColor) {}
     
     @Override
     public int getXTextureOffset() {
@@ -136,24 +139,22 @@ public final class PanelWidget extends Panel {
         int xTextureOffset = getXTextureOffset();
         int yTextureOffset = getYTextureOffset();
         
-        //Four Corners
-        this.drawTexture(x, y, 106 + xTextureOffset, 124 + yTextureOffset, 4, 4);
-        this.drawTexture(x + width - 4, y, 252 + xTextureOffset, 124 + yTextureOffset, 4, 4);
-        this.drawTexture(x, y + height - 4, 106 + xTextureOffset, 186 + yTextureOffset, 4, 4);
-        this.drawTexture(x + width - 4, y + height - 4, 252 + xTextureOffset, 186 + yTextureOffset, 4, 4);
+        // 9 Patch Texture
         
-        //Sides
-        for (int xx = 4; xx < width - 4; xx += 128) {
-            int thisWidth = Math.min(128, width - 4 - xx);
-            this.drawTexture(x + xx, y, 110 + xTextureOffset, 124 + yTextureOffset, thisWidth, 4);
-            this.drawTexture(x + xx, y + height - 4, 110 + xTextureOffset, 186 + yTextureOffset, thisWidth, 4);
-        }
-        for (int yy = 4; yy < height - 4; yy += 50) {
-            int thisHeight = Math.min(50, height - 4 - yy);
-            this.drawTexture(x, y + yy, 106 + xTextureOffset, 128 + yTextureOffset, 4, thisHeight);
-            this.drawTexture(x + width - 4, y + yy, 252 + xTextureOffset, 128 + yTextureOffset, 4, thisHeight);
-        }
-        fillGradient(x + 4, y + 4, x + width - 4, y + height - 4, getInnerColor(), getInnerColor());
+        // Four Corners
+        this.drawTexture(x, y, 106 + xTextureOffset, 124 + yTextureOffset, 8, 8);
+        this.drawTexture(x + width - 8, y, 248 + xTextureOffset, 124 + yTextureOffset, 8, 8);
+        this.drawTexture(x, y + height - 8, 106 + xTextureOffset, 182 + yTextureOffset, 8, 8);
+        this.drawTexture(x + width - 8, y + height - 8, 248 + xTextureOffset, 182 + yTextureOffset, 8, 8);
+        
+        // Sides
+        DrawableHelper.drawTexturedQuad(x + 8, x + width - 8, y, y + 8, getZ(), (114 + xTextureOffset) / 256f, (248 + xTextureOffset) / 256f, (124 + yTextureOffset) / 256f, (132 + yTextureOffset) / 256f);
+        DrawableHelper.drawTexturedQuad(x + 8, x + width - 8, y + height - 8, y + height, getZ(), (114 + xTextureOffset) / 256f, (248 + xTextureOffset) / 256f, (182 + yTextureOffset) / 256f, (190 + yTextureOffset) / 256f);
+        DrawableHelper.drawTexturedQuad(x, x + 8, y + 8, y + height - 8, getZ(), (106 + xTextureOffset) / 256f, (114 + xTextureOffset) / 256f, (132 + yTextureOffset) / 256f, (182 + yTextureOffset) / 256f);
+        DrawableHelper.drawTexturedQuad(x + width - 8, x + width, y + 8, y + height - 8, getZ(), (248 + xTextureOffset) / 256f, (256 + xTextureOffset) / 256f, (132 + yTextureOffset) / 256f, (182 + yTextureOffset) / 256f);
+        
+        // Center
+        DrawableHelper.drawTexturedQuad(x + 8, x + width - 8, y + 8, y + height - 8, getZ(), (114 + xTextureOffset) / 256f, (248 + xTextureOffset) / 256f, (132 + yTextureOffset) / 256f, (182 + yTextureOffset) / 256f);
     }
     
     @Override

@@ -29,12 +29,12 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.widgets.Button;
 import me.shedaniel.rei.api.widgets.Tooltip;
+import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -288,20 +288,22 @@ public class ButtonWidget extends Button {
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(770, 771, 1, 0);
         RenderSystem.blendFunc(770, 771);
-        //Four Corners
-        drawTexture(x, y, getZOffset(), 0, textureOffset * 80, 4, 4, 512, 256);
-        drawTexture(x + width - 4, y, getZOffset(), 252, textureOffset * 80, 4, 4, 512, 256);
-        drawTexture(x, y + height - 4, getZOffset(), 0, textureOffset * 80 + 76, 4, 4, 512, 256);
-        drawTexture(x + width - 4, y + height - 4, getZOffset(), 252, textureOffset * 80 + 76, 4, 4, 512, 256);
         
-        //Sides
-        drawTexture(x + 4, y, getZOffset(), 4, textureOffset * 80, MathHelper.ceil((width - 8) / 2f), 4, 512, 256);
-        drawTexture(x + 4, y + height - 4, getZOffset(), 4, textureOffset * 80 + 76, MathHelper.ceil((width - 8) / 2f), 4, 512, 256);
-        drawTexture(x + 4 + MathHelper.ceil((width - 8) / 2f), y + height - 4, getZOffset(), 252 - MathHelper.floor((width - 8) / 2f), textureOffset * 80 + 76, MathHelper.floor((width - 8) / 2f), 4, 512, 256);
-        drawTexture(x + 4 + MathHelper.ceil((width - 8) / 2f), y, getZOffset(), 252 - MathHelper.floor((width - 8) / 2f), textureOffset * 80, MathHelper.floor((width - 8) / 2f), 4, 512, 256);
-        for (int i = y + 4; i < y + height - 4; i += 76) {
-            drawTexture(x, i, getZOffset(), 0, 4 + textureOffset * 80, MathHelper.ceil(width / 2f), MathHelper.clamp(y + height - 4 - i, 0, 76), 512, 256);
-            drawTexture(x + MathHelper.ceil(width / 2f), i, getZOffset(), 256 - MathHelper.floor(width / 2f), 4 + textureOffset * 80, MathHelper.floor(width / 2f), MathHelper.clamp(y + height - 4 - i, 0, 76), 512, 256);
-        }
+        // 9 Patch Texture
+        
+        // Four Corners
+        drawTexture(x, y, getZOffset(), 0, textureOffset * 80, 8, 8, 512, 256);
+        drawTexture(x + width - 8, y, getZOffset(), 248, textureOffset * 80, 8, 8, 512, 256);
+        drawTexture(x, y + height - 8, getZOffset(), 0, textureOffset * 80 + 72, 8, 8, 512, 256);
+        drawTexture(x + width - 8, y + height - 8, getZOffset(), 248, textureOffset * 80 + 72, 8, 8, 512, 256);
+        
+        // Sides
+        DrawableHelper.drawTexturedQuad(x + 8, x + width - 8, y, y + 8, getZ(), (8) / 256f, (248) / 256f, (textureOffset * 80) / 512f, (textureOffset * 80 + 8) / 512f);
+        DrawableHelper.drawTexturedQuad(x + 8, x + width - 8, y + height - 8, y + height, getZ(), (8) / 256f, (248) / 256f, (textureOffset * 80 + 72) / 512f, (textureOffset * 80 + 80) / 512f);
+        DrawableHelper.drawTexturedQuad(x, x + 8, y + 8, y + height - 8, getZ(), (0) / 256f, (8) / 256f, (textureOffset * 80 + 8) / 512f, (textureOffset * 80 + 72) / 512f);
+        DrawableHelper.drawTexturedQuad(x + width - 8, x + width, y + 8, y + height - 8, getZ(), (248) / 256f, (256) / 256f, (textureOffset * 80 + 8) / 512f, (textureOffset * 80 + 72) / 512f);
+        
+        // Center
+        DrawableHelper.drawTexturedQuad(x + 8, x + width - 8, y + 8, y + height - 8, getZ(), (8) / 256f, (248) / 256f, (textureOffset * 80 + 8) / 512f, (textureOffset * 80 + 72) / 512f);
     }
 }
