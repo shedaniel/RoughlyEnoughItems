@@ -27,14 +27,18 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import me.shedaniel.cloth.hooks.ClothClientHooks;
+import me.shedaniel.math.api.Executor;
+import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
+import me.shedaniel.rei.gui.FailedToLoadScreen;
 import me.shedaniel.rei.gui.OverlaySearchField;
 import me.shedaniel.rei.gui.RecipeScreen;
 import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.event.client.ClientTickCallback;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
@@ -150,13 +154,22 @@ public class ScreenHelper implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ClothClientHooks.SCREEN_INIT_PRE.register((client, screen, screenHooks) -> {
-            if (lastContainerScreen != screen && screen instanceof AbstractContainerScreen)
+            if (!RoughlyEnoughItemsState.getFailedToLoad().isEmpty() && !(screen instanceof FailedToLoadScreen)) {
+                client.openScreen(FailedToLoadScreen.INSTANCE.get());
+            } else if (lastContainerScreen != screen && screen instanceof AbstractContainerScreen)
                 lastContainerScreen = (AbstractContainerScreen<?>) screen;
             return ActionResult.PASS;
         });
-        ClientTickCallback.EVENT.register(minecraftClient -> {
-            if (isOverlayVisible() && getSearchField() != null)
-                getSearchField().tick();
+        boolean loaded = FabricLoader.getInstance().isModLoaded("fabric-events-lifecycle-v0");
+        if (!loaded) {
+            RoughlyEnoughItemsState.failedToLoad("Fabric API is not installed!", "https://www.curseforge.com/minecraft/mc-mods/fabric-api/files/all");
+            return;
+        }
+        Executor.run(() -> () -> {
+            ClientTickCallback.EVENT.register(minecraftClient -> {
+                if (isOverlayVisible() && getSearchField() != null)
+                    getSearchField().tick();
+            });
         });
     }
     
