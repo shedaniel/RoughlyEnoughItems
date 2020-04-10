@@ -26,6 +26,7 @@ package me.shedaniel.rei;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import me.shedaniel.cloth.hooks.ClothClientHooks;
+import me.shedaniel.math.api.Executor;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
@@ -180,39 +181,46 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                 RoughlyEnoughItemsCore.LOGGER.error("REI plugin from " + modContainer.getMetadata().getId() + " is not loaded because it is too old!");
         }
         
-        ClientSidePacketRegistry.INSTANCE.register(RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, (packetContext, packetByteBuf) -> {
-            ItemStack stack = packetByteBuf.readItemStack();
-            String player = packetByteBuf.readString(32767);
-            packetContext.getPlayer().addMessage(new LiteralText(I18n.translate("text.rei.cheat_items").replaceAll("\\{item_name}", SearchArgument.tryGetItemStackName(stack.copy())).replaceAll("\\{item_count}", stack.copy().getCount() + "").replaceAll("\\{player_name}", player)), false);
-        });
-        ClientSidePacketRegistry.INSTANCE.register(RoughlyEnoughItemsNetwork.NOT_ENOUGH_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
-            Screen currentScreen = MinecraftClient.getInstance().currentScreen;
-            if (currentScreen instanceof CraftingScreen) {
-                RecipeBookWidget recipeBookGui = ((RecipeBookProvider) currentScreen).getRecipeBookWidget();
-                RecipeBookGhostSlots ghostSlots = ((RecipeBookGuiHooks) recipeBookGui).rei_getGhostSlots();
-                ghostSlots.reset();
-                
-                List<List<ItemStack>> input = Lists.newArrayList();
-                int mapSize = packetByteBuf.readInt();
-                for (int i = 0; i < mapSize; i++) {
-                    List<ItemStack> list = Lists.newArrayList();
-                    int count = packetByteBuf.readInt();
-                    for (int j = 0; j < count; j++) {
-                        list.add(packetByteBuf.readItemStack());
+        boolean networkingLoaded = FabricLoader.getInstance().isModLoaded("fabric-networking-v0");
+        if (!networkingLoaded) {
+            RoughlyEnoughItemsState.failedToLoad("Fabric API is not installed!", "https://www.curseforge.com/minecraft/mc-mods/fabric-api/files/all");
+            return;
+        }
+        Executor.run(() -> () -> {
+            ClientSidePacketRegistry.INSTANCE.register(RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, (packetContext, packetByteBuf) -> {
+                ItemStack stack = packetByteBuf.readItemStack();
+                String player = packetByteBuf.readString(32767);
+                packetContext.getPlayer().addMessage(new LiteralText(I18n.translate("text.rei.cheat_items").replaceAll("\\{item_name}", SearchArgument.tryGetItemStackName(stack.copy())).replaceAll("\\{item_count}", stack.copy().getCount() + "").replaceAll("\\{player_name}", player)), false);
+            });
+            ClientSidePacketRegistry.INSTANCE.register(RoughlyEnoughItemsNetwork.NOT_ENOUGH_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
+                Screen currentScreen = MinecraftClient.getInstance().currentScreen;
+                if (currentScreen instanceof CraftingScreen) {
+                    RecipeBookWidget recipeBookGui = ((RecipeBookProvider) currentScreen).getRecipeBookWidget();
+                    RecipeBookGhostSlots ghostSlots = ((RecipeBookGuiHooks) recipeBookGui).rei_getGhostSlots();
+                    ghostSlots.reset();
+                    
+                    List<List<ItemStack>> input = Lists.newArrayList();
+                    int mapSize = packetByteBuf.readInt();
+                    for (int i = 0; i < mapSize; i++) {
+                        List<ItemStack> list = Lists.newArrayList();
+                        int count = packetByteBuf.readInt();
+                        for (int j = 0; j < count; j++) {
+                            list.add(packetByteBuf.readItemStack());
+                        }
+                        input.add(list);
                     }
-                    input.add(list);
-                }
-                
-                ghostSlots.addSlot(Ingredient.ofItems(Items.STONE), 381203812, 12738291);
-                CraftingScreenHandler screenHandler = ((CraftingScreen) currentScreen).getScreenHandler();
-                for (int i = 0; i < input.size(); i++) {
-                    List<ItemStack> stacks = input.get(i);
-                    if (!stacks.isEmpty()) {
-                        Slot slot = screenHandler.getSlot(i + screenHandler.getCraftingResultSlotIndex() + 1);
-                        ghostSlots.addSlot(Ingredient.ofStacks(stacks.toArray(new ItemStack[0])), slot.x, slot.y);
+                    
+                    ghostSlots.addSlot(Ingredient.ofItems(Items.STONE), 381203812, 12738291);
+                    CraftingScreenHandler screenHandler = ((CraftingScreen) currentScreen).getScreenHandler();
+                    for (int i = 0; i < input.size(); i++) {
+                        List<ItemStack> stacks = input.get(i);
+                        if (!stacks.isEmpty()) {
+                            Slot slot = screenHandler.getSlot(i + screenHandler.getCraftingResultSlotIndex() + 1);
+                            ghostSlots.addSlot(Ingredient.ofStacks(stacks.toArray(new ItemStack[0])), slot.x, slot.y);
+                        }
                     }
                 }
-            }
+            });
         });
     }
     
