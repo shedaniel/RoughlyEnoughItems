@@ -194,15 +194,17 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
     @Override
     public void onInitializeClient() {
         ClothClientHooks.SCREEN_INIT_PRE.register((client, screen, screenHooks) -> {
-            if (!RoughlyEnoughItemsState.getFailedToLoad().isEmpty() && !(screen instanceof FailedToLoadScreen)) {
-                client.openScreen(FailedToLoadScreen.INSTANCE.get());
+            if ((!RoughlyEnoughItemsState.getErrors().isEmpty() || !RoughlyEnoughItemsState.getWarnings().isEmpty()) && !(screen instanceof FailedToLoadScreen)) {
+                FailedToLoadScreen failedToLoadScreen = FailedToLoadScreen.INSTANCE.get();
+                failedToLoadScreen.setParent(screen);
+                client.openScreen(failedToLoadScreen);
             } else if (lastHandledScreen != screen && screen instanceof HandledScreen)
                 lastHandledScreen = (HandledScreen<?>) screen;
             return ActionResult.PASS;
         });
         boolean loaded = FabricLoader.getInstance().isModLoaded("fabric-events-lifecycle-v0");
         if (!loaded) {
-            RoughlyEnoughItemsState.failedToLoad("Fabric API is not installed!", "https://www.curseforge.com/minecraft/mc-mods/fabric-api/files/all");
+            RoughlyEnoughItemsState.error("Fabric API is not installed!", "https://www.curseforge.com/minecraft/mc-mods/fabric-api/files/all");
             return;
         }
         Executor.run(() -> () -> {
