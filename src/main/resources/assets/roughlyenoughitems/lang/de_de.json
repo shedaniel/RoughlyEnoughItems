@@ -20,7 +20,7 @@
   "category.rei.smoking": "Räuchern",
   "category.rei.blasting": "Sprengen",
   "category.rei.campfire": "Lagerfeuer",
-  "category.rei.campfire.time": "§8%d Sekunden",
+  "category.rei.campfire.time": "%s Sek.",
   "category.rei.stone_cutting": "Stein schneiden",
   "category.rei.brewing": "Brauen",
   "category.rei.brewing.input": "Original Trank",
