@@ -64,6 +64,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -174,6 +177,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     public void onInitializeClient() {
         configManager = new ConfigManagerImpl();
         
+        detectFabricLoader();
         registerClothEvents();
         discoverPluginEntries();
         for (ModContainer modContainer : FabricLoader.getInstance().getAllMods()) {
@@ -184,7 +188,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         
         boolean networkingLoaded = FabricLoader.getInstance().isModLoaded("fabric-networking-v0");
         if (!networkingLoaded) {
-            RoughlyEnoughItemsState.failedToLoad("Fabric API is not installed!", "https://www.curseforge.com/minecraft/mc-mods/fabric-api/files/all");
+            RoughlyEnoughItemsState.error("Fabric API is not installed!", "https://www.curseforge.com/minecraft/mc-mods/fabric-api/files/all");
             return;
         }
         Executor.run(() -> () -> {
@@ -222,6 +226,34 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                     }
                 }
             });
+        });
+    }
+    
+    private void detectFabricLoader() {
+        Executor.run(() -> () -> {
+            try {
+                FabricLoader instance = FabricLoader.getInstance();
+                for (Field field : instance.getClass().getDeclaredFields()) {
+                    if (Logger.class.isAssignableFrom(field.getType())) {
+                        field.setAccessible(true);
+                        Logger logger = (Logger) field.get(instance);
+                        if (logger.getName().toLowerCase(Locale.ROOT).contains("subsystem")) {
+                            if (!new File(instance.getConfigDirectory(), "roughlyenoughitems/.ignoresubsystem").exists()) {
+                                RoughlyEnoughItemsState.warn("Subsystem is detected (probably though Aristois), please contact support from them if anything happens.");
+                                RoughlyEnoughItemsState.onContinue(() -> {
+                                    try {
+                                        new File(instance.getConfigDirectory(), "roughlyenoughitems").mkdirs();
+                                        new File(instance.getConfigDirectory(), "roughlyenoughitems/.ignoresubsystem").createNewFile();
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                });
+                            }
+                        }
+                    }
+                }
+            } catch (Throwable ignored) {
+            }
         });
     }
     
