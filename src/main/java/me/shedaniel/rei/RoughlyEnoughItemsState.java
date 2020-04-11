@@ -26,6 +26,8 @@ package me.shedaniel.rei;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
@@ -37,24 +39,74 @@ import java.util.Set;
 public class RoughlyEnoughItemsState {
     private RoughlyEnoughItemsState() {}
     
-    private static List<Pair<String, String>> failedToLoad = new ArrayList<>();
-    private static Set<String> failedToLoadSet = new LinkedHashSet<>();
+    public static final Logger LOGGER = LogManager.getFormatterLogger("REI");
     
-    public static void failedToLoad(String reason) {
+    private static List<Pair<String, String>> errors = new ArrayList<>();
+    private static List<Pair<String, String>> warnings = new ArrayList<>();
+    private static Set<String> errorSet = new LinkedHashSet<>();
+    private static Set<String> warningSet = new LinkedHashSet<>();
+    private static List<Runnable> continueCallbacks = new ArrayList<>();
+    
+    public static void error(String reason) {
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER || FabricLoader.getInstance().isDevelopmentEnvironment())
             throw new RuntimeException(reason);
-        if (RoughlyEnoughItemsState.failedToLoadSet.add(reason + " " + null))
-            RoughlyEnoughItemsState.failedToLoad.add(new Pair<>(reason, null));
+        if (RoughlyEnoughItemsState.errorSet.add(reason + " " + null)) {
+            RoughlyEnoughItemsState.errors.add(new Pair<>(reason, null));
+            LOGGER.error(reason);
+        }
     }
     
-    public static void failedToLoad(String reason, String link) {
+    public static void error(String reason, String link) {
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER || FabricLoader.getInstance().isDevelopmentEnvironment())
             throw new RuntimeException(reason + " " + link);
-        if (RoughlyEnoughItemsState.failedToLoadSet.add(reason + " " + link))
-            RoughlyEnoughItemsState.failedToLoad.add(new Pair<>(reason, link));
+        if (RoughlyEnoughItemsState.errorSet.add(reason + " " + link)) {
+            RoughlyEnoughItemsState.errors.add(new Pair<>(reason, link));
+            LOGGER.error(reason + " " + link);
+        }
     }
     
-    public static List<Pair<String, String>> getFailedToLoad() {
-        return failedToLoad;
+    public static void warn(String reason) {
+        if (RoughlyEnoughItemsState.warningSet.add(reason + " " + null)) {
+            RoughlyEnoughItemsState.warnings.add(new Pair<>(reason, null));
+            LOGGER.warn(reason);
+        }
+    }
+    
+    public static void warn(String reason, String link) {
+        if (RoughlyEnoughItemsState.warningSet.add(reason + " " + link)) {
+            RoughlyEnoughItemsState.warnings.add(new Pair<>(reason, link));
+            LOGGER.warn(reason + " " + link);
+        }
+    }
+    
+    @SuppressWarnings({"Convert2MethodRef", "FunctionalExpressionCanBeFolded"})
+    public static void onContinue(Runnable runnable) {
+        continueCallbacks.add(runnable);
+    }
+    
+    public static List<Pair<String, String>> getErrors() {
+        return errors;
+    }
+    
+    public static List<Pair<String, String>> getWarnings() {
+        return warnings;
+    }
+    
+    public static void clear() {
+        errors.clear();
+        errorSet.clear();
+        warnings.clear();
+        warningSet.clear();
+    }
+    
+    public static void continues() {
+        for (Runnable callback : continueCallbacks) {
+            try {
+                callback.run();
+            } catch (Throwable throwable) {
+                throwable.printStackTrace();
+            }
+        }
+        continueCallbacks.clear();
     }
 }

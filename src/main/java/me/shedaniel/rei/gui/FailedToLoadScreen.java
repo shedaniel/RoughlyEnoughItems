@@ -31,8 +31,8 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.client.util.NarratorManager;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Lazy;
 import net.minecraft.util.Pair;
@@ -47,14 +47,31 @@ public class FailedToLoadScreen extends Screen {
     public static final Lazy<FailedToLoadScreen> INSTANCE = new Lazy<>(FailedToLoadScreen::new);
     private AbstractButtonWidget buttonExit;
     private StringEntryListWidget listWidget;
+    private Screen parent;
     
     private FailedToLoadScreen() {
-        super(new LiteralText("REI has failed to init"));
+        super(NarratorManager.EMPTY);
     }
     
     @Override
     public boolean shouldCloseOnEsc() {
         return false;
+    }
+    
+    public void setParent(Screen parent) {
+        this.parent = parent;
+    }
+    
+    private void addText(String string) {
+        for (String s : font.wrapStringToWidthAsList(string, width - 80)) {
+            listWidget.creditsAddEntry(new TextItem(s));
+        }
+    }
+    
+    private void addLink(String string, String link) {
+        for (String s : font.wrapStringToWidthAsList(string, width - 80)) {
+            listWidget.creditsAddEntry(new LinkItem(s, link));
+        }
     }
     
     @Override
@@ -63,10 +80,25 @@ public class FailedToLoadScreen extends Screen {
         listWidget.max = 80;
         listWidget.creditsClearEntries();
         listWidget.creditsAddEntry(new EmptyItem());
-        for (Pair<String, String> pair : RoughlyEnoughItemsState.getFailedToLoad()) {
-            listWidget.creditsAddEntry(new TextItem(pair.getLeft()));
+        if (!RoughlyEnoughItemsState.getWarnings().isEmpty())
+            listWidget.creditsAddEntry(new TextItem("§6Warnings:"));
+        for (Pair<String, String> pair : RoughlyEnoughItemsState.getWarnings()) {
+            addText(pair.getLeft());
             if (pair.getRight() != null)
-                listWidget.creditsAddEntry(this.new LinkItem(pair.getRight()));
+                addLink(pair.getRight(), pair.getRight());
+            for (int i = 0; i < 2; i++) {
+                listWidget.creditsAddEntry(new EmptyItem());
+            }
+        }
+        if (!RoughlyEnoughItemsState.getWarnings().isEmpty() && !RoughlyEnoughItemsState.getErrors().isEmpty()) {
+            listWidget.creditsAddEntry(new EmptyItem());
+        }
+        if (!RoughlyEnoughItemsState.getErrors().isEmpty())
+            listWidget.creditsAddEntry(new TextItem("§cErrors:"));
+        for (Pair<String, String> pair : RoughlyEnoughItemsState.getErrors()) {
+            addText(pair.getLeft());
+            if (pair.getRight() != null)
+                addLink(pair.getRight(), pair.getRight());
             for (int i = 0; i < 2; i++) {
                 listWidget.creditsAddEntry(new EmptyItem());
             }
@@ -74,9 +106,18 @@ public class FailedToLoadScreen extends Screen {
         for (StringItem child : listWidget.children()) {
             listWidget.max = Math.max(listWidget.max, child.getWidth());
         }
-        children.add(buttonExit = new ButtonWidget(width / 2 - 100, height - 26, 200, 20, "Exit", button -> {
-            MinecraftClient.getInstance().scheduleStop();
-        }));
+        children.add(buttonExit = new ButtonWidget(width / 2 - 100, height - 26, 200, 20,
+                RoughlyEnoughItemsState.getErrors().isEmpty() ? "Continue" : "Exit",
+                button -> {
+                    if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
+                        RoughlyEnoughItemsState.clear();
+                        RoughlyEnoughItemsState.continues();
+                        MinecraftClient.getInstance().openScreen(parent);
+                        setParent(null);
+                    } else {
+                        MinecraftClient.getInstance().scheduleStop();
+                    }
+                }));
     }
     
     @Override
@@ -88,7 +129,11 @@ public class FailedToLoadScreen extends Screen {
     public void render(int int_1, int int_2, float float_1) {
         this.renderDirtBackground(0);
         this.listWidget.render(int_1, int_2, float_1);
-        this.drawCenteredString(this.font, this.title.asFormattedString(), this.width / 2, 16, 16777215);
+        if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
+            this.drawCenteredString(this.font, "Warnings during Roughly Enough Items' initialization", this.width / 2, 16, 16777215);
+        } else {
+            this.drawCenteredString(this.font, "Errors during Roughly Enough Items' initialization", this.width / 2, 16, 16777215);
+        }
         super.render(int_1, int_2, float_1);
         this.buttonExit.render(int_1, int_2, float_1);
     }
@@ -195,6 +240,7 @@ public class FailedToLoadScreen extends Screen {
     
     private class LinkItem extends StringItem {
         private String text;
+        private String link;
         private boolean contains;
         
         public LinkItem(Text textComponent) {
@@ -202,7 +248,12 @@ public class FailedToLoadScreen extends Screen {
         }
         
         public LinkItem(String text) {
+            this(text, text);
+        }
+        
+        public LinkItem(String text, String link) {
             this.text = text;
+            this.link = link;
         }
         
         @Override
@@ -236,7 +287,7 @@ public class FailedToLoadScreen extends Screen {
             if (contains && button == 0) {
                 MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 try {
-                    Util.getOperatingSystem().open(new URI(text));
+                    Util.getOperatingSystem().open(new URI(link));
                     return true;
                 } catch (URISyntaxException e) {
                     e.printStackTrace();
