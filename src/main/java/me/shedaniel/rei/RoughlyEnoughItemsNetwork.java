@@ -65,7 +65,7 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
             ServerSidePacketRegistry.INSTANCE.register(DELETE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
                 ServerPlayerEntity player = (ServerPlayerEntity) packetContext.getPlayer();
                 if (player.getServer().getPermissionLevel(player.getGameProfile()) < player.getServer().getOpPermissionLevel()) {
-                    player.addMessage(new TranslatableText("text.rei.no_permission_cheat").formatted(Formatting.RED), false);
+                    player.sendMessage(new TranslatableText("text.rei.no_permission_cheat").formatted(Formatting.RED), false);
                     return;
                 }
                 if (!player.inventory.getCursorStack().isEmpty())
@@ -74,14 +74,14 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
             ServerSidePacketRegistry.INSTANCE.register(CREATE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
                 ServerPlayerEntity player = (ServerPlayerEntity) packetContext.getPlayer();
                 if (player.getServer().getPermissionLevel(player.getGameProfile()) < player.getServer().getOpPermissionLevel()) {
-                    player.addMessage(new TranslatableText("text.rei.no_permission_cheat").formatted(Formatting.RED), false);
+                    player.sendMessage(new TranslatableText("text.rei.no_permission_cheat").formatted(Formatting.RED), false);
                     return;
                 }
                 ItemStack stack = packetByteBuf.readItemStack();
                 if (player.inventory.insertStack(stack.copy())) {
                     ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, new PacketByteBuf(Unpooled.buffer()).writeItemStack(stack.copy()).writeString(player.getEntityName(), 32767));
                 } else
-                    player.addMessage(new TranslatableText("text.rei.failed_cheat_items"), false);
+                    player.sendMessage(new TranslatableText("text.rei.failed_cheat_items"), false);
             });
             ServerSidePacketRegistry.INSTANCE.register(MOVE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
                 Identifier category = packetByteBuf.readIdentifier();
@@ -118,9 +118,9 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
                             ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, NOT_ENOUGH_ITEMS_PACKET, buf);
                         }
                     } catch (IllegalStateException e) {
-                        player.sendMessage(new TranslatableText(e.getMessage()).formatted(Formatting.RED));
+                        player.sendSystemMessage(new TranslatableText(e.getMessage()).formatted(Formatting.RED));
                     } catch (Exception e) {
-                        player.sendMessage(new TranslatableText("error.rei.internal.error", e.getMessage()).formatted(Formatting.RED));
+                        player.sendSystemMessage(new TranslatableText("error.rei.internal.error", e.getMessage()).formatted(Formatting.RED));
                         e.printStackTrace();
                     }
                 } catch (Exception e) {
