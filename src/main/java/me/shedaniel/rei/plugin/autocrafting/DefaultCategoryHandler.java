@@ -30,7 +30,6 @@ import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
 import me.shedaniel.rei.api.AutoTransferHandler;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.TransferRecipeDisplay;
-import me.shedaniel.rei.listeners.RecipeBookGuiHooks;
 import me.shedaniel.rei.server.ContainerInfo;
 import me.shedaniel.rei.server.ContainerInfoHandler;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
@@ -43,6 +42,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.util.collection.DefaultedList;
+
 import java.util.List;
 
 public class DefaultCategoryHandler implements AutoTransferHandler {
@@ -56,7 +56,7 @@ public class DefaultCategoryHandler implements AutoTransferHandler {
         if (!(context.getRecipe() instanceof TransferRecipeDisplay))
             return Result.createNotApplicable();
         TransferRecipeDisplay recipe = (TransferRecipeDisplay) context.getRecipe();
-        HandledScreen<?> screenWithHandler = context.getHandledScreen();
+        HandledScreen<?> handledScreen = context.getHandledScreen();
         ScreenHandler screenHandler = context.getScreenHandler();
         ContainerInfo<ScreenHandler> containerInfo = (ContainerInfo<ScreenHandler>) ContainerInfoHandler.getContainerInfo(recipe.getRecipeCategory(), screenHandler.getClass());
         if (containerInfo == null)
@@ -72,9 +72,9 @@ public class DefaultCategoryHandler implements AutoTransferHandler {
         if (!context.isActuallyCrafting())
             return Result.createSuccessful();
         
-        context.getMinecraft().openScreen(screenWithHandler);
-        if (screenWithHandler instanceof RecipeBookProvider)
-            ((RecipeBookGuiHooks) ((RecipeBookProvider) screenWithHandler).getRecipeBookWidget()).rei_getGhostSlots().reset();
+        context.getMinecraft().openScreen(handledScreen);
+        if (handledScreen instanceof RecipeBookProvider)
+            ((RecipeBookProvider) handledScreen).getRecipeBookWidget().ghostSlots.reset();
         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
         buf.writeIdentifier(recipe.getRecipeCategory());
         buf.writeBoolean(Screen.hasShiftDown());

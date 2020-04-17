@@ -31,7 +31,6 @@ import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.impl.EmptyEntryStack;
 import me.shedaniel.rei.impl.FluidEntryStack;
 import me.shedaniel.rei.impl.ItemEntryStack;
-import me.shedaniel.rei.listeners.BucketItemHooks;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.BucketItem;
@@ -140,7 +139,7 @@ public interface EntryStack {
             throw new IllegalArgumentException("EntryStack must be item!");
         Item item = stack.getItem();
         if (item instanceof BucketItem)
-            return EntryStack.create(((BucketItemHooks) item).getFluid(), 1000);
+            return EntryStack.create(((BucketItem) item).fluid, 1000);
         return EntryStack.empty();
     }
     

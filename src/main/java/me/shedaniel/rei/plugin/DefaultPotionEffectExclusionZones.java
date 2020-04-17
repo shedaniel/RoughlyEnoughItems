@@ -26,10 +26,9 @@ package me.shedaniel.rei.plugin;
 import com.google.common.collect.Ordering;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.impl.ScreenHelper;
-import me.shedaniel.rei.listeners.AbstractInventoryScreenHooks;
-import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.entity.effect.StatusEffectInstance;
 
 import java.util.ArrayList;
@@ -41,15 +40,15 @@ import java.util.function.Supplier;
 public class DefaultPotionEffectExclusionZones implements Supplier<List<Rectangle>> {
     @Override
     public List<Rectangle> get() {
-        if (!(ScreenHelper.getLastHandledScreen() instanceof AbstractInventoryScreen) || !((AbstractInventoryScreenHooks) ScreenHelper.getLastHandledScreen()).rei_doesOffsetGuiForEffects())
+        if (!(ScreenHelper.getLastHandledScreen() instanceof AbstractInventoryScreen) || !((AbstractInventoryScreen) ScreenHelper.getLastHandledScreen()).drawStatusEffects)
             return Collections.emptyList();
         Collection<StatusEffectInstance> activePotionEffects = MinecraftClient.getInstance().player.getStatusEffects();
         if (activePotionEffects.isEmpty())
             return Collections.emptyList();
-        ContainerScreenHooks hooks = ((ContainerScreenHooks) ScreenHelper.getLastHandledScreen());
+        HandledScreen<?> handledScreen = ScreenHelper.getLastHandledScreen();
         List<Rectangle> list = new ArrayList<>();
-        int x = hooks.rei_getContainerLeft() - 124;
-        int y = hooks.rei_getContainerTop();
+        int x = handledScreen.x - 124;
+        int y = handledScreen.y;
         int height = 33;
         if (activePotionEffects.size() > 5)
             height = 132 / (activePotionEffects.size() - 1);

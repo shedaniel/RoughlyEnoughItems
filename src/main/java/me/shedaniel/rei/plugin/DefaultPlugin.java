@@ -31,15 +31,12 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
-import me.shedaniel.rei.api.subsets.SubsetsRegistry;
 import me.shedaniel.rei.api.widgets.Panel;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
 import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.impl.RenderingEntry;
-import me.shedaniel.rei.impl.ScreenHelper;
-import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import me.shedaniel.rei.plugin.beacon.DefaultBeaconBaseCategory;
 import me.shedaniel.rei.plugin.beacon.DefaultBeaconBaseDisplay;
 import me.shedaniel.rei.plugin.blasting.DefaultBlastingDisplay;
@@ -305,13 +302,13 @@ public class DefaultPlugin implements REIPluginV0 {
             
             @Override
             public Rectangle getLeftBounds(HandledScreen<?> screen) {
-                return new Rectangle(2, 0, ((ContainerScreenHooks) ScreenHelper.getLastHandledScreen()).rei_getContainerLeft() - 4, MinecraftClient.getInstance().getWindow().getScaledHeight());
+                return new Rectangle(2, 0, screen.x - 4, screen.height);
             }
             
             @Override
             public Rectangle getRightBounds(HandledScreen<?> screen) {
-                int startX = ((ContainerScreenHooks) ScreenHelper.getLastHandledScreen()).rei_getContainerLeft() + ((ContainerScreenHooks) ScreenHelper.getLastHandledScreen()).rei_getContainerWidth() + 2;
-                return new Rectangle(startX, 0, MinecraftClient.getInstance().getWindow().getScaledWidth() - startX - 2, MinecraftClient.getInstance().getWindow().getScaledHeight());
+                int startX = screen.x + screen.backgroundWidth + 2;
+                return new Rectangle(startX, 0, screen.width - startX - 2, screen.height);
             }
             
             @Override

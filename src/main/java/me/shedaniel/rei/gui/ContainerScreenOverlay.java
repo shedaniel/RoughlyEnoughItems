@@ -40,7 +40,6 @@ import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.impl.InternalWidgets;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.Weather;
-import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
@@ -307,7 +306,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                 VillagerRecipeViewingScreen widget = (VillagerRecipeViewingScreen) MinecraftClient.getInstance().currentScreen;
                 return new Rectangle(widget.bounds.x, 3, widget.bounds.width, 18);
             }
-            return new Rectangle(((ContainerScreenHooks) ScreenHelper.getLastHandledScreen()).rei_getContainerLeft(), 3, ((ContainerScreenHooks) ScreenHelper.getLastHandledScreen()).rei_getContainerWidth(), 18);
+            return new Rectangle(ScreenHelper.getLastHandledScreen().x, 3, ScreenHelper.getLastHandledScreen().backgroundWidth, 18);
         }
         return null;
     }
@@ -376,7 +375,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             VillagerRecipeViewingScreen widget = (VillagerRecipeViewingScreen) MinecraftClient.getInstance().currentScreen;
             return new Rectangle(widget.bounds.x, window.getScaledHeight() - 22, widget.bounds.width - widthRemoved, 18);
         }
-        return new Rectangle(((ContainerScreenHooks) ScreenHelper.getLastHandledScreen()).rei_getContainerLeft(), window.getScaledHeight() - 22, ((ContainerScreenHooks) ScreenHelper.getLastHandledScreen()).rei_getContainerWidth() - widthRemoved, 18);
+        return new Rectangle(ScreenHelper.getLastHandledScreen().x, window.getScaledHeight() - 22, ScreenHelper.getLastHandledScreen().backgroundWidth - widthRemoved, 18);
     }
     
     private Rectangle getCraftableToggleArea() {
@@ -427,21 +426,21 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         if (OverlaySearchField.isSearching) {
             setZOffset(200);
             if (MinecraftClient.getInstance().currentScreen instanceof HandledScreen) {
-                ContainerScreenHooks hooks = (ContainerScreenHooks) MinecraftClient.getInstance().currentScreen;
-                int left = hooks.rei_getContainerLeft(), top = hooks.rei_getContainerTop();
-                for (Slot slot : ((HandledScreen<?>) MinecraftClient.getInstance().currentScreen).getScreenHandler().slots)
+                HandledScreen<?> handledScreen = (HandledScreen<?>) MinecraftClient.getInstance().currentScreen;
+                int x = handledScreen.x, y = handledScreen.y;
+                for (Slot slot : handledScreen.getScreenHandler().slots)
                     if (!slot.hasStack() || !ENTRY_LIST_WIDGET.canLastSearchTermsBeAppliedTo(EntryStack.create(slot.getStack())))
-                        fillGradient(left + slot.x, top + slot.y, left + slot.x + 16, top + slot.y + 16, -601874400, -601874400);
+                        fillGradient(x + slot.x, y + slot.y, x + slot.x + 16, y + slot.y + 16, -601874400, -601874400);
             }
             setZOffset(0);
         }
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.renderWidgets(mouseX, mouseY, delta);
         if (MinecraftClient.getInstance().currentScreen instanceof HandledScreen && ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
-            ContainerScreenHooks hooks = (ContainerScreenHooks) MinecraftClient.getInstance().currentScreen;
+            HandledScreen<?> handledScreen = (HandledScreen<?>) MinecraftClient.getInstance().currentScreen;
             for (RecipeHelper.ScreenClickArea area : RecipeHelper.getInstance().getScreenClickAreas())
                 if (area.getScreenClass().equals(MinecraftClient.getInstance().currentScreen.getClass()))
-                    if (area.getRectangle().contains(mouseX - hooks.rei_getContainerLeft(), mouseY - hooks.rei_getContainerTop())) {
+                    if (area.getRectangle().contains(mouseX - handledScreen.x, mouseY - handledScreen.y)) {
                         String collect = CollectionUtils.mapAndJoinToString(area.getCategories(), identifier -> RecipeHelper.getInstance().getCategory(identifier).getCategoryName(), ", ");
                         TOOLTIPS.add(Tooltip.create(I18n.translate("text.rei.view_recipes_for", collect)));
                         break;
@@ -549,9 +548,11 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             return true;
         }
         ItemStack itemStack = null;
-        if (MinecraftClient.getInstance().currentScreen instanceof HandledScreen)
-            if (((ContainerScreenHooks) ScreenHelper.getLastHandledScreen()).rei_getHoveredSlot() != null && !((ContainerScreenHooks) ScreenHelper.getLastHandledScreen()).rei_getHoveredSlot().getStack().isEmpty())
-                itemStack = ((ContainerScreenHooks) ScreenHelper.getLastHandledScreen()).rei_getHoveredSlot().getStack();
+        if (MinecraftClient.getInstance().currentScreen instanceof HandledScreen) {
+            HandledScreen<?> handledScreen = (HandledScreen<?>) MinecraftClient.getInstance().currentScreen;
+            if (handledScreen.focusedSlot != null && !handledScreen.focusedSlot.getStack().isEmpty())
+                itemStack = handledScreen.focusedSlot.getStack();
+        }
         if (itemStack != null && !itemStack.isEmpty()) {
             if (ConfigObject.getInstance().getRecipeKeybind().matchesKey(int_1, int_2))
                 return ClientHelper.getInstance().executeRecipeKeyBind(itemStack);
@@ -599,10 +600,10 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             return true;
         }
         if (MinecraftClient.getInstance().currentScreen instanceof HandledScreen && ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
-            ContainerScreenHooks hooks = (ContainerScreenHooks) MinecraftClient.getInstance().currentScreen;
+            HandledScreen<?> handledScreen = (HandledScreen<?>) MinecraftClient.getInstance().currentScreen;
             for (RecipeHelper.ScreenClickArea area : RecipeHelper.getInstance().getScreenClickAreas())
-                if (area.getScreenClass().equals(MinecraftClient.getInstance().currentScreen.getClass()))
-                    if (area.getRectangle().contains(double_1 - hooks.rei_getContainerLeft(), double_2 - hooks.rei_getContainerTop())) {
+                if (area.getScreenClass().equals(handledScreen.getClass()))
+                    if (area.getRectangle().contains(double_1 - handledScreen.x, double_2 - handledScreen.y)) {
                         ClientHelper.getInstance().executeViewAllRecipesFromCategories(Arrays.asList(area.getCategories()));
                         MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                         return true;

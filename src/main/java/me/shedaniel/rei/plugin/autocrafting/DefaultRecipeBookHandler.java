@@ -27,7 +27,6 @@ import me.shedaniel.rei.api.AutoTransferHandler;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.api.TransferRecipeDisplay;
 import me.shedaniel.rei.impl.ScreenHelper;
-import me.shedaniel.rei.listeners.RecipeBookGuiHooks;
 import me.shedaniel.rei.plugin.cooking.DefaultCookingDisplay;
 import me.shedaniel.rei.plugin.crafting.DefaultCraftingDisplay;
 import net.minecraft.client.gui.screen.Screen;
@@ -69,7 +68,7 @@ public class DefaultRecipeBookHandler implements AutoTransferHandler {
                     return Result.createSuccessful();
                 context.getMinecraft().openScreen(context.getHandledScreen());
                 if (context.getHandledScreen() instanceof RecipeBookProvider)
-                    ((RecipeBookGuiHooks) ((RecipeBookProvider) context.getHandledScreen()).getRecipeBookWidget()).rei_getGhostSlots().reset();
+                    ((RecipeBookProvider) context.getHandledScreen()).getRecipeBookWidget().ghostSlots.reset();
                 context.getMinecraft().interactionManager.clickRecipe(container.syncId, recipe, Screen.hasShiftDown());
                 ScreenHelper.getLastOverlay().init();
             }
@@ -83,7 +82,7 @@ public class DefaultRecipeBookHandler implements AutoTransferHandler {
                     return Result.createSuccessful();
                 context.getMinecraft().openScreen(context.getHandledScreen());
                 if (context.getHandledScreen() instanceof RecipeBookProvider)
-                    ((RecipeBookGuiHooks) ((RecipeBookProvider) context.getHandledScreen()).getRecipeBookWidget()).rei_getGhostSlots().reset();
+                    ((RecipeBookProvider) context.getHandledScreen()).getRecipeBookWidget().ghostSlots.reset();
                 context.getMinecraft().interactionManager.clickRecipe(container.syncId, recipe, Screen.hasShiftDown());
                 ScreenHelper.getLastOverlay().init();
             }

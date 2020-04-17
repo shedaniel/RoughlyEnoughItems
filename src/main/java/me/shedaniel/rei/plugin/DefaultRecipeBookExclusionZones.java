@@ -26,8 +26,8 @@ package me.shedaniel.rei.plugin;
 import com.google.common.collect.Lists;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.impl.ScreenHelper;
-import me.shedaniel.rei.listeners.ContainerScreenHooks;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
 import net.minecraft.client.recipebook.ClientRecipeBook;
 import net.minecraft.screen.AbstractRecipeScreenHandler;
@@ -42,11 +42,11 @@ public class DefaultRecipeBookExclusionZones implements Supplier<List<Rectangle>
     public List<Rectangle> get() {
         if (!MinecraftClient.getInstance().player.getRecipeBook().isGuiOpen() || !(MinecraftClient.getInstance().currentScreen instanceof RecipeBookProvider) || !(ScreenHelper.getLastHandledScreen().getScreenHandler() instanceof AbstractRecipeScreenHandler))
             return Collections.emptyList();
-        ContainerScreenHooks screenHooks = ((ContainerScreenHooks) ScreenHelper.getLastHandledScreen());
-        List<Rectangle> l = Lists.newArrayList(new Rectangle(screenHooks.rei_getContainerLeft() - 4 - 145, screenHooks.rei_getContainerTop(), 4 + 145 + 30, screenHooks.rei_getContainerHeight()));
+        HandledScreen<?> handledScreen = ScreenHelper.getLastHandledScreen();
+        List<Rectangle> l = Lists.newArrayList(new Rectangle(handledScreen.x - 4 - 145, handledScreen.y, 4 + 145 + 30, handledScreen.backgroundHeight));
         int size = ClientRecipeBook.getGroups((AbstractRecipeScreenHandler<?>) ScreenHelper.getLastHandledScreen().getScreenHandler()).size();
         if (size > 0)
-            l.add(new Rectangle(screenHooks.rei_getContainerLeft() - 4 - 145 - 30, screenHooks.rei_getContainerTop(), 30, size * 27));
+            l.add(new Rectangle(handledScreen.x - 4 - 145 - 30, handledScreen.y, 30, size * 27));
         return l;
     }
     
