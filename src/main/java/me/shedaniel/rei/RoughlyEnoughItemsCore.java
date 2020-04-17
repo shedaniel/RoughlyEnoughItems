@@ -31,8 +31,6 @@ import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.impl.*;
-import me.shedaniel.rei.listeners.RecipeBookButtonWidgetHooks;
-import me.shedaniel.rei.listeners.RecipeBookGuiHooks;
 import me.shedaniel.rei.tests.plugin.REITestPlugin;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
@@ -200,7 +198,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                 Screen currentScreen = MinecraftClient.getInstance().currentScreen;
                 if (currentScreen instanceof CraftingScreen) {
                     RecipeBookWidget recipeBookGui = ((RecipeBookProvider) currentScreen).getRecipeBookWidget();
-                    RecipeBookGhostSlots ghostSlots = ((RecipeBookGuiHooks) recipeBookGui).rei_getGhostSlots();
+                    RecipeBookGhostSlots ghostSlots = recipeBookGui.ghostSlots;
                     ghostSlots.reset();
                     
                     List<List<ItemStack>> input = Lists.newArrayList();
@@ -306,7 +304,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         ClothClientHooks.SYNC_RECIPES.register((minecraftClient, recipeManager, synchronizeRecipesS2CPacket) -> syncRecipes(lastSync));
         ClothClientHooks.SCREEN_ADD_BUTTON.register((minecraftClient, screen, abstractButtonWidget) -> {
             if (ConfigObject.getInstance().doesDisableRecipeBook() && screen instanceof HandledScreen && abstractButtonWidget instanceof TexturedButtonWidget)
-                if (((RecipeBookButtonWidgetHooks) abstractButtonWidget).rei_getTexture().equals(recipeButtonTex))
+                if (((TexturedButtonWidget) abstractButtonWidget).texture.equals(recipeButtonTex))
                     return ActionResult.FAIL;
             return ActionResult.PASS;
         });
@@ -376,7 +374,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             ScreenHelper.getLastOverlay().lateRender(i, i1, v);
         });
         ClothClientHooks.SCREEN_KEY_PRESSED.register((minecraftClient, screen, i, i1, i2) -> {
-            if (screen.getFocused() != null && screen.getFocused() instanceof TextFieldWidget || (screen.getFocused() instanceof RecipeBookWidget && ((RecipeBookGuiHooks) screen.getFocused()).rei_getSearchField() != null && ((RecipeBookGuiHooks) screen.getFocused()).rei_getSearchField().isFocused()))
+            if (screen.getFocused() != null && screen.getFocused() instanceof TextFieldWidget || (screen.getFocused() instanceof RecipeBookWidget && ((RecipeBookWidget) screen.getFocused()).searchField != null && ((RecipeBookWidget) screen.getFocused()).searchField.isFocused()))
                 return ActionResult.PASS;
             if (shouldReturn(screen.getClass()))
                 return ActionResult.PASS;

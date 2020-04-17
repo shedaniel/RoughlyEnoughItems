@@ -42,9 +42,9 @@
     "minecraft": "~1.16-Snapshot.20.16.a"
   },
   "mixins": [
-    "mixin.roughlyenoughitems.json",
-    "listeners.roughlyenoughitems.json"
+    "mixin.roughlyenoughitems.json"
   ],
+  "accessWidener": "rei.aw",
   "custom": {
     "rei:translators": {
       "English": "shedaniel",
