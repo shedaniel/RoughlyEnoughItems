@@ -291,7 +291,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                     continue;
                 ActionResult result = decider.shouldScreenBeOverlayed(screen);
                 if (result != ActionResult.PASS)
-                    return result == ActionResult.FAIL || ScreenHelper.getLastHandledScreen() == null;
+                    return result == ActionResult.FAIL || REIHelper.getInstance().getPreviousHandledScreen() == null;
             }
         } catch (ConcurrentModificationException ignored) {
         }

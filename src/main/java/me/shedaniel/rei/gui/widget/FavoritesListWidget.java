@@ -62,7 +62,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
         public int getMaxScrollHeight() {
             return MathHelper.ceil((favorites.size() + blockedCount) / (innerBounds.width / (float) entrySize())) * entrySize();
         }
-    
+        
         @Override
         public int getScrollBarX() {
             if (!ConfigObject.getInstance().isLeftHandSidePanel())

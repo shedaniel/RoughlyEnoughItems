@@ -30,7 +30,6 @@ import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.subsets.SubsetsMenu;
 import me.shedaniel.rei.gui.subsets.SubsetsMenuEntry;
-import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.impl.EntryRegistryImpl;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.CollectionUtils;
