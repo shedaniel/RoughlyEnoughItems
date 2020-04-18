@@ -114,6 +114,7 @@ task remapMavenJar(type: RemapJarTask, dependsOn: jar) {
 
 def releaseChangelog = "No changelog"
 
+/* Thank you modmenu */
 task releaseOnCf {
     def df = new SimpleDateFormat("yyyy-MM-dd HH:mm")
     df.setTimeZone(TimeZone.getTimeZone("UTC"))
