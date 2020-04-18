@@ -118,14 +118,14 @@ def releaseChangelog = "No changelog"
 task releaseOnCf {
     def df = new SimpleDateFormat("yyyy-MM-dd HH:mm")
     df.setTimeZone(TimeZone.getTimeZone("UTC"))
-    def currentBranch
+    def branch
     if (System.env.BRANCH_NAME) {
         branch = System.env.BRANCH_NAME
         branch = branch.substring(branch.lastIndexOf("/")+1)
     } else {
         branch = "git rev-parse --abbrev-ref HEAD".execute().in.text.trim()
     }
-    if (currentBranch == "HEAD") {
+    if (branch == "HEAD") {
         branch = "git rev-parse --short HEAD".execute().in.text.trim()
     }
     def time = df.format(new Date())
