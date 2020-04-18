@@ -588,7 +588,7 @@ public class EntryListWidget extends WidgetWithBounds {
                         }));
                     }
                     try {
-                        CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0])).get(30, TimeUnit.SECONDS);
+                        CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0])).get(10, TimeUnit.SECONDS);
                     } catch (InterruptedException | ExecutionException | TimeoutException e) {
                         e.printStackTrace();
                     }
