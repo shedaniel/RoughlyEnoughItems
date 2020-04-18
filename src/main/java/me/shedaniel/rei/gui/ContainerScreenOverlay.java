@@ -193,7 +193,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                                 ClientHelper.getInstance().setCheating(!ClientHelper.getInstance().isCheating());
                                 return;
                             }
-                            ConfigManager.getInstance().openConfigScreen(ScreenHelper.getLastHandledScreen());
+                            ConfigManager.getInstance().openConfigScreen(REIHelper.getInstance().getPreviousHandledScreen());
                         })
                         .onRender(button -> {
                             if (ClientHelper.getInstance().isCheating() && RoughlyEnoughItemsCore.hasOperatorPermission()) {
@@ -306,7 +306,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                 VillagerRecipeViewingScreen widget = (VillagerRecipeViewingScreen) MinecraftClient.getInstance().currentScreen;
                 return new Rectangle(widget.bounds.x, 3, widget.bounds.width, 18);
             }
-            return new Rectangle(ScreenHelper.getLastHandledScreen().x, 3, ScreenHelper.getLastHandledScreen().backgroundWidth, 18);
+            return new Rectangle(REIHelper.getInstance().getPreviousHandledScreen().x, 3, REIHelper.getInstance().getPreviousHandledScreen().backgroundWidth, 18);
         }
         return null;
     }
@@ -375,7 +375,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             VillagerRecipeViewingScreen widget = (VillagerRecipeViewingScreen) MinecraftClient.getInstance().currentScreen;
             return new Rectangle(widget.bounds.x, window.getScaledHeight() - 22, widget.bounds.width - widthRemoved, 18);
         }
-        return new Rectangle(ScreenHelper.getLastHandledScreen().x, window.getScaledHeight() - 22, ScreenHelper.getLastHandledScreen().backgroundWidth - widthRemoved, 18);
+        return new Rectangle(REIHelper.getInstance().getPreviousHandledScreen().x, window.getScaledHeight() - 22, REIHelper.getInstance().getPreviousHandledScreen().backgroundWidth - widthRemoved, 18);
     }
     
     private Rectangle getCraftableToggleArea() {

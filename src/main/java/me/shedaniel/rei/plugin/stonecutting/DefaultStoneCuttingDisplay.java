@@ -32,6 +32,7 @@ import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.StonecuttingRecipe;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

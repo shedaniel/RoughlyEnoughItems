@@ -26,6 +26,7 @@ package me.shedaniel.rei.api;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import me.shedaniel.rei.impl.ScreenHelper;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,6 +40,8 @@ public interface REIHelper {
     static REIHelper getInstance() {
         return ScreenHelper.getInstance();
     }
+    
+    HandledScreen<?> getPreviousHandledScreen();
     
     boolean isDarkThemeEnabled();
     

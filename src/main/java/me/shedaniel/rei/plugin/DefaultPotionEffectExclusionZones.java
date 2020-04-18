@@ -25,7 +25,7 @@ package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Ordering;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.impl.ScreenHelper;
+import me.shedaniel.rei.api.REIHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -40,12 +40,12 @@ import java.util.function.Supplier;
 public class DefaultPotionEffectExclusionZones implements Supplier<List<Rectangle>> {
     @Override
     public List<Rectangle> get() {
-        if (!(ScreenHelper.getLastHandledScreen() instanceof AbstractInventoryScreen) || !((AbstractInventoryScreen) ScreenHelper.getLastHandledScreen()).drawStatusEffects)
+        if (!(REIHelper.getInstance().getPreviousHandledScreen() instanceof AbstractInventoryScreen) || !((AbstractInventoryScreen<?>) REIHelper.getInstance().getPreviousHandledScreen()).drawStatusEffects)
             return Collections.emptyList();
         Collection<StatusEffectInstance> activePotionEffects = MinecraftClient.getInstance().player.getStatusEffects();
         if (activePotionEffects.isEmpty())
             return Collections.emptyList();
-        HandledScreen<?> handledScreen = ScreenHelper.getLastHandledScreen();
+        HandledScreen<?> handledScreen = REIHelper.getInstance().getPreviousHandledScreen();
         List<Rectangle> list = new ArrayList<>();
         int x = handledScreen.x - 124;
         int y = handledScreen.y;

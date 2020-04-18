@@ -149,7 +149,17 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
         return getLastOverlay(false, false);
     }
     
+    /**
+     * @see REIHelper#getPreviousHandledScreen()
+     */
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     public static HandledScreen<?> getLastHandledScreen() {
+        return lastHandledScreen;
+    }
+    
+    @Override
+    public HandledScreen<?> getPreviousHandledScreen() {
         return lastHandledScreen;
     }
     

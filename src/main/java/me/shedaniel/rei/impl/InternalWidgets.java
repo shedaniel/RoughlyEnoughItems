@@ -54,7 +54,7 @@ public final class InternalWidgets {
     private InternalWidgets() {}
     
     public static Widget createAutoCraftingButtonWidget(Rectangle displayBounds, me.shedaniel.math.Rectangle rectangle, String text, Supplier<RecipeDisplay> displaySupplier, List<Widget> setupDisplay, RecipeCategory<?> category) {
-        HandledScreen<?> handledScreen = ScreenHelper.getLastHandledScreen();
+        HandledScreen<?> handledScreen = REIHelper.getInstance().getPreviousHandledScreen();
         boolean[] visible = {false};
         List<String>[] errorTooltip = new List[]{null};
         Button autoCraftingButton = Widgets.createButton(rectangle, text)
@@ -215,7 +215,7 @@ public final class InternalWidgets {
         public List<? extends Element> children() {
             return widgets;
         }
-    
+        
         @Override
         public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
             for (Widget widget : this.widgets) {
@@ -243,7 +243,7 @@ public final class InternalWidgets {
         public List<? extends Element> children() {
             return Collections.singletonList(this.widget);
         }
-    
+        
         @Override
         public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
             return this.widget.mouseScrolled(mouseX, mouseY, amount);
@@ -277,7 +277,7 @@ public final class InternalWidgets {
         public List<? extends Element> children() {
             return Collections.singletonList(this.widget);
         }
-    
+        
         @Override
         public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
             return this.widget.mouseScrolled(mouseX, mouseY, amount);
@@ -318,7 +318,7 @@ public final class InternalWidgets {
         public List<? extends Element> children() {
             return Collections.singletonList(this.widget);
         }
-    
+        
         @Override
         public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
             return this.widget.mouseScrolled(mouseX, mouseY, amount);

@@ -35,7 +35,6 @@ import me.shedaniel.rei.gui.subsets.SubsetsMenuEntry;
 import me.shedaniel.rei.gui.widget.TabWidget;
 import me.shedaniel.rei.impl.EntryRegistryImpl;
 import me.shedaniel.rei.impl.ScreenHelper;
-import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.sound.PositionedSoundInstance;
