@@ -19,3 +19,4 @@ jobs:
         run: ./gradlew clean build releaseOnCf --refresh-dependencies --stacktrace
         env:
           danielshe_curse_api_key: ${{ secrets.CF_API_KEY }}
+          BRANCH_NAME: ${{ github.ref }}

@@ -57,7 +57,12 @@ public class EmptyEntryStack implements EntryStack {
     }
     
     @Override
-    public void setAmount(int amount) {
+    public double getFloatingAmount() {
+        return 0;
+    }
+    
+    @Override
+    public void setFloatingAmount(double amount) {
     
     }
     

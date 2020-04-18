@@ -40,6 +40,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -77,8 +78,18 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     }
     
     @Override
+    public double getFloatingAmount() {
+        return itemStack.getCount();
+    }
+    
+    @Override
     public void setAmount(int amount) {
         itemStack.setCount(amount);
+    }
+    
+    @Override
+    public void setFloatingAmount(double amount) {
+        itemStack.setCount(MathHelper.floor(amount));
     }
     
     @Override
@@ -103,14 +114,14 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     @Override
     public boolean equalsIgnoreTagsAndAmount(EntryStack stack) {
         if (stack.getType() != Type.ITEM)
-            return false;
+            return EntryStack.copyItemToFluid(this).equalsIgnoreTagsAndAmount(stack);
         return itemStack.getItem() == stack.getItem();
     }
     
     @Override
     public boolean equalsAll(EntryStack stack) {
         if (stack.getType() != Type.ITEM)
-            return false;
+            return EntryStack.copyItemToFluid(this).equalsAll(stack);
         if (itemStack.getItem() != stack.getItem() || getAmount() != stack.getAmount())
             return false;
         return ItemStack.areTagsEqual(itemStack, stack.getItemStack());
@@ -119,7 +130,7 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     @Override
     public boolean equalsIgnoreAmount(EntryStack stack) {
         if (stack.getType() != Type.ITEM)
-            return false;
+            return EntryStack.copyItemToFluid(this).equalsIgnoreAmount(stack);
         if (itemStack.getItem() != stack.getItem())
             return false;
         ItemStack otherStack = stack.getItemStack();
@@ -173,7 +184,7 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     @Override
     public boolean equalsIgnoreTags(EntryStack stack) {
         if (stack.getType() != Type.ITEM)
-            return false;
+            return EntryStack.copyItemToFluid(this).equalsIgnoreTags(stack);
         if (itemStack.getItem() != stack.getItem())
             return false;
         return getAmount() == stack.getAmount();
