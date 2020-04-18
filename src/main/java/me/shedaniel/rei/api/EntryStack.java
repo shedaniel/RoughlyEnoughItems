@@ -27,19 +27,20 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.impl.EmptyEntryStack;
 import me.shedaniel.rei.impl.FluidEntryStack;
 import me.shedaniel.rei.impl.ItemEntryStack;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.fluid.Fluid;
-import net.minecraft.item.BucketItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -62,6 +63,10 @@ public interface EntryStack {
     }
     
     static EntryStack create(Fluid fluid, int amount) {
+        return new FluidEntryStack(fluid, amount);
+    }
+    
+    static EntryStack create(Fluid fluid, double amount) {
         return new FluidEntryStack(fluid, amount);
     }
     
@@ -124,32 +129,41 @@ public interface EntryStack {
         }
     }
     
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     static EntryStack copyFluidToBucket(EntryStack stack) {
-        if (stack.getType() != Type.FLUID)
-            throw new IllegalArgumentException("EntryStack must be fluid!");
-        Fluid fluid = stack.getFluid();
-        Item item = fluid.getBucketItem();
-        if (item == null)
-            return EntryStack.empty();
-        return EntryStack.create(item);
+        return copyFluidToItem(stack);
     }
     
+    static EntryStack copyFluidToItem(EntryStack stack) {
+        return FluidSupportProvider.INSTANCE.fluidToItem(stack);
+    }
+    
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     static EntryStack copyBucketToFluid(EntryStack stack) {
-        if (stack.getType() != Type.ITEM)
-            throw new IllegalArgumentException("EntryStack must be item!");
-        Item item = stack.getItem();
-        if (item instanceof BucketItem)
-            return EntryStack.create(((BucketItem) item).fluid, 1000);
-        return EntryStack.empty();
+        return copyItemToFluid(stack);
+    }
+    
+    static EntryStack copyItemToFluid(EntryStack stack) {
+        return FluidSupportProvider.INSTANCE.itemToFluid(stack);
     }
     
     Optional<Identifier> getIdentifier();
     
     EntryStack.Type getType();
     
-    int getAmount();
+    default int getAmount() {
+        return MathHelper.floor(getFloatingAmount());
+    }
     
-    void setAmount(int amount);
+    double getFloatingAmount();
+    
+    default void setAmount(int amount) {
+        setFloatingAmount(amount);
+    }
+    
+    void setFloatingAmount(double amount);
     
     boolean isEmpty();
     

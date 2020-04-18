@@ -30,6 +30,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.api.widgets.Panel;
 import me.shedaniel.rei.api.widgets.Tooltip;
@@ -78,6 +79,7 @@ import net.minecraft.tag.BlockTags;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -386,6 +388,24 @@ public class DefaultPlugin implements REIPluginV0 {
         recipeHelper.registerScreenClickArea(new Rectangle(78, 32, 28, 23), FurnaceScreen.class, SMELTING);
         recipeHelper.registerScreenClickArea(new Rectangle(78, 32, 28, 23), SmokerScreen.class, SMOKING);
         recipeHelper.registerScreenClickArea(new Rectangle(78, 32, 28, 23), BlastFurnaceScreen.class, BLASTING);
+        FluidSupportProvider.INSTANCE.registerFluidProvider(new FluidSupportProvider.FluidProvider() {
+            @Override
+            public @NotNull EntryStack fluidToItem(@NotNull EntryStack fluidStack) {
+                Fluid fluid = fluidStack.getFluid();
+                Item item = fluid.getBucketItem();
+                if (item == null)
+                    return EntryStack.empty();
+                return EntryStack.create(item);
+            }
+            
+            @Override
+            public @NotNull EntryStack itemToFluid(@NotNull EntryStack itemStack) {
+                Item item = itemStack.getItem();
+                if (item instanceof BucketItem)
+                    return EntryStack.create(((BucketItem) item).fluid, 1000);
+                return EntryStack.empty();
+            }
+        });
 //        SubsetsRegistry subsetsRegistry = SubsetsRegistry.INSTANCE;
 //        subsetsRegistry.registerPathEntry("roughlyenoughitems:food", EntryStack.create(Items.MILK_BUCKET));
 //        subsetsRegistry.registerPathEntry("roughlyenoughitems:food/roughlyenoughitems:cookies", EntryStack.create(Items.COOKIE));

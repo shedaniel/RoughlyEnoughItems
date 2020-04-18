@@ -29,6 +29,7 @@ import com.google.common.collect.Sets;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.api.subsets.SubsetsRegistry;
 import me.shedaniel.rei.impl.subsets.SubsetsRegistryImpl;
@@ -283,6 +284,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         this.liveRecipeGenerators.clear();
         this.autoTransferHandlers.clear();
         ((SubsetsRegistryImpl) SubsetsRegistry.INSTANCE).reset();
+        ((FluidSupportProviderImpl) FluidSupportProvider.INSTANCE).reset();
         ((DisplayHelperImpl) DisplayHelper.getInstance()).resetData();
         ((DisplayHelperImpl) DisplayHelper.getInstance()).resetCache();
         BaseBoundsHandler baseBoundsHandler = new BaseBoundsHandlerImpl();

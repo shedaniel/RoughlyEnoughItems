@@ -725,7 +725,7 @@ public class EntryListWidget extends WidgetWithBounds {
                 EntryStack entry = getCurrentEntry().copy();
                 if (!entry.isEmpty()) {
                     if (entry.getType() == EntryStack.Type.FLUID)
-                        entry = EntryStack.copyFluidToBucket(entry);
+                        entry = EntryStack.copyFluidToItem(entry);
                     if (entry.getType() == EntryStack.Type.ITEM)
                         entry.setAmount(button != 1 && !Screen.hasShiftDown() ? 1 : entry.getItemStack().getMaxCount());
                     ClientHelper.getInstance().tryCheatingEntry(entry);

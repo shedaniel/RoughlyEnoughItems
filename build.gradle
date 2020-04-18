@@ -114,14 +114,23 @@ task remapMavenJar(type: RemapJarTask, dependsOn: jar) {
 
 def releaseChangelog = "No changelog"
 
-/* Thank you modmenu */
+/* Thank you modmenu & fablabs */
 task releaseOnCf {
     def df = new SimpleDateFormat("yyyy-MM-dd HH:mm")
     df.setTimeZone(TimeZone.getTimeZone("UTC"))
-    def currentBranch = "git rev-parse --abbrev-ref HEAD".execute().in.readLines().join('\n')
+    def currentBranch
+    if (System.env.BRANCH_NAME) {
+        branch = System.env.BRANCH_NAME
+        branch = branch.substring(branch.lastIndexOf("/")+1)
+    } else {
+        branch = "git rev-parse --abbrev-ref HEAD".execute().in.text.trim()
+    }
+    if (currentBranch == "HEAD") {
+        branch = "git rev-parse --short HEAD".execute().in.text.trim()
+    }
     def time = df.format(new Date())
     def changes = new StringBuilder()
-    changes << "<h2>REI v$project.version for $project.supported_version</h2>Updated at <b>$time</b>.<br><a href=\"https://www.github.com/shedaniel/RoughlyEnoughItems/commits/$currentBranch\">Click here for changelog</a>"
+    changes << "<h2>REI v$project.version for $project.supported_version</h2>Updated at <b>$time</b>.<br><a href=\"https://www.github.com/shedaniel/RoughlyEnoughItems/commits/$branch\">Click here for changelog</a>"
     def proc = "git log --max-count=200 --pretty=format:\"%s\"".execute()
     proc.in.eachLine { line ->
         def processedLine = line.toString()
