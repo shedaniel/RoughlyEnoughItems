@@ -34,9 +34,9 @@ import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
-import me.shedaniel.rei.gui.FailedToLoadScreen;
 import me.shedaniel.rei.gui.OverlaySearchField;
 import me.shedaniel.rei.gui.RecipeScreen;
+import me.shedaniel.rei.gui.WarningAndErrorScreen;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.event.client.ClientTickCallback;
@@ -204,10 +204,15 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
     @Override
     public void onInitializeClient() {
         ClothClientHooks.SCREEN_INIT_PRE.register((client, screen, screenHooks) -> {
-            if ((!RoughlyEnoughItemsState.getErrors().isEmpty() || !RoughlyEnoughItemsState.getWarnings().isEmpty()) && !(screen instanceof FailedToLoadScreen)) {
-                FailedToLoadScreen failedToLoadScreen = FailedToLoadScreen.INSTANCE.get();
-                failedToLoadScreen.setParent(screen);
-                client.openScreen(failedToLoadScreen);
+            if ((!RoughlyEnoughItemsState.getErrors().isEmpty() || !RoughlyEnoughItemsState.getWarnings().isEmpty()) && !(screen instanceof WarningAndErrorScreen)) {
+                WarningAndErrorScreen warningAndErrorScreen = WarningAndErrorScreen.INSTANCE.get();
+                warningAndErrorScreen.setParent(screen);
+                try {
+                    if (client.currentScreen != null) client.currentScreen.removed();
+                } catch (Throwable ignored) {
+                }
+                client.currentScreen = null;
+                client.openScreen(warningAndErrorScreen);
             } else if (lastHandledScreen != screen && screen instanceof HandledScreen)
                 lastHandledScreen = (HandledScreen<?>) screen;
             return ActionResult.PASS;
