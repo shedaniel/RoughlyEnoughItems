@@ -52,12 +52,12 @@ import java.util.*;
 @ApiStatus.Internal
 public class FluidEntryStack extends AbstractEntryStack {
     private static final Map<Fluid, Pair<Sprite, Integer>> FLUID_SPRITE_CACHE = new HashMap<>();
-    private static final double EMPTY_AMOUNT = -1319182373;
+    private static final double IGNORE_AMOUNT = -1319182373;
     private Fluid fluid;
     private double amount;
     
     public FluidEntryStack(Fluid fluid) {
-        this(fluid, EMPTY_AMOUNT);
+        this(fluid, IGNORE_AMOUNT);
     }
     
     public FluidEntryStack(Fluid fluid, int amount) {
@@ -103,7 +103,7 @@ public class FluidEntryStack extends AbstractEntryStack {
     
     @Override
     public void setFloatingAmount(double amount) {
-        this.amount = amount <= 0 ? EMPTY_AMOUNT : amount;
+        this.amount = amount == IGNORE_AMOUNT ? IGNORE_AMOUNT :  Math.max(amount, 0);
         if (isEmpty()) {
             fluid = Fluids.EMPTY;
         }
@@ -111,7 +111,7 @@ public class FluidEntryStack extends AbstractEntryStack {
     
     @Override
     public boolean isEmpty() {
-        return (amount != EMPTY_AMOUNT && amount <= 0) || fluid == Fluids.EMPTY;
+        return (amount != IGNORE_AMOUNT && amount <= 0) || fluid == Fluids.EMPTY;
     }
     
     @Override
@@ -130,30 +130,38 @@ public class FluidEntryStack extends AbstractEntryStack {
     
     @Override
     public boolean equalsIgnoreTagsAndAmount(EntryStack stack) {
+        if (stack.getType() == Type.ITEM)
+            return equalsIgnoreTagsAndAmount(EntryStack.copyItemToFluid(stack));
         if (stack.getType() != Type.FLUID)
-            return EntryStack.copyFluidToItem(this).equalsIgnoreTagsAndAmount(stack);
+            return false;
         return fluid == stack.getFluid();
     }
     
     @Override
     public boolean equalsIgnoreTags(EntryStack stack) {
+        if (stack.getType() == Type.ITEM)
+            return equalsIgnoreTags(EntryStack.copyItemToFluid(stack));
         if (stack.getType() != Type.FLUID)
-            return EntryStack.copyFluidToItem(this).equalsIgnoreTags(stack);
-        return fluid == stack.getFluid() && amount == stack.getAmount();
+            return false;
+        return fluid == stack.getFluid() && (amount == IGNORE_AMOUNT || stack.getAmount() == IGNORE_AMOUNT || amount == stack.getAmount());
     }
     
     @Override
     public boolean equalsIgnoreAmount(EntryStack stack) {
+        if (stack.getType() == Type.ITEM)
+            return equalsIgnoreAmount(EntryStack.copyItemToFluid(stack));
         if (stack.getType() != Type.FLUID)
-            return EntryStack.copyFluidToItem(this).equalsIgnoreAmount(stack);
+            return false;
         return fluid == stack.getFluid();
     }
     
     @Override
     public boolean equalsAll(EntryStack stack) {
+        if (stack.getType() == Type.ITEM)
+            return equalsAll(EntryStack.copyItemToFluid(stack));
         if (stack.getType() != Type.FLUID)
-            return EntryStack.copyFluidToItem(this).equalsAll(stack);
-        return fluid == stack.getFluid() && amount == stack.getAmount();
+            return false;
+        return fluid == stack.getFluid() && (amount == IGNORE_AMOUNT || stack.getAmount() == IGNORE_AMOUNT || amount == stack.getAmount());
     }
     
     @Override

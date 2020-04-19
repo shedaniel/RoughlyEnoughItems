@@ -111,26 +111,56 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
         return itemStack;
     }
     
+    /**
+     * type:
+     * 0: ignore tags and amount
+     * 1: ignore tags
+     * 2: ignore amount
+     * 3: all
+     */
+    private Boolean compareIfFluid(EntryStack stack, int type) {
+        EntryStack fluid = EntryStack.copyItemToFluid(this);
+        if (fluid.isEmpty()) return null;
+        if (stack.getType() == Type.ITEM)
+            stack = EntryStack.copyItemToFluid(stack);
+        if (stack.isEmpty()) return null;
+        switch (type) {
+            case 0:
+                return fluid.equalsIgnoreTagsAndAmount(stack);
+            case 1:
+                return fluid.equalsIgnoreTags(stack);
+            case 2:
+                return fluid.equalsIgnoreAmount(stack);
+            case 3:
+                return fluid.equalsAll(stack);
+        }
+        return null;
+    }
+    
     @Override
     public boolean equalsIgnoreTagsAndAmount(EntryStack stack) {
+        Boolean ifFluid = compareIfFluid(stack, 0);
+        if (ifFluid != null) return ifFluid;
         if (stack.getType() != Type.ITEM)
-            return EntryStack.copyItemToFluid(this).equalsIgnoreTagsAndAmount(stack);
-        return itemStack.getItem() == stack.getItem();
+            return false;
+        return itemStack.getItem() == stack.getItem() || (stack.getType() != Type.ITEM ? stack : EntryStack.copyItemToFluid(stack)).equalsIgnoreTagsAndAmount(EntryStack.copyItemToFluid(this));
     }
     
     @Override
     public boolean equalsAll(EntryStack stack) {
+        Boolean ifFluid = compareIfFluid(stack, 3);
+        if (ifFluid != null) return ifFluid;
         if (stack.getType() != Type.ITEM)
-            return EntryStack.copyItemToFluid(this).equalsAll(stack);
-        if (itemStack.getItem() != stack.getItem() || getAmount() != stack.getAmount())
             return false;
-        return ItemStack.areTagsEqual(itemStack, stack.getItemStack());
+        return itemStack.getItem() == stack.getItem() && getAmount() != stack.getAmount() && ItemStack.areTagsEqual(itemStack, stack.getItemStack());
     }
     
     @Override
     public boolean equalsIgnoreAmount(EntryStack stack) {
+        Boolean ifFluid = compareIfFluid(stack, 2);
+        if (ifFluid != null) return ifFluid;
         if (stack.getType() != Type.ITEM)
-            return EntryStack.copyItemToFluid(this).equalsIgnoreAmount(stack);
+            return false;
         if (itemStack.getItem() != stack.getItem())
             return false;
         ItemStack otherStack = stack.getItemStack();
@@ -183,8 +213,10 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     
     @Override
     public boolean equalsIgnoreTags(EntryStack stack) {
+        Boolean ifFluid = compareIfFluid(stack, 1);
+        if (ifFluid != null) return ifFluid;
         if (stack.getType() != Type.ITEM)
-            return EntryStack.copyItemToFluid(this).equalsIgnoreTags(stack);
+            return false;
         if (itemStack.getItem() != stack.getItem())
             return false;
         return getAmount() == stack.getAmount();
