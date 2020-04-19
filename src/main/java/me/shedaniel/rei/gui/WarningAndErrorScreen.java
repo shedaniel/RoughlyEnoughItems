@@ -43,13 +43,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 @ApiStatus.Internal
-public class FailedToLoadScreen extends Screen {
-    public static final Lazy<FailedToLoadScreen> INSTANCE = new Lazy<>(FailedToLoadScreen::new);
+public class WarningAndErrorScreen extends Screen {
+    public static final Lazy<WarningAndErrorScreen> INSTANCE = new Lazy<>(WarningAndErrorScreen::new);
     private AbstractButtonWidget buttonExit;
     private StringEntryListWidget listWidget;
     private Screen parent;
     
-    private FailedToLoadScreen() {
+    private WarningAndErrorScreen() {
         super(NarratorManager.EMPTY);
     }
     
@@ -260,7 +260,7 @@ public class FailedToLoadScreen extends Screen {
         public void render(int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
             contains = mouseX >= x && mouseX <= x + entryWidth && mouseY >= y && mouseY <= y + entryHeight;
             if (contains) {
-                FailedToLoadScreen.this.renderTooltip("Click to open link.", mouseX, mouseY);
+                WarningAndErrorScreen.this.renderTooltip("Click to open link.", mouseX, mouseY);
                 MinecraftClient.getInstance().textRenderer.drawWithShadow("§n" + text, x + 5, y, 0xff1fc3ff);
             } else {
                 MinecraftClient.getInstance().textRenderer.drawWithShadow(text, x + 5, y, 0xff1fc3ff);
