@@ -110,6 +110,38 @@ task remapMavenJar(type: RemapJarTask, dependsOn: jar) {
     }
 }
 
+def releaseChangelog = "No changelog"
+
+/* Thank you modmenu & fablabs */
+task releaseOnCf {
+    def df = new SimpleDateFormat("yyyy-MM-dd HH:mm")
+    df.setTimeZone(TimeZone.getTimeZone("UTC"))
+    def branch
+    if (System.env.BRANCH_NAME) {
+        branch = System.env.BRANCH_NAME
+        branch = branch.substring(branch.lastIndexOf("/")+1)
+    } else {
+        branch = "git rev-parse --abbrev-ref HEAD".execute().in.text.trim()
+    }
+    if (branch == "HEAD") {
+        branch = "git rev-parse --short HEAD".execute().in.text.trim()
+    }
+    def time = df.format(new Date())
+    def changes = new StringBuilder()
+    changes << "<h2>REI v$project.version for $project.supported_version</h2>Updated at <b>$time</b>.<br><a href=\"https://www.github.com/shedaniel/RoughlyEnoughItems/commits/$branch\">Click here for changelog</a>"
+    def proc = "git log --max-count=200 --pretty=format:\"%s\"".execute()
+    proc.in.eachLine { line ->
+        def processedLine = line.toString()
+        if (!processedLine.contains("New translations") && !processedLine.contains("Merge") && !processedLine.contains("branch")) {
+            changes << "<br>- $processedLine"
+        }
+    }
+    proc.waitFor()
+    releaseChangelog = changes.toString()
+    println(releaseChangelog)
+    dependsOn tasks.getByName("curseforge")
+}
+
 curseforge {
     if (project.hasProperty('danielshe_curse_api_key') || System.getenv('danielshe_curse_api_key') != null) {
         apiKey = project.hasProperty('danielshe_curse_api_key') ? project.property('danielshe_curse_api_key') : System.getenv('danielshe_curse_api_key')
@@ -117,10 +149,7 @@ curseforge {
             id = '310111'
             releaseType = 'release'
             changelogType = "html"
-            def df = new SimpleDateFormat("yyyy-MM-dd HH:mm")
-            df.setTimeZone(TimeZone.getTimeZone("UTC"))
-            def time = df.format(new Date())
-            changelog = "<h2>REI v$project.version</h2>Updated at <b>$time</b>.<br><a href=\"https://gist.github.com/shedaniel/b7593e692319976f3349263208792922\">Click here for full changelog</a>"
+            changelog = releaseChangelog
             addGameVersion '1.15'
             addGameVersion '1.15.1'
             addGameVersion '1.15.2'
@@ -133,7 +162,7 @@ curseforge {
                 embeddedLibrary 'cloth-config'
             }
             mainArtifact(file("${project.buildDir}/libs/${project.archivesBaseName}-${project.version}.jar")) {
-                displayName = "[Fabric 1.15.x] v$project.version"
+                displayName = "[Fabric $project.supported_version] v$project.version"
             }
             afterEvaluate {
                 uploadTask.dependsOn("remapJar")
