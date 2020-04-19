@@ -16,6 +16,7 @@ jobs:
         with:
           java-version: 1.8
       - name: Upload to CurseForge
-        run: ./gradlew clean build curseforge --refresh-dependencies --stacktrace
+        run: ./gradlew clean build releaseOnCf --refresh-dependencies --stacktrace
         env:
           danielshe_curse_api_key: ${{ secrets.CF_API_KEY }}
+            BRANCH_NAME: ${{ github.ref }}
