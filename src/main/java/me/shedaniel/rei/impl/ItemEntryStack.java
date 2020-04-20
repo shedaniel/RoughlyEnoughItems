@@ -143,7 +143,7 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
         if (ifFluid != null) return ifFluid;
         if (stack.getType() != Type.ITEM)
             return false;
-        return itemStack.getItem() == stack.getItem() || (stack.getType() != Type.ITEM ? stack : EntryStack.copyItemToFluid(stack)).equalsIgnoreTagsAndAmount(EntryStack.copyItemToFluid(this));
+        return itemStack.getItem() == stack.getItem();
     }
     
     @Override
