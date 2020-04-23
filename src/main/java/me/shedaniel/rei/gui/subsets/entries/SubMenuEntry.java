@@ -38,7 +38,9 @@ import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.LiteralText;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
@@ -108,13 +110,13 @@ public class SubMenuEntry extends SubsetsMenuEntry {
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         double filteredRatio = getFilteredRatio();
         if (filteredRatio > 0) {
             filteredRatio = filteredRatio * 0.85 + 0.15;
-            fill(x, y, x + width, y + 12, (16711680 | MathHelper.ceil(filteredRatio * 255.0) << 24) + (selected ? 39321 : 0));
+            fill(matrices, x, y, x + width, y + 12, (16711680 | MathHelper.ceil(filteredRatio * 255.0) << 24) + (selected ? 39321 : 0));
         } else if (selected) {
-            fill(x, y, x + width, y + 12, -12237499);
+            fill(matrices, x, y, x + width, y + 12, -12237499);
         }
         if (selected) {
             if (!entries.isEmpty()) {
@@ -123,21 +125,21 @@ public class SubMenuEntry extends SubsetsMenuEntry {
                 menu.menuStartPoint.y = y - 1;
                 List<Rectangle> areas = Lists.newArrayList(ScissorsHandler.INSTANCE.getScissorsAreas());
                 ScissorsHandler.INSTANCE.clearScissors();
-                menu.render(mouseX, mouseY, delta);
+                menu.render(matrices, mouseX, mouseY, delta);
                 for (Rectangle area : areas) {
                     ScissorsHandler.INSTANCE.scissor(area);
                 }
             } else clickedBefore = false;
             if (clickedBefore) {
                 if (rendering && mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + 12 && !entries.isEmpty()) {
-                    REIHelper.getInstance().queueTooltip(Tooltip.create("Click again to filter everything in this group."));
+                    REIHelper.getInstance().queueTooltip(Tooltip.create(new LiteralText("Click again to filter everything in this group.")));
                 } else clickedBefore = false;
             }
         } else clickedBefore = false;
-        font.draw(text, x + 2, y + 2, selected ? 16777215 : 8947848);
+        font.draw(matrices, text, x + 2, y + 2, selected ? 16777215 : 8947848);
         if (!entries.isEmpty()) {
             MinecraftClient.getInstance().getTextureManager().bindTexture(TabWidget.CHEST_GUI_TEXTURE);
-            drawTexture(x + width - 15, y - 2, 0, 28, 18, 18);
+            drawTexture(matrices, x + width - 15, y - 2, 0, 28, 18, 18);
         }
     }
     

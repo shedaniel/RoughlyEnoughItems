@@ -31,8 +31,11 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.client.gui.widget.AbstractPressableButtonWidget;
-import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.util.NarratorManager;
 import net.minecraft.client.util.Window;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 
 import java.util.List;
 import java.util.Optional;
@@ -43,7 +46,7 @@ public class RecipeScreenTypeEntry extends TooltipListEntry<RecipeScreenType> {
     private RecipeScreenType type;
     private RecipeScreenType defaultValue;
     private Consumer<RecipeScreenType> save;
-    private AbstractButtonWidget buttonWidget = new AbstractPressableButtonWidget(0, 0, 0, 20, "") {
+    private AbstractButtonWidget buttonWidget = new AbstractPressableButtonWidget(0, 0, 0, 20, NarratorManager.EMPTY) {
         @Override
         public void onPress() {
             MinecraftClient.getInstance().openScreen(new PreRecipeViewingScreen(getScreen(), type, false, original -> {
@@ -54,15 +57,15 @@ public class RecipeScreenTypeEntry extends TooltipListEntry<RecipeScreenType> {
         }
         
         @Override
-        public void render(int mouseX, int mouseY, float delta) {
-            setMessage(I18n.translate("config.roughlyenoughitems.recipeScreenType.config", type.toString()));
-            super.render(mouseX, mouseY, delta);
+        public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+            setMessage(new TranslatableText("config.roughlyenoughitems.recipeScreenType.config", type.toString()));
+            super.render(matrices, mouseX, mouseY, delta);
         }
     };
     private List<Element> children = ImmutableList.of(buttonWidget);
     
     @SuppressWarnings("deprecation")
-    public RecipeScreenTypeEntry(int width, String fieldName, RecipeScreenType type, RecipeScreenType defaultValue, Consumer<RecipeScreenType> save) {
+    public RecipeScreenTypeEntry(int width, Text fieldName, RecipeScreenType type, RecipeScreenType defaultValue, Consumer<RecipeScreenType> save) {
         super(fieldName, null);
         this.width = width;
         this.type = type;
@@ -91,13 +94,13 @@ public class RecipeScreenTypeEntry extends TooltipListEntry<RecipeScreenType> {
     }
     
     @Override
-    public void render(int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-        super.render(index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
+    public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+        super.render(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
         Window window = MinecraftClient.getInstance().getWindow();
         this.buttonWidget.active = this.isEditable();
         this.buttonWidget.y = y;
         this.buttonWidget.x = x + entryWidth / 2 - width / 2;
         this.buttonWidget.setWidth(width);
-        this.buttonWidget.render(mouseX, mouseY, delta);
+        this.buttonWidget.render(matrices, mouseX, mouseY, delta);
     }
 }

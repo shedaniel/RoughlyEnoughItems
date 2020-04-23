@@ -38,16 +38,25 @@ import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @ApiStatus.Internal
 public class FluidEntryStack extends AbstractEntryStack {
@@ -103,7 +112,7 @@ public class FluidEntryStack extends AbstractEntryStack {
     
     @Override
     public void setFloatingAmount(double amount) {
-        this.amount = amount == IGNORE_AMOUNT ? IGNORE_AMOUNT :  Math.max(amount, 0);
+        this.amount = amount == IGNORE_AMOUNT ? IGNORE_AMOUNT : Math.max(amount, 0);
         if (isEmpty()) {
             fluid = Fluids.EMPTY;
         }
@@ -194,18 +203,20 @@ public class FluidEntryStack extends AbstractEntryStack {
     public Tooltip getTooltip(Point point) {
         if (!get(Settings.TOOLTIP_ENABLED).get() || isEmpty())
             return null;
-        List<String> toolTip = Lists.newArrayList(SearchArgument.tryGetEntryStackName(this));
+        List<Text> toolTip = Lists.newArrayList(new LiteralText(SearchArgument.tryGetEntryStackName(this)));
         if (amount >= 0) {
             String amountTooltip = get(Settings.Fluid.AMOUNT_TOOLTIP).apply(this);
             if (amountTooltip != null)
-                toolTip.addAll(Arrays.asList(amountTooltip.split("\n")));
+                toolTip.addAll(Stream.of(amountTooltip.split("\n")).map(LiteralText::new).collect(Collectors.toList()));
         }
         toolTip.addAll(get(Settings.TOOLTIP_APPEND_EXTRA).apply(this));
         if (get(Settings.TOOLTIP_APPEND_MOD).get() && ConfigObject.getInstance().shouldAppendModNames()) {
-            final String modString = ClientHelper.getInstance().getFormattedModFromIdentifier(Registry.FLUID.getId(fluid));
+            Identifier id = Registry.FLUID.getId(fluid);
+            final Text modString = ClientHelper.getInstance().getFormattedModFromIdentifier(id);
+            final String modId = ClientHelper.getInstance().getModFromIdentifier(id);
             boolean alreadyHasMod = false;
-            for (String s : toolTip)
-                if (s.equalsIgnoreCase(modString)) {
+            for (Text s : toolTip)
+                if (s.asString().equalsIgnoreCase(modId)) {
                     alreadyHasMod = true;
                     break;
                 }
@@ -217,7 +228,7 @@ public class FluidEntryStack extends AbstractEntryStack {
     
     @SuppressWarnings("deprecation")
     @Override
-    public void render(Rectangle bounds, int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
         if (get(Settings.RENDER).get()) {
             Pair<Sprite, Integer> pair = getOrLoadSprite(getFluid());
             if (pair != null) {
@@ -230,11 +241,12 @@ public class FluidEntryStack extends AbstractEntryStack {
                 MinecraftClient.getInstance().getTextureManager().bindTexture(SpriteAtlasTexture.BLOCK_ATLAS_TEX);
                 Tessellator tess = Tessellator.getInstance();
                 BufferBuilder bb = tess.getBuffer();
+                Matrix4f matrix = matrices.peek().getModel();
                 bb.begin(7, VertexFormats.POSITION_TEXTURE_COLOR);
-                bb.vertex(bounds.getMaxX(), bounds.y, getZ()).texture(sprite.getMaxU(), sprite.getMinV()).color(r, g, b, a).next();
-                bb.vertex(bounds.x, bounds.y, getZ()).texture(sprite.getMinU(), sprite.getMinV()).color(r, g, b, a).next();
-                bb.vertex(bounds.x, bounds.getMaxY(), getZ()).texture(sprite.getMinU(), sprite.getMaxV()).color(r, g, b, a).next();
-                bb.vertex(bounds.getMaxX(), bounds.getMaxY(), getZ()).texture(sprite.getMaxU(), sprite.getMaxV()).color(r, g, b, a).next();
+                bb.vertex(matrix, bounds.getMaxX(), bounds.y, getZ()).texture(sprite.getMaxU(), sprite.getMinV()).color(r, g, b, a).next();
+                bb.vertex(matrix, bounds.x, bounds.y, getZ()).texture(sprite.getMinU(), sprite.getMinV()).color(r, g, b, a).next();
+                bb.vertex(matrix, bounds.x, bounds.getMaxY(), getZ()).texture(sprite.getMinU(), sprite.getMaxV()).color(r, g, b, a).next();
+                bb.vertex(matrix, bounds.getMaxX(), bounds.getMaxY(), getZ()).texture(sprite.getMaxU(), sprite.getMaxV()).color(r, g, b, a).next();
                 tess.draw();
             }
         }

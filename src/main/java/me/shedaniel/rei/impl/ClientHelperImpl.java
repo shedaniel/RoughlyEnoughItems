@@ -48,10 +48,13 @@ import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
+import net.minecraft.client.util.NarratorManager;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -99,19 +102,19 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     }
     
     @Override
-    public String getFormattedModFromItem(Item item) {
+    public Text getFormattedModFromItem(Item item) {
         String mod = getModFromItem(item);
         if (mod.isEmpty())
-            return "";
-        return Formatting.BLUE.toString() + Formatting.ITALIC.toString() + mod;
+            return NarratorManager.EMPTY;
+        return new LiteralText(mod).method_27695(Formatting.BLUE, Formatting.ITALIC);
     }
     
     @Override
-    public String getFormattedModFromIdentifier(Identifier identifier) {
+    public Text getFormattedModFromIdentifier(Identifier identifier) {
         String mod = getModFromIdentifier(identifier);
         if (mod.isEmpty())
-            return "";
-        return Formatting.BLUE.toString() + Formatting.ITALIC.toString() + mod;
+            return NarratorManager.EMPTY;
+        return new LiteralText(mod).method_27695(Formatting.BLUE, Formatting.ITALIC);
     }
     
     @Override

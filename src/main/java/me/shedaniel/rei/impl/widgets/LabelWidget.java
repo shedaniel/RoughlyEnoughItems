@@ -30,14 +30,20 @@ import me.shedaniel.rei.api.widgets.Label;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
 import net.minecraft.client.gui.Element;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class LabelWidget extends Label {
     
@@ -51,133 +57,133 @@ public final class LabelWidget extends Label {
     @NotNull private Point point;
     @Nullable private Function<Label, @Nullable String> tooltip;
     @Nullable private Consumer<Label> onClick;
-    @Nullable private Consumer<Label> onRender;
-    @NotNull private String text;
+    @Nullable private BiConsumer<MatrixStack, Label> onRender;
+    @NotNull private Text text;
     
-    public LabelWidget(@NotNull Point point, @NotNull String text) {
+    public LabelWidget(@NotNull Point point, @NotNull Text text) {
         Objects.requireNonNull(this.point = point);
         Objects.requireNonNull(this.text = text);
     }
     
     @Override
-    public boolean isClickable() {
+    public final boolean isClickable() {
         return clickable;
     }
     
     @Override
-    public void setClickable(boolean clickable) {
+    public final void setClickable(boolean clickable) {
         this.clickable = clickable;
     }
     
     @Nullable
     @Override
-    public Consumer<Label> getOnClick() {
+    public final Consumer<Label> getOnClick() {
         return onClick;
     }
     
     @Override
-    public void setOnClick(@Nullable Consumer<Label> onClick) {
+    public final void setOnClick(@Nullable Consumer<Label> onClick) {
         this.onClick = onClick;
     }
     
     @Nullable
     @Override
-    public Consumer<Label> getOnRender() {
+    public final BiConsumer<MatrixStack, Label> getOnRender() {
         return onRender;
     }
     
     @Override
-    public void setOnRender(@Nullable Consumer<Label> onRender) {
+    public final void setOnRender(@Nullable BiConsumer<MatrixStack, Label> onRender) {
         this.onRender = onRender;
     }
     
     @Override
-    public boolean isFocusable() {
+    public final boolean isFocusable() {
         return focusable;
     }
     
     @Override
-    public void setFocusable(boolean focusable) {
+    public final void setFocusable(boolean focusable) {
         this.focusable = focusable;
     }
     
     @Override
     @Nullable
-    public String getTooltip() {
+    public final String getTooltip() {
         if (tooltip == null)
             return null;
         return tooltip.apply(this);
     }
     
     @Override
-    public void setTooltip(@Nullable Function<Label, @Nullable String> tooltip) {
+    public final void setTooltip(@Nullable Function<Label, @Nullable String> tooltip) {
         this.tooltip = tooltip;
     }
     
     @Override
-    public int getHorizontalAlignment() {
+    public final int getHorizontalAlignment() {
         return horizontalAlignment;
     }
     
     @Override
-    public void setHorizontalAlignment(int horizontalAlignment) {
+    public final void setHorizontalAlignment(int horizontalAlignment) {
         this.horizontalAlignment = horizontalAlignment;
     }
     
     @Override
-    public boolean hasShadow() {
+    public final boolean hasShadow() {
         return hasShadow;
     }
     
     @Override
-    public void setShadow(boolean hasShadow) {
+    public final void setShadow(boolean hasShadow) {
         this.hasShadow = hasShadow;
     }
     
     @Override
-    public int getColor() {
+    public final int getColor() {
         return color;
     }
     
     @Override
-    public void setColor(int color) {
+    public final void setColor(int color) {
         this.color = color;
     }
     
     @Override
-    public int getHoveredColor() {
+    public final int getHoveredColor() {
         return hoveredColor;
     }
     
     @Override
-    public void setHoveredColor(int hoveredColor) {
+    public final void setHoveredColor(int hoveredColor) {
         this.hoveredColor = hoveredColor;
     }
     
     @Override
-    public @NotNull Point getPoint() {
+    public final @NotNull Point getPoint() {
         return point;
     }
     
     @Override
-    public void setPoint(@NotNull Point point) {
+    public final void setPoint(@NotNull Point point) {
         this.point = Objects.requireNonNull(point);
     }
     
     @Override
-    public @NotNull String getText() {
+    public final @NotNull Text getText() {
         return text;
     }
     
     @Override
-    public void setText(@NotNull String text) {
+    public final void setText(@NotNull Text text) {
         this.text = Objects.requireNonNull(text);
     }
     
     @NotNull
     @Override
-    public Rectangle getBounds() {
-        int width = font.getStringWidth(text);
+    public final Rectangle getBounds() {
+        int width = font.method_27525(text);
         Point point = getPoint();
         if (getHorizontalAlignment() == LEFT_ALIGNED)
             return new Rectangle(point.x - 1, point.y - 5, width + 2, 14);
@@ -187,42 +193,42 @@ public final class LabelWidget extends Label {
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (getOnRender() != null)
-            getOnRender().accept(this);
+            getOnRender().accept(matrices, this);
         int color = getColor();
         if (isClickable() && isHovered(mouseX, mouseY))
             color = getHoveredColor();
         Point pos = getPoint();
-        int width = font.getStringWidth(getText());
+        int width = font.method_27525(getText());
         switch (getHorizontalAlignment()) {
             case LEFT_ALIGNED:
                 if (hasShadow())
-                    font.drawWithShadow(getText(), pos.x, pos.y, color);
+                    font.method_27517(matrices, getText(), pos.x, pos.y, color);
                 else
-                    font.draw(getText(), pos.x, pos.y, color);
+                    font.method_27528(matrices, getText(), pos.x, pos.y, color);
                 break;
             case RIGHT_ALIGNED:
                 if (hasShadow())
-                    font.drawWithShadow(getText(), pos.x - width, pos.y, color);
+                    font.method_27517(matrices, getText(), pos.x - width, pos.y, color);
                 else
-                    font.draw(getText(), pos.x - width, pos.y, color);
+                    font.method_27528(matrices, getText(), pos.x - width, pos.y, color);
                 break;
             case CENTER:
             default:
                 if (hasShadow())
-                    font.drawWithShadow(getText(), pos.x - width / 2f, pos.y, color);
+                    font.method_27517(matrices, getText(), pos.x - width / 2f, pos.y, color);
                 else
-                    font.draw(getText(), pos.x - width / 2f, pos.y, color);
+                    font.method_27528(matrices, getText(), pos.x - width / 2f, pos.y, color);
                 break;
         }
         if (isHovered(mouseX, mouseY)) {
             String tooltip = getTooltip();
             if (tooltip != null) {
                 if (!focused && containsMouse(mouseX, mouseY))
-                    Tooltip.create(tooltip.split("\n")).queue();
+                    Tooltip.create(Stream.of(tooltip.split("\n")).map(LiteralText::new).collect(Collectors.toList())).queue();
                 else if (focused)
-                    Tooltip.create(point, tooltip.split("\n")).queue();
+                    Tooltip.create(point, Stream.of(tooltip.split("\n")).map(LiteralText::new).collect(Collectors.toList())).queue();
             }
         }
     }

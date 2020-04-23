@@ -37,14 +37,21 @@ import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.LiteralText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class EntryWidget extends Slot {
     
@@ -271,16 +278,16 @@ public class EntryWidget extends Slot {
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float delta) {
-        drawBackground(mouseX, mouseY, delta);
-        drawCurrentEntry(mouseX, mouseY, delta);
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+        drawBackground(matrices, mouseX, mouseY, delta);
+        drawCurrentEntry(matrices, mouseX, mouseY, delta);
         
         boolean highlighted = containsMouse(mouseX, mouseY);
         if (hasTooltips() && highlighted) {
-            queueTooltip(mouseX, mouseY, delta);
+            queueTooltip(matrices, mouseX, mouseY, delta);
         }
         if (hasHighlight() && highlighted) {
-            drawHighlighted(mouseX, mouseY, delta);
+            drawHighlighted(matrices, mouseX, mouseY, delta);
         }
     }
     
@@ -292,28 +299,30 @@ public class EntryWidget extends Slot {
         return highlight;
     }
     
-    protected void drawBackground(int mouseX, int mouseY, float delta) {
+    protected void drawBackground(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (background) {
             minecraft.getTextureManager().bindTexture(REIHelper.getInstance().isDarkThemeEnabled() ? RECIPE_GUI_DARK : RECIPE_GUI);
-            drawTexture(bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
+            drawTexture(matrices, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
         }
     }
     
-    protected void drawCurrentEntry(int mouseX, int mouseY, float delta) {
+    protected void drawCurrentEntry(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         EntryStack entry = getCurrentEntry();
         entry.setZ(100);
-        entry.render(getInnerBounds(), mouseX, mouseY, delta);
+        entry.render(matrices, getInnerBounds(), mouseX, mouseY, delta);
     }
     
-    protected void queueTooltip(int mouseX, int mouseY, float delta) {
+    protected void queueTooltip(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         Tooltip tooltip = getCurrentTooltip(new Point(mouseX, mouseY));
         if (tooltip != null) {
             if (interactableFavorites && ConfigObject.getInstance().doDisplayFavoritesTooltip() && !ConfigObject.getInstance().getFavoriteKeyCode().isUnknown()) {
-                String name = ConfigObject.getInstance().getFavoriteKeyCode().getLocalizedName();
+                String name = ConfigObject.getInstance().getFavoriteKeyCode().getLocalizedName().getString();
                 if (reverseFavoritesAction())
-                    tooltip.getText().addAll(Arrays.asList(I18n.translate("text.rei.remove_favorites_tooltip", name).split("\n")));
+                    tooltip.getText().addAll(Stream.of(I18n.translate("text.rei.remove_favorites_tooltip", name).split("\n"))
+                            .map(LiteralText::new).collect(Collectors.toList()));
                 else
-                    tooltip.getText().addAll(Arrays.asList(I18n.translate("text.rei.favorites_tooltip", name).split("\n")));
+                    tooltip.getText().addAll(Stream.of(I18n.translate("text.rei.favorites_tooltip", name).split("\n"))
+                            .map(LiteralText::new).collect(Collectors.toList()));
             }
             tooltip.queue();
         }
@@ -324,13 +333,13 @@ public class EntryWidget extends Slot {
         return getCurrentEntry().getTooltip(point);
     }
     
-    protected void drawHighlighted(int mouseX, int mouseY, float delta) {
+    protected void drawHighlighted(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         RenderSystem.disableDepthTest();
         RenderSystem.colorMask(true, true, true, false);
         int color = REIHelper.getInstance().isDarkThemeEnabled() ? -1877929711 : -2130706433;
         setZ(300);
         Rectangle bounds = getInnerBounds();
-        fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), color, color);
+        fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), color, color);
         setZ(0);
         RenderSystem.colorMask(true, true, true, true);
         RenderSystem.enableDepthTest();

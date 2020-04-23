@@ -27,6 +27,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.widgets.Tooltip;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -63,7 +64,7 @@ public class EmptyEntryStack implements EntryStack {
     
     @Override
     public void setFloatingAmount(double amount) {
-    
+        
     }
     
     @Override
@@ -113,7 +114,7 @@ public class EmptyEntryStack implements EntryStack {
     
     @Override
     public void setZ(int z) {
-    
+        
     }
     
     @Override
@@ -142,8 +143,8 @@ public class EmptyEntryStack implements EntryStack {
     }
     
     @Override
-    public void render(Rectangle bounds, int mouseX, int mouseY, float delta) {
-    
+    public void render(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+        
     }
     
     @Override

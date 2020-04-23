@@ -42,6 +42,7 @@ import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import me.shedaniel.rei.impl.EntryRegistryImpl;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -211,11 +212,11 @@ public class SubsetsMenu extends WidgetWithBounds implements LateRenderable {
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         Rectangle bounds = getBounds();
         Rectangle innerBounds = getInnerBounds();
-        fill(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), -6250336);
-        fill(innerBounds.x, innerBounds.y, innerBounds.getMaxX(), innerBounds.getMaxY(), -16777216);
+        fill(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), -6250336);
+        fill(matrices, innerBounds.x, innerBounds.y, innerBounds.getMaxX(), innerBounds.getMaxY(), -16777216);
         boolean contains = innerBounds.contains(mouseX, mouseY);
         SubsetsMenuEntry focused = getFocused() instanceof SubsetsMenuEntry ? (SubsetsMenuEntry) getFocused() : null;
         int currentY = (int) (innerBounds.y - scrolling.scrollAmount);
@@ -233,7 +234,7 @@ public class SubsetsMenu extends WidgetWithBounds implements LateRenderable {
             boolean containsMouse = contains && mouseY >= currentY && mouseY < currentY + child.getEntryHeight();
             child.updateInformation(innerBounds.x, currentY, focused == child || containsMouse, containsMouse, rendering, getMaxEntryWidth());
             if (rendering)
-                child.render(mouseX, mouseY, delta);
+                child.render(matrices, mouseX, mouseY, delta);
             currentY += child.getEntryHeight();
         }
         ScissorsHandler.INSTANCE.removeLastScissor();

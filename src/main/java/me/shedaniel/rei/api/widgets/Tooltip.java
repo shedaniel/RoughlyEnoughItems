@@ -26,6 +26,7 @@ package me.shedaniel.rei.api.widgets;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
+import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -34,25 +35,25 @@ import java.util.List;
 public interface Tooltip {
     @SuppressWarnings("deprecation")
     @NotNull
-    static Tooltip create(Point point, Collection<String> texts) {
+    static Tooltip create(Point point, Collection<Text> texts) {
         return QueuedTooltip.create(point, texts);
     }
     
     @SuppressWarnings("deprecation")
     @NotNull
-    static Tooltip create(Point point, String... texts) {
+    static Tooltip create(Point point, Text... texts) {
         return QueuedTooltip.create(point, texts);
     }
     
     @SuppressWarnings("deprecation")
     @NotNull
-    static Tooltip create(Collection<String> texts) {
+    static Tooltip create(Collection<Text> texts) {
         return QueuedTooltip.create(texts);
     }
     
     @SuppressWarnings("deprecation")
     @NotNull
-    static Tooltip create(String... texts) {
+    static Tooltip create(Text... texts) {
         return QueuedTooltip.create(texts);
     }
     
@@ -60,7 +61,7 @@ public interface Tooltip {
     
     int getY();
     
-    List<String> getText();
+    List<Text> getText();
     
     default void queue() {
         REIHelper.getInstance().queueTooltip(this);

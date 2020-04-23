@@ -47,6 +47,9 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Matrix4f;
@@ -185,7 +188,7 @@ public class EntryListWidget extends WidgetWithBounds {
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
             for (EntryListEntry entry : entries)
                 entry.clearStacks();
@@ -200,7 +203,7 @@ public class EntryListWidget extends WidgetWithBounds {
                 int size = 0;
                 long time = 0;
                 if (sizeForFavorites > 0) {
-                    drawString(font, I18n.translate("text.rei.favorites"), innerBounds.x + 2, (int) (innerBounds.y + 8 - scrolling.scrollAmount), -1);
+                    method_27535(matrices, font, new TranslatableText("text.rei.favorites"), innerBounds.x + 2, (int) (innerBounds.y + 8 - scrolling.scrollAmount), -1);
                     nextIndex += innerBounds.width / entrySize();
                     back1:
                     for (EntryStack stack : favorites) {
@@ -214,7 +217,7 @@ public class EntryListWidget extends WidgetWithBounds {
                                 entry.isFavorites = true;
                                 size++;
                                 long l = System.currentTimeMillis();
-                                entry.render(mouseX, mouseY, delta);
+                                entry.render(matrices, mouseX, mouseY, delta);
                                 time += (System.currentTimeMillis() - l);
                                 nextIndex++;
                                 break;
@@ -241,7 +244,7 @@ public class EntryListWidget extends WidgetWithBounds {
                             if (!entry.getCurrentEntry().isEmpty()) {
                                 size++;
                                 long l = System.nanoTime();
-                                entry.render(mouseX, mouseY, delta);
+                                entry.render(matrices, mouseX, mouseY, delta);
                                 time += (System.nanoTime() - l);
                             }
                             nextIndex++;
@@ -255,18 +258,19 @@ public class EntryListWidget extends WidgetWithBounds {
                 long totalTime = System.nanoTime() - totalTimeStart;
                 int z = getZ();
                 setZ(500);
-                String str = String.format("%d entries, avg. %.0fns, ttl. %.0fms, %s fps", size, time / (double) size, totalTime / 1000000d, minecraft.fpsDebugString.split(" ")[0]);
-                fillGradient(bounds.x, bounds.y, bounds.x + font.getStringWidth(str) + 2, bounds.y + font.fontHeight + 2, -16777216, -16777216);
-                MatrixStack matrixStack_1 = new MatrixStack();
+                Text debugText = new LiteralText(String.format("%d entries, avg. %.0fns, ttl. %.0fms, %s fps", size, time / (double) size, totalTime / 1000000d, minecraft.fpsDebugString.split(" ")[0]));
+                fillGradient(matrices, bounds.x, bounds.y, bounds.x + font.method_27525(debugText) + 2, bounds.y + font.fontHeight + 2, -16777216, -16777216);
                 VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
-                matrixStack_1.translate(0.0D, 0.0D, getZ());
-                Matrix4f matrix4f_1 = matrixStack_1.peek().getModel();
-                font.draw(str, bounds.x + 2, bounds.y + 2, -1, false, matrix4f_1, immediate, false, 0, 15728880);
+                matrices.push();
+                matrices.translate(0.0D, 0.0D, getZ());
+                Matrix4f matrix = matrices.peek().getModel();
+                font.draw(debugText, bounds.x + 2, bounds.y + 2, -1, false, matrix, immediate, false, 0, 15728880);
                 immediate.draw();
                 setZ(z);
+                matrices.pop();
             } else {
                 if (sizeForFavorites > 0) {
-                    drawString(font, I18n.translate("text.rei.favorites"), innerBounds.x + 2, (int) (innerBounds.y + 8 - scrolling.scrollAmount), -1);
+                    method_27535(matrices, font, new TranslatableText("text.rei.favorites"), innerBounds.x + 2, (int) (innerBounds.y + 8 - scrolling.scrollAmount), -1);
                     nextIndex += innerBounds.width / entrySize();
                     back1:
                     for (EntryStack stack : favorites) {
@@ -278,7 +282,7 @@ public class EntryListWidget extends WidgetWithBounds {
                             if (notSteppingOnExclusionZones(entry.getBounds().x, entry.getBounds().y, innerBounds)) {
                                 entry.entry(stack);
                                 entry.isFavorites = true;
-                                entry.render(mouseX, mouseY, delta);
+                                entry.render(matrices, mouseX, mouseY, delta);
                                 nextIndex++;
                                 break;
                             } else {
@@ -301,7 +305,7 @@ public class EntryListWidget extends WidgetWithBounds {
                         if (notSteppingOnExclusionZones(entry.getBounds().x, entry.getBounds().y, innerBounds)) {
                             entry.entry(stack);
                             entry.isFavorites = false;
-                            entry.render(mouseX, mouseY, delta);
+                            entry.render(matrices, mouseX, mouseY, delta);
                             nextIndex++;
                             break;
                         } else {
@@ -319,7 +323,7 @@ public class EntryListWidget extends WidgetWithBounds {
                 int size = 0;
                 long time = 0;
                 for (Widget widget : renders) {
-                    widget.render(mouseX, mouseY, delta);
+                    widget.render(matrices, mouseX, mouseY, delta);
                 }
                 long totalTimeStart = System.nanoTime();
                 if (ConfigObject.getInstance().doesFastEntryRendering()) {
@@ -331,33 +335,33 @@ public class EntryListWidget extends WidgetWithBounds {
                         EntryStack first = firstWidget.getCurrentEntry();
                         if (first instanceof OptimalEntryStack) {
                             OptimalEntryStack firstStack = (OptimalEntryStack) first;
-                            firstStack.optimisedRenderStart(delta);
+                            firstStack.optimisedRenderStart(matrices, delta);
                             long l = System.nanoTime();
                             for (EntryListEntry listEntry : list) {
                                 EntryStack currentEntry = listEntry.getCurrentEntry();
                                 currentEntry.setZ(100);
-                                listEntry.drawBackground(mouseX, mouseY, delta);
-                                ((OptimalEntryStack) currentEntry).optimisedRenderBase(listEntry.getInnerBounds(), mouseX, mouseY, delta);
+                                listEntry.drawBackground(matrices, mouseX, mouseY, delta);
+                                ((OptimalEntryStack) currentEntry).optimisedRenderBase(matrices, listEntry.getInnerBounds(), mouseX, mouseY, delta);
                                 if (!currentEntry.isEmpty())
                                     size++;
                             }
                             for (EntryListEntry listEntry : list) {
                                 EntryStack currentEntry = listEntry.getCurrentEntry();
-                                ((OptimalEntryStack) currentEntry).optimisedRenderOverlay(listEntry.getInnerBounds(), mouseX, mouseY, delta);
+                                ((OptimalEntryStack) currentEntry).optimisedRenderOverlay(matrices, listEntry.getInnerBounds(), mouseX, mouseY, delta);
                                 if (listEntry.containsMouse(mouseX, mouseY)) {
-                                    listEntry.queueTooltip(mouseX, mouseY, delta);
-                                    listEntry.drawHighlighted(mouseX, mouseY, delta);
+                                    listEntry.queueTooltip(matrices, mouseX, mouseY, delta);
+                                    listEntry.drawHighlighted(matrices, mouseX, mouseY, delta);
                                 }
                             }
                             time += (System.nanoTime() - l);
-                            firstStack.optimisedRenderEnd(delta);
+                            firstStack.optimisedRenderEnd(matrices, delta);
                         } else {
                             for (EntryListEntry listEntry : list) {
                                 if (listEntry.getCurrentEntry().isEmpty())
                                     continue;
                                 size++;
                                 long l = System.nanoTime();
-                                listEntry.render(mouseX, mouseY, delta);
+                                listEntry.render(matrices, mouseX, mouseY, delta);
                                 time += (System.nanoTime() - l);
                             }
                         }
@@ -368,26 +372,27 @@ public class EntryListWidget extends WidgetWithBounds {
                             continue;
                         size++;
                         long l = System.nanoTime();
-                        entry.render(mouseX, mouseY, delta);
+                        entry.render(matrices, mouseX, mouseY, delta);
                         time += (System.nanoTime() - l);
                     }
                 }
                 long totalTime = System.nanoTime() - totalTimeStart;
                 int z = getZ();
                 setZ(500);
-                String str = String.format("%d entries, avg. %.0fns, ttl. %.0fms, %s fps", size, time / (double) size, totalTime / 1000000d, minecraft.fpsDebugString.split(" ")[0]);
-                int stringWidth = font.getStringWidth(str);
-                fillGradient(Math.min(bounds.x, minecraft.currentScreen.width - stringWidth - 2), bounds.y, bounds.x + stringWidth + 2, bounds.y + font.fontHeight + 2, -16777216, -16777216);
-                MatrixStack matrixStack_1 = new MatrixStack();
+                Text debugText = new LiteralText(String.format("%d entries, avg. %.0fns, ttl. %.0fms, %s fps", size, time / (double) size, totalTime / 1000000d, minecraft.fpsDebugString.split(" ")[0]));
+                int stringWidth = font.method_27525(debugText);
+                fillGradient(matrices, Math.min(bounds.x, minecraft.currentScreen.width - stringWidth - 2), bounds.y, bounds.x + stringWidth + 2, bounds.y + font.fontHeight + 2, -16777216, -16777216);
                 VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
-                matrixStack_1.translate(0.0D, 0.0D, getZ());
-                Matrix4f matrix4f_1 = matrixStack_1.peek().getModel();
-                font.draw(str, Math.min(bounds.x + 2, minecraft.currentScreen.width - stringWidth), bounds.y + 2, -1, false, matrix4f_1, immediate, false, 0, 15728880);
+                matrices.push();
+                matrices.translate(0.0D, 0.0D, getZ());
+                Matrix4f matrix = matrices.peek().getModel();
+                font.draw(debugText, Math.min(bounds.x + 2, minecraft.currentScreen.width - stringWidth), bounds.y + 2, -1, false, matrix, immediate, false, 0, 15728880);
                 immediate.draw();
                 setZ(z);
+                matrices.pop();
             } else {
                 for (Widget widget : renders) {
-                    widget.render(mouseX, mouseY, delta);
+                    widget.render(matrices, mouseX, mouseY, delta);
                 }
                 if (ConfigObject.getInstance().doesFastEntryRendering()) {
                     for (Map.Entry<? extends Class<? extends EntryStack>, List<EntryListEntry>> entry : entries.stream().collect(Collectors.groupingBy(entryListEntry -> entryListEntry.getCurrentEntry().getClass())).entrySet()) {
@@ -398,27 +403,27 @@ public class EntryListWidget extends WidgetWithBounds {
                         EntryStack first = firstWidget.getCurrentEntry();
                         if (first instanceof OptimalEntryStack) {
                             OptimalEntryStack firstStack = (OptimalEntryStack) first;
-                            firstStack.optimisedRenderStart(delta);
+                            firstStack.optimisedRenderStart(matrices, delta);
                             for (EntryListEntry listEntry : list) {
                                 EntryStack currentEntry = listEntry.getCurrentEntry();
                                 currentEntry.setZ(100);
-                                listEntry.drawBackground(mouseX, mouseY, delta);
-                                ((OptimalEntryStack) currentEntry).optimisedRenderBase(listEntry.getInnerBounds(), mouseX, mouseY, delta);
+                                listEntry.drawBackground(matrices, mouseX, mouseY, delta);
+                                ((OptimalEntryStack) currentEntry).optimisedRenderBase(matrices, listEntry.getInnerBounds(), mouseX, mouseY, delta);
                             }
                             for (EntryListEntry listEntry : list) {
                                 EntryStack currentEntry = listEntry.getCurrentEntry();
-                                ((OptimalEntryStack) currentEntry).optimisedRenderOverlay(listEntry.getInnerBounds(), mouseX, mouseY, delta);
+                                ((OptimalEntryStack) currentEntry).optimisedRenderOverlay(matrices, listEntry.getInnerBounds(), mouseX, mouseY, delta);
                                 if (listEntry.containsMouse(mouseX, mouseY)) {
-                                    listEntry.queueTooltip(mouseX, mouseY, delta);
-                                    listEntry.drawHighlighted(mouseX, mouseY, delta);
+                                    listEntry.queueTooltip(matrices, mouseX, mouseY, delta);
+                                    listEntry.drawHighlighted(matrices, mouseX, mouseY, delta);
                                 }
                             }
-                            firstStack.optimisedRenderEnd(delta);
+                            firstStack.optimisedRenderEnd(matrices, delta);
                         } else {
                             for (EntryListEntry listEntry : list) {
                                 if (listEntry.getCurrentEntry().isEmpty())
                                     continue;
-                                listEntry.render(mouseX, mouseY, delta);
+                                listEntry.render(matrices, mouseX, mouseY, delta);
                             }
                         }
                     }
@@ -426,13 +431,13 @@ public class EntryListWidget extends WidgetWithBounds {
                     for (EntryListEntry listEntry : entries) {
                         if (listEntry.getCurrentEntry().isEmpty())
                             continue;
-                        listEntry.render(mouseX, mouseY, delta);
+                        listEntry.render(matrices, mouseX, mouseY, delta);
                     }
                 }
             }
         }
         if (containsMouse(mouseX, mouseY) && ClientHelper.getInstance().isCheating() && !minecraft.player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
-            Tooltip.create(I18n.translate("text.rei.delete_items")).queue();
+            Tooltip.create(new TranslatableText("text.rei.delete_items")).queue();
     }
     
     private int getScrollbarMinX() {
@@ -509,7 +514,7 @@ public class EntryListWidget extends WidgetWithBounds {
                 int skippedFavorites = page * (entries.size() - width);
                 int j = 0;
                 if (skippedFavorites < favorites.size()) {
-                    renders.add(Widgets.createLabel(new Point(innerBounds.x + 2, innerBounds.y + 6), I18n.translate("text.rei.favorites")).leftAligned());
+                    renders.add(Widgets.createLabel(new Point(innerBounds.x + 2, innerBounds.y + 6), new TranslatableText("text.rei.favorites")).leftAligned());
                     j += width;
                 }
                 List<EntryStack> subFavoritesList = favorites.stream().skip(skippedFavorites).limit(Math.max(0, entries.size() - width)).collect(Collectors.toList());
@@ -690,8 +695,8 @@ public class EntryListWidget extends WidgetWithBounds {
         }
         
         @Override
-        public void drawBackground(int mouseX, int mouseY, float delta) {
-            super.drawBackground(mouseX, mouseY, delta);
+        public void drawBackground(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+            super.drawBackground(matrices, mouseX, mouseY, delta);
         }
         
         @Override
@@ -700,15 +705,15 @@ public class EntryListWidget extends WidgetWithBounds {
         }
         
         @Override
-        public void drawHighlighted(int mouseX, int mouseY, float delta) {
+        public void drawHighlighted(MatrixStack matrices, int mouseX, int mouseY, float delta) {
             if (getCurrentEntry().getType() != EntryStack.Type.EMPTY)
-                super.drawHighlighted(mouseX, mouseY, delta);
+                super.drawHighlighted(matrices, mouseX, mouseY, delta);
         }
         
         @Override
-        public void queueTooltip(int mouseX, int mouseY, float delta) {
+        public void queueTooltip(MatrixStack matrices, int mouseX, int mouseY, float delta) {
             if (!ClientHelper.getInstance().isCheating() || minecraft.player.inventory.getCursorStack().isEmpty()) {
-                super.queueTooltip(mouseX, mouseY, delta);
+                super.queueTooltip(matrices, mouseX, mouseY, delta);
             }
         }
         

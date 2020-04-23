@@ -32,7 +32,9 @@ import me.shedaniel.rei.gui.config.RecipeBorderType;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.Element;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Matrix4f;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -61,10 +63,10 @@ public final class PanelWidget extends Panel {
         this.bounds = Objects.requireNonNull(bounds);
     }
     
-    public static void render(@NotNull Rectangle bounds, int color) {
+    public static void render(MatrixStack matrices, @NotNull Rectangle bounds, int color) {
         TEMP.bounds.setBounds(Objects.requireNonNull(bounds));
         TEMP.color = color;
-        TEMP.render(0, 0, 0);
+        TEMP.render(matrices, 0, 0, 0);
     }
     
     @Deprecated
@@ -126,7 +128,7 @@ public final class PanelWidget extends Panel {
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (!getRendering().test(this))
             return;
         float alpha = ((color >> 24) & 0xFF) / 255f;
@@ -142,19 +144,20 @@ public final class PanelWidget extends Panel {
         // 9 Patch Texture
         
         // Four Corners
-        this.drawTexture(x, y, 106 + xTextureOffset, 124 + yTextureOffset, 8, 8);
-        this.drawTexture(x + width - 8, y, 248 + xTextureOffset, 124 + yTextureOffset, 8, 8);
-        this.drawTexture(x, y + height - 8, 106 + xTextureOffset, 182 + yTextureOffset, 8, 8);
-        this.drawTexture(x + width - 8, y + height - 8, 248 + xTextureOffset, 182 + yTextureOffset, 8, 8);
+        this.drawTexture(matrices, x, y, 106 + xTextureOffset, 124 + yTextureOffset, 8, 8);
+        this.drawTexture(matrices, x + width - 8, y, 248 + xTextureOffset, 124 + yTextureOffset, 8, 8);
+        this.drawTexture(matrices, x, y + height - 8, 106 + xTextureOffset, 182 + yTextureOffset, 8, 8);
+        this.drawTexture(matrices, x + width - 8, y + height - 8, 248 + xTextureOffset, 182 + yTextureOffset, 8, 8);
         
+        Matrix4f matrix = matrices.peek().getModel();
         // Sides
-        DrawableHelper.drawTexturedQuad(x + 8, x + width - 8, y, y + 8, getZ(), (114 + xTextureOffset) / 256f, (248 + xTextureOffset) / 256f, (124 + yTextureOffset) / 256f, (132 + yTextureOffset) / 256f);
-        DrawableHelper.drawTexturedQuad(x + 8, x + width - 8, y + height - 8, y + height, getZ(), (114 + xTextureOffset) / 256f, (248 + xTextureOffset) / 256f, (182 + yTextureOffset) / 256f, (190 + yTextureOffset) / 256f);
-        DrawableHelper.drawTexturedQuad(x, x + 8, y + 8, y + height - 8, getZ(), (106 + xTextureOffset) / 256f, (114 + xTextureOffset) / 256f, (132 + yTextureOffset) / 256f, (182 + yTextureOffset) / 256f);
-        DrawableHelper.drawTexturedQuad(x + width - 8, x + width, y + 8, y + height - 8, getZ(), (248 + xTextureOffset) / 256f, (256 + xTextureOffset) / 256f, (132 + yTextureOffset) / 256f, (182 + yTextureOffset) / 256f);
+        DrawableHelper.drawTexturedQuad(matrix, x + 8, x + width - 8, y, y + 8, getZ(), (114 + xTextureOffset) / 256f, (248 + xTextureOffset) / 256f, (124 + yTextureOffset) / 256f, (132 + yTextureOffset) / 256f);
+        DrawableHelper.drawTexturedQuad(matrix, x + 8, x + width - 8, y + height - 8, y + height, getZ(), (114 + xTextureOffset) / 256f, (248 + xTextureOffset) / 256f, (182 + yTextureOffset) / 256f, (190 + yTextureOffset) / 256f);
+        DrawableHelper.drawTexturedQuad(matrix, x, x + 8, y + 8, y + height - 8, getZ(), (106 + xTextureOffset) / 256f, (114 + xTextureOffset) / 256f, (132 + yTextureOffset) / 256f, (182 + yTextureOffset) / 256f);
+        DrawableHelper.drawTexturedQuad(matrix, x + width - 8, x + width, y + 8, y + height - 8, getZ(), (248 + xTextureOffset) / 256f, (256 + xTextureOffset) / 256f, (132 + yTextureOffset) / 256f, (182 + yTextureOffset) / 256f);
         
         // Center
-        DrawableHelper.drawTexturedQuad(x + 8, x + width - 8, y + 8, y + height - 8, getZ(), (114 + xTextureOffset) / 256f, (248 + xTextureOffset) / 256f, (132 + yTextureOffset) / 256f, (182 + yTextureOffset) / 256f);
+        DrawableHelper.drawTexturedQuad(matrix, x + 8, x + width - 8, y + 8, y + height - 8, getZ(), (114 + xTextureOffset) / 256f, (248 + xTextureOffset) / 256f, (132 + yTextureOffset) / 256f, (182 + yTextureOffset) / 256f);
     }
     
     @Override

@@ -24,10 +24,13 @@
 package me.shedaniel.rei.api.widgets;
 
 import me.shedaniel.math.Point;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.OptionalInt;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -76,12 +79,12 @@ public abstract class Button extends BaseWidget<Button> {
     }
     
     @NotNull
-    public abstract String getText();
+    public abstract Text getText();
     
-    public abstract void setText(@NotNull String text);
+    public abstract void setText(@NotNull Text text);
     
     @NotNull
-    public final Button text(@NotNull String text) {
+    public final Button text(@NotNull Text text) {
         setText(text);
         return this;
     }
@@ -98,12 +101,12 @@ public abstract class Button extends BaseWidget<Button> {
     }
     
     @Nullable
-    public abstract Consumer<Button> getOnRender();
+    public abstract BiConsumer<MatrixStack, Button> getOnRender();
     
-    public abstract void setOnRender(@Nullable Consumer<Button> onRender);
+    public abstract void setOnRender(@Nullable BiConsumer<MatrixStack, Button> onRender);
     
     @NotNull
-    public final Button onRender(@Nullable Consumer<Button> onRender) {
+    public final Button onRender(@Nullable BiConsumer<MatrixStack, Button> onRender) {
         setOnRender(onRender);
         return this;
     }

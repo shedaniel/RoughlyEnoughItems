@@ -58,6 +58,8 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
@@ -81,31 +83,32 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
     public boolean shouldReInit = false;
     private int tooltipWidth;
     private int tooltipHeight;
-    private List<String> tooltipLines;
-    public final TriConsumer<Integer, Integer, Float> renderTooltipCallback = (x, y, aFloat) -> {
+    private List<Text> tooltipLines;
+    public final TriConsumer<MatrixStack, Point, Float> renderTooltipCallback = (matrices, mouse, aFloat) -> {
         RenderSystem.disableRescaleNormal();
         RenderSystem.disableDepthTest();
-        setZOffset(999);
-        this.fillGradient(x - 3, y - 4, x + tooltipWidth + 3, y - 3, -267386864, -267386864);
-        this.fillGradient(x - 3, y + tooltipHeight + 3, x + tooltipWidth + 3, y + tooltipHeight + 4, -267386864, -267386864);
-        this.fillGradient(x - 3, y - 3, x + tooltipWidth + 3, y + tooltipHeight + 3, -267386864, -267386864);
-        this.fillGradient(x - 4, y - 3, x - 3, y + tooltipHeight + 3, -267386864, -267386864);
-        this.fillGradient(x + tooltipWidth + 3, y - 3, x + tooltipWidth + 4, y + tooltipHeight + 3, -267386864, -267386864);
-        this.fillGradient(x - 3, y - 3 + 1, x - 3 + 1, y + tooltipHeight + 3 - 1, 1347420415, 1344798847);
-        this.fillGradient(x + tooltipWidth + 2, y - 3 + 1, x + tooltipWidth + 3, y + tooltipHeight + 3 - 1, 1347420415, 1344798847);
-        this.fillGradient(x - 3, y - 3, x + tooltipWidth + 3, y - 3 + 1, 1347420415, 1347420415);
-        this.fillGradient(x - 3, y + tooltipHeight + 2, x + tooltipWidth + 3, y + tooltipHeight + 3, 1344798847, 1344798847);
+        matrices.push();
+        matrices.translate(0, 0, 999);
+        int x = mouse.x;
+        int y = mouse.y;
+        this.fillGradient(matrices, x - 3, y - 4, x + tooltipWidth + 3, y - 3, -267386864, -267386864);
+        this.fillGradient(matrices, x - 3, y + tooltipHeight + 3, x + tooltipWidth + 3, y + tooltipHeight + 4, -267386864, -267386864);
+        this.fillGradient(matrices, x - 3, y - 3, x + tooltipWidth + 3, y + tooltipHeight + 3, -267386864, -267386864);
+        this.fillGradient(matrices, x - 4, y - 3, x - 3, y + tooltipHeight + 3, -267386864, -267386864);
+        this.fillGradient(matrices, x + tooltipWidth + 3, y - 3, x + tooltipWidth + 4, y + tooltipHeight + 3, -267386864, -267386864);
+        this.fillGradient(matrices, x - 3, y - 3 + 1, x - 3 + 1, y + tooltipHeight + 3 - 1, 1347420415, 1344798847);
+        this.fillGradient(matrices, x + tooltipWidth + 2, y - 3 + 1, x + tooltipWidth + 3, y + tooltipHeight + 3 - 1, 1347420415, 1344798847);
+        this.fillGradient(matrices, x - 3, y - 3, x + tooltipWidth + 3, y - 3 + 1, 1347420415, 1347420415);
+        this.fillGradient(matrices, x - 3, y + tooltipHeight + 2, x + tooltipWidth + 3, y + tooltipHeight + 3, 1344798847, 1344798847);
         int currentY = y;
-        MatrixStack matrixStack_1 = new MatrixStack();
         VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
-        matrixStack_1.translate(0.0D, 0.0D, getZOffset());
-        Matrix4f matrix4f_1 = matrixStack_1.peek().getModel();
+        Matrix4f matrix = matrices.peek().getModel();
         for (int lineIndex = 0; lineIndex < tooltipLines.size(); lineIndex++) {
-            font.draw(tooltipLines.get(lineIndex), x, currentY, -1, true, matrix4f_1, immediate, false, 0, 15728880);
+            font.draw(tooltipLines.get(lineIndex), x, currentY, -1, true, matrix, immediate, false, 0, 15728880);
             currentY += lineIndex == 0 ? 12 : 10;
         }
         immediate.draw();
-        setZOffset(0);
+        matrices.pop();
         RenderSystem.enableDepthTest();
         RenderSystem.enableRescaleNormal();
     };
@@ -195,7 +198,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                             }
                             ConfigManager.getInstance().openConfigScreen(REIHelper.getInstance().getPreviousHandledScreen());
                         })
-                        .onRender(button -> {
+                        .onRender((matrices, button) -> {
                             if (ClientHelper.getInstance().isCheating() && RoughlyEnoughItemsCore.hasOperatorPermission()) {
                                 button.setTint(RoughlyEnoughItemsCore.hasPermissionToUsePackets() ? 721354752 : 1476440063);
                             } else {
@@ -217,10 +220,10 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                                 tooltips += "\n" + I18n.translate("text.rei.cheating_limited_enabled");
                             return tooltips;
                         }),
-                Widgets.createDrawableWidget((helper, mouseX, mouseY, delta) -> {
+                Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
                     helper.setZOffset(helper.getZOffset() + 1);
                     MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
-                    helper.drawTexture(configButtonArea.x + 3, configButtonArea.y + 3, 0, 0, 14, 14);
+                    helper.drawTexture(matrices, configButtonArea.x + 3, configButtonArea.y + 3, 0, 0, 14, 14);
                 })
                 )
         ));
@@ -228,7 +231,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         if (ConfigObject.getInstance().doesShowUtilsButtons()) {
             widgets.add(Widgets.createButton(ConfigObject.getInstance().isLowerConfigButton() ? new Rectangle(ConfigObject.getInstance().isLeftHandSidePanel() ? window.getScaledWidth() - 30 : 10, 10, 20, 20) : new Rectangle(ConfigObject.getInstance().isLeftHandSidePanel() ? window.getScaledWidth() - 55 : 35, 10, 20, 20), NarratorManager.EMPTY)
                     .onClick(button -> MinecraftClient.getInstance().player.sendChatMessage(ConfigObject.getInstance().getGamemodeCommand().replaceAll("\\{gamemode}", getNextGameMode(Screen.hasShiftDown()).getName())))
-                    .onRender(button -> button.setText(getGameModeShortText(getCurrentGameMode())))
+                    .onRender((matrices, button) -> button.setText(new LiteralText(getGameModeShortText(getCurrentGameMode()))))
                     .focusable(false)
                     .tooltipLine(I18n.translate("text.rei.gamemode_button.tooltip", getGameModeText(getNextGameMode(Screen.hasShiftDown()))))
                     .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y)));
@@ -240,17 +243,17 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                         .tooltipLine(I18n.translate("text.rei.weather_button.tooltip", I18n.translate(weather.getTranslateKey())))
                         .focusable(false)
                         .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y)));
-                widgets.add(Widgets.createDrawableWidget((helper, mouseX, mouseY, delta) -> {
+                widgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
                     MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
                     RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-                    helper.drawTexture(weatherButton.getBounds().x + 3, weatherButton.getBounds().y + 3, weather.getId() * 14, 14, 14, 14);
+                    helper.drawTexture(matrices, weatherButton.getBounds().x + 3, weatherButton.getBounds().y + 3, weather.getId() * 14, 14, 14, 14);
                 }));
                 xxx += ConfigObject.getInstance().isLeftHandSidePanel() ? -25 : 25;
             }
         }
         subsetsButtonBounds = getSubsetsButtonBounds();
         if (ConfigObject.getInstance().isSubsetsEnabled()) {
-            widgets.add(InternalWidgets.wrapLateRenderable(Widgets.createButton(subsetsButtonBounds, ((ClientHelperImpl) ClientHelper.getInstance()).isAprilFools.get() ? I18n.translate("text.rei.tiny_potato") : I18n.translate("text.rei.subsets"))
+            widgets.add(InternalWidgets.wrapLateRenderable(Widgets.createButton(subsetsButtonBounds, ((ClientHelperImpl) ClientHelper.getInstance()).isAprilFools.get() ? new TranslatableText("text.rei.tiny_potato") : new TranslatableText("text.rei.subsets"))
                     .onClick(button -> {
                         if (subsetsMenu == null) {
                             wrappedSubsetsMenu = InternalWidgets.wrapTranslate(InternalWidgets.wrapLateRenderable(this.subsetsMenu = SubsetsMenu.createFromRegistry(new Point(this.subsetsButtonBounds.x, this.subsetsButtonBounds.getMaxY()))), 0, 0, 400);
@@ -263,12 +266,12 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                     })));
         }
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-            widgets.add(Widgets.createClickableLabel(new Point(bounds.x + (bounds.width / 2), bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 10), "", label -> {
+            widgets.add(Widgets.createClickableLabel(new Point(bounds.x + (bounds.width / 2), bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 10), NarratorManager.EMPTY, label -> {
                 ENTRY_LIST_WIDGET.setPage(0);
                 ENTRY_LIST_WIDGET.updateEntriesPosition();
-            }).tooltipLine(I18n.translate("text.rei.go_back_first_page")).focusable(false).onRender(label -> {
+            }).tooltipLine(I18n.translate("text.rei.go_back_first_page")).focusable(false).onRender((matrices, label) -> {
                 label.setClickable(ENTRY_LIST_WIDGET.getTotalPages() > 1);
-                label.setText(String.format("%s/%s", ENTRY_LIST_WIDGET.getPage() + 1, Math.max(ENTRY_LIST_WIDGET.getTotalPages(), 1)));
+                label.setText(new LiteralText(String.format("%s/%s", ENTRY_LIST_WIDGET.getPage() + 1, Math.max(ENTRY_LIST_WIDGET.getTotalPages(), 1))));
             }));
         }
         if (ConfigObject.getInstance().isCraftableFilterEnabled()) {
@@ -282,10 +285,10 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                                 ConfigManager.getInstance().toggleCraftableOnly();
                                 ENTRY_LIST_WIDGET.updateSearch(ScreenHelper.getSearchField().getText(), true);
                             })
-                            .onRender(button -> button.setTint(ConfigManager.getInstance().isCraftableOnlyEnabled() ? 939579655 : 956235776))
+                            .onRender((matrices, button) -> button.setTint(ConfigManager.getInstance().isCraftableOnlyEnabled() ? 939579655 : 956235776))
                             .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y))
                             .tooltipSupplier(button -> I18n.translate(ConfigManager.getInstance().isCraftableOnlyEnabled() ? "text.rei.showing_craftable" : "text.rei.showing_all")),
-                    Widgets.createDrawableWidget((helper, mouseX, mouseY, delta) -> {
+                    Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
                         itemRenderer.zOffset = helper.getZOffset();
                         itemRenderer.renderGuiItemIcon(icon, area.x + 2, area.y + 2);
                         itemRenderer.zOffset = 0.0F;
@@ -406,7 +409,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         List<ItemStack> currentStacks = ClientHelper.getInstance().getInventoryItemsTypes();
         if (shouldReInit) {
             ENTRY_LIST_WIDGET.updateSearch(ScreenHelper.getSearchField().getText(), true);
@@ -424,62 +427,63 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             ENTRY_LIST_WIDGET.updateSearch(ScreenHelper.getSearchField().getText(), true);
         }
         if (OverlaySearchField.isSearching) {
-            setZOffset(200);
+            matrices.push();
+            matrices.translate(0, 0, 200f);
             if (MinecraftClient.getInstance().currentScreen instanceof HandledScreen) {
                 HandledScreen<?> handledScreen = (HandledScreen<?>) MinecraftClient.getInstance().currentScreen;
                 int x = handledScreen.x, y = handledScreen.y;
                 for (Slot slot : handledScreen.getScreenHandler().slots)
                     if (!slot.hasStack() || !ENTRY_LIST_WIDGET.canLastSearchTermsBeAppliedTo(EntryStack.create(slot.getStack())))
-                        fillGradient(x + slot.x, y + slot.y, x + slot.x + 16, y + slot.y + 16, -601874400, -601874400);
+                        fillGradient(matrices, x + slot.x, y + slot.y, x + slot.x + 16, y + slot.y + 16, -601874400, -601874400);
             }
-            setZOffset(0);
+            matrices.pop();
         }
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        this.renderWidgets(mouseX, mouseY, delta);
+        this.renderWidgets(matrices, mouseX, mouseY, delta);
         if (MinecraftClient.getInstance().currentScreen instanceof HandledScreen && ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
             HandledScreen<?> handledScreen = (HandledScreen<?>) MinecraftClient.getInstance().currentScreen;
             for (RecipeHelper.ScreenClickArea area : RecipeHelper.getInstance().getScreenClickAreas())
                 if (area.getScreenClass().equals(MinecraftClient.getInstance().currentScreen.getClass()))
                     if (area.getRectangle().contains(mouseX - handledScreen.x, mouseY - handledScreen.y)) {
                         String collect = CollectionUtils.mapAndJoinToString(area.getCategories(), identifier -> RecipeHelper.getInstance().getCategory(identifier).getCategoryName(), ", ");
-                        TOOLTIPS.add(Tooltip.create(I18n.translate("text.rei.view_recipes_for", collect)));
+                        TOOLTIPS.add(Tooltip.create(new TranslatableText("text.rei.view_recipes_for", collect)));
                         break;
                     }
         }
     }
     
-    public void lateRender(int mouseX, int mouseY, float delta) {
+    public void lateRender(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (ScreenHelper.isOverlayVisible()) {
-            ScreenHelper.getSearchField().laterRender(mouseX, mouseY, delta);
+            ScreenHelper.getSearchField().laterRender(matrices, mouseX, mouseY, delta);
             for (Widget widget : widgets) {
                 if (widget instanceof LateRenderable && wrappedSubsetsMenu != widget)
-                    widget.render(mouseX, mouseY, delta);
+                    widget.render(matrices, mouseX, mouseY, delta);
             }
         }
         if (wrappedSubsetsMenu != null) {
             TOOLTIPS.clear();
-            wrappedSubsetsMenu.render(mouseX, mouseY, delta);
+            wrappedSubsetsMenu.render(matrices, mouseX, mouseY, delta);
         }
         Screen currentScreen = MinecraftClient.getInstance().currentScreen;
         if (!(currentScreen instanceof RecipeViewingScreen) || !((RecipeViewingScreen) currentScreen).choosePageActivated)
             for (Tooltip tooltip : TOOLTIPS) {
                 if (tooltip != null)
-                    renderTooltip(tooltip);
+                    renderTooltip(matrices, tooltip);
             }
         TOOLTIPS.clear();
     }
     
-    public void renderTooltip(Tooltip tooltip) {
-        renderTooltip(tooltip.getText(), tooltip.getX(), tooltip.getY());
+    public void renderTooltip(MatrixStack matrices, Tooltip tooltip) {
+        renderTooltip(matrices, tooltip.getText(), tooltip.getX(), tooltip.getY());
     }
     
-    public void renderTooltip(List<String> lines, int mouseX, int mouseY) {
+    public void renderTooltip(MatrixStack matrices, List<Text> lines, int mouseX, int mouseY) {
         if (lines.isEmpty())
             return;
-        tooltipWidth = lines.stream().map(font::getStringWidth).max(Integer::compareTo).get();
+        tooltipWidth = lines.stream().map(font::method_27525).max(Integer::compareTo).get();
         tooltipHeight = lines.size() <= 1 ? 8 : lines.size() * 10;
         tooltipLines = lines;
-        ScreenHelper.drawHoveringWidget(mouseX, mouseY, renderTooltipCallback, tooltipWidth, tooltipHeight, 0);
+        ScreenHelper.drawHoveringWidget(matrices, mouseX, mouseY, renderTooltipCallback, tooltipWidth, tooltipHeight, 0);
     }
     
     private boolean hasSameListContent(List<ItemStack> list1, List<ItemStack> list2) {
@@ -493,7 +497,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             TOOLTIPS.add(tooltip);
     }
     
-    public void renderWidgets(int int_1, int int_2, float float_1) {
+    public void renderWidgets(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (!ScreenHelper.isOverlayVisible())
             return;
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
@@ -502,15 +506,15 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         }
         for (Widget widget : widgets) {
             if (!(widget instanceof LateRenderable))
-                widget.render(int_1, int_2, float_1);
+                widget.render(matrices, mouseX, mouseY, delta);
         }
     }
     
     @Override
-    public boolean mouseScrolled(double i, double j, double amount) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
         if (!ScreenHelper.isOverlayVisible())
             return false;
-        if (wrappedSubsetsMenu != null && wrappedSubsetsMenu.mouseScrolled(i, j, amount))
+        if (wrappedSubsetsMenu != null && wrappedSubsetsMenu.mouseScrolled(mouseX, mouseY, amount))
             return true;
         if (isInside(PointHelper.ofMouse())) {
             if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
@@ -521,15 +525,15 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                 else
                     return false;
                 return true;
-            } else if (ENTRY_LIST_WIDGET.mouseScrolled(i, j, amount))
+            } else if (ENTRY_LIST_WIDGET.mouseScrolled(mouseX, mouseY, amount))
                 return true;
         }
         if (isNotInExclusionZones(PointHelper.getMouseX(), PointHelper.getMouseY())) {
-            if (favoritesListWidget != null && favoritesListWidget.mouseScrolled(i, j, amount))
+            if (favoritesListWidget != null && favoritesListWidget.mouseScrolled(mouseX, mouseY, amount))
                 return true;
         }
         for (Widget widget : widgets)
-            if (widget != ENTRY_LIST_WIDGET && (favoritesListWidget == null || widget != favoritesListWidget) && (wrappedSubsetsMenu == null || widget != wrappedSubsetsMenu) && widget.mouseScrolled(i, j, amount))
+            if (widget != ENTRY_LIST_WIDGET && (favoritesListWidget == null || widget != favoritesListWidget) && (wrappedSubsetsMenu == null || widget != wrappedSubsetsMenu) && widget.mouseScrolled(mouseX, mouseY, amount))
                 return true;
         return false;
     }

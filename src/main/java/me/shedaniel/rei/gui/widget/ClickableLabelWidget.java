@@ -27,9 +27,14 @@ import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @see Widgets#createClickableLabel(Point, String, Consumer)
@@ -43,7 +48,7 @@ public abstract class ClickableLabelWidget extends LabelWidget {
     private int hoveredColor;
     
     @ApiStatus.Internal
-    protected ClickableLabelWidget(Point point, String text) {
+    protected ClickableLabelWidget(Point point, Text text) {
         super(point, text);
         this.hoveredColor = REIHelper.getInstance().isDarkThemeEnabled() ? -1 : 0xFF66FFCC;
     }
@@ -63,7 +68,7 @@ public abstract class ClickableLabelWidget extends LabelWidget {
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         int color = getDefaultColor();
         if (isClickable() && isHovered(mouseX, mouseY))
             color = getHoveredColor();
@@ -71,14 +76,14 @@ public abstract class ClickableLabelWidget extends LabelWidget {
         int width = font.getStringWidth(getText());
         if (isCentered()) {
             if (isHasShadows())
-                font.drawWithShadow(getText(), pos.x - width / 2f, pos.y, color);
+                font.method_27517(matrices, text, pos.x - width / 2f, pos.y, color);
             else
-                font.draw(getText(), pos.x - width / 2f, pos.y, color);
+                font.method_27528(matrices, text, pos.x - width / 2f, pos.y, color);
         } else {
             if (isHasShadows())
-                font.drawWithShadow(getText(), pos.x, pos.y, color);
+                font.method_27517(matrices, text, pos.x, pos.y, color);
             else
-                font.draw(getText(), pos.x, pos.y, color);
+                font.method_27528(matrices, text, pos.x, pos.y, color);
         }
         drawTooltips(mouseX, mouseY);
     }
@@ -87,9 +92,9 @@ public abstract class ClickableLabelWidget extends LabelWidget {
     protected void drawTooltips(int mouseX, int mouseY) {
         if (isClickable() && getTooltips().isPresent())
             if (!focused && containsMouse(mouseX, mouseY))
-                Tooltip.create(getTooltips().get().split("\n")).queue();
+                Tooltip.create(Stream.of(getTooltips().get().split("\n")).map(LiteralText::new).collect(Collectors.toList())).queue();
             else if (focused)
-                Tooltip.create(getLocation(), getTooltips().get().split("\n")).queue();
+                Tooltip.create(getLocation(), Stream.of(getTooltips().get().split("\n")).map(LiteralText::new).collect(Collectors.toList())).queue();
     }
     
     public int getHoveredColor() {

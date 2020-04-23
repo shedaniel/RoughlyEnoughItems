@@ -36,7 +36,9 @@ import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.Items;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
@@ -73,7 +75,7 @@ public class DefaultFuelCategory implements RecipeCategory<DefaultFuelDisplay> {
         String burnItems = DECIMAL_FORMAT.format(recipeDisplay.getFuelTime() / 200d);
         List<Widget> widgets = Lists.newArrayList();
         widgets.add(Widgets.createRecipeBase(bounds));
-        widgets.add(Widgets.createLabel(new Point(bounds.x + 26, bounds.getMaxY() - 15), I18n.translate("category.rei.fuel.time.items", burnItems))
+        widgets.add(Widgets.createLabel(new Point(bounds.x + 26, bounds.getMaxY() - 15), new TranslatableText("category.rei.fuel.time.items", burnItems))
                 .color(0xFF404040, 0xFFBBBBBB).noShadow().leftAligned());
         widgets.add(Widgets.createBurningFire(new Point(bounds.x + 6, startPoint.y + 1)).animationDurationTicks(recipeDisplay.getFuelTime()));
         widgets.add(Widgets.createSlot(new Point(bounds.x + 6, startPoint.y + 18)).entries(recipeDisplay.getInputEntries().get(0)).markInput());
@@ -99,11 +101,11 @@ public class DefaultFuelCategory implements RecipeCategory<DefaultFuelDisplay> {
             }
             
             @Override
-            public void render(Rectangle bounds, int mouseX, int mouseY, float delta) {
+            public void render(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
                 slot.setZ(getZ() + 50);
                 slot.getBounds().setLocation(bounds.x + 4, bounds.y + 2);
-                slot.render(mouseX, mouseY, delta);
-                MinecraftClient.getInstance().textRenderer.drawWithShadow(I18n.translate("category.rei.fuel.time_short.items", burnItems), bounds.x + 25, bounds.y + 8, -1);
+                slot.render(matrices, mouseX, mouseY, delta);
+                MinecraftClient.getInstance().textRenderer.method_27517(matrices, new TranslatableText("category.rei.fuel.time_short.items", burnItems), bounds.x + 25, bounds.y + 8, -1);
             }
         };
     }

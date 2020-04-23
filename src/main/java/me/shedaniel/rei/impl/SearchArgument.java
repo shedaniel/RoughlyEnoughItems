@@ -36,6 +36,7 @@ import net.minecraft.client.resource.language.I18n;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
@@ -190,7 +191,7 @@ public class SearchArgument {
             return tryGetFluidName(stack.getFluid());
         Tooltip tooltip = stack.getTooltip(PointHelper.ofMouse());
         if (tooltip != null)
-            return tooltip.getText().isEmpty() ? "" : tooltip.getText().get(0);
+            return tooltip.getText().isEmpty() ? "" : tooltip.getText().get(0).getString();
         return "";
     }
     
@@ -201,14 +202,14 @@ public class SearchArgument {
             return tryGetFluidName(stack.getFluid());
         Tooltip tooltip = stack.getTooltip(PointHelper.ofMouse());
         if (tooltip != null)
-            return tooltip.getText().isEmpty() ? "" : tooltip.getText().get(0);
+            return tooltip.getText().isEmpty() ? "" : tooltip.getText().get(0).getString();
         return "";
     }
     
     public static String tryGetEntryStackTooltip(EntryStack stack) {
         Tooltip tooltip = stack.getTooltip(new Point());
         if (tooltip != null)
-            return CollectionUtils.joinToString(tooltip.getText(), "\n");
+            return CollectionUtils.mapAndJoinToString(tooltip.getText(), Text::getString, "\n");
         return "";
     }
     
@@ -219,21 +220,21 @@ public class SearchArgument {
         return CollectionUtils.mapAndJoinToString(id.getPath().split("_"), StringUtils::capitalize, " ");
     }
     
-    public static List<String> tryGetItemStackToolTip(ItemStack itemStack, boolean careAboutAdvanced) {
+    public static List<Text> tryGetItemStackToolTip(ItemStack itemStack, boolean careAboutAdvanced) {
         if (!searchBlacklisted.contains(itemStack.getItem()))
             try {
-                return CollectionUtils.map(itemStack.getTooltip(MinecraftClient.getInstance().player, MinecraftClient.getInstance().options.advancedItemTooltips && careAboutAdvanced ? TooltipContext.Default.ADVANCED : TooltipContext.Default.NORMAL), Text::asFormattedString);
+                return itemStack.getTooltip(MinecraftClient.getInstance().player, MinecraftClient.getInstance().options.advancedItemTooltips && careAboutAdvanced ? TooltipContext.Default.ADVANCED : TooltipContext.Default.NORMAL);
             } catch (Throwable e) {
                 e.printStackTrace();
                 searchBlacklisted.add(itemStack.getItem());
             }
-        return Collections.singletonList(tryGetItemStackName(itemStack));
+        return Collections.singletonList(new LiteralText(tryGetItemStackName(itemStack)));
     }
     
     public static String tryGetItemStackName(ItemStack stack) {
         if (!searchBlacklisted.contains(stack.getItem()))
             try {
-                return stack.getName().asFormattedString();
+                return stack.getName().getString();
             } catch (Throwable e) {
                 e.printStackTrace();
                 searchBlacklisted.add(stack.getItem());

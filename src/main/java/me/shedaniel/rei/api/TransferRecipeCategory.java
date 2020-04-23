@@ -26,11 +26,12 @@ package me.shedaniel.rei.api;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.gui.widget.Widget;
+import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 
 public interface TransferRecipeCategory<T extends RecipeDisplay> extends RecipeCategory<T> {
     @ApiStatus.OverrideOnly
-    void renderRedSlots(List<Widget> widgets, Rectangle bounds, T display, IntList redSlots);
+    void renderRedSlots(MatrixStack matrices, List<Widget> widgets, Rectangle bounds, T display, IntList redSlots);
 }

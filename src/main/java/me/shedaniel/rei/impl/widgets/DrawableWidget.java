@@ -26,6 +26,7 @@ package me.shedaniel.rei.impl.widgets;
 import me.shedaniel.rei.api.DrawableConsumer;
 import me.shedaniel.rei.gui.widget.Widget;
 import net.minecraft.client.gui.Element;
+import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -40,8 +41,8 @@ public final class DrawableWidget extends Widget {
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float delta) {
-        this.drawable.render(this, mouseX, mouseY, delta);
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+        this.drawable.render(this, matrices, mouseX, mouseY, delta);
     }
     
     @Override

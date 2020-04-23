@@ -26,9 +26,12 @@ package me.shedaniel.rei.api.widgets;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -100,14 +103,14 @@ public abstract class Label extends WidgetWithBounds {
      * @return the consumer before render, null if not set.
      */
     @Nullable
-    public abstract Consumer<Label> getOnRender();
+    public abstract BiConsumer<MatrixStack, Label> getOnRender();
     
     /**
      * Sets the consumer before render.
      *
      * @param onRender the consumer before render.
      */
-    public abstract void setOnRender(@Nullable Consumer<Label> onRender);
+    public abstract void setOnRender(@Nullable BiConsumer<MatrixStack, Label> onRender);
     
     /**
      * Sets the consumer before render.
@@ -116,7 +119,7 @@ public abstract class Label extends WidgetWithBounds {
      * @return the label itself.
      */
     @NotNull
-    public final Label onRender(@Nullable Consumer<Label> onRender) {
+    public final Label onRender(@Nullable BiConsumer<MatrixStack, Label> onRender) {
         setOnRender(onRender);
         return this;
     }
@@ -291,12 +294,12 @@ public abstract class Label extends WidgetWithBounds {
     }
     
     @NotNull
-    public abstract String getText();
+    public abstract Text getText();
     
-    public abstract void setText(@NotNull String text);
+    public abstract void setText(@NotNull Text text);
     
     @NotNull
-    public final Label text(@NotNull String text) {
+    public final Label text(@NotNull Text text) {
         setText(text);
         return this;
     }

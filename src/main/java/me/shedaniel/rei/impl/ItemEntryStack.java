@@ -39,6 +39,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
@@ -54,7 +55,6 @@ import java.util.function.Predicate;
 public class ItemEntryStack extends AbstractEntryStack implements OptimalEntryStack {
     
     private static final Predicate<BakedModel> IS_SIDE_LIT = BakedModel::isSideLit;
-    private static final MatrixStack MATRICES = new MatrixStack();
     
     private ItemStack itemStack;
     
@@ -262,13 +262,14 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     public Tooltip getTooltip(Point point) {
         if (isEmpty() || !get(Settings.TOOLTIP_ENABLED).get())
             return null;
-        List<String> toolTip = Lists.newArrayList(SearchArgument.tryGetItemStackToolTip(getItemStack(), true));
+        List<Text> toolTip = Lists.newArrayList(SearchArgument.tryGetItemStackToolTip(getItemStack(), true));
         toolTip.addAll(get(Settings.TOOLTIP_APPEND_EXTRA).apply(this));
         if (get(Settings.TOOLTIP_APPEND_MOD).get() && ConfigObject.getInstance().shouldAppendModNames()) {
-            final String modString = ClientHelper.getInstance().getFormattedModFromItem(getItem());
+            final Text modString = ClientHelper.getInstance().getFormattedModFromItem(getItem());
+            final String modId = ClientHelper.getInstance().getModFromItem(getItem());
             boolean alreadyHasMod = false;
-            for (String s : toolTip)
-                if (s.equalsIgnoreCase(modString)) {
+            for (Text s : toolTip)
+                if (s.asString().equalsIgnoreCase(modId)) {
                     alreadyHasMod = true;
                     break;
                 }
@@ -279,23 +280,23 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     }
     
     @Override
-    public void render(Rectangle bounds, int mouseX, int mouseY, float delta) {
-        optimisedRenderStart(delta);
-        optimisedRenderBase(bounds, mouseX, mouseY, delta);
-        optimisedRenderOverlay(bounds, mouseX, mouseY, delta);
-        optimisedRenderEnd(delta);
+    public void render(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+        optimisedRenderStart(matrices, delta);
+        optimisedRenderBase(matrices, bounds, mouseX, mouseY, delta);
+        optimisedRenderOverlay(matrices, bounds, mouseX, mouseY, delta);
+        optimisedRenderEnd(matrices, delta);
     }
     
     @SuppressWarnings("deprecation")
     @Override
-    public void optimisedRenderStart(float delta) {
+    public void optimisedRenderStart(MatrixStack matrices, float delta) {
         MinecraftClient.getInstance().getTextureManager().bindTexture(SpriteAtlasTexture.BLOCK_ATLAS_TEX);
         GlStateManager.enableRescaleNormal();
     }
     
     @SuppressWarnings("deprecation")
     @Override
-    public void optimisedRenderEnd(float delta) {
+    public void optimisedRenderEnd(MatrixStack matrices, float delta) {
         GlStateManager.disableRescaleNormal();
     }
     
@@ -309,29 +310,29 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     }
     
     @Override
-    public void optimisedRenderBase(Rectangle bounds, int mouseX, int mouseY, float delta) {
+    public void optimisedRenderBase(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
         if (!isEmpty() && get(Settings.RENDER).get()) {
             ItemStack stack = getItemStack();
             ((ItemStackHook) (Object) stack).rei_setRenderEnchantmentGlint(get(Settings.Item.RENDER_ENCHANTMENT_GLINT).get());
-            MATRICES.push();
-            MATRICES.translate(bounds.getCenterX(), bounds.getCenterY(), 100.0F + getZ());
-            MATRICES.scale(bounds.getWidth(), (bounds.getWidth() + bounds.getHeight()) / -2f, bounds.getHeight());
+            matrices.push();
+            matrices.translate(bounds.getCenterX(), bounds.getCenterY(), 100.0F + getZ());
+            matrices.scale(bounds.getWidth(), (bounds.getWidth() + bounds.getHeight()) / -2f, bounds.getHeight());
             VertexConsumerProvider.Immediate immediate = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
             BakedModel model = getModelFromStack(stack);
             boolean bl = !IS_SIDE_LIT.test(model);
             if (bl)
                 GlStateManager.setupGuiFlatDiffuseLighting();
-            MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformation.Mode.GUI, false, MATRICES, immediate, 15728880, OverlayTexture.DEFAULT_UV, model);
+            MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformation.Mode.GUI, false, matrices, immediate, 15728880, OverlayTexture.DEFAULT_UV, model);
             immediate.draw();
             if (bl)
                 GlStateManager.setupGui3dDiffuseLighting();
-            MATRICES.pop();
+            matrices.pop();
             ((ItemStackHook) (Object) stack).rei_setRenderEnchantmentGlint(false);
         }
     }
     
     @Override
-    public void optimisedRenderOverlay(Rectangle bounds, int mouseX, int mouseY, float delta) {
+    public void optimisedRenderOverlay(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
         if (!isEmpty() && get(Settings.RENDER).get()) {
             MinecraftClient.getInstance().getItemRenderer().zOffset = getZ();
             MinecraftClient.getInstance().getItemRenderer().renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, getItemStack(), bounds.x, bounds.y, get(Settings.RENDER_COUNTS).get() ? get(Settings.COUNTS).apply(this) : "");

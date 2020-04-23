@@ -28,6 +28,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -69,12 +70,12 @@ public class RecipeArrowWidget extends WidgetWithBounds {
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
-        drawTexture(x, y, 106, 91, 24, 17);
+        drawTexture(matrices, x, y, 106, 91, 24, 17);
         if (animated) {
             int width = MathHelper.ceil((System.currentTimeMillis() / (time / 24) % 24d) / 1f);
-            drawTexture(x, y, 82, 91, width, 17);
+            drawTexture(matrices, x, y, 82, 91, width, 17);
         }
     }
     

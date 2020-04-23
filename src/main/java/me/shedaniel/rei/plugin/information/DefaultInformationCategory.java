@@ -47,6 +47,7 @@ import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.Texts;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Matrix4f;
@@ -89,8 +90,8 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
             }
             
             @Override
-            public void render(Rectangle rectangle, int mouseX, int mouseY, float delta) {
-                MinecraftClient.getInstance().textRenderer.draw(name.asFormattedString(), rectangle.x + 5, rectangle.y + 6, -1);
+            public void render(MatrixStack matrices, Rectangle rectangle, int mouseX, int mouseY, float delta) {
+                MinecraftClient.getInstance().textRenderer.method_27528(matrices, name, rectangle.x + 5, rectangle.y + 6, -1);
             }
         };
     }
@@ -99,10 +100,13 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
     public EntryStack getLogo() {
         return new RenderingEntry() {
             @Override
-            public void render(Rectangle bounds, int mouseX, int mouseY, float delta) {
+            public void render(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
                 MinecraftClient.getInstance().getTextureManager().bindTexture(DefaultPlugin.getDisplayTexture());
-                Matrix4f matrix4f = Matrix4f.translate(-1.2f, -1, 0);
-                DefaultInformationCategory.innerBlit(matrix4f, bounds.getCenterX() - 8, bounds.getCenterX() + 8, bounds.getCenterY() - 8, bounds.getCenterY() + 8, 0, 116f / 256f, (116f + 16f) / 256f, 0f, 16f / 256f);
+                matrices.push();
+                matrices.translate(-1.2f, -1, 0);
+                Matrix4f matrix = matrices.peek().getModel();
+                DefaultInformationCategory.innerBlit(matrix, bounds.getCenterX() - 8, bounds.getCenterX() + 8, bounds.getCenterY() - 8, bounds.getCenterY() + 8, 0, 116f / 256f, (116f + 16f) / 256f, 0f, 16f / 256f);
+                matrices.pop();
             }
         };
     }
@@ -110,7 +114,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
     @Override
     public List<Widget> setupDisplay(DefaultInformationDisplay recipeDisplay, me.shedaniel.math.Rectangle bounds) {
         List<Widget> widgets = Lists.newArrayList();
-        widgets.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.y + 3), recipeDisplay.getName().asFormattedString()).noShadow().color(0xFF404040, 0xFFBBBBBB));
+        widgets.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.y + 3), recipeDisplay.getName()).noShadow().color(0xFF404040, 0xFFBBBBBB));
         widgets.add(Widgets.createSlot(new Point(bounds.getCenterX() - 8, bounds.y + 15)).entries(recipeDisplay.getEntryStacks()).markInput());
         Rectangle rectangle = new Rectangle(bounds.getCenterX() - (bounds.width / 2), bounds.y + 35, bounds.width, bounds.height - 40);
         widgets.add(Widgets.createSlotBase(rectangle));
@@ -154,7 +158,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
             for (Text text : texts) {
                 if (!this.texts.isEmpty())
                     this.texts.add(null);
-                this.texts.addAll(Texts.wrapLines(text, bounds.width - 11, MinecraftClient.getInstance().textRenderer, true, false));
+                this.texts.addAll(Texts.wrapLines(text, bounds.width - 11, MinecraftClient.getInstance().textRenderer));
             }
         }
         
@@ -188,14 +192,14 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
         }
         
         @Override
-        public void render(int mouseX, int mouseY, float delta) {
+        public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
             scrolling.updatePosition(delta);
             Rectangle innerBounds = scrolling.getScissorBounds();
             ScissorsHandler.INSTANCE.scissor(innerBounds);
             int currentY = (int) -scrolling.scrollAmount + innerBounds.y;
             for (Text text : texts) {
                 if (text != null && currentY + font.fontHeight >= innerBounds.y && currentY <= innerBounds.getMaxY()) {
-                    font.draw(text.asFormattedString(), innerBounds.x + 2, currentY + 2, REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF090909);
+                    font.method_27528(matrices, text, innerBounds.x + 2, currentY + 2, REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF090909);
                 }
                 currentY += text == null ? 4 : font.fontHeight;
             }

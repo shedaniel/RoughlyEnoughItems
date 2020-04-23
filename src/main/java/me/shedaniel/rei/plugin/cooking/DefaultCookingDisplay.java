@@ -28,10 +28,10 @@ import me.shedaniel.rei.api.TransferRecipeDisplay;
 import me.shedaniel.rei.server.ContainerInfo;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.block.entity.FurnaceBlockEntity;
-import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.Item;
 import net.minecraft.recipe.AbstractCookingRecipe;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
@@ -45,7 +45,7 @@ public abstract class DefaultCookingDisplay implements TransferRecipeDisplay {
     private static List<EntryStack> fuel;
     
     static {
-        fuel = FurnaceBlockEntity.createFuelTimeMap().keySet().stream().map(Item::getStackForRender).map(EntryStack::create).map(e -> e.setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, stack -> Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("category.rei.smelting.fuel")))).collect(Collectors.toList());
+        fuel = FurnaceBlockEntity.createFuelTimeMap().keySet().stream().map(Item::getStackForRender).map(EntryStack::create).map(e -> e.setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, stack -> Collections.singletonList(new TranslatableText("category.rei.smelting.fuel").method_27692(Formatting.YELLOW)))).collect(Collectors.toList());
     }
     
     private AbstractCookingRecipe recipe;

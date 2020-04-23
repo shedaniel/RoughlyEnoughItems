@@ -28,6 +28,7 @@ import com.google.common.collect.Lists;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.widgets.Tooltip;
+import net.minecraft.text.Text;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -43,40 +44,40 @@ import java.util.List;
 public class QueuedTooltip implements Tooltip {
     
     private Point location;
-    private List<String> text;
+    private List<Text> text;
     
-    private QueuedTooltip(Point location, Collection<String> text) {
+    private QueuedTooltip(Point location, Collection<Text> text) {
         this.location = location;
         this.text = Lists.newArrayList(text);
     }
     
     @NotNull
-    public static QueuedTooltip create(Point location, List<String> text) {
+    public static QueuedTooltip create(Point location, List<Text> text) {
         return new QueuedTooltip(location, text);
     }
     
     @NotNull
-    public static QueuedTooltip create(Point location, Collection<String> text) {
+    public static QueuedTooltip create(Point location, Collection<Text> text) {
         return new QueuedTooltip(location, text);
     }
     
     @NotNull
-    public static QueuedTooltip create(Point location, String... text) {
+    public static QueuedTooltip create(Point location, Text... text) {
         return QueuedTooltip.create(location, Lists.newArrayList(text));
     }
     
     @NotNull
-    public static QueuedTooltip create(List<String> text) {
+    public static QueuedTooltip create(List<Text> text) {
         return QueuedTooltip.create(PointHelper.ofMouse(), text);
     }
     
     @NotNull
-    public static QueuedTooltip create(Collection<String> text) {
+    public static QueuedTooltip create(Collection<Text> text) {
         return QueuedTooltip.create(PointHelper.ofMouse(), text);
     }
     
     @NotNull
-    public static QueuedTooltip create(String... text) {
+    public static QueuedTooltip create(Text... text) {
         return QueuedTooltip.create(PointHelper.ofMouse(), text);
     }
     
@@ -91,7 +92,7 @@ public class QueuedTooltip implements Tooltip {
     }
     
     @Override
-    public List<String> getText() {
+    public List<Text> getText() {
         return text;
     }
     

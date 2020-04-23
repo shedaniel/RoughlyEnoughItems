@@ -29,6 +29,8 @@ import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.widgets.Tooltip;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
@@ -104,12 +106,12 @@ public class TabWidget extends WidgetWithBounds {
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (shown) {
             minecraft.getTextureManager().bindTexture(REIHelper.getInstance().isDarkThemeEnabled() ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
-            this.drawTexture(bounds.x, bounds.y + 2, u + (selected ? bounds.width : 0), v, bounds.width, (selected ? bounds.height + 2 : bounds.height - 1));
+            this.drawTexture(matrices, bounds.x, bounds.y + 2, u + (selected ? bounds.width : 0), v, bounds.width, (selected ? bounds.height + 2 : bounds.height - 1));
             logo.setZ(100);
-            logo.render(new Rectangle(bounds.getCenterX() - 8, bounds.getCenterY() - 5, 16, 16), mouseX, mouseY, delta);
+            logo.render(matrices, new Rectangle(bounds.getCenterX() - 8, bounds.getCenterY() - 5, 16, 16), mouseX, mouseY, delta);
             if (containsMouse(mouseX, mouseY)) {
                 drawTooltip();
             }
@@ -118,9 +120,9 @@ public class TabWidget extends WidgetWithBounds {
     
     private void drawTooltip() {
         if (this.minecraft.options.advancedItemTooltips)
-            Tooltip.create(categoryName, Formatting.DARK_GRAY.toString() + category.getIdentifier().toString(), ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())).queue();
+            Tooltip.create(new LiteralText(categoryName), new LiteralText(category.getIdentifier().toString()).method_27692(Formatting.DARK_GRAY), ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())).queue();
         else
-            Tooltip.create(categoryName, ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())).queue();
+            Tooltip.create(new LiteralText(categoryName), ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())).queue();
     }
     
     @NotNull

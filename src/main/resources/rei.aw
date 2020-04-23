@@ -10,3 +10,4 @@ accessible field net/minecraft/client/gui/screen/ingame/HandledScreen background
 accessible field net/minecraft/client/gui/screen/ingame/HandledScreen backgroundHeight I
 accessible field net/minecraft/client/gui/screen/ingame/HandledScreen focusedSlot Lnet/minecraft/screen/slot/Slot;
 accessible field net/minecraft/client/gui/widget/TexturedButtonWidget texture Lnet/minecraft/util/Identifier;
+accessible method net/minecraft/client/gui/DrawableHelper drawTexturedQuad (Lnet/minecraft/util/math/Matrix4f;IIIIIFFFF)V
