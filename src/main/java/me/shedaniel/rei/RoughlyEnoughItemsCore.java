@@ -330,10 +330,10 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             if (!alreadyAdded)
                 screenHooks.cloth_getChildren().add(ScreenHelper.getLastOverlay(true, false));
         });
-        ClothClientHooks.SCREEN_RENDER_POST.register((minecraftClient, screen, i, i1, v) -> {
+        ClothClientHooks.SCREEN_RENDER_POST.register((matrices, minecraftClient, screen, i, i1, v) -> {
             if (shouldReturn(screen))
                 return;
-            ScreenHelper.getLastOverlay().render(i, i1, v);
+            ScreenHelper.getLastOverlay().render(matrices, i, i1, v);
         });
         ClothClientHooks.SCREEN_MOUSE_DRAGGED.register((minecraftClient, screen, v, v1, i, v2, v3) -> {
             if (shouldReturn(screen))
@@ -371,12 +371,12 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                 return ActionResult.SUCCESS;
             return ActionResult.PASS;
         });
-        ClothClientHooks.SCREEN_LATE_RENDER.register((minecraftClient, screen, i, i1, v) -> {
+        ClothClientHooks.SCREEN_LATE_RENDER.register((matrices, minecraftClient, screen, i, i1, v) -> {
             if (shouldReturn(screen))
                 return;
             if (!ScreenHelper.isOverlayVisible())
                 return;
-            ScreenHelper.getLastOverlay().lateRender(i, i1, v);
+            ScreenHelper.getLastOverlay().lateRender(matrices, i, i1, v);
         });
         ClothClientHooks.SCREEN_KEY_PRESSED.register((minecraftClient, screen, i, i1, i2) -> {
             if (shouldReturn(screen))

@@ -29,6 +29,9 @@ import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
 import net.minecraft.client.gui.Element;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,6 +40,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @see Widgets#createLabel(Point, String)
@@ -47,26 +52,26 @@ import java.util.function.Supplier;
 public class LabelWidget extends WidgetWithBounds {
     
     private Point pos;
-    private String text;
+    protected Text text;
     private int defaultColor;
     private boolean hasShadows = true;
     private boolean centered = true;
     private Supplier<String> tooltipSupplier;
     
     @ApiStatus.Internal
-    public LabelWidget(Point point, String text) {
+    public LabelWidget(Point point, Text text) {
         this.pos = point;
         this.text = text;
         this.defaultColor = REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : -1;
     }
     
     public static LabelWidget create(Point point, String text) {
-        return new LabelWidget(point, text);
+        return new LabelWidget(point, new LiteralText(text));
     }
     
     public static ClickableLabelWidget createClickable(Point point, String text, Consumer<ClickableLabelWidget> onClicked) {
         ClickableLabelWidget[] widget = {null};
-        widget[0] = new ClickableLabelWidget(point, text) {
+        widget[0] = new ClickableLabelWidget(point, new LiteralText(text)) {
             @Override
             public void onLabelClicked() {
                 onClicked.accept(widget[0]);
@@ -132,11 +137,11 @@ public class LabelWidget extends WidgetWithBounds {
     }
     
     public String getText() {
-        return text;
+        return text.getString();
     }
     
     public LabelWidget setText(String text) {
-        this.text = text;
+        this.text = new LiteralText(text);
         return this;
     }
     
@@ -152,7 +157,7 @@ public class LabelWidget extends WidgetWithBounds {
     @NotNull
     @Override
     public Rectangle getBounds() {
-        int width = font.getStringWidth(text);
+        int width = font.method_27525(text);
         Point pos = getLocation();
         if (isCentered())
             return new Rectangle(pos.x - width / 2 - 1, pos.y - 5, width + 2, 14);
@@ -165,25 +170,25 @@ public class LabelWidget extends WidgetWithBounds {
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float delta) {
-        int width = font.getStringWidth(text);
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+        int width = font.method_27525(text);
         Point pos = getLocation();
         if (isCentered()) {
             if (hasShadows)
-                font.drawWithShadow(text, pos.x - width / 2f, pos.y, defaultColor);
+                font.method_27517(matrices, text, pos.x - width / 2f, pos.y, defaultColor);
             else
-                font.draw(text, pos.x - width / 2f, pos.y, defaultColor);
+                font.method_27528(matrices, text, pos.x - width / 2f, pos.y, defaultColor);
         } else {
             if (hasShadows)
-                font.drawWithShadow(text, pos.x, pos.y, defaultColor);
+                font.method_27517(matrices, text, pos.x, pos.y, defaultColor);
             else
-                font.draw(text, pos.x, pos.y, defaultColor);
+                font.method_27528(matrices, text, pos.x, pos.y, defaultColor);
         }
     }
     
     protected void drawTooltips(int mouseX, int mouseY) {
         if (getTooltips().isPresent())
             if (containsMouse(mouseX, mouseY))
-                Tooltip.create(getTooltips().get().split("\n")).queue();
+                Tooltip.create(Stream.of(getTooltips().get().split("\n")).map(LiteralText::new).collect(Collectors.toList())).queue();
     }
 }

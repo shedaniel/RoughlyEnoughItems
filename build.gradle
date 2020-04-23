@@ -53,7 +53,9 @@ dependencies {
     minecraft("com.mojang:minecraft:${project.minecraft_version}")
     mappings("net.fabricmc:yarn:${project.yarn_version}:v2")
     modApi("net.fabricmc:fabric-loader:${project.fabricloader_version}")
-    modApi("net.fabricmc.fabric-api:fabric-api:${project.fabric_api}")
+    modApi("net.fabricmc.fabric-api:fabric-api:${project.fabric_api}") {
+        exclude module: "fabric-biomes-v1"
+    }
     modApi("me.shedaniel.cloth:cloth-events:${cloth_events_version}") {
         transitive = false
     }
@@ -67,9 +69,9 @@ dependencies {
     modCompileOnly("io.github.prospector:modmenu:${modmenu_version}") {
         transitive = false
     }
-    modRuntime("io.github.prospector:modmenu:${modmenu_version}") {
-        transitive = false
-    }
+//    modRuntime("io.github.prospector:modmenu:${modmenu_version}") {
+//        transitive = false
+//    }
     if (includeDep) {
         afterEvaluate {
             def listAdded = new ArrayList(Arrays.asList((api_exculde as String).split(',')))

@@ -29,7 +29,9 @@ import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Matrix4f;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.opengl.GL11;
 
@@ -55,23 +57,23 @@ public final class TexturedDrawableConsumer implements DrawableConsumer {
     }
     
     @Override
-    public void render(@NotNull DrawableHelper helper, int mouseX, int mouseY, float delta) {
+    public void render(@NotNull DrawableHelper helper, MatrixStack matrices, int mouseX, int mouseY, float delta) {
         MinecraftClient.getInstance().getTextureManager().bindTexture(identifier);
-        innerBlit(x, x + width, y, y + height, helper.getZOffset(), uWidth, vHeight, u, v, textureWidth, textureHeight);
+        innerBlit(matrices.peek().getModel(), x, x + width, y, y + height, helper.getZOffset(), uWidth, vHeight, u, v, textureWidth, textureHeight);
     }
     
-    private static void innerBlit(int xStart, int xEnd, int yStart, int yEnd, int z, int width, int height, float u, float v, int texWidth, int texHeight) {
-        innerBlit(xStart, xEnd, yStart, yEnd, z, u / texWidth, (u + width) / texWidth, v / texHeight, (v + height) / texHeight);
+    private static void innerBlit(Matrix4f matrix, int xStart, int xEnd, int yStart, int yEnd, int z, int width, int height, float u, float v, int texWidth, int texHeight) {
+        innerBlit(matrix, xStart, xEnd, yStart, yEnd, z, u / texWidth, (u + width) / texWidth, v / texHeight, (v + height) / texHeight);
     }
     
-    protected static void innerBlit(int xStart, int xEnd, int yStart, int yEnd, int z, float uStart, float uEnd, float vStart, float vEnd) {
+    protected static void innerBlit(Matrix4f matrix, int xStart, int xEnd, int yStart, int yEnd, int z, float uStart, float uEnd, float vStart, float vEnd) {
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bufferBuilder = tessellator.getBuffer();
         bufferBuilder.begin(GL11.GL_QUADS, VertexFormats.POSITION_TEXTURE);
-        bufferBuilder.vertex(xStart, yEnd, z).texture(uStart, vEnd).next();
-        bufferBuilder.vertex(xEnd, yEnd, z).texture(uEnd, vEnd).next();
-        bufferBuilder.vertex(xEnd, yStart, z).texture(uEnd, vStart).next();
-        bufferBuilder.vertex(xStart, yStart, z).texture(uStart, vStart).next();
+        bufferBuilder.vertex(matrix, xStart, yEnd, z).texture(uStart, vEnd).next();
+        bufferBuilder.vertex(matrix, xEnd, yEnd, z).texture(uEnd, vEnd).next();
+        bufferBuilder.vertex(matrix, xEnd, yStart, z).texture(uEnd, vStart).next();
+        bufferBuilder.vertex(matrix, xStart, yStart, z).texture(uStart, vStart).next();
         tessellator.draw();
     }
 }

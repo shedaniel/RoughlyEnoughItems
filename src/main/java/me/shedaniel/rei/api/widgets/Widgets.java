@@ -36,6 +36,7 @@ import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -68,11 +69,11 @@ public final class Widgets {
         }
         
         @Override
-        public void render(int mouseX, int mouseY, float delta) {
+        public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
             if (element instanceof DrawableHelper)
                 ((DrawableHelper) element).setZOffset(getZ());
             if (element instanceof Drawable)
-                ((Drawable) element).render(mouseX, mouseY, delta);
+                ((Drawable) element).render(matrices, mouseX, mouseY, delta);
         }
         
         @Override
@@ -127,12 +128,12 @@ public final class Widgets {
     }
     
     @NotNull
-    public static Label createLabel(@NotNull Point point, @NotNull String text) {
+    public static Label createLabel(@NotNull Point point, @NotNull Text text) {
         return new LabelWidget(point, text);
     }
     
     @NotNull
-    public static Label createClickableLabel(@NotNull Point point, @NotNull String text, @Nullable Consumer<Label> onClick) {
+    public static Label createClickableLabel(@NotNull Point point, @NotNull Text text, @Nullable Consumer<Label> onClick) {
         return new LabelWidget(point, text).clickable().onClick(onClick);
     }
     
@@ -198,11 +199,6 @@ public final class Widgets {
     @NotNull
     public static Slot createSlot(@NotNull Point point) {
         return EntryWidget.create(point.x, point.y);
-    }
-    
-    @NotNull
-    public static Button createButton(@NotNull Rectangle bounds, @NotNull String text) {
-        return new ButtonWidget(bounds, text);
     }
     
     @NotNull

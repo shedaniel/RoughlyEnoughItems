@@ -24,19 +24,20 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.math.Rectangle;
+import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
 public interface OptimalEntryStack {
-    default void optimisedRenderStart(float delta) {
+    default void optimisedRenderStart(MatrixStack matrices, float delta) {
     }
     
-    default void optimisedRenderBase(Rectangle bounds, int mouseX, int mouseY, float delta) {
+    default void optimisedRenderBase(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
     }
     
-    default void optimisedRenderOverlay(Rectangle bounds, int mouseX, int mouseY, float delta) {
+    default void optimisedRenderOverlay(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
     }
     
-    default void optimisedRenderEnd(float delta) {
+    default void optimisedRenderEnd(MatrixStack matrices, float delta) {
     }
 }

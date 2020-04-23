@@ -34,6 +34,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Pair;
 import org.jetbrains.annotations.ApiStatus;
@@ -72,33 +73,33 @@ public class OverlaySearchField extends TextFieldWidget {
         }
     }
     
-    public void laterRender(int int_1, int int_2, float float_1) {
+    public void laterRender(MatrixStack matrices, int int_1, int int_2, float float_1) {
         RenderSystem.disableDepthTest();
         setEditableColor(isMain && ContainerScreenOverlay.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty() ? 16733525 : isSearching && isMain ? -852212 : (containsMouse(PointHelper.ofMouse()) || isFocused()) ? (REIHelper.getInstance().isDarkThemeEnabled() ? -17587 : -1) : -6250336);
         setSuggestion(!isFocused() && getText().isEmpty() ? I18n.translate("text.rei.search.field.suggestion") : null);
-        super.render(int_1, int_2, float_1);
+        super.render(matrices, int_1, int_2, float_1);
         RenderSystem.enableDepthTest();
     }
     
     @Override
-    protected void renderSuggestion(int x, int y) {
+    protected void renderSuggestion(MatrixStack matrices, int x, int y) {
         if (containsMouse(PointHelper.ofMouse()) || isFocused())
-            this.font.drawWithShadow(this.font.trimToWidth(this.getSuggestion(), this.getWidth()), x, y, REIHelper.getInstance().isDarkThemeEnabled() ? 0xccddaa3d : 0xddeaeaea);
+            this.font.drawWithShadow(matrices, this.font.method_27523(this.getSuggestion(), this.getWidth()), x, y, REIHelper.getInstance().isDarkThemeEnabled() ? 0xccddaa3d : 0xddeaeaea);
         else
-            this.font.drawWithShadow(this.font.trimToWidth(this.getSuggestion(), this.getWidth()), x, y, -6250336);
+            this.font.drawWithShadow(matrices, this.font.method_27523(this.getSuggestion(), this.getWidth()), x, y, -6250336);
     }
     
     @Override
-    public void renderBorder() {
+    public void renderBorder(MatrixStack matrices) {
         if (isMain && isSearching) {
-            fill(this.getBounds().x - 1, this.getBounds().y - 1, this.getBounds().x + this.getBounds().width + 1, this.getBounds().y + this.getBounds().height + 1, -852212);
+            fill(matrices, this.getBounds().x - 1, this.getBounds().y - 1, this.getBounds().x + this.getBounds().width + 1, this.getBounds().y + this.getBounds().height + 1, -852212);
         } else if (isMain && ContainerScreenOverlay.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty()) {
-            fill(this.getBounds().x - 1, this.getBounds().y - 1, this.getBounds().x + this.getBounds().width + 1, this.getBounds().y + this.getBounds().height + 1, -43691);
+            fill(matrices, this.getBounds().x - 1, this.getBounds().y - 1, this.getBounds().x + this.getBounds().width + 1, this.getBounds().y + this.getBounds().height + 1, -43691);
         } else {
-            super.renderBorder();
+            super.renderBorder(matrices);
             return;
         }
-        fill(this.getBounds().x, this.getBounds().y, this.getBounds().x + this.getBounds().width, this.getBounds().y + this.getBounds().height, -16777216);
+        fill(matrices, this.getBounds().x, this.getBounds().y, this.getBounds().x + this.getBounds().width, this.getBounds().y + this.getBounds().height, -16777216);
     }
     
     public int getManhattanDistance(Point point1, Point point2) {
@@ -172,7 +173,7 @@ public class OverlaySearchField extends TextFieldWidget {
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
     }
     
 }

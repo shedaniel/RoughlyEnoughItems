@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
@@ -40,6 +39,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -53,7 +54,7 @@ import java.util.function.Supplier;
 public final class InternalWidgets {
     private InternalWidgets() {}
     
-    public static Widget createAutoCraftingButtonWidget(Rectangle displayBounds, me.shedaniel.math.Rectangle rectangle, String text, Supplier<RecipeDisplay> displaySupplier, List<Widget> setupDisplay, RecipeCategory<?> category) {
+    public static Widget createAutoCraftingButtonWidget(Rectangle displayBounds, Rectangle rectangle, Text text, Supplier<RecipeDisplay> displaySupplier, List<Widget> setupDisplay, RecipeCategory<?> category) {
         HandledScreen<?> handledScreen = REIHelper.getInstance().getPreviousHandledScreen();
         boolean[] visible = {false};
         List<String>[] errorTooltip = new List[]{null};
@@ -72,7 +73,7 @@ public final class InternalWidgets {
                     MinecraftClient.getInstance().openScreen(handledScreen);
                     ScreenHelper.getLastOverlay().init();
                 })
-                .onRender(button -> {
+                .onRender((matrices, button) -> {
                     button.setEnabled(false);
                     List<String> error = null;
                     int color = 0;
@@ -113,7 +114,7 @@ public final class InternalWidgets {
                         error.add("error.rei.no.handlers.applicable");
                     }
                     if ((button.containsMouse(PointHelper.ofMouse()) || button.isFocused()) && category instanceof TransferRecipeCategory && redSlots != null) {
-                        ((TransferRecipeCategory<RecipeDisplay>) category).renderRedSlots(setupDisplay, displayBounds, displaySupplier.get(), redSlots);
+                        ((TransferRecipeCategory<RecipeDisplay>) category).renderRedSlots(matrices, setupDisplay, displayBounds, displaySupplier.get(), redSlots);
                     }
                     errorTooltip[0] = error == null || error.isEmpty() ? null : Lists.newArrayList();
                     if (errorTooltip[0] != null) {
@@ -162,8 +163,8 @@ public final class InternalWidgets {
             }
             
             @Override
-            public void render(int mouseX, int mouseY, float delta) {
-                autoCraftingButton.render(mouseX, mouseY, delta);
+            public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+                autoCraftingButton.render(matrices, mouseX, mouseY, delta);
             }
             
             @Override
@@ -204,10 +205,10 @@ public final class InternalWidgets {
         }
         
         @Override
-        public void render(int mouseX, int mouseY, float delta) {
+        public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
             for (Widget widget : widgets) {
                 widget.setZ(getZ());
-                widget.render(mouseX, mouseY, delta);
+                widget.render(matrices, mouseX, mouseY, delta);
             }
         }
         
@@ -234,9 +235,9 @@ public final class InternalWidgets {
         }
         
         @Override
-        public void render(int mouseX, int mouseY, float delta) {
+        public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
             this.widget.setZ(getZ());
-            this.widget.render(mouseX, mouseY, delta);
+            this.widget.render(matrices, mouseX, mouseY, delta);
         }
         
         @Override
@@ -263,9 +264,9 @@ public final class InternalWidgets {
         }
         
         @Override
-        public void render(int mouseX, int mouseY, float delta) {
+        public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
             this.widget.setZ(getZ());
-            this.widget.render(mouseX, mouseY, delta);
+            this.widget.render(matrices, mouseX, mouseY, delta);
         }
         
         @Override
@@ -301,12 +302,12 @@ public final class InternalWidgets {
         }
         
         @Override
-        public void render(int mouseX, int mouseY, float delta) {
-            RenderSystem.pushMatrix();
-            RenderSystem.translatef(x, y, z);
+        public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+            matrices.push();
+            matrices.translate(x, y, z);
             this.widget.setZ(getZ());
-            this.widget.render(mouseX, mouseY, delta);
-            RenderSystem.popMatrix();
+            this.widget.render(matrices, mouseX, mouseY, delta);
+            matrices.pop();
         }
         
         @Override

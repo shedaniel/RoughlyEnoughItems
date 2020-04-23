@@ -26,6 +26,7 @@ package me.shedaniel.rei.api;
 import me.shedaniel.rei.impl.ClientHelperImpl;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -129,7 +130,7 @@ public interface ClientHelper {
      * @param item the item to find
      * @return the mod name with blue and italic formatting
      */
-    String getFormattedModFromItem(Item item);
+    Text getFormattedModFromItem(Item item);
     
     /**
      * Gets the formatted mod from an identifier
@@ -137,7 +138,7 @@ public interface ClientHelper {
      * @param identifier the identifier to find
      * @return the mod name with blue and italic formatting
      */
-    String getFormattedModFromIdentifier(Identifier identifier);
+    Text getFormattedModFromIdentifier(Identifier identifier);
     
     /**
      * Gets the mod from an identifier

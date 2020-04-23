@@ -58,9 +58,11 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.client.gui.widget.AbstractPressableButtonWidget;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.Window;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -100,19 +102,19 @@ public class ConfigManagerImpl implements ConfigManager {
         guiRegistry.registerPredicateProvider((i13n, field, config, defaults, guiProvider) -> {
             if (field.isAnnotationPresent(ConfigEntry.Gui.Excluded.class))
                 return Collections.emptyList();
-            KeyCodeEntry entry = ConfigEntryBuilder.create().startModifierKeyCodeField(i13n, getUnsafely(field, config, ModifierKeyCode.unknown())).setModifierDefaultValue(() -> getUnsafely(field, defaults)).setModifierSaveConsumer(newValue -> setUnsafely(field, config, newValue)).build();
+            KeyCodeEntry entry = ConfigEntryBuilder.create().startModifierKeyCodeField(new TranslatableText(i13n), getUnsafely(field, config, ModifierKeyCode.unknown())).setModifierDefaultValue(() -> getUnsafely(field, defaults)).setModifierSaveConsumer(newValue -> setUnsafely(field, config, newValue)).build();
             entry.setAllowMouse(false);
             return Collections.singletonList(entry);
         }, field -> field.getType() == ModifierKeyCode.class);
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> {
             ConfigObjectImpl.UsePercentage bounds = field.getAnnotation(ConfigObjectImpl.UsePercentage.class);
-            return Collections.singletonList(ConfigEntryBuilder.create().startIntSlider(i13n, MathHelper.ceil(Utils.getUnsafely(field, config, 0.0) * 100), MathHelper.ceil(bounds.min() * 100), MathHelper.ceil(bounds.max() * 100)).setDefaultValue(() -> MathHelper.ceil((double) Utils.getUnsafely(field, defaults) * 100)).setSaveConsumer((newValue) -> {
+            return Collections.singletonList(ConfigEntryBuilder.create().startIntSlider(new TranslatableText(i13n), MathHelper.ceil(Utils.getUnsafely(field, config, 0.0) * 100), MathHelper.ceil(bounds.min() * 100), MathHelper.ceil(bounds.max() * 100)).setDefaultValue(() -> MathHelper.ceil((double) Utils.getUnsafely(field, defaults) * 100)).setSaveConsumer((newValue) -> {
                 Utils.setUnsafely(field, config, newValue / 100d);
-            }).setTextGetter(integer -> String.format("Size: %d%%", integer)).build());
+            }).setTextGetter(integer -> new LiteralText(String.format("Size: %d%%", integer))).build());
         }, (field) -> field.getType() == Double.TYPE || field.getType() == Double.class, ConfigObjectImpl.UsePercentage.class);
         
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) ->
-                        Collections.singletonList(new RecipeScreenTypeEntry(220, i13n, getUnsafely(field, config, RecipeScreenType.UNSET), getUnsafely(field, defaults), type -> setUnsafely(field, config, type)))
+                        Collections.singletonList(new RecipeScreenTypeEntry(220, new TranslatableText(i13n), getUnsafely(field, config, RecipeScreenType.UNSET), getUnsafely(field, defaults), type -> setUnsafely(field, config, type)))
                 , (field) -> field.getType() == RecipeScreenType.class, ConfigObjectImpl.UseSpecialRecipeTypeScreen.class);
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) ->
                         REIHelper.getInstance().getPreviousHandledScreen() == null || MinecraftClient.getInstance().getNetworkHandler() == null || MinecraftClient.getInstance().getNetworkHandler().getRecipeManager() == null ?
@@ -160,11 +162,11 @@ public class ConfigManagerImpl implements ConfigManager {
             provider.setOptionFunction((baseI13n, field) -> field.isAnnotationPresent(ConfigObjectImpl.DontApplyFieldName.class) ? baseI13n : String.format("%s.%s", baseI13n, field.getName()));
             provider.setCategoryFunction((baseI13n, categoryName) -> String.format("%s.%s", baseI13n, categoryName));
             provider.setBuildFunction(builder -> {
-                builder.getOrCreateCategory("config.roughlyenoughitems.!general").addEntry(new TooltipListEntry<Object>(I18n.translate("config.roughlyenoughitems.smooth_scrolling"), null) {
+                builder.getOrCreateCategory(new TranslatableText("config.roughlyenoughitems.!general")).addEntry(new TooltipListEntry<Object>(new TranslatableText("config.roughlyenoughitems.smooth_scrolling"), null) {
                     int width = 220;
                     private AbstractButtonWidget buttonWidget = new AbstractPressableButtonWidget(0, 0, 0, 20, this.getFieldName()) {
                         public void onPress() {
-                            Screen screen = ClothConfigInitializer.getConfigBuilder().setTitle("Smooth Scrolling Settings").build();
+                            Screen screen = ClothConfigInitializer.getConfigBuilder().setTitle(new LiteralText("Smooth Scrolling Settings")).build();
                             MinecraftClient.getInstance().openScreen(screen);
                         }
                     };
@@ -185,31 +187,31 @@ public class ConfigManagerImpl implements ConfigManager {
                         return this.children;
                     }
                     
-                    public void render(int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-                        super.render(index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
+                    public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+                        super.render(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
                         Window window = MinecraftClient.getInstance().getWindow();
                         this.buttonWidget.active = this.isEditable();
                         this.buttonWidget.y = y;
                         this.buttonWidget.x = x + entryWidth / 2 - this.width / 2;
                         this.buttonWidget.setWidth(this.width);
-                        this.buttonWidget.render(mouseX, mouseY, delta);
+                        this.buttonWidget.render(matrices, mouseX, mouseY, delta);
                     }
                 });
                 return builder.setAfterInitConsumer(screen -> {
                     if (MinecraftClient.getInstance().getNetworkHandler() != null && MinecraftClient.getInstance().getNetworkHandler().getRecipeManager() != null) {
-                        ((ScreenHooks) screen).cloth_addButton(new net.minecraft.client.gui.widget.ButtonWidget(4, 4, 100, 20, I18n.translate("text.rei.reload_config"), buttonWidget -> {
+                        ((ScreenHooks) screen).cloth_addButton(new net.minecraft.client.gui.widget.ButtonWidget(4, 4, 100, 20, new TranslatableText("text.rei.reload_config"), buttonWidget -> {
                             RoughlyEnoughItemsCore.syncRecipes(null);
                         }) {
                             @Override
-                            public void render(int int_1, int int_2, float float_1) {
+                            public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
                                 if (RecipeHelper.getInstance().arePluginsLoading()) {
                                     MinecraftClient.getInstance().openScreen(new ConfigReloadingScreen(MinecraftClient.getInstance().currentScreen));
                                 } else
-                                    super.render(int_1, int_2, float_1);
+                                    super.render(matrices, mouseX, mouseY, delta);
                             }
                         });
                     }
-                    ((ScreenHooks) screen).cloth_addButton(new ButtonWidget(screen.width - 104, 4, 100, 20, I18n.translate("text.rei.credits"), button -> {
+                    ((ScreenHooks) screen).cloth_addButton(new ButtonWidget(screen.width - 104, 4, 100, 20, new TranslatableText("text.rei.credits"), button -> {
                         MinecraftClient.getInstance().openScreen(new CreditsScreen(screen));
                     }));
                 }).setSavingRunnable(() -> {

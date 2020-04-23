@@ -33,12 +33,14 @@ import me.shedaniel.rei.impl.EmptyEntryStack;
 import me.shedaniel.rei.impl.FluidEntryStack;
 import me.shedaniel.rei.impl.ItemEntryStack;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.StringNbtReader;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
@@ -248,7 +250,7 @@ public interface EntryStack {
         return null;
     }
     
-    void render(Rectangle bounds, int mouseX, int mouseY, float delta);
+    void render(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta);
     
     enum Type {
         ITEM,
@@ -266,7 +268,7 @@ public interface EntryStack {
         public static final Settings<Supplier<Boolean>> TOOLTIP_ENABLED = new Settings<>(TRUE);
         public static final Settings<Supplier<Boolean>> TOOLTIP_APPEND_MOD = new Settings<>(TRUE);
         public static final Settings<Supplier<Boolean>> RENDER_COUNTS = new Settings<>(TRUE);
-        public static final Settings<Function<EntryStack, List<String>>> TOOLTIP_APPEND_EXTRA = new Settings<>(stack -> Collections.emptyList());
+        public static final Settings<Function<EntryStack, List<Text>>> TOOLTIP_APPEND_EXTRA = new Settings<>(stack -> Collections.emptyList());
         public static final Settings<Function<EntryStack, String>> COUNTS = new Settings<>(stack -> null);
         
         private T defaultValue;

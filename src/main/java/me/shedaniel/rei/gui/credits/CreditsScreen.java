@@ -33,7 +33,10 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.AbstractPressableButtonWidget;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.util.NarratorManager;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Pair;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -103,12 +106,12 @@ public class CreditsScreen extends Screen {
                 } else {
                     int maxWidth = translatorsMapped.stream().mapToInt(pair -> textRenderer.getStringWidth(pair.getLeft())).max().orElse(0) + 5;
                     for (Pair<String, String> pair : translatorsMapped) {
-                        entryListWidget.creditsAddEntry(new TranslationCreditsItem(pair.getLeft(), pair.getRight(), i - maxWidth - 10, maxWidth));
+                        entryListWidget.creditsAddEntry(new TranslationCreditsItem(new TranslatableText(pair.getLeft()), new TranslatableText(pair.getRight()), i - maxWidth - 10, maxWidth));
                     }
                 }
             } else entryListWidget.creditsAddEntry(new TextCreditsItem(new LiteralText(line)));
-        entryListWidget.creditsAddEntry(new TextCreditsItem(new LiteralText("")));
-        children.add(buttonDone = new AbstractPressableButtonWidget(width / 2 - 100, height - 26, 200, 20, I18n.translate("gui.done")) {
+        entryListWidget.creditsAddEntry(new TextCreditsItem(NarratorManager.EMPTY));
+        children.add(buttonDone = new AbstractPressableButtonWidget(width / 2 - 100, height - 26, 200, 20, new TranslatableText("gui.done")) {
             @Override
             public void onPress() {
                 CreditsScreen.this.client.openScreen(parent);
@@ -126,12 +129,12 @@ public class CreditsScreen extends Screen {
     }
     
     @Override
-    public void render(int int_1, int int_2, float float_1) {
+    public void render(MatrixStack matrices, int int_1, int int_2, float float_1) {
         this.renderDirtBackground(0);
-        this.entryListWidget.render(int_1, int_2, float_1);
-        this.drawCenteredString(this.textRenderer, I18n.translate("text.rei.credits"), this.width / 2, 16, 16777215);
-        super.render(int_1, int_2, float_1);
-        buttonDone.render(int_1, int_2, float_1);
+        this.entryListWidget.render(matrices, int_1, int_2, float_1);
+        this.drawCenteredString(matrices, this.textRenderer, I18n.translate("text.rei.credits"), this.width / 2, 16, 16777215);
+        super.render(matrices, int_1, int_2, float_1);
+        buttonDone.render(matrices, int_1, int_2, float_1);
     }
     
 }

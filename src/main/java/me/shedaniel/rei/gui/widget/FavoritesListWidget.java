@@ -39,7 +39,8 @@ import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -99,7 +100,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (bounds.isEmpty())
             return;
         for (EntryListEntry entry : entries)
@@ -119,7 +120,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
                     break back;
                 if (notSteppingOnExclusionZones(entry.getBounds().x, entry.getBounds().y, innerBounds)) {
                     entry.entry(stack);
-                    entry.render(mouseX, mouseY, delta);
+                    entry.render(matrices, mouseX, mouseY, delta);
                     nextIndex++;
                     break;
                 } else {
@@ -132,7 +133,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
         scrolling.renderScrollBar();
         ScissorsHandler.INSTANCE.removeLastScissor();
         if (containsMouse(mouseX, mouseY) && ClientHelper.getInstance().isCheating() && !minecraft.player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
-            Tooltip.create(I18n.translate("text.rei.delete_items")).queue();
+            Tooltip.create(new TranslatableText("text.rei.delete_items")).queue();
     }
     
     @Override
@@ -271,9 +272,9 @@ public class FavoritesListWidget extends WidgetWithBounds {
         }
         
         @Override
-        protected void drawHighlighted(int mouseX, int mouseY, float delta) {
+        protected void drawHighlighted(MatrixStack matrices, int mouseX, int mouseY, float delta) {
             if (!getCurrentEntry().isEmpty())
-                super.drawHighlighted(mouseX, mouseY, delta);
+                super.drawHighlighted(matrices, mouseX, mouseY, delta);
         }
         
         @Override
@@ -282,9 +283,9 @@ public class FavoritesListWidget extends WidgetWithBounds {
         }
         
         @Override
-        public void queueTooltip(int mouseX, int mouseY, float delta) {
+        public void queueTooltip(MatrixStack matrices, int mouseX, int mouseY, float delta) {
             if (!ClientHelper.getInstance().isCheating() || minecraft.player.inventory.getCursorStack().isEmpty()) {
-                super.queueTooltip(mouseX, mouseY, delta);
+                super.queueTooltip(matrices, mouseX, mouseY, delta);
             }
         }
         

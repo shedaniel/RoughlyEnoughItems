@@ -77,6 +77,7 @@ public final class RecipeDisplayExporter extends Widget {
     
     @SuppressWarnings("deprecation")
     private void exportRecipe(Rectangle rectangle, List<Widget> widgets) {
+        MatrixStack matrices = new MatrixStack();
         Framebuffer framebuffer = new Framebuffer(rectangle.width * 8, rectangle.height * 8, true, MinecraftClient.IS_SYSTEM_MAC);
         framebuffer.setClearColor(0, 0, 0, 0);
         //        int color = REIHelper.getInstance().isDarkThemeEnabled() ? -13750738 : -3750202;
@@ -120,7 +121,7 @@ public final class RecipeDisplayExporter extends Widget {
         RenderSystem.disableCull();
         RenderSystem.pushLightingAttributes();
         for (Widget widget : widgets) {
-            widget.render(-1, -1, minecraft.getTickDelta());
+            widget.render(matrices, -1, -1, minecraft.getTickDelta());
         }
         {
             ItemStack stack = new ItemStack(Items.OAK_STAIRS);
@@ -136,10 +137,10 @@ public final class RecipeDisplayExporter extends Widget {
             RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
             
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-            MatrixStack matrixStack = new MatrixStack();
+            matrices.push();
             
-            matrixStack.translate(rectangle.x + 8, rectangle.y + 8, 0);
-            matrixStack.scale(16, -16, 1F);
+            matrices.translate(rectangle.x + 8, rectangle.y + 8, 0);
+            matrices.scale(16, -16, 1F);
             
             boolean disableGuiLight = !model.isSideLit();
             if (disableGuiLight) {
@@ -147,8 +148,9 @@ public final class RecipeDisplayExporter extends Widget {
             }
             
             VertexConsumerProvider.Immediate immediate = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
-            minecraft.getItemRenderer().renderItem(stack, ModelTransformation.Mode.GUI, false, matrixStack, immediate, 15728880, OverlayTexture.DEFAULT_UV, model);
+            minecraft.getItemRenderer().renderItem(stack, ModelTransformation.Mode.GUI, false, matrices, immediate, 15728880, OverlayTexture.DEFAULT_UV, model);
             immediate.draw();
+            matrices.pop();
             
             RenderSystem.enableDepthTest();
             
@@ -209,8 +211,8 @@ public final class RecipeDisplayExporter extends Widget {
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float delta) {
-    
+    public void render(MatrixStack matrixStack, int mouseY, int i, float f) {
+        
     }
     
     @Override

@@ -47,7 +47,10 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.util.NarratorManager;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -101,28 +104,28 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
     private List<SearchArgument.SearchArguments> lastSearchArguments = Collections.emptyList();
     
     public FilteringEntry(List<EntryStack> configFiltered, List<EntryStack> defaultValue, Consumer<List<EntryStack>> saveConsumer) {
-        super("", false);
+        super(NarratorManager.EMPTY, false);
         this.configFiltered = configFiltered;
         this.defaultValue = defaultValue;
         this.saveConsumer = saveConsumer;
         this.searchField = new OverlaySearchField(0, 0, 0, 0);
         {
-            String selectAllText = I18n.translate("config.roughlyenoughitems.filteredEntries.selectAll");
-            this.selectAllButton = new ButtonWidget(0, 0, MinecraftClient.getInstance().textRenderer.getStringWidth(selectAllText) + 10, 20, selectAllText, button -> {
+            Text selectAllText = new TranslatableText("config.roughlyenoughitems.filteredEntries.selectAll");
+            this.selectAllButton = new ButtonWidget(0, 0, MinecraftClient.getInstance().textRenderer.method_27525(selectAllText) + 10, 20, selectAllText, button -> {
                 this.selectionPoint = new Point(-Integer.MAX_VALUE / 2, -Integer.MAX_VALUE / 2);
                 this.secondPoint = new Point(Integer.MAX_VALUE / 2, Integer.MAX_VALUE / 2);
             });
         }
         {
-            String selectNoneText = I18n.translate("config.roughlyenoughitems.filteredEntries.selectNone");
-            this.selectNoneButton = new ButtonWidget(0, 0, MinecraftClient.getInstance().textRenderer.getStringWidth(selectNoneText) + 10, 20, selectNoneText, button -> {
+            Text selectNoneText = new TranslatableText("config.roughlyenoughitems.filteredEntries.selectNone");
+            this.selectNoneButton = new ButtonWidget(0, 0, MinecraftClient.getInstance().textRenderer.method_27525(selectNoneText) + 10, 20, selectNoneText, button -> {
                 this.selectionPoint = new Point(Integer.MAX_VALUE, Integer.MAX_VALUE);
                 this.secondPoint = new Point(Integer.MAX_VALUE, Integer.MAX_VALUE);
             });
         }
         {
-            String hideText = I18n.translate("config.roughlyenoughitems.filteredEntries.hide");
-            this.hideButton = new ButtonWidget(0, 0, MinecraftClient.getInstance().textRenderer.getStringWidth(hideText) + 10, 20, hideText, button -> {
+            Text hideText = new TranslatableText("config.roughlyenoughitems.filteredEntries.hide");
+            this.hideButton = new ButtonWidget(0, 0, MinecraftClient.getInstance().textRenderer.method_27525(hideText) + 10, 20, hideText, button -> {
                 for (int i = 0; i < entryStacks.size(); i++) {
                     EntryStack stack = entryStacks.get(i);
                     EntryListEntry entry = entries.get(i);
@@ -135,8 +138,8 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
             });
         }
         {
-            String showText = I18n.translate("config.roughlyenoughitems.filteredEntries.show");
-            this.showButton = new ButtonWidget(0, 0, MinecraftClient.getInstance().textRenderer.getStringWidth(showText) + 10, 20, showText, button -> {
+            Text showText = new TranslatableText("config.roughlyenoughitems.filteredEntries.show");
+            this.showButton = new ButtonWidget(0, 0, MinecraftClient.getInstance().textRenderer.method_27525(showText) + 10, 20, showText, button -> {
                 for (int i = 0; i < entryStacks.size(); i++) {
                     EntryStack stack = entryStacks.get(i);
                     EntryListEntry entry = entries.get(i);
@@ -178,7 +181,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
     
     @SuppressWarnings("rawtypes")
     @Override
-    public void render(int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+    public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
         ClothConfigScreen.ListWidget parent = getParent();
         Rectangle bounds = getBounds();
         if (lastList != parent) {
@@ -210,20 +213,21 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
             if (entry.getBounds().y > bounds.getMaxY())
                 break;
             entry.entry(stack);
-            entry.render(mouseX, mouseY, delta);
+            entry.render(matrices, mouseX, mouseY, delta);
             nextIndex++;
         }
         updatePosition(delta);
         scrolling.renderScrollBar(0xff000000, 1);
-        RenderSystem.translatef(0, 0, 300);
-        this.searchField.laterRender(mouseX, mouseY, delta);
-        this.selectAllButton.render(mouseX, mouseY, delta);
-        this.selectNoneButton.render(mouseX, mouseY, delta);
-        this.hideButton.render(mouseX, mouseY, delta);
-        this.showButton.render(mouseX, mouseY, delta);
-        RenderSystem.translatef(0, 0, -300);
+        matrices.push();
+        matrices.translate(0, 0, 300);
+        this.searchField.laterRender(matrices, mouseX, mouseY, delta);
+        this.selectAllButton.render(matrices, mouseX, mouseY, delta);
+        this.selectNoneButton.render(matrices, mouseX, mouseY, delta);
+        this.hideButton.render(matrices, mouseX, mouseY, delta);
+        this.showButton.render(matrices, mouseX, mouseY, delta);
+        matrices.pop();
         if (tooltip != null) {
-            ScreenHelper.getLastOverlay().renderTooltip(tooltip);
+            ScreenHelper.getLastOverlay().renderTooltip(matrices, tooltip);
         }
     }
     
@@ -404,17 +408,17 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
         }
         
         @Override
-        protected void drawHighlighted(int mouseX, int mouseY, float delta) {
-        
+        protected void drawHighlighted(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+            
         }
         
         @Override
-        public void render(int mouseX, int mouseY, float delta) {
-            super.render(mouseX, mouseY, delta);
+        public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+            super.render(matrices, mouseX, mouseY, delta);
             if (isSelected()) {
                 Rectangle bounds = getBounds();
                 RenderSystem.disableDepthTest();
-                fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 0x896b70fa, 0x896b70fa);
+                fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 0x896b70fa, 0x896b70fa);
                 RenderSystem.enableDepthTest();
             }
         }
@@ -433,17 +437,17 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
         }
         
         @Override
-        protected void drawBackground(int mouseX, int mouseY, float delta) {
+        protected void drawBackground(MatrixStack matrices, int mouseX, int mouseY, float delta) {
             if (isFiltered()) {
                 Rectangle bounds = getBounds();
                 RenderSystem.disableDepthTest();
-                fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 0xffff0000, 0xffff0000);
+                fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 0xffff0000, 0xffff0000);
                 RenderSystem.enableDepthTest();
             }
         }
         
         @Override
-        protected void queueTooltip(int mouseX, int mouseY, float delta) {
+        protected void queueTooltip(MatrixStack matrices, int mouseX, int mouseY, float delta) {
             if (searchField.containsMouse(mouseX, mouseY))
                 return;
             Tooltip tooltip = getCurrentTooltip(new Point(mouseX, mouseY));

@@ -32,8 +32,11 @@ import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.NarratorManager;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Lazy;
 import net.minecraft.util.Pair;
 import net.minecraft.util.Util;
@@ -62,15 +65,15 @@ public class WarningAndErrorScreen extends Screen {
         this.parent = parent;
     }
     
-    private void addText(String string) {
-        for (String s : textRenderer.wrapStringToWidthAsList(string, width - 80)) {
+    private void addText(Text string) {
+        for (Text s : textRenderer.wrapStringToWidthAsList(string, width - 80)) {
             listWidget.creditsAddEntry(new TextItem(s));
         }
     }
     
-    private void addLink(String string, String link) {
-        for (String s : textRenderer.wrapStringToWidthAsList(string, width - 80)) {
-            listWidget.creditsAddEntry(new LinkItem(s, link));
+    private void addLink(Text string, String link) {
+        for (Text s : textRenderer.wrapStringToWidthAsList(string, width - 80)) {
+            listWidget.creditsAddEntry(new LinkItem(s.getString(), link));
         }
     }
     
@@ -81,11 +84,11 @@ public class WarningAndErrorScreen extends Screen {
         listWidget.creditsClearEntries();
         listWidget.creditsAddEntry(new EmptyItem());
         if (!RoughlyEnoughItemsState.getWarnings().isEmpty())
-            listWidget.creditsAddEntry(new TextItem("§6Warnings:"));
+            listWidget.creditsAddEntry(new TextItem(new LiteralText("Warnings:").method_27692(Formatting.RED)));
         for (Pair<String, String> pair : RoughlyEnoughItemsState.getWarnings()) {
-            addText(pair.getLeft());
+            addText(new LiteralText(pair.getLeft()));
             if (pair.getRight() != null)
-                addLink(pair.getRight(), pair.getRight());
+                addLink(new LiteralText(pair.getRight()), pair.getRight());
             for (int i = 0; i < 2; i++) {
                 listWidget.creditsAddEntry(new EmptyItem());
             }
@@ -94,11 +97,11 @@ public class WarningAndErrorScreen extends Screen {
             listWidget.creditsAddEntry(new EmptyItem());
         }
         if (!RoughlyEnoughItemsState.getErrors().isEmpty())
-            listWidget.creditsAddEntry(new TextItem("§cErrors:"));
+            listWidget.creditsAddEntry(new TextItem(new LiteralText("Errors:").method_27692(Formatting.RED)));
         for (Pair<String, String> pair : RoughlyEnoughItemsState.getErrors()) {
-            addText(pair.getLeft());
+            addText(new LiteralText(pair.getLeft()));
             if (pair.getRight() != null)
-                addLink(pair.getRight(), pair.getRight());
+                addLink(new LiteralText(pair.getRight()), pair.getRight());
             for (int i = 0; i < 2; i++) {
                 listWidget.creditsAddEntry(new EmptyItem());
             }
@@ -107,7 +110,7 @@ public class WarningAndErrorScreen extends Screen {
             listWidget.max = Math.max(listWidget.max, child.getWidth());
         }
         children.add(buttonExit = new ButtonWidget(width / 2 - 100, height - 26, 200, 20,
-                RoughlyEnoughItemsState.getErrors().isEmpty() ? "Continue" : "Exit",
+                new LiteralText(RoughlyEnoughItemsState.getErrors().isEmpty() ? "Continue" : "Exit"),
                 button -> {
                     if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
                         RoughlyEnoughItemsState.clear();
@@ -126,16 +129,16 @@ public class WarningAndErrorScreen extends Screen {
     }
     
     @Override
-    public void render(int int_1, int int_2, float float_1) {
+    public void render(MatrixStack matrices, int int_1, int int_2, float float_1) {
         this.renderDirtBackground(0);
-        this.listWidget.render(int_1, int_2, float_1);
+        this.listWidget.render(matrices, int_1, int_2, float_1);
         if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
-            this.drawCenteredString(this.textRenderer, "Warnings during Roughly Enough Items' initialization", this.width / 2, 16, 16777215);
+            this.drawCenteredString(matrices, this.textRenderer, "Warnings during Roughly Enough Items' initialization", this.width / 2, 16, 16777215);
         } else {
-            this.drawCenteredString(this.textRenderer, "Errors during Roughly Enough Items' initialization", this.width / 2, 16, 16777215);
+            this.drawCenteredString(matrices, this.textRenderer, "Errors during Roughly Enough Items' initialization", this.width / 2, 16, 16777215);
         }
-        super.render(int_1, int_2, float_1);
-        this.buttonExit.render(int_1, int_2, float_1);
+        super.render(matrices, int_1, int_2, float_1);
+        this.buttonExit.render(matrices, int_1, int_2, float_1);
     }
     
     private static class StringEntryListWidget extends DynamicNewSmoothScrollingEntryListWidget<StringItem> {
@@ -191,8 +194,8 @@ public class WarningAndErrorScreen extends Screen {
     
     private static class EmptyItem extends StringItem {
         @Override
-        public void render(int i, int i1, int i2, int i3, int i4, int i5, int i6, boolean b, float v) {
-        
+        public void render(MatrixStack matrixStack, int i, int i1, int i2, int i3, int i4, int i5, int i6, boolean b, float v) {
+            
         }
         
         @Override
@@ -207,19 +210,15 @@ public class WarningAndErrorScreen extends Screen {
     }
     
     private static class TextItem extends StringItem {
-        private String text;
+        private Text text;
         
-        public TextItem(Text textComponent) {
-            this(textComponent.asFormattedString());
-        }
-        
-        public TextItem(String text) {
+        public TextItem(Text text) {
             this.text = text;
         }
         
         @Override
-        public void render(int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-            MinecraftClient.getInstance().textRenderer.drawWithShadow(text, x + 5, y, -1);
+        public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+            MinecraftClient.getInstance().textRenderer.method_27517(matrices, text, x + 5, y, -1);
         }
         
         @Override
@@ -234,7 +233,7 @@ public class WarningAndErrorScreen extends Screen {
         
         @Override
         public int getWidth() {
-            return MinecraftClient.getInstance().textRenderer.getStringWidth(text) + 10;
+            return MinecraftClient.getInstance().textRenderer.method_27525(text) + 10;
         }
     }
     
@@ -243,27 +242,19 @@ public class WarningAndErrorScreen extends Screen {
         private String link;
         private boolean contains;
         
-        public LinkItem(Text textComponent) {
-            this(textComponent.asFormattedString());
-        }
-        
-        public LinkItem(String text) {
-            this(text, text);
-        }
-        
         public LinkItem(String text, String link) {
             this.text = text;
             this.link = link;
         }
         
         @Override
-        public void render(int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+        public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
             contains = mouseX >= x && mouseX <= x + entryWidth && mouseY >= y && mouseY <= y + entryHeight;
             if (contains) {
-                WarningAndErrorScreen.this.renderTooltip("Click to open link.", mouseX, mouseY);
-                MinecraftClient.getInstance().textRenderer.drawWithShadow("§n" + text, x + 5, y, 0xff1fc3ff);
+                WarningAndErrorScreen.this.renderTooltip(matrices, new LiteralText("Click to open link."), mouseX, mouseY);
+                MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, "§n" + text, x + 5, y, 0xff1fc3ff);
             } else {
-                MinecraftClient.getInstance().textRenderer.drawWithShadow(text, x + 5, y, 0xff1fc3ff);
+                MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, text, x + 5, y, 0xff1fc3ff);
             }
         }
         

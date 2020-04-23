@@ -163,7 +163,7 @@ public class EntryRegistryImpl implements EntryRegistry {
         if (afterStack != null) {
             int index = getStacksList().size();
             for (int i = index - 1; i >= 0; i--) {
-                if (getStacksList().get(i).equalsAll(afterStack)) {
+                if (getStacksList().get(i).equalsIgnoreAmount(afterStack)) {
                     index = i + 1;
                     break;
                 }

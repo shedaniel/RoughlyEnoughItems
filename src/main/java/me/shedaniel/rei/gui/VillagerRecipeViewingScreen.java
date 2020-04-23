@@ -48,7 +48,10 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.NarratorManager;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -168,7 +171,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
             widgets.add(Widgets.createCategoryBase(new Rectangle(xx - 5, bounds.y + bounds.height - 5, 10 + w * 16, 12 + h * 16)));
             widgets.add(Widgets.createSlotBase(new Rectangle(xx - 1, yy - 1, 2 + w * 16, 2 + h * 16)));
             int index = 0;
-            List<String> list = Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("text.rei.working_station"));
+            List<Text> list = Collections.singletonList(new TranslatableText("text.rei.working_station").method_27692(Formatting.YELLOW));
             for (List<EntryStack> workingStation : workingStations) {
                 widgets.add(new RecipeViewingScreen.WorkstationSlotWidget(xx, yy, CollectionUtils.map(workingStation, stack -> stack.copy().setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> list))));
                 index++;
@@ -192,7 +195,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
         this.widgets.addAll(setupDisplay);
         Optional<ButtonAreaSupplier> supplier = RecipeHelper.getInstance().getAutoCraftButtonArea(category);
         if (supplier.isPresent() && supplier.get().get(recipeBounds) != null)
-            this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(recipeBounds, supplier.get().get(recipeBounds), supplier.get().getButtonText(), () -> display, setupDisplay, category));
+            this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(recipeBounds, supplier.get().get(recipeBounds), new LiteralText(supplier.get().getButtonText()), () -> display, setupDisplay, category));
         
         int index = 0;
         for (RecipeDisplay recipeDisplay : categoryMap.get(category)) {
@@ -207,7 +210,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
                     .containsMousePredicate((button, point) -> {
                         return (button.getBounds().contains(point) && scrollListBounds.contains(point)) || button.isFocused();
                     })
-                    .onRender(button -> button.setEnabled(selectedRecipeIndex != finalIndex)));
+                    .onRender((matrices, button) -> button.setEnabled(selectedRecipeIndex != finalIndex)));
             index++;
         }
         int tabV = isCompactTabs ? 166 : 192;
@@ -243,7 +246,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
                 })
                 .enabled(categories.size() > tabsPerPage));
         
-        this.widgets.add(Widgets.createClickableLabel(new Point(bounds.x + 4 + scrollListBounds.width / 2, bounds.y + 6), categories.get(selectedCategoryIndex).getCategoryName(), label -> {
+        this.widgets.add(Widgets.createClickableLabel(new Point(bounds.x + 4 + scrollListBounds.width / 2, bounds.y + 6), new LiteralText(categories.get(selectedCategoryIndex).getCategoryName()), label -> {
             ClientHelper.getInstance().executeViewAllRecipesKeyBind();
         }).tooltipLine(I18n.translate("text.rei.view_all_categories")).noShadow().color(0xFF404040, 0xFFBBBBBB).hoveredColor(0xFF0041FF, 0xFFFFBD4D));
         
@@ -303,7 +306,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (ConfigObject.getInstance().doesVillagerScreenHavePermanentScrollBar()) {
             scrollBarAlphaFutureTime = System.currentTimeMillis();
             scrollBarAlphaFuture = 0;
@@ -327,32 +330,32 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
             }
         }
         scrolling.updatePosition(delta);
-        this.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
+        this.fillGradient(matrices, 0, 0, this.width, this.height, -1072689136, -804253680);
         int yOffset = 0;
         for (Widget widget : widgets) {
-            widget.render(mouseX, mouseY, delta);
+            widget.render(matrices, mouseX, mouseY, delta);
         }
-        ScreenHelper.getLastOverlay().render(mouseX, mouseY, delta);
+        ScreenHelper.getLastOverlay().render(matrices, mouseX, mouseY, delta);
         RenderSystem.pushMatrix();
         ScissorsHandler.INSTANCE.scissor(scrolling.getBounds());
         for (Button button : buttonList) {
             button.getBounds().y = scrollListBounds.y + 1 + yOffset - (int) scrolling.scrollAmount;
             if (button.getBounds().getMaxY() > scrollListBounds.getMinY() && button.getBounds().getMinY() < scrollListBounds.getMaxY()) {
-                button.render(mouseX, mouseY, delta);
+                button.render(matrices, mouseX, mouseY, delta);
             }
             yOffset += button.getBounds().height;
         }
         for (int i = 0; i < buttonList.size(); i++) {
             if (buttonList.get(i).getBounds().getMaxY() > scrollListBounds.getMinY() && buttonList.get(i).getBounds().getMinY() < scrollListBounds.getMaxY()) {
                 recipeRenderers.get(i).setZ(1);
-                recipeRenderers.get(i).render(buttonList.get(i).getBounds(), mouseX, mouseY, delta);
+                recipeRenderers.get(i).render(matrices, buttonList.get(i).getBounds(), mouseX, mouseY, delta);
                 Optional.ofNullable(recipeRenderers.get(i).getTooltip(new Point(mouseX, mouseY))).ifPresent(Tooltip::queue);
             }
         }
         scrolling.renderScrollBar(0, scrollBarAlpha);
         ScissorsHandler.INSTANCE.removeLastScissor();
         RenderSystem.popMatrix();
-        ScreenHelper.getLastOverlay().lateRender(mouseX, mouseY, delta);
+        ScreenHelper.getLastOverlay().lateRender(matrices, mouseX, mouseY, delta);
     }
     
     @Override

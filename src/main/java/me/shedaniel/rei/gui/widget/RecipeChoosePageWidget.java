@@ -24,7 +24,6 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
@@ -33,8 +32,8 @@ import me.shedaniel.rei.api.widgets.Panel;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.Window;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
@@ -116,11 +115,11 @@ public class RecipeChoosePageWidget extends DraggableWidget {
             }
             
             @Override
-            public void render(int i, int i1, float v) {
-                font.draw(I18n.translate("text.rei.choose_page"), bounds.x + 5, bounds.y + 5, REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF404040);
+            public void render(MatrixStack matrices, int i, int i1, float v) {
+                font.method_27528(matrices, new TranslatableText("text.rei.choose_page"), bounds.x + 5, bounds.y + 5, REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF404040);
                 String endString = String.format(" /%d", maxPage);
                 int width = font.getStringWidth(endString);
-                font.draw(endString, bounds.x + bounds.width - 5 - width, bounds.y + 22, REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF404040);
+                font.draw(matrices, endString, bounds.x + bounds.width - 5 - width, bounds.y + 22, REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF404040);
             }
         });
         String endString = String.format(" /%d", maxPage);
@@ -160,12 +159,13 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     }
     
     @Override
-    public void render(int i, int i1, float v) {
-        RenderSystem.translatef(0, 0, 800);
+    public void render(MatrixStack matrices, int i, int i1, float v) {
+        matrices.push();
+        matrices.translate(0, 0, 800);
         for (Widget widget : widgets) {
-            widget.render(i, i1, v);
+            widget.render(matrices, i, i1, v);
         }
-        RenderSystem.translatef(0, 0, -800);
+        matrices.pop();
     }
     
     @Override

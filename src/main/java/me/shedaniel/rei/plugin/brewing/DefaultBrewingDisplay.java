@@ -27,9 +27,9 @@ import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
-import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Ingredient;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
@@ -43,14 +43,14 @@ public class DefaultBrewingDisplay implements RecipeDisplay {
     private List<EntryStack> reactant;
     
     public DefaultBrewingDisplay(ItemStack input, Ingredient reactant, ItemStack output) {
-        this.input = EntryStack.create(input).setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, stack -> Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("category.rei.brewing.input")));
+        this.input = EntryStack.create(input).setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, stack -> Collections.singletonList(new TranslatableText("category.rei.brewing.input").method_27692(Formatting.YELLOW)));
         this.reactant = new ArrayList<>();
         for (ItemStack stack : reactant.getMatchingStacksClient()) {
             EntryStack entryStack = EntryStack.create(stack);
-            entryStack.setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("category.rei.brewing.reactant")));
+            entryStack.setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> Collections.singletonList(new TranslatableText("category.rei.brewing.reactant").method_27692(Formatting.YELLOW)));
             this.reactant.add(entryStack);
         }
-        this.output = EntryStack.create(output).setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, stack -> Collections.singletonList(Formatting.YELLOW.toString() + I18n.translate("category.rei.brewing.result")));
+        this.output = EntryStack.create(output).setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, stack -> Collections.singletonList(new TranslatableText("category.rei.brewing.result").method_27692(Formatting.YELLOW)));
     }
     
     @Override

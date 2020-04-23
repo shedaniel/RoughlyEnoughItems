@@ -30,6 +30,7 @@ import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.NotNull;
 
 public final class FillRectangleDrawableConsumer implements DrawableConsumer {
@@ -43,7 +44,7 @@ public final class FillRectangleDrawableConsumer implements DrawableConsumer {
     }
     
     @Override
-    public void render(@NotNull DrawableHelper helper, int mouseX, int mouseY, float delta) {
+    public void render(@NotNull DrawableHelper helper, MatrixStack matrices, int mouseX, int mouseY, float delta) {
         float a = (color >> 24 & 255) / 255.0F;
         float r = (color >> 16 & 255) / 255.0F;
         float g = (color >> 8 & 255) / 255.0F;

@@ -27,6 +27,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.toast.Toast;
 import net.minecraft.client.toast.ToastManager;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -49,15 +50,15 @@ public class CopyRecipeIdentifierToast implements Toast {
     }
     
     @Override
-    public Visibility draw(ToastManager toastManager, long var2) {
+    public Visibility draw(MatrixStack matrices, ToastManager toastManager, long var2) {
         toastManager.getGame().getTextureManager().bindTexture(TOASTS_TEX);
         RenderSystem.color3f(1.0F, 1.0F, 1.0F);
-        toastManager.drawTexture(0, 0, 0, 0, 160, 32);
+        toastManager.drawTexture(matrices, 0, 0, 0, 0, 160, 32);
         if (this.subtitle == null) {
-            toastManager.getGame().textRenderer.draw(this.title, 18.0F, 12.0F, 11141120);
+            toastManager.getGame().textRenderer.draw(matrices, this.title, 18.0F, 12.0F, 11141120);
         } else {
-            toastManager.getGame().textRenderer.draw(this.title, 18.0F, 7.0F, 11141120);
-            toastManager.getGame().textRenderer.draw(this.subtitle, 18.0F, 18.0F, -16777216);
+            toastManager.getGame().textRenderer.draw(matrices, this.title, 18.0F, 7.0F, 11141120);
+            toastManager.getGame().textRenderer.draw(matrices, this.subtitle, 18.0F, 18.0F, -16777216);
         }
         
         return var2 - this.startTime < 5000L ? Visibility.SHOW : Visibility.HIDE;

@@ -29,6 +29,8 @@ import me.shedaniel.rei.api.EntryStack;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.util.NarratorManager;
+import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collections;
@@ -43,7 +45,7 @@ public class NoFilteringEntry extends AbstractConfigListEntry<List<EntryStack>> 
     private List<EntryStack> configFiltered;
     
     public NoFilteringEntry(List<EntryStack> configFiltered, List<EntryStack> defaultValue, Consumer<List<EntryStack>> saveConsumer) {
-        super("", false);
+        super(NarratorManager.EMPTY, false);
         this.configFiltered = configFiltered;
         this.defaultValue = defaultValue;
         this.saveConsumer = saveConsumer;
@@ -66,9 +68,9 @@ public class NoFilteringEntry extends AbstractConfigListEntry<List<EntryStack>> 
     
     @SuppressWarnings("rawtypes")
     @Override
-    public void render(int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+    public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
         ClothConfigScreen.ListWidget parent = getParent();
-        drawCenteredString(MinecraftClient.getInstance().textRenderer, I18n.translate("config.roughlyenoughitems.filteredEntries.loadWorldFirst"), (parent.right - parent.left) / 2 + parent.left, (parent.bottom - parent.top) / 2 + parent.top - 5, -1);
+        drawCenteredString(matrices, MinecraftClient.getInstance().textRenderer, I18n.translate("config.roughlyenoughitems.filteredEntries.loadWorldFirst"), (parent.right - parent.left) / 2 + parent.left, (parent.bottom - parent.top) / 2 + parent.top - 5, -1);
     }
     
     @Override

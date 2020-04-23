@@ -32,6 +32,7 @@ import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.MathHelper;
@@ -95,14 +96,14 @@ public class SimpleRecipeEntry extends RecipeEntry {
     }
     
     @Override
-    public void render(Rectangle bounds, int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
         int xx = bounds.x + 4, yy = bounds.y + 2;
         int j = 0;
         int itemsPerLine = getItemsPerLine();
         for (Slot entryWidget : inputWidgets) {
             entryWidget.setZ(getZ() + 50);
             entryWidget.getBounds().setLocation(xx, yy);
-            entryWidget.render(mouseX, mouseY, delta);
+            entryWidget.render(matrices, mouseX, mouseY, delta);
             xx += 18;
             j++;
             if (j >= getItemsPerLine() - 2) {
@@ -114,11 +115,11 @@ public class SimpleRecipeEntry extends RecipeEntry {
         xx = bounds.x + 4 + 18 * (getItemsPerLine() - 2);
         yy = bounds.y + getHeight() / 2 - 8;
         MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
-        drawTexture(xx, yy, 0, 28, 18, 18);
+        drawTexture(matrices, xx, yy, 0, 28, 18, 18);
         xx += 18;
         outputWidget.setZ(getZ() + 50);
         outputWidget.getBounds().setLocation(xx, yy);
-        outputWidget.render(mouseX, mouseY, delta);
+        outputWidget.render(matrices, mouseX, mouseY, delta);
     }
     
     @Nullable

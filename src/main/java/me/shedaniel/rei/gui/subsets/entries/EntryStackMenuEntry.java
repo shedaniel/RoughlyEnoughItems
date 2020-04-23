@@ -35,6 +35,7 @@ import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.sound.SoundEvents;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -75,15 +76,15 @@ public class EntryStackMenuEntry extends SubsetsMenuEntry {
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (isFiltered()) {
             if (selected) {
-                fill(x, y, x + width, y + 18, -26215);
+                fill(matrices, x, y, x + width, y + 18, -26215);
             } else {
-                fill(x, y, x + width, y + 18, -65536);
+                fill(matrices, x, y, x + width, y + 18, -65536);
             }
         } else if (selected) {
-            fill(x, y, x + width, y + 18, 1174405119);
+            fill(matrices, x, y, x + width, y + 18, 1174405119);
         }
         if (containsMouse && mouseX >= x + (width / 2) - 8 && mouseX <= x + (width / 2) + 8 && mouseY >= y + 1 && mouseY <= y + 17) {
             REIHelper.getInstance().queueTooltip(stack.getTooltip(new Point(mouseX, mouseY)));
@@ -107,7 +108,7 @@ public class EntryStackMenuEntry extends SubsetsMenuEntry {
                 }
             } else if (!RoughlyEnoughItemsCore.isLeftModePressed) clickedLast = false;
         } else clickedLast = false;
-        stack.render(new Rectangle(x + (width / 2) - 8, y + 1, 16, 16), mouseX, mouseY, delta);
+        stack.render(matrices, new Rectangle(x + (width / 2) - 8, y + 1, 16, 16), mouseX, mouseY, delta);
     }
     
     void recalculateFilter(SubsetsMenu menu) {

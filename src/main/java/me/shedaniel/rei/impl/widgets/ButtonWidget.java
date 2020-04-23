@@ -29,12 +29,16 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.widgets.Button;
 import me.shedaniel.rei.api.widgets.Tooltip;
+import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Matrix4f;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -42,6 +46,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.OptionalInt;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -53,13 +58,13 @@ public class ButtonWidget extends Button {
     private Rectangle bounds;
     private boolean enabled = true;
     @NotNull
-    private String text;
+    private Text text;
     @Nullable
     private Integer tint;
     @Nullable
     private Consumer<Button> onClick;
     @Nullable
-    private Consumer<Button> onRender;
+    private BiConsumer<MatrixStack, Button> onRender;
     private boolean focusable = false;
     private boolean focused = false;
     @Nullable
@@ -69,11 +74,7 @@ public class ButtonWidget extends Button {
     @Nullable
     private BiFunction<@NotNull Button, @NotNull Point, @NotNull Integer> textureIdFunction;
     
-    public ButtonWidget(me.shedaniel.math.Rectangle rectangle, Text text) {
-        this(rectangle, Objects.requireNonNull(text).asFormattedString());
-    }
-    
-    public ButtonWidget(me.shedaniel.math.Rectangle rectangle, String text) {
+    public ButtonWidget(Rectangle rectangle, Text text) {
         this.bounds = new Rectangle(Objects.requireNonNull(rectangle));
         this.text = Objects.requireNonNull(text);
     }
@@ -110,12 +111,12 @@ public class ButtonWidget extends Button {
     
     @Override
     @NotNull
-    public final String getText() {
+    public final Text getText() {
         return text;
     }
     
     @Override
-    public final void setText(@NotNull String text) {
+    public final void setText(@NotNull Text text) {
         this.text = text;
     }
     
@@ -129,13 +130,14 @@ public class ButtonWidget extends Button {
         this.onClick = onClick;
     }
     
+    @Nullable
     @Override
-    public final @Nullable Consumer<Button> getOnRender() {
+    public final BiConsumer<MatrixStack, Button> getOnRender() {
         return onRender;
     }
     
     @Override
-    public final void setOnRender(@Nullable Consumer<Button> onRender) {
+    public final void setOnRender(BiConsumer<MatrixStack, Button> onRender) {
         this.onRender = onRender;
     }
     
@@ -192,12 +194,12 @@ public class ButtonWidget extends Button {
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (onRender != null) {
-            onRender.accept(this);
+            onRender.accept(matrices, this);
         }
         int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;
-        renderBackground(x, y, width, height, this.getTextureId(new Point(mouseX, mouseY)));
+        renderBackground(matrices, x, y, width, height, this.getTextureId(new Point(mouseX, mouseY)));
         
         int color = 14737632;
         if (!this.enabled) {
@@ -207,16 +209,16 @@ public class ButtonWidget extends Button {
         }
         
         if (tint != null)
-            fillGradient(x + 1, y + 1, x + width - 1, y + height - 1, tint, tint);
+            fillGradient(matrices, x + 1, y + 1, x + width - 1, y + height - 1, tint, tint);
         
-        this.drawCenteredString(font, getText(), x + width / 2, y + (height - 8) / 2, color);
+        this.method_27534(matrices, font, getText(), x + width / 2, y + (height - 8) / 2, color);
         
         String tooltip = getTooltip();
         if (tooltip != null)
             if (!focused && containsMouse(mouseX, mouseY))
-                Tooltip.create(tooltip.split("\n")).queue();
+                Tooltip.create(CollectionUtils.map(tooltip.split("\n"), LiteralText::new)).queue();
             else if (focused)
-                Tooltip.create(new Point(x + width / 2, y + height / 2), tooltip.split("\n")).queue();
+                Tooltip.create(new Point(x + width / 2, y + height / 2), CollectionUtils.map(tooltip.split("\n"), LiteralText::new)).queue();
     }
     
     protected boolean isFocused(int mouseX, int mouseY) {
@@ -282,7 +284,7 @@ public class ButtonWidget extends Button {
         return 1;
     }
     
-    protected void renderBackground(int x, int y, int width, int height, int textureOffset) {
+    protected void renderBackground(MatrixStack matrices, int x, int y, int width, int height, int textureOffset) {
         minecraft.getTextureManager().bindTexture(REIHelper.getInstance().isDarkThemeEnabled() ? BUTTON_LOCATION_DARK : BUTTON_LOCATION);
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.enableBlend();
@@ -292,18 +294,19 @@ public class ButtonWidget extends Button {
         // 9 Patch Texture
         
         // Four Corners
-        drawTexture(x, y, getZOffset(), 0, textureOffset * 80, 8, 8, 512, 256);
-        drawTexture(x + width - 8, y, getZOffset(), 248, textureOffset * 80, 8, 8, 512, 256);
-        drawTexture(x, y + height - 8, getZOffset(), 0, textureOffset * 80 + 72, 8, 8, 512, 256);
-        drawTexture(x + width - 8, y + height - 8, getZOffset(), 248, textureOffset * 80 + 72, 8, 8, 512, 256);
+        drawTexture(matrices, x, y, getZOffset(), 0, textureOffset * 80, 8, 8, 512, 256);
+        drawTexture(matrices, x + width - 8, y, getZOffset(), 248, textureOffset * 80, 8, 8, 512, 256);
+        drawTexture(matrices, x, y + height - 8, getZOffset(), 0, textureOffset * 80 + 72, 8, 8, 512, 256);
+        drawTexture(matrices, x + width - 8, y + height - 8, getZOffset(), 248, textureOffset * 80 + 72, 8, 8, 512, 256);
         
+        Matrix4f matrix = matrices.peek().getModel();
         // Sides
-        DrawableHelper.drawTexturedQuad(x + 8, x + width - 8, y, y + 8, getZ(), (8) / 256f, (248) / 256f, (textureOffset * 80) / 512f, (textureOffset * 80 + 8) / 512f);
-        DrawableHelper.drawTexturedQuad(x + 8, x + width - 8, y + height - 8, y + height, getZ(), (8) / 256f, (248) / 256f, (textureOffset * 80 + 72) / 512f, (textureOffset * 80 + 80) / 512f);
-        DrawableHelper.drawTexturedQuad(x, x + 8, y + 8, y + height - 8, getZ(), (0) / 256f, (8) / 256f, (textureOffset * 80 + 8) / 512f, (textureOffset * 80 + 72) / 512f);
-        DrawableHelper.drawTexturedQuad(x + width - 8, x + width, y + 8, y + height - 8, getZ(), (248) / 256f, (256) / 256f, (textureOffset * 80 + 8) / 512f, (textureOffset * 80 + 72) / 512f);
+        DrawableHelper.drawTexturedQuad(matrix, x + 8, x + width - 8, y, y + 8, getZ(), (8) / 256f, (248) / 256f, (textureOffset * 80) / 512f, (textureOffset * 80 + 8) / 512f);
+        DrawableHelper.drawTexturedQuad(matrix, x + 8, x + width - 8, y + height - 8, y + height, getZ(), (8) / 256f, (248) / 256f, (textureOffset * 80 + 72) / 512f, (textureOffset * 80 + 80) / 512f);
+        DrawableHelper.drawTexturedQuad(matrix, x, x + 8, y + 8, y + height - 8, getZ(), (0) / 256f, (8) / 256f, (textureOffset * 80 + 8) / 512f, (textureOffset * 80 + 72) / 512f);
+        DrawableHelper.drawTexturedQuad(matrix, x + width - 8, x + width, y + 8, y + height - 8, getZ(), (248) / 256f, (256) / 256f, (textureOffset * 80 + 8) / 512f, (textureOffset * 80 + 72) / 512f);
         
         // Center
-        DrawableHelper.drawTexturedQuad(x + 8, x + width - 8, y + 8, y + height - 8, getZ(), (8) / 256f, (248) / 256f, (textureOffset * 80 + 8) / 512f, (textureOffset * 80 + 72) / 512f);
+        DrawableHelper.drawTexturedQuad(matrix, x + 8, x + width - 8, y + 8, y + height - 8, getZ(), (8) / 256f, (248) / 256f, (textureOffset * 80 + 8) / 512f, (textureOffset * 80 + 72) / 512f);
     }
 }

@@ -36,7 +36,9 @@ import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemConvertible;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
@@ -71,8 +73,8 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
             }
             
             @Override
-            public void render(Rectangle rectangle, int mouseX, int mouseY, float delta) {
-                MinecraftClient.getInstance().textRenderer.draw(I18n.translate("text.rei.composting.page", recipe.getPage() + 1), rectangle.x + 5, rectangle.y + 6, -1);
+            public void render(MatrixStack matrices, Rectangle rectangle, int mouseX, int mouseY, float delta) {
+                MinecraftClient.getInstance().textRenderer.method_27528(matrices, new TranslatableText("text.rei.composting.page", recipe.getPage() + 1), rectangle.x + 5, rectangle.y + 6, -1);
             }
         };
     }
@@ -91,7 +93,7 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
                 if (entryStack.getType() != EntryStack.Type.EMPTY)
                     for (Map.Entry<ItemConvertible, Float> entry : display.getInputMap().entrySet()) {
                         if (entry.getKey().asItem().equals(entryStack.getItem())) {
-                            entryStack = entryStack.setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> Collections.singletonList(I18n.translate("text.rei.composting.chance", MathHelper.fastFloor(entry.getValue() * 100))));
+                            entryStack = entryStack.setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> Collections.singletonList(new TranslatableText("text.rei.composting.chance", MathHelper.fastFloor(entry.getValue() * 100))));
                             break;
                         }
                     }

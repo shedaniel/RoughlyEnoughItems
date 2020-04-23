@@ -33,6 +33,7 @@ import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 
 import java.text.DecimalFormat;
@@ -65,7 +66,7 @@ public class DefaultCampfireCategory implements RecipeCategory<DefaultCampfireDi
         widgets.add(Widgets.createResultSlotBackground(new Point(startPoint.x + 61, startPoint.y + 9)));
         widgets.add(Widgets.createBurningFire(new Point(startPoint.x + 1, startPoint.y + 20)).animationDurationMS(10000));
         widgets.add(Widgets.createLabel(new Point(bounds.x + bounds.width - 5, bounds.y + 5),
-                I18n.translate("category.rei.campfire.time", df.format(cookingTime / 20d))).noShadow().rightAligned().color(0xFF404040, 0xFFBBBBBB));
+                new TranslatableText("category.rei.campfire.time", df.format(cookingTime / 20d))).noShadow().rightAligned().color(0xFF404040, 0xFFBBBBBB));
         widgets.add(Widgets.createArrow(new Point(startPoint.x + 24, startPoint.y + 8)).animationDurationTicks(cookingTime));
         widgets.add(Widgets.createSlot(new Point(startPoint.x + 1, startPoint.y + 1)).entries(display.getInputEntries().get(0)).markInput());
         widgets.add(Widgets.createSlot(new Point(startPoint.x + 61, startPoint.y + 9)).entries(display.getOutputEntries()).disableBackground().markOutput());

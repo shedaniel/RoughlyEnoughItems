@@ -69,6 +69,7 @@ import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.*;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.fluid.Fluid;
@@ -76,6 +77,7 @@ import net.minecraft.item.*;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.recipe.*;
 import net.minecraft.tag.BlockTags;
+import net.minecraft.text.LiteralText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
@@ -164,9 +166,9 @@ public class DefaultPlugin implements REIPluginV0 {
             private Identifier id = new Identifier("roughlyenoughitems", "textures/gui/kirb.png");
             
             @Override
-            public void render(Rectangle bounds, int mouseX, int mouseY, float delta) {
+            public void render(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
                 MinecraftClient.getInstance().getTextureManager().bindTexture(id);
-                drawTexturedQuad(bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), getZOffset(), 0, 1, 0, 1);
+                drawTexturedQuad(matrices.peek().getModel(), bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), getZOffset(), 0, 1, 0, 1);
             }
             
             @Override
@@ -176,7 +178,7 @@ public class DefaultPlugin implements REIPluginV0 {
             
             @Override
             public @Nullable Tooltip getTooltip(Point point) {
-                return Tooltip.create("Kibby");
+                return Tooltip.create(new LiteralText("Kibby"));
             }
         });
     }

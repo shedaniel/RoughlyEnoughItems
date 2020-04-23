@@ -27,6 +27,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import me.shedaniel.cloth.hooks.ClothClientHooks;
+import me.shedaniel.math.Point;
 import me.shedaniel.math.api.Executor;
 import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.api.ConfigManager;
@@ -45,6 +46,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.util.Window;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import org.apache.logging.log4j.util.TriConsumer;
@@ -167,19 +169,19 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
         ScreenHelper.lastHandledScreen = lastScreenWithHandler;
     }
     
-    public static void drawHoveringWidget(int x, int y, TriConsumer<Integer, Integer, Float> consumer, int width, int height, float delta) {
+    public static void drawHoveringWidget(MatrixStack matrices, int x, int y, TriConsumer<MatrixStack, Point, Float> consumer, int width, int height, float delta) {
         Window window = MinecraftClient.getInstance().getWindow();
-        drawHoveringWidget(window.getScaledWidth(), window.getScaledHeight(), x, y, consumer, width, height, delta);
+        drawHoveringWidget(matrices, window.getScaledWidth(), window.getScaledHeight(), x, y, consumer, width, height, delta);
     }
     
-    public static void drawHoveringWidget(int screenWidth, int screenHeight, int x, int y, TriConsumer<Integer, Integer, Float> consumer, int width, int height, float delta) {
+    public static void drawHoveringWidget(MatrixStack matrices, int screenWidth, int screenHeight, int x, int y, TriConsumer<MatrixStack, Point, Float> consumer, int width, int height, float delta) {
         int actualX = Math.max(x + 12, 6);
         int actualY = Math.min(y - height / 2, screenHeight - height - 6);
         if (actualX + width > screenWidth)
             actualX -= 24 + width;
         if (actualY < 6)
             actualY += 24;
-        consumer.accept(actualX, actualY, delta);
+        consumer.accept(matrices, new Point(actualX, actualY), delta);
     }
     
     /**

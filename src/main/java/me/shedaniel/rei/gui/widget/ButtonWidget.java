@@ -30,6 +30,7 @@ import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
@@ -44,10 +45,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @see me.shedaniel.rei.api.widgets.Widgets#createButton(me.shedaniel.math.Rectangle, Text)
- * @see me.shedaniel.rei.api.widgets.Widgets#createButton(me.shedaniel.math.Rectangle, String)
  */
 @Deprecated
 @ApiStatus.ScheduledForRemoval
@@ -64,7 +66,7 @@ public abstract class ButtonWidget extends WidgetWithBounds {
     
     protected ButtonWidget(Rectangle rectangle, Text text) {
         this.bounds = Objects.requireNonNull(rectangle);
-        this.text = Objects.requireNonNull(text).asFormattedString();
+        this.text = Objects.requireNonNull(text).getString();
     }
     
     public static ButtonWidget create(Rectangle point, String text, Consumer<ButtonWidget> onClick) {
@@ -125,33 +127,33 @@ public abstract class ButtonWidget extends WidgetWithBounds {
         return int_1;
     }
     
-    protected void renderBackground(int x, int y, int width, int height, int textureOffset) {
+    protected void renderBackground(MatrixStack matrices, int x, int y, int width, int height, int textureOffset) {
         minecraft.getTextureManager().bindTexture(REIHelper.getInstance().isDarkThemeEnabled() ? BUTTON_LOCATION_DARK : BUTTON_LOCATION);
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(770, 771, 1, 0);
         RenderSystem.blendFunc(770, 771);
         //Four Corners
-        drawTexture(x, y, getZOffset(), 0, textureOffset * 80, 4, 4, 512, 256);
-        drawTexture(x + width - 4, y, getZOffset(), 252, textureOffset * 80, 4, 4, 512, 256);
-        drawTexture(x, y + height - 4, getZOffset(), 0, textureOffset * 80 + 76, 4, 4, 512, 256);
-        drawTexture(x + width - 4, y + height - 4, getZOffset(), 252, textureOffset * 80 + 76, 4, 4, 512, 256);
+        drawTexture(matrices, x, y, getZOffset(), 0, textureOffset * 80, 4, 4, 512, 256);
+        drawTexture(matrices, x + width - 4, y, getZOffset(), 252, textureOffset * 80, 4, 4, 512, 256);
+        drawTexture(matrices, x, y + height - 4, getZOffset(), 0, textureOffset * 80 + 76, 4, 4, 512, 256);
+        drawTexture(matrices, x + width - 4, y + height - 4, getZOffset(), 252, textureOffset * 80 + 76, 4, 4, 512, 256);
         
         //Sides
-        drawTexture(x + 4, y, getZOffset(), 4, textureOffset * 80, MathHelper.ceil((width - 8) / 2f), 4, 512, 256);
-        drawTexture(x + 4, y + height - 4, getZOffset(), 4, textureOffset * 80 + 76, MathHelper.ceil((width - 8) / 2f), 4, 512, 256);
-        drawTexture(x + 4 + MathHelper.ceil((width - 8) / 2f), y + height - 4, getZOffset(), 252 - MathHelper.floor((width - 8) / 2f), textureOffset * 80 + 76, MathHelper.floor((width - 8) / 2f), 4, 512, 256);
-        drawTexture(x + 4 + MathHelper.ceil((width - 8) / 2f), y, getZOffset(), 252 - MathHelper.floor((width - 8) / 2f), textureOffset * 80, MathHelper.floor((width - 8) / 2f), 4, 512, 256);
+        drawTexture(matrices, x + 4, y, getZOffset(), 4, textureOffset * 80, MathHelper.ceil((width - 8) / 2f), 4, 512, 256);
+        drawTexture(matrices, x + 4, y + height - 4, getZOffset(), 4, textureOffset * 80 + 76, MathHelper.ceil((width - 8) / 2f), 4, 512, 256);
+        drawTexture(matrices, x + 4 + MathHelper.ceil((width - 8) / 2f), y + height - 4, getZOffset(), 252 - MathHelper.floor((width - 8) / 2f), textureOffset * 80 + 76, MathHelper.floor((width - 8) / 2f), 4, 512, 256);
+        drawTexture(matrices, x + 4 + MathHelper.ceil((width - 8) / 2f), y, getZOffset(), 252 - MathHelper.floor((width - 8) / 2f), textureOffset * 80, MathHelper.floor((width - 8) / 2f), 4, 512, 256);
         for (int i = y + 4; i < y + height - 4; i += 76) {
-            drawTexture(x, i, getZOffset(), 0, 4 + textureOffset * 80, MathHelper.ceil(width / 2f), MathHelper.clamp(y + height - 4 - i, 0, 76), 512, 256);
-            drawTexture(x + MathHelper.ceil(width / 2f), i, getZOffset(), 256 - MathHelper.floor(width / 2f), 4 + textureOffset * 80, MathHelper.floor(width / 2f), MathHelper.clamp(y + height - 4 - i, 0, 76), 512, 256);
+            drawTexture(matrices, x, i, getZOffset(), 0, 4 + textureOffset * 80, MathHelper.ceil(width / 2f), MathHelper.clamp(y + height - 4 - i, 0, 76), 512, 256);
+            drawTexture(matrices, x + MathHelper.ceil(width / 2f), i, getZOffset(), 256 - MathHelper.floor(width / 2f), 4 + textureOffset * 80, MathHelper.floor(width / 2f), MathHelper.clamp(y + height - 4 - i, 0, 76), 512, 256);
         }
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;
-        renderBackground(x, y, width, height, this.getTextureId(isHovered(mouseX, mouseY)));
+        renderBackground(matrices, x, y, width, height, this.getTextureId(isHovered(mouseX, mouseY)));
         
         int color = 14737632;
         if (!this.enabled) {
@@ -160,13 +162,13 @@ public abstract class ButtonWidget extends WidgetWithBounds {
             color = 16777120;
         }
         
-        this.drawCenteredString(font, getText(), x + width / 2, y + (height - 8) / 2, color);
+        this.drawCenteredString(matrices, font, getText(), x + width / 2, y + (height - 8) / 2, color);
         
         if (getTooltips().isPresent())
             if (!focused && containsMouse(mouseX, mouseY))
-                Tooltip.create(getTooltips().get().split("\n")).queue();
+                Tooltip.create(Stream.of(getTooltips().get().split("\n")).map(LiteralText::new).collect(Collectors.toList())).queue();
             else if (focused)
-                Tooltip.create(new Point(x + width / 2, y + height / 2), getTooltips().get().split("\n")).queue();
+                Tooltip.create(new Point(x + width / 2, y + height / 2), Stream.of(getTooltips().get().split("\n")).map(LiteralText::new).collect(Collectors.toList())).queue();
     }
     
     public boolean isHovered(int mouseX, int mouseY) {

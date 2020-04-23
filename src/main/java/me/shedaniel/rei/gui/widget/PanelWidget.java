@@ -29,6 +29,7 @@ import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.gui.config.RecipeBorderType;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -75,7 +76,7 @@ public class PanelWidget extends WidgetWithBounds {
     }
     
     public void render() {
-        render(0, 0, 0);
+        render(new MatrixStack(), 0, 0, 0);
     }
     
     public int getColor() {
@@ -87,7 +88,7 @@ public class PanelWidget extends WidgetWithBounds {
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (!isRendering())
             return;
         float alpha = ((color >> 24) & 0xFF) / 255f;
@@ -101,23 +102,23 @@ public class PanelWidget extends WidgetWithBounds {
         int yTextureOffset = getYTextureOffset();
         
         //Four Corners
-        this.drawTexture(x, y, 106 + xTextureOffset, 124 + yTextureOffset, 4, 4);
-        this.drawTexture(x + width - 4, y, 252 + xTextureOffset, 124 + yTextureOffset, 4, 4);
-        this.drawTexture(x, y + height - 4, 106 + xTextureOffset, 186 + yTextureOffset, 4, 4);
-        this.drawTexture(x + width - 4, y + height - 4, 252 + xTextureOffset, 186 + yTextureOffset, 4, 4);
+        this.drawTexture(matrices, x, y, 106 + xTextureOffset, 124 + yTextureOffset, 4, 4);
+        this.drawTexture(matrices, x + width - 4, y, 252 + xTextureOffset, 124 + yTextureOffset, 4, 4);
+        this.drawTexture(matrices, x, y + height - 4, 106 + xTextureOffset, 186 + yTextureOffset, 4, 4);
+        this.drawTexture(matrices, x + width - 4, y + height - 4, 252 + xTextureOffset, 186 + yTextureOffset, 4, 4);
         
         //Sides
         for (int xx = 4; xx < width - 4; xx += 128) {
             int thisWidth = Math.min(128, width - 4 - xx);
-            this.drawTexture(x + xx, y, 110 + xTextureOffset, 124 + yTextureOffset, thisWidth, 4);
-            this.drawTexture(x + xx, y + height - 4, 110 + xTextureOffset, 186 + yTextureOffset, thisWidth, 4);
+            this.drawTexture(matrices, x + xx, y, 110 + xTextureOffset, 124 + yTextureOffset, thisWidth, 4);
+            this.drawTexture(matrices, x + xx, y + height - 4, 110 + xTextureOffset, 186 + yTextureOffset, thisWidth, 4);
         }
         for (int yy = 4; yy < height - 4; yy += 50) {
             int thisHeight = Math.min(50, height - 4 - yy);
-            this.drawTexture(x, y + yy, 106 + xTextureOffset, 128 + yTextureOffset, 4, thisHeight);
-            this.drawTexture(x + width - 4, y + yy, 252 + xTextureOffset, 128 + yTextureOffset, 4, thisHeight);
+            this.drawTexture(matrices, x, y + yy, 106 + xTextureOffset, 128 + yTextureOffset, 4, thisHeight);
+            this.drawTexture(matrices, x + width - 4, y + yy, 252 + xTextureOffset, 128 + yTextureOffset, 4, thisHeight);
         }
-        fillGradient(x + 4, y + 4, x + width - 4, y + height - 4, getInnerColor(), getInnerColor());
+        fillGradient(matrices, x + 4, y + 4, x + width - 4, y + height - 4, getInnerColor(), getInnerColor());
     }
     
     protected boolean isRendering() {

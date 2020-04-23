@@ -42,6 +42,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.NotNull;
@@ -75,8 +76,8 @@ public class DefaultBeaconBaseCategory implements RecipeCategory<DefaultBeaconBa
             }
             
             @Override
-            public void render(Rectangle rectangle, int mouseX, int mouseY, float delta) {
-                MinecraftClient.getInstance().textRenderer.draw(name, rectangle.x + 5, rectangle.y + 6, -1);
+            public void render(MatrixStack matrices, Rectangle rectangle, int mouseX, int mouseY, float delta) {
+                MinecraftClient.getInstance().textRenderer.draw(matrices, name, rectangle.x + 5, rectangle.y + 6, -1);
             }
         };
     }
@@ -152,7 +153,7 @@ public class DefaultBeaconBaseCategory implements RecipeCategory<DefaultBeaconBa
         }
         
         @Override
-        public void render(int mouseX, int mouseY, float delta) {
+        public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
             scrolling.updatePosition(delta);
             Rectangle innerBounds = scrolling.getScissorBounds();
             ScissorsHandler.INSTANCE.scissor(innerBounds);
@@ -163,7 +164,7 @@ public class DefaultBeaconBaseCategory implements RecipeCategory<DefaultBeaconBa
                         break;
                     Slot widget = widgets.get(index);
                     widget.getBounds().setLocation(bounds.x + 1 + x * 18, (int) (bounds.y + 1 + y * 18 - scrolling.scrollAmount));
-                    widget.render(mouseX, mouseY, delta);
+                    widget.render(matrices, mouseX, mouseY, delta);
                 }
             }
             ScissorsHandler.INSTANCE.removeLastScissor();
