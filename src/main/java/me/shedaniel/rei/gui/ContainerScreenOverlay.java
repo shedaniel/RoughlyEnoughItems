@@ -34,6 +34,8 @@ import me.shedaniel.rei.api.widgets.Button;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.config.SearchFieldLocation;
+import me.shedaniel.rei.gui.modules.GameModeMenuEntry;
+import me.shedaniel.rei.gui.modules.WeatherMenuEntry;
 import me.shedaniel.rei.gui.subsets.SubsetsMenu;
 import me.shedaniel.rei.gui.widget.*;
 import me.shedaniel.rei.impl.ClientHelperImpl;
@@ -54,6 +56,7 @@ import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.NarratorManager;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.util.math.Vector4f;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.Slot;
@@ -70,13 +73,17 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
 
 @ApiStatus.Internal
 public class ContainerScreenOverlay extends WidgetWithBounds {
     
     private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private static final List<Tooltip> TOOLTIPS = Lists.newArrayList();
+    private static final List<Runnable> AFTER_RENDER = Lists.newArrayList();
     private static final EntryListWidget ENTRY_LIST_WIDGET = new EntryListWidget();
     private static FavoritesListWidget favoritesListWidget = null;
     private final List<Widget> widgets = Lists.newLinkedList();
@@ -122,6 +129,18 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
     private SubsetsMenu subsetsMenu = null;
     private Widget wrappedSubsetsMenu = null;
     
+    @Nullable
+    private SubsetsMenu weatherMenu = null;
+    private Widget wrappedWeatherMenu = null;
+    private boolean renderWeatherMenu = false;
+    private Button weatherButton = null;
+    
+    @Nullable
+    private SubsetsMenu gameModeMenu = null;
+    private Widget wrappedGameModeMenu = null;
+    private boolean renderGameModeMenu = false;
+    private Button gameModeButton = null;
+    
     public static EntryListWidget getEntryListWidget() {
         return ENTRY_LIST_WIDGET;
     }
@@ -137,6 +156,22 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         return subsetsMenu;
     }
     
+    public void removeWeatherMenu() {
+        this.renderWeatherMenu = false;
+        Widget tmpWeatherMenu = wrappedWeatherMenu;
+        AFTER_RENDER.add(() -> this.widgets.remove(tmpWeatherMenu));
+        this.weatherMenu = null;
+        this.wrappedWeatherMenu = null;
+    }
+    
+    public void removeGameModeMenu() {
+        this.renderGameModeMenu = false;
+        Widget tmpGameModeMenu = wrappedGameModeMenu;
+        AFTER_RENDER.add(() -> this.widgets.remove(tmpGameModeMenu));
+        this.gameModeMenu = null;
+        this.wrappedGameModeMenu = null;
+    }
+    
     public void init(boolean useless) {
         init();
     }
@@ -147,6 +182,9 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         this.children().clear();
         this.wrappedSubsetsMenu = null;
         this.subsetsMenu = null;
+        this.weatherMenu = null;
+        this.renderWeatherMenu = false;
+        this.weatherButton = null;
         this.window = MinecraftClient.getInstance().getWindow();
         @SuppressWarnings({"RawTypeCanBeGeneric", "rawtypes"})
         DisplayHelper.DisplayBoundsHandler boundsHandler = DisplayHelper.getInstance().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
@@ -229,27 +267,52 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         ));
         tmp.setZ(600);
         if (ConfigObject.getInstance().doesShowUtilsButtons()) {
-            widgets.add(Widgets.createButton(ConfigObject.getInstance().isLowerConfigButton() ? new Rectangle(ConfigObject.getInstance().isLeftHandSidePanel() ? window.getScaledWidth() - 30 : 10, 10, 20, 20) : new Rectangle(ConfigObject.getInstance().isLeftHandSidePanel() ? window.getScaledWidth() - 55 : 35, 10, 20, 20), NarratorManager.EMPTY)
-                    .onClick(button -> MinecraftClient.getInstance().player.sendChatMessage(ConfigObject.getInstance().getGamemodeCommand().replaceAll("\\{gamemode}", getNextGameMode(Screen.hasShiftDown()).getName())))
-                    .onRender((matrices, button) -> button.setText(new LiteralText(getGameModeShortText(getCurrentGameMode()))))
+            widgets.add(gameModeButton = Widgets.createButton(ConfigObject.getInstance().isLowerConfigButton() ? new Rectangle(ConfigObject.getInstance().isLeftHandSidePanel() ? window.getScaledWidth() - 30 : 10, 10, 20, 20) : new Rectangle(ConfigObject.getInstance().isLeftHandSidePanel() ? window.getScaledWidth() - 55 : 35, 10, 20, 20), NarratorManager.EMPTY)
+                    .onRender((matrices, button) -> {
+                        boolean tmpRender = renderGameModeMenu;
+                        renderGameModeMenu = !renderWeatherMenu && (button.isFocused() || button.containsMouse(PointHelper.ofMouse()) || (wrappedGameModeMenu != null && wrappedGameModeMenu.containsMouse(PointHelper.ofMouse())));
+                        if (tmpRender != renderGameModeMenu) {
+                            if (renderGameModeMenu) {
+                                this.gameModeMenu = new SubsetsMenu(new Point(button.getBounds().x, button.getBounds().getMaxY()),
+                                        CollectionUtils.filterAndMap(Arrays.asList(GameMode.values()), mode -> mode != GameMode.NOT_SET, GameModeMenuEntry::new));
+                                if (ConfigObject.getInstance().isLeftHandSidePanel())
+                                    this.gameModeMenu.menuStartPoint.x -= this.gameModeMenu.getBounds().width - this.gameModeButton.getBounds().width;
+                                this.wrappedGameModeMenu = InternalWidgets.wrapTranslate(InternalWidgets.wrapLateRenderable(gameModeMenu), 0, 0, 400);
+                                AFTER_RENDER.add(() -> this.widgets.add(wrappedGameModeMenu));
+                            } else {
+                                removeGameModeMenu();
+                            }
+                        }
+                        button.setText(new LiteralText(getGameModeShortText(getCurrentGameMode())));
+                    })
                     .focusable(false)
-                    .tooltipLine(I18n.translate("text.rei.gamemode_button.tooltip", getGameModeText(getNextGameMode(Screen.hasShiftDown()))))
+                    .tooltipLine(I18n.translate("text.rei.gamemode_button.tooltip.all"))
                     .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y)));
-            int xxx = ConfigObject.getInstance().isLeftHandSidePanel() ? window.getScaledWidth() - 30 : 10;
-            for (Weather weather : Weather.values()) {
-                Button weatherButton;
-                widgets.add(weatherButton = Widgets.createButton(new Rectangle(xxx, 35, 20, 20), NarratorManager.EMPTY)
-                        .onClick(button -> MinecraftClient.getInstance().player.sendChatMessage(ConfigObject.getInstance().getWeatherCommand().replaceAll("\\{weather}", weather.name().toLowerCase(Locale.ROOT))))
-                        .tooltipLine(I18n.translate("text.rei.weather_button.tooltip", I18n.translate(weather.getTranslateKey())))
-                        .focusable(false)
-                        .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y)));
-                widgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-                    MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
-                    RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-                    helper.drawTexture(matrices, weatherButton.getBounds().x + 3, weatherButton.getBounds().y + 3, weather.getId() * 14, 14, 14, 14);
-                }));
-                xxx += ConfigObject.getInstance().isLeftHandSidePanel() ? -25 : 25;
-            }
+            widgets.add(weatherButton = Widgets.createButton(new Rectangle(ConfigObject.getInstance().isLeftHandSidePanel() ? window.getScaledWidth() - 30 : 10, 35, 20, 20), NarratorManager.EMPTY)
+                    .onRender((matrices, button) -> {
+                        boolean tmpRender = renderWeatherMenu;
+                        renderWeatherMenu = !renderGameModeMenu && (button.isFocused() || button.containsMouse(PointHelper.ofMouse()) || (wrappedWeatherMenu != null && wrappedWeatherMenu.containsMouse(PointHelper.ofMouse())));
+                        if (tmpRender != renderWeatherMenu) {
+                            if (renderWeatherMenu) {
+                                this.weatherMenu = new SubsetsMenu(new Point(button.getBounds().x, button.getBounds().getMaxY()),
+                                        CollectionUtils.map(Weather.values(), WeatherMenuEntry::new));
+                                if (ConfigObject.getInstance().isLeftHandSidePanel())
+                                    this.weatherMenu.menuStartPoint.x -= this.weatherMenu.getBounds().width - this.weatherButton.getBounds().width;
+                                this.wrappedWeatherMenu = InternalWidgets.wrapTranslate(InternalWidgets.wrapLateRenderable(weatherMenu), 0, 0, 400);
+                                AFTER_RENDER.add(() -> this.widgets.add(wrappedWeatherMenu));
+                            } else {
+                                removeWeatherMenu();
+                            }
+                        }
+                    })
+                    .tooltipLine(I18n.translate("text.rei.weather_button.tooltip.all"))
+                    .focusable(false)
+                    .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y)));
+            widgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+                MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
+                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+                helper.drawTexture(matrices, weatherButton.getBounds().x + 3, weatherButton.getBounds().y + 3, getCurrentWeather().getId() * 14, 14, 14, 14);
+            }));
         }
         subsetsButtonBounds = getSubsetsButtonBounds();
         if (ConfigObject.getInstance().isSubsetsEnabled()) {
@@ -289,8 +352,10 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                             .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y))
                             .tooltipSupplier(button -> I18n.translate(ConfigManager.getInstance().isCraftableOnlyEnabled() ? "text.rei.showing_craftable" : "text.rei.showing_all")),
                     Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-                        itemRenderer.zOffset = helper.getZOffset();
-                        itemRenderer.renderGuiItemIcon(icon, area.x + 2, area.y + 2);
+                        Vector4f vector = new Vector4f(area.x + 2, area.y + 2, helper.getZOffset() - 10, 1.0F);
+                        vector.transform(matrices.peek().getModel());
+                        itemRenderer.zOffset = vector.getZ();
+                        itemRenderer.renderGuiItemIcon(icon, (int) vector.getX(), (int) vector.getY());
                         itemRenderer.zOffset = 0.0F;
                     }))
             ));
@@ -456,9 +521,20 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         if (ScreenHelper.isOverlayVisible()) {
             ScreenHelper.getSearchField().laterRender(matrices, mouseX, mouseY, delta);
             for (Widget widget : widgets) {
-                if (widget instanceof LateRenderable && wrappedSubsetsMenu != widget)
+                if (widget instanceof LateRenderable && wrappedSubsetsMenu != widget && wrappedWeatherMenu != widget && wrappedGameModeMenu != widget)
                     widget.render(matrices, mouseX, mouseY, delta);
             }
+        }
+        if (wrappedWeatherMenu != null) {
+            if (wrappedWeatherMenu.containsMouse(mouseX, mouseY)) {
+                TOOLTIPS.clear();
+            }
+            wrappedWeatherMenu.render(matrices, mouseX, mouseY, delta);
+        } else if (wrappedGameModeMenu != null) {
+            if (wrappedGameModeMenu.containsMouse(mouseX, mouseY)) {
+                TOOLTIPS.clear();
+            }
+            wrappedGameModeMenu.render(matrices, mouseX, mouseY, delta);
         }
         if (wrappedSubsetsMenu != null) {
             TOOLTIPS.clear();
@@ -470,7 +546,11 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                 if (tooltip != null)
                     renderTooltip(matrices, tooltip);
             }
+        for (Runnable runnable : AFTER_RENDER) {
+            runnable.run();
+        }
         TOOLTIPS.clear();
+        AFTER_RENDER.clear();
     }
     
     public void renderTooltip(MatrixStack matrices, Tooltip tooltip) {
@@ -516,6 +596,10 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             return false;
         if (wrappedSubsetsMenu != null && wrappedSubsetsMenu.mouseScrolled(mouseX, mouseY, amount))
             return true;
+        if (wrappedWeatherMenu != null && wrappedWeatherMenu.mouseScrolled(mouseX, mouseY, amount))
+            return true;
+        if (wrappedGameModeMenu != null && wrappedGameModeMenu.mouseScrolled(mouseX, mouseY, amount))
+            return true;
         if (isInside(PointHelper.ofMouse())) {
             if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
                 if (amount > 0 && leftButton.isEnabled())
@@ -533,7 +617,11 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                 return true;
         }
         for (Widget widget : widgets)
-            if (widget != ENTRY_LIST_WIDGET && (favoritesListWidget == null || widget != favoritesListWidget) && (wrappedSubsetsMenu == null || widget != wrappedSubsetsMenu) && widget.mouseScrolled(mouseX, mouseY, amount))
+            if (widget != ENTRY_LIST_WIDGET && (favoritesListWidget == null || widget != favoritesListWidget)
+                && (wrappedSubsetsMenu == null || widget != wrappedSubsetsMenu)
+                && (wrappedWeatherMenu == null || widget != wrappedWeatherMenu)
+                && (wrappedGameModeMenu == null || widget != wrappedGameModeMenu)
+                && widget.mouseScrolled(mouseX, mouseY, amount))
                 return true;
         return false;
     }
@@ -603,6 +691,28 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             ScreenHelper.getSearchField().setFocused(false);
             return true;
         }
+        if (wrappedWeatherMenu != null) {
+            if (wrappedWeatherMenu.mouseClicked(double_1, double_2, int_1)) {
+                this.setFocused(wrappedWeatherMenu);
+                if (int_1 == 0)
+                    this.setDragging(true);
+                ScreenHelper.getSearchField().setFocused(false);
+                return true;
+            } else if (!wrappedWeatherMenu.containsMouse(double_1, double_2) && !weatherButton.containsMouse(double_1, double_2)) {
+                removeWeatherMenu();
+            }
+        }
+        if (wrappedGameModeMenu != null) {
+            if (wrappedGameModeMenu.mouseClicked(double_1, double_2, int_1)) {
+                this.setFocused(wrappedGameModeMenu);
+                if (int_1 == 0)
+                    this.setDragging(true);
+                ScreenHelper.getSearchField().setFocused(false);
+                return true;
+            } else if (!wrappedGameModeMenu.containsMouse(double_1, double_2) && !gameModeButton.containsMouse(double_1, double_2)) {
+                removeGameModeMenu();
+            }
+        }
         if (MinecraftClient.getInstance().currentScreen instanceof HandledScreen && ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
             HandledScreen<?> handledScreen = (HandledScreen<?>) MinecraftClient.getInstance().currentScreen;
             for (RecipeHelper.ScreenClickArea area : RecipeHelper.getInstance().getScreenClickAreas())
@@ -614,7 +724,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                     }
         }
         for (Element element : widgets)
-            if (element != wrappedSubsetsMenu && element.mouseClicked(double_1, double_2, int_1)) {
+            if (element != wrappedSubsetsMenu && element != wrappedWeatherMenu && element != wrappedGameModeMenu && element.mouseClicked(double_1, double_2, int_1)) {
                 this.setFocused(element);
                 if (int_1 == 0)
                     this.setDragging(true);

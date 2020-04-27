@@ -142,7 +142,6 @@ task releaseOnCf {
     }
     proc.waitFor()
     releaseChangelog = changes.toString()
-    println(releaseChangelog)
     dependsOn tasks.getByName("curseforge")
 }
 

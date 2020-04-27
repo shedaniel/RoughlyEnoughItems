@@ -139,7 +139,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
     }
     
     @Override
-    protected void init() {
+    public void init() {
         super.init();
         boolean isCompactTabs = ConfigObject.getInstance().isUsingCompactTabs();
         int tabSize = isCompactTabs ? 24 : 28;

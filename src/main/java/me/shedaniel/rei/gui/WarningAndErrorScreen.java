@@ -78,7 +78,7 @@ public class WarningAndErrorScreen extends Screen {
     }
     
     @Override
-    protected void init() {
+    public void init() {
         children.add(listWidget = new StringEntryListWidget(client, width, height, 32, height - 32));
         listWidget.max = 80;
         listWidget.creditsClearEntries();
