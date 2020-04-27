@@ -33,6 +33,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.EntryRegistry;
 import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.subsets.SubsetsRegistry;
 import me.shedaniel.rei.gui.subsets.entries.EntryStackMenuEntry;
 import me.shedaniel.rei.gui.subsets.entries.SubMenuEntry;
@@ -215,7 +216,7 @@ public class SubsetsMenu extends WidgetWithBounds implements LateRenderable {
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         Rectangle bounds = getBounds();
         Rectangle innerBounds = getInnerBounds();
-        fill(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), -6250336);
+        fill(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), containsMouse(mouseX, mouseY) ? (REIHelper.getInstance().isDarkThemeEnabled() ? -17587 : -1) :-6250336);
         fill(matrices, innerBounds.x, innerBounds.y, innerBounds.getMaxX(), innerBounds.getMaxY(), -16777216);
         boolean contains = innerBounds.contains(mouseX, mouseY);
         SubsetsMenuEntry focused = getFocused() instanceof SubsetsMenuEntry ? (SubsetsMenuEntry) getFocused() : null;

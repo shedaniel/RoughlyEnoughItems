@@ -69,7 +69,7 @@ public class CreditsScreen extends Screen {
     }
     
     @Override
-    protected void init() {
+    public void init() {
         children.add(entryListWidget = new CreditsEntryListWidget(client, width, height, 32, height - 32));
         entryListWidget.creditsClearEntries();
         List<Pair<String, String>> translators = Lists.newArrayList();

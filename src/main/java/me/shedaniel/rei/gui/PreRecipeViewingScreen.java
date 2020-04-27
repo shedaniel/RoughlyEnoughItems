@@ -101,7 +101,7 @@ public class PreRecipeViewingScreen extends Screen {
     }
     
     @Override
-    protected void init() {
+    public void init() {
         this.children.clear();
         this.widgets.clear();
         this.widgets.add(Widgets.createButton(new Rectangle(width / 2 - 100, height - 40, 200, 20), NarratorManager.EMPTY)
