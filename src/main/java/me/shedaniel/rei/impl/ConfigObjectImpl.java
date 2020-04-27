@@ -163,7 +163,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     @Override
     public int getMaxRecipePerPage() {
-        return appearance.maxRecipePerPage;
+        return appearance.maxRecipesPerPage;
     }
     
     @Override
@@ -336,6 +336,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         return experimental.isSubsetsEnabled;
     }
     
+    @Override
+    public boolean shouldResizeDynamically() {
+        return appearance.resizeDynamically;
+    }
+    
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD})
     @interface DontApplyFieldName {}
@@ -381,7 +386,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         private SearchFieldLocation searchFieldLocation = SearchFieldLocation.CENTER;
         @Comment("Declares the position of the item list panel.") private boolean mirrorItemPanel = false;
         @Comment("Declares the maximum amount of recipes displayed in a page if possible.") @ConfigEntry.BoundedDiscrete(min = 2, max = 99)
-        private int maxRecipePerPage = 3;
+        private int maxRecipesPerPage = 15;
         private boolean clickableRecipeArrows = true;
         @Comment("Declares the appearance of recipe's border.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
         private RecipeBorderType recipeBorder = RecipeBorderType.DEFAULT;
@@ -395,6 +400,8 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         @UsePercentage(min = 0.25, max = 4.0) private double entrySize = 1.0;
         private boolean useCompactTabs = true;
         private boolean lowerConfigButton = false;
+        @Comment("Declares whether REI should resize its recipe window dynamically")
+        private boolean resizeDynamically = false;
     }
     
     public static class Technical {
