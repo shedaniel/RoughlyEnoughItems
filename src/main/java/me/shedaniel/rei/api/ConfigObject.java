@@ -155,4 +155,6 @@ public interface ConfigObject {
     
     @ApiStatus.Experimental
     boolean isSubsetsEnabled();
+    
+    boolean shouldResizeDynamically();
 }

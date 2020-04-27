@@ -223,17 +223,18 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
         this.preWidgets.clear();
         this.widgets.clear();
         this.largestWidth = width - 100;
-        this.largestHeight = Math.max(height - 36, 100);
+        this.largestHeight = Math.max(height - 34 - 30, 100);
         int maxWidthDisplay = CollectionUtils.mapAndMax(getCurrentDisplayed(), selectedCategory::getDisplayWidth, Comparator.naturalOrder()).orElse(150);
-        this.guiWidth = maxWidthDisplay + 20;
+        this.guiWidth = Math.max(maxWidthDisplay + 40, 0);
         this.guiHeight = MathHelper.floor(MathHelper.clamp((double) (selectedCategory.getDisplayHeight() + 4) * (getRecipesPerPage() + 1) + 36, 100, largestHeight));
+        if (!ConfigObject.getInstance().shouldResizeDynamically()) this.guiHeight = largestHeight;
         this.tabsPerPage = Math.max(5, MathHelper.floor((guiWidth - 20d) / tabSize));
         if (this.categoryPages == -1) {
             this.categoryPages = Math.max(0, categories.indexOf(selectedCategory) / tabsPerPage);
         }
         this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - guiHeight / 2, guiWidth, guiHeight);
         this.page = MathHelper.clamp(page, 0, getTotalPages(selectedCategory) - 1);
-        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x + 2, bounds.y - 16, 10, 10), new TranslatableText("text.rei.left_arrow"))
+        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x, bounds.y - 16, 10, 10), new TranslatableText("text.rei.left_arrow"))
                 .onClick(button -> {
                     categoryPages--;
                     if (categoryPages < 0)
@@ -241,7 +242,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
                     RecipeViewingScreen.this.init();
                 })
                 .enabled(categories.size() > tabsPerPage));
-        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x + bounds.width - 12, bounds.y - 16, 10, 10), new TranslatableText("text.rei.right_arrow"))
+        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x + bounds.width - 10, bounds.y - 16, 10, 10), new TranslatableText("text.rei.right_arrow"))
                 .onClick(button -> {
                     categoryPages++;
                     if (categoryPages > MathHelper.ceil(categories.size() / (float) tabsPerPage) - 1)
@@ -283,7 +284,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
             RecipeViewingScreen.this.init();
         }).onRender((matrices, label) -> {
             label.setText(new LiteralText(String.format("%d/%d", page + 1, getTotalPages(selectedCategory))));
-            label.setClickable(categoriesMap.get(selectedCategory).size() > getRecipesPerPageByHeight());
+            label.setClickable(getTotalPages(selectedCategory) > 1);
         }).tooltipSupplier(label -> label.isClickable() ? I18n.translate("text.rei.choose_page") : null));
         widgets.add(recipeNext = Widgets.createButton(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 19, 12, 12), new TranslatableText("text.rei.right_arrow"))
                 .onClick(button -> {
@@ -292,8 +293,8 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
                         page = 0;
                     RecipeViewingScreen.this.init();
                 }).tooltipLine(I18n.translate("text.rei.next_page")));
-        recipeBack.setEnabled(categoriesMap.get(selectedCategory).size() > getRecipesPerPageByHeight());
-        recipeNext.setEnabled(categoriesMap.get(selectedCategory).size() > getRecipesPerPageByHeight());
+        recipeBack.setEnabled(getTotalPages(selectedCategory) > 1);
+        recipeNext.setEnabled(getTotalPages(selectedCategory) > 1);
         int tabV = isCompactTabs ? 166 : 192;
         for (int i = 0; i < tabsPerPage; i++) {
             int j = i + categoryPages * tabsPerPage;
@@ -316,7 +317,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
             final RecipeDisplay display = currentDisplayed.get(i);
             final Supplier<RecipeDisplay> displaySupplier = () -> display;
             int displayWidth = selectedCategory.getDisplayWidth(displaySupplier.get());
-            final Rectangle displayBounds = new Rectangle(getBounds().getCenterX() - displayWidth / 2, getBounds().y - 2 + 36 + recipeHeight * i + 4 * i, displayWidth, recipeHeight);
+            final Rectangle displayBounds = new Rectangle(getBounds().getCenterX() - displayWidth / 2, getBounds().getCenterY() + 16 - recipeHeight * (getRecipesPerPage() + 1) / 2 - 2 * (getRecipesPerPage() + 1) + recipeHeight * i + 4 * i, displayWidth, recipeHeight);
             List<Widget> setupDisplay = selectedCategory.setupDisplay(display, displayBounds);
             transformIngredientNotice(setupDisplay, ingredientStackToNotice);
             transformResultNotice(setupDisplay, resultStackToNotice);
