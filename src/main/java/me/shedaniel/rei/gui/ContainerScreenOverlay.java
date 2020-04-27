@@ -277,7 +277,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                                         CollectionUtils.filterAndMap(Arrays.asList(GameMode.values()), mode -> mode != GameMode.NOT_SET, GameModeMenuEntry::new));
                                 if (ConfigObject.getInstance().isLeftHandSidePanel())
                                     this.gameModeMenu.menuStartPoint.x -= this.gameModeMenu.getBounds().width - this.gameModeButton.getBounds().width;
-                                this.wrappedGameModeMenu = InternalWidgets.wrapTranslate(InternalWidgets.wrapLateRenderable(gameModeMenu), 0, 0, 400);
+                                this.wrappedGameModeMenu = InternalWidgets.wrapTranslate(InternalWidgets.wrapLateRenderable(gameModeMenu), 0, 0, 600);
                                 AFTER_RENDER.add(() -> this.widgets.add(wrappedGameModeMenu));
                             } else {
                                 removeGameModeMenu();
@@ -316,7 +316,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         }
         subsetsButtonBounds = getSubsetsButtonBounds();
         if (ConfigObject.getInstance().isSubsetsEnabled()) {
-            widgets.add(InternalWidgets.wrapLateRenderable(Widgets.createButton(subsetsButtonBounds, ((ClientHelperImpl) ClientHelper.getInstance()).isAprilFools.get() ? new TranslatableText("text.rei.tiny_potato") : new TranslatableText("text.rei.subsets"))
+            widgets.add(InternalWidgets.wrapLateRenderable(InternalWidgets.wrapTranslate(Widgets.createButton(subsetsButtonBounds, ((ClientHelperImpl) ClientHelper.getInstance()).isAprilFools.get() ? new TranslatableText("text.rei.tiny_potato") : new TranslatableText("text.rei.subsets"))
                     .onClick(button -> {
                         if (subsetsMenu == null) {
                             wrappedSubsetsMenu = InternalWidgets.wrapTranslate(InternalWidgets.wrapLateRenderable(this.subsetsMenu = SubsetsMenu.createFromRegistry(new Point(this.subsetsButtonBounds.x, this.subsetsButtonBounds.getMaxY()))), 0, 0, 400);
@@ -326,7 +326,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                             this.subsetsMenu = null;
                             this.wrappedSubsetsMenu = null;
                         }
-                    })));
+                    }), 0, 0, 600)));
         }
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
             widgets.add(Widgets.createClickableLabel(new Point(bounds.x + (bounds.width / 2), bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 10), NarratorManager.EMPTY, label -> {
