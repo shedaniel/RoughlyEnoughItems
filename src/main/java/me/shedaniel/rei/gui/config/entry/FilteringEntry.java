@@ -36,10 +36,11 @@ import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryRegistry;
 import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.OverlaySearchField;
 import me.shedaniel.rei.gui.widget.EntryWidget;
-import me.shedaniel.rei.gui.widget.ScrollingContainer;
+import me.shedaniel.clothconfig2.api.ScrollingContainer;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.SearchArgument;
 import me.shedaniel.rei.utils.CollectionUtils;
@@ -111,21 +112,21 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
         this.searchField = new OverlaySearchField(0, 0, 0, 0);
         {
             Text selectAllText = new TranslatableText("config.roughlyenoughitems.filteredEntries.selectAll");
-            this.selectAllButton = new ButtonWidget(0, 0, MinecraftClient.getInstance().textRenderer.method_27525(selectAllText) + 10, 20, selectAllText, button -> {
+            this.selectAllButton = new ButtonWidget(0, 0, MinecraftClient.getInstance().textRenderer.getWidth(selectAllText) + 10, 20, selectAllText, button -> {
                 this.selectionPoint = new Point(-Integer.MAX_VALUE / 2, -Integer.MAX_VALUE / 2);
                 this.secondPoint = new Point(Integer.MAX_VALUE / 2, Integer.MAX_VALUE / 2);
             });
         }
         {
             Text selectNoneText = new TranslatableText("config.roughlyenoughitems.filteredEntries.selectNone");
-            this.selectNoneButton = new ButtonWidget(0, 0, MinecraftClient.getInstance().textRenderer.method_27525(selectNoneText) + 10, 20, selectNoneText, button -> {
+            this.selectNoneButton = new ButtonWidget(0, 0, MinecraftClient.getInstance().textRenderer.getWidth(selectNoneText) + 10, 20, selectNoneText, button -> {
                 this.selectionPoint = new Point(Integer.MAX_VALUE, Integer.MAX_VALUE);
                 this.secondPoint = new Point(Integer.MAX_VALUE, Integer.MAX_VALUE);
             });
         }
         {
             Text hideText = new TranslatableText("config.roughlyenoughitems.filteredEntries.hide");
-            this.hideButton = new ButtonWidget(0, 0, MinecraftClient.getInstance().textRenderer.method_27525(hideText) + 10, 20, hideText, button -> {
+            this.hideButton = new ButtonWidget(0, 0, MinecraftClient.getInstance().textRenderer.getWidth(hideText) + 10, 20, hideText, button -> {
                 for (int i = 0; i < entryStacks.size(); i++) {
                     EntryStack stack = entryStacks.get(i);
                     EntryListEntry entry = entries.get(i);
@@ -139,7 +140,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
         }
         {
             Text showText = new TranslatableText("config.roughlyenoughitems.filteredEntries.show");
-            this.showButton = new ButtonWidget(0, 0, MinecraftClient.getInstance().textRenderer.method_27525(showText) + 10, 20, showText, button -> {
+            this.showButton = new ButtonWidget(0, 0, MinecraftClient.getInstance().textRenderer.getWidth(showText) + 10, 20, showText, button -> {
                 for (int i = 0; i < entryStacks.size(); i++) {
                     EntryStack stack = entryStacks.get(i);
                     EntryListEntry entry = entries.get(i);
@@ -217,7 +218,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
             nextIndex++;
         }
         updatePosition(delta);
-        scrolling.renderScrollBar(0xff000000, 1);
+        scrolling.renderScrollBar(0xff000000, 1, REIHelper.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
         matrices.push();
         matrices.translate(0, 0, 300);
         this.searchField.laterRender(matrices, mouseX, mouseY, delta);
@@ -249,7 +250,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
     
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dx, double dy) {
-        if (scrolling.mouseDragged(mouseX, mouseY, button, dx, dy, true))
+        if (scrolling.mouseDragged(mouseX, mouseY, button, dx, dy, ConfigObject.getInstance().doesSnapToRows(), entrySize()))
             return true;
         return super.mouseDragged(mouseX, mouseY, button, dx, dy);
     }

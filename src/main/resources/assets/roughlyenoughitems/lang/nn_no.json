@@ -85,7 +85,7 @@
   "text.rei.favorites_tooltip": " \n§7Press %s to add this to favorites.",
   "text.rei.remove_favorites_tooltip": " \n§7Press %s to remove this from favorites.",
   "text.rei.working_station": "Working Station",
-  "text.rei.release_export": "§lRelease %s to export",
+  "text.rei.release_export": "Release %s to export",
   "text.rei.recipe_id": "\n%sRecipe Id: %s",
   "text.rei.recipe_screen_type.selection": "Recipe Screen Type Selection",
   "text.rei.recipe_screen_type.selection.sub": "You can always edit this setting again via the config screen.",

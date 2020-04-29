@@ -85,7 +85,7 @@
   "text.rei.favorites_tooltip": " \n§7按 %s 將其添加到我的最愛。",
   "text.rei.remove_favorites_tooltip": " \n§7按 %s 可以將其從我的最愛中移除。",
   "text.rei.working_station": "工作台",
-  "text.rei.release_export": "§l放開 %s 以匯出此食譜",
+  "text.rei.release_export": "放開 %s 以匯出此食譜",
   "text.rei.recipe_id": "\n%s合成識別碼: %s",
   "text.rei.recipe_screen_type.selection": "配方介面選擇",
   "text.rei.recipe_screen_type.selection.sub": "你可以在設置中改變配方介面.",

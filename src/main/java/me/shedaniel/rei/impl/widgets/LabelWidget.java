@@ -183,7 +183,7 @@ public final class LabelWidget extends Label {
     @NotNull
     @Override
     public final Rectangle getBounds() {
-        int width = font.method_27525(text);
+        int width = font.getWidth(text);
         Point point = getPoint();
         if (getHorizontalAlignment() == LEFT_ALIGNED)
             return new Rectangle(point.x - 1, point.y - 5, width + 2, 14);
@@ -200,26 +200,26 @@ public final class LabelWidget extends Label {
         if (isClickable() && isHovered(mouseX, mouseY))
             color = getHoveredColor();
         Point pos = getPoint();
-        int width = font.method_27525(getText());
+        int width = font.getWidth(getText());
         switch (getHorizontalAlignment()) {
             case LEFT_ALIGNED:
                 if (hasShadow())
-                    font.method_27517(matrices, getText(), pos.x, pos.y, color);
+                    font.drawWithShadow(matrices, getText(), pos.x, pos.y, color);
                 else
-                    font.method_27528(matrices, getText(), pos.x, pos.y, color);
+                    font.draw(matrices, getText(), pos.x, pos.y, color);
                 break;
             case RIGHT_ALIGNED:
                 if (hasShadow())
-                    font.method_27517(matrices, getText(), pos.x - width, pos.y, color);
+                    font.drawWithShadow(matrices, getText(), pos.x - width, pos.y, color);
                 else
-                    font.method_27528(matrices, getText(), pos.x - width, pos.y, color);
+                    font.draw(matrices, getText(), pos.x - width, pos.y, color);
                 break;
             case CENTER:
             default:
                 if (hasShadow())
-                    font.method_27517(matrices, getText(), pos.x - width / 2f, pos.y, color);
+                    font.drawWithShadow(matrices, getText(), pos.x - width / 2f, pos.y, color);
                 else
-                    font.method_27528(matrices, getText(), pos.x - width / 2f, pos.y, color);
+                    font.draw(matrices, getText(), pos.x - width / 2f, pos.y, color);
                 break;
         }
         if (isHovered(mouseX, mouseY)) {

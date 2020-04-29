@@ -342,7 +342,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
             preWidgets.add(workingStationsBaseWidget = Widgets.createCategoryBase(new Rectangle(xx - 5, yy - 5, 15 + innerWidth * 16, 10 + actualHeight * 16)));
             preWidgets.add(Widgets.createSlotBase(new Rectangle(xx - 1, yy - 1, innerWidth * 16 + 2, actualHeight * 16 + 2)));
             int index = 0;
-            List<Text> list = Collections.singletonList(new TranslatableText("text.rei.working_station").method_27692(Formatting.YELLOW));
+            List<Text> list = Collections.singletonList(new TranslatableText("text.rei.working_station").formatted(Formatting.YELLOW));
             xx += (innerWidth - 1) * 16;
             for (List<EntryStack> workingStation : workingStations) {
                 preWidgets.add(new WorkstationSlotWidget(xx, yy, CollectionUtils.map(workingStation, stack -> stack.copy().setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> list))));
@@ -436,12 +436,12 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
                     setZOffset(470);
                     if (bounds.contains(mouseX, mouseY)) {
                         fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 1744822402, 1744822402);
-                        Text text = new TranslatableText("text.rei.release_export", export.getLocalizedName());
+                        Text text = new TranslatableText("text.rei.release_export", export.getLocalizedName().copy().getString());
                         VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
                         matrices.push();
                         matrices.translate(0.0D, 0.0D, 480);
                         Matrix4f matrix4f = matrices.peek().getModel();
-                        textRenderer.draw(text, bounds.getCenterX() - textRenderer.method_27525(text) / 2f, bounds.getCenterY() - 4.5f, 0xff000000, false, matrix4f, immediate, false, 0, 15728880);
+                        textRenderer.draw(text, bounds.getCenterX() - textRenderer.getWidth(text) / 2f, bounds.getCenterY() - 4.5f, 0xff000000, false, matrix4f, immediate, false, 0, 15728880);
                         immediate.draw();
                         matrices.pop();
                     } else {

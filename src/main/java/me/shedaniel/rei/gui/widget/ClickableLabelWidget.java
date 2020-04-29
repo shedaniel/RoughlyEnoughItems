@@ -73,17 +73,17 @@ public abstract class ClickableLabelWidget extends LabelWidget {
         if (isClickable() && isHovered(mouseX, mouseY))
             color = getHoveredColor();
         Point pos = getLocation();
-        int width = font.getStringWidth(getText());
+        int width = font.getWidth(getText());
         if (isCentered()) {
             if (isHasShadows())
-                font.method_27517(matrices, text, pos.x - width / 2f, pos.y, color);
+                font.drawWithShadow(matrices, text, pos.x - width / 2f, pos.y, color);
             else
-                font.method_27528(matrices, text, pos.x - width / 2f, pos.y, color);
+                font.draw(matrices, text, pos.x - width / 2f, pos.y, color);
         } else {
             if (isHasShadows())
-                font.method_27517(matrices, text, pos.x, pos.y, color);
+                font.drawWithShadow(matrices, text, pos.x, pos.y, color);
             else
-                font.method_27528(matrices, text, pos.x, pos.y, color);
+                font.draw(matrices, text, pos.x, pos.y, color);
         }
         drawTooltips(mouseX, mouseY);
     }

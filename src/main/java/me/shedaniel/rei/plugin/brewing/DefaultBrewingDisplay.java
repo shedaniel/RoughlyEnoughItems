@@ -43,14 +43,14 @@ public class DefaultBrewingDisplay implements RecipeDisplay {
     private List<EntryStack> reactant;
     
     public DefaultBrewingDisplay(ItemStack input, Ingredient reactant, ItemStack output) {
-        this.input = EntryStack.create(input).setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, stack -> Collections.singletonList(new TranslatableText("category.rei.brewing.input").method_27692(Formatting.YELLOW)));
+        this.input = EntryStack.create(input).setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, stack -> Collections.singletonList(new TranslatableText("category.rei.brewing.input").formatted(Formatting.YELLOW)));
         this.reactant = new ArrayList<>();
         for (ItemStack stack : reactant.getMatchingStacksClient()) {
             EntryStack entryStack = EntryStack.create(stack);
-            entryStack.setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> Collections.singletonList(new TranslatableText("category.rei.brewing.reactant").method_27692(Formatting.YELLOW)));
+            entryStack.setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> Collections.singletonList(new TranslatableText("category.rei.brewing.reactant").formatted(Formatting.YELLOW)));
             this.reactant.add(entryStack);
         }
-        this.output = EntryStack.create(output).setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, stack -> Collections.singletonList(new TranslatableText("category.rei.brewing.result").method_27692(Formatting.YELLOW)));
+        this.output = EntryStack.create(output).setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, stack -> Collections.singletonList(new TranslatableText("category.rei.brewing.result").formatted(Formatting.YELLOW)));
     }
     
     @Override

@@ -85,7 +85,7 @@
   "text.rei.favorites_tooltip": " \n§7Naciśnij %s aby dodać przedmiot do Ulubionych.",
   "text.rei.remove_favorites_tooltip": " \n§7Naciśnij %s aby usunąć przedmiot z Ulubionych.",
   "text.rei.working_station": "Stacja robocza",
-  "text.rei.release_export": "§lZwolnij %s aby wyeksportować",
+  "text.rei.release_export": "Zwolnij %s aby wyeksportować",
   "text.rei.recipe_id": "\n%sId receptury: %s",
   "text.rei.recipe_screen_type.selection": "Wybór typu ekranu receptur",
   "text.rei.recipe_screen_type.selection.sub": "Zawsze możesz zmienić tę opcję w Panelu Konfiguracyjnym.",

@@ -30,6 +30,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.model.BakedModel;
@@ -49,13 +50,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 @ApiStatus.Internal
 public class ItemEntryStack extends AbstractEntryStack implements OptimalEntryStack {
-    
-    private static final Predicate<BakedModel> IS_SIDE_LIT = BakedModel::isSideLit;
-    
     private ItemStack itemStack;
     
     public ItemEntryStack(ItemStack itemStack) {
@@ -301,12 +298,7 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     }
     
     private BakedModel getModelFromStack(ItemStack stack) {
-        BakedModel model = MinecraftClient.getInstance().getItemRenderer().getModels().getModel(stack);
-        if (stack.getItem().hasPropertyGetters())
-            model = model.getItemPropertyOverrides().apply(model, stack, null, null);
-        if (model != null)
-            return model;
-        return MinecraftClient.getInstance().getItemRenderer().getModels().getModelManager().getMissingModel();
+        return MinecraftClient.getInstance().getItemRenderer().getHeldItemModel(stack, null, null);
     }
     
     @Override
@@ -319,13 +311,13 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
             matrices.scale(bounds.getWidth(), (bounds.getWidth() + bounds.getHeight()) / -2f, bounds.getHeight());
             VertexConsumerProvider.Immediate immediate = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
             BakedModel model = getModelFromStack(stack);
-            boolean bl = !IS_SIDE_LIT.test(model);
-            if (bl)
-                GlStateManager.setupGuiFlatDiffuseLighting();
+            boolean sideLit = !model.isSideLit();
+            if (sideLit)
+                DiffuseLighting.disableGuiDepthLighting();
             MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformation.Mode.GUI, false, matrices, immediate, 15728880, OverlayTexture.DEFAULT_UV, model);
             immediate.draw();
-            if (bl)
-                GlStateManager.setupGui3dDiffuseLighting();
+            if (sideLit)
+                DiffuseLighting.enableGuiDepthLighting();
             matrices.pop();
             ((ItemStackHook) (Object) stack).rei_setRenderEnchantmentGlint(false);
         }

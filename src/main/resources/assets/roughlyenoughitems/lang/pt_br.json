@@ -85,7 +85,7 @@
   "text.rei.favorites_tooltip": " §7Pressione %s para colocar nos favoritos.",
   "text.rei.remove_favorites_tooltip": " §7Pressione %s para apagar dos favoritos.",
   "text.rei.working_station": "Estação de trabalho",
-  "text.rei.release_export": "§lRelease %s para exportar",
+  "text.rei.release_export": "Release %s para exportar",
   "text.rei.recipe_id": "\n%sID de receita: %s",
   "text.rei.recipe_screen_type.selection": "Seleção do tipo do menu de receitas",
   "text.rei.recipe_screen_type.selection.sub": "Você sempre pode editar essa opção denovo através do menu de configuração.",

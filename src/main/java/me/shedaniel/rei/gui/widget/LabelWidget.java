@@ -157,7 +157,7 @@ public class LabelWidget extends WidgetWithBounds {
     @NotNull
     @Override
     public Rectangle getBounds() {
-        int width = font.method_27525(text);
+        int width = font.getWidth(text);
         Point pos = getLocation();
         if (isCentered())
             return new Rectangle(pos.x - width / 2 - 1, pos.y - 5, width + 2, 14);
@@ -171,18 +171,18 @@ public class LabelWidget extends WidgetWithBounds {
     
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        int width = font.method_27525(text);
+        int width = font.getWidth(text);
         Point pos = getLocation();
         if (isCentered()) {
             if (hasShadows)
-                font.method_27517(matrices, text, pos.x - width / 2f, pos.y, defaultColor);
+                font.drawWithShadow(matrices, text, pos.x - width / 2f, pos.y, defaultColor);
             else
-                font.method_27528(matrices, text, pos.x - width / 2f, pos.y, defaultColor);
+                font.draw(matrices, text, pos.x - width / 2f, pos.y, defaultColor);
         } else {
             if (hasShadows)
-                font.method_27517(matrices, text, pos.x, pos.y, defaultColor);
+                font.drawWithShadow(matrices, text, pos.x, pos.y, defaultColor);
             else
-                font.method_27528(matrices, text, pos.x, pos.y, defaultColor);
+                font.draw(matrices, text, pos.x, pos.y, defaultColor);
         }
     }
     

@@ -66,13 +66,13 @@ public class WarningAndErrorScreen extends Screen {
     }
     
     private void addText(Text string) {
-        for (Text s : textRenderer.wrapStringToWidthAsList(string, width - 80)) {
+        for (Text s : textRenderer.wrapLines(string, width - 80)) {
             listWidget.creditsAddEntry(new TextItem(s));
         }
     }
     
     private void addLink(Text string, String link) {
-        for (Text s : textRenderer.wrapStringToWidthAsList(string, width - 80)) {
+        for (Text s : textRenderer.wrapLines(string, width - 80)) {
             listWidget.creditsAddEntry(new LinkItem(s.getString(), link));
         }
     }
@@ -84,7 +84,7 @@ public class WarningAndErrorScreen extends Screen {
         listWidget.creditsClearEntries();
         listWidget.creditsAddEntry(new EmptyItem());
         if (!RoughlyEnoughItemsState.getWarnings().isEmpty())
-            listWidget.creditsAddEntry(new TextItem(new LiteralText("Warnings:").method_27692(Formatting.RED)));
+            listWidget.creditsAddEntry(new TextItem(new LiteralText("Warnings:").formatted(Formatting.RED)));
         for (Pair<String, String> pair : RoughlyEnoughItemsState.getWarnings()) {
             addText(new LiteralText(pair.getLeft()));
             if (pair.getRight() != null)
@@ -97,7 +97,7 @@ public class WarningAndErrorScreen extends Screen {
             listWidget.creditsAddEntry(new EmptyItem());
         }
         if (!RoughlyEnoughItemsState.getErrors().isEmpty())
-            listWidget.creditsAddEntry(new TextItem(new LiteralText("Errors:").method_27692(Formatting.RED)));
+            listWidget.creditsAddEntry(new TextItem(new LiteralText("Errors:").formatted(Formatting.RED)));
         for (Pair<String, String> pair : RoughlyEnoughItemsState.getErrors()) {
             addText(new LiteralText(pair.getLeft()));
             if (pair.getRight() != null)
@@ -218,7 +218,7 @@ public class WarningAndErrorScreen extends Screen {
         
         @Override
         public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-            MinecraftClient.getInstance().textRenderer.method_27517(matrices, text, x + 5, y, -1);
+            MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, text, x + 5, y, -1);
         }
         
         @Override
@@ -233,7 +233,7 @@ public class WarningAndErrorScreen extends Screen {
         
         @Override
         public int getWidth() {
-            return MinecraftClient.getInstance().textRenderer.method_27525(text) + 10;
+            return MinecraftClient.getInstance().textRenderer.getWidth(text) + 10;
         }
     }
     
@@ -270,7 +270,7 @@ public class WarningAndErrorScreen extends Screen {
         
         @Override
         public int getWidth() {
-            return MinecraftClient.getInstance().textRenderer.getStringWidth(text) + 10;
+            return MinecraftClient.getInstance().textRenderer.getWidth(text) + 10;
         }
         
         @Override

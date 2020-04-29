@@ -45,7 +45,7 @@ public abstract class DefaultCookingDisplay implements TransferRecipeDisplay {
     private static List<EntryStack> fuel;
     
     static {
-        fuel = FurnaceBlockEntity.createFuelTimeMap().keySet().stream().map(Item::getStackForRender).map(EntryStack::create).map(e -> e.setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, stack -> Collections.singletonList(new TranslatableText("category.rei.smelting.fuel").method_27692(Formatting.YELLOW)))).collect(Collectors.toList());
+        fuel = FurnaceBlockEntity.createFuelTimeMap().keySet().stream().map(Item::getStackForRender).map(EntryStack::create).map(e -> e.setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, stack -> Collections.singletonList(new TranslatableText("category.rei.smelting.fuel").formatted(Formatting.YELLOW)))).collect(Collectors.toList());
     }
     
     private AbstractCookingRecipe recipe;

@@ -21,12 +21,12 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.gui.modules;
+package me.shedaniel.rei.gui.modules.entries;
 
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.widgets.Tooltip;
-import me.shedaniel.rei.gui.subsets.SubsetsMenuEntry;
+import me.shedaniel.rei.gui.modules.MenuEntry;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
@@ -40,7 +40,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-public class GameModeMenuEntry extends SubsetsMenuEntry {
+public class GameModeMenuEntry extends MenuEntry {
     public final String text;
     public final GameMode gameMode;
     private int x, y, width;
@@ -54,7 +54,7 @@ public class GameModeMenuEntry extends SubsetsMenuEntry {
     
     private int getTextWidth() {
         if (textWidth == -69) {
-            this.textWidth = Math.max(0, font.getStringWidth(text));
+            this.textWidth = Math.max(0, font.getWidth(text));
         }
         return this.textWidth;
     }

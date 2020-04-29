@@ -104,7 +104,7 @@ public class CreditsScreen extends Screen {
                     for (StackTraceElement traceElement : exception[0].getStackTrace())
                         entryListWidget.creditsAddEntry(new TextCreditsItem(new LiteralText("  at " + traceElement)));
                 } else {
-                    int maxWidth = translatorsMapped.stream().mapToInt(pair -> textRenderer.getStringWidth(pair.getLeft())).max().orElse(0) + 5;
+                    int maxWidth = translatorsMapped.stream().mapToInt(pair -> textRenderer.getWidth(pair.getLeft())).max().orElse(0) + 5;
                     for (Pair<String, String> pair : translatorsMapped) {
                         entryListWidget.creditsAddEntry(new TranslationCreditsItem(new TranslatableText(pair.getLeft()), new TranslatableText(pair.getRight()), i - maxWidth - 10, maxWidth));
                     }

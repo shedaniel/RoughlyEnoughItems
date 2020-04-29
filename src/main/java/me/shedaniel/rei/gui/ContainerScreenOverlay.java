@@ -34,9 +34,9 @@ import me.shedaniel.rei.api.widgets.Button;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.config.SearchFieldLocation;
-import me.shedaniel.rei.gui.modules.GameModeMenuEntry;
-import me.shedaniel.rei.gui.modules.WeatherMenuEntry;
-import me.shedaniel.rei.gui.subsets.SubsetsMenu;
+import me.shedaniel.rei.gui.modules.entries.GameModeMenuEntry;
+import me.shedaniel.rei.gui.modules.entries.WeatherMenuEntry;
+import me.shedaniel.rei.gui.modules.Menu;
 import me.shedaniel.rei.gui.widget.*;
 import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.impl.InternalWidgets;
@@ -126,17 +126,17 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
     private Rectangle subsetsButtonBounds;
     @ApiStatus.Experimental
     @Nullable
-    private SubsetsMenu subsetsMenu = null;
+    private Menu subsetsMenu = null;
     private Widget wrappedSubsetsMenu = null;
     
     @Nullable
-    private SubsetsMenu weatherMenu = null;
+    private Menu weatherMenu = null;
     private Widget wrappedWeatherMenu = null;
     private boolean renderWeatherMenu = false;
     private Button weatherButton = null;
     
     @Nullable
-    private SubsetsMenu gameModeMenu = null;
+    private Menu gameModeMenu = null;
     private Widget wrappedGameModeMenu = null;
     private boolean renderGameModeMenu = false;
     private Button gameModeButton = null;
@@ -152,7 +152,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
     
     @ApiStatus.Experimental
     @Nullable
-    public SubsetsMenu getSubsetsMenu() {
+    public Menu getSubsetsMenu() {
         return subsetsMenu;
     }
     
@@ -273,7 +273,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                         renderGameModeMenu = !renderWeatherMenu && (button.isFocused() || button.containsMouse(PointHelper.ofMouse()) || (wrappedGameModeMenu != null && wrappedGameModeMenu.containsMouse(PointHelper.ofMouse())));
                         if (tmpRender != renderGameModeMenu) {
                             if (renderGameModeMenu) {
-                                this.gameModeMenu = new SubsetsMenu(new Point(button.getBounds().x, button.getBounds().getMaxY()),
+                                this.gameModeMenu = new Menu(new Point(button.getBounds().x, button.getBounds().getMaxY()),
                                         CollectionUtils.filterAndMap(Arrays.asList(GameMode.values()), mode -> mode != GameMode.NOT_SET, GameModeMenuEntry::new));
                                 if (ConfigObject.getInstance().isLeftHandSidePanel())
                                     this.gameModeMenu.menuStartPoint.x -= this.gameModeMenu.getBounds().width - this.gameModeButton.getBounds().width;
@@ -294,7 +294,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                         renderWeatherMenu = !renderGameModeMenu && (button.isFocused() || button.containsMouse(PointHelper.ofMouse()) || (wrappedWeatherMenu != null && wrappedWeatherMenu.containsMouse(PointHelper.ofMouse())));
                         if (tmpRender != renderWeatherMenu) {
                             if (renderWeatherMenu) {
-                                this.weatherMenu = new SubsetsMenu(new Point(button.getBounds().x, button.getBounds().getMaxY()),
+                                this.weatherMenu = new Menu(new Point(button.getBounds().x, button.getBounds().getMaxY()),
                                         CollectionUtils.map(Weather.values(), WeatherMenuEntry::new));
                                 if (ConfigObject.getInstance().isLeftHandSidePanel())
                                     this.weatherMenu.menuStartPoint.x -= this.weatherMenu.getBounds().width - this.weatherButton.getBounds().width;
@@ -319,7 +319,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             widgets.add(InternalWidgets.wrapLateRenderable(InternalWidgets.wrapTranslate(Widgets.createButton(subsetsButtonBounds, ((ClientHelperImpl) ClientHelper.getInstance()).isAprilFools.get() ? new TranslatableText("text.rei.tiny_potato") : new TranslatableText("text.rei.subsets"))
                     .onClick(button -> {
                         if (subsetsMenu == null) {
-                            wrappedSubsetsMenu = InternalWidgets.wrapTranslate(InternalWidgets.wrapLateRenderable(this.subsetsMenu = SubsetsMenu.createFromRegistry(new Point(this.subsetsButtonBounds.x, this.subsetsButtonBounds.getMaxY()))), 0, 0, 400);
+                            wrappedSubsetsMenu = InternalWidgets.wrapTranslate(InternalWidgets.wrapLateRenderable(this.subsetsMenu = Menu.createSubsetsMenuFromRegistry(new Point(this.subsetsButtonBounds.x, this.subsetsButtonBounds.getMaxY()))), 0, 0, 400);
                             this.widgets.add(this.wrappedSubsetsMenu);
                         } else {
                             this.widgets.remove(this.wrappedSubsetsMenu);
@@ -560,7 +560,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
     public void renderTooltip(MatrixStack matrices, List<Text> lines, int mouseX, int mouseY) {
         if (lines.isEmpty())
             return;
-        tooltipWidth = lines.stream().map(font::method_27525).max(Integer::compareTo).get();
+        tooltipWidth = lines.stream().map(font::getWidth).max(Integer::compareTo).get();
         tooltipHeight = lines.size() <= 1 ? 8 : lines.size() * 10;
         tooltipLines = lines;
         ScreenHelper.drawHoveringWidget(matrices, mouseX, mouseY, renderTooltipCallback, tooltipWidth, tooltipHeight, 0);

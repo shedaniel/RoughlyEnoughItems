@@ -29,11 +29,12 @@ import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.widgets.Slot;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.entries.RecipeEntry;
-import me.shedaniel.rei.gui.widget.ScrollingContainer;
+import me.shedaniel.clothconfig2.api.ScrollingContainer;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import me.shedaniel.rei.plugin.DefaultPlugin;
@@ -169,7 +170,7 @@ public class DefaultBeaconBaseCategory implements RecipeCategory<DefaultBeaconBa
             }
             ScissorsHandler.INSTANCE.removeLastScissor();
             ScissorsHandler.INSTANCE.scissor(scrolling.getBounds());
-            scrolling.renderScrollBar(0xff000000, 1);
+            scrolling.renderScrollBar(0xff000000, 1, REIHelper.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
             ScissorsHandler.INSTANCE.removeLastScissor();
         }
         
