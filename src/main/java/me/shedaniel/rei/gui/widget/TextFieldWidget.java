@@ -403,8 +403,8 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
                     int_2 -= 4;
                 }
                 
-                String string_1 = this.font.method_27523(this.text.substring(this.field_2103), this.getWidth());
-                this.moveCursorTo(this.font.method_27523(string_1, int_2).length() + this.field_2103, true);
+                String string_1 = this.font.trimToWidth(this.text.substring(this.field_2103), this.getWidth());
+                this.moveCursorTo(this.font.trimToWidth(string_1, int_2).length() + this.field_2103, true);
                 return true;
             } else {
                 return false;
@@ -430,7 +430,7 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
             int color = this.editable ? this.editableColor : this.notEditableColor;
             int int_4 = this.cursorMax - this.field_2103;
             int int_5 = this.cursorMin - this.field_2103;
-            String string_1 = this.font.method_27523(this.text.substring(this.field_2103), this.getWidth());
+            String string_1 = this.font.trimToWidth(this.text.substring(this.field_2103), this.getWidth());
             boolean boolean_1 = int_4 >= 0 && int_4 <= string_1.length();
             boolean boolean_2 = this.focused && this.focusedTicks / 6 % 2 == 0 && boolean_1;
             int x = this.hasBorder ? this.bounds.x + 4 : this.bounds.x;
@@ -469,14 +469,14 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
             
             // Render selection overlay
             if (int_5 != int_4) {
-                int int_10 = x + this.font.getStringWidth(string_1.substring(0, int_5));
+                int int_10 = x + this.font.getWidth(string_1.substring(0, int_5));
                 this.renderSelection(matrices, int_9, y - 1, int_10 - 1, y + 9, color);
             }
         }
     }
     
     protected void renderSuggestion(MatrixStack matrices, int x, int y) {
-        this.font.drawWithShadow(matrices, this.font.method_27523(this.suggestion, this.getWidth()), x, y, -8355712);
+        this.font.drawWithShadow(matrices, this.font.trimToWidth(this.suggestion, this.getWidth()), x, y, -8355712);
     }
     
     protected void renderSelection(MatrixStack matrices, int x1, int y1, int x2, int y2, int color) {
@@ -596,10 +596,10 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
             }
             
             int int_3 = this.getWidth();
-            String string_1 = this.font.method_27523(this.text.substring(this.field_2103), int_3);
+            String string_1 = this.font.trimToWidth(this.text.substring(this.field_2103), int_3);
             int int_4 = string_1.length() + this.field_2103;
             if (this.cursorMin == this.field_2103) {
-                this.field_2103 -= this.font.method_27524(this.text, int_3, true).length();
+                this.field_2103 -= this.font.trimToWidth(this.text, int_3, true).length();
             }
             
             if (this.cursorMin > int_4) {
@@ -626,7 +626,7 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
     }
     
     public int method_1889(int int_1) {
-        return int_1 > this.text.length() ? this.bounds.x : this.bounds.x + this.font.getStringWidth(this.text.substring(0, int_1));
+        return int_1 > this.text.length() ? this.bounds.x : this.bounds.x + this.font.getWidth(this.text.substring(0, int_1));
     }
     
 }

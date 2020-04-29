@@ -106,7 +106,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         String mod = getModFromItem(item);
         if (mod.isEmpty())
             return NarratorManager.EMPTY;
-        return new LiteralText(mod).method_27695(Formatting.BLUE, Formatting.ITALIC);
+        return new LiteralText(mod).formatted(Formatting.BLUE, Formatting.ITALIC);
     }
     
     @Override
@@ -114,7 +114,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         String mod = getModFromIdentifier(identifier);
         if (mod.isEmpty())
             return NarratorManager.EMPTY;
-        return new LiteralText(mod).method_27695(Formatting.BLUE, Formatting.ITALIC);
+        return new LiteralText(mod).formatted(Formatting.BLUE, Formatting.ITALIC);
     }
     
     @Override

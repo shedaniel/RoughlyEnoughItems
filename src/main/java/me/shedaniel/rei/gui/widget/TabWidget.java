@@ -120,7 +120,7 @@ public class TabWidget extends WidgetWithBounds {
     
     private void drawTooltip() {
         if (this.minecraft.options.advancedItemTooltips)
-            Tooltip.create(new LiteralText(categoryName), new LiteralText(category.getIdentifier().toString()).method_27692(Formatting.DARK_GRAY), ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())).queue();
+            Tooltip.create(new LiteralText(categoryName), new LiteralText(category.getIdentifier().toString()).formatted(Formatting.DARK_GRAY), ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())).queue();
         else
             Tooltip.create(new LiteralText(categoryName), ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())).queue();
     }

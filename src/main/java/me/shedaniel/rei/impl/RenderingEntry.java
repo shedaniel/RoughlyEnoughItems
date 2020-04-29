@@ -54,12 +54,12 @@ public abstract class RenderingEntry extends DrawableHelper implements EntryStac
     
     @Override
     public void setAmount(int amount) {
-    
+        
     }
     
     @Override
     public void setFloatingAmount(double amount) {
-    
+        
     }
     
     @Override

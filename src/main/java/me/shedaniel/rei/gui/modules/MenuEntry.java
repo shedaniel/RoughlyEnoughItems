@@ -21,18 +21,18 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.gui.subsets;
+package me.shedaniel.rei.gui.modules;
 
 import me.shedaniel.rei.gui.widget.Widget;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Experimental
 @ApiStatus.Internal
-public abstract class SubsetsMenuEntry extends Widget {
+public abstract class MenuEntry extends Widget {
     @Deprecated
-    SubsetsMenu parent = null;
+    Menu parent = null;
     
-    public final SubsetsMenu getParent() {
+    public final Menu getParent() {
         return parent;
     }
     

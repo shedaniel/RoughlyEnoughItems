@@ -69,9 +69,9 @@ dependencies {
     modCompileOnly("io.github.prospector:modmenu:${modmenu_version}") {
         transitive = false
     }
-//    modRuntime("io.github.prospector:modmenu:${modmenu_version}") {
-//        transitive = false
-//    }
+    modRuntime("io.github.prospector:modmenu:${modmenu_version}") {
+        transitive = false
+    }
     if (includeDep) {
         afterEvaluate {
             def listAdded = new ArrayList(Arrays.asList((api_exculde as String).split(',')))

@@ -127,7 +127,7 @@ public class PreRecipeViewingScreen extends Screen {
         this.method_27534(matrices, this.textRenderer, this.title, this.width / 2, 20, 16777215);
         if (showTips) {
             int i = 30;
-            for (Text s : this.textRenderer.wrapStringToWidthAsList(new TranslatableText("text.rei.recipe_screen_type.selection.sub").method_27692(Formatting.GRAY), width - 30)) {
+            for (Text s : this.textRenderer.wrapLines(new TranslatableText("text.rei.recipe_screen_type.selection.sub").formatted(Formatting.GRAY), width - 30)) {
                 this.method_27534(matrices, this.textRenderer, s, width / 2, i, -1);
                 i += 10;
             }

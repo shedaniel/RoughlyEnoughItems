@@ -105,7 +105,7 @@ public class DefaultFuelCategory implements RecipeCategory<DefaultFuelDisplay> {
                 slot.setZ(getZ() + 50);
                 slot.getBounds().setLocation(bounds.x + 4, bounds.y + 2);
                 slot.render(matrices, mouseX, mouseY, delta);
-                MinecraftClient.getInstance().textRenderer.method_27517(matrices, new TranslatableText("category.rei.fuel.time_short.items", burnItems), bounds.x + 25, bounds.y + 8, -1);
+                MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, new TranslatableText("category.rei.fuel.time_short.items", burnItems), bounds.x + 25, bounds.y + 8, -1);
             }
         };
     }

@@ -21,15 +21,15 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.gui.subsets.entries;
+package me.shedaniel.rei.gui.modules.entries;
 
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
-import me.shedaniel.rei.gui.subsets.SubsetsMenu;
-import me.shedaniel.rei.gui.subsets.SubsetsMenuEntry;
+import me.shedaniel.rei.gui.modules.Menu;
+import me.shedaniel.rei.gui.modules.MenuEntry;
 import me.shedaniel.rei.impl.EntryRegistryImpl;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.CollectionUtils;
@@ -44,14 +44,14 @@ import java.util.List;
 
 @ApiStatus.Experimental
 @ApiStatus.Internal
-public class EntryStackMenuEntry extends SubsetsMenuEntry {
+public class EntryStackSubsetsMenuEntry extends MenuEntry {
     final EntryStack stack;
     private int x, y, width;
     private boolean selected, containsMouse, rendering;
     private boolean clickedLast = false;
     private Boolean isFiltered = null;
     
-    public EntryStackMenuEntry(EntryStack stack) {
+    public EntryStackSubsetsMenuEntry(EntryStack stack) {
         this.stack = stack;
     }
     
@@ -98,7 +98,7 @@ public class EntryStackMenuEntry extends SubsetsMenuEntry {
                     } else {
                         filteredStacks.add(stack.copy());
                     }
-                    SubsetsMenu subsetsMenu = ScreenHelper.getLastOverlay().getSubsetsMenu();
+                    Menu subsetsMenu = ScreenHelper.getLastOverlay().getSubsetsMenu();
                     if (subsetsMenu != null)
                         recalculateFilter(subsetsMenu);
                     ConfigManager.getInstance().saveConfig();
@@ -111,12 +111,12 @@ public class EntryStackMenuEntry extends SubsetsMenuEntry {
         stack.render(matrices, new Rectangle(x + (width / 2) - 8, y + 1, 16, 16), mouseX, mouseY, delta);
     }
     
-    void recalculateFilter(SubsetsMenu menu) {
-        for (SubsetsMenuEntry child : menu.children()) {
-            if (child instanceof SubMenuEntry && ((SubMenuEntry) child).getSubsetsMenu() != null)
-                recalculateFilter(((SubMenuEntry) child).getSubsetsMenu());
-            else if (child instanceof EntryStackMenuEntry && ((EntryStackMenuEntry) child).stack.equalsIgnoreAmount(stack))
-                ((EntryStackMenuEntry) child).isFiltered = null;
+    void recalculateFilter(Menu menu) {
+        for (MenuEntry child : menu.children()) {
+            if (child instanceof SubSubsetsMenuEntry && ((SubSubsetsMenuEntry) child).getSubsetsMenu() != null)
+                recalculateFilter(((SubSubsetsMenuEntry) child).getSubsetsMenu());
+            else if (child instanceof EntryStackSubsetsMenuEntry && ((EntryStackSubsetsMenuEntry) child).stack.equalsIgnoreAmount(stack))
+                ((EntryStackSubsetsMenuEntry) child).isFiltered = null;
         }
     }
     

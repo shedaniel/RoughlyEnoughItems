@@ -84,9 +84,9 @@ public class OverlaySearchField extends TextFieldWidget {
     @Override
     protected void renderSuggestion(MatrixStack matrices, int x, int y) {
         if (containsMouse(PointHelper.ofMouse()) || isFocused())
-            this.font.drawWithShadow(matrices, this.font.method_27523(this.getSuggestion(), this.getWidth()), x, y, REIHelper.getInstance().isDarkThemeEnabled() ? 0xccddaa3d : 0xddeaeaea);
+            this.font.drawWithShadow(matrices, this.font.trimToWidth(this.getSuggestion(), this.getWidth()), x, y, REIHelper.getInstance().isDarkThemeEnabled() ? 0xccddaa3d : 0xddeaeaea);
         else
-            this.font.drawWithShadow(matrices, this.font.method_27523(this.getSuggestion(), this.getWidth()), x, y, -6250336);
+            this.font.drawWithShadow(matrices, this.font.trimToWidth(this.getSuggestion(), this.getWidth()), x, y, -6250336);
     }
     
     @Override

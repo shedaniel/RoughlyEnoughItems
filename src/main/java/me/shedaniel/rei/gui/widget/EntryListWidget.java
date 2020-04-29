@@ -26,6 +26,7 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.collect.Lists;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
+import me.shedaniel.clothconfig2.api.ScrollingContainer;
 import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -44,7 +45,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.text.LiteralText;
@@ -259,7 +259,7 @@ public class EntryListWidget extends WidgetWithBounds {
                 int z = getZ();
                 setZ(500);
                 Text debugText = new LiteralText(String.format("%d entries, avg. %.0fns, ttl. %.0fms, %s fps", size, time / (double) size, totalTime / 1000000d, minecraft.fpsDebugString.split(" ")[0]));
-                fillGradient(matrices, bounds.x, bounds.y, bounds.x + font.method_27525(debugText) + 2, bounds.y + font.fontHeight + 2, -16777216, -16777216);
+                fillGradient(matrices, bounds.x, bounds.y, bounds.x + font.getWidth(debugText) + 2, bounds.y + font.fontHeight + 2, -16777216, -16777216);
                 VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
                 matrices.push();
                 matrices.translate(0.0D, 0.0D, getZ());
@@ -317,7 +317,7 @@ public class EntryListWidget extends WidgetWithBounds {
             }
             updatePosition(delta);
             ScissorsHandler.INSTANCE.removeLastScissor();
-            scrolling.renderScrollBar();
+            scrolling.renderScrollBar(0, 1, REIHelper.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
         } else {
             if (debugTime) {
                 int size = 0;
@@ -380,7 +380,7 @@ public class EntryListWidget extends WidgetWithBounds {
                 int z = getZ();
                 setZ(500);
                 Text debugText = new LiteralText(String.format("%d entries, avg. %.0fns, ttl. %.0fms, %s fps", size, time / (double) size, totalTime / 1000000d, minecraft.fpsDebugString.split(" ")[0]));
-                int stringWidth = font.method_27525(debugText);
+                int stringWidth = font.getWidth(debugText);
                 fillGradient(matrices, Math.min(bounds.x, minecraft.currentScreen.width - stringWidth - 2), bounds.y, bounds.x + stringWidth + 2, bounds.y + font.fontHeight + 2, -16777216, -16777216);
                 VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
                 matrices.push();
@@ -448,7 +448,7 @@ public class EntryListWidget extends WidgetWithBounds {
     
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dx, double dy) {
-        if (scrolling.mouseDragged(mouseX, mouseY, button, dx, dy, true))
+        if (scrolling.mouseDragged(mouseX, mouseY, button, dx, dy, ConfigObject.getInstance().doesSnapToRows(), entrySize()))
             return true;
         return super.mouseDragged(mouseX, mouseY, button, dx, dy);
     }

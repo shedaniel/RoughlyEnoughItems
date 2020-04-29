@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.gui.subsets.entries;
+package me.shedaniel.rei.gui.modules.entries;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
@@ -30,8 +30,8 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
-import me.shedaniel.rei.gui.subsets.SubsetsMenu;
-import me.shedaniel.rei.gui.subsets.SubsetsMenuEntry;
+import me.shedaniel.rei.gui.modules.Menu;
+import me.shedaniel.rei.gui.modules.MenuEntry;
 import me.shedaniel.rei.gui.widget.TabWidget;
 import me.shedaniel.rei.impl.EntryRegistryImpl;
 import me.shedaniel.rei.impl.ScreenHelper;
@@ -51,40 +51,40 @@ import java.util.function.Supplier;
 
 @ApiStatus.Experimental
 @ApiStatus.Internal
-public class SubMenuEntry extends SubsetsMenuEntry {
+public class SubSubsetsMenuEntry extends MenuEntry {
     public final String text;
     private int textWidth = -69;
     private int x, y, width;
     private boolean selected, containsMouse, rendering;
-    private List<SubsetsMenuEntry> entries;
-    private SubsetsMenu subsetsMenu;
+    private List<MenuEntry> entries;
+    private Menu subsetsMenu;
     private Pair<Integer, Integer> filteredRatio = null;
     private long lastListHash = -1;
     private boolean clickedBefore = false;
     
-    public SubMenuEntry(String text) {
+    public SubSubsetsMenuEntry(String text) {
         this(text, Collections.emptyList());
     }
     
-    public SubMenuEntry(String text, Supplier<List<SubsetsMenuEntry>> entries) {
+    public SubSubsetsMenuEntry(String text, Supplier<List<MenuEntry>> entries) {
         this(text, entries.get());
     }
     
-    public SubMenuEntry(String text, List<SubsetsMenuEntry> entries) {
+    public SubSubsetsMenuEntry(String text, List<MenuEntry> entries) {
         this.text = text;
         this.entries = entries;
     }
     
     private int getTextWidth() {
         if (textWidth == -69) {
-            this.textWidth = Math.max(0, font.getStringWidth(text));
+            this.textWidth = Math.max(0, font.getWidth(text));
         }
         return this.textWidth;
     }
     
-    public SubsetsMenu getSubsetsMenu() {
+    public Menu getSubsetsMenu() {
         if (subsetsMenu == null) {
-            this.subsetsMenu = new SubsetsMenu(new Point(getParent().getBounds().getMaxX() - 1, y - 1), entries);
+            this.subsetsMenu = new Menu(new Point(getParent().getBounds().getMaxX() - 1, y - 1), entries);
         }
         return subsetsMenu;
     }
@@ -120,7 +120,7 @@ public class SubMenuEntry extends SubsetsMenuEntry {
         }
         if (selected) {
             if (!entries.isEmpty()) {
-                SubsetsMenu menu = getSubsetsMenu();
+                Menu menu = getSubsetsMenu();
                 menu.menuStartPoint.x = getParent().getBounds().getMaxX() - 1;
                 menu.menuStartPoint.y = y - 1;
                 List<Rectangle> areas = Lists.newArrayList(ScissorsHandler.INSTANCE.getScissorsAreas());
@@ -149,7 +149,7 @@ public class SubMenuEntry extends SubsetsMenuEntry {
             if (clickedBefore) {
                 clickedBefore = false;
                 List<EntryStack> filteredStacks = ConfigObject.getInstance().getFilteredStacks();
-                SubsetsMenu subsetsMenu = ScreenHelper.getLastOverlay().getSubsetsMenu();
+                Menu subsetsMenu = ScreenHelper.getLastOverlay().getSubsetsMenu();
                 setFiltered(filteredStacks, subsetsMenu, this, !(getFilteredRatio() > 0));
                 ConfigManager.getInstance().saveConfig();
                 ((EntryRegistryImpl) EntryRegistry.getInstance()).refilter();
@@ -164,20 +164,20 @@ public class SubMenuEntry extends SubsetsMenuEntry {
         return super.mouseClicked(mouseX, mouseY, button);
     }
     
-    private void setFiltered(List<EntryStack> filteredStacks, SubsetsMenu subsetsMenu, SubMenuEntry subMenuEntry, boolean filtered) {
-        for (SubsetsMenuEntry entry : subMenuEntry.entries) {
-            if (entry instanceof EntryStackMenuEntry) {
-                if (((EntryStackMenuEntry) entry).isFiltered() != filtered) {
+    private void setFiltered(List<EntryStack> filteredStacks, Menu subsetsMenu, SubSubsetsMenuEntry subSubsetsMenuEntry, boolean filtered) {
+        for (MenuEntry entry : subSubsetsMenuEntry.entries) {
+            if (entry instanceof EntryStackSubsetsMenuEntry) {
+                if (((EntryStackSubsetsMenuEntry) entry).isFiltered() != filtered) {
                     if (!filtered) {
-                        filteredStacks.removeIf(next -> next.equalsIgnoreAmount(((EntryStackMenuEntry) entry).stack));
+                        filteredStacks.removeIf(next -> next.equalsIgnoreAmount(((EntryStackSubsetsMenuEntry) entry).stack));
                     } else {
-                        filteredStacks.add(((EntryStackMenuEntry) entry).stack.copy());
+                        filteredStacks.add(((EntryStackSubsetsMenuEntry) entry).stack.copy());
                     }
                 }
                 if (subsetsMenu != null)
-                    ((EntryStackMenuEntry) entry).recalculateFilter(subsetsMenu);
-            } else if (entry instanceof SubMenuEntry) {
-                setFiltered(filteredStacks, subsetsMenu, (SubMenuEntry) entry, filtered);
+                    ((EntryStackSubsetsMenuEntry) entry).recalculateFilter(subsetsMenu);
+            } else if (entry instanceof SubSubsetsMenuEntry) {
+                setFiltered(filteredStacks, subsetsMenu, (SubSubsetsMenuEntry) entry, filtered);
             }
         }
     }
@@ -192,13 +192,13 @@ public class SubMenuEntry extends SubsetsMenuEntry {
         if (lastListHash != filteredStacks.hashCode()) {
             int size = 0;
             int filtered = 0;
-            for (SubsetsMenuEntry entry : entries) {
-                if (entry instanceof EntryStackMenuEntry) {
+            for (MenuEntry entry : entries) {
+                if (entry instanceof EntryStackSubsetsMenuEntry) {
                     size++;
-                    if (((EntryStackMenuEntry) entry).isFiltered())
+                    if (((EntryStackSubsetsMenuEntry) entry).isFiltered())
                         filtered++;
-                } else if (entry instanceof SubMenuEntry) {
-                    Pair<Integer, Integer> pair = ((SubMenuEntry) entry).getFilteredRatioPair();
+                } else if (entry instanceof SubSubsetsMenuEntry) {
+                    Pair<Integer, Integer> pair = ((SubSubsetsMenuEntry) entry).getFilteredRatioPair();
                     filtered += pair.getLeft();
                     size += pair.getRight();
                 }

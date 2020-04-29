@@ -21,13 +21,14 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.gui.subsets;
+package me.shedaniel.rei.gui.modules;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
+import me.shedaniel.clothconfig2.api.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
@@ -35,10 +36,9 @@ import me.shedaniel.rei.api.EntryRegistry;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.subsets.SubsetsRegistry;
-import me.shedaniel.rei.gui.subsets.entries.EntryStackMenuEntry;
-import me.shedaniel.rei.gui.subsets.entries.SubMenuEntry;
+import me.shedaniel.rei.gui.modules.entries.EntryStackSubsetsMenuEntry;
+import me.shedaniel.rei.gui.modules.entries.SubSubsetsMenuEntry;
 import me.shedaniel.rei.gui.widget.LateRenderable;
-import me.shedaniel.rei.gui.widget.ScrollingContainer;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import me.shedaniel.rei.impl.EntryRegistryImpl;
 import me.shedaniel.rei.utils.CollectionUtils;
@@ -56,14 +56,14 @@ import java.util.*;
 
 @ApiStatus.Experimental
 @ApiStatus.Internal
-public class SubsetsMenu extends WidgetWithBounds implements LateRenderable {
+public class Menu extends WidgetWithBounds implements LateRenderable {
     public final Point menuStartPoint;
-    private final List<SubsetsMenuEntry> entries = Lists.newArrayList();
+    private final List<MenuEntry> entries = Lists.newArrayList();
     public final ScrollingContainer scrolling = new ScrollingContainer() {
         @Override
         public int getMaxScrollHeight() {
             int i = 0;
-            for (SubsetsMenuEntry entry : children()) {
+            for (MenuEntry entry : children()) {
                 i += entry.getEntryHeight();
             }
             return i;
@@ -71,21 +71,21 @@ public class SubsetsMenu extends WidgetWithBounds implements LateRenderable {
         
         @Override
         public Rectangle getBounds() {
-            return SubsetsMenu.this.getInnerBounds();
+            return Menu.this.getInnerBounds();
         }
         
         @Override
         public boolean hasScrollBar() {
-            return SubsetsMenu.this.hasScrollBar();
+            return Menu.this.hasScrollBar();
         }
     };
     
-    public SubsetsMenu(Point menuStartPoint, Collection<SubsetsMenuEntry> entries) {
+    public Menu(Point menuStartPoint, Collection<MenuEntry> entries) {
         this.menuStartPoint = menuStartPoint;
         buildEntries(entries);
     }
     
-    public static SubsetsMenu createFromRegistry(Point menuStartPoint) {
+    public static Menu createSubsetsMenuFromRegistry(Point menuStartPoint) {
         List<EntryStack> stacks = EntryRegistry.getInstance().getStacksList();
         Map<String, Object> entries = Maps.newHashMap();
         {
@@ -130,7 +130,7 @@ public class SubsetsMenu extends WidgetWithBounds implements LateRenderable {
                     putEntryInMap(lastMap, firstStack);
             }
         }
-        return new SubsetsMenu(menuStartPoint, buildEntries(entries));
+        return new Menu(menuStartPoint, buildEntries(entries));
     }
     
     private static Map<String, Object> getOrCreateSubEntryInMap(Map<String, Object> parent, String pathSegment) {
@@ -153,23 +153,23 @@ public class SubsetsMenu extends WidgetWithBounds implements LateRenderable {
         items.add(stack);
     }
     
-    private static List<SubsetsMenuEntry> buildEntries(Map<String, Object> map) {
-        List<SubsetsMenuEntry> entries = Lists.newArrayList();
+    private static List<MenuEntry> buildEntries(Map<String, Object> map) {
+        List<MenuEntry> entries = Lists.newArrayList();
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             if (entry.getKey().equals("items")) {
                 Set<EntryStack> items = (Set<EntryStack>) entry.getValue();
                 for (EntryStack item : items) {
-                    entries.add(new EntryStackMenuEntry(item));
+                    entries.add(new EntryStackSubsetsMenuEntry(item));
                 }
             } else {
                 Map<String, Object> entryMap = (Map<String, Object>) entry.getValue();
                 if (entry.getKey().startsWith("_item_group_")) {
-                    entries.add(new SubMenuEntry(I18n.translate(entry.getKey().replace("_item_group_", "itemGroup.")), buildEntries(entryMap)));
+                    entries.add(new SubSubsetsMenuEntry(I18n.translate(entry.getKey().replace("_item_group_", "itemGroup.")), buildEntries(entryMap)));
                 } else {
                     String translationKey = "subsets.rei." + entry.getKey().replace(':', '.');
                     if (!I18n.hasTranslation(translationKey))
                         RoughlyEnoughItemsCore.LOGGER.warn("Subsets menu " + translationKey + " does not have a translation");
-                    entries.add(new SubMenuEntry(I18n.translate(translationKey), buildEntries(entryMap)));
+                    entries.add(new SubSubsetsMenuEntry(I18n.translate(translationKey), buildEntries(entryMap)));
                 }
             }
         }
@@ -177,11 +177,11 @@ public class SubsetsMenu extends WidgetWithBounds implements LateRenderable {
     }
     
     @SuppressWarnings("deprecation")
-    private void buildEntries(Collection<SubsetsMenuEntry> entries) {
+    private void buildEntries(Collection<MenuEntry> entries) {
         this.entries.clear();
         this.entries.addAll(entries);
-        this.entries.sort(Comparator.comparing(entry -> entry instanceof SubMenuEntry ? 0 : 1).thenComparing(entry -> entry instanceof SubMenuEntry ? ((SubMenuEntry) entry).text : ""));
-        for (SubsetsMenuEntry entry : this.entries) {
+        this.entries.sort(Comparator.comparing(entry -> entry instanceof SubSubsetsMenuEntry ? 0 : 1).thenComparing(entry -> entry instanceof SubSubsetsMenuEntry ? ((SubSubsetsMenuEntry) entry).text : ""));
+        for (MenuEntry entry : this.entries) {
             entry.parent = this;
         }
     }
@@ -205,7 +205,7 @@ public class SubsetsMenu extends WidgetWithBounds implements LateRenderable {
     
     public int getMaxEntryWidth() {
         int i = 0;
-        for (SubsetsMenuEntry entry : children()) {
+        for (MenuEntry entry : children()) {
             if (entry.getEntryWidth() > i)
                 i = entry.getEntryWidth();
         }
@@ -216,12 +216,12 @@ public class SubsetsMenu extends WidgetWithBounds implements LateRenderable {
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         Rectangle bounds = getBounds();
         Rectangle innerBounds = getInnerBounds();
-        fill(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), containsMouse(mouseX, mouseY) ? (REIHelper.getInstance().isDarkThemeEnabled() ? -17587 : -1) :-6250336);
+        fill(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), containsMouse(mouseX, mouseY) ? (REIHelper.getInstance().isDarkThemeEnabled() ? -17587 : -1) : -6250336);
         fill(matrices, innerBounds.x, innerBounds.y, innerBounds.getMaxX(), innerBounds.getMaxY(), -16777216);
         boolean contains = innerBounds.contains(mouseX, mouseY);
-        SubsetsMenuEntry focused = getFocused() instanceof SubsetsMenuEntry ? (SubsetsMenuEntry) getFocused() : null;
+        MenuEntry focused = getFocused() instanceof MenuEntry ? (MenuEntry) getFocused() : null;
         int currentY = (int) (innerBounds.y - scrolling.scrollAmount);
-        for (SubsetsMenuEntry child : children()) {
+        for (MenuEntry child : children()) {
             boolean containsMouse = contains && mouseY >= currentY && mouseY < currentY + child.getEntryHeight();
             if (containsMouse) {
                 focused = child;
@@ -230,7 +230,7 @@ public class SubsetsMenu extends WidgetWithBounds implements LateRenderable {
         }
         currentY = (int) (innerBounds.y - scrolling.scrollAmount);
         ScissorsHandler.INSTANCE.scissor(scrolling.getScissorBounds());
-        for (SubsetsMenuEntry child : children()) {
+        for (MenuEntry child : children()) {
             boolean rendering = currentY + child.getEntryHeight() >= innerBounds.y && currentY <= innerBounds.getMaxY();
             boolean containsMouse = contains && mouseY >= currentY && mouseY < currentY + child.getEntryHeight();
             child.updateInformation(innerBounds.x, currentY, focused == child || containsMouse, containsMouse, rendering, getMaxEntryWidth());
@@ -240,7 +240,7 @@ public class SubsetsMenu extends WidgetWithBounds implements LateRenderable {
         }
         ScissorsHandler.INSTANCE.removeLastScissor();
         setFocused(focused);
-        scrolling.renderScrollBar();
+        scrolling.renderScrollBar(0, 1, REIHelper.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
         scrolling.updatePosition(delta);
     }
     
@@ -264,8 +264,8 @@ public class SubsetsMenu extends WidgetWithBounds implements LateRenderable {
             scrolling.offset(ClothConfigInitializer.getScrollStep() * -amount, true);
             return true;
         }
-        for (SubsetsMenuEntry child : children()) {
-            if (child instanceof SubMenuEntry) {
+        for (MenuEntry child : children()) {
+            if (child instanceof SubSubsetsMenuEntry) {
                 if (child.mouseScrolled(mouseX, mouseY, amount))
                     return true;
             }
@@ -274,7 +274,7 @@ public class SubsetsMenu extends WidgetWithBounds implements LateRenderable {
     }
     
     @Override
-    public List<SubsetsMenuEntry> children() {
+    public List<MenuEntry> children() {
         return entries;
     }
 }

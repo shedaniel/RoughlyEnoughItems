@@ -92,7 +92,7 @@ public class CreditsEntryListWidget extends DynamicNewSmoothScrollingEntryListWi
         
         @Override
         public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-            MinecraftClient.getInstance().textRenderer.method_27517(matrices, text, x + 5, y + 5, -1);
+            MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, text, x + 5, y + 5, -1);
         }
         
         @Override
@@ -113,16 +113,16 @@ public class CreditsEntryListWidget extends DynamicNewSmoothScrollingEntryListWi
         
         public TranslationCreditsItem(Text language, Text translators, int width, int maxWidth) {
             this.language = language;
-            this.translators = MinecraftClient.getInstance().textRenderer.wrapStringToWidthAsList(translators, width);
+            this.translators = MinecraftClient.getInstance().textRenderer.wrapLines(translators, width);
             this.maxWidth = maxWidth;
         }
         
         @Override
         public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-            MinecraftClient.getInstance().textRenderer.method_27517(matrices, language, x + 5, y + 5, -1);
+            MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, language, x + 5, y + 5, -1);
             int yy = y + 5;
             for (Text translator : translators) {
-                MinecraftClient.getInstance().textRenderer.method_27517(matrices, translator, x + 5 + maxWidth, yy, -1);
+                MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, translator, x + 5 + maxWidth, yy, -1);
                 yy += 12;
             }
         }

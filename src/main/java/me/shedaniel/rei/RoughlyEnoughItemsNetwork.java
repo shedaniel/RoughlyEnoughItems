@@ -65,7 +65,7 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
             ServerSidePacketRegistry.INSTANCE.register(DELETE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
                 ServerPlayerEntity player = (ServerPlayerEntity) packetContext.getPlayer();
                 if (player.getServer().getPermissionLevel(player.getGameProfile()) < player.getServer().getOpPermissionLevel()) {
-                    player.sendMessage(new TranslatableText("text.rei.no_permission_cheat").method_27692(Formatting.RED), false);
+                    player.sendMessage(new TranslatableText("text.rei.no_permission_cheat").formatted(Formatting.RED), false);
                     return;
                 }
                 if (!player.inventory.getCursorStack().isEmpty())
@@ -74,7 +74,7 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
             ServerSidePacketRegistry.INSTANCE.register(CREATE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
                 ServerPlayerEntity player = (ServerPlayerEntity) packetContext.getPlayer();
                 if (player.getServer().getPermissionLevel(player.getGameProfile()) < player.getServer().getOpPermissionLevel()) {
-                    player.sendMessage(new TranslatableText("text.rei.no_permission_cheat").method_27692(Formatting.RED), false);
+                    player.sendMessage(new TranslatableText("text.rei.no_permission_cheat").formatted(Formatting.RED), false);
                     return;
                 }
                 ItemStack stack = packetByteBuf.readItemStack();
@@ -118,9 +118,9 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
                             ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, NOT_ENOUGH_ITEMS_PACKET, buf);
                         }
                     } catch (IllegalStateException e) {
-                        player.sendSystemMessage(new TranslatableText(e.getMessage()).method_27692(Formatting.RED));
+                        player.sendSystemMessage(new TranslatableText(e.getMessage()).formatted(Formatting.RED));
                     } catch (Exception e) {
-                        player.sendSystemMessage(new TranslatableText("error.rei.internal.error", e.getMessage()).method_27692(Formatting.RED));
+                        player.sendSystemMessage(new TranslatableText("error.rei.internal.error", e.getMessage()).formatted(Formatting.RED));
                         e.printStackTrace();
                     }
                 } catch (Exception e) {

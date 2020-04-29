@@ -34,7 +34,7 @@ import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.entries.RecipeEntry;
-import me.shedaniel.rei.gui.widget.ScrollingContainer;
+import me.shedaniel.clothconfig2.api.ScrollingContainer;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import me.shedaniel.rei.impl.RenderingEntry;
@@ -46,7 +46,6 @@ import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.util.Texts;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -91,7 +90,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
             
             @Override
             public void render(MatrixStack matrices, Rectangle rectangle, int mouseX, int mouseY, float delta) {
-                MinecraftClient.getInstance().textRenderer.method_27528(matrices, name, rectangle.x + 5, rectangle.y + 6, -1);
+                MinecraftClient.getInstance().textRenderer.draw(matrices, name, rectangle.x + 5, rectangle.y + 6, -1);
             }
         };
     }
@@ -158,7 +157,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
             for (Text text : texts) {
                 if (!this.texts.isEmpty())
                     this.texts.add(null);
-                this.texts.addAll(Texts.wrapLines(text, bounds.width - 11, MinecraftClient.getInstance().textRenderer));
+                this.texts.addAll(MinecraftClient.getInstance().textRenderer.wrapLines(text, bounds.width - 11));
             }
         }
         
@@ -199,13 +198,13 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
             int currentY = (int) -scrolling.scrollAmount + innerBounds.y;
             for (Text text : texts) {
                 if (text != null && currentY + font.fontHeight >= innerBounds.y && currentY <= innerBounds.getMaxY()) {
-                    font.method_27528(matrices, text, innerBounds.x + 2, currentY + 2, REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF090909);
+                    font.draw(matrices, text, innerBounds.x + 2, currentY + 2, REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF090909);
                 }
                 currentY += text == null ? 4 : font.fontHeight;
             }
             ScissorsHandler.INSTANCE.removeLastScissor();
             ScissorsHandler.INSTANCE.scissor(scrolling.getBounds());
-            scrolling.renderScrollBar(0xff000000, 1);
+            scrolling.renderScrollBar(0xff000000, 1, REIHelper.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
             ScissorsHandler.INSTANCE.removeLastScissor();
         }
         
