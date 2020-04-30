@@ -494,11 +494,11 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
                     if (bounds.contains(mouseX, mouseY)) {
                         fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 1744822402, 1744822402);
                         String s = I18n.translate("text.rei.release_export", export.getLocalizedName());
-                        MatrixStack matrixStack_1 = new MatrixStack();
+                        MatrixStack matrices = new MatrixStack();
                         VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
-                        matrixStack_1.translate(0.0D, 0.0D, 480);
-                        Matrix4f matrix4f_1 = matrixStack_1.peek().getModel();
-                        font.draw(s, bounds.getCenterX() - font.getStringWidth(s) / 2f, bounds.getCenterY() - 4.5f, 0xff000000, false, matrix4f_1, immediate, false, 0, 15728880);
+                        matrices.translate(0.0D, 0.0D, 480);
+                        Matrix4f matrix = matrices.peek().getModel();
+                        font.draw(s, bounds.getCenterX() - font.getStringWidth(s) / 2f, bounds.getCenterY() - 4.5f, 0xff000000, false, matrix, immediate, false, 0, 15728880);
                         immediate.draw();
                     } else {
                         fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 1744830463, 1744830463);

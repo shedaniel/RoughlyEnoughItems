@@ -82,7 +82,7 @@
   "text.rei.favorites_tooltip": " \n§7按 %s 将其添加到收藏夹。",
   "text.rei.remove_favorites_tooltip": " \n§7按 %s 可以将其从收藏夹中移除。",
   "text.rei.working_station": "工作站",
-  "text.rei.release_export": "§l放开 %s 以汇出此食谱",
+  "text.rei.release_export": "放开 %s 以汇出此食谱",
   "text.rei.recipe_id": "\n%s配方 ID: %s",
   "text.rei.recipe_screen_type.selection": "合成界面类型选择",
   "text.rei.recipe_screen_type.selection.sub": "你始终可以通过配置界面再次编辑此设置.",

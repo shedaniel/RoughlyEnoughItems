@@ -33,20 +33,20 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.Internal
-public class CopyRecipeIdentifierToast implements Toast {
+public class ExportRecipeIdentifierToast implements Toast {
     
     protected static final Identifier TOASTS_TEX = new Identifier("roughlyenoughitems", "textures/gui/toasts.png");
     private String title;
     private String subtitle;
     private long startTime;
     
-    public CopyRecipeIdentifierToast(String title, @Nullable String subtitleNullable) {
+    public ExportRecipeIdentifierToast(String title, @Nullable String subtitleNullable) {
         this.title = title;
         this.subtitle = subtitleNullable;
     }
     
     public static void addToast(String title, @Nullable String subtitleNullable) {
-        MinecraftClient.getInstance().getToastManager().add(new CopyRecipeIdentifierToast(title, subtitleNullable));
+        MinecraftClient.getInstance().getToastManager().add(new ExportRecipeIdentifierToast(title, subtitleNullable));
     }
     
     @Override
