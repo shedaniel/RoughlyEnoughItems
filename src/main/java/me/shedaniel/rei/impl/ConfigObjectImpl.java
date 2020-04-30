@@ -386,7 +386,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         private ModifierKeyCode focusSearchFieldKeybind = ModifierKeyCode.unknown();
         private ModifierKeyCode copyRecipeIdentifierKeybind = ModifierKeyCode.unknown();
         private ModifierKeyCode favoriteKeybind = ModifierKeyCode.of(InputUtil.Type.KEYSYM.createFromCode(65), Modifier.none());
-        @ConfigEntry.Gui.Excluded private ModifierKeyCode exportImageKeybind = ModifierKeyCode.unknown();
+        private ModifierKeyCode exportImageKeybind = ModifierKeyCode.unknown();
     }
     
     public static class Appearance {
