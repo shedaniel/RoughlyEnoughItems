@@ -1,13 +1,15 @@
-import net.fabricmc.loom.task.RemapJarTask
-
-import java.text.SimpleDateFormat
-
 plugins {
     id 'fabric-loom' version '0.4.3'
     id 'maven-publish'
+    id 'java'
+    id 'java-library'
     id 'net.minecrell.licenser' version '0.4.1'
     id 'com.matthewprenger.cursegradle' version '1.4.0'
+    id 'net.corda.plugins.jar-filter' version "5.0.8" apply false
 }
+
+import net.fabricmc.loom.task.RemapJarTask
+import java.text.SimpleDateFormat
 
 sourceCompatibility = targetCompatibility = 1.8
 
@@ -22,12 +24,6 @@ def includeDep = true
 
 minecraft {
     accessWidener = file("src/main/resources/rei.aw")
-}
-
-static def buildTime() {
-    def df = new SimpleDateFormat("yyyyMMddHHmm")
-    df.setTimeZone(TimeZone.getTimeZone("UTC"))
-    return df.format(new Date())
 }
 
 license {
@@ -98,8 +94,30 @@ dependencies {
     }
 }
 
+task jarFilter(type: net.corda.gradle.jarfilter.JarFilterTask) {
+    jars remapJar
+    annotations {
+        forRemove = [
+                "org.jetbrains.annotations.NotNull",
+                "org.jetbrains.annotations.Nullable",
+                "org.jetbrains.annotations.ApiStatus\$Experimental",
+                "org.jetbrains.annotations.ApiStatus\$Internal",
+                "org.jetbrains.annotations.ApiStatus\$ScheduledForRemoval",
+                "org.jetbrains.annotations.ApiStatus\$AvailableSince",
+                "org.jetbrains.annotations.ApiStatus\$NonExtendable",
+                "org.jetbrains.annotations.ApiStatus\$OverrideOnly"
+        ]
+    }
+}
+
+task copyJarFilter(type: Copy) {
+    from jarFilter
+    into "${project.buildDir}/filtered-libs/"
+    rename { "${project.archivesBaseName}-${project.version}.jar" }
+}
+
 task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = "sources"
+    classifier("sources")
     from sourceSets.main.allSource
 }
 
@@ -123,7 +141,7 @@ task releaseOnCf {
     def branch
     if (System.env.BRANCH_NAME) {
         branch = System.env.BRANCH_NAME
-        branch = branch.substring(branch.lastIndexOf("/")+1)
+        branch = branch.substring(branch.lastIndexOf("/") + 1)
     } else {
         branch = "git rev-parse --abbrev-ref HEAD".execute().in.text.trim()
     }
@@ -133,11 +151,11 @@ task releaseOnCf {
     def time = df.format(new Date())
     def changes = new StringBuilder()
     changes << "<h2>REI v$project.version for $project.supported_version</h2>Updated at <b>$time</b>.<br><a href=\"https://www.github.com/shedaniel/RoughlyEnoughItems/commits/$branch\">Click here for changelog</a>"
-    def proc = "git log --max-count=200 --pretty=format:\"%s\"".execute()
+    def proc = "git log --max-count=200 --pretty=format:%s".execute()
     proc.in.eachLine { line ->
         def processedLine = line.toString()
         if (!processedLine.contains("New translations") && !processedLine.contains("Merge") && !processedLine.contains("branch")) {
-            changes << "<br>- $processedLine"
+            changes << "<br>- ${processedLine.capitalize()}"
         }
     }
     proc.waitFor()
@@ -161,11 +179,14 @@ curseforge {
                 embeddedLibrary 'cloth'
                 embeddedLibrary 'cloth-config'
             }
-            mainArtifact(file("${project.buildDir}/libs/${project.archivesBaseName}-${project.version}.jar")) {
+            mainArtifact(file("${project.buildDir}/filtered-libs/${project.archivesBaseName}-${project.version}.jar")) {
                 displayName = "[Fabric $project.supported_version] v$project.version"
             }
+            addArtifact(file("${project.buildDir}/libs/${project.archivesBaseName}-${project.version}-sources.jar")) {
+                displayName = "[Fabric $project.supported_version] v$project.version Sources"
+            }
             afterEvaluate {
-                uploadTask.dependsOn("remapJar")
+                uploadTask.dependsOn("copyJarFilter")
             }
         }
     }
