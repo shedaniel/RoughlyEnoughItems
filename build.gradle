@@ -55,7 +55,7 @@ dependencies {
     modApi("me.shedaniel.cloth:cloth-events:${cloth_events_version}") {
         transitive = false
     }
-    modImplementation("me.shedaniel.cloth:config-2:${cloth_config_version}") {
+    modApi("me.shedaniel.cloth:config-2:${cloth_config_version}") {
         exclude module: "fabric-api"
     }
     modApi("me.sargunvohra.mcmods:autoconfig1u:${project.autoconfig1u}") {
@@ -73,6 +73,7 @@ dependencies {
             def listAdded = new ArrayList(Arrays.asList((api_exculde as String).split(',')))
             def eachDep = { dep ->
                 for (apiIncludeDepStr in (api_include as String).split(',')) {
+                    if (apiIncludeDepStr.isEmpty()) continue
                     def apiIncludeGroup = apiIncludeDepStr.split(':')[0]
                     def apiIncludeDep = apiIncludeDepStr.split(':')[1]
                     if (dep.module.id.group == apiIncludeGroup && dep.module.id.name.startsWith(apiIncludeDep)) {
