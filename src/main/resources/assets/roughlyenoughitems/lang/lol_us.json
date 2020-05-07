@@ -150,6 +150,7 @@
   "config.roughlyenoughitems.mirrorItemPanel.boolean.false": "Wight Side",
   "config.roughlyenoughitems.debugRenderTimeRequired": "Entry List Debug Mode:",
   "config.roughlyenoughitems.debugSearchTimeRequired": "Search Debug Mode:",
+  "config.roughlyenoughitems.resizeDynamically": "Resize Dynamically:",
   "config.roughlyenoughitems.searchFieldLocation": "Seawch Fiewd Position:",
   "config.roughlyenoughitems.searchFieldLocation.bottom_side": "Bottom Weft / Wight",
   "config.roughlyenoughitems.searchFieldLocation.top_side": "Top Left / Wight",
