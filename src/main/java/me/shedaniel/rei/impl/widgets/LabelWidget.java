@@ -183,7 +183,7 @@ public final class LabelWidget extends Label {
     @NotNull
     @Override
     public final Rectangle getBounds() {
-        int width = font.getWidth(text);
+        int width = font.getStringWidth(text);
         Point point = getPoint();
         if (getHorizontalAlignment() == LEFT_ALIGNED)
             return new Rectangle(point.x - 1, point.y - 5, width + 2, 14);
@@ -200,7 +200,7 @@ public final class LabelWidget extends Label {
         if (isClickable() && isHovered(mouseX, mouseY))
             color = getHoveredColor();
         Point pos = getPoint();
-        int width = font.getWidth(getText());
+        int width = font.getStringWidth(getText());
         switch (getHorizontalAlignment()) {
             case LEFT_ALIGNED:
                 if (hasShadow())

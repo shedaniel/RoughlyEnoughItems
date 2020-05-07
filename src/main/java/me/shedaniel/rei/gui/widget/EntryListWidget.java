@@ -203,7 +203,7 @@ public class EntryListWidget extends WidgetWithBounds {
                 int size = 0;
                 long time = 0;
                 if (sizeForFavorites > 0) {
-                    method_27535(matrices, font, new TranslatableText("text.rei.favorites"), innerBounds.x + 2, (int) (innerBounds.y + 8 - scrolling.scrollAmount), -1);
+                    drawTextWithShadow(matrices, font, new TranslatableText("text.rei.favorites"), innerBounds.x + 2, (int) (innerBounds.y + 8 - scrolling.scrollAmount), -1);
                     nextIndex += innerBounds.width / entrySize();
                     back1:
                     for (EntryStack stack : favorites) {
@@ -259,7 +259,7 @@ public class EntryListWidget extends WidgetWithBounds {
                 int z = getZ();
                 setZ(500);
                 Text debugText = new LiteralText(String.format("%d entries, avg. %.0fns, ttl. %.0fms, %s fps", size, time / (double) size, totalTime / 1000000d, minecraft.fpsDebugString.split(" ")[0]));
-                fillGradient(matrices, bounds.x, bounds.y, bounds.x + font.getWidth(debugText) + 2, bounds.y + font.fontHeight + 2, -16777216, -16777216);
+                fillGradient(matrices, bounds.x, bounds.y, bounds.x + font.getStringWidth(debugText) + 2, bounds.y + font.fontHeight + 2, -16777216, -16777216);
                 VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
                 matrices.push();
                 matrices.translate(0.0D, 0.0D, getZ());
@@ -270,7 +270,7 @@ public class EntryListWidget extends WidgetWithBounds {
                 matrices.pop();
             } else {
                 if (sizeForFavorites > 0) {
-                    method_27535(matrices, font, new TranslatableText("text.rei.favorites"), innerBounds.x + 2, (int) (innerBounds.y + 8 - scrolling.scrollAmount), -1);
+                    drawTextWithShadow(matrices, font, new TranslatableText("text.rei.favorites"), innerBounds.x + 2, (int) (innerBounds.y + 8 - scrolling.scrollAmount), -1);
                     nextIndex += innerBounds.width / entrySize();
                     back1:
                     for (EntryStack stack : favorites) {
@@ -380,7 +380,7 @@ public class EntryListWidget extends WidgetWithBounds {
                 int z = getZ();
                 setZ(500);
                 Text debugText = new LiteralText(String.format("%d entries, avg. %.0fns, ttl. %.0fms, %s fps", size, time / (double) size, totalTime / 1000000d, minecraft.fpsDebugString.split(" ")[0]));
-                int stringWidth = font.getWidth(debugText);
+                int stringWidth = font.getStringWidth(debugText);
                 fillGradient(matrices, Math.min(bounds.x, minecraft.currentScreen.width - stringWidth - 2), bounds.y, bounds.x + stringWidth + 2, bounds.y + font.fontHeight + 2, -16777216, -16777216);
                 VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
                 matrices.push();

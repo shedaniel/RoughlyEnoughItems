@@ -130,7 +130,7 @@ public class WarningAndErrorScreen extends Screen {
     
     @Override
     public void render(MatrixStack matrices, int int_1, int int_2, float float_1) {
-        this.renderDirtBackground(0);
+        this.renderBackgroundTexture(0);
         this.listWidget.render(matrices, int_1, int_2, float_1);
         if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
             this.drawCenteredString(matrices, this.textRenderer, "Warnings during Roughly Enough Items' initialization", this.width / 2, 16, 16777215);
@@ -233,7 +233,7 @@ public class WarningAndErrorScreen extends Screen {
         
         @Override
         public int getWidth() {
-            return MinecraftClient.getInstance().textRenderer.getWidth(text) + 10;
+            return MinecraftClient.getInstance().textRenderer.getStringWidth(text) + 10;
         }
     }
     

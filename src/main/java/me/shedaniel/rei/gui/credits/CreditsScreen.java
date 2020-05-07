@@ -130,7 +130,7 @@ public class CreditsScreen extends Screen {
     
     @Override
     public void render(MatrixStack matrices, int int_1, int int_2, float float_1) {
-        this.renderDirtBackground(0);
+        this.renderBackgroundTexture(0);
         this.entryListWidget.render(matrices, int_1, int_2, float_1);
         this.drawCenteredString(matrices, this.textRenderer, I18n.translate("text.rei.credits"), this.width / 2, 16, 16777215);
         super.render(matrices, int_1, int_2, float_1);
