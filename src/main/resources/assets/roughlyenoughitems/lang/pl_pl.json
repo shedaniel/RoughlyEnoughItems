@@ -150,6 +150,7 @@
   "config.roughlyenoughitems.mirrorItemPanel.boolean.false": "Po prawej",
   "config.roughlyenoughitems.debugRenderTimeRequired": "Tryb debugowania listy przedmiotów:",
   "config.roughlyenoughitems.debugSearchTimeRequired": "Search Debug Mode:",
+  "config.roughlyenoughitems.resizeDynamically": "Resize Dynamically:",
   "config.roughlyenoughitems.searchFieldLocation": "Pozycja pola wyszukiwania:",
   "config.roughlyenoughitems.searchFieldLocation.bottom_side": "Lewy / Prawy Dolny",
   "config.roughlyenoughitems.searchFieldLocation.top_side": "Lewy / Prawy Górny",
