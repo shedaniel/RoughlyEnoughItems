@@ -150,6 +150,7 @@
   "config.roughlyenoughitems.mirrorItemPanel.boolean.false": "Paremal",
   "config.roughlyenoughitems.debugRenderTimeRequired": "Esemenimekirja silumisrežiim:",
   "config.roughlyenoughitems.debugSearchTimeRequired": "Otsingu silumisrežiim:",
+  "config.roughlyenoughitems.resizeDynamically": "Resize Dynamically:",
   "config.roughlyenoughitems.searchFieldLocation": "Otsingukasti asukoht:",
   "config.roughlyenoughitems.searchFieldLocation.bottom_side": "All vasakul/paremal",
   "config.roughlyenoughitems.searchFieldLocation.top_side": "Üleval vasakul/paremal",
