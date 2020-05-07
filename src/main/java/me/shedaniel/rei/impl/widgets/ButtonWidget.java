@@ -211,7 +211,7 @@ public class ButtonWidget extends Button {
         if (tint != null)
             fillGradient(matrices, x + 1, y + 1, x + width - 1, y + height - 1, tint, tint);
         
-        this.method_27534(matrices, font, getText(), x + width / 2, y + (height - 8) / 2, color);
+        this.drawCenteredText(matrices, font, getText(), x + width / 2, y + (height - 8) / 2, color);
         
         String tooltip = getTooltip();
         if (tooltip != null)

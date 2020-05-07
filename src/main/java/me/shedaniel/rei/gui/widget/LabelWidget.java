@@ -44,8 +44,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * @see Widgets#createLabel(Point, String)
- * @see Widgets#createClickableLabel(Point, String, Consumer)
+ * @see Widgets#createLabel(Point, Text)
+ * @see Widgets#createClickableLabel(Point, Text, Consumer)
  */
 @Deprecated
 @ApiStatus.ScheduledForRemoval
@@ -157,7 +157,7 @@ public class LabelWidget extends WidgetWithBounds {
     @NotNull
     @Override
     public Rectangle getBounds() {
-        int width = font.getWidth(text);
+        int width = font.getStringWidth(text);
         Point pos = getLocation();
         if (isCentered())
             return new Rectangle(pos.x - width / 2 - 1, pos.y - 5, width + 2, 14);
@@ -171,7 +171,7 @@ public class LabelWidget extends WidgetWithBounds {
     
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        int width = font.getWidth(text);
+        int width = font.getStringWidth(text);
         Point pos = getLocation();
         if (isCentered()) {
             if (hasShadows)

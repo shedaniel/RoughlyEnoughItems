@@ -112,21 +112,21 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
         this.searchField = new OverlaySearchField(0, 0, 0, 0);
         {
             Text selectAllText = new TranslatableText("config.roughlyenoughitems.filteredEntries.selectAll");
-            this.selectAllButton = new ButtonWidget(0, 0, MinecraftClient.getInstance().textRenderer.getWidth(selectAllText) + 10, 20, selectAllText, button -> {
+            this.selectAllButton = new ButtonWidget(0, 0, MinecraftClient.getInstance().textRenderer.getStringWidth(selectAllText) + 10, 20, selectAllText, button -> {
                 this.selectionPoint = new Point(-Integer.MAX_VALUE / 2, -Integer.MAX_VALUE / 2);
                 this.secondPoint = new Point(Integer.MAX_VALUE / 2, Integer.MAX_VALUE / 2);
             });
         }
         {
             Text selectNoneText = new TranslatableText("config.roughlyenoughitems.filteredEntries.selectNone");
-            this.selectNoneButton = new ButtonWidget(0, 0, MinecraftClient.getInstance().textRenderer.getWidth(selectNoneText) + 10, 20, selectNoneText, button -> {
+            this.selectNoneButton = new ButtonWidget(0, 0, MinecraftClient.getInstance().textRenderer.getStringWidth(selectNoneText) + 10, 20, selectNoneText, button -> {
                 this.selectionPoint = new Point(Integer.MAX_VALUE, Integer.MAX_VALUE);
                 this.secondPoint = new Point(Integer.MAX_VALUE, Integer.MAX_VALUE);
             });
         }
         {
             Text hideText = new TranslatableText("config.roughlyenoughitems.filteredEntries.hide");
-            this.hideButton = new ButtonWidget(0, 0, MinecraftClient.getInstance().textRenderer.getWidth(hideText) + 10, 20, hideText, button -> {
+            this.hideButton = new ButtonWidget(0, 0, MinecraftClient.getInstance().textRenderer.getStringWidth(hideText) + 10, 20, hideText, button -> {
                 for (int i = 0; i < entryStacks.size(); i++) {
                     EntryStack stack = entryStacks.get(i);
                     EntryListEntry entry = entries.get(i);
@@ -140,7 +140,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
         }
         {
             Text showText = new TranslatableText("config.roughlyenoughitems.filteredEntries.show");
-            this.showButton = new ButtonWidget(0, 0, MinecraftClient.getInstance().textRenderer.getWidth(showText) + 10, 20, showText, button -> {
+            this.showButton = new ButtonWidget(0, 0, MinecraftClient.getInstance().textRenderer.getStringWidth(showText) + 10, 20, showText, button -> {
                 for (int i = 0; i < entryStacks.size(); i++) {
                     EntryStack stack = entryStacks.get(i);
                     EntryListEntry entry = entries.get(i);
