@@ -150,6 +150,7 @@
   "config.roughlyenoughitems.mirrorItemPanel.boolean.false": "Lado Direito",
   "config.roughlyenoughitems.debugRenderTimeRequired": "Modo de Depuração da Lista de Referências:",
   "config.roughlyenoughitems.debugSearchTimeRequired": "Modo de Depuração da Pesquisa:",
+  "config.roughlyenoughitems.resizeDynamically": "Resize Dynamically:",
   "config.roughlyenoughitems.searchFieldLocation": "Posição do Campo de Pesquisa:",
   "config.roughlyenoughitems.searchFieldLocation.bottom_side": "Canto Inferior Esquerdo / Direito",
   "config.roughlyenoughitems.searchFieldLocation.top_side": "Canto Superior Esquerdo / Direito",
