@@ -150,6 +150,7 @@
   "config.roughlyenoughitems.mirrorItemPanel.boolean.false": "右側",
   "config.roughlyenoughitems.debugRenderTimeRequired": "Entry List Debug Mode:",
   "config.roughlyenoughitems.debugSearchTimeRequired": "Search Debug Mode:",
+  "config.roughlyenoughitems.resizeDynamically": "Resize Dynamically:",
   "config.roughlyenoughitems.searchFieldLocation": "検索欄の位置:",
   "config.roughlyenoughitems.searchFieldLocation.bottom_side": "左下 / 右下",
   "config.roughlyenoughitems.searchFieldLocation.top_side": "左上 / 右上",
