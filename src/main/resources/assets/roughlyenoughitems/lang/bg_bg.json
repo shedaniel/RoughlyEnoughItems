@@ -150,6 +150,7 @@
   "config.roughlyenoughitems.mirrorItemPanel.boolean.false": "Right Side",
   "config.roughlyenoughitems.debugRenderTimeRequired": "Entry List Debug Mode:",
   "config.roughlyenoughitems.debugSearchTimeRequired": "Search Debug Mode:",
+  "config.roughlyenoughitems.resizeDynamically": "Resize Dynamically:",
   "config.roughlyenoughitems.searchFieldLocation": "Search Field Position:",
   "config.roughlyenoughitems.searchFieldLocation.bottom_side": "Bottom Left / Right",
   "config.roughlyenoughitems.searchFieldLocation.top_side": "Top Left / Right",
