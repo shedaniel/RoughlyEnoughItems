@@ -157,7 +157,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
             for (Text text : texts) {
                 if (!this.texts.isEmpty())
                     this.texts.add(null);
-                this.texts.addAll(MinecraftClient.getInstance().textRenderer.wrapLines(text, bounds.width - 11));
+                this.texts.addAll(MinecraftClient.getInstance().textRenderer.wrapStringToWidthAsList(text, bounds.width - 11));
             }
         }
         

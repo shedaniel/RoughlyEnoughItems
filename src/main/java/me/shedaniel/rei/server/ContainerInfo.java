@@ -23,10 +23,10 @@
 
 package me.shedaniel.rei.server;
 
-import net.minecraft.screen.ScreenHandler;
+import net.minecraft.container.Container;
 
-public interface ContainerInfo<T extends ScreenHandler> {
-    Class<? extends ScreenHandler> getContainerClass();
+public interface ContainerInfo<T extends Container> {
+    Class<? extends Container> getContainerClass();
     
     int getCraftingResultSlotIndex(T container);
     

@@ -28,8 +28,8 @@ import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.TransferRecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import me.shedaniel.rei.server.ContainerInfo;
+import net.minecraft.container.Container;
 import net.minecraft.recipe.Recipe;
-import net.minecraft.screen.ScreenHandler;
 import net.minecraft.util.Identifier;
 
 import java.util.Collections;
@@ -56,7 +56,7 @@ public interface DefaultCraftingDisplay extends TransferRecipeDisplay {
     Optional<Recipe<?>> getOptionalRecipe();
     
     @Override
-    default List<List<EntryStack>> getOrganisedInputEntries(ContainerInfo<ScreenHandler> containerInfo, ScreenHandler container) {
+    default List<List<EntryStack>> getOrganisedInputEntries(ContainerInfo<Container> containerInfo, Container container) {
         List<List<EntryStack>> list = Lists.newArrayListWithCapacity(containerInfo.getCraftingWidth(container) * containerInfo.getCraftingHeight(container));
         for (int i = 0; i < containerInfo.getCraftingWidth(container) * containerInfo.getCraftingHeight(container); i++) {
             list.add(Collections.emptyList());

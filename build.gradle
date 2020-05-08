@@ -32,6 +32,7 @@ license {
 }
 
 repositories {
+    maven { url "https://dl.bintray.com/shedaniel/legacy-yarn-updated" }
 }
 
 jar {

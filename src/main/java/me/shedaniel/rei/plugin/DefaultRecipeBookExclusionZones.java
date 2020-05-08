@@ -27,10 +27,10 @@ import com.google.common.collect.Lists;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
 import net.minecraft.client.recipebook.ClientRecipeBook;
-import net.minecraft.screen.AbstractRecipeScreenHandler;
+import net.minecraft.container.CraftingContainer;
 
 import java.util.Collections;
 import java.util.List;
@@ -40,13 +40,13 @@ public class DefaultRecipeBookExclusionZones implements Supplier<List<Rectangle>
     
     @Override
     public List<Rectangle> get() {
-        if (!MinecraftClient.getInstance().player.getRecipeBook().isGuiOpen() || !(MinecraftClient.getInstance().currentScreen instanceof RecipeBookProvider) || !(REIHelper.getInstance().getPreviousHandledScreen().getScreenHandler() instanceof AbstractRecipeScreenHandler))
+        if (!MinecraftClient.getInstance().player.getRecipeBook().isGuiOpen() || !(MinecraftClient.getInstance().currentScreen instanceof RecipeBookProvider) || !(REIHelper.getInstance().getPreviousContainerScreen().getContainer() instanceof CraftingContainer))
             return Collections.emptyList();
-        HandledScreen<?> handledScreen = REIHelper.getInstance().getPreviousHandledScreen();
-        List<Rectangle> l = Lists.newArrayList(new Rectangle(handledScreen.x - 4 - 145, handledScreen.y, 4 + 145 + 30, handledScreen.backgroundHeight));
-        int size = ClientRecipeBook.getGroups((AbstractRecipeScreenHandler<?>) REIHelper.getInstance().getPreviousHandledScreen().getScreenHandler()).size();
+        ContainerScreen<?> containerScreen = REIHelper.getInstance().getPreviousContainerScreen();
+        List<Rectangle> l = Lists.newArrayList(new Rectangle(containerScreen.x - 4 - 145, containerScreen.y, 4 + 145 + 30, containerScreen.containerHeight));
+        int size = ClientRecipeBook.getGroupsForContainer((CraftingContainer<?>) REIHelper.getInstance().getPreviousContainerScreen().getContainer()).size();
         if (size > 0)
-            l.add(new Rectangle(handledScreen.x - 4 - 145 - 30, handledScreen.y, 30, size * 27));
+            l.add(new Rectangle(containerScreen.x - 4 - 145 - 30, containerScreen.y, 30, size * 27));
         return l;
     }
     

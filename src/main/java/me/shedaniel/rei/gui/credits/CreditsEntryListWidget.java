@@ -113,7 +113,7 @@ public class CreditsEntryListWidget extends DynamicNewSmoothScrollingEntryListWi
         
         public TranslationCreditsItem(Text language, Text translators, int width, int maxWidth) {
             this.language = language;
-            this.translators = MinecraftClient.getInstance().textRenderer.wrapLines(translators, width);
+            this.translators = MinecraftClient.getInstance().textRenderer.wrapStringToWidthAsList(translators, width);
             this.maxWidth = maxWidth;
         }
         

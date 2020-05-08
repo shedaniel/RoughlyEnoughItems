@@ -299,20 +299,20 @@ public class DefaultPlugin implements REIPluginV0 {
                 return Collections.emptyList();
             return Collections.singletonList(widget.getBounds().clone());
         });
-        displayHelper.registerHandler(new DisplayHelper.DisplayBoundsHandler<HandledScreen<?>>() {
+        displayHelper.registerHandler(new DisplayHelper.DisplayBoundsHandler<ContainerScreen<?>>() {
             @Override
             public Class<?> getBaseSupportedClass() {
-                return HandledScreen.class;
+                return ContainerScreen.class;
             }
             
             @Override
-            public Rectangle getLeftBounds(HandledScreen<?> screen) {
+            public Rectangle getLeftBounds(ContainerScreen<?> screen) {
                 return new Rectangle(2, 0, screen.x - 4, screen.height);
             }
             
             @Override
-            public Rectangle getRightBounds(HandledScreen<?> screen) {
-                int startX = screen.x + screen.backgroundWidth + 2;
+            public Rectangle getRightBounds(ContainerScreen<?> screen) {
+                int startX = screen.x + screen.containerWidth + 2;
                 return new Rectangle(startX, 0, screen.width - startX - 2, screen.height);
             }
             
@@ -392,7 +392,7 @@ public class DefaultPlugin implements REIPluginV0 {
         recipeHelper.removeAutoCraftButton(COMPOSTING);
         recipeHelper.removeAutoCraftButton(BEACON);
         recipeHelper.removeAutoCraftButton(INFO);
-        recipeHelper.registerScreenClickArea(new Rectangle(88, 32, 28, 23), CraftingScreen.class, CRAFTING);
+        recipeHelper.registerScreenClickArea(new Rectangle(88, 32, 28, 23), CraftingTableScreen.class, CRAFTING);
         recipeHelper.registerScreenClickArea(new Rectangle(137, 29, 10, 13), InventoryScreen.class, CRAFTING);
         recipeHelper.registerScreenClickArea(new Rectangle(97, 16, 14, 30), BrewingStandScreen.class, BREWING);
         recipeHelper.registerScreenClickArea(new Rectangle(78, 32, 28, 23), FurnaceScreen.class, SMELTING);

@@ -25,23 +25,23 @@ package me.shedaniel.rei.plugin.containers;
 
 import me.shedaniel.rei.server.ContainerInfo;
 import me.shedaniel.rei.server.RecipeFinder;
+import net.minecraft.container.Container;
+import net.minecraft.container.CraftingContainer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.screen.AbstractRecipeScreenHandler;
-import net.minecraft.screen.ScreenHandler;
 
-public class CraftingContainerInfoWrapper<T extends AbstractRecipeScreenHandler<?>> implements ContainerInfo<T> {
-    private Class<? extends AbstractRecipeScreenHandler<?>> containerClass;
+public class CraftingContainerInfoWrapper<T extends CraftingContainer<?>> implements ContainerInfo<T> {
+    private Class<? extends CraftingContainer<?>> containerClass;
     
     public CraftingContainerInfoWrapper(Class<T> containerClass) {
         this.containerClass = containerClass;
     }
     
-    public static <R extends AbstractRecipeScreenHandler<?>> ContainerInfo<R> create(Class<R> containerClass) {
+    public static <R extends CraftingContainer<?>> ContainerInfo<R> create(Class<R> containerClass) {
         return new CraftingContainerInfoWrapper<>(containerClass);
     }
     
     @Override
-    public Class<? extends ScreenHandler> getContainerClass() {
+    public Class<? extends Container> getContainerClass() {
         return containerClass;
     }
     

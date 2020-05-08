@@ -32,6 +32,9 @@ import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.gui.config.*;
+import me.shedaniel.rei.impl.ConfigObjectImpl.DontApplyFieldName;
+import me.shedaniel.rei.impl.ConfigObjectImpl.UseFilteringScreen;
+import me.shedaniel.rei.impl.ConfigObjectImpl.UseSpecialRecipeTypeScreen;
 import net.minecraft.client.util.InputUtil;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -399,7 +402,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         @Comment("Declares whether favorites will be searched.") private boolean searchFavorites = true;
         @UsePercentage(min = 0.25, max = 4.0) private double entrySize = 1.0;
         private boolean useCompactTabs = true;
-        private boolean lowerConfigButton = false;
+        private boolean lowerConfigButton = true;
         @Comment("Declares whether REI should resize its recipe window dynamically")
         private boolean resizeDynamically = false;
     }
@@ -415,7 +418,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     public static class Modules {
-        @Comment("Declares whether the craftable filter button is enabled.") private boolean enableCraftableOnlyButton = true;
+        @Comment("Declares whether the craftable filter button is enabled.") private boolean enableCraftableOnlyButton = false;
         private boolean toastDisplayedOnCopyIdentifier = true;
         @Comment("Declares whether the utils buttons are shown.") private boolean showUtilsButtons = false;
         @Comment("Declares whether REI should remove the recipe book.") private boolean disableRecipeBook = false;

@@ -44,7 +44,7 @@ import net.fabricmc.fabric.api.event.client.ClientTickCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
@@ -64,7 +64,7 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
     @ApiStatus.Internal
     public static List<ItemStack> inventoryStacks = Lists.newArrayList();
     private static ContainerScreenOverlay overlay;
-    private static HandledScreen<?> lastHandledScreen = null;
+    private static ContainerScreen<?> previousContainerScreen = null;
     private static LinkedHashSet<RecipeScreen> lastRecipeScreen = Sets.newLinkedHashSetWithExpectedSize(5);
     private static ScreenHelper instance;
     
@@ -152,21 +152,21 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
     }
     
     /**
-     * @see REIHelper#getPreviousHandledScreen()
+     * @see REIHelper#getPreviousContainerScreen()
      */
     @Deprecated
     @ApiStatus.ScheduledForRemoval
-    public static HandledScreen<?> getLastHandledScreen() {
-        return lastHandledScreen;
+    public static ContainerScreen<?> getLastHandledScreen() {
+        return previousContainerScreen;
     }
     
     @Override
-    public HandledScreen<?> getPreviousHandledScreen() {
-        return lastHandledScreen;
+    public ContainerScreen<?> getPreviousContainerScreen() {
+        return previousContainerScreen;
     }
     
-    public static void setLastHandledScreen(HandledScreen<?> lastScreenWithHandler) {
-        ScreenHelper.lastHandledScreen = lastScreenWithHandler;
+    public static void setPreviousContainerScreen(ContainerScreen<?> previousContainerScreen) {
+        ScreenHelper.previousContainerScreen = previousContainerScreen;
     }
     
     public static void drawHoveringWidget(MatrixStack matrices, int x, int y, TriConsumer<MatrixStack, Point, Float> consumer, int width, int height, float delta) {
@@ -215,8 +215,8 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
                 }
                 client.currentScreen = null;
                 client.openScreen(warningAndErrorScreen);
-            } else if (lastHandledScreen != screen && screen instanceof HandledScreen)
-                lastHandledScreen = (HandledScreen<?>) screen;
+            } else if (previousContainerScreen != screen && screen instanceof ContainerScreen)
+                previousContainerScreen = (ContainerScreen<?>) screen;
             return ActionResult.PASS;
         });
         boolean loaded = FabricLoader.getInstance().isModLoaded("fabric-events-lifecycle-v0");

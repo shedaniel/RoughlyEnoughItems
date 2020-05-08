@@ -79,7 +79,6 @@ public class RoughlyEnoughItemsState {
         }
     }
     
-    @SuppressWarnings({"Convert2MethodRef", "FunctionalExpressionCanBeFolded"})
     public static void onContinue(Runnable runnable) {
         continueCallbacks.add(runnable);
     }
