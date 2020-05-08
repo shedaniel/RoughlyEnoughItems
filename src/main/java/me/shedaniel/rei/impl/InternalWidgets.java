@@ -37,7 +37,7 @@ import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
@@ -55,13 +55,13 @@ public final class InternalWidgets {
     private InternalWidgets() {}
     
     public static Widget createAutoCraftingButtonWidget(Rectangle displayBounds, Rectangle rectangle, Text text, Supplier<RecipeDisplay> displaySupplier, List<Widget> setupDisplay, RecipeCategory<?> category) {
-        HandledScreen<?> handledScreen = REIHelper.getInstance().getPreviousHandledScreen();
+        ContainerScreen<?> containerScreen = REIHelper.getInstance().getPreviousContainerScreen();
         boolean[] visible = {false};
         List<String>[] errorTooltip = new List[]{null};
         Button autoCraftingButton = Widgets.createButton(rectangle, text)
                 .focusable(false)
                 .onClick(button -> {
-                    AutoTransferHandler.Context context = AutoTransferHandler.Context.create(true, handledScreen, displaySupplier.get());
+                    AutoTransferHandler.Context context = AutoTransferHandler.Context.create(true, containerScreen, displaySupplier.get());
                     for (AutoTransferHandler autoTransferHandler : RecipeHelper.getInstance().getSortedAutoCraftingHandler())
                         try {
                             AutoTransferHandler.Result result = autoTransferHandler.handle(context);
@@ -70,7 +70,7 @@ public final class InternalWidgets {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                    MinecraftClient.getInstance().openScreen(handledScreen);
+                    MinecraftClient.getInstance().openScreen(containerScreen);
                     ScreenHelper.getLastOverlay().init();
                 })
                 .onRender((matrices, button) -> {
@@ -79,7 +79,7 @@ public final class InternalWidgets {
                     int color = 0;
                     visible[0] = false;
                     IntList redSlots = null;
-                    AutoTransferHandler.Context context = AutoTransferHandler.Context.create(false, handledScreen, displaySupplier.get());
+                    AutoTransferHandler.Context context = AutoTransferHandler.Context.create(false, containerScreen, displaySupplier.get());
                     for (AutoTransferHandler autoTransferHandler : RecipeHelper.getInstance().getSortedAutoCraftingHandler()) {
                         try {
                             AutoTransferHandler.Result result = autoTransferHandler.handle(context);

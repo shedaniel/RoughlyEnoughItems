@@ -40,7 +40,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.screen.ScreenHandler;
+import net.minecraft.container.Container;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
@@ -95,13 +95,13 @@ public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCr
     
     @Override
     public void renderRedSlots(MatrixStack matrices, List<Widget> widgets, Rectangle bounds, DefaultCraftingDisplay display, IntList redSlots) {
-        ContainerInfo<ScreenHandler> info = (ContainerInfo<ScreenHandler>) ContainerInfoHandler.getContainerInfo(getIdentifier(), REIHelper.getInstance().getPreviousHandledScreen().getScreenHandler().getClass());
+        ContainerInfo<Container> info = (ContainerInfo<Container>) ContainerInfoHandler.getContainerInfo(getIdentifier(), REIHelper.getInstance().getPreviousContainerScreen().getContainer().getClass());
         if (info == null)
             return;
         matrices.push();
         matrices.translate(0, 0, 400);
         Point startPoint = new Point(bounds.getCenterX() - 58, bounds.getCenterY() - 27);
-        int width = info.getCraftingWidth(REIHelper.getInstance().getPreviousHandledScreen().getScreenHandler());
+        int width = info.getCraftingWidth(REIHelper.getInstance().getPreviousContainerScreen().getContainer());
         for (Integer slot : redSlots) {
             int i = slot;
             int x = i % width;

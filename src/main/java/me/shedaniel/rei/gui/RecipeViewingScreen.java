@@ -193,7 +193,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
             if (element.keyPressed(int_1, int_2, int_3))
                 return true;
         if (int_1 == 256 || this.client.options.keyInventory.matchesKey(int_1, int_2)) {
-            MinecraftClient.getInstance().openScreen(ScreenHelper.getLastHandledScreen());
+            MinecraftClient.getInstance().openScreen(REIHelper.getInstance().getPreviousContainerScreen());
             ScreenHelper.getLastOverlay().init();
             return true;
         }
@@ -201,7 +201,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
             if (ScreenHelper.hasLastRecipeScreen())
                 client.openScreen(ScreenHelper.getLastRecipeScreen());
             else
-                client.openScreen(ScreenHelper.getLastHandledScreen());
+                client.openScreen(REIHelper.getInstance().getPreviousContainerScreen());
             return true;
         }
         return super.keyPressed(int_1, int_2, int_3);

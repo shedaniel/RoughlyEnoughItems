@@ -126,7 +126,7 @@ public class EntryRegistryImpl implements EntryRegistry {
     public ItemStack[] getAllStacksFromItem(Item item) {
         List<ItemStack> list = appendStacksForItem(item);
         ItemStack[] array = list.toArray(new ItemStack[0]);
-        Arrays.sort(array, (a, b) -> ItemStack.areEqual(a, b) ? 0 : 1);
+        Arrays.sort(array, (a, b) -> ItemStack.areEqualIgnoreDamage(a, b) ? 0 : 1);
         return array;
     }
     

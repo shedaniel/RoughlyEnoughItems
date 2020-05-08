@@ -66,13 +66,13 @@ public class WarningAndErrorScreen extends Screen {
     }
     
     private void addText(Text string) {
-        for (Text s : textRenderer.wrapLines(string, width - 80)) {
+        for (Text s : textRenderer.wrapStringToWidthAsList(string, width - 80)) {
             listWidget.creditsAddEntry(new TextItem(s));
         }
     }
     
     private void addLink(Text string, String link) {
-        for (Text s : textRenderer.wrapLines(string, width - 80)) {
+        for (Text s : textRenderer.wrapStringToWidthAsList(string, width - 80)) {
             listWidget.creditsAddEntry(new LinkItem(s.getString(), link));
         }
     }

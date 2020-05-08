@@ -39,9 +39,9 @@ import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.CraftingScreen;
+import net.minecraft.client.gui.screen.ingame.ContainerScreen;
+import net.minecraft.client.gui.screen.ingame.CraftingTableScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookGhostSlots;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
@@ -49,11 +49,11 @@ import net.minecraft.client.gui.screen.recipebook.RecipeBookWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.container.CraftingTableContainer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.RecipeManager;
-import net.minecraft.screen.CraftingScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.ActionResult;
@@ -192,11 +192,11 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             ClientSidePacketRegistry.INSTANCE.register(RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, (packetContext, packetByteBuf) -> {
                 ItemStack stack = packetByteBuf.readItemStack();
                 String player = packetByteBuf.readString(32767);
-                packetContext.getPlayer().sendMessage(new LiteralText(I18n.translate("text.rei.cheat_items").replaceAll("\\{item_name}", SearchArgument.tryGetItemStackName(stack.copy())).replaceAll("\\{item_count}", stack.copy().getCount() + "").replaceAll("\\{player_name}", player)), false);
+                packetContext.getPlayer().addMessage(new LiteralText(I18n.translate("text.rei.cheat_items").replaceAll("\\{item_name}", SearchArgument.tryGetItemStackName(stack.copy())).replaceAll("\\{item_count}", stack.copy().getCount() + "").replaceAll("\\{player_name}", player)), false);
             });
             ClientSidePacketRegistry.INSTANCE.register(RoughlyEnoughItemsNetwork.NOT_ENOUGH_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
                 Screen currentScreen = MinecraftClient.getInstance().currentScreen;
-                if (currentScreen instanceof CraftingScreen) {
+                if (currentScreen instanceof CraftingTableScreen) {
                     RecipeBookWidget recipeBookGui = ((RecipeBookProvider) currentScreen).getRecipeBookWidget();
                     RecipeBookGhostSlots ghostSlots = recipeBookGui.ghostSlots;
                     ghostSlots.reset();
@@ -213,12 +213,12 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                     }
                     
                     ghostSlots.addSlot(Ingredient.ofItems(Items.STONE), 381203812, 12738291);
-                    CraftingScreenHandler screenHandler = ((CraftingScreen) currentScreen).getScreenHandler();
+                    CraftingTableContainer container = ((CraftingTableScreen) currentScreen).getContainer();
                     for (int i = 0; i < input.size(); i++) {
                         List<ItemStack> stacks = input.get(i);
                         if (!stacks.isEmpty()) {
-                            Slot slot = screenHandler.getSlot(i + screenHandler.getCraftingResultSlotIndex() + 1);
-                            ghostSlots.addSlot(Ingredient.ofStacks(stacks.toArray(new ItemStack[0])), slot.x, slot.y);
+                            Slot slot = container.getSlot(i + container.getCraftingResultSlotIndex() + 1);
+                            ghostSlots.addSlot(Ingredient.ofStacks(stacks.toArray(new ItemStack[0])), slot.xPosition, slot.yPosition);
                         }
                     }
                 }
@@ -296,7 +296,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                     continue;
                 ActionResult result = decider.shouldScreenBeOverlayed(screen);
                 if (result != ActionResult.PASS)
-                    return result == ActionResult.FAIL || REIHelper.getInstance().getPreviousHandledScreen() == null;
+                    return result == ActionResult.FAIL || REIHelper.getInstance().getPreviousContainerScreen() == null;
             }
         } catch (ConcurrentModificationException ignored) {
         }
@@ -308,7 +308,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         long[] lastSync = {-1};
         ClothClientHooks.SYNC_RECIPES.register((minecraftClient, recipeManager, synchronizeRecipesS2CPacket) -> syncRecipes(lastSync));
         ClothClientHooks.SCREEN_ADD_BUTTON.register((minecraftClient, screen, abstractButtonWidget) -> {
-            if (ConfigObject.getInstance().doesDisableRecipeBook() && screen instanceof HandledScreen && abstractButtonWidget instanceof TexturedButtonWidget)
+            if (ConfigObject.getInstance().doesDisableRecipeBook() && screen instanceof ContainerScreen && abstractButtonWidget instanceof TexturedButtonWidget)
                 if (((TexturedButtonWidget) abstractButtonWidget).texture.equals(recipeButtonTex))
                     return ActionResult.FAIL;
             return ActionResult.PASS;
@@ -318,8 +318,8 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                 return;
             if (screen instanceof InventoryScreen && minecraftClient.interactionManager.hasCreativeInventory())
                 return;
-            if (screen instanceof HandledScreen)
-                ScreenHelper.setLastHandledScreen((HandledScreen<?>) screen);
+            if (screen instanceof ContainerScreen)
+                ScreenHelper.setPreviousContainerScreen((ContainerScreen<?>) screen);
             boolean alreadyAdded = false;
             for (Element element : Lists.newArrayList(screenHooks.cloth_getChildren()))
                 if (ContainerScreenOverlay.class.isAssignableFrom(element.getClass()))
@@ -385,9 +385,9 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                 return ActionResult.PASS;
             if (ScreenHelper.getLastOverlay().keyPressed(i, i1, i2))
                 return ActionResult.SUCCESS;
-            if (screen instanceof HandledScreen && ConfigObject.getInstance().doesDisableRecipeBook() && ConfigObject.getInstance().doesFixTabCloseContainer())
+            if (screen instanceof ContainerScreen && ConfigObject.getInstance().doesDisableRecipeBook() && ConfigObject.getInstance().doesFixTabCloseContainer())
                 if (i == 258 && minecraftClient.options.keyInventory.matchesKey(i, i1)) {
-                    minecraftClient.player.closeHandledScreen();
+                    minecraftClient.player.closeContainer();
                     return ActionResult.SUCCESS;
                 }
             return ActionResult.PASS;

@@ -25,16 +25,16 @@ package me.shedaniel.rei.plugin;
 
 import me.shedaniel.rei.plugin.containers.CraftingContainerInfoWrapper;
 import me.shedaniel.rei.server.ContainerInfoHandler;
-import net.minecraft.screen.*;
+import net.minecraft.container.*;
 import net.minecraft.util.Identifier;
 
 public class DefaultServerContainerPlugin implements Runnable {
     @Override
     public void run() {
-        ContainerInfoHandler.registerScreenWithHandlerInfo(new Identifier("minecraft", "plugins/crafting"), CraftingContainerInfoWrapper.create(CraftingScreenHandler.class));
-        ContainerInfoHandler.registerScreenWithHandlerInfo(new Identifier("minecraft", "plugins/crafting"), CraftingContainerInfoWrapper.create(PlayerScreenHandler.class));
-        ContainerInfoHandler.registerScreenWithHandlerInfo(new Identifier("minecraft", "plugins/smelting"), CraftingContainerInfoWrapper.create(FurnaceScreenHandler.class));
-        ContainerInfoHandler.registerScreenWithHandlerInfo(new Identifier("minecraft", "plugins/smoking"), CraftingContainerInfoWrapper.create(SmokerScreenHandler.class));
-        ContainerInfoHandler.registerScreenWithHandlerInfo(new Identifier("minecraft", "plugins/blasting"), CraftingContainerInfoWrapper.create(BlastFurnaceScreenHandler.class));
+        ContainerInfoHandler.registerContainerInfo(new Identifier("minecraft", "plugins/crafting"), CraftingContainerInfoWrapper.create(CraftingTableContainer.class));
+        ContainerInfoHandler.registerContainerInfo(new Identifier("minecraft", "plugins/crafting"), CraftingContainerInfoWrapper.create(PlayerContainer.class));
+        ContainerInfoHandler.registerContainerInfo(new Identifier("minecraft", "plugins/smelting"), CraftingContainerInfoWrapper.create(FurnaceContainer.class));
+        ContainerInfoHandler.registerContainerInfo(new Identifier("minecraft", "plugins/smoking"), CraftingContainerInfoWrapper.create(SmokerContainer.class));
+        ContainerInfoHandler.registerContainerInfo(new Identifier("minecraft", "plugins/blasting"), CraftingContainerInfoWrapper.create(BlastFurnaceContainer.class));
     }
 }
