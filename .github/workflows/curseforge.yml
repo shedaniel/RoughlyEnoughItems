@@ -22,7 +22,7 @@ jobs:
           danielshe_curse_api_key: ${{ secrets.CF_API_KEY }}
           BRANCH_NAME: ${{ github.ref }}
       - name: Upload to CurseForge
-          run: ./gradlew build releaseOnCf --stacktrace
-          env:
-            danielshe_curse_api_key: ${{ secrets.CF_API_KEY }}
-            BRANCH_NAME: ${{ github.ref }}
+        run: ./gradlew build releaseOnCf --stacktrace
+        env:
+          danielshe_curse_api_key: ${{ secrets.CF_API_KEY }}
+          BRANCH_NAME: ${{ github.ref }}
