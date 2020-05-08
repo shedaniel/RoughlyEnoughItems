@@ -9,14 +9,20 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'ci skip')"
     steps:
       - uses: actions/checkout@v1
       - name: Set up JDK 1.8
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
-      - name: Upload to CurseForge
-        run: ./gradlew clean build releaseOnCf --refresh-dependencies --stacktrace
+      - name: Clean Gradle
+        run: ./gradlew clean --refresh-dependencies --stacktrace
         env:
           danielshe_curse_api_key: ${{ secrets.CF_API_KEY }}
           BRANCH_NAME: ${{ github.ref }}
+      - name: Upload to CurseForge
+          run: ./gradlew build releaseOnCf --stacktrace
+          env:
+            danielshe_curse_api_key: ${{ secrets.CF_API_KEY }}
+            BRANCH_NAME: ${{ github.ref }}
