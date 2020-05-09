@@ -1,14 +1,15 @@
 plugins {
-    id 'fabric-loom' version '0.4.3'
-    id 'maven-publish'
-    id 'java'
-    id 'java-library'
-    id 'net.minecrell.licenser' version '0.4.1'
-    id 'com.matthewprenger.cursegradle' version '1.4.0'
-    id 'net.corda.plugins.jar-filter' version "5.0.8" apply false
+    id("fabric-loom") version "0.4.3"
+    id("maven-publish")
+    id("java")
+    id("java-library")
+    id("net.minecrell.licenser") version("0.4.1")
+    id("com.matthewprenger.cursegradle") version("1.4.0")
+    id("net.corda.plugins.jar-filter") version("5.0.8") apply false
 }
 
 import net.fabricmc.loom.task.RemapJarTask
+
 import java.text.SimpleDateFormat
 
 sourceCompatibility = targetCompatibility = 1.8
@@ -16,11 +17,7 @@ sourceCompatibility = targetCompatibility = 1.8
 archivesBaseName = "RoughlyEnoughItems"
 group = "me.shedaniel"
 
-def forceVersion = ""
-
-version = forceVersion != "" ? forceVersion : project.mod_version
-
-def includeDep = true
+version = project.mod_version
 
 minecraft {
     accessWidener = file("src/main/resources/rei.aw")
@@ -67,30 +64,28 @@ dependencies {
     modRuntime("io.github.prospector:modmenu:${modmenu_version}") {
         transitive = false
     }
-    if (includeDep) {
-        afterEvaluate {
-            def listAdded = new ArrayList(Arrays.asList((api_exculde as String).split(',')))
-            def eachDep = { dep ->
-                for (apiIncludeDepStr in (api_include as String).split(',')) {
-                    if (apiIncludeDepStr.isEmpty()) continue
-                    def apiIncludeGroup = apiIncludeDepStr.split(':')[0]
-                    def apiIncludeDep = apiIncludeDepStr.split(':')[1]
-                    if (dep.module.id.group == apiIncludeGroup && dep.module.id.name.startsWith(apiIncludeDep)) {
-                        def version = dep.module.id.version.indexOf('@') >= 0 ? dep.module.id.version.substring(0, dep.module.id.version.indexOf('@')) : dep.module.id.version
-                        def mavenDep = "${dep.module.id.group}:${dep.module.id.name}:$version"
-                        if (!(mavenDep in listAdded)) {
-                            include(mavenDep) {
-                                transitive = false
-                            }
-                            listAdded.add(mavenDep)
+    afterEvaluate {
+        def listAdded = new ArrayList(Arrays.asList((api_exculde as String).split(',')))
+        def eachDep = { dep ->
+            for (apiIncludeDepStr in (api_include as String).split(',')) {
+                if (apiIncludeDepStr.isEmpty()) continue
+                def apiIncludeGroup = apiIncludeDepStr.split(':')[0]
+                def apiIncludeDep = apiIncludeDepStr.split(':')[1]
+                if (dep.module.id.group == apiIncludeGroup && dep.module.id.name.startsWith(apiIncludeDep)) {
+                    def version = dep.module.id.version.indexOf('@') >= 0 ? dep.module.id.version.substring(0, dep.module.id.version.indexOf('@')) : dep.module.id.version
+                    def mavenDep = "${dep.module.id.group}:${dep.module.id.name}:$version"
+                    if (!(mavenDep in listAdded)) {
+                        include(mavenDep) {
+                            transitive = false
                         }
-                        break
+                        listAdded.add(mavenDep)
                     }
+                    break
                 }
             }
-            configurations.compile.resolvedConfiguration.firstLevelModuleDependencies.each eachDep
-            configurations.runtimeClasspath.resolvedConfiguration.firstLevelModuleDependencies.each eachDep
         }
+        configurations.compile.resolvedConfiguration.firstLevelModuleDependencies.each eachDep
+        configurations.runtimeClasspath.resolvedConfiguration.firstLevelModuleDependencies.each eachDep
     }
 }
 
@@ -122,12 +117,9 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 }
 
 task remapMavenJar(type: RemapJarTask, dependsOn: jar) {
-//    classifier = "maven"
     afterEvaluate {
-        //noinspection GroovyAccessibility
         input = file("${project.buildDir}/libs/${archivesBaseName}-${version}-dev.jar")
         archiveName = "${archivesBaseName}-${version}.jar"
-        //noinspection GroovyAccessibility
         addNestedDependencies = false
     }
 }
@@ -167,17 +159,18 @@ curseforge {
     if (project.hasProperty('danielshe_curse_api_key') || System.getenv('danielshe_curse_api_key') != null) {
         apiKey = project.hasProperty('danielshe_curse_api_key') ? project.property('danielshe_curse_api_key') : System.getenv('danielshe_curse_api_key')
         project {
-            id = '310111'
-            releaseType = 'beta'
+            id = "310111"
+            releaseType = "beta"
             changelogType = "html"
             changelog = releaseChangelog
-            addGameVersion '1.16-Snapshot'
-            addGameVersion 'Java 8'
-            addGameVersion 'Fabric'
+            addGameVersion "1.16-Snapshot"
+            addGameVersion "Java 8"
+            addGameVersion "Fabric"
             relations {
-                requiredDependency 'fabric-api'
-                embeddedLibrary 'cloth'
-                embeddedLibrary 'cloth-config'
+                requiredDependency "fabric-api"
+                embeddedLibrary "cloth"
+                embeddedLibrary "cloth-config"
+                embeddedLibrary "auto-config-updated-api"
             }
             mainArtifact(file("${project.buildDir}/filtered-libs/${project.archivesBaseName}-${project.version}.jar")) {
                 displayName = "[Fabric $project.supported_version] v$project.version"
