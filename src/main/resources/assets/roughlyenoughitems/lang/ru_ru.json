@@ -87,7 +87,7 @@
   "text.rei.recipe_screen_type.selection": "Выбор типа экрана рецепта",
   "text.rei.recipe_screen_type.selection.sub": "Вы всегда можете изменить эту настройку через окно конфигурации.",
   "text.rei.view_recipes_for": "Посмотреть рецепты для %s",
-  "text.rei.subsets": "Subsets",
+  "text.rei.subsets": "Поднаборы",
   "text.rei.tiny_potato": "Мини картошка",
   "tooltip.rei.fluid_amount": "§7%d Единицы измерения",
   "msg.rei.copied_recipe_id": "Идентификатор рецепта скопирован",
