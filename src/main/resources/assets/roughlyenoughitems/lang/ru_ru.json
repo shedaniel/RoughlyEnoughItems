@@ -94,7 +94,7 @@
   "msg.rei.recipe_id_details": "ID рецепта: %s",
   "msg.rei.exported_recipe": "Exported Recipe",
   "msg.rei.exported_recipe.desc": "Проверьте папку 'rei_exports'.",
-  "subsets.rei.roughlyenoughitems.all_entries": "All Entries",
+  "subsets.rei.roughlyenoughitems.all_entries": "Все записи",
   "subsets.rei.roughlyenoughitems.item_groups": "Вкладки творчества",
   "_comment": "Конфигурация подсказок",
   "config.roughlyenoughitems.title": "Конфигурация Roughly Enough Items",
