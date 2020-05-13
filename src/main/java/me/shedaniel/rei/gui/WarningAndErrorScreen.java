@@ -233,7 +233,7 @@ public class WarningAndErrorScreen extends Screen {
         
         @Override
         public int getWidth() {
-            return MinecraftClient.getInstance().textRenderer.getStringWidth(text) + 10;
+            return MinecraftClient.getInstance().textRenderer.getWidth(text) + 10;
         }
     }
     
@@ -270,7 +270,7 @@ public class WarningAndErrorScreen extends Screen {
         
         @Override
         public int getWidth() {
-            return MinecraftClient.getInstance().textRenderer.getWidth(text) + 10;
+            return MinecraftClient.getInstance().textRenderer.getStringWidth(text) + 10;
         }
         
         @Override

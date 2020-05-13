@@ -118,12 +118,12 @@ public class RecipeChoosePageWidget extends DraggableWidget {
             public void render(MatrixStack matrices, int i, int i1, float v) {
                 font.draw(matrices, new TranslatableText("text.rei.choose_page"), bounds.x + 5, bounds.y + 5, REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF404040);
                 String endString = String.format(" /%d", maxPage);
-                int width = font.getWidth(endString);
+                int width = font.getStringWidth(endString);
                 font.draw(matrices, endString, bounds.x + bounds.width - 5 - width, bounds.y + 22, REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF404040);
             }
         });
         String endString = String.format(" /%d", maxPage);
-        int width = font.getWidth(endString);
+        int width = font.getStringWidth(endString);
         this.widgets.add(textFieldWidget = new TextFieldWidget(bounds.x + 7, bounds.y + 16, bounds.width - width - 12, 18));
         textFieldWidget.setMaxLength(10000);
         textFieldWidget.stripInvalid = s -> {

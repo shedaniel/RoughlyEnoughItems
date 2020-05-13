@@ -43,4 +43,8 @@ public interface LiveRecipeGenerator<T extends RecipeDisplay> {
         return Optional.empty();
     }
     
+    default Optional<List<T>> getDisplaysGenerated(ClientHelper.ViewSearchBuilder builder) {
+        return Optional.empty();
+    }
+    
 }

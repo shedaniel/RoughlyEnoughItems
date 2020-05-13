@@ -114,6 +114,8 @@ public interface RecipeHelper {
     @Deprecated
     void registerDisplay(Identifier categoryIdentifier, RecipeDisplay display);
     
+    Map<RecipeCategory<?>, List<RecipeDisplay>> buildMapFor(ClientHelper.ViewSearchBuilder builder);
+    
     /**
      * Gets a map of recipes for an entry
      *
@@ -177,6 +179,8 @@ public interface RecipeHelper {
      * @return the map of recipes
      */
     Map<RecipeCategory<?>, List<RecipeDisplay>> getAllRecipes();
+    
+    Map<RecipeCategory<?>, List<RecipeDisplay>> getAllRecipesNoHandlers();
     
     List<RecipeDisplay> getAllRecipesFromCategory(RecipeCategory<?> category);
     

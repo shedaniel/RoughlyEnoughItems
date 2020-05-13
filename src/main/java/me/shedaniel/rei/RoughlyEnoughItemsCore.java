@@ -381,15 +381,15 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         ClothClientHooks.SCREEN_KEY_PRESSED.register((minecraftClient, screen, i, i1, i2) -> {
             if (shouldReturn(screen))
                 return ActionResult.PASS;
-            if (screen.getFocused() != null && screen.getFocused() instanceof TextFieldWidget || (screen.getFocused() instanceof RecipeBookWidget && ((RecipeBookWidget) screen.getFocused()).searchField != null && ((RecipeBookWidget) screen.getFocused()).searchField.isFocused()))
-                return ActionResult.PASS;
-            if (ScreenHelper.getLastOverlay().keyPressed(i, i1, i2))
-                return ActionResult.SUCCESS;
             if (screen instanceof ContainerScreen && ConfigObject.getInstance().doesDisableRecipeBook() && ConfigObject.getInstance().doesFixTabCloseContainer())
                 if (i == 258 && minecraftClient.options.keyInventory.matchesKey(i, i1)) {
                     minecraftClient.player.closeContainer();
                     return ActionResult.SUCCESS;
                 }
+            if (screen.getFocused() != null && screen.getFocused() instanceof TextFieldWidget || (screen.getFocused() instanceof RecipeBookWidget && ((RecipeBookWidget) screen.getFocused()).searchField != null && ((RecipeBookWidget) screen.getFocused()).searchField.isFocused()))
+                return ActionResult.PASS;
+            if (ScreenHelper.getLastOverlay().keyPressed(i, i1, i2))
+                return ActionResult.SUCCESS;
             return ActionResult.PASS;
         });
     }

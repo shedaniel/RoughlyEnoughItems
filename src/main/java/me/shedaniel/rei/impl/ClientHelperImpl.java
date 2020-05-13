@@ -25,23 +25,16 @@ package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Maps;
 import io.netty.buffer.Unpooled;
-import me.sargunvohra.mcmods.autoconfig1u.annotation.ConfigEntry;
-import me.shedaniel.clothconfig2.api.FakeModifierKeyCodeAdder;
-import me.shedaniel.clothconfig2.api.ModifierKeyCode;
-import me.shedaniel.math.api.Executor;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
-import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.gui.PreRecipeViewingScreen;
 import me.shedaniel.rei.gui.RecipeScreen;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
-import me.shedaniel.rei.utils.CollectionUtils;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
-import net.fabricmc.fabric.impl.client.keybinding.KeyBindingRegistryImpl;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
@@ -61,14 +54,11 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.Lazy;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Field;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @ApiStatus.Internal
 public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
@@ -149,7 +139,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     @Override
     public void sendDeletePacket() {
-        if (REIHelper.getInstance().getPreviousHandledScreen() instanceof CreativeInventoryScreen) {
+        if (REIHelper.getInstance().getPreviousContainerScreen() instanceof CreativeInventoryScreen) {
             MinecraftClient.getInstance().player.inventory.setCursorStack(ItemStack.EMPTY);
             return;
         }
@@ -185,22 +175,6 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     }
     
     @Override
-    public boolean executeRecipeKeyBind(EntryStack stack) {
-        Map<RecipeCategory<?>, List<RecipeDisplay>> map = RecipeHelper.getInstance().getRecipesFor(stack);
-        if (map.keySet().size() > 0)
-            openRecipeViewingScreen(map, null, null, stack);
-        return map.keySet().size() > 0;
-    }
-    
-    @Override
-    public boolean executeUsageKeyBind(EntryStack stack) {
-        Map<RecipeCategory<?>, List<RecipeDisplay>> map = RecipeHelper.getInstance().getUsagesFor(stack);
-        if (map.keySet().size() > 0)
-            openRecipeViewingScreen(map, null, stack, null);
-        return map.keySet().size() > 0;
-    }
-    
-    @Override
     public List<ItemStack> getInventoryItemsTypes() {
         List<ItemStack> inventoryStacks = new ArrayList<>(MinecraftClient.getInstance().player.inventory.main);
         inventoryStacks.addAll(MinecraftClient.getInstance().player.inventory.armor);
@@ -208,130 +182,234 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         return inventoryStacks;
     }
     
-    @Override
-    public boolean executeViewAllRecipesKeyBind() {
-        Map<RecipeCategory<?>, List<RecipeDisplay>> map = RecipeHelper.getInstance().getAllRecipes();
-        if (map.keySet().size() > 0)
-            openRecipeViewingScreen(map, null, null, null);
-        return map.keySet().size() > 0;
-    }
-    
-    @Override
-    public boolean executeViewAllRecipesFromCategory(Identifier category) {
-        Map<RecipeCategory<?>, List<RecipeDisplay>> map = Maps.newLinkedHashMap();
-        RecipeCategory<?> recipeCategory = CollectionUtils.findFirstOrNull(RecipeHelper.getInstance().getAllCategories(), c -> c.getIdentifier().equals(category));
-        if (recipeCategory == null)
-            return false;
-        map.put(recipeCategory, RecipeHelper.getInstance().getAllRecipesFromCategory(recipeCategory));
-        if (map.keySet().size() > 0)
-            openRecipeViewingScreen(map);
-        return map.keySet().size() > 0;
-    }
-    
-    @Override
-    public boolean executeViewAllRecipesFromCategories(List<Identifier> categories) {
-        Map<RecipeCategory<?>, List<RecipeDisplay>> map = Maps.newLinkedHashMap();
-        for (Identifier category : categories) {
-            RecipeCategory<?> recipeCategory = CollectionUtils.findFirstOrNull(RecipeHelper.getInstance().getAllCategories(), c -> c.getIdentifier().equals(category));
-            if (recipeCategory == null)
-                continue;
-            map.put(recipeCategory, RecipeHelper.getInstance().getAllRecipesFromCategory(recipeCategory));
-        }
-        if (map.keySet().size() > 0)
-            openRecipeViewingScreen(map);
-        return map.keySet().size() > 0;
-    }
-    
+    @ApiStatus.ScheduledForRemoval
+    @Deprecated
     @Override
     public void openRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map) {
         openRecipeViewingScreen(map, null, null, null);
     }
     
+    @ApiStatus.ScheduledForRemoval
+    @Deprecated
     @ApiStatus.Internal
     public void openRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map, @Nullable Identifier category, @Nullable EntryStack ingredientNotice, @Nullable EntryStack resultNotice) {
-        if (category == null) {
-            Screen currentScreen = MinecraftClient.getInstance().currentScreen;
-            if (currentScreen instanceof RecipeScreen) {
-                category = ((RecipeScreen) currentScreen).getCurrentCategory();
-            }
-        }
+        openView(new LegacyWrapperViewSearchBuilder(map).setPreferredOpenedCategory(category).setInputNotice(ingredientNotice).setOutputNotice(resultNotice).fillPreferredOpenedCategory());
+    }
+    
+    @Override
+    public boolean openView(ClientHelper.ViewSearchBuilder builder) {
+        Map<RecipeCategory<?>, List<RecipeDisplay>> map = builder.buildMap();
+        if (map.isEmpty()) return false;
         Screen screen;
         if (ConfigObject.getInstance().getRecipeScreenType() == RecipeScreenType.VILLAGER) {
-            screen = new VillagerRecipeViewingScreen(map, category);
+            screen = new VillagerRecipeViewingScreen(map, builder.getPreferredOpenedCategory());
         } else if (ConfigObject.getInstance().getRecipeScreenType() == RecipeScreenType.UNSET) {
-            @Nullable Identifier finalCategory = category;
             screen = new PreRecipeViewingScreen(REIHelper.getInstance().getPreviousContainerScreen(), RecipeScreenType.UNSET, true, original -> {
                 ConfigObject.getInstance().setRecipeScreenType(original ? RecipeScreenType.ORIGINAL : RecipeScreenType.VILLAGER);
                 ConfigManager.getInstance().saveConfig();
-                openRecipeViewingScreen(map, finalCategory, ingredientNotice, resultNotice);
+                openView(builder);
             });
         } else {
-            screen = new RecipeViewingScreen(map, category);
+            screen = new RecipeViewingScreen(map, builder.getPreferredOpenedCategory());
         }
         if (screen instanceof RecipeScreen) {
-            if (ingredientNotice != null)
-                ((RecipeScreen) screen).addIngredientStackToNotice(ingredientNotice);
-            if (resultNotice != null)
-                ((RecipeScreen) screen).addResultStackToNotice(resultNotice);
+            if (builder.getInputNotice() != null)
+                ((RecipeScreen) screen).addIngredientStackToNotice(builder.getInputNotice());
+            if (builder.getOutputNotice() != null)
+                ((RecipeScreen) screen).addResultStackToNotice(builder.getOutputNotice());
         }
         if (MinecraftClient.getInstance().currentScreen instanceof RecipeScreen)
             ScreenHelper.storeRecipeScreen((RecipeScreen) MinecraftClient.getInstance().currentScreen);
         MinecraftClient.getInstance().openScreen(screen);
+        return true;
     }
     
     @Override
     public void onInitializeClient() {
         ClientHelperImpl.instance = this;
-        registerFabricKeyBinds();
         modNameCache.put("minecraft", "Minecraft");
         modNameCache.put("c", "Global");
         modNameCache.put("global", "Global");
     }
     
-    @Override
-    public void registerFabricKeyBinds() {
-        boolean keybindingsLoaded = FabricLoader.getInstance().isModLoaded("fabric-keybindings-v0");
-        if (!keybindingsLoaded) {
-            RoughlyEnoughItemsState.error("Fabric API is not installed!", "https://www.curseforge.com/minecraft/mc-mods/fabric-api/files/all");
-            return;
+    public static final class ViewSearchBuilder implements ClientHelper.ViewSearchBuilder {
+        @NotNull private final Set<Identifier> categories = new HashSet<>();
+        @NotNull private final List<EntryStack> recipesFor = new ArrayList<>();
+        @NotNull private final List<EntryStack> usagesFor = new ArrayList<>();
+        @Nullable private Identifier preferredOpenedCategory = null;
+        @Nullable private EntryStack inputNotice;
+        @Nullable private EntryStack outputNotice;
+        @NotNull private final Lazy<Map<RecipeCategory<?>, List<RecipeDisplay>>> map = new Lazy<>(() -> RecipeHelper.getInstance().buildMapFor(this));
+        
+        @Override
+        public ClientHelper.ViewSearchBuilder addCategory(Identifier category) {
+            this.categories.add(category);
+            return this;
         }
-        Executor.run(() -> () -> {
-            String category = "key.rei.category";
-            if (!FabricLoader.getInstance().isModLoaded("amecs")) {
-                try {
-                    ConfigObjectImpl.General general = ConfigObject.getInstance().getGeneral();
-                    ConfigObjectImpl.General instance = general.getClass().getConstructor().newInstance();
-                    for (Field declaredField : general.getClass().getDeclaredFields()) {
-                        if (declaredField.getType() == ModifierKeyCode.class && !declaredField.isAnnotationPresent(ConfigEntry.Gui.Excluded.class)) {
-                            declaredField.setAccessible(true);
-                            FakeModifierKeyCodeAdder.INSTANCE.registerModifierKeyCode(category, "config.roughlyenoughitems." + declaredField.getName(), () -> {
-                                try {
-                                    ModifierKeyCode code = (ModifierKeyCode) declaredField.get(general);
-                                    return code == null ? ModifierKeyCode.unknown() : code;
-                                } catch (Exception e) {
-                                    throw new RuntimeException(e);
-                                }
-                            }, () -> {
-                                try {
-                                    return (ModifierKeyCode) declaredField.get(instance);
-                                } catch (IllegalAccessException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            }, keyCode -> {
-                                try {
-                                    declaredField.set(general, keyCode);
-                                } catch (IllegalAccessException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            });
-                        }
-                    }
-                    KeyBindingRegistryImpl.INSTANCE.addCategory(category);
-                } catch (Throwable throwable) {
-                    throwable.printStackTrace();
-                }
-            }
-        });
+        
+        @Override
+        public ClientHelper.ViewSearchBuilder addCategories(Collection<Identifier> categories) {
+            this.categories.addAll(categories);
+            return this;
+        }
+        
+        @Override
+        @NotNull
+        public Set<Identifier> getCategories() {
+            return categories;
+        }
+        
+        @Override
+        public ClientHelper.ViewSearchBuilder addRecipesFor(EntryStack stack) {
+            this.recipesFor.add(stack);
+            return this;
+        }
+        
+        @Override
+        @NotNull
+        public List<EntryStack> getRecipesFor() {
+            return recipesFor;
+        }
+        
+        @Override
+        public ClientHelper.ViewSearchBuilder addUsagesFor(EntryStack stack) {
+            this.usagesFor.add(stack);
+            return this;
+        }
+        
+        @Override
+        @NotNull
+        public List<EntryStack> getUsagesFor() {
+            return usagesFor;
+        }
+        
+        @Override
+        public ClientHelper.ViewSearchBuilder setPreferredOpenedCategory(@Nullable Identifier category) {
+            this.preferredOpenedCategory = category;
+            return this;
+        }
+        
+        @Nullable
+        @Override
+        public Identifier getPreferredOpenedCategory() {
+            return this.preferredOpenedCategory;
+        }
+        
+        @Override
+        public ClientHelper.ViewSearchBuilder setInputNotice(@Nullable EntryStack stack) {
+            this.inputNotice = stack;
+            return this;
+        }
+        
+        @Nullable
+        @Override
+        public EntryStack getInputNotice() {
+            return inputNotice;
+        }
+        
+        @Override
+        public ClientHelper.ViewSearchBuilder setOutputNotice(@Nullable EntryStack stack) {
+            this.outputNotice = stack;
+            return this;
+        }
+        
+        @Nullable
+        @Override
+        public EntryStack getOutputNotice() {
+            return outputNotice;
+        }
+        
+        @NotNull
+        @Override
+        public Map<RecipeCategory<?>, List<RecipeDisplay>> buildMap() {
+            return this.map.get();
+        }
     }
     
+    public static final class LegacyWrapperViewSearchBuilder implements ClientHelper.ViewSearchBuilder {
+        @NotNull private final Map<RecipeCategory<?>, List<RecipeDisplay>> map;
+        @Nullable private Identifier preferredOpenedCategory = null;
+        @Nullable private EntryStack inputNotice;
+        @Nullable private EntryStack outputNotice;
+        
+        public LegacyWrapperViewSearchBuilder(@NotNull Map<RecipeCategory<?>, List<RecipeDisplay>> map) {
+            this.map = map;
+        }
+        
+        @Override
+        public ClientHelper.ViewSearchBuilder addCategory(Identifier category) {
+            return this;
+        }
+        
+        @Override
+        public ClientHelper.ViewSearchBuilder addCategories(Collection<Identifier> categories) {
+            return this;
+        }
+        
+        @Override
+        public @NotNull Set<Identifier> getCategories() {
+            return Collections.emptySet();
+        }
+        
+        @Override
+        public ClientHelper.ViewSearchBuilder addRecipesFor(EntryStack stack) {
+            return this;
+        }
+        
+        @Override
+        public @NotNull List<EntryStack> getRecipesFor() {
+            return Collections.emptyList();
+        }
+        
+        @Override
+        public ClientHelper.ViewSearchBuilder addUsagesFor(EntryStack stack) {
+            return this;
+        }
+        
+        @Override
+        public @NotNull List<EntryStack> getUsagesFor() {
+            return Collections.emptyList();
+        }
+        
+        @Override
+        public ClientHelper.ViewSearchBuilder setPreferredOpenedCategory(@Nullable Identifier category) {
+            this.preferredOpenedCategory = category;
+            return this;
+        }
+        
+        @Nullable
+        @Override
+        public Identifier getPreferredOpenedCategory() {
+            return this.preferredOpenedCategory;
+        }
+        
+        @Override
+        public ClientHelper.ViewSearchBuilder setInputNotice(@Nullable EntryStack stack) {
+            this.inputNotice = stack;
+            return this;
+        }
+        
+        @Nullable
+        @Override
+        public EntryStack getInputNotice() {
+            return inputNotice;
+        }
+        
+        @Override
+        public ClientHelper.ViewSearchBuilder setOutputNotice(@Nullable EntryStack stack) {
+            this.outputNotice = stack;
+            return this;
+        }
+        
+        @Nullable
+        @Override
+        public EntryStack getOutputNotice() {
+            return outputNotice;
+        }
+        
+        @Override
+        public @NotNull Map<RecipeCategory<?>, List<RecipeDisplay>> buildMap() {
+            return this.map;
+        }
+    }
 }
