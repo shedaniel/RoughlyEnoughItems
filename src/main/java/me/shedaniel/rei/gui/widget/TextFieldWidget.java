@@ -469,7 +469,7 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
             
             // Render selection overlay
             if (int_5 != int_4) {
-                int int_10 = x + this.font.getWidth(string_1.substring(0, int_5));
+                int int_10 = x + this.font.getStringWidth(string_1.substring(0, int_5));
                 this.renderSelection(matrices, int_9, y - 1, int_10 - 1, y + 9, color);
             }
         }
@@ -626,7 +626,7 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
     }
     
     public int method_1889(int int_1) {
-        return int_1 > this.text.length() ? this.bounds.x : this.bounds.x + this.font.getWidth(this.text.substring(0, int_1));
+        return int_1 > this.text.length() ? this.bounds.x : this.bounds.x + this.font.getStringWidth(this.text.substring(0, int_1));
     }
     
 }

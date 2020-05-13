@@ -200,6 +200,7 @@ public class DefaultPlugin implements REIPluginV0 {
         recipeHelper.registerCategory(new DefaultCompostingCategory());
         recipeHelper.registerCategory(new DefaultStrippingCategory());
         recipeHelper.registerCategory(new DefaultBeaconBaseCategory());
+        recipeHelper.registerCategory(new DefaultInformationCategory());
     }
     
     @Override
@@ -260,14 +261,13 @@ public class DefaultPlugin implements REIPluginV0 {
     
     @Override
     public void postRegister() {
-        RecipeHelper.getInstance().registerCategory(new DefaultInformationCategory());
         for (DefaultInformationDisplay display : INFO_DISPLAYS)
             RecipeHelper.getInstance().registerDisplay(display);
         // Sit tight! This will be a fast journey!
         long time = System.currentTimeMillis();
         for (EntryStack stack : EntryRegistry.getInstance().getStacksList())
             applyPotionTransformer(stack);
-        for (List<RecipeDisplay> displays : RecipeHelper.getInstance().getAllRecipes().values()) {
+        for (List<RecipeDisplay> displays : RecipeHelper.getInstance().getAllRecipesNoHandlers().values()) {
             for (RecipeDisplay display : displays) {
                 for (List<EntryStack> entries : display.getInputEntries())
                     for (EntryStack stack : entries)

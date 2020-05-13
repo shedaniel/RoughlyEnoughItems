@@ -77,7 +77,7 @@ public class SubSubsetsMenuEntry extends MenuEntry {
     
     private int getTextWidth() {
         if (textWidth == -69) {
-            this.textWidth = Math.max(0, font.getWidth(text));
+            this.textWidth = Math.max(0, font.getStringWidth(text));
         }
         return this.textWidth;
     }

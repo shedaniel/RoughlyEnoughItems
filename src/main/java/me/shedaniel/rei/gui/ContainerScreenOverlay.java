@@ -560,7 +560,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
     public void renderTooltip(MatrixStack matrices, List<Text> lines, int mouseX, int mouseY) {
         if (lines.isEmpty())
             return;
-        tooltipWidth = lines.stream().map(font::getStringWidth).max(Integer::compareTo).get();
+        tooltipWidth = lines.stream().map(font::getWidth).max(Integer::compareTo).get();
         tooltipHeight = lines.size() <= 1 ? 8 : lines.size() * 10;
         tooltipLines = lines;
         ScreenHelper.drawHoveringWidget(matrices, mouseX, mouseY, renderTooltipCallback, tooltipWidth, tooltipHeight, 0);

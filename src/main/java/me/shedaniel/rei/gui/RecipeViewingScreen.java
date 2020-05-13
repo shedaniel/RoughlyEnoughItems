@@ -166,45 +166,45 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
     }
     
     @Override
-    public boolean keyPressed(int int_1, int int_2, int int_3) {
-        if (int_1 == 256 && choosePageActivated) {
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == 256 && choosePageActivated) {
             choosePageActivated = false;
             init();
             return true;
         }
-        if (int_1 == 258) {
+        if (keyCode == 258 && !client.options.keyInventory.matchesKey(keyCode, scanCode)) {
             boolean boolean_1 = !hasShiftDown();
             if (!this.changeFocus(boolean_1))
                 this.changeFocus(boolean_1);
             return true;
         }
         if (choosePageActivated)
-            return recipeChoosePageWidget.keyPressed(int_1, int_2, int_3);
-        else if (ConfigObject.getInstance().getNextPageKeybind().matchesKey(int_1, int_2)) {
+            return recipeChoosePageWidget.keyPressed(keyCode, scanCode, modifiers);
+        else if (ConfigObject.getInstance().getNextPageKeybind().matchesKey(keyCode, scanCode)) {
             if (recipeNext.isEnabled())
                 recipeNext.onClick();
             return recipeNext.isEnabled();
-        } else if (ConfigObject.getInstance().getPreviousPageKeybind().matchesKey(int_1, int_2)) {
+        } else if (ConfigObject.getInstance().getPreviousPageKeybind().matchesKey(keyCode, scanCode)) {
             if (recipeBack.isEnabled())
                 recipeBack.onClick();
             return recipeBack.isEnabled();
         }
         for (Element element : children())
-            if (element.keyPressed(int_1, int_2, int_3))
+            if (element.keyPressed(keyCode, scanCode, modifiers))
                 return true;
-        if (int_1 == 256 || this.client.options.keyInventory.matchesKey(int_1, int_2)) {
+        if (keyCode == 256 || this.client.options.keyInventory.matchesKey(keyCode, scanCode)) {
             MinecraftClient.getInstance().openScreen(REIHelper.getInstance().getPreviousContainerScreen());
             ScreenHelper.getLastOverlay().init();
             return true;
         }
-        if (int_1 == 259) {
+        if (keyCode == 259) {
             if (ScreenHelper.hasLastRecipeScreen())
                 client.openScreen(ScreenHelper.getLastRecipeScreen());
             else
                 client.openScreen(REIHelper.getInstance().getPreviousContainerScreen());
             return true;
         }
-        return super.keyPressed(int_1, int_2, int_3);
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
     
     @Override
@@ -441,7 +441,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
                         matrices.push();
                         matrices.translate(0.0D, 0.0D, 480);
                         Matrix4f matrix4f = matrices.peek().getModel();
-                        textRenderer.draw(text, bounds.getCenterX() - textRenderer.getStringWidth(text) / 2f, bounds.getCenterY() - 4.5f, 0xff000000, false, matrix4f, immediate, false, 0, 15728880);
+                        textRenderer.draw(text, bounds.getCenterX() - textRenderer.getWidth(text) / 2f, bounds.getCenterY() - 4.5f, 0xff000000, false, matrix4f, immediate, false, 0, 15728880);
                         immediate.draw();
                         matrices.pop();
                     } else {

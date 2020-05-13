@@ -369,14 +369,14 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
     }
     
     @Override
-    public boolean keyPressed(int int_1, int int_2, int int_3) {
-        if (int_1 == 258) {
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == 258 && !client.options.keyInventory.matchesKey(keyCode, scanCode)) {
             boolean boolean_1 = !hasShiftDown();
             if (!this.changeFocus(boolean_1))
                 this.changeFocus(boolean_1);
             return true;
         }
-        if (ConfigObject.getInstance().getNextPageKeybind().matchesKey(int_1, int_2)) {
+        if (ConfigObject.getInstance().getNextPageKeybind().matchesKey(keyCode, scanCode)) {
             if (categoryMap.get(categories.get(selectedCategoryIndex)).size() > 1) {
                 selectedRecipeIndex++;
                 if (selectedRecipeIndex >= categoryMap.get(categories.get(selectedCategoryIndex)).size())
@@ -385,7 +385,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
                 return true;
             }
             return false;
-        } else if (ConfigObject.getInstance().getPreviousPageKeybind().matchesKey(int_1, int_2)) {
+        } else if (ConfigObject.getInstance().getPreviousPageKeybind().matchesKey(keyCode, scanCode)) {
             if (categoryMap.get(categories.get(selectedCategoryIndex)).size() > 1) {
                 selectedRecipeIndex--;
                 if (selectedRecipeIndex < 0)
@@ -396,21 +396,21 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
             return false;
         }
         for (Element element : children())
-            if (element.keyPressed(int_1, int_2, int_3))
+            if (element.keyPressed(keyCode, scanCode, modifiers))
                 return true;
-        if (int_1 == 256 || this.client.options.keyInventory.matchesKey(int_1, int_2)) {
+        if (keyCode == 256 || this.client.options.keyInventory.matchesKey(keyCode, scanCode)) {
             MinecraftClient.getInstance().openScreen(REIHelper.getInstance().getPreviousContainerScreen());
             ScreenHelper.getLastOverlay().init();
             return true;
         }
-        if (int_1 == 259) {
+        if (keyCode == 259) {
             if (ScreenHelper.hasLastRecipeScreen())
                 client.openScreen(ScreenHelper.getLastRecipeScreen());
             else
                 client.openScreen(REIHelper.getInstance().getPreviousContainerScreen());
             return true;
         }
-        return super.keyPressed(int_1, int_2, int_3);
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
     
 }
