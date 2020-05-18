@@ -53,7 +53,7 @@ public class REITestPlugin implements REIPluginV0 {
     
     @Override
     public void registerEntries(EntryRegistry entryRegistry) {
-        int times = 100;
+        int times = 10;
         for (Item item : Registry.ITEM) {
             for (int i = 0; i < times; i++)
                 entryRegistry.queueRegisterEntryAfter(EntryStack.create(item), Collections.singleton(transformStack(EntryStack.create(item))));
