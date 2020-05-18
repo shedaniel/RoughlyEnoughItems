@@ -84,7 +84,9 @@ public class ConfigManagerImpl implements ConfigManager {
         AutoConfig.register(ConfigObjectImpl.class, (definition, configClass) -> new JanksonConfigSerializer<>(definition, configClass, Jankson.builder().registerPrimitiveTypeAdapter(InputUtil.KeyCode.class, it -> {
             return it instanceof String ? InputUtil.fromName((String) it) : null;
         }).registerSerializer(InputUtil.KeyCode.class, (it, marshaller) -> new JsonPrimitive(it.getName())).registerTypeAdapter(ModifierKeyCode.class, o -> {
-            InputUtil.KeyCode keyCode = InputUtil.fromName(((JsonPrimitive) o.get("keyCode")).asString());
+            String code = ((JsonPrimitive) o.get("keyCode")).asString();
+            if (code.endsWith(".unknown")) return ModifierKeyCode.unknown();
+            InputUtil.KeyCode keyCode = InputUtil.fromName(code);
             Modifier modifier = Modifier.of(((Number) ((JsonPrimitive) o.get("modifier")).getValue()).shortValue());
             return ModifierKeyCode.of(keyCode, modifier);
         }).registerSerializer(ModifierKeyCode.class, (keyCode, marshaller) -> {
