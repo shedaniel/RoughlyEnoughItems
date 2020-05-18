@@ -23,10 +23,12 @@
 
 package me.shedaniel.rei.impl.widgets;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.rei.api.DrawableConsumer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
@@ -67,13 +69,14 @@ public final class TexturedDrawableConsumer implements DrawableConsumer {
     }
     
     protected static void innerBlit(Matrix4f matrix, int xStart, int xEnd, int yStart, int yEnd, int z, float uStart, float uEnd, float vStart, float vEnd) {
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder bufferBuilder = tessellator.getBuffer();
+        BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
         bufferBuilder.begin(GL11.GL_QUADS, VertexFormats.POSITION_TEXTURE);
         bufferBuilder.vertex(matrix, xStart, yEnd, z).texture(uStart, vEnd).next();
         bufferBuilder.vertex(matrix, xEnd, yEnd, z).texture(uEnd, vEnd).next();
         bufferBuilder.vertex(matrix, xEnd, yStart, z).texture(uEnd, vStart).next();
         bufferBuilder.vertex(matrix, xStart, yStart, z).texture(uStart, vStart).next();
-        tessellator.draw();
+        bufferBuilder.end();
+        RenderSystem.enableAlphaTest();
+        BufferRenderer.draw(bufferBuilder);
     }
 }
