@@ -93,6 +93,10 @@ dependencies {
     }
 }
 
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
 task jarFilter(type: net.corda.gradle.jarfilter.JarFilterTask) {
     jars remapJar
     annotations {
