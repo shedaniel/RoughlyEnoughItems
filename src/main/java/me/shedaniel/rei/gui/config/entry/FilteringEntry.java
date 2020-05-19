@@ -28,6 +28,7 @@ import com.google.common.collect.Sets;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
+import me.shedaniel.clothconfig2.api.ScrollingContainer;
 import me.shedaniel.clothconfig2.gui.ClothConfigScreen;
 import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
 import me.shedaniel.math.Point;
@@ -40,7 +41,6 @@ import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.OverlaySearchField;
 import me.shedaniel.rei.gui.widget.EntryWidget;
-import me.shedaniel.clothconfig2.api.ScrollingContainer;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.SearchArgument;
 import me.shedaniel.rei.utils.CollectionUtils;
@@ -102,6 +102,8 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
     private ButtonWidget hideButton;
     private ButtonWidget showButton;
     
+    private boolean edited = false;
+    
     private List<SearchArgument.SearchArguments> lastSearchArguments = Collections.emptyList();
     
     public FilteringEntry(List<EntryStack> configFiltered, List<EntryStack> defaultValue, Consumer<List<EntryStack>> saveConsumer) {
@@ -133,7 +135,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
                     entry.getBounds().y = (int) (entry.backupY - scrolling.scrollAmount);
                     if (entry.isSelected() && !entry.isFiltered()) {
                         configFiltered.add(stack);
-                        getScreen().setEdited(true, false);
+                        edited = true;
                     }
                 }
             });
@@ -146,7 +148,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
                     EntryListEntry entry = entries.get(i);
                     entry.getBounds().y = (int) (entry.backupY - scrolling.scrollAmount);
                     if (entry.isSelected() && configFiltered.remove(stack)) {
-                        getScreen().setEdited(true, false);
+                        edited = true;
                     }
                 }
             });
@@ -178,6 +180,12 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
     @Override
     public void save() {
         saveConsumer.accept(getValue());
+        this.edited = false;
+    }
+    
+    @Override
+    public boolean isEdited() {
+        return super.isEdited() || edited;
     }
     
     @SuppressWarnings("rawtypes")

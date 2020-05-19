@@ -43,6 +43,7 @@ import java.util.function.Consumer;
 
 public class RecipeScreenTypeEntry extends TooltipListEntry<RecipeScreenType> {
     private int width;
+    private final RecipeScreenType original;
     private RecipeScreenType type;
     private RecipeScreenType defaultValue;
     private Consumer<RecipeScreenType> save;
@@ -52,7 +53,6 @@ public class RecipeScreenTypeEntry extends TooltipListEntry<RecipeScreenType> {
             MinecraftClient.getInstance().openScreen(new PreRecipeViewingScreen(getScreen(), type, false, original -> {
                 MinecraftClient.getInstance().openScreen(getScreen());
                 type = original ? RecipeScreenType.ORIGINAL : RecipeScreenType.VILLAGER;
-                getScreen().setEdited(true, isRequiresRestart());
             }));
         }
         
@@ -67,10 +67,16 @@ public class RecipeScreenTypeEntry extends TooltipListEntry<RecipeScreenType> {
     @SuppressWarnings("deprecation")
     public RecipeScreenTypeEntry(int width, Text fieldName, RecipeScreenType type, RecipeScreenType defaultValue, Consumer<RecipeScreenType> save) {
         super(fieldName, null);
+        this.original = type;
         this.width = width;
         this.type = type;
         this.defaultValue = defaultValue;
         this.save = save;
+    }
+    
+    @Override
+    public boolean isEdited() {
+        return super.isEdited() || getValue() != original;
     }
     
     @Override
