@@ -150,7 +150,7 @@
   "config.roughlyenoughitems.mirrorItemPanel.boolean.false": "右侧",
   "config.roughlyenoughitems.debugRenderTimeRequired": "条目列表调试模式：",
   "config.roughlyenoughitems.debugSearchTimeRequired": "搜索调试模式：",
-  "config.roughlyenoughitems.resizeDynamically": "Resize Dynamically:",
+  "config.roughlyenoughitems.resizeDynamically": "调整大小",
   "config.roughlyenoughitems.searchFieldLocation": "搜索框的位置:",
   "config.roughlyenoughitems.searchFieldLocation.bottom_side": "左/右下角",
   "config.roughlyenoughitems.searchFieldLocation.top_side": "左/右上角",
