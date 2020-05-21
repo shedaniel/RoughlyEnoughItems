@@ -1,5 +1,5 @@
 plugins {
-    id("fabric-loom") version "0.4.5"
+    id("fabric-loom") version "0.4-SNAPSHOT"
     id("maven-publish")
     id("java")
     id("java-library")
@@ -48,9 +48,8 @@ dependencies {
     mappings("me.shedaniel:legacy-yarn:${project.yarn_version}:v2")
     modApi("net.fabricmc:fabric-loader:${project.fabricloader_version}")
     modApi("net.fabricmc.fabric-api:fabric-api:${project.fabric_api}") {
-        exclude(module: "fabric-dimensions-v1")
+        exclude(group: "net.fabricmc")
         exclude(module: "fabric-biomes-v1")
-        exclude(module: "fabric-events-interaction-v0")
     }
     modApi("me.shedaniel.cloth:cloth-events:${cloth_events_version}") {
         transitive = false

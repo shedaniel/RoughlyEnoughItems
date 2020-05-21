@@ -40,6 +40,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Util;
 
 import java.util.Comparator;
 import java.util.List;
@@ -118,9 +119,9 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
                             ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, NOT_ENOUGH_ITEMS_PACKET, buf);
                         }
                     } catch (IllegalStateException e) {
-                        player.sendMessage(new TranslatableText(e.getMessage()).formatted(Formatting.RED));
+                        player.sendMessage(new TranslatableText(e.getMessage()).formatted(Formatting.RED), Util.field_25140);
                     } catch (Exception e) {
-                        player.sendMessage(new TranslatableText("error.rei.internal.error", e.getMessage()).formatted(Formatting.RED));
+                        player.sendMessage(new TranslatableText("error.rei.internal.error", e.getMessage()).formatted(Formatting.RED), Util.field_25140);
                         e.printStackTrace();
                     }
                 } catch (Exception e) {
