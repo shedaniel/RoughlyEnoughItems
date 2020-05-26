@@ -166,8 +166,6 @@ public class FluidEntryStack extends AbstractEntryStack {
     
     @Override
     public boolean equalsAll(EntryStack stack) {
-        if (stack.getType() == Type.ITEM)
-            return equalsAll(EntryStack.copyItemToFluid(stack));
         if (stack.getType() != Type.FLUID)
             return false;
         return fluid == stack.getFluid() && (amount == IGNORE_AMOUNT || stack.getAmount() == IGNORE_AMOUNT || amount == stack.getAmount());
