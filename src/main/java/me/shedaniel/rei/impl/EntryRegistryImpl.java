@@ -39,13 +39,13 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 @ApiStatus.Internal
 public class EntryRegistryImpl implements EntryRegistry {
     
-    private final CopyOnWriteArrayList<EntryStack> preFilteredList = Lists.newCopyOnWriteArrayList();
-    private final CopyOnWriteArrayList<EntryStack> entries = Lists.newCopyOnWriteArrayList();
+    private final List<EntryStack> preFilteredList = Lists.newCopyOnWriteArrayList();
+    private final List<EntryStack> entries = Lists.newCopyOnWriteArrayList();
     private final Queue<Pair<EntryStack, Collection<? extends EntryStack>>> queueRegisterEntryStackAfter = Queues.newConcurrentLinkedQueue();
     private List<EntryStack> reloadList;
     private boolean doingDistinct = false;
@@ -61,30 +61,53 @@ public class EntryRegistryImpl implements EntryRegistry {
     public void distinct() {
         preFilteredList.clear();
         doingDistinct = true;
-        Set<EntryStack> set = Sets.newLinkedHashSet();
-        set.addAll(reloadList);
-        entries.clear();
-        entries.addAll(set);
-        entries.removeIf(EntryStack::isEmpty);
-        reloadList.clear();
         while (true) {
             Pair<EntryStack, Collection<? extends EntryStack>> pair = queueRegisterEntryStackAfter.poll();
             if (pair == null)
                 break;
             registerEntriesAfter(pair.getLeft(), pair.getRight());
         }
-        set.clear();
-        set.addAll(entries);
-        set.removeIf(EntryStack::isEmpty);
-        entries.clear();
-        entries.addAll(set);
-        set.clear();
         doingDistinct = false;
+        Set<EntryStackWrapper> set = Sets.newLinkedHashSet();
+        set.addAll(reloadList.stream().map(EntryStackWrapper::new).collect(Collectors.toList()));
+        set.removeIf(EntryStackWrapper::isEmpty);
+        entries.clear();
+        entries.addAll(set.stream().map(EntryStackWrapper::unwrap).collect(Collectors.toList()));
+    }
+    
+    private static class EntryStackWrapper {
+        private final EntryStack stack;
+        
+        public EntryStackWrapper(EntryStack stack) {
+            this.stack = Objects.requireNonNull(stack);
+        }
+        
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            
+            EntryStackWrapper that = (EntryStackWrapper) o;
+            return stack.equalsAll(that.stack);
+        }
+        
+        @Override
+        public int hashCode() {
+            return stack.hashCode();
+        }
+        
+        public boolean isEmpty() {
+            return stack.isEmpty();
+        }
+        
+        public EntryStack unwrap() {
+            return stack;
+        }
     }
     
     @Override
     public List<EntryStack> getStacksList() {
-        return RecipeHelper.getInstance().arePluginsLoading() && !doingDistinct ? reloadList : entries;
+        return RecipeHelper.getInstance().arePluginsLoading() || doingDistinct ? reloadList : entries;
     }
     
     @Override

@@ -314,7 +314,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     private void startSection(Object[] sectionData, String section) {
         sectionData[0] = Util.getMeasuringTimeNano();
         sectionData[2] = section;
-        RoughlyEnoughItemsCore.LOGGER.debug("Reloading REI: \"%s\"", section);
+        RoughlyEnoughItemsCore.LOGGER.debug("Reloading Section: \"%s\"", section);
     }
     
     private void endSection(Object[] sectionData) {
@@ -322,9 +322,9 @@ public class RecipeHelperImpl implements RecipeHelper {
         long time = (long) sectionData[1] - (long) sectionData[0];
         String section = (String) sectionData[2];
         if (time >= 1000000) {
-            RoughlyEnoughItemsCore.LOGGER.debug("Reloading REI: \"%s\" done in %.2fms", section, time / 1000000.0F);
+            RoughlyEnoughItemsCore.LOGGER.debug("Reloading Section: \"%s\" done in %.2fms", section, time / 1000000.0F);
         } else {
-            RoughlyEnoughItemsCore.LOGGER.debug("Reloading REI: \"%s\" done in %.2fμs", section, time / 1000.0F);
+            RoughlyEnoughItemsCore.LOGGER.debug("Reloading Section: \"%s\" done in %.2fμs", section, time / 1000.0F);
         }
     }
     
@@ -438,16 +438,24 @@ public class RecipeHelperImpl implements RecipeHelper {
             }
         });
         endSection(sectionData);
-        startSection(sectionData, "finalizing");
         
         // Clear Cache
         ((DisplayHelperImpl) DisplayHelper.getInstance()).resetCache();
         ScreenHelper.getOptionalOverlay().ifPresent(overlay -> overlay.shouldReInit = true);
         
+        startSection(sectionData, "entry-registry-distinct");
+        
         // Remove duplicate entries
         ((EntryRegistryImpl) EntryRegistry.getInstance()).distinct();
+        
+        endSection(sectionData);
+        startSection(sectionData, "entry-registry-refilter");
+        
         arePluginsLoading = false;
         ((EntryRegistryImpl) EntryRegistry.getInstance()).refilter();
+        
+        endSection(sectionData);
+        startSection(sectionData, "finalizing");
         
         // Clear Cache Again!
         ((DisplayHelperImpl) DisplayHelper.getInstance()).resetCache();

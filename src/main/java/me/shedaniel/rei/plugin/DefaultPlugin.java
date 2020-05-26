@@ -158,7 +158,7 @@ public class DefaultPlugin implements REIPluginV0 {
                 enchantments.add(EntryStack.create(itemStack).setting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE));
             }
         }
-        entryRegistry.queueRegisterEntryAfter(stack, enchantments);
+        entryRegistry.registerEntriesAfter(stack, enchantments);
         for (Fluid fluid : Registry.FLUID) {
             if (!fluid.getDefaultState().isEmpty() && fluid.getDefaultState().isStill())
                 entryRegistry.registerEntry(EntryStack.create(fluid));

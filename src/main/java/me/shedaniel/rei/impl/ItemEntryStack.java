@@ -145,8 +145,6 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     
     @Override
     public boolean equalsAll(EntryStack stack) {
-        Boolean ifFluid = compareIfFluid(stack, 3);
-        if (ifFluid != null) return ifFluid;
         if (stack.getType() != Type.ITEM)
             return false;
         return itemStack.getItem() == stack.getItem() && getAmount() != stack.getAmount() && ItemStack.areTagsEqual(itemStack, stack.getItemStack());
