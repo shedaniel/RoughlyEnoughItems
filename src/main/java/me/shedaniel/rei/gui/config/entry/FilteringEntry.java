@@ -29,7 +29,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.ScrollingContainer;
-import me.shedaniel.clothconfig2.gui.ClothConfigScreen;
+import me.shedaniel.clothconfig2.gui.widget.DynamicEntryListWidget;
 import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -87,7 +87,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
     private List<EntryStack> defaultValue;
     private List<EntryStack> configFiltered;
     private Tooltip tooltip = null;
-    @SuppressWarnings("rawtypes") private ClothConfigScreen.ListWidget lastList = null;
+    @SuppressWarnings("rawtypes") private DynamicEntryListWidget lastList = null;
     private List<EntryStack> entryStacks = null;
     private Rectangle innerBounds;
     private List<EntryListEntry> entries = Collections.emptyList();
@@ -163,7 +163,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
     
     @SuppressWarnings("rawtypes")
     public Rectangle getBounds() {
-        ClothConfigScreen.ListWidget listWidget = getParent();
+        DynamicEntryListWidget listWidget = getParent();
         return new Rectangle(listWidget.left, listWidget.top, listWidget.right - listWidget.left, listWidget.bottom - listWidget.top);
     }
     
@@ -191,7 +191,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
     @SuppressWarnings("rawtypes")
     @Override
     public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-        ClothConfigScreen.ListWidget parent = getParent();
+        DynamicEntryListWidget parent = getParent();
         Rectangle bounds = getBounds();
         if (lastList != parent) {
             updateSearch(this.searchField.getText());

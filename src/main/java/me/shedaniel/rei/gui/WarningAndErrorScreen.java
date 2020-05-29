@@ -25,6 +25,7 @@ package me.shedaniel.rei.gui;
 
 import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
 import me.shedaniel.rei.RoughlyEnoughItemsState;
+import net.minecraft.class_5348;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
@@ -32,9 +33,11 @@ import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.NarratorManager;
+import net.minecraft.client.util.TextCollector;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Lazy;
@@ -44,6 +47,7 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Optional;
 
 @ApiStatus.Internal
 public class WarningAndErrorScreen extends Screen {
@@ -66,14 +70,14 @@ public class WarningAndErrorScreen extends Screen {
     }
     
     private void addText(Text string) {
-        for (Text s : textRenderer.wrapStringToWidthAsList(string, width - 80)) {
+        for (class_5348 s : textRenderer.wrapStringToWidthAsList(string, width - 80)) {
             listWidget.creditsAddEntry(new TextItem(s));
         }
     }
     
     private void addLink(Text string, String link) {
-        for (Text s : textRenderer.wrapStringToWidthAsList(string, width - 80)) {
-            listWidget.creditsAddEntry(new LinkItem(s.getString(), link));
+        for (class_5348 s : textRenderer.wrapStringToWidthAsList(string, width - 80)) {
+            listWidget.creditsAddEntry(new LinkItem(s, link));
         }
     }
     
@@ -210,9 +214,9 @@ public class WarningAndErrorScreen extends Screen {
     }
     
     private static class TextItem extends StringItem {
-        private Text text;
+        private class_5348 text;
         
-        public TextItem(Text text) {
+        public TextItem(class_5348 text) {
             this.text = text;
         }
         
@@ -238,11 +242,11 @@ public class WarningAndErrorScreen extends Screen {
     }
     
     private class LinkItem extends StringItem {
-        private String text;
+        private class_5348 text;
         private String link;
         private boolean contains;
         
-        public LinkItem(String text, String link) {
+        public LinkItem(class_5348 text, String link) {
             this.text = text;
             this.link = link;
         }
@@ -252,7 +256,16 @@ public class WarningAndErrorScreen extends Screen {
             contains = mouseX >= x && mouseX <= x + entryWidth && mouseY >= y && mouseY <= y + entryHeight;
             if (contains) {
                 WarningAndErrorScreen.this.renderTooltip(matrices, new LiteralText("Click to open link."), mouseX, mouseY);
-                MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, "§n" + text, x + 5, y, 0xff1fc3ff);
+                class_5348 underlined = text.visit(new class_5348.StyledVisitor<class_5348>() {
+                    TextCollector collector = new TextCollector();
+                    
+                    @Override
+                    public Optional<class_5348> accept(Style style, String asString) {
+                        collector.add(class_5348.method_29431(asString, style));
+                        return Optional.of(collector.getCombined());
+                    }
+                }, Style.EMPTY.withFormatting(Formatting.UNDERLINE)).orElse(text);
+                MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, underlined, x + 5, y, 0xff1fc3ff);
             } else {
                 MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, text, x + 5, y, 0xff1fc3ff);
             }
@@ -270,7 +283,7 @@ public class WarningAndErrorScreen extends Screen {
         
         @Override
         public int getWidth() {
-            return MinecraftClient.getInstance().textRenderer.getStringWidth(text) + 10;
+            return MinecraftClient.getInstance().textRenderer.getWidth(text) + 10;
         }
         
         @Override
