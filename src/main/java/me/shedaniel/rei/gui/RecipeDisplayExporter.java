@@ -74,7 +74,7 @@ public final class RecipeDisplayExporter extends Widget {
         RenderSystem.pushMatrix();
         MinecraftClient client = MinecraftClient.getInstance();
         Window window = client.getWindow();
-        Framebuffer framebuffer = new Framebuffer(window.getFramebufferWidth(), window.getFramebufferHeight(), false, false);
+        Framebuffer framebuffer = new Framebuffer(window.getFramebufferWidth(), window.getFramebufferHeight(), true, false);
         framebuffer.beginWrite(true);
         RenderSystem.viewport(0, 0, window.getFramebufferWidth(), window.getFramebufferHeight());
         RenderSystem.clear(256, MinecraftClient.IS_SYSTEM_MAC);
