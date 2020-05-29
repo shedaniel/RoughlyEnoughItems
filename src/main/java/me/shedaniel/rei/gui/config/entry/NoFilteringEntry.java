@@ -25,6 +25,7 @@ package me.shedaniel.rei.gui.config.entry;
 
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.gui.ClothConfigScreen;
+import me.shedaniel.clothconfig2.gui.widget.DynamicEntryListWidget;
 import me.shedaniel.rei.api.EntryStack;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
@@ -69,7 +70,7 @@ public class NoFilteringEntry extends AbstractConfigListEntry<List<EntryStack>> 
     @SuppressWarnings("rawtypes")
     @Override
     public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-        ClothConfigScreen.ListWidget parent = getParent();
+        DynamicEntryListWidget parent = getParent();
         drawCenteredString(matrices, MinecraftClient.getInstance().textRenderer, I18n.translate("config.roughlyenoughitems.filteredEntries.loadWorldFirst"), (parent.right - parent.left) / 2 + parent.left, (parent.bottom - parent.top) / 2 + parent.top - 5, -1);
     }
     

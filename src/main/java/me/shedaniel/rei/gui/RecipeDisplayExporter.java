@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.gui;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.gui.toast.ExportRecipeIdentifierToast;
@@ -75,7 +76,7 @@ public final class RecipeDisplayExporter extends Widget {
         RenderSystem.pushMatrix();
         MinecraftClient client = MinecraftClient.getInstance();
         Window window = client.getWindow();
-        Framebuffer framebuffer = new Framebuffer(window.getFramebufferWidth(), window.getFramebufferHeight(), false, false);
+        Framebuffer framebuffer = new Framebuffer(window.getFramebufferWidth(), window.getFramebufferHeight(), true, false);
         framebuffer.beginWrite(true);
         RenderSystem.viewport(0, 0, window.getFramebufferWidth(), window.getFramebufferHeight());
         RenderSystem.clear(256, MinecraftClient.IS_SYSTEM_MAC);

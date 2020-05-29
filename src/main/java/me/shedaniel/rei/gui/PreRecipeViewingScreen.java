@@ -34,6 +34,7 @@ import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import me.shedaniel.rei.impl.ScreenHelper;
+import net.minecraft.class_5348;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
@@ -127,7 +128,7 @@ public class PreRecipeViewingScreen extends Screen {
         this.drawCenteredText(matrices, this.textRenderer, this.title, this.width / 2, 20, 16777215);
         if (showTips) {
             int i = 30;
-            for (Text s : this.textRenderer.wrapStringToWidthAsList(new TranslatableText("text.rei.recipe_screen_type.selection.sub").formatted(Formatting.GRAY), width - 30)) {
+            for (class_5348 s : this.textRenderer.wrapStringToWidthAsList(new TranslatableText("text.rei.recipe_screen_type.selection.sub").formatted(Formatting.GRAY), width - 30)) {
                 this.drawCenteredText(matrices, this.textRenderer, s, width / 2, i, -1);
                 i += 10;
             }

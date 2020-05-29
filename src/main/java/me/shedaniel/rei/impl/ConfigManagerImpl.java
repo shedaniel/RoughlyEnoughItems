@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -37,12 +36,10 @@ import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.JsonObje
 import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.JsonPrimitive;
 import me.sargunvohra.mcmods.autoconfig1u.util.Utils;
 import me.shedaniel.cloth.hooks.ScreenHooks;
-import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import me.shedaniel.clothconfig2.api.Modifier;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.clothconfig2.gui.entries.KeyCodeEntry;
-import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.gui.ConfigReloadingScreen;
@@ -53,13 +50,9 @@ import me.shedaniel.rei.gui.config.entry.NoFilteringEntry;
 import me.shedaniel.rei.gui.config.entry.RecipeScreenTypeEntry;
 import me.shedaniel.rei.gui.credits.CreditsScreen;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.AbstractButtonWidget;
-import net.minecraft.client.gui.widget.AbstractPressableButtonWidget;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.client.util.Window;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
@@ -69,7 +62,6 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static me.sargunvohra.mcmods.autoconfig1u.util.Utils.getUnsafely;
 import static me.sargunvohra.mcmods.autoconfig1u.util.Utils.setUnsafely;
@@ -164,41 +156,6 @@ public class ConfigManagerImpl implements ConfigManager {
             provider.setOptionFunction((baseI13n, field) -> field.isAnnotationPresent(ConfigObjectImpl.DontApplyFieldName.class) ? baseI13n : String.format("%s.%s", baseI13n, field.getName()));
             provider.setCategoryFunction((baseI13n, categoryName) -> String.format("%s.%s", baseI13n, categoryName));
             provider.setBuildFunction(builder -> {
-                builder.getOrCreateCategory(new TranslatableText("config.roughlyenoughitems.!general")).addEntry(new TooltipListEntry<Object>(new TranslatableText("config.roughlyenoughitems.smooth_scrolling"), null) {
-                    int width = 220;
-                    private AbstractButtonWidget buttonWidget = new AbstractPressableButtonWidget(0, 0, 0, 20, this.getFieldName()) {
-                        public void onPress() {
-                            Screen screen = ClothConfigInitializer.getConfigBuilder().setTitle(new LiteralText("Smooth Scrolling Settings")).build();
-                            MinecraftClient.getInstance().openScreen(screen);
-                        }
-                    };
-                    private List<Element> children = ImmutableList.of(this.buttonWidget);
-                    
-                    public Object getValue() {
-                        return null;
-                    }
-                    
-                    public Optional<Object> getDefaultValue() {
-                        return Optional.empty();
-                    }
-                    
-                    public void save() {
-                    }
-                    
-                    public List<? extends Element> children() {
-                        return this.children;
-                    }
-                    
-                    public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-                        super.render(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
-                        Window window = MinecraftClient.getInstance().getWindow();
-                        this.buttonWidget.active = this.isEditable();
-                        this.buttonWidget.y = y;
-                        this.buttonWidget.x = x + entryWidth / 2 - this.width / 2;
-                        this.buttonWidget.setWidth(this.width);
-                        this.buttonWidget.render(matrices, mouseX, mouseY, delta);
-                    }
-                });
                 return builder.setAfterInitConsumer(screen -> {
                     if (MinecraftClient.getInstance().getNetworkHandler() != null && MinecraftClient.getInstance().getNetworkHandler().getRecipeManager() != null) {
                         ((ScreenHooks) screen).cloth_addButton(new net.minecraft.client.gui.widget.ButtonWidget(4, 4, 100, 20, new TranslatableText("text.rei.reload_config"), buttonWidget -> {
