@@ -97,7 +97,7 @@ public class CreditsScreen extends Screen {
             );
         }).collect(Collectors.toList());
         int i = width - 80 - 6;
-        for (String line : I18n.translate("text.rei.credit.text", FabricLoader.getInstance().getModContainer("roughlyenoughitems").map(mod -> mod.getMetadata().getVersion().getFriendlyString()).orElse("Unknown"), "%translators%").split("\n"))
+        for (String line : String.format("§lRoughly Enough Items (v%s)\n§7Originally a fork for Almost Enough Items.\n\n§lLanguage Translation\n%s\n\n§lLicense\n§7Roughly Enough Items is licensed under MIT.", FabricLoader.getInstance().getModContainer("roughlyenoughitems").map(mod -> mod.getMetadata().getVersion().getFriendlyString()).orElse("Unknown"), "%translators%").split("\n"))
             if (line.equalsIgnoreCase("%translators%")) {
                 if (exception[0] != null) {
                     entryListWidget.creditsAddEntry(new TextCreditsItem(new LiteralText("Failed to get translators: " + exception[0].toString())));
