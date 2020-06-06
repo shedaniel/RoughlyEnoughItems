@@ -34,6 +34,7 @@ import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Tickable;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Matrix4f;
 import org.jetbrains.annotations.ApiStatus;
@@ -55,9 +56,9 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
     public Function<String, String> stripInvalid;
     protected int focusedTicks;
     protected boolean editable;
-    protected int field_2103;
-    protected int cursorMax;
-    protected int cursorMin;
+    protected int firstCharacterIndex;
+    protected int selectionStart;
+    protected int selectionEnd;
     protected int editableColor;
     protected int notEditableColor;
     protected BiFunction<String, Integer, String> renderTextProvider;
@@ -65,9 +66,10 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
     private String text;
     private int maxLength;
     private boolean hasBorder;
-    private boolean field_2096;
+    private boolean focusUnlocked;
     private boolean focused;
     private boolean visible;
+    private boolean selecting;
     private String suggestion;
     private Consumer<String> changedListener;
     private Predicate<String> textPredicate;
@@ -76,7 +78,7 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
         this.text = "";
         this.maxLength = 32;
         this.hasBorder = true;
-        this.field_2096 = true;
+        this.focusUnlocked = true;
         this.editable = true;
         this.editableColor = 14737632;
         this.notEditableColor = 7368816;
@@ -111,7 +113,7 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
         this.changedListener = biConsumer_1;
     }
     
-    public void method_1854(BiFunction<String, Integer, String> biFunction_1) {
+    public void setRenderTextProvider(BiFunction<String, Integer, String> biFunction_1) {
         this.renderTextProvider = biFunction_1;
     }
     
@@ -133,25 +135,25 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
             }
             
             this.onChanged(string_1);
-            this.moveCursorToEnd();
+            this.setCursorToEnd();
         }
     }
     
     public String getSelectedText() {
-        int int_1 = Math.min(this.cursorMax, this.cursorMin);
-        int int_2 = Math.max(this.cursorMax, this.cursorMin);
-        return this.text.substring(int_1, int_2);
+        int i = Math.min(this.selectionStart, this.selectionEnd);
+        int j = Math.max(this.selectionStart, this.selectionEnd);
+        return this.text.substring(i, j);
     }
     
-    public void method_1890(Predicate<String> predicate_1) {
+    public void setTextPredicate(Predicate<String> predicate_1) {
         this.textPredicate = predicate_1;
     }
     
     public void addText(String string_1) {
         String string_2 = "";
         String string_3 = stripInvalid.apply(string_1);
-        int int_1 = Math.min(this.cursorMax, this.cursorMin);
-        int int_2 = Math.max(this.cursorMax, this.cursorMin);
+        int int_1 = Math.min(this.selectionStart, this.selectionEnd);
+        int int_2 = Math.max(this.selectionStart, this.selectionEnd);
         int int_3 = this.maxLength - this.text.length() - (int_1 - int_2);
         if (!this.text.isEmpty()) {
             string_2 = string_2 + this.text.substring(0, int_1);
@@ -172,8 +174,8 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
         
         if (this.textPredicate.test(string_2)) {
             this.text = string_2;
-            this.setCursor(int_1 + int_5);
-            this.method_1884(this.cursorMax);
+            this.setSelectionStart(int_1 + int_5);
+            this.setSelectionEnd(this.selectionStart);
             this.onChanged(this.text);
         }
     }
@@ -185,119 +187,111 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
         
     }
     
-    private void method_16873(int int_1) {
+    private void erase(int int_1) {
         if (Screen.hasControlDown()) {
-            this.method_1877(int_1);
+            this.eraseWords(int_1);
         } else {
-            this.method_1878(int_1);
+            this.eraseCharacters(int_1);
         }
-        
     }
     
-    public void method_1877(int int_1) {
+    public void eraseWords(int wordOffset) {
         if (!this.text.isEmpty()) {
-            if (this.cursorMin != this.cursorMax) {
+            if (this.selectionEnd != this.selectionStart) {
                 this.addText("");
             } else {
-                this.method_1878(this.method_1853(int_1) - this.cursorMax);
+                this.eraseCharacters(this.getWordSkipPosition(wordOffset) - this.selectionStart);
             }
         }
     }
     
-    public void method_1878(int int_1) {
+    public void eraseCharacters(int characterOffset) {
         if (!this.text.isEmpty()) {
-            if (this.cursorMin != this.cursorMax) {
+            if (this.selectionEnd != this.selectionStart) {
                 this.addText("");
             } else {
-                boolean boolean_1 = int_1 < 0;
-                int int_2 = boolean_1 ? this.cursorMax + int_1 : this.cursorMax;
-                int int_3 = boolean_1 ? this.cursorMax : this.cursorMax + int_1;
-                String string_1 = "";
-                if (int_2 >= 0) {
-                    string_1 = this.text.substring(0, int_2);
-                }
-                
-                if (int_3 < this.text.length()) {
-                    string_1 = string_1 + this.text.substring(int_3);
-                }
-                
-                if (this.textPredicate.test(string_1)) {
-                    this.text = string_1;
-                    if (boolean_1) {
-                        this.moveCursor(int_1, true);
+                int i = this.getMovedCursorIndex(characterOffset);
+                int j = Math.min(i, this.selectionStart);
+                int k = Math.max(i, this.selectionStart);
+                if (j != k) {
+                    String string = (new StringBuilder(this.text)).delete(j, k).toString();
+                    if (this.textPredicate.test(string)) {
+                        this.text = string;
+                        this.setCursor(j);
                     }
-                    
-                    this.onChanged(this.text);
                 }
+                this.onChanged(this.text);
             }
         }
     }
     
-    public int method_1853(int int_1) {
-        return this.method_1869(int_1, this.getCursor());
+    public int getWordSkipPosition(int int_1) {
+        return this.getWordSkipPosition(int_1, this.getCursor());
     }
     
-    public int method_1869(int int_1, int int_2) {
-        return this.method_1864(int_1, int_2, true);
+    public int getWordSkipPosition(int int_1, int int_2) {
+        return this.getWordSkipPosition(int_1, int_2, true);
     }
     
-    public int method_1864(int int_1, int int_2, boolean boolean_1) {
-        int int_3 = int_2;
-        boolean boolean_2 = int_1 < 0;
-        int int_4 = Math.abs(int_1);
+    public int getWordSkipPosition(int wordOffset, int cursorPosition, boolean skipOverSpaces) {
+        int i = cursorPosition;
+        boolean bl = wordOffset < 0;
+        int j = Math.abs(wordOffset);
         
-        for (int int_5 = 0; int_5 < int_4; ++int_5) {
-            if (!boolean_2) {
-                int int_6 = this.text.length();
-                int_3 = this.text.indexOf(32, int_3);
-                if (int_3 == -1) {
-                    int_3 = int_6;
+        for (int k = 0; k < j; ++k) {
+            if (!bl) {
+                int l = this.text.length();
+                i = this.text.indexOf(32, i);
+                if (i == -1) {
+                    i = l;
                 } else {
-                    while (boolean_1 && int_3 < int_6 && this.text.charAt(int_3) == ' ') {
-                        ++int_3;
+                    while (skipOverSpaces && i < l && this.text.charAt(i) == ' ') {
+                        ++i;
                     }
                 }
             } else {
-                while (boolean_1 && int_3 > 0 && this.text.charAt(int_3 - 1) == ' ') {
-                    --int_3;
+                while (skipOverSpaces && i > 0 && this.text.charAt(i - 1) == ' ') {
+                    --i;
                 }
                 
-                while (int_3 > 0 && this.text.charAt(int_3 - 1) != ' ') {
-                    --int_3;
+                while (i > 0 && this.text.charAt(i - 1) != ' ') {
+                    --i;
                 }
             }
         }
         
-        return int_3;
+        return i;
     }
     
-    public void moveCursor(int int_1, boolean resetSelect) {
-        this.moveCursorTo(this.cursorMax + int_1, resetSelect);
+    public void moveCursor(int int_1) {
+        this.setCursor(this.selectionStart + int_1);
     }
     
-    public void moveCursorTo(int int_1, boolean resetSelect) {
-        this.setCursor(int_1);
-        //        if (!this.field_17037) {
-        if (resetSelect) {
-            this.method_1884(this.cursorMax);
+    private int getMovedCursorIndex(int i) {
+        return Util.moveCursor(this.text, this.selectionStart, i);
+    }
+    
+    public void setCursor(int int_1) {
+        this.setSelectionStart(int_1);
+        if (!selecting) {
+            this.setSelectionEnd(this.selectionStart);
         }
-        
-        this.onChanged(this.text);
     }
     
-    public void moveCursorToHead() {
-        this.moveCursorTo(0, true);
+    public void setCursorToStart() {
+        this.setCursor(0);
     }
     
-    public void moveCursorToEnd() {
-        this.moveCursorTo(this.text.length(), true);
+    public void setCursorToEnd() {
+        this.setCursor(this.text.length());
     }
     
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (this.isVisible() && this.isFocused()) {
+            this.selecting = Screen.hasShiftDown();
             if (Screen.isSelectAll(int_1)) {
-                this.moveCursorToEnd();
-                this.method_1884(0);
+                this.setCursorToEnd();
+                this.setSelectionEnd(0);
                 return true;
             } else if (Screen.isCopy(int_1)) {
                 minecraft.keyboard.setClipboard(this.getSelectedText());
@@ -319,7 +313,9 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
                 switch (int_1) {
                     case 259:
                         if (this.editable) {
-                            this.method_16873(-1);
+                            this.selecting = false;
+                            this.erase(-1);
+                            this.selecting = Screen.hasShiftDown();
                         }
                         
                         return true;
@@ -332,31 +328,33 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
                         return int_1 != 256;
                     case 261:
                         if (this.editable) {
-                            this.method_16873(1);
+                            this.selecting = false;
+                            this.erase(1);
+                            this.selecting = Screen.hasShiftDown();
                         }
                         
                         return true;
                     case 262:
                         if (Screen.hasControlDown()) {
-                            this.moveCursorTo(this.method_1853(1), !Screen.hasShiftDown());
+                            this.setCursor(this.getWordSkipPosition(1));
                         } else {
-                            this.moveCursor(1, !Screen.hasShiftDown());
+                            this.moveCursor(1);
                         }
                         
                         return true;
                     case 263:
                         if (Screen.hasControlDown()) {
-                            this.moveCursorTo(this.method_1853(-1), !Screen.hasShiftDown());
+                            this.setCursor(this.getWordSkipPosition(-1));
                         } else {
-                            this.moveCursor(-1, !Screen.hasShiftDown());
+                            this.moveCursor(-1);
                         }
                         
                         return true;
                     case 268:
-                        this.moveCursorToHead();
+                        this.setCursorToStart();
                         return true;
                     case 269:
-                        this.moveCursorToEnd();
+                        this.setCursorToEnd();
                         return true;
                 }
             }
@@ -368,7 +366,11 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
     @Override
     public boolean charTyped(char char_1, int int_1) {
         if (this.isVisible() && this.isFocused()) {
-            if (SharedConstants.isValidChar(char_1)) {
+            if (SharedConstants.isValidChar(char_1) && !(
+                    Screen.hasControlDown() && !Screen.hasShiftDown() && !Screen.hasAltDown() && (
+                            char_1 == 'a' || char_1 == 'c' || char_1 == 'v'
+                    )
+            )) {
                 if (this.editable) {
                     this.addText(Character.toString(char_1));
                 }
@@ -393,7 +395,7 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
             return false;
         } else {
             boolean boolean_1 = double_1 >= (double) this.bounds.x && double_1 < (double) (this.bounds.x + this.bounds.width) && double_2 >= (double) this.bounds.y && double_2 < (double) (this.bounds.y + this.bounds.height);
-            if (this.field_2096) {
+            if (this.focusUnlocked) {
                 this.setFocused(boolean_1);
             }
             
@@ -403,8 +405,8 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
                     int_2 -= 4;
                 }
                 
-                String string_1 = this.font.trimToWidth(this.text.substring(this.field_2103), this.getWidth());
-                this.moveCursorTo(this.font.trimToWidth(string_1, int_2).length() + this.field_2103, true);
+                String string_1 = this.font.trimToWidth(this.text.substring(this.firstCharacterIndex), this.getWidth());
+                this.setCursor(this.font.trimToWidth(string_1, int_2).length() + this.firstCharacterIndex);
                 return true;
             } else {
                 return false;
@@ -428,9 +430,9 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
             renderBorder(matrices);
             
             int color = this.editable ? this.editableColor : this.notEditableColor;
-            int int_4 = this.cursorMax - this.field_2103;
-            int int_5 = this.cursorMin - this.field_2103;
-            String string_1 = this.font.trimToWidth(this.text.substring(this.field_2103), this.getWidth());
+            int int_4 = this.selectionStart - this.firstCharacterIndex;
+            int int_5 = this.selectionEnd - this.firstCharacterIndex;
+            String string_1 = this.font.trimToWidth(this.text.substring(this.firstCharacterIndex), this.getWidth());
             boolean boolean_1 = int_4 >= 0 && int_4 <= string_1.length();
             boolean boolean_2 = this.focused && this.focusedTicks / 6 % 2 == 0 && boolean_1;
             int x = this.hasBorder ? this.bounds.x + 4 : this.bounds.x;
@@ -442,10 +444,10 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
             
             if (!string_1.isEmpty()) {
                 String string_2 = boolean_1 ? string_1.substring(0, int_4) : string_1;
-                int_8 = this.font.drawWithShadow(matrices, this.renderTextProvider.apply(string_2, this.field_2103), (float) x, (float) y, color);
+                int_8 = this.font.drawWithShadow(matrices, this.renderTextProvider.apply(string_2, this.firstCharacterIndex), (float) x, (float) y, color);
             }
             
-            boolean isCursorInsideText = this.cursorMax < this.text.length() || this.text.length() >= this.getMaxLength();
+            boolean isCursorInsideText = this.selectionStart < this.text.length() || this.text.length() >= this.getMaxLength();
             int int_9 = int_8;
             if (!boolean_1) {
                 int_9 = int_4 > 0 ? x + this.bounds.width : x;
@@ -455,7 +457,7 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
             int_9--;
             
             if (!string_1.isEmpty() && boolean_1 && int_4 < string_1.length()) {
-                this.font.drawWithShadow(matrices, this.renderTextProvider.apply(string_1.substring(int_4), this.cursorMax), (float) int_8, (float) y, color);
+                this.font.drawWithShadow(matrices, this.renderTextProvider.apply(string_1.substring(int_4), this.selectionStart), (float) int_8, (float) y, color);
             }
             
             if (!isCursorInsideText && text.isEmpty() && this.suggestion != null) {
@@ -537,11 +539,11 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
     }
     
     public int getCursor() {
-        return this.cursorMax;
+        return this.selectionStart;
     }
     
-    public void setCursor(int int_1) {
-        this.cursorMax = MathHelper.clamp(int_1, 0, this.text.length());
+    public void setSelectionStart(int int_1) {
+        this.selectionStart = MathHelper.clamp(int_1, 0, this.text.length());
     }
     
     public boolean hasBorder() {
@@ -587,46 +589,46 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
         return this.hasBorder() ? this.bounds.width - 8 : this.bounds.width;
     }
     
-    public void method_1884(int int_1) {
-        int int_2 = this.text.length();
-        this.cursorMin = MathHelper.clamp(int_1, 0, int_2);
+    public void setSelectionEnd(int i) {
+        int j = this.text.length();
+        this.selectionEnd = MathHelper.clamp(i, 0, j);
         if (this.font != null) {
-            if (this.field_2103 > int_2) {
-                this.field_2103 = int_2;
+            if (this.firstCharacterIndex > j) {
+                this.firstCharacterIndex = j;
             }
             
             int int_3 = this.getWidth();
-            String string_1 = this.font.trimToWidth(this.text.substring(this.field_2103), int_3);
-            int int_4 = string_1.length() + this.field_2103;
-            if (this.cursorMin == this.field_2103) {
-                this.field_2103 -= this.font.trimToWidth(this.text, int_3, true).length();
+            String string_1 = this.font.trimToWidth(this.text.substring(this.firstCharacterIndex), int_3);
+            int int_4 = string_1.length() + this.firstCharacterIndex;
+            if (this.selectionEnd == this.firstCharacterIndex) {
+                this.firstCharacterIndex -= this.font.trimToWidth(this.text, int_3, true).length();
             }
             
-            if (this.cursorMin > int_4) {
-                this.field_2103 += this.cursorMin - int_4;
-            } else if (this.cursorMin <= this.field_2103) {
-                this.field_2103 -= this.field_2103 - this.cursorMin;
+            if (this.selectionEnd > int_4) {
+                this.firstCharacterIndex += this.selectionEnd - int_4;
+            } else if (this.selectionEnd <= this.firstCharacterIndex) {
+                this.firstCharacterIndex -= this.firstCharacterIndex - this.selectionEnd;
             }
             
-            this.field_2103 = MathHelper.clamp(this.field_2103, 0, int_2);
+            this.firstCharacterIndex = MathHelper.clamp(this.firstCharacterIndex, 0, j);
         }
         
     }
     
-    public void method_1856(boolean boolean_1) {
-        this.field_2096 = boolean_1;
+    public void setFocusUnlocked(boolean boolean_1) {
+        this.focusUnlocked = boolean_1;
     }
     
     public boolean isVisible() {
         return this.visible;
     }
     
-    public void setVisible(boolean boolean_1) {
-        this.visible = boolean_1;
+    public void setVisible(boolean visible) {
+        this.visible = visible;
     }
     
-    public int method_1889(int int_1) {
-        return int_1 > this.text.length() ? this.bounds.x : this.bounds.x + this.font.getStringWidth(this.text.substring(0, int_1));
+    public int getCharacterX(int index) {
+        return index > this.text.length() ? this.bounds.x : this.bounds.x + this.font.getStringWidth(this.text.substring(0, index));
     }
     
 }

@@ -30,7 +30,7 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Optional;
 
-@ApiStatus.Internal
+@ApiStatus.OverrideOnly
 public abstract class RenderingEntry extends DrawableHelper implements EntryStack {
     @Override
     public Optional<Identifier> getIdentifier() {

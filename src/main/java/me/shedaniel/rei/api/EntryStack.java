@@ -32,6 +32,7 @@ import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.impl.EmptyEntryStack;
 import me.shedaniel.rei.impl.FluidEntryStack;
 import me.shedaniel.rei.impl.ItemEntryStack;
+import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.fluid.Fluid;
@@ -40,7 +41,9 @@ import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.StringNbtReader;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
@@ -54,7 +57,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 @SuppressWarnings("deprecation")
-public interface EntryStack {
+public interface EntryStack extends TextRepresentable {
     
     static EntryStack empty() {
         return EmptyEntryStack.EMPTY;
@@ -137,8 +140,14 @@ public interface EntryStack {
         return copyFluidToItem(stack);
     }
     
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     static EntryStack copyFluidToItem(EntryStack stack) {
-        return FluidSupportProvider.INSTANCE.fluidToItem(stack);
+        Item bucketItem = stack.getFluid().getBucketItem();
+        if (bucketItem != null) {
+            return EntryStack.create(bucketItem);
+        }
+        return EntryStack.empty();
     }
     
     @Deprecated

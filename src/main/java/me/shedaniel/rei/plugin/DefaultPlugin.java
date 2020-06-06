@@ -400,15 +400,6 @@ public class DefaultPlugin implements REIPluginV0 {
         recipeHelper.registerScreenClickArea(new Rectangle(78, 32, 28, 23), BlastFurnaceScreen.class, BLASTING);
         FluidSupportProvider.INSTANCE.registerFluidProvider(new FluidSupportProvider.FluidProvider() {
             @Override
-            public @NotNull EntryStack fluidToItem(@NotNull EntryStack fluidStack) {
-                Fluid fluid = fluidStack.getFluid();
-                Item item = fluid.getBucketItem();
-                if (item == null)
-                    return EntryStack.empty();
-                return EntryStack.create(item);
-            }
-            
-            @Override
             public @NotNull EntryStack itemToFluid(@NotNull EntryStack itemStack) {
                 Item item = itemStack.getItem();
                 if (item instanceof BucketItem)

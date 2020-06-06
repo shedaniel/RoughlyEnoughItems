@@ -41,7 +41,6 @@ import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.impl.InternalWidgets;
 import me.shedaniel.rei.impl.ScreenHelper;
-import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
@@ -51,15 +50,12 @@ import net.minecraft.client.util.NarratorManager;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -171,9 +167,8 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
             widgets.add(Widgets.createCategoryBase(new Rectangle(xx - 5, bounds.y + bounds.height - 5, 10 + w * 16, 12 + h * 16)));
             widgets.add(Widgets.createSlotBase(new Rectangle(xx - 1, yy - 1, 2 + w * 16, 2 + h * 16)));
             int index = 0;
-            List<Text> list = Collections.singletonList(new TranslatableText("text.rei.working_station").formatted(Formatting.YELLOW));
             for (List<EntryStack> workingStation : workingStations) {
-                widgets.add(new RecipeViewingScreen.WorkstationSlotWidget(xx, yy, CollectionUtils.map(workingStation, stack -> stack.copy().setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> list))));
+                widgets.add(new RecipeViewingScreen.WorkstationSlotWidget(xx, yy, workingStation));
                 index++;
                 xx += 16;
                 if (index >= ww) {

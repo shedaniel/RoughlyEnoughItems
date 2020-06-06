@@ -47,18 +47,6 @@ public class FluidSupportProviderImpl implements FluidSupportProvider {
     }
     
     @Override
-    public @NotNull EntryStack fluidToItem(@NotNull EntryStack fluidStack) {
-        if (fluidStack.isEmpty()) return EntryStack.empty();
-        if (fluidStack.getType() != EntryStack.Type.FLUID)
-            throw new IllegalArgumentException("EntryStack must be fluid!");
-        for (FluidProvider provider : providers) {
-            EntryStack stack = Objects.requireNonNull(provider.fluidToItem(fluidStack), provider.getClass() + " is creating null objects for fluidToItem!");
-            if (!stack.isEmpty()) return stack;
-        }
-        return EntryStack.empty();
-    }
-    
-    @Override
     public @NotNull EntryStack itemToFluid(@NotNull EntryStack itemStack) {
         if (itemStack.isEmpty()) return EntryStack.empty();
         if (itemStack.getType() != EntryStack.Type.ITEM)
