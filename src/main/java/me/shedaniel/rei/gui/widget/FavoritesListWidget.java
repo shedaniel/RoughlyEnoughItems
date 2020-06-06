@@ -41,6 +41,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.item.Item;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
@@ -297,8 +298,12 @@ public class FavoritesListWidget extends WidgetWithBounds {
             if (containsMouse(mouseX, mouseY) && ClientHelper.getInstance().isCheating()) {
                 EntryStack entry = getCurrentEntry().copy();
                 if (!entry.isEmpty()) {
-                    if (entry.getType() == EntryStack.Type.FLUID)
-                        entry = EntryStack.copyFluidToItem(entry);
+                    if (entry.getType() == EntryStack.Type.FLUID) {
+                        Item bucketItem = entry.getFluid().getBucketItem();
+                        if (bucketItem != null) {
+                            entry = EntryStack.create(bucketItem);
+                        }
+                    }
                     if (entry.getType() == EntryStack.Type.ITEM)
                         entry.setAmount(button != 1 && !Screen.hasShiftDown() ? 1 : entry.getItemStack().getMaxCount());
                     ClientHelper.getInstance().tryCheatingEntry(entry);

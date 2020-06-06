@@ -37,13 +37,19 @@ public interface FluidSupportProvider {
     
     void registerFluidProvider(@NotNull FluidProvider provider);
     
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     @NotNull
-    EntryStack fluidToItem(@NotNull EntryStack fluidStack);
+    default EntryStack fluidToItem(@NotNull EntryStack fluidStack) {
+        return EntryStack.empty();
+    }
     
     @NotNull
     EntryStack itemToFluid(@NotNull EntryStack itemStack);
     
     interface FluidProvider {
+        @Deprecated
+        @ApiStatus.ScheduledForRemoval
         @NotNull
         default EntryStack fluidToItem(@NotNull EntryStack fluidStack) {
             return EntryStack.empty();

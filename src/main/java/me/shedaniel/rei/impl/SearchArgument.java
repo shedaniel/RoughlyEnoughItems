@@ -23,83 +23,72 @@
 
 package me.shedaniel.rei.impl;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import me.shedaniel.math.Point;
-import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.widgets.Tooltip;
+import me.shedaniel.rei.impl.search.AlwaysMatchingArgument;
+import me.shedaniel.rei.impl.search.Argument;
+import me.shedaniel.rei.impl.search.ArgumentsRegistry;
+import me.shedaniel.rei.impl.search.MatchStatus;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @ApiStatus.Internal
 public class SearchArgument {
-    
-    private static final String SPACE = " ", EMPTY = "";
-    private static final SearchArgument ALWAYS = new SearchArgument(ArgumentType.ALWAYS, "", true);
-    private static List<Item> searchBlacklisted = Lists.newArrayList();
-    private ArgumentType argumentType;
+    public static final String SPACE = " ", EMPTY = "";
+    private static final SearchArgument ALWAYS = new SearchArgument(AlwaysMatchingArgument.INSTANCE, EMPTY, true);
+    private Argument argument;
     private String text;
-    private final Function<String, Boolean> INCLUDE = s -> s.contains(text);
-    private final Function<String, Boolean> NOT_INCLUDE = s -> !s.contains(text);
-    private boolean include;
+    private Object data;
+    private boolean regular;
+    private static final Pattern SPLIT_PATTERN = Pattern.compile("(?:\"([^\"]*)\")|([^\\s]+)");
     
-    public SearchArgument(ArgumentType argumentType, String text, boolean include) {
-        this(argumentType, text, include, true);
+    public SearchArgument(Argument argument, String text, boolean regular) {
+        this(argument, text, regular, true);
     }
     
-    public SearchArgument(ArgumentType argumentType, String text, boolean include, boolean autoLowerCase) {
-        this.argumentType = argumentType;
-        this.text = autoLowerCase ? text.toLowerCase(Locale.ROOT) : text;
-        this.include = include;
+    public SearchArgument(Argument argument, String text, boolean regular, boolean lowercase) {
+        this.argument = argument;
+        this.text = lowercase ? text.toLowerCase(Locale.ROOT) : text;
+        this.regular = regular;
+        this.data = null;
     }
     
     @ApiStatus.Internal
     public static List<SearchArgument.SearchArguments> processSearchTerm(String searchTerm) {
         List<SearchArgument.SearchArguments> searchArguments = Lists.newArrayList();
-        for (String split : StringUtils.splitByWholeSeparatorPreserveAllTokens(searchTerm.toLowerCase(Locale.ROOT), "|")) {
-            String[] terms = StringUtils.split(split);
-            if (terms.length == 0)
-                searchArguments.add(SearchArgument.SearchArguments.ALWAYS);
-            else {
-                SearchArgument[] arguments = new SearchArgument[terms.length];
-                for (int i = 0; i < terms.length; i++) {
-                    String term = terms[i];
-                    if (term.startsWith("-@") || term.startsWith("@-")) {
-                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.MOD, term.substring(2), false);
-                    } else if (term.startsWith("@")) {
-                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.MOD, term.substring(1), true);
-                    } else if (term.startsWith("-$") || term.startsWith("$-")) {
-                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TAG, term.substring(2), false);
-                    } else if (term.startsWith("$")) {
-                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TAG, term.substring(1), true);
-                    } else if (term.startsWith("-#") || term.startsWith("#-")) {
-                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, term.substring(2), false);
-                    } else if (term.startsWith("#")) {
-                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TOOLTIP, term.substring(1), true);
-                    } else if (term.startsWith("-")) {
-                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TEXT, term.substring(1), false);
-                    } else {
-                        arguments[i] = new SearchArgument(SearchArgument.ArgumentType.TEXT, term, true);
+        for (String split : StringUtils.splitByWholeSeparatorPreserveAllTokens(searchTerm, "|")) {
+            Matcher terms = SPLIT_PATTERN.matcher(split);
+            List<SearchArgument> arguments = Lists.newArrayList();
+            while (terms.find()) {
+                String term = MoreObjects.firstNonNull(terms.group(1), terms.group(2));
+                for (Argument argument : ArgumentsRegistry.ARGUMENTS) {
+                    MatchStatus status = argument.matchesArgumentPrefix(term);
+                    if (status.isMatched()) {
+                        arguments.add(new SearchArgument(argument, status.getText(), !status.isInverted(), !status.shouldPreserveCasing()));
+                        break;
                     }
                 }
-                searchArguments.add(new SearchArgument.SearchArguments(arguments));
+            }
+            if (arguments.isEmpty()) {
+                searchArguments.add(SearchArgument.SearchArguments.ALWAYS);
+            } else {
+                searchArguments.add(new SearchArgument.SearchArguments(arguments.toArray(new SearchArgument[0])));
+            }
+        }
+        for (SearchArguments arguments : searchArguments) {
+            for (SearchArgument argument : arguments.getArguments()) {
+                argument.data = argument.argument.prepareSearchData(argument.getText());
             }
         }
         return searchArguments;
@@ -110,100 +99,19 @@ public class SearchArgument {
         if (searchArguments.isEmpty())
             return true;
         MinecraftClient minecraft = MinecraftClient.getInstance();
-        String mod = null;
-        String modName = null;
-        String name = null;
-        String tooltip = null;
-        String[] tags = null;
+        Object[] data = new Object[ArgumentsRegistry.ARGUMENTS.size()];
         for (SearchArgument.SearchArguments arguments : searchArguments) {
             boolean applicable = true;
             for (SearchArgument argument : arguments.getArguments()) {
-                if (argument.getArgumentType() == SearchArgument.ArgumentType.ALWAYS)
-                    return true;
-                else if (argument.getArgumentType() == SearchArgument.ArgumentType.MOD) {
-                    if (mod == null)
-                        mod = stack.getIdentifier().map(Identifier::getNamespace).orElse("").replace(SPACE, EMPTY).toLowerCase(Locale.ROOT);
-                    if (mod != null && !mod.isEmpty()) {
-                        if (argument.getFunction(!argument.isInclude()).apply(mod)) {
-                            if (modName == null)
-                                modName = ClientHelper.getInstance().getModFromModId(mod).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT);
-                            if (modName == null || modName.isEmpty() || argument.getFunction(!argument.isInclude()).apply(modName)) {
-                                applicable = false;
-                                break;
-                            }
-                            break;
-                        }
-                    }
-                } else if (argument.getArgumentType() == SearchArgument.ArgumentType.TEXT) {
-                    if (name == null)
-                        name = SearchArgument.tryGetEntryStackName(stack).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT);
-                    if (name != null && !name.isEmpty() && argument.getFunction(!argument.isInclude()).apply(name)) {
-                        applicable = false;
-                        break;
-                    }
-                } else if (argument.getArgumentType() == SearchArgument.ArgumentType.TOOLTIP) {
-                    if (tooltip == null)
-                        tooltip = SearchArgument.tryGetEntryStackTooltip(stack).replace(SPACE, EMPTY).toLowerCase(Locale.ROOT);
-                    if (tooltip != null && !tooltip.isEmpty() && argument.getFunction(!argument.isInclude()).apply(tooltip)) {
-                        applicable = false;
-                        break;
-                    }
-                } else if (argument.getArgumentType() == SearchArgument.ArgumentType.TAG) {
-                    if (tags == null) {
-                        if (stack.getType() == EntryStack.Type.ITEM) {
-                            Identifier[] tagsFor = minecraft.getNetworkHandler().getTagManager().items().getTagsFor(stack.getItem()).toArray(new Identifier[0]);
-                            tags = new String[tagsFor.length];
-                            for (int i = 0; i < tagsFor.length; i++)
-                                tags[i] = tagsFor[i].toString();
-                        } else if (stack.getType() == EntryStack.Type.FLUID) {
-                            Identifier[] tagsFor = minecraft.getNetworkHandler().getTagManager().fluids().getTagsFor(stack.getFluid()).toArray(new Identifier[0]);
-                            tags = new String[tagsFor.length];
-                            for (int i = 0; i < tagsFor.length; i++)
-                                tags[i] = tagsFor[i].toString();
-                        } else
-                            tags = new String[0];
-                    }
-                    if (tags != null && tags.length > 0) {
-                        boolean a = false;
-                        for (String tag : tags)
-                            if (argument.getFunction(argument.isInclude()).apply(tag))
-                                a = true;
-                        if (!a) {
-                            applicable = false;
-                            break;
-                        }
-                    } else {
-                        applicable = false;
-                        break;
-                    }
+                if (argument.getArgument().matches(data, stack, argument.getText(), argument.data) != argument.isRegular()) {
+                    applicable = false;
+                    break;
                 }
             }
             if (applicable)
                 return true;
         }
         return false;
-    }
-    
-    public static String tryGetEntryStackName(EntryStack stack) {
-        if (stack.getType() == EntryStack.Type.ITEM)
-            return tryGetItemStackName(stack.getItemStack());
-        else if (stack.getType() == EntryStack.Type.FLUID)
-            return tryGetFluidName(stack.getFluid());
-        Tooltip tooltip = stack.getTooltip(PointHelper.ofMouse());
-        if (tooltip != null)
-            return tooltip.getText().isEmpty() ? "" : tooltip.getText().get(0).getString();
-        return "";
-    }
-    
-    public static String tryGetEntryStackNameNoFormatting(EntryStack stack) {
-        if (stack.getType() == EntryStack.Type.ITEM)
-            return tryGetItemStackNameNoFormatting(stack.getItemStack());
-        else if (stack.getType() == EntryStack.Type.FLUID)
-            return tryGetFluidName(stack.getFluid());
-        Tooltip tooltip = stack.getTooltip(PointHelper.ofMouse());
-        if (tooltip != null)
-            return tooltip.getText().isEmpty() ? "" : tooltip.getText().get(0).getString();
-        return "";
     }
     
     public static String tryGetEntryStackTooltip(EntryStack stack) {
@@ -213,83 +121,21 @@ public class SearchArgument {
         return "";
     }
     
-    public static String tryGetFluidName(Fluid fluid) {
-        Identifier id = Registry.FLUID.getId(fluid);
-        if (I18n.hasTranslation("block." + id.toString().replaceFirst(":", ".")))
-            return I18n.translate("block." + id.toString().replaceFirst(":", "."));
-        return CollectionUtils.mapAndJoinToString(id.getPath().split("_"), StringUtils::capitalize, " ");
-    }
-    
-    public static List<Text> tryGetItemStackToolTip(ItemStack itemStack, boolean careAboutAdvanced) {
-        if (!searchBlacklisted.contains(itemStack.getItem()))
-            try {
-                return itemStack.getTooltip(MinecraftClient.getInstance().player, MinecraftClient.getInstance().options.advancedItemTooltips && careAboutAdvanced ? TooltipContext.Default.ADVANCED : TooltipContext.Default.NORMAL);
-            } catch (Throwable e) {
-                e.printStackTrace();
-                searchBlacklisted.add(itemStack.getItem());
-            }
-        return Collections.singletonList(new LiteralText(tryGetItemStackName(itemStack)));
-    }
-    
-    public static String tryGetItemStackName(ItemStack stack) {
-        if (!searchBlacklisted.contains(stack.getItem()))
-            try {
-                return stack.getName().getString();
-            } catch (Throwable e) {
-                e.printStackTrace();
-                searchBlacklisted.add(stack.getItem());
-            }
-        try {
-            return I18n.translate("item." + Registry.ITEM.getId(stack.getItem()).toString().replace(":", "."));
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
-        return "ERROR";
-    }
-    
-    public static String tryGetItemStackNameNoFormatting(ItemStack stack) {
-        if (!searchBlacklisted.contains(stack.getItem()))
-            try {
-                return stack.getName().asString();
-            } catch (Throwable e) {
-                e.printStackTrace();
-                searchBlacklisted.add(stack.getItem());
-            }
-        try {
-            return I18n.translate("item." + Registry.ITEM.getId(stack.getItem()).toString().replace(":", "."));
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
-        return "ERROR";
-    }
-    
-    public Function<String, Boolean> getFunction(boolean include) {
-        return include ? INCLUDE : NOT_INCLUDE;
-    }
-    
-    public ArgumentType getArgumentType() {
-        return argumentType;
+    public Argument getArgument() {
+        return argument;
     }
     
     public String getText() {
         return text;
     }
     
-    public boolean isInclude() {
-        return include;
+    public boolean isRegular() {
+        return regular;
     }
     
     @Override
     public String toString() {
-        return String.format("Argument[%s]: name = %s, include = %b", argumentType.name(), text, include);
-    }
-    
-    public enum ArgumentType {
-        TEXT,
-        MOD,
-        TOOLTIP,
-        TAG,
-        ALWAYS
+        return String.format("Argument[%s]: name = %s, regular = %b", argument.getName(), text, regular);
     }
     
     public static class SearchArguments {

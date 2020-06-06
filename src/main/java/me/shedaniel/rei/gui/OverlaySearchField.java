@@ -135,7 +135,7 @@ public class OverlaySearchField extends TextFieldWidget {
                 addToHistory(getText());
                 setFocused(false);
                 return true;
-            } else if (int_1 == 265) {
+            } else if (int_1 == 264) {
                 int i = history.indexOf(getText()) - 1;
                 if (i < -1 && getText().isEmpty())
                     i = history.size() - 1;
@@ -147,7 +147,7 @@ public class OverlaySearchField extends TextFieldWidget {
                     setText(history.get(i));
                     return true;
                 }
-            } else if (int_1 == 264) {
+            } else if (int_1 == 265) {
                 int i = history.indexOf(getText()) + 1;
                 if (i > 0) {
                     setText(i < history.size() ? history.get(i) : "");

@@ -30,12 +30,14 @@ import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.widgets.Tooltip;
+import me.shedaniel.rei.utils.CollectionUtils;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.math.MatrixStack;
@@ -43,12 +45,15 @@ import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.registry.Registry;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -60,7 +65,6 @@ import java.util.stream.Stream;
 
 @ApiStatus.Internal
 public class FluidEntryStack extends AbstractEntryStack {
-    private static final Map<Fluid, Pair<Sprite, Integer>> FLUID_SPRITE_CACHE = new HashMap<>();
     private static final double IGNORE_AMOUNT = -1319182373;
     private Fluid fluid;
     private double amount;
@@ -76,23 +80,6 @@ public class FluidEntryStack extends AbstractEntryStack {
     public FluidEntryStack(Fluid fluid, double amount) {
         this.fluid = fluid;
         this.amount = amount;
-    }
-    
-    protected static Pair<Sprite, Integer> getOrLoadSprite(Fluid fluid) {
-        Pair<Sprite, Integer> possibleCached = FLUID_SPRITE_CACHE.get(fluid);
-        if (possibleCached != null)
-            return possibleCached;
-        
-        FluidRenderHandler fluidRenderHandler = FluidRenderHandlerRegistry.INSTANCE.get(fluid);
-        if (fluidRenderHandler == null)
-            return null;
-        Sprite[] sprites = fluidRenderHandler.getFluidSprites(MinecraftClient.getInstance().world, MinecraftClient.getInstance().world == null ? null : BlockPos.ORIGIN, fluid.getDefaultState());
-        int color = -1;
-        if (MinecraftClient.getInstance().world != null)
-            color = fluidRenderHandler.getFluidColor(MinecraftClient.getInstance().world, BlockPos.ORIGIN, fluid.getDefaultState());
-        Pair<Sprite, Integer> pair = new Pair<>(sprites[0], color);
-        FLUID_SPRITE_CACHE.put(fluid, pair);
-        return pair;
     }
     
     @Override
@@ -201,7 +188,7 @@ public class FluidEntryStack extends AbstractEntryStack {
     public Tooltip getTooltip(Point point) {
         if (!get(Settings.TOOLTIP_ENABLED).get() || isEmpty())
             return null;
-        List<Text> toolTip = Lists.newArrayList(new LiteralText(SearchArgument.tryGetEntryStackName(this)));
+        List<Text> toolTip = Lists.newArrayList(asFormattedText());
         if (amount >= 0) {
             String amountTooltip = get(Settings.Fluid.AMOUNT_TOOLTIP).apply(this);
             if (amountTooltip != null)
@@ -228,10 +215,10 @@ public class FluidEntryStack extends AbstractEntryStack {
     @Override
     public void render(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
         if (get(Settings.RENDER).get()) {
-            Pair<Sprite, Integer> pair = getOrLoadSprite(getFluid());
-            if (pair != null) {
-                Sprite sprite = pair.getLeft();
-                int color = pair.getRight();
+            SimpleFluidRenderer.FluidRenderingData renderingData = SimpleFluidRenderer.fromFluid(fluid);
+            if (renderingData != null) {
+                Sprite sprite = renderingData.getSprite();
+                int color = renderingData.getColor();
                 int a = 255;
                 int r = (color >> 16 & 255);
                 int g = (color >> 8 & 255);
@@ -248,5 +235,14 @@ public class FluidEntryStack extends AbstractEntryStack {
                 tess.draw();
             }
         }
+    }
+    
+    @NotNull
+    @Override
+    public Text asFormattedText() {
+        Identifier id = Registry.FLUID.getId(fluid);
+        if (I18n.hasTranslation("block." + id.toString().replaceFirst(":", ".")))
+            return new TranslatableText("block." + id.toString().replaceFirst(":", "."));
+        return new LiteralText(CollectionUtils.mapAndJoinToString(id.getPath().split("_"), StringUtils::capitalize, " "));
     }
 }

@@ -46,6 +46,7 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
@@ -69,7 +70,7 @@ import java.util.stream.Collectors;
 public class EntryListWidget extends WidgetWithBounds {
     
     static final Supplier<Boolean> RENDER_ENCHANTMENT_GLINT = ConfigObject.getInstance()::doesRenderEntryEnchantmentGlint;
-    static final Comparator<? super EntryStack> ENTRY_NAME_COMPARER = Comparator.comparing(SearchArgument::tryGetEntryStackName);
+    static final Comparator<? super EntryStack> ENTRY_NAME_COMPARER = Comparator.comparing(stack -> stack.asFormatStrippedText().getString());
     static final Comparator<? super EntryStack> ENTRY_GROUP_COMPARER = Comparator.comparingInt(stack -> {
         if (stack.getType() == EntryStack.Type.ITEM) {
             ItemGroup group = stack.getItem().getGroup();
@@ -729,8 +730,12 @@ public class EntryListWidget extends WidgetWithBounds {
             if (containsMouse(mouseX, mouseY) && ClientHelper.getInstance().isCheating()) {
                 EntryStack entry = getCurrentEntry().copy();
                 if (!entry.isEmpty()) {
-                    if (entry.getType() == EntryStack.Type.FLUID)
-                        entry = EntryStack.copyFluidToItem(entry);
+                    if (entry.getType() == EntryStack.Type.FLUID) {
+                        Item bucketItem = entry.getFluid().getBucketItem();
+                        if (bucketItem != null) {
+                            entry = EntryStack.create(bucketItem);
+                        }
+                    }
                     if (entry.getType() == EntryStack.Type.ITEM)
                         entry.setAmount(button != 1 && !Screen.hasShiftDown() ? 1 : entry.getItemStack().getMaxCount());
                     ClientHelper.getInstance().tryCheatingEntry(entry);

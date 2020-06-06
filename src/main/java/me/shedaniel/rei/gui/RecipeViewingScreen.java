@@ -342,10 +342,9 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
             preWidgets.add(workingStationsBaseWidget = Widgets.createCategoryBase(new Rectangle(xx - 5, yy - 5, 15 + innerWidth * 16, 10 + actualHeight * 16)));
             preWidgets.add(Widgets.createSlotBase(new Rectangle(xx - 1, yy - 1, innerWidth * 16 + 2, actualHeight * 16 + 2)));
             int index = 0;
-            List<Text> list = Collections.singletonList(new TranslatableText("text.rei.working_station").formatted(Formatting.YELLOW));
             xx += (innerWidth - 1) * 16;
             for (List<EntryStack> workingStation : workingStations) {
-                preWidgets.add(new WorkstationSlotWidget(xx, yy, CollectionUtils.map(workingStation, stack -> stack.copy().setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> list))));
+                preWidgets.add(new WorkstationSlotWidget(xx, yy, workingStation));
                 index++;
                 yy += 16;
                 if (index >= hh) {

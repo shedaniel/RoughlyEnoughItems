@@ -30,6 +30,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.item.TooltipContext;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -37,16 +38,21 @@ import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -257,7 +263,7 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     public Tooltip getTooltip(Point point) {
         if (isEmpty() || !get(Settings.TOOLTIP_ENABLED).get())
             return null;
-        List<Text> toolTip = Lists.newArrayList(SearchArgument.tryGetItemStackToolTip(getItemStack(), true));
+        List<Text> toolTip = Lists.newArrayList(tryGetItemStackToolTip(true));
         toolTip.addAll(get(Settings.TOOLTIP_APPEND_EXTRA).apply(this));
         if (get(Settings.TOOLTIP_APPEND_MOD).get() && ConfigObject.getInstance().shouldAppendModNames()) {
             final Text modString = ClientHelper.getInstance().getFormattedModFromItem(getItem());
@@ -328,5 +334,35 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
             MinecraftClient.getInstance().getItemRenderer().renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, getItemStack(), bounds.x, bounds.y, get(Settings.RENDER_COUNTS).get() ? get(Settings.COUNTS).apply(this) : "");
             MinecraftClient.getInstance().getItemRenderer().zOffset = 0.0F;
         }
+    }
+    
+    private static final List<Item> SEARCH_BLACKLISTED = Lists.newArrayList();
+    
+    @Override
+    public @NotNull Text asFormattedText() {
+        if (!SEARCH_BLACKLISTED.contains(getItem()))
+            try {
+                return getItemStack().getName();
+            } catch (Throwable e) {
+                e.printStackTrace();
+                SEARCH_BLACKLISTED.add(getItem());
+            }
+        try {
+            return new TranslatableText("item." + Registry.ITEM.getId(getItem()).toString().replace(":", "."));
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+        return new LiteralText("ERROR");
+    }
+    
+    private List<Text> tryGetItemStackToolTip(boolean careAboutAdvanced) {
+        if (!SEARCH_BLACKLISTED.contains(getItem()))
+            try {
+                return itemStack.getTooltip(MinecraftClient.getInstance().player, MinecraftClient.getInstance().options.advancedItemTooltips && careAboutAdvanced ? TooltipContext.Default.ADVANCED : TooltipContext.Default.NORMAL);
+            } catch (Throwable e) {
+                e.printStackTrace();
+                SEARCH_BLACKLISTED.add(getItem());
+            }
+        return Collections.singletonList(asFormattedText());
     }
 }
