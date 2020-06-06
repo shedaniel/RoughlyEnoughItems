@@ -119,9 +119,9 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
                             ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, NOT_ENOUGH_ITEMS_PACKET, buf);
                         }
                     } catch (IllegalStateException e) {
-                        player.sendMessage(new TranslatableText(e.getMessage()).formatted(Formatting.RED), Util.field_25140);
+                        player.sendMessage(new TranslatableText(e.getMessage()).formatted(Formatting.RED), Util.NIL_UUID);
                     } catch (Exception e) {
-                        player.sendMessage(new TranslatableText("error.rei.internal.error", e.getMessage()).formatted(Formatting.RED), Util.field_25140);
+                        player.sendMessage(new TranslatableText("error.rei.internal.error", e.getMessage()).formatted(Formatting.RED), Util.NIL_UUID);
                         e.printStackTrace();
                     }
                 } catch (Exception e) {

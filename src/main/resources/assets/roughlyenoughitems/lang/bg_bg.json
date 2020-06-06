@@ -199,7 +199,6 @@
   "config.roughlyenoughitems.scrollingEntryListWidget": "Entry List Action:",
   "config.roughlyenoughitems.scrollingEntryListWidget.boolean.true": "Scrolled",
   "config.roughlyenoughitems.scrollingEntryListWidget.boolean.false": "Paginated",
-  "text.rei.credit.text": "§lRoughly Enough Items (v%s)\n§7Originally a fork for Almost Enough Items.\n\n§lDevelopers\n  Originally by ZenDarva\n  Rewritten by Danielshe\n  Old Plugin Support by TehNut\n\n§lLanguage Translation\n%s\n\n§lLicense\n§7Roughly Enough Items is licensed with MIT.",
   "language.roughlyenoughitems.english": "английски",
   "language.roughlyenoughitems.japanese": "японски",
   "language.roughlyenoughitems.chinese_simplified": "опростен китайски",

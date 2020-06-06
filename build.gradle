@@ -60,7 +60,7 @@ dependencies {
     modApi("me.sargunvohra.mcmods:autoconfig1u:${project.autoconfig1u}") {
         exclude module: "fabric-api"
     }
-    modApi("org.jetbrains:annotations:18.0.0")
+    modApi("org.jetbrains:annotations:19.0.0")
     modCompileOnly("io.github.prospector:modmenu:${modmenu_version}") {
         transitive = false
     }

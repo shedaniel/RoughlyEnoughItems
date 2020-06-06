@@ -199,7 +199,6 @@
   "config.roughlyenoughitems.scrollingEntryListWidget": "Darstellung der Gegenstandsliste:",
   "config.roughlyenoughitems.scrollingEntryListWidget.boolean.true": "Bildlauf",
   "config.roughlyenoughitems.scrollingEntryListWidget.boolean.false": "Mehrere Seiten",
-  "text.rei.credit.text": "§lRoughly Enough Items (v%s)\n§7Ursprünglich ein Fork von Almost Enough Items.\n\n§lEntwickler\n  Original von ZenDarva\n  Neu geschrieben von Danielshe\n  Alter Plugin Support von TehNut\n\n§lÜbersetzung\n%s\n\n§lLizenz \n§7Roughly Enough Items ist unter der MIT-Lizenz veröffentlicht.",
   "language.roughlyenoughitems.english": "Englisch",
   "language.roughlyenoughitems.japanese": "Japanisch",
   "language.roughlyenoughitems.chinese_simplified": "Chinesisch (Vereinfacht)",
