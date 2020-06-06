@@ -175,7 +175,7 @@ curseforge {
             addGameVersion "Fabric"
             relations {
                 requiredDependency "fabric-api"
-                embeddedLibrary "cloth"
+                embeddedLibrary "cloth-api"
                 embeddedLibrary "cloth-config"
                 embeddedLibrary "auto-config-updated-api"
             }
