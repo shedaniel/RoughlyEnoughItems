@@ -199,7 +199,6 @@
   "config.roughlyenoughitems.scrollingEntryListWidget": "項目列表操作:",
   "config.roughlyenoughitems.scrollingEntryListWidget.boolean.true": "滾動",
   "config.roughlyenoughitems.scrollingEntryListWidget.boolean.false": "分頁",
-  "text.rei.credit.text": "§lRoughly Enough Items (v%s)\n§7原是 Almost Enough Items 的分支.\n\n§l主要開發人員\n  AEI 作者 ZenDarva\n  重寫作者 Danielshe\n\n§l語言翻譯\n%s\n\n§l許可\n§7Roughly Enough Items 使用 MIT.",
   "language.roughlyenoughitems.english": "英語",
   "language.roughlyenoughitems.japanese": "日語",
   "language.roughlyenoughitems.chinese_simplified": "簡體中文",
