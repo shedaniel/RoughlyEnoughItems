@@ -32,9 +32,6 @@ import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.gui.config.*;
-import me.shedaniel.rei.impl.ConfigObjectImpl.DontApplyFieldName;
-import me.shedaniel.rei.impl.ConfigObjectImpl.UseFilteringScreen;
-import me.shedaniel.rei.impl.ConfigObjectImpl.UseSpecialRecipeTypeScreen;
 import net.minecraft.client.util.InputUtil;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -220,11 +217,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
-    public boolean doDisplayFavoritesOnTheLeft() {
-        return appearance.displayFavoritesOnTheLeft;
-    }
-    
-    @Override
     public boolean doesFastEntryRendering() {
         return performance.newFastEntryRendering;
     }
@@ -397,7 +389,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         @Comment("Declares how the scrollbar in villager screen should act.") private boolean villagerScreenPermanentScrollBar = false;
         @Comment("Declares whether entry list widget is scrolled.") private boolean scrollingEntryListWidget = false;
         @Comment("Declares whether scrolled entry list widget should snap to rows.") private boolean snapToRows = false;
-        @Comment("Declares the location of the favorites list.") private boolean displayFavoritesOnTheLeft = true;
         @Comment("Declares whether favorites tooltip should be displayed.") private boolean displayFavoritesTooltip = false;
         @Comment("Declares whether favorites will be searched.") private boolean searchFavorites = true;
         @UsePercentage(min = 0.25, max = 4.0) private double entrySize = 1.0;

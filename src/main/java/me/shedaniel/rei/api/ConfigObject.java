@@ -105,7 +105,11 @@ public interface ConfigObject {
     
     boolean doDisplayFavoritesTooltip();
     
-    boolean doDisplayFavoritesOnTheLeft();
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
+    default boolean doDisplayFavoritesOnTheLeft() {
+        return true;
+    }
     
     boolean doesFastEntryRendering();
     

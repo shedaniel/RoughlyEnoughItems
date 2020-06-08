@@ -171,7 +171,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
     }
     
     public void updateSearch(EntryListWidget listWidget, String searchTerm) {
-        if (ConfigObject.getInstance().isFavoritesEnabled() && ConfigObject.getInstance().doDisplayFavoritesOnTheLeft()) {
+        if (ConfigObject.getInstance().isFavoritesEnabled()) {
             if (ConfigObject.getInstance().doSearchFavorites()) {
                 List<EntryStack> list = Lists.newArrayList();
                 boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
