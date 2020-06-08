@@ -34,9 +34,9 @@ import me.shedaniel.rei.api.widgets.Button;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.config.SearchFieldLocation;
+import me.shedaniel.rei.gui.modules.Menu;
 import me.shedaniel.rei.gui.modules.entries.GameModeMenuEntry;
 import me.shedaniel.rei.gui.modules.entries.WeatherMenuEntry;
-import me.shedaniel.rei.gui.modules.Menu;
 import me.shedaniel.rei.gui.widget.*;
 import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.impl.InternalWidgets;
@@ -627,15 +627,15 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
     }
     
     @Override
-    public boolean keyPressed(int int_1, int int_2, int int_3) {
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (ScreenHelper.isOverlayVisible()) {
-            if (ScreenHelper.getSearchField().keyPressed(int_1, int_2, int_3))
+            if (ScreenHelper.getSearchField().keyPressed(keyCode, scanCode, modifiers))
                 return true;
             for (Element listener : widgets)
-                if (listener != ScreenHelper.getSearchField() && listener.keyPressed(int_1, int_2, int_3))
+                if (listener != ScreenHelper.getSearchField() && listener.keyPressed(keyCode, scanCode, modifiers))
                     return true;
         }
-        if (ConfigObject.getInstance().getHideKeybind().matchesKey(int_1, int_2)) {
+        if (ConfigObject.getInstance().getHideKeybind().matchesKey(keyCode, scanCode)) {
             ScreenHelper.toggleOverlayVisible();
             return true;
         }
@@ -646,18 +646,33 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                 itemStack = containerScreen.focusedSlot.getStack();
         }
         if (itemStack != null && !itemStack.isEmpty()) {
-            if (ConfigObject.getInstance().getRecipeKeybind().matchesKey(int_1, int_2))
+            if (ConfigObject.getInstance().getRecipeKeybind().matchesKey(keyCode, scanCode))
                 return ClientHelper.getInstance().executeRecipeKeyBind(itemStack);
-            else if (ConfigObject.getInstance().getUsageKeybind().matchesKey(int_1, int_2))
+            else if (ConfigObject.getInstance().getUsageKeybind().matchesKey(keyCode, scanCode))
                 return ClientHelper.getInstance().executeUsageKeyBind(itemStack);
+            else if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(keyCode, scanCode)) {
+                EntryStack entry = EntryStack.create(itemStack.copy());
+                entry.setAmount(127);
+                if (!CollectionUtils.anyMatchEqualsEntryIgnoreAmount(ConfigObject.getInstance().getFavorites(), entry))
+                    ConfigObject.getInstance().getFavorites().add(entry);
+                ConfigManager.getInstance().saveConfig();
+                if (ConfigObject.getInstance().doDisplayFavoritesOnTheLeft()) {
+                    FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
+                    if (favoritesListWidget != null)
+                        favoritesListWidget.updateSearch(ContainerScreenOverlay.getEntryListWidget(), ScreenHelper.getSearchField().getText());
+                } else {
+                    ContainerScreenOverlay.getEntryListWidget().updateSearch(ScreenHelper.getSearchField().getText());
+                }
+                return true;
+            }
         }
         if (!ScreenHelper.isOverlayVisible())
             return false;
-        if (ConfigObject.getInstance().getFocusSearchFieldKeybind().matchesKey(int_1, int_2)) {
+        if (ConfigObject.getInstance().getFocusSearchFieldKeybind().matchesKey(keyCode, scanCode)) {
             ScreenHelper.getSearchField().setFocused(true);
             setFocused(ScreenHelper.getSearchField());
             ScreenHelper.getSearchField().keybindFocusTime = System.currentTimeMillis();
-            ScreenHelper.getSearchField().keybindFocusKey = int_1;
+            ScreenHelper.getSearchField().keybindFocusKey = keyCode;
             return true;
         }
         return false;
