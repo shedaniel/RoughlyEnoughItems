@@ -190,7 +190,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         DisplayHelper.DisplayBoundsHandler boundsHandler = DisplayHelper.getInstance().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
         this.bounds = ConfigObject.getInstance().isLeftHandSidePanel() ? boundsHandler.getLeftBounds(MinecraftClient.getInstance().currentScreen) : boundsHandler.getRightBounds(MinecraftClient.getInstance().currentScreen);
         widgets.add(ENTRY_LIST_WIDGET);
-        if (ConfigObject.getInstance().doDisplayFavoritesOnTheLeft() && ConfigObject.getInstance().isFavoritesEnabled()) {
+        if (ConfigObject.getInstance().isFavoritesEnabled()) {
             if (favoritesListWidget == null)
                 favoritesListWidget = new FavoritesListWidget();
             widgets.add(favoritesListWidget);
@@ -646,23 +646,19 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                 itemStack = containerScreen.focusedSlot.getStack();
         }
         if (itemStack != null && !itemStack.isEmpty()) {
-            if (ConfigObject.getInstance().getRecipeKeybind().matchesKey(keyCode, scanCode))
-                return ClientHelper.getInstance().executeRecipeKeyBind(itemStack);
-            else if (ConfigObject.getInstance().getUsageKeybind().matchesKey(keyCode, scanCode))
-                return ClientHelper.getInstance().executeUsageKeyBind(itemStack);
-            else if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(keyCode, scanCode)) {
-                EntryStack entry = EntryStack.create(itemStack.copy());
-                entry.setAmount(127);
-                if (!CollectionUtils.anyMatchEqualsEntryIgnoreAmount(ConfigObject.getInstance().getFavorites(), entry))
-                    ConfigObject.getInstance().getFavorites().add(entry);
+            EntryStack stack = EntryStack.create(itemStack.copy());
+            if (ConfigObject.getInstance().getRecipeKeybind().matchesKey(keyCode, scanCode)) {
+                return ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addRecipesFor(stack).setOutputNotice(stack).fillPreferredOpenedCategory());
+            } else if (ConfigObject.getInstance().getUsageKeybind().matchesKey(keyCode, scanCode)) {
+                return ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addUsagesFor(stack).setInputNotice(stack).fillPreferredOpenedCategory());
+            } else if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(keyCode, scanCode)) {
+                stack.setAmount(127);
+                if (!CollectionUtils.anyMatchEqualsEntryIgnoreAmount(ConfigObject.getInstance().getFavorites(), stack))
+                    ConfigObject.getInstance().getFavorites().add(stack);
                 ConfigManager.getInstance().saveConfig();
-                if (ConfigObject.getInstance().doDisplayFavoritesOnTheLeft()) {
-                    FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
-                    if (favoritesListWidget != null)
-                        favoritesListWidget.updateSearch(ContainerScreenOverlay.getEntryListWidget(), ScreenHelper.getSearchField().getText());
-                } else {
-                    ContainerScreenOverlay.getEntryListWidget().updateSearch(ScreenHelper.getSearchField().getText());
-                }
+                FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
+                if (favoritesListWidget != null)
+                    favoritesListWidget.updateSearch(ContainerScreenOverlay.getEntryListWidget(), ScreenHelper.getSearchField().getText());
                 return true;
             }
         }

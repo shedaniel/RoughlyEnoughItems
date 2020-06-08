@@ -90,16 +90,13 @@ public class EntryListWidget extends WidgetWithBounds {
         
         @Override
         public int getMaxScrollHeight() {
-            if (favorites.isEmpty())
-                return MathHelper.ceil((allStacks.size() + blockedCount) / (innerBounds.width / (float) entrySize())) * entrySize();
-            return MathHelper.ceil((allStacks.size() + blockedCount + getScrollNumberForFavorites()) / (innerBounds.width / (float) entrySize())) * entrySize() - 12;
+            return MathHelper.ceil((allStacks.size() + blockedCount) / (innerBounds.width / (float) entrySize())) * entrySize();
         }
     };
     protected int blockedCount;
     private boolean debugTime;
     private Rectangle bounds, innerBounds;
     private List<EntryStack> allStacks = null;
-    private List<EntryStack> favorites = null;
     private List<EntryListEntry> entries = Collections.emptyList();
     private List<Widget> renders = Collections.emptyList();
     private List<Widget> widgets = Collections.emptyList();
@@ -131,24 +128,6 @@ public class EntryListWidget extends WidgetWithBounds {
         int width = Math.max(MathHelper.floor((bounds.width - 2) / (float) entrySize()), 1);
         int height = Math.max(MathHelper.floor((bounds.height - 2) / (float) entrySize()), 1);
         return new Rectangle((int) (bounds.getCenterX() - width * (entrySize() / 2f)), (int) (bounds.getCenterY() - height * (entrySize() / 2f)), width * entrySize(), height * entrySize());
-    }
-    
-    protected final int getSlotsHeightNumberForFavorites() {
-        if (favorites.isEmpty())
-            return 0;
-        if (ConfigObject.getInstance().isEntryListWidgetScrolled())
-            return MathHelper.ceil(2 + favorites.size() / (innerBounds.width / (float) entrySize()));
-        int height = MathHelper.ceil(favorites.size() / (innerBounds.width / (float) entrySize()));
-        int pagesToFit = MathHelper.ceil(height / (innerBounds.height / (float) entrySize() - 1));
-        if (height > (innerBounds.height / entrySize() - 1) && (height) % (innerBounds.height / entrySize()) == (innerBounds.height / entrySize()) - 2)
-            height--;
-        return height + pagesToFit + 1;
-    }
-    
-    protected final int getScrollNumberForFavorites() {
-        if (favorites.isEmpty())
-            return 0;
-        return (innerBounds.width / entrySize()) * getSlotsHeightNumberForFavorites();
     }
     
     @Override
@@ -185,7 +164,7 @@ public class EntryListWidget extends WidgetWithBounds {
     public int getTotalPages() {
         if (ConfigObject.getInstance().isEntryListWidgetScrolled())
             return 1;
-        return MathHelper.ceil((allStacks.size() + getScrollNumberForFavorites()) / (float) entries.size());
+        return MathHelper.ceil(allStacks.size() / (float) entries.size());
     }
     
     @Override
@@ -194,8 +173,7 @@ public class EntryListWidget extends WidgetWithBounds {
             for (EntryListEntry entry : entries)
                 entry.clearStacks();
             ScissorsHandler.INSTANCE.scissor(bounds);
-            int sizeForFavorites = getSlotsHeightNumberForFavorites();
-            int skip = Math.max(0, MathHelper.floor(scrolling.scrollAmount / (float) entrySize()) - sizeForFavorites);
+            int skip = Math.max(0, MathHelper.floor(scrolling.scrollAmount / (float) entrySize()));
             int nextIndex = skip * innerBounds.width / entrySize();
             int i = nextIndex;
             blockedCount = 0;
@@ -203,45 +181,16 @@ public class EntryListWidget extends WidgetWithBounds {
                 long totalTimeStart = System.nanoTime();
                 int size = 0;
                 long time = 0;
-                if (sizeForFavorites > 0) {
-                    drawTextWithShadow(matrices, font, new TranslatableText("text.rei.favorites"), innerBounds.x + 2, (int) (innerBounds.y + 8 - scrolling.scrollAmount), -1);
-                    nextIndex += innerBounds.width / entrySize();
-                    back1:
-                    for (EntryStack stack : favorites) {
-                        while (true) {
-                            EntryListEntry entry = entries.get(nextIndex);
-                            entry.getBounds().y = (int) (entry.backupY - scrolling.scrollAmount);
-                            if (entry.getBounds().y > bounds.getMaxY())
-                                break back1;
-                            if (notSteppingOnExclusionZones(entry.getBounds().x, entry.getBounds().y, innerBounds)) {
-                                entry.entry(stack);
-                                entry.isFavorites = true;
-                                size++;
-                                long l = System.currentTimeMillis();
-                                entry.render(matrices, mouseX, mouseY, delta);
-                                time += (System.currentTimeMillis() - l);
-                                nextIndex++;
-                                break;
-                            } else {
-                                blockedCount++;
-                                nextIndex++;
-                            }
-                        }
-                    }
-                    nextIndex += innerBounds.width / -entrySize() + getScrollNumberForFavorites() - favorites.size();
-                }
-                int offset = sizeForFavorites > 0 ? -12 : 0;
                 back:
                 for (; i < allStacks.size(); i++) {
                     EntryStack stack = allStacks.get(i);
                     while (true) {
                         EntryListEntry entry = entries.get(nextIndex);
-                        entry.getBounds().y = (int) (entry.backupY - scrolling.scrollAmount + offset);
+                        entry.getBounds().y = (int) (entry.backupY - scrolling.scrollAmount);
                         if (entry.getBounds().y > bounds.getMaxY())
                             break back;
                         if (notSteppingOnExclusionZones(entry.getBounds().x, entry.getBounds().y, innerBounds)) {
                             entry.entry(stack);
-                            entry.isFavorites = false;
                             if (!entry.getCurrentEntry().isEmpty()) {
                                 size++;
                                 long l = System.nanoTime();
@@ -270,42 +219,16 @@ public class EntryListWidget extends WidgetWithBounds {
                 setZ(z);
                 matrices.pop();
             } else {
-                if (sizeForFavorites > 0) {
-                    drawTextWithShadow(matrices, font, new TranslatableText("text.rei.favorites"), innerBounds.x + 2, (int) (innerBounds.y + 8 - scrolling.scrollAmount), -1);
-                    nextIndex += innerBounds.width / entrySize();
-                    back1:
-                    for (EntryStack stack : favorites) {
-                        while (true) {
-                            EntryListEntry entry = entries.get(nextIndex);
-                            entry.getBounds().y = (int) (entry.backupY - scrolling.scrollAmount);
-                            if (entry.getBounds().y > bounds.getMaxY())
-                                break back1;
-                            if (notSteppingOnExclusionZones(entry.getBounds().x, entry.getBounds().y, innerBounds)) {
-                                entry.entry(stack);
-                                entry.isFavorites = true;
-                                entry.render(matrices, mouseX, mouseY, delta);
-                                nextIndex++;
-                                break;
-                            } else {
-                                blockedCount++;
-                                nextIndex++;
-                            }
-                        }
-                    }
-                    nextIndex += innerBounds.width / -entrySize() + getScrollNumberForFavorites() - favorites.size();
-                }
-                int offset = sizeForFavorites > 0 ? -12 : 0;
                 back:
                 for (; i < allStacks.size(); i++) {
                     EntryStack stack = allStacks.get(i);
                     while (true) {
                         EntryListEntry entry = entries.get(nextIndex);
-                        entry.getBounds().y = (int) (entry.backupY - scrolling.scrollAmount + offset);
+                        entry.getBounds().y = (int) (entry.backupY - scrolling.scrollAmount);
                         if (entry.getBounds().y > bounds.getMaxY())
                             break back;
                         if (notSteppingOnExclusionZones(entry.getBounds().x, entry.getBounds().y, innerBounds)) {
                             entry.entry(stack);
-                            entry.isFavorites = false;
                             entry.render(matrices, mouseX, mouseY, delta);
                             nextIndex++;
                             break;
@@ -481,7 +404,7 @@ public class EntryListWidget extends WidgetWithBounds {
             favoritesListWidget.updateFavoritesBounds(boundsHandler, searchTerm);
         if (searchTerm != null)
             updateSearch(searchTerm, true);
-        else if (allStacks == null || favorites == null || (favoritesListWidget != null && favoritesListWidget.favorites == null))
+        else if (allStacks == null || (favoritesListWidget != null && favoritesListWidget.favorites == null))
             updateSearch("", true);
         else
             updateEntriesPosition();
@@ -503,36 +426,19 @@ public class EntryListWidget extends WidgetWithBounds {
                 }
             }
             page = Math.max(Math.min(page, getTotalPages() - 1), 0);
-            int numberForFavorites = getScrollNumberForFavorites();
-            List<EntryStack> subList = allStacks.stream().skip(Math.max(0, page * entries.size() - numberForFavorites)).limit(Math.max(0, entries.size() - Math.max(0, numberForFavorites - page * entries.size()))).collect(Collectors.toList());
+            List<EntryStack> subList = allStacks.stream().skip(Math.max(0, page * entries.size())).limit(Math.max(0, entries.size() - Math.max(0, -page * entries.size()))).collect(Collectors.toList());
             for (int i = 0; i < subList.size(); i++) {
                 EntryStack stack = subList.get(i);
-                entries.get(i + Math.max(0, numberForFavorites - page * entries.size())).clearStacks().entry(stack);
-                entries.get(i + Math.max(0, numberForFavorites - page * entries.size())).isFavorites = false;
+                entries.get(i + Math.max(0, -page * entries.size())).clearStacks().entry(stack);
             }
             this.entries = entries;
-            if (numberForFavorites > 0) {
-                int skippedFavorites = page * (entries.size() - width);
-                int j = 0;
-                if (skippedFavorites < favorites.size()) {
-                    renders.add(Widgets.createLabel(new Point(innerBounds.x + 2, innerBounds.y + 6), new TranslatableText("text.rei.favorites")).leftAligned());
-                    j += width;
-                }
-                List<EntryStack> subFavoritesList = favorites.stream().skip(skippedFavorites).limit(Math.max(0, entries.size() - width)).collect(Collectors.toList());
-                for (EntryStack stack : subFavoritesList) {
-                    entries.get(j).clearStacks().entry(stack);
-                    entries.get(j).isFavorites = true;
-                    j++;
-                }
-            }
             this.widgets = Lists.newArrayList(renders);
             this.widgets.addAll(entries);
         } else {
             page = 0;
             int width = innerBounds.width / entrySize();
             int pageHeight = innerBounds.height / entrySize();
-            int sizeForFavorites = getScrollNumberForFavorites();
-            int slotsToPrepare = Math.max(allStacks.size() * 3 + sizeForFavorites * 3, width * pageHeight * 3);
+            int slotsToPrepare = Math.max(allStacks.size() * 3, width * pageHeight * 3);
             int currentX = 0;
             int currentY = 0;
             List<EntryListEntry> entries = Lists.newArrayList();
@@ -622,27 +528,6 @@ public class EntryListWidget extends WidgetWithBounds {
                 Collections.reverse(list);
             allStacks = list;
         }
-        if (ConfigObject.getInstance().isFavoritesEnabled() && !ConfigObject.getInstance().doDisplayFavoritesOnTheLeft()) {
-            List<EntryStack> list = Lists.newArrayList();
-            boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
-            List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
-            for (EntryStack stack : ConfigObject.getInstance().getFavorites()) {
-                if (canLastSearchTermsBeAppliedTo(stack)) {
-                    if (workingItems != null && CollectionUtils.findFirstOrNullEqualsEntryIgnoreAmount(workingItems, stack) == null)
-                        continue;
-                    list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
-                }
-            }
-            ItemListOrdering ordering = ConfigObject.getInstance().getItemListOrdering();
-            if (ordering == ItemListOrdering.name)
-                list.sort(ENTRY_NAME_COMPARER);
-            if (ordering == ItemListOrdering.item_groups)
-                list.sort(ENTRY_GROUP_COMPARER);
-            if (!ConfigObject.getInstance().isItemListAscending())
-                Collections.reverse(list);
-            favorites = list;
-        } else
-            favorites = Collections.emptyList();
         debugTime = ConfigObject.getInstance().doDebugRenderTimeRequired();
         FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
         if (favoritesListWidget != null)
@@ -687,7 +572,6 @@ public class EntryListWidget extends WidgetWithBounds {
     
     private class EntryListEntry extends EntryWidget {
         private int backupY;
-        private boolean isFavorites;
         
         private EntryListEntry(int x, int y) {
             super(new Point(x, y));
@@ -716,11 +600,6 @@ public class EntryListWidget extends WidgetWithBounds {
             if (!ClientHelper.getInstance().isCheating() || minecraft.player.inventory.getCursorStack().isEmpty()) {
                 super.queueTooltip(matrices, mouseX, mouseY, delta);
             }
-        }
-        
-        @Override
-        protected boolean reverseFavoritesAction() {
-            return isFavorites;
         }
         
         @Override

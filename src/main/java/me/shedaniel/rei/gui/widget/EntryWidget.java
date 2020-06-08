@@ -354,9 +354,9 @@ public class EntryWidget extends Slot {
             return false;
         if (containsMouse(mouseX, mouseY)) {
             if (button == 0)
-                return ClientHelper.getInstance().executeRecipeKeyBind(getCurrentEntry());
+                return ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addRecipesFor(getCurrentEntry()).setOutputNotice(getCurrentEntry()).fillPreferredOpenedCategory());
             else if (button == 1)
-                return ClientHelper.getInstance().executeUsageKeyBind(getCurrentEntry());
+                return ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addUsagesFor(getCurrentEntry()).setInputNotice(getCurrentEntry()).fillPreferredOpenedCategory());
         }
         return false;
     }
@@ -380,20 +380,16 @@ public class EntryWidget extends Slot {
                     else if (!CollectionUtils.anyMatchEqualsEntryIgnoreAmount(ConfigObject.getInstance().getFavorites(), entry))
                         ConfigObject.getInstance().getFavorites().add(entry);
                     ConfigManager.getInstance().saveConfig();
-                    if (ConfigObject.getInstance().doDisplayFavoritesOnTheLeft()) {
-                        FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
-                        if (favoritesListWidget != null)
-                            favoritesListWidget.updateSearch(ContainerScreenOverlay.getEntryListWidget(), ScreenHelper.getSearchField().getText());
-                    } else {
-                        ContainerScreenOverlay.getEntryListWidget().updateSearch(ScreenHelper.getSearchField().getText());
-                    }
+                    FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
+                    if (favoritesListWidget != null)
+                        favoritesListWidget.updateSearch(ContainerScreenOverlay.getEntryListWidget(), ScreenHelper.getSearchField().getText());
                     return true;
                 }
             }
             if (ConfigObject.getInstance().getRecipeKeybind().matchesKey(int_1, int_2))
-                return ClientHelper.getInstance().executeRecipeKeyBind(getCurrentEntry());
+                return ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addRecipesFor(getCurrentEntry()).setOutputNotice(getCurrentEntry()).fillPreferredOpenedCategory());
             else if (ConfigObject.getInstance().getUsageKeybind().matchesKey(int_1, int_2))
-                return ClientHelper.getInstance().executeUsageKeyBind(getCurrentEntry());
+                return ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addUsagesFor(getCurrentEntry()).setInputNotice(getCurrentEntry()).fillPreferredOpenedCategory());
         }
         return false;
     }
