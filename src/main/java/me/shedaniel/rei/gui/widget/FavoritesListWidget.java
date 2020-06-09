@@ -166,10 +166,10 @@ public class FavoritesListWidget extends WidgetWithBounds {
     
     public void updateSearch(EntryListWidget listWidget, String searchTerm) {
         if (ConfigObject.getInstance().isFavoritesEnabled() && ConfigObject.getInstance().doDisplayFavoritesOnTheLeft()) {
+            List<EntryStack> list = Lists.newArrayList();
+            boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
+            List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
             if (ConfigObject.getInstance().doSearchFavorites()) {
-                List<EntryStack> list = Lists.newArrayList();
-                boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
-                List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
                 for (EntryStack stack : ConfigObject.getInstance().getFavorites()) {
                     if (listWidget.canLastSearchTermsBeAppliedTo(stack)) {
                         if (checkCraftable && CollectionUtils.findFirstOrNullEqualsEntryIgnoreAmount(workingItems, stack) == null)
@@ -177,32 +177,14 @@ public class FavoritesListWidget extends WidgetWithBounds {
                         list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
                     }
                 }
-                ItemListOrdering ordering = ConfigObject.getInstance().getItemListOrdering();
-                if (ordering == ItemListOrdering.name)
-                    list.sort(ENTRY_NAME_COMPARER);
-                if (ordering == ItemListOrdering.item_groups)
-                    list.sort(ENTRY_GROUP_COMPARER);
-                if (!ConfigObject.getInstance().isItemListAscending())
-                    Collections.reverse(list);
-                favorites = list;
             } else {
-                List<EntryStack> list = Lists.newArrayList();
-                boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
-                List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
                 for (EntryStack stack : ConfigObject.getInstance().getFavorites()) {
                     if (checkCraftable && CollectionUtils.findFirstOrNullEqualsEntryIgnoreAmount(workingItems, stack) == null)
                         continue;
                     list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
                 }
-                ItemListOrdering ordering = ConfigObject.getInstance().getItemListOrdering();
-                if (ordering == ItemListOrdering.name)
-                    list.sort(ENTRY_NAME_COMPARER);
-                if (ordering == ItemListOrdering.item_groups)
-                    list.sort(ENTRY_GROUP_COMPARER);
-                if (!ConfigObject.getInstance().isItemListAscending())
-                    Collections.reverse(list);
-                favorites = list;
             }
+            favorites = list;
         } else
             favorites = Collections.emptyList();
     }
