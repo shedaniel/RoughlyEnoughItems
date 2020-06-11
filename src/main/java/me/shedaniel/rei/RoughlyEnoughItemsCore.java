@@ -25,7 +25,7 @@ package me.shedaniel.rei;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import me.shedaniel.cloth.hooks.ClothClientHooks;
+import me.shedaniel.cloth.api.client.events.v0.ClothClientHooks;
 import me.shedaniel.math.api.Executor;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
@@ -321,14 +321,14 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             if (screen instanceof ContainerScreen)
                 ScreenHelper.setPreviousContainerScreen((ContainerScreen<?>) screen);
             boolean alreadyAdded = false;
-            for (Element element : Lists.newArrayList(screenHooks.cloth_getChildren()))
+            for (Element element : Lists.newArrayList(screenHooks.cloth$getChildren()))
                 if (ContainerScreenOverlay.class.isAssignableFrom(element.getClass()))
                     if (alreadyAdded)
-                        screenHooks.cloth_getChildren().remove(element);
+                        screenHooks.cloth$getChildren().remove(element);
                     else
                         alreadyAdded = true;
             if (!alreadyAdded)
-                screenHooks.cloth_getChildren().add(ScreenHelper.getLastOverlay(true, false));
+                screenHooks.cloth$getChildren().add(ScreenHelper.getLastOverlay(true, false));
         });
         ClothClientHooks.SCREEN_RENDER_POST.register((matrices, minecraftClient, screen, i, i1, v) -> {
             if (shouldReturn(screen))

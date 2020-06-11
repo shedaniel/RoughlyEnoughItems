@@ -23,19 +23,18 @@
 
 package me.shedaniel.rei.gui.config;
 
+import me.shedaniel.clothconfig2.gui.entries.SelectionListEntry;
 import net.minecraft.client.resource.language.I18n;
-import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 
-@ApiStatus.Internal
-public enum SearchFieldLocation {
-    CENTER,
-    BOTTOM_SIDE,
-    TOP_SIDE;
+public enum ConfigButtonPosition implements SelectionListEntry.Translatable {
+    UPPER,
+    LOWER;
     
     @Override
-    public String toString() {
-        return I18n.translate("config.roughlyenoughitems.layout.searchFieldLocation.%s", name().toLowerCase(Locale.ROOT));
+    public @NotNull String getKey() {
+        return I18n.translate("config.roughlyenoughitems.layout.configButtonLocation." + name().toLowerCase(Locale.ROOT));
     }
 }

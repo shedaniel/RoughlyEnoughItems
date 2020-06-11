@@ -26,7 +26,7 @@ package me.shedaniel.rei.impl;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import me.shedaniel.cloth.hooks.ClothClientHooks;
+import me.shedaniel.cloth.api.client.events.v0.ClothClientHooks;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.api.Executor;
 import me.shedaniel.rei.RoughlyEnoughItemsState;

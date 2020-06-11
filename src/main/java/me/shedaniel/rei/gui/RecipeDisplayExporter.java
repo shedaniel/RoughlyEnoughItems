@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.gui;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.gui.toast.ExportRecipeIdentifierToast;
@@ -36,7 +35,7 @@ import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.resource.ResourceImpl;
+import net.minecraft.util.Util;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.io.File;
@@ -105,7 +104,7 @@ public final class RecipeDisplayExporter extends Widget {
                 strippedImage.setPixelRgba(x, y, nativeImage.getPixelRgba(x + (int) (rectangle.x * window.getScaleFactor()), y + (int) (rectangle.y * window.getScaleFactor())));
             }
         }
-        ResourceImpl.RESOURCE_IO_EXECUTOR.execute(() -> {
+        Util.method_27958().execute(() -> {
             try {
                 File export = new File(minecraft.runDirectory, "rei_exports");
                 export.mkdirs();

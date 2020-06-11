@@ -25,59 +25,62 @@ package me.shedaniel.rei.gui.config.entry;
 
 import com.google.common.collect.ImmutableList;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
-import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.api.RecipeHelper;
+import me.shedaniel.rei.gui.ConfigReloadingScreen;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.NarratorManager;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Unit;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 @ApiStatus.Internal
-public class NoFilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
+public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
     private int width;
-    private Consumer<List<EntryStack>> saveConsumer;
-    private List<EntryStack> defaultValue;
-    private List<EntryStack> configFiltered;
-    private final AbstractButtonWidget buttonWidget = new ButtonWidget(0, 0, 0, 20, new TranslatableText("config.roughlyenoughitems.filteredEntries.loadWorldFirst"), button -> {});
-    private final List<Element> children = ImmutableList.of(buttonWidget);
+    private AbstractButtonWidget buttonWidget = new ButtonWidget(0, 0, 0, 20, NarratorManager.EMPTY, button -> RoughlyEnoughItemsCore.syncRecipes(null)) {
+        @Override
+        public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+            if (RecipeHelper.getInstance().arePluginsLoading()) {
+                MinecraftClient.getInstance().openScreen(new ConfigReloadingScreen(MinecraftClient.getInstance().currentScreen));
+            } else
+                super.render(matrices, mouseX, mouseY, delta);
+        }
+    };
+    private List<Element> children = ImmutableList.of(buttonWidget);
     
-    public NoFilteringEntry(int width,List<EntryStack> configFiltered, List<EntryStack> defaultValue, Consumer<List<EntryStack>> saveConsumer) {
+    public ReloadPluginsEntry(int width) {
         super(NarratorManager.EMPTY, false);
         this.width = width;
-        this.configFiltered = configFiltered;
-        this.defaultValue = defaultValue;
-        this.saveConsumer = saveConsumer;
+        buttonWidget.setMessage(new TranslatableText("text.rei.reload_config"));
     }
     
     @Override
-    public List<EntryStack> getValue() {
-        return configFiltered;
+    public Unit getValue() {
+        return Unit.INSTANCE;
     }
     
     @Override
-    public Optional<List<EntryStack>> getDefaultValue() {
-        return Optional.ofNullable(defaultValue);
+    public Optional<Unit> getDefaultValue() {
+        return Optional.of(Unit.INSTANCE);
     }
     
     @Override
     public void save() {
-        saveConsumer.accept(getValue());
+        
     }
     
     @Override
     public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
         Window window = MinecraftClient.getInstance().getWindow();
-        this.buttonWidget.active = false;
+        this.buttonWidget.active = this.isEditable();
         this.buttonWidget.y = y;
         this.buttonWidget.x = x + entryWidth / 2 - width / 2;
         this.buttonWidget.setWidth(width);

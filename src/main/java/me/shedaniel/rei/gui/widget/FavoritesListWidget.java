@@ -34,7 +34,7 @@ import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.widgets.Tooltip;
-import me.shedaniel.rei.gui.config.ItemListOrdering;
+import me.shedaniel.rei.gui.config.EntryPanelOrdering;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
@@ -183,10 +183,10 @@ public class FavoritesListWidget extends WidgetWithBounds {
                         list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
                     }
                 }
-                ItemListOrdering ordering = ConfigObject.getInstance().getItemListOrdering();
-                if (ordering == ItemListOrdering.name)
+                EntryPanelOrdering ordering = ConfigObject.getInstance().getItemListOrdering();
+                if (ordering == EntryPanelOrdering.NAME)
                     list.sort(ENTRY_NAME_COMPARER);
-                if (ordering == ItemListOrdering.item_groups)
+                if (ordering == EntryPanelOrdering.GROUPS)
                     list.sort(ENTRY_GROUP_COMPARER);
                 if (!ConfigObject.getInstance().isItemListAscending())
                     Collections.reverse(list);
@@ -200,10 +200,10 @@ public class FavoritesListWidget extends WidgetWithBounds {
                         continue;
                     list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
                 }
-                ItemListOrdering ordering = ConfigObject.getInstance().getItemListOrdering();
-                if (ordering == ItemListOrdering.name)
+                EntryPanelOrdering ordering = ConfigObject.getInstance().getItemListOrdering();
+                if (ordering == EntryPanelOrdering.NAME)
                     list.sort(ENTRY_NAME_COMPARER);
-                if (ordering == ItemListOrdering.item_groups)
+                if (ordering == EntryPanelOrdering.GROUPS)
                     list.sort(ENTRY_GROUP_COMPARER);
                 if (!ConfigObject.getInstance().isItemListAscending())
                     Collections.reverse(list);
