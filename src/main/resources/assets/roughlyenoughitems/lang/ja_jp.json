@@ -94,7 +94,7 @@
   "msg.rei.recipe_id_details": "Recipe ID: %s",
   "msg.rei.exported_recipe": "Exported Recipe",
   "msg.rei.exported_recipe.desc": "Check the 'rei_exports' folder.",
-  "subsets.rei.roughlyenoughitems.all_entries": "All Entries",
+  "subsets.rei.roughlyenoughitems.all_entries": "全項目",
   "subsets.rei.roughlyenoughitems.item_groups": "Creative Tabs",
   "_comment": "Tooltipsの設定",
   "config.roughlyenoughitems.title": "Roughly Enough Itemsの設定",
