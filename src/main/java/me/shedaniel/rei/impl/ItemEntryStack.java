@@ -41,6 +41,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
@@ -167,10 +168,10 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
         ItemStack otherStack = stack.getItemStack();
         CompoundTag o1 = itemStack.getTag();
         CompoundTag o2 = otherStack.getTag();
-        return o1 == o2 || ((o1 != null && o2 != null) && equals(o1, o2));
+        return o1 == o2 || ((o1 != null && o2 != null) && equalsTagWithoutCount(o1, o2));
     }
     
-    public boolean equals(CompoundTag o1, CompoundTag o2) {
+    private boolean equalsTagWithoutCount(CompoundTag o1, CompoundTag o2) {
         int o1Size = 0;
         int o2Size = 0;
         for (String key : o1.getKeys()) {
@@ -194,21 +195,34 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
                     continue;
                 Tag value = o1.get(key);
                 Tag otherValue = o2.get(key);
-                if (value == null) {
-                    if (!(otherValue == null && o2.contains(key)))
-                        return false;
-                } else if (value instanceof CompoundTag && otherValue instanceof CompoundTag) {
-                    if (!(value == otherValue || (value != null && otherValue != null) && equals((CompoundTag) value, (CompoundTag) otherValue)))
-                        return false;
-                } else {
-                    if (!value.asString().equals(otherValue.asString()))
-                        return false;
-                }
+                if (!equalsTag(value, otherValue))
+                    return false;
             }
         } catch (ClassCastException | NullPointerException unused) {
             return false;
         }
         
+        return true;
+    }
+    
+    private boolean equalsTag(Tag tag, Tag otherTag) {
+        if (tag == null || otherTag == null) {
+            return tag == otherTag;
+        }
+        if (tag instanceof ListTag && otherTag instanceof ListTag)
+            return equalsList((ListTag) tag, (ListTag) otherTag);
+        return tag.equals(otherTag);
+    }
+    
+    private boolean equalsList(ListTag listTag, ListTag otherListTag) {
+        if (listTag.size() != otherListTag.size())
+            return false;
+        for (int i = 0; i < listTag.size(); i++) {
+            Tag value = listTag.get(i);
+            Tag otherValue = otherListTag.get(i);
+            if (!equalsTag(value, otherValue))
+                return false;
+        }
         return true;
     }
     

@@ -376,7 +376,7 @@ public class EntryWidget extends Slot {
                 entry.setAmount(127);
                 if (keyCode.matchesKey(int_1, int_2)) {
                     if (reverseFavoritesAction())
-                        ConfigObject.getInstance().getFavorites().remove(entry);
+                        ConfigObject.getInstance().getFavorites().removeIf(entry::equalsIgnoreAmount);
                     else if (!CollectionUtils.anyMatchEqualsEntryIgnoreAmount(ConfigObject.getInstance().getFavorites(), entry))
                         ConfigObject.getInstance().getFavorites().add(entry);
                     ConfigManager.getInstance().saveConfig();
