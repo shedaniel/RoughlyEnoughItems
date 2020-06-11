@@ -47,11 +47,11 @@ public class RecipeScreenTypeEntry extends TooltipListEntry<RecipeScreenType> {
     private RecipeScreenType type;
     private RecipeScreenType defaultValue;
     private Consumer<RecipeScreenType> save;
-    private AbstractButtonWidget buttonWidget = new AbstractPressableButtonWidget(0, 0, 0, 20, NarratorManager.EMPTY) {
+    private final AbstractButtonWidget buttonWidget = new AbstractPressableButtonWidget(0, 0, 0, 20, NarratorManager.EMPTY) {
         @Override
         public void onPress() {
-            MinecraftClient.getInstance().openScreen(new PreRecipeViewingScreen(getScreen(), type, false, original -> {
-                MinecraftClient.getInstance().openScreen(getScreen());
+            MinecraftClient.getInstance().openScreen(new PreRecipeViewingScreen(getConfigScreen(), type, false, original -> {
+                MinecraftClient.getInstance().openScreen(getConfigScreen());
                 type = original ? RecipeScreenType.ORIGINAL : RecipeScreenType.VILLAGER;
             }));
         }
@@ -62,7 +62,7 @@ public class RecipeScreenTypeEntry extends TooltipListEntry<RecipeScreenType> {
             super.render(matrices, mouseX, mouseY, delta);
         }
     };
-    private List<Element> children = ImmutableList.of(buttonWidget);
+    private final List<Element> children = ImmutableList.of(buttonWidget);
     
     @SuppressWarnings("deprecation")
     public RecipeScreenTypeEntry(int width, Text fieldName, RecipeScreenType type, RecipeScreenType defaultValue, Consumer<RecipeScreenType> save) {

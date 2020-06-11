@@ -35,25 +35,24 @@ import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.Jankson;
 import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.JsonObject;
 import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.JsonPrimitive;
 import me.sargunvohra.mcmods.autoconfig1u.util.Utils;
-import me.shedaniel.cloth.hooks.ScreenHooks;
+import me.shedaniel.cloth.api.client.events.v0.ScreenHooks;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import me.shedaniel.clothconfig2.api.Modifier;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.clothconfig2.gui.entries.KeyCodeEntry;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.gui.ConfigReloadingScreen;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.gui.config.entry.FilteringEntry;
 import me.shedaniel.rei.gui.config.entry.NoFilteringEntry;
 import me.shedaniel.rei.gui.config.entry.RecipeScreenTypeEntry;
+import me.shedaniel.rei.gui.config.entry.ReloadPluginsEntry;
 import me.shedaniel.rei.gui.credits.CreditsScreen;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.MathHelper;
@@ -112,9 +111,9 @@ public class ConfigManagerImpl implements ConfigManager {
                 , (field) -> field.getType() == RecipeScreenType.class, ConfigObjectImpl.UseSpecialRecipeTypeScreen.class);
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) ->
                         REIHelper.getInstance().getPreviousContainerScreen() == null || MinecraftClient.getInstance().getNetworkHandler() == null || MinecraftClient.getInstance().getNetworkHandler().getRecipeManager() == null ?
-                                Collections.singletonList(new NoFilteringEntry(getUnsafely(field, config, new ArrayList<>()), getUnsafely(field, defaults), list -> setUnsafely(field, config, list)))
+                                Collections.singletonList(new NoFilteringEntry(220, getUnsafely(field, config, new ArrayList<>()), getUnsafely(field, defaults), list -> setUnsafely(field, config, list)))
                                 :
-                                Collections.singletonList(new FilteringEntry(getUnsafely(field, config, new ArrayList<>()), getUnsafely(field, defaults), list -> setUnsafely(field, config, list)))
+                                Collections.singletonList(new FilteringEntry(220, getUnsafely(field, config, new ArrayList<>()), getUnsafely(field, defaults), list -> setUnsafely(field, config, list)))
                 , (field) -> field.getType() == List.class, ConfigObjectImpl.UseFilteringScreen.class);
         saveConfig();
         RoughlyEnoughItemsCore.LOGGER.info("Config loaded.");
@@ -156,21 +155,13 @@ public class ConfigManagerImpl implements ConfigManager {
             provider.setOptionFunction((baseI13n, field) -> field.isAnnotationPresent(ConfigObjectImpl.DontApplyFieldName.class) ? baseI13n : String.format("%s.%s", baseI13n, field.getName()));
             provider.setCategoryFunction((baseI13n, categoryName) -> String.format("%s.%s", baseI13n, categoryName));
             provider.setBuildFunction(builder -> {
+                builder.setGlobalized(true);
+                builder.setGlobalizedExpanded(true);
+                if (MinecraftClient.getInstance().getNetworkHandler() != null && MinecraftClient.getInstance().getNetworkHandler().getRecipeManager() != null) {
+                    builder.getOrCreateCategory(new TranslatableText("config.roughlyenoughitems.advanced")).getEntries().add(0, new ReloadPluginsEntry(220));
+                }
                 return builder.setAfterInitConsumer(screen -> {
-                    if (MinecraftClient.getInstance().getNetworkHandler() != null && MinecraftClient.getInstance().getNetworkHandler().getRecipeManager() != null) {
-                        ((ScreenHooks) screen).cloth_addButton(new net.minecraft.client.gui.widget.ButtonWidget(4, 4, 100, 20, new TranslatableText("text.rei.reload_config"), buttonWidget -> {
-                            RoughlyEnoughItemsCore.syncRecipes(null);
-                        }) {
-                            @Override
-                            public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-                                if (RecipeHelper.getInstance().arePluginsLoading()) {
-                                    MinecraftClient.getInstance().openScreen(new ConfigReloadingScreen(MinecraftClient.getInstance().currentScreen));
-                                } else
-                                    super.render(matrices, mouseX, mouseY, delta);
-                            }
-                        });
-                    }
-                    ((ScreenHooks) screen).cloth_addButton(new ButtonWidget(screen.width - 104, 4, 100, 20, new TranslatableText("text.rei.credits"), button -> {
+                    ((ScreenHooks) screen).cloth$addButtonWidget(new ButtonWidget(screen.width - 104, 4, 100, 20, new TranslatableText("text.rei.credits"), button -> {
                         MinecraftClient.getInstance().openScreen(new CreditsScreen(screen));
                     }));
                 }).setSavingRunnable(() -> {

@@ -26,16 +26,38 @@ package me.shedaniel.rei.gui.config;
 import net.minecraft.client.resource.language.I18n;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.Locale;
-
 @ApiStatus.Internal
-public enum SearchFieldLocation {
-    CENTER,
-    BOTTOM_SIDE,
-    TOP_SIDE;
+public enum EntryPanelOrderingConfig {
+    REGISTRY_ASCENDING(EntryPanelOrdering.REGISTRY, true),
+    NAME_ASCENDING(EntryPanelOrdering.NAME, true),
+    GROUPS_ASCENDING(EntryPanelOrdering.GROUPS, true),
+    REGISTRY_DESCENDING(EntryPanelOrdering.REGISTRY, false),
+    NAME_DESCENDING(EntryPanelOrdering.NAME, false),
+    GROUPS_DESCENDING(EntryPanelOrdering.GROUPS, false);
+    
+    private EntryPanelOrdering ordering;
+    private boolean isAscending;
+    
+    EntryPanelOrderingConfig(EntryPanelOrdering ordering, boolean isAscending) {
+        this.ordering = ordering;
+        this.isAscending = isAscending;
+    }
+    
+    public static EntryPanelOrderingConfig from(EntryPanelOrdering ordering, boolean isAscending) {
+        int index = ordering.ordinal() + (isAscending ? 0 : 3);
+        return values()[index];
+    }
+    
+    public EntryPanelOrdering getOrdering() {
+        return ordering;
+    }
+    
+    public boolean isAscending() {
+        return isAscending;
+    }
     
     @Override
     public String toString() {
-        return I18n.translate("config.roughlyenoughitems.layout.searchFieldLocation.%s", name().toLowerCase(Locale.ROOT));
+        return I18n.translate("config.roughlyenoughitems.list_ordering_button", I18n.translate(getOrdering().getNameTranslationKey()), I18n.translate(isAscending ? "ordering.rei.ascending" : "ordering.rei.descending"));
     }
 }

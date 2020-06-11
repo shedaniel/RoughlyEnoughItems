@@ -46,64 +46,58 @@ import java.util.List;
 @Config(name = "roughlyenoughitems/config")
 public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
-    @ConfigEntry.Category("!general") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
-    public General general = new General();
+    @ConfigEntry.Category("basics") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
+    public Basics basics = new Basics();
     @ConfigEntry.Category("appearance") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
     private Appearance appearance = new Appearance();
-    @ConfigEntry.Category("modules") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
-    private Modules modules = new Modules();
-    @ConfigEntry.Category("technical") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
-    private Technical technical = new Technical();
-    @ConfigEntry.Category("performance") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
-    private Performance performance = new Performance();
-    @ConfigEntry.Category("filtering") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
-    private Filtering filtering = new Filtering();
-    @ConfigEntry.Category("experimental") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName @ApiStatus.Experimental
-    private Experimental experimental = new Experimental();
+    @ConfigEntry.Category("functionality") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
+    private Functionality functionality = new Functionality();
+    @ConfigEntry.Category("advanced") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
+    private Advanced advanced = new Advanced();
     
     @Override
     public boolean isOverlayVisible() {
-        return general.overlayVisible;
+        return basics.overlayVisible;
     }
     
     @Override
     public void setOverlayVisible(boolean overlayVisible) {
-        general.overlayVisible = overlayVisible;
+        basics.overlayVisible = overlayVisible;
     }
     
     @Override
     public boolean isCheating() {
-        return general.cheating;
+        return basics.cheating;
     }
     
     @Override
     public void setCheating(boolean cheating) {
-        general.cheating = cheating;
+        basics.cheating = cheating;
     }
     
     @Override
-    public ItemListOrdering getItemListOrdering() {
-        return appearance.itemListOrdering.getOrdering();
+    public EntryPanelOrdering getItemListOrdering() {
+        return advanced.layout.entryPanelOrdering.getOrdering();
     }
     
     @Override
     public boolean isItemListAscending() {
-        return appearance.itemListOrdering.isAscending();
+        return advanced.layout.entryPanelOrdering.isAscending();
     }
     
     @Override
     public boolean isUsingDarkTheme() {
-        return appearance.darkTheme;
+        return appearance.theme == AppearanceTheme.DARK;
     }
     
     @Override
     public boolean isToastDisplayedOnCopyIdentifier() {
-        return modules.toastDisplayedOnCopyIdentifier;
+        return advanced.accessibility.toastDisplayedOnCopyIdentifier;
     }
     
     @Override
     public boolean doesRenderEntryEnchantmentGlint() {
-        return performance.renderEntryEnchantmentGlint;
+        return advanced.miscellaneous.renderEntryEnchantmentGlint;
     }
     
     @Override
@@ -113,7 +107,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     @Override
     public boolean shouldAppendModNames() {
-        return appearance.appendModNames;
+        return advanced.tooltips.appendModNames;
     }
     
     @Override
@@ -128,62 +122,62 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     @Override
     public boolean isLoadingDefaultPlugin() {
-        return technical.loadDefaultPlugin;
+        return advanced.miscellaneous.loadDefaultPlugin;
     }
     
     @Override
     public SearchFieldLocation getSearchFieldLocation() {
-        return appearance.searchFieldLocation;
+        return appearance.layout.searchFieldLocation;
     }
     
     @Override
     public boolean isLeftHandSidePanel() {
-        return appearance.mirrorItemPanel;
+        return advanced.accessibility.displayPanelLocation == DisplayPanelLocation.LEFT;
     }
     
     @Override
     public boolean isCraftableFilterEnabled() {
-        return modules.enableCraftableOnlyButton;
+        return appearance.layout.enableCraftableOnlyButton;
     }
     
     @Override
     public String getGamemodeCommand() {
-        return technical.gamemodeCommand;
+        return advanced.commands.gamemodeCommand;
     }
     
     @Override
     public String getGiveCommand() {
-        return technical.giveCommand;
+        return advanced.commands.giveCommand;
     }
     
     @Override
     public String getWeatherCommand() {
-        return technical.weatherCommand;
+        return advanced.commands.weatherCommand;
     }
     
     @Override
     public int getMaxRecipePerPage() {
-        return appearance.maxRecipesPerPage;
+        return advanced.layout.maxRecipesPerPage;
     }
     
     @Override
     public boolean doesShowUtilsButtons() {
-        return modules.showUtilsButtons;
+        return appearance.layout.showUtilsButtons;
     }
     
     @Override
     public boolean doesDisableRecipeBook() {
-        return modules.disableRecipeBook;
+        return functionality.disableRecipeBook;
     }
     
     @Override
     public boolean doesFixTabCloseContainer() {
-        return modules.fixTabCloseContainer;
+        return functionality.disableRecipeBook;
     }
     
     @Override
     public boolean areClickableRecipeArrowsEnabled() {
-        return appearance.clickableRecipeArrows;
+        return advanced.miscellaneous.clickableRecipeArrows;
     }
     
     @Override
@@ -193,147 +187,141 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     @Override
     public boolean doesVillagerScreenHavePermanentScrollBar() {
-        return appearance.villagerScreenPermanentScrollBar;
+        return advanced.accessibility.villagerScreenPermanentScrollBar;
     }
     
     @Override
     public boolean doesRegisterRecipesInAnotherThread() {
-        return technical.registerRecipesInAnotherThread;
+        return advanced.miscellaneous.registerRecipesInAnotherThread;
     }
     
     @Override
     public boolean doesSnapToRows() {
-        return appearance.snapToRows;
+        return advanced.accessibility.snapToRows;
     }
     
     @Override
     public boolean isFavoritesEnabled() {
-        return general.favoritesEnabled;
+        return basics.favoritesEnabled;
     }
     
     @Override
     public boolean doDisplayFavoritesTooltip() {
-        return isFavoritesEnabled() && appearance.displayFavoritesTooltip;
+        return isFavoritesEnabled() && advanced.tooltips.displayFavoritesTooltip;
     }
     
     @Override
     public boolean doesFastEntryRendering() {
-        return performance.newFastEntryRendering;
+        return advanced.miscellaneous.newFastEntryRendering;
     }
     
     @Override
     public boolean doDebugRenderTimeRequired() {
-        return technical.debugRenderTimeRequired;
+        return advanced.layout.debugRenderTimeRequired;
     }
     
     @Override
     public boolean doSearchFavorites() {
-        return appearance.searchFavorites;
+        return advanced.search.searchFavorites;
     }
     
     @Override
     public ModifierKeyCode getFavoriteKeyCode() {
-        return general.favoriteKeybind == null ? ModifierKeyCode.unknown() : general.favoriteKeybind;
+        return basics.keyBindings.favoriteKeybind == null ? ModifierKeyCode.unknown() : basics.keyBindings.favoriteKeybind;
     }
     
     @Override
     public ModifierKeyCode getRecipeKeybind() {
-        return general.recipeKeybind == null ? ModifierKeyCode.unknown() : general.recipeKeybind;
+        return basics.keyBindings.recipeKeybind == null ? ModifierKeyCode.unknown() : basics.keyBindings.recipeKeybind;
     }
     
     @Override
     public ModifierKeyCode getUsageKeybind() {
-        return general.usageKeybind == null ? ModifierKeyCode.unknown() : general.usageKeybind;
+        return basics.keyBindings.usageKeybind == null ? ModifierKeyCode.unknown() : basics.keyBindings.usageKeybind;
     }
     
     @Override
     public ModifierKeyCode getHideKeybind() {
-        return general.hideKeybind == null ? ModifierKeyCode.unknown() : general.hideKeybind;
+        return basics.keyBindings.hideKeybind == null ? ModifierKeyCode.unknown() : basics.keyBindings.hideKeybind;
     }
     
     @Override
     public ModifierKeyCode getPreviousPageKeybind() {
-        return general.previousPageKeybind == null ? ModifierKeyCode.unknown() : general.previousPageKeybind;
+        return basics.keyBindings.previousPageKeybind == null ? ModifierKeyCode.unknown() : basics.keyBindings.previousPageKeybind;
     }
     
     @Override
     public ModifierKeyCode getNextPageKeybind() {
-        return general.nextPageKeybind == null ? ModifierKeyCode.unknown() : general.nextPageKeybind;
+        return basics.keyBindings.nextPageKeybind == null ? ModifierKeyCode.unknown() : basics.keyBindings.nextPageKeybind;
     }
     
     @Override
     public ModifierKeyCode getFocusSearchFieldKeybind() {
-        return general.focusSearchFieldKeybind == null ? ModifierKeyCode.unknown() : general.focusSearchFieldKeybind;
+        return basics.keyBindings.focusSearchFieldKeybind == null ? ModifierKeyCode.unknown() : basics.keyBindings.focusSearchFieldKeybind;
     }
     
     @Override
     public ModifierKeyCode getCopyRecipeIdentifierKeybind() {
-        return general.copyRecipeIdentifierKeybind == null ? ModifierKeyCode.unknown() : general.copyRecipeIdentifierKeybind;
+        return basics.keyBindings.copyRecipeIdentifierKeybind == null ? ModifierKeyCode.unknown() : basics.keyBindings.copyRecipeIdentifierKeybind;
     }
     
     @Override
     public ModifierKeyCode getExportImageKeybind() {
-        return general.exportImageKeybind == null ? ModifierKeyCode.unknown() : general.exportImageKeybind;
+        return basics.keyBindings.exportImageKeybind == null ? ModifierKeyCode.unknown() : basics.keyBindings.exportImageKeybind;
     }
     
     @Override
     public double getEntrySize() {
-        return appearance.entrySize;
-    }
-    
-    @Deprecated
-    @Override
-    public General getGeneral() {
-        return general;
+        return advanced.accessibility.entrySize;
     }
     
     @Override
     public boolean isUsingCompactTabs() {
-        return appearance.useCompactTabs;
+        return advanced.accessibility.useCompactTabs;
     }
     
     @Override
     public boolean isLowerConfigButton() {
-        return appearance.lowerConfigButton;
+        return appearance.layout.configButtonLocation == ConfigButtonPosition.LOWER;
     }
     
     @Override
     public List<EntryStack> getFavorites() {
-        return general.favorites;
+        return basics.favorites;
     }
     
     @Override
     public List<EntryStack> getFilteredStacks() {
-        return filtering.filteredStacks;
+        return advanced.filtering.filteredStacks;
     }
     
     @Override
     @ApiStatus.Experimental
     public boolean shouldAsyncSearch() {
-        return performance.asyncSearch;
+        return advanced.search.asyncSearch;
     }
     
     @Override
     @ApiStatus.Experimental
     public int getNumberAsyncSearch() {
-        return performance.numberAsyncSearch;
+        return advanced.search.numberAsyncSearch;
     }
     
     @Override
     @ApiStatus.Experimental
     public boolean doDebugSearchTimeRequired() {
-        return technical.debugSearchTimeRequired;
+        return advanced.search.debugSearchTimeRequired;
     }
     
     @Override
     @ApiStatus.Experimental
     public boolean isSubsetsEnabled() {
-        return experimental.isSubsetsEnabled;
+        return functionality.isSubsetsEnabled;
     }
     
     @Override
     public boolean shouldResizeDynamically() {
-        return appearance.resizeDynamically;
+        return advanced.accessibility.resizeDynamically;
     }
     
     @Retention(RetentionPolicy.RUNTIME)
@@ -356,11 +344,16 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         double max();
     }
     
-    public static class General {
+    public static class Basics {
         @ConfigEntry.Gui.Excluded public List<EntryStack> favorites = new ArrayList<>();
         @Comment("Declares whether cheating mode is on.") private boolean cheating = false;
-        @Comment("Declares whether REI is visible.") @ConfigEntry.Gui.Excluded private boolean overlayVisible = true;
         private boolean favoritesEnabled = true;
+        @ConfigEntry.Gui.CollapsibleObject(startExpanded = true)
+        private KeyBindings keyBindings = new KeyBindings();
+        @Comment("Declares whether REI is visible.") @ConfigEntry.Gui.Excluded private boolean overlayVisible = true;
+    }
+    
+    public static class KeyBindings {
         private ModifierKeyCode recipeKeybind = ModifierKeyCode.of(InputUtil.Type.KEYSYM.createFromCode(82), Modifier.none());
         private ModifierKeyCode usageKeybind = ModifierKeyCode.of(InputUtil.Type.KEYSYM.createFromCode(85), Modifier.none());
         private ModifierKeyCode hideKeybind = ModifierKeyCode.of(InputUtil.Type.KEYSYM.createFromCode(79), Modifier.of(false, true, false));
@@ -374,62 +367,94 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     public static class Appearance {
         @UseSpecialRecipeTypeScreen private RecipeScreenType recipeScreenType = RecipeScreenType.UNSET;
-        @Comment("Declares the appearance of REI windows.") private boolean darkTheme = false;
-        @Comment("The ordering of the items on the item panel.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
-        private ItemListOrderingConfig itemListOrdering = ItemListOrderingConfig.REGISTRY_ASCENDING;
-        @Comment("Declares the position of the search field.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
-        private SearchFieldLocation searchFieldLocation = SearchFieldLocation.CENTER;
-        @Comment("Declares the position of the item list panel.") private boolean mirrorItemPanel = false;
-        @Comment("Declares the maximum amount of recipes displayed in a page if possible.") @ConfigEntry.BoundedDiscrete(min = 2, max = 99)
-        private int maxRecipesPerPage = 15;
-        private boolean clickableRecipeArrows = true;
+        @Comment("Declares the appearance of REI windows.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+        private AppearanceTheme theme = AppearanceTheme.LIGHT;
+        @ConfigEntry.Gui.CollapsibleObject
+        private Layout layout = new Layout();
         @Comment("Declares the appearance of recipe's border.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
         private RecipeBorderType recipeBorder = RecipeBorderType.DEFAULT;
-        @Comment("Declares whether REI should append mod names to item stacks.") private boolean appendModNames = true;
-        @Comment("Declares how the scrollbar in villager screen should act.") private boolean villagerScreenPermanentScrollBar = false;
-        @Comment("Declares whether entry list widget is scrolled.") private boolean scrollingEntryListWidget = false;
-        @Comment("Declares whether scrolled entry list widget should snap to rows.") private boolean snapToRows = false;
-        @Comment("Declares whether favorites tooltip should be displayed.") private boolean displayFavoritesTooltip = false;
-        @Comment("Declares whether favorites will be searched.") private boolean searchFavorites = true;
-        @UsePercentage(min = 0.25, max = 4.0) private double entrySize = 1.0;
-        private boolean useCompactTabs = true;
-        private boolean lowerConfigButton = true;
-        @Comment("Declares whether REI should resize its recipe window dynamically")
-        private boolean resizeDynamically = false;
+        @Comment("Declares whether entry panel is scrolled.") private boolean scrollingEntryListWidget = false;
+        
+        public static class Layout {
+            @Comment("Declares the position of the search field.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+            private SearchFieldLocation searchFieldLocation = SearchFieldLocation.CENTER;
+            @Comment("Declares the position of the config button.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+            private ConfigButtonPosition configButtonLocation = ConfigButtonPosition.LOWER;
+            @Comment("Declares whether the craftable filter button is enabled.") private boolean enableCraftableOnlyButton = false;
+            @Comment("Declares whether the utils buttons are shown.") private boolean showUtilsButtons = false;
+        }
     }
     
-    public static class Technical {
-        @Comment("To disable REI's default plugin.\nDon't change this unless you understand what you are doing!") private boolean loadDefaultPlugin = true;
-        @Comment("Declares the command used to change gamemode.") private String gamemodeCommand = "/gamemode {gamemode}";
-        @Comment("Declares the command used in servers to cheat items.") private String giveCommand = "/give {player_name} {item_identifier}{nbt} {count}";
-        @Comment("Declares the command used to change weather.") private String weatherCommand = "/weather {weather}";
-        private boolean registerRecipesInAnotherThread = true;
-        private boolean debugRenderTimeRequired = false;
-        @Comment("Experimental: Declares whether search time should be debugged.") private boolean debugSearchTimeRequired = false;
-    }
-    
-    public static class Modules {
-        @Comment("Declares whether the craftable filter button is enabled.") private boolean enableCraftableOnlyButton = false;
-        private boolean toastDisplayedOnCopyIdentifier = true;
-        @Comment("Declares whether the utils buttons are shown.") private boolean showUtilsButtons = false;
+    public static class Functionality {
         @Comment("Declares whether REI should remove the recipe book.") private boolean disableRecipeBook = false;
-        @Comment("Declares whether REI should fix closing container with tab.") private boolean fixTabCloseContainer = false;
+        @Comment("Declares whether subsets is enabled.") private boolean isSubsetsEnabled = false;
     }
     
-    public static class Performance {
-        @Comment("Whether REI should render entry's enchantment glint") private boolean renderEntryEnchantmentGlint = true;
-        private boolean newFastEntryRendering = true;
-        @Comment("Experimental: Declares whether REI should search async.") private boolean asyncSearch = true;
-        @Comment("Experimental: Declares how many entries should be grouped one async search.") @ConfigEntry.BoundedDiscrete(min = 25, max = 400)
-        private int numberAsyncSearch = 50;
-    }
-    
-    public static class Filtering {
-        @UseFilteringScreen private List<EntryStack> filteredStacks = new ArrayList<>();
-    }
-    
-    @ApiStatus.Experimental
-    public static class Experimental {
-        private boolean isSubsetsEnabled = false;
+    public static class Advanced {
+        @ConfigEntry.Gui.CollapsibleObject
+        private Tooltips tooltips = new Tooltips();
+        @ConfigEntry.Gui.CollapsibleObject
+        private Layout layout = new Layout();
+        @ConfigEntry.Gui.CollapsibleObject
+        private Accessibility accessibility = new Accessibility();
+        @ConfigEntry.Gui.CollapsibleObject
+        private Search search = new Search();
+        @ConfigEntry.Gui.CollapsibleObject
+        private Commands commands = new Commands();
+        @ConfigEntry.Gui.CollapsibleObject
+        private Miscellaneous miscellaneous = new Miscellaneous();
+        @ConfigEntry.Gui.CollapsibleObject(startExpanded = true)
+        private Filtering filtering = new Filtering();
+        
+        public static class Tooltips {
+            @Comment("Declares whether REI should append mod names to entries.") private boolean appendModNames = true;
+            @Comment("Declares whether favorites tooltip should be displayed.") private boolean displayFavoritesTooltip = false;
+        }
+        
+        public static class Layout {
+            @Comment("The ordering of the items on the entry panel.")
+            @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+            private EntryPanelOrderingConfig entryPanelOrdering = EntryPanelOrderingConfig.REGISTRY_ASCENDING;
+            @Comment("Declares the maximum amount of recipes displayed in a page if possible.") @ConfigEntry.BoundedDiscrete(min = 2, max = 99)
+            private int maxRecipesPerPage = 15;
+            @Comment("Declares whether entry rendering time should be debugged.") private boolean debugRenderTimeRequired = false;
+        }
+        
+        public static class Accessibility {
+            @UsePercentage(min = 0.25, max = 4.0) private double entrySize = 1.0;
+            @Comment("Declares the position of the entry panel.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+            private DisplayPanelLocation displayPanelLocation = DisplayPanelLocation.RIGHT;
+            @Comment("Declares whether scrolled entry panel should snap to rows.") private boolean snapToRows = false;
+            @Comment("Declares how the scrollbar in villager screen should act.") private boolean villagerScreenPermanentScrollBar = false;
+            private boolean toastDisplayedOnCopyIdentifier = true;
+            @Comment("Declares whether REI should use compact tabs for categories.") private boolean useCompactTabs = true;
+            @Comment("Declares whether REI should resize its recipe window dynamically") private boolean resizeDynamically = false;
+        }
+        
+        public static class Search {
+            @Comment("Declares whether favorites will be searched.") private boolean searchFavorites = true;
+            @Comment("Declares whether search time should be debugged.") private boolean debugSearchTimeRequired = false;
+            @Comment("Declares whether REI should search async.") private boolean asyncSearch = true;
+            @Comment("Declares how many entries should be grouped one async search.") @ConfigEntry.BoundedDiscrete(min = 25, max = 400)
+            private int numberAsyncSearch = 50;
+        }
+        
+        public static class Commands {
+            @Comment("Declares the command used to change gamemode.") private String gamemodeCommand = "/gamemode {gamemode}";
+            @Comment("Declares the command used in servers to cheat items.") private String giveCommand = "/give {player_name} {item_identifier}{nbt} {count}";
+            @Comment("Declares the command used to change weather.") private String weatherCommand = "/weather {weather}";
+        }
+        
+        public static class Miscellaneous {
+            @Comment("Declares whether arrows in containers should be clickable.") private boolean clickableRecipeArrows = true;
+            @Comment("To disable REI's default plugin.\nDon't change this unless you understand what you are doing!") private boolean loadDefaultPlugin = true;
+            private boolean registerRecipesInAnotherThread = true;
+            @Comment("Whether REI should render entry's enchantment glint") private boolean renderEntryEnchantmentGlint = true;
+            private boolean newFastEntryRendering = true;
+        }
+        
+        public static class Filtering {
+            @UseFilteringScreen private List<EntryStack> filteredStacks = new ArrayList<>();
+        }
     }
 }

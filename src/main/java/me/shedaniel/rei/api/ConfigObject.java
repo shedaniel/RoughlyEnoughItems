@@ -24,12 +24,11 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
-import me.shedaniel.rei.gui.config.ItemListOrdering;
+import me.shedaniel.rei.gui.config.EntryPanelOrdering;
 import me.shedaniel.rei.gui.config.RecipeBorderType;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.impl.ConfigManagerImpl;
-import me.shedaniel.rei.impl.ConfigObjectImpl;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
@@ -51,7 +50,7 @@ public interface ConfigObject {
     
     void setCheating(boolean cheating);
     
-    ItemListOrdering getItemListOrdering();
+    EntryPanelOrdering getItemListOrdering();
     
     boolean isItemListAscending();
     
@@ -136,9 +135,6 @@ public interface ConfigObject {
     ModifierKeyCode getExportImageKeybind();
     
     double getEntrySize();
-    
-    @ApiStatus.Internal
-    ConfigObjectImpl.General getGeneral();
     
     boolean isUsingCompactTabs();
     

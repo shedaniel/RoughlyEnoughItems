@@ -23,23 +23,18 @@
 
 package me.shedaniel.rei.gui.config;
 
-import org.jetbrains.annotations.ApiStatus;
+import me.shedaniel.clothconfig2.gui.entries.SelectionListEntry;
+import net.minecraft.client.resource.language.I18n;
+import org.jetbrains.annotations.NotNull;
 
-@ApiStatus.Internal
-public enum ItemListOrdering {
+import java.util.Locale;
+
+public enum DisplayPanelLocation implements SelectionListEntry.Translatable {
+    LEFT,
+    RIGHT;
     
-    registry("ordering.rei.registry"),
-    name("ordering.rei.name"),
-    item_groups("ordering.rei.item_groups");
-    
-    private String nameTranslationKey;
-    
-    ItemListOrdering(String nameTranslationKey) {
-        this.nameTranslationKey = nameTranslationKey;
+    @Override
+    public @NotNull String getKey() {
+        return I18n.translate("config.roughlyenoughitems.accessibility.displayPanelLocation." + name().toLowerCase(Locale.ROOT));
     }
-    
-    public String getNameTranslationKey() {
-        return nameTranslationKey;
-    }
-    
 }

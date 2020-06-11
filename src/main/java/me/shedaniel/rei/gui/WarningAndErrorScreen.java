@@ -25,7 +25,6 @@ package me.shedaniel.rei.gui;
 
 import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
 import me.shedaniel.rei.RoughlyEnoughItemsState;
-import net.minecraft.class_5348;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
@@ -37,6 +36,7 @@ import net.minecraft.client.util.TextCollector;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.StringRenderable;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -70,13 +70,13 @@ public class WarningAndErrorScreen extends Screen {
     }
     
     private void addText(Text string) {
-        for (class_5348 s : textRenderer.wrapStringToWidthAsList(string, width - 80)) {
+        for (StringRenderable s : textRenderer.wrapStringToWidthAsList(string, width - 80)) {
             listWidget.creditsAddEntry(new TextItem(s));
         }
     }
     
     private void addLink(Text string, String link) {
-        for (class_5348 s : textRenderer.wrapStringToWidthAsList(string, width - 80)) {
+        for (StringRenderable s : textRenderer.wrapStringToWidthAsList(string, width - 80)) {
             listWidget.creditsAddEntry(new LinkItem(s, link));
         }
     }
@@ -214,9 +214,9 @@ public class WarningAndErrorScreen extends Screen {
     }
     
     private static class TextItem extends StringItem {
-        private class_5348 text;
+        private StringRenderable text;
         
-        public TextItem(class_5348 text) {
+        public TextItem(StringRenderable text) {
             this.text = text;
         }
         
@@ -242,11 +242,11 @@ public class WarningAndErrorScreen extends Screen {
     }
     
     private class LinkItem extends StringItem {
-        private class_5348 text;
+        private StringRenderable text;
         private String link;
         private boolean contains;
         
-        public LinkItem(class_5348 text, String link) {
+        public LinkItem(StringRenderable text, String link) {
             this.text = text;
             this.link = link;
         }
@@ -256,12 +256,12 @@ public class WarningAndErrorScreen extends Screen {
             contains = mouseX >= x && mouseX <= x + entryWidth && mouseY >= y && mouseY <= y + entryHeight;
             if (contains) {
                 WarningAndErrorScreen.this.renderTooltip(matrices, new LiteralText("Click to open link."), mouseX, mouseY);
-                class_5348 underlined = text.visit(new class_5348.StyledVisitor<class_5348>() {
+                StringRenderable underlined = text.visit(new StringRenderable.StyledVisitor<StringRenderable>() {
                     TextCollector collector = new TextCollector();
                     
                     @Override
-                    public Optional<class_5348> accept(Style style, String asString) {
-                        collector.add(class_5348.method_29431(asString, style));
+                    public Optional<StringRenderable> accept(Style style, String asString) {
+                        collector.add(StringRenderable.styled(asString, style));
                         return Optional.of(collector.getCombined());
                     }
                 }, Style.EMPTY.withFormatting(Formatting.UNDERLINE)).orElse(text);

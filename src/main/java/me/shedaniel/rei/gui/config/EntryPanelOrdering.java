@@ -23,19 +23,23 @@
 
 package me.shedaniel.rei.gui.config;
 
-import net.minecraft.client.resource.language.I18n;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.Locale;
-
 @ApiStatus.Internal
-public enum SearchFieldLocation {
-    CENTER,
-    BOTTOM_SIDE,
-    TOP_SIDE;
+public enum EntryPanelOrdering {
     
-    @Override
-    public String toString() {
-        return I18n.translate("config.roughlyenoughitems.layout.searchFieldLocation.%s", name().toLowerCase(Locale.ROOT));
+    REGISTRY("ordering.rei.registry"),
+    NAME("ordering.rei.name"),
+    GROUPS("ordering.rei.item_groups");
+    
+    private String nameTranslationKey;
+    
+    EntryPanelOrdering(String nameTranslationKey) {
+        this.nameTranslationKey = nameTranslationKey;
     }
+    
+    public String getNameTranslationKey() {
+        return nameTranslationKey;
+    }
+    
 }

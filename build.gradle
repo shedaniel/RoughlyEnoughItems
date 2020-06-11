@@ -30,6 +30,7 @@ license {
 
 repositories {
     maven { url "https://dl.bintray.com/shedaniel/legacy-yarn-updated" }
+    maven { url "https://dl.bintray.com/shedaniel/shedaniel-mods" }
 }
 
 jar {
@@ -48,24 +49,26 @@ dependencies {
     mappings("me.shedaniel:legacy-yarn:${project.yarn_version}:v2")
     modApi("net.fabricmc:fabric-loader:${project.fabricloader_version}")
     modApi("net.fabricmc.fabric-api:fabric-api:${project.fabric_api}") {
-        exclude(group: "net.fabricmc")
         exclude(module: "fabric-biomes-v1")
     }
-    modApi("me.shedaniel.cloth:cloth-events:${cloth_events_version}") {
-        transitive = false
+    modApi("me.shedaniel.cloth.api:cloth-client-events-v0:${cloth_client_events_v0_version}") {
+        transitive(false)
     }
     modApi("me.shedaniel.cloth:config-2:${cloth_config_version}") {
-        exclude module: "fabric-api"
+        exclude(module: "fabric-api")
     }
     modApi("me.sargunvohra.mcmods:autoconfig1u:${project.autoconfig1u}") {
-        exclude module: "fabric-api"
+        exclude(module: "fabric-api")
     }
     modApi("org.jetbrains:annotations:19.0.0")
     modCompileOnly("io.github.prospector:modmenu:${modmenu_version}") {
-        transitive = false
+        transitive(false)
     }
     modRuntime("io.github.prospector:modmenu:${modmenu_version}") {
-        transitive = false
+        transitive(false)
+    }
+    modRuntime("me.shedaniel:SmoothScrollingEverywhere:3.0.3-unstable") {
+        transitive(false)
     }
     afterEvaluate {
         def listAdded = new ArrayList(Arrays.asList((api_exculde as String).split(',')))
