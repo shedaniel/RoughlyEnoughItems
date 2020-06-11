@@ -101,7 +101,7 @@
   "subsets.rei.roughlyenoughitems.item_groups": "分類",
   "_comment": "設置提示",
   "config.roughlyenoughitems.title": "Roughly Enough Items 設置",
-  "config.roughlyenoughitems.basics": "Basics",
+  "config.roughlyenoughitems.basics": "基礎",
   "config.roughlyenoughitems.appearance": "外觀",
   "config.roughlyenoughitems.functionality": "Functionality",
   "config.roughlyenoughitems.advanced": "Advanced",
