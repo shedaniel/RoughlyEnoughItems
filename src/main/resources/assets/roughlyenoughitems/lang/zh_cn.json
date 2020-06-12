@@ -1,8 +1,8 @@
 {
-  "key.rei.category": "Roughly Enough Items（在“配置”屏幕上设置快捷键）",
-  "text.rei.cheating": "作弊",
-  "text.rei.cheating_disabled": "§7作弊已禁用",
-  "text.rei.cheating_enabled": "§c作弊已启用",
+  "key.rei.category": "REI（在“配置”屏幕上设置快捷键）",
+  "text.rei.cheating": "作弊模式",
+  "text.rei.cheating_disabled": "§7已禁用作弊",
+  "text.rei.cheating_enabled": "§c已启用作弊",
   "text.rei.cheating_limited_enabled": "§b作弊已启用(使用命令)",
   "text.rei.cheating_enabled_no_perms": "§7作弊已§c启用§7(无权限)",
   "text.rei.no_permission_cheat": "作弊给予物品需要OP权限",
