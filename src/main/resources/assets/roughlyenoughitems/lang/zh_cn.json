@@ -1,5 +1,5 @@
 {
-  "key.rei.category": "REI（在“配置”屏幕上设置快捷键）",
+  "key.rei.category": "Roughly Enough Items（在“配置”屏幕上设置快捷键）",
   "text.rei.cheating": "作弊",
   "text.rei.cheating_disabled": "§7作弊已禁用",
   "text.rei.cheating_enabled": "§c作弊已启用",
@@ -48,7 +48,7 @@
   "error.rei.not.enough.materials": "材料不足",
   "error.rei.internal.error": "内部错误: %s",
   "error.rei.recipe.not.unlocked": "配方未解锁",
-  "error.rei.no.handlers.applicable": "没有处理程序.",
+  "error.rei.no.handlers.applicable": "无适用处理程序。",
   "error.rei.multi.errors": "多个错误：",
   "rei.rei.no.slot.in.inv": "您的物品栏已满.",
   "text.rei.showing_craftable": "显示可合成的物品",
