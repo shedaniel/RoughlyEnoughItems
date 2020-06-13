@@ -25,13 +25,8 @@ package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Maps;
 import io.netty.buffer.Unpooled;
-import me.sargunvohra.mcmods.autoconfig1u.annotation.ConfigEntry;
-import me.shedaniel.clothconfig2.api.FakeModifierKeyCodeAdder;
-import me.shedaniel.clothconfig2.api.ModifierKeyCode;
-import me.shedaniel.math.api.Executor;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
-import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.gui.PreRecipeViewingScreen;
 import me.shedaniel.rei.gui.RecipeScreen;
@@ -41,7 +36,6 @@ import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
-import net.fabricmc.fabric.impl.client.keybinding.KeyBindingRegistryImpl;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
@@ -60,7 +54,6 @@ import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -285,48 +278,6 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     @Override
     public void registerFabricKeyBinds() {
-        boolean keybindingsLoaded = FabricLoader.getInstance().isModLoaded("fabric-keybindings-v0");
-        if (!keybindingsLoaded) {
-            RoughlyEnoughItemsState.error("Fabric API is not installed!", "https://www.curseforge.com/minecraft/mc-mods/fabric-api/files/all");
-            return;
-        }
-        Executor.run(() -> () -> {
-            String category = "key.rei.category";
-            if (!FabricLoader.getInstance().isModLoaded("amecs")) {
-                try {
-                    ConfigObjectImpl.General general = ConfigObject.getInstance().getGeneral();
-                    ConfigObjectImpl.General instance = general.getClass().getConstructor().newInstance();
-                    for (Field declaredField : general.getClass().getDeclaredFields()) {
-                        if (declaredField.getType() == ModifierKeyCode.class && !declaredField.isAnnotationPresent(ConfigEntry.Gui.Excluded.class)) {
-                            declaredField.setAccessible(true);
-                            FakeModifierKeyCodeAdder.INSTANCE.registerModifierKeyCode(category, "config.roughlyenoughitems." + declaredField.getName(), () -> {
-                                try {
-                                    ModifierKeyCode code = (ModifierKeyCode) declaredField.get(general);
-                                    return code == null ? ModifierKeyCode.unknown() : code;
-                                } catch (Exception e) {
-                                    throw new RuntimeException(e);
-                                }
-                            }, () -> {
-                                try {
-                                    return (ModifierKeyCode) declaredField.get(instance);
-                                } catch (IllegalAccessException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            }, keyCode -> {
-                                try {
-                                    declaredField.set(general, keyCode);
-                                } catch (IllegalAccessException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            });
-                        }
-                    }
-                    KeyBindingRegistryImpl.INSTANCE.addCategory(category);
-                } catch (Throwable throwable) {
-                    throwable.printStackTrace();
-                }
-            }
-        });
     }
     
 }
