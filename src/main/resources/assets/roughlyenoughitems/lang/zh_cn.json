@@ -16,7 +16,7 @@
   "category.rei.fuel.time_short": "%d 游戏刻",
   "category.rei.fuel.time_short.items": "%s 个物品",
   "category.rei.cooking.xp": "%f 经验",
-  "category.rei.cooking.time&xp": "在 %s 秒内获得 %s 经验   ",
+  "category.rei.cooking.time&xp": "在 %2$s 秒内获得 %1$s 经验",
   "category.rei.smoking": "烟熏",
   "category.rei.blasting": "熔炼",
   "category.rei.campfire": "营火",
