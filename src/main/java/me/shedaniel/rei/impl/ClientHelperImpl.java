@@ -17,15 +17,15 @@ import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.zeroeightsix.fiber.exception.FiberException;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
-import net.fabricmc.fabric.impl.client.keybinding.KeyBindingRegistryImpl;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
+import net.minecraft.client.options.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -54,7 +54,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     private final Identifier focusSearchFieldKeybind = new Identifier("roughlyenoughitems", "focus_search");
     private final Identifier copyRecipeIdentifierKeybind = new Identifier("roughlyenoughitems", "copy_recipe_id");
     private final Map<String, String> modNameCache = Maps.newHashMap();
-    public FabricKeyBinding recipe, usage, hide, previousPage, nextPage, focusSearchField, copyRecipeIdentifier;
+    public KeyBinding recipe, usage, hide, previousPage, nextPage, focusSearchField, copyRecipeIdentifier;
     
     @Override
     public String getFormattedModFromItem(Item item) {
@@ -73,37 +73,37 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     }
     
     @Override
-    public FabricKeyBinding getRecipeKeyBinding() {
+    public KeyBinding getRecipeKeyBinding() {
         return recipe;
     }
     
     @Override
-    public FabricKeyBinding getUsageKeyBinding() {
+    public KeyBinding getUsageKeyBinding() {
         return usage;
     }
     
     @Override
-    public FabricKeyBinding getHideKeyBinding() {
+    public KeyBinding getHideKeyBinding() {
         return hide;
     }
     
     @Override
-    public FabricKeyBinding getPreviousPageKeyBinding() {
+    public KeyBinding getPreviousPageKeyBinding() {
         return previousPage;
     }
     
     @Override
-    public FabricKeyBinding getNextPageKeyBinding() {
+    public KeyBinding getNextPageKeyBinding() {
         return nextPage;
     }
     
     @Override
-    public FabricKeyBinding getFocusSearchFieldKeyBinding() {
+    public KeyBinding getFocusSearchFieldKeyBinding() {
         return focusSearchField;
     }
     
     @Override
-    public FabricKeyBinding getCopyRecipeIdentifierKeyBinding() {
+    public KeyBinding getCopyRecipeIdentifierKeyBinding() {
         return copyRecipeIdentifier;
     }
     
@@ -257,7 +257,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     @Override
     public void onInitializeClient() {
-        ClientHelperImpl.instance = (ClientHelperImpl) this;
+        ClientHelperImpl.instance = this;
         registerFabricKeyBinds();
         modNameCache.put("minecraft", "Minecraft");
         modNameCache.put("c", "Common");
@@ -266,14 +266,17 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     @Override
     public void registerFabricKeyBinds() {
         String category = "key.rei.category";
-        KeyBindingRegistryImpl.INSTANCE.addCategory(category);
-        KeyBindingRegistryImpl.INSTANCE.register(recipe = FabricKeyBinding.Builder.create(recipeKeybind, InputUtil.Type.KEYSYM, 82, category).build());
-        KeyBindingRegistryImpl.INSTANCE.register(usage = FabricKeyBinding.Builder.create(usageKeybind, InputUtil.Type.KEYSYM, 85, category).build());
-        KeyBindingRegistryImpl.INSTANCE.register(hide = FabricKeyBinding.Builder.create(hideKeybind, InputUtil.Type.KEYSYM, 79, category).build());
-        KeyBindingRegistryImpl.INSTANCE.register(previousPage = FabricKeyBinding.Builder.create(previousPageKeybind, InputUtil.Type.KEYSYM, -1, category).build());
-        KeyBindingRegistryImpl.INSTANCE.register(nextPage = FabricKeyBinding.Builder.create(nextPageKeybind, InputUtil.Type.KEYSYM, -1, category).build());
-        KeyBindingRegistryImpl.INSTANCE.register(focusSearchField = FabricKeyBinding.Builder.create(focusSearchFieldKeybind, InputUtil.Type.KEYSYM, -1, category).build());
-        KeyBindingRegistryImpl.INSTANCE.register(copyRecipeIdentifier = FabricKeyBinding.Builder.create(copyRecipeIdentifierKeybind, InputUtil.Type.KEYSYM, -1, category).build());
+        recipe = registerKeyBinding(recipeKeybind, InputUtil.Type.KEYSYM, 82, category);
+        usage = registerKeyBinding(usageKeybind, InputUtil.Type.KEYSYM, 85, category);
+        hide = registerKeyBinding(hideKeybind, InputUtil.Type.KEYSYM, 79, category);
+        previousPage = registerKeyBinding(previousPageKeybind, InputUtil.Type.KEYSYM, -1, category);
+        nextPage = registerKeyBinding(nextPageKeybind, InputUtil.Type.KEYSYM, -1, category);
+        focusSearchField = registerKeyBinding(focusSearchFieldKeybind, InputUtil.Type.KEYSYM, -1, category);
+        copyRecipeIdentifier = registerKeyBinding(copyRecipeIdentifierKeybind, InputUtil.Type.KEYSYM, -1, category);
+    }
+    
+    private KeyBinding registerKeyBinding(Identifier id, InputUtil.Type type, int code, String category) {
+        return KeyBindingHelper.registerKeyBinding(new KeyBinding("key." + id.getNamespace() + "." + id.getPath(), type, code, category));
     }
     
 }

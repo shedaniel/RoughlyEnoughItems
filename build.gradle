@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '0.2.5-SNAPSHOT'
+    id 'fabric-loom' version '0.4-SNAPSHOT'
     id 'maven-publish'
     id 'net.minecrell.licenser' version '0.4.1'
 }
@@ -10,8 +10,7 @@ targetCompatibility = 1.8
 archivesBaseName = "RoughlyEnoughItems"
 group = "me.shedaniel"
 
-def ENV = System.getenv()
-version = project.mod_version + "+" + (ENV.BUILD_NUMBER ? ("build." + ENV.BUILD_NUMBER) : "local")
+version = project.mod_version
 
 def includeDep = true
 
@@ -21,12 +20,6 @@ minecraft {
 license {
     header rootProject.file('HEADER')
     include '**/*.java'
-}
-
-repositories {
-    maven { url "https://tehnut.info/maven/" }
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
-    maven { url "https://minecraft.curseforge.com/api/maven" }
 }
 
 processResources {

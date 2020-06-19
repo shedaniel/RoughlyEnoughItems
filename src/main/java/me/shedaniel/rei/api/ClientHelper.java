@@ -7,6 +7,7 @@ package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.impl.ClientHelperImpl;
 import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
+import net.minecraft.client.options.KeyBinding;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
@@ -90,9 +91,9 @@ public interface ClientHelper {
         return executeUsageKeyBind(EntryStack.create(stack));
     }
     
-    FabricKeyBinding getFocusSearchFieldKeyBinding();
+    KeyBinding getFocusSearchFieldKeyBinding();
     
-    FabricKeyBinding getCopyRecipeIdentifierKeyBinding();
+    KeyBinding getCopyRecipeIdentifierKeyBinding();
     
     /**
      * Gets the mod from an item
@@ -134,27 +135,27 @@ public interface ClientHelper {
     /**
      * @return the recipe keybind, defaulted R
      */
-    FabricKeyBinding getRecipeKeyBinding();
+    KeyBinding getRecipeKeyBinding();
     
     /**
      * @return the usage keybind, defaulted U
      */
-    FabricKeyBinding getUsageKeyBinding();
+    KeyBinding getUsageKeyBinding();
     
     /**
      * @return the hide keybind, defaulted O
      */
-    FabricKeyBinding getHideKeyBinding();
+    KeyBinding getHideKeyBinding();
     
     /**
      * @return the previous page keybind, defaulted not set
      */
-    FabricKeyBinding getPreviousPageKeyBinding();
+    KeyBinding getPreviousPageKeyBinding();
     
     /**
      * @return the next page keybind, defaulted not set
      */
-    FabricKeyBinding getNextPageKeyBinding();
+    KeyBinding getNextPageKeyBinding();
     
     /**
      * Finds all recipes and open them in a recipe screen.
