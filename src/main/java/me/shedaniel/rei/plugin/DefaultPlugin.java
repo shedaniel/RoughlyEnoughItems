@@ -57,6 +57,8 @@ import me.shedaniel.rei.plugin.fuel.DefaultFuelDisplay;
 import me.shedaniel.rei.plugin.information.DefaultInformationCategory;
 import me.shedaniel.rei.plugin.information.DefaultInformationDisplay;
 import me.shedaniel.rei.plugin.smelting.DefaultSmeltingDisplay;
+import me.shedaniel.rei.plugin.smithing.DefaultSmithingCategory;
+import me.shedaniel.rei.plugin.smithing.DefaultSmithingDisplay;
 import me.shedaniel.rei.plugin.smoking.DefaultSmokingDisplay;
 import me.shedaniel.rei.plugin.stonecutting.DefaultStoneCuttingCategory;
 import me.shedaniel.rei.plugin.stonecutting.DefaultStoneCuttingDisplay;
@@ -100,6 +102,7 @@ public class DefaultPlugin implements REIPluginV0 {
     public static final Identifier PLUGIN = new Identifier("roughlyenoughitems", "default_plugin");
     public static final Identifier COMPOSTING = new Identifier("minecraft", "plugins/composting");
     public static final Identifier FUEL = new Identifier("minecraft", "plugins/fuel");
+    public static final Identifier SMITHING = new Identifier("minecraft", "plugins/smithing");
     public static final Identifier BEACON = new Identifier("minecraft", "plugins/beacon");
     public static final Identifier INFO = new Identifier("roughlyenoughitems", "plugins/information");
     private static final Identifier DISPLAY_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/display.png");
@@ -199,6 +202,7 @@ public class DefaultPlugin implements REIPluginV0 {
         recipeHelper.registerCategory(new DefaultBrewingCategory());
         recipeHelper.registerCategory(new DefaultCompostingCategory());
         recipeHelper.registerCategory(new DefaultStrippingCategory());
+        recipeHelper.registerCategory(new DefaultSmithingCategory());
         recipeHelper.registerCategory(new DefaultBeaconBaseCategory());
         recipeHelper.registerCategory(new DefaultInformationCategory());
     }
@@ -215,6 +219,7 @@ public class DefaultPlugin implements REIPluginV0 {
         recipeHelper.registerRecipes(BLASTING, BlastingRecipe.class, DefaultBlastingDisplay::new);
         recipeHelper.registerRecipes(CAMPFIRE, CampfireCookingRecipe.class, DefaultCampfireDisplay::new);
         recipeHelper.registerRecipes(STONE_CUTTING, StonecuttingRecipe.class, DefaultStoneCuttingDisplay::new);
+        recipeHelper.registerRecipes(SMITHING, SmithingRecipe.class, DefaultSmithingDisplay::new);
         for (DefaultBrewingDisplay display : BREWING_DISPLAYS) {
             recipeHelper.registerDisplay(display);
         }
@@ -245,7 +250,7 @@ public class DefaultPlugin implements REIPluginV0 {
                 map.put(entry.getKey(), entry.getFloatValue());
         }
         List<ItemConvertible> stacks = new LinkedList<>(map.keySet());
-        stacks.sort((first, second) -> (int) ((map.get(first) - map.get(second)) * 100));
+        stacks.sort(Comparator.comparing(map::get));
         for (int i = 0; i < stacks.size(); i += MathHelper.clamp(48, 1, stacks.size() - i)) {
             List<ItemConvertible> thisStacks = Lists.newArrayList();
             for (int j = i; j < i + 48; j++)
@@ -254,7 +259,7 @@ public class DefaultPlugin implements REIPluginV0 {
             recipeHelper.registerDisplay(new DefaultCompostingDisplay(MathHelper.floor(i / 48f), thisStacks, map, Lists.newArrayList(map.keySet()), new ItemStack[]{new ItemStack(Items.BONE_MEAL)}));
         }
         DummyAxeItem.getStrippedBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getId(b.getKey()))).forEach(set -> {
-            recipeHelper.registerDisplay(new DefaultStrippingDisplay(new ItemStack(set.getKey()), new ItemStack(set.getValue())));
+            recipeHelper.registerDisplay(new DefaultStrippingDisplay(EntryStack.create(set.getKey()), EntryStack.create(set.getValue())));
         });
         recipeHelper.registerDisplay(new DefaultBeaconBaseDisplay(CollectionUtils.map(Lists.newArrayList(BlockTags.BEACON_BASE_BLOCKS.values()), ItemStack::new)));
     }
@@ -263,6 +268,7 @@ public class DefaultPlugin implements REIPluginV0 {
     public void postRegister() {
         for (DefaultInformationDisplay display : INFO_DISPLAYS)
             RecipeHelper.getInstance().registerDisplay(display);
+        // TODO Turn this into an API
         // Sit tight! This will be a fast journey!
         long time = System.currentTimeMillis();
         for (EntryStack stack : EntryRegistry.getInstance().getStacksList())
@@ -381,6 +387,7 @@ public class DefaultPlugin implements REIPluginV0 {
         recipeHelper.registerWorkingStations(BREWING, EntryStack.create(Items.BREWING_STAND));
         recipeHelper.registerWorkingStations(STONE_CUTTING, EntryStack.create(Items.STONECUTTER));
         recipeHelper.registerWorkingStations(COMPOSTING, EntryStack.create(Items.COMPOSTER));
+        recipeHelper.registerWorkingStations(SMITHING, EntryStack.create(Items.SMITHING_TABLE));
         recipeHelper.registerWorkingStations(BEACON, EntryStack.create(Items.BEACON));
         Tag<Item> axes = MinecraftClient.getInstance().getNetworkHandler().getTagManager().items().get(new Identifier("fabric", "axes"));
         if (axes != null) {

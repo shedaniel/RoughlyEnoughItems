@@ -4,7 +4,7 @@ pipeline {
 
       stage ('Build') {
          when {
-            expression { env.BRANCH_NAME == '3.x' || env.BRANCH_NAME == '4.x-unstable' }
+            expression { env.BRANCH_NAME == '4.x' || env.BRANCH_NAME == '4.x-unstable' }
          }
          steps {
             sh "rm -rf build/libs/"

@@ -33,8 +33,12 @@ import java.util.Collections;
 import java.util.List;
 
 public class DefaultStrippingDisplay implements RecipeDisplay {
-    
     private EntryStack in, out;
+    
+    public DefaultStrippingDisplay(EntryStack in, EntryStack out) {
+        this.in = in;
+        this.out = out;
+    }
     
     public DefaultStrippingDisplay(ItemStack in, ItemStack out) {
         this.in = EntryStack.create(in);
