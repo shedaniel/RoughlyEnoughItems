@@ -5,6 +5,7 @@ on:
     branches:
       - 3.x
       - 4.x-unstable
+      - 4.x
 
 jobs:
   build:
