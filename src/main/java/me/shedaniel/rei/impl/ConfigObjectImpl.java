@@ -369,7 +369,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         @UseSpecialRecipeTypeScreen private RecipeScreenType recipeScreenType = RecipeScreenType.UNSET;
         @Comment("Declares the appearance of REI windows.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
         private AppearanceTheme theme = AppearanceTheme.LIGHT;
-        @ConfigEntry.Gui.CollapsibleObject
+        @ConfigEntry.Gui.CollapsibleObject(startExpanded = true)
         private Layout layout = new Layout();
         @Comment("Declares the appearance of recipe's border.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
         private RecipeBorderType recipeBorder = RecipeBorderType.DEFAULT;
