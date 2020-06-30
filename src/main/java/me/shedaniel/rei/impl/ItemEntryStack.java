@@ -277,19 +277,18 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     public Tooltip getTooltip(Point point) {
         if (isEmpty() || !get(Settings.TOOLTIP_ENABLED).get())
             return null;
-        List<Text> toolTip = Lists.newArrayList(tryGetItemStackToolTip(true));
+        List<Text> toolTip = tryGetItemStackToolTip(true);
         toolTip.addAll(get(Settings.TOOLTIP_APPEND_EXTRA).apply(this));
         if (get(Settings.TOOLTIP_APPEND_MOD).get() && ConfigObject.getInstance().shouldAppendModNames()) {
-            final Text modString = ClientHelper.getInstance().getFormattedModFromItem(getItem());
             final String modId = ClientHelper.getInstance().getModFromItem(getItem());
             boolean alreadyHasMod = false;
             for (Text s : toolTip)
-                if (s.asString().equalsIgnoreCase(modId)) {
+                if (s.getString().equalsIgnoreCase(modId)) {
                     alreadyHasMod = true;
                     break;
                 }
             if (!alreadyHasMod)
-                toolTip.add(modString);
+                toolTip.add(ClientHelper.getInstance().getFormattedModFromItem(getItem()));
         }
         return Tooltip.create(toolTip);
     }
@@ -377,6 +376,6 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
                 e.printStackTrace();
                 SEARCH_BLACKLISTED.add(getItem());
             }
-        return Collections.singletonList(asFormattedText());
+        return Lists.newArrayList(asFormattedText());
     }
 }
