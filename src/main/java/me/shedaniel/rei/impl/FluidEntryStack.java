@@ -197,16 +197,15 @@ public class FluidEntryStack extends AbstractEntryStack {
         toolTip.addAll(get(Settings.TOOLTIP_APPEND_EXTRA).apply(this));
         if (get(Settings.TOOLTIP_APPEND_MOD).get() && ConfigObject.getInstance().shouldAppendModNames()) {
             Identifier id = Registry.FLUID.getId(fluid);
-            final Text modString = ClientHelper.getInstance().getFormattedModFromIdentifier(id);
             final String modId = ClientHelper.getInstance().getModFromIdentifier(id);
             boolean alreadyHasMod = false;
             for (Text s : toolTip)
-                if (s.asString().equalsIgnoreCase(modId)) {
+                if (s.getString().equalsIgnoreCase(modId)) {
                     alreadyHasMod = true;
                     break;
                 }
             if (!alreadyHasMod)
-                toolTip.add(modString);
+                toolTip.add(ClientHelper.getInstance().getFormattedModFromIdentifier(id));
         }
         return Tooltip.create(toolTip);
     }
