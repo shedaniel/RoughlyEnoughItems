@@ -37,8 +37,6 @@ import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.config.EntryPanelOrdering;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.util.math.MatrixStack;
@@ -272,11 +270,11 @@ public class FavoritesListWidget extends WidgetWithBounds {
                 if (widget.mouseReleased(mouseX, mouseY, button))
                     return true;
             ClientPlayerEntity player = minecraft.player;
-            if (ClientHelper.getInstance().isCheating() && player.inventory != null && !player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.canDeleteItems()) {
+            if (ClientHelper.getInstance().isCheating() && player != null && player.inventory != null && !player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.canDeleteItems()) {
                 ClientHelper.getInstance().sendDeletePacket();
                 return true;
             }
-            if (player.inventory != null && !player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
+            if (player != null && player.inventory != null && !player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
                 return false;
         }
         return false;
