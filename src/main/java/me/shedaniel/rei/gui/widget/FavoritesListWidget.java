@@ -272,11 +272,11 @@ public class FavoritesListWidget extends WidgetWithBounds {
                 if (widget.mouseReleased(mouseX, mouseY, button))
                     return true;
             ClientPlayerEntity player = minecraft.player;
-            if (ClientHelper.getInstance().isCheating() && !player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.canDeleteItems()) {
+            if (ClientHelper.getInstance().isCheating() && player.inventory != null && !player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.canDeleteItems()) {
                 ClientHelper.getInstance().sendDeletePacket();
                 return true;
             }
-            if (!player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
+            if (player.inventory != null && !player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
                 return false;
         }
         return false;
