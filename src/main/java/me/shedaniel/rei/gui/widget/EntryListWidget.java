@@ -584,7 +584,7 @@ public class EntryListWidget extends WidgetWithBounds {
                 ClientHelper.getInstance().sendDeletePacket();
                 return true;
             }
-            if (!player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
+            if (player.inventory != null && !player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
                 return false;
         }
         return false;
