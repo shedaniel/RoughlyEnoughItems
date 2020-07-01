@@ -33,6 +33,8 @@ import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.impl.*;
 import me.shedaniel.rei.tests.plugin.REITestPlugin;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
@@ -71,6 +73,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @ApiStatus.Internal
+@Environment(EnvType.CLIENT)
 public class RoughlyEnoughItemsCore implements ClientModInitializer {
     
     @ApiStatus.Internal public static final Logger LOGGER = LogManager.getFormatterLogger("REI");
@@ -145,7 +148,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     }
     
     public static boolean canUsePackets() {
-        return ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET) && ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.DELETE_ITEMS_PACKET);
+        return ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET) && ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.CREATE_ITEMS_GRAB_PACKET) && ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.DELETE_ITEMS_PACKET);
     }
     
     @ApiStatus.Internal
@@ -168,6 +171,10 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     @ApiStatus.Internal
     public static boolean isDebugModeEnabled() {
         return System.getProperty("rei.test", "false").equals("true");
+    }
+    
+    public static boolean canDeleteItems() {
+        return hasPermissionToUsePackets() || MinecraftClient.getInstance().interactionManager.hasCreativeInventory();
     }
     
     @SuppressWarnings("deprecation")
@@ -344,17 +351,22 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         });
         ClothClientHooks.SCREEN_MOUSE_CLICKED.register((minecraftClient, screen, v, v1, i) -> {
             isLeftModePressed = true;
-            if (screen instanceof CreativeInventoryScreen)
-                if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().mouseClicked(v, v1, i)) {
-                    screen.setFocused(ScreenHelper.getLastOverlay());
-                    if (i == 0)
-                        screen.setDragging(true);
-                    return ActionResult.SUCCESS;
-                }
+            if (ScreenHelper.getOptionalOverlay().isPresent())
+                if (screen instanceof CreativeInventoryScreen)
+                    if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().mouseClicked(v, v1, i)) {
+                        screen.setFocused(ScreenHelper.getLastOverlay());
+                        if (i == 0)
+                            screen.setDragging(true);
+                        return ActionResult.SUCCESS;
+                    }
             return ActionResult.PASS;
         });
         ClothClientHooks.SCREEN_MOUSE_RELEASED.register((minecraftClient, screen, v, v1, i) -> {
             isLeftModePressed = false;
+            if (ScreenHelper.getOptionalOverlay().isPresent())
+                if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().mouseReleased(v, v1, i)) {
+                    return ActionResult.SUCCESS;
+                }
             return ActionResult.PASS;
         });
         ClothClientHooks.SCREEN_MOUSE_SCROLLED.register((minecraftClient, screen, v, v1, v2) -> {

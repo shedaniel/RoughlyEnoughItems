@@ -9,6 +9,7 @@ accessible field net/minecraft/client/gui/screen/ingame/ContainerScreen y I
 accessible field net/minecraft/client/gui/screen/ingame/ContainerScreen containerWidth I
 accessible field net/minecraft/client/gui/screen/ingame/ContainerScreen containerHeight I
 accessible field net/minecraft/client/gui/screen/ingame/ContainerScreen focusedSlot Lnet/minecraft/screen/slot/Slot;
+accessible field net/minecraft/client/gui/screen/ingame/ContainerScreen isCursorDragging Z
 accessible field net/minecraft/client/gui/widget/TexturedButtonWidget texture Lnet/minecraft/util/Identifier;
 accessible method net/minecraft/client/gui/DrawableHelper drawTexturedQuad (Lnet/minecraft/util/math/Matrix4f;IIIIIFFFF)V
 accessible field net/minecraft/recipe/SmithingRecipe base Lnet/minecraft/recipe/Ingredient;

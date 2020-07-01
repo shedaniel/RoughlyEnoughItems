@@ -21,15 +21,23 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei;
+package me.shedaniel.rei.gui.config;
 
-import io.github.prospector.modmenu.api.ConfigScreenFactory;
-import io.github.prospector.modmenu.api.ModMenuApi;
-import me.shedaniel.rei.api.ConfigManager;
+import me.shedaniel.clothconfig2.gui.entries.SelectionListEntry;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.resource.language.I18n;
+import org.jetbrains.annotations.NotNull;
 
-public class REIModMenuEntryPoint implements ModMenuApi {
+import java.util.Locale;
+
+@Environment(EnvType.CLIENT)
+public enum ItemCheatingStyle implements SelectionListEntry.Translatable {
+    GRAB,
+    GIVE;
+    
     @Override
-    public ConfigScreenFactory<?> getModConfigScreenFactory() {
-        return parent -> ConfigManager.getInstance().getConfigScreen(parent);
+    public @NotNull String getKey() {
+        return I18n.translate("config.roughlyenoughitems.cheatingStyle." + name().toLowerCase(Locale.ROOT));
     }
 }

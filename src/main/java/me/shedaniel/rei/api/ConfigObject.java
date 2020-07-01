@@ -29,10 +29,13 @@ import me.shedaniel.rei.gui.config.RecipeBorderType;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.impl.ConfigManagerImpl;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 
+@Environment(EnvType.CLIENT)
 public interface ConfigObject {
     
     /**
@@ -55,6 +58,8 @@ public interface ConfigObject {
     boolean isItemListAscending();
     
     boolean isUsingDarkTheme();
+    
+    boolean isGrabbingItems();
     
     boolean isToastDisplayedOnCopyIdentifier();
     

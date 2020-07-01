@@ -250,9 +250,11 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
                             tooltips += "\n  ";
                             if (!ClientHelper.getInstance().isCheating())
                                 tooltips += "\n" + I18n.translate("text.rei.cheating_disabled");
-                            else if (!RoughlyEnoughItemsCore.hasOperatorPermission())
-                                tooltips += "\n" + I18n.translate("text.rei.cheating_enabled_no_perms");
-                            else if (RoughlyEnoughItemsCore.hasPermissionToUsePackets())
+                            else if (!RoughlyEnoughItemsCore.hasOperatorPermission()) {
+                                if (minecraft.interactionManager.hasCreativeInventory())
+                                    tooltips += "\n" + I18n.translate("text.rei.cheating_limited_creative_enabled");
+                                else tooltips += "\n" + I18n.translate("text.rei.cheating_enabled_no_perms");
+                            } else if (RoughlyEnoughItemsCore.hasPermissionToUsePackets())
                                 tooltips += "\n" + I18n.translate("text.rei.cheating_enabled");
                             else
                                 tooltips += "\n" + I18n.translate("text.rei.cheating_limited_enabled");

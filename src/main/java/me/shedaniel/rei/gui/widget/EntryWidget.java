@@ -349,7 +349,7 @@ public class EntryWidget extends Slot {
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (!interactable)
             return false;
         if (containsMouse(mouseX, mouseY)) {
@@ -358,6 +358,11 @@ public class EntryWidget extends Slot {
             else if (button == 1)
                 return ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addUsagesFor(getCurrentEntry()).setInputNotice(getCurrentEntry()).fillPreferredOpenedCategory());
         }
+        return false;
+    }
+    
+    @ApiStatus.Internal
+    protected boolean cancelDeleteItems(EntryStack stack) {
         return false;
     }
     

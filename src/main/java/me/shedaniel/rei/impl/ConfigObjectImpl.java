@@ -32,6 +32,8 @@ import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.gui.config.*;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.util.InputUtil;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -44,6 +46,7 @@ import java.util.List;
 
 @ApiStatus.Internal
 @Config(name = "roughlyenoughitems/config")
+@Environment(EnvType.CLIENT)
 public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     @ConfigEntry.Category("basics") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
@@ -88,6 +91,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @Override
     public boolean isUsingDarkTheme() {
         return appearance.theme == AppearanceTheme.DARK;
+    }
+    
+    @Override
+    public boolean isGrabbingItems() {
+        return basics.cheatingStyle == ItemCheatingStyle.GRAB;
     }
     
     @Override
@@ -351,6 +359,8 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         @ConfigEntry.Gui.CollapsibleObject(startExpanded = true)
         private KeyBindings keyBindings = new KeyBindings();
         @Comment("Declares whether REI is visible.") @ConfigEntry.Gui.Excluded private boolean overlayVisible = true;
+        @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+        private ItemCheatingStyle cheatingStyle = ItemCheatingStyle.GRAB;
     }
     
     public static class KeyBindings {
