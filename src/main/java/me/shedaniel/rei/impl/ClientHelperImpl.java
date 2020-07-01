@@ -156,6 +156,8 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     public boolean tryCheatingEntry(EntryStack entry) {
         if (entry.getType() != EntryStack.Type.ITEM)
             return false;
+        if (MinecraftClient.getInstance().player == null) return false;
+        if (MinecraftClient.getInstance().player.inventory == null) return false;
         ItemStack cheatedStack = entry.getItemStack().copy();
         if (ConfigObject.getInstance().isGrabbingItems() && MinecraftClient.getInstance().currentScreen instanceof CreativeInventoryScreen) {
             PlayerInventory inventory = MinecraftClient.getInstance().player.inventory;
