@@ -363,6 +363,8 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         });
         ClothClientHooks.SCREEN_MOUSE_RELEASED.register((minecraftClient, screen, v, v1, i) -> {
             isLeftModePressed = false;
+            if (shouldReturn(screen))
+                return ActionResult.PASS;
             if (ScreenHelper.getOptionalOverlay().isPresent())
                 if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().mouseReleased(v, v1, i)) {
                     return ActionResult.SUCCESS;
