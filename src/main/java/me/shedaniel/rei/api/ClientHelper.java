@@ -26,6 +26,8 @@ package me.shedaniel.rei.api;
 import me.shedaniel.rei.gui.RecipeScreen;
 import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.utils.CollectionUtils;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.item.Item;
@@ -41,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+@Environment(EnvType.CLIENT)
 public interface ClientHelper {
     
     /**

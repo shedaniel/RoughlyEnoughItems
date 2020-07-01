@@ -40,7 +40,6 @@ import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.SearchArgument;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -359,8 +358,23 @@ public class EntryListWidget extends WidgetWithBounds {
                 }
             }
         }
-        if (containsMouse(mouseX, mouseY) && ClientHelper.getInstance().isCheating() && !minecraft.player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
+        if (containsMouse(mouseX, mouseY) && ClientHelper.getInstance().isCheating() && !minecraft.player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.canDeleteItems()) {
+            EntryStack stack = EntryStack.create(minecraft.player.inventory.getCursorStack().copy());
+            if (stack.getType() == EntryStack.Type.FLUID) {
+                Item bucketItem = stack.getFluid().getBucketItem();
+                if (bucketItem != null) {
+                    stack = EntryStack.create(bucketItem);
+                }
+            }
+            for (Widget child : children()) {
+                if (child.containsMouse(mouseX, mouseY) && child instanceof EntryWidget) {
+                    if (((EntryWidget) child).cancelDeleteItems(stack)) {
+                        return;
+                    }
+                }
+            }
             Tooltip.create(new TranslatableText("text.rei.delete_items")).queue();
+        }
     }
     
     private int getScrollbarMinX() {
@@ -553,74 +567,37 @@ public class EntryListWidget extends WidgetWithBounds {
             if (scrolling.updateDraggingState(double_1, double_2, int_1))
                 return true;
         }
-        
-        if (containsMouse(double_1, double_2)) {
+        for (Widget widget : children())
+            if (widget.mouseClicked(double_1, double_2, int_1))
+                return true;
+        return false;
+    }
+    
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (containsMouse(mouseX, mouseY)) {
+            for (Widget widget : children())
+                if (widget.mouseReleased(mouseX, mouseY, button))
+                    return true;
             ClientPlayerEntity player = minecraft.player;
-            if (ClientHelper.getInstance().isCheating() && !player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets()) {
+            if (ClientHelper.getInstance().isCheating() && !player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.canDeleteItems()) {
                 ClientHelper.getInstance().sendDeletePacket();
                 return true;
             }
             if (!player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
                 return false;
-            for (Widget widget : children())
-                if (widget.mouseClicked(double_1, double_2, int_1))
-                    return true;
         }
         return false;
     }
     
-    private class EntryListEntry extends EntryWidget {
-        private int backupY;
-        
+    private class EntryListEntry extends EntryListEntryWidget {
         private EntryListEntry(int x, int y) {
             super(new Point(x, y));
-            this.backupY = y;
-            getBounds().width = getBounds().height = entrySize();
-        }
-        
-        @Override
-        public void drawBackground(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-            super.drawBackground(matrices, mouseX, mouseY, delta);
         }
         
         @Override
         public boolean containsMouse(double mouseX, double mouseY) {
             return super.containsMouse(mouseX, mouseY) && bounds.contains(mouseX, mouseY);
-        }
-        
-        @Override
-        public void drawHighlighted(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-            if (getCurrentEntry().getType() != EntryStack.Type.EMPTY)
-                super.drawHighlighted(matrices, mouseX, mouseY, delta);
-        }
-        
-        @Override
-        public void queueTooltip(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-            if (!ClientHelper.getInstance().isCheating() || minecraft.player.inventory.getCursorStack().isEmpty()) {
-                super.queueTooltip(matrices, mouseX, mouseY, delta);
-            }
-        }
-        
-        @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (!interactable)
-                return super.mouseClicked(mouseX, mouseY, button);
-            if (containsMouse(mouseX, mouseY) && ClientHelper.getInstance().isCheating()) {
-                EntryStack entry = getCurrentEntry().copy();
-                if (!entry.isEmpty()) {
-                    if (entry.getType() == EntryStack.Type.FLUID) {
-                        Item bucketItem = entry.getFluid().getBucketItem();
-                        if (bucketItem != null) {
-                            entry = EntryStack.create(bucketItem);
-                        }
-                    }
-                    if (entry.getType() == EntryStack.Type.ITEM)
-                        entry.setAmount(button != 1 && !Screen.hasShiftDown() ? 1 : entry.getItemStack().getMaxCount());
-                    ClientHelper.getInstance().tryCheatingEntry(entry);
-                    return true;
-                }
-            }
-            return super.mouseClicked(mouseX, mouseY, button);
         }
     }
 }

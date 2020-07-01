@@ -34,6 +34,8 @@ import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
@@ -42,6 +44,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.util.NarratorManager;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -52,6 +55,7 @@ import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Lazy;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -61,6 +65,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 @ApiStatus.Internal
+@Environment(EnvType.CLIENT)
 public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     private static ClientHelperImpl instance;
@@ -139,8 +144,9 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     @Override
     public void sendDeletePacket() {
-        if (REIHelper.getInstance().getPreviousContainerScreen() instanceof CreativeInventoryScreen) {
+        if (MinecraftClient.getInstance().currentScreen instanceof CreativeInventoryScreen) {
             MinecraftClient.getInstance().player.inventory.setCursorStack(ItemStack.EMPTY);
+            ((CreativeInventoryScreen) MinecraftClient.getInstance().currentScreen).isCursorDragging = false;
             return;
         }
         ClientSidePacketRegistry.INSTANCE.sendToServer(RoughlyEnoughItemsNetwork.DELETE_ITEMS_PACKET, new PacketByteBuf(Unpooled.buffer()));
@@ -151,9 +157,19 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         if (entry.getType() != EntryStack.Type.ITEM)
             return false;
         ItemStack cheatedStack = entry.getItemStack().copy();
-        if (RoughlyEnoughItemsCore.canUsePackets()) {
+        if (ConfigObject.getInstance().isGrabbingItems() && MinecraftClient.getInstance().currentScreen instanceof CreativeInventoryScreen) {
+            PlayerInventory inventory = MinecraftClient.getInstance().player.inventory;
+            EntryStack stack = entry.copy();
+            if (!inventory.getCursorStack().isEmpty() && EntryStack.create(inventory.getCursorStack()).equalsIgnoreAmount(stack)) {
+                stack.setAmount(MathHelper.clamp(stack.getAmount() + inventory.getCursorStack().getCount(), 1, stack.getItemStack().getMaxCount()));
+            } else if (!inventory.getCursorStack().isEmpty()) {
+                return false;
+            }
+            inventory.setCursorStack(stack.getItemStack().copy());
+            return true;
+        } else if (RoughlyEnoughItemsCore.canUsePackets()) {
             try {
-                ClientSidePacketRegistry.INSTANCE.sendToServer(RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET, new PacketByteBuf(Unpooled.buffer()).writeItemStack(cheatedStack));
+                ClientSidePacketRegistry.INSTANCE.sendToServer(ConfigObject.getInstance().isGrabbingItems() ? RoughlyEnoughItemsNetwork.CREATE_ITEMS_GRAB_PACKET : RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET, new PacketByteBuf(Unpooled.buffer()).writeItemStack(cheatedStack));
                 return true;
             } catch (Exception e) {
                 return false;
