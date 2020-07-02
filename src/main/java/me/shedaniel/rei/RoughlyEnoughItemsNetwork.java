@@ -27,7 +27,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.netty.buffer.Unpooled;
 import me.shedaniel.math.api.Executor;
-import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.server.InputSlotCrafter;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
@@ -97,15 +96,15 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
                 
                 PlayerInventory inventory = player.inventory;
                 ItemStack itemStack = packetByteBuf.readItemStack();
-                EntryStack stack = EntryStack.create(itemStack.copy());
-                if (!inventory.getCursorStack().isEmpty() && EntryStack.create(inventory.getCursorStack()).equalsIgnoreAmount(stack)) {
-                    stack.setAmount(MathHelper.clamp(stack.getAmount() + inventory.getCursorStack().getCount(), 1, stack.getItemStack().getMaxCount()));
+                ItemStack stack = itemStack.copy();
+                if (!inventory.getCursorStack().isEmpty() && ItemStack.areItemsEqual(inventory.getCursorStack(), stack) && ItemStack.areTagsEqual(inventory.getCursorStack(), stack)) {
+                    stack.setCount(MathHelper.clamp(stack.getCount() + inventory.getCursorStack().getCount(), 1, stack.getMaxCount()));
                 } else if (!inventory.getCursorStack().isEmpty()) {
                     inventory.setCursorStack(ItemStack.EMPTY);
                     player.updateCursorStack();
                     return;
                 }
-                inventory.setCursorStack(stack.getItemStack().copy());
+                inventory.setCursorStack(stack.copy());
                 player.updateCursorStack();
                 ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, new PacketByteBuf(Unpooled.buffer()).writeItemStack(itemStack.copy()).writeString(player.getEntityName(), 32767));
             });
