@@ -258,6 +258,13 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
             scrollBarAlpha = 1;
             return true;
         }
+        for (Element entry : children())
+            if (entry.mouseClicked(mouseX, mouseY, int_1)) {
+                setFocused(entry);
+                if (int_1 == 0)
+                    setDragging(true);
+                return true;
+            }
         return super.mouseClicked(mouseX, mouseY, int_1);
     }
     
@@ -354,12 +361,23 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
     }
     
     @Override
+    public boolean mouseReleased(double double_1, double double_2, int int_1) {
+        for (Element entry : children())
+            if (entry.mouseReleased(double_1, double_2, int_1))
+                return true;
+        return super.mouseReleased(double_1, double_2, int_1);
+    }
+    
+    @Override
     public boolean mouseDragged(double mouseX, double mouseY, int int_1, double double_3, double double_4) {
         if (scrolling.mouseDragged(mouseX, mouseY, int_1, double_3, double_4)) {
             scrollBarAlphaFutureTime = System.currentTimeMillis();
             scrollBarAlphaFuture = 1f;
             return true;
         }
+        for (Element entry : children())
+            if (entry.mouseDragged(mouseX, mouseY, int_1, double_3, double_4))
+                return true;
         return super.mouseDragged(mouseX, mouseY, int_1, double_3, double_4);
     }
     

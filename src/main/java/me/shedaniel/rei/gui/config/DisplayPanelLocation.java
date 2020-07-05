@@ -24,14 +24,22 @@
 package me.shedaniel.rei.gui.config;
 
 import me.shedaniel.clothconfig2.gui.entries.SelectionListEntry;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.resource.language.I18n;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 
+@Environment(EnvType.CLIENT)
 public enum DisplayPanelLocation implements SelectionListEntry.Translatable {
     LEFT,
     RIGHT;
+    
+    public DisplayPanelLocation mirror() {
+        if (this == LEFT) return RIGHT;
+        return LEFT;
+    }
     
     @Override
     public @NotNull String getKey() {

@@ -105,13 +105,17 @@ public class EntryListWidget extends WidgetWithBounds {
         return MathHelper.ceil(SIZE * ConfigObject.getInstance().getEntrySize());
     }
     
-    @SuppressWarnings("rawtypes")
     static boolean notSteppingOnExclusionZones(int left, int top, Rectangle listArea) {
         MinecraftClient instance = MinecraftClient.getInstance();
-        for (DisplayHelper.DisplayBoundsHandler sortedBoundsHandler : DisplayHelper.getInstance().getSortedBoundsHandlers(instance.currentScreen.getClass())) {
-            ActionResult fit = sortedBoundsHandler.canItemSlotWidgetFit(left, top, instance.currentScreen, listArea);
-            if (fit != ActionResult.PASS)
+        for (OverlayDecider decider : DisplayHelper.getInstance().getSortedOverlayDeciders(instance.currentScreen.getClass())) {
+            ActionResult fit = decider.isInZone(left, top);
+            if (fit == ActionResult.FAIL)
                 return fit == ActionResult.SUCCESS;
+            ActionResult fit2 = decider.isInZone(left + 18, top + 18);
+            if (fit2 == ActionResult.FAIL)
+                return fit == ActionResult.SUCCESS;
+            if (fit == ActionResult.SUCCESS && fit2 == ActionResult.SUCCESS)
+                return true;
         }
         return true;
     }
@@ -410,11 +414,11 @@ public class EntryListWidget extends WidgetWithBounds {
         return false;
     }
     
-    public void updateArea(DisplayHelper.DisplayBoundsHandler<?> boundsHandler, @Nullable String searchTerm) {
-        this.bounds = boundsHandler.getItemListArea(ScreenHelper.getLastOverlay().getBounds());
+    public void updateArea(@Nullable String searchTerm) {
+        this.bounds = ScreenHelper.getItemListArea(ScreenHelper.getLastOverlay().getBounds());
         FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
         if (favoritesListWidget != null)
-            favoritesListWidget.updateFavoritesBounds(boundsHandler, searchTerm);
+            favoritesListWidget.updateFavoritesBounds(searchTerm);
         if (searchTerm != null)
             updateSearch(searchTerm, true);
         else if (allStacks == null || (favoritesListWidget != null && favoritesListWidget.favorites == null))

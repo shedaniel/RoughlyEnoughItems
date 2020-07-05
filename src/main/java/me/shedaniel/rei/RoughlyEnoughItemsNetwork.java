@@ -72,8 +72,10 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
                     player.addMessage(new TranslatableText("text.rei.no_permission_cheat").formatted(Formatting.RED), false);
                     return;
                 }
-                if (!player.inventory.getCursorStack().isEmpty())
+                if (!player.inventory.getCursorStack().isEmpty()) {
                     player.inventory.setCursorStack(ItemStack.EMPTY);
+                    player.updateCursorStack();
+                }
             });
             ServerSidePacketRegistry.INSTANCE.register(CREATE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
                 ServerPlayerEntity player = (ServerPlayerEntity) packetContext.getPlayer();
@@ -100,8 +102,6 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
                 if (!inventory.getCursorStack().isEmpty() && ItemStack.areItemsEqual(inventory.getCursorStack(), stack) && ItemStack.areTagsEqual(inventory.getCursorStack(), stack)) {
                     stack.setCount(MathHelper.clamp(stack.getCount() + inventory.getCursorStack().getCount(), 1, stack.getMaxCount()));
                 } else if (!inventory.getCursorStack().isEmpty()) {
-                    inventory.setCursorStack(ItemStack.EMPTY);
-                    player.updateCursorStack();
                     return;
                 }
                 inventory.setCursorStack(stack.copy());

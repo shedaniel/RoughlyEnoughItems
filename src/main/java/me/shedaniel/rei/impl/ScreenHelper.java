@@ -28,6 +28,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import me.shedaniel.cloth.api.client.events.v0.ClothClientHooks;
 import me.shedaniel.math.Point;
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.api.Executor;
 import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.api.ConfigManager;
@@ -38,8 +39,11 @@ import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.OverlaySearchField;
 import me.shedaniel.rei.gui.RecipeScreen;
 import me.shedaniel.rei.gui.WarningAndErrorScreen;
+import me.shedaniel.rei.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.event.client.ClientTickCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
@@ -58,6 +62,7 @@ import java.util.List;
 import java.util.Optional;
 
 @ApiStatus.Internal
+@Environment(EnvType.CLIENT)
 public class ScreenHelper implements ClientModInitializer, REIHelper {
     
     private OverlaySearchField searchField;
@@ -201,6 +206,15 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
     
     public ScreenHelper() {
         ScreenHelper.instance = this;
+    }
+    
+    public static Rectangle getItemListArea(Rectangle bounds) {
+        return new Rectangle(bounds.x, bounds.y + 2 + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + (ConfigObject.getInstance().isEntryListWidgetScrolled() ? 0 : 22), bounds.width, bounds.height - (ConfigObject.getInstance().getSearchFieldLocation() != SearchFieldLocation.CENTER ? 27 + 22 : 27) + (!ConfigObject.getInstance().isEntryListWidgetScrolled() ? 0 : 22));
+    }
+    
+    public static Rectangle getFavoritesListArea(Rectangle bounds) {
+        int offset = 6 + (!ConfigObject.getInstance().isLowerConfigButton() ? 25 : 0) + (ConfigObject.getInstance().doesShowUtilsButtons() ? 25 : 0);
+        return new Rectangle(bounds.x, bounds.y + 2 + offset, bounds.width, bounds.height - 5 - offset);
     }
     
     @Override

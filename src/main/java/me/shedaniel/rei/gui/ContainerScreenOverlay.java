@@ -186,16 +186,14 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         this.renderWeatherMenu = false;
         this.weatherButton = null;
         this.window = MinecraftClient.getInstance().getWindow();
-        @SuppressWarnings({"RawTypeCanBeGeneric", "rawtypes"})
-        DisplayHelper.DisplayBoundsHandler boundsHandler = DisplayHelper.getInstance().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
-        this.bounds = ConfigObject.getInstance().isLeftHandSidePanel() ? boundsHandler.getLeftBounds(MinecraftClient.getInstance().currentScreen) : boundsHandler.getRightBounds(MinecraftClient.getInstance().currentScreen);
+        this.bounds = DisplayHelper.getInstance().getOverlayBounds(ConfigObject.getInstance().getDisplayPanelLocation(), MinecraftClient.getInstance().currentScreen);
         widgets.add(ENTRY_LIST_WIDGET);
         if (ConfigObject.getInstance().isFavoritesEnabled()) {
             if (favoritesListWidget == null)
                 favoritesListWidget = new FavoritesListWidget();
             widgets.add(favoritesListWidget);
         }
-        ENTRY_LIST_WIDGET.updateArea(boundsHandler, ScreenHelper.getSearchField() == null ? "" : null);
+        ENTRY_LIST_WIDGET.updateArea(ScreenHelper.getSearchField() == null ? "" : null);
         if (ScreenHelper.getSearchField() == null) {
             ScreenHelper.setSearchField(new OverlaySearchField(0, 0, 0, 0));
         }
@@ -437,15 +435,13 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             return new Rectangle(bounds.x + 2, window.getScaledHeight() - 22, bounds.width - 6 - widthRemoved, 18);
         if (searchFieldLocation == SearchFieldLocation.TOP_SIDE)
             return new Rectangle(bounds.x + 2, 4, bounds.width - 6 - widthRemoved, 18);
-        if (MinecraftClient.getInstance().currentScreen instanceof RecipeViewingScreen) {
-            RecipeViewingScreen widget = (RecipeViewingScreen) MinecraftClient.getInstance().currentScreen;
-            return new Rectangle(widget.getBounds().x, window.getScaledHeight() - 22, widget.getBounds().width - widthRemoved, 18);
+        for (OverlayDecider decider : DisplayHelper.getInstance().getSortedOverlayDeciders(MinecraftClient.getInstance().currentScreen.getClass())) {
+            if (decider instanceof DisplayHelper.DisplayBoundsProvider) {
+                Rectangle containerBounds = ((DisplayHelper.DisplayBoundsProvider<Screen>) decider).getScreenBounds(MinecraftClient.getInstance().currentScreen);
+                return new Rectangle(containerBounds.x, window.getScaledHeight() - 22, containerBounds.width - widthRemoved, 18);
+            }
         }
-        if (MinecraftClient.getInstance().currentScreen instanceof VillagerRecipeViewingScreen) {
-            VillagerRecipeViewingScreen widget = (VillagerRecipeViewingScreen) MinecraftClient.getInstance().currentScreen;
-            return new Rectangle(widget.bounds.x, window.getScaledHeight() - 22, widget.bounds.width - widthRemoved, 18);
-        }
-        return new Rectangle(REIHelper.getInstance().getPreviousContainerScreen().x, window.getScaledHeight() - 22, REIHelper.getInstance().getPreviousContainerScreen().containerWidth - widthRemoved, 18);
+        return new Rectangle();
     }
     
     private Rectangle getCraftableToggleArea() {
@@ -482,8 +478,8 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
             ENTRY_LIST_WIDGET.updateSearch(ScreenHelper.getSearchField().getText(), true);
             init();
         } else {
-            for (DisplayHelper.DisplayBoundsHandler<?> handler : DisplayHelper.getInstance().getSortedBoundsHandlers(minecraft.currentScreen.getClass())) {
-                if (handler != null && handler.shouldRecalculateArea(!ConfigObject.getInstance().isLeftHandSidePanel(), bounds)) {
+            for (OverlayDecider decider : DisplayHelper.getInstance().getSortedOverlayDeciders(minecraft.currentScreen.getClass())) {
+                if (decider != null && decider.shouldRecalculateArea(ConfigObject.getInstance().getDisplayPanelLocation(), bounds)) {
                     init();
                     break;
                 }
@@ -760,8 +756,8 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
     }
     
     public boolean isNotInExclusionZones(double mouseX, double mouseY) {
-        for (DisplayHelper.DisplayBoundsHandler<?> handler : DisplayHelper.getInstance().getSortedBoundsHandlers(MinecraftClient.getInstance().currentScreen.getClass())) {
-            ActionResult in = handler.isInZone(mouseX, mouseY);
+        for (OverlayDecider decider : DisplayHelper.getInstance().getSortedOverlayDeciders(MinecraftClient.getInstance().currentScreen.getClass())) {
+            ActionResult in = decider.isInZone(mouseX, mouseY);
             if (in != ActionResult.PASS)
                 return in == ActionResult.SUCCESS;
         }

@@ -66,6 +66,8 @@ import me.shedaniel.rei.plugin.stripping.DefaultStrippingCategory;
 import me.shedaniel.rei.plugin.stripping.DefaultStrippingDisplay;
 import me.shedaniel.rei.plugin.stripping.DummyAxeItem;
 import me.shedaniel.rei.utils.CollectionUtils;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.block.ComposterBlock;
 import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.client.MinecraftClient;
@@ -89,6 +91,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+@Environment(EnvType.CLIENT)
 public class DefaultPlugin implements REIPluginV0 {
     
     public static final Identifier CRAFTING = new Identifier("minecraft", "plugins/crafting");
@@ -305,70 +308,37 @@ public class DefaultPlugin implements REIPluginV0 {
                 return Collections.emptyList();
             return Collections.singletonList(widget.getBounds().clone());
         });
-        displayHelper.registerHandler(new DisplayHelper.DisplayBoundsHandler<ContainerScreen<?>>() {
+        displayHelper.registerProvider(new DisplayHelper.DisplayBoundsProvider<ContainerScreen<?>>() {
+            @Override
+            public Rectangle getScreenBounds(ContainerScreen<?> screen) {
+                return new Rectangle(screen.x, screen.y, screen.containerWidth, screen.containerHeight);
+            }
+            
             @Override
             public Class<?> getBaseSupportedClass() {
                 return ContainerScreen.class;
             }
-            
-            @Override
-            public Rectangle getLeftBounds(ContainerScreen<?> screen) {
-                return new Rectangle(2, 0, screen.x - 4, screen.height);
-            }
-            
-            @Override
-            public Rectangle getRightBounds(ContainerScreen<?> screen) {
-                int startX = screen.x + screen.containerWidth + 2;
-                return new Rectangle(startX, 0, screen.width - startX - 2, screen.height);
-            }
-            
-            @Override
-            public float getPriority() {
-                return -1.0f;
-            }
         });
-        displayHelper.registerHandler(new DisplayHelper.DisplayBoundsHandler<RecipeViewingScreen>() {
+        displayHelper.registerProvider(new DisplayHelper.DisplayBoundsProvider<RecipeViewingScreen>() {
+            @Override
+            public Rectangle getScreenBounds(RecipeViewingScreen screen) {
+                return screen.getBounds();
+            }
+            
             @Override
             public Class<?> getBaseSupportedClass() {
                 return RecipeViewingScreen.class;
             }
-            
-            @Override
-            public Rectangle getLeftBounds(RecipeViewingScreen screen) {
-                return new Rectangle(2, 0, screen.getBounds().x - 4, MinecraftClient.getInstance().getWindow().getScaledHeight());
-            }
-            
-            @Override
-            public Rectangle getRightBounds(RecipeViewingScreen screen) {
-                int startX = screen.getBounds().x + screen.getBounds().width + 2;
-                return new Rectangle(startX, 0, MinecraftClient.getInstance().getWindow().getScaledWidth() - startX - 2, MinecraftClient.getInstance().getWindow().getScaledHeight());
-            }
-            
-            @Override
-            public float getPriority() {
-                return -1.0f;
-            }
         });
-        displayHelper.registerHandler(new DisplayHelper.DisplayBoundsHandler<VillagerRecipeViewingScreen>() {
+        displayHelper.registerProvider(new DisplayHelper.DisplayBoundsProvider<VillagerRecipeViewingScreen>() {
+            @Override
+            public Rectangle getScreenBounds(VillagerRecipeViewingScreen screen) {
+                return screen.bounds;
+            }
+            
             @Override
             public Class<?> getBaseSupportedClass() {
                 return VillagerRecipeViewingScreen.class;
-            }
-            
-            @Override
-            public Rectangle getLeftBounds(VillagerRecipeViewingScreen screen) {
-                return new Rectangle(2, 0, screen.bounds.x - 4, MinecraftClient.getInstance().getWindow().getScaledHeight());
-            }
-            
-            @Override
-            public Rectangle getRightBounds(VillagerRecipeViewingScreen screen) {
-                int startX = screen.bounds.x + screen.bounds.width + 2;
-                return new Rectangle(startX, 0, MinecraftClient.getInstance().getWindow().getScaledWidth() - startX - 2, MinecraftClient.getInstance().getWindow().getScaledHeight());
-            }
-            
-            @Override
-            public float getPriority() {
-                return -1.0f;
             }
         });
     }

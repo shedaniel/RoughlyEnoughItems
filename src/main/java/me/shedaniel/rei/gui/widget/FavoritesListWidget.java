@@ -179,9 +179,8 @@ public class FavoritesListWidget extends WidgetWithBounds {
         return false;
     }
     
-    @SuppressWarnings("rawtypes")
-    public void updateFavoritesBounds(DisplayHelper.DisplayBoundsHandler boundsHandler, @Nullable String searchTerm) {
-        this.bounds = boundsHandler.getFavoritesListArea(!ConfigObject.getInstance().isLeftHandSidePanel() ? boundsHandler.getLeftBounds(MinecraftClient.getInstance().currentScreen) : boundsHandler.getRightBounds(MinecraftClient.getInstance().currentScreen));
+    public void updateFavoritesBounds(@Nullable String searchTerm) {
+        this.bounds = ScreenHelper.getFavoritesListArea(DisplayHelper.getInstance().getOverlayBounds(ConfigObject.getInstance().getDisplayPanelLocation().mirror(), MinecraftClient.getInstance().currentScreen));
     }
     
     public void updateSearch(EntryListWidget listWidget, String searchTerm) {
