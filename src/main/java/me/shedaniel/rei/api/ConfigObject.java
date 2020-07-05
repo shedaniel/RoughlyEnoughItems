@@ -24,10 +24,7 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
-import me.shedaniel.rei.gui.config.EntryPanelOrdering;
-import me.shedaniel.rei.gui.config.RecipeBorderType;
-import me.shedaniel.rei.gui.config.RecipeScreenType;
-import me.shedaniel.rei.gui.config.SearchFieldLocation;
+import me.shedaniel.rei.gui.config.*;
 import me.shedaniel.rei.impl.ConfigManagerImpl;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -77,7 +74,11 @@ public interface ConfigObject {
     
     SearchFieldLocation getSearchFieldLocation();
     
-    boolean isLeftHandSidePanel();
+    default boolean isLeftHandSidePanel() {
+        return getDisplayPanelLocation() == DisplayPanelLocation.LEFT;
+    }
+    
+    DisplayPanelLocation getDisplayPanelLocation();
     
     boolean isCraftableFilterEnabled();
     

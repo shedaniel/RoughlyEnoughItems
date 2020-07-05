@@ -139,8 +139,8 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
-    public boolean isLeftHandSidePanel() {
-        return advanced.accessibility.displayPanelLocation == DisplayPanelLocation.LEFT;
+    public DisplayPanelLocation getDisplayPanelLocation() {
+        return advanced.accessibility.displayPanelLocation;
     }
     
     @Override

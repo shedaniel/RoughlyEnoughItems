@@ -27,6 +27,9 @@ import com.google.common.collect.Lists;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.BaseBoundsHandler;
 import me.shedaniel.rei.api.DisplayHelper;
+import me.shedaniel.rei.gui.config.DisplayPanelLocation;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.ActionResult;
@@ -38,6 +41,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
+@Environment(EnvType.CLIENT)
 public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
     
     private static final Comparator<? super Rectangle> RECTANGLE_COMPARER = Comparator.comparingLong(Rectangle::hashCode);
@@ -46,18 +50,8 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
     private List<Pair<Pair<Class<?>, Float>, Supplier<List<Rectangle>>>> list = Lists.newArrayList();
     
     @Override
-    public Class<?> getBaseSupportedClass() {
-        return Screen.class;
-    }
-    
-    @Override
-    public Rectangle getLeftBounds(Screen screen) {
-        return new Rectangle();
-    }
-    
-    @Override
-    public Rectangle getRightBounds(Screen screen) {
-        return new Rectangle();
+    public boolean isHandingScreen(Class<?> screen) {
+        return Screen.class.isAssignableFrom(screen);
     }
     
     @Override
@@ -78,30 +72,16 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
     }
     
     @Override
-    public boolean shouldRecalculateArea(boolean isOnRightSide, Rectangle rectangle) {
-        long current = currentHashCode(isOnRightSide);
+    public boolean shouldRecalculateArea(DisplayPanelLocation location, Rectangle rectangle) {
+        long current = currentHashCode(location);
         if (lastArea == current)
             return false;
         lastArea = current;
         return true;
     }
     
-    private long currentHashCode(boolean isOnRightSide) {
-        DisplayHelper.DisplayBoundsHandler<Screen> handler = (DisplayHelper.DisplayBoundsHandler<Screen>) DisplayHelper.getInstance().getResponsibleBoundsHandler(MinecraftClient.getInstance().currentScreen.getClass());
-        return areasHashCode(isOnRightSide ? handler.getRightBounds(MinecraftClient.getInstance().currentScreen) : handler.getLeftBounds(MinecraftClient.getInstance().currentScreen), getExclusionZones(MinecraftClient.getInstance().currentScreen.getClass(), false));
-    }
-    
-    @Override
-    public ActionResult canItemSlotWidgetFit(int left, int top, Screen screen, Rectangle fullBounds) {
-        Class<? extends Screen> screenClass = screen.getClass();
-        for (Pair<Pair<Class<?>, Float>, Supplier<List<Rectangle>>> pair : list) {
-            if (pair.getLeft().getLeft().isAssignableFrom(screenClass))
-                for (Rectangle zone : pair.getRight().get()) {
-                    if (left + 18 >= zone.x && top + 18 >= zone.y && left <= zone.getMaxX() && top <= zone.getMaxY())
-                        return ActionResult.FAIL;
-                }
-        }
-        return ActionResult.PASS;
+    private long currentHashCode(DisplayPanelLocation location) {
+        return areasHashCode(DisplayHelper.getInstance().getOverlayBounds(location, MinecraftClient.getInstance().currentScreen), getExclusionZones(MinecraftClient.getInstance().currentScreen.getClass(), false));
     }
     
     @Override

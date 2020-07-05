@@ -25,14 +25,19 @@ package me.shedaniel.rei.api;
 
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.gui.config.SearchFieldLocation;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.util.ActionResult;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 import java.util.function.Supplier;
 
 import static net.minecraft.util.ActionResult.PASS;
 
+@Environment(EnvType.CLIENT)
 public interface DisplayHelper {
     
     /**
@@ -49,7 +54,11 @@ public interface DisplayHelper {
      * @return the sorted list of responsible bounds handlers
      * @see DisplayHelper#getResponsibleBoundsHandler(Class) for the unsorted version
      */
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     List<DisplayBoundsHandler<?>> getSortedBoundsHandlers(Class<?> screenClass);
+    
+    List<OverlayDecider> getSortedOverlayDeciders(Class<?> screenClass);
     
     /**
      * Gets all registered overlay deciders
@@ -59,12 +68,14 @@ public interface DisplayHelper {
     List<OverlayDecider> getAllOverlayDeciders();
     
     /**
-     * Gets all responsible bounds handlers
+     * Gets the responsible bounds handlers
      *
      * @param screenClass the class for checking responsible bounds handlers
      * @return the the list of responsible bounds handlers
      * @see DisplayHelper#getSortedBoundsHandlers(Class) for the sorted version
      */
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     DisplayBoundsHandler<?> getResponsibleBoundsHandler(Class<?> screenClass);
     
     /**
@@ -74,6 +85,40 @@ public interface DisplayHelper {
      */
     void registerHandler(OverlayDecider decider);
     
+    default <T> void registerProvider(DisplayBoundsProvider<T> provider) {
+        registerHandler(provider);
+    }
+    
+    /**
+     * Gets the left bounds of the overlay
+     *
+     * @param screen the current screen
+     * @return the left bounds
+     */
+    <T> Rectangle getOverlayBounds(DisplayPanelLocation location, T screen);
+    
+    interface DisplayBoundsProvider<T> extends OverlayDecider {
+        /**
+         * @param screen the screen
+         * @return the boundary of the base container panel.
+         */
+        Rectangle getScreenBounds(T screen);
+        
+        /**
+         * Gets the base supported class for the bounds handler
+         *
+         * @return the base class
+         */
+        Class<?> getBaseSupportedClass();
+        
+        @Override
+        default boolean isHandingScreen(Class<?> screen) {
+            return getBaseSupportedClass().isAssignableFrom(screen);
+        }
+    }
+    
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     interface DisplayBoundsHandler<T> extends OverlayDecider {
         /**
          * Gets the base supported class for the bounds handler
@@ -114,18 +159,20 @@ public interface DisplayHelper {
          * @see BaseBoundsHandler#registerExclusionZones(Class, Supplier) for easier api
          */
         default ActionResult canItemSlotWidgetFit(int left, int top, T screen, Rectangle fullBounds) {
+            ActionResult fit = isInZone(left, top);
+            if (fit == ActionResult.FAIL)
+                return ActionResult.FAIL;
+            ActionResult fit2 = isInZone(left + 18, top + 18);
+            if (fit2 == ActionResult.FAIL)
+                return ActionResult.FAIL;
+            if (fit == ActionResult.SUCCESS && fit2 == ActionResult.SUCCESS)
+                return ActionResult.SUCCESS;
             return PASS;
         }
         
-        /**
-         * Checks if mouse is inside the overlay
-         *
-         * @param mouseX mouse's x coordinates
-         * @param mouseY mouse's y coordinates
-         * @return whether mouse is inside the overlay
-         */
+        @Override
         default ActionResult isInZone(double mouseX, double mouseY) {
-            return PASS;
+            return OverlayDecider.super.isInZone(mouseX, mouseY);
         }
         
         /**
@@ -143,15 +190,15 @@ public interface DisplayHelper {
             return new Rectangle(rectangle.x + 1, rectangle.y + 2 + offset, rectangle.width - 2, rectangle.height - 5 - offset);
         }
         
-        /**
-         * Checks if REI should recalculate the overlay bounds
-         *
-         * @param isOnRightSide whether the user has set the overlay to the right
-         * @param rectangle     the current overlay bounds
-         * @return whether REI should recalculate the overlay bounds
-         */
+        @Deprecated
+        @ApiStatus.ScheduledForRemoval
         default boolean shouldRecalculateArea(boolean isOnRightSide, Rectangle rectangle) {
             return false;
+        }
+        
+        @Override
+        default boolean shouldRecalculateArea(DisplayPanelLocation location, Rectangle rectangle) {
+            return shouldRecalculateArea(location == DisplayPanelLocation.RIGHT, rectangle);
         }
         
         /**
@@ -160,9 +207,7 @@ public interface DisplayHelper {
          * @return the priority in float
          */
         @Override
-        default float getPriority() {
-            return 0f;
-        }
+        float getPriority();
     }
     
 }

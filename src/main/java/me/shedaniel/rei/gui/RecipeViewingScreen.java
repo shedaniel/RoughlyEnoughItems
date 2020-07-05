@@ -57,14 +57,16 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Matrix4f;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
@@ -497,6 +499,9 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
         if (choosePageActivated) {
             return recipeChoosePageWidget.mouseDragged(double_1, double_2, int_1, double_3, double_4);
         }
+        for (Element entry : children())
+            if (entry.mouseDragged(double_1, double_2, int_1, double_3, double_4))
+                return true;
         return super.mouseDragged(double_1, double_2, int_1, double_3, double_4);
     }
     
@@ -505,6 +510,9 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
         if (choosePageActivated) {
             return recipeChoosePageWidget.mouseReleased(double_1, double_2, int_1);
         }
+        for (Element entry : children())
+            if (entry.mouseReleased(double_1, double_2, int_1))
+                return true;
         return super.mouseReleased(double_1, double_2, int_1);
     }
     

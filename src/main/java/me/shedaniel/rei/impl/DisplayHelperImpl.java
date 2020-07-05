@@ -29,7 +29,12 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.BaseBoundsHandler;
 import me.shedaniel.rei.api.DisplayHelper;
 import me.shedaniel.rei.api.OverlayDecider;
+import me.shedaniel.rei.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.utils.CollectionUtils;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.util.Window;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collections;
@@ -38,9 +43,10 @@ import java.util.List;
 import java.util.Map;
 
 @ApiStatus.Internal
+@Environment(EnvType.CLIENT)
 public class DisplayHelperImpl implements DisplayHelper {
     
-    private static final Comparator<OverlayDecider> BOUNDS_HANDLER_COMPARATOR;
+    private static final Comparator<OverlayDecider> BOUNDS_HANDLER_COMPARATOR = Comparator.comparingDouble(OverlayDecider::getPriority).reversed();
     private static final DisplayBoundsHandler<Object> EMPTY = new DisplayBoundsHandler<Object>() {
         @Override
         public Class<Object> getBaseSupportedClass() {
@@ -63,13 +69,9 @@ public class DisplayHelperImpl implements DisplayHelper {
         }
     };
     
-    static {
-        Comparator<OverlayDecider> comparator = Comparator.comparingDouble(OverlayDecider::getPriority);
-        BOUNDS_HANDLER_COMPARATOR = comparator.reversed();
-    }
-    
     private List<OverlayDecider> screenDisplayBoundsHandlers = Lists.newArrayList();
     private Map<Class<?>, DisplayBoundsHandler<?>> handlerCache = Maps.newHashMap();
+    private Map<Class<?>, List<OverlayDecider>> deciderSortedCache = Maps.newHashMap();
     private Map<Class<?>, List<DisplayBoundsHandler<?>>> handlerSortedCache = Maps.newHashMap();
     private BaseBoundsHandler baseBoundsHandler;
     private Class<?> tempScreen;
@@ -86,6 +88,16 @@ public class DisplayHelperImpl implements DisplayHelper {
     }
     
     @Override
+    public List<OverlayDecider> getSortedOverlayDeciders(Class<?> screenClass) {
+        List<OverlayDecider> possibleCached = deciderSortedCache.get(screenClass);
+        if (possibleCached != null)
+            return possibleCached;
+        tempScreen = screenClass;
+        deciderSortedCache.put(screenClass, (List) CollectionUtils.filter(screenDisplayBoundsHandlers, this::filterResponsible));
+        return deciderSortedCache.get(screenClass);
+    }
+    
+    @Override
     public List<OverlayDecider> getAllOverlayDeciders() {
         return Collections.unmodifiableList(screenDisplayBoundsHandlers);
     }
@@ -98,6 +110,28 @@ public class DisplayHelperImpl implements DisplayHelper {
         List<DisplayBoundsHandler<?>> handlers = getSortedBoundsHandlers(screenClass);
         handlerCache.put(screenClass, handlers.isEmpty() ? EMPTY : handlers.get(0));
         return handlerCache.get(screenClass);
+    }
+    
+    @Override
+    public <T> Rectangle getOverlayBounds(DisplayPanelLocation location, T screen) {
+        Window window = MinecraftClient.getInstance().getWindow();
+        int scaledWidth = window.getScaledWidth();
+        int scaledHeight = window.getScaledHeight();
+        for (OverlayDecider decider : getSortedOverlayDeciders(screen.getClass())) {
+            if (decider instanceof DisplayBoundsProvider) {
+                Rectangle containerBounds = ((DisplayBoundsProvider<T>) decider).getScreenBounds(screen);
+                if (location == DisplayPanelLocation.LEFT) {
+                    if (containerBounds.x < 10) continue;
+                    return new Rectangle(2, 0, containerBounds.x - 2, scaledHeight);
+                } else {
+                    if (scaledWidth - containerBounds.getMaxX() < 10) continue;
+                    return new Rectangle(containerBounds.getMaxX() + 2, 0, scaledWidth - containerBounds.getMaxX() - 4, scaledHeight);
+                }
+            } else if (decider instanceof DisplayBoundsHandler) {
+                return location == DisplayPanelLocation.LEFT ? ((DisplayBoundsHandler<T>) decider).getLeftBounds(screen) : ((DisplayBoundsHandler<T>) decider).getRightBounds(screen);
+            }
+        }
+        return new Rectangle();
     }
     
     private boolean filterResponsible(OverlayDecider handler) {

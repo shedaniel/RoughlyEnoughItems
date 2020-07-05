@@ -25,12 +25,15 @@ package me.shedaniel.rei.api;
 
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.impl.DisplayHelperImpl;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screen.Screen;
 
 import java.util.List;
 import java.util.function.Supplier;
 
-public interface BaseBoundsHandler extends DisplayHelper.DisplayBoundsHandler<Screen> {
+@Environment(EnvType.CLIENT)
+public interface BaseBoundsHandler extends OverlayDecider {
     
     static BaseBoundsHandler getInstance() {
         return ((DisplayHelperImpl) DisplayHelper.getInstance()).getBaseBoundsHandler();

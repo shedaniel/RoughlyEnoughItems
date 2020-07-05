@@ -23,7 +23,11 @@
 
 package me.shedaniel.rei.api;
 
+import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.gui.config.DisplayPanelLocation;
 import net.minecraft.util.ActionResult;
+
+import static net.minecraft.util.ActionResult.PASS;
 
 public interface OverlayDecider {
     boolean isHandingScreen(Class<?> screen);
@@ -39,5 +43,27 @@ public interface OverlayDecider {
      */
     default float getPriority() {
         return 0f;
+    }
+    
+    /**
+     * Checks if REI should recalculate the overlay bounds
+     *
+     * @param location  the location of the display panel
+     * @param rectangle the current overlay bounds
+     * @return whether REI should recalculate the overlay bounds
+     */
+    default boolean shouldRecalculateArea(DisplayPanelLocation location, Rectangle rectangle) {
+        return false;
+    }
+    
+    /**
+     * Checks if mouse is inside the overlay
+     *
+     * @param mouseX mouse's x coordinates
+     * @param mouseY mouse's y coordinates
+     * @return whether mouse is inside the overlay
+     */
+    default ActionResult isInZone(double mouseX, double mouseY) {
+        return PASS;
     }
 }

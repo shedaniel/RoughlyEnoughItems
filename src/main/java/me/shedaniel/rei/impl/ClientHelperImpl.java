@@ -170,6 +170,11 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
             inventory.setCursorStack(stack.getItemStack().copy());
             return true;
         } else if (RoughlyEnoughItemsCore.canUsePackets()) {
+            PlayerInventory inventory = MinecraftClient.getInstance().player.inventory;
+            EntryStack stack = entry.copy();
+            if (!inventory.getCursorStack().isEmpty() && !EntryStack.create(inventory.getCursorStack()).equalsIgnoreAmount(stack)) {
+                return false;
+            }
             try {
                 ClientSidePacketRegistry.INSTANCE.sendToServer(ConfigObject.getInstance().isGrabbingItems() ? RoughlyEnoughItemsNetwork.CREATE_ITEMS_GRAB_PACKET : RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET, new PacketByteBuf(Unpooled.buffer()).writeItemStack(cheatedStack));
                 return true;
