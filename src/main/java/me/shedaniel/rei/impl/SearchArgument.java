@@ -33,6 +33,8 @@ import me.shedaniel.rei.impl.search.Argument;
 import me.shedaniel.rei.impl.search.ArgumentsRegistry;
 import me.shedaniel.rei.impl.search.MatchStatus;
 import me.shedaniel.rei.utils.CollectionUtils;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import org.apache.commons.lang3.StringUtils;
@@ -44,6 +46,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @ApiStatus.Internal
+@Environment(EnvType.CLIENT)
 public class SearchArgument {
     public static final String SPACE = " ", EMPTY = "";
     private static final SearchArgument ALWAYS = new SearchArgument(AlwaysMatchingArgument.INSTANCE, EMPTY, true);
@@ -72,7 +75,7 @@ public class SearchArgument {
             List<SearchArgument> arguments = Lists.newArrayList();
             while (terms.find()) {
                 String term = MoreObjects.firstNonNull(terms.group(1), terms.group(2));
-                for (Argument argument : ArgumentsRegistry.ARGUMENTS) {
+                for (Argument argument : ArgumentsRegistry.ARGUMENT_LIST) {
                     MatchStatus status = argument.matchesArgumentPrefix(term);
                     if (status.isMatched()) {
                         arguments.add(new SearchArgument(argument, status.getText(), !status.isInverted(), !status.shouldPreserveCasing()));
@@ -99,7 +102,7 @@ public class SearchArgument {
         if (searchArguments.isEmpty())
             return true;
         MinecraftClient minecraft = MinecraftClient.getInstance();
-        Object[] data = new Object[ArgumentsRegistry.ARGUMENTS.size()];
+        Object[] data = new Object[ArgumentsRegistry.ARGUMENT_LIST.size()];
         for (SearchArgument.SearchArguments arguments : searchArguments) {
             boolean applicable = true;
             for (SearchArgument argument : arguments.getArguments()) {
@@ -148,6 +151,10 @@ public class SearchArgument {
         
         public SearchArgument[] getArguments() {
             return arguments;
+        }
+        
+        public final boolean isAlways() {
+            return this == ALWAYS;
         }
     }
     

@@ -50,7 +50,6 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
-import net.minecraft.client.util.NarratorManager;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
@@ -103,6 +102,7 @@ public class FilteringScreen extends Screen {
     private ButtonWidget hideButton;
     private ButtonWidget showButton;
     private ButtonWidget backButton;
+    private Rectangle selectionCache;
     
     private List<SearchArgument.SearchArguments> lastSearchArguments = Collections.emptyList();
     
@@ -134,6 +134,7 @@ public class FilteringScreen extends Screen {
                     if (entry.isSelected() && !entry.isFiltered()) {
                         filteringEntry.configFiltered.add(stack);
                         filteringEntry.edited = true;
+                        entry.dirty = true;
                     }
                 }
             });
@@ -147,6 +148,7 @@ public class FilteringScreen extends Screen {
                     entry.getBounds().y = (int) (entry.backupY - scrolling.scrollAmount);
                     if (entry.isSelected() && filteringEntry.configFiltered.remove(stack)) {
                         filteringEntry.edited = true;
+                        entry.dirty = true;
                     }
                 }
             });
@@ -207,6 +209,7 @@ public class FilteringScreen extends Screen {
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         renderHoleBackground(matrices, 0, height, 32, 255, 255);
+        updateSelectionCache();
         Rectangle bounds = getBounds();
         tooltip = null;
         if (bounds.isEmpty())
@@ -269,6 +272,10 @@ public class FilteringScreen extends Screen {
     }
     
     private Rectangle getSelection() {
+        return selectionCache;
+    }
+    
+    private void updateSelectionCache() {
         if (selectionPoint != null) {
             Point p = secondPoint;
             if (p == null) {
@@ -279,9 +286,10 @@ public class FilteringScreen extends Screen {
             int top = Math.min(p.y, selectionPoint.y);
             int right = Math.max(p.x, selectionPoint.x);
             int bottom = Math.max(p.y, selectionPoint.y);
-            return new Rectangle(left, (int) (top - scrolling.scrollAmount), right - left, bottom - top);
+            selectionCache = new Rectangle(left, (int) (top - scrolling.scrollAmount), right - left, bottom - top);
+            return;
         }
-        return new Rectangle(0, 0, 0, 0);
+        selectionCache = new Rectangle(0, 0, 0, 0);
     }
     
     @Override
@@ -416,7 +424,7 @@ public class FilteringScreen extends Screen {
             if (!this.changeFocus(bl)) {
                 this.changeFocus(bl);
             }
-        
+            
             return true;
         }
         return false;
@@ -443,6 +451,8 @@ public class FilteringScreen extends Screen {
     
     private class EntryListEntry extends EntryWidget {
         private int backupY;
+        private boolean filtered = false;
+        private boolean dirty = true;
         
         private EntryListEntry(int x, int y) {
             super(new Point(x, y));
@@ -484,7 +494,11 @@ public class FilteringScreen extends Screen {
         }
         
         public boolean isFiltered() {
-            return CollectionUtils.findFirstOrNullEqualsEntryIgnoreAmount(filteringEntry.configFiltered, getCurrentEntry()) != null;
+            if (dirty) {
+                filtered = CollectionUtils.findFirstOrNullEqualsEntryIgnoreAmount(filteringEntry.configFiltered, getCurrentEntry()) != null;
+                dirty = false;
+            }
+            return filtered;
         }
         
         @Override

@@ -30,14 +30,12 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.NarratorManager;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -51,7 +49,7 @@ public class NoFilteringEntry extends AbstractConfigListEntry<List<EntryStack>> 
     private final AbstractButtonWidget buttonWidget = new ButtonWidget(0, 0, 0, 20, new TranslatableText("config.roughlyenoughitems.filteredEntries.loadWorldFirst"), button -> {});
     private final List<Element> children = ImmutableList.of(buttonWidget);
     
-    public NoFilteringEntry(int width,List<EntryStack> configFiltered, List<EntryStack> defaultValue, Consumer<List<EntryStack>> saveConsumer) {
+    public NoFilteringEntry(int width, List<EntryStack> configFiltered, List<EntryStack> defaultValue, Consumer<List<EntryStack>> saveConsumer) {
         super(NarratorManager.EMPTY, false);
         this.width = width;
         this.configFiltered = configFiltered;

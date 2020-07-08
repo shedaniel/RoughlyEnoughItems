@@ -26,6 +26,7 @@ package me.shedaniel.rei.api;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.rei.gui.config.*;
 import me.shedaniel.rei.impl.ConfigManagerImpl;
+import me.shedaniel.rei.impl.filtering.FilteringRule;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.ApiStatus;
@@ -149,6 +150,8 @@ public interface ConfigObject {
     List<EntryStack> getFavorites();
     
     List<EntryStack> getFilteredStacks();
+    
+    List<FilteringRule<?>> getFilteringRules();
     
     @ApiStatus.Experimental
     boolean shouldAsyncSearch();

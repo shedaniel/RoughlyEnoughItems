@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl;
 
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -49,6 +50,8 @@ import me.shedaniel.rei.gui.config.entry.NoFilteringEntry;
 import me.shedaniel.rei.gui.config.entry.RecipeScreenTypeEntry;
 import me.shedaniel.rei.gui.config.entry.ReloadPluginsEntry;
 import me.shedaniel.rei.gui.credits.CreditsScreen;
+import me.shedaniel.rei.impl.filtering.FilteringRule;
+import me.shedaniel.rei.impl.filtering.rules.ManualFilteringRule;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
@@ -58,6 +61,8 @@ import net.minecraft.client.gui.screen.ScreenTexts;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
@@ -97,6 +102,15 @@ public class ConfigManagerImpl implements ConfigManager {
             return new JsonPrimitive(gson.toJson(stack.toJson()));
         }).registerPrimitiveTypeAdapter(EntryStack.class, it -> {
             return it instanceof String ? EntryStack.readFromJson(gson.fromJson((String) it, JsonElement.class)) : null;
+        }).registerSerializer(FilteringRule.class, (rule, marshaller) -> {
+            return new JsonPrimitive(FilteringRule.toTag(rule, new CompoundTag()).toString());
+        }).registerPrimitiveTypeAdapter(FilteringRule.class, it -> {
+            try {
+                return it instanceof String ? FilteringRule.fromTag(StringNbtReader.parse((String) it)) : null;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
         }).build()));
         GuiRegistry guiRegistry = AutoConfig.getGuiRegistry(ConfigObjectImpl.class);
         guiRegistry.registerPredicateProvider((i13n, field, config, defaults, guiProvider) -> {
@@ -120,7 +134,7 @@ public class ConfigManagerImpl implements ConfigManager {
                         REIHelper.getInstance().getPreviousContainerScreen() == null || MinecraftClient.getInstance().getNetworkHandler() == null || MinecraftClient.getInstance().getNetworkHandler().getRecipeManager() == null ?
                                 Collections.singletonList(new NoFilteringEntry(220, getUnsafely(field, config, new ArrayList<>()), getUnsafely(field, defaults), list -> setUnsafely(field, config, list)))
                                 :
-                                Collections.singletonList(new FilteringEntry(220, getUnsafely(field, config, new ArrayList<>()), getUnsafely(field, defaults), list -> setUnsafely(field, config, list)))
+                                Collections.singletonList(new FilteringEntry(220, getUnsafely(field, config, new ArrayList<>()), ((ConfigObjectImpl.Advanced.Filtering) config).filteringRules, getUnsafely(field, defaults), list -> setUnsafely(field, config, list), list -> ((ConfigObjectImpl.Advanced.Filtering) config).filteringRules = Lists.newArrayList(list)))
                 , (field) -> field.getType() == List.class, ConfigObjectImpl.UseFilteringScreen.class);
         saveConfig();
         RoughlyEnoughItemsCore.LOGGER.info("Config loaded.");
@@ -135,6 +149,9 @@ public class ConfigManagerImpl implements ConfigManager {
             for (EntryStack stack : getConfig().getFilteredStacks()) {
                 stack.setting(EntryStack.Settings.CHECK_AMOUNT, EntryStack.Settings.FALSE).setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE);
             }
+        }
+        if (getConfig().getFilteringRules().stream().noneMatch(filteringRule -> filteringRule instanceof ManualFilteringRule)) {
+            getConfig().getFilteringRules().add(new ManualFilteringRule());
         }
         ((me.sargunvohra.mcmods.autoconfig1u.ConfigManager<ConfigObjectImpl>) AutoConfig.getConfigHolder(ConfigObjectImpl.class)).save();
     }
