@@ -36,6 +36,8 @@
   "text.rei.composting.page": "Страница %d",
   "text.rei.config": "Конфигурация",
   "text.rei.config_tooltip": "Отвори екран за конфигуриране\n§7Shift-кликни за да превключиш мамене",
+  "text.rei.config.optifine.title": "Failed to open REI config screen",
+  "text.rei.config.optifine.description": "The configuration screen is incompatible with OptiFine / OptiFabric.",
   "text.rei.cheat_items": "Даден е [{item_name}§f] x{item_count} на {player_name}.",
   "text.rei.failed_cheat_items": "§cНеуспешно даване на предмети.",
   "ordering.rei.ascending": "Възходящ",
