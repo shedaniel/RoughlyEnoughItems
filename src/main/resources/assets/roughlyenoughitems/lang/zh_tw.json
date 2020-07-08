@@ -36,6 +36,8 @@
   "text.rei.composting.page": "第 %d 頁",
   "text.rei.config": "設置",
   "text.rei.config_tooltip": "打開設置\n§7按住Shift鍵單擊以切換作弊模式",
+  "text.rei.config.optifine.title": "Failed to open REI config screen",
+  "text.rei.config.optifine.description": "The configuration screen is incompatible with OptiFine / OptiFabric.",
   "text.rei.cheat_items": "已將 {item_count} 個 [{item_name}§f] 給予 {player_name}",
   "text.rei.failed_cheat_items": "§c未能作弊物品.",
   "ordering.rei.ascending": "順序",
