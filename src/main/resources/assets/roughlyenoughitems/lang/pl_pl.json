@@ -36,6 +36,8 @@
   "text.rei.composting.page": "Strona %d",
   "text.rei.config": "Konfiguracja",
   "text.rei.config_tooltip": "Otwórz Panel Konfiguracyjny\n§7Kliknij z Shiftem by przełączyć Tryb Oszukiwania",
+  "text.rei.config.optifine.title": "Failed to open REI config screen",
+  "text.rei.config.optifine.description": "The configuration screen is incompatible with OptiFine / OptiFabric.",
   "text.rei.cheat_items": "Daj [{item_name}§f] x{item_count} graczowi {player_name}.",
   "text.rei.failed_cheat_items": "§cBłąd podczas dawania przedmiotów.",
   "ordering.rei.ascending": "Rosnący",
