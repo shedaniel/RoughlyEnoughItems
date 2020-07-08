@@ -36,6 +36,8 @@
   "text.rei.composting.page": "Page %d",
   "text.rei.config": "Config",
   "text.rei.config_tooltip": "Open Config Scween\n§7Shift-Cwick to toggwe cheat mode",
+  "text.rei.config.optifine.title": "Failed to open REI config screen",
+  "text.rei.config.optifine.description": "The configuration screen is incompatible with OptiFine / OptiFabric.",
   "text.rei.cheat_items": "Gave [{item_name}§f] x{item_count} to {pwayew_name}.",
   "text.rei.failed_cheat_items": "§cFaiwed to give items.",
   "ordering.rei.ascending": "Ascending",
