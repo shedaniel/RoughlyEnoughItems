@@ -36,6 +36,8 @@
   "text.rei.composting.page": "Leht %d",
   "text.rei.config": "Seadistus",
   "text.rei.config_tooltip": "Ava seadistuskuva\n§7Shift-klõps sohitegemise lülitamiseks",
+  "text.rei.config.optifine.title": "Failed to open REI config screen",
+  "text.rei.config.optifine.description": "The configuration screen is incompatible with OptiFine / OptiFabric.",
   "text.rei.cheat_items": "{item_count} [{item_name}§f] antud mängijale {player_name}.",
   "text.rei.failed_cheat_items": "§cEsemete andmine ebaõnnestus.",
   "ordering.rei.ascending": "kasvav",
