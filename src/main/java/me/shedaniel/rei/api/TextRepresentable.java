@@ -25,11 +25,14 @@ package me.shedaniel.rei.api;
 
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.widgets.Tooltip;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
 
+@Environment(EnvType.CLIENT)
 public interface TextRepresentable {
     @NotNull
     default Text asFormattedText() {

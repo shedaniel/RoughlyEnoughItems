@@ -49,11 +49,17 @@ import me.shedaniel.rei.gui.config.entry.NoFilteringEntry;
 import me.shedaniel.rei.gui.config.entry.RecipeScreenTypeEntry;
 import me.shedaniel.rei.gui.config.entry.ReloadPluginsEntry;
 import me.shedaniel.rei.gui.credits.CreditsScreen;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ScreenTexts;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
@@ -66,6 +72,7 @@ import static me.sargunvohra.mcmods.autoconfig1u.util.Utils.getUnsafely;
 import static me.sargunvohra.mcmods.autoconfig1u.util.Utils.setUnsafely;
 
 @ApiStatus.Internal
+@Environment(EnvType.CLIENT)
 public class ConfigManagerImpl implements ConfigManager {
     
     private boolean craftableOnly;
@@ -150,6 +157,9 @@ public class ConfigManagerImpl implements ConfigManager {
     @Override
     public Screen getConfigScreen(Screen parent) {
         try {
+            if (FabricLoader.getInstance().isModLoaded("optifabric")) {
+                return new ConfigErrorScreen(parent, new TranslatableText("text.rei.config.optifine.title"), new TranslatableText("text.rei.config.optifine.description"));
+            }
             ConfigScreenProvider<ConfigObjectImpl> provider = (ConfigScreenProvider<ConfigObjectImpl>) AutoConfig.getConfigScreen(ConfigObjectImpl.class, parent);
             provider.setI13nFunction(manager -> "config.roughlyenoughitems");
             provider.setOptionFunction((baseI13n, field) -> field.isAnnotationPresent(ConfigObjectImpl.DontApplyFieldName.class) ? baseI13n : String.format("%s.%s", baseI13n, field.getName()));
@@ -176,6 +186,36 @@ public class ConfigManagerImpl implements ConfigManager {
             e.printStackTrace();
         }
         return null;
+    }
+    
+    public static class ConfigErrorScreen extends Screen {
+        private final Text message;
+        private final Screen parent;
+        
+        public ConfigErrorScreen(Screen parent, Text title, Text message) {
+            super(title);
+            this.parent = parent;
+            this.message = message;
+        }
+        
+        @Override
+        protected void init() {
+            super.init();
+            this.addButton(new ButtonWidget(this.width / 2 - 100, 140, 200, 20, ScreenTexts.CANCEL, button -> this.client.openScreen(parent)));
+        }
+        
+        @Override
+        public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+            this.renderBackground(matrices);
+            this.drawCenteredText(matrices, this.textRenderer, this.title, this.width / 2, 90, 16777215);
+            this.drawCenteredText(matrices, this.textRenderer, this.message, this.width / 2, 110, 16777215);
+            super.render(matrices, mouseX, mouseY, delta);
+        }
+        
+        @Override
+        public boolean shouldCloseOnEsc() {
+            return false;
+        }
     }
     
 }
