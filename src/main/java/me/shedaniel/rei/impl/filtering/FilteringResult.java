@@ -21,44 +21,47 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.search;
+package me.shedaniel.rei.impl.filtering;
 
+import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.EntryStack;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 @ApiStatus.Internal
-public abstract class Argument {
-    public Argument() {
+@ApiStatus.Experimental
+public interface FilteringResult {
+    static FilteringResult create() {
+        return create(Lists.newArrayList(), Lists.newArrayList());
     }
     
-    private int dataOrdinal = -1;
-    
-    public abstract String getName();
-    
-    @Nullable
-    public String getPrefix() {
-        return null;
+    static FilteringResult create(List<EntryStack> hiddenStacks, List<EntryStack> shownStacks) {
+        return new FilteringResultImpl(hiddenStacks, shownStacks);
     }
     
-    public MatchStatus matchesArgumentPrefix(String text) {
-        String prefix = getPrefix();
-        if (prefix == null) return MatchStatus.unmatched();
-        if (text.startsWith("-" + prefix)) return MatchStatus.invertMatched(text.substring(1 + prefix.length()));
-        if (text.startsWith(prefix + "-")) return MatchStatus.invertMatched(text.substring(1 + prefix.length()));
-        return text.startsWith(prefix) ? MatchStatus.matched(text.substring(prefix.length())) : MatchStatus.unmatched();
+    Set<EntryStack> getHiddenStacks();
+    
+    Set<EntryStack> getShownStacks();
+    
+    default FilteringResult hide(EntryStack stack) {
+        return hide(Collections.singletonList(stack));
     }
     
-    public final int getDataOrdinal() {
-        if (dataOrdinal == -1) {
-            dataOrdinal = ArgumentsRegistry.ARGUMENT_LIST.indexOf(this);
-        }
-        return dataOrdinal;
+    default FilteringResult hide(Collection<EntryStack> stacks) {
+        getHiddenStacks().addAll(stacks);
+        return this;
     }
     
-    public abstract boolean matches(Object[] data, EntryStack stack, String searchText, Object searchData);
+    default FilteringResult show(EntryStack stack) {
+        return show(Collections.singletonList(stack));
+    }
     
-    public Object prepareSearchData(String searchText) {
-        return null;
+    default FilteringResult show(Collection<EntryStack> stacks) {
+        getShownStacks().addAll(stacks);
+        return this;
     }
 }

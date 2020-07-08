@@ -31,6 +31,10 @@ import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryRegistry;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeHelper;
+import me.shedaniel.rei.impl.filtering.FilteringContextImpl;
+import me.shedaniel.rei.impl.filtering.FilteringRule;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Pair;
@@ -42,6 +46,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @ApiStatus.Internal
+@Environment(EnvType.CLIENT)
 public class EntryRegistryImpl implements EntryRegistry {
     
     private final List<EntryStack> preFilteredList = Lists.newCopyOnWriteArrayList();
@@ -117,14 +122,19 @@ public class EntryRegistryImpl implements EntryRegistry {
     
     public void refilter() {
         long started = System.currentTimeMillis();
-        Collection<EntryStack> filteredStacks = ConfigObject.getInstance().getFilteredStacks();
+        FilteringContextImpl context = new FilteringContextImpl(getStacksList());
+        List<FilteringRule<?>> rules = ConfigObject.getInstance().getFilteringRules();
+        for (int i = rules.size() - 1; i >= 0; i--) {
+            context.handleResult(rules.get(i).processFilteredStacks(context));
+        }
         preFilteredList.clear();
+        Collection<EntryStack> filteredStacks = context.getHiddenStacks();
         for (EntryStack stack : getStacksList()) {
             if (findFirstOrNullEqualsEntryIgnoreAmount(filteredStacks, stack) == null)
                 preFilteredList.add(stack);
         }
         long time = System.currentTimeMillis() - started;
-        RoughlyEnoughItemsCore.LOGGER.info("Refiltered %d entries in %dms.", filteredStacks.size(), time);
+        RoughlyEnoughItemsCore.LOGGER.info("Refiltered %d entries with %d rules in %dms.", filteredStacks.size(), rules.size(), time);
     }
     
     public void reset() {

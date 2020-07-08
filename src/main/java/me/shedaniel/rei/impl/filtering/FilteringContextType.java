@@ -21,31 +21,14 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.search;
+package me.shedaniel.rei.impl.filtering;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import org.jetbrains.annotations.ApiStatus;
-
-import java.util.List;
-import java.util.Map;
-
-@ApiStatus.Internal
-public final class ArgumentsRegistry {
-    public static final Map<String, Argument> ARGUMENTS = Maps.newHashMap();
-    public static final List<Argument> ARGUMENT_LIST = Lists.newArrayList();
+public enum FilteringContextType {
+    SHOWN,
+    DEFAULT,
+    HIDDEN;
     
-    static {
-        register(AlwaysMatchingArgument.INSTANCE);
-        register(ModArgument.INSTANCE);
-        register(TooltipArgument.INSTANCE);
-        register(TagArgument.INSTANCE);
-        register(RegexArgument.INSTANCE);
-        register(TextArgument.INSTANCE);
-    }
-    
-    private static void register(Argument argument) {
-        ARGUMENTS.put(argument.getName(), argument);
-        ARGUMENT_LIST.add(argument);
+    public boolean isHidden() {
+        return this == HIDDEN;
     }
 }

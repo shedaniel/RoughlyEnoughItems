@@ -25,6 +25,8 @@ package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.utils.CollectionUtils;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
@@ -33,6 +35,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+@Environment(EnvType.CLIENT)
 public interface EntryRegistry {
     
     /**

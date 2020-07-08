@@ -32,6 +32,7 @@ import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.gui.config.*;
+import me.shedaniel.rei.impl.filtering.FilteringRule;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.util.InputUtil;
@@ -56,7 +57,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @ConfigEntry.Category("functionality") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
     private Functionality functionality = new Functionality();
     @ConfigEntry.Category("advanced") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
-    private Advanced advanced = new Advanced();
+    public Advanced advanced = new Advanced();
     
     @Override
     public boolean isOverlayVisible() {
@@ -304,6 +305,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
+    public List<FilteringRule<?>> getFilteringRules() {
+        return advanced.filtering.filteringRules;
+    }
+    
+    @Override
     @ApiStatus.Experimental
     public boolean shouldAsyncSearch() {
         return advanced.search.asyncSearch;
@@ -414,7 +420,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         @ConfigEntry.Gui.CollapsibleObject
         private Miscellaneous miscellaneous = new Miscellaneous();
         @ConfigEntry.Gui.CollapsibleObject(startExpanded = true)
-        private Filtering filtering = new Filtering();
+        public Filtering filtering = new Filtering();
         
         public static class Tooltips {
             @Comment("Declares whether REI should append mod names to entries.") private boolean appendModNames = true;
@@ -465,6 +471,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         
         public static class Filtering {
             @UseFilteringScreen private List<EntryStack> filteredStacks = new ArrayList<>();
+            @ConfigEntry.Gui.Excluded public List<FilteringRule<?>> filteringRules = new ArrayList<>();
         }
     }
 }

@@ -21,44 +21,32 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.search;
+package me.shedaniel.rei.impl.filtering;
 
 import me.shedaniel.rei.api.EntryStack;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
 
-@ApiStatus.Internal
-public abstract class Argument {
-    public Argument() {
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
+public class FilteringResultImpl implements FilteringResult {
+    private final Set<EntryStack> hiddenStacks, shownStacks;
+    
+    public FilteringResultImpl(List<EntryStack> hiddenStacks, List<EntryStack> shownStacks) {
+        this.hiddenStacks = new TreeSet<>(Comparator.comparing(EntryStack::hashIgnoreAmount));
+        this.shownStacks = new TreeSet<>(Comparator.comparing(EntryStack::hashIgnoreAmount));
+        this.hiddenStacks.addAll(hiddenStacks);
+        this.shownStacks.addAll(shownStacks);
     }
     
-    private int dataOrdinal = -1;
-    
-    public abstract String getName();
-    
-    @Nullable
-    public String getPrefix() {
-        return null;
+    @Override
+    public Set<EntryStack> getHiddenStacks() {
+        return hiddenStacks;
     }
     
-    public MatchStatus matchesArgumentPrefix(String text) {
-        String prefix = getPrefix();
-        if (prefix == null) return MatchStatus.unmatched();
-        if (text.startsWith("-" + prefix)) return MatchStatus.invertMatched(text.substring(1 + prefix.length()));
-        if (text.startsWith(prefix + "-")) return MatchStatus.invertMatched(text.substring(1 + prefix.length()));
-        return text.startsWith(prefix) ? MatchStatus.matched(text.substring(prefix.length())) : MatchStatus.unmatched();
-    }
-    
-    public final int getDataOrdinal() {
-        if (dataOrdinal == -1) {
-            dataOrdinal = ArgumentsRegistry.ARGUMENT_LIST.indexOf(this);
-        }
-        return dataOrdinal;
-    }
-    
-    public abstract boolean matches(Object[] data, EntryStack stack, String searchText, Object searchData);
-    
-    public Object prepareSearchData(String searchText) {
-        return null;
+    @Override
+    public Set<EntryStack> getShownStacks() {
+        return shownStacks;
     }
 }

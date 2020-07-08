@@ -24,8 +24,10 @@
 package me.shedaniel.rei.gui.config.entry;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.impl.filtering.FilteringRule;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
@@ -44,22 +46,27 @@ import java.util.function.Consumer;
 public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
     private int width;
     Consumer<List<EntryStack>> saveConsumer;
+    Consumer<List<FilteringRule<?>>> rulesSaveConsumer;
     List<EntryStack> defaultValue;
     List<EntryStack> configFiltered;
+    List<FilteringRule<?>> rules;
     boolean edited = false;
-    private final FilteringScreen filteringScreen = new FilteringScreen(this);
+    final FilteringScreen filteringScreen = new FilteringScreen(this);
+    final FilteringRulesScreen filteringRulesScreen = new FilteringRulesScreen(this);
     private final AbstractButtonWidget buttonWidget = new ButtonWidget(0, 0, 0, 20, new TranslatableText("config.roughlyenoughitems.filteringScreen"), button -> {
-        filteringScreen.parent = MinecraftClient.getInstance().currentScreen;
-        MinecraftClient.getInstance().openScreen(filteringScreen);
+        filteringRulesScreen.parent = MinecraftClient.getInstance().currentScreen;
+        MinecraftClient.getInstance().openScreen(filteringRulesScreen);
     });
     private final List<Element> children = ImmutableList.of(buttonWidget);
     
-    public FilteringEntry(int width, List<EntryStack> configFiltered, List<EntryStack> defaultValue, Consumer<List<EntryStack>> saveConsumer) {
+    public FilteringEntry(int width, List<EntryStack> configFiltered, List<FilteringRule<?>> rules, List<EntryStack> defaultValue, Consumer<List<EntryStack>> saveConsumer, Consumer<List<FilteringRule<?>>> rulesSaveConsumer) {
         super(NarratorManager.EMPTY, false);
         this.width = width;
         this.configFiltered = configFiltered;
+        this.rules = Lists.newArrayList(rules);
         this.defaultValue = defaultValue;
         this.saveConsumer = saveConsumer;
+        this.rulesSaveConsumer = rulesSaveConsumer;
     }
     
     @Override
@@ -75,6 +82,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
     @Override
     public void save() {
         saveConsumer.accept(getValue());
+        rulesSaveConsumer.accept(rules);
         this.edited = false;
     }
     

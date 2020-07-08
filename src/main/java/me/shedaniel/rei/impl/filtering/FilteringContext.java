@@ -21,44 +21,32 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.search;
+package me.shedaniel.rei.impl.filtering;
 
 import me.shedaniel.rei.api.EntryStack;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
+
+import java.util.Map;
+import java.util.Set;
 
 @ApiStatus.Internal
-public abstract class Argument {
-    public Argument() {
+@ApiStatus.Experimental
+public interface FilteringContext {
+    Map<FilteringContextType, Set<EntryStack>> getStacks();
+    
+    default Set<EntryStack> getStacks(FilteringContextType type) {
+        return getStacks().get(type);
     }
     
-    private int dataOrdinal = -1;
-    
-    public abstract String getName();
-    
-    @Nullable
-    public String getPrefix() {
-        return null;
+    default Set<EntryStack> getShownStacks() {
+        return getStacks(FilteringContextType.SHOWN);
     }
     
-    public MatchStatus matchesArgumentPrefix(String text) {
-        String prefix = getPrefix();
-        if (prefix == null) return MatchStatus.unmatched();
-        if (text.startsWith("-" + prefix)) return MatchStatus.invertMatched(text.substring(1 + prefix.length()));
-        if (text.startsWith(prefix + "-")) return MatchStatus.invertMatched(text.substring(1 + prefix.length()));
-        return text.startsWith(prefix) ? MatchStatus.matched(text.substring(prefix.length())) : MatchStatus.unmatched();
+    default Set<EntryStack> getUnsetStacks() {
+        return getStacks(FilteringContextType.DEFAULT);
     }
     
-    public final int getDataOrdinal() {
-        if (dataOrdinal == -1) {
-            dataOrdinal = ArgumentsRegistry.ARGUMENT_LIST.indexOf(this);
-        }
-        return dataOrdinal;
-    }
-    
-    public abstract boolean matches(Object[] data, EntryStack stack, String searchText, Object searchData);
-    
-    public Object prepareSearchData(String searchText) {
-        return null;
+    default Set<EntryStack> getHiddenStacks() {
+        return getStacks(FilteringContextType.HIDDEN);
     }
 }
