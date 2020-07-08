@@ -36,6 +36,8 @@
   "text.rei.composting.page": "Página %d",
   "text.rei.config": "Configuração",
   "text.rei.config_tooltip": "Abrir menu de configuração\n§7Shift-Clique para alternar modo trapaça",
+  "text.rei.config.optifine.title": "Failed to open REI config screen",
+  "text.rei.config.optifine.description": "The configuration screen is incompatible with OptiFine / OptiFabric.",
   "text.rei.cheat_items": "Entregado [{item_name}§f] x{item_count} para {player_name}.",
   "text.rei.failed_cheat_items": "§cFalha ao obter itens.",
   "ordering.rei.ascending": "Crescente",
