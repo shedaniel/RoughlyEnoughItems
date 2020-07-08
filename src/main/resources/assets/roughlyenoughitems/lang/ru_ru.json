@@ -36,6 +36,8 @@
   "text.rei.composting.page": "%d страница",
   "text.rei.config": "Конфигурация",
   "text.rei.config_tooltip": "Открыть окно конфигурации\n§7Shift+ЛКМ переключение режима читерства",
+  "text.rei.config.optifine.title": "Failed to open REI config screen",
+  "text.rei.config.optifine.description": "The configuration screen is incompatible with OptiFine / OptiFabric.",
   "text.rei.cheat_items": "Выдано x{item_count} [{item_name}] игроку {player_name}",
   "text.rei.failed_cheat_items": "§cНе удалось выдать предметы.",
   "ordering.rei.ascending": "По возрастанию",
