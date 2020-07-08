@@ -36,6 +36,8 @@
   "text.rei.composting.page": "Page %d",
   "text.rei.config": "Config",
   "text.rei.config_tooltip": "Open Config Screen\n§7Shift-Click to toggle cheat mode",
+  "text.rei.config.optifine.title": "Failed to open REI config screen",
+  "text.rei.config.optifine.description": "The configuration screen is incompatible with OptiFine / OptiFabric.",
   "text.rei.cheat_items": "Gave [{item_name}§f] x{item_count} to {player_name}.",
   "text.rei.failed_cheat_items": "§cFailed to give items.",
   "ordering.rei.ascending": "Ascending",
