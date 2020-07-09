@@ -5,7 +5,7 @@
   "text.rei.cheating_enabled": "§cSchummeln Aktiviert",
   "text.rei.cheating_limited_enabled": "§bSchummeln Aktiviert (durch Befehl)",
   "text.rei.cheating_enabled_no_perms": "§7Schummeln §cAktiviert §7(Keine Berechtigung)",
-  "text.rei.cheating_limited_creative_enabled": "§aCheating Enabled (Using Creative)",
+  "text.rei.cheating_limited_creative_enabled": "§aCheating aktiviert (Kreativ verwenden)",
   "text.rei.no_permission_cheat": "Operator-Berechtigungen sind erforderlich, um Gegenstände herbei zu schummeln",
   "text.rei.search.field.suggestion": "Suche...",
   "category.rei.crafting": "Herstellen",
