@@ -206,7 +206,7 @@
   "config.roughlyenoughitems.filteringRulesScreen.new": "Filterregel erstellen",
   "config.roughlyenoughitems.filteringRulesScreen.delete": "Löschen",
   "rule.roughlyenoughitems.filtering.manual": "Manuelle Filterung",
-  "rule.roughlyenoughitems.filtering.manual.subtitle": "Manually select what to hide and show.",
+  "rule.roughlyenoughitems.filtering.manual.subtitle": "Wählen Sie manuell aus, was versteckt und angezeigt werden soll.",
   "rule.roughlyenoughitems.filtering.search": "Search Filtering",
   "rule.roughlyenoughitems.filtering.search.subtitle": "Filter using search filters.",
   "rule.roughlyenoughitems.filtering.search.filter": "Search Filter:",
