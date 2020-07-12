@@ -48,8 +48,8 @@ public class DefaultSmithingDisplay implements RecipeDisplay {
     public DefaultSmithingDisplay(@NotNull SmithingRecipe recipe) {
         this(
                 Lists.newArrayList(
-                        CollectionUtils.map(recipe.base.getMatchingStacksClient(), EntryStack::create),
-                        CollectionUtils.map(recipe.addition.getMatchingStacksClient(), EntryStack::create)
+                        EntryStack.create(recipe.base),
+                        EntryStack.create(recipe.addition)
                 ),
                 Collections.singletonList(EntryStack.create(recipe.getOutput())),
                 recipe.getId()
