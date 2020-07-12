@@ -56,7 +56,7 @@ public abstract class DefaultCookingDisplay implements TransferRecipeDisplay {
     
     public DefaultCookingDisplay(AbstractCookingRecipe recipe) {
         this.recipe = recipe;
-        this.input = CollectionUtils.map(recipe.getPreviewInputs(), i -> CollectionUtils.map(i.getMatchingStacksClient(), EntryStack::create));
+        this.input = EntryStack.create(recipe.getPreviewInputs());
         this.output = Collections.singletonList(EntryStack.create(recipe.getOutput()));
         this.xp = recipe.getExperience();
         this.cookTime = recipe.getCookTime();
