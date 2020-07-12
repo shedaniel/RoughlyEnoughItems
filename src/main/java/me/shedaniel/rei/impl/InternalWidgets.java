@@ -65,8 +65,12 @@ public final class InternalWidgets {
                     for (AutoTransferHandler autoTransferHandler : RecipeHelper.getInstance().getSortedAutoCraftingHandler())
                         try {
                             AutoTransferHandler.Result result = autoTransferHandler.handle(context);
-                            if (result.isSuccessful())
+                            if (result.isSuccessful()) {
+                                if (result.isReturnToScreen()) {
+                                    break; // Same as failing, but doesn't ask other handlers
+                                }
                                 return;
+                            }
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
