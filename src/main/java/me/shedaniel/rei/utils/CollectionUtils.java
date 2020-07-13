@@ -26,6 +26,8 @@ package me.shedaniel.rei.utils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import me.shedaniel.rei.api.EntryStack;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import java.util.*;
 import java.util.function.Function;
@@ -73,6 +75,7 @@ public class CollectionUtils {
         return false;
     }
     
+    @Environment(EnvType.CLIENT)
     public static boolean anyMatchEqualsAll(List<EntryStack> list, EntryStack stack) {
         for (EntryStack t : list) {
             if (t.equalsAll(stack))
@@ -81,6 +84,7 @@ public class CollectionUtils {
         return false;
     }
     
+    @Environment(EnvType.CLIENT)
     public static boolean anyMatchEqualsEntryIgnoreAmount(List<EntryStack> list, EntryStack stack) {
         for (EntryStack t : list) {
             if (t.equalsIgnoreAmount(stack))
@@ -89,6 +93,7 @@ public class CollectionUtils {
         return false;
     }
     
+    @Environment(EnvType.CLIENT)
     public static EntryStack firstOrNullEqualsAll(List<EntryStack> list, EntryStack stack) {
         for (EntryStack t : list) {
             if (t.equalsAll(stack))
@@ -97,6 +102,7 @@ public class CollectionUtils {
         return null;
     }
     
+    @Environment(EnvType.CLIENT)
     public static EntryStack findFirstOrNullEqualsEntryIgnoreAmount(Collection<EntryStack> list, EntryStack stack) {
         for (EntryStack t : list) {
             if (t.equalsIgnoreAmount(stack))
@@ -136,6 +142,14 @@ public class CollectionUtils {
     }
     
     public static <T, R> List<R> map(List<T> list, Function<T, R> function) {
+        List<R> l = Lists.newArrayList();
+        for (T t : list) {
+            l.add(function.apply(t));
+        }
+        return l;
+    }
+    
+    public static <T, R> List<R> map(Collection<T> list, Function<T, R> function) {
         List<R> l = Lists.newArrayList();
         for (T t : list) {
             l.add(function.apply(t));

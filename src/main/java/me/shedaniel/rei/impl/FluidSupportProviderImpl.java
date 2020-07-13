@@ -35,7 +35,7 @@ import java.util.Objects;
 @ApiStatus.Experimental
 @ApiStatus.Internal
 public class FluidSupportProviderImpl implements FluidSupportProvider {
-    private final List<FluidProvider> providers = Lists.newArrayList();
+    private final List<FluidProvider> providers = Lists.newCopyOnWriteArrayList();
     
     public void reset() {
         providers.clear();
@@ -52,7 +52,7 @@ public class FluidSupportProviderImpl implements FluidSupportProvider {
         if (itemStack.getType() != EntryStack.Type.ITEM)
             throw new IllegalArgumentException("EntryStack must be item!");
         for (FluidProvider provider : providers) {
-            EntryStack stack = Objects.requireNonNull(provider.itemToFluid(itemStack), provider.getClass() + " is creating null objects for itemToFluid!");
+            EntryStack stack = Objects.requireNonNull(provider.itemToFluid(itemStack));
             if (!stack.isEmpty()) return stack;
         }
         return EntryStack.empty();

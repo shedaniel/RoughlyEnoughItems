@@ -242,12 +242,14 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                         field.setAccessible(true);
                         Logger logger = (Logger) field.get(instance);
                         if (logger.getName().toLowerCase(Locale.ROOT).contains("subsystem")) {
-                            if (!new File(instance.getConfigDirectory(), "roughlyenoughitems/.ignoresubsystem").exists()) {
+                            File reiConfigFolder = new File(instance.getConfigDirectory(), "roughlyenoughitems");
+                            File ignoreFile = new File(reiConfigFolder, ".ignoresubsystem");
+                            if (!ignoreFile.exists()) {
                                 RoughlyEnoughItemsState.warn("Subsystem is detected (probably though Aristois), please contact support from them if anything happens.");
                                 RoughlyEnoughItemsState.onContinue(() -> {
                                     try {
-                                        new File(instance.getConfigDirectory(), "roughlyenoughitems").mkdirs();
-                                        new File(instance.getConfigDirectory(), "roughlyenoughitems/.ignoresubsystem").createNewFile();
+                                        reiConfigFolder.mkdirs();
+                                        ignoreFile.createNewFile();
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }

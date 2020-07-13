@@ -68,9 +68,4 @@ public class ConfigReloadingScreen extends Screen {
         this.drawCenteredString(matrices, this.textRenderer, string_3, this.width / 2, this.height / 2 - 41, 8421504);
         super.render(matrices, int_1, int_2, float_1);
     }
-    
-    @Override
-    public boolean isPauseScreen() {
-        return false;
-    }
 }

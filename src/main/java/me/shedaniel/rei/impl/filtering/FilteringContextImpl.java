@@ -23,41 +23,77 @@
 
 package me.shedaniel.rei.impl.filtering;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.impl.AmountIgnoredEntryStackWrapper;
+import me.shedaniel.rei.utils.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @Environment(EnvType.CLIENT)
 public class FilteringContextImpl implements FilteringContext {
-    private final Map<FilteringContextType, Set<EntryStack>> stacks;
+    private final Map<FilteringContextType, Set<AmountIgnoredEntryStackWrapper>> stacks;
+    private final Map<FilteringContextType, Collection<EntryStack>> cachedStacks;
     
     public FilteringContextImpl(List<EntryStack> allStacks) {
         this(Maps.newHashMap());
         getUnsetStacks().addAll(allStacks);
     }
     
-    public FilteringContextImpl(Map<FilteringContextType, Set<EntryStack>> stacks) {
+    public FilteringContextImpl(Map<FilteringContextType, Set<AmountIgnoredEntryStackWrapper>> stacks) {
         this.stacks = stacks;
+        this.cachedStacks = Maps.newHashMap();
         for (FilteringContextType type : FilteringContextType.values()) {
-            this.stacks.computeIfAbsent(type, t -> new TreeSet<>(Comparator.comparing(EntryStack::hashIgnoreAmount)));
+            this.stacks.computeIfAbsent(type, t -> Sets.newHashSet());
+        }
+        fillCache();
+    }
+    
+    private void fillCache() {
+        this.cachedStacks.clear();
+        for (FilteringContextType type : FilteringContextType.values()) {
+            this.cachedStacks.put(type, CollectionUtils.map(stacks.get(type), AmountIgnoredEntryStackWrapper::unwrap));
         }
     }
     
     @Override
-    public Map<FilteringContextType, Set<EntryStack>> getStacks() {
-        return stacks;
+    public Collection<EntryStack> getStacks(FilteringContextType type) {
+        return cachedStacks.get(type);
     }
     
     public void handleResult(FilteringResult result) {
-        getUnsetStacks().removeAll(result.getHiddenStacks());
-        getShownStacks().removeAll(result.getHiddenStacks());
-        getHiddenStacks().addAll(result.getHiddenStacks());
+        Collection<AmountIgnoredEntryStackWrapper> hiddenStacks = CollectionUtils.map(result.getHiddenStacks(), AmountIgnoredEntryStackWrapper::new);
+        Collection<AmountIgnoredEntryStackWrapper> shownStacks = CollectionUtils.map(result.getShownStacks(), AmountIgnoredEntryStackWrapper::new);
         
-        getHiddenStacks().removeAll(result.getShownStacks());
-        getUnsetStacks().removeAll(result.getShownStacks());
-        getShownStacks().addAll(result.getShownStacks());
+        List<CompletableFuture<Void>> completableFutures = Lists.newArrayList();
+        completableFutures.add(CompletableFuture.runAsync(() -> {
+            this.stacks.get(FilteringContextType.DEFAULT).removeAll(hiddenStacks);
+            this.stacks.get(FilteringContextType.DEFAULT).removeAll(shownStacks);
+        }));
+        completableFutures.add(CompletableFuture.runAsync(() -> {
+            this.stacks.get(FilteringContextType.SHOWN).removeAll(hiddenStacks);
+            this.stacks.get(FilteringContextType.SHOWN).addAll(shownStacks);
+        }));
+        completableFutures.add(CompletableFuture.runAsync(() -> {
+            this.stacks.get(FilteringContextType.HIDDEN).addAll(hiddenStacks);
+            this.stacks.get(FilteringContextType.HIDDEN).removeAll(shownStacks);
+        }));
+        try {
+            CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0])).get(20, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            e.printStackTrace();
+        }
+        fillCache();
     }
 }
