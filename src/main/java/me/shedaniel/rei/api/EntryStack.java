@@ -32,7 +32,6 @@ import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.impl.EmptyEntryStack;
 import me.shedaniel.rei.impl.FluidEntryStack;
 import me.shedaniel.rei.impl.ItemEntryStack;
-import me.shedaniel.rei.utils.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.resource.language.I18n;
@@ -43,15 +42,16 @@ import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.StringNbtReader;
-import net.minecraft.text.LiteralText;
+import net.minecraft.recipe.Ingredient;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -81,11 +81,36 @@ public interface EntryStack extends TextRepresentable {
     static EntryStack create(ItemStack stack) {
         return new ItemEntryStack(stack);
     }
-    
+
     static EntryStack create(ItemConvertible item) {
         return create(new ItemStack(item));
     }
-    
+
+    static List<EntryStack> create(Collection<ItemStack> stacks) {
+        List<EntryStack> result = new ArrayList<>(stacks.size());
+        for (ItemStack stack : stacks) {
+            result.add(create(stack));
+        }
+        return result;
+    }
+
+    static List<EntryStack> create(Ingredient ingredient) {
+        ItemStack[] matchingStacks = ingredient.getMatchingStacksClient();
+        List<EntryStack> result = new ArrayList<>(matchingStacks.length);
+        for (ItemStack matchingStack : matchingStacks) {
+            result.add(create(matchingStack));
+        }
+        return result;
+    }
+
+    static List<List<EntryStack>> create(List<Ingredient> ingredients) {
+        List<List<EntryStack>> result = new ArrayList<>(ingredients.size());
+        for (Ingredient ingredient : ingredients) {
+            result.add(create(ingredient));
+        }
+        return result;
+    }
+
     @ApiStatus.Internal
     static EntryStack readFromJson(JsonElement jsonElement) {
         try {
