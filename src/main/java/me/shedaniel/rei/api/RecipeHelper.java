@@ -32,6 +32,7 @@ import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,7 @@ public interface RecipeHelper {
     /**
      * @return the api instance of {@link me.shedaniel.rei.impl.RecipeHelperImpl}
      */
+    @NotNull
     static RecipeHelper getInstance() {
         return RoughlyEnoughItemsCore.getRecipeHelper();
     }

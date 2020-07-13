@@ -40,19 +40,18 @@ import me.shedaniel.rei.gui.modules.entries.EntryStackSubsetsMenuEntry;
 import me.shedaniel.rei.gui.modules.entries.SubSubsetsMenuEntry;
 import me.shedaniel.rei.gui.widget.LateRenderable;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
-import me.shedaniel.rei.impl.EntryRegistryImpl;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @ApiStatus.Experimental
 @ApiStatus.Internal
@@ -86,7 +85,8 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
     }
     
     public static Menu createSubsetsMenuFromRegistry(Point menuStartPoint) {
-        List<EntryStack> stacks = EntryRegistry.getInstance().getStacksList();
+        EntryRegistry instance = EntryRegistry.getInstance();
+        List<EntryStack> stacks = instance.getEntryStacks().collect(Collectors.toList());
         Map<String, Object> entries = Maps.newHashMap();
         {
             // All Entries group
@@ -102,12 +102,9 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
                 ItemGroup group = item.getGroup();
                 if (group == null)
                     continue;
-                DefaultedList<ItemStack> list;
+                List<ItemStack> list;
                 try {
-                    list = new EntryRegistryImpl.DefaultedLinkedList<>(Lists.newLinkedList(), null);
-                    item.appendStacks(group, list);
-                    if (list.isEmpty())
-                        list.add(item.getStackForRender());
+                    list = instance.appendStacksForItem(item);
                     Map<String, Object> groupMenu = getOrCreateSubEntryInMap(itemGroups, "_item_group_" + group.getId());
                     for (ItemStack stack : list) {
                         putEntryInMap(groupMenu, EntryStack.create(stack));

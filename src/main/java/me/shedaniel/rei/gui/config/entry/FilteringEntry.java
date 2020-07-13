@@ -38,8 +38,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.TranslatableText;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 
 @ApiStatus.Internal
@@ -48,7 +47,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
     Consumer<List<EntryStack>> saveConsumer;
     Consumer<List<FilteringRule<?>>> rulesSaveConsumer;
     List<EntryStack> defaultValue;
-    List<EntryStack> configFiltered;
+    Set<EntryStack> configFiltered;
     List<FilteringRule<?>> rules;
     boolean edited = false;
     final FilteringScreen filteringScreen = new FilteringScreen(this);
@@ -62,7 +61,8 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
     public FilteringEntry(int width, List<EntryStack> configFiltered, List<FilteringRule<?>> rules, List<EntryStack> defaultValue, Consumer<List<EntryStack>> saveConsumer, Consumer<List<FilteringRule<?>>> rulesSaveConsumer) {
         super(NarratorManager.EMPTY, false);
         this.width = width;
-        this.configFiltered = configFiltered;
+        this.configFiltered = new TreeSet<>(Comparator.comparing(EntryStack::hashIgnoreAmount));
+        this.configFiltered.addAll(configFiltered);
         this.rules = Lists.newArrayList(rules);
         this.defaultValue = defaultValue;
         this.saveConsumer = saveConsumer;
@@ -71,7 +71,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
     
     @Override
     public List<EntryStack> getValue() {
-        return configFiltered;
+        return Lists.newArrayList(configFiltered);
     }
     
     @Override

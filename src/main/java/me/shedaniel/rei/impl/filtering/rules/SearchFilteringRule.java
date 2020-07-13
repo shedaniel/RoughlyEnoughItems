@@ -108,17 +108,16 @@ public class SearchFilteringRule extends AbstractFilteringRule<SearchFilteringRu
         return new SearchFilteringRule("", Collections.singletonList(SearchArgument.SearchArguments.ALWAYS), true);
     }
     
-    private void processList(Set<EntryStack> stacks, List<CompletableFuture<List<EntryStack>>> completableFutures) {
+    private void processList(Collection<EntryStack> stacks, List<CompletableFuture<List<EntryStack>>> completableFutures) {
         int size = 100;
-        List<EntryStack> stacks1 = Lists.newArrayList(stacks);
-        Iterator<EntryStack> iterator = stacks1.iterator();
-        for (int i = 0; i < stacks1.size(); i += size) {
+        Iterator<EntryStack> iterator = stacks.iterator();
+        for (int i = 0; i < stacks.size(); i += size) {
             int[] start = {i};
             completableFutures.add(CompletableFuture.supplyAsync(() -> {
-                int end = Math.min(stacks1.size(), start[0] + size);
+                int end = Math.min(stacks.size(), start[0] + size);
                 List<EntryStack> output = Lists.newArrayList();
                 for (; start[0] < end; start[0]++) {
-                    EntryStack stack = stacks1.get(start[0]);
+                    EntryStack stack = ((List<EntryStack>) stacks).get(start[0]);
                     boolean shown = SearchArgument.canSearchTermsBeAppliedTo(stack, arguments);
                     if (shown) {
                         output.add(stack);

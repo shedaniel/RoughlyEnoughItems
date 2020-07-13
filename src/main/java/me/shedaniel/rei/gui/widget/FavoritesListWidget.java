@@ -47,8 +47,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static me.shedaniel.rei.gui.widget.EntryListWidget.*;
 
@@ -188,10 +187,12 @@ public class FavoritesListWidget extends WidgetWithBounds {
             if (ConfigObject.getInstance().doSearchFavorites()) {
                 List<EntryStack> list = Lists.newArrayList();
                 boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
-                List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
+                Set<EntryStack> workingItems = checkCraftable ? new TreeSet<>(Comparator.comparing(EntryStack::hashIgnoreAmount)) : null;
+                if (checkCraftable)
+                    workingItems.addAll(RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)));
                 for (EntryStack stack : ConfigObject.getInstance().getFavorites()) {
                     if (listWidget.canLastSearchTermsBeAppliedTo(stack)) {
-                        if (checkCraftable && CollectionUtils.findFirstOrNullEqualsEntryIgnoreAmount(workingItems, stack) == null)
+                        if (checkCraftable && workingItems.contains(stack))
                             continue;
                         list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
                     }
@@ -207,9 +208,11 @@ public class FavoritesListWidget extends WidgetWithBounds {
             } else {
                 List<EntryStack> list = Lists.newArrayList();
                 boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
-                List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
+                Set<EntryStack> workingItems = checkCraftable ? new TreeSet<>(Comparator.comparing(EntryStack::hashIgnoreAmount)) : null;
+                if (checkCraftable)
+                    workingItems.addAll(RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)));
                 for (EntryStack stack : ConfigObject.getInstance().getFavorites()) {
-                    if (checkCraftable && CollectionUtils.findFirstOrNullEqualsEntryIgnoreAmount(workingItems, stack) == null)
+                    if (checkCraftable && workingItems.contains(stack))
                         continue;
                     list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
                 }

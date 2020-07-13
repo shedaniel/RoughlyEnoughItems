@@ -24,11 +24,13 @@
 package me.shedaniel.rei.impl.filtering.rules;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.impl.filtering.AbstractFilteringRule;
 import me.shedaniel.rei.impl.filtering.FilteringContext;
 import me.shedaniel.rei.impl.filtering.FilteringResult;
+import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
@@ -57,22 +59,14 @@ public class ManualFilteringRule extends AbstractFilteringRule<ManualFilteringRu
         return result;
     }
     
-    private void processList(Set<EntryStack> stacks, FilteringResult result) {
-        List<EntryStack> filteredStacks = ConfigObject.getInstance().getFilteredStacks();
+    private void processList(Collection<EntryStack> stacks, FilteringResult result) {
+        Set<Integer> filteredStacks = Sets.newHashSet(CollectionUtils.map(ConfigObject.getInstance().getFilteredStacks(), EntryStack::hashIgnoreAmount));
         List<EntryStack> filtered = Lists.newArrayList();
         for (EntryStack stack : stacks) {
-            if (findFirstOrNullEqualsEntryIgnoreAmount(filteredStacks, stack) != null)
+            if (filteredStacks.contains(stack.hashIgnoreAmount()))
                 filtered.add(stack);
         }
         result.hide(filtered);
-    }
-    
-    private static EntryStack findFirstOrNullEqualsEntryIgnoreAmount(Collection<EntryStack> list, EntryStack obj) {
-        for (EntryStack t : list) {
-            if (t.equalsIgnoreAmount(obj))
-                return t;
-        }
-        return null;
     }
     
     @Override

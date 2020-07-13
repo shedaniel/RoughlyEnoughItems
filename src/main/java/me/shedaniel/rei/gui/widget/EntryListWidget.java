@@ -56,10 +56,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -494,7 +491,9 @@ public class EntryListWidget extends WidgetWithBounds {
             this.lastSearchArguments = SearchArgument.processSearchTerm(searchTerm);
             List<EntryStack> list = Lists.newArrayList();
             boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
-            List<EntryStack> workingItems = checkCraftable ? RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)) : null;
+            Set<EntryStack> workingItems = checkCraftable ? new TreeSet<>(Comparator.comparing(EntryStack::hashIgnoreAmount)) : null;
+            if (checkCraftable)
+                workingItems.addAll(RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)));
             List<EntryStack> stacks = EntryRegistry.getInstance().getPreFilteredList();
             if (stacks instanceof CopyOnWriteArrayList && !stacks.isEmpty()) {
                 if (ConfigObject.getInstance().shouldAsyncSearch()) {
@@ -508,7 +507,7 @@ public class EntryListWidget extends WidgetWithBounds {
                             for (; start[0] < end; start[0]++) {
                                 EntryStack stack = stacks.get(start[0]);
                                 if (canLastSearchTermsBeAppliedTo(stack)) {
-                                    if (workingItems != null && CollectionUtils.findFirstOrNullEqualsEntryIgnoreAmount(workingItems, stack) == null)
+                                    if (workingItems != null && workingItems.contains(stack))
                                         continue;
                                     filtered.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
                                 }
@@ -529,7 +528,7 @@ public class EntryListWidget extends WidgetWithBounds {
                 } else {
                     for (EntryStack stack : stacks) {
                         if (canLastSearchTermsBeAppliedTo(stack)) {
-                            if (workingItems != null && CollectionUtils.findFirstOrNullEqualsEntryIgnoreAmount(workingItems, stack) == null)
+                            if (workingItems != null && workingItems.contains(stack))
                                 continue;
                             list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
                         }

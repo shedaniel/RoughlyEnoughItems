@@ -39,8 +39,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.sound.SoundEvents;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @ApiStatus.Experimental
 @ApiStatus.Internal
@@ -131,8 +130,8 @@ public class EntryStackSubsetsMenuEntry extends MenuEntry {
     }
     
     public boolean isFiltered() {
-        List<EntryStack> filteredStacks = ConfigObject.getInstance().getFilteredStacks();
         if (isFiltered == null) {
+            List<EntryStack> filteredStacks = ConfigObject.getInstance().getFilteredStacks();
             isFiltered = CollectionUtils.findFirstOrNullEqualsEntryIgnoreAmount(filteredStacks, stack) != null;
         }
         return isFiltered;

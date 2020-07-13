@@ -28,6 +28,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import org.jetbrains.annotations.NotNull;
 
 @Environment(EnvType.CLIENT)
 public interface ConfigManager {
@@ -35,6 +36,7 @@ public interface ConfigManager {
     /**
      * @return the api instance of {@link me.shedaniel.rei.impl.ConfigManagerImpl}
      */
+    @NotNull
     static ConfigManager getInstance() {
         return RoughlyEnoughItemsCore.getConfigManager();
     }

@@ -42,7 +42,6 @@ import me.shedaniel.rei.gui.OverlaySearchField;
 import me.shedaniel.rei.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.SearchArgument;
-import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
@@ -495,7 +494,7 @@ public class FilteringScreen extends Screen {
         
         public boolean isFiltered() {
             if (dirty) {
-                filtered = CollectionUtils.findFirstOrNullEqualsEntryIgnoreAmount(filteringEntry.configFiltered, getCurrentEntry()) != null;
+                filtered = filteringEntry.configFiltered.contains(getCurrentEntry());
                 dirty = false;
             }
             return filtered;

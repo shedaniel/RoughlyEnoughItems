@@ -446,10 +446,10 @@ public class RecipeHelperImpl implements RecipeHelper {
         ((DisplayHelperImpl) DisplayHelper.getInstance()).resetCache();
         ScreenHelper.getOptionalOverlay().ifPresent(overlay -> overlay.shouldReInit = true);
         
-        startSection(sectionData, "entry-registry-distinct");
+        startSection(sectionData, "entry-registry-finalise");
         
-        // Remove duplicate entries
-        ((EntryRegistryImpl) EntryRegistry.getInstance()).distinct();
+        // Finish Reload
+        ((EntryRegistryImpl) EntryRegistry.getInstance()).finishReload();
         
         endSection(sectionData);
         startSection(sectionData, "entry-registry-refilter");

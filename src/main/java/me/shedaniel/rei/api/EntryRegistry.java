@@ -30,10 +30,15 @@ import net.fabricmc.api.Environment;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Environment(EnvType.CLIENT)
 public interface EntryRegistry {
@@ -41,6 +46,7 @@ public interface EntryRegistry {
     /**
      * @return the api instance of {@link me.shedaniel.rei.impl.EntryRegistryImpl}
      */
+    @NotNull
     static EntryRegistry getInstance() {
         return RoughlyEnoughItemsCore.getEntryRegistry();
     }
@@ -50,11 +56,21 @@ public interface EntryRegistry {
      *
      * @return a stacks list
      */
-    List<EntryStack> getStacksList();
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
+    @NotNull
+    default List<EntryStack> getStacksList() {
+        return getEntryStacks().collect(Collectors.toList());
+    }
     
+    @NotNull
+    Stream<EntryStack> getEntryStacks();
+    
+    @NotNull
     List<EntryStack> getPreFilteredList();
     
-    List<ItemStack> appendStacksForItem(Item item);
+    @NotNull
+    List<ItemStack> appendStacksForItem(@NotNull Item item);
     
     /**
      * Gets all possible stacks from an item
@@ -62,9 +78,10 @@ public interface EntryRegistry {
      * @param item the item to find
      * @return the array of possible stacks
      */
-    ItemStack[] getAllStacksFromItem(Item item);
+    @NotNull
+    ItemStack[] getAllStacksFromItem(@NotNull Item item);
     
-    default void registerEntry(EntryStack stack) {
+    default void registerEntry(@NotNull EntryStack stack) {
         registerEntryAfter(null, stack);
     }
     
@@ -74,8 +91,8 @@ public interface EntryRegistry {
      * @param afterEntry the stack to put after
      * @param stack      the stack to register
      */
-    default void registerEntryAfter(EntryStack afterEntry, EntryStack stack) {
-        registerEntryAfter(afterEntry, stack, true);
+    default void registerEntryAfter(@Nullable EntryStack afterEntry, @NotNull EntryStack stack) {
+        registerEntriesAfter(afterEntry, Collections.singletonList(stack));
     }
     
     /**
@@ -87,11 +104,16 @@ public interface EntryRegistry {
      * @see #queueRegisterEntryAfter(EntryStack, Collection) for a faster method
      */
     @Deprecated
-    @ApiStatus.Internal
-    void registerEntryAfter(EntryStack afterEntry, EntryStack stack, boolean checkAlreadyContains);
+    @ApiStatus.ScheduledForRemoval
+    default void registerEntryAfter(@Nullable EntryStack afterEntry, @NotNull EntryStack stack, boolean checkAlreadyContains) {
+        registerEntryAfter(afterEntry, stack);
+    }
     
-    
-    void queueRegisterEntryAfter(EntryStack afterEntry, Collection<? extends EntryStack> stacks);
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
+    default void queueRegisterEntryAfter(@Nullable EntryStack afterEntry, @NotNull Collection<@NotNull ? extends EntryStack> stacks) {
+        registerEntriesAfter(afterEntry, stacks);
+    }
     
     /**
      * Registers multiple stacks to the item list
@@ -99,7 +121,7 @@ public interface EntryRegistry {
      * @param afterStack the stack to put after
      * @param stacks     the stacks to register
      */
-    default void registerEntriesAfter(EntryStack afterStack, EntryStack... stacks) {
+    default void registerEntriesAfter(@Nullable EntryStack afterStack, @NotNull EntryStack... stacks) {
         registerEntriesAfter(afterStack, Arrays.asList(stacks));
     }
     
@@ -109,14 +131,14 @@ public interface EntryRegistry {
      * @param afterStack the stack to put after
      * @param stacks     the stacks to register
      */
-    void registerEntriesAfter(EntryStack afterStack, Collection<? extends EntryStack> stacks);
+    void registerEntriesAfter(@Nullable EntryStack afterStack, @NotNull Collection<@NotNull ? extends EntryStack> stacks);
     
     /**
      * Registers multiple stacks to the item list
      *
      * @param stacks the stacks to register
      */
-    default void registerEntries(EntryStack... stacks) {
+    default void registerEntries(@NotNull EntryStack... stacks) {
         registerEntriesAfter(null, stacks);
     }
     

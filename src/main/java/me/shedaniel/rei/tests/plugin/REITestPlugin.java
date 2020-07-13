@@ -26,17 +26,20 @@ package me.shedaniel.rei.tests.plugin;
 import me.shedaniel.rei.api.EntryRegistry;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.TestOnly;
 
-import java.util.Collections;
 import java.util.Random;
 
 @TestOnly
+@Environment(EnvType.CLIENT)
 public class REITestPlugin implements REIPluginV0 {
     
     private Random random = new Random();
@@ -56,7 +59,7 @@ public class REITestPlugin implements REIPluginV0 {
         int times = 10;
         for (Item item : Registry.ITEM) {
             for (int i = 0; i < times; i++)
-                entryRegistry.queueRegisterEntryAfter(EntryStack.create(item), Collections.singleton(transformStack(EntryStack.create(item))));
+                entryRegistry.registerEntryAfter(EntryStack.create(item), transformStack(EntryStack.create(item)));
             try {
                 for (ItemStack stack : entryRegistry.appendStacksForItem(item)) {
                     for (int i = 0; i < times; i++)
@@ -68,8 +71,8 @@ public class REITestPlugin implements REIPluginV0 {
     }
     
     public EntryStack transformStack(EntryStack stack) {
-        stack.setAmount(random.nextInt(Byte.MAX_VALUE));
-        stack.setting(EntryStack.Settings.CHECK_AMOUNT, EntryStack.Settings.TRUE);
+        CompoundTag tag = stack.getItemStack().getOrCreateTag();
+        tag.putInt("Whatever", random.nextInt(Integer.MAX_VALUE));
         return stack;
     }
     
