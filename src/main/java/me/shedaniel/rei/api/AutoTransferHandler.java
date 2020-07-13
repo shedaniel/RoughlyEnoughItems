@@ -48,7 +48,7 @@ public interface AutoTransferHandler {
             return new ResultImpl();
         }
 
-        static Result createSuccessfulReturnToScreen() {
+        static Result createSuccessfulReturningToScreen() {
             return new ResultImpl(true, true, true);
         }
 
@@ -80,7 +80,7 @@ public interface AutoTransferHandler {
          * Applicable if {@link #isSuccessful()} is true. Will return
          * to the previous screen rather than staying open.
          */
-        boolean isReturnToScreen();
+        boolean isReturningToScreen();
         
         boolean isApplicable();
         
@@ -121,7 +121,7 @@ public interface AutoTransferHandler {
     
     @ApiStatus.Internal
     final class ResultImpl implements Result {
-        private boolean successful, applicable, returnToScreen;
+        private boolean successful, applicable, returningToScreen;
         private String errorKey;
         private IntList integers = new IntArrayList();
         private int color;
@@ -134,10 +134,10 @@ public interface AutoTransferHandler {
             this(false, applicable, false);
         }
 
-        public ResultImpl(boolean successful, boolean applicable, boolean returnToScreen) {
+        public ResultImpl(boolean successful, boolean applicable, boolean returningToScreen) {
             this.successful = successful;
             this.applicable = applicable;
-            this.returnToScreen = returnToScreen;
+            this.returningToScreen = returningToScreen;
         }
 
         public ResultImpl(String errorKey, IntList integers, int color) {
@@ -165,8 +165,8 @@ public interface AutoTransferHandler {
         }
 
         @Override
-        public boolean isReturnToScreen() {
-            return returnToScreen;
+        public boolean isReturningToScreen() {
+            return returningToScreen;
         }
 
         @Override
