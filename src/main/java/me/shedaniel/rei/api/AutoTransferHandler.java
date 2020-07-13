@@ -47,7 +47,11 @@ public interface AutoTransferHandler {
         static Result createSuccessful() {
             return new ResultImpl();
         }
-        
+
+        static Result createSuccessfulReturningToScreen() {
+            return new ResultImpl(true, true, true);
+        }
+
         static Result createNotApplicable() {
             return new ResultImpl(false);
         }
@@ -71,6 +75,12 @@ public interface AutoTransferHandler {
         int getColor();
         
         boolean isSuccessful();
+
+        /**
+         * Applicable if {@link #isSuccessful()} is true. Will return
+         * to the previous screen rather than staying open.
+         */
+        boolean isReturningToScreen();
         
         boolean isApplicable();
         
@@ -111,21 +121,25 @@ public interface AutoTransferHandler {
     
     @ApiStatus.Internal
     final class ResultImpl implements Result {
-        private boolean successful, applicable;
+        private boolean successful, applicable, returningToScreen;
         private String errorKey;
         private IntList integers = new IntArrayList();
         private int color;
         
         private ResultImpl() {
-            this.successful = true;
-            this.applicable = true;
+            this(true, true, false);
         }
         
         public ResultImpl(boolean applicable) {
-            this.successful = false;
-            this.applicable = applicable;
+            this(false, applicable, false);
         }
-        
+
+        public ResultImpl(boolean successful, boolean applicable, boolean returningToScreen) {
+            this.successful = successful;
+            this.applicable = applicable;
+            this.returningToScreen = returningToScreen;
+        }
+
         public ResultImpl(String errorKey, IntList integers, int color) {
             this.successful = false;
             this.applicable = true;
@@ -144,12 +158,17 @@ public interface AutoTransferHandler {
         public boolean isSuccessful() {
             return successful;
         }
-        
+
         @Override
         public boolean isApplicable() {
             return applicable;
         }
-        
+
+        @Override
+        public boolean isReturningToScreen() {
+            return returningToScreen;
+        }
+
         @Override
         public String getErrorKey() {
             return errorKey;

@@ -35,6 +35,8 @@ import me.shedaniel.rei.gui.widget.LateRenderable;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import me.shedaniel.rei.utils.CollectionUtils;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.ingame.ContainerScreen;
@@ -51,6 +53,7 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
+@Environment(EnvType.CLIENT)
 public final class InternalWidgets {
     private InternalWidgets() {}
     
@@ -65,8 +68,12 @@ public final class InternalWidgets {
                     for (AutoTransferHandler autoTransferHandler : RecipeHelper.getInstance().getSortedAutoCraftingHandler())
                         try {
                             AutoTransferHandler.Result result = autoTransferHandler.handle(context);
-                            if (result.isSuccessful())
+                            if (result.isSuccessful()) {
+                                if (result.isReturningToScreen()) {
+                                    break; // Same as failing, but doesn't ask other handlers
+                                }
                                 return;
+                            }
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
