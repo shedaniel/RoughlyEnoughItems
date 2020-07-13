@@ -43,13 +43,7 @@ public class DefaultShapelessDisplay implements DefaultCraftingDisplay {
     
     public DefaultShapelessDisplay(ShapelessRecipe recipe) {
         this.display = recipe;
-        this.input = recipe.getPreviewInputs().stream().map(i -> {
-            List<EntryStack> entries = new ArrayList<>();
-            for (ItemStack stack : i.getMatchingStacksClient()) {
-                entries.add(EntryStack.create(stack));
-            }
-            return entries;
-        }).collect(Collectors.toList());
+        this.input = EntryStack.create(recipe.getPreviewInputs());
         this.output = Collections.singletonList(EntryStack.create(recipe.getOutput()));
     }
     
