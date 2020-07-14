@@ -34,26 +34,20 @@ import java.util.Objects;
 @Environment(EnvType.CLIENT)
 public class AmountIgnoredEntryStackWrapper {
     private final EntryStack stack;
-    private int hash = -1390123012;
+    private int hash;
     
     public AmountIgnoredEntryStackWrapper(EntryStack stack) {
         this.stack = Objects.requireNonNull(stack);
+        this.hash = stack.hashIgnoreAmount();
     }
     
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        
-        AmountIgnoredEntryStackWrapper that = (AmountIgnoredEntryStackWrapper) o;
-        return hashCode() == that.hashCode();
+        return o instanceof AmountIgnoredEntryStackWrapper && hashCode() == o.hashCode();
     }
     
     @Override
     public int hashCode() {
-        if (hash == -1390123012) {
-            hash = stack.hashIgnoreAmount();
-        }
         return hash;
     }
     

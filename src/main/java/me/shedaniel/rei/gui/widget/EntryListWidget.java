@@ -529,7 +529,7 @@ public class EntryListWidget extends WidgetWithBounds {
                 } else {
                     for (EntryStack stack : stacks) {
                         if (canLastSearchTermsBeAppliedTo(stack)) {
-                            if (workingItems != null && workingItems.contains(stack))
+                            if (workingItems != null && !workingItems.contains(stack.hashIgnoreAmount()))
                                 continue;
                             list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
                         }

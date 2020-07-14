@@ -47,8 +47,13 @@ public class FilteringContextImpl implements FilteringContext {
     private final Map<FilteringContextType, Collection<EntryStack>> cachedStacks;
     
     public FilteringContextImpl(List<EntryStack> allStacks) {
-        this(Maps.newHashMap());
-        getUnsetStacks().addAll(allStacks);
+        this.stacks = Maps.newHashMap();
+        this.cachedStacks = Maps.newHashMap();
+        for (FilteringContextType type : FilteringContextType.values()) {
+            this.stacks.computeIfAbsent(type, t -> Sets.newHashSet());
+        }
+        this.stacks.get(FilteringContextType.DEFAULT).addAll(CollectionUtils.map(allStacks, AmountIgnoredEntryStackWrapper::new));
+        fillCache();
     }
     
     public FilteringContextImpl(Map<FilteringContextType, Set<AmountIgnoredEntryStackWrapper>> stacks) {
@@ -73,8 +78,8 @@ public class FilteringContextImpl implements FilteringContext {
     }
     
     public void handleResult(FilteringResult result) {
-        Collection<AmountIgnoredEntryStackWrapper> hiddenStacks = CollectionUtils.map(result.getHiddenStacks(), AmountIgnoredEntryStackWrapper::new);
-        Collection<AmountIgnoredEntryStackWrapper> shownStacks = CollectionUtils.map(result.getShownStacks(), AmountIgnoredEntryStackWrapper::new);
+        Collection<AmountIgnoredEntryStackWrapper> hiddenStacks = result.getHiddenStacks();
+        Collection<AmountIgnoredEntryStackWrapper> shownStacks = result.getShownStacks();
         
         List<CompletableFuture<Void>> completableFutures = Lists.newArrayList();
         completableFutures.add(CompletableFuture.runAsync(() -> {
