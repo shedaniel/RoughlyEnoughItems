@@ -26,19 +26,21 @@ package me.shedaniel.rei.plugin.beacon;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
-import me.shedaniel.rei.utils.CollectionUtils;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
 import java.util.Collections;
 import java.util.List;
 
+@Environment(EnvType.CLIENT)
 public class DefaultBeaconBaseDisplay implements RecipeDisplay {
     
     private List<EntryStack> entries;
     
     public DefaultBeaconBaseDisplay(List<ItemStack> entries) {
-        this.entries = CollectionUtils.map(entries, EntryStack::create);
+        this.entries = EntryStack.ofItemStacks(entries);
     }
     
     @Override

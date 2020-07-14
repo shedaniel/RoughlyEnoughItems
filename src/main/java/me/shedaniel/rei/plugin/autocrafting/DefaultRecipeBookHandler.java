@@ -29,6 +29,8 @@ import me.shedaniel.rei.api.TransferRecipeDisplay;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.plugin.cooking.DefaultCookingDisplay;
 import me.shedaniel.rei.plugin.crafting.DefaultCraftingDisplay;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
 import net.minecraft.client.resource.language.I18n;
@@ -37,6 +39,7 @@ import net.minecraft.container.CraftingTableContainer;
 import net.minecraft.container.PlayerContainer;
 import net.minecraft.recipe.Recipe;
 
+@Environment(EnvType.CLIENT)
 public class DefaultRecipeBookHandler implements AutoTransferHandler {
     @Override
     public Result handle(Context context) {

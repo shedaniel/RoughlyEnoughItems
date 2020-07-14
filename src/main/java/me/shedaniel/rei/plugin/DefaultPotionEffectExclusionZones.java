@@ -26,6 +26,8 @@ package me.shedaniel.rei.plugin;
 import com.google.common.collect.Ordering;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.ContainerScreen;
@@ -37,6 +39,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
+@Environment(EnvType.CLIENT)
 public class DefaultPotionEffectExclusionZones implements Supplier<List<Rectangle>> {
     @Override
     public List<Rectangle> get() {

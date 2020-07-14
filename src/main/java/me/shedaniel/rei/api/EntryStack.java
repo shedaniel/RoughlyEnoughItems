@@ -50,11 +50,7 @@ import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -81,20 +77,28 @@ public interface EntryStack extends TextRepresentable {
     static EntryStack create(ItemStack stack) {
         return new ItemEntryStack(stack);
     }
-
+    
     static EntryStack create(ItemConvertible item) {
         return create(new ItemStack(item));
     }
-
-    static List<EntryStack> create(Collection<ItemStack> stacks) {
+    
+    static List<EntryStack> ofItems(Collection<ItemConvertible> stacks) {
+        List<EntryStack> result = new ArrayList<>(stacks.size());
+        for (ItemConvertible stack : stacks) {
+            result.add(create(stack));
+        }
+        return result;
+    }
+    
+    static List<EntryStack> ofItemStacks(Collection<ItemStack> stacks) {
         List<EntryStack> result = new ArrayList<>(stacks.size());
         for (ItemStack stack : stacks) {
             result.add(create(stack));
         }
         return result;
     }
-
-    static List<EntryStack> create(Ingredient ingredient) {
+    
+    static List<EntryStack> ofIngredient(Ingredient ingredient) {
         ItemStack[] matchingStacks = ingredient.getMatchingStacksClient();
         List<EntryStack> result = new ArrayList<>(matchingStacks.length);
         for (ItemStack matchingStack : matchingStacks) {
@@ -102,15 +106,33 @@ public interface EntryStack extends TextRepresentable {
         }
         return result;
     }
-
-    static List<List<EntryStack>> create(List<Ingredient> ingredients) {
+    
+    static List<List<EntryStack>> ofIngredients(List<Ingredient> ingredients) {
         List<List<EntryStack>> result = new ArrayList<>(ingredients.size());
         for (Ingredient ingredient : ingredients) {
-            result.add(create(ingredient));
+            result.add(ofIngredient(ingredient));
         }
         return result;
     }
-
+    
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
+    static List<EntryStack> create(Collection<ItemStack> stacks) {
+        return ofItemStacks(stacks);
+    }
+    
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
+    static List<EntryStack> create(Ingredient ingredient) {
+        return ofIngredient(ingredient);
+    }
+    
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
+    static List<List<EntryStack>> create(List<Ingredient> ingredients) {
+        return ofIngredients(ingredients);
+    }
+    
     @ApiStatus.Internal
     static EntryStack readFromJson(JsonElement jsonElement) {
         try {

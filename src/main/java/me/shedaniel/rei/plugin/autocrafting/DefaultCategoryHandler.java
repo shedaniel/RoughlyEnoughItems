@@ -32,6 +32,8 @@ import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.TransferRecipeDisplay;
 import me.shedaniel.rei.server.ContainerInfo;
 import me.shedaniel.rei.server.ContainerInfoHandler;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -45,6 +47,7 @@ import net.minecraft.util.collection.DefaultedList;
 
 import java.util.List;
 
+@Environment(EnvType.CLIENT)
 public class DefaultCategoryHandler implements AutoTransferHandler {
     
     public static boolean canUseMovePackets() {

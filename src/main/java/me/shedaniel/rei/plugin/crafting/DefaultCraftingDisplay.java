@@ -28,6 +28,8 @@ import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.TransferRecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import me.shedaniel.rei.server.ContainerInfo;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.container.Container;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.util.Identifier;
@@ -36,6 +38,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+@Environment(EnvType.CLIENT)
 public interface DefaultCraftingDisplay extends TransferRecipeDisplay {
     
     @Override

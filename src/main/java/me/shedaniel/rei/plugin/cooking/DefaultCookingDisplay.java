@@ -26,7 +26,8 @@ package me.shedaniel.rei.plugin.cooking;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.TransferRecipeDisplay;
 import me.shedaniel.rei.server.ContainerInfo;
-import me.shedaniel.rei.utils.CollectionUtils;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.block.entity.FurnaceBlockEntity;
 import net.minecraft.container.Container;
 import net.minecraft.item.Item;
@@ -41,6 +42,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Environment(EnvType.CLIENT)
 public abstract class DefaultCookingDisplay implements TransferRecipeDisplay {
     private static List<EntryStack> fuel;
     
@@ -56,7 +58,7 @@ public abstract class DefaultCookingDisplay implements TransferRecipeDisplay {
     
     public DefaultCookingDisplay(AbstractCookingRecipe recipe) {
         this.recipe = recipe;
-        this.input = EntryStack.create(recipe.getPreviewInputs());
+        this.input = EntryStack.ofIngredients(recipe.getPreviewInputs());
         this.output = Collections.singletonList(EntryStack.create(recipe.getOutput()));
         this.xp = recipe.getExperience();
         this.cookTime = recipe.getCookTime();

@@ -230,21 +230,19 @@ public class DefaultPlugin implements REIPluginV0 {
             recipeHelper.registerDisplay(new DefaultFuelDisplay(EntryStack.create(entry.getKey()), entry.getValue()));
         }
         List<EntryStack> arrowStack = Collections.singletonList(EntryStack.create(Items.ARROW));
-        for (EntryStack entry : EntryRegistry.getInstance().getStacksList()) {
-            if (entry.getItem() == Items.LINGERING_POTION) {
-                List<List<EntryStack>> input = new ArrayList<>();
-                for (int i = 0; i < 4; i++)
-                    input.add(arrowStack);
-                input.add(Collections.singletonList(EntryStack.create(entry.getItemStack())));
-                for (int i = 0; i < 4; i++)
-                    input.add(arrowStack);
-                ItemStack outputStack = new ItemStack(Items.TIPPED_ARROW, 8);
-                PotionUtil.setPotion(outputStack, PotionUtil.getPotion(entry.getItemStack()));
-                PotionUtil.setCustomPotionEffects(outputStack, PotionUtil.getCustomPotionEffects(entry.getItemStack()));
-                List<EntryStack> output = Collections.singletonList(EntryStack.create(outputStack).addSetting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE));
-                recipeHelper.registerDisplay(new DefaultCustomDisplay(null, input, output));
-            }
-        }
+        EntryRegistry.getInstance().getEntryStacks().filter(entry -> entry.getItem() == Items.LINGERING_POTION).forEach(entry -> {
+            List<List<EntryStack>> input = new ArrayList<>();
+            for (int i = 0; i < 4; i++)
+                input.add(arrowStack);
+            input.add(Collections.singletonList(EntryStack.create(entry.getItemStack())));
+            for (int i = 0; i < 4; i++)
+                input.add(arrowStack);
+            ItemStack outputStack = new ItemStack(Items.TIPPED_ARROW, 8);
+            PotionUtil.setPotion(outputStack, PotionUtil.getPotion(entry.getItemStack()));
+            PotionUtil.setCustomPotionEffects(outputStack, PotionUtil.getCustomPotionEffects(entry.getItemStack()));
+            List<EntryStack> output = Collections.singletonList(EntryStack.create(outputStack).addSetting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE));
+            recipeHelper.registerDisplay(new DefaultCustomDisplay(null, input, output));
+        });
         Map<ItemConvertible, Float> map = Maps.newLinkedHashMap();
         if (ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.isEmpty())
             ComposterBlock.registerDefaultCompostableItems();
@@ -274,8 +272,7 @@ public class DefaultPlugin implements REIPluginV0 {
         // TODO Turn this into an API
         // Sit tight! This will be a fast journey!
         long time = System.currentTimeMillis();
-        for (EntryStack stack : EntryRegistry.getInstance().getStacksList())
-            applyPotionTransformer(stack);
+        EntryRegistry.getInstance().getEntryStacks().forEach(this::applyPotionTransformer);
         for (List<RecipeDisplay> displays : RecipeHelper.getInstance().getAllRecipesNoHandlers().values()) {
             for (RecipeDisplay display : displays) {
                 for (List<EntryStack> entries : display.getInputEntries())

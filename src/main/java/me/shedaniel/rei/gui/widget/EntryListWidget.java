@@ -24,6 +24,7 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.ScrollingContainer;
@@ -491,9 +492,9 @@ public class EntryListWidget extends WidgetWithBounds {
             this.lastSearchArguments = SearchArgument.processSearchTerm(searchTerm);
             List<EntryStack> list = Lists.newArrayList();
             boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
-            Set<EntryStack> workingItems = checkCraftable ? new TreeSet<>(Comparator.comparing(EntryStack::hashIgnoreAmount)) : null;
+            Set<Integer> workingItems = checkCraftable ? Sets.newHashSet() : null;
             if (checkCraftable)
-                workingItems.addAll(RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)));
+                workingItems.addAll(CollectionUtils.map(RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)), EntryStack::hashIgnoreAmount));
             List<EntryStack> stacks = EntryRegistry.getInstance().getPreFilteredList();
             if (stacks instanceof CopyOnWriteArrayList && !stacks.isEmpty()) {
                 if (ConfigObject.getInstance().shouldAsyncSearch()) {
@@ -507,7 +508,7 @@ public class EntryListWidget extends WidgetWithBounds {
                             for (; start[0] < end; start[0]++) {
                                 EntryStack stack = stacks.get(start[0]);
                                 if (canLastSearchTermsBeAppliedTo(stack)) {
-                                    if (workingItems != null && workingItems.contains(stack))
+                                    if (workingItems != null && !workingItems.contains(stack.hashIgnoreAmount()))
                                         continue;
                                     filtered.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
                                 }
