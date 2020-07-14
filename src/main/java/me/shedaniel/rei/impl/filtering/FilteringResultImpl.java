@@ -23,30 +23,33 @@
 
 package me.shedaniel.rei.impl.filtering;
 
+import com.google.common.collect.Sets;
 import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.impl.AmountIgnoredEntryStackWrapper;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
+@Environment(EnvType.CLIENT)
 public class FilteringResultImpl implements FilteringResult {
-    private final Set<EntryStack> hiddenStacks, shownStacks;
+    private final Set<AmountIgnoredEntryStackWrapper> hiddenStacks, shownStacks;
     
     public FilteringResultImpl(List<EntryStack> hiddenStacks, List<EntryStack> shownStacks) {
-        this.hiddenStacks = new TreeSet<>(Comparator.comparing(EntryStack::hashIgnoreAmount));
-        this.shownStacks = new TreeSet<>(Comparator.comparing(EntryStack::hashIgnoreAmount));
-        this.hiddenStacks.addAll(hiddenStacks);
-        this.shownStacks.addAll(shownStacks);
+        this.hiddenStacks = Sets.newHashSetWithExpectedSize(hiddenStacks.size());
+        this.shownStacks = Sets.newHashSetWithExpectedSize(shownStacks.size());
+        hide(hiddenStacks);
+        show(shownStacks);
     }
     
     @Override
-    public Set<EntryStack> getHiddenStacks() {
+    public Set<AmountIgnoredEntryStackWrapper> getHiddenStacks() {
         return hiddenStacks;
     }
     
     @Override
-    public Set<EntryStack> getShownStacks() {
+    public Set<AmountIgnoredEntryStackWrapper> getShownStacks() {
         return shownStacks;
     }
 }

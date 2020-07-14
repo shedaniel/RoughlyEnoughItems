@@ -88,6 +88,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
     
     @Override
     public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+        super.render(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
         Window window = MinecraftClient.getInstance().getWindow();
         this.buttonWidget.active = this.isEditable();
         this.buttonWidget.y = y;

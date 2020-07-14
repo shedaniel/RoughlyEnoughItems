@@ -253,11 +253,9 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     
     @Override
     public int hashIgnoreAmount() {
-        int result = 1;
-        result = 31 * result + getType().hashCode();
-        result = 31 * result + itemStack.getItem().hashCode();
+        int result = hashIgnoreAmountAndTags();
         if (itemStack.hasTag()) {
-            result = 31 * result + itemStack.getTag().asString().hashCode();
+            result = 31 * result + itemStack.getTag().toString().hashCode();
         } else {
             result = 31 * result;
         }
@@ -267,7 +265,6 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     @Override
     public int hashIgnoreAmountAndTags() {
         int result = 1;
-        result = 31 * result + getType().hashCode();
         result = 31 * result + itemStack.getItem().hashCode();
         return result;
     }
