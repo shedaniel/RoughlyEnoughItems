@@ -25,9 +25,12 @@ package me.shedaniel.rei.plugin.blasting;
 
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import me.shedaniel.rei.plugin.cooking.DefaultCookingDisplay;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.recipe.BlastingRecipe;
 import net.minecraft.util.Identifier;
 
+@Environment(EnvType.CLIENT)
 public class DefaultBlastingDisplay extends DefaultCookingDisplay {
     
     public DefaultBlastingDisplay(BlastingRecipe recipe) {

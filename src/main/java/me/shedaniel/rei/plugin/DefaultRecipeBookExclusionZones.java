@@ -26,6 +26,8 @@ package me.shedaniel.rei.plugin;
 import com.google.common.collect.Lists;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
@@ -36,6 +38,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
+@Environment(EnvType.CLIENT)
 public class DefaultRecipeBookExclusionZones implements Supplier<List<Rectangle>> {
     
     @Override

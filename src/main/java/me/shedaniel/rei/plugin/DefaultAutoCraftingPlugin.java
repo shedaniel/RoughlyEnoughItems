@@ -28,8 +28,11 @@ import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.plugin.autocrafting.DefaultCategoryHandler;
 import me.shedaniel.rei.plugin.autocrafting.DefaultRecipeBookHandler;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.util.Identifier;
 
+@Environment(EnvType.CLIENT)
 public class DefaultAutoCraftingPlugin implements REIPluginV0 {
     
     public static final Identifier PLUGIN = new Identifier("roughlyenoughitems", "default_auto_crafting_plugin");

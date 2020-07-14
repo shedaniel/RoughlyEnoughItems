@@ -142,7 +142,7 @@ public class CollectionUtils {
     }
     
     public static <T, R> List<R> map(List<T> list, Function<T, R> function) {
-        List<R> l = Lists.newArrayList();
+        List<R> l = new ArrayList<>(list.size());
         for (T t : list) {
             l.add(function.apply(t));
         }
@@ -150,7 +150,7 @@ public class CollectionUtils {
     }
     
     public static <T, R> List<R> map(Collection<T> list, Function<T, R> function) {
-        List<R> l = Lists.newArrayList();
+        List<R> l = new ArrayList<>(list.size());
         for (T t : list) {
             l.add(function.apply(t));
         }
@@ -158,7 +158,7 @@ public class CollectionUtils {
     }
     
     public static <T, R> List<R> map(T[] list, Function<T, R> function) {
-        List<R> l = Lists.newArrayList();
+        List<R> l = new ArrayList<>(list.length);
         for (T t : list) {
             l.add(function.apply(t));
         }

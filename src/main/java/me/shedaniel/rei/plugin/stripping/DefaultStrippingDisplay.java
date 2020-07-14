@@ -26,12 +26,15 @@ package me.shedaniel.rei.plugin.stripping;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
 import java.util.Collections;
 import java.util.List;
 
+@Environment(EnvType.CLIENT)
 public class DefaultStrippingDisplay implements RecipeDisplay {
     private EntryStack in, out;
     

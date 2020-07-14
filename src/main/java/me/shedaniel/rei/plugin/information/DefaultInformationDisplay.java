@@ -27,6 +27,8 @@ import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
@@ -35,6 +37,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+@Environment(EnvType.CLIENT)
 public class DefaultInformationDisplay implements RecipeDisplay {
     private List<EntryStack> entryStacks;
     private List<Text> texts;

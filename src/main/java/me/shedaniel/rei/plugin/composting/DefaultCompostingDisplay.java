@@ -26,13 +26,15 @@ package me.shedaniel.rei.plugin.composting;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
+@Environment(EnvType.CLIENT)
 public class DefaultCompostingDisplay implements RecipeDisplay {
     
     private List<EntryStack> order, allItems;
@@ -42,10 +44,10 @@ public class DefaultCompostingDisplay implements RecipeDisplay {
     
     public DefaultCompostingDisplay(int page, List<ItemConvertible> order, Map<ItemConvertible, Float> inputMap, List<ItemConvertible> allItems, ItemStack[] output) {
         this.page = page;
-        this.order = order.stream().map(EntryStack::create).collect(Collectors.toList());
+        this.order = EntryStack.ofItems(order);
         this.inputMap = inputMap;
-        this.output = Arrays.stream(output).map(EntryStack::create).collect(Collectors.toList());
-        this.allItems = allItems.stream().map(EntryStack::create).collect(Collectors.toList());
+        this.output = EntryStack.ofItemStacks(Arrays.asList(output));
+        this.allItems = EntryStack.ofItems(allItems);
     }
     
     public int getPage() {

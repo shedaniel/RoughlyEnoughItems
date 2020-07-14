@@ -26,6 +26,8 @@ package me.shedaniel.rei.plugin.crafting;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.utils.CollectionUtils;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.util.Identifier;
@@ -33,6 +35,7 @@ import net.minecraft.util.Identifier;
 import java.util.List;
 import java.util.Optional;
 
+@Environment(EnvType.CLIENT)
 public class DefaultCustomDisplay implements DefaultCraftingDisplay {
     
     private List<List<EntryStack>> input;
@@ -41,7 +44,7 @@ public class DefaultCustomDisplay implements DefaultCraftingDisplay {
     private int width, height;
     
     public DefaultCustomDisplay(List<List<ItemStack>> input, List<ItemStack> output, Recipe<?> possibleRecipe) {
-        this(possibleRecipe, CollectionUtils.map(input, i -> CollectionUtils.map(i, EntryStack::create)), CollectionUtils.map(output, EntryStack::create));
+        this(possibleRecipe, CollectionUtils.map(input, EntryStack::ofItemStacks), EntryStack.ofItemStacks(output));
     }
     
     public DefaultCustomDisplay(Recipe<?> possibleRecipe, List<List<EntryStack>> input, List<EntryStack> output) {

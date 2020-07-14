@@ -26,6 +26,8 @@ package me.shedaniel.rei.plugin.campfire;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.AbstractCookingRecipe;
 import net.minecraft.recipe.CampfireCookingRecipe;
@@ -39,6 +41,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Environment(EnvType.CLIENT)
 public class DefaultCampfireDisplay implements RecipeDisplay {
     
     private List<List<EntryStack>> inputs;
@@ -52,7 +55,7 @@ public class DefaultCampfireDisplay implements RecipeDisplay {
     }
     
     public DefaultCampfireDisplay(DefaultedList<Ingredient> ingredients, ItemStack output, int cookTime) {
-        this.inputs = EntryStack.create(ingredients);
+        this.inputs = EntryStack.ofIngredients(ingredients);
         this.output = Collections.singletonList(EntryStack.create(output));
         this.cookTime = cookTime;
     }

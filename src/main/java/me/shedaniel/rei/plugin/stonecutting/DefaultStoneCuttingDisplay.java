@@ -26,6 +26,8 @@ package me.shedaniel.rei.plugin.stonecutting;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.CuttingRecipe;
 import net.minecraft.recipe.Ingredient;
@@ -33,12 +35,11 @@ import net.minecraft.recipe.StonecuttingRecipe;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
+@Environment(EnvType.CLIENT)
 public class DefaultStoneCuttingDisplay implements RecipeDisplay {
     
     private List<List<EntryStack>> inputs;
@@ -51,7 +52,7 @@ public class DefaultStoneCuttingDisplay implements RecipeDisplay {
     }
     
     public DefaultStoneCuttingDisplay(DefaultedList<Ingredient> ingredients, ItemStack output) {
-        this.inputs = EntryStack.create(ingredients);
+        this.inputs = EntryStack.ofIngredients(ingredients);
         this.output = Collections.singletonList(EntryStack.create(output));
     }
     

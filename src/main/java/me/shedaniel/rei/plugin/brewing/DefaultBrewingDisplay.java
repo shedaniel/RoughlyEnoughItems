@@ -27,6 +27,8 @@ import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.text.TranslatableText;
@@ -37,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@Environment(EnvType.CLIENT)
 public class DefaultBrewingDisplay implements RecipeDisplay {
     
     private EntryStack input, output;
@@ -44,8 +47,9 @@ public class DefaultBrewingDisplay implements RecipeDisplay {
     
     public DefaultBrewingDisplay(ItemStack input, Ingredient reactant, ItemStack output) {
         this.input = EntryStack.create(input).setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, stack -> Collections.singletonList(new TranslatableText("category.rei.brewing.input").formatted(Formatting.YELLOW)));
-        this.reactant = new ArrayList<>();
-        for (ItemStack stack : reactant.getMatchingStacksClient()) {
+        ItemStack[] reactantStacks = reactant.getMatchingStacksClient();
+        this.reactant = new ArrayList<>(reactantStacks.length);
+        for (ItemStack stack : reactantStacks) {
             EntryStack entryStack = EntryStack.create(stack);
             entryStack.setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> Collections.singletonList(new TranslatableText("category.rei.brewing.reactant").formatted(Formatting.YELLOW)));
             this.reactant.add(entryStack);

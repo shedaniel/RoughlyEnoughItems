@@ -27,7 +27,8 @@ import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
-import me.shedaniel.rei.utils.CollectionUtils;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.recipe.SmithingRecipe;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +38,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+@Environment(EnvType.CLIENT)
 public class DefaultSmithingDisplay implements RecipeDisplay {
     @NotNull
     private List<List<EntryStack>> input;
@@ -48,8 +50,8 @@ public class DefaultSmithingDisplay implements RecipeDisplay {
     public DefaultSmithingDisplay(@NotNull SmithingRecipe recipe) {
         this(
                 Lists.newArrayList(
-                        EntryStack.create(recipe.base),
-                        EntryStack.create(recipe.addition)
+                        EntryStack.ofIngredient(recipe.base),
+                        EntryStack.ofIngredient(recipe.addition)
                 ),
                 Collections.singletonList(EntryStack.create(recipe.getOutput())),
                 recipe.getId()
@@ -71,6 +73,11 @@ public class DefaultSmithingDisplay implements RecipeDisplay {
     @Override
     public List<EntryStack> getOutputEntries() {
         return output;
+    }
+    
+    @Override
+    public List<List<EntryStack>> getRequiredEntries() {
+        return getInputEntries();
     }
     
     @Override

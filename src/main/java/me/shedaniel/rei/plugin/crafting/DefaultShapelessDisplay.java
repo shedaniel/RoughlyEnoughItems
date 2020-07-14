@@ -24,17 +24,17 @@
 package me.shedaniel.rei.plugin.crafting;
 
 import me.shedaniel.rei.api.EntryStack;
-import net.minecraft.item.ItemStack;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.ShapelessRecipe;
 import net.minecraft.util.Identifier;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
+@Environment(EnvType.CLIENT)
 public class DefaultShapelessDisplay implements DefaultCraftingDisplay {
     
     private ShapelessRecipe display;
@@ -43,7 +43,7 @@ public class DefaultShapelessDisplay implements DefaultCraftingDisplay {
     
     public DefaultShapelessDisplay(ShapelessRecipe recipe) {
         this.display = recipe;
-        this.input = EntryStack.create(recipe.getPreviewInputs());
+        this.input = EntryStack.ofIngredients(recipe.getPreviewInputs());
         this.output = Collections.singletonList(EntryStack.create(recipe.getOutput()));
     }
     
