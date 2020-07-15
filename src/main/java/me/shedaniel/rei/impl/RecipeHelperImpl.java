@@ -365,7 +365,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         ((SubsetsRegistryImpl) SubsetsRegistry.INSTANCE).reset();
         ((FluidSupportProviderImpl) FluidSupportProvider.INSTANCE).reset();
         ((DisplayHelperImpl) DisplayHelper.getInstance()).resetData();
-        ((DisplayHelperImpl) DisplayHelper.getInstance()).resetCache();
+        DisplayHelper.getInstance().resetCache();
         BaseBoundsHandler baseBoundsHandler = new BaseBoundsHandlerImpl();
         DisplayHelper.getInstance().registerHandler(baseBoundsHandler);
         ((DisplayHelperImpl) DisplayHelper.getInstance()).setBaseBoundsHandler(baseBoundsHandler);
@@ -443,8 +443,8 @@ public class RecipeHelperImpl implements RecipeHelper {
         endSection(sectionData);
         
         // Clear Cache
-        ((DisplayHelperImpl) DisplayHelper.getInstance()).resetCache();
-        ScreenHelper.getOptionalOverlay().ifPresent(overlay -> overlay.shouldReInit = true);
+        DisplayHelper.getInstance().resetCache();
+        REIHelper.getInstance().getOverlay().ifPresent(REIOverlay::queueReloadOverlay);
         
         startSection(sectionData, "entry-registry-finalise");
         
@@ -455,14 +455,14 @@ public class RecipeHelperImpl implements RecipeHelper {
         startSection(sectionData, "entry-registry-refilter");
         
         arePluginsLoading = false;
-        ((EntryRegistryImpl) EntryRegistry.getInstance()).refilter();
+        EntryRegistry.getInstance().refilter();
         
         endSection(sectionData);
         startSection(sectionData, "finalizing");
         
         // Clear Cache Again!
-        ((DisplayHelperImpl) DisplayHelper.getInstance()).resetCache();
-        ScreenHelper.getOptionalOverlay().ifPresent(overlay -> overlay.shouldReInit = true);
+        DisplayHelper.getInstance().resetCache();
+        REIHelper.getInstance().getOverlay().ifPresent(REIOverlay::queueReloadOverlay);
         
         displayVisibilityHandlers.sort(VISIBILITY_HANDLER_COMPARATOR);
         endSection(sectionData);

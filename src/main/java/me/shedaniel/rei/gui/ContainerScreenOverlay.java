@@ -79,7 +79,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 @ApiStatus.Internal
-public class ContainerScreenOverlay extends WidgetWithBounds {
+public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverlay {
     
     private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private static final List<Tooltip> TOOLTIPS = Lists.newArrayList();
@@ -170,6 +170,11 @@ public class ContainerScreenOverlay extends WidgetWithBounds {
         AFTER_RENDER.add(() -> this.widgets.remove(tmpGameModeMenu));
         this.gameModeMenu = null;
         this.wrappedGameModeMenu = null;
+    }
+    
+    @Override
+    public void queueReloadOverlay() {
+        shouldReInit = true;
     }
     
     public void init(boolean useless) {

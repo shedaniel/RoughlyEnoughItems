@@ -99,6 +99,9 @@ public interface DisplayHelper {
      */
     <T> Rectangle getOverlayBounds(DisplayPanelLocation location, T screen);
     
+    @ApiStatus.Experimental
+    void resetCache();
+    
     interface DisplayBoundsProvider<T> extends OverlayDecider {
         /**
          * @param screen the screen

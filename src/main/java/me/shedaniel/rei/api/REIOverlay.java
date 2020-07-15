@@ -23,45 +23,9 @@
 
 package me.shedaniel.rei.api;
 
-import me.shedaniel.rei.api.widgets.Tooltip;
-import me.shedaniel.rei.gui.widget.TextFieldWidget;
-import me.shedaniel.rei.impl.ScreenHelper;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.screen.ingame.ContainerScreen;
-import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.Optional;
-
-@Environment(EnvType.CLIENT)
-public interface REIHelper {
-    
-    /**
-     * @return the instance of {@link REIHelper}
-     */
-    static REIHelper getInstance() {
-        return ScreenHelper.getInstance();
-    }
-    
-    @ApiStatus.Experimental
-    Optional<REIOverlay> getOverlay();
-    
-    ContainerScreen<?> getPreviousContainerScreen();
-    
-    @Deprecated
-    default ContainerScreen<?> getPreviousHandledScreen() {
-        return getPreviousContainerScreen();
-    }
-    
-    boolean isDarkThemeEnabled();
-    
-    TextFieldWidget getSearchTextField();
-    
-    List<ItemStack> getInventoryStacks();
-    
-    void queueTooltip(@Nullable Tooltip tooltip);
-    
+@ApiStatus.Experimental
+public interface REIOverlay {
+    void queueReloadOverlay();
 }

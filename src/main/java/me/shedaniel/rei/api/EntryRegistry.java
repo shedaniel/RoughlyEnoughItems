@@ -24,7 +24,6 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.utils.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.item.Item;
@@ -36,6 +35,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -67,6 +67,9 @@ public interface EntryRegistry {
     
     @NotNull
     List<EntryStack> getPreFilteredList();
+    
+    @ApiStatus.Experimental
+    void refilter();
     
     @NotNull
     List<ItemStack> appendStacksForItem(@NotNull Item item);
@@ -145,8 +148,11 @@ public interface EntryRegistry {
      * @param stack the stack to check
      * @return whether the stack has been registered
      */
-    default boolean alreadyContain(EntryStack stack) {
-        return CollectionUtils.anyMatchEqualsAll(getStacksList(), stack);
-    }
+    boolean alreadyContain(EntryStack stack);
     
+    @ApiStatus.Experimental
+    void removeEntry(EntryStack stack);
+    
+    @ApiStatus.Experimental
+    void removeEntryIf(Predicate<EntryStack> stackPredicate);
 }
