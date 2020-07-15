@@ -33,20 +33,20 @@ import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.entries.RecipeEntry;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.ItemConvertible;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+@Environment(EnvType.CLIENT)
 public class DefaultCompostingCategory implements RecipeCategory<DefaultCompostingDisplay> {
     
     @Override
@@ -84,20 +84,17 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
         List<Widget> widgets = Lists.newArrayList();
         Point startingPoint = new Point(bounds.x + bounds.width - 55, bounds.y + 110);
         widgets.add(Widgets.createFilledRectangle(bounds, REIHelper.getInstance().isDarkThemeEnabled() ? -13750738 : -3750202));
-        List<EntryStack> stacks = new LinkedList<>(display.getItemsByOrder());
+        List<EntryStack> stacks = new ArrayList<>(display.getRequiredEntries().get(0));
         int i = 0;
         for (int y = 0; y < 6; y++)
             for (int x = 0; x < 8; x++) {
-                int finalI = i;
-                EntryStack entryStack = stacks.size() > i ? stacks.get(finalI) : EntryStack.empty();
-                if (entryStack.getType() != EntryStack.Type.EMPTY)
-                    for (Map.Entry<ItemConvertible, Float> entry : display.getInputMap().entrySet()) {
-                        if (entry.getKey().asItem().equals(entryStack.getItem())) {
-                            entryStack = entryStack.setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> Collections.singletonList(new TranslatableText("text.rei.composting.chance", MathHelper.fastFloor(entry.getValue() * 100))));
-                            break;
-                        }
-                    }
-                widgets.add(Widgets.createSlot(new Point(bounds.getCenterX() - 72 + x * 18, bounds.y + 3 + y * 18)).entry(entryStack).markInput());
+                EntryStack[] entryStack = {stacks.size() > i ? stacks.get(i) : EntryStack.empty()};
+                if (!entryStack[0].isEmpty()) {
+                    display.getInputMap().entrySet().parallelStream().filter(entry -> entry.getKey() != null && Objects.equals(entry.getKey().asItem(), entryStack[0].getItem())).findAny().map(Map.Entry::getValue).ifPresent(chance -> {
+                        entryStack[0] = entryStack[0].setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> Collections.singletonList(new TranslatableText("text.rei.composting.chance", MathHelper.fastFloor(chance * 100)).formatted(Formatting.YELLOW)));
+                    });
+                }
+                widgets.add(Widgets.createSlot(new Point(bounds.getCenterX() - 72 + x * 18, bounds.y + 3 + y * 18)).entry(entryStack[0]).markInput());
                 i++;
             }
         widgets.add(Widgets.createArrow(new Point(startingPoint.x - 1, startingPoint.y + 7)));

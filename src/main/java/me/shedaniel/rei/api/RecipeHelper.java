@@ -82,6 +82,18 @@ public interface RecipeHelper {
      */
     void registerCategory(RecipeCategory<?> category);
     
+    default void registerCategories(Iterable<RecipeCategory<?>> categories) {
+        for (RecipeCategory<?> category : categories) {
+            registerCategory(category);
+        }
+    }
+    
+    default void registerCategories(RecipeCategory<?>... categories) {
+        for (RecipeCategory<?> category : categories) {
+            registerCategory(category);
+        }
+    }
+    
     /**
      * Registers the working stations of a category
      *

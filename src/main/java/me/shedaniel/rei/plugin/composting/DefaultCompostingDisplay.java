@@ -26,28 +26,29 @@ package me.shedaniel.rei.plugin.composting;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
+import me.shedaniel.rei.utils.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 @Environment(EnvType.CLIENT)
 public class DefaultCompostingDisplay implements RecipeDisplay {
-    
-    private List<EntryStack> order, allItems;
+    private List<EntryStack> order;
     private Map<ItemConvertible, Float> inputMap;
     private List<EntryStack> output;
     private int page;
     
-    public DefaultCompostingDisplay(int page, List<ItemConvertible> order, Map<ItemConvertible, Float> inputMap, List<ItemConvertible> allItems, ItemStack[] output) {
+    public DefaultCompostingDisplay(int page, List<ItemConvertible> order, Map<ItemConvertible, Float> inputMap, ItemStack output) {
         this.page = page;
         this.order = EntryStack.ofItems(order);
         this.inputMap = inputMap;
-        this.output = EntryStack.ofItemStacks(Arrays.asList(output));
-        this.allItems = EntryStack.ofItems(allItems);
+        this.output = EntryStack.ofItemStacks(Collections.singletonList(output));
     }
     
     public int getPage() {
@@ -56,11 +57,7 @@ public class DefaultCompostingDisplay implements RecipeDisplay {
     
     @Override
     public List<List<EntryStack>> getInputEntries() {
-        List<List<EntryStack>> lists = new ArrayList<>();
-        for (EntryStack allItem : allItems) {
-            lists.add(Collections.singletonList(allItem));
-        }
-        return lists;
+        return CollectionUtils.map(order, Collections::singletonList);
     }
     
     public Map<ItemConvertible, Float> getInputMap() {
@@ -79,11 +76,6 @@ public class DefaultCompostingDisplay implements RecipeDisplay {
     
     @Override
     public List<List<EntryStack>> getRequiredEntries() {
-        return Collections.singletonList(allItems);
+        return Collections.singletonList(order);
     }
-    
-    public List<EntryStack> getItemsByOrder() {
-        return order;
-    }
-    
 }
