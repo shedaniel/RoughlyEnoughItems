@@ -159,9 +159,11 @@ public class DisplayHelperImpl implements DisplayHelper {
         screenDisplayBoundsHandlers.clear();
     }
     
-    @ApiStatus.Internal
+    @ApiStatus.Experimental
+    @Override
     public void resetCache() {
         handlerCache.clear();
+        deciderSortedCache.clear();
         handlerSortedCache.clear();
     }
     

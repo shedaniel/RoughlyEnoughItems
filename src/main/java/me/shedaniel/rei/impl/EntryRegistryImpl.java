@@ -42,6 +42,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 @ApiStatus.Internal
@@ -82,6 +83,8 @@ public class EntryRegistryImpl implements EntryRegistry {
         return preFilteredList;
     }
     
+    @Override
+    @ApiStatus.Experimental
     public void refilter() {
         long started = System.currentTimeMillis();
         
@@ -153,6 +156,32 @@ public class EntryRegistryImpl implements EntryRegistry {
                 int index = entries.lastIndexOf(afterEntry);
                 entries.addAll(index, stacks);
             } else entries.addAll(stacks);
+        }
+    }
+    
+    @Override
+    public boolean alreadyContain(EntryStack stack) {
+        if (reloading) {
+            return reloadingRegistry.parallelStream().anyMatch(s -> s.unwrap().equalsAll(stack));
+        }
+        return entries.parallelStream().anyMatch(s -> s.equalsAll(stack));
+    }
+    
+    @Override
+    public void removeEntry(EntryStack stack) {
+        if (reloading) {
+            reloadingRegistry.remove(new AmountIgnoredEntryStackWrapper(stack));
+        } else {
+            entries.remove(stack);
+        }
+    }
+    
+    @Override
+    public void removeEntryIf(Predicate<EntryStack> stackPredicate) {
+        if (reloading) {
+            reloadingRegistry.removeIf(wrapper -> stackPredicate.test(wrapper.unwrap()));
+        } else {
+            entries.removeIf(stackPredicate);
         }
     }
 }

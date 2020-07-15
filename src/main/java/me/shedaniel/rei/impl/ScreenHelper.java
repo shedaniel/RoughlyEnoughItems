@@ -34,6 +34,7 @@ import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.REIHelper;
+import me.shedaniel.rei.api.REIOverlay;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.OverlaySearchField;
@@ -140,6 +141,11 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
     }
     
     public static Optional<ContainerScreenOverlay> getOptionalOverlay() {
+        return Optional.ofNullable(overlay);
+    }
+    
+    @Override
+    public Optional<REIOverlay> getOverlay() {
         return Optional.ofNullable(overlay);
     }
     
