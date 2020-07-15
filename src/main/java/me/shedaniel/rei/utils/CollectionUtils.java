@@ -32,6 +32,8 @@ import net.fabricmc.api.Environment;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class CollectionUtils {
     public static <A, B> List<B> getOrPutEmptyList(Map<A, List<B>> map, A key) {
@@ -155,6 +157,14 @@ public class CollectionUtils {
             l.add(function.apply(t));
         }
         return l;
+    }
+    
+    public static <T, R> List<R> mapParallel(Collection<T> list, Function<T, R> function) {
+        return list.parallelStream().map(function).collect(Collectors.toList());
+    }
+    
+    public static <T, R, C extends Collection<R>> C mapParallel(Collection<T> list, Function<T, R> function, Supplier<C> supplier) {
+        return list.parallelStream().map(function).collect(Collectors.toCollection(supplier));
     }
     
     public static <T, R> List<R> map(T[] list, Function<T, R> function) {

@@ -91,12 +91,10 @@ public class EntryRegistryImpl implements EntryRegistry {
             context.handleResult(rules.get(i).processFilteredStacks(context));
         }
         
-        Set<AmountIgnoredEntryStackWrapper> set = Sets.newLinkedHashSet();
-        set.addAll(CollectionUtils.map(entries, AmountIgnoredEntryStackWrapper::new));
-        Collection<EntryStack> hiddenStacks = context.getHiddenStacks();
-        set.removeAll(CollectionUtils.map(hiddenStacks, AmountIgnoredEntryStackWrapper::new));
+        Set<AmountIgnoredEntryStackWrapper> set = CollectionUtils.mapParallel(entries, AmountIgnoredEntryStackWrapper::new, Sets::newLinkedHashSet);
+        set.removeAll(CollectionUtils.mapParallel(context.getHiddenStacks(), AmountIgnoredEntryStackWrapper::new, Sets::newHashSet));
         preFilteredList.clear();
-        preFilteredList.addAll(CollectionUtils.map(set, AmountIgnoredEntryStackWrapper::unwrap));
+        preFilteredList.addAll(CollectionUtils.mapParallel(set, AmountIgnoredEntryStackWrapper::unwrap));
         
         long time = System.currentTimeMillis() - started;
         RoughlyEnoughItemsCore.LOGGER.info("Refiltered %d entries with %d rules in %dms.", entries.size() - preFilteredList.size(), rules.size(), time);
@@ -129,15 +127,30 @@ public class EntryRegistryImpl implements EntryRegistry {
     }
     
     @Override
-    public void registerEntriesAfter(@Nullable EntryStack afterStack, @NotNull Collection<@NotNull ? extends EntryStack> stacks) {
+    public void registerEntryAfter(@Nullable EntryStack afterEntry, @NotNull EntryStack stack) {
         if (reloading) {
-            int index = afterStack != null ? reloadingRegistry.lastIndexOf(new AmountIgnoredEntryStackWrapper(afterStack)) : -1;
+            int index = afterEntry != null ? reloadingRegistry.lastIndexOf(new AmountIgnoredEntryStackWrapper(afterEntry)) : -1;
+            if (index >= 0) {
+                reloadingRegistry.add(index, new AmountIgnoredEntryStackWrapper(stack));
+            } else reloadingRegistry.add(new AmountIgnoredEntryStackWrapper(stack));
+        } else {
+            if (afterEntry != null) {
+                int index = entries.lastIndexOf(afterEntry);
+                entries.add(index, stack);
+            } else entries.add(stack);
+        }
+    }
+    
+    @Override
+    public void registerEntriesAfter(@Nullable EntryStack afterEntry, @NotNull Collection<@NotNull ? extends EntryStack> stacks) {
+        if (reloading) {
+            int index = afterEntry != null ? reloadingRegistry.lastIndexOf(new AmountIgnoredEntryStackWrapper(afterEntry)) : -1;
             if (index >= 0) {
                 reloadingRegistry.addAll(index, CollectionUtils.map(stacks, AmountIgnoredEntryStackWrapper::new));
             } else reloadingRegistry.addAll(CollectionUtils.map(stacks, AmountIgnoredEntryStackWrapper::new));
         } else {
-            if (afterStack != null) {
-                int index = entries.lastIndexOf(afterStack);
+            if (afterEntry != null) {
+                int index = entries.lastIndexOf(afterEntry);
                 entries.addAll(index, stacks);
             } else entries.addAll(stacks);
         }

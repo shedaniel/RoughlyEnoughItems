@@ -52,7 +52,7 @@ public class FilteringContextImpl implements FilteringContext {
         for (FilteringContextType type : FilteringContextType.values()) {
             this.stacks.computeIfAbsent(type, t -> Sets.newHashSet());
         }
-        this.stacks.get(FilteringContextType.DEFAULT).addAll(CollectionUtils.map(allStacks, AmountIgnoredEntryStackWrapper::new));
+        this.stacks.get(FilteringContextType.DEFAULT).addAll(CollectionUtils.mapParallel(allStacks, AmountIgnoredEntryStackWrapper::new));
         fillCache();
     }
     
