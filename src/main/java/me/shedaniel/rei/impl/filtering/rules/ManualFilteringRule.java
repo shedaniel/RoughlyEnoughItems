@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.impl.filtering.rules;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.impl.filtering.AbstractFilteringRule;
@@ -37,8 +37,7 @@ import net.minecraft.text.TranslatableText;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ManualFilteringRule extends AbstractFilteringRule<ManualFilteringRule> {
     @Override
@@ -60,13 +59,8 @@ public class ManualFilteringRule extends AbstractFilteringRule<ManualFilteringRu
     }
     
     private void processList(Collection<EntryStack> stacks, FilteringResult result) {
-        Set<Integer> filteredStacks = Sets.newHashSet(CollectionUtils.map(ConfigObject.getInstance().getFilteredStacks(), EntryStack::hashIgnoreAmount));
-        List<EntryStack> filtered = Lists.newArrayList();
-        for (EntryStack stack : stacks) {
-            if (filteredStacks.contains(stack.hashIgnoreAmount()))
-                filtered.add(stack);
-        }
-        result.hide(filtered);
+        IntSet filteredStacks = CollectionUtils.mapParallel(ConfigObject.getInstance().getFilteredStacks(), EntryStack::hashIgnoreAmount, IntOpenHashSet::new);
+        result.hide(stacks.parallelStream().filter(stack -> filteredStacks.contains(stack.hashIgnoreAmount())).collect(Collectors.toList()));
     }
     
     @Override

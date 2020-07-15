@@ -42,6 +42,7 @@ import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.util.NarratorManager;
 import net.minecraft.entity.player.PlayerInventory;
@@ -150,6 +151,9 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
             return;
         }
         ClientSidePacketRegistry.INSTANCE.sendToServer(RoughlyEnoughItemsNetwork.DELETE_ITEMS_PACKET, new PacketByteBuf(Unpooled.buffer()));
+        if (MinecraftClient.getInstance().currentScreen instanceof ContainerScreen) {
+            ((ContainerScreen<?>) MinecraftClient.getInstance().currentScreen).isCursorDragging = false;
+        }
     }
     
     @Override

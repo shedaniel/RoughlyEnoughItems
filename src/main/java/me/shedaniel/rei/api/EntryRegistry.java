@@ -35,7 +35,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -91,9 +90,7 @@ public interface EntryRegistry {
      * @param afterEntry the stack to put after
      * @param stack      the stack to register
      */
-    default void registerEntryAfter(@Nullable EntryStack afterEntry, @NotNull EntryStack stack) {
-        registerEntriesAfter(afterEntry, Collections.singletonList(stack));
-    }
+    void registerEntryAfter(@Nullable EntryStack afterEntry, @NotNull EntryStack stack);
     
     /**
      * Registers an new stack to the entry list
