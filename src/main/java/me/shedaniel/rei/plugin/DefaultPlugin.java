@@ -195,19 +195,20 @@ public class DefaultPlugin implements REIPluginV0 {
         if (!ConfigObject.getInstance().isLoadingDefaultPlugin()) {
             return;
         }
-        recipeHelper.registerCategory(new DefaultCraftingCategory());
-        recipeHelper.registerCategory(new DefaultCookingCategory(SMELTING, EntryStack.create(Items.FURNACE), "category.rei.smelting"));
-        recipeHelper.registerCategory(new DefaultCookingCategory(SMOKING, EntryStack.create(Items.SMOKER), "category.rei.smoking"));
-        recipeHelper.registerCategory(new DefaultCookingCategory(BLASTING, EntryStack.create(Items.BLAST_FURNACE), "category.rei.blasting"));
-        recipeHelper.registerCategory(new DefaultCampfireCategory());
-        recipeHelper.registerCategory(new DefaultStoneCuttingCategory());
-        recipeHelper.registerCategory(new DefaultFuelCategory());
-        recipeHelper.registerCategory(new DefaultBrewingCategory());
-        recipeHelper.registerCategory(new DefaultCompostingCategory());
-        recipeHelper.registerCategory(new DefaultStrippingCategory());
-        recipeHelper.registerCategory(new DefaultSmithingCategory());
-        recipeHelper.registerCategory(new DefaultBeaconBaseCategory());
-        recipeHelper.registerCategory(new DefaultInformationCategory());
+        recipeHelper.registerCategories(
+                new DefaultCraftingCategory(),
+                new DefaultCookingCategory(SMELTING, EntryStack.create(Items.FURNACE), "category.rei.smelting"),
+                new DefaultCookingCategory(SMOKING, EntryStack.create(Items.SMOKER), "category.rei.smoking"),
+                new DefaultCookingCategory(BLASTING, EntryStack.create(Items.BLAST_FURNACE), "category.rei.blasting"), new DefaultCampfireCategory(),
+                new DefaultStoneCuttingCategory(),
+                new DefaultFuelCategory(),
+                new DefaultBrewingCategory(),
+                new DefaultCompostingCategory(),
+                new DefaultStrippingCategory(),
+                new DefaultSmithingCategory(),
+                new DefaultBeaconBaseCategory(),
+                new DefaultInformationCategory()
+        );
     }
     
     @Override
@@ -250,14 +251,14 @@ public class DefaultPlugin implements REIPluginV0 {
             if (entry.getFloatValue() > 0)
                 map.put(entry.getKey(), entry.getFloatValue());
         }
-        List<ItemConvertible> stacks = new LinkedList<>(map.keySet());
+        List<ItemConvertible> stacks = Lists.newArrayList(map.keySet());
         stacks.sort(Comparator.comparing(map::get));
         for (int i = 0; i < stacks.size(); i += MathHelper.clamp(48, 1, stacks.size() - i)) {
             List<ItemConvertible> thisStacks = Lists.newArrayList();
             for (int j = i; j < i + 48; j++)
                 if (j < stacks.size())
                     thisStacks.add(stacks.get(j));
-            recipeHelper.registerDisplay(new DefaultCompostingDisplay(MathHelper.floor(i / 48f), thisStacks, map, Lists.newArrayList(map.keySet()), new ItemStack[]{new ItemStack(Items.BONE_MEAL)}));
+            recipeHelper.registerDisplay(new DefaultCompostingDisplay(MathHelper.floor(i / 48f), thisStacks, map, new ItemStack(Items.BONE_MEAL)));
         }
         DummyAxeItem.getStrippedBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getId(b.getKey()))).forEach(set -> {
             recipeHelper.registerDisplay(new DefaultStrippingDisplay(EntryStack.create(set.getKey()), EntryStack.create(set.getValue())));
