@@ -36,13 +36,17 @@ import me.shedaniel.rei.impl.subsets.SubsetsRegistryImpl;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -54,26 +58,23 @@ import java.util.stream.Collectors;
 @Environment(EnvType.CLIENT)
 public class RecipeHelperImpl implements RecipeHelper {
     
-    private static final Comparator<DisplayVisibilityHandler> VISIBILITY_HANDLER_COMPARATOR;
+    private static final Comparator<FocusedStackProvider> FOCUSED_STACK_PROVIDER_COMPARATOR = Comparator.comparingDouble(FocusedStackProvider::getPriority).reversed();
+    private static final Comparator<DisplayVisibilityHandler> VISIBILITY_HANDLER_COMPARATOR = Comparator.comparingDouble(DisplayVisibilityHandler::getPriority).reversed();
     @SuppressWarnings("rawtypes")
     private static final Comparator<Recipe> RECIPE_COMPARATOR = Comparator.comparing((Recipe o) -> o.getId().getNamespace()).thenComparing(o -> o.getId().getPath());
     
-    static {
-        Comparator<DisplayVisibilityHandler> comparator = Comparator.comparingDouble(DisplayVisibilityHandler::getPriority);
-        VISIBILITY_HANDLER_COMPARATOR = comparator.reversed();
-    }
-    
-    private final List<AutoTransferHandler> autoTransferHandlers = Lists.newLinkedList();
-    private final List<RecipeFunction> recipeFunctions = Lists.newLinkedList();
-    private final List<ScreenClickArea> screenClickAreas = Lists.newLinkedList();
+    private final List<FocusedStackProvider> focusedStackProviders = Lists.newArrayList();
+    private final List<AutoTransferHandler> autoTransferHandlers = Lists.newArrayList();
+    private final List<RecipeFunction> recipeFunctions = Lists.newArrayList();
+    private final List<ScreenClickArea> screenClickAreas = Lists.newArrayList();
     private final int[] recipeCount = {0};
     private final Map<Identifier, List<RecipeDisplay>> recipeCategoryListMap = Maps.newLinkedHashMap();
     private final Map<RecipeCategory<?>, Identifier> categories = Maps.newLinkedHashMap();
     private final Map<Identifier, RecipeCategory<?>> reversedCategories = Maps.newHashMap();
-    private final Map<Identifier, ButtonAreaSupplier> autoCraftAreaSupplierMap = Maps.newLinkedHashMap();
-    private final Map<Identifier, List<List<EntryStack>>> categoryWorkingStations = Maps.newLinkedHashMap();
-    private final List<DisplayVisibilityHandler> displayVisibilityHandlers = Lists.newLinkedList();
-    private final List<LiveRecipeGenerator<RecipeDisplay>> liveRecipeGenerators = Lists.newLinkedList();
+    private final Map<Identifier, ButtonAreaSupplier> autoCraftAreaSupplierMap = Maps.newHashMap();
+    private final Map<Identifier, List<List<EntryStack>>> categoryWorkingStations = Maps.newHashMap();
+    private final List<DisplayVisibilityHandler> displayVisibilityHandlers = Lists.newArrayList();
+    private final List<LiveRecipeGenerator<RecipeDisplay>> liveRecipeGenerators = Lists.newArrayList();
     private RecipeManager recipeManager;
     private boolean arePluginsLoading = false;
     
@@ -362,6 +363,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         this.displayVisibilityHandlers.clear();
         this.liveRecipeGenerators.clear();
         this.autoTransferHandlers.clear();
+        this.focusedStackProviders.clear();
         ((SubsetsRegistryImpl) SubsetsRegistry.INSTANCE).reset();
         ((FluidSupportProviderImpl) FluidSupportProvider.INSTANCE).reset();
         ((DisplayHelperImpl) DisplayHelper.getInstance()).resetData();
@@ -424,6 +426,23 @@ public class RecipeHelperImpl implements RecipeHelper {
                     return -1f;
                 }
             });
+        registerFocusedStackProvider(new FocusedStackProvider() {
+            @Override
+            @NotNull
+            public TypedActionResult<EntryStack> provide(Screen screen) {
+                if (screen instanceof ContainerScreen) {
+                    ContainerScreen<?> containerScreen = (ContainerScreen<?>) screen;
+                    if (containerScreen.focusedSlot != null && !containerScreen.focusedSlot.getStack().isEmpty())
+                        return TypedActionResult.success(EntryStack.create(containerScreen.focusedSlot.getStack()));
+                }
+                return TypedActionResult.pass(EntryStack.empty());
+            }
+            
+            @Override
+            public double getPriority() {
+                return -1.0;
+            }
+        });
         DisplayHelper.getInstance().registerHandler(new OverlayDecider() {
             @Override
             public boolean isHandingScreen(Class<?> screen) {
@@ -476,6 +495,27 @@ public class RecipeHelperImpl implements RecipeHelper {
     public AutoTransferHandler registerAutoCraftingHandler(AutoTransferHandler handler) {
         autoTransferHandlers.add(handler);
         return handler;
+    }
+    
+    @Override
+    public void registerFocusedStackProvider(FocusedStackProvider provider) {
+        focusedStackProviders.add(provider);
+        focusedStackProviders.sort(FOCUSED_STACK_PROVIDER_COMPARATOR);
+    }
+    
+    @Override
+    @Nullable
+    public EntryStack getScreenFocusedStack(Screen screen) {
+        for (FocusedStackProvider provider : focusedStackProviders) {
+            TypedActionResult<EntryStack> result = Objects.requireNonNull(provider.provide(screen));
+            if (result.getResult() == ActionResult.SUCCESS) {
+                if (!result.getValue().isEmpty())
+                    return result.getValue();
+                return null;
+            } else if (result.getResult() == ActionResult.FAIL)
+                return null;
+        }
+        return null;
     }
     
     @Override

@@ -642,14 +642,9 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
             ScreenHelper.toggleOverlayVisible();
             return true;
         }
-        ItemStack itemStack = null;
-        if (MinecraftClient.getInstance().currentScreen instanceof ContainerScreen) {
-            ContainerScreen<?> containerScreen = (ContainerScreen<?>) MinecraftClient.getInstance().currentScreen;
-            if (containerScreen.focusedSlot != null && !containerScreen.focusedSlot.getStack().isEmpty())
-                itemStack = containerScreen.focusedSlot.getStack();
-        }
-        if (itemStack != null && !itemStack.isEmpty()) {
-            EntryStack stack = EntryStack.create(itemStack.copy());
+        EntryStack stack = RecipeHelper.getInstance().getScreenFocusedStack(MinecraftClient.getInstance().currentScreen);
+        if (stack != null && !stack.isEmpty()) {
+            stack = stack.copy();
             if (ConfigObject.getInstance().getRecipeKeybind().matchesKey(keyCode, scanCode)) {
                 return ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addRecipesFor(stack).setOutputNotice(stack).fillPreferredOpenedCategory());
             } else if (ConfigObject.getInstance().getUsageKeybind().matchesKey(keyCode, scanCode)) {

@@ -25,6 +25,7 @@ package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.*;
@@ -53,7 +54,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -293,22 +293,52 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     @Override
     public void render(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
         optimisedRenderStart(matrices, delta);
-        optimisedRenderBase(matrices, bounds, mouseX, mouseY, delta);
+        VertexConsumerProvider.Immediate immediate = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
+        optimisedRenderBase(matrices, immediate, bounds, mouseX, mouseY, delta);
+        immediate.draw();
         optimisedRenderOverlay(matrices, bounds, mouseX, mouseY, delta);
         optimisedRenderEnd(matrices, delta);
     }
     
-    @SuppressWarnings("deprecation")
     @Override
     public void optimisedRenderStart(MatrixStack matrices, float delta) {
-        MinecraftClient.getInstance().getTextureManager().bindTexture(SpriteAtlasTexture.BLOCK_ATLAS_TEX);
-        GlStateManager.enableRescaleNormal();
+        optimisedRenderStart(matrices, delta, true);
     }
     
     @SuppressWarnings("deprecation")
+    public void optimisedRenderStart(MatrixStack matrices, float delta, boolean isOptimised) {
+        MinecraftClient.getInstance().getTextureManager().bindTexture(SpriteAtlasTexture.BLOCK_ATLAS_TEX);
+        MinecraftClient.getInstance().getTextureManager().getTexture(SpriteAtlasTexture.BLOCK_ATLAS_TEX).setFilter(false, false);
+        RenderSystem.pushMatrix();
+        RenderSystem.enableRescaleNormal();
+        RenderSystem.enableAlphaTest();
+        RenderSystem.defaultAlphaFunc();
+        RenderSystem.enableBlend();
+        RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        if (isOptimised) {
+            boolean sideLit = getModelFromStack(itemStack).isSideLit();
+            if (!sideLit)
+                DiffuseLighting.disableGuiDepthLighting();
+        }
+    }
+    
     @Override
     public void optimisedRenderEnd(MatrixStack matrices, float delta) {
-        GlStateManager.disableRescaleNormal();
+        optimisedRenderEnd(matrices, delta, true);
+    }
+    
+    @SuppressWarnings("deprecation")
+    public void optimisedRenderEnd(MatrixStack matrices, float delta, boolean isOptimised) {
+        RenderSystem.enableDepthTest();
+        RenderSystem.disableAlphaTest();
+        RenderSystem.disableRescaleNormal();
+        if (isOptimised) {
+            boolean sideLit = getModelFromStack(itemStack).isSideLit();
+            if (!sideLit)
+                DiffuseLighting.enableGuiDepthLighting();
+        }
+        RenderSystem.popMatrix();
     }
     
     private BakedModel getModelFromStack(ItemStack stack) {
@@ -316,22 +346,19 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     }
     
     @Override
-    public void optimisedRenderBase(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+    public int groupingHash() {
+        return 1738923 + (getModelFromStack(itemStack).isSideLit() ? 1 : 0);
+    }
+    
+    @Override
+    public void optimisedRenderBase(MatrixStack matrices, VertexConsumerProvider.Immediate immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
         if (!isEmpty() && get(Settings.RENDER).get()) {
             ItemStack stack = getItemStack();
             ((ItemStackHook) (Object) stack).rei_setRenderEnchantmentGlint(get(Settings.Item.RENDER_ENCHANTMENT_GLINT).get());
             matrices.push();
             matrices.translate(bounds.getCenterX(), bounds.getCenterY(), 100.0F + getZ());
             matrices.scale(bounds.getWidth(), (bounds.getWidth() + bounds.getHeight()) / -2f, bounds.getHeight());
-            VertexConsumerProvider.Immediate immediate = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
-            BakedModel model = getModelFromStack(stack);
-            boolean sideLit = !model.isSideLit();
-            if (sideLit)
-                DiffuseLighting.disableGuiDepthLighting();
-            MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformation.Mode.GUI, false, matrices, immediate, 15728880, OverlayTexture.DEFAULT_UV, model);
-            immediate.draw();
-            if (sideLit)
-                DiffuseLighting.enableGuiDepthLighting();
+            MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformation.Mode.GUI, false, matrices, immediate, 15728880, OverlayTexture.DEFAULT_UV, getModelFromStack(stack));
             matrices.pop();
             ((ItemStackHook) (Object) stack).rei_setRenderEnchantmentGlint(false);
         }

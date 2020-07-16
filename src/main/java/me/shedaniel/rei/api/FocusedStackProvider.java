@@ -23,31 +23,18 @@
 
 package me.shedaniel.rei.api;
 
-import me.shedaniel.math.Rectangle;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.util.math.MatrixStack;
-import org.jetbrains.annotations.ApiStatus;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.util.TypedActionResult;
+import org.jetbrains.annotations.NotNull;
 
-@ApiStatus.Internal
-public interface OptimalEntryStack {
-    static int groupingHashFrom(EntryStack stack) {
-        if (stack instanceof OptimalEntryStack) return ((OptimalEntryStack) stack).groupingHash();
-        return stack.getClass().hashCode();
+public interface FocusedStackProvider {
+    /**
+     * @return the priority of this handler, higher priorities will be called first.
+     */
+    default double getPriority() {
+        return 0d;
     }
     
-    default int groupingHash() {
-        return getClass().hashCode();
-    }
-    
-    default void optimisedRenderStart(MatrixStack matrices, float delta) {
-    }
-    
-    default void optimisedRenderBase(MatrixStack matrices, VertexConsumerProvider.Immediate immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
-    }
-    
-    default void optimisedRenderOverlay(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-    }
-    
-    default void optimisedRenderEnd(MatrixStack matrices, float delta) {
-    }
+    @NotNull
+    TypedActionResult<EntryStack> provide(Screen screen);
 }
