@@ -27,12 +27,14 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
@@ -52,6 +54,12 @@ public interface RecipeHelper {
     }
     
     AutoTransferHandler registerAutoCraftingHandler(AutoTransferHandler handler);
+    
+    void registerFocusedStackProvider(FocusedStackProvider provider);
+    
+    @Nullable
+    @ApiStatus.Internal
+    EntryStack getScreenFocusedStack(Screen screen);
     
     List<AutoTransferHandler> getSortedAutoCraftingHandler();
     
