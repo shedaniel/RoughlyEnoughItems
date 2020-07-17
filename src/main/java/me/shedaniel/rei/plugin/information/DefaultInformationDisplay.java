@@ -64,7 +64,7 @@ public class DefaultInformationDisplay implements RecipeDisplay {
     
     @Override
     public List<EntryStack> getOutputEntries() {
-        return Collections.emptyList();
+        return entryStacks;
     }
     
     public DefaultInformationDisplay line(Text line) {
