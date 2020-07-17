@@ -115,7 +115,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
     public List<Widget> setupDisplay(DefaultInformationDisplay recipeDisplay, me.shedaniel.math.Rectangle bounds) {
         List<Widget> widgets = Lists.newArrayList();
         widgets.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.y + 3), recipeDisplay.getName()).noShadow().color(0xFF404040, 0xFFBBBBBB));
-        widgets.add(Widgets.createSlot(new Point(bounds.getCenterX() - 8, bounds.y + 15)).entries(recipeDisplay.getEntryStacks()).markInput());
+        widgets.add(Widgets.createSlot(new Point(bounds.getCenterX() - 8, bounds.y + 15)).entries(recipeDisplay.getEntryStacks()));
         Rectangle rectangle = new Rectangle(bounds.getCenterX() - (bounds.width / 2), bounds.y + 35, bounds.width, bounds.height - 40);
         widgets.add(Widgets.createSlotBase(rectangle));
         widgets.add(new ScrollableTextWidget(rectangle, recipeDisplay.getTexts()));
