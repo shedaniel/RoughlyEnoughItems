@@ -23,16 +23,17 @@
 
 package me.shedaniel.rei.impl;
 
+import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import me.shedaniel.rei.api.EntryStack;
 import net.minecraft.client.gui.DrawableHelper;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @ApiStatus.Internal
 public abstract class AbstractEntryStack extends DrawableHelper implements EntryStack {
-    private Map<Settings<?>, Object> settings = new HashMap<>();
+    private Reference2ObjectMap<Settings<?>, Object> settings = new Reference2ObjectOpenHashMap<>();
     
     @Override
     public <T> EntryStack setting(Settings<T> settings, T value) {

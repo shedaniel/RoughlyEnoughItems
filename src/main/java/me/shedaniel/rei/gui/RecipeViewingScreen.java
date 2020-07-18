@@ -431,7 +431,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
         ScreenHelper.getLastOverlay().lateRender(matrices, mouseX, mouseY, delta);
         {
             ModifierKeyCode export = ConfigObject.getInstance().getExportImageKeybind();
-            if (export.matchesCurrentKey()) {
+            if (export.matchesCurrentKey() || export.matchesCurrentMouse()) {
                 for (Map.Entry<Rectangle, List<Widget>> entry : recipeBounds.entrySet()) {
                     Rectangle bounds = entry.getKey();
                     setZOffset(470);
@@ -506,14 +506,25 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
     }
     
     @Override
-    public boolean mouseReleased(double double_1, double double_2, int int_1) {
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (choosePageActivated) {
-            return recipeChoosePageWidget.mouseReleased(double_1, double_2, int_1);
+            return recipeChoosePageWidget.mouseReleased(mouseX, mouseY, button);
+        } else {
+            ModifierKeyCode export = ConfigObject.getInstance().getExportImageKeybind();
+            if (export.matchesMouse(button)) {
+                for (Map.Entry<Rectangle, List<Widget>> entry : recipeBounds.entrySet()) {
+                    Rectangle bounds = entry.getKey();
+                    if (bounds.contains(PointHelper.ofMouse())) {
+                        RecipeDisplayExporter.exportRecipeDisplay(bounds, entry.getValue());
+                        break;
+                    }
+                }
+            }
         }
         for (Element entry : children())
-            if (entry.mouseReleased(double_1, double_2, int_1))
+            if (entry.mouseReleased(mouseX, mouseY, button))
                 return true;
-        return super.mouseReleased(double_1, double_2, int_1);
+        return super.mouseReleased(mouseX, mouseY, button);
     }
     
     @Override
@@ -537,19 +548,28 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
     }
     
     @Override
-    public boolean mouseClicked(double double_1, double double_2, int int_1) {
-        if (choosePageActivated)
-            if (recipeChoosePageWidget.containsMouse(double_1, double_2)) {
-                return recipeChoosePageWidget.mouseClicked(double_1, double_2, int_1);
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (choosePageActivated) {
+            if (recipeChoosePageWidget.containsMouse(mouseX, mouseY)) {
+                return recipeChoosePageWidget.mouseClicked(mouseX, mouseY, button);
             } else {
                 choosePageActivated = false;
                 init();
                 return false;
             }
+        } else if (ConfigObject.getInstance().getNextPageKeybind().matchesMouse(button)) {
+            if (recipeNext.isEnabled())
+                recipeNext.onClick();
+            return recipeNext.isEnabled();
+        } else if (ConfigObject.getInstance().getPreviousPageKeybind().matchesMouse(button)) {
+            if (recipeBack.isEnabled())
+                recipeBack.onClick();
+            return recipeBack.isEnabled();
+        }
         for (Element entry : children())
-            if (entry.mouseClicked(double_1, double_2, int_1)) {
+            if (entry.mouseClicked(mouseX, mouseY, button)) {
                 setFocused(entry);
-                if (int_1 == 0)
+                if (button == 0)
                     setDragging(true);
                 return true;
             }

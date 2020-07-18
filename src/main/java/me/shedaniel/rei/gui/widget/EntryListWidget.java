@@ -64,6 +64,7 @@ import java.util.Set;
 import java.util.concurrent.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @ApiStatus.Internal
 public class EntryListWidget extends WidgetWithBounds {
@@ -94,6 +95,11 @@ public class EntryListWidget extends WidgetWithBounds {
     };
     protected int blockedCount;
     private boolean debugTime;
+    private double lastAverageDebugTime;
+    private double averageDebugTime;
+    private double lastTotalDebugTime;
+    private double totalDebugTime;
+    private float totalDebugTimeDelta;
     private Rectangle bounds, innerBounds;
     private List<EntryStack> allStacks = null;
     private List<EntryListEntry> entries = Collections.emptyList();
@@ -111,10 +117,10 @@ public class EntryListWidget extends WidgetWithBounds {
         for (OverlayDecider decider : DisplayHelper.getInstance().getSortedOverlayDeciders(instance.currentScreen.getClass())) {
             ActionResult fit = decider.isInZone(left, top);
             if (fit == ActionResult.FAIL)
-                return fit == ActionResult.SUCCESS;
+                return false;
             ActionResult fit2 = decider.isInZone(left + 18, top + 18);
             if (fit2 == ActionResult.FAIL)
-                return fit == ActionResult.SUCCESS;
+                return false;
             if (fit == ActionResult.SUCCESS && fit2 == ActionResult.SUCCESS)
                 return true;
         }
@@ -170,199 +176,132 @@ public class EntryListWidget extends WidgetWithBounds {
         return MathHelper.ceil(allStacks.size() / (float) entries.size());
     }
     
+    public static void renderEntries(boolean debugTime, int[] size, long[] time, boolean fastEntryRendering, MatrixStack matrices, int mouseX, int mouseY, float delta, List<EntryListEntryWidget> entries) {
+        if (entries.isEmpty()) return;
+        EntryListEntryWidget firstWidget = entries.get(0);
+        EntryStack first = firstWidget.getCurrentEntry();
+        if (fastEntryRendering && first instanceof OptimalEntryStack) {
+            OptimalEntryStack firstStack = (OptimalEntryStack) first;
+            firstStack.optimisedRenderStart(matrices, delta);
+            long l = debugTime ? System.nanoTime() : 0;
+            VertexConsumerProvider.Immediate immediate = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
+            for (EntryListEntryWidget listEntry : entries) {
+                EntryStack currentEntry = listEntry.getCurrentEntry();
+                currentEntry.setZ(100);
+                listEntry.drawBackground(matrices, mouseX, mouseY, delta);
+                ((OptimalEntryStack) currentEntry).optimisedRenderBase(matrices, immediate, listEntry.getInnerBounds(), mouseX, mouseY, delta);
+                if (debugTime && !currentEntry.isEmpty()) size[0]++;
+            }
+            immediate.draw();
+            for (EntryListEntryWidget listEntry : entries) {
+                EntryStack currentEntry = listEntry.getCurrentEntry();
+                ((OptimalEntryStack) currentEntry).optimisedRenderOverlay(matrices, listEntry.getInnerBounds(), mouseX, mouseY, delta);
+                if (listEntry.containsMouse(mouseX, mouseY)) {
+                    listEntry.queueTooltip(matrices, mouseX, mouseY, delta);
+                    listEntry.drawHighlighted(matrices, mouseX, mouseY, delta);
+                }
+            }
+            if (debugTime) time[0] += (System.nanoTime() - l);
+            firstStack.optimisedRenderEnd(matrices, delta);
+        } else {
+            for (EntryListEntryWidget entry : entries) {
+                if (entry.getCurrentEntry().isEmpty())
+                    continue;
+                if (debugTime) {
+                    size[0]++;
+                    long l = System.nanoTime();
+                    entry.render(matrices, mouseX, mouseY, delta);
+                    time[0] += (System.nanoTime() - l);
+                } else entry.render(matrices, mouseX, mouseY, delta);
+            }
+        }
+    }
+    
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+        int[] size = {0};
+        long[] time = {0};
+        long totalTimeStart = debugTime ? System.nanoTime() : 0;
+        boolean fastEntryRendering = ConfigObject.getInstance().doesFastEntryRendering();
         if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
             for (EntryListEntry entry : entries)
                 entry.clearStacks();
             ScissorsHandler.INSTANCE.scissor(bounds);
+            
             int skip = Math.max(0, MathHelper.floor(scrolling.scrollAmount / (float) entrySize()));
             int nextIndex = skip * innerBounds.width / entrySize();
-            int i = nextIndex;
+            int[] i = {nextIndex};
             blockedCount = 0;
-            if (debugTime) {
-                long totalTimeStart = System.nanoTime();
-                int size = 0;
-                long time = 0;
-                back:
-                for (; i < allStacks.size(); i++) {
-                    EntryStack stack = allStacks.get(i);
-                    while (true) {
-                        EntryListEntry entry = entries.get(nextIndex);
-                        entry.getBounds().y = (int) (entry.backupY - scrolling.scrollAmount);
-                        if (entry.getBounds().y > bounds.getMaxY())
-                            break back;
-                        if (notSteppingOnExclusionZones(entry.getBounds().x, entry.getBounds().y, innerBounds)) {
-                            entry.entry(stack);
-                            if (!entry.getCurrentEntry().isEmpty()) {
-                                size++;
-                                long l = System.nanoTime();
-                                entry.render(matrices, mouseX, mouseY, delta);
-                                time += (System.nanoTime() - l);
-                            }
-                            nextIndex++;
-                            break;
-                        } else {
-                            blockedCount++;
-                            nextIndex++;
-                        }
+            
+            Stream<EntryListEntry> entryStream = this.entries.stream().skip(nextIndex).filter(entry -> {
+                entry.getBounds().y = (int) (entry.backupY - scrolling.scrollAmount);
+                if (entry.getBounds().y > bounds.getMaxY()) return false;
+                if (notSteppingOnExclusionZones(entry.getBounds().x, entry.getBounds().y, innerBounds)) {
+                    EntryStack stack = allStacks.get(i[0]++);
+                    if (!stack.isEmpty()) {
+                        entry.entry(stack);
+                        return true;
                     }
+                } else {
+                    blockedCount++;
                 }
-                long totalTime = System.nanoTime() - totalTimeStart;
-                int z = getZ();
-                setZ(500);
-                Text debugText = new LiteralText(String.format("%d entries, avg. %.0fns, ttl. %.0fms, %s fps", size, time / (double) size, totalTime / 1000000d, minecraft.fpsDebugString.split(" ")[0]));
-                fillGradient(matrices, bounds.x, bounds.y, bounds.x + font.getWidth(debugText) + 2, bounds.y + font.fontHeight + 2, -16777216, -16777216);
-                VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
-                matrices.push();
-                matrices.translate(0.0D, 0.0D, getZ());
-                Matrix4f matrix = matrices.peek().getModel();
-                font.draw(debugText, bounds.x + 2, bounds.y + 2, -1, false, matrix, immediate, false, 0, 15728880);
-                immediate.draw();
-                setZ(z);
-                matrices.pop();
+                return false;
+            }).limit(allStacks.size() - i[0]);
+            
+            if (fastEntryRendering) {
+                entryStream.collect(Collectors.groupingBy(entryListEntry -> OptimalEntryStack.groupingHashFrom(entryListEntry.getCurrentEntry()))).forEach((integer, entries) -> {
+                    renderEntries(debugTime, size, time, fastEntryRendering, matrices, mouseX, mouseY, delta, (List) entries);
+                });
             } else {
-                back:
-                for (; i < allStacks.size(); i++) {
-                    EntryStack stack = allStacks.get(i);
-                    while (true) {
-                        EntryListEntry entry = entries.get(nextIndex);
-                        entry.getBounds().y = (int) (entry.backupY - scrolling.scrollAmount);
-                        if (entry.getBounds().y > bounds.getMaxY())
-                            break back;
-                        if (notSteppingOnExclusionZones(entry.getBounds().x, entry.getBounds().y, innerBounds)) {
-                            entry.entry(stack);
-                            entry.render(matrices, mouseX, mouseY, delta);
-                            nextIndex++;
-                            break;
-                        } else {
-                            blockedCount++;
-                            nextIndex++;
-                        }
-                    }
-                }
+                renderEntries(debugTime, size, time, fastEntryRendering, matrices, mouseX, mouseY, delta, entryStream.collect(Collectors.toList()));
             }
+            
             updatePosition(delta);
             ScissorsHandler.INSTANCE.removeLastScissor();
             scrolling.renderScrollBar(0, 1, REIHelper.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
         } else {
-            if (debugTime) {
-                int[] size = {0};
-                long[] time = {0};
-                for (Widget widget : renders) {
-                    widget.render(matrices, mouseX, mouseY, delta);
-                }
-                long totalTimeStart = System.nanoTime();
-                if (ConfigObject.getInstance().doesFastEntryRendering()) {
-                    entries.stream().collect(Collectors.groupingBy(entryListEntry -> OptimalEntryStack.groupingHashFrom(entryListEntry.getCurrentEntry()))).forEach((integer, entries) -> {
-                        if (entries.isEmpty()) return;
-                        EntryListEntry firstWidget = entries.get(0);
-                        EntryStack first = firstWidget.getCurrentEntry();
-                        if (first instanceof OptimalEntryStack) {
-                            OptimalEntryStack firstStack = (OptimalEntryStack) first;
-                            firstStack.optimisedRenderStart(matrices, delta);
-                            long l = System.nanoTime();
-                            VertexConsumerProvider.Immediate immediate = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
-                            for (EntryListEntry listEntry : entries) {
-                                EntryStack currentEntry = listEntry.getCurrentEntry();
-                                currentEntry.setZ(100);
-                                listEntry.drawBackground(matrices, mouseX, mouseY, delta);
-                                ((OptimalEntryStack) currentEntry).optimisedRenderBase(matrices, immediate, listEntry.getInnerBounds(), mouseX, mouseY, delta);
-                                if (!currentEntry.isEmpty())
-                                    size[0]++;
-                            }
-                            immediate.draw();
-                            for (EntryListEntry listEntry : entries) {
-                                EntryStack currentEntry = listEntry.getCurrentEntry();
-                                ((OptimalEntryStack) currentEntry).optimisedRenderOverlay(matrices, listEntry.getInnerBounds(), mouseX, mouseY, delta);
-                                if (listEntry.containsMouse(mouseX, mouseY)) {
-                                    listEntry.queueTooltip(matrices, mouseX, mouseY, delta);
-                                    listEntry.drawHighlighted(matrices, mouseX, mouseY, delta);
-                                }
-                            }
-                            time[0] += (System.nanoTime() - l);
-                            firstStack.optimisedRenderEnd(matrices, delta);
-                        } else {
-                            for (EntryListEntry listEntry : entries) {
-                                if (listEntry.getCurrentEntry().isEmpty())
-                                    continue;
-                                size[0]++;
-                                long l = System.nanoTime();
-                                listEntry.render(matrices, mouseX, mouseY, delta);
-                                time[0] += (System.nanoTime() - l);
-                            }
-                        }
-                    });
-                } else {
-                    for (EntryListEntry entry : entries) {
-                        if (entry.getCurrentEntry().isEmpty())
-                            continue;
-                        size[0]++;
-                        long l = System.nanoTime();
-                        entry.render(matrices, mouseX, mouseY, delta);
-                        time[0] += (System.nanoTime() - l);
-                    }
-                }
-                long totalTime = System.nanoTime() - totalTimeStart;
-                int z = getZ();
-                setZ(500);
-                Text debugText = new LiteralText(String.format("%d entries, avg. %.0fns, ttl. %.0fms, %s fps", size[0], time[0] / (double) size[0], totalTime / 1000000d, minecraft.fpsDebugString.split(" ")[0]));
-                int stringWidth = font.getWidth(debugText);
-                fillGradient(matrices, Math.min(bounds.x, minecraft.currentScreen.width - stringWidth - 2), bounds.y, bounds.x + stringWidth + 2, bounds.y + font.fontHeight + 2, -16777216, -16777216);
-                VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
-                matrices.push();
-                matrices.translate(0.0D, 0.0D, getZ());
-                Matrix4f matrix = matrices.peek().getModel();
-                font.draw(debugText, Math.min(bounds.x + 2, minecraft.currentScreen.width - stringWidth), bounds.y + 2, -1, false, matrix, immediate, false, 0, 15728880);
-                immediate.draw();
-                setZ(z);
-                matrices.pop();
+            for (Widget widget : renders) {
+                widget.render(matrices, mouseX, mouseY, delta);
+            }
+            if (fastEntryRendering) {
+                entries.stream().collect(Collectors.groupingBy(entryListEntry -> OptimalEntryStack.groupingHashFrom(entryListEntry.getCurrentEntry()))).forEach((integer, entries) -> {
+                    renderEntries(debugTime, size, time, fastEntryRendering, matrices, mouseX, mouseY, delta, (List) entries);
+                });
             } else {
-                for (Widget widget : renders) {
-                    widget.render(matrices, mouseX, mouseY, delta);
-                }
-                if (ConfigObject.getInstance().doesFastEntryRendering()) {
-                    entries.stream().collect(Collectors.groupingBy(entryListEntry -> OptimalEntryStack.groupingHashFrom(entryListEntry.getCurrentEntry()))).forEach((integer, entries) -> {
-                        if (entries.isEmpty()) return;
-                        EntryListEntry firstWidget = entries.get(0);
-                        EntryStack first = firstWidget.getCurrentEntry();
-                        if (first instanceof OptimalEntryStack) {
-                            OptimalEntryStack firstStack = (OptimalEntryStack) first;
-                            firstStack.optimisedRenderStart(matrices, delta);
-                            VertexConsumerProvider.Immediate immediate = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
-                            for (EntryListEntry listEntry : entries) {
-                                EntryStack currentEntry = listEntry.getCurrentEntry();
-                                currentEntry.setZ(100);
-                                listEntry.drawBackground(matrices, mouseX, mouseY, delta);
-                                ((OptimalEntryStack) currentEntry).optimisedRenderBase(matrices, immediate, listEntry.getInnerBounds(), mouseX, mouseY, delta);
-                            }
-                            immediate.draw();
-                            for (EntryListEntry listEntry : entries) {
-                                EntryStack currentEntry = listEntry.getCurrentEntry();
-                                ((OptimalEntryStack) currentEntry).optimisedRenderOverlay(matrices, listEntry.getInnerBounds(), mouseX, mouseY, delta);
-                                if (listEntry.containsMouse(mouseX, mouseY)) {
-                                    listEntry.queueTooltip(matrices, mouseX, mouseY, delta);
-                                    listEntry.drawHighlighted(matrices, mouseX, mouseY, delta);
-                                }
-                            }
-                            firstStack.optimisedRenderEnd(matrices, delta);
-                        } else {
-                            for (EntryListEntry listEntry : entries) {
-                                if (listEntry.getCurrentEntry().isEmpty())
-                                    continue;
-                                listEntry.render(matrices, mouseX, mouseY, delta);
-                            }
-                        }
-                    });
-                } else {
-                    for (EntryListEntry listEntry : entries) {
-                        if (listEntry.getCurrentEntry().isEmpty())
-                            continue;
-                        listEntry.render(matrices, mouseX, mouseY, delta);
-                    }
-                }
+                renderEntries(debugTime, size, time, fastEntryRendering, matrices, mouseX, mouseY, delta, (List) entries);
             }
         }
+        
+        if (debugTime) {
+            long totalTime = System.nanoTime() - totalTimeStart;
+            averageDebugTime += (time[0] / (double) size[0]) * delta;
+            totalDebugTime += totalTime / 1000000d * delta;
+            totalDebugTimeDelta += delta;
+            if (totalDebugTimeDelta >= 20) {
+                lastAverageDebugTime = averageDebugTime / totalDebugTimeDelta;
+                lastTotalDebugTime = totalDebugTime / totalDebugTimeDelta;
+                averageDebugTime = 0;
+                totalDebugTime = 0;
+                totalDebugTimeDelta = 0;
+            } else if (lastAverageDebugTime == 0) {
+                lastAverageDebugTime = time[0] / (double) size[0];
+                totalDebugTime = totalTime / 1000000d;
+            }
+            int z = getZ();
+            setZ(500);
+            Text debugText = new LiteralText(String.format("%d entries, avg. %.0fns, ttl. %.2fms, %s fps", size[0], lastAverageDebugTime, lastTotalDebugTime, minecraft.fpsDebugString.split(" ")[0]));
+            int stringWidth = font.getWidth(debugText);
+            fillGradient(matrices, Math.min(bounds.x, minecraft.currentScreen.width - stringWidth - 2), bounds.y, bounds.x + stringWidth + 2, bounds.y + font.fontHeight + 2, -16777216, -16777216);
+            VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
+            matrices.push();
+            matrices.translate(0.0D, 0.0D, getZ());
+            Matrix4f matrix = matrices.peek().getModel();
+            font.draw(debugText, Math.min(bounds.x + 2, minecraft.currentScreen.width - stringWidth), bounds.y + 2, -1, false, matrix, immediate, false, 0, 15728880);
+            immediate.draw();
+            setZ(z);
+            matrices.pop();
+        }
+        
         if (containsMouse(mouseX, mouseY) && ClientHelper.getInstance().isCheating() && !minecraft.player.inventory.getCursorStack().isEmpty() && RoughlyEnoughItemsCore.canDeleteItems()) {
             EntryStack stack = EntryStack.create(minecraft.player.inventory.getCursorStack().copy());
             if (stack.getType() == EntryStack.Type.FLUID) {

@@ -253,19 +253,32 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int int_1) {
-        if (scrolling.updateDraggingState(mouseX, mouseY, int_1)) {
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (scrolling.updateDraggingState(mouseX, mouseY, button)) {
             scrollBarAlpha = 1;
             return true;
         }
+        if (ConfigObject.getInstance().getNextPageKeybind().matchesMouse(button)) {
+            selectedRecipeIndex++;
+            if (selectedRecipeIndex >= categoryMap.get(categories.get(selectedCategoryIndex)).size())
+                selectedRecipeIndex = 0;
+            init();
+            return true;
+        } else if (ConfigObject.getInstance().getPreviousPageKeybind().matchesMouse(button)) {
+            selectedRecipeIndex--;
+            if (selectedRecipeIndex < 0)
+                selectedRecipeIndex = categoryMap.get(categories.get(selectedCategoryIndex)).size() - 1;
+            init();
+            return true;
+        }
         for (Element entry : children())
-            if (entry.mouseClicked(mouseX, mouseY, int_1)) {
+            if (entry.mouseClicked(mouseX, mouseY, button)) {
                 setFocused(entry);
-                if (int_1 == 0)
+                if (button == 0)
                     setDragging(true);
                 return true;
             }
-        return super.mouseClicked(mouseX, mouseY, int_1);
+        return super.mouseClicked(mouseX, mouseY, button);
     }
     
     @Override
@@ -296,6 +309,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
                 if (selectedRecipeIndex >= categoryMap.get(categories.get(selectedCategoryIndex)).size())
                     selectedRecipeIndex = 0;
                 init();
+                return true;
             } else if (categoryMap.get(categories.get(selectedCategoryIndex)).size() > 1) {
                 selectedRecipeIndex--;
                 if (selectedRecipeIndex < 0)

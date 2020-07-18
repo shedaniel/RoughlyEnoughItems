@@ -39,6 +39,8 @@ import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import me.shedaniel.rei.impl.RenderingEntry;
 import me.shedaniel.rei.plugin.DefaultPlugin;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.render.BufferBuilder;
@@ -57,6 +59,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+@Environment(EnvType.CLIENT)
 public class DefaultInformationCategory implements RecipeCategory<DefaultInformationDisplay> {
     protected static void innerBlit(Matrix4f matrix4f, int xStart, int xEnd, int yStart, int yEnd, int z, float uStart, float uEnd, float vStart, float vEnd) {
         BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
@@ -112,7 +115,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
     }
     
     @Override
-    public List<Widget> setupDisplay(DefaultInformationDisplay recipeDisplay, me.shedaniel.math.Rectangle bounds) {
+    public List<Widget> setupDisplay(DefaultInformationDisplay recipeDisplay, Rectangle bounds) {
         List<Widget> widgets = Lists.newArrayList();
         widgets.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.y + 3), recipeDisplay.getName()).noShadow().color(0xFF404040, 0xFFBBBBBB));
         widgets.add(Widgets.createSlot(new Point(bounds.getCenterX() - 8, bounds.y + 15)).entries(recipeDisplay.getEntryStacks()));

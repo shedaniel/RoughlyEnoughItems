@@ -117,7 +117,6 @@ public class ConfigManagerImpl implements ConfigManager {
             if (field.isAnnotationPresent(ConfigEntry.Gui.Excluded.class))
                 return Collections.emptyList();
             KeyCodeEntry entry = ConfigEntryBuilder.create().startModifierKeyCodeField(new TranslatableText(i13n), getUnsafely(field, config, ModifierKeyCode.unknown())).setModifierDefaultValue(() -> getUnsafely(field, defaults)).setModifierSaveConsumer(newValue -> setUnsafely(field, config, newValue)).build();
-            entry.setAllowMouse(false);
             return Collections.singletonList(entry);
         }, field -> field.getType() == ModifierKeyCode.class);
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> {

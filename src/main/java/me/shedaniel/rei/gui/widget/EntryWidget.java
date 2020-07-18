@@ -36,6 +36,7 @@ import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Identifier;
@@ -353,9 +354,25 @@ public class EntryWidget extends Slot {
         if (!interactable)
             return false;
         if (containsMouse(mouseX, mouseY)) {
-            if (button == 0)
+            if (interactableFavorites && ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(PointHelper.ofMouse()) && !getCurrentEntry().isEmpty()) {
+                ModifierKeyCode keyCode = ConfigObject.getInstance().getFavoriteKeyCode();
+                EntryStack entry = getCurrentEntry().copy();
+                entry.setAmount(127);
+                if (keyCode.matchesMouse(button)) {
+                    if (reverseFavoritesAction())
+                        ConfigObject.getInstance().getFavorites().removeIf(entry::equalsIgnoreAmount);
+                    else if (!CollectionUtils.anyMatchEqualsEntryIgnoreAmount(ConfigObject.getInstance().getFavorites(), entry))
+                        ConfigObject.getInstance().getFavorites().add(entry);
+                    ConfigManager.getInstance().saveConfig();
+                    FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
+                    if (favoritesListWidget != null)
+                        favoritesListWidget.updateSearch(ContainerScreenOverlay.getEntryListWidget(), ScreenHelper.getSearchField().getText());
+                    return true;
+                }
+            }
+            if ((ConfigObject.getInstance().getRecipeKeybind().getType() != InputUtil.Type.MOUSE && button == 0) || ConfigObject.getInstance().getRecipeKeybind().matchesMouse(button))
                 return ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addRecipesFor(getCurrentEntry()).setOutputNotice(getCurrentEntry()).fillPreferredOpenedCategory());
-            else if (button == 1)
+            else if ((ConfigObject.getInstance().getUsageKeybind().getType() != InputUtil.Type.MOUSE && button == 1) || ConfigObject.getInstance().getUsageKeybind().matchesMouse(button))
                 return ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addUsagesFor(getCurrentEntry()).setInputNotice(getCurrentEntry()).fillPreferredOpenedCategory());
         }
         return false;
