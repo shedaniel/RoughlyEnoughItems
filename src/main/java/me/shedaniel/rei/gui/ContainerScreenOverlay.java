@@ -690,35 +690,57 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
     }
     
     @Override
-    public boolean mouseClicked(double double_1, double double_2, int int_1) {
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (ConfigObject.getInstance().getHideKeybind().matchesMouse(button)) {
+            ScreenHelper.toggleOverlayVisible();
+            return true;
+        }
+        EntryStack stack = RecipeHelper.getInstance().getScreenFocusedStack(MinecraftClient.getInstance().currentScreen);
+        if (stack != null && !stack.isEmpty()) {
+            stack = stack.copy();
+            if (ConfigObject.getInstance().getRecipeKeybind().matchesMouse(button)) {
+                return ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addRecipesFor(stack).setOutputNotice(stack).fillPreferredOpenedCategory());
+            } else if (ConfigObject.getInstance().getUsageKeybind().matchesMouse(button)) {
+                return ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addUsagesFor(stack).setInputNotice(stack).fillPreferredOpenedCategory());
+            } else if (ConfigObject.getInstance().getFavoriteKeyCode().matchesMouse(button)) {
+                stack.setAmount(127);
+                if (!CollectionUtils.anyMatchEqualsEntryIgnoreAmount(ConfigObject.getInstance().getFavorites(), stack))
+                    ConfigObject.getInstance().getFavorites().add(stack);
+                ConfigManager.getInstance().saveConfig();
+                FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
+                if (favoritesListWidget != null)
+                    favoritesListWidget.updateSearch(ContainerScreenOverlay.getEntryListWidget(), ScreenHelper.getSearchField().getText());
+                return true;
+            }
+        }
         if (!ScreenHelper.isOverlayVisible())
             return false;
-        if (wrappedSubsetsMenu != null && wrappedSubsetsMenu.mouseClicked(double_1, double_2, int_1)) {
+        if (wrappedSubsetsMenu != null && wrappedSubsetsMenu.mouseClicked(mouseX, mouseY, button)) {
             this.setFocused(wrappedSubsetsMenu);
-            if (int_1 == 0)
+            if (button == 0)
                 this.setDragging(true);
             ScreenHelper.getSearchField().setFocused(false);
             return true;
         }
         if (wrappedWeatherMenu != null) {
-            if (wrappedWeatherMenu.mouseClicked(double_1, double_2, int_1)) {
+            if (wrappedWeatherMenu.mouseClicked(mouseX, mouseY, button)) {
                 this.setFocused(wrappedWeatherMenu);
-                if (int_1 == 0)
+                if (button == 0)
                     this.setDragging(true);
                 ScreenHelper.getSearchField().setFocused(false);
                 return true;
-            } else if (!wrappedWeatherMenu.containsMouse(double_1, double_2) && !weatherButton.containsMouse(double_1, double_2)) {
+            } else if (!wrappedWeatherMenu.containsMouse(mouseX, mouseY) && !weatherButton.containsMouse(mouseX, mouseY)) {
                 removeWeatherMenu();
             }
         }
         if (wrappedGameModeMenu != null) {
-            if (wrappedGameModeMenu.mouseClicked(double_1, double_2, int_1)) {
+            if (wrappedGameModeMenu.mouseClicked(mouseX, mouseY, button)) {
                 this.setFocused(wrappedGameModeMenu);
-                if (int_1 == 0)
+                if (button == 0)
                     this.setDragging(true);
                 ScreenHelper.getSearchField().setFocused(false);
                 return true;
-            } else if (!wrappedGameModeMenu.containsMouse(double_1, double_2) && !gameModeButton.containsMouse(double_1, double_2)) {
+            } else if (!wrappedGameModeMenu.containsMouse(mouseX, mouseY) && !gameModeButton.containsMouse(mouseX, mouseY)) {
                 removeGameModeMenu();
             }
         }
@@ -726,21 +748,28 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
             ContainerScreen<?> containerScreen = (ContainerScreen<?>) MinecraftClient.getInstance().currentScreen;
             for (RecipeHelper.ScreenClickArea area : RecipeHelper.getInstance().getScreenClickAreas())
                 if (area.getScreenClass().equals(containerScreen.getClass()))
-                    if (area.getRectangle().contains(double_1 - containerScreen.x, double_2 - containerScreen.y)) {
+                    if (area.getRectangle().contains(mouseX - containerScreen.x, mouseY - containerScreen.y)) {
                         ClientHelper.getInstance().executeViewAllRecipesFromCategories(Arrays.asList(area.getCategories()));
                         MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                         return true;
                     }
         }
         for (Element element : widgets)
-            if (element != wrappedSubsetsMenu && element != wrappedWeatherMenu && element != wrappedGameModeMenu && element.mouseClicked(double_1, double_2, int_1)) {
+            if (element != wrappedSubsetsMenu && element != wrappedWeatherMenu && element != wrappedGameModeMenu && element.mouseClicked(mouseX, mouseY, button)) {
                 this.setFocused(element);
-                if (int_1 == 0)
+                if (button == 0)
                     this.setDragging(true);
                 if (!(element instanceof OverlaySearchField))
                     ScreenHelper.getSearchField().setFocused(false);
                 return true;
             }
+        if (ConfigObject.getInstance().getFocusSearchFieldKeybind().matchesMouse(button)) {
+            ScreenHelper.getSearchField().setFocused(true);
+            setFocused(ScreenHelper.getSearchField());
+            ScreenHelper.getSearchField().keybindFocusTime = -1;
+            ScreenHelper.getSearchField().keybindFocusKey = -1;
+            return true;
+        }
         return false;
     }
     

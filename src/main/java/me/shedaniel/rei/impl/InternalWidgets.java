@@ -175,15 +175,27 @@ public final class InternalWidgets {
             }
             
             @Override
-            public boolean keyPressed(int int_1, int int_2, int int_3) {
-                if (displaySupplier.get().getRecipeLocation().isPresent() && ConfigObject.getInstance().getCopyRecipeIdentifierKeybind().matchesKey(int_1, int_2) && containsMouse(PointHelper.ofMouse())) {
+            public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+                if (displaySupplier.get().getRecipeLocation().isPresent() && ConfigObject.getInstance().getCopyRecipeIdentifierKeybind().matchesKey(keyCode, scanCode) && containsMouse(PointHelper.ofMouse())) {
                     minecraft.keyboard.setClipboard(displaySupplier.get().getRecipeLocation().get().toString());
                     if (ConfigObject.getInstance().isToastDisplayedOnCopyIdentifier()) {
                         CopyRecipeIdentifierToast.addToast(I18n.translate("msg.rei.copied_recipe_id"), I18n.translate("msg.rei.recipe_id_details", displaySupplier.get().getRecipeLocation().get().toString()));
                     }
                     return true;
                 }
-                return super.keyPressed(int_1, int_2, int_3);
+                return super.keyPressed(keyCode, scanCode, modifiers);
+            }
+            
+            @Override
+            public boolean mouseClicked(double mouseX, double mouseY, int button) {
+                if (displaySupplier.get().getRecipeLocation().isPresent() && ConfigObject.getInstance().getCopyRecipeIdentifierKeybind().matchesMouse(button) && containsMouse(PointHelper.ofMouse())) {
+                    minecraft.keyboard.setClipboard(displaySupplier.get().getRecipeLocation().get().toString());
+                    if (ConfigObject.getInstance().isToastDisplayedOnCopyIdentifier()) {
+                        CopyRecipeIdentifierToast.addToast(I18n.translate("msg.rei.copied_recipe_id"), I18n.translate("msg.rei.recipe_id_details", displaySupplier.get().getRecipeLocation().get().toString()));
+                    }
+                    return true;
+                }
+                return super.mouseClicked(mouseX, mouseY, button);
             }
         };
     }

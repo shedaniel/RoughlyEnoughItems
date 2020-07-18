@@ -51,6 +51,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static me.shedaniel.rei.gui.widget.EntryListWidget.*;
 
@@ -106,32 +108,38 @@ public class FavoritesListWidget extends WidgetWithBounds {
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (bounds.isEmpty())
             return;
+        boolean fastEntryRendering = ConfigObject.getInstance().doesFastEntryRendering();
         for (EntryListEntry entry : entries)
             entry.clearStacks();
         ScissorsHandler.INSTANCE.scissor(bounds);
         int skip = Math.max(0, MathHelper.floor(scrolling.scrollAmount / (float) entrySize()));
         int nextIndex = skip * innerBounds.width / entrySize();
-        int i = nextIndex;
+        int[] i = {nextIndex};
         blockedCount = 0;
-        back:
-        for (; i < favorites.size(); i++) {
-            EntryStack stack = favorites.get(i);
-            while (true) {
-                EntryListEntry entry = entries.get(nextIndex);
-                entry.getBounds().y = (int) (entry.backupY - scrolling.scrollAmount);
-                if (entry.getBounds().y > bounds.getMaxY())
-                    break back;
-                if (notSteppingOnExclusionZones(entry.getBounds().x, entry.getBounds().y, innerBounds)) {
+        
+        Stream<EntryListEntry> entryStream = this.entries.stream().skip(nextIndex).filter(entry -> {
+            entry.getBounds().y = (int) (entry.backupY - scrolling.scrollAmount);
+            if (entry.getBounds().y > bounds.getMaxY()) return false;
+            if (notSteppingOnExclusionZones(entry.getBounds().x, entry.getBounds().y, innerBounds)) {
+                EntryStack stack = favorites.get(i[0]++);
+                if (!stack.isEmpty()) {
                     entry.entry(stack);
-                    entry.render(matrices, mouseX, mouseY, delta);
-                    nextIndex++;
-                    break;
-                } else {
-                    blockedCount++;
-                    nextIndex++;
+                    return true;
                 }
+            } else {
+                blockedCount++;
             }
+            return false;
+        }).limit(favorites.size() - i[0]);
+        
+        if (fastEntryRendering) {
+            entryStream.collect(Collectors.groupingBy(entryListEntry -> OptimalEntryStack.groupingHashFrom(entryListEntry.getCurrentEntry()))).forEach((integer, entries) -> {
+                renderEntries(false, new int[]{0}, new long[]{0}, fastEntryRendering, matrices, mouseX, mouseY, delta, (List) entries);
+            });
+        } else {
+            renderEntries(false, new int[]{0}, new long[]{0}, fastEntryRendering, matrices, mouseX, mouseY, delta, entryStream.collect(Collectors.toList()));
         }
+        
         updatePosition(delta);
         scrolling.renderScrollBar(0, 1, REIHelper.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
         ScissorsHandler.INSTANCE.removeLastScissor();

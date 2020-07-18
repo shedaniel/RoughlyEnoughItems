@@ -134,10 +134,11 @@ public interface RecipeHelper {
      * @param display            the recipe display
      * @deprecated Use {@link RecipeHelper#registerDisplay(RecipeDisplay)}
      */
-    @ApiStatus.Internal
     @ApiStatus.ScheduledForRemoval
     @Deprecated
-    void registerDisplay(Identifier categoryIdentifier, RecipeDisplay display);
+    default void registerDisplay(Identifier categoryIdentifier, RecipeDisplay display) {
+        registerDisplay(display);
+    }
     
     Map<RecipeCategory<?>, List<RecipeDisplay>> buildMapFor(ClientHelper.ViewSearchBuilder builder);
     
