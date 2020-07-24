@@ -44,6 +44,7 @@ import net.minecraft.container.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.collection.DefaultedList;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -54,8 +55,9 @@ public class DefaultCategoryHandler implements AutoTransferHandler {
         return ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.MOVE_ITEMS_PACKET);
     }
     
+    @NotNull
     @Override
-    public Result handle(Context context) {
+    public Result handle(@NotNull Context context) {
         if (!(context.getRecipe() instanceof TransferRecipeDisplay))
             return Result.createNotApplicable();
         TransferRecipeDisplay recipe = (TransferRecipeDisplay) context.getRecipe();

@@ -68,9 +68,9 @@ public final class InternalWidgets {
                     for (AutoTransferHandler autoTransferHandler : RecipeHelper.getInstance().getSortedAutoCraftingHandler())
                         try {
                             AutoTransferHandler.Result result = autoTransferHandler.handle(context);
-                            if (result.isSuccessful()) {
+                            if (result.isBlocking()) {
                                 if (result.isReturningToScreen()) {
-                                    break; // Same as failing, but doesn't ask other handlers
+                                    break;
                                 }
                                 return;
                             }
@@ -97,7 +97,6 @@ public final class InternalWidgets {
                                 error = null;
                                 color = 0;
                                 redSlots = null;
-                                break;
                             } else if (result.isApplicable()) {
                                 if (error == null) {
                                     error = Lists.newArrayList();
@@ -107,6 +106,8 @@ public final class InternalWidgets {
                                 if (result.getIntegers() != null && !result.getIntegers().isEmpty())
                                     redSlots = result.getIntegers();
                             }
+                            
+                            if (result.isBlocking()) break;
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
