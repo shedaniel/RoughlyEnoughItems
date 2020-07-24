@@ -38,11 +38,13 @@ import net.minecraft.container.CraftingContainer;
 import net.minecraft.container.CraftingTableContainer;
 import net.minecraft.container.PlayerContainer;
 import net.minecraft.recipe.Recipe;
+import org.jetbrains.annotations.NotNull;
 
 @Environment(EnvType.CLIENT)
 public class DefaultRecipeBookHandler implements AutoTransferHandler {
+    @NotNull
     @Override
-    public Result handle(Context context) {
+    public Result handle(@NotNull Context context) {
         if (context.getRecipe() instanceof TransferRecipeDisplay && DefaultCategoryHandler.canUseMovePackets())
             return Result.createNotApplicable();
         RecipeDisplay display = context.getRecipe();
