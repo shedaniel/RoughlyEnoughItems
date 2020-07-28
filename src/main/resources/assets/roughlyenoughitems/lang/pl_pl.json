@@ -184,7 +184,7 @@
   "config.roughlyenoughitems.miscellaneous.loadDefaultPlugin": "Wczytaj domyślny plugin:",
   "config.roughlyenoughitems.miscellaneous.loadDefaultPlugin.boolean.false": "§cNie (Niebezpieczne)",
   "config.roughlyenoughitems.miscellaneous.registerRecipesInAnotherThread": "REI Reload Thread:",
-  "config.roughlyenoughitems.miscellaneous.registerRecipesInAnotherThread.boolean.true": "REI Thread",
+  "config.roughlyenoughitems.miscellaneous.registerRecipesInAnotherThread.boolean.true": "Wątek REI",
   "config.roughlyenoughitems.miscellaneous.registerRecipesInAnotherThread.boolean.false": "§cWątek pakietów",
   "config.roughlyenoughitems.commands.weatherCommand": "Komenda na zmianę pogody:",
   "config.roughlyenoughitems.layout.entryPanelOrdering": "Entry Panel Ordering:",
