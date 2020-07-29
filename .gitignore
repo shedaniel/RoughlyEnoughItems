@@ -1,12 +1,17 @@
 # Compiled nonsense that does not belong in *source* control
+*/build
 /build
 /bin
+*/bin
 /.gradle
+*/.gradle
 /minecraft
+*/minecraft
 /out
+*/run
+*/out
 /run
 /classes
-/old
 
 # IDE nonsense that could go in source control but really shouldn't
 .classpath
@@ -19,13 +24,9 @@
 *.ipr
 *.iws
 
-# Sekrit files
+# Sekrit files 
 private.properties
 
 # Files from bad operating systems :^)
 Thumbs.db
 .DS_Store
-
-secret\.properties
-
-local\.properties

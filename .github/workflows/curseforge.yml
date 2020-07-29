@@ -6,6 +6,7 @@ on:
       - 3.x
       - 4.x-unstable
       - 4.x
+      - 5.x
 
 jobs:
   build:
