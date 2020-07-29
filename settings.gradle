@@ -10,3 +10,7 @@ pluginManagement {
 }
 
 rootProject.name = "RoughlyEnoughItems"
+
+include "RoughlyEnoughItems-api"
+include "RoughlyEnoughItems-default-plugin"
+include "RoughlyEnoughItems-runtime"

@@ -1,5 +1,5 @@
 plugins {
-    id("fabric-loom") version "0.4-SNAPSHOT"
+    id("fabric-loom") version("0.5-SNAPSHOT") apply false
     id("maven-publish")
     id("java")
     id("java-library")
@@ -12,65 +12,194 @@ import net.fabricmc.loom.task.RemapJarTask
 
 import java.text.SimpleDateFormat
 
-sourceCompatibility = targetCompatibility = 1.8
-
 archivesBaseName = "RoughlyEnoughItems"
+version = project.mod_version
 group = "me.shedaniel"
 
-version = project.mod_version
+allprojects {
+    apply plugin: 'maven-publish'
+    apply plugin: 'maven'
+    apply plugin: 'fabric-loom'
+    apply plugin: 'net.minecrell.licenser'
+    apply plugin: 'net.corda.plugins.jar-filter'
 
-minecraft {
-    accessWidener = file("src/main/resources/rei.aw")
-}
+    sourceCompatibility = targetCompatibility = 1.8
 
-license {
-    header rootProject.file('HEADER')
-    include '**/*.java'
-}
-
-repositories {
-    maven { url "https://dl.bintray.com/shedaniel/legacy-yarn-updated" }
-    maven { url "https://dl.bintray.com/shedaniel/shedaniel-mods" }
-}
-
-jar {
-    from "LICENSE"
-}
-
-processResources {
-    filesMatching('fabric.mod.json') {
-        expand 'version': project.version
+    sourceSets {
+        testmod {
+            compileClasspath += main.compileClasspath
+            runtimeClasspath += main.runtimeClasspath
+        }
     }
-    inputs.property "version", project.version
+
+    repositories {
+        maven { url "https://dl.bintray.com/shedaniel/legacy-yarn-updated" }
+        maven { url "https://dl.bintray.com/shedaniel/shedaniel-mods" }
+        mavenLocal()
+    }
+
+    afterEvaluate {
+        processResources {
+            filesMatching('fabric.mod.json') {
+                expand 'version': project.version
+            }
+            inputs.property "version", project.version
+        }
+
+        license {
+            header rootProject.file('HEADER')
+            include '**/*.java'
+        }
+
+        jar {
+            from rootProject.file("LICENSE")
+        }
+    }
+
+    dependencies {
+        minecraft("com.mojang:minecraft:${project.minecraft_version}")
+        mappings("me.shedaniel:legacy-yarn:${project.yarn_version}:v2")
+        modApi("net.fabricmc:fabric-loader:${project.fabricloader_version}")
+        modApi("net.fabricmc.fabric-api:fabric-api:${project.fabric_api}") {
+            exclude(module: "fabric-biomes-v1")
+        }
+        modApi("me.shedaniel.cloth.api:cloth-client-events-v0:${cloth_client_events_v0_version}") {
+            transitive(false)
+        }
+        modApi("me.shedaniel.cloth:config-2:${cloth_config_version}") {
+            exclude(module: "fabric-api")
+        }
+        modApi("me.sargunvohra.mcmods:autoconfig1u:${project.autoconfig1u}") {
+            exclude(module: "fabric-api")
+        }
+        modApi("org.jetbrains:annotations:19.0.0")
+        modCompileOnly("io.github.prospector:modmenu:${modmenu_version}") {
+            transitive(false)
+        }
+        modRuntime("io.github.prospector:modmenu:${modmenu_version}") {
+            transitive(false)
+        }
+        modRuntime("me.shedaniel:SmoothScrollingEverywhere:3.0.3-unstable") {
+            transitive(false)
+        }
+    }
+
+    tasks.withType(JavaCompile) {
+        options.encoding = "UTF-8"
+    }
+
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier("sources")
+        from sourceSets.main.allSource
+    }
+}
+
+subprojects {
+    group = rootProject.group
+    version = rootProject.version
+
+    dependencies {
+        testmodCompile sourceSets.main.output
+    }
+
+    task remapMavenJar(type: Copy, dependsOn: remapJar) {
+        afterEvaluate {
+            from("${project.buildDir}/libs/$archivesBaseName-${version}.jar")
+            into("${project.buildDir}/libs/")
+            rename { String fn -> "$archivesBaseName-${version}-maven.jar" }
+        }
+    }
+
+    configurations {
+        dev
+        remapped
+    }
+
+    jar {
+        classifier("dev")
+    }
+
+    remapJar {
+        input.set(file("${project.buildDir}/filtered-libs/$archivesBaseName-${version}-dev-filtered.jar"))
+        classifier(null)
+    }
+
+    artifacts {
+        dev file: file("${project.buildDir}/libs/$archivesBaseName-${version}-dev.jar"), type: "jar", builtBy: jar
+        remapped file: file("${project.buildDir}/libs/$archivesBaseName-${version}.jar"), type: "jar", builtBy: remapJar
+    }
+
+    task jarFilter(type: net.corda.gradle.jarfilter.JarFilterTask) {
+        jars jar
+        annotations {
+            forRemove = [
+                    "org.jetbrains.annotations.NotNull",
+                    "org.jetbrains.annotations.Nullable",
+                    "org.jetbrains.annotations.ApiStatus\$Experimental",
+                    "org.jetbrains.annotations.ApiStatus\$Internal",
+                    "org.jetbrains.annotations.ApiStatus\$ScheduledForRemoval",
+                    "org.jetbrains.annotations.ApiStatus\$AvailableSince",
+                    "org.jetbrains.annotations.ApiStatus\$NonExtendable",
+                    "org.jetbrains.annotations.ApiStatus\$OverrideOnly"
+            ]
+        }
+    }
+
+    remapJar.dependsOn("jarFilter")
+
+    publishing {
+        publications {
+            create("${archivesBaseName}_mavenJava", MavenPublication) {
+                afterEvaluate {
+                    artifact(file("${project.buildDir}/libs/$archivesBaseName-${version}-maven.jar")) {
+                        builtBy remapMavenJar
+                    }
+                    artifact(sourcesJar) {
+                        builtBy remapSourcesJar
+                    }
+                }
+            }
+        }
+
+        repositories {
+            if (project.hasProperty('danielshe_pass')) {
+                maven {
+                    url = "http://deploy.modmuss50.me/"
+                    credentials {
+                        username = "danielshe"
+                        password = project.getProperty('danielshe_pass')
+                    }
+                }
+            }
+        }
+    }
+}
+
+task licenseFormatAll
+subprojects { licenseFormatAll.dependsOn("${path}:licenseFormat") }
+subprojects { rootProject.remapJar.dependsOn("${path}:remapJar") }
+
+task remapMavenJar(type: RemapJarTask, dependsOn: jar) {
+    afterEvaluate {
+        input.set(file("${project.buildDir}/libs/${archivesBaseName}-${version}-dev.jar"))
+        archiveName = "${archivesBaseName}-${version}-maven.jar"
+        addNestedDependencies.set(false)
+    }
+}
+
+sourceSets {
+    testmod
 }
 
 dependencies {
-    minecraft("com.mojang:minecraft:${project.minecraft_version}")
-    mappings("me.shedaniel:legacy-yarn:${project.yarn_version}:v2")
-    modApi("net.fabricmc:fabric-loader:${project.fabricloader_version}")
-    modApi("net.fabricmc.fabric-api:fabric-api:${project.fabric_api}") {
-        exclude(module: "fabric-biomes-v1")
-    }
-    modApi("me.shedaniel.cloth.api:cloth-client-events-v0:${cloth_client_events_v0_version}") {
-        transitive(false)
-    }
-    modApi("me.shedaniel.cloth:config-2:${cloth_config_version}") {
-        exclude(module: "fabric-api")
-    }
-    modApi("me.sargunvohra.mcmods:autoconfig1u:${project.autoconfig1u}") {
-        exclude(module: "fabric-api")
-    }
-    modApi("org.jetbrains:annotations:19.0.0")
-    modCompileOnly("io.github.prospector:modmenu:${modmenu_version}") {
-        transitive(false)
-    }
-    modRuntime("io.github.prospector:modmenu:${modmenu_version}") {
-        transitive(false)
-    }
-    modRuntime("me.shedaniel:SmoothScrollingEverywhere:3.0.3-unstable") {
-        transitive(false)
-    }
     afterEvaluate {
+        subprojects.each {
+            compile project(path: ":${it.name}", configuration: "dev")
+            include project(path: ":${it.name}", configuration: "remapped")
+
+            testmodCompile project("${it.name}:").sourceSets.testmod.output
+        }
+
         def listAdded = new ArrayList(Arrays.asList((api_exculde as String).split(',')))
         def eachDep = { dep ->
             for (apiIncludeDepStr in (api_include as String).split(',')) {
@@ -90,47 +219,8 @@ dependencies {
                 }
             }
         }
-        configurations.compile.resolvedConfiguration.firstLevelModuleDependencies.each eachDep
-        configurations.runtimeClasspath.resolvedConfiguration.firstLevelModuleDependencies.each eachDep
-    }
-}
-
-tasks.withType(JavaCompile) {
-    options.encoding = "UTF-8"
-}
-
-task jarFilter(type: net.corda.gradle.jarfilter.JarFilterTask) {
-    jars remapJar
-    annotations {
-        forRemove = [
-                "org.jetbrains.annotations.NotNull",
-                "org.jetbrains.annotations.Nullable",
-                "org.jetbrains.annotations.ApiStatus\$Experimental",
-                "org.jetbrains.annotations.ApiStatus\$Internal",
-                "org.jetbrains.annotations.ApiStatus\$ScheduledForRemoval",
-                "org.jetbrains.annotations.ApiStatus\$AvailableSince",
-                "org.jetbrains.annotations.ApiStatus\$NonExtendable",
-                "org.jetbrains.annotations.ApiStatus\$OverrideOnly"
-        ]
-    }
-}
-
-task copyJarFilter(type: Copy) {
-    from jarFilter
-    into "${project.buildDir}/filtered-libs/"
-    rename { "${project.archivesBaseName}-${project.version}.jar" }
-}
-
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier("sources")
-    from sourceSets.main.allSource
-}
-
-task remapMavenJar(type: RemapJarTask, dependsOn: jar) {
-    afterEvaluate {
-        input = file("${project.buildDir}/libs/${archivesBaseName}-${version}-dev.jar")
-        archiveName = "${archivesBaseName}-${version}.jar"
-        addNestedDependencies = false
+        rootProject.configurations.compile.resolvedConfiguration.firstLevelModuleDependencies.each eachDep
+        rootProject.configurations.runtimeClasspath.resolvedConfiguration.firstLevelModuleDependencies.each eachDep
     }
 }
 
@@ -170,12 +260,10 @@ curseforge {
         apiKey = project.hasProperty('danielshe_curse_api_key') ? project.property('danielshe_curse_api_key') : System.getenv('danielshe_curse_api_key')
         project {
             id = "310111"
-            releaseType = "release"
+            releaseType = "beta"
             changelogType = "html"
             changelog = releaseChangelog
             addGameVersion "1.16-Snapshot"
-            addGameVersion "1.16"
-            addGameVersion "1.16.1"
             addGameVersion "Java 8"
             addGameVersion "Fabric"
             relations {
@@ -184,14 +272,14 @@ curseforge {
                 embeddedLibrary "cloth-config"
                 embeddedLibrary "auto-config-updated-api"
             }
-            mainArtifact(file("${project.buildDir}/filtered-libs/${project.archivesBaseName}-${project.version}.jar")) {
+            mainArtifact(file("${project.buildDir}/libs/${project.archivesBaseName}-${project.version}.jar")) {
                 displayName = "[Fabric $project.supported_version] v$project.version"
             }
             addArtifact(file("${project.buildDir}/libs/${project.archivesBaseName}-${project.version}-sources.jar")) {
                 displayName = "[Fabric $project.supported_version] v$project.version Sources"
             }
             afterEvaluate {
-                uploadTask.dependsOn("copyJarFilter")
+                uploadTask.dependsOn("build")
             }
         }
     }
@@ -204,11 +292,21 @@ curseforge {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact(file("${project.buildDir}/libs/$archivesBaseName-${version}.jar")) {
+            artifact(file("${project.buildDir}/libs/$archivesBaseName-${version}-maven.jar")) {
                 builtBy remapMavenJar
             }
             artifact(sourcesJar) {
                 builtBy remapSourcesJar
+            }
+            pom.withXml {
+                def depsNode = asNode().appendNode("dependencies")
+                subprojects.each {
+                    def depNode = depsNode.appendNode("dependency")
+                    depNode.appendNode("groupId", it.group)
+                    depNode.appendNode("artifactId", it.name)
+                    depNode.appendNode("version", it.version)
+                    depNode.appendNode("scope", "compile")
+                }
             }
         }
     }

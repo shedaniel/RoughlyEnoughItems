@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "roughlyenoughitems-api",
+  "name": "REI (API)",
+  "description": "The api facing part of Roughly Enough Items.",
+  "version": "${version}",
+  "authors": [
+    "shedaniel"
+  ],
+  "contact": {
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/roughly-enough-items",
+    "sources": "https://github.com/shedaniel/RoughlyEnoughItems",
+    "issues": "https://github.com/shedaniel/RoughlyEnoughItems/issues"
+  },
+  "license": "MIT",
+  "icon": "icon.png",
+  "custom": {
+    "modmenu:parent": "roughlyenoughitems"
+  }
+}

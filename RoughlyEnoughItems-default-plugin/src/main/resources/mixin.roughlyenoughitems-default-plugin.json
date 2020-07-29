@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "me.shedaniel.rei.plugin.mixin",
+  "minVersion": "0.7.11",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [],
+  "client": [
+    "MixinBrewingRecipeRegistry"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "roughlyenoughitems-default-plugin",
+  "name": "REI (Default Plugin)",
+  "description": "The default implementation of handling vanilla features.",
+  "version": "${version}",
+  "authors": [
+    "shedaniel"
+  ],
+  "contact": {
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/roughly-enough-items",
+    "sources": "https://github.com/shedaniel/RoughlyEnoughItems",
+    "issues": "https://github.com/shedaniel/RoughlyEnoughItems/issues"
+  },
+  "license": "MIT",
+  "icon": "icon.png",
+  "entrypoints": {
+    "rei_plugins": [
+      "me.shedaniel.rei.plugin.DefaultPlugin"
+    ],
+    "rei_containers": [
+      "me.shedaniel.rei.plugin.DefaultServerContainerPlugin"
+    ]
+  },
+  "accessWidener": "roughlyenoughitems-default-plugin.accessWidener",
+  "mixins": [
+    "mixin.roughlyenoughitems-default-plugin.json"
+  ],
+  "custom": {
+    "modmenu:parent": "roughlyenoughitems"
+  }
+}

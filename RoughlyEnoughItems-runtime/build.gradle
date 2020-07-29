@@ -1,0 +1,9 @@
+archivesBaseName = "RoughlyEnoughItems-runtime"
+
+minecraft {
+    accessWidener = file("src/main/resources/roughlyenoughitems-runtime.accessWidener")
+}
+
+dependencies {
+    compile project(path: ':RoughlyEnoughItems-api', configuration: 'dev')
+}
