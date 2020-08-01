@@ -246,7 +246,7 @@ public class EntryListWidget extends WidgetWithBounds {
                     blockedCount++;
                 }
                 return false;
-            }).limit(allStacks.size() - i[0]);
+            }).limit(Math.max(0, allStacks.size() - i[0]));
             
             if (fastEntryRendering) {
                 entryStream.collect(Collectors.groupingBy(entryListEntry -> OptimalEntryStack.groupingHashFrom(entryListEntry.getCurrentEntry()))).forEach((integer, entries) -> {

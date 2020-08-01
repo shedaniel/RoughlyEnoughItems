@@ -130,7 +130,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
                 blockedCount++;
             }
             return false;
-        }).limit(favorites.size() - i[0]);
+        }).limit(Math.max(0, favorites.size() - i[0]));
         
         if (fastEntryRendering) {
             entryStream.collect(Collectors.groupingBy(entryListEntry -> OptimalEntryStack.groupingHashFrom(entryListEntry.getCurrentEntry()))).forEach((integer, entries) -> {
