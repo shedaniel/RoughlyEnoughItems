@@ -227,7 +227,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
         this.largestWidth = width - 100;
         this.largestHeight = Math.max(height - 34 - 30, 100);
         int maxWidthDisplay = CollectionUtils.mapAndMax(getCurrentDisplayed(), selectedCategory::getDisplayWidth, Comparator.naturalOrder()).orElse(150);
-        this.guiWidth = Math.max(maxWidthDisplay + 40, 0);
+        this.guiWidth = Math.max(maxWidthDisplay + 40, 190);
         this.guiHeight = MathHelper.floor(MathHelper.clamp((double) (selectedCategory.getDisplayHeight() + 4) * (getRecipesPerPage() + 1) + 36, 100, largestHeight));
         if (!ConfigObject.getInstance().shouldResizeDynamically()) this.guiHeight = largestHeight;
         this.tabsPerPage = Math.max(5, MathHelper.floor((guiWidth - 20d) / tabSize));

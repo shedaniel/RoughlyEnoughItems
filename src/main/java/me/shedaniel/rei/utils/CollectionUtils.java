@@ -34,6 +34,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CollectionUtils {
     public static <A, B> List<B> getOrPutEmptyList(Map<A, List<B>> map, A key) {
@@ -178,33 +179,25 @@ public class CollectionUtils {
     public static <T, R> Optional<R> mapAndMax(List<T> list, Function<T, R> function, Comparator<R> comparator) {
         if (list.isEmpty())
             return Optional.empty();
-        List<R> copyOf = CollectionUtils.map(list, function);
-        copyOf.sort(comparator);
-        return Optional.ofNullable(copyOf.get(copyOf.size() - 1));
+        return list.stream().max(Comparator.comparing(function, comparator)).map(function);
     }
     
     public static <T, R> Optional<R> mapAndMax(T[] list, Function<T, R> function, Comparator<R> comparator) {
         if (list.length <= 0)
             return Optional.empty();
-        List<R> copyOf = CollectionUtils.map(list, function);
-        copyOf.sort(comparator);
-        return Optional.ofNullable(copyOf.get(copyOf.size() - 1));
+        return Stream.of(list).max(Comparator.comparing(function, comparator)).map(function);
     }
     
     public static <T> Optional<T> max(List<T> list, Comparator<T> comparator) {
         if (list.isEmpty())
             return Optional.empty();
-        ArrayList<T> ts = new ArrayList<>(list);
-        ts.sort(comparator);
-        return Optional.ofNullable(ts.get(ts.size() - 1));
+        return list.stream().max(comparator);
     }
     
     public static <T> Optional<T> max(T[] list, Comparator<T> comparator) {
         if (list.length <= 0)
             return Optional.empty();
-        T[] copyOf = list.clone();
-        Arrays.sort(copyOf, comparator);
-        return Optional.ofNullable(copyOf[copyOf.length - 1]);
+        return Stream.of(list).max(comparator);
     }
     
     public static String joinToString(List<String> list, String separator) {
