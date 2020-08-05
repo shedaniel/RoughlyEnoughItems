@@ -63,8 +63,8 @@ public class DefaultInformationDisplay implements RecipeDisplay {
     }
     
     @Override
-    public List<EntryStack> getOutputEntries() {
-        return entryStacks;
+    public List<List<EntryStack>> getResultingEntries() {
+        return Collections.singletonList(entryStacks);
     }
     
     public DefaultInformationDisplay line(Text line) {

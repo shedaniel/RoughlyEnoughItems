@@ -98,7 +98,7 @@ public class RecipeHelperImpl implements RecipeHelper {
                     }
                 }
                 if (slotsCraftable == recipeDisplay.getRequiredEntries().size())
-                    craftables.addAll(recipeDisplay.getOutputEntries());
+                    recipeDisplay.getResultingEntries().stream().flatMap(Collection::stream).collect(Collectors.toCollection(() -> craftables));
             }
         return craftables.stream().distinct().collect(Collectors.toList());
     }
@@ -175,12 +175,14 @@ public class RecipeHelperImpl implements RecipeHelper {
             for (RecipeDisplay display : allRecipesFromCategory) {
                 if (!isDisplayVisible(display)) continue;
                 if (!recipesFor.isEmpty()) {
-                    label:
-                    for (EntryStack outputStack : display.getOutputEntries()) {
-                        for (EntryStack stack : recipesFor) {
-                            if (stack.equals(outputStack)) {
-                                set.add(display);
-                                break label;
+                    back:
+                    for (List<EntryStack> results : display.getResultingEntries()) {
+                        for (EntryStack otherEntry : results) {
+                            for (EntryStack stack : recipesFor) {
+                                if (otherEntry.equals(stack)) {
+                                    set.add(display);
+                                    break back;
+                                }
                             }
                         }
                     }

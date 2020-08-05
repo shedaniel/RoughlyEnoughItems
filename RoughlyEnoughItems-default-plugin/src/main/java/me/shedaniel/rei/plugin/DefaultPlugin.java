@@ -252,8 +252,9 @@ public class DefaultPlugin implements REIPluginV0 {
                 for (List<EntryStack> entries : display.getInputEntries())
                     for (EntryStack stack : entries)
                         applyPotionTransformer(stack);
-                for (EntryStack stack : display.getOutputEntries())
-                    applyPotionTransformer(stack);
+                for (List<EntryStack> entries : display.getResultingEntries())
+                    for (EntryStack stack : entries)
+                        applyPotionTransformer(stack);
             }
         }
         time = System.currentTimeMillis() - time;

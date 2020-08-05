@@ -70,7 +70,7 @@ public interface RecipeCategory<T extends RecipeDisplay> {
      */
     @ApiStatus.OverrideOnly
     default RecipeEntry getSimpleRenderer(T recipe) {
-        return SimpleRecipeEntry.create(recipe::getInputEntries, recipe::getOutputEntries);
+        return SimpleRecipeEntry.from(recipe::getInputEntries, recipe::getResultingEntries);
     }
     
     /**

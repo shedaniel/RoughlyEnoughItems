@@ -89,7 +89,7 @@ public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCr
                 slots.get(i).entries(input.get(i));
         }
         widgets.addAll(slots);
-        widgets.add(Widgets.createSlot(new Point(startPoint.x + 95, startPoint.y + 19)).entries(display.getOutputEntries()).disableBackground().markOutput());
+        widgets.add(Widgets.createSlot(new Point(startPoint.x + 95, startPoint.y + 19)).entries(display.getResultingEntries().get(0)).disableBackground().markOutput());
         return widgets;
     }
     

@@ -58,8 +58,8 @@ public class DefaultShapedDisplay implements DefaultCraftingDisplay {
     }
     
     @Override
-    public List<EntryStack> getOutputEntries() {
-        return output;
+    public List<List<EntryStack>> getResultingEntries() {
+        return Collections.singletonList(output);
     }
     
     @Override

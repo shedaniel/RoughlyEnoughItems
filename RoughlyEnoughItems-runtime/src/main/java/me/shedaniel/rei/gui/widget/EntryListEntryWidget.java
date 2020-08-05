@@ -62,7 +62,7 @@ public class EntryListEntryWidget extends EntryWidget {
             return super.mouseReleased(mouseX, mouseY, button);
         if (containsMouse(mouseX, mouseY) && ClientHelper.getInstance().isCheating()) {
             EntryStack entry = getCurrentEntry().copy();
-            if (!entry.isEmpty()) {
+            if (!entry.isEmpty() && wasClicked()) {
                 if (entry.getType() == EntryStack.Type.FLUID) {
                     Item bucketItem = entry.getFluid().getBucketItem();
                     if (bucketItem != null) {

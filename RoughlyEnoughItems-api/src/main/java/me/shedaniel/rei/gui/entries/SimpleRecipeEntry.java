@@ -23,10 +23,11 @@
 
 package me.shedaniel.rei.gui.entries;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.fractions.Fraction;
 import me.shedaniel.rei.api.widgets.Slot;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
@@ -34,14 +35,15 @@ import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -50,35 +52,51 @@ public class SimpleRecipeEntry extends RecipeEntry {
     private static final Comparator<EntryStack> ENTRY_COMPARATOR = Comparator.comparingLong(EntryStack::hashCode);
     private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private List<Slot> inputWidgets;
-    private Slot outputWidget;
+    private List<Slot> outputWidgets;
     
     @ApiStatus.Internal
-    protected SimpleRecipeEntry(List<List<EntryStack>> input, List<EntryStack> output) {
-        List<Pair<List<EntryStack>, AtomicInteger>> newList = Lists.newArrayList();
-        List<Pair<List<EntryStack>, Integer>> a = CollectionUtils.map(input, stacks -> new Pair<>(stacks, stacks.stream().map(EntryStack::getAmount).max(Integer::compareTo).orElse(1)));
-        for (Pair<List<EntryStack>, Integer> pair : a) {
-            Pair<List<EntryStack>, AtomicInteger> any = CollectionUtils.findFirstOrNull(newList, pairr -> equalsList(pair.getLeft(), pairr.getLeft()));
-            if (any != null) {
-                any.getRight().addAndGet(pair.getRight());
-            } else
-                newList.add(new Pair<>(pair.getLeft(), new AtomicInteger(pair.getRight())));
-        }
-        List<List<EntryStack>> b = Lists.newArrayList();
-        for (Pair<List<EntryStack>, AtomicInteger> pair : newList)
-            b.add(pair.getLeft().stream().map(stack -> {
-                EntryStack s = stack.copy();
-                s.setAmount(pair.getRight().get());
-                return s;
-            }).collect(Collectors.toList()));
-        this.inputWidgets = b.stream().filter(stacks -> !stacks.isEmpty()).map(stacks -> Widgets.createSlot(new Point(0, 0)).entries(stacks).disableBackground().disableHighlight().disableTooltips()).collect(Collectors.toList());
-        this.outputWidget = Widgets.createSlot(new Point(0, 0)).entries(CollectionUtils.filter(output, stack -> !stack.isEmpty())).disableBackground().disableHighlight().disableTooltips();
+    protected SimpleRecipeEntry(List<List<EntryStack>> input, List<List<EntryStack>> output) {
+        this.inputWidgets = simplify(input).stream().filter(stacks -> !stacks.isEmpty()).map(stacks -> Widgets.createSlot(new Point(0, 0)).entries(stacks).disableBackground().disableHighlight().disableTooltips()).collect(Collectors.toList());
+        this.outputWidgets = CollectionUtils.map(simplify(output), outputStacks ->
+                Widgets.createSlot(new Point(0, 0)).entries(CollectionUtils.filter(outputStacks, stack -> !stack.isEmpty())).disableBackground().disableHighlight().disableTooltips());
     }
     
+    private static List<List<EntryStack>> simplify(List<List<EntryStack>> original) {
+        Map<List<EntryStack>, AtomicReference<Fraction>> inputCounter = Maps.newLinkedHashMap();
+        original.stream().collect(Collectors.groupingBy(stacks -> CollectionUtils.mapAndMax(stacks, EntryStack::getAccurateAmount, Fraction::compareTo).orElse(Fraction.empty())))
+                .forEach((fraction, value) -> {
+                    if (!fraction.equals(Fraction.empty())) {
+                        value.forEach(stackList -> {
+                            List<EntryStack> stacks = inputCounter.keySet().stream().filter(s -> equalsList(stackList, s)).findFirst().orElse(stackList);
+                            AtomicReference<Fraction> reference = inputCounter.computeIfAbsent(stacks, s -> new AtomicReference<>(Fraction.empty()));
+                            reference.set(reference.get().add(fraction));
+                        });
+                    }
+                });
+        return inputCounter.entrySet().stream().map(entry -> CollectionUtils.map(entry.getKey(), stack -> {
+            EntryStack s = stack.copy();
+            s.setAmount(entry.getValue().get());
+            return s;
+        })).collect(Collectors.toList());
+    }
+    
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     public static RecipeEntry create(Supplier<List<List<EntryStack>>> input, Supplier<List<EntryStack>> output) {
         return create(input.get(), output.get());
     }
     
+    public static RecipeEntry from(Supplier<List<List<EntryStack>>> input, Supplier<List<List<EntryStack>>> output) {
+        return from(input.get(), output.get());
+    }
+    
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     public static RecipeEntry create(List<List<EntryStack>> input, List<EntryStack> output) {
+        return from(input, CollectionUtils.map(output, Collections::singletonList));
+    }
+    
+    public static RecipeEntry from(List<List<EntryStack>> input, List<List<EntryStack>> output) {
         return new SimpleRecipeEntry(input, output);
     }
     
@@ -117,9 +135,12 @@ public class SimpleRecipeEntry extends RecipeEntry {
         MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
         drawTexture(matrices, xx, yy, 0, 28, 18, 18);
         xx += 18;
-        outputWidget.setZ(getZ() + 50);
-        outputWidget.getBounds().setLocation(xx, yy);
-        outputWidget.render(matrices, mouseX, mouseY, delta);
+        yy += outputWidgets.size() * -9 + 9;
+        for (Slot outputWidget : outputWidgets) {
+            outputWidget.setZ(getZ() + 50);
+            outputWidget.getBounds().setLocation(xx, yy);
+            outputWidget.render(matrices, mouseX, mouseY, delta);
+        }
     }
     
     @Nullable
@@ -129,8 +150,10 @@ public class SimpleRecipeEntry extends RecipeEntry {
             if (widget.containsMouse(point))
                 return widget.getCurrentTooltip(point);
         }
-        if (outputWidget.containsMouse(point))
-            return outputWidget.getCurrentTooltip(point);
+        for (Slot widget : outputWidgets) {
+            if (widget.containsMouse(point))
+                return widget.getCurrentTooltip(point);
+        }
         return null;
     }
     

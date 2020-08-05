@@ -53,7 +53,7 @@ public class DefaultBeaconBaseDisplay implements RecipeDisplay {
     }
     
     @Override
-    public List<EntryStack> getOutputEntries() {
+    public List<List<EntryStack>> getResultingEntries() {
         return Collections.emptyList();
     }
     

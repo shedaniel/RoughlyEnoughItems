@@ -29,7 +29,6 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.api.fractions.Fraction;
 import me.shedaniel.rei.api.widgets.Slot;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
@@ -65,6 +64,7 @@ public class EntryWidget extends Slot {
     protected boolean background = true;
     protected boolean interactable = true;
     protected boolean interactableFavorites = true;
+    protected boolean wasClicked = false;
     private Rectangle bounds;
     private List<EntryStack> entryStacks;
     
@@ -350,11 +350,24 @@ public class EntryWidget extends Slot {
         return Collections.emptyList();
     }
     
+    protected boolean wasClicked() {
+        boolean b = this.wasClicked;
+        this.wasClicked = false;
+        return b;
+    }
+    
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (containsMouse(mouseX, mouseY))
+            this.wasClicked = true;
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+    
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (!interactable)
             return false;
-        if (containsMouse(mouseX, mouseY)) {
+        if (wasClicked() && containsMouse(mouseX, mouseY)) {
             if (interactableFavorites && ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(PointHelper.ofMouse()) && !getCurrentEntry().isEmpty()) {
                 ModifierKeyCode keyCode = ConfigObject.getInstance().getFavoriteKeyCode();
                 EntryStack entry = getCurrentEntry().copy();

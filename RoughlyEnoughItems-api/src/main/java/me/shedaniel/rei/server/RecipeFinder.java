@@ -71,7 +71,7 @@ public class RecipeFinder {
         
     }
     
-    private boolean contains(int itemId) {
+    public boolean contains(int itemId) {
         return this.idToAmountMap.get(itemId) > 0;
     }
     
@@ -80,7 +80,7 @@ public class RecipeFinder {
      *
      * @return the amount taken
      */
-    private int take(int itemId, int amount) {
+    public int take(int itemId, int amount) {
         int mapAmount = this.idToAmountMap.get(itemId);
         if (mapAmount >= amount) {
             this.idToAmountMap.put(itemId, mapAmount - amount);

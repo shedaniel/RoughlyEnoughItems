@@ -27,7 +27,6 @@ import com.google.common.collect.Lists;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.entries.RecipeEntry;
@@ -86,7 +85,6 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
     public List<Widget> setupDisplay(DefaultCompostingDisplay display, Rectangle bounds) {
         List<Widget> widgets = Lists.newArrayList();
         Point startingPoint = new Point(bounds.x + bounds.width - 55, bounds.y + 110);
-        widgets.add(Widgets.createFilledRectangle(bounds, REIHelper.getInstance().isDarkThemeEnabled() ? -13750738 : -3750202));
         List<EntryStack> stacks = new ArrayList<>(display.getRequiredEntries().get(0));
         int i = 0;
         for (int y = 0; y < 6; y++)
@@ -102,7 +100,7 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
             }
         widgets.add(Widgets.createArrow(new Point(startingPoint.x - 1, startingPoint.y + 7)));
         widgets.add(Widgets.createResultSlotBackground(new Point(startingPoint.x + 33, startingPoint.y + 8)));
-        widgets.add(Widgets.createSlot(new Point(startingPoint.x + 33, startingPoint.y + 8)).entries(display.getOutputEntries()).disableBackground().markOutput());
+        widgets.add(Widgets.createSlot(new Point(startingPoint.x + 33, startingPoint.y + 8)).entries(display.getResultingEntries().get(0)).disableBackground().markOutput());
         return widgets;
     }
     
