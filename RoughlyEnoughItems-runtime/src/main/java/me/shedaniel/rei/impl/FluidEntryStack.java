@@ -65,6 +65,8 @@ public class FluidEntryStack extends AbstractEntryStack {
     private static final Fraction IGNORE_AMOUNT = Fraction.of(ThreadLocalRandom.current().nextLong(), ThreadLocalRandom.current().nextLong(Long.MAX_VALUE)).simplify();
     private Fluid fluid;
     private Fraction amount;
+    private int hashIgnoreAmount;
+    private int hash;
     
     public FluidEntryStack(Fluid fluid) {
         this(fluid, IGNORE_AMOUNT);
@@ -73,6 +75,15 @@ public class FluidEntryStack extends AbstractEntryStack {
     public FluidEntryStack(Fluid fluid, Fraction amount) {
         this.fluid = fluid;
         this.amount = amount;
+        
+        rehash();
+    }
+    
+    private void rehash() {
+        hashIgnoreAmount = 31 + getType().ordinal();
+        hashIgnoreAmount = 31 * hashIgnoreAmount + fluid.hashCode();
+        
+        hash = 31 * hashIgnoreAmount + amount.hashCode();
     }
     
     @Override
@@ -96,6 +107,8 @@ public class FluidEntryStack extends AbstractEntryStack {
         if (isEmpty()) {
             fluid = Fluids.EMPTY;
         }
+        
+        rehash();
     }
     
     private <T extends Comparable<T>> T max(T o1, T o2) {
@@ -157,27 +170,22 @@ public class FluidEntryStack extends AbstractEntryStack {
     
     @Override
     public int hashOfAll() {
-        int result = hashIgnoreAmountAndTags();
-        result = 31 * result + amount.hashCode();
-        return result;
+        return hash;
     }
     
     @Override
     public int hashIgnoreAmountAndTags() {
-        int result = 1;
-        result = 31 * result + getType().ordinal();
-        result = 31 * result + fluid.hashCode();
-        return result;
+        return hashIgnoreAmount;
     }
     
     @Override
     public int hashIgnoreTags() {
-        return hashOfAll();
+        return hash;
     }
     
     @Override
     public int hashIgnoreAmount() {
-        return hashIgnoreAmountAndTags();
+        return hashIgnoreAmount;
     }
     
     @Nullable

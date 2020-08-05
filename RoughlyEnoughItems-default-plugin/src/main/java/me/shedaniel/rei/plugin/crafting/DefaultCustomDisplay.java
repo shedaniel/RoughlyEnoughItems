@@ -32,6 +32,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.util.Identifier;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -84,8 +85,8 @@ public class DefaultCustomDisplay implements DefaultCraftingDisplay {
     }
     
     @Override
-    public List<EntryStack> getOutputEntries() {
-        return output;
+    public List<List<EntryStack>> getResultingEntries() {
+        return Collections.singletonList(output);
     }
     
     @Override

@@ -62,8 +62,8 @@ public class DefaultStrippingDisplay implements RecipeDisplay {
     }
     
     @Override
-    public List<EntryStack> getOutputEntries() {
-        return Collections.singletonList(out);
+    public List<List<EntryStack>> getResultingEntries() {
+        return Collections.singletonList(Collections.singletonList(out));
     }
     
     @Override

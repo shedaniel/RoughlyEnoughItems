@@ -448,7 +448,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         }
         
         public static class Search {
-            @Comment("Declares whether favorites will be searched.") private boolean searchFavorites = true;
+            @Comment("Declares whether favorites will be searched.") private boolean searchFavorites = false;
             @Comment("Declares whether search time should be debugged.") private boolean debugSearchTimeRequired = false;
             @Comment("Declares whether REI should search async.") private boolean asyncSearch = true;
             @Comment("Declares how many entries should be grouped one async search.") @ConfigEntry.BoundedDiscrete(min = 25, max = 400)

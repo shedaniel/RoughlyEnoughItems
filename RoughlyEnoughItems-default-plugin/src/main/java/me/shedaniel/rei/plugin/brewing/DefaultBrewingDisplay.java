@@ -65,8 +65,8 @@ public class DefaultBrewingDisplay implements RecipeDisplay {
     }
     
     @Override
-    public List<EntryStack> getOutputEntries() {
-        return Collections.singletonList(output);
+    public List<List<EntryStack>> getResultingEntries() {
+        return Collections.singletonList(Collections.singletonList(output));
     }
     
     @Override

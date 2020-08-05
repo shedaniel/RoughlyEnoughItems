@@ -73,8 +73,8 @@ public class DefaultCampfireDisplay implements RecipeDisplay {
     }
     
     @Override
-    public List<EntryStack> getOutputEntries() {
-        return output;
+    public List<List<EntryStack>> getResultingEntries() {
+        return Collections.singletonList(output);
     }
     
     @Override
