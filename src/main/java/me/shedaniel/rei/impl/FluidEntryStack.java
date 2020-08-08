@@ -46,6 +46,7 @@ import net.minecraft.fluid.Fluids;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
@@ -200,7 +201,7 @@ public class FluidEntryStack extends AbstractEntryStack {
             final String modId = ClientHelper.getInstance().getModFromIdentifier(id);
             boolean alreadyHasMod = false;
             for (Text s : toolTip)
-                if (s.getString().equalsIgnoreCase(modId)) {
+                if (Formatting.strip(s.getString()).equalsIgnoreCase(modId)) {
                     alreadyHasMod = true;
                     break;
                 }
