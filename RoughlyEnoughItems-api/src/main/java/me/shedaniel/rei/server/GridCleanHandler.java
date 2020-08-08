@@ -23,22 +23,28 @@
 
 package me.shedaniel.rei.server;
 
-import org.jetbrains.annotations.ApiStatus;
+import net.minecraft.container.Container;
+import net.minecraft.item.ItemStack;
 
-import java.util.Iterator;
-import java.util.List;
-
-@ApiStatus.Internal
-public interface RecipeGridAligner<T> {
-    default void alignRecipeToGrid(List<StackAccessor> gridStacks, Iterator<T> iterator_1, int craftsAmount) {
-        for (StackAccessor gridStack : gridStacks) {
-            if (!iterator_1.hasNext()) {
-                return;
-            }
-            
-            this.acceptAlignedInput(iterator_1, gridStack, craftsAmount);
-        }
+@FunctionalInterface
+public interface GridCleanHandler<T extends Container> {
+    void clean(ContainerContext<T> context);
+    
+    static void error(String translationKey) {
+        throw new IllegalStateException(translationKey);
     }
     
-    void acceptAlignedInput(Iterator<T> var1, StackAccessor gridSlot, int craftsAmount);
+    static <T extends Container> void returnSlotToPlayerInventory(ContainerContext<T> context, StackAccessor stackAccessor) {
+        DumpHandler<T> dumpHandler = context.getContainerInfo().getDumpHandler();
+        ItemStack stackToReturn = stackAccessor.getItemStack();
+        if (!stackToReturn.isEmpty()) {
+            for (; stackToReturn.getCount() > 0; stackAccessor.takeStack(1)) {
+                ItemStack stackToInsert = stackToReturn.copy();
+                stackToInsert.setCount(1);
+                if (!dumpHandler.dump(context, stackToInsert)) {
+                    error("rei.rei.no.slot.in.inv");
+                }
+            }
+        }
+    }
 }

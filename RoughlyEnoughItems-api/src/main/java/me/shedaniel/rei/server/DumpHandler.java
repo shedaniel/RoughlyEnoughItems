@@ -23,22 +23,36 @@
 
 package me.shedaniel.rei.server;
 
-import org.jetbrains.annotations.ApiStatus;
+import net.minecraft.container.Container;
+import net.minecraft.item.ItemStack;
 
-import java.util.Iterator;
 import java.util.List;
 
-@ApiStatus.Internal
-public interface RecipeGridAligner<T> {
-    default void alignRecipeToGrid(List<StackAccessor> gridStacks, Iterator<T> iterator_1, int craftsAmount) {
-        for (StackAccessor gridStack : gridStacks) {
-            if (!iterator_1.hasNext()) {
-                return;
+@FunctionalInterface
+public interface DumpHandler<T extends Container> {
+    boolean dump(ContainerContext<T> context, ItemStack stackToInsert);
+    
+    static StackAccessor getOccupiedSlotWithRoomForStack(ItemStack stack, List<StackAccessor> inventoryStacks) {
+        for (StackAccessor inventoryStack : inventoryStacks) {
+            if (canStackAddMore(inventoryStack.getItemStack(), stack)) {
+                return inventoryStack;
             }
-            
-            this.acceptAlignedInput(iterator_1, gridStack, craftsAmount);
         }
+        
+        return null;
     }
     
-    void acceptAlignedInput(Iterator<T> var1, StackAccessor gridSlot, int craftsAmount);
+    static StackAccessor getEmptySlot(List<StackAccessor> inventoryStacks) {
+        for (StackAccessor inventoryStack : inventoryStacks) {
+            if (inventoryStack.getItemStack().isEmpty()) {
+                return inventoryStack;
+            }
+        }
+        
+        return null;
+    }
+    
+    static boolean canStackAddMore(ItemStack existingStack, ItemStack stack) {
+        return !existingStack.isEmpty() && ItemStack.areItemsEqual(existingStack, stack) && existingStack.isStackable() && existingStack.getCount() + stack.getCount() <= existingStack.getMaxCount();
+    }
 }
