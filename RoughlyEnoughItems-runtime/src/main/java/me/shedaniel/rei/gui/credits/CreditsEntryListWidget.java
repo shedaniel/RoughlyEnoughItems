@@ -24,11 +24,10 @@
 package me.shedaniel.rei.gui.credits;
 
 import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
-import net.minecraft.class_5481;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.StringRenderable;
+import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -94,7 +93,7 @@ public class CreditsEntryListWidget extends DynamicNewSmoothScrollingEntryListWi
         
         @Override
         public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-            MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, text.method_30937(), x + 5, y + 5, -1);
+            MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, text.asOrderedText(), x + 5, y + 5, -1);
         }
         
         @Override
@@ -110,7 +109,7 @@ public class CreditsEntryListWidget extends DynamicNewSmoothScrollingEntryListWi
     
     public static class TranslationCreditsItem extends CreditsItem {
         private Text language;
-        private List<class_5481> translators;
+        private List<OrderedText> translators;
         private int maxWidth;
         
         public TranslationCreditsItem(Text language, Text translators, int width, int maxWidth) {
@@ -121,9 +120,9 @@ public class CreditsEntryListWidget extends DynamicNewSmoothScrollingEntryListWi
         
         @Override
         public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-            MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, language.method_30937(), x + 5, y + 5, -1);
+            MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, language.asOrderedText(), x + 5, y + 5, -1);
             int yy = y + 5;
-            for (class_5481 translator : translators) {
+            for (OrderedText translator : translators) {
                 MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, translator, x + 5 + maxWidth, yy, -1);
                 yy += 12;
             }

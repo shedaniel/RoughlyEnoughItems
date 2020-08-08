@@ -30,11 +30,11 @@ import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.widgets.Label;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
-import net.minecraft.class_5481;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
-import net.minecraft.text.StringRenderable;
+import net.minecraft.text.OrderedText;
+import net.minecraft.text.StringVisitable;
 import net.minecraft.util.Language;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -61,10 +61,10 @@ public final class LabelWidget extends Label {
     @Nullable private Function<Label, @Nullable String> tooltip;
     @Nullable private Consumer<Label> onClick;
     @Nullable private BiConsumer<MatrixStack, Label> onRender;
-    @NotNull private StringRenderable text;
-    @NotNull private final LazyResettable<class_5481> class_5481 = new LazyResettable<>(() -> Language.getInstance().method_30934(getMessage()));
+    @NotNull private StringVisitable text;
+    @NotNull private final LazyResettable<OrderedText> orderedText = new LazyResettable<>(() -> Language.getInstance().reorder(getMessage()));
     
-    public LabelWidget(@NotNull Point point, @NotNull StringRenderable text) {
+    public LabelWidget(@NotNull Point point, @NotNull StringVisitable text) {
         Objects.requireNonNull(this.point = point);
         Objects.requireNonNull(this.text = text);
     }
@@ -175,14 +175,14 @@ public final class LabelWidget extends Label {
     }
     
     @Override
-    public StringRenderable getMessage() {
+    public StringVisitable getMessage() {
         return text;
     }
     
     @Override
-    public void setMessage(@NotNull StringRenderable message) {
+    public void setMessage(@NotNull StringVisitable message) {
         this.text = Objects.requireNonNull(message);
-        this.class_5481.reset();
+        this.orderedText.reset();
     }
     
     @NotNull
@@ -205,26 +205,26 @@ public final class LabelWidget extends Label {
         if (isClickable() && isHovered(mouseX, mouseY))
             color = getHoveredColor();
         Point pos = getPoint();
-        int width = font.method_30880(class_5481.get());
+        int width = font.getWidth(orderedText.get());
         switch (getHorizontalAlignment()) {
             case LEFT_ALIGNED:
                 if (hasShadow())
-                    font.drawWithShadow(matrices, class_5481.get(), pos.x, pos.y, color);
+                    font.drawWithShadow(matrices, orderedText.get(), pos.x, pos.y, color);
                 else
-                    font.draw(matrices, class_5481.get(), pos.x, pos.y, color);
+                    font.draw(matrices, orderedText.get(), pos.x, pos.y, color);
                 break;
             case RIGHT_ALIGNED:
                 if (hasShadow())
-                    font.drawWithShadow(matrices, class_5481.get(), pos.x - width, pos.y, color);
+                    font.drawWithShadow(matrices, orderedText.get(), pos.x - width, pos.y, color);
                 else
-                    font.draw(matrices, class_5481.get(), pos.x - width, pos.y, color);
+                    font.draw(matrices, orderedText.get(), pos.x - width, pos.y, color);
                 break;
             case CENTER:
             default:
                 if (hasShadow())
-                    font.drawWithShadow(matrices, class_5481.get(), pos.x - width / 2f, pos.y, color);
+                    font.drawWithShadow(matrices, orderedText.get(), pos.x - width / 2f, pos.y, color);
                 else
-                    font.draw(matrices, class_5481.get(), pos.x - width / 2f, pos.y, color);
+                    font.draw(matrices, orderedText.get(), pos.x - width / 2f, pos.y, color);
                 break;
         }
         if (isHovered(mouseX, mouseY)) {

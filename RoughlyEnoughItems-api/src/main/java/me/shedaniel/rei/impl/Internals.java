@@ -35,7 +35,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.StringRenderable;
+import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
@@ -148,7 +148,7 @@ public final class Internals {
         
         Panel createPanelWidget(Rectangle bounds);
         
-        Label createLabel(Point point, StringRenderable text);
+        Label createLabel(Point point, StringVisitable text);
         
         Arrow createArrow(Rectangle rectangle);
         

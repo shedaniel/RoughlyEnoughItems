@@ -80,11 +80,11 @@ public interface FilteringRule<T extends FilteringRule<?>> {
     }
     
     default Text getTitle() {
-        return Text.method_30163(FilteringRule.REGISTRY.getId(this).toString());
+        return Text.of(FilteringRule.REGISTRY.getId(this).toString());
     }
     
     default Text getSubtitle() {
-        return Text.method_30163(null);
+        return Text.of(null);
     }
     
     T createNew();

@@ -297,7 +297,7 @@ public class EntryListWidget extends WidgetWithBounds {
             matrices.push();
             matrices.translate(0.0D, 0.0D, getZ());
             Matrix4f matrix = matrices.peek().getModel();
-            font.draw(debugText.method_30937(), Math.min(bounds.x + 2, minecraft.currentScreen.width - stringWidth), bounds.y + 2, -1, false, matrix, immediate, false, 0, 15728880);
+            font.draw(debugText.asOrderedText(), Math.min(bounds.x + 2, minecraft.currentScreen.width - stringWidth), bounds.y + 2, -1, false, matrix, immediate, false, 0, 15728880);
             immediate.draw();
             setZ(z);
             matrices.pop();

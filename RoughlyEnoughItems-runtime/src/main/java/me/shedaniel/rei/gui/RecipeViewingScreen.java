@@ -442,7 +442,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
                         matrices.push();
                         matrices.translate(0.0D, 0.0D, 480);
                         Matrix4f matrix4f = matrices.peek().getModel();
-                        textRenderer.draw(text.method_30937(), bounds.getCenterX() - textRenderer.getWidth(text) / 2f, bounds.getCenterY() - 4.5f, 0xff000000, false, matrix4f, immediate, false, 0, 15728880);
+                        textRenderer.draw(text.asOrderedText(), bounds.getCenterX() - textRenderer.getWidth(text) / 2f, bounds.getCenterY() - 4.5f, 0xff000000, false, matrix4f, immediate, false, 0, 15728880);
                         immediate.draw();
                         matrices.pop();
                     } else {

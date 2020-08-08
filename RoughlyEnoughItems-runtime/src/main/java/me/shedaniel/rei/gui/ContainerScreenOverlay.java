@@ -44,7 +44,6 @@ import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.Weather;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.block.Blocks;
-import net.minecraft.class_5481;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
@@ -63,6 +62,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
@@ -91,7 +91,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
     public boolean shouldReInit = false;
     private int tooltipWidth;
     private int tooltipHeight;
-    private List<class_5481> tooltipLines;
+    private List<OrderedText> tooltipLines;
     public final TriConsumer<MatrixStack, Point, Float> renderTooltipCallback = (matrices, mouse, aFloat) -> {
         RenderSystem.disableRescaleNormal();
         RenderSystem.disableDepthTest();
@@ -564,14 +564,14 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
     public void renderTooltip(MatrixStack matrices, List<Text> lines, int mouseX, int mouseY) {
         if (lines.isEmpty())
             return;
-        List<class_5481> characterVisitables = CollectionUtils.map(lines, Text::method_30937);
-        renderTooltipInner(matrices, characterVisitables, mouseX, mouseY);
+        List<OrderedText> orderedTexts = CollectionUtils.map(lines, Text::asOrderedText);
+        renderTooltipInner(matrices, orderedTexts, mouseX, mouseY);
     }
     
-    public void renderTooltipInner(MatrixStack matrices, List<class_5481> lines, int mouseX, int mouseY) {
+    public void renderTooltipInner(MatrixStack matrices, List<OrderedText> lines, int mouseX, int mouseY) {
         if (lines.isEmpty())
             return;
-        tooltipWidth = lines.stream().map(font::method_30880).max(Integer::compareTo).get();
+        tooltipWidth = lines.stream().map(font::getWidth).max(Integer::compareTo).get();
         tooltipHeight = lines.size() <= 1 ? 8 : lines.size() * 10;
         tooltipLines = lines;
         ScreenHelper.drawHoveringWidget(matrices, mouseX, mouseY, renderTooltipCallback, tooltipWidth, tooltipHeight, 0);

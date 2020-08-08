@@ -32,7 +32,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
-import net.minecraft.text.StringRenderable;
+import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
@@ -75,7 +75,7 @@ public class FilteringAddRuleScreen extends Screen {
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         this.rulesList.render(matrices, mouseX, mouseY, delta);
         super.render(matrices, mouseX, mouseY, delta);
-        this.textRenderer.drawWithShadow(matrices, this.title.method_30937(), this.width / 2.0F - this.textRenderer.getWidth(this.title) / 2.0F, 12.0F, -1);
+        this.textRenderer.drawWithShadow(matrices, this.title.asOrderedText(), this.width / 2.0F - this.textRenderer.getWidth(this.title) / 2.0F, 12.0F, -1);
     }
     
     public static class RulesList extends DynamicElementListWidget<RuleEntry> {
@@ -151,7 +151,7 @@ public class FilteringAddRuleScreen extends Screen {
         public DefaultRuleEntry(Screen parent, FilteringEntry entry, FilteringRule<?> rule, BiFunction<FilteringEntry, Screen, Screen> screenFunction) {
             super(rule);
             this.screenFunction = (screenFunction == null ? rule.createEntryScreen().orElse(null) : screenFunction);
-            addButton = new ButtonWidget(0, 0, 20, 20, Text.method_30163(" + "), button -> {
+            addButton = new ButtonWidget(0, 0, 20, 20, Text.of(" + "), button -> {
                 entry.edited = true;
                 MinecraftClient.getInstance().openScreen(this.screenFunction.apply(entry, parent));
                 entry.rules.add(0, rule);
@@ -166,20 +166,20 @@ public class FilteringAddRuleScreen extends Screen {
                 Text title = getRule().getTitle();
                 int i = client.textRenderer.getWidth(title);
                 if (i > entryWidth - 28) {
-                    StringRenderable titleTrimmed = StringRenderable.concat(client.textRenderer.trimToWidth(title, entryWidth - 28 - client.textRenderer.getStringWidth("...")), StringRenderable.plain("..."));
-                    client.textRenderer.drawWithShadow(matrices, Language.getInstance().method_30934(titleTrimmed), x + 2, y + 1, 16777215);
+                    StringVisitable titleTrimmed = StringVisitable.concat(client.textRenderer.trimToWidth(title, entryWidth - 28 - client.textRenderer.getStringWidth("...")), StringVisitable.plain("..."));
+                    client.textRenderer.drawWithShadow(matrices, Language.getInstance().reorder(titleTrimmed), x + 2, y + 1, 16777215);
                 } else {
-                    client.textRenderer.drawWithShadow(matrices, title.method_30937(), x + 2, y + 1, 16777215);
+                    client.textRenderer.drawWithShadow(matrices, title.asOrderedText(), x + 2, y + 1, 16777215);
                 }
             }
             {
                 Text subtitle = getRule().getSubtitle();
                 int i = client.textRenderer.getWidth(subtitle);
                 if (i > entryWidth - 28) {
-                    StringRenderable subtitleTrimmed = StringRenderable.concat(client.textRenderer.trimToWidth(subtitle, entryWidth - 28 - client.textRenderer.getStringWidth("...")), StringRenderable.plain("..."));
-                    client.textRenderer.drawWithShadow(matrices, Language.getInstance().method_30934(subtitleTrimmed), x + 2, y + 12, 8421504);
+                    StringVisitable subtitleTrimmed = StringVisitable.concat(client.textRenderer.trimToWidth(subtitle, entryWidth - 28 - client.textRenderer.getStringWidth("...")), StringVisitable.plain("..."));
+                    client.textRenderer.drawWithShadow(matrices, Language.getInstance().reorder(subtitleTrimmed), x + 2, y + 12, 8421504);
                 } else {
-                    client.textRenderer.drawWithShadow(matrices, subtitle.method_30937(), x + 2, y + 12, 8421504);
+                    client.textRenderer.drawWithShadow(matrices, subtitle.asOrderedText(), x + 2, y + 12, 8421504);
                 }
             }
             addButton.x = x + entryWidth - 25;

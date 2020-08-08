@@ -120,7 +120,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
             @Override
             public void render(MatrixStack matrices, int i, int i1, float v) {
                 text = new TranslatableText("text.rei.choose_page");
-                font.draw(matrices, text.method_30937(), bounds.x + 5, bounds.y + 5, REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF404040);
+                font.draw(matrices, text.asOrderedText(), bounds.x + 5, bounds.y + 5, REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF404040);
                 String endString = String.format(" /%d", maxPage);
                 int width = font.getStringWidth(endString);
                 font.draw(matrices, endString, bounds.x + bounds.width - 5 - width, bounds.y + 22, REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF404040);

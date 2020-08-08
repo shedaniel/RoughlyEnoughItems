@@ -25,7 +25,6 @@ package me.shedaniel.rei.gui;
 
 import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
 import me.shedaniel.rei.RoughlyEnoughItemsState;
-import net.minecraft.class_5481;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
@@ -36,6 +35,7 @@ import net.minecraft.client.util.NarratorManager;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Lazy;
@@ -67,13 +67,13 @@ public class WarningAndErrorScreen extends Screen {
     }
     
     private void addText(Text string) {
-        for (class_5481 s : textRenderer.wrapStringToWidthAsList(string, width - 80)) {
+        for (OrderedText s : textRenderer.wrapStringToWidthAsList(string, width - 80)) {
             listWidget.creditsAddEntry(new TextItem(s));
         }
     }
     
     private void addLink(Text string, String link) {
-        for (class_5481 s : textRenderer.wrapStringToWidthAsList(string, width - 80)) {
+        for (OrderedText s : textRenderer.wrapStringToWidthAsList(string, width - 80)) {
             listWidget.creditsAddEntry(new LinkItem(s, link));
         }
     }
@@ -85,7 +85,7 @@ public class WarningAndErrorScreen extends Screen {
         listWidget.creditsClearEntries();
         listWidget.creditsAddEntry(new EmptyItem());
         if (!RoughlyEnoughItemsState.getWarnings().isEmpty())
-            listWidget.creditsAddEntry(new TextItem(new LiteralText("Warnings:").formatted(Formatting.RED).method_30937()));
+            listWidget.creditsAddEntry(new TextItem(new LiteralText("Warnings:").formatted(Formatting.RED).asOrderedText()));
         for (Pair<String, String> pair : RoughlyEnoughItemsState.getWarnings()) {
             addText(new LiteralText(pair.getLeft()));
             if (pair.getRight() != null)
@@ -98,7 +98,7 @@ public class WarningAndErrorScreen extends Screen {
             listWidget.creditsAddEntry(new EmptyItem());
         }
         if (!RoughlyEnoughItemsState.getErrors().isEmpty())
-            listWidget.creditsAddEntry(new TextItem(new LiteralText("Errors:").formatted(Formatting.RED).method_30937()));
+            listWidget.creditsAddEntry(new TextItem(new LiteralText("Errors:").formatted(Formatting.RED).asOrderedText()));
         for (Pair<String, String> pair : RoughlyEnoughItemsState.getErrors()) {
             addText(new LiteralText(pair.getLeft()));
             if (pair.getRight() != null)
@@ -211,9 +211,9 @@ public class WarningAndErrorScreen extends Screen {
     }
     
     private static class TextItem extends StringItem {
-        private class_5481 text;
+        private OrderedText text;
         
-        public TextItem(class_5481 text) {
+        public TextItem(OrderedText text) {
             this.text = text;
         }
         
@@ -234,16 +234,16 @@ public class WarningAndErrorScreen extends Screen {
         
         @Override
         public int getWidth() {
-            return MinecraftClient.getInstance().textRenderer.method_30880(text) + 10;
+            return MinecraftClient.getInstance().textRenderer.getWidth(text) + 10;
         }
     }
     
     private class LinkItem extends StringItem {
-        private class_5481 text;
+        private OrderedText text;
         private String link;
         private boolean contains;
         
-        public LinkItem(class_5481 text, String link) {
+        public LinkItem(OrderedText text, String link) {
             this.text = text;
             this.link = link;
         }
@@ -273,7 +273,7 @@ public class WarningAndErrorScreen extends Screen {
         
         @Override
         public int getWidth() {
-            return MinecraftClient.getInstance().textRenderer.method_30880(text) + 10;
+            return MinecraftClient.getInstance().textRenderer.getWidth(text) + 10;
         }
         
         @Override
