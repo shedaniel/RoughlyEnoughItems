@@ -28,7 +28,7 @@ import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
-import net.minecraft.text.StringRenderable;
+import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -303,13 +303,13 @@ public abstract class Label extends WidgetWithBounds {
         return new LiteralText("");
     }
     
-    public abstract StringRenderable getMessage();
+    public abstract StringVisitable getMessage();
     
     public final void setText(@NotNull Text text) {
         setMessage(text);
     }
     
-    public abstract void setMessage(@NotNull StringRenderable message);
+    public abstract void setMessage(@NotNull StringVisitable message);
     
     @NotNull
     public final Label text(@NotNull Text text) {
@@ -318,7 +318,7 @@ public abstract class Label extends WidgetWithBounds {
     }
     
     @NotNull
-    public final Label message(@NotNull StringRenderable message) {
+    public final Label message(@NotNull StringVisitable message) {
         setMessage(message);
         return this;
     }

@@ -25,14 +25,14 @@ package me.shedaniel.rei.gui.config.entry;
 
 import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
 import me.shedaniel.rei.impl.filtering.FilteringRule;
-import net.minecraft.class_5481;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.StringRenderable;
+import net.minecraft.text.OrderedText;
+import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
@@ -75,8 +75,8 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
     
     public abstract void save();
     
-    public void addText(Consumer<RuleEntry> entryConsumer, StringRenderable text) {
-        for (class_5481 s : textRenderer.wrapStringToWidthAsList(text, width - 80)) {
+    public void addText(Consumer<RuleEntry> entryConsumer, StringVisitable text) {
+        for (OrderedText s : textRenderer.wrapStringToWidthAsList(text, width - 80)) {
             entryConsumer.accept(new TextRuleEntry(rule, s));
         }
     }
@@ -89,7 +89,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         this.rulesList.render(matrices, mouseX, mouseY, delta);
         super.render(matrices, mouseX, mouseY, delta);
-        this.textRenderer.drawWithShadow(matrices, this.title.method_30937(), this.width / 2.0F - this.textRenderer.getWidth(this.title) / 2.0F, 12.0F, -1);
+        this.textRenderer.drawWithShadow(matrices, this.title.asOrderedText(), this.width / 2.0F - this.textRenderer.getWidth(this.title) / 2.0F, 12.0F, -1);
     }
     
     public static class RulesList extends DynamicElementListWidget<RuleEntry> {
@@ -126,9 +126,9 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
     }
     
     public static class TextRuleEntry extends RuleEntry {
-        private final class_5481 text;
+        private final OrderedText text;
         
-        public TextRuleEntry(FilteringRule<?> rule, class_5481 text) {
+        public TextRuleEntry(FilteringRule<?> rule, OrderedText text) {
             super(rule);
             this.text = text;
         }
@@ -177,7 +177,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         
         public TextFieldRuleEntry(int width, FilteringRule<?> rule, Consumer<TextFieldWidget> widgetConsumer) {
             super(rule);
-            this.widget = new TextFieldWidget(MinecraftClient.getInstance().textRenderer, 0, 0, width, 18, Text.method_30163(""));
+            this.widget = new TextFieldWidget(MinecraftClient.getInstance().textRenderer, 0, 0, width, 18, Text.of(""));
             widgetConsumer.accept(widget);
         }
         

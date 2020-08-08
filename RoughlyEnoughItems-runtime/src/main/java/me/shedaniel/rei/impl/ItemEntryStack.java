@@ -50,6 +50,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
@@ -283,7 +284,7 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
             final String modId = ClientHelper.getInstance().getModFromItem(getItem());
             boolean alreadyHasMod = false;
             for (Text s : toolTip)
-                if (s.getString().equalsIgnoreCase(modId)) {
+                if (Formatting.strip(s.getString()).equalsIgnoreCase(modId)) {
                     alreadyHasMod = true;
                     break;
                 }

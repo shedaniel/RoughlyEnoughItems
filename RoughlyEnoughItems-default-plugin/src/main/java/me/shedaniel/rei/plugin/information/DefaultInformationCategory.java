@@ -41,7 +41,6 @@ import me.shedaniel.rei.impl.RenderingEntry;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.class_5481;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.render.BufferBuilder;
@@ -50,7 +49,8 @@ import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.StringRenderable;
+import net.minecraft.text.OrderedText;
+import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Matrix4f;
@@ -86,7 +86,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
     
     @Override
     public RecipeEntry getSimpleRenderer(DefaultInformationDisplay recipe) {
-        class_5481 name = recipe.getName().method_30937();
+        OrderedText name = recipe.getName().asOrderedText();
         return new RecipeEntry() {
             @Override
             public int getHeight() {
@@ -138,7 +138,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
     
     private static class ScrollableTextWidget extends WidgetWithBounds {
         private Rectangle bounds;
-        private List<class_5481> texts;
+        private List<OrderedText> texts;
         private final ScrollingContainer scrolling = new ScrollingContainer() {
             @Override
             public Rectangle getBounds() {
@@ -149,7 +149,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
             @Override
             public int getMaxScrollHeight() {
                 int i = 2;
-                for (class_5481 entry : texts) {
+                for (OrderedText entry : texts) {
                     i += entry == null ? 4 : font.fontHeight;
                 }
                 return i;
@@ -159,7 +159,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
         public ScrollableTextWidget(Rectangle bounds, List<Text> texts) {
             this.bounds = Objects.requireNonNull(bounds);
             this.texts = Lists.newArrayList();
-            for (StringRenderable text : texts) {
+            for (StringVisitable text : texts) {
                 if (!this.texts.isEmpty())
                     this.texts.add(null);
                 this.texts.addAll(MinecraftClient.getInstance().textRenderer.wrapStringToWidthAsList(text, bounds.width - 11));
@@ -201,7 +201,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
             Rectangle innerBounds = scrolling.getScissorBounds();
             ScissorsHandler.INSTANCE.scissor(innerBounds);
             int currentY = (int) -scrolling.scrollAmount + innerBounds.y;
-            for (class_5481 text : texts) {
+            for (OrderedText text : texts) {
                 if (text != null && currentY + font.fontHeight >= innerBounds.y && currentY <= innerBounds.getMaxY()) {
                     font.draw(matrices, text, innerBounds.x + 2, currentY + 2, REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF090909);
                 }

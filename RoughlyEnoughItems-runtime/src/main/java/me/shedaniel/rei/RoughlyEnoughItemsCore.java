@@ -70,7 +70,7 @@ import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.LiteralText;
-import net.minecraft.text.StringRenderable;
+import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
@@ -153,7 +153,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             }
             
             @Override
-            public Label createLabel(Point point, StringRenderable text) {
+            public Label createLabel(Point point, StringVisitable text) {
                 return new LabelWidget(point, text);
             }
             

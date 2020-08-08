@@ -76,14 +76,14 @@ public abstract class ClickableLabelWidget extends LabelWidget {
         int width = font.getStringWidth(getText());
         if (isCentered()) {
             if (isHasShadows())
-                font.drawWithShadow(matrices, text.method_30937(), pos.x - width / 2f, pos.y, color);
+                font.drawWithShadow(matrices, text.asOrderedText(), pos.x - width / 2f, pos.y, color);
             else
-                font.draw(matrices, text.method_30937(), pos.x - width / 2f, pos.y, color);
+                font.draw(matrices, text.asOrderedText(), pos.x - width / 2f, pos.y, color);
         } else {
             if (isHasShadows())
-                font.drawWithShadow(matrices, text.method_30937(), pos.x, pos.y, color);
+                font.drawWithShadow(matrices, text.asOrderedText(), pos.x, pos.y, color);
             else
-                font.draw(matrices, text.method_30937(), pos.x, pos.y, color);
+                font.draw(matrices, text.asOrderedText(), pos.x, pos.y, color);
         }
         drawTooltips(mouseX, mouseY);
     }

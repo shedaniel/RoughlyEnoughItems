@@ -76,7 +76,7 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
             
             @Override
             public void render(MatrixStack matrices, Rectangle rectangle, int mouseX, int mouseY, float delta) {
-                MinecraftClient.getInstance().textRenderer.draw(matrices, text.method_30937(), rectangle.x + 5, rectangle.y + 6, -1);
+                MinecraftClient.getInstance().textRenderer.draw(matrices, text.asOrderedText(), rectangle.x + 5, rectangle.y + 6, -1);
             }
         };
     }

@@ -175,14 +175,14 @@ public class LabelWidget extends WidgetWithBounds {
         Point pos = getLocation();
         if (isCentered()) {
             if (hasShadows)
-                font.drawWithShadow(matrices, text.method_30937(), pos.x - width / 2f, pos.y, defaultColor);
+                font.drawWithShadow(matrices, text.asOrderedText(), pos.x - width / 2f, pos.y, defaultColor);
             else
-                font.draw(matrices, text.method_30937(), pos.x - width / 2f, pos.y, defaultColor);
+                font.draw(matrices, text.asOrderedText(), pos.x - width / 2f, pos.y, defaultColor);
         } else {
             if (hasShadows)
-                font.drawWithShadow(matrices, text.method_30937(), pos.x, pos.y, defaultColor);
+                font.drawWithShadow(matrices, text.asOrderedText(), pos.x, pos.y, defaultColor);
             else
-                font.draw(matrices, text.method_30937(), pos.x, pos.y, defaultColor);
+                font.draw(matrices, text.asOrderedText(), pos.x, pos.y, defaultColor);
         }
     }
     

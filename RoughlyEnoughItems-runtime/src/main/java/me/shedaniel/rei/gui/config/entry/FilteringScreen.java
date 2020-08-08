@@ -267,7 +267,7 @@ public class FilteringScreen extends Screen {
             ScreenHelper.getLastOverlay().renderTooltip(matrices, tooltip);
         }
         
-        this.textRenderer.drawWithShadow(matrices, this.title.method_30937(), this.width / 2.0F - this.textRenderer.getWidth(this.title) / 2.0F, 12.0F, -1);
+        this.textRenderer.drawWithShadow(matrices, this.title.asOrderedText(), this.width / 2.0F - this.textRenderer.getWidth(this.title) / 2.0F, 12.0F, -1);
     }
     
     private Rectangle getSelection() {
