@@ -89,6 +89,8 @@ import java.util.concurrent.Executors;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
+import static me.shedaniel.rei.impl.Internals.attachInstance;
+
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public class RoughlyEnoughItemsCore implements ClientModInitializer {
@@ -178,25 +180,6 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             }
         }, Internals.WidgetsProvider.class);
         attachInstance((BiFunction<@Nullable Point, Collection<Text>, Tooltip>) QueuedTooltip::create, "tooltipProvider");
-    }
-    
-    public static <T> void attachInstance(T instance, Class<T> clazz) {
-        attachInstance((Supplier<T>) () -> instance, clazz.getSimpleName());
-    }
-    
-    public static <T> void attachInstance(T instance, String name) {
-        try {
-            for (Field field : Internals.class.getDeclaredFields()) {
-                if (field.getName().equalsIgnoreCase(name)) {
-                    field.setAccessible(true);
-                    field.set(null, instance);
-                    return;
-                }
-            }
-            throw new RuntimeException("Failed to attach " + instance + " with field name: " + name);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
     }
     
     /**

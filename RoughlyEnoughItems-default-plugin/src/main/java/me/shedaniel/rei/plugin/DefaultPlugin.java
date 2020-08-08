@@ -75,6 +75,7 @@ import net.minecraft.potion.PotionUtil;
 import net.minecraft.recipe.*;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.tag.Tag;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Lazy;
 import net.minecraft.util.math.MathHelper;
@@ -85,24 +86,28 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
+
+import static me.shedaniel.rei.impl.Internals.attachInstance;
 
 @Environment(EnvType.CLIENT)
-public class DefaultPlugin implements REIPluginV0 {
+public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
     private static final Logger LOGGER = LogManager.getFormatterLogger("REI/DefaultPlugin");
-    public static final Identifier CRAFTING = new Identifier("minecraft", "plugins/crafting");
-    public static final Identifier SMELTING = new Identifier("minecraft", "plugins/smelting");
-    public static final Identifier SMOKING = new Identifier("minecraft", "plugins/smoking");
-    public static final Identifier BLASTING = new Identifier("minecraft", "plugins/blasting");
-    public static final Identifier CAMPFIRE = new Identifier("minecraft", "plugins/campfire");
-    public static final Identifier STONE_CUTTING = new Identifier("minecraft", "plugins/stone_cutting");
-    public static final Identifier STRIPPING = new Identifier("minecraft", "plugins/stripping");
-    public static final Identifier BREWING = new Identifier("minecraft", "plugins/brewing");
-    public static final Identifier PLUGIN = new Identifier("roughlyenoughitems", "default_plugin");
-    public static final Identifier COMPOSTING = new Identifier("minecraft", "plugins/composting");
-    public static final Identifier FUEL = new Identifier("minecraft", "plugins/fuel");
-    public static final Identifier SMITHING = new Identifier("minecraft", "plugins/smithing");
-    public static final Identifier BEACON = new Identifier("minecraft", "plugins/beacon");
-    public static final Identifier INFO = new Identifier("roughlyenoughitems", "plugins/information");
+    public static final Identifier CRAFTING = BuiltinPlugin.CRAFTING;
+    public static final Identifier SMELTING = BuiltinPlugin.SMELTING;
+    public static final Identifier SMOKING = BuiltinPlugin.SMOKING;
+    public static final Identifier BLASTING = BuiltinPlugin.BLASTING;
+    public static final Identifier CAMPFIRE = BuiltinPlugin.CAMPFIRE;
+    public static final Identifier STONE_CUTTING = BuiltinPlugin.STONE_CUTTING;
+    public static final Identifier STRIPPING = BuiltinPlugin.STRIPPING;
+    public static final Identifier BREWING = BuiltinPlugin.BREWING;
+    public static final Identifier PLUGIN = BuiltinPlugin.PLUGIN;
+    public static final Identifier COMPOSTING = BuiltinPlugin.COMPOSTING;
+    public static final Identifier FUEL = BuiltinPlugin.FUEL;
+    public static final Identifier SMITHING = BuiltinPlugin.SMITHING;
+    public static final Identifier BEACON = BuiltinPlugin.BEACON;
+    public static final Identifier INFO = BuiltinPlugin.INFO;
     private static final Identifier DISPLAY_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/display.png");
     private static final Identifier DISPLAY_TEXTURE_DARK = new Identifier("roughlyenoughitems", "textures/gui/display_dark.png");
     private static final List<Lazy<DefaultBrewingDisplay>> BREWING_DISPLAYS = Lists.newArrayList();
@@ -110,6 +115,10 @@ public class DefaultPlugin implements REIPluginV0 {
     
     public static Identifier getDisplayTexture() {
         return REIHelper.getInstance().getDefaultDisplayTexture();
+    }
+    
+    public DefaultPlugin() {
+        attachInstance(this, BuiltinPlugin.class);
     }
     
     @Deprecated
@@ -124,6 +133,16 @@ public class DefaultPlugin implements REIPluginV0 {
     
     public static void registerInfoDisplay(DefaultInformationDisplay display) {
         INFO_DISPLAYS.add(display);
+    }
+    
+    @Override
+    public void registerBrewingRecipe(ItemStack input, Ingredient ingredient, ItemStack output) {
+        registerBrewingRecipe(new RegisteredBrewingRecipe(input, ingredient, output));
+    }
+    
+    @Override
+    public void registerInformation(List<EntryStack> entryStacks, Text name, UnaryOperator<List<Text>> textBuilder) {
+        registerInfoDisplay(DefaultInformationDisplay.createFromEntries(entryStacks, name).lines(textBuilder.apply(Lists.newArrayList())));
     }
     
     @Override

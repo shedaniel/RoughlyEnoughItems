@@ -42,6 +42,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
@@ -60,6 +61,7 @@ public final class Internals {
     private static Supplier<WidgetsProvider> widgetsProvider = Internals::throwNotSetup;
     private static Supplier<ClientHelper.ViewSearchBuilder> viewSearchBuilder = Internals::throwNotSetup;
     private static BiFunction<@Nullable Point, Collection<Text>, Tooltip> tooltipProvider = (point, texts) -> throwNotSetup();
+    private static Supplier<BuiltinPlugin> builtinPlugin = Internals::throwNotSetup;
     
     private static <T> T throwNotSetup() {
         throw new AssertionError("REI Internals have not been initialized!");
@@ -124,6 +126,32 @@ public final class Internals {
     @NotNull
     public static Tooltip createTooltip(@Nullable Point point, Collection<Text> texts) {
         return tooltipProvider.apply(point, texts);
+    }
+    
+    @NotNull
+    public static BuiltinPlugin getBuiltinPlugin() {
+        return builtinPlugin.get();
+    }
+    
+    @ApiStatus.Internal
+    public static <T> void attachInstance(T instance, Class<T> clazz) {
+        attachInstance((Supplier<T>) () -> instance, clazz.getSimpleName());
+    }
+    
+    @ApiStatus.Internal
+    public static <T> void attachInstance(T instance, String name) {
+        try {
+            for (Field field : Internals.class.getDeclaredFields()) {
+                if (field.getName().equalsIgnoreCase(name)) {
+                    field.setAccessible(true);
+                    field.set(null, instance);
+                    return;
+                }
+            }
+            throw new RuntimeException("Failed to attach " + instance + " with field name: " + name);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
     
     public interface EntryStackProvider {
