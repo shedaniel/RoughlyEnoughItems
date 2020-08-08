@@ -23,22 +23,13 @@
 
 package me.shedaniel.rei.server;
 
-import org.jetbrains.annotations.ApiStatus;
+import net.minecraft.container.Container;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.Iterator;
-import java.util.List;
+import java.util.function.Consumer;
 
-@ApiStatus.Internal
-public interface RecipeGridAligner<T> {
-    default void alignRecipeToGrid(List<StackAccessor> gridStacks, Iterator<T> iterator_1, int craftsAmount) {
-        for (StackAccessor gridStack : gridStacks) {
-            if (!iterator_1.hasNext()) {
-                return;
-            }
-            
-            this.acceptAlignedInput(iterator_1, gridStack, craftsAmount);
-        }
-    }
-    
-    void acceptAlignedInput(Iterator<T> var1, StackAccessor gridSlot, int craftsAmount);
+@FunctionalInterface
+public interface RecipeFinderPopulator<T extends Container> {
+    @NotNull
+    Consumer<RecipeFinder> populate(ContainerContext<T> context);
 }

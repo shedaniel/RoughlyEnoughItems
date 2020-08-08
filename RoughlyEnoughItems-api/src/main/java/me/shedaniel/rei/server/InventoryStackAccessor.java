@@ -23,22 +23,30 @@
 
 package me.shedaniel.rei.server;
 
-import org.jetbrains.annotations.ApiStatus;
+import net.minecraft.inventory.Inventory;
+import net.minecraft.item.ItemStack;
 
-import java.util.Iterator;
-import java.util.List;
-
-@ApiStatus.Internal
-public interface RecipeGridAligner<T> {
-    default void alignRecipeToGrid(List<StackAccessor> gridStacks, Iterator<T> iterator_1, int craftsAmount) {
-        for (StackAccessor gridStack : gridStacks) {
-            if (!iterator_1.hasNext()) {
-                return;
-            }
-            
-            this.acceptAlignedInput(iterator_1, gridStack, craftsAmount);
-        }
+public class InventoryStackAccessor implements StackAccessor {
+    protected Inventory inventory;
+    protected int index;
+    
+    public InventoryStackAccessor(Inventory inventory, int index) {
+        this.inventory = inventory;
+        this.index = index;
     }
     
-    void acceptAlignedInput(Iterator<T> var1, StackAccessor gridSlot, int craftsAmount);
+    @Override
+    public ItemStack getItemStack() {
+        return inventory.getInvStack(index);
+    }
+    
+    @Override
+    public void setItemStack(ItemStack stack) {
+        this.inventory.setInvStack(index, stack);
+    }
+    
+    @Override
+    public ItemStack takeStack(int amount) {
+        return this.inventory.takeInvStack(index, amount);
+    }
 }

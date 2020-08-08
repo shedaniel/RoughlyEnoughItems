@@ -24,9 +24,87 @@
 package me.shedaniel.rei.server;
 
 import net.minecraft.container.Container;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.item.ItemStack;
+import net.minecraft.screen.slot.Slot;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.collection.DefaultedList;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public interface ContainerInfo<T extends Container> {
     Class<? extends Container> getContainerClass();
+    
+    default StackAccessor getStack(ContainerContext<T> context, int slotIndex) {
+        return new SlotStackAccessor(context.getContainer().getSlot(slotIndex));
+    }
+    
+    default GridCleanHandler<T> getGridCleanHandler() {
+        return context -> {
+            T container = context.getContainer();
+            for (StackAccessor gridStack : getGridStacks(context)) {
+                GridCleanHandler.returnSlotToPlayerInventory(context, gridStack);
+            }
+
+            clearCraftingSlots(container);
+        };
+    }
+    
+    default DumpHandler<T> getDumpHandler() {
+        return (context, stackToInsert) -> {
+            List<StackAccessor> inventoryStacks = context.getContainerInfo().getInventoryStacks(context);
+            
+            StackAccessor nextSlot = DumpHandler.getOccupiedSlotWithRoomForStack(stackToInsert, inventoryStacks);
+            if (nextSlot == null) {
+                nextSlot = DumpHandler.getEmptySlot(inventoryStacks);
+            }
+            if (nextSlot == null) {
+                return false;
+            }
+            
+            ItemStack stack = stackToInsert.copy();
+            stack.setCount(nextSlot.getItemStack().getCount() + stack.getCount());
+            nextSlot.setItemStack(stack);
+            return true;
+        };
+    }
+    
+    default RecipeFinderPopulator<T> getRecipeFinderPopulator() {
+        return context -> recipeFinder -> {
+            for (StackAccessor inventoryStack : getInventoryStacks(context)) {
+                recipeFinder.addNormalItem(inventoryStack.getItemStack());
+            }
+            populateRecipeFinder(context.getContainer(), recipeFinder);
+        };
+    }
+    
+    default List<StackAccessor> getGridStacks(ContainerContext<T> context) {
+        return IntStream.range(0, getCraftingWidth(context.getContainer()) * getCraftingHeight(context.getContainer()) + 1)
+                .filter(value -> value != getCraftingResultSlotIndex(context.getContainer()))
+                .mapToObj(context::getStack)
+                .collect(Collectors.toList());
+    }
+    
+    default List<StackAccessor> getInventoryStacks(ContainerContext<T> context) {
+        PlayerInventory inventory = context.getPlayerEntity().inventory;
+        return IntStream.range(0, inventory.main.size())
+                .mapToObj(index -> (StackAccessor) new InventoryStackAccessor(inventory, index))
+                .collect(Collectors.toList());
+    }
+    
+    default void markDirty(ContainerContext<T> context) {
+        context.getPlayerEntity().inventory.markDirty();
+        context.getContainer().sendContentUpdates();
+        
+        DefaultedList<ItemStack> defaultedList = DefaultedList.of();
+        for (Slot slot : context.getPlayerEntity().container.slots) {
+            defaultedList.add(slot.getStack());
+        }
+        
+        ((ServerPlayerEntity) context.getPlayerEntity()).onContainerRegistered(context.getPlayerEntity().container, defaultedList);
+    }
     
     int getCraftingResultSlotIndex(T container);
     
@@ -34,7 +112,7 @@ public interface ContainerInfo<T extends Container> {
     
     int getCraftingHeight(T container);
     
-    void clearCraftingSlots(T container);
+    default void clearCraftingSlots(T container) {}
     
-    void populateRecipeFinder(T container, RecipeFinder var1);
+    default void populateRecipeFinder(T container, RecipeFinder var1) {}
 }

@@ -31,6 +31,7 @@ import me.shedaniel.rei.api.AutoTransferHandler;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.TransferRecipeDisplay;
+import me.shedaniel.rei.server.ContainerContext;
 import me.shedaniel.rei.server.ContainerInfo;
 import me.shedaniel.rei.server.ContainerInfoHandler;
 import me.shedaniel.rei.server.RecipeFinder;
@@ -43,6 +44,7 @@ import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.container.Container;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.registry.Registry;
@@ -104,10 +106,22 @@ public class DefaultCategoryHandler implements AutoTransferHandler {
     public IntList hasItems(Container container, ContainerInfo<Container> containerInfo, List<List<EntryStack>> inputs) {
         // Create a clone of player's inventory, and count
         RecipeFinder recipeFinder = new RecipeFinder();
-        containerInfo.populateRecipeFinder(container, recipeFinder);
-        for (ItemStack stack : MinecraftClient.getInstance().player.inventory.main) {
-            recipeFinder.addNormalItem(stack.copy());
-        }
+        containerInfo.getRecipeFinderPopulator().populate(new ContainerContext<Container>() {
+            @Override
+            public Container getContainer() {
+                return container;
+            }
+            
+            @Override
+            public PlayerEntity getPlayerEntity() {
+                return MinecraftClient.getInstance().player;
+            }
+            
+            @Override
+            public ContainerInfo<Container> getContainerInfo() {
+                return containerInfo;
+            }
+        }).accept(recipeFinder);
         IntList intList = new IntArrayList();
         for (int i = 0; i < inputs.size(); i++) {
             List<EntryStack> possibleStacks = inputs.get(i);
