@@ -30,7 +30,6 @@ import me.shedaniel.cloth.api.client.events.v0.ClothClientHooks;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.api.Executor;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.api.ConfigObject;
@@ -59,6 +58,8 @@ import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
+
+import static me.shedaniel.rei.impl.Internals.attachInstance;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -220,7 +221,7 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
     
     public ScreenHelper() {
         ScreenHelper.instance = this;
-        RoughlyEnoughItemsCore.attachInstance(instance, REIHelper.class);
+        attachInstance(instance, REIHelper.class);
     }
     
     public static Rectangle getItemListArea(Rectangle bounds) {

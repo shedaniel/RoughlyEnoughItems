@@ -62,6 +62,8 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import static me.shedaniel.rei.impl.Internals.attachInstance;
+
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Supplier;
@@ -260,8 +262,8 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ClientHelperImpl.instance = this;
-        RoughlyEnoughItemsCore.attachInstance(instance, ClientHelper.class);
-        RoughlyEnoughItemsCore.attachInstance((Supplier<ClientHelper.ViewSearchBuilder>) ViewSearchBuilder::new, "viewSearchBuilder");
+        attachInstance(instance, ClientHelper.class);
+        attachInstance((Supplier<ClientHelper.ViewSearchBuilder>) ViewSearchBuilder::new, "viewSearchBuilder");
         modNameCache.put("minecraft", "Minecraft");
         modNameCache.put("c", "Global");
         modNameCache.put("global", "Global");
