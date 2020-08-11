@@ -120,7 +120,7 @@ public class DefaultCategoryHandler implements AutoTransferHandler {
                 if (!done) {
                     if (possibleStack.getType() == EntryStack.Type.ITEM) {
                         int invRequiredCount = possibleStack.getAmount();
-                        int key = Registry.ITEM.getRawId(possibleStack.getItem());
+                        int key = RecipeFinder.getItemId(possibleStack.getItemStack());
                         while (invRequiredCount > 0 && recipeFinder.contains(key)) {
                             invRequiredCount--;
                             recipeFinder.take(key, 1);
