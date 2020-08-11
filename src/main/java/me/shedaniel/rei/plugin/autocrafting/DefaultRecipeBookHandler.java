@@ -54,16 +54,14 @@ public class DefaultRecipeBookHandler implements AutoTransferHandler {
         if (display instanceof DefaultCraftingDisplay) {
             DefaultCraftingDisplay craftingDisplay = (DefaultCraftingDisplay) display;
             if (craftingDisplay.getOptionalRecipe().isPresent()) {
-                int h = -1, w = -1;
+                int h, w;
                 if (container instanceof CraftingTableContainer) {
                     h = 3;
                     w = 3;
                 } else if (container instanceof PlayerContainer) {
                     h = 2;
                     w = 2;
-                }
-                if (h == -1 || w == -1)
-                    return Result.createNotApplicable();
+                } else return Result.createNotApplicable();
                 Recipe<?> recipe = (craftingDisplay).getOptionalRecipe().get();
                 if (craftingDisplay.getHeight() > h || craftingDisplay.getWidth() > w)
                     return Result.createFailed(I18n.translate("error.rei.transfer.too_small", h, w));

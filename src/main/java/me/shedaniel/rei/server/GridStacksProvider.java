@@ -23,22 +23,9 @@
 
 package me.shedaniel.rei.server;
 
-import org.jetbrains.annotations.ApiStatus;
+import net.minecraft.container.Container;
 
-import java.util.Iterator;
-import java.util.List;
-
-@ApiStatus.Internal
-public interface RecipeGridAligner<T> {
-    default void alignRecipeToGrid(List<StackAccessor> gridStacks, Iterator<T> iterator_1, int craftsAmount) {
-        for (StackAccessor gridStack : gridStacks) {
-            if (!iterator_1.hasNext()) {
-                return;
-            }
-            
-            this.acceptAlignedInput(iterator_1, gridStack, craftsAmount);
-        }
-    }
-    
-    void acceptAlignedInput(Iterator<T> var1, StackAccessor gridSlot, int craftsAmount);
+@FunctionalInterface
+public interface GridStacksProvider<T extends Container> {
+    Iterable<StackAccessor> getStacks(ContainerContext<T> context);
 }
