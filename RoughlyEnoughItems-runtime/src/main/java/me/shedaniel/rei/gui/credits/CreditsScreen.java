@@ -27,6 +27,7 @@ import com.google.common.collect.Lists;
 import me.shedaniel.rei.gui.credits.CreditsEntryListWidget.TextCreditsItem;
 import me.shedaniel.rei.gui.credits.CreditsEntryListWidget.TranslationCreditsItem;
 import me.shedaniel.rei.impl.ScreenHelper;
+import me.shedaniel.rei.utils.ImmutableLiteralText;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.CustomValue;
 import net.minecraft.client.gui.screen.Screen;
@@ -100,16 +101,16 @@ public class CreditsScreen extends Screen {
         for (String line : String.format("§lRoughly Enough Items (v%s)\n§7Originally a fork for Almost Enough Items.\n\n§lLanguage Translation\n%s\n\n§lLicense\n§7Roughly Enough Items is licensed under MIT.", FabricLoader.getInstance().getModContainer("roughlyenoughitems").map(mod -> mod.getMetadata().getVersion().getFriendlyString()).orElse("Unknown"), "%translators%").split("\n"))
             if (line.equalsIgnoreCase("%translators%")) {
                 if (exception[0] != null) {
-                    entryListWidget.creditsAddEntry(new TextCreditsItem(new LiteralText("Failed to get translators: " + exception[0].toString())));
+                    entryListWidget.creditsAddEntry(new TextCreditsItem(new ImmutableLiteralText("Failed to get translators: " + exception[0].toString())));
                     for (StackTraceElement traceElement : exception[0].getStackTrace())
-                        entryListWidget.creditsAddEntry(new TextCreditsItem(new LiteralText("  at " + traceElement)));
+                        entryListWidget.creditsAddEntry(new TextCreditsItem(new ImmutableLiteralText("  at " + traceElement)));
                 } else {
                     int maxWidth = translatorsMapped.stream().mapToInt(pair -> textRenderer.getStringWidth(pair.getLeft())).max().orElse(0) + 5;
                     for (Pair<String, String> pair : translatorsMapped) {
                         entryListWidget.creditsAddEntry(new TranslationCreditsItem(new TranslatableText(pair.getLeft()), new TranslatableText(pair.getRight()), i - maxWidth - 10, maxWidth));
                     }
                 }
-            } else entryListWidget.creditsAddEntry(new TextCreditsItem(new LiteralText(line)));
+            } else entryListWidget.creditsAddEntry(new TextCreditsItem(new ImmutableLiteralText(line)));
         entryListWidget.creditsAddEntry(new TextCreditsItem(NarratorManager.EMPTY));
         children.add(buttonDone = new AbstractPressableButtonWidget(width / 2 - 100, height - 26, 200, 20, new TranslatableText("gui.done")) {
             @Override

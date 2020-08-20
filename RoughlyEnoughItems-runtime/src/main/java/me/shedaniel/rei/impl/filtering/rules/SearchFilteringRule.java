@@ -31,6 +31,7 @@ import me.shedaniel.rei.impl.SearchArgument;
 import me.shedaniel.rei.impl.filtering.AbstractFilteringRule;
 import me.shedaniel.rei.impl.filtering.FilteringContext;
 import me.shedaniel.rei.impl.filtering.FilteringResult;
+import me.shedaniel.rei.utils.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screen.Screen;
@@ -40,7 +41,10 @@ import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -109,15 +113,10 @@ public class SearchFilteringRule extends AbstractFilteringRule<SearchFilteringRu
     }
     
     private void processList(Collection<EntryStack> stacks, List<CompletableFuture<List<EntryStack>>> completableFutures) {
-        int size = 100;
-        Iterator<EntryStack> iterator = stacks.iterator();
-        for (int i = 0; i < stacks.size(); i += size) {
-            int[] start = {i};
+        for (Iterable<EntryStack> partitionStacks : CollectionUtils.partition((List<EntryStack>) stacks, 100)) {
             completableFutures.add(CompletableFuture.supplyAsync(() -> {
-                int end = Math.min(stacks.size(), start[0] + size);
                 List<EntryStack> output = Lists.newArrayList();
-                for (; start[0] < end; start[0]++) {
-                    EntryStack stack = ((List<EntryStack>) stacks).get(start[0]);
+                for (EntryStack stack : partitionStacks) {
                     boolean shown = SearchArgument.canSearchTermsBeAppliedTo(stack, arguments);
                     if (shown) {
                         output.add(stack);

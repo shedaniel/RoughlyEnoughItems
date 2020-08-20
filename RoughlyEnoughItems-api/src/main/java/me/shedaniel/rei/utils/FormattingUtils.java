@@ -21,31 +21,28 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api;
+package me.shedaniel.rei.utils;
 
-import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.widgets.Tooltip;
-import me.shedaniel.rei.utils.FormattingUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
-import org.jetbrains.annotations.NotNull;
-
-@Environment(EnvType.CLIENT)
-public interface TextRepresentable {
-    @NotNull
-    default Text asFormattedText() {
-        if (this instanceof EntryStack) {
-            Tooltip tooltip = ((EntryStack) this).getTooltip(PointHelper.ofMouse());
-            if (tooltip != null && !tooltip.getText().isEmpty())
-                return tooltip.getText().get(0);
+public final class FormattingUtils {
+    public static String stripFormatting(String string) {
+        StringBuilder builder = new StringBuilder();
+        boolean lastSpecial = false;
+        for (char c : string.toCharArray()) {
+            if (lastSpecial) {
+                lastSpecial = false;
+                if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || c == 'r' || (c >= 'A' && c <= 'F') || c == 'R')) {
+                    builder.append('§');
+                    builder.append(c);
+                }
+            } else if (c == '§') {
+                lastSpecial = true;
+            } else {
+                builder.append(c);
+            }
         }
-        return new LiteralText("");
-    }
-    
-    @NotNull
-    default Text asFormatStrippedText() {
-        return new LiteralText(FormattingUtils.stripFormatting(asFormattedText().getString()));
+        if (lastSpecial) {
+            builder.append('§');
+        }
+        return builder.toString();
     }
 }
