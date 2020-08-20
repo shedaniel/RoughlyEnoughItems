@@ -59,30 +59,29 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
         this.player = player;
         this.inventoryStacks = this.containerInfo.getInventoryStacks(this);
         this.gridStacks = this.containerInfo.getGridStacks(this);
-        if (player.isCreative()) {
-            player.skipPacketSlotUpdates = true;
-            // Return the already placed items on the grid
+        
+        player.skipPacketSlotUpdates = true;
+        // Return the already placed items on the grid
+        this.returnInputs();
+        
+        RecipeFinder recipeFinder = new RecipeFinder();
+        this.containerInfo.getRecipeFinderPopulator().populate(this).accept(recipeFinder);
+        DefaultedList<Ingredient> ingredients = DefaultedList.of();
+        map.entrySet().stream().sorted(Comparator.comparingInt(Map.Entry::getKey)).forEach(entry -> {
+            ingredients.add(Ingredient.ofItems(entry.getValue().stream().map(ItemStack::getItem).toArray(Item[]::new)));
+        });
+        
+        if (recipeFinder.findRecipe(ingredients, null)) {
+            this.fillInputSlots(recipeFinder, ingredients, hasShift);
+        } else {
             this.returnInputs();
-            
-            RecipeFinder recipeFinder = new RecipeFinder();
-            this.containerInfo.getRecipeFinderPopulator().populate(this).accept(recipeFinder);
-            DefaultedList<Ingredient> ingredients = DefaultedList.of();
-            map.entrySet().stream().sorted(Comparator.comparingInt(Map.Entry::getKey)).forEach(entry -> {
-                ingredients.add(Ingredient.ofItems(entry.getValue().stream().map(ItemStack::getItem).toArray(Item[]::new)));
-            });
-            
-            if (recipeFinder.findRecipe(ingredients, null)) {
-                this.fillInputSlots(recipeFinder, ingredients, hasShift);
-            } else {
-                this.returnInputs();
-                player.skipPacketSlotUpdates = false;
-                this.containerInfo.markDirty(this);
-                throw new NotEnoughMaterialsException();
-            }
-            
             player.skipPacketSlotUpdates = false;
             this.containerInfo.markDirty(this);
+            throw new NotEnoughMaterialsException();
         }
+        
+        player.skipPacketSlotUpdates = false;
+        this.containerInfo.markDirty(this);
     }
     
     @Override
