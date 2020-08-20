@@ -32,6 +32,8 @@ import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.fractions.Fraction;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.utils.CollectionUtils;
+import me.shedaniel.rei.utils.FormattingUtils;
+import me.shedaniel.rei.utils.ImmutableLiteralText;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
@@ -44,8 +46,6 @@ import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.registry.Registry;
@@ -206,7 +206,7 @@ public class FluidEntryStack extends AbstractEntryStack {
             final String modId = ClientHelper.getInstance().getModFromIdentifier(id);
             boolean alreadyHasMod = false;
             for (Text s : toolTip)
-                if (Formatting.strip(s.getString()).equalsIgnoreCase(modId)) {
+                if (FormattingUtils.stripFormatting(s.getString()).equalsIgnoreCase(modId)) {
                     alreadyHasMod = true;
                     break;
                 }
@@ -247,7 +247,7 @@ public class FluidEntryStack extends AbstractEntryStack {
     public Text asFormattedText() {
         Identifier id = Registry.FLUID.getId(fluid);
         if (I18n.hasTranslation("block." + id.toString().replaceFirst(":", ".")))
-            return new TranslatableText("block." + id.toString().replaceFirst(":", "."));
-        return new LiteralText(CollectionUtils.mapAndJoinToString(id.getPath().split("_"), StringUtils::capitalize, " "));
+            return new ImmutableLiteralText(I18n.translate("block." + id.toString().replaceFirst(":", ".")));
+        return new ImmutableLiteralText(CollectionUtils.mapAndJoinToString(id.getPath().split("_"), StringUtils::capitalize, " "));
     }
 }

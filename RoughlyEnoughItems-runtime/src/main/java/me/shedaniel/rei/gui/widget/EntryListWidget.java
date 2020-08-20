@@ -441,15 +441,11 @@ public class EntryListWidget extends WidgetWithBounds {
             List<EntryStack> stacks = EntryRegistry.getInstance().getPreFilteredList();
             if (stacks instanceof CopyOnWriteArrayList && !stacks.isEmpty()) {
                 if (ConfigObject.getInstance().shouldAsyncSearch()) {
-                    int size = ConfigObject.getInstance().getNumberAsyncSearch();
                     List<CompletableFuture<List<EntryStack>>> completableFutures = Lists.newArrayList();
-                    for (int i = 0; i < stacks.size(); i += size) {
-                        int[] start = {i};
+                    for (Iterable<EntryStack> partitionStacks : CollectionUtils.partition(stacks, ConfigObject.getInstance().getAsyncSearchPartitionSize())) {
                         completableFutures.add(CompletableFuture.supplyAsync(() -> {
-                            int end = Math.min(stacks.size(), start[0] + size);
                             List<EntryStack> filtered = Lists.newArrayList();
-                            for (; start[0] < end; start[0]++) {
-                                EntryStack stack = stacks.get(start[0]);
+                            for (EntryStack stack : partitionStacks) {
                                 if (canLastSearchTermsBeAppliedTo(stack)) {
                                     if (workingItems != null && !workingItems.contains(stack.hashIgnoreAmount()))
                                         continue;

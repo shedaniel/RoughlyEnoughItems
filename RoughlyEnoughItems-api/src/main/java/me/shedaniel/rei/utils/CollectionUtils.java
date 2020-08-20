@@ -25,9 +25,11 @@ package me.shedaniel.rei.utils;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.common.collect.UnmodifiableIterator;
 import me.shedaniel.rei.api.EntryStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.util.math.MathHelper;
 
 import java.util.*;
 import java.util.function.Function;
@@ -274,5 +276,36 @@ public class CollectionUtils {
             sum += t;
         }
         return sum;
+    }
+    
+    public static <T> Iterable<Iterable<T>> partition(List<T> list, int size) {
+        return () -> new UnmodifiableIterator<Iterable<T>>() {
+            int i = 0;
+            int partitionSize = MathHelper.ceil(list.size() / (float) size);
+            
+            @Override
+            public boolean hasNext() {
+                return i < partitionSize;
+            }
+            
+            @Override
+            public Iterable<T> next() {
+                UnmodifiableIterator<T> iterator = new UnmodifiableIterator<T>() {
+                    int cursor = i++ * size;
+                    int curSize = cursor + Math.min(list.size() - cursor, size);
+                    
+                    @Override
+                    public boolean hasNext() {
+                        return cursor < curSize;
+                    }
+                    
+                    @Override
+                    public T next() {
+                        return list.get(cursor++);
+                    }
+                };
+                return () -> iterator;
+            }
+        };
     }
 }

@@ -317,8 +317,8 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     @Override
     @ApiStatus.Experimental
-    public int getNumberAsyncSearch() {
-        return advanced.search.numberAsyncSearch;
+    public int getAsyncSearchPartitionSize() {
+        return advanced.search.asyncSearchPartitionSize;
     }
     
     @Override
@@ -452,7 +452,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
             @Comment("Declares whether search time should be debugged.") private boolean debugSearchTimeRequired = false;
             @Comment("Declares whether REI should search async.") private boolean asyncSearch = true;
             @Comment("Declares how many entries should be grouped one async search.") @ConfigEntry.BoundedDiscrete(min = 25, max = 400)
-            private int numberAsyncSearch = 50;
+            private int asyncSearchPartitionSize = 100;
         }
         
         public static class Commands {

@@ -26,6 +26,8 @@ package me.shedaniel.rei.impl;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
+import it.unimi.dsi.fastutil.objects.ReferenceSet;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.ClientHelper;
@@ -33,6 +35,8 @@ import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.fractions.Fraction;
 import me.shedaniel.rei.api.widgets.Tooltip;
+import me.shedaniel.rei.utils.FormattingUtils;
+import me.shedaniel.rei.utils.ImmutableLiteralText;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.client.render.DiffuseLighting;
@@ -40,6 +44,7 @@ import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.json.ModelTransformation;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.Item;
@@ -47,10 +52,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
@@ -284,7 +286,7 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
             final String modId = ClientHelper.getInstance().getModFromItem(getItem());
             boolean alreadyHasMod = false;
             for (Text s : toolTip)
-                if (Formatting.strip(s.getString()).equalsIgnoreCase(modId)) {
+                if (FormattingUtils.stripFormatting(s.getString()).equalsIgnoreCase(modId)) {
                     alreadyHasMod = true;
                     break;
                 }
@@ -377,32 +379,32 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
         }
     }
     
-    private static final List<Item> SEARCH_BLACKLISTED = Lists.newArrayList();
+    private static final ReferenceSet<Item> SEARCH_BLACKLISTED = new ReferenceOpenHashSet<>();
     
     @Override
     public @NotNull Text asFormattedText() {
-        if (!SEARCH_BLACKLISTED.contains(getItem()))
+        if (!SEARCH_BLACKLISTED.contains(itemStack.getItem()))
             try {
-                return getItemStack().getName();
+                return itemStack.getName();
             } catch (Throwable e) {
                 e.printStackTrace();
-                SEARCH_BLACKLISTED.add(getItem());
+                SEARCH_BLACKLISTED.add(itemStack.getItem());
             }
         try {
-            return new TranslatableText("item." + Registry.ITEM.getId(getItem()).toString().replace(":", "."));
+            return new ImmutableLiteralText(I18n.translate("item." + Registry.ITEM.getId(itemStack.getItem()).toString().replace(":", ".")));
         } catch (Throwable e) {
             e.printStackTrace();
         }
-        return new LiteralText("ERROR");
+        return new ImmutableLiteralText("ERROR");
     }
     
     private List<Text> tryGetItemStackToolTip(boolean careAboutAdvanced) {
-        if (!SEARCH_BLACKLISTED.contains(getItem()))
+        if (!SEARCH_BLACKLISTED.contains(itemStack.getItem()))
             try {
                 return itemStack.getTooltip(MinecraftClient.getInstance().player, MinecraftClient.getInstance().options.advancedItemTooltips && careAboutAdvanced ? TooltipContext.Default.ADVANCED : TooltipContext.Default.NORMAL);
             } catch (Throwable e) {
                 e.printStackTrace();
-                SEARCH_BLACKLISTED.add(getItem());
+                SEARCH_BLACKLISTED.add(itemStack.getItem());
             }
         return Lists.newArrayList(asFormattedText());
     }

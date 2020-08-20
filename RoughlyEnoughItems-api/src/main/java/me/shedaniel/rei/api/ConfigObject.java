@@ -155,7 +155,7 @@ public interface ConfigObject {
     boolean shouldAsyncSearch();
     
     @ApiStatus.Experimental
-    int getNumberAsyncSearch();
+    int getAsyncSearchPartitionSize();
     
     @ApiStatus.Experimental
     boolean doDebugSearchTimeRequired();

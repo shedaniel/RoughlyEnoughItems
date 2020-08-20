@@ -43,6 +43,7 @@ import me.shedaniel.rei.impl.InternalWidgets;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.widgets.PanelWidget;
 import me.shedaniel.rei.utils.CollectionUtils;
+import me.shedaniel.rei.utils.ImmutableLiteralText;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
@@ -285,7 +286,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
             RecipeViewingScreen.this.choosePageActivated = true;
             RecipeViewingScreen.this.init();
         }).onRender((matrices, label) -> {
-            label.setText(new LiteralText(String.format("%d/%d", page + 1, getTotalPages(selectedCategory))));
+            label.setText(new ImmutableLiteralText(String.format("%d/%d", page + 1, getTotalPages(selectedCategory))));
             label.setClickable(getTotalPages(selectedCategory) > 1);
         }).tooltipSupplier(label -> label.isClickable() ? I18n.translate("text.rei.choose_page") : null));
         widgets.add(recipeNext = Widgets.createButton(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 19, 12, 12), new TranslatableText("text.rei.right_arrow"))
