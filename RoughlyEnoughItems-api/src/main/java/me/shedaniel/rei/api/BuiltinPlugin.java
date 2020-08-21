@@ -48,6 +48,8 @@ public interface BuiltinPlugin {
     Identifier SMITHING = new Identifier("minecraft", "plugins/smithing");
     Identifier BEACON = new Identifier("minecraft", "plugins/beacon");
     Identifier INFO = new Identifier("roughlyenoughitems", "plugins/information");
+    Identifier TILLING = new Identifier("minecraft", "plugins/tilling");
+    Identifier PATHING = new Identifier("minecraft", "plugins/pathing");
     
     static BuiltinPlugin getInstance() {
         return Internals.getBuiltinPlugin();

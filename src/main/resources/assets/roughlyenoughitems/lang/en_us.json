@@ -32,6 +32,8 @@
   "category.rei.smithing": "Smithing",
   "category.rei.beacon_base": "Beacon Base",
   "category.rei.information": "Information",
+  "category.rei.tilling": "Tilling",
+  "category.rei.pathing": "Pathing",
   "text.rei.composting.chance": "§e%d%% Chance",
   "text.rei.composting.page": "Page %d",
   "text.rei.config": "Config",

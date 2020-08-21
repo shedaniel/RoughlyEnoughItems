@@ -50,6 +50,9 @@ import me.shedaniel.rei.plugin.fuel.DefaultFuelCategory;
 import me.shedaniel.rei.plugin.fuel.DefaultFuelDisplay;
 import me.shedaniel.rei.plugin.information.DefaultInformationCategory;
 import me.shedaniel.rei.plugin.information.DefaultInformationDisplay;
+import me.shedaniel.rei.plugin.pathing.DefaultPathingCategory;
+import me.shedaniel.rei.plugin.pathing.DefaultPathingDisplay;
+import me.shedaniel.rei.plugin.pathing.DummyShovelItem;
 import me.shedaniel.rei.plugin.smelting.DefaultSmeltingDisplay;
 import me.shedaniel.rei.plugin.smithing.DefaultSmithingCategory;
 import me.shedaniel.rei.plugin.smithing.DefaultSmithingDisplay;
@@ -59,6 +62,9 @@ import me.shedaniel.rei.plugin.stonecutting.DefaultStoneCuttingDisplay;
 import me.shedaniel.rei.plugin.stripping.DefaultStrippingCategory;
 import me.shedaniel.rei.plugin.stripping.DefaultStrippingDisplay;
 import me.shedaniel.rei.plugin.stripping.DummyAxeItem;
+import me.shedaniel.rei.plugin.tilling.DefaultTillingCategory;
+import me.shedaniel.rei.plugin.tilling.DefaultTillingDisplay;
+import me.shedaniel.rei.plugin.tilling.DummyHoeItem;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -108,6 +114,8 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
     public static final Identifier SMITHING = BuiltinPlugin.SMITHING;
     public static final Identifier BEACON = BuiltinPlugin.BEACON;
     public static final Identifier INFO = BuiltinPlugin.INFO;
+    public static final Identifier TILLING = BuiltinPlugin.TILLING;
+    public static final Identifier PATHING = BuiltinPlugin.PATHING;
     private static final Identifier DISPLAY_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/display.png");
     private static final Identifier DISPLAY_TEXTURE_DARK = new Identifier("roughlyenoughitems", "textures/gui/display_dark.png");
     private static final List<Lazy<DefaultBrewingDisplay>> BREWING_DISPLAYS = Lists.newArrayList();
@@ -202,7 +210,9 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
                 new DefaultStrippingCategory(),
                 new DefaultSmithingCategory(),
                 new DefaultBeaconBaseCategory(),
-                new DefaultInformationCategory()
+                new DefaultInformationCategory(),
+                new DefaultTillingCategory(),
+                new DefaultPathingCategory()
         );
     }
     
@@ -254,6 +264,12 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
         }
         DummyAxeItem.getStrippedBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getId(b.getKey()))).forEach(set -> {
             recipeHelper.registerDisplay(new DefaultStrippingDisplay(EntryStack.create(set.getKey()), EntryStack.create(set.getValue())));
+        });
+        DummyHoeItem.getTilledBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getId(b.getKey()))).forEach(set -> {
+            recipeHelper.registerDisplay(new DefaultTillingDisplay(EntryStack.create(set.getKey()), EntryStack.create(set.getValue().getBlock())));
+        });
+        DummyShovelItem.getPathBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getId(b.getKey()))).forEach(set -> {
+            recipeHelper.registerDisplay(new DefaultPathingDisplay(EntryStack.create(set.getKey()), EntryStack.create(set.getValue().getBlock())));
         });
         recipeHelper.registerDisplay(new DefaultBeaconBaseDisplay(CollectionUtils.map(Lists.newArrayList(BlockTags.BEACON_BASE_BLOCKS.values()), ItemStack::new)));
     }
@@ -322,6 +338,18 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
         if (axes != null) {
             for (Item item : axes.values()) {
                 recipeHelper.registerWorkingStations(STRIPPING, EntryStack.create(item));
+            }
+        }
+        Tag<Item> hoes = MinecraftClient.getInstance().getNetworkHandler().getTagManager().getItems().getTag(new Identifier("fabric", "hoes"));
+        if (hoes != null) {
+            for (Item item : hoes.values()) {
+                recipeHelper.registerWorkingStations(TILLING, EntryStack.create(item));
+            }
+        }
+        Tag<Item> shovels = MinecraftClient.getInstance().getNetworkHandler().getTagManager().getItems().getTag(new Identifier("fabric", "shovels"));
+        if (shovels != null) {
+            for (Item item : shovels.values()) {
+                recipeHelper.registerWorkingStations(PATHING, EntryStack.create(item));
             }
         }
         recipeHelper.removeAutoCraftButton(FUEL);
