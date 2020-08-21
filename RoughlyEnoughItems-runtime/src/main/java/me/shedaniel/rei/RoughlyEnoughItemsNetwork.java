@@ -24,7 +24,6 @@
 package me.shedaniel.rei;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import io.netty.buffer.Unpooled;
 import me.shedaniel.math.api.Executor;
 import me.shedaniel.rei.server.InputSlotCrafter;
@@ -42,11 +41,10 @@ import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
+import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.MathHelper;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
 public class RoughlyEnoughItemsNetwork implements ModInitializer {
     
@@ -115,7 +113,7 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
                 PlayerContainer playerContainer = player.playerContainer;
                 try {
                     boolean shift = packetByteBuf.readBoolean();
-                    Map<Integer, List<ItemStack>> input = Maps.newHashMap();
+                    DefaultedList<List<ItemStack>> input = DefaultedList.of();
                     int mapSize = packetByteBuf.readInt();
                     for (int i = 0; i < mapSize; i++) {
                         List<ItemStack> list = Lists.newArrayList();
@@ -123,7 +121,7 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
                         for (int j = 0; j < count; j++) {
                             list.add(packetByteBuf.readItemStack());
                         }
-                        input.put(i, list);
+                        input.add(list);
                     }
                     try {
                         InputSlotCrafter.start(category, container, player, input, shift);
@@ -132,13 +130,12 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
                             return;
                         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
                         buf.writeInt(input.size());
-                        input.entrySet().stream().sorted(Comparator.comparingInt(Map.Entry::getKey)).forEach(entry -> {
-                            List<ItemStack> stacks = entry.getValue();
+                        for (List<ItemStack> stacks : input) {
                             buf.writeInt(stacks.size());
                             for (ItemStack stack : stacks) {
                                 buf.writeItemStack(stack);
                             }
-                        });
+                        }
                         if (ServerSidePacketRegistry.INSTANCE.canPlayerReceive(player, NOT_ENOUGH_ITEMS_PACKET)) {
                             ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, NOT_ENOUGH_ITEMS_PACKET, buf);
                         }
