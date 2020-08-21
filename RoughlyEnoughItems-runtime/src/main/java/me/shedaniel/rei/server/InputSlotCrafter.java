@@ -25,17 +25,20 @@ package me.shedaniel.rei.server;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.container.Container;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
-import net.minecraft.item.Item;
+import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
 
 public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<Integer>, ContainerContext {
     
@@ -50,12 +53,12 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
         this.containerInfo = containerInfo;
     }
     
-    public static <C extends Inventory> void start(Identifier category, Container craftingContainer_1, ServerPlayerEntity player, Map<Integer, List<ItemStack>> map, boolean hasShift) {
+    public static <C extends Inventory> void start(Identifier category, Container craftingContainer_1, ServerPlayerEntity player, DefaultedList<List<ItemStack>> map, boolean hasShift) {
         ContainerInfo<? extends Container> containerInfo = Objects.requireNonNull(ContainerInfoHandler.getContainerInfo(category, craftingContainer_1.getClass()), "Container Info does not exist on the server!");
         new InputSlotCrafter<C>(craftingContainer_1, containerInfo).fillInputSlots(player, map, hasShift);
     }
     
-    private void fillInputSlots(ServerPlayerEntity player, Map<Integer, List<ItemStack>> map, boolean hasShift) {
+    private void fillInputSlots(ServerPlayerEntity player, DefaultedList<List<ItemStack>> map, boolean hasShift) {
         this.player = player;
         this.inventoryStacks = this.containerInfo.getInventoryStacks(this);
         this.gridStacks = this.containerInfo.getGridStacks(this);
@@ -67,9 +70,9 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
         RecipeFinder recipeFinder = new RecipeFinder();
         this.containerInfo.getRecipeFinderPopulator().populate(this).accept(recipeFinder);
         DefaultedList<Ingredient> ingredients = DefaultedList.of();
-        map.entrySet().stream().sorted(Comparator.comparingInt(Map.Entry::getKey)).forEach(entry -> {
-            ingredients.add(Ingredient.ofItems(entry.getValue().stream().map(ItemStack::getItem).toArray(Item[]::new)));
-        });
+        for (List<ItemStack> itemStacks : map) {
+            ingredients.add(Ingredient.ofItems(CollectionUtils.map(itemStacks, ItemStack::getItem).toArray(new ItemConvertible[0])));
+        }
         
         if (recipeFinder.findRecipe(ingredients, null)) {
             this.fillInputSlots(recipeFinder, ingredients, hasShift);

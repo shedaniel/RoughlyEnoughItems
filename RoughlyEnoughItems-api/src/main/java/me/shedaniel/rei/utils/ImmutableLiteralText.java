@@ -76,7 +76,7 @@ public final class ImmutableLiteralText implements Text {
     
     @Override
     public OrderedText asOrderedText() {
-        if (orderedText != null) {
+        if (orderedText == null) {
             orderedText = Language.getInstance().reorder(this);
         }
         return orderedText;

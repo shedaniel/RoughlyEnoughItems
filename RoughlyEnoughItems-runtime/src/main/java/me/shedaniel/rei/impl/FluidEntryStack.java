@@ -195,7 +195,7 @@ public class FluidEntryStack extends AbstractEntryStack {
         if (!get(Settings.TOOLTIP_ENABLED).get() || isEmpty())
             return null;
         List<Text> toolTip = Lists.newArrayList(asFormattedText());
-        if (!amount.isLessThan(Fraction.empty())) {
+        if (!amount.isLessThan(Fraction.empty()) && !amount.equals(IGNORE_AMOUNT)) {
             String amountTooltip = get(Settings.Fluid.AMOUNT_TOOLTIP).apply(this);
             if (amountTooltip != null)
                 toolTip.addAll(Stream.of(amountTooltip.split("\n")).map(LiteralText::new).collect(Collectors.toList()));
