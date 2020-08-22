@@ -31,6 +31,8 @@
   "category.rei.stripping": "Stripping",
   "category.rei.smithing": "Smithing",
   "category.rei.beacon_base": "Beacon Base",
+  "category.rei.tilling": "Tilling",
+  "category.rei.pathing": "Pathing",
   "category.rei.information": "Information",
   "text.rei.composting.chance": "§e%d%% Chance",
   "text.rei.composting.page": "Page %d",
