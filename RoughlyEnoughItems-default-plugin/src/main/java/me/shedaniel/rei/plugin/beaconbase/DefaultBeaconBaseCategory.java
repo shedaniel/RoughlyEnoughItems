@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.plugin.beacon;
+package me.shedaniel.rei.plugin.beaconbase;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
@@ -54,7 +54,7 @@ import java.util.Objects;
 public class DefaultBeaconBaseCategory implements RecipeCategory<DefaultBeaconBaseDisplay> {
     @Override
     public Identifier getIdentifier() {
-        return DefaultPlugin.BEACON;
+        return DefaultPlugin.BEACON_BASE;
     }
     
     @Override

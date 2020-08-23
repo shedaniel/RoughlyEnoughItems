@@ -46,9 +46,10 @@ public interface BuiltinPlugin {
     Identifier COMPOSTING = new Identifier("minecraft", "plugins/composting");
     Identifier FUEL = new Identifier("minecraft", "plugins/fuel");
     Identifier SMITHING = new Identifier("minecraft", "plugins/smithing");
-    Identifier BEACON = new Identifier("minecraft", "plugins/beacon");
+    Identifier BEACON_BASE = new Identifier("minecraft", "plugins/beacon_base");
     Identifier TILLING = new Identifier("minecraft", "plugins/tilling");
     Identifier PATHING = new Identifier("minecraft", "plugins/pathing");
+    Identifier BEACON_PAYMENT = new Identifier("minecraft", "plugins/beacon_payment");
     Identifier INFO = new Identifier("roughlyenoughitems", "plugins/information");
     
     static BuiltinPlugin getInstance() {

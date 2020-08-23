@@ -21,25 +21,27 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.plugin.beacon;
+package me.shedaniel.rei.plugin.beaconpayment;
+
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.Identifier;
 
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
 
 import java.util.Collections;
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
-public class DefaultBeaconBaseDisplay implements RecipeDisplay {
-    
+public class DefaultBeaconPaymentDisplay implements RecipeDisplay {
+
     private List<EntryStack> entries;
-    
-    public DefaultBeaconBaseDisplay(List<ItemStack> entries) {
+
+    public DefaultBeaconPaymentDisplay(List<ItemStack> entries) {
         this.entries = EntryStack.ofItemStacks(entries);
     }
     
@@ -59,6 +61,6 @@ public class DefaultBeaconBaseDisplay implements RecipeDisplay {
     
     @Override
     public Identifier getRecipeCategory() {
-        return DefaultPlugin.BEACON;
+        return DefaultPlugin.BEACON_PAYMENT;
     }
 }

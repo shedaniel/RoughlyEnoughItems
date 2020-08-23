@@ -31,8 +31,10 @@ import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.plugin.autocrafting.DefaultRecipeBookHandler;
-import me.shedaniel.rei.plugin.beacon.DefaultBeaconBaseCategory;
-import me.shedaniel.rei.plugin.beacon.DefaultBeaconBaseDisplay;
+import me.shedaniel.rei.plugin.beaconbase.DefaultBeaconBaseCategory;
+import me.shedaniel.rei.plugin.beaconbase.DefaultBeaconBaseDisplay;
+import me.shedaniel.rei.plugin.beaconpayment.DefaultBeaconPaymentCategory;
+import me.shedaniel.rei.plugin.beaconpayment.DefaultBeaconPaymentDisplay;
 import me.shedaniel.rei.plugin.blasting.DefaultBlastingDisplay;
 import me.shedaniel.rei.plugin.brewing.DefaultBrewingCategory;
 import me.shedaniel.rei.plugin.brewing.DefaultBrewingDisplay;
@@ -80,6 +82,7 @@ import net.minecraft.item.*;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.recipe.*;
 import net.minecraft.tag.BlockTags;
+import net.minecraft.tag.ItemTags;
 import net.minecraft.tag.Tag;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -111,9 +114,10 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
     public static final Identifier COMPOSTING = BuiltinPlugin.COMPOSTING;
     public static final Identifier FUEL = BuiltinPlugin.FUEL;
     public static final Identifier SMITHING = BuiltinPlugin.SMITHING;
-    public static final Identifier BEACON = BuiltinPlugin.BEACON;
+    public static final Identifier BEACON_BASE = BuiltinPlugin.BEACON_BASE;
     public static final Identifier TILLING = BuiltinPlugin.TILLING;
     public static final Identifier PATHING = BuiltinPlugin.PATHING;
+    public static final Identifier BEACON_PAYMENT = BuiltinPlugin.BEACON_PAYMENT;
     public static final Identifier INFO = BuiltinPlugin.INFO;
     private static final Identifier DISPLAY_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/display.png");
     private static final Identifier DISPLAY_TEXTURE_DARK = new Identifier("roughlyenoughitems", "textures/gui/display_dark.png");
@@ -201,7 +205,8 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
                 new DefaultCraftingCategory(),
                 new DefaultCookingCategory(SMELTING, EntryStack.create(Items.FURNACE), "category.rei.smelting"),
                 new DefaultCookingCategory(SMOKING, EntryStack.create(Items.SMOKER), "category.rei.smoking"),
-                new DefaultCookingCategory(BLASTING, EntryStack.create(Items.BLAST_FURNACE), "category.rei.blasting"), new DefaultCampfireCategory(),
+                new DefaultCookingCategory(BLASTING, EntryStack.create(Items.BLAST_FURNACE), "category.rei.blasting"),
+                new DefaultCampfireCategory(),
                 new DefaultStoneCuttingCategory(),
                 new DefaultFuelCategory(),
                 new DefaultBrewingCategory(),
@@ -211,6 +216,7 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
                 new DefaultBeaconBaseCategory(),
                 new DefaultTillingCategory(),
                 new DefaultPathingCategory(),
+                new DefaultBeaconPaymentCategory(),
                 new DefaultInformationCategory()
         );
     }
@@ -271,6 +277,7 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
             recipeHelper.registerDisplay(new DefaultPathingDisplay(EntryStack.create(set.getKey()), EntryStack.create(set.getValue().getBlock())));
         });
         recipeHelper.registerDisplay(new DefaultBeaconBaseDisplay(CollectionUtils.map(Lists.newArrayList(BlockTags.BEACON_BASE_BLOCKS.values()), ItemStack::new)));
+        recipeHelper.registerDisplay(new DefaultBeaconPaymentDisplay(CollectionUtils.map(Lists.newArrayList(ItemTags.BEACON_PAYMENT_ITEMS.values()), ItemStack::new)));
     }
     
     @Override
@@ -332,7 +339,8 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
         recipeHelper.registerWorkingStations(STONE_CUTTING, EntryStack.create(Items.STONECUTTER));
         recipeHelper.registerWorkingStations(COMPOSTING, EntryStack.create(Items.COMPOSTER));
         recipeHelper.registerWorkingStations(SMITHING, EntryStack.create(Items.SMITHING_TABLE));
-        recipeHelper.registerWorkingStations(BEACON, EntryStack.create(Items.BEACON));
+        recipeHelper.registerWorkingStations(BEACON_BASE, EntryStack.create(Items.BEACON));
+        recipeHelper.registerWorkingStations(BEACON_PAYMENT, EntryStack.create(Items.BEACON));
         Tag<Item> axes = MinecraftClient.getInstance().getNetworkHandler().getTagManager().getItems().getTag(new Identifier("fabric", "axes"));
         if (axes != null) {
             for (Item item : axes.values()) {
@@ -353,7 +361,8 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
         }
         recipeHelper.removeAutoCraftButton(FUEL);
         recipeHelper.removeAutoCraftButton(COMPOSTING);
-        recipeHelper.removeAutoCraftButton(BEACON);
+        recipeHelper.removeAutoCraftButton(BEACON_BASE);
+        recipeHelper.removeAutoCraftButton(BEACON_PAYMENT);
         recipeHelper.removeAutoCraftButton(INFO);
         recipeHelper.registerScreenClickArea(new Rectangle(88, 32, 28, 23), CraftingTableScreen.class, CRAFTING);
         recipeHelper.registerScreenClickArea(new Rectangle(137, 29, 10, 13), InventoryScreen.class, CRAFTING);
