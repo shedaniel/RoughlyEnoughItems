@@ -333,7 +333,7 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
         recipeHelper.registerWorkingStations(SMELTING, EntryStack.create(Items.FURNACE));
         recipeHelper.registerWorkingStations(SMOKING, EntryStack.create(Items.SMOKER));
         recipeHelper.registerWorkingStations(BLASTING, EntryStack.create(Items.BLAST_FURNACE));
-        recipeHelper.registerWorkingStations(CAMPFIRE, EntryStack.create(Items.CAMPFIRE));
+        recipeHelper.registerWorkingStations(CAMPFIRE, EntryStack.create(Items.CAMPFIRE), EntryStack.create(Items.SOUL_CAMPFIRE));
         recipeHelper.registerWorkingStations(FUEL, EntryStack.create(Items.FURNACE), EntryStack.create(Items.SMOKER), EntryStack.create(Items.BLAST_FURNACE));
         recipeHelper.registerWorkingStations(BREWING, EntryStack.create(Items.BREWING_STAND));
         recipeHelper.registerWorkingStations(STONE_CUTTING, EntryStack.create(Items.STONECUTTER));
