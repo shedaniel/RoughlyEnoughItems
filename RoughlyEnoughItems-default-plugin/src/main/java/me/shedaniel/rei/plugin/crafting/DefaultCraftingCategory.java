@@ -43,6 +43,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.Blocks;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -55,22 +56,22 @@ public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCr
     }
     
     @Override
-    public ResourceLocation getIdentifier() {
+    public @NotNull ResourceLocation getIdentifier() {
         return DefaultPlugin.CRAFTING;
     }
     
     @Override
-    public EntryStack getLogo() {
+    public @NotNull EntryStack getLogo() {
         return EntryStack.create(Blocks.CRAFTING_TABLE);
     }
     
     @Override
-    public String getCategoryName() {
+    public @NotNull String getCategoryName() {
         return I18n.get("category.rei.crafting");
     }
     
     @Override
-    public List<Widget> setupDisplay(DefaultCraftingDisplay display, Rectangle bounds) {
+    public @NotNull List<Widget> setupDisplay(DefaultCraftingDisplay display, Rectangle bounds) {
         Point startPoint = new Point(bounds.getCenterX() - 58, bounds.getCenterY() - 27);
         List<Widget> widgets = Lists.newArrayList();
         widgets.add(Widgets.createRecipeBase(bounds));

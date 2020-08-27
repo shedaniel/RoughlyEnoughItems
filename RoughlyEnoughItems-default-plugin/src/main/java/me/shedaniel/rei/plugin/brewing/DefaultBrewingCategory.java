@@ -40,6 +40,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -47,22 +48,22 @@ import java.util.List;
 public class DefaultBrewingCategory implements RecipeCategory<DefaultBrewingDisplay> {
     
     @Override
-    public ResourceLocation getIdentifier() {
+    public @NotNull ResourceLocation getIdentifier() {
         return DefaultPlugin.BREWING;
     }
     
     @Override
-    public EntryStack getLogo() {
+    public @NotNull EntryStack getLogo() {
         return EntryStack.create(Blocks.BREWING_STAND);
     }
     
     @Override
-    public String getCategoryName() {
+    public @NotNull String getCategoryName() {
         return I18n.get("category.rei.brewing");
     }
     
     @Override
-    public List<Widget> setupDisplay(DefaultBrewingDisplay display, Rectangle bounds) {
+    public @NotNull List<Widget> setupDisplay(DefaultBrewingDisplay display, Rectangle bounds) {
         Point startPoint = new Point(bounds.getCenterX() - 52, bounds.getCenterY() - 29);
         List<Widget> widgets = Lists.newArrayList();
         widgets.add(Widgets.createRecipeBase(bounds));

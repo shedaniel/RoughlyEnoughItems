@@ -34,28 +34,29 @@ import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 public class DefaultStoneCuttingCategory implements RecipeCategory<DefaultStoneCuttingDisplay> {
     
     @Override
-    public ResourceLocation getIdentifier() {
+    public @NotNull ResourceLocation getIdentifier() {
         return DefaultPlugin.STONE_CUTTING;
     }
     
     @Override
-    public EntryStack getLogo() {
+    public @NotNull EntryStack getLogo() {
         return EntryStack.create(Blocks.STONECUTTER);
     }
     
     @Override
-    public String getCategoryName() {
+    public @NotNull String getCategoryName() {
         return I18n.get("category.rei.stone_cutting");
     }
     
     @Override
-    public List<Widget> setupDisplay(DefaultStoneCuttingDisplay display, Rectangle bounds) {
+    public @NotNull List<Widget> setupDisplay(DefaultStoneCuttingDisplay display, Rectangle bounds) {
         Point startPoint = new Point(bounds.getCenterX() - 41, bounds.getCenterY() - 13);
         List<Widget> widgets = Lists.newArrayList();
         widgets.add(Widgets.createRecipeBase(bounds));

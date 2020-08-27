@@ -35,6 +35,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
+import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;
 import java.util.List;
@@ -42,22 +43,22 @@ import java.util.List;
 public class DefaultCampfireCategory implements RecipeCategory<DefaultCampfireDisplay> {
     
     @Override
-    public ResourceLocation getIdentifier() {
+    public @NotNull ResourceLocation getIdentifier() {
         return DefaultPlugin.CAMPFIRE;
     }
     
     @Override
-    public EntryStack getLogo() {
+    public @NotNull EntryStack getLogo() {
         return EntryStack.create(Blocks.CAMPFIRE);
     }
     
     @Override
-    public String getCategoryName() {
+    public @NotNull String getCategoryName() {
         return I18n.get("category.rei.campfire");
     }
     
     @Override
-    public List<Widget> setupDisplay(DefaultCampfireDisplay display, Rectangle bounds) {
+    public @NotNull List<Widget> setupDisplay(DefaultCampfireDisplay display, Rectangle bounds) {
         Point startPoint = new Point(bounds.getCenterX() - 41, bounds.y + 10);
         final double cookingTime = display.getCookTime();
         DecimalFormat df = new DecimalFormat("###.##");

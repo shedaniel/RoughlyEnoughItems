@@ -32,6 +32,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
@@ -44,6 +45,7 @@ public interface RecipeCategory<T extends RecipeDisplay> {
      *
      * @return the unique identifier of the category
      */
+    @NotNull
     ResourceLocation getIdentifier();
     
     /**
@@ -51,6 +53,7 @@ public interface RecipeCategory<T extends RecipeDisplay> {
      *
      * @return the renderer of the icon
      */
+    @NotNull
     default EntryStack getLogo() {
         return EntryStack.empty();
     }
@@ -60,6 +63,7 @@ public interface RecipeCategory<T extends RecipeDisplay> {
      *
      * @return the name
      */
+    @NotNull
     String getCategoryName();
     
     /**
@@ -69,6 +73,7 @@ public interface RecipeCategory<T extends RecipeDisplay> {
      * @return the recipe renderer
      */
     @ApiStatus.OverrideOnly
+    @NotNull
     default RecipeEntry getSimpleRenderer(T recipe) {
         return SimpleRecipeEntry.from(recipe::getInputEntries, recipe::getResultingEntries);
     }
@@ -81,6 +86,7 @@ public interface RecipeCategory<T extends RecipeDisplay> {
      * @return the list of widgets
      */
     @ApiStatus.OverrideOnly
+    @NotNull
     default List<Widget> setupDisplay(T recipeDisplay, Rectangle bounds) {
         return Collections.singletonList(Widgets.createCategoryBase(bounds));
     }

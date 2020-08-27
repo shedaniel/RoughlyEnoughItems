@@ -42,6 +42,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.text.DecimalFormat;
@@ -53,12 +54,12 @@ public class DefaultFuelCategory implements RecipeCategory<DefaultFuelDisplay> {
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.##");
     
     @Override
-    public ResourceLocation getIdentifier() {
+    public @NotNull ResourceLocation getIdentifier() {
         return DefaultPlugin.FUEL;
     }
     
     @Override
-    public String getCategoryName() {
+    public @NotNull String getCategoryName() {
         return I18n.get("category.rei.fuel");
     }
     
@@ -68,12 +69,12 @@ public class DefaultFuelCategory implements RecipeCategory<DefaultFuelDisplay> {
     }
     
     @Override
-    public EntryStack getLogo() {
+    public @NotNull EntryStack getLogo() {
         return EntryStack.create(Items.COAL);
     }
     
     @Override
-    public List<Widget> setupDisplay(DefaultFuelDisplay recipeDisplay, Rectangle bounds) {
+    public @NotNull List<Widget> setupDisplay(DefaultFuelDisplay recipeDisplay, Rectangle bounds) {
         Point startPoint = new Point(bounds.getCenterX() - 41, bounds.getCenterY() - 17);
         String burnItems = DECIMAL_FORMAT.format(recipeDisplay.getFuelTime() / 200d);
         List<Widget> widgets = Lists.newArrayList();
@@ -86,7 +87,7 @@ public class DefaultFuelCategory implements RecipeCategory<DefaultFuelDisplay> {
     }
     
     @Override
-    public RecipeEntry getSimpleRenderer(DefaultFuelDisplay recipe) {
+    public @NotNull RecipeEntry getSimpleRenderer(DefaultFuelDisplay recipe) {
         Slot slot = Widgets.createSlot(new Point(0, 0)).entries(recipe.getInputEntries().get(0)).disableBackground().disableHighlight();
         String burnItems = DECIMAL_FORMAT.format(recipe.getFuelTime() / 200d);
         return new RecipeEntry() {
