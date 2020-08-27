@@ -27,7 +27,7 @@ import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.EntryStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -52,7 +52,7 @@ public final class ModArgument extends Argument {
     public boolean matches(Object[] data, EntryStack stack, String searchText, Object searchData) {
         if (data[getDataOrdinal()] == null) {
             data[getDataOrdinal()] = new String[]{
-                    stack.getIdentifier().map(Identifier::getNamespace).orElse("").toLowerCase(Locale.ROOT),
+                    stack.getIdentifier().map(ResourceLocation::getNamespace).orElse("").toLowerCase(Locale.ROOT),
                     null
             };
         }

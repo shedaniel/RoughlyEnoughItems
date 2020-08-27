@@ -28,11 +28,11 @@ import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.TestOnly;
 
@@ -50,8 +50,8 @@ public class REITestPlugin implements REIPluginV0 {
     }
     
     @Override
-    public Identifier getPluginIdentifier() {
-        return new Identifier("roughlyenoughitems:test_dev_plugin");
+    public ResourceLocation getPluginIdentifier() {
+        return new ResourceLocation("roughlyenoughitems:test_dev_plugin");
     }
     
     @Override

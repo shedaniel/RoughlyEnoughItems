@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.server;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.slot.Slot;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 
 public class SlotStackAccessor implements StackAccessor {
     protected Slot slot;
@@ -35,16 +35,16 @@ public class SlotStackAccessor implements StackAccessor {
     
     @Override
     public ItemStack getItemStack() {
-        return slot.getStack();
+        return slot.getItem();
     }
     
     @Override
     public void setItemStack(ItemStack stack) {
-        this.slot.setStack(stack);
+        this.slot.set(stack);
     }
     
     @Override
     public ItemStack takeStack(int amount) {
-        return slot.takeStack(amount);
+        return slot.remove(amount);
     }
 }

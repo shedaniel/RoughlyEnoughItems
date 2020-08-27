@@ -26,6 +26,11 @@ package me.shedaniel.rei.gui.config.entry;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.math.Matrix4f;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.ScrollingContainer;
@@ -42,19 +47,14 @@ import me.shedaniel.rei.gui.OverlaySearchField;
 import me.shedaniel.rei.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.SearchArgument;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormats;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Matrix4f;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -70,7 +70,7 @@ public class FilteringScreen extends Screen {
     protected final ScrollingContainer scrolling = new ScrollingContainer() {
         @Override
         public int getMaxScrollHeight() {
-            return MathHelper.ceil(entryStacks.size() / (innerBounds.width / (float) entrySize())) * entrySize() + 28;
+            return Mth.ceil(entryStacks.size() / (innerBounds.width / (float) entrySize())) * entrySize() + 28;
         }
         
         @Override
@@ -90,42 +90,42 @@ public class FilteringScreen extends Screen {
     private List<EntryStack> entryStacks = null;
     private Rectangle innerBounds;
     private List<EntryListEntry> entries = Collections.emptyList();
-    private List<Element> elements = Collections.emptyList();
+    private List<GuiEventListener> elements = Collections.emptyList();
     
     private Point selectionPoint = null;
     private Point secondPoint = null;
     
     private OverlaySearchField searchField;
-    private ButtonWidget selectAllButton;
-    private ButtonWidget selectNoneButton;
-    private ButtonWidget hideButton;
-    private ButtonWidget showButton;
-    private ButtonWidget backButton;
+    private Button selectAllButton;
+    private Button selectNoneButton;
+    private Button hideButton;
+    private Button showButton;
+    private Button backButton;
     private Rectangle selectionCache;
     
     private List<SearchArgument.SearchArguments> lastSearchArguments = Collections.emptyList();
     
     public FilteringScreen(FilteringEntry filteringEntry) {
-        super(new TranslatableText("config.roughlyenoughitems.filteringScreen"));
+        super(new TranslatableComponent("config.roughlyenoughitems.filteringScreen"));
         this.filteringEntry = filteringEntry;
         this.searchField = new OverlaySearchField(0, 0, 0, 0);
         {
-            Text selectAllText = new TranslatableText("config.roughlyenoughitems.filteredEntries.selectAll");
-            this.selectAllButton = new ButtonWidget(0, 0, MinecraftClient.getInstance().textRenderer.getWidth(selectAllText) + 10, 20, selectAllText, button -> {
+            Component selectAllText = new TranslatableComponent("config.roughlyenoughitems.filteredEntries.selectAll");
+            this.selectAllButton = new Button(0, 0, Minecraft.getInstance().font.width(selectAllText) + 10, 20, selectAllText, button -> {
                 this.selectionPoint = new Point(-Integer.MAX_VALUE / 2, -Integer.MAX_VALUE / 2);
                 this.secondPoint = new Point(Integer.MAX_VALUE / 2, Integer.MAX_VALUE / 2);
             });
         }
         {
-            Text selectNoneText = new TranslatableText("config.roughlyenoughitems.filteredEntries.selectNone");
-            this.selectNoneButton = new ButtonWidget(0, 0, MinecraftClient.getInstance().textRenderer.getWidth(selectNoneText) + 10, 20, selectNoneText, button -> {
+            Component selectNoneText = new TranslatableComponent("config.roughlyenoughitems.filteredEntries.selectNone");
+            this.selectNoneButton = new Button(0, 0, Minecraft.getInstance().font.width(selectNoneText) + 10, 20, selectNoneText, button -> {
                 this.selectionPoint = new Point(Integer.MAX_VALUE, Integer.MAX_VALUE);
                 this.secondPoint = new Point(Integer.MAX_VALUE, Integer.MAX_VALUE);
             });
         }
         {
-            Text hideText = new TranslatableText("config.roughlyenoughitems.filteredEntries.hide");
-            this.hideButton = new ButtonWidget(0, 0, MinecraftClient.getInstance().textRenderer.getWidth(hideText) + 10, 20, hideText, button -> {
+            Component hideText = new TranslatableComponent("config.roughlyenoughitems.filteredEntries.hide");
+            this.hideButton = new Button(0, 0, Minecraft.getInstance().font.width(hideText) + 10, 20, hideText, button -> {
                 for (int i = 0; i < entryStacks.size(); i++) {
                     EntryStack stack = entryStacks.get(i);
                     EntryListEntry entry = entries.get(i);
@@ -139,8 +139,8 @@ public class FilteringScreen extends Screen {
             });
         }
         {
-            Text showText = new TranslatableText("config.roughlyenoughitems.filteredEntries.show");
-            this.showButton = new ButtonWidget(0, 0, MinecraftClient.getInstance().textRenderer.getWidth(showText) + 10, 20, showText, button -> {
+            Component showText = new TranslatableComponent("config.roughlyenoughitems.filteredEntries.show");
+            this.showButton = new Button(0, 0, Minecraft.getInstance().font.width(showText) + 10, 20, showText, button -> {
                 for (int i = 0; i < entryStacks.size(); i++) {
                     EntryStack stack = entryStacks.get(i);
                     EntryListEntry entry = entries.get(i);
@@ -153,9 +153,9 @@ public class FilteringScreen extends Screen {
             });
         }
         {
-            Text backText = new LiteralText("↩ ").append(new TranslatableText("gui.back"));
-            this.backButton = new ButtonWidget(0, 0, MinecraftClient.getInstance().textRenderer.getWidth(backText) + 10, 20, backText, button -> {
-                client.openScreen(parent);
+            Component backText = new TextComponent("↩ ").append(new TranslatableComponent("gui.back"));
+            this.backButton = new Button(0, 0, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
+                minecraft.setScreen(parent);
                 this.parent = null;
             });
         }
@@ -163,7 +163,7 @@ public class FilteringScreen extends Screen {
     }
     
     private static Rectangle updateInnerBounds(Rectangle bounds) {
-        int width = Math.max(MathHelper.floor((bounds.width - 2 - 6) / (float) entrySize()), 1);
+        int width = Math.max(Mth.floor((bounds.width - 2 - 6) / (float) entrySize()), 1);
         return new Rectangle((int) (bounds.getCenterX() - width * entrySize() / 2f), bounds.y + 5, width * entrySize(), bounds.height);
     }
     
@@ -190,23 +190,23 @@ public class FilteringScreen extends Screen {
         this.searchField.setChangedListener(this::updateSearch);
     }
     
-    protected void renderHoleBackground(MatrixStack matrices, int y1, int y2, int tint, int alpha1, int alpha2) {
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuffer();
-        this.client.getTextureManager().bindTexture(BACKGROUND_TEXTURE);
-        Matrix4f matrix = matrices.peek().getModel();
+    protected void renderHoleBackground(PoseStack matrices, int y1, int y2, int tint, int alpha1, int alpha2) {
+        Tesselator tessellator = Tesselator.getInstance();
+        BufferBuilder buffer = tessellator.getBuilder();
+        this.minecraft.getTextureManager().bind(BACKGROUND_LOCATION);
+        Matrix4f matrix = matrices.last().pose();
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         float float_1 = 32.0F;
-        buffer.begin(7, VertexFormats.POSITION_TEXTURE_COLOR);
-        buffer.vertex(matrix, 0, y2, 0.0F).texture(0.0F, y2 / 32.0F).color(tint, tint, tint, alpha2).next();
-        buffer.vertex(matrix, this.width, y2, 0.0F).texture(this.width / 32.0F, y2 / 32.0F).color(tint, tint, tint, alpha2).next();
-        buffer.vertex(matrix, this.width, y1, 0.0F).texture(this.width / 32.0F, y1 / 32.0F).color(tint, tint, tint, alpha1).next();
-        buffer.vertex(matrix, 0, y1, 0.0F).texture(0.0F, y1 / 32.0F).color(tint, tint, tint, alpha1).next();
-        tessellator.draw();
+        buffer.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
+        buffer.vertex(matrix, 0, y2, 0.0F).uv(0.0F, y2 / 32.0F).color(tint, tint, tint, alpha2).endVertex();
+        buffer.vertex(matrix, this.width, y2, 0.0F).uv(this.width / 32.0F, y2 / 32.0F).color(tint, tint, tint, alpha2).endVertex();
+        buffer.vertex(matrix, this.width, y1, 0.0F).uv(this.width / 32.0F, y1 / 32.0F).color(tint, tint, tint, alpha1).endVertex();
+        buffer.vertex(matrix, 0, y1, 0.0F).uv(0.0F, y1 / 32.0F).color(tint, tint, tint, alpha1).endVertex();
+        tessellator.end();
     }
     
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         renderHoleBackground(matrices, 0, height, 32, 255, 255);
         updateSelectionCache();
         Rectangle bounds = getBounds();
@@ -216,7 +216,7 @@ public class FilteringScreen extends Screen {
         ScissorsHandler.INSTANCE.scissor(bounds);
         for (EntryListEntry entry : entries)
             entry.clearStacks();
-        int skip = Math.max(0, MathHelper.floor(scrolling.scrollAmount / (float) entrySize()));
+        int skip = Math.max(0, Mth.floor(scrolling.scrollAmount / (float) entrySize()));
         int nextIndex = skip * innerBounds.width / entrySize();
         int i = nextIndex;
         for (; i < entryStacks.size(); i++) {
@@ -231,30 +231,30 @@ public class FilteringScreen extends Screen {
         }
         updatePosition(delta);
         scrolling.renderScrollBar(0xff000000, 1, REIHelper.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
-        matrices.push();
+        matrices.pushPose();
         matrices.translate(0, 0, 300);
         this.searchField.laterRender(matrices, mouseX, mouseY, delta);
         this.selectAllButton.render(matrices, mouseX, mouseY, delta);
         this.selectNoneButton.render(matrices, mouseX, mouseY, delta);
         this.hideButton.render(matrices, mouseX, mouseY, delta);
         this.showButton.render(matrices, mouseX, mouseY, delta);
-        matrices.pop();
+        matrices.popPose();
         
         ScissorsHandler.INSTANCE.removeLastScissor();
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuffer();
+        Tesselator tessellator = Tesselator.getInstance();
+        BufferBuilder buffer = tessellator.getBuilder();
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(770, 771, 0, 1);
         RenderSystem.disableAlphaTest();
         RenderSystem.shadeModel(7425);
         RenderSystem.disableTexture();
-        Matrix4f matrix = matrices.peek().getModel();
-        buffer.begin(7, VertexFormats.POSITION_TEXTURE_COLOR);
-        buffer.vertex(matrix, 0, bounds.y + 4, 0.0F).texture(0.0F, 1.0F).color(0, 0, 0, 0).next();
-        buffer.vertex(matrix, width, bounds.y + 4, 0.0F).texture(1.0F, 1.0F).color(0, 0, 0, 0).next();
-        buffer.vertex(matrix, width, bounds.y, 0.0F).texture(1.0F, 0.0F).color(0, 0, 0, 255).next();
-        buffer.vertex(matrix, 0, bounds.y, 0.0F).texture(0.0F, 0.0F).color(0, 0, 0, 255).next();
-        tessellator.draw();
+        Matrix4f matrix = matrices.last().pose();
+        buffer.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
+        buffer.vertex(matrix, 0, bounds.y + 4, 0.0F).uv(0.0F, 1.0F).color(0, 0, 0, 0).endVertex();
+        buffer.vertex(matrix, width, bounds.y + 4, 0.0F).uv(1.0F, 1.0F).color(0, 0, 0, 0).endVertex();
+        buffer.vertex(matrix, width, bounds.y, 0.0F).uv(1.0F, 0.0F).color(0, 0, 0, 255).endVertex();
+        buffer.vertex(matrix, 0, bounds.y, 0.0F).uv(0.0F, 0.0F).color(0, 0, 0, 255).endVertex();
+        tessellator.end();
         RenderSystem.enableTexture();
         RenderSystem.shadeModel(7424);
         RenderSystem.enableAlphaTest();
@@ -267,7 +267,7 @@ public class FilteringScreen extends Screen {
             ScreenHelper.getLastOverlay().renderTooltip(matrices, tooltip);
         }
         
-        this.textRenderer.drawWithShadow(matrices, this.title.asOrderedText(), this.width / 2.0F - this.textRenderer.getWidth(this.title) / 2.0F, 12.0F, -1);
+        this.font.drawShadow(matrices, this.title.getVisualOrderText(), this.width / 2.0F - this.font.width(this.title) / 2.0F, 12.0F, -1);
     }
     
     private Rectangle getSelection() {
@@ -350,7 +350,7 @@ public class FilteringScreen extends Screen {
     }
     
     @Override
-    public List<? extends Element> children() {
+    public List<? extends GuiEventListener> children() {
         return elements;
     }
     
@@ -399,7 +399,7 @@ public class FilteringScreen extends Screen {
     
     @Override
     public boolean charTyped(char chr, int keyCode) {
-        for (Element element : children())
+        for (GuiEventListener element : children())
             if (element.charTyped(chr, keyCode))
                 return true;
         return super.charTyped(chr, keyCode);
@@ -407,7 +407,7 @@ public class FilteringScreen extends Screen {
     
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        for (Element element : children())
+        for (GuiEventListener element : children())
             if (element.keyPressed(keyCode, scanCode, modifiers))
                 return true;
         if (Screen.isSelectAll(keyCode)) {
@@ -468,12 +468,12 @@ public class FilteringScreen extends Screen {
         }
         
         @Override
-        protected void drawHighlighted(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+        protected void drawHighlighted(PoseStack matrices, int mouseX, int mouseY, float delta) {
             
         }
         
         @Override
-        public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
             super.render(matrices, mouseX, mouseY, delta);
             if (isSelected()) {
                 Rectangle bounds = getBounds();
@@ -501,7 +501,7 @@ public class FilteringScreen extends Screen {
         }
         
         @Override
-        protected void drawBackground(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+        protected void drawBackground(PoseStack matrices, int mouseX, int mouseY, float delta) {
             if (isFiltered()) {
                 Rectangle bounds = getBounds();
                 RenderSystem.disableDepthTest();
@@ -511,7 +511,7 @@ public class FilteringScreen extends Screen {
         }
         
         @Override
-        protected void queueTooltip(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+        protected void queueTooltip(PoseStack matrices, int mouseX, int mouseY, float delta) {
             if (searchField.containsMouse(mouseX, mouseY))
                 return;
             Tooltip tooltip = getCurrentTooltip(new Point(mouseX, mouseY));

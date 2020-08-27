@@ -26,64 +26,64 @@ package me.shedaniel.rei.server;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.minecraft.container.Container;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.ItemConvertible;
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.core.NonNullList;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.ItemLike;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
-public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<Integer>, ContainerContext {
+public class InputSlotCrafter<C extends Container> implements RecipeGridAligner<Integer>, ContainerContext {
     
-    protected Container container;
+    protected AbstractContainerMenu container;
     protected ContainerInfo containerInfo;
     private List<StackAccessor> gridStacks;
     private List<StackAccessor> inventoryStacks;
-    private ServerPlayerEntity player;
+    private ServerPlayer player;
     
-    private InputSlotCrafter(Container container, ContainerInfo<? extends Container> containerInfo) {
+    private InputSlotCrafter(AbstractContainerMenu container, ContainerInfo<? extends AbstractContainerMenu> containerInfo) {
         this.container = container;
         this.containerInfo = containerInfo;
     }
     
-    public static <C extends Inventory> void start(Identifier category, Container craftingContainer_1, ServerPlayerEntity player, DefaultedList<List<ItemStack>> map, boolean hasShift) {
-        ContainerInfo<? extends Container> containerInfo = Objects.requireNonNull(ContainerInfoHandler.getContainerInfo(category, craftingContainer_1.getClass()), "Container Info does not exist on the server!");
+    public static <C extends Container> void start(ResourceLocation category, AbstractContainerMenu craftingContainer_1, ServerPlayer player, NonNullList<List<ItemStack>> map, boolean hasShift) {
+        ContainerInfo<? extends AbstractContainerMenu> containerInfo = Objects.requireNonNull(ContainerInfoHandler.getContainerInfo(category, craftingContainer_1.getClass()), "Container Info does not exist on the server!");
         new InputSlotCrafter<C>(craftingContainer_1, containerInfo).fillInputSlots(player, map, hasShift);
     }
     
-    private void fillInputSlots(ServerPlayerEntity player, DefaultedList<List<ItemStack>> map, boolean hasShift) {
+    private void fillInputSlots(ServerPlayer player, NonNullList<List<ItemStack>> map, boolean hasShift) {
         this.player = player;
         this.inventoryStacks = this.containerInfo.getInventoryStacks(this);
         this.gridStacks = this.containerInfo.getGridStacks(this);
         
-        player.skipPacketSlotUpdates = true;
+        player.ignoreSlotUpdateHack = true;
         // Return the already placed items on the grid
         this.returnInputs();
         
         RecipeFinder recipeFinder = new RecipeFinder();
         this.containerInfo.getRecipeFinderPopulator().populate(this).accept(recipeFinder);
-        DefaultedList<Ingredient> ingredients = DefaultedList.of();
+        NonNullList<Ingredient> ingredients = NonNullList.create();
         for (List<ItemStack> itemStacks : map) {
-            ingredients.add(Ingredient.ofItems(CollectionUtils.map(itemStacks, ItemStack::getItem).toArray(new ItemConvertible[0])));
+            ingredients.add(Ingredient.of(CollectionUtils.map(itemStacks, ItemStack::getItem).toArray(new ItemLike[0])));
         }
         
         if (recipeFinder.findRecipe(ingredients, null)) {
             this.fillInputSlots(recipeFinder, ingredients, hasShift);
         } else {
             this.returnInputs();
-            player.skipPacketSlotUpdates = false;
+            player.ignoreSlotUpdateHack = false;
             this.containerInfo.markDirty(this);
             throw new NotEnoughMaterialsException();
         }
         
-        player.skipPacketSlotUpdates = false;
+        player.ignoreSlotUpdateHack = false;
         this.containerInfo.markDirty(this);
     }
     
@@ -112,13 +112,13 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
                 if (slot.getItemStack().isEmpty()) {
                     slot.setItemStack(takenStack);
                 } else {
-                    slot.getItemStack().increment(1);
+                    slot.getItemStack().grow(1);
                 }
             }
         }
     }
     
-    protected void fillInputSlots(RecipeFinder recipeFinder, DefaultedList<Ingredient> ingredients, boolean hasShift) {
+    protected void fillInputSlots(RecipeFinder recipeFinder, NonNullList<Ingredient> ingredients, boolean hasShift) {
         int recipeCrafts = recipeFinder.countRecipeCrafts(ingredients, null);
         int amountToFill = this.getAmountToFill(hasShift, recipeCrafts, false);
         IntList intList_1 = new IntArrayList();
@@ -126,7 +126,7 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
             int finalCraftsAmount = amountToFill;
             
             for (int itemId : intList_1) {
-                finalCraftsAmount = Math.min(finalCraftsAmount, RecipeFinder.getStackFromId(itemId).getMaxCount());
+                finalCraftsAmount = Math.min(finalCraftsAmount, RecipeFinder.getStackFromId(itemId).getMaxStackSize());
             }
             
             if (recipeFinder.findRecipe(ingredients, intList_1, finalCraftsAmount)) {
@@ -163,7 +163,7 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
     public int method_7371(ItemStack itemStack) {
         for (int i = 0; i < inventoryStacks.size(); i++) {
             ItemStack itemStack1 = this.inventoryStacks.get(i).getItemStack();
-            if (!itemStack1.isEmpty() && areItemsEqual(itemStack, itemStack1) && !itemStack1.isDamaged() && !itemStack1.hasEnchantments() && !itemStack1.hasCustomName()) {
+            if (!itemStack1.isEmpty() && areItemsEqual(itemStack, itemStack1) && !itemStack1.isDamaged() && !itemStack1.isEnchanted() && !itemStack1.hasCustomHoverName()) {
                 return i;
             }
         }
@@ -172,7 +172,7 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
     }
     
     private static boolean areItemsEqual(ItemStack stack1, ItemStack stack2) {
-        return stack1.getItem() == stack2.getItem() && ItemStack.areTagsEqual(stack1, stack2);
+        return stack1.getItem() == stack2.getItem() && ItemStack.tagMatches(stack1, stack2);
     }
     
     private int getFreeInventorySlots() {
@@ -186,12 +186,12 @@ public class InputSlotCrafter<C extends Inventory> implements RecipeGridAligner<
     }
     
     @Override
-    public Container getContainer() {
+    public AbstractContainerMenu getContainer() {
         return container;
     }
     
     @Override
-    public PlayerEntity getPlayerEntity() {
+    public Player getPlayerEntity() {
         return player;
     }
     

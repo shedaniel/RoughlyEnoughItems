@@ -25,16 +25,16 @@ package me.shedaniel.rei.impl;
 
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.fractions.Fraction;
-import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Optional;
 
 @ApiStatus.OverrideOnly
-public abstract class RenderingEntry extends DrawableHelper implements EntryStack {
+public abstract class RenderingEntry extends GuiComponent implements EntryStack {
     @Override
-    public Optional<Identifier> getIdentifier() {
+    public Optional<ResourceLocation> getIdentifier() {
         return Optional.empty();
     }
     
@@ -105,12 +105,12 @@ public abstract class RenderingEntry extends DrawableHelper implements EntryStac
     
     @Override
     public int getZ() {
-        return getZOffset();
+        return getBlitOffset();
     }
     
     @Override
     public void setZ(int z) {
-        setZOffset(z);
+        setBlitOffset(z);
     }
     
     @Override

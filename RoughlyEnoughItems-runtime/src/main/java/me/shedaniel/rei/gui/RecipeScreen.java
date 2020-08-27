@@ -24,7 +24,7 @@
 package me.shedaniel.rei.gui;
 
 import me.shedaniel.rei.api.EntryStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
@@ -36,7 +36,7 @@ public interface RecipeScreen {
     void addResultStackToNotice(EntryStack stack);
     
     @ApiStatus.Internal
-    Identifier getCurrentCategory();
+    ResourceLocation getCurrentCategory();
     
     @ApiStatus.Internal
     void recalculateCategoryPage();

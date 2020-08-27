@@ -29,8 +29,8 @@ import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.recipe.SmithingRecipe;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.UpgradeRecipe;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,20 +45,20 @@ public class DefaultSmithingDisplay implements RecipeDisplay {
     @NotNull
     private List<EntryStack> output;
     @Nullable
-    private Identifier location;
+    private ResourceLocation location;
     
-    public DefaultSmithingDisplay(@NotNull SmithingRecipe recipe) {
+    public DefaultSmithingDisplay(@NotNull UpgradeRecipe recipe) {
         this(
                 Lists.newArrayList(
                         EntryStack.ofIngredient(recipe.base),
                         EntryStack.ofIngredient(recipe.addition)
                 ),
-                Collections.singletonList(EntryStack.create(recipe.getOutput())),
+                Collections.singletonList(EntryStack.create(recipe.getResultItem())),
                 recipe.getId()
         );
     }
     
-    public DefaultSmithingDisplay(@NotNull List<List<EntryStack>> input, @NotNull List<EntryStack> output, @Nullable Identifier location) {
+    public DefaultSmithingDisplay(@NotNull List<List<EntryStack>> input, @NotNull List<EntryStack> output, @Nullable ResourceLocation location) {
         this.input = input;
         this.output = output;
         if (this.input.size() != 2) throw new IllegalArgumentException("input must have 2 entries.");
@@ -81,12 +81,12 @@ public class DefaultSmithingDisplay implements RecipeDisplay {
     }
     
     @Override
-    public Identifier getRecipeCategory() {
+    public ResourceLocation getRecipeCategory() {
         return DefaultPlugin.SMITHING;
     }
     
     @Override
-    public Optional<Identifier> getRecipeLocation() {
+    public Optional<ResourceLocation> getRecipeLocation() {
         return Optional.ofNullable(location);
     }
 }

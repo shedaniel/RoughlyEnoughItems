@@ -28,10 +28,10 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
-import net.minecraft.client.gui.screen.ingame.ContainerScreen;
-import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
+import net.minecraft.world.effect.MobEffectInstance;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,19 +43,19 @@ import java.util.function.Supplier;
 public class DefaultPotionEffectExclusionZones implements Supplier<List<Rectangle>> {
     @Override
     public List<Rectangle> get() {
-        if (!(REIHelper.getInstance().getPreviousContainerScreen() instanceof AbstractInventoryScreen) || !((AbstractInventoryScreen<?>) REIHelper.getInstance().getPreviousContainerScreen()).offsetGuiForEffects)
+        if (!(REIHelper.getInstance().getPreviousContainerScreen() instanceof EffectRenderingInventoryScreen) || !((EffectRenderingInventoryScreen<?>) REIHelper.getInstance().getPreviousContainerScreen()).doRenderEffects)
             return Collections.emptyList();
-        Collection<StatusEffectInstance> activePotionEffects = MinecraftClient.getInstance().player.getStatusEffects();
+        Collection<MobEffectInstance> activePotionEffects = Minecraft.getInstance().player.getActiveEffects();
         if (activePotionEffects.isEmpty())
             return Collections.emptyList();
-        ContainerScreen<?> containerScreen = REIHelper.getInstance().getPreviousContainerScreen();
+        AbstractContainerScreen<?> containerScreen = REIHelper.getInstance().getPreviousContainerScreen();
         List<Rectangle> list = new ArrayList<>();
-        int x = containerScreen.x - 124;
-        int y = containerScreen.y;
+        int x = containerScreen.leftPos - 124;
+        int y = containerScreen.topPos;
         int height = 33;
         if (activePotionEffects.size() > 5)
             height = 132 / (activePotionEffects.size() - 1);
-        for (StatusEffectInstance instance : Ordering.natural().sortedCopy(activePotionEffects)) {
+        for (MobEffectInstance instance : Ordering.natural().sortedCopy(activePotionEffects)) {
             list.add(new Rectangle(x, y, 166, height));
             y += height;
         }

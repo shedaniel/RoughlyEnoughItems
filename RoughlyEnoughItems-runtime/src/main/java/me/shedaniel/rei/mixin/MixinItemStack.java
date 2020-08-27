@@ -24,7 +24,7 @@
 package me.shedaniel.rei.mixin;
 
 import me.shedaniel.rei.impl.ItemStackHook;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -39,7 +39,7 @@ public class MixinItemStack implements ItemStackHook {
         rei_dontRenderOverlay = !b;
     }
     
-    @Inject(method = "hasEnchantmentGlint", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "hasFoil", at = @At("HEAD"), cancellable = true)
     public void hasEnchantmentGlint(CallbackInfoReturnable<Boolean> callbackInfo) {
         if (rei_dontRenderOverlay)
             callbackInfo.setReturnValue(false);

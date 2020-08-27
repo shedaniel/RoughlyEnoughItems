@@ -23,18 +23,18 @@
 
 package me.shedaniel.rei.server;
 
-import net.minecraft.container.Container;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
 
 @FunctionalInterface
-public interface GridCleanHandler<T extends Container> {
+public interface GridCleanHandler<T extends AbstractContainerMenu> {
     void clean(ContainerContext<T> context);
     
     static void error(String translationKey) {
         throw new IllegalStateException(translationKey);
     }
     
-    static <T extends Container> void returnSlotToPlayerInventory(ContainerContext<T> context, StackAccessor stackAccessor) {
+    static <T extends AbstractContainerMenu> void returnSlotToPlayerInventory(ContainerContext<T> context, StackAccessor stackAccessor) {
         DumpHandler<T> dumpHandler = context.getContainerInfo().getDumpHandler();
         ItemStack stackToReturn = stackAccessor.getItemStack();
         if (!stackToReturn.isEmpty()) {

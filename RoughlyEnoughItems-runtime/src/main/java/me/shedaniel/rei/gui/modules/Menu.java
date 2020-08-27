@@ -26,6 +26,7 @@ package me.shedaniel.rei.gui.modules;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.ScrollingContainer;
@@ -41,12 +42,11 @@ import me.shedaniel.rei.gui.modules.entries.SubSubsetsMenuEntry;
 import me.shedaniel.rei.gui.widget.LateRenderable;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.Registry;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -99,13 +99,13 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
             // Item Groups group
             Map<String, Object> itemGroups = getOrCreateSubEntryInMap(entries, "roughlyenoughitems:item_groups");
             for (Item item : Registry.ITEM) {
-                ItemGroup group = item.getGroup();
+                CreativeModeTab group = item.getItemCategory();
                 if (group == null)
                     continue;
                 List<ItemStack> list;
                 try {
                     list = instance.appendStacksForItem(item);
-                    Map<String, Object> groupMenu = getOrCreateSubEntryInMap(itemGroups, "_item_group_" + group.id);
+                    Map<String, Object> groupMenu = getOrCreateSubEntryInMap(itemGroups, "_item_group_" + group.langId);
                     for (ItemStack stack : list) {
                         putEntryInMap(groupMenu, EntryStack.create(stack));
                     }
@@ -161,12 +161,12 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
             } else {
                 Map<String, Object> entryMap = (Map<String, Object>) entry.getValue();
                 if (entry.getKey().startsWith("_item_group_")) {
-                    entries.add(new SubSubsetsMenuEntry(I18n.translate(entry.getKey().replace("_item_group_", "itemGroup.")), buildEntries(entryMap)));
+                    entries.add(new SubSubsetsMenuEntry(I18n.get(entry.getKey().replace("_item_group_", "itemGroup.")), buildEntries(entryMap)));
                 } else {
                     String translationKey = "subsets.rei." + entry.getKey().replace(':', '.');
-                    if (!I18n.hasTranslation(translationKey))
+                    if (!I18n.exists(translationKey))
                         RoughlyEnoughItemsCore.LOGGER.warn("Subsets menu " + translationKey + " does not have a translation");
-                    entries.add(new SubSubsetsMenuEntry(I18n.translate(translationKey), buildEntries(entryMap)));
+                    entries.add(new SubSubsetsMenuEntry(I18n.get(translationKey), buildEntries(entryMap)));
                 }
             }
         }
@@ -197,7 +197,7 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
     }
     
     public int getInnerHeight() {
-        return Math.min(scrolling.getMaxScrollHeight(), minecraft.currentScreen.height - 20 - menuStartPoint.y);
+        return Math.min(scrolling.getMaxScrollHeight(), minecraft.screen.height - 20 - menuStartPoint.y);
     }
     
     public int getMaxEntryWidth() {
@@ -210,7 +210,7 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
     }
     
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         Rectangle bounds = getBounds();
         Rectangle innerBounds = getInnerBounds();
         fill(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), containsMouse(mouseX, mouseY) ? (REIHelper.getInstance().isDarkThemeEnabled() ? -17587 : -1) : -6250336);

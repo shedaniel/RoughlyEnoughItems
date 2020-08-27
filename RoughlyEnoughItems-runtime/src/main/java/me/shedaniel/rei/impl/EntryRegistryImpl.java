@@ -34,9 +34,9 @@ import me.shedaniel.rei.impl.filtering.FilteringRule;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -113,10 +113,10 @@ public class EntryRegistryImpl implements EntryRegistry {
     @NotNull
     @Override
     public List<ItemStack> appendStacksForItem(@NotNull Item item) {
-        DefaultedList<ItemStack> list = DefaultedList.of();
-        item.appendStacks(item.getGroup(), list);
+        NonNullList<ItemStack> list = NonNullList.create();
+        item.fillItemCategory(item.getItemCategory(), list);
         if (list.isEmpty())
-            return Collections.singletonList(item.getStackForRender());
+            return Collections.singletonList(item.getDefaultInstance());
         return list;
     }
     
@@ -125,7 +125,7 @@ public class EntryRegistryImpl implements EntryRegistry {
     public ItemStack[] getAllStacksFromItem(@NotNull Item item) {
         List<ItemStack> list = appendStacksForItem(item);
         ItemStack[] array = list.toArray(new ItemStack[0]);
-        Arrays.sort(array, (a, b) -> ItemStack.areEqualIgnoreDamage(a, b) ? 0 : 1);
+        Arrays.sort(array, (a, b) -> ItemStack.matches(a, b) ? 0 : 1);
         return array;
     }
     

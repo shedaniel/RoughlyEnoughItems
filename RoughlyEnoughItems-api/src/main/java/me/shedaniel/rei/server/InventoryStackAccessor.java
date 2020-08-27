@@ -23,30 +23,30 @@
 
 package me.shedaniel.rei.server;
 
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
 
 public class InventoryStackAccessor implements StackAccessor {
-    protected Inventory inventory;
+    protected Container inventory;
     protected int index;
     
-    public InventoryStackAccessor(Inventory inventory, int index) {
+    public InventoryStackAccessor(Container inventory, int index) {
         this.inventory = inventory;
         this.index = index;
     }
     
     @Override
     public ItemStack getItemStack() {
-        return inventory.getInvStack(index);
+        return inventory.getItem(index);
     }
     
     @Override
     public void setItemStack(ItemStack stack) {
-        this.inventory.setInvStack(index, stack);
+        this.inventory.setItem(index, stack);
     }
     
     @Override
     public ItemStack takeStack(int amount) {
-        return this.inventory.takeInvStack(index, amount);
+        return this.inventory.removeItem(index, amount);
     }
 }

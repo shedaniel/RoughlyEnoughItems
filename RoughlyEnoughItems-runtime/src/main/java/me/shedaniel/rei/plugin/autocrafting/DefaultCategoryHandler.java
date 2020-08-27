@@ -38,16 +38,15 @@ import me.shedaniel.rei.server.RecipeFinder;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.ContainerScreen;
-import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.container.Container;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -61,13 +60,13 @@ public class DefaultCategoryHandler implements AutoTransferHandler {
         if (!(context.getRecipe() instanceof TransferRecipeDisplay))
             return Result.createNotApplicable();
         TransferRecipeDisplay recipe = (TransferRecipeDisplay) context.getRecipe();
-        ContainerScreen<?> containerScreen = context.getContainerScreen();
-        Container container = context.getContainer();
-        ContainerInfo<Container> containerInfo = (ContainerInfo<Container>) ContainerInfoHandler.getContainerInfo(recipe.getRecipeCategory(), container.getClass());
+        AbstractContainerScreen<?> containerScreen = context.getContainerScreen();
+        AbstractContainerMenu container = context.getContainer();
+        ContainerInfo<AbstractContainerMenu> containerInfo = (ContainerInfo<AbstractContainerMenu>) ContainerInfoHandler.getContainerInfo(recipe.getRecipeCategory(), container.getClass());
         if (containerInfo == null)
             return Result.createNotApplicable();
         if (recipe.getHeight() > containerInfo.getCraftingHeight(container) || recipe.getWidth() > containerInfo.getCraftingWidth(container))
-            return Result.createFailed(I18n.translate("error.rei.transfer.too_small", containerInfo.getCraftingWidth(container), containerInfo.getCraftingHeight(container)));
+            return Result.createFailed(I18n.get("error.rei.transfer.too_small", containerInfo.getCraftingWidth(container), containerInfo.getCraftingHeight(container)));
         List<List<EntryStack>> input = recipe.getOrganisedInputEntries(containerInfo, container);
         IntList intList = hasItems(container, containerInfo, input);
         if (!intList.isEmpty())
@@ -77,11 +76,11 @@ public class DefaultCategoryHandler implements AutoTransferHandler {
         if (!context.isActuallyCrafting())
             return Result.createSuccessful();
         
-        context.getMinecraft().openScreen(containerScreen);
-        if (containerScreen instanceof RecipeBookProvider)
-            ((RecipeBookProvider) containerScreen).getRecipeBookWidget().ghostSlots.reset();
-        PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-        buf.writeIdentifier(recipe.getRecipeCategory());
+        context.getMinecraft().setScreen(containerScreen);
+        if (containerScreen instanceof RecipeUpdateListener)
+            ((RecipeUpdateListener) containerScreen).getRecipeBookComponent().ghostRecipe.clear();
+        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+        buf.writeResourceLocation(recipe.getRecipeCategory());
         buf.writeBoolean(Screen.hasShiftDown());
         
         buf.writeInt(input.size());
@@ -89,9 +88,9 @@ public class DefaultCategoryHandler implements AutoTransferHandler {
             buf.writeInt(stacks.size());
             for (EntryStack stack : stacks) {
                 if (stack.getItemStack() != null)
-                    buf.writeItemStack(stack.getItemStack());
+                    buf.writeItem(stack.getItemStack());
                 else
-                    buf.writeItemStack(ItemStack.EMPTY);
+                    buf.writeItem(ItemStack.EMPTY);
             }
         }
         ClientSidePacketRegistry.INSTANCE.sendToServer(RoughlyEnoughItemsNetwork.MOVE_ITEMS_PACKET, buf);
@@ -103,22 +102,22 @@ public class DefaultCategoryHandler implements AutoTransferHandler {
         return -10;
     }
     
-    public IntList hasItems(Container container, ContainerInfo<Container> containerInfo, List<List<EntryStack>> inputs) {
+    public IntList hasItems(AbstractContainerMenu container, ContainerInfo<AbstractContainerMenu> containerInfo, List<List<EntryStack>> inputs) {
         // Create a clone of player's inventory, and count
         RecipeFinder recipeFinder = new RecipeFinder();
-        containerInfo.getRecipeFinderPopulator().populate(new ContainerContext<Container>() {
+        containerInfo.getRecipeFinderPopulator().populate(new ContainerContext<AbstractContainerMenu>() {
             @Override
-            public Container getContainer() {
+            public AbstractContainerMenu getContainer() {
                 return container;
             }
             
             @Override
-            public PlayerEntity getPlayerEntity() {
-                return MinecraftClient.getInstance().player;
+            public Player getPlayerEntity() {
+                return Minecraft.getInstance().player;
             }
             
             @Override
-            public ContainerInfo<Container> getContainerInfo() {
+            public ContainerInfo<AbstractContainerMenu> getContainerInfo() {
                 return containerInfo;
             }
         }).accept(recipeFinder);

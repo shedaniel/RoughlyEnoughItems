@@ -23,17 +23,21 @@
 
 package me.shedaniel.rei.utils;
 
-import net.minecraft.text.*;
-import net.minecraft.util.Language;
+import net.minecraft.locale.Language;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.util.FormattedCharSequence;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public final class ImmutableLiteralText implements Text {
+public final class ImmutableLiteralText implements Component {
     public static final ImmutableLiteralText EMPTY = new ImmutableLiteralText("");
     private final String content;
-    private OrderedText orderedText;
+    private FormattedCharSequence orderedText;
     
     public ImmutableLiteralText(String content) {
         this.content = content;
@@ -45,39 +49,39 @@ public final class ImmutableLiteralText implements Text {
     }
     
     @Override
-    public String asString() {
+    public String getContents() {
         return content;
     }
     
     @Override
-    public List<Text> getSiblings() {
+    public List<Component> getSiblings() {
         return Collections.emptyList();
     }
     
     @Override
-    public MutableText copy() {
-        return new LiteralText(content);
+    public MutableComponent plainCopy() {
+        return new TextComponent(content);
     }
     
     @Override
-    public MutableText shallowCopy() {
-        return copy();
+    public MutableComponent copy() {
+        return plainCopy();
     }
     
     @Override
-    public <T> Optional<T> visit(Visitor<T> visitor) {
+    public <T> Optional<T> visit(ContentConsumer<T> visitor) {
         return visitSelf(visitor);
     }
     
     @Override
-    public <T> Optional<T> visit(StyledVisitor<T> styledVisitor, Style style) {
+    public <T> Optional<T> visit(StyledContentConsumer<T> styledVisitor, Style style) {
         return visitSelf(styledVisitor, style);
     }
     
     @Override
-    public OrderedText asOrderedText() {
+    public FormattedCharSequence getVisualOrderText() {
         if (orderedText == null) {
-            orderedText = Language.getInstance().reorder(this);
+            orderedText = Language.getInstance().getVisualOrder(this);
         }
         return orderedText;
     }

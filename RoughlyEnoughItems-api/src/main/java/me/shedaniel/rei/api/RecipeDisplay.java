@@ -24,7 +24,7 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collections;
@@ -68,14 +68,14 @@ public interface RecipeDisplay {
      *
      * @return the identifier of the category
      */
-    Identifier getRecipeCategory();
+    ResourceLocation getRecipeCategory();
     
     /**
      * Gets the recipe location from datapack.
      *
      * @return the recipe location
      */
-    default Optional<Identifier> getRecipeLocation() {
+    default Optional<ResourceLocation> getRecipeLocation() {
         return Optional.empty();
     }
     

@@ -24,6 +24,7 @@
 package me.shedaniel.rei.plugin.composting;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
@@ -34,15 +35,14 @@ import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.block.Blocks;
 
 import java.util.*;
 
@@ -50,7 +50,7 @@ import java.util.*;
 public class DefaultCompostingCategory implements RecipeCategory<DefaultCompostingDisplay> {
     
     @Override
-    public Identifier getIdentifier() {
+    public ResourceLocation getIdentifier() {
         return DefaultPlugin.COMPOSTING;
     }
     
@@ -61,22 +61,22 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
     
     @Override
     public String getCategoryName() {
-        return I18n.translate("category.rei.composting");
+        return I18n.get("category.rei.composting");
     }
     
     @Override
     public RecipeEntry getSimpleRenderer(DefaultCompostingDisplay recipe) {
         return new RecipeEntry() {
-            private Text text = new TranslatableText("text.rei.composting.page", recipe.getPage() + 1);
+            private Component text = new TranslatableComponent("text.rei.composting.page", recipe.getPage() + 1);
             
             @Override
             public int getHeight() {
-                return 10 + MinecraftClient.getInstance().textRenderer.fontHeight;
+                return 10 + Minecraft.getInstance().font.lineHeight;
             }
             
             @Override
-            public void render(MatrixStack matrices, Rectangle rectangle, int mouseX, int mouseY, float delta) {
-                MinecraftClient.getInstance().textRenderer.draw(matrices, text.asOrderedText(), rectangle.x + 5, rectangle.y + 6, -1);
+            public void render(PoseStack matrices, Rectangle rectangle, int mouseX, int mouseY, float delta) {
+                Minecraft.getInstance().font.draw(matrices, text.getVisualOrderText(), rectangle.x + 5, rectangle.y + 6, -1);
             }
         };
     }
@@ -92,7 +92,7 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
                 EntryStack[] entryStack = {stacks.size() > i ? stacks.get(i) : EntryStack.empty()};
                 if (!entryStack[0].isEmpty()) {
                     display.getInputMap().entrySet().parallelStream().filter(entry -> entry.getKey() != null && Objects.equals(entry.getKey().asItem(), entryStack[0].getItem())).findAny().map(Map.Entry::getValue).ifPresent(chance -> {
-                        entryStack[0] = entryStack[0].setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> Collections.singletonList(new TranslatableText("text.rei.composting.chance", MathHelper.fastFloor(chance * 100)).formatted(Formatting.YELLOW)));
+                        entryStack[0] = entryStack[0].setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> Collections.singletonList(new TranslatableComponent("text.rei.composting.chance", Mth.fastFloor(chance * 100)).withStyle(ChatFormatting.YELLOW)));
                     });
                 }
                 widgets.add(Widgets.createSlot(new Point(bounds.getCenterX() - 72 + x * 18, bounds.y + 3 + y * 18)).entry(entryStack[0]).markInput());

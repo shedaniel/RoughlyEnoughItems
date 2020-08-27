@@ -24,21 +24,21 @@
 package me.shedaniel.rei.gui.credits;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.rei.gui.credits.CreditsEntryListWidget.TextCreditsItem;
 import me.shedaniel.rei.gui.credits.CreditsEntryListWidget.TranslationCreditsItem;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.ImmutableLiteralText;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.CustomValue;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.ContainerScreen;
-import net.minecraft.client.gui.widget.AbstractPressableButtonWidget;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.util.NarratorManager;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Pair;
+import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.gui.components.AbstractButton;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.Tuple;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Comparator;
@@ -50,19 +50,19 @@ import java.util.stream.Collectors;
 public class CreditsScreen extends Screen {
     
     private Screen parent;
-    private AbstractPressableButtonWidget buttonDone;
+    private AbstractButton buttonDone;
     private CreditsEntryListWidget entryListWidget;
     
     public CreditsScreen(Screen parent) {
-        super(new LiteralText(""));
+        super(new TextComponent(""));
         this.parent = parent;
     }
     
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (int_1 == 256 && this.shouldCloseOnEsc()) {
-            this.client.openScreen(parent);
-            if (parent instanceof ContainerScreen)
+            this.minecraft.setScreen(parent);
+            if (parent instanceof AbstractContainerScreen)
                 ScreenHelper.getLastOverlay().init();
             return true;
         }
@@ -71,9 +71,9 @@ public class CreditsScreen extends Screen {
     
     @Override
     public void init() {
-        children.add(entryListWidget = new CreditsEntryListWidget(client, width, height, 32, height - 32));
+        children.add(entryListWidget = new CreditsEntryListWidget(minecraft, width, height, 32, height - 32));
         entryListWidget.creditsClearEntries();
-        List<Pair<String, String>> translators = Lists.newArrayList();
+        List<Tuple<String, String>> translators = Lists.newArrayList();
         Exception[] exception = {null};
         FabricLoader.getInstance().getModContainer("roughlyenoughitems-runtime").ifPresent(rei -> {
             try {
@@ -82,19 +82,19 @@ public class CreditsScreen extends Screen {
                     jsonObject.forEach(entry -> {
                         CustomValue value = entry.getValue();
                         String behind = value.getType() == CustomValue.CvType.ARRAY ? Lists.newArrayList(value.getAsArray().iterator()).stream().map(CustomValue::getAsString).sorted(String::compareToIgnoreCase).collect(Collectors.joining(", ")) : value.getAsString();
-                        translators.add(new Pair<>(entry.getKey(), behind));
+                        translators.add(new Tuple<>(entry.getKey(), behind));
                     });
                 }
-                translators.sort(Comparator.comparing(Pair::getLeft, String::compareToIgnoreCase));
+                translators.sort(Comparator.comparing(Tuple::getA, String::compareToIgnoreCase));
             } catch (Exception e) {
                 exception[0] = e;
                 e.printStackTrace();
             }
         });
-        List<Pair<String, String>> translatorsMapped = translators.stream().map(pair -> {
-            return new Pair<>(
-                    "  " + (I18n.hasTranslation("language.roughlyenoughitems." + pair.getLeft().toLowerCase(Locale.ROOT).replace(' ', '_')) ? I18n.translate("language.roughlyenoughitems." + pair.getLeft().toLowerCase(Locale.ROOT).replace(' ', '_')) : pair.getLeft()),
-                    pair.getRight()
+        List<Tuple<String, String>> translatorsMapped = translators.stream().map(pair -> {
+            return new Tuple<>(
+                    "  " + (I18n.exists("language.roughlyenoughitems." + pair.getA().toLowerCase(Locale.ROOT).replace(' ', '_')) ? I18n.get("language.roughlyenoughitems." + pair.getA().toLowerCase(Locale.ROOT).replace(' ', '_')) : pair.getA()),
+                    pair.getB()
             );
         }).collect(Collectors.toList());
         int i = width - 80 - 6;
@@ -105,18 +105,18 @@ public class CreditsScreen extends Screen {
                     for (StackTraceElement traceElement : exception[0].getStackTrace())
                         entryListWidget.creditsAddEntry(new TextCreditsItem(new ImmutableLiteralText("  at " + traceElement)));
                 } else {
-                    int maxWidth = translatorsMapped.stream().mapToInt(pair -> textRenderer.getStringWidth(pair.getLeft())).max().orElse(0) + 5;
-                    for (Pair<String, String> pair : translatorsMapped) {
-                        entryListWidget.creditsAddEntry(new TranslationCreditsItem(new TranslatableText(pair.getLeft()), new TranslatableText(pair.getRight()), i - maxWidth - 10, maxWidth));
+                    int maxWidth = translatorsMapped.stream().mapToInt(pair -> font.width(pair.getA())).max().orElse(0) + 5;
+                    for (Tuple<String, String> pair : translatorsMapped) {
+                        entryListWidget.creditsAddEntry(new TranslationCreditsItem(new TranslatableComponent(pair.getA()), new TranslatableComponent(pair.getB()), i - maxWidth - 10, maxWidth));
                     }
                 }
             } else entryListWidget.creditsAddEntry(new TextCreditsItem(new ImmutableLiteralText(line)));
-        entryListWidget.creditsAddEntry(new TextCreditsItem(NarratorManager.EMPTY));
-        children.add(buttonDone = new AbstractPressableButtonWidget(width / 2 - 100, height - 26, 200, 20, new TranslatableText("gui.done")) {
+        entryListWidget.creditsAddEntry(new TextCreditsItem(NarratorChatListener.NO_TITLE));
+        children.add(buttonDone = new AbstractButton(width / 2 - 100, height - 26, 200, 20, new TranslatableComponent("gui.done")) {
             @Override
             public void onPress() {
-                CreditsScreen.this.client.openScreen(parent);
-                if (parent instanceof ContainerScreen)
+                CreditsScreen.this.minecraft.setScreen(parent);
+                if (parent instanceof AbstractContainerScreen)
                     ScreenHelper.getLastOverlay().init();
             }
         });
@@ -130,10 +130,10 @@ public class CreditsScreen extends Screen {
     }
     
     @Override
-    public void render(MatrixStack matrices, int int_1, int int_2, float float_1) {
-        this.renderBackgroundTexture(0);
+    public void render(PoseStack matrices, int int_1, int int_2, float float_1) {
+        this.renderDirtBackground(0);
         this.entryListWidget.render(matrices, int_1, int_2, float_1);
-        this.drawCenteredString(matrices, this.textRenderer, I18n.translate("text.rei.credits"), this.width / 2, 16, 16777215);
+        this.drawCenteredString(matrices, this.font, I18n.get("text.rei.credits"), this.width / 2, 16, 16777215);
         super.render(matrices, int_1, int_2, float_1);
         buttonDone.render(matrices, int_1, int_2, float_1);
     }

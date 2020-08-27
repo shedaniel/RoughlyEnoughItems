@@ -27,11 +27,11 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.impl.Internals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.ContainerScreen;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeManager;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeManager;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -108,7 +108,7 @@ public interface RecipeHelper {
      * @param category        the category
      * @param workingStations the working stations
      */
-    void registerWorkingStations(Identifier category, List<EntryStack>... workingStations);
+    void registerWorkingStations(ResourceLocation category, List<EntryStack>... workingStations);
     
     /**
      * Registers the working stations of a category
@@ -116,9 +116,9 @@ public interface RecipeHelper {
      * @param category        the category
      * @param workingStations the working stations
      */
-    void registerWorkingStations(Identifier category, EntryStack... workingStations);
+    void registerWorkingStations(ResourceLocation category, EntryStack... workingStations);
     
-    List<List<EntryStack>> getWorkingStations(Identifier category);
+    List<List<EntryStack>> getWorkingStations(ResourceLocation category);
     
     /**
      * Registers a recipe display.
@@ -136,7 +136,7 @@ public interface RecipeHelper {
      */
     @ApiStatus.ScheduledForRemoval
     @Deprecated
-    default void registerDisplay(Identifier categoryIdentifier, RecipeDisplay display) {
+    default void registerDisplay(ResourceLocation categoryIdentifier, RecipeDisplay display) {
         registerDisplay(display);
     }
     
@@ -150,7 +150,7 @@ public interface RecipeHelper {
      */
     Map<RecipeCategory<?>, List<RecipeDisplay>> getRecipesFor(EntryStack stack);
     
-    RecipeCategory<?> getCategory(Identifier identifier);
+    RecipeCategory<?> getCategory(ResourceLocation identifier);
     
     /**
      * Gets the vanilla recipe manager
@@ -188,14 +188,14 @@ public interface RecipeHelper {
      * @param category  the category of the button area
      * @param rectangle the button area
      */
-    void registerAutoCraftButtonArea(Identifier category, ButtonAreaSupplier rectangle);
+    void registerAutoCraftButtonArea(ResourceLocation category, ButtonAreaSupplier rectangle);
     
     /**
      * Removes the auto crafting button
      *
      * @param category the category of the button
      */
-    default void removeAutoCraftButton(Identifier category) {
+    default void removeAutoCraftButton(ResourceLocation category) {
         registerAutoCraftButtonArea(category, bounds -> null);
     }
     
@@ -241,7 +241,7 @@ public interface RecipeHelper {
      */
     boolean isDisplayVisible(RecipeDisplay display);
     
-    <T extends Recipe<?>> void registerRecipes(Identifier category, Predicate<Recipe> recipeFilter, Function<T, RecipeDisplay> mappingFunction);
+    <T extends Recipe<?>> void registerRecipes(ResourceLocation category, Predicate<Recipe> recipeFilter, Function<T, RecipeDisplay> mappingFunction);
     
     /**
      * Registers a live recipe generator.
@@ -251,11 +251,11 @@ public interface RecipeHelper {
      */
     void registerLiveRecipeGenerator(LiveRecipeGenerator<?> liveRecipeGenerator);
     
-    void registerScreenClickArea(Rectangle rectangle, Class<? extends ContainerScreen<?>> screenClass, Identifier... categories);
+    void registerScreenClickArea(Rectangle rectangle, Class<? extends AbstractContainerScreen<?>> screenClass, ResourceLocation... categories);
     
-    <T extends Recipe<?>> void registerRecipes(Identifier category, Class<T> recipeClass, Function<T, RecipeDisplay> mappingFunction);
+    <T extends Recipe<?>> void registerRecipes(ResourceLocation category, Class<T> recipeClass, Function<T, RecipeDisplay> mappingFunction);
     
-    <T extends Recipe<?>> void registerRecipes(Identifier category, Function<Recipe, Boolean> recipeFilter, Function<T, RecipeDisplay> mappingFunction);
+    <T extends Recipe<?>> void registerRecipes(ResourceLocation category, Function<Recipe, Boolean> recipeFilter, Function<T, RecipeDisplay> mappingFunction);
     
     List<RecipeHelper.ScreenClickArea> getScreenClickAreas();
     
@@ -263,11 +263,11 @@ public interface RecipeHelper {
     boolean arePluginsLoading();
     
     interface ScreenClickArea {
-        Class<? extends ContainerScreen> getScreenClass();
+        Class<? extends AbstractContainerScreen> getScreenClass();
         
         Rectangle getRectangle();
         
-        Identifier[] getCategories();
+        ResourceLocation[] getCategories();
     }
     
 }

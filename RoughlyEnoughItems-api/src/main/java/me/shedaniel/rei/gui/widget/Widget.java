@@ -24,33 +24,32 @@
 package me.shedaniel.rei.gui.widget;
 
 import me.shedaniel.math.Point;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.AbstractParentElement;
-import net.minecraft.client.gui.Drawable;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 
 /**
  * The base class for a screen widget
  *
  * @see WidgetWithBounds for a widget with bounds
  */
-public abstract class Widget extends AbstractParentElement implements Drawable {
+public abstract class Widget extends AbstractContainerEventHandler implements net.minecraft.client.gui.components.Widget {
     
     /**
      * The Minecraft Client instance
      */
-    protected final MinecraftClient minecraft = MinecraftClient.getInstance();
+    protected final Minecraft minecraft = Minecraft.getInstance();
     /**
      * The font for rendering text
      */
-    protected final TextRenderer font = minecraft.textRenderer;
+    protected final Font font = minecraft.font;
     
     public int getZ() {
-        return this.getZOffset();
+        return this.getBlitOffset();
     }
     
     public void setZ(int z) {
-        this.setZOffset(z);
+        this.setBlitOffset(z);
     }
     
     public boolean containsMouse(double mouseX, double mouseY) {

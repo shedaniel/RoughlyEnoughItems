@@ -26,7 +26,7 @@ package me.shedaniel.rei.gui.config;
 import me.shedaniel.clothconfig2.gui.entries.SelectionListEntry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.resources.language.I18n;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
@@ -43,6 +43,6 @@ public enum DisplayPanelLocation implements SelectionListEntry.Translatable {
     
     @Override
     public @NotNull String getKey() {
-        return I18n.translate("config.roughlyenoughitems.accessibility.displayPanelLocation." + name().toLowerCase(Locale.ROOT));
+        return I18n.get("config.roughlyenoughitems.accessibility.displayPanelLocation." + name().toLowerCase(Locale.ROOT));
     }
 }

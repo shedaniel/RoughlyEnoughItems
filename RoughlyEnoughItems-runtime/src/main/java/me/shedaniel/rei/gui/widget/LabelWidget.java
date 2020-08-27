@@ -23,15 +23,15 @@
 
 package me.shedaniel.rei.gui.widget;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -52,26 +52,26 @@ import java.util.stream.Stream;
 public class LabelWidget extends WidgetWithBounds {
     
     private Point pos;
-    protected Text text;
+    protected Component text;
     private int defaultColor;
     private boolean hasShadows = true;
     private boolean centered = true;
     private Supplier<String> tooltipSupplier;
     
     @ApiStatus.Internal
-    public LabelWidget(Point point, Text text) {
+    public LabelWidget(Point point, Component text) {
         this.pos = point;
         this.text = text;
         this.defaultColor = REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : -1;
     }
     
     public static LabelWidget create(Point point, String text) {
-        return new LabelWidget(point, new LiteralText(text));
+        return new LabelWidget(point, new TextComponent(text));
     }
     
     public static ClickableLabelWidget createClickable(Point point, String text, Consumer<ClickableLabelWidget> onClicked) {
         ClickableLabelWidget[] widget = {null};
-        widget[0] = new ClickableLabelWidget(point, new LiteralText(text)) {
+        widget[0] = new ClickableLabelWidget(point, new TextComponent(text)) {
             @Override
             public void onLabelClicked() {
                 onClicked.accept(widget[0]);
@@ -141,7 +141,7 @@ public class LabelWidget extends WidgetWithBounds {
     }
     
     public LabelWidget setText(String text) {
-        this.text = new LiteralText(text);
+        this.text = new TextComponent(text);
         return this;
     }
     
@@ -157,7 +157,7 @@ public class LabelWidget extends WidgetWithBounds {
     @NotNull
     @Override
     public Rectangle getBounds() {
-        int width = font.getWidth(text);
+        int width = font.width(text);
         Point pos = getLocation();
         if (isCentered())
             return new Rectangle(pos.x - width / 2 - 1, pos.y - 5, width + 2, 14);
@@ -165,30 +165,30 @@ public class LabelWidget extends WidgetWithBounds {
     }
     
     @Override
-    public List<? extends Element> children() {
+    public List<? extends GuiEventListener> children() {
         return Collections.emptyList();
     }
     
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        int width = font.getWidth(text);
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        int width = font.width(text);
         Point pos = getLocation();
         if (isCentered()) {
             if (hasShadows)
-                font.drawWithShadow(matrices, text.asOrderedText(), pos.x - width / 2f, pos.y, defaultColor);
+                font.drawShadow(matrices, text.getVisualOrderText(), pos.x - width / 2f, pos.y, defaultColor);
             else
-                font.draw(matrices, text.asOrderedText(), pos.x - width / 2f, pos.y, defaultColor);
+                font.draw(matrices, text.getVisualOrderText(), pos.x - width / 2f, pos.y, defaultColor);
         } else {
             if (hasShadows)
-                font.drawWithShadow(matrices, text.asOrderedText(), pos.x, pos.y, defaultColor);
+                font.drawShadow(matrices, text.getVisualOrderText(), pos.x, pos.y, defaultColor);
             else
-                font.draw(matrices, text.asOrderedText(), pos.x, pos.y, defaultColor);
+                font.draw(matrices, text.getVisualOrderText(), pos.x, pos.y, defaultColor);
         }
     }
     
     protected void drawTooltips(int mouseX, int mouseY) {
         if (getTooltips().isPresent())
             if (containsMouse(mouseX, mouseY))
-                Tooltip.create(Stream.of(getTooltips().get().split("\n")).map(LiteralText::new).collect(Collectors.toList())).queue();
+                Tooltip.create(Stream.of(getTooltips().get().split("\n")).map(TextComponent::new).collect(Collectors.toList())).queue();
     }
 }

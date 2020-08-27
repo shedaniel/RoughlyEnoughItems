@@ -24,6 +24,7 @@
 package me.shedaniel.rei.gui;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
 import me.shedaniel.clothconfig2.impl.EasingMethod;
@@ -34,17 +35,16 @@ import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import me.shedaniel.rei.impl.ScreenHelper;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.ContainerScreen;
-import net.minecraft.client.util.NarratorManager;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -54,7 +54,7 @@ import java.util.List;
 @ApiStatus.Internal
 public class PreRecipeViewingScreen extends Screen {
     
-    private static final Identifier IDENTIFIER = new Identifier("roughlyenoughitems", "textures/gui/screenshot.png");
+    private static final ResourceLocation IDENTIFIER = new ResourceLocation("roughlyenoughitems", "textures/gui/screenshot.png");
     private final List<Widget> widgets;
     protected long start;
     protected long duration;
@@ -67,7 +67,7 @@ public class PreRecipeViewingScreen extends Screen {
     private boolean showTips;
     
     public PreRecipeViewingScreen(Screen parent, RecipeScreenType type, boolean showTips, BooleanConsumer callback) {
-        super(new TranslatableText("text.rei.recipe_screen_type.selection"));
+        super(new TranslatableComponent("text.rei.recipe_screen_type.selection"));
         this.widgets = Lists.newArrayList();
         if (type == RecipeScreenType.UNSET) {
             this.isSet = false;
@@ -87,7 +87,7 @@ public class PreRecipeViewingScreen extends Screen {
     }
     
     public final double clamp(double v, double clampExtension) {
-        return MathHelper.clamp(v, -clampExtension, 1 + clampExtension);
+        return Mth.clamp(v, -clampExtension, 1 + clampExtension);
     }
     
     private void moveFrameTo(double value, boolean animated, long duration) {
@@ -104,31 +104,31 @@ public class PreRecipeViewingScreen extends Screen {
     public void init() {
         this.children.clear();
         this.widgets.clear();
-        this.widgets.add(Widgets.createButton(new Rectangle(width / 2 - 100, height - 40, 200, 20), NarratorManager.EMPTY)
+        this.widgets.add(Widgets.createButton(new Rectangle(width / 2 - 100, height - 40, 200, 20), NarratorChatListener.NO_TITLE)
                 .onRender((matrices, button) -> {
                     button.setEnabled(isSet);
-                    button.setText(isSet ? new TranslatableText("text.rei.select") : new TranslatableText("config.roughlyenoughitems.recipeScreenType.unset"));
+                    button.setText(isSet ? new TranslatableComponent("text.rei.select") : new TranslatableComponent("config.roughlyenoughitems.recipeScreenType.unset"));
                 })
                 .onClick(button -> callback.accept(original)));
         this.widgets.add(new ScreenTypeSelection(width / 2 - 200 - 5, height / 2 - 112 / 2 - 10, 0));
-        this.widgets.add(Widgets.createLabel(new Point(width / 2 - 200 - 5 + 104, height / 2 - 112 / 2 + 115), new TranslatableText("config.roughlyenoughitems.recipeScreenType.original")).noShadow().color(-1124073473));
+        this.widgets.add(Widgets.createLabel(new Point(width / 2 - 200 - 5 + 104, height / 2 - 112 / 2 + 115), new TranslatableComponent("config.roughlyenoughitems.recipeScreenType.original")).noShadow().color(-1124073473));
         this.widgets.add(new ScreenTypeSelection(width / 2 + 5, height / 2 - 112 / 2 - 10, 112));
-        this.widgets.add(Widgets.createLabel(new Point(width / 2 + 5 + 104, height / 2 - 112 / 2 + 115), new TranslatableText("config.roughlyenoughitems.recipeScreenType.villager")).noShadow().color(-1124073473));
+        this.widgets.add(Widgets.createLabel(new Point(width / 2 + 5 + 104, height / 2 - 112 / 2 + 115), new TranslatableComponent("config.roughlyenoughitems.recipeScreenType.villager")).noShadow().color(-1124073473));
         this.children.addAll(widgets);
     }
     
     @Override
-    public void render(MatrixStack matrices, int int_1, int int_2, float float_1) {
-        if (this.client.world != null) {
+    public void render(PoseStack matrices, int int_1, int int_2, float float_1) {
+        if (this.minecraft.level != null) {
             this.fillGradient(matrices, 0, 0, this.width, this.height, -1072689136, -804253680);
         } else {
             this.fillGradient(matrices, 0, 0, this.width, this.height, -16777216, -16777216);
         }
-        drawCenteredText(matrices, this.textRenderer, this.title, this.width / 2, 20, 16777215);
+        drawCenteredString(matrices, this.font, this.title, this.width / 2, 20, 16777215);
         if (showTips) {
             int i = 30;
-            for (OrderedText s : this.textRenderer.wrapStringToWidthAsList(new TranslatableText("text.rei.recipe_screen_type.selection.sub").formatted(Formatting.GRAY), width - 30)) {
-                textRenderer.drawWithShadow(matrices, s, width / 2 - textRenderer.getWidth(s) / 2, i, -1);
+            for (FormattedCharSequence s : this.font.split(new TranslatableComponent("text.rei.recipe_screen_type.selection.sub").withStyle(ChatFormatting.GRAY), width - 30)) {
+                font.drawShadow(matrices, s, width / 2 - font.width(s) / 2, i, -1);
                 i += 10;
             }
         }
@@ -161,9 +161,9 @@ public class PreRecipeViewingScreen extends Screen {
     
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
-        if (int_1 == 256 || this.client.options.keyInventory.matchesKey(int_1, int_2)) {
-            MinecraftClient.getInstance().openScreen(parent);
-            if (parent instanceof ContainerScreen)
+        if (int_1 == 256 || this.minecraft.options.keyInventory.matches(int_1, int_2)) {
+            Minecraft.getInstance().setScreen(parent);
+            if (parent instanceof AbstractContainerScreen)
                 ScreenHelper.getLastOverlay().init();
             return true;
         }
@@ -188,9 +188,9 @@ public class PreRecipeViewingScreen extends Screen {
         }
         
         @Override
-        public void render(MatrixStack matrices, int i, int i1, float delta) {
-            MinecraftClient.getInstance().getTextureManager().bindTexture(IDENTIFIER);
-            drawTexture(matrices, bounds.x + 4, bounds.y + 4, u, v, 200, 112);
+        public void render(PoseStack matrices, int i, int i1, float delta) {
+            Minecraft.getInstance().getTextureManager().bind(IDENTIFIER);
+            blit(matrices, bounds.x + 4, bounds.y + 4, u, v, 200, 112);
         }
         
         @Override
@@ -208,7 +208,7 @@ public class PreRecipeViewingScreen extends Screen {
         }
         
         @Override
-        public List<? extends Element> children() {
+        public List<? extends GuiEventListener> children() {
             return Collections.emptyList();
         }
     }

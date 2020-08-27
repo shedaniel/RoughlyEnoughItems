@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.widgets;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.LazyResettable;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -30,12 +31,11 @@ import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.widgets.Label;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.StringVisitable;
-import net.minecraft.util.Language;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.locale.Language;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -60,11 +60,11 @@ public final class LabelWidget extends Label {
     @NotNull private Point point;
     @Nullable private Function<Label, @Nullable String> tooltip;
     @Nullable private Consumer<Label> onClick;
-    @Nullable private BiConsumer<MatrixStack, Label> onRender;
-    @NotNull private StringVisitable text;
-    @NotNull private final LazyResettable<OrderedText> orderedText = new LazyResettable<>(() -> Language.getInstance().reorder(getMessage()));
+    @Nullable private BiConsumer<PoseStack, Label> onRender;
+    @NotNull private FormattedText text;
+    @NotNull private final LazyResettable<FormattedCharSequence> orderedText = new LazyResettable<>(() -> Language.getInstance().getVisualOrder(getMessage()));
     
-    public LabelWidget(@NotNull Point point, @NotNull StringVisitable text) {
+    public LabelWidget(@NotNull Point point, @NotNull FormattedText text) {
         Objects.requireNonNull(this.point = point);
         Objects.requireNonNull(this.text = text);
     }
@@ -92,12 +92,12 @@ public final class LabelWidget extends Label {
     
     @Nullable
     @Override
-    public final BiConsumer<MatrixStack, Label> getOnRender() {
+    public final BiConsumer<PoseStack, Label> getOnRender() {
         return onRender;
     }
     
     @Override
-    public final void setOnRender(@Nullable BiConsumer<MatrixStack, Label> onRender) {
+    public final void setOnRender(@Nullable BiConsumer<PoseStack, Label> onRender) {
         this.onRender = onRender;
     }
     
@@ -175,12 +175,12 @@ public final class LabelWidget extends Label {
     }
     
     @Override
-    public StringVisitable getMessage() {
+    public FormattedText getMessage() {
         return text;
     }
     
     @Override
-    public void setMessage(@NotNull StringVisitable message) {
+    public void setMessage(@NotNull FormattedText message) {
         this.text = Objects.requireNonNull(message);
         this.orderedText.reset();
     }
@@ -188,7 +188,7 @@ public final class LabelWidget extends Label {
     @NotNull
     @Override
     public final Rectangle getBounds() {
-        int width = font.getWidth(text);
+        int width = font.width(text);
         Point point = getPoint();
         if (getHorizontalAlignment() == LEFT_ALIGNED)
             return new Rectangle(point.x - 1, point.y - 5, width + 2, 14);
@@ -198,31 +198,31 @@ public final class LabelWidget extends Label {
     }
     
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (getOnRender() != null)
             getOnRender().accept(matrices, this);
         int color = getColor();
         if (isClickable() && isHovered(mouseX, mouseY))
             color = getHoveredColor();
         Point pos = getPoint();
-        int width = font.getWidth(orderedText.get());
+        int width = font.width(orderedText.get());
         switch (getHorizontalAlignment()) {
             case LEFT_ALIGNED:
                 if (hasShadow())
-                    font.drawWithShadow(matrices, orderedText.get(), pos.x, pos.y, color);
+                    font.drawShadow(matrices, orderedText.get(), pos.x, pos.y, color);
                 else
                     font.draw(matrices, orderedText.get(), pos.x, pos.y, color);
                 break;
             case RIGHT_ALIGNED:
                 if (hasShadow())
-                    font.drawWithShadow(matrices, orderedText.get(), pos.x - width, pos.y, color);
+                    font.drawShadow(matrices, orderedText.get(), pos.x - width, pos.y, color);
                 else
                     font.draw(matrices, orderedText.get(), pos.x - width, pos.y, color);
                 break;
             case CENTER:
             default:
                 if (hasShadow())
-                    font.drawWithShadow(matrices, orderedText.get(), pos.x - width / 2f, pos.y, color);
+                    font.drawShadow(matrices, orderedText.get(), pos.x - width / 2f, pos.y, color);
                 else
                     font.draw(matrices, orderedText.get(), pos.x - width / 2f, pos.y, color);
                 break;
@@ -231,9 +231,9 @@ public final class LabelWidget extends Label {
             String tooltip = getTooltip();
             if (tooltip != null) {
                 if (!focused && containsMouse(mouseX, mouseY))
-                    Tooltip.create(Stream.of(tooltip.split("\n")).map(LiteralText::new).collect(Collectors.toList())).queue();
+                    Tooltip.create(Stream.of(tooltip.split("\n")).map(TextComponent::new).collect(Collectors.toList())).queue();
                 else if (focused)
-                    Tooltip.create(point, Stream.of(tooltip.split("\n")).map(LiteralText::new).collect(Collectors.toList())).queue();
+                    Tooltip.create(point, Stream.of(tooltip.split("\n")).map(TextComponent::new).collect(Collectors.toList())).queue();
             }
         }
     }
@@ -274,7 +274,7 @@ public final class LabelWidget extends Label {
     }
     
     @Override
-    public List<? extends Element> children() {
+    public List<? extends GuiEventListener> children() {
         return Collections.emptyList();
     }
 }

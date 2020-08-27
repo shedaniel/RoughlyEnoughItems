@@ -40,48 +40,48 @@ import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.ContainerScreen;
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-import net.minecraft.client.util.NarratorManager;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Lazy;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.core.Registry;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.LazyLoadedValue;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static me.shedaniel.rei.impl.Internals.attachInstance;
-
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Supplier;
+
+import static me.shedaniel.rei.impl.Internals.attachInstance;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     private static ClientHelperImpl instance;
-    @ApiStatus.Internal public final Lazy<Boolean> isYog = new Lazy<>(() -> {
+    @ApiStatus.Internal public final LazyLoadedValue<Boolean> isYog = new LazyLoadedValue<>(() -> {
         try {
-            if (MinecraftClient.getInstance().getSession().getProfile().getId().equals(UUID.fromString("f9546389-9415-4358-9c29-2c26b25bff5b")))
+            if (Minecraft.getInstance().getUser().getGameProfile().getId().equals(UUID.fromString("f9546389-9415-4358-9c29-2c26b25bff5b")))
                 return true;
         } catch (Throwable ignored) {
         }
         return false;
     });
-    @ApiStatus.Internal public final Lazy<Boolean> isAprilFools = new Lazy<>(() -> {
+    @ApiStatus.Internal public final LazyLoadedValue<Boolean> isAprilFools = new LazyLoadedValue<>(() -> {
         try {
             LocalDateTime now = LocalDateTime.now();
             return now.getMonthValue() == 4 && now.getDayOfMonth() == 1;
@@ -101,26 +101,26 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     }
     
     @Override
-    public Text getFormattedModFromItem(Item item) {
+    public Component getFormattedModFromItem(Item item) {
         String mod = getModFromItem(item);
         if (mod.isEmpty())
-            return NarratorManager.EMPTY;
-        return new LiteralText(mod).formatted(Formatting.BLUE, Formatting.ITALIC);
+            return NarratorChatListener.NO_TITLE;
+        return new TextComponent(mod).withStyle(ChatFormatting.BLUE, ChatFormatting.ITALIC);
     }
     
     @Override
-    public Text getFormattedModFromIdentifier(Identifier identifier) {
+    public Component getFormattedModFromIdentifier(ResourceLocation identifier) {
         String mod = getModFromIdentifier(identifier);
         if (mod.isEmpty())
-            return NarratorManager.EMPTY;
-        return new LiteralText(mod).formatted(Formatting.BLUE, Formatting.ITALIC);
+            return NarratorChatListener.NO_TITLE;
+        return new TextComponent(mod).withStyle(ChatFormatting.BLUE, ChatFormatting.ITALIC);
     }
     
     @Override
     public String getModFromItem(Item item) {
         if (item.equals(Items.AIR))
             return "";
-        return getModFromIdentifier(Registry.ITEM.getId(item));
+        return getModFromIdentifier(Registry.ITEM.getKey(item));
     }
     
     @Override
@@ -148,14 +148,14 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     @Override
     public void sendDeletePacket() {
-        if (MinecraftClient.getInstance().currentScreen instanceof CreativeInventoryScreen) {
-            MinecraftClient.getInstance().player.inventory.setCursorStack(ItemStack.EMPTY);
-            ((CreativeInventoryScreen) MinecraftClient.getInstance().currentScreen).isCursorDragging = false;
+        if (Minecraft.getInstance().screen instanceof CreativeModeInventoryScreen) {
+            Minecraft.getInstance().player.inventory.setCarried(ItemStack.EMPTY);
+            ((CreativeModeInventoryScreen) Minecraft.getInstance().screen).isQuickCrafting = false;
             return;
         }
-        ClientSidePacketRegistry.INSTANCE.sendToServer(RoughlyEnoughItemsNetwork.DELETE_ITEMS_PACKET, new PacketByteBuf(Unpooled.buffer()));
-        if (MinecraftClient.getInstance().currentScreen instanceof ContainerScreen) {
-            ((ContainerScreen<?>) MinecraftClient.getInstance().currentScreen).isCursorDragging = false;
+        ClientSidePacketRegistry.INSTANCE.sendToServer(RoughlyEnoughItemsNetwork.DELETE_ITEMS_PACKET, new FriendlyByteBuf(Unpooled.buffer()));
+        if (Minecraft.getInstance().screen instanceof AbstractContainerScreen) {
+            ((AbstractContainerScreen<?>) Minecraft.getInstance().screen).isQuickCrafting = false;
         }
     }
     
@@ -163,52 +163,52 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     public boolean tryCheatingEntry(EntryStack entry) {
         if (entry.getType() != EntryStack.Type.ITEM)
             return false;
-        if (MinecraftClient.getInstance().player == null) return false;
-        if (MinecraftClient.getInstance().player.inventory == null) return false;
+        if (Minecraft.getInstance().player == null) return false;
+        if (Minecraft.getInstance().player.inventory == null) return false;
         ItemStack cheatedStack = entry.getItemStack().copy();
-        if (ConfigObject.getInstance().isGrabbingItems() && MinecraftClient.getInstance().currentScreen instanceof CreativeInventoryScreen) {
-            PlayerInventory inventory = MinecraftClient.getInstance().player.inventory;
+        if (ConfigObject.getInstance().isGrabbingItems() && Minecraft.getInstance().screen instanceof CreativeModeInventoryScreen) {
+            Inventory inventory = Minecraft.getInstance().player.inventory;
             EntryStack stack = entry.copy();
-            if (!inventory.getCursorStack().isEmpty() && EntryStack.create(inventory.getCursorStack()).equalsIgnoreAmount(stack)) {
-                stack.setAmount(MathHelper.clamp(stack.getAmount() + inventory.getCursorStack().getCount(), 1, stack.getItemStack().getMaxCount()));
-            } else if (!inventory.getCursorStack().isEmpty()) {
+            if (!inventory.getCarried().isEmpty() && EntryStack.create(inventory.getCarried()).equalsIgnoreAmount(stack)) {
+                stack.setAmount(Mth.clamp(stack.getAmount() + inventory.getCarried().getCount(), 1, stack.getItemStack().getMaxStackSize()));
+            } else if (!inventory.getCarried().isEmpty()) {
                 return false;
             }
-            inventory.setCursorStack(stack.getItemStack().copy());
+            inventory.setCarried(stack.getItemStack().copy());
             return true;
         } else if (RoughlyEnoughItemsCore.canUsePackets()) {
-            PlayerInventory inventory = MinecraftClient.getInstance().player.inventory;
+            Inventory inventory = Minecraft.getInstance().player.inventory;
             EntryStack stack = entry.copy();
-            if (!inventory.getCursorStack().isEmpty() && !EntryStack.create(inventory.getCursorStack()).equalsIgnoreAmount(stack)) {
+            if (!inventory.getCarried().isEmpty() && !EntryStack.create(inventory.getCarried()).equalsIgnoreAmount(stack)) {
                 return false;
             }
             try {
-                ClientSidePacketRegistry.INSTANCE.sendToServer(ConfigObject.getInstance().isGrabbingItems() ? RoughlyEnoughItemsNetwork.CREATE_ITEMS_GRAB_PACKET : RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET, new PacketByteBuf(Unpooled.buffer()).writeItemStack(cheatedStack));
+                ClientSidePacketRegistry.INSTANCE.sendToServer(ConfigObject.getInstance().isGrabbingItems() ? RoughlyEnoughItemsNetwork.CREATE_ITEMS_GRAB_PACKET : RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(cheatedStack));
                 return true;
             } catch (Exception e) {
                 return false;
             }
         } else {
-            Identifier identifier = entry.getIdentifier().orElse(null);
+            ResourceLocation identifier = entry.getIdentifier().orElse(null);
             if (identifier == null)
                 return false;
-            String tagMessage = cheatedStack.copy().getTag() != null && !cheatedStack.copy().getTag().isEmpty() ? cheatedStack.copy().getTag().asString() : "";
+            String tagMessage = cheatedStack.copy().getTag() != null && !cheatedStack.copy().getTag().isEmpty() ? cheatedStack.copy().getTag().getAsString() : "";
             String og = cheatedStack.getCount() == 1 ? ConfigObject.getInstance().getGiveCommand().replaceAll(" \\{count}", "") : ConfigObject.getInstance().getGiveCommand();
-            String madeUpCommand = og.replaceAll("\\{player_name}", MinecraftClient.getInstance().player.getEntityName()).replaceAll("\\{item_name}", identifier.getPath()).replaceAll("\\{item_identifier}", identifier.toString()).replaceAll("\\{nbt}", tagMessage).replaceAll("\\{count}", String.valueOf(cheatedStack.getCount()));
+            String madeUpCommand = og.replaceAll("\\{player_name}", Minecraft.getInstance().player.getScoreboardName()).replaceAll("\\{item_name}", identifier.getPath()).replaceAll("\\{item_identifier}", identifier.toString()).replaceAll("\\{nbt}", tagMessage).replaceAll("\\{count}", String.valueOf(cheatedStack.getCount()));
             if (madeUpCommand.length() > 256) {
-                madeUpCommand = og.replaceAll("\\{player_name}", MinecraftClient.getInstance().player.getEntityName()).replaceAll("\\{item_name}", identifier.getPath()).replaceAll("\\{item_identifier}", identifier.toString()).replaceAll("\\{nbt}", "").replaceAll("\\{count}", String.valueOf(cheatedStack.getCount()));
-                MinecraftClient.getInstance().player.addMessage(new TranslatableText("text.rei.too_long_nbt"), false);
+                madeUpCommand = og.replaceAll("\\{player_name}", Minecraft.getInstance().player.getScoreboardName()).replaceAll("\\{item_name}", identifier.getPath()).replaceAll("\\{item_identifier}", identifier.toString()).replaceAll("\\{nbt}", "").replaceAll("\\{count}", String.valueOf(cheatedStack.getCount()));
+                Minecraft.getInstance().player.displayClientMessage(new TranslatableComponent("text.rei.too_long_nbt"), false);
             }
-            MinecraftClient.getInstance().player.sendChatMessage(madeUpCommand);
+            Minecraft.getInstance().player.chat(madeUpCommand);
             return true;
         }
     }
     
     @Override
     public List<ItemStack> getInventoryItemsTypes() {
-        List<ItemStack> inventoryStacks = new ArrayList<>(MinecraftClient.getInstance().player.inventory.main);
-        inventoryStacks.addAll(MinecraftClient.getInstance().player.inventory.armor);
-        inventoryStacks.addAll(MinecraftClient.getInstance().player.inventory.offHand);
+        List<ItemStack> inventoryStacks = new ArrayList<>(Minecraft.getInstance().player.inventory.items);
+        inventoryStacks.addAll(Minecraft.getInstance().player.inventory.armor);
+        inventoryStacks.addAll(Minecraft.getInstance().player.inventory.offhand);
         return inventoryStacks;
     }
     
@@ -222,7 +222,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     @ApiStatus.ScheduledForRemoval
     @Deprecated
     @ApiStatus.Internal
-    public void openRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map, @Nullable Identifier category, @Nullable EntryStack ingredientNotice, @Nullable EntryStack resultNotice) {
+    public void openRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map, @Nullable ResourceLocation category, @Nullable EntryStack ingredientNotice, @Nullable EntryStack resultNotice) {
         openView(new LegacyWrapperViewSearchBuilder(map).setPreferredOpenedCategory(category).setInputNotice(ingredientNotice).setOutputNotice(resultNotice).fillPreferredOpenedCategory());
     }
     
@@ -248,9 +248,9 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
             if (builder.getOutputNotice() != null)
                 ((RecipeScreen) screen).addResultStackToNotice(builder.getOutputNotice());
         }
-        if (MinecraftClient.getInstance().currentScreen instanceof RecipeScreen)
-            ScreenHelper.storeRecipeScreen((RecipeScreen) MinecraftClient.getInstance().currentScreen);
-        MinecraftClient.getInstance().openScreen(screen);
+        if (Minecraft.getInstance().screen instanceof RecipeScreen)
+            ScreenHelper.storeRecipeScreen((RecipeScreen) Minecraft.getInstance().screen);
+        Minecraft.getInstance().setScreen(screen);
         return true;
     }
     
@@ -270,29 +270,29 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     }
     
     public static final class ViewSearchBuilder implements ClientHelper.ViewSearchBuilder {
-        @NotNull private final Set<Identifier> categories = new HashSet<>();
+        @NotNull private final Set<ResourceLocation> categories = new HashSet<>();
         @NotNull private final List<EntryStack> recipesFor = new ArrayList<>();
         @NotNull private final List<EntryStack> usagesFor = new ArrayList<>();
-        @Nullable private Identifier preferredOpenedCategory = null;
+        @Nullable private ResourceLocation preferredOpenedCategory = null;
         @Nullable private EntryStack inputNotice;
         @Nullable private EntryStack outputNotice;
-        @NotNull private final Lazy<Map<RecipeCategory<?>, List<RecipeDisplay>>> map = new Lazy<>(() -> RecipeHelper.getInstance().buildMapFor(this));
+        @NotNull private final LazyLoadedValue<Map<RecipeCategory<?>, List<RecipeDisplay>>> map = new LazyLoadedValue<>(() -> RecipeHelper.getInstance().buildMapFor(this));
         
         @Override
-        public ClientHelper.ViewSearchBuilder addCategory(Identifier category) {
+        public ClientHelper.ViewSearchBuilder addCategory(ResourceLocation category) {
             this.categories.add(category);
             return this;
         }
         
         @Override
-        public ClientHelper.ViewSearchBuilder addCategories(Collection<Identifier> categories) {
+        public ClientHelper.ViewSearchBuilder addCategories(Collection<ResourceLocation> categories) {
             this.categories.addAll(categories);
             return this;
         }
         
         @Override
         @NotNull
-        public Set<Identifier> getCategories() {
+        public Set<ResourceLocation> getCategories() {
             return categories;
         }
         
@@ -321,21 +321,21 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         }
         
         @Override
-        public ClientHelper.ViewSearchBuilder setPreferredOpenedCategory(@Nullable Identifier category) {
+        public ClientHelper.ViewSearchBuilder setPreferredOpenedCategory(@Nullable ResourceLocation category) {
             this.preferredOpenedCategory = category;
             return this;
         }
         
         @Nullable
         @Override
-        public Identifier getPreferredOpenedCategory() {
+        public ResourceLocation getPreferredOpenedCategory() {
             return this.preferredOpenedCategory;
         }
         
         @Override
         public ClientHelper.ViewSearchBuilder fillPreferredOpenedCategory() {
             if (getPreferredOpenedCategory() == null) {
-                Screen currentScreen = MinecraftClient.getInstance().currentScreen;
+                Screen currentScreen = Minecraft.getInstance().screen;
                 if (currentScreen instanceof RecipeScreen) {
                     setPreferredOpenedCategory(((RecipeScreen) currentScreen).getCurrentCategory());
                 }
@@ -376,7 +376,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     public static final class LegacyWrapperViewSearchBuilder implements ClientHelper.ViewSearchBuilder {
         @NotNull private final Map<RecipeCategory<?>, List<RecipeDisplay>> map;
-        @Nullable private Identifier preferredOpenedCategory = null;
+        @Nullable private ResourceLocation preferredOpenedCategory = null;
         @Nullable private EntryStack inputNotice;
         @Nullable private EntryStack outputNotice;
         
@@ -385,17 +385,17 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         }
         
         @Override
-        public ClientHelper.ViewSearchBuilder addCategory(Identifier category) {
+        public ClientHelper.ViewSearchBuilder addCategory(ResourceLocation category) {
             return this;
         }
         
         @Override
-        public ClientHelper.ViewSearchBuilder addCategories(Collection<Identifier> categories) {
+        public ClientHelper.ViewSearchBuilder addCategories(Collection<ResourceLocation> categories) {
             return this;
         }
         
         @Override
-        public @NotNull Set<Identifier> getCategories() {
+        public @NotNull Set<ResourceLocation> getCategories() {
             return Collections.emptySet();
         }
         
@@ -420,21 +420,21 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         }
         
         @Override
-        public ClientHelper.ViewSearchBuilder setPreferredOpenedCategory(@Nullable Identifier category) {
+        public ClientHelper.ViewSearchBuilder setPreferredOpenedCategory(@Nullable ResourceLocation category) {
             this.preferredOpenedCategory = category;
             return this;
         }
         
         @Nullable
         @Override
-        public Identifier getPreferredOpenedCategory() {
+        public ResourceLocation getPreferredOpenedCategory() {
             return this.preferredOpenedCategory;
         }
         
         @Override
         public ClientHelper.ViewSearchBuilder fillPreferredOpenedCategory() {
             if (getPreferredOpenedCategory() == null) {
-                Screen currentScreen = MinecraftClient.getInstance().currentScreen;
+                Screen currentScreen = Minecraft.getInstance().screen;
                 if (currentScreen instanceof RecipeScreen) {
                     setPreferredOpenedCategory(((RecipeScreen) currentScreen).getCurrentCategory());
                 }

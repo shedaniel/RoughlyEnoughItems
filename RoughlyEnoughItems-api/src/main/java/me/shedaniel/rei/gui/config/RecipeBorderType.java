@@ -25,7 +25,7 @@ package me.shedaniel.rei.gui.config;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.resources.language.I18n;
 
 import java.util.Locale;
 
@@ -57,6 +57,6 @@ public enum RecipeBorderType {
     
     @Override
     public String toString() {
-        return I18n.translate("config.roughlyenoughitems.recipeBorder." + name().toLowerCase(Locale.ROOT));
+        return I18n.get("config.roughlyenoughitems.recipeBorder." + name().toLowerCase(Locale.ROOT));
     }
 }

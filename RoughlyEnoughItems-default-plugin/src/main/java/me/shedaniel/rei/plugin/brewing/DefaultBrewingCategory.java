@@ -34,12 +34,12 @@ import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.item.Items;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
 
@@ -47,7 +47,7 @@ import java.util.List;
 public class DefaultBrewingCategory implements RecipeCategory<DefaultBrewingDisplay> {
     
     @Override
-    public Identifier getIdentifier() {
+    public ResourceLocation getIdentifier() {
         return DefaultPlugin.BREWING;
     }
     
@@ -58,7 +58,7 @@ public class DefaultBrewingCategory implements RecipeCategory<DefaultBrewingDisp
     
     @Override
     public String getCategoryName() {
-        return I18n.translate("category.rei.brewing");
+        return I18n.get("category.rei.brewing");
     }
     
     @Override
@@ -67,10 +67,10 @@ public class DefaultBrewingCategory implements RecipeCategory<DefaultBrewingDisp
         List<Widget> widgets = Lists.newArrayList();
         widgets.add(Widgets.createRecipeBase(bounds));
         widgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-            MinecraftClient.getInstance().getTextureManager().bindTexture(REIHelper.getInstance().getDefaultDisplayTexture());
-            helper.drawTexture(matrices, startPoint.x, startPoint.y, 0, 108, 103, 59);
-            int width = MathHelper.ceil(System.currentTimeMillis() / 250d % 18d);
-            helper.drawTexture(matrices, startPoint.x + 44, startPoint.y + 28, 103, 163, width, 4);
+            Minecraft.getInstance().getTextureManager().bind(REIHelper.getInstance().getDefaultDisplayTexture());
+            helper.blit(matrices, startPoint.x, startPoint.y, 0, 108, 103, 59);
+            int width = Mth.ceil(System.currentTimeMillis() / 250d % 18d);
+            helper.blit(matrices, startPoint.x + 44, startPoint.y + 28, 103, 163, width, 4);
         }));
         widgets.add(Widgets.createSlot(new Point(startPoint.x + 1, startPoint.y + 1)).entry(EntryStack.create(Items.BLAZE_POWDER)).disableBackground().markInput());
         widgets.add(Widgets.createSlot(new Point(startPoint.x + 40, startPoint.y + 1)).entries(display.getInputEntries().get(0)).disableBackground().markInput());

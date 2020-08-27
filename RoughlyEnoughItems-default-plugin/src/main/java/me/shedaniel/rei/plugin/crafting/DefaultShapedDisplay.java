@@ -26,9 +26,9 @@ package me.shedaniel.rei.plugin.crafting;
 import me.shedaniel.rei.api.EntryStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.ShapedRecipe;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.ShapedRecipe;
 
 import java.util.Collections;
 import java.util.List;
@@ -43,12 +43,12 @@ public class DefaultShapedDisplay implements DefaultCraftingDisplay {
     
     public DefaultShapedDisplay(ShapedRecipe recipe) {
         this.display = recipe;
-        this.input = EntryStack.ofIngredients(recipe.getPreviewInputs());
-        this.output = Collections.singletonList(EntryStack.create(recipe.getOutput()));
+        this.input = EntryStack.ofIngredients(recipe.getIngredients());
+        this.output = Collections.singletonList(EntryStack.create(recipe.getResultItem()));
     }
     
     @Override
-    public Optional<Identifier> getRecipeLocation() {
+    public Optional<ResourceLocation> getRecipeLocation() {
         return Optional.ofNullable(display).map(ShapedRecipe::getId);
     }
     

@@ -24,6 +24,7 @@
 package me.shedaniel.rei.gui.entries;
 
 import com.google.common.collect.Maps;
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
@@ -32,10 +33,9 @@ import me.shedaniel.rei.api.widgets.Slot;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
 public class SimpleRecipeEntry extends RecipeEntry {
     
     private static final Comparator<EntryStack> ENTRY_COMPARATOR = Comparator.comparingLong(EntryStack::hashCode);
-    private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
+    private static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private List<Slot> inputWidgets;
     private List<Slot> outputWidgets;
     
@@ -114,7 +114,7 @@ public class SimpleRecipeEntry extends RecipeEntry {
     }
     
     @Override
-    public void render(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+    public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
         int xx = bounds.x + 4, yy = bounds.y + 2;
         int j = 0;
         int itemsPerLine = getItemsPerLine();
@@ -132,8 +132,8 @@ public class SimpleRecipeEntry extends RecipeEntry {
         }
         xx = bounds.x + 4 + 18 * (getItemsPerLine() - 2);
         yy = bounds.y + getHeight() / 2 - 8;
-        MinecraftClient.getInstance().getTextureManager().bindTexture(CHEST_GUI_TEXTURE);
-        drawTexture(matrices, xx, yy, 0, 28, 18, 18);
+        Minecraft.getInstance().getTextureManager().bind(CHEST_GUI_TEXTURE);
+        blit(matrices, xx, yy, 0, 28, 18, 18);
         xx += 18;
         yy += outputWidgets.size() * -9 + 9;
         for (Slot outputWidget : outputWidgets) {
@@ -163,11 +163,11 @@ public class SimpleRecipeEntry extends RecipeEntry {
     }
     
     public int getItemsHeight() {
-        return MathHelper.ceil(((float) inputWidgets.size()) / (getItemsPerLine() - 2));
+        return Mth.ceil(((float) inputWidgets.size()) / (getItemsPerLine() - 2));
     }
     
     public int getItemsPerLine() {
-        return MathHelper.floor((getWidth() - 4f) / 18f);
+        return Mth.floor((getWidth() - 4f) / 18f);
     }
     
 }

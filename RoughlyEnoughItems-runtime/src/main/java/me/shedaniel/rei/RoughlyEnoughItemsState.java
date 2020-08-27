@@ -25,7 +25,7 @@ package me.shedaniel.rei;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.util.Pair;
+import net.minecraft.util.Tuple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
@@ -41,8 +41,8 @@ public class RoughlyEnoughItemsState {
     
     public static final Logger LOGGER = LogManager.getFormatterLogger("REI");
     
-    private static List<Pair<String, String>> errors = new ArrayList<>();
-    private static List<Pair<String, String>> warnings = new ArrayList<>();
+    private static List<Tuple<String, String>> errors = new ArrayList<>();
+    private static List<Tuple<String, String>> warnings = new ArrayList<>();
     private static Set<String> errorSet = new LinkedHashSet<>();
     private static Set<String> warningSet = new LinkedHashSet<>();
     private static List<Runnable> continueCallbacks = new ArrayList<>();
@@ -51,7 +51,7 @@ public class RoughlyEnoughItemsState {
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER || FabricLoader.getInstance().isDevelopmentEnvironment())
             throw new RuntimeException(reason);
         if (RoughlyEnoughItemsState.errorSet.add(reason + " " + null)) {
-            RoughlyEnoughItemsState.errors.add(new Pair<>(reason, null));
+            RoughlyEnoughItemsState.errors.add(new Tuple<>(reason, null));
             LOGGER.error(reason);
         }
     }
@@ -60,21 +60,21 @@ public class RoughlyEnoughItemsState {
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER || FabricLoader.getInstance().isDevelopmentEnvironment())
             throw new RuntimeException(reason + " " + link);
         if (RoughlyEnoughItemsState.errorSet.add(reason + " " + link)) {
-            RoughlyEnoughItemsState.errors.add(new Pair<>(reason, link));
+            RoughlyEnoughItemsState.errors.add(new Tuple<>(reason, link));
             LOGGER.error(reason + " " + link);
         }
     }
     
     public static void warn(String reason) {
         if (RoughlyEnoughItemsState.warningSet.add(reason + " " + null)) {
-            RoughlyEnoughItemsState.warnings.add(new Pair<>(reason, null));
+            RoughlyEnoughItemsState.warnings.add(new Tuple<>(reason, null));
             LOGGER.warn(reason);
         }
     }
     
     public static void warn(String reason, String link) {
         if (RoughlyEnoughItemsState.warningSet.add(reason + " " + link)) {
-            RoughlyEnoughItemsState.warnings.add(new Pair<>(reason, link));
+            RoughlyEnoughItemsState.warnings.add(new Tuple<>(reason, link));
             LOGGER.warn(reason + " " + link);
         }
     }
@@ -83,11 +83,11 @@ public class RoughlyEnoughItemsState {
         continueCallbacks.add(runnable);
     }
     
-    public static List<Pair<String, String>> getErrors() {
+    public static List<Tuple<String, String>> getErrors() {
         return errors;
     }
     
-    public static List<Pair<String, String>> getWarnings() {
+    public static List<Tuple<String, String>> getWarnings() {
         return warnings;
     }
     

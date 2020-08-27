@@ -5,7 +5,7 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [],
   "client": [
-    "MixinBrewingRecipeRegistry"
+    "MixinPotionBrewing"
   ],
   "injectors": {
     "defaultRequire": 1

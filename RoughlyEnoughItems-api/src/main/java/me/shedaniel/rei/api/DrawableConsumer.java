@@ -23,13 +23,13 @@
 
 package me.shedaniel.rei.api;
 
-import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.util.math.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiComponent;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * Consumer of a {@link DrawableHelper} and information of mouse and delta.
  */
 public interface DrawableConsumer {
-    void render(@NotNull DrawableHelper helper, @NotNull MatrixStack matrices, int mouseX, int mouseY, float delta);
+    void render(@NotNull GuiComponent helper, @NotNull PoseStack matrices, int mouseX, int mouseY, float delta);
 }

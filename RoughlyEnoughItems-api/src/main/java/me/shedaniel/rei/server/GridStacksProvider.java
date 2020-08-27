@@ -23,9 +23,9 @@
 
 package me.shedaniel.rei.server;
 
-import net.minecraft.container.Container;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 
 @FunctionalInterface
-public interface GridStacksProvider<T extends Container> {
+public interface GridStacksProvider<T extends AbstractContainerMenu> {
     Iterable<StackAccessor> getStacks(ContainerContext<T> context);
 }

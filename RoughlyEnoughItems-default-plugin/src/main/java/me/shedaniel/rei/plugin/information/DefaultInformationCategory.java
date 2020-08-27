@@ -25,6 +25,8 @@ package me.shedaniel.rei.plugin.information;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.Matrix4f;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.ScrollingContainer;
@@ -41,19 +43,13 @@ import me.shedaniel.rei.impl.RenderingEntry;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.BufferRenderer;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormats;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.StringVisitable;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Matrix4f;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -63,39 +59,39 @@ import java.util.Objects;
 @Environment(EnvType.CLIENT)
 public class DefaultInformationCategory implements RecipeCategory<DefaultInformationDisplay> {
     protected static void innerBlit(Matrix4f matrix4f, int xStart, int xEnd, int yStart, int yEnd, int z, float uStart, float uEnd, float vStart, float vEnd) {
-        BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
-        bufferBuilder.begin(7, VertexFormats.POSITION_TEXTURE);
-        bufferBuilder.vertex(matrix4f, xStart, yEnd, z).texture(uStart, vEnd).next();
-        bufferBuilder.vertex(matrix4f, xEnd, yEnd, z).texture(uEnd, vEnd).next();
-        bufferBuilder.vertex(matrix4f, xEnd, yStart, z).texture(uEnd, vStart).next();
-        bufferBuilder.vertex(matrix4f, xStart, yStart, z).texture(uStart, vStart).next();
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+        bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
+        bufferBuilder.vertex(matrix4f, xStart, yEnd, z).uv(uStart, vEnd).endVertex();
+        bufferBuilder.vertex(matrix4f, xEnd, yEnd, z).uv(uEnd, vEnd).endVertex();
+        bufferBuilder.vertex(matrix4f, xEnd, yStart, z).uv(uEnd, vStart).endVertex();
+        bufferBuilder.vertex(matrix4f, xStart, yStart, z).uv(uStart, vStart).endVertex();
         bufferBuilder.end();
         RenderSystem.enableAlphaTest();
-        BufferRenderer.draw(bufferBuilder);
+        BufferUploader.end(bufferBuilder);
     }
     
     @Override
-    public Identifier getIdentifier() {
+    public ResourceLocation getIdentifier() {
         return DefaultPlugin.INFO;
     }
     
     @Override
     public String getCategoryName() {
-        return I18n.translate("category.rei.information");
+        return I18n.get("category.rei.information");
     }
     
     @Override
     public RecipeEntry getSimpleRenderer(DefaultInformationDisplay recipe) {
-        OrderedText name = recipe.getName().asOrderedText();
+        FormattedCharSequence name = recipe.getName().getVisualOrderText();
         return new RecipeEntry() {
             @Override
             public int getHeight() {
-                return 10 + MinecraftClient.getInstance().textRenderer.fontHeight;
+                return 10 + Minecraft.getInstance().font.lineHeight;
             }
             
             @Override
-            public void render(MatrixStack matrices, Rectangle rectangle, int mouseX, int mouseY, float delta) {
-                MinecraftClient.getInstance().textRenderer.draw(matrices, name, rectangle.x + 5, rectangle.y + 6, -1);
+            public void render(PoseStack matrices, Rectangle rectangle, int mouseX, int mouseY, float delta) {
+                Minecraft.getInstance().font.draw(matrices, name, rectangle.x + 5, rectangle.y + 6, -1);
             }
         };
     }
@@ -104,13 +100,13 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
     public EntryStack getLogo() {
         return new RenderingEntry() {
             @Override
-            public void render(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-                MinecraftClient.getInstance().getTextureManager().bindTexture(REIHelper.getInstance().getDefaultDisplayTexture());
-                matrices.push();
+            public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+                Minecraft.getInstance().getTextureManager().bind(REIHelper.getInstance().getDefaultDisplayTexture());
+                matrices.pushPose();
                 matrices.translate(-1.2f, -1, 0);
-                Matrix4f matrix = matrices.peek().getModel();
+                Matrix4f matrix = matrices.last().pose();
                 DefaultInformationCategory.innerBlit(matrix, bounds.getCenterX() - 8, bounds.getCenterX() + 8, bounds.getCenterY() - 8, bounds.getCenterY() + 8, 0, 116f / 256f, (116f + 16f) / 256f, 0f, 16f / 256f);
-                matrices.pop();
+                matrices.popPose();
             }
         };
     }
@@ -138,7 +134,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
     
     private static class ScrollableTextWidget extends WidgetWithBounds {
         private Rectangle bounds;
-        private List<OrderedText> texts;
+        private List<FormattedCharSequence> texts;
         private final ScrollingContainer scrolling = new ScrollingContainer() {
             @Override
             public Rectangle getBounds() {
@@ -149,20 +145,20 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
             @Override
             public int getMaxScrollHeight() {
                 int i = 2;
-                for (OrderedText entry : texts) {
-                    i += entry == null ? 4 : font.fontHeight;
+                for (FormattedCharSequence entry : texts) {
+                    i += entry == null ? 4 : font.lineHeight;
                 }
                 return i;
             }
         };
         
-        public ScrollableTextWidget(Rectangle bounds, List<Text> texts) {
+        public ScrollableTextWidget(Rectangle bounds, List<Component> texts) {
             this.bounds = Objects.requireNonNull(bounds);
             this.texts = Lists.newArrayList();
-            for (StringVisitable text : texts) {
+            for (FormattedText text : texts) {
                 if (!this.texts.isEmpty())
                     this.texts.add(null);
-                this.texts.addAll(MinecraftClient.getInstance().textRenderer.wrapStringToWidthAsList(text, bounds.width - 11));
+                this.texts.addAll(Minecraft.getInstance().font.split(text, bounds.width - 11));
             }
         }
         
@@ -196,16 +192,16 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
         }
         
         @Override
-        public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
             scrolling.updatePosition(delta);
             Rectangle innerBounds = scrolling.getScissorBounds();
             ScissorsHandler.INSTANCE.scissor(innerBounds);
             int currentY = (int) -scrolling.scrollAmount + innerBounds.y;
-            for (OrderedText text : texts) {
-                if (text != null && currentY + font.fontHeight >= innerBounds.y && currentY <= innerBounds.getMaxY()) {
+            for (FormattedCharSequence text : texts) {
+                if (text != null && currentY + font.lineHeight >= innerBounds.y && currentY <= innerBounds.getMaxY()) {
                     font.draw(matrices, text, innerBounds.x + 2, currentY + 2, REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF090909);
                 }
-                currentY += text == null ? 4 : font.fontHeight;
+                currentY += text == null ? 4 : font.lineHeight;
             }
             ScissorsHandler.INSTANCE.removeLastScissor();
             ScissorsHandler.INSTANCE.scissor(scrolling.getBounds());
@@ -214,7 +210,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
         }
         
         @Override
-        public List<? extends Element> children() {
+        public List<? extends GuiEventListener> children() {
             return Collections.emptyList();
         }
     }

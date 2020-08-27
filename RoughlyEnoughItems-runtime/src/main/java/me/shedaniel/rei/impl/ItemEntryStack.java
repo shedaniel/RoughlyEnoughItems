@@ -25,7 +25,9 @@ package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
 import me.shedaniel.math.Point;
@@ -37,25 +39,23 @@ import me.shedaniel.rei.api.fractions.Fraction;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.utils.FormattingUtils;
 import me.shedaniel.rei.utils.ImmutableLiteralText;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.client.render.DiffuseLighting;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.model.BakedModel;
-import net.minecraft.client.render.model.json.ModelTransformation;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.texture.SpriteAtlasTexture;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -73,8 +73,8 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     }
     
     @Override
-    public Optional<Identifier> getIdentifier() {
-        return Optional.ofNullable(Registry.ITEM.getId(getItem()));
+    public Optional<ResourceLocation> getIdentifier() {
+        return Optional.ofNullable(Registry.ITEM.getKey(getItem()));
     }
     
     @Override
@@ -99,7 +99,7 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     
     @Override
     public void setFloatingAmount(double amount) {
-        itemStack.setCount(MathHelper.floor(amount));
+        itemStack.setCount(Mth.floor(amount));
     }
     
     @Override
@@ -160,7 +160,7 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     public boolean equalsAll(EntryStack stack) {
         if (stack.getType() != Type.ITEM)
             return false;
-        return itemStack.getItem() == stack.getItem() && getAmount() != stack.getAmount() && ItemStack.areTagsEqual(itemStack, stack.getItemStack());
+        return itemStack.getItem() == stack.getItem() && getAmount() != stack.getAmount() && ItemStack.tagMatches(itemStack, stack.getItemStack());
     }
     
     @Override
@@ -180,12 +180,12 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     private boolean equalsTagWithoutCount(CompoundTag o1, CompoundTag o2) {
         int o1Size = 0;
         int o2Size = 0;
-        for (String key : o1.getKeys()) {
+        for (String key : o1.getAllKeys()) {
             if (key.equals("Count"))
                 continue;
             o1Size++;
         }
-        for (String key : o2.getKeys()) {
+        for (String key : o2.getAllKeys()) {
             if (key.equals("Count"))
                 continue;
             o2Size++;
@@ -196,7 +196,7 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
             return false;
         
         try {
-            for (String key : o1.getKeys()) {
+            for (String key : o1.getAllKeys()) {
                 if (key.equals("Count"))
                     continue;
                 Tag value = o1.get(key);
@@ -280,12 +280,12 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     public Tooltip getTooltip(Point point) {
         if (isEmpty() || !get(Settings.TOOLTIP_ENABLED).get())
             return null;
-        List<Text> toolTip = tryGetItemStackToolTip(true);
+        List<Component> toolTip = tryGetItemStackToolTip(true);
         toolTip.addAll(get(Settings.TOOLTIP_APPEND_EXTRA).apply(this));
         if (get(Settings.TOOLTIP_APPEND_MOD).get() && ConfigObject.getInstance().shouldAppendModNames()) {
             final String modId = ClientHelper.getInstance().getModFromItem(getItem());
             boolean alreadyHasMod = false;
-            for (Text s : toolTip)
+            for (Component s : toolTip)
                 if (FormattingUtils.stripFormatting(s.getString()).equalsIgnoreCase(modId)) {
                     alreadyHasMod = true;
                     break;
@@ -297,111 +297,111 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     }
     
     @Override
-    public void render(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+    public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
         optimisedRenderStart(matrices, delta);
-        VertexConsumerProvider.Immediate immediate = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
+        MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
         optimisedRenderBase(matrices, immediate, bounds, mouseX, mouseY, delta);
-        immediate.draw();
+        immediate.endBatch();
         optimisedRenderOverlay(matrices, bounds, mouseX, mouseY, delta);
         optimisedRenderEnd(matrices, delta);
     }
     
     @Override
-    public void optimisedRenderStart(MatrixStack matrices, float delta) {
+    public void optimisedRenderStart(PoseStack matrices, float delta) {
         optimisedRenderStart(matrices, delta, true);
     }
     
     @SuppressWarnings("deprecation")
-    public void optimisedRenderStart(MatrixStack matrices, float delta, boolean isOptimised) {
-        MinecraftClient.getInstance().getTextureManager().bindTexture(SpriteAtlasTexture.BLOCK_ATLAS_TEX);
-        MinecraftClient.getInstance().getTextureManager().getTexture(SpriteAtlasTexture.BLOCK_ATLAS_TEX).setFilter(false, false);
+    public void optimisedRenderStart(PoseStack matrices, float delta, boolean isOptimised) {
+        Minecraft.getInstance().getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
+        Minecraft.getInstance().getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS).setFilter(false, false);
         RenderSystem.pushMatrix();
         RenderSystem.enableRescaleNormal();
         RenderSystem.enableAlphaTest();
         RenderSystem.defaultAlphaFunc();
         RenderSystem.enableBlend();
-        RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         if (isOptimised) {
-            boolean sideLit = getModelFromStack(itemStack).isSideLit();
+            boolean sideLit = getModelFromStack(itemStack).usesBlockLight();
             if (!sideLit)
-                DiffuseLighting.disableGuiDepthLighting();
+                Lighting.setupForFlatItems();
         }
     }
     
     @Override
-    public void optimisedRenderEnd(MatrixStack matrices, float delta) {
+    public void optimisedRenderEnd(PoseStack matrices, float delta) {
         optimisedRenderEnd(matrices, delta, true);
     }
     
     @SuppressWarnings("deprecation")
-    public void optimisedRenderEnd(MatrixStack matrices, float delta, boolean isOptimised) {
+    public void optimisedRenderEnd(PoseStack matrices, float delta, boolean isOptimised) {
         RenderSystem.enableDepthTest();
         RenderSystem.disableAlphaTest();
         RenderSystem.disableRescaleNormal();
         if (isOptimised) {
-            boolean sideLit = getModelFromStack(itemStack).isSideLit();
+            boolean sideLit = getModelFromStack(itemStack).usesBlockLight();
             if (!sideLit)
-                DiffuseLighting.enableGuiDepthLighting();
+                Lighting.setupFor3DItems();
         }
         RenderSystem.popMatrix();
     }
     
     private BakedModel getModelFromStack(ItemStack stack) {
-        return MinecraftClient.getInstance().getItemRenderer().getHeldItemModel(stack, null, null);
+        return Minecraft.getInstance().getItemRenderer().getModel(stack, null, null);
     }
     
     @Override
     public int groupingHash() {
-        return 1738923 + (getModelFromStack(itemStack).isSideLit() ? 1 : 0);
+        return 1738923 + (getModelFromStack(itemStack).usesBlockLight() ? 1 : 0);
     }
     
     @Override
-    public void optimisedRenderBase(MatrixStack matrices, VertexConsumerProvider.Immediate immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
+    public void optimisedRenderBase(PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
         if (!isEmpty() && get(Settings.RENDER).get()) {
             ItemStack stack = getItemStack();
             ((ItemStackHook) (Object) stack).rei_setRenderEnchantmentGlint(get(Settings.Item.RENDER_ENCHANTMENT_GLINT).get());
-            matrices.push();
+            matrices.pushPose();
             matrices.translate(bounds.getCenterX(), bounds.getCenterY(), 100.0F + getZ());
             matrices.scale(bounds.getWidth(), (bounds.getWidth() + bounds.getHeight()) / -2f, bounds.getHeight());
-            MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformation.Mode.GUI, false, matrices, immediate, 15728880, OverlayTexture.DEFAULT_UV, getModelFromStack(stack));
-            matrices.pop();
+            Minecraft.getInstance().getItemRenderer().render(stack, ItemTransforms.TransformType.GUI, false, matrices, immediate, 15728880, OverlayTexture.NO_OVERLAY, getModelFromStack(stack));
+            matrices.popPose();
             ((ItemStackHook) (Object) stack).rei_setRenderEnchantmentGlint(false);
         }
     }
     
     @Override
-    public void optimisedRenderOverlay(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+    public void optimisedRenderOverlay(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
         if (!isEmpty() && get(Settings.RENDER).get()) {
-            MinecraftClient.getInstance().getItemRenderer().zOffset = getZ();
-            MinecraftClient.getInstance().getItemRenderer().renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, getItemStack(), bounds.x, bounds.y, get(Settings.RENDER_COUNTS).get() ? get(Settings.COUNTS).apply(this) : "");
-            MinecraftClient.getInstance().getItemRenderer().zOffset = 0.0F;
+            Minecraft.getInstance().getItemRenderer().blitOffset = getZ();
+            Minecraft.getInstance().getItemRenderer().renderGuiItemDecorations(Minecraft.getInstance().font, getItemStack(), bounds.x, bounds.y, get(Settings.RENDER_COUNTS).get() ? get(Settings.COUNTS).apply(this) : "");
+            Minecraft.getInstance().getItemRenderer().blitOffset = 0.0F;
         }
     }
     
     private static final ReferenceSet<Item> SEARCH_BLACKLISTED = new ReferenceOpenHashSet<>();
     
     @Override
-    public @NotNull Text asFormattedText() {
+    public @NotNull Component asFormattedText() {
         if (!SEARCH_BLACKLISTED.contains(itemStack.getItem()))
             try {
-                return itemStack.getName();
+                return itemStack.getHoverName();
             } catch (Throwable e) {
                 e.printStackTrace();
                 SEARCH_BLACKLISTED.add(itemStack.getItem());
             }
         try {
-            return new ImmutableLiteralText(I18n.translate("item." + Registry.ITEM.getId(itemStack.getItem()).toString().replace(":", ".")));
+            return new ImmutableLiteralText(I18n.get("item." + Registry.ITEM.getKey(itemStack.getItem()).toString().replace(":", ".")));
         } catch (Throwable e) {
             e.printStackTrace();
         }
         return new ImmutableLiteralText("ERROR");
     }
     
-    private List<Text> tryGetItemStackToolTip(boolean careAboutAdvanced) {
+    private List<Component> tryGetItemStackToolTip(boolean careAboutAdvanced) {
         if (!SEARCH_BLACKLISTED.contains(itemStack.getItem()))
             try {
-                return itemStack.getTooltip(MinecraftClient.getInstance().player, MinecraftClient.getInstance().options.advancedItemTooltips && careAboutAdvanced ? TooltipContext.Default.ADVANCED : TooltipContext.Default.NORMAL);
+                return itemStack.getTooltipLines(Minecraft.getInstance().player, Minecraft.getInstance().options.advancedItemTooltips && careAboutAdvanced ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
             } catch (Throwable e) {
                 e.printStackTrace();
                 SEARCH_BLACKLISTED.add(itemStack.getItem());

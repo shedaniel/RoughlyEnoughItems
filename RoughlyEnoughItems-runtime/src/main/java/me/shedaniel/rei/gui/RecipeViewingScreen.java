@@ -25,7 +25,11 @@ package me.shedaniel.rei.gui;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.math.Matrix4f;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -44,23 +48,19 @@ import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.widgets.PanelWidget;
 import me.shedaniel.rei.utils.CollectionUtils;
 import me.shedaniel.rei.utils.ImmutableLiteralText;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.util.NarratorManager;
-import net.minecraft.client.util.Window;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Matrix4f;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -73,7 +73,7 @@ import java.util.function.Supplier;
 @ApiStatus.Internal
 public class RecipeViewingScreen extends Screen implements RecipeScreen {
     
-    public static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
+    public static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private final List<Widget> preWidgets = Lists.newArrayList();
     private final List<Widget> widgets = Lists.newArrayList();
     private final Map<Rectangle, List<Widget>> recipeBounds = Maps.newHashMap();
@@ -96,10 +96,10 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
     private EntryStack ingredientStackToNotice = EntryStack.empty();
     private EntryStack resultStackToNotice = EntryStack.empty();
     
-    public RecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> categoriesMap, @Nullable Identifier category) {
-        super(NarratorManager.EMPTY);
-        Window window = MinecraftClient.getInstance().getWindow();
-        this.bounds = new Rectangle(window.getScaledWidth() / 2 - guiWidth / 2, window.getScaledHeight() / 2 - guiHeight / 2, 176, 150);
+    public RecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> categoriesMap, @Nullable ResourceLocation category) {
+        super(NarratorChatListener.NO_TITLE);
+        Window window = Minecraft.getInstance().getWindow();
+        this.bounds = new Rectangle(window.getGuiScaledWidth() / 2 - guiWidth / 2, window.getGuiScaledHeight() / 2 - guiHeight / 2, 176, 150);
         this.categoriesMap = categoriesMap;
         this.categories = Lists.newArrayList(categoriesMap.keySet());
         RecipeCategory<?> selected = categories.get(0);
@@ -154,7 +154,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
     }
     
     @Override
-    public Identifier getCurrentCategory() {
+    public ResourceLocation getCurrentCategory() {
         return selectedCategory.getIdentifier();
     }
     
@@ -175,7 +175,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
             init();
             return true;
         }
-        if (keyCode == 258 && !client.options.keyInventory.matchesKey(keyCode, scanCode)) {
+        if (keyCode == 258 && !minecraft.options.keyInventory.matches(keyCode, scanCode)) {
             boolean boolean_1 = !hasShiftDown();
             if (!this.changeFocus(boolean_1))
                 this.changeFocus(boolean_1);
@@ -192,19 +192,19 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
                 recipeBack.onClick();
             return recipeBack.isEnabled();
         }
-        for (Element element : children())
+        for (GuiEventListener element : children())
             if (element.keyPressed(keyCode, scanCode, modifiers))
                 return true;
-        if (keyCode == 256 || this.client.options.keyInventory.matchesKey(keyCode, scanCode)) {
-            MinecraftClient.getInstance().openScreen(REIHelper.getInstance().getPreviousContainerScreen());
+        if (keyCode == 256 || this.minecraft.options.keyInventory.matches(keyCode, scanCode)) {
+            Minecraft.getInstance().setScreen(REIHelper.getInstance().getPreviousContainerScreen());
             ScreenHelper.getLastOverlay().init();
             return true;
         }
         if (keyCode == 259) {
             if (ScreenHelper.hasLastRecipeScreen())
-                client.openScreen(ScreenHelper.getLastRecipeScreen());
+                minecraft.setScreen(ScreenHelper.getLastRecipeScreen());
             else
-                client.openScreen(REIHelper.getInstance().getPreviousContainerScreen());
+                minecraft.setScreen(REIHelper.getInstance().getPreviousContainerScreen());
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
@@ -229,73 +229,73 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
         this.largestHeight = Math.max(height - 34 - 30, 100);
         int maxWidthDisplay = CollectionUtils.mapAndMax(getCurrentDisplayed(), selectedCategory::getDisplayWidth, Comparator.naturalOrder()).orElse(150);
         this.guiWidth = Math.max(maxWidthDisplay + 40, 190);
-        this.guiHeight = MathHelper.floor(MathHelper.clamp((double) (selectedCategory.getDisplayHeight() + 4) * (getRecipesPerPage() + 1) + 36, 100, largestHeight));
+        this.guiHeight = Mth.floor(Mth.clamp((double) (selectedCategory.getDisplayHeight() + 4) * (getRecipesPerPage() + 1) + 36, 100, largestHeight));
         if (!ConfigObject.getInstance().shouldResizeDynamically()) this.guiHeight = largestHeight;
-        this.tabsPerPage = Math.max(5, MathHelper.floor((guiWidth - 20d) / tabSize));
+        this.tabsPerPage = Math.max(5, Mth.floor((guiWidth - 20d) / tabSize));
         if (this.categoryPages == -1) {
             this.categoryPages = Math.max(0, categories.indexOf(selectedCategory) / tabsPerPage);
         }
         this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - guiHeight / 2, guiWidth, guiHeight);
-        this.page = MathHelper.clamp(page, 0, getTotalPages(selectedCategory) - 1);
-        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x, bounds.y - 16, 10, 10), new TranslatableText("text.rei.left_arrow"))
+        this.page = Mth.clamp(page, 0, getTotalPages(selectedCategory) - 1);
+        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x, bounds.y - 16, 10, 10), new TranslatableComponent("text.rei.left_arrow"))
                 .onClick(button -> {
                     categoryPages--;
                     if (categoryPages < 0)
-                        categoryPages = MathHelper.ceil(categories.size() / (float) tabsPerPage) - 1;
+                        categoryPages = Mth.ceil(categories.size() / (float) tabsPerPage) - 1;
                     RecipeViewingScreen.this.init();
                 })
                 .enabled(categories.size() > tabsPerPage));
-        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x + bounds.width - 10, bounds.y - 16, 10, 10), new TranslatableText("text.rei.right_arrow"))
+        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x + bounds.width - 10, bounds.y - 16, 10, 10), new TranslatableComponent("text.rei.right_arrow"))
                 .onClick(button -> {
                     categoryPages++;
-                    if (categoryPages > MathHelper.ceil(categories.size() / (float) tabsPerPage) - 1)
+                    if (categoryPages > Mth.ceil(categories.size() / (float) tabsPerPage) - 1)
                         categoryPages = 0;
                     RecipeViewingScreen.this.init();
                 })
                 .enabled(categories.size() > tabsPerPage));
-        widgets.add(categoryBack = Widgets.createButton(new Rectangle(bounds.getX() + 5, bounds.getY() + 5, 12, 12), new TranslatableText("text.rei.left_arrow"))
+        widgets.add(categoryBack = Widgets.createButton(new Rectangle(bounds.getX() + 5, bounds.getY() + 5, 12, 12), new TranslatableComponent("text.rei.left_arrow"))
                 .onClick(button -> {
                     int currentCategoryIndex = categories.indexOf(selectedCategory);
                     currentCategoryIndex--;
                     if (currentCategoryIndex < 0)
                         currentCategoryIndex = categories.size() - 1;
                     ClientHelperImpl.getInstance().openRecipeViewingScreen(categoriesMap, categories.get(currentCategoryIndex).getIdentifier(), ingredientStackToNotice, resultStackToNotice);
-                }).tooltipLine(I18n.translate("text.rei.previous_category")));
-        widgets.add(Widgets.createClickableLabel(new Point(bounds.getCenterX(), bounds.getY() + 7), new LiteralText(selectedCategory.getCategoryName()), clickableLabelWidget -> {
+                }).tooltipLine(I18n.get("text.rei.previous_category")));
+        widgets.add(Widgets.createClickableLabel(new Point(bounds.getCenterX(), bounds.getY() + 7), new TextComponent(selectedCategory.getCategoryName()), clickableLabelWidget -> {
             ClientHelper.getInstance().executeViewAllRecipesKeyBind();
-        }).tooltipLine(I18n.translate("text.rei.view_all_categories")));
-        widgets.add(categoryNext = Widgets.createButton(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 5, 12, 12), new TranslatableText("text.rei.right_arrow"))
+        }).tooltipLine(I18n.get("text.rei.view_all_categories")));
+        widgets.add(categoryNext = Widgets.createButton(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 5, 12, 12), new TranslatableComponent("text.rei.right_arrow"))
                 .onClick(button -> {
                     int currentCategoryIndex = categories.indexOf(selectedCategory);
                     currentCategoryIndex++;
                     if (currentCategoryIndex >= categories.size())
                         currentCategoryIndex = 0;
                     ClientHelperImpl.getInstance().openRecipeViewingScreen(categoriesMap, categories.get(currentCategoryIndex).getIdentifier(), ingredientStackToNotice, resultStackToNotice);
-                }).tooltipLine(I18n.translate("text.rei.next_category")));
+                }).tooltipLine(I18n.get("text.rei.next_category")));
         categoryBack.setEnabled(categories.size() > 1);
         categoryNext.setEnabled(categories.size() > 1);
         
-        widgets.add(recipeBack = Widgets.createButton(new Rectangle(bounds.getX() + 5, bounds.getY() + 19, 12, 12), new TranslatableText("text.rei.left_arrow"))
+        widgets.add(recipeBack = Widgets.createButton(new Rectangle(bounds.getX() + 5, bounds.getY() + 19, 12, 12), new TranslatableComponent("text.rei.left_arrow"))
                 .onClick(button -> {
                     page--;
                     if (page < 0)
                         page = getTotalPages(selectedCategory) - 1;
                     RecipeViewingScreen.this.init();
-                }).tooltipLine(I18n.translate("text.rei.previous_page")));
-        widgets.add(Widgets.createClickableLabel(new Point(bounds.getCenterX(), bounds.getY() + 21), NarratorManager.EMPTY, label -> {
+                }).tooltipLine(I18n.get("text.rei.previous_page")));
+        widgets.add(Widgets.createClickableLabel(new Point(bounds.getCenterX(), bounds.getY() + 21), NarratorChatListener.NO_TITLE, label -> {
             RecipeViewingScreen.this.choosePageActivated = true;
             RecipeViewingScreen.this.init();
         }).onRender((matrices, label) -> {
             label.setText(new ImmutableLiteralText(String.format("%d/%d", page + 1, getTotalPages(selectedCategory))));
             label.setClickable(getTotalPages(selectedCategory) > 1);
-        }).tooltipSupplier(label -> label.isClickable() ? I18n.translate("text.rei.choose_page") : null));
-        widgets.add(recipeNext = Widgets.createButton(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 19, 12, 12), new TranslatableText("text.rei.right_arrow"))
+        }).tooltipSupplier(label -> label.isClickable() ? I18n.get("text.rei.choose_page") : null));
+        widgets.add(recipeNext = Widgets.createButton(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 19, 12, 12), new TranslatableComponent("text.rei.right_arrow"))
                 .onClick(button -> {
                     page++;
                     if (page >= getTotalPages(selectedCategory))
                         page = 0;
                     RecipeViewingScreen.this.init();
-                }).tooltipLine(I18n.translate("text.rei.next_page")));
+                }).tooltipLine(I18n.get("text.rei.next_page")));
         recipeBack.setEnabled(getTotalPages(selectedCategory) > 1);
         recipeNext.setEnabled(getTotalPages(selectedCategory) > 1);
         int tabV = isCompactTabs ? 166 : 192;
@@ -304,7 +304,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
             if (categories.size() > j) {
                 TabWidget tab;
                 tabs.add(tab = TabWidget.create(i, tabSize, bounds.x + bounds.width / 2 - Math.min(categories.size() - categoryPages * tabsPerPage, tabsPerPage) * tabSize / 2, bounds.y, 0, tabV, widget -> {
-                    MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                    Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                     if (widget.getId() + categoryPages * tabsPerPage == categories.indexOf(selectedCategory))
                         return false;
                     ClientHelperImpl.getInstance().openRecipeViewingScreen(categoriesMap, categories.get(widget.getId() + categoryPages * tabsPerPage).getIdentifier(), ingredientStackToNotice, resultStackToNotice);
@@ -327,7 +327,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
             recipeBounds.put(displayBounds, setupDisplay);
             this.widgets.addAll(setupDisplay);
             if (supplier.isPresent() && supplier.get().get(displayBounds) != null)
-                this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(displayBounds, supplier.get().get(displayBounds), new LiteralText(supplier.get().getButtonText()), displaySupplier, setupDisplay, selectedCategory));
+                this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(displayBounds, supplier.get().get(displayBounds), new TextComponent(supplier.get().getButtonText()), displaySupplier, setupDisplay, selectedCategory));
         }
         if (choosePageActivated)
             recipeChoosePageWidget = new RecipeChoosePageWidget(this, page, getTotalPages(selectedCategory));
@@ -337,9 +337,9 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
         workingStationsBaseWidget = null;
         List<List<EntryStack>> workingStations = RecipeHelper.getInstance().getWorkingStations(selectedCategory.getIdentifier());
         if (!workingStations.isEmpty()) {
-            int hh = MathHelper.floor((bounds.height - 16) / 18f);
+            int hh = Mth.floor((bounds.height - 16) / 18f);
             int actualHeight = Math.min(hh, workingStations.size());
-            int innerWidth = MathHelper.ceil(workingStations.size() / ((float) hh));
+            int innerWidth = Mth.ceil(workingStations.size() / ((float) hh));
             int xx = bounds.x - (8 + innerWidth * 16) + 6;
             int yy = bounds.y + 16;
             preWidgets.add(workingStationsBaseWidget = Widgets.createCategoryBase(new Rectangle(xx - 5, yy - 5, 15 + innerWidth * 16, 10 + actualHeight * 16)));
@@ -393,16 +393,16 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
         if (selectedCategory.getFixedRecipesPerPage() > 0)
             return selectedCategory.getFixedRecipesPerPage() - 1;
         int height = selectedCategory.getDisplayHeight();
-        return MathHelper.clamp(MathHelper.floor(((double) largestHeight - 36) / ((double) height + 4)) - 1, 0, Math.min(ConfigObject.getInstance().getMaxRecipePerPage() - 1, selectedCategory.getMaximumRecipePerPage() - 1));
+        return Mth.clamp(Mth.floor(((double) largestHeight - 36) / ((double) height + 4)) - 1, 0, Math.min(ConfigObject.getInstance().getMaxRecipePerPage() - 1, selectedCategory.getMaximumRecipePerPage() - 1));
     }
     
     private int getRecipesPerPageByHeight() {
         int height = selectedCategory.getDisplayHeight();
-        return MathHelper.clamp(MathHelper.floor(((double) guiHeight - 36) / ((double) height + 4)), 0, Math.min(ConfigObject.getInstance().getMaxRecipePerPage() - 1, selectedCategory.getMaximumRecipePerPage() - 1));
+        return Mth.clamp(Mth.floor(((double) guiHeight - 36) / ((double) height + 4)), 0, Math.min(ConfigObject.getInstance().getMaxRecipePerPage() - 1, selectedCategory.getMaximumRecipePerPage() - 1));
     }
     
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         this.fillGradient(matrices, 0, 0, this.width, this.height, -1072689136, -804253680);
         for (Widget widget : preWidgets) {
             widget.render(matrices, mouseX, mouseY, delta);
@@ -435,28 +435,28 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
             if (export.matchesCurrentKey() || export.matchesCurrentMouse()) {
                 for (Map.Entry<Rectangle, List<Widget>> entry : recipeBounds.entrySet()) {
                     Rectangle bounds = entry.getKey();
-                    setZOffset(470);
+                    setBlitOffset(470);
                     if (bounds.contains(mouseX, mouseY)) {
                         fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 1744822402, 1744822402);
-                        Text text = new TranslatableText("text.rei.release_export", export.getLocalizedName().copy().getString());
-                        VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
-                        matrices.push();
+                        Component text = new TranslatableComponent("text.rei.release_export", export.getLocalizedName().plainCopy().getString());
+                        MultiBufferSource.BufferSource immediate = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+                        matrices.pushPose();
                         matrices.translate(0.0D, 0.0D, 480);
-                        Matrix4f matrix4f = matrices.peek().getModel();
-                        textRenderer.draw(text.asOrderedText(), bounds.getCenterX() - textRenderer.getWidth(text) / 2f, bounds.getCenterY() - 4.5f, 0xff000000, false, matrix4f, immediate, false, 0, 15728880);
-                        immediate.draw();
-                        matrices.pop();
+                        Matrix4f matrix4f = matrices.last().pose();
+                        font.drawInBatch(text.getVisualOrderText(), bounds.getCenterX() - font.width(text) / 2f, bounds.getCenterY() - 4.5f, 0xff000000, false, matrix4f, immediate, false, 0, 15728880);
+                        immediate.endBatch();
+                        matrices.popPose();
                     } else {
                         fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 1744830463, 1744830463);
                     }
-                    setZOffset(0);
+                    setBlitOffset(0);
                 }
             }
         }
         if (choosePageActivated) {
-            setZOffset(500);
+            setBlitOffset(500);
             this.fillGradient(matrices, 0, 0, this.width, this.height, -1072689136, -804253680);
-            setZOffset(0);
+            setBlitOffset(0);
             recipeChoosePageWidget.render(matrices, mouseX, mouseY, delta);
         }
     }
@@ -477,7 +477,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
     }
     
     public int getTotalPages(RecipeCategory<RecipeDisplay> category) {
-        return MathHelper.ceil(categoriesMap.get(category).size() / (double) (getRecipesPerPage() + 1));
+        return Mth.ceil(categoriesMap.get(category).size() / (double) (getRecipesPerPage() + 1));
     }
     
     public Rectangle getBounds() {
@@ -489,7 +489,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
         if (choosePageActivated) {
             return recipeChoosePageWidget.charTyped(char_1, int_1);
         }
-        for (Element listener : children())
+        for (GuiEventListener listener : children())
             if (listener.charTyped(char_1, int_1))
                 return true;
         return super.charTyped(char_1, int_1);
@@ -500,7 +500,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
         if (choosePageActivated) {
             return recipeChoosePageWidget.mouseDragged(double_1, double_2, int_1, double_3, double_4);
         }
-        for (Element entry : children())
+        for (GuiEventListener entry : children())
             if (entry.mouseDragged(double_1, double_2, int_1, double_3, double_4))
                 return true;
         return super.mouseDragged(double_1, double_2, int_1, double_3, double_4);
@@ -522,7 +522,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
                 }
             }
         }
-        for (Element entry : children())
+        for (GuiEventListener entry : children())
             if (entry.mouseReleased(mouseX, mouseY, button))
                 return true;
         return super.mouseReleased(mouseX, mouseY, button);
@@ -530,7 +530,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
     
     @Override
     public boolean mouseScrolled(double i, double j, double amount) {
-        for (Element listener : children())
+        for (GuiEventListener listener : children())
             if (listener.mouseScrolled(i, j, amount))
                 return true;
         if (getBounds().contains(PointHelper.ofMouse())) {
@@ -567,7 +567,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
                 recipeBack.onClick();
             return recipeBack.isEnabled();
         }
-        for (Element entry : children())
+        for (GuiEventListener entry : children())
             if (entry.mouseClicked(mouseX, mouseY, button)) {
                 setFocused(entry);
                 if (button == 0)
@@ -578,7 +578,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
     }
     
     @Override
-    public Element getFocused() {
+    public GuiEventListener getFocused() {
         if (choosePageActivated)
             return recipeChoosePageWidget;
         return super.getFocused();

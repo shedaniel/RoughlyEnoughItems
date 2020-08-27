@@ -25,7 +25,7 @@ package me.shedaniel.rei.api;
 
 import net.fabricmc.loader.api.SemanticVersion;
 import net.fabricmc.loader.util.version.VersionParsingException;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
@@ -53,6 +53,6 @@ public interface REIPluginEntry {
     /**
      * @return the unique identifier of the plugin.
      */
-    Identifier getPluginIdentifier();
+    ResourceLocation getPluginIdentifier();
     
 }

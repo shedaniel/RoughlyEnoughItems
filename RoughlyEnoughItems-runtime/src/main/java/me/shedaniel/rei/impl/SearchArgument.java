@@ -35,8 +35,8 @@ import me.shedaniel.rei.impl.search.MatchStatus;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -101,7 +101,7 @@ public class SearchArgument {
     public static boolean canSearchTermsBeAppliedTo(EntryStack stack, List<SearchArgument.SearchArguments> searchArguments) {
         if (searchArguments.isEmpty())
             return true;
-        MinecraftClient minecraft = MinecraftClient.getInstance();
+        Minecraft minecraft = Minecraft.getInstance();
         Object[] data = new Object[ArgumentsRegistry.ARGUMENT_LIST.size()];
         for (SearchArgument.SearchArguments arguments : searchArguments) {
             boolean applicable = true;
@@ -120,7 +120,7 @@ public class SearchArgument {
     public static String tryGetEntryStackTooltip(EntryStack stack) {
         Tooltip tooltip = stack.getTooltip(new Point());
         if (tooltip != null)
-            return CollectionUtils.mapAndJoinToString(tooltip.getText(), Text::getString, "\n");
+            return CollectionUtils.mapAndJoinToString(tooltip.getText(), Component::getString, "\n");
         return "";
     }
     

@@ -27,10 +27,10 @@ import me.shedaniel.rei.impl.Internals;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -146,7 +146,7 @@ public interface ClientHelper {
      * @param item the item to find
      * @return the mod name with blue and italic formatting
      */
-    Text getFormattedModFromItem(Item item);
+    Component getFormattedModFromItem(Item item);
     
     /**
      * Gets the formatted mod from an identifier
@@ -154,7 +154,7 @@ public interface ClientHelper {
      * @param identifier the identifier to find
      * @return the mod name with blue and italic formatting
      */
-    Text getFormattedModFromIdentifier(Identifier identifier);
+    Component getFormattedModFromIdentifier(ResourceLocation identifier);
     
     /**
      * Gets the mod from an identifier
@@ -162,7 +162,7 @@ public interface ClientHelper {
      * @param identifier the identifier to find
      * @return the mod name
      */
-    default String getModFromIdentifier(Identifier identifier) {
+    default String getModFromIdentifier(ResourceLocation identifier) {
         if (identifier == null)
             return "";
         return getModFromModId(identifier.getNamespace());
@@ -189,13 +189,13 @@ public interface ClientHelper {
     
     @Deprecated
     @ApiStatus.ScheduledForRemoval
-    default boolean executeViewAllRecipesFromCategory(Identifier category) {
+    default boolean executeViewAllRecipesFromCategory(ResourceLocation category) {
         return openView(ViewSearchBuilder.builder().addCategory(category).fillPreferredOpenedCategory());
     }
     
     @Deprecated
     @ApiStatus.ScheduledForRemoval
-    default boolean executeViewAllRecipesFromCategories(List<Identifier> categories) {
+    default boolean executeViewAllRecipesFromCategories(List<ResourceLocation> categories) {
         return openView(ViewSearchBuilder.builder().addCategories(categories).fillPreferredOpenedCategory());
     }
     
@@ -208,15 +208,15 @@ public interface ClientHelper {
             return Internals.createViewSearchBuilder();
         }
         
-        ViewSearchBuilder addCategory(Identifier category);
+        ViewSearchBuilder addCategory(ResourceLocation category);
         
-        ViewSearchBuilder addCategories(Collection<Identifier> categories);
+        ViewSearchBuilder addCategories(Collection<ResourceLocation> categories);
         
         default ViewSearchBuilder addAllCategories() {
             return addCategories(CollectionUtils.map(RecipeHelper.getInstance().getAllCategories(), RecipeCategory::getIdentifier));
         }
         
-        @NotNull Set<Identifier> getCategories();
+        @NotNull Set<ResourceLocation> getCategories();
         
         ViewSearchBuilder addRecipesFor(EntryStack stack);
         
@@ -226,10 +226,10 @@ public interface ClientHelper {
         
         @NotNull List<EntryStack> getUsagesFor();
         
-        ViewSearchBuilder setPreferredOpenedCategory(@Nullable Identifier category);
+        ViewSearchBuilder setPreferredOpenedCategory(@Nullable ResourceLocation category);
         
         @Nullable
-        Identifier getPreferredOpenedCategory();
+        ResourceLocation getPreferredOpenedCategory();
         
         ViewSearchBuilder fillPreferredOpenedCategory();
         

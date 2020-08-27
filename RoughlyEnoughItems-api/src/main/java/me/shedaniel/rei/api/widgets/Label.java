@@ -23,13 +23,13 @@
 
 package me.shedaniel.rei.api.widgets;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.StringVisitable;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.TextComponent;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -106,14 +106,14 @@ public abstract class Label extends WidgetWithBounds {
      * @return the consumer before render, null if not set.
      */
     @Nullable
-    public abstract BiConsumer<MatrixStack, Label> getOnRender();
+    public abstract BiConsumer<PoseStack, Label> getOnRender();
     
     /**
      * Sets the consumer before render.
      *
      * @param onRender the consumer before render.
      */
-    public abstract void setOnRender(@Nullable BiConsumer<MatrixStack, Label> onRender);
+    public abstract void setOnRender(@Nullable BiConsumer<PoseStack, Label> onRender);
     
     /**
      * Sets the consumer before render.
@@ -122,7 +122,7 @@ public abstract class Label extends WidgetWithBounds {
      * @return the label itself.
      */
     @NotNull
-    public final Label onRender(@Nullable BiConsumer<MatrixStack, Label> onRender) {
+    public final Label onRender(@Nullable BiConsumer<PoseStack, Label> onRender) {
         setOnRender(onRender);
         return this;
     }
@@ -299,26 +299,26 @@ public abstract class Label extends WidgetWithBounds {
     @NotNull
     @ApiStatus.ScheduledForRemoval
     @Deprecated
-    public Text getText() {
-        return new LiteralText("");
+    public Component getText() {
+        return new TextComponent("");
     }
     
-    public abstract StringVisitable getMessage();
+    public abstract FormattedText getMessage();
     
-    public final void setText(@NotNull Text text) {
+    public final void setText(@NotNull Component text) {
         setMessage(text);
     }
     
-    public abstract void setMessage(@NotNull StringVisitable message);
+    public abstract void setMessage(@NotNull FormattedText message);
     
     @NotNull
-    public final Label text(@NotNull Text text) {
+    public final Label text(@NotNull Component text) {
         setText(text);
         return this;
     }
     
     @NotNull
-    public final Label message(@NotNull StringVisitable message) {
+    public final Label message(@NotNull FormattedText message) {
         setMessage(message);
         return this;
     }

@@ -24,19 +24,19 @@
 package me.shedaniel.rei.gui;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import me.shedaniel.rei.impl.ScreenHelper;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Pair;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Tuple;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
@@ -48,7 +48,7 @@ public class OverlaySearchField extends TextFieldWidget {
     public long keybindFocusTime = -1;
     public int keybindFocusKey = -1;
     public boolean isMain = true;
-    protected Pair<Long, Point> lastClickedDetails = null;
+    protected Tuple<Long, Point> lastClickedDetails = null;
     private List<String> history = Lists.newArrayListWithCapacity(100);
     
     public OverlaySearchField(int x, int y, int width, int height) {
@@ -73,24 +73,24 @@ public class OverlaySearchField extends TextFieldWidget {
         }
     }
     
-    public void laterRender(MatrixStack matrices, int int_1, int int_2, float float_1) {
+    public void laterRender(PoseStack matrices, int int_1, int int_2, float float_1) {
         RenderSystem.disableDepthTest();
         setEditableColor(isMain && ContainerScreenOverlay.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty() ? 16733525 : isSearching && isMain ? -852212 : (containsMouse(PointHelper.ofMouse()) || isFocused()) ? (REIHelper.getInstance().isDarkThemeEnabled() ? -17587 : -1) : -6250336);
-        setSuggestion(!isFocused() && getText().isEmpty() ? I18n.translate("text.rei.search.field.suggestion") : null);
+        setSuggestion(!isFocused() && getText().isEmpty() ? I18n.get("text.rei.search.field.suggestion") : null);
         super.render(matrices, int_1, int_2, float_1);
         RenderSystem.enableDepthTest();
     }
     
     @Override
-    protected void renderSuggestion(MatrixStack matrices, int x, int y) {
+    protected void renderSuggestion(PoseStack matrices, int x, int y) {
         if (containsMouse(PointHelper.ofMouse()) || isFocused())
-            this.font.drawWithShadow(matrices, this.font.trimToWidth(this.getSuggestion(), this.getWidth()), x, y, REIHelper.getInstance().isDarkThemeEnabled() ? 0xccddaa3d : 0xddeaeaea);
+            this.font.drawShadow(matrices, this.font.plainSubstrByWidth(this.getSuggestion(), this.getWidth()), x, y, REIHelper.getInstance().isDarkThemeEnabled() ? 0xccddaa3d : 0xddeaeaea);
         else
-            this.font.drawWithShadow(matrices, this.font.trimToWidth(this.getSuggestion(), this.getWidth()), x, y, -6250336);
+            this.font.drawShadow(matrices, this.font.plainSubstrByWidth(this.getSuggestion(), this.getWidth()), x, y, -6250336);
     }
     
     @Override
-    public void renderBorder(MatrixStack matrices) {
+    public void renderBorder(PoseStack matrices) {
         if (isMain && isSearching) {
             fill(matrices, this.getBounds().x - 1, this.getBounds().y - 1, this.getBounds().x + this.getBounds().width + 1, this.getBounds().y + this.getBounds().height + 1, -852212);
         } else if (isMain && ContainerScreenOverlay.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty()) {
@@ -115,15 +115,15 @@ public class OverlaySearchField extends TextFieldWidget {
             setText("");
         if (contains && int_1 == 0 && isMain)
             if (lastClickedDetails == null)
-                lastClickedDetails = new Pair<>(System.currentTimeMillis(), new Point(double_1, double_2));
-            else if (System.currentTimeMillis() - lastClickedDetails.getLeft() > 1500)
+                lastClickedDetails = new Tuple<>(System.currentTimeMillis(), new Point(double_1, double_2));
+            else if (System.currentTimeMillis() - lastClickedDetails.getA() > 1500)
                 lastClickedDetails = null;
-            else if (getManhattanDistance(lastClickedDetails.getRight(), new Point(double_1, double_2)) <= 25) {
+            else if (getManhattanDistance(lastClickedDetails.getB(), new Point(double_1, double_2)) <= 25) {
                 lastClickedDetails = null;
                 isSearching = !isSearching;
-                minecraft.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             } else {
-                lastClickedDetails = new Pair<>(System.currentTimeMillis(), new Point(double_1, double_2));
+                lastClickedDetails = new Tuple<>(System.currentTimeMillis(), new Point(double_1, double_2));
             }
         return super.mouseClicked(double_1, double_2, int_1);
     }
@@ -159,7 +159,7 @@ public class OverlaySearchField extends TextFieldWidget {
     
     @Override
     public boolean charTyped(char char_1, int int_1) {
-        if (System.currentTimeMillis() - keybindFocusTime < 1000 && InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), keybindFocusKey)) {
+        if (System.currentTimeMillis() - keybindFocusTime < 1000 && InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), keybindFocusKey)) {
             keybindFocusTime = -1;
             keybindFocusKey = -1;
             return true;
@@ -173,7 +173,7 @@ public class OverlaySearchField extends TextFieldWidget {
     }
     
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
     }
     
 }

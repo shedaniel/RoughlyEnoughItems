@@ -24,21 +24,21 @@
 package me.shedaniel.rei.impl.widgets;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.widgets.Button;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Matrix4f;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -52,19 +52,19 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class ButtonWidget extends Button {
-    private static final Identifier BUTTON_LOCATION = new Identifier("roughlyenoughitems", "textures/gui/button.png");
-    private static final Identifier BUTTON_LOCATION_DARK = new Identifier("roughlyenoughitems", "textures/gui/button_dark.png");
+    private static final ResourceLocation BUTTON_LOCATION = new ResourceLocation("roughlyenoughitems", "textures/gui/button.png");
+    private static final ResourceLocation BUTTON_LOCATION_DARK = new ResourceLocation("roughlyenoughitems", "textures/gui/button_dark.png");
     @NotNull
     private Rectangle bounds;
     private boolean enabled = true;
     @NotNull
-    private Text text;
+    private Component text;
     @Nullable
     private Integer tint;
     @Nullable
     private Consumer<Button> onClick;
     @Nullable
-    private BiConsumer<MatrixStack, Button> onRender;
+    private BiConsumer<PoseStack, Button> onRender;
     private boolean focusable = false;
     private boolean focused = false;
     @Nullable
@@ -74,7 +74,7 @@ public class ButtonWidget extends Button {
     @Nullable
     private BiFunction<@NotNull Button, @NotNull Point, @NotNull Integer> textureIdFunction;
     
-    public ButtonWidget(Rectangle rectangle, Text text) {
+    public ButtonWidget(Rectangle rectangle, Component text) {
         this.bounds = new Rectangle(Objects.requireNonNull(rectangle));
         this.text = Objects.requireNonNull(text);
     }
@@ -111,12 +111,12 @@ public class ButtonWidget extends Button {
     
     @Override
     @NotNull
-    public final Text getText() {
+    public final Component getText() {
         return text;
     }
     
     @Override
-    public final void setText(@NotNull Text text) {
+    public final void setText(@NotNull Component text) {
         this.text = text;
     }
     
@@ -132,12 +132,12 @@ public class ButtonWidget extends Button {
     
     @Nullable
     @Override
-    public final BiConsumer<MatrixStack, Button> getOnRender() {
+    public final BiConsumer<PoseStack, Button> getOnRender() {
         return onRender;
     }
     
     @Override
-    public final void setOnRender(BiConsumer<MatrixStack, Button> onRender) {
+    public final void setOnRender(BiConsumer<PoseStack, Button> onRender) {
         this.onRender = onRender;
     }
     
@@ -194,7 +194,7 @@ public class ButtonWidget extends Button {
     }
     
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (onRender != null) {
             onRender.accept(matrices, this);
         }
@@ -211,14 +211,14 @@ public class ButtonWidget extends Button {
         if (tint != null)
             fillGradient(matrices, x + 1, y + 1, x + width - 1, y + height - 1, tint, tint);
         
-        this.drawCenteredText(matrices, font, getText(), x + width / 2, y + (height - 8) / 2, color);
+        drawCenteredString(matrices, font, getText(), x + width / 2, y + (height - 8) / 2, color);
         
         String tooltip = getTooltip();
         if (tooltip != null)
             if (!focused && containsMouse(mouseX, mouseY))
-                Tooltip.create(CollectionUtils.map(tooltip.split("\n"), LiteralText::new)).queue();
+                Tooltip.create(CollectionUtils.map(tooltip.split("\n"), TextComponent::new)).queue();
             else if (focused)
-                Tooltip.create(new Point(x + width / 2, y + height / 2), CollectionUtils.map(tooltip.split("\n"), LiteralText::new)).queue();
+                Tooltip.create(new Point(x + width / 2, y + height / 2), CollectionUtils.map(tooltip.split("\n"), TextComponent::new)).queue();
     }
     
     protected boolean isFocused(int mouseX, int mouseY) {
@@ -243,7 +243,7 @@ public class ButtonWidget extends Button {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (containsMouse(mouseX, mouseY) && isEnabled() && button == 0) {
-            minecraft.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             onClick();
             return true;
         }
@@ -256,7 +256,7 @@ public class ButtonWidget extends Button {
             if (int_1 != 257 && int_1 != 32 && int_1 != 335) {
                 return false;
             } else {
-                minecraft.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 onClick();
                 return true;
             }
@@ -265,7 +265,7 @@ public class ButtonWidget extends Button {
     }
     
     @Override
-    public List<? extends Element> children() {
+    public List<? extends GuiEventListener> children() {
         return Collections.emptyList();
     }
     
@@ -284,8 +284,8 @@ public class ButtonWidget extends Button {
         return 1;
     }
     
-    protected void renderBackground(MatrixStack matrices, int x, int y, int width, int height, int textureOffset) {
-        minecraft.getTextureManager().bindTexture(REIHelper.getInstance().isDarkThemeEnabled() ? BUTTON_LOCATION_DARK : BUTTON_LOCATION);
+    protected void renderBackground(PoseStack matrices, int x, int y, int width, int height, int textureOffset) {
+        minecraft.getTextureManager().bind(REIHelper.getInstance().isDarkThemeEnabled() ? BUTTON_LOCATION_DARK : BUTTON_LOCATION);
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(770, 771, 1, 0);
@@ -294,19 +294,19 @@ public class ButtonWidget extends Button {
         // 9 Patch Texture
         
         // Four Corners
-        drawTexture(matrices, x, y, getZOffset(), 0, textureOffset * 80, 8, 8, 512, 256);
-        drawTexture(matrices, x + width - 8, y, getZOffset(), 248, textureOffset * 80, 8, 8, 512, 256);
-        drawTexture(matrices, x, y + height - 8, getZOffset(), 0, textureOffset * 80 + 72, 8, 8, 512, 256);
-        drawTexture(matrices, x + width - 8, y + height - 8, getZOffset(), 248, textureOffset * 80 + 72, 8, 8, 512, 256);
+        blit(matrices, x, y, getBlitOffset(), 0, textureOffset * 80, 8, 8, 512, 256);
+        blit(matrices, x + width - 8, y, getBlitOffset(), 248, textureOffset * 80, 8, 8, 512, 256);
+        blit(matrices, x, y + height - 8, getBlitOffset(), 0, textureOffset * 80 + 72, 8, 8, 512, 256);
+        blit(matrices, x + width - 8, y + height - 8, getBlitOffset(), 248, textureOffset * 80 + 72, 8, 8, 512, 256);
         
-        Matrix4f matrix = matrices.peek().getModel();
+        Matrix4f matrix = matrices.last().pose();
         // Sides
-        DrawableHelper.drawTexturedQuad(matrix, x + 8, x + width - 8, y, y + 8, getZ(), (8) / 256f, (248) / 256f, (textureOffset * 80) / 512f, (textureOffset * 80 + 8) / 512f);
-        DrawableHelper.drawTexturedQuad(matrix, x + 8, x + width - 8, y + height - 8, y + height, getZ(), (8) / 256f, (248) / 256f, (textureOffset * 80 + 72) / 512f, (textureOffset * 80 + 80) / 512f);
-        DrawableHelper.drawTexturedQuad(matrix, x, x + 8, y + 8, y + height - 8, getZ(), (0) / 256f, (8) / 256f, (textureOffset * 80 + 8) / 512f, (textureOffset * 80 + 72) / 512f);
-        DrawableHelper.drawTexturedQuad(matrix, x + width - 8, x + width, y + 8, y + height - 8, getZ(), (248) / 256f, (256) / 256f, (textureOffset * 80 + 8) / 512f, (textureOffset * 80 + 72) / 512f);
+        GuiComponent.innerBlit(matrix, x + 8, x + width - 8, y, y + 8, getZ(), (8) / 256f, (248) / 256f, (textureOffset * 80) / 512f, (textureOffset * 80 + 8) / 512f);
+        GuiComponent.innerBlit(matrix, x + 8, x + width - 8, y + height - 8, y + height, getZ(), (8) / 256f, (248) / 256f, (textureOffset * 80 + 72) / 512f, (textureOffset * 80 + 80) / 512f);
+        GuiComponent.innerBlit(matrix, x, x + 8, y + 8, y + height - 8, getZ(), (0) / 256f, (8) / 256f, (textureOffset * 80 + 8) / 512f, (textureOffset * 80 + 72) / 512f);
+        GuiComponent.innerBlit(matrix, x + width - 8, x + width, y + 8, y + height - 8, getZ(), (248) / 256f, (256) / 256f, (textureOffset * 80 + 8) / 512f, (textureOffset * 80 + 72) / 512f);
         
         // Center
-        DrawableHelper.drawTexturedQuad(matrix, x + 8, x + width - 8, y + 8, y + height - 8, getZ(), (8) / 256f, (248) / 256f, (textureOffset * 80 + 8) / 512f, (textureOffset * 80 + 72) / 512f);
+        GuiComponent.innerBlit(matrix, x + 8, x + width - 8, y + 8, y + height - 8, getZ(), (8) / 256f, (248) / 256f, (textureOffset * 80 + 8) / 512f, (textureOffset * 80 + 72) / 512f);
     }
 }

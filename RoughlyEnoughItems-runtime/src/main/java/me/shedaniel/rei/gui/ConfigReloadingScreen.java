@@ -23,12 +23,12 @@
 
 package me.shedaniel.rei.gui;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.rei.api.RecipeHelper;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.util.NarratorManager;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Util;
+import net.minecraft.Util;
+import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.language.I18n;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
@@ -37,7 +37,7 @@ public class ConfigReloadingScreen extends Screen {
     private Screen parent;
     
     public ConfigReloadingScreen(Screen parent) {
-        super(NarratorManager.EMPTY);
+        super(NarratorChatListener.NO_TITLE);
         this.parent = parent;
     }
     
@@ -47,13 +47,13 @@ public class ConfigReloadingScreen extends Screen {
     }
     
     @Override
-    public void render(MatrixStack matrices, int int_1, int int_2, float float_1) {
-        this.renderBackgroundTexture(0);
+    public void render(PoseStack matrices, int int_1, int int_2, float float_1) {
+        this.renderDirtBackground(0);
         if (!RecipeHelper.getInstance().arePluginsLoading())
-            client.openScreen(parent);
-        this.drawCenteredString(matrices, this.textRenderer, I18n.translate("text.rei.config.is.reloading"), this.width / 2, this.height / 2 - 50, 16777215);
+            minecraft.setScreen(parent);
+        this.drawCenteredString(matrices, this.font, I18n.get("text.rei.config.is.reloading"), this.width / 2, this.height / 2 - 50, 16777215);
         String string_3;
-        switch ((int) (Util.getMeasuringTimeMs() / 300L % 4L)) {
+        switch ((int) (Util.getMillis() / 300L % 4L)) {
             case 0:
             default:
                 string_3 = "O o o";
@@ -65,7 +65,7 @@ public class ConfigReloadingScreen extends Screen {
             case 2:
                 string_3 = "o o O";
         }
-        this.drawCenteredString(matrices, this.textRenderer, string_3, this.width / 2, this.height / 2 - 41, 8421504);
+        this.drawCenteredString(matrices, this.font, string_3, this.width / 2, this.height / 2 - 41, 8421504);
         super.render(matrices, int_1, int_2, float_1);
     }
 }

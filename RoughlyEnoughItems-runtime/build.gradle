@@ -1,6 +1,6 @@
 archivesBaseName = "RoughlyEnoughItems-runtime"
 
-minecraft {
+loom {
     accessWidener = file("src/main/resources/roughlyenoughitems-runtime.accessWidener")
 }
 

@@ -28,24 +28,24 @@ import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.utils.FormattingUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import org.jetbrains.annotations.NotNull;
 
 @Environment(EnvType.CLIENT)
 public interface TextRepresentable {
     @NotNull
-    default Text asFormattedText() {
+    default Component asFormattedText() {
         if (this instanceof EntryStack) {
             Tooltip tooltip = ((EntryStack) this).getTooltip(PointHelper.ofMouse());
             if (tooltip != null && !tooltip.getText().isEmpty())
                 return tooltip.getText().get(0);
         }
-        return new LiteralText("");
+        return new TextComponent("");
     }
     
     @NotNull
-    default Text asFormatStrippedText() {
-        return new LiteralText(FormattingUtils.stripFormatting(asFormattedText().getString()));
+    default Component asFormatStrippedText() {
+        return new TextComponent(FormattingUtils.stripFormatting(asFormattedText().getString()));
     }
 }

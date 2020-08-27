@@ -25,34 +25,32 @@ package me.shedaniel.rei.server;
 
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.ints.*;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.core.NonNullList;
+import net.minecraft.core.Registry;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @ApiStatus.Internal
 public class RecipeFinder {
     public final Int2IntMap idToAmountMap = new Int2IntOpenHashMap();
     
     public static int getItemId(ItemStack itemStack_1) {
-        return Registry.ITEM.getRawId(itemStack_1.getItem());
+        return Registry.ITEM.getId(itemStack_1.getItem());
     }
     
     public static ItemStack getStackFromId(int int_1) {
-        return int_1 == 0 ? ItemStack.EMPTY : new ItemStack(Item.byRawId(int_1));
+        return int_1 == 0 ? ItemStack.EMPTY : new ItemStack(Item.byId(int_1));
     }
     
     public void addNormalItem(ItemStack itemStack_1) {
-        if (!itemStack_1.isDamaged() && !itemStack_1.hasEnchantments() && !itemStack_1.hasCustomName()) {
+        if (!itemStack_1.isDamaged() && !itemStack_1.isEnchanted() && !itemStack_1.hasCustomHoverName()) {
             this.addItem(itemStack_1);
         }
         
@@ -94,19 +92,19 @@ public class RecipeFinder {
         this.idToAmountMap.put(itemId, this.idToAmountMap.get(itemId) + itemCount);
     }
     
-    public boolean findRecipe(DefaultedList<Ingredient> ingredients, @Nullable IntList intList_1) {
+    public boolean findRecipe(NonNullList<Ingredient> ingredients, @Nullable IntList intList_1) {
         return this.findRecipe(ingredients, intList_1, 1);
     }
     
-    public boolean findRecipe(DefaultedList<Ingredient> ingredients, @Nullable IntList intList_1, int int_1) {
+    public boolean findRecipe(NonNullList<Ingredient> ingredients, @Nullable IntList intList_1, int int_1) {
         return (new RecipeFinder.Filter(ingredients)).find(int_1, intList_1);
     }
     
-    public int countRecipeCrafts(DefaultedList<Ingredient> ingredients, @Nullable IntList intList_1) {
+    public int countRecipeCrafts(NonNullList<Ingredient> ingredients, @Nullable IntList intList_1) {
         return this.countRecipeCrafts(ingredients, Integer.MAX_VALUE, intList_1);
     }
     
-    public int countRecipeCrafts(DefaultedList<Ingredient> ingredients, int int_1, @Nullable IntList intList_1) {
+    public int countRecipeCrafts(NonNullList<Ingredient> ingredients, int int_1, @Nullable IntList intList_1) {
         return (new RecipeFinder.Filter(ingredients)).countCrafts(int_1, intList_1);
     }
     
@@ -121,9 +119,9 @@ public class RecipeFinder {
         private final int usableIngredientSize;
         private final BitSet bitSet;
         private final IntList field_7557 = new IntArrayList();
-        private final DefaultedList<Ingredient> ingredientsInput;
+        private final NonNullList<Ingredient> ingredientsInput;
         
-        public Filter(DefaultedList<Ingredient> ingredientsInput) {
+        public Filter(NonNullList<Ingredient> ingredientsInput) {
             this.ingredientsInput = ingredientsInput;
             this.ingredients.addAll(new ArrayList<>(ingredientsInput));
             this.ingredients.removeIf(Ingredient::isEmpty);
@@ -133,7 +131,7 @@ public class RecipeFinder {
             this.bitSet = new BitSet(this.ingredientCount + this.usableIngredientSize + this.ingredientCount + this.ingredientCount * this.usableIngredientSize);
             
             for (int ingredientIndex = 0; ingredientIndex < this.ingredients.size(); ++ingredientIndex) {
-                IntList possibleStacks = this.ingredients.get(ingredientIndex).getIds();
+                IntList possibleStacks = this.ingredients.get(ingredientIndex).getStackingIds();
                 
                 // Loops over usable ingredients
                 for (int usableIngredientIndex = 0; usableIngredientIndex < this.usableIngredientSize; ++usableIngredientIndex) {
@@ -200,7 +198,7 @@ public class RecipeFinder {
             IntCollection intCollection_1 = new IntAVLTreeSet();
     
             for (Ingredient ingredient_1 : this.ingredients) {
-                intCollection_1.addAll(ingredient_1.getIds());
+                intCollection_1.addAll(ingredient_1.getStackingIds());
             }
             
             IntIterator intIterator_1 = intCollection_1.iterator();
@@ -328,7 +326,7 @@ public class RecipeFinder {
                 int int_2 = 0;
         
                 int int_3;
-                for (IntListIterator var5 = ingredient_1.getIds().iterator(); var5.hasNext(); int_2 = Math.max(int_2, RecipeFinder.this.idToAmountMap.get(int_3))) {
+                for (IntListIterator var5 = ingredient_1.getStackingIds().iterator(); var5.hasNext(); int_2 = Math.max(int_2, RecipeFinder.this.idToAmountMap.get(int_3))) {
                     int_3 = var5.next();
                 }
         

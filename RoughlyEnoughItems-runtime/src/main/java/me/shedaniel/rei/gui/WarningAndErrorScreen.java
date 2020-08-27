@@ -23,24 +23,24 @@
 
 package me.shedaniel.rei.gui;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
 import me.shedaniel.rei.RoughlyEnoughItemsState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.AbstractButtonWidget;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.util.NarratorManager;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Lazy;
-import net.minecraft.util.Pair;
-import net.minecraft.util.Util;
+import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.LazyLoadedValue;
+import net.minecraft.util.Tuple;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.net.URI;
@@ -48,13 +48,13 @@ import java.net.URISyntaxException;
 
 @ApiStatus.Internal
 public class WarningAndErrorScreen extends Screen {
-    public static final Lazy<WarningAndErrorScreen> INSTANCE = new Lazy<>(WarningAndErrorScreen::new);
-    private AbstractButtonWidget buttonExit;
+    public static final LazyLoadedValue<WarningAndErrorScreen> INSTANCE = new LazyLoadedValue<>(WarningAndErrorScreen::new);
+    private AbstractWidget buttonExit;
     private StringEntryListWidget listWidget;
     private Screen parent;
     
     private WarningAndErrorScreen() {
-        super(NarratorManager.EMPTY);
+        super(NarratorChatListener.NO_TITLE);
     }
     
     @Override
@@ -66,30 +66,30 @@ public class WarningAndErrorScreen extends Screen {
         this.parent = parent;
     }
     
-    private void addText(Text string) {
-        for (OrderedText s : textRenderer.wrapStringToWidthAsList(string, width - 80)) {
+    private void addText(Component string) {
+        for (FormattedCharSequence s : font.split(string, width - 80)) {
             listWidget.creditsAddEntry(new TextItem(s));
         }
     }
     
-    private void addLink(Text string, String link) {
-        for (OrderedText s : textRenderer.wrapStringToWidthAsList(string, width - 80)) {
+    private void addLink(Component string, String link) {
+        for (FormattedCharSequence s : font.split(string, width - 80)) {
             listWidget.creditsAddEntry(new LinkItem(s, link));
         }
     }
     
     @Override
     public void init() {
-        children.add(listWidget = new StringEntryListWidget(client, width, height, 32, height - 32));
+        children.add(listWidget = new StringEntryListWidget(minecraft, width, height, 32, height - 32));
         listWidget.max = 80;
         listWidget.creditsClearEntries();
         listWidget.creditsAddEntry(new EmptyItem());
         if (!RoughlyEnoughItemsState.getWarnings().isEmpty())
-            listWidget.creditsAddEntry(new TextItem(new LiteralText("Warnings:").formatted(Formatting.RED).asOrderedText()));
-        for (Pair<String, String> pair : RoughlyEnoughItemsState.getWarnings()) {
-            addText(new LiteralText(pair.getLeft()));
-            if (pair.getRight() != null)
-                addLink(new LiteralText(pair.getRight()), pair.getRight());
+            listWidget.creditsAddEntry(new TextItem(new TextComponent("Warnings:").withStyle(ChatFormatting.RED).getVisualOrderText()));
+        for (Tuple<String, String> pair : RoughlyEnoughItemsState.getWarnings()) {
+            addText(new TextComponent(pair.getA()));
+            if (pair.getB() != null)
+                addLink(new TextComponent(pair.getB()), pair.getB());
             for (int i = 0; i < 2; i++) {
                 listWidget.creditsAddEntry(new EmptyItem());
             }
@@ -98,11 +98,11 @@ public class WarningAndErrorScreen extends Screen {
             listWidget.creditsAddEntry(new EmptyItem());
         }
         if (!RoughlyEnoughItemsState.getErrors().isEmpty())
-            listWidget.creditsAddEntry(new TextItem(new LiteralText("Errors:").formatted(Formatting.RED).asOrderedText()));
-        for (Pair<String, String> pair : RoughlyEnoughItemsState.getErrors()) {
-            addText(new LiteralText(pair.getLeft()));
-            if (pair.getRight() != null)
-                addLink(new LiteralText(pair.getRight()), pair.getRight());
+            listWidget.creditsAddEntry(new TextItem(new TextComponent("Errors:").withStyle(ChatFormatting.RED).getVisualOrderText()));
+        for (Tuple<String, String> pair : RoughlyEnoughItemsState.getErrors()) {
+            addText(new TextComponent(pair.getA()));
+            if (pair.getB() != null)
+                addLink(new TextComponent(pair.getB()), pair.getB());
             for (int i = 0; i < 2; i++) {
                 listWidget.creditsAddEntry(new EmptyItem());
             }
@@ -110,16 +110,16 @@ public class WarningAndErrorScreen extends Screen {
         for (StringItem child : listWidget.children()) {
             listWidget.max = Math.max(listWidget.max, child.getWidth());
         }
-        children.add(buttonExit = new ButtonWidget(width / 2 - 100, height - 26, 200, 20,
-                new LiteralText(RoughlyEnoughItemsState.getErrors().isEmpty() ? "Continue" : "Exit"),
+        children.add(buttonExit = new Button(width / 2 - 100, height - 26, 200, 20,
+                new TextComponent(RoughlyEnoughItemsState.getErrors().isEmpty() ? "Continue" : "Exit"),
                 button -> {
                     if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
                         RoughlyEnoughItemsState.clear();
                         RoughlyEnoughItemsState.continues();
-                        MinecraftClient.getInstance().openScreen(parent);
+                        Minecraft.getInstance().setScreen(parent);
                         setParent(null);
                     } else {
-                        MinecraftClient.getInstance().scheduleStop();
+                        Minecraft.getInstance().stop();
                     }
                 }));
     }
@@ -130,13 +130,13 @@ public class WarningAndErrorScreen extends Screen {
     }
     
     @Override
-    public void render(MatrixStack matrices, int int_1, int int_2, float float_1) {
-        this.renderBackgroundTexture(0);
+    public void render(PoseStack matrices, int int_1, int int_2, float float_1) {
+        this.renderDirtBackground(0);
         this.listWidget.render(matrices, int_1, int_2, float_1);
         if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
-            this.drawCenteredString(matrices, this.textRenderer, "Warnings during Roughly Enough Items' initialization", this.width / 2, 16, 16777215);
+            this.drawCenteredString(matrices, this.font, "Warnings during Roughly Enough Items' initialization", this.width / 2, 16, 16777215);
         } else {
-            this.drawCenteredString(matrices, this.textRenderer, "Errors during Roughly Enough Items' initialization", this.width / 2, 16, 16777215);
+            this.drawCenteredString(matrices, this.font, "Errors during Roughly Enough Items' initialization", this.width / 2, 16, 16777215);
         }
         super.render(matrices, int_1, int_2, float_1);
         this.buttonExit.render(matrices, int_1, int_2, float_1);
@@ -146,8 +146,8 @@ public class WarningAndErrorScreen extends Screen {
         private boolean inFocus;
         private int max = 80;
         
-        public StringEntryListWidget(MinecraftClient client, int width, int height, int startY, int endY) {
-            super(client, width, height, startY, endY, DrawableHelper.BACKGROUND_TEXTURE);
+        public StringEntryListWidget(Minecraft client, int width, int height, int startY, int endY) {
+            super(client, width, height, startY, endY, GuiComponent.BACKGROUND_LOCATION);
         }
         
         @Override
@@ -195,7 +195,7 @@ public class WarningAndErrorScreen extends Screen {
     
     private static class EmptyItem extends StringItem {
         @Override
-        public void render(MatrixStack matrixStack, int i, int i1, int i2, int i3, int i4, int i5, int i6, boolean b, float v) {
+        public void render(PoseStack matrixStack, int i, int i1, int i2, int i3, int i4, int i5, int i6, boolean b, float v) {
             
         }
         
@@ -211,15 +211,15 @@ public class WarningAndErrorScreen extends Screen {
     }
     
     private static class TextItem extends StringItem {
-        private OrderedText text;
+        private FormattedCharSequence text;
         
-        public TextItem(OrderedText text) {
+        public TextItem(FormattedCharSequence text) {
             this.text = text;
         }
         
         @Override
-        public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-            MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, text, x + 5, y, -1);
+        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+            Minecraft.getInstance().font.drawShadow(matrices, text, x + 5, y, -1);
         }
         
         @Override
@@ -234,30 +234,30 @@ public class WarningAndErrorScreen extends Screen {
         
         @Override
         public int getWidth() {
-            return MinecraftClient.getInstance().textRenderer.getWidth(text) + 10;
+            return Minecraft.getInstance().font.width(text) + 10;
         }
     }
     
     private class LinkItem extends StringItem {
-        private OrderedText text;
+        private FormattedCharSequence text;
         private String link;
         private boolean contains;
         
-        public LinkItem(OrderedText text, String link) {
+        public LinkItem(FormattedCharSequence text, String link) {
             this.text = text;
             this.link = link;
         }
         
         @Override
-        public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
             contains = mouseX >= x && mouseX <= x + entryWidth && mouseY >= y && mouseY <= y + entryHeight;
             if (contains) {
-                WarningAndErrorScreen.this.renderTooltip(matrices, new LiteralText("Click to open link."), mouseX, mouseY);
-                MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, characterVisitor -> {
-                    return text.accept((charIndex, style, codePoint) -> characterVisitor.accept(charIndex, style.withFormatting(Formatting.UNDERLINE), codePoint));
+                WarningAndErrorScreen.this.renderTooltip(matrices, new TextComponent("Click to open link."), mouseX, mouseY);
+                Minecraft.getInstance().font.drawShadow(matrices, characterVisitor -> {
+                    return text.accept((charIndex, style, codePoint) -> characterVisitor.accept(charIndex, style.applyFormat(ChatFormatting.UNDERLINE), codePoint));
                 }, x + 5, y, 0xff1fc3ff);
             } else {
-                MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, text, x + 5, y, 0xff1fc3ff);
+                Minecraft.getInstance().font.drawShadow(matrices, text, x + 5, y, 0xff1fc3ff);
             }
         }
         
@@ -273,15 +273,15 @@ public class WarningAndErrorScreen extends Screen {
         
         @Override
         public int getWidth() {
-            return MinecraftClient.getInstance().textRenderer.getWidth(text) + 10;
+            return Minecraft.getInstance().font.width(text) + 10;
         }
         
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             if (contains && button == 0) {
-                MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 try {
-                    Util.getOperatingSystem().open(new URI(link));
+                    Util.getPlatform().openUri(new URI(link));
                     return true;
                 } catch (URISyntaxException e) {
                     e.printStackTrace();

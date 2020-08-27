@@ -29,13 +29,13 @@ import me.shedaniel.rei.plugin.brewing.BrewingRecipe;
 import me.shedaniel.rei.plugin.brewing.RegisteredBrewingRecipe;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.PotionItem;
-import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionUtil;
-import net.minecraft.recipe.BrewingRecipeRegistry;
-import net.minecraft.recipe.Ingredient;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.PotionItem;
+import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.PotionBrewing;
+import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.crafting.Ingredient;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -44,43 +44,44 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 
-@Mixin(BrewingRecipeRegistry.class)
+@Mixin(PotionBrewing.class)
 @Environment(EnvType.CLIENT)
-public class MixinBrewingRecipeRegistry {
+public class MixinPotionBrewing {
     
     @Unique private static final List<BrewingRecipe> SELF_ITEM_RECIPES = Lists.newArrayList();
     @Unique private static final List<Potion> REGISTERED_POTION_TYPES = Lists.newArrayList();
     @Unique private static final List<Ingredient> SELF_POTION_TYPES = Lists.newArrayList();
     
-    @Inject(method = "registerPotionType", at = @At("RETURN"))
-    private static void method_8080(Item item_1, CallbackInfo ci) {
+    @Inject(method = "addContainer", at = @At("RETURN"))
+    private static void addContainer(Item item_1, CallbackInfo ci) {
         if (item_1 instanceof PotionItem)
-            SELF_POTION_TYPES.add(Ingredient.ofItems(item_1));
+            SELF_POTION_TYPES.add(Ingredient.of(item_1));
     }
     
-    @Inject(method = "registerItemRecipe", at = @At("RETURN"))
-    private static void method_8071(Item item_1, Item item_2, Item item_3, CallbackInfo ci) {
+    @Inject(method = "addContainerRecipe", at = @At("RETURN"))
+    private static void addContainerRecipe(Item item_1, Item item_2, Item item_3, CallbackInfo ci) {
         if (item_1 instanceof PotionItem && item_3 instanceof PotionItem)
-            SELF_ITEM_RECIPES.add(new BrewingRecipe(item_1, Ingredient.ofItems(item_2), item_3));
+            SELF_ITEM_RECIPES.add(new BrewingRecipe(item_1, Ingredient.of(item_2), item_3));
     }
     
-    @Inject(method = "registerPotionRecipe", at = @At("RETURN"))
-    private static void registerPotionRecipe(Potion potion_1, Item item_1, Potion potion_2, CallbackInfo ci) {
+    @Inject(method = "addMix", at = @At("RETURN"))
+    private static void addMix(Potion potion_1, Item item_1, Potion potion_2, CallbackInfo ci) {
         if (!REGISTERED_POTION_TYPES.contains(potion_1))
             rei_registerPotionType(potion_1);
         if (!REGISTERED_POTION_TYPES.contains(potion_2))
             rei_registerPotionType(potion_2);
         for (Ingredient type : SELF_POTION_TYPES) {
-            for (ItemStack stack : type.getMatchingStacksClient()) {
-                DefaultPlugin.registerBrewingRecipe(new RegisteredBrewingRecipe(PotionUtil.setPotion(stack.copy(), potion_1), Ingredient.ofItems(item_1), PotionUtil.setPotion(stack.copy(), potion_2)));
+            for (ItemStack stack : type.getItems()) {
+                DefaultPlugin.registerBrewingRecipe(new RegisteredBrewingRecipe(PotionUtils.setPotion(stack.copy(), potion_1), Ingredient.of(item_1), PotionUtils.setPotion(stack.copy(), potion_2)));
             }
         }
     }
     
+    @Unique
     private static void rei_registerPotionType(Potion potion) {
         REGISTERED_POTION_TYPES.add(potion);
         for (BrewingRecipe recipe : SELF_ITEM_RECIPES) {
-            DefaultPlugin.registerBrewingRecipe(new RegisteredBrewingRecipe(PotionUtil.setPotion(recipe.input.getStackForRender(), potion), recipe.ingredient, PotionUtil.setPotion(recipe.output.getStackForRender(), potion)));
+            DefaultPlugin.registerBrewingRecipe(new RegisteredBrewingRecipe(PotionUtils.setPotion(recipe.input.getDefaultInstance(), potion), recipe.ingredient, PotionUtils.setPotion(recipe.output.getDefaultInstance(), potion)));
         }
     }
     

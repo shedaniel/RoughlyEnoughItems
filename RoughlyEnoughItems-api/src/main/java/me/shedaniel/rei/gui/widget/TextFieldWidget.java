@@ -24,19 +24,19 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.REIHelper;
 import net.minecraft.SharedConstants;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormats;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Tickable;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Matrix4f;
+import net.minecraft.Util;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.block.entity.TickableBlockEntity;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -51,7 +51,7 @@ import java.util.function.Predicate;
  * @see net.minecraft.client.gui.widget.TextFieldWidget
  */
 @ApiStatus.Internal
-public class TextFieldWidget extends WidgetWithBounds implements Tickable {
+public class TextFieldWidget extends WidgetWithBounds implements TickableBlockEntity {
     
     public Function<String, String> stripInvalid;
     protected int focusedTicks;
@@ -88,7 +88,7 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
             return string_1;
         };
         this.bounds = rectangle;
-        this.stripInvalid = SharedConstants::stripInvalidChars;
+        this.stripInvalid = SharedConstants::filterText;
     }
     
     public TextFieldWidget(int x, int y, int width, int height) {
@@ -268,7 +268,7 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
     }
     
     private int getMovedCursorIndex(int i) {
-        return Util.moveCursor(this.text, this.selectionStart, i);
+        return Util.offsetByCodepoints(this.text, this.selectionStart, i);
     }
     
     public void setCursor(int int_1) {
@@ -294,16 +294,16 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
                 this.setSelectionEnd(0);
                 return true;
             } else if (Screen.isCopy(int_1)) {
-                minecraft.keyboard.setClipboard(this.getSelectedText());
+                minecraft.keyboardHandler.setClipboard(this.getSelectedText());
                 return true;
             } else if (Screen.isPaste(int_1)) {
                 if (this.editable) {
-                    this.addText(minecraft.keyboard.getClipboard());
+                    this.addText(minecraft.keyboardHandler.getClipboard());
                 }
                 
                 return true;
             } else if (Screen.isCut(int_1)) {
-                minecraft.keyboard.setClipboard(this.getSelectedText());
+                minecraft.keyboardHandler.setClipboard(this.getSelectedText());
                 if (this.editable) {
                     this.addText("");
                 }
@@ -366,7 +366,7 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
     @Override
     public boolean charTyped(char char_1, int int_1) {
         if (this.isVisible() && this.isFocused()) {
-            if (SharedConstants.isValidChar(char_1) && !(
+            if (SharedConstants.isAllowedChatCharacter(char_1) && !(
                     Screen.hasControlDown() && !Screen.hasShiftDown() && !Screen.hasAltDown() && (
                             char_1 == 'a' || char_1 == 'c' || char_1 == 'v'
                     )
@@ -400,13 +400,13 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
             }
             
             if (this.focused && boolean_1 && int_1 == 0) {
-                int int_2 = MathHelper.floor(double_1) - this.bounds.x;
+                int int_2 = Mth.floor(double_1) - this.bounds.x;
                 if (this.hasBorder) {
                     int_2 -= 4;
                 }
                 
-                String string_1 = this.font.trimToWidth(this.text.substring(this.firstCharacterIndex), this.getWidth());
-                this.setCursor(this.font.trimToWidth(string_1, int_2).length() + this.firstCharacterIndex);
+                String string_1 = this.font.plainSubstrByWidth(this.text.substring(this.firstCharacterIndex), this.getWidth());
+                this.setCursor(this.font.plainSubstrByWidth(string_1, int_2).length() + this.firstCharacterIndex);
                 return true;
             } else {
                 return false;
@@ -414,7 +414,7 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
         }
     }
     
-    public void renderBorder(MatrixStack matrices) {
+    public void renderBorder(PoseStack matrices) {
         if (this.hasBorder()) {
             if (containsMouse(PointHelper.ofMouse()) || focused)
                 fill(matrices, this.bounds.x - 1, this.bounds.y - 1, this.bounds.x + this.bounds.width + 1, this.bounds.y + this.bounds.height + 1, REIHelper.getInstance().isDarkThemeEnabled() ? -17587 : -1);
@@ -425,14 +425,14 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
     }
     
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (this.isVisible()) {
             renderBorder(matrices);
             
             int color = this.editable ? this.editableColor : this.notEditableColor;
             int int_4 = this.selectionStart - this.firstCharacterIndex;
             int int_5 = this.selectionEnd - this.firstCharacterIndex;
-            String string_1 = this.font.trimToWidth(this.text.substring(this.firstCharacterIndex), this.getWidth());
+            String string_1 = this.font.plainSubstrByWidth(this.text.substring(this.firstCharacterIndex), this.getWidth());
             boolean boolean_1 = int_4 >= 0 && int_4 <= string_1.length();
             boolean boolean_2 = this.focused && this.focusedTicks / 6 % 2 == 0 && boolean_1;
             int x = this.hasBorder ? this.bounds.x + 4 : this.bounds.x;
@@ -444,7 +444,7 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
             
             if (!string_1.isEmpty()) {
                 String string_2 = boolean_1 ? string_1.substring(0, int_4) : string_1;
-                int_8 = this.font.drawWithShadow(matrices, this.renderTextProvider.apply(string_2, this.firstCharacterIndex), (float) x, (float) y, color);
+                int_8 = this.font.drawShadow(matrices, this.renderTextProvider.apply(string_2, this.firstCharacterIndex), (float) x, (float) y, color);
             }
             
             boolean isCursorInsideText = this.selectionStart < this.text.length() || this.text.length() >= this.getMaxLength();
@@ -457,7 +457,7 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
             int_9--;
             
             if (!string_1.isEmpty() && boolean_1 && int_4 < string_1.length()) {
-                this.font.drawWithShadow(matrices, this.renderTextProvider.apply(string_1.substring(int_4), this.selectionStart), (float) int_8, (float) y, color);
+                this.font.drawShadow(matrices, this.renderTextProvider.apply(string_1.substring(int_4), this.selectionStart), (float) int_8, (float) y, color);
             }
             
             if (!isCursorInsideText && text.isEmpty() && this.suggestion != null) {
@@ -471,17 +471,17 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
             
             // Render selection overlay
             if (int_5 != int_4) {
-                int int_10 = x + this.font.getStringWidth(string_1.substring(0, int_5));
+                int int_10 = x + this.font.width(string_1.substring(0, int_5));
                 this.renderSelection(matrices, int_9, y - 1, int_10 - 1, y + 9, color);
             }
         }
     }
     
-    protected void renderSuggestion(MatrixStack matrices, int x, int y) {
-        this.font.drawWithShadow(matrices, this.font.trimToWidth(this.suggestion, this.getWidth()), x, y, -8355712);
+    protected void renderSuggestion(PoseStack matrices, int x, int y) {
+        this.font.drawShadow(matrices, this.font.plainSubstrByWidth(this.suggestion, this.getWidth()), x, y, -8355712);
     }
     
-    protected void renderSelection(MatrixStack matrices, int x1, int y1, int x2, int y2, int color) {
+    protected void renderSelection(PoseStack matrices, int x1, int y1, int x2, int y2, int color) {
         int tmp;
         if (x1 < x2) {
             tmp = x1;
@@ -506,20 +506,20 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
         int r = (color >> 16 & 255);
         int g = (color >> 8 & 255);
         int b = (color & 255);
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuffer();
+        Tesselator tessellator = Tesselator.getInstance();
+        BufferBuilder buffer = tessellator.getBuilder();
         RenderSystem.disableTexture();
         RenderSystem.enableBlend();
         RenderSystem.disableAlphaTest();
         RenderSystem.blendFuncSeparate(770, 771, 1, 0);
         RenderSystem.shadeModel(7425);
-        Matrix4f matrix = matrices.peek().getModel();
-        buffer.begin(7, VertexFormats.POSITION_COLOR);
-        buffer.vertex(matrix, x1, y2, getZOffset() + 50f).color(r, g, b, 120).next();
-        buffer.vertex(matrix, x2, y2, getZOffset() + 50f).color(r, g, b, 120).next();
-        buffer.vertex(matrix, x2, y1, getZOffset() + 50f).color(r, g, b, 120).next();
-        buffer.vertex(matrix, x1, y1, getZOffset() + 50f).color(r, g, b, 120).next();
-        tessellator.draw();
+        Matrix4f matrix = matrices.last().pose();
+        buffer.begin(7, DefaultVertexFormat.POSITION_COLOR);
+        buffer.vertex(matrix, x1, y2, getBlitOffset() + 50f).color(r, g, b, 120).endVertex();
+        buffer.vertex(matrix, x2, y2, getBlitOffset() + 50f).color(r, g, b, 120).endVertex();
+        buffer.vertex(matrix, x2, y1, getBlitOffset() + 50f).color(r, g, b, 120).endVertex();
+        buffer.vertex(matrix, x1, y1, getBlitOffset() + 50f).color(r, g, b, 120).endVertex();
+        tessellator.end();
         RenderSystem.shadeModel(7424);
         RenderSystem.disableBlend();
         RenderSystem.enableAlphaTest();
@@ -543,7 +543,7 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
     }
     
     public void setSelectionStart(int int_1) {
-        this.selectionStart = MathHelper.clamp(int_1, 0, this.text.length());
+        this.selectionStart = Mth.clamp(int_1, 0, this.text.length());
     }
     
     public boolean hasBorder() {
@@ -591,17 +591,17 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
     
     public void setSelectionEnd(int i) {
         int j = this.text.length();
-        this.selectionEnd = MathHelper.clamp(i, 0, j);
+        this.selectionEnd = Mth.clamp(i, 0, j);
         if (this.font != null) {
             if (this.firstCharacterIndex > j) {
                 this.firstCharacterIndex = j;
             }
             
             int int_3 = this.getWidth();
-            String string_1 = this.font.trimToWidth(this.text.substring(this.firstCharacterIndex), int_3);
+            String string_1 = this.font.plainSubstrByWidth(this.text.substring(this.firstCharacterIndex), int_3);
             int int_4 = string_1.length() + this.firstCharacterIndex;
             if (this.selectionEnd == this.firstCharacterIndex) {
-                this.firstCharacterIndex -= this.font.trimToWidth(this.text, int_3, true).length();
+                this.firstCharacterIndex -= this.font.plainSubstrByWidth(this.text, int_3, true).length();
             }
             
             if (this.selectionEnd > int_4) {
@@ -610,7 +610,7 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
                 this.firstCharacterIndex -= this.firstCharacterIndex - this.selectionEnd;
             }
             
-            this.firstCharacterIndex = MathHelper.clamp(this.firstCharacterIndex, 0, j);
+            this.firstCharacterIndex = Mth.clamp(this.firstCharacterIndex, 0, j);
         }
         
     }
@@ -628,7 +628,7 @@ public class TextFieldWidget extends WidgetWithBounds implements Tickable {
     }
     
     public int getCharacterX(int index) {
-        return index > this.text.length() ? this.bounds.x : this.bounds.x + this.font.getStringWidth(this.text.substring(0, index));
+        return index > this.text.length() ? this.bounds.x : this.bounds.x + this.font.width(this.text.substring(0, index));
     }
     
 }

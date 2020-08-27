@@ -30,9 +30,9 @@ import me.shedaniel.rei.plugin.DefaultPlugin;
 import me.shedaniel.rei.server.ContainerInfo;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.container.Container;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.crafting.Recipe;
 
 import java.util.Collections;
 import java.util.List;
@@ -42,7 +42,7 @@ import java.util.Optional;
 public interface DefaultCraftingDisplay extends TransferRecipeDisplay {
     
     @Override
-    default Identifier getRecipeCategory() {
+    default ResourceLocation getRecipeCategory() {
         return DefaultPlugin.CRAFTING;
     }
     
@@ -59,7 +59,7 @@ public interface DefaultCraftingDisplay extends TransferRecipeDisplay {
     Optional<Recipe<?>> getOptionalRecipe();
     
     @Override
-    default List<List<EntryStack>> getOrganisedInputEntries(ContainerInfo<Container> containerInfo, Container container) {
+    default List<List<EntryStack>> getOrganisedInputEntries(ContainerInfo<AbstractContainerMenu> containerInfo, AbstractContainerMenu container) {
         List<List<EntryStack>> list = Lists.newArrayListWithCapacity(containerInfo.getCraftingWidth(container) * containerInfo.getCraftingHeight(container));
         for (int i = 0; i < containerInfo.getCraftingWidth(container) * containerInfo.getCraftingHeight(container); i++) {
             list.add(Collections.emptyList());

@@ -23,20 +23,20 @@
 
 package me.shedaniel.rei.gui.config.entry;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
 import me.shedaniel.rei.impl.filtering.FilteringRule;
 import me.shedaniel.rei.impl.filtering.rules.ManualFilteringRule;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.StringVisitable;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Language;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.locale.Language;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.Collections;
 import java.util.List;
@@ -49,7 +49,7 @@ public class FilteringAddRuleScreen extends Screen {
     Screen parent;
     
     public FilteringAddRuleScreen(FilteringEntry entry) {
-        super(new TranslatableText("config.roughlyenoughitems.filteringRulesScreen.new"));
+        super(new TranslatableComponent("config.roughlyenoughitems.filteringRulesScreen.new"));
         this.entry = entry;
     }
     
@@ -57,13 +57,13 @@ public class FilteringAddRuleScreen extends Screen {
     protected void init() {
         super.init();
         {
-            Text backText = new LiteralText("↩ ").append(new TranslatableText("gui.back"));
-            addButton(new ButtonWidget(4, 4, MinecraftClient.getInstance().textRenderer.getWidth(backText) + 10, 20, backText, button -> {
-                client.openScreen(parent);
+            Component backText = new TextComponent("↩ ").append(new TranslatableComponent("gui.back"));
+            addButton(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
+                minecraft.setScreen(parent);
                 this.parent = null;
             }));
         }
-        rulesList = addChild(new RulesList(client, width, height, 30, height, BACKGROUND_TEXTURE));
+        rulesList = addWidget(new RulesList(minecraft, width, height, 30, height, BACKGROUND_LOCATION));
         for (FilteringRule<?> rule : FilteringRule.REGISTRY) {
             if (!(rule instanceof ManualFilteringRule))
                 rulesList.addItem(new DefaultRuleEntry(parent, entry, rule.createNew(), null));
@@ -72,16 +72,16 @@ public class FilteringAddRuleScreen extends Screen {
     }
     
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         this.rulesList.render(matrices, mouseX, mouseY, delta);
         super.render(matrices, mouseX, mouseY, delta);
-        this.textRenderer.drawWithShadow(matrices, this.title.asOrderedText(), this.width / 2.0F - this.textRenderer.getWidth(this.title) / 2.0F, 12.0F, -1);
+        this.font.drawShadow(matrices, this.title.getVisualOrderText(), this.width / 2.0F - this.font.width(this.title) / 2.0F, 12.0F, -1);
     }
     
     public static class RulesList extends DynamicElementListWidget<RuleEntry> {
         private boolean inFocus;
         
-        public RulesList(MinecraftClient client, int width, int height, int top, int bottom, Identifier backgroundLocation) {
+        public RulesList(Minecraft client, int width, int height, int top, int bottom, ResourceLocation backgroundLocation) {
             super(client, width, height, top, bottom, backgroundLocation);
         }
         
@@ -145,41 +145,41 @@ public class FilteringAddRuleScreen extends Screen {
     }
     
     public static class DefaultRuleEntry extends RuleEntry {
-        private final ButtonWidget addButton;
+        private final Button addButton;
         private final BiFunction<FilteringEntry, Screen, Screen> screenFunction;
         
         public DefaultRuleEntry(Screen parent, FilteringEntry entry, FilteringRule<?> rule, BiFunction<FilteringEntry, Screen, Screen> screenFunction) {
             super(rule);
             this.screenFunction = (screenFunction == null ? rule.createEntryScreen().orElse(null) : screenFunction);
-            addButton = new ButtonWidget(0, 0, 20, 20, Text.of(" + "), button -> {
+            addButton = new Button(0, 0, 20, 20, Component.nullToEmpty(" + "), button -> {
                 entry.edited = true;
-                MinecraftClient.getInstance().openScreen(this.screenFunction.apply(entry, parent));
+                Minecraft.getInstance().setScreen(this.screenFunction.apply(entry, parent));
                 entry.rules.add(0, rule);
             });
             addButton.active = this.screenFunction != null;
         }
         
         @Override
-        public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
-            MinecraftClient client = MinecraftClient.getInstance();
+        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
+            Minecraft client = Minecraft.getInstance();
             {
-                Text title = getRule().getTitle();
-                int i = client.textRenderer.getWidth(title);
+                Component title = getRule().getTitle();
+                int i = client.font.width(title);
                 if (i > entryWidth - 28) {
-                    StringVisitable titleTrimmed = StringVisitable.concat(client.textRenderer.trimToWidth(title, entryWidth - 28 - client.textRenderer.getStringWidth("...")), StringVisitable.plain("..."));
-                    client.textRenderer.drawWithShadow(matrices, Language.getInstance().reorder(titleTrimmed), x + 2, y + 1, 16777215);
+                    FormattedText titleTrimmed = FormattedText.composite(client.font.substrByWidth(title, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));
+                    client.font.drawShadow(matrices, Language.getInstance().getVisualOrder(titleTrimmed), x + 2, y + 1, 16777215);
                 } else {
-                    client.textRenderer.drawWithShadow(matrices, title.asOrderedText(), x + 2, y + 1, 16777215);
+                    client.font.drawShadow(matrices, title.getVisualOrderText(), x + 2, y + 1, 16777215);
                 }
             }
             {
-                Text subtitle = getRule().getSubtitle();
-                int i = client.textRenderer.getWidth(subtitle);
+                Component subtitle = getRule().getSubtitle();
+                int i = client.font.width(subtitle);
                 if (i > entryWidth - 28) {
-                    StringVisitable subtitleTrimmed = StringVisitable.concat(client.textRenderer.trimToWidth(subtitle, entryWidth - 28 - client.textRenderer.getStringWidth("...")), StringVisitable.plain("..."));
-                    client.textRenderer.drawWithShadow(matrices, Language.getInstance().reorder(subtitleTrimmed), x + 2, y + 12, 8421504);
+                    FormattedText subtitleTrimmed = FormattedText.composite(client.font.substrByWidth(subtitle, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));
+                    client.font.drawShadow(matrices, Language.getInstance().getVisualOrder(subtitleTrimmed), x + 2, y + 12, 8421504);
                 } else {
-                    client.textRenderer.drawWithShadow(matrices, subtitle.asOrderedText(), x + 2, y + 12, 8421504);
+                    client.font.drawShadow(matrices, subtitle.getVisualOrderText(), x + 2, y + 12, 8421504);
                 }
             }
             addButton.x = x + entryWidth - 25;
@@ -188,7 +188,7 @@ public class FilteringAddRuleScreen extends Screen {
         }
         
         @Override
-        public List<? extends Element> children() {
+        public List<? extends GuiEventListener> children() {
             return Collections.singletonList(addButton);
         }
     }

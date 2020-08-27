@@ -30,7 +30,7 @@ import me.shedaniel.rei.gui.entries.SimpleRecipeEntry;
 import me.shedaniel.rei.gui.widget.Widget;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collections;
@@ -44,7 +44,7 @@ public interface RecipeCategory<T extends RecipeDisplay> {
      *
      * @return the unique identifier of the category
      */
-    Identifier getIdentifier();
+    ResourceLocation getIdentifier();
     
     /**
      * Gets the renderer of the icon, allowing developers to render things other than items

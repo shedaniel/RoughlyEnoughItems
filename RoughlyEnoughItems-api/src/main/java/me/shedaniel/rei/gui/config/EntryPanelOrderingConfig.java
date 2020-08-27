@@ -25,7 +25,7 @@ package me.shedaniel.rei.gui.config;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.resources.language.I18n;
 
 @Environment(EnvType.CLIENT)
 public enum EntryPanelOrderingConfig {
@@ -59,6 +59,6 @@ public enum EntryPanelOrderingConfig {
     
     @Override
     public String toString() {
-        return I18n.translate("config.roughlyenoughitems.list_ordering_button", I18n.translate(getOrdering().getNameTranslationKey()), I18n.translate(isAscending ? "ordering.rei.ascending" : "ordering.rei.descending"));
+        return I18n.get("config.roughlyenoughitems.list_ordering_button", I18n.get(getOrdering().getNameTranslationKey()), I18n.get(isAscending ? "ordering.rei.ascending" : "ordering.rei.descending"));
     }
 }

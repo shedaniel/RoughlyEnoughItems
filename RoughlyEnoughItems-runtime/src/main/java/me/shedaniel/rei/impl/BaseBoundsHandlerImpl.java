@@ -30,10 +30,10 @@ import me.shedaniel.rei.api.DisplayHelper;
 import me.shedaniel.rei.gui.config.DisplayPanelLocation;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Pair;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.InteractionResult;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Comparator;
@@ -47,7 +47,7 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
     private static final Comparator<? super Rectangle> RECTANGLE_COMPARER = Comparator.comparingLong(Rectangle::hashCode);
     
     private long lastArea = -1;
-    private List<Pair<Pair<Class<?>, Float>, Supplier<List<Rectangle>>>> list = Lists.newArrayList();
+    private List<Tuple<Tuple<Class<?>, Float>, Supplier<List<Rectangle>>>> list = Lists.newArrayList();
     
     @Override
     public boolean isHandingScreen(Class<?> screen) {
@@ -60,15 +60,15 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
     }
     
     @Override
-    public ActionResult isInZone(double mouseX, double mouseY) {
-        Class<? extends Screen> screenClass = MinecraftClient.getInstance().currentScreen.getClass();
-        for (Pair<Pair<Class<?>, Float>, Supplier<List<Rectangle>>> pair : list) {
-            if (pair.getLeft().getLeft().isAssignableFrom(screenClass))
-                for (Rectangle zone : pair.getRight().get())
+    public InteractionResult isInZone(double mouseX, double mouseY) {
+        Class<? extends Screen> screenClass = Minecraft.getInstance().screen.getClass();
+        for (Tuple<Tuple<Class<?>, Float>, Supplier<List<Rectangle>>> pair : list) {
+            if (pair.getA().getA().isAssignableFrom(screenClass))
+                for (Rectangle zone : pair.getB().get())
                     if (zone.contains(mouseX, mouseY))
-                        return ActionResult.FAIL;
+                        return InteractionResult.FAIL;
         }
-        return ActionResult.PASS;
+        return InteractionResult.PASS;
     }
     
     @Override
@@ -81,15 +81,15 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
     }
     
     private long currentHashCode(DisplayPanelLocation location) {
-        return areasHashCode(DisplayHelper.getInstance().getOverlayBounds(location, MinecraftClient.getInstance().currentScreen), getExclusionZones(MinecraftClient.getInstance().currentScreen.getClass(), false));
+        return areasHashCode(DisplayHelper.getInstance().getOverlayBounds(location, Minecraft.getInstance().screen), getExclusionZones(Minecraft.getInstance().screen.getClass(), false));
     }
     
     @Override
     public List<Rectangle> getExclusionZones(Class<?> currentScreenClass, boolean sort) {
         List<Rectangle> rectangles = Lists.newArrayList();
-        for (Pair<Pair<Class<?>, Float>, Supplier<List<Rectangle>>> pair : list) {
-            if (pair.getLeft().getLeft().isAssignableFrom(currentScreenClass))
-                rectangles.addAll(pair.getRight().get());
+        for (Tuple<Tuple<Class<?>, Float>, Supplier<List<Rectangle>>> pair : list) {
+            if (pair.getA().getA().isAssignableFrom(currentScreenClass))
+                rectangles.addAll(pair.getB().get());
         }
         if (sort)
             rectangles.sort(RECTANGLE_COMPARER);
@@ -103,7 +103,7 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
     
     @Override
     public void registerExclusionZones(Class<?> screenClass, Supplier<List<Rectangle>> supplier) {
-        list.add(new Pair<>(new Pair<>(screenClass, 0f), supplier));
+        list.add(new Tuple<>(new Tuple<>(screenClass, 0f), supplier));
     }
     
     private long areasHashCode(Rectangle rectangle, List<Rectangle> exclusionZones) {

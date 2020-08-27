@@ -23,13 +23,13 @@
 
 package me.shedaniel.rei.server;
 
-import net.minecraft.container.Container;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
 @FunctionalInterface
-public interface RecipeFinderPopulator<T extends Container> {
+public interface RecipeFinderPopulator<T extends AbstractContainerMenu> {
     @NotNull
     Consumer<RecipeFinder> populate(ContainerContext<T> context);
 }

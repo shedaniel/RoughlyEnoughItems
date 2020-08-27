@@ -24,6 +24,7 @@
 package me.shedaniel.rei.plugin.beacon;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.ScrollingContainer;
@@ -39,13 +40,12 @@ import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -53,13 +53,13 @@ import java.util.Objects;
 
 public class DefaultBeaconBaseCategory implements RecipeCategory<DefaultBeaconBaseDisplay> {
     @Override
-    public Identifier getIdentifier() {
+    public ResourceLocation getIdentifier() {
         return DefaultPlugin.BEACON;
     }
     
     @Override
     public String getCategoryName() {
-        return I18n.translate("category.rei.beacon_base");
+        return I18n.get("category.rei.beacon_base");
     }
     
     @Override
@@ -73,12 +73,12 @@ public class DefaultBeaconBaseCategory implements RecipeCategory<DefaultBeaconBa
         return new RecipeEntry() {
             @Override
             public int getHeight() {
-                return 10 + MinecraftClient.getInstance().textRenderer.fontHeight;
+                return 10 + Minecraft.getInstance().font.lineHeight;
             }
             
             @Override
-            public void render(MatrixStack matrices, Rectangle rectangle, int mouseX, int mouseY, float delta) {
-                MinecraftClient.getInstance().textRenderer.draw(matrices, name, rectangle.x + 5, rectangle.y + 6, -1);
+            public void render(PoseStack matrices, Rectangle rectangle, int mouseX, int mouseY, float delta) {
+                Minecraft.getInstance().font.draw(matrices, name, rectangle.x + 5, rectangle.y + 6, -1);
             }
         };
     }
@@ -115,7 +115,7 @@ public class DefaultBeaconBaseCategory implements RecipeCategory<DefaultBeaconBa
             
             @Override
             public int getMaxScrollHeight() {
-                return MathHelper.ceil(widgets.size() / 8f) * 18;
+                return Mth.ceil(widgets.size() / 8f) * 18;
             }
         };
         
@@ -154,11 +154,11 @@ public class DefaultBeaconBaseCategory implements RecipeCategory<DefaultBeaconBa
         }
         
         @Override
-        public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
             scrolling.updatePosition(delta);
             Rectangle innerBounds = scrolling.getScissorBounds();
             ScissorsHandler.INSTANCE.scissor(innerBounds);
-            for (int y = 0; y < MathHelper.ceil(widgets.size() / 8f); y++) {
+            for (int y = 0; y < Mth.ceil(widgets.size() / 8f); y++) {
                 for (int x = 0; x < 8; x++) {
                     int index = y * 8 + x;
                     if (widgets.size() <= index)
@@ -175,7 +175,7 @@ public class DefaultBeaconBaseCategory implements RecipeCategory<DefaultBeaconBa
         }
         
         @Override
-        public List<? extends Element> children() {
+        public List<? extends GuiEventListener> children() {
             return widgets;
         }
     }

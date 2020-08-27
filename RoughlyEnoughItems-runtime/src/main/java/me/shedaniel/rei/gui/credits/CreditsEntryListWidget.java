@@ -23,12 +23,12 @@
 
 package me.shedaniel.rei.gui.credits;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
@@ -38,8 +38,8 @@ public class CreditsEntryListWidget extends DynamicNewSmoothScrollingEntryListWi
     
     private boolean inFocus;
     
-    public CreditsEntryListWidget(MinecraftClient client, int width, int height, int startY, int endY) {
-        super(client, width, height, startY, endY, DrawableHelper.BACKGROUND_TEXTURE);
+    public CreditsEntryListWidget(Minecraft client, int width, int height, int startY, int endY) {
+        super(client, width, height, startY, endY, GuiComponent.BACKGROUND_LOCATION);
     }
     
     @Override
@@ -85,15 +85,15 @@ public class CreditsEntryListWidget extends DynamicNewSmoothScrollingEntryListWi
     }
     
     public static class TextCreditsItem extends CreditsItem {
-        private Text text;
+        private Component text;
         
-        public TextCreditsItem(Text text) {
+        public TextCreditsItem(Component text) {
             this.text = text;
         }
         
         @Override
-        public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-            MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, text.asOrderedText(), x + 5, y + 5, -1);
+        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+            Minecraft.getInstance().font.drawShadow(matrices, text.getVisualOrderText(), x + 5, y + 5, -1);
         }
         
         @Override
@@ -108,22 +108,22 @@ public class CreditsEntryListWidget extends DynamicNewSmoothScrollingEntryListWi
     }
     
     public static class TranslationCreditsItem extends CreditsItem {
-        private Text language;
-        private List<OrderedText> translators;
+        private Component language;
+        private List<FormattedCharSequence> translators;
         private int maxWidth;
         
-        public TranslationCreditsItem(Text language, Text translators, int width, int maxWidth) {
+        public TranslationCreditsItem(Component language, Component translators, int width, int maxWidth) {
             this.language = language;
-            this.translators = MinecraftClient.getInstance().textRenderer.wrapStringToWidthAsList(translators, width);
+            this.translators = Minecraft.getInstance().font.split(translators, width);
             this.maxWidth = maxWidth;
         }
         
         @Override
-        public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-            MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, language.asOrderedText(), x + 5, y + 5, -1);
+        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+            Minecraft.getInstance().font.drawShadow(matrices, language.getVisualOrderText(), x + 5, y + 5, -1);
             int yy = y + 5;
-            for (OrderedText translator : translators) {
-                MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, translator, x + 5 + maxWidth, yy, -1);
+            for (FormattedCharSequence translator : translators) {
+                Minecraft.getInstance().font.drawShadow(matrices, translator, x + 5 + maxWidth, yy, -1);
                 yy += 12;
             }
         }

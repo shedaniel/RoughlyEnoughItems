@@ -28,7 +28,7 @@ import me.shedaniel.math.api.Executor;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.impl.Internals;
 import net.fabricmc.api.EnvType;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,22 +38,22 @@ import java.util.List;
 
 public interface Tooltip {
     @NotNull
-    static Tooltip create(@Nullable Point point, Collection<Text> texts) {
+    static Tooltip create(@Nullable Point point, Collection<Component> texts) {
         return Internals.createTooltip(point, texts);
     }
     
     @NotNull
-    static Tooltip create(@Nullable Point point, Text... texts) {
+    static Tooltip create(@Nullable Point point, Component... texts) {
         return create(point, Arrays.asList(texts));
     }
     
     @NotNull
-    static Tooltip create(Collection<Text> texts) {
+    static Tooltip create(Collection<Component> texts) {
         return create(null, texts);
     }
     
     @NotNull
-    static Tooltip create(Text... texts) {
+    static Tooltip create(Component... texts) {
         return create(Arrays.asList(texts));
     }
     
@@ -61,7 +61,7 @@ public interface Tooltip {
     
     int getY();
     
-    List<Text> getText();
+    List<Component> getText();
     
     default void queue() {
         Executor.runIfEnv(EnvType.CLIENT, () -> () -> REIHelper.getInstance().queueTooltip(this));

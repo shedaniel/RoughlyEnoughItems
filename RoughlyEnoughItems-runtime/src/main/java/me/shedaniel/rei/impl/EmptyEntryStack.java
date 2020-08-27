@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
@@ -30,8 +31,7 @@ import me.shedaniel.rei.api.fractions.Fraction;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -48,7 +48,7 @@ public class EmptyEntryStack implements EntryStack {
     }
     
     @Override
-    public Optional<Identifier> getIdentifier() {
+    public Optional<ResourceLocation> getIdentifier() {
         return Optional.empty();
     }
     
@@ -148,7 +148,7 @@ public class EmptyEntryStack implements EntryStack {
     }
     
     @Override
-    public void render(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+    public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
         
     }
     

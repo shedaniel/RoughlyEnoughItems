@@ -24,13 +24,13 @@
 package me.shedaniel.rei.impl.widgets;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.DrawableConsumer;
-import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormats;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.GuiComponent;
 import org.jetbrains.annotations.NotNull;
 
 public final class FillRectangleDrawableConsumer implements DrawableConsumer {
@@ -44,7 +44,7 @@ public final class FillRectangleDrawableConsumer implements DrawableConsumer {
     }
     
     @Override
-    public void render(@NotNull DrawableHelper helper, @NotNull MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(@NotNull GuiComponent helper, @NotNull PoseStack matrices, int mouseX, int mouseY, float delta) {
         float a = (color >> 24 & 255) / 255.0F;
         float r = (color >> 16 & 255) / 255.0F;
         float g = (color >> 8 & 255) / 255.0F;
@@ -54,14 +54,14 @@ public final class FillRectangleDrawableConsumer implements DrawableConsumer {
         RenderSystem.disableAlphaTest();
         RenderSystem.defaultBlendFunc();
         RenderSystem.shadeModel(7425);
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder bufferBuilder = tessellator.getBuffer();
-        bufferBuilder.begin(7, VertexFormats.POSITION_COLOR);
-        bufferBuilder.vertex(rectangle.getMaxX(), rectangle.getMinY(), helper.getZOffset()).color(r, g, b, a).next();
-        bufferBuilder.vertex(rectangle.getMinX(), rectangle.getMinY(), helper.getZOffset()).color(r, g, b, a).next();
-        bufferBuilder.vertex(rectangle.getMinX(), rectangle.getMaxY(), helper.getZOffset()).color(r, g, b, a).next();
-        bufferBuilder.vertex(rectangle.getMaxX(), rectangle.getMaxY(), helper.getZOffset()).color(r, g, b, a).next();
-        tessellator.draw();
+        Tesselator tessellator = Tesselator.getInstance();
+        BufferBuilder bufferBuilder = tessellator.getBuilder();
+        bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR);
+        bufferBuilder.vertex(rectangle.getMaxX(), rectangle.getMinY(), helper.getBlitOffset()).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(rectangle.getMinX(), rectangle.getMinY(), helper.getBlitOffset()).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(rectangle.getMinX(), rectangle.getMaxY(), helper.getBlitOffset()).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(rectangle.getMaxX(), rectangle.getMaxY(), helper.getBlitOffset()).color(r, g, b, a).endVertex();
+        tessellator.end();
         RenderSystem.shadeModel(7424);
         RenderSystem.disableBlend();
         RenderSystem.enableAlphaTest();
