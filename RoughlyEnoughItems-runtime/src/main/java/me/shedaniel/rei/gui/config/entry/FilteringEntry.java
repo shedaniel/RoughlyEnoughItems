@@ -25,17 +25,17 @@ package me.shedaniel.rei.gui.config.entry;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.impl.filtering.FilteringRule;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.widget.AbstractButtonWidget;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.util.NarratorManager;
-import net.minecraft.client.util.Window;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
@@ -52,14 +52,14 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
     boolean edited = false;
     final FilteringScreen filteringScreen = new FilteringScreen(this);
     final FilteringRulesScreen filteringRulesScreen = new FilteringRulesScreen(this);
-    private final AbstractButtonWidget buttonWidget = new ButtonWidget(0, 0, 0, 20, new TranslatableText("config.roughlyenoughitems.filteringScreen"), button -> {
-        filteringRulesScreen.parent = MinecraftClient.getInstance().currentScreen;
-        MinecraftClient.getInstance().openScreen(filteringRulesScreen);
+    private final AbstractWidget buttonWidget = new Button(0, 0, 0, 20, new TranslatableComponent("config.roughlyenoughitems.filteringScreen"), button -> {
+        filteringRulesScreen.parent = Minecraft.getInstance().screen;
+        Minecraft.getInstance().setScreen(filteringRulesScreen);
     });
-    private final List<Element> children = ImmutableList.of(buttonWidget);
+    private final List<GuiEventListener> children = ImmutableList.of(buttonWidget);
     
     public FilteringEntry(int width, List<EntryStack> configFiltered, List<FilteringRule<?>> rules, List<EntryStack> defaultValue, Consumer<List<EntryStack>> saveConsumer, Consumer<List<FilteringRule<?>>> rulesSaveConsumer) {
-        super(NarratorManager.EMPTY, false);
+        super(NarratorChatListener.NO_TITLE, false);
         this.width = width;
         this.configFiltered = new TreeSet<>(Comparator.comparing(EntryStack::hashIgnoreAmount));
         this.configFiltered.addAll(configFiltered);
@@ -87,9 +87,9 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
     }
     
     @Override
-    public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+    public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
         super.render(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
-        Window window = MinecraftClient.getInstance().getWindow();
+        Window window = Minecraft.getInstance().getWindow();
         this.buttonWidget.active = this.isEditable();
         this.buttonWidget.y = y;
         this.buttonWidget.x = x + entryWidth / 2 - width / 2;
@@ -98,7 +98,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
     }
     
     @Override
-    public List<? extends Element> children() {
+    public List<? extends GuiEventListener> children() {
         return children;
     }
     

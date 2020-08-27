@@ -28,12 +28,12 @@ import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.AbstractCookingRecipe;
-import net.minecraft.recipe.CampfireCookingRecipe;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.core.NonNullList;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
+import net.minecraft.world.item.crafting.CampfireCookingRecipe;
+import net.minecraft.world.item.crafting.Ingredient;
 
 import java.util.Collections;
 import java.util.List;
@@ -48,11 +48,11 @@ public class DefaultCampfireDisplay implements RecipeDisplay {
     private CampfireCookingRecipe display;
     
     public DefaultCampfireDisplay(CampfireCookingRecipe recipe) {
-        this(recipe.getPreviewInputs(), recipe.getOutput(), recipe.getCookTime());
+        this(recipe.getIngredients(), recipe.getResultItem(), recipe.getCookingTime());
         this.display = recipe;
     }
     
-    public DefaultCampfireDisplay(DefaultedList<Ingredient> ingredients, ItemStack output, int cookTime) {
+    public DefaultCampfireDisplay(NonNullList<Ingredient> ingredients, ItemStack output, int cookTime) {
         this.inputs = EntryStack.ofIngredients(ingredients);
         this.output = Collections.singletonList(EntryStack.create(output));
         this.cookTime = cookTime;
@@ -63,7 +63,7 @@ public class DefaultCampfireDisplay implements RecipeDisplay {
     }
     
     @Override
-    public Optional<Identifier> getRecipeLocation() {
+    public Optional<ResourceLocation> getRecipeLocation() {
         return Optional.ofNullable(display).map(AbstractCookingRecipe::getId);
     }
     
@@ -83,7 +83,7 @@ public class DefaultCampfireDisplay implements RecipeDisplay {
     }
     
     @Override
-    public Identifier getRecipeCategory() {
+    public ResourceLocation getRecipeCategory() {
         return DefaultPlugin.CAMPFIRE;
     }
     

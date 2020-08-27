@@ -33,11 +33,11 @@ import me.shedaniel.rei.api.widgets.*;
 import me.shedaniel.rei.gui.widget.Widget;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.StringVisitable;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -60,7 +60,7 @@ public final class Internals {
     private static Supplier<DisplayHelper> displayHelper = Internals::throwNotSetup;
     private static Supplier<WidgetsProvider> widgetsProvider = Internals::throwNotSetup;
     private static Supplier<ClientHelper.ViewSearchBuilder> viewSearchBuilder = Internals::throwNotSetup;
-    private static BiFunction<@Nullable Point, Collection<Text>, Tooltip> tooltipProvider = (point, texts) -> throwNotSetup();
+    private static BiFunction<@Nullable Point, Collection<Component>, Tooltip> tooltipProvider = (point, texts) -> throwNotSetup();
     private static Supplier<BuiltinPlugin> builtinPlugin = Internals::throwNotSetup;
     
     private static <T> T throwNotSetup() {
@@ -124,7 +124,7 @@ public final class Internals {
     }
     
     @NotNull
-    public static Tooltip createTooltip(@Nullable Point point, Collection<Text> texts) {
+    public static Tooltip createTooltip(@Nullable Point point, Collection<Component> texts) {
         return tooltipProvider.apply(point, texts);
     }
     
@@ -172,17 +172,17 @@ public final class Internals {
         
         Slot createSlot(Point point);
         
-        Button createButton(Rectangle bounds, Text text);
+        Button createButton(Rectangle bounds, Component text);
         
         Panel createPanelWidget(Rectangle bounds);
         
-        Label createLabel(Point point, StringVisitable text);
+        Label createLabel(Point point, FormattedText text);
         
         Arrow createArrow(Rectangle rectangle);
         
         BurningFire createBurningFire(Rectangle rectangle);
         
-        DrawableConsumer createTexturedConsumer(Identifier texture, int x, int y, int width, int height, float u, float v, int uWidth, int vHeight, int textureWidth, int textureHeight);
+        DrawableConsumer createTexturedConsumer(ResourceLocation texture, int x, int y, int width, int height, float u, float v, int uWidth, int vHeight, int textureWidth, int textureHeight);
         
         DrawableConsumer createFillRectangleConsumer(Rectangle rectangle, int color);
     }

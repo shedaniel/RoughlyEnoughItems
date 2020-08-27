@@ -25,16 +25,16 @@ package me.shedaniel.rei.plugin;
 
 import me.shedaniel.rei.plugin.containers.CraftingContainerInfoWrapper;
 import me.shedaniel.rei.server.ContainerInfoHandler;
-import net.minecraft.container.*;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.*;
 
 public class DefaultServerContainerPlugin implements Runnable {
     @Override
     public void run() {
-        ContainerInfoHandler.registerContainerInfo(new Identifier("minecraft", "plugins/crafting"), CraftingContainerInfoWrapper.create(CraftingTableContainer.class));
-        ContainerInfoHandler.registerContainerInfo(new Identifier("minecraft", "plugins/crafting"), CraftingContainerInfoWrapper.create(PlayerContainer.class));
-        ContainerInfoHandler.registerContainerInfo(new Identifier("minecraft", "plugins/smelting"), CraftingContainerInfoWrapper.create(FurnaceContainer.class));
-        ContainerInfoHandler.registerContainerInfo(new Identifier("minecraft", "plugins/smoking"), CraftingContainerInfoWrapper.create(SmokerContainer.class));
-        ContainerInfoHandler.registerContainerInfo(new Identifier("minecraft", "plugins/blasting"), CraftingContainerInfoWrapper.create(BlastFurnaceContainer.class));
+        ContainerInfoHandler.registerContainerInfo(new ResourceLocation("minecraft", "plugins/crafting"), CraftingContainerInfoWrapper.create(CraftingMenu.class));
+        ContainerInfoHandler.registerContainerInfo(new ResourceLocation("minecraft", "plugins/crafting"), CraftingContainerInfoWrapper.create(InventoryMenu.class));
+        ContainerInfoHandler.registerContainerInfo(new ResourceLocation("minecraft", "plugins/smelting"), CraftingContainerInfoWrapper.create(FurnaceMenu.class));
+        ContainerInfoHandler.registerContainerInfo(new ResourceLocation("minecraft", "plugins/smoking"), CraftingContainerInfoWrapper.create(SmokerMenu.class));
+        ContainerInfoHandler.registerContainerInfo(new ResourceLocation("minecraft", "plugins/blasting"), CraftingContainerInfoWrapper.create(BlastFurnaceMenu.class));
     }
 }

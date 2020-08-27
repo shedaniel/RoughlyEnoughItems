@@ -25,6 +25,7 @@ package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.mojang.blaze3d.platform.Window;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.BaseBoundsHandler;
 import me.shedaniel.rei.api.DisplayHelper;
@@ -33,8 +34,7 @@ import me.shedaniel.rei.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.util.Window;
+import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collections;
@@ -114,9 +114,9 @@ public class DisplayHelperImpl implements DisplayHelper {
     
     @Override
     public <T> Rectangle getOverlayBounds(DisplayPanelLocation location, T screen) {
-        Window window = MinecraftClient.getInstance().getWindow();
-        int scaledWidth = window.getScaledWidth();
-        int scaledHeight = window.getScaledHeight();
+        Window window = Minecraft.getInstance().getWindow();
+        int scaledWidth = window.getGuiScaledWidth();
+        int scaledHeight = window.getGuiScaledHeight();
         for (OverlayDecider decider : getSortedOverlayDeciders(screen.getClass())) {
             if (decider instanceof DisplayBoundsProvider) {
                 Rectangle containerBounds = ((DisplayBoundsProvider<T>) decider).getScreenBounds(screen);

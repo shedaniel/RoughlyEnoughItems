@@ -24,6 +24,7 @@
 package me.shedaniel.rei.gui.modules.entries;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -35,14 +36,13 @@ import me.shedaniel.rei.gui.modules.MenuEntry;
 import me.shedaniel.rei.gui.widget.TabWidget;
 import me.shedaniel.rei.impl.EntryRegistryImpl;
 import me.shedaniel.rei.impl.ScreenHelper;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.LiteralText;
-import net.minecraft.util.Pair;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
+import net.minecraft.util.Tuple;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collections;
@@ -58,7 +58,7 @@ public class SubSubsetsMenuEntry extends MenuEntry {
     private boolean selected, containsMouse, rendering;
     private List<MenuEntry> entries;
     private Menu subsetsMenu;
-    private Pair<Integer, Integer> filteredRatio = null;
+    private Tuple<Integer, Integer> filteredRatio = null;
     private long lastListHash = -1;
     private boolean clickedBefore = false;
     
@@ -77,7 +77,7 @@ public class SubSubsetsMenuEntry extends MenuEntry {
     
     private int getTextWidth() {
         if (textWidth == -69) {
-            this.textWidth = Math.max(0, font.getStringWidth(text));
+            this.textWidth = Math.max(0, font.width(text));
         }
         return this.textWidth;
     }
@@ -110,11 +110,11 @@ public class SubSubsetsMenuEntry extends MenuEntry {
     }
     
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         double filteredRatio = getFilteredRatio();
         if (filteredRatio > 0) {
             filteredRatio = filteredRatio * 0.85 + 0.15;
-            fill(matrices, x, y, x + width, y + 12, (16711680 | MathHelper.ceil(filteredRatio * 255.0) << 24) + (selected ? 39321 : 0));
+            fill(matrices, x, y, x + width, y + 12, (16711680 | Mth.ceil(filteredRatio * 255.0) << 24) + (selected ? 39321 : 0));
         } else if (selected) {
             fill(matrices, x, y, x + width, y + 12, -12237499);
         }
@@ -132,14 +132,14 @@ public class SubSubsetsMenuEntry extends MenuEntry {
             } else clickedBefore = false;
             if (clickedBefore) {
                 if (rendering && mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + 12 && !entries.isEmpty()) {
-                    REIHelper.getInstance().queueTooltip(Tooltip.create(new LiteralText("Click again to filter everything in this group.")));
+                    REIHelper.getInstance().queueTooltip(Tooltip.create(new TextComponent("Click again to filter everything in this group.")));
                 } else clickedBefore = false;
             }
         } else clickedBefore = false;
         font.draw(matrices, text, x + 2, y + 2, selected ? 16777215 : 8947848);
         if (!entries.isEmpty()) {
-            MinecraftClient.getInstance().getTextureManager().bindTexture(TabWidget.CHEST_GUI_TEXTURE);
-            drawTexture(matrices, x + width - 15, y - 2, 0, 28, 18, 18);
+            Minecraft.getInstance().getTextureManager().bind(TabWidget.CHEST_GUI_TEXTURE);
+            blit(matrices, x + width - 15, y - 2, 0, 28, 18, 18);
         }
     }
     
@@ -158,7 +158,7 @@ public class SubSubsetsMenuEntry extends MenuEntry {
             } else {
                 clickedBefore = true;
             }
-            minecraft.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             return true;
         }
         return super.mouseClicked(mouseX, mouseY, button);
@@ -183,11 +183,11 @@ public class SubSubsetsMenuEntry extends MenuEntry {
     }
     
     public double getFilteredRatio() {
-        Pair<Integer, Integer> pair = getFilteredRatioPair();
-        return pair.getRight() == 0 ? 0 : pair.getLeft() / (double) pair.getRight();
+        Tuple<Integer, Integer> pair = getFilteredRatioPair();
+        return pair.getB() == 0 ? 0 : pair.getA() / (double) pair.getB();
     }
     
-    public Pair<Integer, Integer> getFilteredRatioPair() {
+    public Tuple<Integer, Integer> getFilteredRatioPair() {
         List<EntryStack> filteredStacks = ConfigObject.getInstance().getFilteredStacks();
         if (lastListHash != filteredStacks.hashCode()) {
             int size = 0;
@@ -198,12 +198,12 @@ public class SubSubsetsMenuEntry extends MenuEntry {
                     if (((EntryStackSubsetsMenuEntry) entry).isFiltered())
                         filtered++;
                 } else if (entry instanceof SubSubsetsMenuEntry) {
-                    Pair<Integer, Integer> pair = ((SubSubsetsMenuEntry) entry).getFilteredRatioPair();
-                    filtered += pair.getLeft();
-                    size += pair.getRight();
+                    Tuple<Integer, Integer> pair = ((SubSubsetsMenuEntry) entry).getFilteredRatioPair();
+                    filtered += pair.getA();
+                    size += pair.getB();
                 }
             }
-            filteredRatio = new Pair<>(filtered, size);
+            filteredRatio = new Tuple<>(filtered, size);
             lastListHash = filteredStacks.hashCode();
         }
         return filteredRatio;
@@ -224,7 +224,7 @@ public class SubSubsetsMenuEntry extends MenuEntry {
     }
     
     @Override
-    public List<? extends Element> children() {
+    public List<? extends GuiEventListener> children() {
         if (subsetsMenu != null && !subsetsMenu.children().isEmpty() && selected) {
             return Collections.singletonList(subsetsMenu);
         }

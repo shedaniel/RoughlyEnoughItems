@@ -25,8 +25,8 @@ package me.shedaniel.rei.plugin.smoking;
 
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import me.shedaniel.rei.plugin.cooking.DefaultCookingDisplay;
-import net.minecraft.recipe.SmokingRecipe;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.SmokingRecipe;
 
 public class DefaultSmokingDisplay extends DefaultCookingDisplay {
     
@@ -35,7 +35,7 @@ public class DefaultSmokingDisplay extends DefaultCookingDisplay {
     }
     
     @Override
-    public Identifier getRecipeCategory() {
+    public ResourceLocation getRecipeCategory() {
         return DefaultPlugin.SMOKING;
     }
 }

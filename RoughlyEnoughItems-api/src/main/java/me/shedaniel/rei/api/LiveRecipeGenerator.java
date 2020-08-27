@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.api;
 
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,7 +33,7 @@ public interface LiveRecipeGenerator<T extends RecipeDisplay> {
     /**
      * @return the identifier of the category the recipes goes to.
      */
-    Identifier getCategoryIdentifier();
+    ResourceLocation getCategoryIdentifier();
     
     default Optional<List<T>> getRecipeFor(EntryStack entry) {
         return Optional.empty();

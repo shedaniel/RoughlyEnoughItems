@@ -24,13 +24,13 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.gui.config.RecipeBorderType;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -47,8 +47,8 @@ import java.util.List;
 @Deprecated
 public class PanelWidget extends WidgetWithBounds {
     
-    private static final Identifier CHEST_GUI_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
-    private static final Identifier CHEST_GUI_TEXTURE_DARK = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
+    private static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
+    private static final ResourceLocation CHEST_GUI_TEXTURE_DARK = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
     
     private static final PanelWidget TEMP = new PanelWidget(new Rectangle());
     private Rectangle bounds;
@@ -76,7 +76,7 @@ public class PanelWidget extends WidgetWithBounds {
     }
     
     public void render() {
-        render(new MatrixStack(), 0, 0, 0);
+        render(new PoseStack(), 0, 0, 0);
     }
     
     public int getColor() {
@@ -88,7 +88,7 @@ public class PanelWidget extends WidgetWithBounds {
     }
     
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (!isRendering())
             return;
         float alpha = ((color >> 24) & 0xFF) / 255f;
@@ -96,27 +96,27 @@ public class PanelWidget extends WidgetWithBounds {
         float green = ((color >> 8) & 0xFF) / 255f;
         float blue = (color & 0xFF) / 255f;
         RenderSystem.color4f(red, green, blue, alpha);
-        minecraft.getTextureManager().bindTexture(REIHelper.getInstance().isDarkThemeEnabled() ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
+        minecraft.getTextureManager().bind(REIHelper.getInstance().isDarkThemeEnabled() ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
         int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;
         int xTextureOffset = getXTextureOffset();
         int yTextureOffset = getYTextureOffset();
         
         //Four Corners
-        this.drawTexture(matrices, x, y, 106 + xTextureOffset, 124 + yTextureOffset, 4, 4);
-        this.drawTexture(matrices, x + width - 4, y, 252 + xTextureOffset, 124 + yTextureOffset, 4, 4);
-        this.drawTexture(matrices, x, y + height - 4, 106 + xTextureOffset, 186 + yTextureOffset, 4, 4);
-        this.drawTexture(matrices, x + width - 4, y + height - 4, 252 + xTextureOffset, 186 + yTextureOffset, 4, 4);
+        this.blit(matrices, x, y, 106 + xTextureOffset, 124 + yTextureOffset, 4, 4);
+        this.blit(matrices, x + width - 4, y, 252 + xTextureOffset, 124 + yTextureOffset, 4, 4);
+        this.blit(matrices, x, y + height - 4, 106 + xTextureOffset, 186 + yTextureOffset, 4, 4);
+        this.blit(matrices, x + width - 4, y + height - 4, 252 + xTextureOffset, 186 + yTextureOffset, 4, 4);
         
         //Sides
         for (int xx = 4; xx < width - 4; xx += 128) {
             int thisWidth = Math.min(128, width - 4 - xx);
-            this.drawTexture(matrices, x + xx, y, 110 + xTextureOffset, 124 + yTextureOffset, thisWidth, 4);
-            this.drawTexture(matrices, x + xx, y + height - 4, 110 + xTextureOffset, 186 + yTextureOffset, thisWidth, 4);
+            this.blit(matrices, x + xx, y, 110 + xTextureOffset, 124 + yTextureOffset, thisWidth, 4);
+            this.blit(matrices, x + xx, y + height - 4, 110 + xTextureOffset, 186 + yTextureOffset, thisWidth, 4);
         }
         for (int yy = 4; yy < height - 4; yy += 50) {
             int thisHeight = Math.min(50, height - 4 - yy);
-            this.drawTexture(matrices, x, y + yy, 106 + xTextureOffset, 128 + yTextureOffset, 4, thisHeight);
-            this.drawTexture(matrices, x + width - 4, y + yy, 252 + xTextureOffset, 128 + yTextureOffset, 4, thisHeight);
+            this.blit(matrices, x, y + yy, 106 + xTextureOffset, 128 + yTextureOffset, 4, thisHeight);
+            this.blit(matrices, x + width - 4, y + yy, 252 + xTextureOffset, 128 + yTextureOffset, 4, thisHeight);
         }
         fillGradient(matrices, x + 4, y + 4, x + width - 4, y + height - 4, getInnerColor(), getInnerColor());
     }

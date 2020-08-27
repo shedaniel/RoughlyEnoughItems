@@ -31,16 +31,16 @@ import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.item.Items;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Items;
 
 import java.util.List;
 
 public class DefaultStrippingCategory implements RecipeCategory<DefaultStrippingDisplay> {
     
     @Override
-    public Identifier getIdentifier() {
+    public ResourceLocation getIdentifier() {
         return DefaultPlugin.STRIPPING;
     }
     
@@ -51,7 +51,7 @@ public class DefaultStrippingCategory implements RecipeCategory<DefaultStripping
     
     @Override
     public String getCategoryName() {
-        return I18n.translate("category.rei.stripping");
+        return I18n.get("category.rei.stripping");
     }
     
     @Override

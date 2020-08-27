@@ -68,24 +68,25 @@ import me.shedaniel.rei.plugin.tilling.DummyHoeItem;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.block.ComposterBlock;
-import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.*;
-import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.item.*;
-import net.minecraft.potion.PotionUtil;
-import net.minecraft.recipe.*;
-import net.minecraft.tag.BlockTags;
-import net.minecraft.tag.Tag;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Lazy;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.*;
+import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
+import net.minecraft.core.Registry;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.Tag;
+import net.minecraft.util.LazyLoadedValue;
+import net.minecraft.util.Mth;
+import net.minecraft.world.item.*;
+import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.block.ComposterBlock;
+import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
+import net.minecraft.world.level.material.Fluid;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
@@ -99,28 +100,28 @@ import static me.shedaniel.rei.impl.Internals.attachInstance;
 @Environment(EnvType.CLIENT)
 public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
     private static final Logger LOGGER = LogManager.getFormatterLogger("REI/DefaultPlugin");
-    public static final Identifier CRAFTING = BuiltinPlugin.CRAFTING;
-    public static final Identifier SMELTING = BuiltinPlugin.SMELTING;
-    public static final Identifier SMOKING = BuiltinPlugin.SMOKING;
-    public static final Identifier BLASTING = BuiltinPlugin.BLASTING;
-    public static final Identifier CAMPFIRE = BuiltinPlugin.CAMPFIRE;
-    public static final Identifier STONE_CUTTING = BuiltinPlugin.STONE_CUTTING;
-    public static final Identifier STRIPPING = BuiltinPlugin.STRIPPING;
-    public static final Identifier BREWING = BuiltinPlugin.BREWING;
-    public static final Identifier PLUGIN = BuiltinPlugin.PLUGIN;
-    public static final Identifier COMPOSTING = BuiltinPlugin.COMPOSTING;
-    public static final Identifier FUEL = BuiltinPlugin.FUEL;
-    public static final Identifier SMITHING = BuiltinPlugin.SMITHING;
-    public static final Identifier BEACON = BuiltinPlugin.BEACON;
-    public static final Identifier TILLING = BuiltinPlugin.TILLING;
-    public static final Identifier PATHING = BuiltinPlugin.PATHING;
-    public static final Identifier INFO = BuiltinPlugin.INFO;
-    private static final Identifier DISPLAY_TEXTURE = new Identifier("roughlyenoughitems", "textures/gui/display.png");
-    private static final Identifier DISPLAY_TEXTURE_DARK = new Identifier("roughlyenoughitems", "textures/gui/display_dark.png");
-    private static final List<Lazy<DefaultBrewingDisplay>> BREWING_DISPLAYS = Lists.newArrayList();
+    public static final ResourceLocation CRAFTING = BuiltinPlugin.CRAFTING;
+    public static final ResourceLocation SMELTING = BuiltinPlugin.SMELTING;
+    public static final ResourceLocation SMOKING = BuiltinPlugin.SMOKING;
+    public static final ResourceLocation BLASTING = BuiltinPlugin.BLASTING;
+    public static final ResourceLocation CAMPFIRE = BuiltinPlugin.CAMPFIRE;
+    public static final ResourceLocation STONE_CUTTING = BuiltinPlugin.STONE_CUTTING;
+    public static final ResourceLocation STRIPPING = BuiltinPlugin.STRIPPING;
+    public static final ResourceLocation BREWING = BuiltinPlugin.BREWING;
+    public static final ResourceLocation PLUGIN = BuiltinPlugin.PLUGIN;
+    public static final ResourceLocation COMPOSTING = BuiltinPlugin.COMPOSTING;
+    public static final ResourceLocation FUEL = BuiltinPlugin.FUEL;
+    public static final ResourceLocation SMITHING = BuiltinPlugin.SMITHING;
+    public static final ResourceLocation BEACON = BuiltinPlugin.BEACON;
+    public static final ResourceLocation TILLING = BuiltinPlugin.TILLING;
+    public static final ResourceLocation PATHING = BuiltinPlugin.PATHING;
+    public static final ResourceLocation INFO = BuiltinPlugin.INFO;
+    private static final ResourceLocation DISPLAY_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/display.png");
+    private static final ResourceLocation DISPLAY_TEXTURE_DARK = new ResourceLocation("roughlyenoughitems", "textures/gui/display_dark.png");
+    private static final List<LazyLoadedValue<DefaultBrewingDisplay>> BREWING_DISPLAYS = Lists.newArrayList();
     private static final List<DefaultInformationDisplay> INFO_DISPLAYS = Lists.newArrayList();
     
-    public static Identifier getDisplayTexture() {
+    public static ResourceLocation getDisplayTexture() {
         return REIHelper.getInstance().getDefaultDisplayTexture();
     }
     
@@ -131,11 +132,11 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
     @Deprecated
     @ApiStatus.ScheduledForRemoval
     public static void registerBrewingDisplay(DefaultBrewingDisplay recipe) {
-        BREWING_DISPLAYS.add(new Lazy<>(() -> recipe));
+        BREWING_DISPLAYS.add(new LazyLoadedValue<>(() -> recipe));
     }
     
     public static void registerBrewingRecipe(RegisteredBrewingRecipe recipe) {
-        BREWING_DISPLAYS.add(new Lazy<>(() -> new DefaultBrewingDisplay(recipe.input, recipe.ingredient, recipe.output)));
+        BREWING_DISPLAYS.add(new LazyLoadedValue<>(() -> new DefaultBrewingDisplay(recipe.input, recipe.ingredient, recipe.output)));
     }
     
     public static void registerInfoDisplay(DefaultInformationDisplay display) {
@@ -148,12 +149,12 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
     }
     
     @Override
-    public void registerInformation(List<EntryStack> entryStacks, Text name, UnaryOperator<List<Text>> textBuilder) {
+    public void registerInformation(List<EntryStack> entryStacks, Component name, UnaryOperator<List<Component>> textBuilder) {
         registerInfoDisplay(DefaultInformationDisplay.createFromEntries(entryStacks, name).lines(textBuilder.apply(Lists.newArrayList())));
     }
     
     @Override
-    public Identifier getPluginIdentifier() {
+    public ResourceLocation getPluginIdentifier() {
         return PLUGIN;
     }
     
@@ -180,17 +181,17 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
         EntryStack stack = EntryStack.create(Items.ENCHANTED_BOOK);
         List<EntryStack> enchantments = new ArrayList<>();
         for (Enchantment enchantment : Registry.ENCHANTMENT) {
-            for (int i = enchantment.getMinimumLevel(); i <= enchantment.getMaximumLevel(); i++) {
+            for (int i = enchantment.getMinLevel(); i <= enchantment.getMaxLevel(); i++) {
                 Map<Enchantment, Integer> map = new HashMap<>();
                 map.put(enchantment, i);
                 ItemStack itemStack = new ItemStack(Items.ENCHANTED_BOOK);
-                EnchantmentHelper.set(map, itemStack);
+                EnchantmentHelper.setEnchantments(map, itemStack);
                 enchantments.add(EntryStack.create(itemStack).setting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE));
             }
         }
         entryRegistry.registerEntriesAfter(stack, enchantments);
         for (Fluid fluid : Registry.FLUID) {
-            if (!fluid.getDefaultState().isEmpty() && fluid.getDefaultState().isStill())
+            if (!fluid.defaultFluidState().isEmpty() && fluid.defaultFluidState().isSource())
                 entryRegistry.registerEntry(EntryStack.create(fluid));
         }
     }
@@ -223,12 +224,12 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
         recipeHelper.registerRecipes(SMOKING, SmokingRecipe.class, DefaultSmokingDisplay::new);
         recipeHelper.registerRecipes(BLASTING, BlastingRecipe.class, DefaultBlastingDisplay::new);
         recipeHelper.registerRecipes(CAMPFIRE, CampfireCookingRecipe.class, DefaultCampfireDisplay::new);
-        recipeHelper.registerRecipes(STONE_CUTTING, StonecuttingRecipe.class, DefaultStoneCuttingDisplay::new);
-        recipeHelper.registerRecipes(SMITHING, SmithingRecipe.class, DefaultSmithingDisplay::new);
-        for (Lazy<DefaultBrewingDisplay> display : BREWING_DISPLAYS) {
+        recipeHelper.registerRecipes(STONE_CUTTING, StonecutterRecipe.class, DefaultStoneCuttingDisplay::new);
+        recipeHelper.registerRecipes(SMITHING, UpgradeRecipe.class, DefaultSmithingDisplay::new);
+        for (LazyLoadedValue<DefaultBrewingDisplay> display : BREWING_DISPLAYS) {
             recipeHelper.registerDisplay(display.get());
         }
-        for (Map.Entry<Item, Integer> entry : AbstractFurnaceBlockEntity.createFuelTimeMap().entrySet()) {
+        for (Map.Entry<Item, Integer> entry : AbstractFurnaceBlockEntity.getFuel().entrySet()) {
             recipeHelper.registerDisplay(new DefaultFuelDisplay(EntryStack.create(entry.getKey()), entry.getValue()));
         }
         List<EntryStack> arrowStack = Collections.singletonList(EntryStack.create(Items.ARROW));
@@ -240,37 +241,37 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
             for (int i = 0; i < 4; i++)
                 input.add(arrowStack);
             ItemStack outputStack = new ItemStack(Items.TIPPED_ARROW, 8);
-            PotionUtil.setPotion(outputStack, PotionUtil.getPotion(entry.getItemStack()));
-            PotionUtil.setCustomPotionEffects(outputStack, PotionUtil.getCustomPotionEffects(entry.getItemStack()));
+            PotionUtils.setPotion(outputStack, PotionUtils.getPotion(entry.getItemStack()));
+            PotionUtils.setCustomEffects(outputStack, PotionUtils.getCustomEffects(entry.getItemStack()));
             List<EntryStack> output = Collections.singletonList(EntryStack.create(outputStack).addSetting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE));
             recipeHelper.registerDisplay(new DefaultCustomDisplay(null, input, output));
         });
-        Map<ItemConvertible, Float> map = Maps.newLinkedHashMap();
-        if (ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.isEmpty())
-            ComposterBlock.registerDefaultCompostableItems();
-        for (Object2FloatMap.Entry<ItemConvertible> entry : ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.object2FloatEntrySet()) {
+        Map<ItemLike, Float> map = Maps.newLinkedHashMap();
+        if (ComposterBlock.COMPOSTABLES.isEmpty())
+            ComposterBlock.bootStrap();
+        for (Object2FloatMap.Entry<ItemLike> entry : ComposterBlock.COMPOSTABLES.object2FloatEntrySet()) {
             if (entry.getFloatValue() > 0)
                 map.put(entry.getKey(), entry.getFloatValue());
         }
-        List<ItemConvertible> stacks = Lists.newArrayList(map.keySet());
+        List<ItemLike> stacks = Lists.newArrayList(map.keySet());
         stacks.sort(Comparator.comparing(map::get));
-        for (int i = 0; i < stacks.size(); i += MathHelper.clamp(48, 1, stacks.size() - i)) {
-            List<ItemConvertible> thisStacks = Lists.newArrayList();
+        for (int i = 0; i < stacks.size(); i += Mth.clamp(48, 1, stacks.size() - i)) {
+            List<ItemLike> thisStacks = Lists.newArrayList();
             for (int j = i; j < i + 48; j++)
                 if (j < stacks.size())
                     thisStacks.add(stacks.get(j));
-            recipeHelper.registerDisplay(new DefaultCompostingDisplay(MathHelper.floor(i / 48f), thisStacks, map, new ItemStack(Items.BONE_MEAL)));
+            recipeHelper.registerDisplay(new DefaultCompostingDisplay(Mth.floor(i / 48f), thisStacks, map, new ItemStack(Items.BONE_MEAL)));
         }
-        DummyAxeItem.getStrippedBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getId(b.getKey()))).forEach(set -> {
+        DummyAxeItem.getStrippedBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getKey(b.getKey()))).forEach(set -> {
             recipeHelper.registerDisplay(new DefaultStrippingDisplay(EntryStack.create(set.getKey()), EntryStack.create(set.getValue())));
         });
-        DummyHoeItem.getTilledBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getId(b.getKey()))).forEach(set -> {
+        DummyHoeItem.getTilledBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getKey(b.getKey()))).forEach(set -> {
             recipeHelper.registerDisplay(new DefaultTillingDisplay(EntryStack.create(set.getKey()), EntryStack.create(set.getValue().getBlock())));
         });
-        DummyShovelItem.getPathBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getId(b.getKey()))).forEach(set -> {
+        DummyShovelItem.getPathBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getKey(b.getKey()))).forEach(set -> {
             recipeHelper.registerDisplay(new DefaultPathingDisplay(EntryStack.create(set.getKey()), EntryStack.create(set.getValue().getBlock())));
         });
-        recipeHelper.registerDisplay(new DefaultBeaconBaseDisplay(CollectionUtils.map(Lists.newArrayList(BlockTags.BEACON_BASE_BLOCKS.values()), ItemStack::new)));
+        recipeHelper.registerDisplay(new DefaultBeaconBaseDisplay(CollectionUtils.map(Lists.newArrayList(BlockTags.BEACON_BASE_BLOCKS.getValues()), ItemStack::new)));
     }
     
     @Override
@@ -303,17 +304,17 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
     @Override
     public void registerBounds(DisplayHelper displayHelper) {
         BaseBoundsHandler baseBoundsHandler = BaseBoundsHandler.getInstance();
-        baseBoundsHandler.registerExclusionZones(AbstractInventoryScreen.class, new DefaultPotionEffectExclusionZones());
-        baseBoundsHandler.registerExclusionZones(RecipeBookProvider.class, new DefaultRecipeBookExclusionZones());
-        displayHelper.registerProvider(new DisplayHelper.DisplayBoundsProvider<ContainerScreen<?>>() {
+        baseBoundsHandler.registerExclusionZones(EffectRenderingInventoryScreen.class, new DefaultPotionEffectExclusionZones());
+        baseBoundsHandler.registerExclusionZones(RecipeUpdateListener.class, new DefaultRecipeBookExclusionZones());
+        displayHelper.registerProvider(new DisplayHelper.DisplayBoundsProvider<AbstractContainerScreen<?>>() {
             @Override
-            public Rectangle getScreenBounds(ContainerScreen<?> screen) {
-                return new Rectangle(screen.x, screen.y, screen.containerWidth, screen.containerHeight);
+            public Rectangle getScreenBounds(AbstractContainerScreen<?> screen) {
+                return new Rectangle(screen.leftPos, screen.topPos, screen.imageWidth, screen.imageHeight);
             }
             
             @Override
             public Class<?> getBaseSupportedClass() {
-                return ContainerScreen.class;
+                return AbstractContainerScreen.class;
             }
         });
     }
@@ -333,21 +334,21 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
         recipeHelper.registerWorkingStations(COMPOSTING, EntryStack.create(Items.COMPOSTER));
         recipeHelper.registerWorkingStations(SMITHING, EntryStack.create(Items.SMITHING_TABLE));
         recipeHelper.registerWorkingStations(BEACON, EntryStack.create(Items.BEACON));
-        Tag<Item> axes = MinecraftClient.getInstance().getNetworkHandler().getTagManager().getItems().getTag(new Identifier("fabric", "axes"));
+        Tag<Item> axes = Minecraft.getInstance().getConnection().getTags().getItems().getTag(new ResourceLocation("fabric", "axes"));
         if (axes != null) {
-            for (Item item : axes.values()) {
+            for (Item item : axes.getValues()) {
                 recipeHelper.registerWorkingStations(STRIPPING, EntryStack.create(item));
             }
         }
-        Tag<Item> hoes = MinecraftClient.getInstance().getNetworkHandler().getTagManager().getItems().getTag(new Identifier("fabric", "hoes"));
+        Tag<Item> hoes = Minecraft.getInstance().getConnection().getTags().getItems().getTag(new ResourceLocation("fabric", "hoes"));
         if (hoes != null) {
-            for (Item item : hoes.values()) {
+            for (Item item : hoes.getValues()) {
                 recipeHelper.registerWorkingStations(TILLING, EntryStack.create(item));
             }
         }
-        Tag<Item> shovels = MinecraftClient.getInstance().getNetworkHandler().getTagManager().getItems().getTag(new Identifier("fabric", "shovels"));
+        Tag<Item> shovels = Minecraft.getInstance().getConnection().getTags().getItems().getTag(new ResourceLocation("fabric", "shovels"));
         if (shovels != null) {
-            for (Item item : shovels.values()) {
+            for (Item item : shovels.getValues()) {
                 recipeHelper.registerWorkingStations(PATHING, EntryStack.create(item));
             }
         }
@@ -355,7 +356,7 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
         recipeHelper.removeAutoCraftButton(COMPOSTING);
         recipeHelper.removeAutoCraftButton(BEACON);
         recipeHelper.removeAutoCraftButton(INFO);
-        recipeHelper.registerScreenClickArea(new Rectangle(88, 32, 28, 23), CraftingTableScreen.class, CRAFTING);
+        recipeHelper.registerScreenClickArea(new Rectangle(88, 32, 28, 23), CraftingScreen.class, CRAFTING);
         recipeHelper.registerScreenClickArea(new Rectangle(137, 29, 10, 13), InventoryScreen.class, CRAFTING);
         recipeHelper.registerScreenClickArea(new Rectangle(97, 16, 14, 30), BrewingStandScreen.class, BREWING);
         recipeHelper.registerScreenClickArea(new Rectangle(78, 32, 28, 23), FurnaceScreen.class, SMELTING);
@@ -366,7 +367,7 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
             public @NotNull EntryStack itemToFluid(@NotNull EntryStack itemStack) {
                 Item item = itemStack.getItem();
                 if (item instanceof BucketItem)
-                    return EntryStack.create(((BucketItem) item).fluid, 1000);
+                    return EntryStack.create(((BucketItem) item).content, 1000);
                 return EntryStack.empty();
             }
         });

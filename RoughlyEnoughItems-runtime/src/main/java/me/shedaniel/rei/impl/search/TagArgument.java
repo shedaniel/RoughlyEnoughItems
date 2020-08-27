@@ -26,8 +26,8 @@ package me.shedaniel.rei.impl.search;
 import me.shedaniel.rei.api.EntryStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,7 +37,7 @@ import java.util.Collection;
 @Environment(EnvType.CLIENT)
 public final class TagArgument extends Argument {
     public static final TagArgument INSTANCE = new TagArgument();
-    private static final MinecraftClient minecraft = MinecraftClient.getInstance();
+    private static final Minecraft minecraft = Minecraft.getInstance();
     
     @Override
     public String getName() {
@@ -53,20 +53,20 @@ public final class TagArgument extends Argument {
     public boolean matches(Object[] data, EntryStack stack, String searchText, Object searchData) {
         if (data[getDataOrdinal()] == null) {
             if (stack.getType() == EntryStack.Type.ITEM) {
-                Collection<Identifier> tagsFor = minecraft.getNetworkHandler().getTagManager().getItems().getTagsFor(stack.getItem());
+                Collection<ResourceLocation> tagsFor = minecraft.getConnection().getTags().getItems().getMatchingTags(stack.getItem());
                 data[getDataOrdinal()] = new String[tagsFor.size()];
                 int i = 0;
                 
-                for (Identifier identifier : tagsFor) {
+                for (ResourceLocation identifier : tagsFor) {
                     ((String[]) data[getDataOrdinal()])[i] = identifier.toString();
                     i++;
                 }
             } else if (stack.getType() == EntryStack.Type.FLUID) {
-                Collection<Identifier> tagsFor = minecraft.getNetworkHandler().getTagManager().getFluids().getTagsFor(stack.getFluid());
+                Collection<ResourceLocation> tagsFor = minecraft.getConnection().getTags().getFluids().getMatchingTags(stack.getFluid());
                 data[getDataOrdinal()] = new String[tagsFor.size()];
                 int i = 0;
                 
-                for (Identifier identifier : tagsFor) {
+                for (ResourceLocation identifier : tagsFor) {
                     ((String[]) data[getDataOrdinal()])[i] = identifier.toString();
                     i++;
                 }

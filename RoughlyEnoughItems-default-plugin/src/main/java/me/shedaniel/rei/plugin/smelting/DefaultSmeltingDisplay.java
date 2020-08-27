@@ -27,8 +27,8 @@ import me.shedaniel.rei.plugin.DefaultPlugin;
 import me.shedaniel.rei.plugin.cooking.DefaultCookingDisplay;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.recipe.SmeltingRecipe;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.SmeltingRecipe;
 
 @Environment(EnvType.CLIENT)
 public class DefaultSmeltingDisplay extends DefaultCookingDisplay {
@@ -38,7 +38,7 @@ public class DefaultSmeltingDisplay extends DefaultCookingDisplay {
     }
     
     @Override
-    public Identifier getRecipeCategory() {
+    public ResourceLocation getRecipeCategory() {
         return DefaultPlugin.SMELTING;
     }
 }

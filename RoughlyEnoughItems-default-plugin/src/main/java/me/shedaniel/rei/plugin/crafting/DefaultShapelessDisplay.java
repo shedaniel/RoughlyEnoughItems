@@ -26,9 +26,9 @@ package me.shedaniel.rei.plugin.crafting;
 import me.shedaniel.rei.api.EntryStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.ShapelessRecipe;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.ShapelessRecipe;
 
 import java.util.Collections;
 import java.util.List;
@@ -43,8 +43,8 @@ public class DefaultShapelessDisplay implements DefaultCraftingDisplay {
     
     public DefaultShapelessDisplay(ShapelessRecipe recipe) {
         this.display = recipe;
-        this.input = EntryStack.ofIngredients(recipe.getPreviewInputs());
-        this.output = Collections.singletonList(EntryStack.create(recipe.getOutput()));
+        this.input = EntryStack.ofIngredients(recipe.getIngredients());
+        this.output = Collections.singletonList(EntryStack.create(recipe.getResultItem()));
     }
     
     @Override
@@ -53,7 +53,7 @@ public class DefaultShapelessDisplay implements DefaultCraftingDisplay {
     }
     
     @Override
-    public Optional<Identifier> getRecipeLocation() {
+    public Optional<ResourceLocation> getRecipeLocation() {
         return Optional.ofNullable(display).map(ShapelessRecipe::getId);
     }
     
@@ -74,14 +74,14 @@ public class DefaultShapelessDisplay implements DefaultCraftingDisplay {
     
     @Override
     public int getWidth() {
-        if (display.getPreviewInputs().size() > 4)
+        if (display.getIngredients().size() > 4)
             return 3;
         return 2;
     }
     
     @Override
     public int getHeight() {
-        if (display.getPreviewInputs().size() > 4)
+        if (display.getIngredients().size() > 4)
             return 3;
         return 2;
     }

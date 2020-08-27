@@ -23,19 +23,19 @@
 
 package me.shedaniel.rei.gui.modules.entries;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.modules.MenuEntry;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.Weather;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.sounds.SoundEvents;
 
 import java.util.Collections;
 import java.util.List;
@@ -49,13 +49,13 @@ public class WeatherMenuEntry extends MenuEntry {
     private int textWidth = -69;
     
     public WeatherMenuEntry(Weather weather) {
-        this.text = I18n.translate(weather.getTranslateKey());
+        this.text = I18n.get(weather.getTranslateKey());
         this.weather = weather;
     }
     
     private int getTextWidth() {
         if (textWidth == -69) {
-            this.textWidth = Math.max(0, font.getStringWidth(text));
+            this.textWidth = Math.max(0, font.width(text));
         }
         return this.textWidth;
     }
@@ -71,7 +71,7 @@ public class WeatherMenuEntry extends MenuEntry {
     }
     
     @Override
-    public List<? extends Element> children() {
+    public List<? extends GuiEventListener> children() {
         return Collections.emptyList();
     }
     
@@ -86,12 +86,12 @@ public class WeatherMenuEntry extends MenuEntry {
     }
     
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (selected) {
             fill(matrices, x, y, x + width, y + 12, -12237499);
         }
         if (selected && containsMouse) {
-            REIHelper.getInstance().queueTooltip(Tooltip.create(new TranslatableText("text.rei.weather_button.tooltip.entry", text)));
+            REIHelper.getInstance().queueTooltip(Tooltip.create(new TranslatableComponent("text.rei.weather_button.tooltip.entry", text)));
         }
         font.draw(matrices, text, x + 2, y + 2, selected ? 16777215 : 8947848);
     }
@@ -99,8 +99,8 @@ public class WeatherMenuEntry extends MenuEntry {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (rendering && mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + 12) {
-            MinecraftClient.getInstance().player.sendChatMessage(ConfigObject.getInstance().getWeatherCommand().replaceAll("\\{weather}", weather.name().toLowerCase(Locale.ROOT)));
-            minecraft.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            Minecraft.getInstance().player.chat(ConfigObject.getInstance().getWeatherCommand().replaceAll("\\{weather}", weather.name().toLowerCase(Locale.ROOT)));
+            minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             ScreenHelper.getLastOverlay().removeWeatherMenu();
             return true;
         }

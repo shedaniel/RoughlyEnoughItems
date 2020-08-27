@@ -23,10 +23,10 @@
 
 package me.shedaniel.rei.impl.widgets;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.rei.api.DrawableConsumer;
 import me.shedaniel.rei.gui.widget.Widget;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -41,12 +41,12 @@ public final class DrawableWidget extends Widget {
     }
     
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         this.drawable.render(this, matrices, mouseX, mouseY, delta);
     }
     
     @Override
-    public List<? extends Element> children() {
+    public List<? extends GuiEventListener> children() {
         return Collections.emptyList();
     }
 }

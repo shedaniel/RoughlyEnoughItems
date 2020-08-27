@@ -34,11 +34,11 @@ import me.shedaniel.rei.impl.filtering.FilteringResult;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Formatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -128,13 +128,13 @@ public class SearchFilteringRule extends AbstractFilteringRule<SearchFilteringRu
     }
     
     @Override
-    public Text getTitle() {
-        return new TranslatableText("rule.roughlyenoughitems.filtering.search");
+    public Component getTitle() {
+        return new TranslatableComponent("rule.roughlyenoughitems.filtering.search");
     }
     
     @Override
-    public Text getSubtitle() {
-        return new TranslatableText("rule.roughlyenoughitems.filtering.search.subtitle");
+    public Component getSubtitle() {
+        return new TranslatableComponent("rule.roughlyenoughitems.filtering.search.subtitle");
     }
     
     @Override
@@ -146,22 +146,22 @@ public class SearchFilteringRule extends AbstractFilteringRule<SearchFilteringRu
             @Override
             public void addEntries(Consumer<RuleEntry> entryConsumer) {
                 addEmpty(entryConsumer, 10);
-                addText(entryConsumer, new TranslatableText("rule.roughlyenoughitems.filtering.search.filter").formatted(Formatting.GRAY));
+                addText(entryConsumer, new TranslatableComponent("rule.roughlyenoughitems.filtering.search.filter").withStyle(ChatFormatting.GRAY));
                 entryConsumer.accept(entry = new TextFieldRuleEntry(width - 36, rule, widget -> {
                     widget.setMaxLength(9999);
-                    if (entry != null) widget.setText(entry.getWidget().getText());
-                    else widget.setText(rule.filter);
+                    if (entry != null) widget.setValue(entry.getWidget().getValue());
+                    else widget.setValue(rule.filter);
                 }));
                 addEmpty(entryConsumer, 10);
-                addText(entryConsumer, new TranslatableText("rule.roughlyenoughitems.filtering.search.show").formatted(Formatting.GRAY));
+                addText(entryConsumer, new TranslatableComponent("rule.roughlyenoughitems.filtering.search.show").withStyle(ChatFormatting.GRAY));
                 entryConsumer.accept(show = new BooleanRuleEntry(width - 36, show == null ? rule.show : show.getBoolean(), rule, bool -> {
-                    return new TranslatableText("rule.roughlyenoughitems.filtering.search.show." + bool);
+                    return new TranslatableComponent("rule.roughlyenoughitems.filtering.search.show." + bool);
                 }));
             }
             
             @Override
             public void save() {
-                rule.filter = entry.getWidget().getText();
+                rule.filter = entry.getWidget().getValue();
                 rule.arguments = SearchArgument.processSearchTerm(rule.filter);
                 rule.show = show.getBoolean();
             }

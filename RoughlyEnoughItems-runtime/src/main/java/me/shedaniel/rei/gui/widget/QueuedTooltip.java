@@ -30,7 +30,7 @@ import me.shedaniel.math.api.Executor;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import net.fabricmc.api.EnvType;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -45,9 +45,9 @@ import java.util.List;
 public class QueuedTooltip implements Tooltip {
     
     private Point location;
-    private List<Text> text;
+    private List<Component> text;
     
-    private QueuedTooltip(Point location, Collection<Text> text) {
+    private QueuedTooltip(Point location, Collection<Component> text) {
         this.location = location;
         if (this.location == null) {
             Executor.runIfEnv(EnvType.CLIENT, () -> () -> {
@@ -58,32 +58,32 @@ public class QueuedTooltip implements Tooltip {
     }
     
     @NotNull
-    public static QueuedTooltip create(Point location, List<Text> text) {
+    public static QueuedTooltip create(Point location, List<Component> text) {
         return new QueuedTooltip(location, text);
     }
     
     @NotNull
-    public static QueuedTooltip create(Point location, Collection<Text> text) {
+    public static QueuedTooltip create(Point location, Collection<Component> text) {
         return new QueuedTooltip(location, text);
     }
     
     @NotNull
-    public static QueuedTooltip create(Point location, Text... text) {
+    public static QueuedTooltip create(Point location, Component... text) {
         return QueuedTooltip.create(location, Arrays.asList(text));
     }
     
     @NotNull
-    public static QueuedTooltip create(List<Text> text) {
+    public static QueuedTooltip create(List<Component> text) {
         return QueuedTooltip.create(null, text);
     }
     
     @NotNull
-    public static QueuedTooltip create(Collection<Text> text) {
+    public static QueuedTooltip create(Collection<Component> text) {
         return QueuedTooltip.create(null, text);
     }
     
     @NotNull
-    public static QueuedTooltip create(Text... text) {
+    public static QueuedTooltip create(Component... text) {
         return QueuedTooltip.create(null, text);
     }
     
@@ -98,7 +98,7 @@ public class QueuedTooltip implements Tooltip {
     }
     
     @Override
-    public List<Text> getText() {
+    public List<Component> getText() {
         return text;
     }
     

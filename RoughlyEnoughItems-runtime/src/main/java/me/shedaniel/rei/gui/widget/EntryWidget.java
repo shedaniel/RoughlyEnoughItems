@@ -23,7 +23,9 @@
 
 package me.shedaniel.rei.gui.widget;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -34,13 +36,11 @@ import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.LiteralText;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -54,8 +54,8 @@ import java.util.stream.Stream;
 
 public class EntryWidget extends Slot {
     
-    protected static final Identifier RECIPE_GUI = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer.png");
-    protected static final Identifier RECIPE_GUI_DARK = new Identifier("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
+    protected static final ResourceLocation RECIPE_GUI = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
+    protected static final ResourceLocation RECIPE_GUI_DARK = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
     
     @ApiStatus.Internal
     private byte noticeMark = 0;
@@ -254,7 +254,7 @@ public class EntryWidget extends Slot {
             return EntryStack.empty();
         if (entryStacks.size() == 1)
             return entryStacks.get(0);
-        return entryStacks.get(MathHelper.floor((System.currentTimeMillis() / 500 % (double) entryStacks.size()) / 1f));
+        return entryStacks.get(Mth.floor((System.currentTimeMillis() / 500 % (double) entryStacks.size()) / 1f));
     }
     
     @NotNull
@@ -278,7 +278,7 @@ public class EntryWidget extends Slot {
     }
     
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         drawBackground(matrices, mouseX, mouseY, delta);
         drawCurrentEntry(matrices, mouseX, mouseY, delta);
         
@@ -299,30 +299,30 @@ public class EntryWidget extends Slot {
         return highlight;
     }
     
-    protected void drawBackground(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    protected void drawBackground(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (background) {
-            minecraft.getTextureManager().bindTexture(REIHelper.getInstance().isDarkThemeEnabled() ? RECIPE_GUI_DARK : RECIPE_GUI);
-            drawTexture(matrices, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
+            minecraft.getTextureManager().bind(REIHelper.getInstance().isDarkThemeEnabled() ? RECIPE_GUI_DARK : RECIPE_GUI);
+            blit(matrices, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
         }
     }
     
-    protected void drawCurrentEntry(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    protected void drawCurrentEntry(PoseStack matrices, int mouseX, int mouseY, float delta) {
         EntryStack entry = getCurrentEntry();
         entry.setZ(100);
         entry.render(matrices, getInnerBounds(), mouseX, mouseY, delta);
     }
     
-    protected void queueTooltip(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    protected void queueTooltip(PoseStack matrices, int mouseX, int mouseY, float delta) {
         Tooltip tooltip = getCurrentTooltip(new Point(mouseX, mouseY));
         if (tooltip != null) {
             if (interactableFavorites && ConfigObject.getInstance().doDisplayFavoritesTooltip() && !ConfigObject.getInstance().getFavoriteKeyCode().isUnknown()) {
                 String name = ConfigObject.getInstance().getFavoriteKeyCode().getLocalizedName().getString();
                 if (reverseFavoritesAction())
-                    tooltip.getText().addAll(Stream.of(I18n.translate("text.rei.remove_favorites_tooltip", name).split("\n"))
-                            .map(LiteralText::new).collect(Collectors.toList()));
+                    tooltip.getText().addAll(Stream.of(I18n.get("text.rei.remove_favorites_tooltip", name).split("\n"))
+                            .map(TextComponent::new).collect(Collectors.toList()));
                 else
-                    tooltip.getText().addAll(Stream.of(I18n.translate("text.rei.favorites_tooltip", name).split("\n"))
-                            .map(LiteralText::new).collect(Collectors.toList()));
+                    tooltip.getText().addAll(Stream.of(I18n.get("text.rei.favorites_tooltip", name).split("\n"))
+                            .map(TextComponent::new).collect(Collectors.toList()));
             }
             tooltip.queue();
         }
@@ -333,7 +333,7 @@ public class EntryWidget extends Slot {
         return getCurrentEntry().getTooltip(point);
     }
     
-    protected void drawHighlighted(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    protected void drawHighlighted(PoseStack matrices, int mouseX, int mouseY, float delta) {
         RenderSystem.disableDepthTest();
         RenderSystem.colorMask(true, true, true, false);
         int color = REIHelper.getInstance().isDarkThemeEnabled() ? -1877929711 : -2130706433;
@@ -346,7 +346,7 @@ public class EntryWidget extends Slot {
     }
     
     @Override
-    public List<? extends Element> children() {
+    public List<? extends GuiEventListener> children() {
         return Collections.emptyList();
     }
     
@@ -384,9 +384,9 @@ public class EntryWidget extends Slot {
                     return true;
                 }
             }
-            if ((ConfigObject.getInstance().getRecipeKeybind().getType() != InputUtil.Type.MOUSE && button == 0) || ConfigObject.getInstance().getRecipeKeybind().matchesMouse(button))
+            if ((ConfigObject.getInstance().getRecipeKeybind().getType() != InputConstants.Type.MOUSE && button == 0) || ConfigObject.getInstance().getRecipeKeybind().matchesMouse(button))
                 return ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addRecipesFor(getCurrentEntry()).setOutputNotice(getCurrentEntry()).fillPreferredOpenedCategory());
-            else if ((ConfigObject.getInstance().getUsageKeybind().getType() != InputUtil.Type.MOUSE && button == 1) || ConfigObject.getInstance().getUsageKeybind().matchesMouse(button))
+            else if ((ConfigObject.getInstance().getUsageKeybind().getType() != InputConstants.Type.MOUSE && button == 1) || ConfigObject.getInstance().getUsageKeybind().matchesMouse(button))
                 return ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addUsagesFor(getCurrentEntry()).setInputNotice(getCurrentEntry()).fillPreferredOpenedCategory());
         }
         return false;

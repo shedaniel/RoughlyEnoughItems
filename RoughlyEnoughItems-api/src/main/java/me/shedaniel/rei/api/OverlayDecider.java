@@ -25,15 +25,15 @@ package me.shedaniel.rei.api;
 
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.gui.config.DisplayPanelLocation;
-import net.minecraft.util.ActionResult;
+import net.minecraft.world.InteractionResult;
 
-import static net.minecraft.util.ActionResult.PASS;
+import static net.minecraft.world.InteractionResult.PASS;
 
 public interface OverlayDecider {
     boolean isHandingScreen(Class<?> screen);
     
-    default ActionResult shouldScreenBeOverlayed(Class<?> screen) {
-        return ActionResult.PASS;
+    default InteractionResult shouldScreenBeOverlayed(Class<?> screen) {
+        return InteractionResult.PASS;
     }
     
     /**
@@ -63,7 +63,7 @@ public interface OverlayDecider {
      * @param mouseY mouse's y coordinates
      * @return whether mouse is inside the overlay
      */
-    default ActionResult isInZone(double mouseX, double mouseY) {
+    default InteractionResult isInZone(double mouseX, double mouseY) {
         return PASS;
     }
 }

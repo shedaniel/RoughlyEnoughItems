@@ -28,9 +28,9 @@ import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
 
 import java.util.Collections;
 import java.util.List;
@@ -75,7 +75,7 @@ public class DefaultCustomDisplay implements DefaultCraftingDisplay {
     }
     
     @Override
-    public Optional<Identifier> getRecipeLocation() {
+    public Optional<ResourceLocation> getRecipeLocation() {
         return getRecipe().map(Recipe::getId);
     }
     

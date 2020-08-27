@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.api.widgets;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Dimension;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -32,15 +33,13 @@ import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.impl.Internals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Drawable;
-import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -59,68 +58,68 @@ public final class Widgets {
     }
     
     @NotNull
-    public static Widget wrapVanillaWidget(@NotNull Element element) {
+    public static Widget wrapVanillaWidget(@NotNull GuiEventListener element) {
         return new VanillaWrappedWidget(element);
     }
     
     private static class VanillaWrappedWidget extends Widget {
-        private Element element;
+        private GuiEventListener element;
         
-        public VanillaWrappedWidget(Element element) {
+        public VanillaWrappedWidget(GuiEventListener element) {
             this.element = Objects.requireNonNull(element);
         }
         
         @Override
-        public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-            if (element instanceof DrawableHelper)
-                ((DrawableHelper) element).setZOffset(getZ());
-            if (element instanceof Drawable)
-                ((Drawable) element).render(matrices, mouseX, mouseY, delta);
+        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+            if (element instanceof GuiComponent)
+                ((GuiComponent) element).setBlitOffset(getZ());
+            if (element instanceof net.minecraft.client.gui.components.Widget)
+                ((net.minecraft.client.gui.components.Widget) element).render(matrices, mouseX, mouseY, delta);
         }
         
         @Override
-        public List<? extends Element> children() {
+        public List<? extends GuiEventListener> children() {
             return Collections.singletonList(element);
         }
     }
     
     @NotNull
-    public static Widget createTexturedWidget(@NotNull Identifier identifier, @NotNull Rectangle bounds) {
+    public static Widget createTexturedWidget(@NotNull ResourceLocation identifier, @NotNull Rectangle bounds) {
         return createTexturedWidget(identifier, bounds, 0, 0);
     }
     
     @NotNull
-    public static Widget createTexturedWidget(@NotNull Identifier identifier, int x, int y, int width, int height) {
+    public static Widget createTexturedWidget(@NotNull ResourceLocation identifier, int x, int y, int width, int height) {
         return createTexturedWidget(identifier, x, y, 0, 0, width, height);
     }
     
     @NotNull
-    public static Widget createTexturedWidget(@NotNull Identifier identifier, @NotNull Rectangle bounds, float u, float v) {
+    public static Widget createTexturedWidget(@NotNull ResourceLocation identifier, @NotNull Rectangle bounds, float u, float v) {
         return createTexturedWidget(identifier, bounds, u, v, 256, 256);
     }
     
     @NotNull
-    public static Widget createTexturedWidget(@NotNull Identifier identifier, int x, int y, float u, float v, int width, int height) {
+    public static Widget createTexturedWidget(@NotNull ResourceLocation identifier, int x, int y, float u, float v, int width, int height) {
         return createTexturedWidget(identifier, x, y, u, v, width, height, 256, 256);
     }
     
     @NotNull
-    public static Widget createTexturedWidget(@NotNull Identifier identifier, @NotNull Rectangle bounds, float u, float v, int textureWidth, int textureHeight) {
+    public static Widget createTexturedWidget(@NotNull ResourceLocation identifier, @NotNull Rectangle bounds, float u, float v, int textureWidth, int textureHeight) {
         return createTexturedWidget(identifier, bounds.x, bounds.y, u, v, bounds.width, bounds.height, bounds.width, bounds.height, textureWidth, textureHeight);
     }
     
     @NotNull
-    public static Widget createTexturedWidget(@NotNull Identifier identifier, int x, int y, float u, float v, int width, int height, int textureWidth, int textureHeight) {
+    public static Widget createTexturedWidget(@NotNull ResourceLocation identifier, int x, int y, float u, float v, int width, int height, int textureWidth, int textureHeight) {
         return createTexturedWidget(identifier, x, y, u, v, width, height, width, height, textureWidth, textureHeight);
     }
     
     @NotNull
-    public static Widget createTexturedWidget(@NotNull Identifier identifier, @NotNull Rectangle bounds, float u, float v, int uWidth, int vHeight, int textureWidth, int textureHeight) {
+    public static Widget createTexturedWidget(@NotNull ResourceLocation identifier, @NotNull Rectangle bounds, float u, float v, int uWidth, int vHeight, int textureWidth, int textureHeight) {
         return createTexturedWidget(identifier, bounds.x, bounds.y, u, v, bounds.width, bounds.height, uWidth, vHeight, textureWidth, textureHeight);
     }
     
     @NotNull
-    public static Widget createTexturedWidget(@NotNull Identifier identifier, int x, int y, float u, float v, int width, int height, int uWidth, int vHeight, int textureWidth, int textureHeight) {
+    public static Widget createTexturedWidget(@NotNull ResourceLocation identifier, int x, int y, float u, float v, int width, int height, int uWidth, int vHeight, int textureWidth, int textureHeight) {
         return createDrawableWidget(Internals.getWidgetsProvider().createTexturedConsumer(identifier, x, y, width, height, u, v, uWidth, vHeight, textureWidth, textureHeight));
     }
     
@@ -130,12 +129,12 @@ public final class Widgets {
     }
     
     @NotNull
-    public static Label createLabel(@NotNull Point point, @NotNull Text text) {
+    public static Label createLabel(@NotNull Point point, @NotNull Component text) {
         return Internals.getWidgetsProvider().createLabel(point, text);
     }
     
     @NotNull
-    public static Label createClickableLabel(@NotNull Point point, @NotNull Text text, @Nullable Consumer<Label> onClick) {
+    public static Label createClickableLabel(@NotNull Point point, @NotNull Component text, @Nullable Consumer<Label> onClick) {
         return createLabel(point, text).clickable().onClick(onClick);
     }
     
@@ -203,11 +202,11 @@ public final class Widgets {
     }
     
     @NotNull
-    public static Button createButton(@NotNull Rectangle bounds, @NotNull Text text) {
+    public static Button createButton(@NotNull Rectangle bounds, @NotNull Component text) {
         return Internals.getWidgetsProvider().createButton(bounds, text);
     }
     
     public static void produceClickSound() {
-        MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
     }
 }

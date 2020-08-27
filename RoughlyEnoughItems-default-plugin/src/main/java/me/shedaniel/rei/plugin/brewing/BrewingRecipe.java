@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.plugin.brewing;
 
-import net.minecraft.item.Item;
-import net.minecraft.recipe.Ingredient;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.Ingredient;
 
 public class BrewingRecipe {
     

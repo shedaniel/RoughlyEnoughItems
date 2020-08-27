@@ -23,19 +23,19 @@
 
 package me.shedaniel.rei.plugin.tilling;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.HoeItem;
-import net.minecraft.item.ToolMaterial;
+import net.minecraft.world.item.HoeItem;
+import net.minecraft.world.item.Tier;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Map;
 
 public class DummyHoeItem extends HoeItem {
-    protected DummyHoeItem(ToolMaterial toolMaterial_1, int int_1, float float_1, Settings item$Settings_1) {
+    protected DummyHoeItem(Tier toolMaterial_1, int int_1, float float_1, Properties item$Settings_1) {
         super(toolMaterial_1, int_1, float_1, item$Settings_1);
     }
     
     public static Map<Block, BlockState> getTilledBlocksMap() {
-        return TILLED_BLOCKS;
+        return TILLABLES;
     }
 }

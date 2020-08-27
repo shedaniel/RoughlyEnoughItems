@@ -23,10 +23,7 @@
 
 package me.shedaniel.rei.plugin.tilling;
 
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.item.Items;
-import net.minecraft.util.Identifier;
-
+import com.google.common.collect.Lists;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
@@ -34,14 +31,16 @@ import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Items;
 
-import com.google.common.collect.Lists;
 import java.util.List;
 
 public class DefaultTillingCategory implements RecipeCategory<DefaultTillingDisplay> {
     
     @Override
-    public Identifier getIdentifier() {
+    public ResourceLocation getIdentifier() {
         return DefaultPlugin.TILLING;
     }
     
@@ -52,7 +51,7 @@ public class DefaultTillingCategory implements RecipeCategory<DefaultTillingDisp
     
     @Override
     public String getCategoryName() {
-        return I18n.translate("category.rei.tilling");
+        return I18n.get("category.rei.tilling");
     }
     
     @Override

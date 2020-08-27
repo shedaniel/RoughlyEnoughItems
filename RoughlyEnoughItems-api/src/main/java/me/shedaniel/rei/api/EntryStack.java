@@ -25,6 +25,7 @@ package me.shedaniel.rei.api;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
@@ -33,18 +34,17 @@ import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.impl.Internals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemConvertible;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.StringNbtReader;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.nbt.TagParser;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -79,13 +79,13 @@ public interface EntryStack extends TextRepresentable {
         return Internals.getEntryStackProvider().item(stack);
     }
     
-    static EntryStack create(ItemConvertible item) {
+    static EntryStack create(ItemLike item) {
         return create(new ItemStack(item));
     }
     
-    static List<EntryStack> ofItems(Collection<ItemConvertible> stacks) {
+    static List<EntryStack> ofItems(Collection<ItemLike> stacks) {
         List<EntryStack> result = new ArrayList<>(stacks.size());
-        for (ItemConvertible stack : stacks) {
+        for (ItemLike stack : stacks) {
             result.add(create(stack));
         }
         return result;
@@ -100,7 +100,7 @@ public interface EntryStack extends TextRepresentable {
     }
     
     static List<EntryStack> ofIngredient(Ingredient ingredient) {
-        ItemStack[] matchingStacks = ingredient.getMatchingStacksClient();
+        ItemStack[] matchingStacks = ingredient.getItems();
         List<EntryStack> result = new ArrayList<>(matchingStacks.length);
         for (ItemStack matchingStack : matchingStacks) {
             result.add(create(matchingStack));
@@ -140,9 +140,9 @@ public interface EntryStack extends TextRepresentable {
             JsonObject obj = jsonElement.getAsJsonObject();
             switch (obj.getAsJsonPrimitive("type").getAsString()) {
                 case "stack":
-                    return EntryStack.create(ItemStack.fromTag(StringNbtReader.parse(obj.get("nbt").getAsString())));
+                    return EntryStack.create(ItemStack.of(TagParser.parseTag(obj.get("nbt").getAsString())));
                 case "fluid":
-                    return EntryStack.create(Registry.FLUID.get(Identifier.tryParse(obj.get("id").getAsString())));
+                    return EntryStack.create(Registry.FLUID.get(ResourceLocation.tryParse(obj.get("id").getAsString())));
                 case "empty":
                     return EntryStack.empty();
                 default:
@@ -162,10 +162,10 @@ public interface EntryStack extends TextRepresentable {
                 case ITEM:
                     JsonObject obj1 = new JsonObject();
                     obj1.addProperty("type", "stack");
-                    obj1.addProperty("nbt", getItemStack().toTag(new CompoundTag()).toString());
+                    obj1.addProperty("nbt", getItemStack().save(new CompoundTag()).toString());
                     return obj1;
                 case FLUID:
-                    Optional<Identifier> optionalIdentifier = getIdentifier();
+                    Optional<ResourceLocation> optionalIdentifier = getIdentifier();
                     if (!optionalIdentifier.isPresent())
                         throw new NullPointerException("Invalid Fluid: " + toString());
                     JsonObject obj2 = new JsonObject();
@@ -194,7 +194,7 @@ public interface EntryStack extends TextRepresentable {
     @Deprecated
     @ApiStatus.ScheduledForRemoval
     static EntryStack copyFluidToItem(EntryStack stack) {
-        Item bucketItem = stack.getFluid().getBucketItem();
+        Item bucketItem = stack.getFluid().getBucket();
         if (bucketItem != null) {
             return EntryStack.create(bucketItem);
         }
@@ -211,7 +211,7 @@ public interface EntryStack extends TextRepresentable {
         return FluidSupportProvider.getInstance().itemToFluid(stack);
     }
     
-    Optional<Identifier> getIdentifier();
+    Optional<ResourceLocation> getIdentifier();
     
     EntryStack.Type getType();
     
@@ -318,7 +318,7 @@ public interface EntryStack extends TextRepresentable {
         return null;
     }
     
-    void render(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta);
+    void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta);
     
     enum Type {
         ITEM,
@@ -336,7 +336,7 @@ public interface EntryStack extends TextRepresentable {
         public static final Settings<Supplier<Boolean>> TOOLTIP_ENABLED = new Settings<>(TRUE);
         public static final Settings<Supplier<Boolean>> TOOLTIP_APPEND_MOD = new Settings<>(TRUE);
         public static final Settings<Supplier<Boolean>> RENDER_COUNTS = new Settings<>(TRUE);
-        public static final Settings<Function<EntryStack, List<Text>>> TOOLTIP_APPEND_EXTRA = new Settings<>(stack -> Collections.emptyList());
+        public static final Settings<Function<EntryStack, List<Component>>> TOOLTIP_APPEND_EXTRA = new Settings<>(stack -> Collections.emptyList());
         public static final Settings<Function<EntryStack, String>> COUNTS = new Settings<>(stack -> null);
         
         private T defaultValue;
@@ -358,7 +358,7 @@ public interface EntryStack extends TextRepresentable {
         
         public static class Fluid {
             // Return null to disable
-            public static final Settings<Function<EntryStack, String>> AMOUNT_TOOLTIP = new Settings<>(stack -> I18n.translate("tooltip.rei.fluid_amount", stack.simplifyAmount().getAccurateAmount()));
+            public static final Settings<Function<EntryStack, String>> AMOUNT_TOOLTIP = new Settings<>(stack -> I18n.get("tooltip.rei.fluid_amount", stack.simplifyAmount().getAccurateAmount()));
             
             private Fluid() {
             }

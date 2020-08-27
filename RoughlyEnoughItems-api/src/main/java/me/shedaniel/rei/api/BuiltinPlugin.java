@@ -24,32 +24,32 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.impl.Internals;
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
 public interface BuiltinPlugin {
-    Identifier CRAFTING = new Identifier("minecraft", "plugins/crafting");
-    Identifier SMELTING = new Identifier("minecraft", "plugins/smelting");
-    Identifier SMOKING = new Identifier("minecraft", "plugins/smoking");
-    Identifier BLASTING = new Identifier("minecraft", "plugins/blasting");
-    Identifier CAMPFIRE = new Identifier("minecraft", "plugins/campfire");
-    Identifier STONE_CUTTING = new Identifier("minecraft", "plugins/stone_cutting");
-    Identifier STRIPPING = new Identifier("minecraft", "plugins/stripping");
-    Identifier BREWING = new Identifier("minecraft", "plugins/brewing");
-    Identifier PLUGIN = new Identifier("roughlyenoughitems", "default_plugin");
-    Identifier COMPOSTING = new Identifier("minecraft", "plugins/composting");
-    Identifier FUEL = new Identifier("minecraft", "plugins/fuel");
-    Identifier SMITHING = new Identifier("minecraft", "plugins/smithing");
-    Identifier BEACON = new Identifier("minecraft", "plugins/beacon");
-    Identifier TILLING = new Identifier("minecraft", "plugins/tilling");
-    Identifier PATHING = new Identifier("minecraft", "plugins/pathing");
-    Identifier INFO = new Identifier("roughlyenoughitems", "plugins/information");
+    ResourceLocation CRAFTING = new ResourceLocation("minecraft", "plugins/crafting");
+    ResourceLocation SMELTING = new ResourceLocation("minecraft", "plugins/smelting");
+    ResourceLocation SMOKING = new ResourceLocation("minecraft", "plugins/smoking");
+    ResourceLocation BLASTING = new ResourceLocation("minecraft", "plugins/blasting");
+    ResourceLocation CAMPFIRE = new ResourceLocation("minecraft", "plugins/campfire");
+    ResourceLocation STONE_CUTTING = new ResourceLocation("minecraft", "plugins/stone_cutting");
+    ResourceLocation STRIPPING = new ResourceLocation("minecraft", "plugins/stripping");
+    ResourceLocation BREWING = new ResourceLocation("minecraft", "plugins/brewing");
+    ResourceLocation PLUGIN = new ResourceLocation("roughlyenoughitems", "default_plugin");
+    ResourceLocation COMPOSTING = new ResourceLocation("minecraft", "plugins/composting");
+    ResourceLocation FUEL = new ResourceLocation("minecraft", "plugins/fuel");
+    ResourceLocation SMITHING = new ResourceLocation("minecraft", "plugins/smithing");
+    ResourceLocation BEACON = new ResourceLocation("minecraft", "plugins/beacon");
+    ResourceLocation TILLING = new ResourceLocation("minecraft", "plugins/tilling");
+    ResourceLocation PATHING = new ResourceLocation("minecraft", "plugins/pathing");
+    ResourceLocation INFO = new ResourceLocation("roughlyenoughitems", "plugins/information");
     
     static BuiltinPlugin getInstance() {
         return Internals.getBuiltinPlugin();
@@ -57,9 +57,9 @@ public interface BuiltinPlugin {
     
     void registerBrewingRecipe(ItemStack input, Ingredient ingredient, ItemStack output);
     
-    void registerInformation(List<EntryStack> entryStacks, Text name, UnaryOperator<List<Text>> textBuilder);
+    void registerInformation(List<EntryStack> entryStacks, Component name, UnaryOperator<List<Component>> textBuilder);
     
-    default void registerInformation(EntryStack entryStack, Text name, UnaryOperator<List<Text>> textBuilder) {
+    default void registerInformation(EntryStack entryStack, Component name, UnaryOperator<List<Component>> textBuilder) {
         registerInformation(Collections.singletonList(entryStack), name, textBuilder);
     }
 }

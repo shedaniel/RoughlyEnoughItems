@@ -24,6 +24,11 @@
 package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.ClientHelper;
@@ -34,21 +39,16 @@ import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.utils.CollectionUtils;
 import me.shedaniel.rei.utils.FormattingUtils;
 import me.shedaniel.rei.utils.ImmutableLiteralText;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormats;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.texture.SpriteAtlasTexture;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Matrix4f;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.Registry;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -88,8 +88,8 @@ public class FluidEntryStack extends AbstractEntryStack {
     }
     
     @Override
-    public Optional<Identifier> getIdentifier() {
-        return Optional.ofNullable(Registry.FLUID.getId(getFluid()));
+    public Optional<ResourceLocation> getIdentifier() {
+        return Optional.ofNullable(Registry.FLUID.getKey(getFluid()));
     }
     
     @Override
@@ -194,18 +194,18 @@ public class FluidEntryStack extends AbstractEntryStack {
     public Tooltip getTooltip(Point point) {
         if (!get(Settings.TOOLTIP_ENABLED).get() || isEmpty())
             return null;
-        List<Text> toolTip = Lists.newArrayList(asFormattedText());
+        List<Component> toolTip = Lists.newArrayList(asFormattedText());
         if (!amount.isLessThan(Fraction.empty()) && !amount.equals(IGNORE_AMOUNT)) {
             String amountTooltip = get(Settings.Fluid.AMOUNT_TOOLTIP).apply(this);
             if (amountTooltip != null)
-                toolTip.addAll(Stream.of(amountTooltip.split("\n")).map(LiteralText::new).collect(Collectors.toList()));
+                toolTip.addAll(Stream.of(amountTooltip.split("\n")).map(TextComponent::new).collect(Collectors.toList()));
         }
         toolTip.addAll(get(Settings.TOOLTIP_APPEND_EXTRA).apply(this));
         if (get(Settings.TOOLTIP_APPEND_MOD).get() && ConfigObject.getInstance().shouldAppendModNames()) {
-            Identifier id = Registry.FLUID.getId(fluid);
+            ResourceLocation id = Registry.FLUID.getKey(fluid);
             final String modId = ClientHelper.getInstance().getModFromIdentifier(id);
             boolean alreadyHasMod = false;
-            for (Text s : toolTip)
+            for (Component s : toolTip)
                 if (FormattingUtils.stripFormatting(s.getString()).equalsIgnoreCase(modId)) {
                     alreadyHasMod = true;
                     break;
@@ -218,36 +218,36 @@ public class FluidEntryStack extends AbstractEntryStack {
     
     @SuppressWarnings("deprecation")
     @Override
-    public void render(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+    public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
         if (get(Settings.RENDER).get()) {
             SimpleFluidRenderer.FluidRenderingData renderingData = SimpleFluidRenderer.fromFluid(fluid);
             if (renderingData != null) {
-                Sprite sprite = renderingData.getSprite();
+                TextureAtlasSprite sprite = renderingData.getSprite();
                 int color = renderingData.getColor();
                 int a = 255;
                 int r = (color >> 16 & 255);
                 int g = (color >> 8 & 255);
                 int b = (color & 255);
-                MinecraftClient.getInstance().getTextureManager().bindTexture(SpriteAtlasTexture.BLOCK_ATLAS_TEX);
-                Tessellator tess = Tessellator.getInstance();
-                BufferBuilder bb = tess.getBuffer();
-                Matrix4f matrix = matrices.peek().getModel();
-                bb.begin(7, VertexFormats.POSITION_TEXTURE_COLOR);
-                bb.vertex(matrix, bounds.getMaxX(), bounds.y, getZ()).texture(sprite.getMaxU(), sprite.getMinV()).color(r, g, b, a).next();
-                bb.vertex(matrix, bounds.x, bounds.y, getZ()).texture(sprite.getMinU(), sprite.getMinV()).color(r, g, b, a).next();
-                bb.vertex(matrix, bounds.x, bounds.getMaxY(), getZ()).texture(sprite.getMinU(), sprite.getMaxV()).color(r, g, b, a).next();
-                bb.vertex(matrix, bounds.getMaxX(), bounds.getMaxY(), getZ()).texture(sprite.getMaxU(), sprite.getMaxV()).color(r, g, b, a).next();
-                tess.draw();
+                Minecraft.getInstance().getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
+                Tesselator tess = Tesselator.getInstance();
+                BufferBuilder bb = tess.getBuilder();
+                Matrix4f matrix = matrices.last().pose();
+                bb.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
+                bb.vertex(matrix, bounds.getMaxX(), bounds.y, getZ()).uv(sprite.getU1(), sprite.getV0()).color(r, g, b, a).endVertex();
+                bb.vertex(matrix, bounds.x, bounds.y, getZ()).uv(sprite.getU0(), sprite.getV0()).color(r, g, b, a).endVertex();
+                bb.vertex(matrix, bounds.x, bounds.getMaxY(), getZ()).uv(sprite.getU0(), sprite.getV1()).color(r, g, b, a).endVertex();
+                bb.vertex(matrix, bounds.getMaxX(), bounds.getMaxY(), getZ()).uv(sprite.getU1(), sprite.getV1()).color(r, g, b, a).endVertex();
+                tess.end();
             }
         }
     }
     
     @NotNull
     @Override
-    public Text asFormattedText() {
-        Identifier id = Registry.FLUID.getId(fluid);
-        if (I18n.hasTranslation("block." + id.toString().replaceFirst(":", ".")))
-            return new ImmutableLiteralText(I18n.translate("block." + id.toString().replaceFirst(":", ".")));
+    public Component asFormattedText() {
+        ResourceLocation id = Registry.FLUID.getKey(fluid);
+        if (I18n.exists("block." + id.toString().replaceFirst(":", ".")))
+            return new ImmutableLiteralText(I18n.get("block." + id.toString().replaceFirst(":", ".")));
         return new ImmutableLiteralText(CollectionUtils.mapAndJoinToString(id.getPath().split("_"), StringUtils::capitalize, " "));
     }
 }

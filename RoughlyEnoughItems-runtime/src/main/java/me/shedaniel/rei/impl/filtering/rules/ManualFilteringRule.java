@@ -32,8 +32,8 @@ import me.shedaniel.rei.impl.filtering.FilteringContext;
 import me.shedaniel.rei.impl.filtering.FilteringResult;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -64,13 +64,13 @@ public class ManualFilteringRule extends AbstractFilteringRule<ManualFilteringRu
     }
     
     @Override
-    public Text getTitle() {
-        return new TranslatableText("rule.roughlyenoughitems.filtering.manual");
+    public Component getTitle() {
+        return new TranslatableComponent("rule.roughlyenoughitems.filtering.manual");
     }
     
     @Override
-    public Text getSubtitle() {
-        return new TranslatableText("rule.roughlyenoughitems.filtering.manual.subtitle");
+    public Component getSubtitle() {
+        return new TranslatableComponent("rule.roughlyenoughitems.filtering.manual.subtitle");
     }
     
     @Override

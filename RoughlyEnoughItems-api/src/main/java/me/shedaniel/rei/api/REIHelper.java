@@ -28,9 +28,9 @@ import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import me.shedaniel.rei.impl.Internals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.screen.ingame.ContainerScreen;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,10 +50,10 @@ public interface REIHelper {
     @ApiStatus.Experimental
     Optional<REIOverlay> getOverlay();
     
-    ContainerScreen<?> getPreviousContainerScreen();
+    AbstractContainerScreen<?> getPreviousContainerScreen();
     
     @Deprecated
-    default ContainerScreen<?> getPreviousHandledScreen() {
+    default AbstractContainerScreen<?> getPreviousHandledScreen() {
         return getPreviousContainerScreen();
     }
     
@@ -65,5 +65,5 @@ public interface REIHelper {
     
     void queueTooltip(@Nullable Tooltip tooltip);
     
-    Identifier getDefaultDisplayTexture();
+    ResourceLocation getDefaultDisplayTexture();
 }

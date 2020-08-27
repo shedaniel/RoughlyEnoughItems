@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.gui.plugin;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.*;
@@ -36,10 +37,9 @@ import me.shedaniel.rei.impl.RenderingEntry;
 import me.shedaniel.rei.plugin.autocrafting.DefaultCategoryHandler;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.LiteralText;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -48,22 +48,22 @@ import java.util.Collections;
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public class DefaultRuntimePlugin implements REIPluginV0 {
-    public static final Identifier PLUGIN = new Identifier("roughlyenoughitems", "default_runtime_plugin");
+    public static final ResourceLocation PLUGIN = new ResourceLocation("roughlyenoughitems", "default_runtime_plugin");
     
     @Override
-    public Identifier getPluginIdentifier() {
+    public ResourceLocation getPluginIdentifier() {
         return PLUGIN;
     }
     
     @Override
     public void registerEntries(EntryRegistry entryRegistry) {
         entryRegistry.registerEntry(new RenderingEntry() {
-            private Identifier id = new Identifier("roughlyenoughitems", "textures/gui/kirb.png");
+            private ResourceLocation id = new ResourceLocation("roughlyenoughitems", "textures/gui/kirb.png");
             
             @Override
-            public void render(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-                MinecraftClient.getInstance().getTextureManager().bindTexture(id);
-                drawTexturedQuad(matrices.peek().getModel(), bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), getZOffset(), 0, 1, 0, 1);
+            public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+                Minecraft.getInstance().getTextureManager().bind(id);
+                innerBlit(matrices.last().pose(), bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), getBlitOffset(), 0, 1, 0, 1);
             }
             
             @Override
@@ -73,7 +73,7 @@ public class DefaultRuntimePlugin implements REIPluginV0 {
             
             @Override
             public @Nullable Tooltip getTooltip(Point point) {
-                return Tooltip.create(new LiteralText("Kibby"));
+                return Tooltip.create(new TextComponent("Kibby"));
             }
         });
     }
@@ -82,7 +82,7 @@ public class DefaultRuntimePlugin implements REIPluginV0 {
     public void registerBounds(DisplayHelper displayHelper) {
         BaseBoundsHandler baseBoundsHandler = BaseBoundsHandler.getInstance();
         baseBoundsHandler.registerExclusionZones(RecipeViewingScreen.class, () -> {
-            Panel widget = ((RecipeViewingScreen) MinecraftClient.getInstance().currentScreen).getWorkingStationsBaseWidget();
+            Panel widget = ((RecipeViewingScreen) Minecraft.getInstance().screen).getWorkingStationsBaseWidget();
             if (widget == null)
                 return Collections.emptyList();
             return Collections.singletonList(widget.getBounds().clone());

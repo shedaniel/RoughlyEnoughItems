@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import me.sargunvohra.mcmods.autoconfig1u.ConfigData;
 import me.sargunvohra.mcmods.autoconfig1u.annotation.Config;
 import me.sargunvohra.mcmods.autoconfig1u.annotation.ConfigEntry;
@@ -35,7 +36,6 @@ import me.shedaniel.rei.gui.config.*;
 import me.shedaniel.rei.impl.filtering.FilteringRule;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.util.InputUtil;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.annotation.ElementType;
@@ -370,14 +370,14 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     public static class KeyBindings {
-        private ModifierKeyCode recipeKeybind = ModifierKeyCode.of(InputUtil.Type.KEYSYM.createFromCode(82), Modifier.none());
-        private ModifierKeyCode usageKeybind = ModifierKeyCode.of(InputUtil.Type.KEYSYM.createFromCode(85), Modifier.none());
-        private ModifierKeyCode hideKeybind = ModifierKeyCode.of(InputUtil.Type.KEYSYM.createFromCode(79), Modifier.of(false, true, false));
+        private ModifierKeyCode recipeKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(82), Modifier.none());
+        private ModifierKeyCode usageKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(85), Modifier.none());
+        private ModifierKeyCode hideKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(79), Modifier.of(false, true, false));
         private ModifierKeyCode previousPageKeybind = ModifierKeyCode.unknown();
         private ModifierKeyCode nextPageKeybind = ModifierKeyCode.unknown();
         private ModifierKeyCode focusSearchFieldKeybind = ModifierKeyCode.unknown();
         private ModifierKeyCode copyRecipeIdentifierKeybind = ModifierKeyCode.unknown();
-        private ModifierKeyCode favoriteKeybind = ModifierKeyCode.of(InputUtil.Type.KEYSYM.createFromCode(65), Modifier.none());
+        private ModifierKeyCode favoriteKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(65), Modifier.none());
         private ModifierKeyCode exportImageKeybind = ModifierKeyCode.unknown();
     }
     

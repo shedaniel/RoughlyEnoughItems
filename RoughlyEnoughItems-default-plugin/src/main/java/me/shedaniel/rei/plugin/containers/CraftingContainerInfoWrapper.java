@@ -25,51 +25,51 @@ package me.shedaniel.rei.plugin.containers;
 
 import me.shedaniel.rei.server.ContainerInfo;
 import me.shedaniel.rei.server.RecipeFinder;
-import net.minecraft.container.Container;
-import net.minecraft.container.CraftingContainer;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.RecipeBookMenu;
+import net.minecraft.world.item.ItemStack;
 
-public class CraftingContainerInfoWrapper<T extends CraftingContainer<?>> implements ContainerInfo<T> {
-    private Class<? extends CraftingContainer<?>> containerClass;
+public class CraftingContainerInfoWrapper<T extends RecipeBookMenu<?>> implements ContainerInfo<T> {
+    private Class<? extends RecipeBookMenu<?>> containerClass;
     
     public CraftingContainerInfoWrapper(Class<T> containerClass) {
         this.containerClass = containerClass;
     }
     
-    public static <R extends CraftingContainer<?>> ContainerInfo<R> create(Class<R> containerClass) {
+    public static <R extends RecipeBookMenu<?>> ContainerInfo<R> create(Class<R> containerClass) {
         return new CraftingContainerInfoWrapper<>(containerClass);
     }
     
     @Override
-    public Class<? extends Container> getContainerClass() {
+    public Class<? extends AbstractContainerMenu> getContainerClass() {
         return containerClass;
     }
     
     @Override
     public int getCraftingResultSlotIndex(T container) {
-        return container.getCraftingResultSlotIndex();
+        return container.getResultSlotIndex();
     }
     
     @Override
     public int getCraftingWidth(T container) {
-        return container.getCraftingWidth();
+        return container.getGridWidth();
     }
     
     @Override
     public int getCraftingHeight(T container) {
-        return container.getCraftingHeight();
+        return container.getGridHeight();
     }
     
     @Override
     public void clearCraftingSlots(T container) {
-        container.clearCraftingSlots();
+        container.clearCraftingContent();
     }
     
     @Override
     public void populateRecipeFinder(T container, RecipeFinder var1) {
-        container.populateRecipeFinder(new net.minecraft.recipe.RecipeFinder() {
+        container.fillCraftSlotsStackedContents(new net.minecraft.world.entity.player.StackedContents() {
             @Override
-            public void addNormalItem(ItemStack itemStack_1) {
+            public void accountSimpleStack(ItemStack itemStack_1) {
                 var1.addNormalItem(itemStack_1);
             }
         });

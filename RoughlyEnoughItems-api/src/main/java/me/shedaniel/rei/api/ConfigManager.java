@@ -26,8 +26,8 @@ package me.shedaniel.rei.api;
 import me.shedaniel.rei.impl.Internals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.NotNull;
 
 @Environment(EnvType.CLIENT)
@@ -64,7 +64,7 @@ public interface ConfigManager {
      * @param parent the screen shown before
      */
     default void openConfigScreen(Screen parent) {
-        MinecraftClient.getInstance().openScreen(getConfigScreen(parent));
+        Minecraft.getInstance().setScreen(getConfigScreen(parent));
     }
     
     /**

@@ -23,19 +23,19 @@
 
 package me.shedaniel.rei.server;
 
-import net.minecraft.container.Container;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.core.NonNullList;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public interface ContainerInfo<T extends Container> {
-    Class<? extends Container> getContainerClass();
+public interface ContainerInfo<T extends AbstractContainerMenu> {
+    Class<? extends AbstractContainerMenu> getContainerClass();
     
     default StackAccessor getStack(ContainerContext<T> context, int slotIndex) {
         return new SlotStackAccessor(context.getContainer().getSlot(slotIndex));
@@ -88,22 +88,22 @@ public interface ContainerInfo<T extends Container> {
     }
     
     default List<StackAccessor> getInventoryStacks(ContainerContext<T> context) {
-        PlayerInventory inventory = context.getPlayerEntity().inventory;
-        return IntStream.range(0, inventory.main.size())
+        Inventory inventory = context.getPlayerEntity().inventory;
+        return IntStream.range(0, inventory.items.size())
                 .mapToObj(index -> (StackAccessor) new InventoryStackAccessor(inventory, index))
                 .collect(Collectors.toList());
     }
     
     default void markDirty(ContainerContext<T> context) {
-        context.getPlayerEntity().inventory.markDirty();
-        context.getContainer().sendContentUpdates();
+        context.getPlayerEntity().inventory.setChanged();
+        context.getContainer().broadcastChanges();
         
-        DefaultedList<ItemStack> defaultedList = DefaultedList.of();
-        for (Slot slot : context.getPlayerEntity().container.slots) {
-            defaultedList.add(slot.getStack());
+        NonNullList<ItemStack> defaultedList = NonNullList.create();
+        for (Slot slot : context.getPlayerEntity().containerMenu.slots) {
+            defaultedList.add(slot.getItem());
         }
         
-        ((ServerPlayerEntity) context.getPlayerEntity()).onContainerRegistered(context.getPlayerEntity().container, defaultedList);
+        ((ServerPlayer) context.getPlayerEntity()).refreshContainer(context.getPlayerEntity().containerMenu, defaultedList);
     }
     
     int getCraftingResultSlotIndex(T container);

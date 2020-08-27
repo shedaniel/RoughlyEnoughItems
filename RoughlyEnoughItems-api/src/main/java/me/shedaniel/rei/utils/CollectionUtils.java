@@ -29,7 +29,7 @@ import com.google.common.collect.UnmodifiableIterator;
 import me.shedaniel.rei.api.EntryStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 import java.util.*;
 import java.util.function.Function;
@@ -281,7 +281,7 @@ public class CollectionUtils {
     public static <T> Iterable<Iterable<T>> partition(List<T> list, int size) {
         return () -> new UnmodifiableIterator<Iterable<T>>() {
             int i = 0;
-            int partitionSize = MathHelper.ceil(list.size() / (float) size);
+            int partitionSize = Mth.ceil(list.size() / (float) size);
             
             @Override
             public boolean hasNext() {

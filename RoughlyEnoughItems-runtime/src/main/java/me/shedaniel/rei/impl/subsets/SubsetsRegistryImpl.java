@@ -31,7 +31,7 @@ import me.shedaniel.rei.api.subsets.SubsetsRegistry;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -101,7 +101,7 @@ public class SubsetsRegistryImpl implements SubsetsRegistry {
     private boolean isPathValid(String path) {
         String[] pathSegments = path.split("/");
         for (String pathSegment : pathSegments) {
-            if (!Identifier.isValid(pathSegment))
+            if (!ResourceLocation.isValidResourceLocation(pathSegment))
                 return false;
         }
         return true;

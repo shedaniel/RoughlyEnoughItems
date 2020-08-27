@@ -27,9 +27,9 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.ContainerScreen;
-import net.minecraft.container.Container;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -170,21 +170,21 @@ public interface AutoTransferHandler {
     }
     
     interface Context {
-        static Context create(boolean actuallyCrafting, ContainerScreen<?> containerScreen, RecipeDisplay recipeDisplay) {
+        static Context create(boolean actuallyCrafting, AbstractContainerScreen<?> containerScreen, RecipeDisplay recipeDisplay) {
             return new ContextImpl(actuallyCrafting, containerScreen, () -> recipeDisplay);
         }
         
-        default MinecraftClient getMinecraft() {
-            return MinecraftClient.getInstance();
+        default Minecraft getMinecraft() {
+            return Minecraft.getInstance();
         }
         
         boolean isActuallyCrafting();
         
-        ContainerScreen<?> getContainerScreen();
+        AbstractContainerScreen<?> getContainerScreen();
         
         @Deprecated
         @ApiStatus.ScheduledForRemoval
-        default ContainerScreen<?> getHandledScreen() {
+        default AbstractContainerScreen<?> getHandledScreen() {
             return getContainerScreen();
         }
         
@@ -192,12 +192,12 @@ public interface AutoTransferHandler {
         
         @Deprecated
         @ApiStatus.ScheduledForRemoval
-        default Container getScreenHandler() {
+        default AbstractContainerMenu getScreenHandler() {
             return getContainer();
         }
         
-        default Container getContainer() {
-            return getHandledScreen().getContainer();
+        default AbstractContainerMenu getContainer() {
+            return getHandledScreen().getMenu();
         }
     }
     
@@ -276,10 +276,10 @@ public interface AutoTransferHandler {
     @ApiStatus.Internal
     final class ContextImpl implements Context {
         private boolean actuallyCrafting;
-        private ContainerScreen<?> containerScreen;
+        private AbstractContainerScreen<?> containerScreen;
         private Supplier<RecipeDisplay> recipeDisplaySupplier;
         
-        private ContextImpl(boolean actuallyCrafting, ContainerScreen<?> containerScreen, Supplier<RecipeDisplay> recipeDisplaySupplier) {
+        private ContextImpl(boolean actuallyCrafting, AbstractContainerScreen<?> containerScreen, Supplier<RecipeDisplay> recipeDisplaySupplier) {
             this.actuallyCrafting = actuallyCrafting;
             this.containerScreen = containerScreen;
             this.recipeDisplaySupplier = recipeDisplaySupplier;
@@ -291,7 +291,7 @@ public interface AutoTransferHandler {
         }
         
         @Override
-        public ContainerScreen<?> getContainerScreen() {
+        public AbstractContainerScreen<?> getContainerScreen() {
             return containerScreen;
         }
         

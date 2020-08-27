@@ -24,6 +24,7 @@
 package me.shedaniel.rei.plugin.crafting;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -36,13 +37,12 @@ import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import me.shedaniel.rei.server.ContainerInfo;
 import me.shedaniel.rei.server.ContainerInfoHandler;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.container.Container;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
 
@@ -55,7 +55,7 @@ public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCr
     }
     
     @Override
-    public Identifier getIdentifier() {
+    public ResourceLocation getIdentifier() {
         return DefaultPlugin.CRAFTING;
     }
     
@@ -66,7 +66,7 @@ public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCr
     
     @Override
     public String getCategoryName() {
-        return I18n.translate("category.rei.crafting");
+        return I18n.get("category.rei.crafting");
     }
     
     @Override
@@ -94,20 +94,20 @@ public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCr
     }
     
     @Override
-    public void renderRedSlots(MatrixStack matrices, List<Widget> widgets, Rectangle bounds, DefaultCraftingDisplay display, IntList redSlots) {
-        ContainerInfo<Container> info = (ContainerInfo<Container>) ContainerInfoHandler.getContainerInfo(getIdentifier(), REIHelper.getInstance().getPreviousContainerScreen().getContainer().getClass());
+    public void renderRedSlots(PoseStack matrices, List<Widget> widgets, Rectangle bounds, DefaultCraftingDisplay display, IntList redSlots) {
+        ContainerInfo<AbstractContainerMenu> info = (ContainerInfo<AbstractContainerMenu>) ContainerInfoHandler.getContainerInfo(getIdentifier(), REIHelper.getInstance().getPreviousContainerScreen().getMenu().getClass());
         if (info == null)
             return;
-        matrices.push();
+        matrices.pushPose();
         matrices.translate(0, 0, 400);
         Point startPoint = new Point(bounds.getCenterX() - 58, bounds.getCenterY() - 27);
-        int width = info.getCraftingWidth(REIHelper.getInstance().getPreviousContainerScreen().getContainer());
+        int width = info.getCraftingWidth(REIHelper.getInstance().getPreviousContainerScreen().getMenu());
         for (Integer slot : redSlots) {
             int i = slot;
             int x = i % width;
-            int y = MathHelper.floor(i / (float) width);
-            DrawableHelper.fill(matrices, startPoint.x + 1 + x * 18, startPoint.y + 1 + y * 18, startPoint.x + 1 + x * 18 + 16, startPoint.y + 1 + y * 18 + 16, 0x60ff0000);
+            int y = Mth.floor(i / (float) width);
+            GuiComponent.fill(matrices, startPoint.x + 1 + x * 18, startPoint.y + 1 + y * 18, startPoint.x + 1 + x * 18 + 16, startPoint.y + 1 + y * 18 + 16, 0x60ff0000);
         }
-        matrices.pop();
+        matrices.popPose();
     }
 }

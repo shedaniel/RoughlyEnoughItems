@@ -24,18 +24,18 @@
 package me.shedaniel.rei.gui.toast;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.toast.Toast;
-import net.minecraft.client.toast.ToastManager;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.toasts.Toast;
+import net.minecraft.client.gui.components.toasts.ToastComponent;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.Internal
 public class CopyRecipeIdentifierToast implements Toast {
     
-    protected static final Identifier TOASTS_TEX = new Identifier("roughlyenoughitems", "textures/gui/toasts.png");
+    protected static final ResourceLocation TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/toasts.png");
     private String title;
     private String subtitle;
     private long startTime;
@@ -46,26 +46,26 @@ public class CopyRecipeIdentifierToast implements Toast {
     }
     
     public static void addToast(String title, @Nullable String subtitleNullable) {
-        MinecraftClient.getInstance().getToastManager().add(new CopyRecipeIdentifierToast(title, subtitleNullable));
+        Minecraft.getInstance().getToasts().addToast(new CopyRecipeIdentifierToast(title, subtitleNullable));
     }
     
     @Override
-    public Visibility draw(MatrixStack matrices, ToastManager toastManager, long var2) {
-        toastManager.getGame().getTextureManager().bindTexture(TOASTS_TEX);
+    public Visibility render(PoseStack matrices, ToastComponent toastManager, long var2) {
+        toastManager.getMinecraft().getTextureManager().bind(TEXTURE);
         RenderSystem.color3f(1.0F, 1.0F, 1.0F);
-        toastManager.drawTexture(matrices, 0, 0, 0, 0, 160, 32);
+        toastManager.blit(matrices, 0, 0, 0, 0, 160, 32);
         if (this.subtitle == null) {
-            toastManager.getGame().textRenderer.draw(matrices, this.title, 18.0F, 12.0F, 11141120);
+            toastManager.getMinecraft().font.draw(matrices, this.title, 18.0F, 12.0F, 11141120);
         } else {
-            toastManager.getGame().textRenderer.draw(matrices, this.title, 18.0F, 7.0F, 11141120);
-            toastManager.getGame().textRenderer.draw(matrices, this.subtitle, 18.0F, 18.0F, -16777216);
+            toastManager.getMinecraft().font.draw(matrices, this.title, 18.0F, 7.0F, 11141120);
+            toastManager.getMinecraft().font.draw(matrices, this.subtitle, 18.0F, 18.0F, -16777216);
         }
         
         return var2 - this.startTime < 5000L ? Visibility.SHOW : Visibility.HIDE;
     }
     
     @Override
-    public Object getType() {
+    public Object getToken() {
         return Type.THIS_IS_SURE_A_TYPE;
     }
     

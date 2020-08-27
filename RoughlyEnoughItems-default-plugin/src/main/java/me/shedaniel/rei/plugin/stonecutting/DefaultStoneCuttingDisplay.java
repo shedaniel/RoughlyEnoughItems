@@ -28,12 +28,12 @@ import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.CuttingRecipe;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.recipe.StonecuttingRecipe;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.core.NonNullList;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.SingleItemRecipe;
+import net.minecraft.world.item.crafting.StonecutterRecipe;
 
 import java.util.Collections;
 import java.util.List;
@@ -44,21 +44,21 @@ public class DefaultStoneCuttingDisplay implements RecipeDisplay {
     
     private List<List<EntryStack>> inputs;
     private List<EntryStack> output;
-    private StonecuttingRecipe display;
+    private StonecutterRecipe display;
     
-    public DefaultStoneCuttingDisplay(StonecuttingRecipe recipe) {
-        this(recipe.getPreviewInputs(), recipe.getOutput());
+    public DefaultStoneCuttingDisplay(StonecutterRecipe recipe) {
+        this(recipe.getIngredients(), recipe.getResultItem());
         this.display = recipe;
     }
     
-    public DefaultStoneCuttingDisplay(DefaultedList<Ingredient> ingredients, ItemStack output) {
+    public DefaultStoneCuttingDisplay(NonNullList<Ingredient> ingredients, ItemStack output) {
         this.inputs = EntryStack.ofIngredients(ingredients);
         this.output = Collections.singletonList(EntryStack.create(output));
     }
     
     @Override
-    public Optional<Identifier> getRecipeLocation() {
-        return Optional.ofNullable(display).map(CuttingRecipe::getId);
+    public Optional<ResourceLocation> getRecipeLocation() {
+        return Optional.ofNullable(display).map(SingleItemRecipe::getId);
     }
     
     @Override
@@ -72,7 +72,7 @@ public class DefaultStoneCuttingDisplay implements RecipeDisplay {
     }
     
     @Override
-    public Identifier getRecipeCategory() {
+    public ResourceLocation getRecipeCategory() {
         return DefaultPlugin.STONE_CUTTING;
     }
     

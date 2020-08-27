@@ -24,16 +24,16 @@
 package me.shedaniel.rei.gui.config.entry;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.rei.api.EntryStack;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.widget.AbstractButtonWidget;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.util.NarratorManager;
-import net.minecraft.client.util.Window;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
@@ -46,11 +46,11 @@ public class NoFilteringEntry extends AbstractConfigListEntry<List<EntryStack>> 
     private Consumer<List<EntryStack>> saveConsumer;
     private List<EntryStack> defaultValue;
     private List<EntryStack> configFiltered;
-    private final AbstractButtonWidget buttonWidget = new ButtonWidget(0, 0, 0, 20, new TranslatableText("config.roughlyenoughitems.filteredEntries.loadWorldFirst"), button -> {});
-    private final List<Element> children = ImmutableList.of(buttonWidget);
+    private final AbstractWidget buttonWidget = new Button(0, 0, 0, 20, new TranslatableComponent("config.roughlyenoughitems.filteredEntries.loadWorldFirst"), button -> {});
+    private final List<GuiEventListener> children = ImmutableList.of(buttonWidget);
     
     public NoFilteringEntry(int width, List<EntryStack> configFiltered, List<EntryStack> defaultValue, Consumer<List<EntryStack>> saveConsumer) {
-        super(NarratorManager.EMPTY, false);
+        super(NarratorChatListener.NO_TITLE, false);
         this.width = width;
         this.configFiltered = configFiltered;
         this.defaultValue = defaultValue;
@@ -73,9 +73,9 @@ public class NoFilteringEntry extends AbstractConfigListEntry<List<EntryStack>> 
     }
     
     @Override
-    public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+    public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
         super.render(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
-        Window window = MinecraftClient.getInstance().getWindow();
+        Window window = Minecraft.getInstance().getWindow();
         this.buttonWidget.active = false;
         this.buttonWidget.y = y;
         this.buttonWidget.x = x + entryWidth / 2 - width / 2;
@@ -84,7 +84,7 @@ public class NoFilteringEntry extends AbstractConfigListEntry<List<EntryStack>> 
     }
     
     @Override
-    public List<? extends Element> children() {
+    public List<? extends GuiEventListener> children() {
         return children;
     }
 }

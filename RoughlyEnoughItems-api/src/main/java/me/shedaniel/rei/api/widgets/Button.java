@@ -23,9 +23,9 @@
 
 package me.shedaniel.rei.api.widgets;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -79,12 +79,12 @@ public abstract class Button extends BaseWidget<Button> {
     }
     
     @NotNull
-    public abstract Text getText();
+    public abstract Component getText();
     
-    public abstract void setText(@NotNull Text text);
+    public abstract void setText(@NotNull Component text);
     
     @NotNull
-    public final Button text(@NotNull Text text) {
+    public final Button text(@NotNull Component text) {
         setText(text);
         return this;
     }
@@ -101,12 +101,12 @@ public abstract class Button extends BaseWidget<Button> {
     }
     
     @Nullable
-    public abstract BiConsumer<MatrixStack, Button> getOnRender();
+    public abstract BiConsumer<PoseStack, Button> getOnRender();
     
-    public abstract void setOnRender(@Nullable BiConsumer<MatrixStack, Button> onRender);
+    public abstract void setOnRender(@Nullable BiConsumer<PoseStack, Button> onRender);
     
     @NotNull
-    public final Button onRender(@Nullable BiConsumer<MatrixStack, Button> onRender) {
+    public final Button onRender(@Nullable BiConsumer<PoseStack, Button> onRender) {
         setOnRender(onRender);
         return this;
     }

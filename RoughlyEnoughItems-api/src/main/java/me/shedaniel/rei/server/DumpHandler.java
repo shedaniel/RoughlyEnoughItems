@@ -23,13 +23,13 @@
 
 package me.shedaniel.rei.server;
 
-import net.minecraft.container.Container;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
 @FunctionalInterface
-public interface DumpHandler<T extends Container> {
+public interface DumpHandler<T extends AbstractContainerMenu> {
     boolean dump(ContainerContext<T> context, ItemStack stackToInsert);
     
     static StackAccessor getOccupiedSlotWithRoomForStack(ItemStack stack, List<StackAccessor> inventoryStacks) {
@@ -53,6 +53,6 @@ public interface DumpHandler<T extends Container> {
     }
     
     static boolean canStackAddMore(ItemStack existingStack, ItemStack stack) {
-        return !existingStack.isEmpty() && ItemStack.areItemsEqual(existingStack, stack) && existingStack.isStackable() && existingStack.getCount() + stack.getCount() <= existingStack.getMaxCount();
+        return !existingStack.isEmpty() && ItemStack.isSameIgnoreDurability(existingStack, stack) && existingStack.isStackable() && existingStack.getCount() + stack.getCount() <= existingStack.getMaxStackSize();
     }
 }

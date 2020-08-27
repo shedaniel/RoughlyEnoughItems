@@ -25,10 +25,10 @@ package me.shedaniel.rei.impl;
 
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -47,16 +47,16 @@ public final class SimpleFluidRenderer {
     }
     
     public interface FluidRenderingData {
-        Sprite getSprite();
+        TextureAtlasSprite getSprite();
         
         int getColor();
     }
     
     public static final class FluidRenderingDataImpl implements FluidRenderingData {
-        private final Sprite sprite;
+        private final TextureAtlasSprite sprite;
         private final int color;
         
-        public FluidRenderingDataImpl(Sprite sprite, int color) {
+        public FluidRenderingDataImpl(TextureAtlasSprite sprite, int color) {
             this.sprite = sprite;
             this.color = color;
         }
@@ -65,15 +65,15 @@ public final class SimpleFluidRenderer {
             FluidRenderHandler fluidRenderHandler = FluidRenderHandlerRegistry.INSTANCE.get(fluid);
             if (fluidRenderHandler == null)
                 return null;
-            Sprite[] sprites = fluidRenderHandler.getFluidSprites(MinecraftClient.getInstance().world, MinecraftClient.getInstance().world == null ? null : BlockPos.ORIGIN, fluid.getDefaultState());
+            TextureAtlasSprite[] sprites = fluidRenderHandler.getFluidSprites(Minecraft.getInstance().level, Minecraft.getInstance().level == null ? null : BlockPos.ZERO, fluid.defaultFluidState());
             int color = -1;
-            if (MinecraftClient.getInstance().world != null)
-                color = fluidRenderHandler.getFluidColor(MinecraftClient.getInstance().world, BlockPos.ORIGIN, fluid.getDefaultState());
+            if (Minecraft.getInstance().level != null)
+                color = fluidRenderHandler.getFluidColor(Minecraft.getInstance().level, BlockPos.ZERO, fluid.defaultFluidState());
             return new FluidRenderingDataImpl(sprites[0], color);
         }
         
         @Override
-        public Sprite getSprite() {
+        public TextureAtlasSprite getSprite() {
             return sprite;
         }
         

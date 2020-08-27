@@ -32,8 +32,11 @@ allprojects {
         }
     }
 
+    loom {
+        shareCaches = true
+    }
+
     repositories {
-        maven { url "https://dl.bintray.com/shedaniel/legacy-yarn-updated" }
         maven { url "https://dl.bintray.com/shedaniel/shedaniel-mods" }
         mavenLocal()
     }
@@ -58,7 +61,7 @@ allprojects {
 
     dependencies {
         minecraft("com.mojang:minecraft:${project.minecraft_version}")
-        mappings("me.shedaniel:legacy-yarn:${project.yarn_version}:v2")
+        mappings(minecraft.officialMojangMappings())
         modApi("net.fabricmc:fabric-loader:${project.fabricloader_version}")
         modApi("net.fabricmc.fabric-api:fabric-api:${project.fabric_api}") {
             exclude(module: "fabric-biomes-v1")

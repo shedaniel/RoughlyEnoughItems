@@ -23,13 +23,13 @@
 
 package me.shedaniel.rei.impl.widgets;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.widgets.BurningFire;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -64,17 +64,17 @@ public final class BurningFireWidget extends BurningFire {
     }
     
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        MinecraftClient.getInstance().getTextureManager().bindTexture(REIHelper.getInstance().getDefaultDisplayTexture());
-        drawTexture(matrices, getX(), getY(), 1, 74, 14, 14);
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        Minecraft.getInstance().getTextureManager().bind(REIHelper.getInstance().getDefaultDisplayTexture());
+        blit(matrices, getX(), getY(), 1, 74, 14, 14);
         if (getAnimationDuration() > 0) {
-            int height = 14 - MathHelper.ceil((System.currentTimeMillis() / (animationDuration / 14) % 14d) / 1f);
-            drawTexture(matrices, getX(), getY() + 14 - height, 82, 77 + (14 - height), 14, height);
+            int height = 14 - Mth.ceil((System.currentTimeMillis() / (animationDuration / 14) % 14d) / 1f);
+            blit(matrices, getX(), getY() + 14 - height, 82, 77 + (14 - height), 14, height);
         }
     }
     
     @Override
-    public List<? extends Element> children() {
+    public List<? extends GuiEventListener> children() {
         return Collections.emptyList();
     }
 }

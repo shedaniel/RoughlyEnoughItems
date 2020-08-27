@@ -24,6 +24,7 @@
 package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
@@ -37,13 +38,12 @@ import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.screen.ingame.ContainerScreen;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -57,8 +57,8 @@ import java.util.function.Supplier;
 public final class InternalWidgets {
     private InternalWidgets() {}
     
-    public static Widget createAutoCraftingButtonWidget(Rectangle displayBounds, Rectangle rectangle, Text text, Supplier<RecipeDisplay> displaySupplier, List<Widget> setupDisplay, RecipeCategory<?> category) {
-        ContainerScreen<?> containerScreen = REIHelper.getInstance().getPreviousContainerScreen();
+    public static Widget createAutoCraftingButtonWidget(Rectangle displayBounds, Rectangle rectangle, Component text, Supplier<RecipeDisplay> displaySupplier, List<Widget> setupDisplay, RecipeCategory<?> category) {
+        AbstractContainerScreen<?> containerScreen = REIHelper.getInstance().getPreviousContainerScreen();
         boolean[] visible = {false};
         List<String>[] errorTooltip = new List[]{null};
         Button autoCraftingButton = Widgets.createButton(rectangle, text)
@@ -77,7 +77,7 @@ public final class InternalWidgets {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                    MinecraftClient.getInstance().openScreen(containerScreen);
+                    Minecraft.getInstance().setScreen(containerScreen);
                     ScreenHelper.getLastOverlay().init();
                 })
                 .onRender((matrices, button) -> {
@@ -146,16 +146,16 @@ public final class InternalWidgets {
                     String str = "";
                     if (errorTooltip[0] == null) {
                         if (((ClientHelperImpl) ClientHelper.getInstance()).isYog.get())
-                            str += I18n.translate("text.auto_craft.move_items.yog");
+                            str += I18n.get("text.auto_craft.move_items.yog");
                         else
-                            str += I18n.translate("text.auto_craft.move_items");
+                            str += I18n.get("text.auto_craft.move_items");
                     } else {
                         if (errorTooltip[0].size() > 1)
-                            str += Formatting.RED.toString() + I18n.translate("error.rei.multi.errors") + "\n";
-                        str += CollectionUtils.mapAndJoinToString(errorTooltip[0], s -> Formatting.RED.toString() + (errorTooltip[0].size() > 1 ? "- " : "") + I18n.translate(s), "\n");
+                            str += ChatFormatting.RED.toString() + I18n.get("error.rei.multi.errors") + "\n";
+                        str += CollectionUtils.mapAndJoinToString(errorTooltip[0], s -> ChatFormatting.RED.toString() + (errorTooltip[0].size() > 1 ? "- " : "") + I18n.get(s), "\n");
                     }
-                    if (MinecraftClient.getInstance().options.advancedItemTooltips) {
-                        str += displaySupplier.get().getRecipeLocation().isPresent() ? I18n.translate("text.rei.recipe_id", Formatting.GRAY.toString(), displaySupplier.get().getRecipeLocation().get().toString()) : "";
+                    if (Minecraft.getInstance().options.advancedItemTooltips) {
+                        str += displaySupplier.get().getRecipeLocation().isPresent() ? I18n.get("text.rei.recipe_id", ChatFormatting.GRAY.toString(), displaySupplier.get().getRecipeLocation().get().toString()) : "";
                     }
                     return str;
                 });
@@ -166,21 +166,21 @@ public final class InternalWidgets {
             }
             
             @Override
-            public List<? extends Element> children() {
+            public List<? extends GuiEventListener> children() {
                 return Collections.singletonList(autoCraftingButton);
             }
             
             @Override
-            public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+            public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
                 autoCraftingButton.render(matrices, mouseX, mouseY, delta);
             }
             
             @Override
             public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
                 if (displaySupplier.get().getRecipeLocation().isPresent() && ConfigObject.getInstance().getCopyRecipeIdentifierKeybind().matchesKey(keyCode, scanCode) && containsMouse(PointHelper.ofMouse())) {
-                    minecraft.keyboard.setClipboard(displaySupplier.get().getRecipeLocation().get().toString());
+                    minecraft.keyboardHandler.setClipboard(displaySupplier.get().getRecipeLocation().get().toString());
                     if (ConfigObject.getInstance().isToastDisplayedOnCopyIdentifier()) {
-                        CopyRecipeIdentifierToast.addToast(I18n.translate("msg.rei.copied_recipe_id"), I18n.translate("msg.rei.recipe_id_details", displaySupplier.get().getRecipeLocation().get().toString()));
+                        CopyRecipeIdentifierToast.addToast(I18n.get("msg.rei.copied_recipe_id"), I18n.get("msg.rei.recipe_id_details", displaySupplier.get().getRecipeLocation().get().toString()));
                     }
                     return true;
                 }
@@ -190,9 +190,9 @@ public final class InternalWidgets {
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int button) {
                 if (displaySupplier.get().getRecipeLocation().isPresent() && ConfigObject.getInstance().getCopyRecipeIdentifierKeybind().matchesMouse(button) && containsMouse(PointHelper.ofMouse())) {
-                    minecraft.keyboard.setClipboard(displaySupplier.get().getRecipeLocation().get().toString());
+                    minecraft.keyboardHandler.setClipboard(displaySupplier.get().getRecipeLocation().get().toString());
                     if (ConfigObject.getInstance().isToastDisplayedOnCopyIdentifier()) {
-                        CopyRecipeIdentifierToast.addToast(I18n.translate("msg.rei.copied_recipe_id"), I18n.translate("msg.rei.recipe_id_details", displaySupplier.get().getRecipeLocation().get().toString()));
+                        CopyRecipeIdentifierToast.addToast(I18n.get("msg.rei.copied_recipe_id"), I18n.get("msg.rei.recipe_id_details", displaySupplier.get().getRecipeLocation().get().toString()));
                     }
                     return true;
                 }
@@ -225,7 +225,7 @@ public final class InternalWidgets {
         }
         
         @Override
-        public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
             for (Widget widget : widgets) {
                 widget.setZ(getZ());
                 widget.render(matrices, mouseX, mouseY, delta);
@@ -233,7 +233,7 @@ public final class InternalWidgets {
         }
         
         @Override
-        public List<? extends Element> children() {
+        public List<? extends GuiEventListener> children() {
             return widgets;
         }
         
@@ -255,13 +255,13 @@ public final class InternalWidgets {
         }
         
         @Override
-        public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
             this.widget.setZ(getZ());
             this.widget.render(matrices, mouseX, mouseY, delta);
         }
         
         @Override
-        public List<? extends Element> children() {
+        public List<? extends GuiEventListener> children() {
             return Collections.singletonList(this.widget);
         }
         
@@ -284,7 +284,7 @@ public final class InternalWidgets {
         }
         
         @Override
-        public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
             this.widget.setZ(getZ());
             this.widget.render(matrices, mouseX, mouseY, delta);
         }
@@ -295,7 +295,7 @@ public final class InternalWidgets {
         }
         
         @Override
-        public List<? extends Element> children() {
+        public List<? extends GuiEventListener> children() {
             return Collections.singletonList(this.widget);
         }
         
@@ -322,12 +322,12 @@ public final class InternalWidgets {
         }
         
         @Override
-        public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-            matrices.push();
+        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+            matrices.pushPose();
             matrices.translate(x, y, z);
             this.widget.setZ(getZ());
             this.widget.render(matrices, mouseX, mouseY, delta);
-            matrices.pop();
+            matrices.popPose();
         }
         
         @Override
@@ -336,7 +336,7 @@ public final class InternalWidgets {
         }
         
         @Override
-        public List<? extends Element> children() {
+        public List<? extends GuiEventListener> children() {
             return Collections.singletonList(this.widget);
         }
         

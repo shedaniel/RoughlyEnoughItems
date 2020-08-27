@@ -29,14 +29,14 @@ import me.shedaniel.rei.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.impl.Internals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.util.ActionResult;
+import net.minecraft.world.InteractionResult;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.function.Supplier;
 
-import static net.minecraft.util.ActionResult.PASS;
+import static net.minecraft.world.InteractionResult.PASS;
 
 @Environment(EnvType.CLIENT)
 public interface DisplayHelper {
@@ -166,20 +166,20 @@ public interface DisplayHelper {
          * @return whether the item slot can fit
          * @see BaseBoundsHandler#registerExclusionZones(Class, Supplier) for easier api
          */
-        default ActionResult canItemSlotWidgetFit(int left, int top, T screen, Rectangle fullBounds) {
-            ActionResult fit = isInZone(left, top);
-            if (fit == ActionResult.FAIL)
-                return ActionResult.FAIL;
-            ActionResult fit2 = isInZone(left + 18, top + 18);
-            if (fit2 == ActionResult.FAIL)
-                return ActionResult.FAIL;
-            if (fit == ActionResult.SUCCESS && fit2 == ActionResult.SUCCESS)
-                return ActionResult.SUCCESS;
+        default InteractionResult canItemSlotWidgetFit(int left, int top, T screen, Rectangle fullBounds) {
+            InteractionResult fit = isInZone(left, top);
+            if (fit == InteractionResult.FAIL)
+                return InteractionResult.FAIL;
+            InteractionResult fit2 = isInZone(left + 18, top + 18);
+            if (fit2 == InteractionResult.FAIL)
+                return InteractionResult.FAIL;
+            if (fit == InteractionResult.SUCCESS && fit2 == InteractionResult.SUCCESS)
+                return InteractionResult.SUCCESS;
             return PASS;
         }
         
         @Override
-        default ActionResult isInZone(double mouseX, double mouseY) {
+        default InteractionResult isInZone(double mouseX, double mouseY) {
             return OverlayDecider.super.isInZone(mouseX, mouseY);
         }
         

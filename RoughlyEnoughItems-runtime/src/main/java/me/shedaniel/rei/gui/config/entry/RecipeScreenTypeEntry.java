@@ -24,18 +24,18 @@
 package me.shedaniel.rei.gui.config.entry;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
 import me.shedaniel.rei.gui.PreRecipeViewingScreen;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.widget.AbstractButtonWidget;
-import net.minecraft.client.gui.widget.AbstractPressableButtonWidget;
-import net.minecraft.client.util.NarratorManager;
-import net.minecraft.client.util.Window;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.gui.components.AbstractButton;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 
 import java.util.List;
 import java.util.Optional;
@@ -47,25 +47,25 @@ public class RecipeScreenTypeEntry extends TooltipListEntry<RecipeScreenType> {
     private RecipeScreenType type;
     private RecipeScreenType defaultValue;
     private Consumer<RecipeScreenType> save;
-    private final AbstractButtonWidget buttonWidget = new AbstractPressableButtonWidget(0, 0, 0, 20, NarratorManager.EMPTY) {
+    private final AbstractWidget buttonWidget = new AbstractButton(0, 0, 0, 20, NarratorChatListener.NO_TITLE) {
         @Override
         public void onPress() {
-            MinecraftClient.getInstance().openScreen(new PreRecipeViewingScreen(getConfigScreen(), type, false, original -> {
-                MinecraftClient.getInstance().openScreen(getConfigScreen());
+            Minecraft.getInstance().setScreen(new PreRecipeViewingScreen(getConfigScreen(), type, false, original -> {
+                Minecraft.getInstance().setScreen(getConfigScreen());
                 type = original ? RecipeScreenType.ORIGINAL : RecipeScreenType.VILLAGER;
             }));
         }
         
         @Override
-        public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-            setMessage(new TranslatableText("config.roughlyenoughitems.recipeScreenType.config", type.toString()));
+        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+            setMessage(new TranslatableComponent("config.roughlyenoughitems.recipeScreenType.config", type.toString()));
             super.render(matrices, mouseX, mouseY, delta);
         }
     };
-    private final List<Element> children = ImmutableList.of(buttonWidget);
+    private final List<GuiEventListener> children = ImmutableList.of(buttonWidget);
     
     @SuppressWarnings("deprecation")
-    public RecipeScreenTypeEntry(int width, Text fieldName, RecipeScreenType type, RecipeScreenType defaultValue, Consumer<RecipeScreenType> save) {
+    public RecipeScreenTypeEntry(int width, Component fieldName, RecipeScreenType type, RecipeScreenType defaultValue, Consumer<RecipeScreenType> save) {
         super(fieldName, null);
         this.original = type;
         this.width = width;
@@ -95,14 +95,14 @@ public class RecipeScreenTypeEntry extends TooltipListEntry<RecipeScreenType> {
     }
     
     @Override
-    public List<? extends Element> children() {
+    public List<? extends GuiEventListener> children() {
         return children;
     }
     
     @Override
-    public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+    public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
         super.render(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
-        Window window = MinecraftClient.getInstance().getWindow();
+        Window window = Minecraft.getInstance().getWindow();
         this.buttonWidget.active = this.isEditable();
         this.buttonWidget.y = y;
         this.buttonWidget.x = x + entryWidth / 2 - width / 2;

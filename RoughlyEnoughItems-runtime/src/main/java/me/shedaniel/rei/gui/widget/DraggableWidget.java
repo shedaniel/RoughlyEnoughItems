@@ -23,12 +23,12 @@
 
 package me.shedaniel.rei.gui.widget;
 
+import com.mojang.blaze3d.platform.Window;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.util.Window;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
@@ -43,7 +43,7 @@ public abstract class DraggableWidget extends WidgetWithBounds {
     }
     
     public DraggableWidget() {
-        this(new Point(MinecraftClient.getInstance().getWindow().getScaledWidth() / 2, MinecraftClient.getInstance().getWindow().getScaledHeight() / 2));
+        this(new Point(Minecraft.getInstance().getWindow().getGuiScaledWidth() / 2, Minecraft.getInstance().getWindow().getGuiScaledHeight() / 2));
     }
     
     protected abstract void initWidgets(Point midPoint);
@@ -76,7 +76,7 @@ public abstract class DraggableWidget extends WidgetWithBounds {
             }
             return true;
         }
-        for (Element listener : children())
+        for (GuiEventListener listener : children())
             if (listener.mouseDragged(double_1, double_2, int_1, double_3, double_4))
                 return true;
         return false;
@@ -92,7 +92,7 @@ public abstract class DraggableWidget extends WidgetWithBounds {
                 onMouseReleaseMidPoint(getMidPoint());
                 return true;
             }
-        for (Element listener : children())
+        for (GuiEventListener listener : children())
             if (listener.mouseReleased(double_1, double_2, int_1))
                 return true;
         return false;

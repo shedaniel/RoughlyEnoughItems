@@ -29,11 +29,11 @@ import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
@@ -48,15 +48,15 @@ public class DefaultBrewingDisplay implements RecipeDisplay {
     
     @ApiStatus.Internal
     public DefaultBrewingDisplay(ItemStack input, Ingredient reactant, ItemStack output) {
-        this.input = EntryStack.create(input).setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, stack -> Collections.singletonList(new TranslatableText("category.rei.brewing.input").formatted(Formatting.YELLOW)));
-        ItemStack[] reactantStacks = reactant.getMatchingStacksClient();
+        this.input = EntryStack.create(input).setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, stack -> Collections.singletonList(new TranslatableComponent("category.rei.brewing.input").withStyle(ChatFormatting.YELLOW)));
+        ItemStack[] reactantStacks = reactant.getItems();
         this.reactant = new ArrayList<>(reactantStacks.length);
         for (ItemStack stack : reactantStacks) {
             EntryStack entryStack = EntryStack.create(stack);
-            entryStack.setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> Collections.singletonList(new TranslatableText("category.rei.brewing.reactant").formatted(Formatting.YELLOW)));
+            entryStack.setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> Collections.singletonList(new TranslatableComponent("category.rei.brewing.reactant").withStyle(ChatFormatting.YELLOW)));
             this.reactant.add(entryStack);
         }
-        this.output = EntryStack.create(output).setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, stack -> Collections.singletonList(new TranslatableText("category.rei.brewing.result").formatted(Formatting.YELLOW)));
+        this.output = EntryStack.create(output).setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, stack -> Collections.singletonList(new TranslatableComponent("category.rei.brewing.result").withStyle(ChatFormatting.YELLOW)));
     }
     
     @Override
@@ -70,7 +70,7 @@ public class DefaultBrewingDisplay implements RecipeDisplay {
     }
     
     @Override
-    public Identifier getRecipeCategory() {
+    public ResourceLocation getRecipeCategory() {
         return DefaultPlugin.BREWING;
     }
     

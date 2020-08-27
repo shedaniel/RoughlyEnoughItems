@@ -1,14 +1,14 @@
 accessWidener   v1  named
-accessible field net/minecraft/item/BucketItem fluid Lnet/minecraft/fluid/Fluid;
-accessible field net/minecraft/client/gui/screen/ingame/AbstractInventoryScreen offsetGuiForEffects Z
-accessible field net/minecraft/client/gui/screen/recipebook/RecipeBookWidget ghostSlots Lnet/minecraft/client/gui/screen/recipebook/RecipeBookGhostSlots;
-accessible field net/minecraft/client/gui/screen/recipebook/RecipeBookWidget searchField Lnet/minecraft/client/gui/widget/TextFieldWidget;
-accessible field net/minecraft/client/gui/screen/recipebook/RecipeBookWidget tabButtons Ljava/util/List;
-accessible field net/minecraft/client/gui/screen/ingame/ContainerScreen x I
-accessible field net/minecraft/client/gui/screen/ingame/ContainerScreen y I
-accessible field net/minecraft/client/gui/screen/ingame/ContainerScreen containerWidth I
-accessible field net/minecraft/client/gui/screen/ingame/ContainerScreen containerHeight I
-accessible field net/minecraft/client/gui/screen/ingame/ContainerScreen focusedSlot Lnet/minecraft/screen/slot/Slot;
-accessible method net/minecraft/client/gui/DrawableHelper drawTexturedQuad (Lnet/minecraft/util/math/Matrix4f;IIIIIFFFF)V
-accessible field net/minecraft/recipe/SmithingRecipe base Lnet/minecraft/recipe/Ingredient;
-accessible field net/minecraft/recipe/SmithingRecipe addition Lnet/minecraft/recipe/Ingredient;
+accessible field net/minecraft/world/item/BucketItem content Lnet/minecraft/world/level/material/Fluid;
+accessible field net/minecraft/client/gui/screens/inventory/EffectRenderingInventoryScreen doRenderEffects Z
+accessible field net/minecraft/client/gui/screens/recipebook/RecipeBookComponent ghostRecipe Lnet/minecraft/client/gui/screens/recipebook/GhostRecipe;
+accessible field net/minecraft/client/gui/screens/recipebook/RecipeBookComponent searchBox Lnet/minecraft/client/gui/components/EditBox;
+accessible field net/minecraft/client/gui/screens/recipebook/RecipeBookComponent tabButtons Ljava/util/List;
+accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen leftPos I
+accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen topPos I
+accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen imageWidth I
+accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen imageHeight I
+accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen hoveredSlot Lnet/minecraft/world/inventory/Slot;
+accessible method net/minecraft/client/gui/GuiComponent innerBlit (Lcom/mojang/math/Matrix4f;IIIIIFFFF)V
+accessible field net/minecraft/world/item/crafting/UpgradeRecipe base Lnet/minecraft/world/item/crafting/Ingredient;
+accessible field net/minecraft/world/item/crafting/UpgradeRecipe addition Lnet/minecraft/world/item/crafting/Ingredient;
