@@ -33,10 +33,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.api.Executor;
 import me.shedaniel.rei.RoughlyEnoughItemsState;
-import me.shedaniel.rei.api.ConfigManager;
-import me.shedaniel.rei.api.ConfigObject;
-import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.REIOverlay;
+import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.OverlaySearchField;
@@ -48,6 +45,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.event.client.ClientTickCallback;
+import net.fabricmc.fabric.api.screenhandler.v1.ScreenHandlerRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -227,13 +225,35 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
         attachInstance(instance, REIHelper.class);
     }
     
+    public static SearchFieldLocation getContextualSearchFieldLocation() {
+        Window window = Minecraft.getInstance().getWindow();
+        for (OverlayDecider decider : DisplayHelper.getInstance().getSortedOverlayDeciders(Minecraft.getInstance().screen.getClass())) {
+            if (decider instanceof DisplayHelper.DisplayBoundsProvider) {
+                Rectangle containerBounds = ((DisplayHelper.DisplayBoundsProvider<Screen>) decider).getScreenBounds(Minecraft.getInstance().screen);
+                if (window.getGuiScaledHeight() - 20 <= containerBounds.getMaxY())
+                    return SearchFieldLocation.BOTTOM_SIDE;
+                else break;
+            }
+        }
+        return ConfigObject.getInstance().getSearchFieldLocation();
+    }
+    
     public static Rectangle getItemListArea(Rectangle bounds) {
-        return new Rectangle(bounds.x, bounds.y + 2 + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + (ConfigObject.getInstance().isEntryListWidgetScrolled() ? 0 : 22), bounds.width, bounds.height - (ConfigObject.getInstance().getSearchFieldLocation() != SearchFieldLocation.CENTER ? 27 + 22 : 27) + (!ConfigObject.getInstance().isEntryListWidgetScrolled() ? 0 : 22));
+        SearchFieldLocation searchFieldLocation = ScreenHelper.getContextualSearchFieldLocation();
+        
+        int yOffset = 2;
+        if (searchFieldLocation == SearchFieldLocation.TOP_SIDE) yOffset += 24;
+        if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) yOffset += 22;
+        int heightOffset = 0;
+        if (searchFieldLocation == SearchFieldLocation.BOTTOM_SIDE) heightOffset += 24;
+        return new Rectangle(bounds.x, bounds.y + yOffset, bounds.width, bounds.height - 1 - yOffset - heightOffset);
     }
     
     public static Rectangle getFavoritesListArea(Rectangle bounds) {
-        int offset = 6 + (!ConfigObject.getInstance().isLowerConfigButton() ? 25 : 0) + (ConfigObject.getInstance().doesShowUtilsButtons() ? 25 : 0);
-        return new Rectangle(bounds.x, bounds.y + 2 + offset, bounds.width, bounds.height - 5 - offset);
+        int yOffset = 8;
+        if (ConfigObject.getInstance().doesShowUtilsButtons()) yOffset += 50;
+        else if (!ConfigObject.getInstance().isLowerConfigButton()) yOffset += 25;
+        return new Rectangle(bounds.x, bounds.y + yOffset, bounds.width, bounds.height - 3 - yOffset);
     }
     
     @Override

@@ -435,19 +435,38 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
     }
     
     private Rectangle getSearchFieldArea() {
-        int widthRemoved = 1 + (ConfigObject.getInstance().isCraftableFilterEnabled() ? 22 : 0) + (ConfigObject.getInstance().isLowerConfigButton() ? 22 : 0);
-        SearchFieldLocation searchFieldLocation = ConfigObject.getInstance().getSearchFieldLocation();
-        if (searchFieldLocation == SearchFieldLocation.BOTTOM_SIDE)
-            return new Rectangle(bounds.x + 2, window.getGuiScaledHeight() - 22, bounds.width - 6 - widthRemoved, 18);
-        if (searchFieldLocation == SearchFieldLocation.TOP_SIDE)
-            return new Rectangle(bounds.x + 2, 4, bounds.width - 6 - widthRemoved, 18);
-        for (OverlayDecider decider : DisplayHelper.getInstance().getSortedOverlayDeciders(Minecraft.getInstance().screen.getClass())) {
-            if (decider instanceof DisplayHelper.DisplayBoundsProvider) {
-                Rectangle containerBounds = ((DisplayHelper.DisplayBoundsProvider<Screen>) decider).getScreenBounds(Minecraft.getInstance().screen);
-                return new Rectangle(containerBounds.x, window.getGuiScaledHeight() - 22, containerBounds.width - widthRemoved, 18);
+        int widthRemoved = 1;
+        if (ConfigObject.getInstance().isCraftableFilterEnabled()) widthRemoved += 22;
+        if (ConfigObject.getInstance().isLowerConfigButton()) widthRemoved += 22;
+        SearchFieldLocation searchFieldLocation = ScreenHelper.getContextualSearchFieldLocation();
+        switch (searchFieldLocation) {
+            case TOP_SIDE:
+                return getTopSideSearchFieldArea(widthRemoved);
+            case BOTTOM_SIDE:
+                return getBottomSideSearchFieldArea(widthRemoved);
+            default:
+            case CENTER: {
+                for (OverlayDecider decider : DisplayHelper.getInstance().getSortedOverlayDeciders(Minecraft.getInstance().screen.getClass())) {
+                    if (decider instanceof DisplayHelper.DisplayBoundsProvider) {
+                        Rectangle containerBounds = ((DisplayHelper.DisplayBoundsProvider<Screen>) decider).getScreenBounds(Minecraft.getInstance().screen);
+                        return getBottomCenterSearchFieldArea(containerBounds, widthRemoved);
+                    }
+                }
+                return new Rectangle();
             }
         }
-        return new Rectangle();
+    }
+    
+    private Rectangle getTopSideSearchFieldArea(int widthRemoved) {
+        return new Rectangle(bounds.x + 2, 4, bounds.width - 6 - widthRemoved, 18);
+    }
+    
+    private Rectangle getBottomSideSearchFieldArea(int widthRemoved) {
+        return new Rectangle(bounds.x + 2, window.getGuiScaledHeight() - 22, bounds.width - 6 - widthRemoved, 18);
+    }
+    
+    private Rectangle getBottomCenterSearchFieldArea(Rectangle containerBounds, int widthRemoved) {
+        return new Rectangle(containerBounds.x, window.getGuiScaledHeight() - 22, containerBounds.width - widthRemoved, 18);
     }
     
     private Rectangle getCraftableToggleArea() {
