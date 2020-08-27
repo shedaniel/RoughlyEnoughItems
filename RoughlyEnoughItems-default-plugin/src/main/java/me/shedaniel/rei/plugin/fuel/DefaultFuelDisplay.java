@@ -29,6 +29,7 @@ import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
@@ -44,17 +45,17 @@ public class DefaultFuelDisplay implements RecipeDisplay {
     }
     
     @Override
-    public List<List<EntryStack>> getInputEntries() {
+    public @NotNull List<List<EntryStack>> getInputEntries() {
         return Collections.singletonList(Collections.singletonList(fuel));
     }
     
     @Override
-    public List<List<EntryStack>> getResultingEntries() {
+    public @NotNull List<List<EntryStack>> getResultingEntries() {
         return Collections.emptyList();
     }
     
     @Override
-    public ResourceLocation getRecipeCategory() {
+    public @NotNull ResourceLocation getRecipeCategory() {
         return DefaultPlugin.FUEL;
     }
     

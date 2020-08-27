@@ -71,17 +71,17 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
     }
     
     @Override
-    public ResourceLocation getIdentifier() {
+    public @NotNull ResourceLocation getIdentifier() {
         return DefaultPlugin.INFO;
     }
     
     @Override
-    public String getCategoryName() {
+    public @NotNull String getCategoryName() {
         return I18n.get("category.rei.information");
     }
     
     @Override
-    public RecipeEntry getSimpleRenderer(DefaultInformationDisplay recipe) {
+    public @NotNull RecipeEntry getSimpleRenderer(DefaultInformationDisplay recipe) {
         FormattedCharSequence name = recipe.getName().getVisualOrderText();
         return new RecipeEntry() {
             @Override
@@ -97,7 +97,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
     }
     
     @Override
-    public EntryStack getLogo() {
+    public @NotNull EntryStack getLogo() {
         return new RenderingEntry() {
             @Override
             public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
@@ -112,7 +112,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
     }
     
     @Override
-    public List<Widget> setupDisplay(DefaultInformationDisplay recipeDisplay, Rectangle bounds) {
+    public @NotNull List<Widget> setupDisplay(DefaultInformationDisplay recipeDisplay, Rectangle bounds) {
         List<Widget> widgets = Lists.newArrayList();
         widgets.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.y + 3), recipeDisplay.getName()).noShadow().color(0xFF404040, 0xFFBBBBBB));
         widgets.add(Widgets.createSlot(new Point(bounds.getCenterX() - 8, bounds.y + 15)).entries(recipeDisplay.getEntryStacks()));

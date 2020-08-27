@@ -34,27 +34,28 @@ import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 public class DefaultSmithingCategory implements RecipeCategory<DefaultSmithingDisplay> {
     @Override
-    public ResourceLocation getIdentifier() {
+    public @NotNull ResourceLocation getIdentifier() {
         return DefaultPlugin.SMITHING;
     }
     
     @Override
-    public String getCategoryName() {
+    public @NotNull String getCategoryName() {
         return I18n.get("category.rei.smithing");
     }
     
     @Override
-    public EntryStack getLogo() {
+    public @NotNull EntryStack getLogo() {
         return EntryStack.create(Blocks.SMITHING_TABLE);
     }
     
     @Override
-    public List<Widget> setupDisplay(DefaultSmithingDisplay display, Rectangle bounds) {
+    public @NotNull List<Widget> setupDisplay(DefaultSmithingDisplay display, Rectangle bounds) {
         Point startPoint = new Point(bounds.getCenterX() - 31, bounds.getCenterY() - 13);
         List<Widget> widgets = Lists.newArrayList();
         widgets.add(Widgets.createRecipeBase(bounds));

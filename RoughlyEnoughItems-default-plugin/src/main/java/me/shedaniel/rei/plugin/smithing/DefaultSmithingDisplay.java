@@ -66,27 +66,27 @@ public class DefaultSmithingDisplay implements RecipeDisplay {
     }
     
     @Override
-    public List<List<EntryStack>> getInputEntries() {
+    public @NotNull List<List<EntryStack>> getInputEntries() {
         return input;
     }
     
     @Override
-    public List<List<EntryStack>> getResultingEntries() {
+    public @NotNull List<List<EntryStack>> getResultingEntries() {
         return Collections.singletonList(output);
     }
     
     @Override
-    public List<List<EntryStack>> getRequiredEntries() {
+    public @NotNull List<List<EntryStack>> getRequiredEntries() {
         return getInputEntries();
     }
     
     @Override
-    public ResourceLocation getRecipeCategory() {
+    public @NotNull ResourceLocation getRecipeCategory() {
         return DefaultPlugin.SMITHING;
     }
     
     @Override
-    public Optional<ResourceLocation> getRecipeLocation() {
+    public @NotNull Optional<ResourceLocation> getRecipeLocation() {
         return Optional.ofNullable(location);
     }
 }

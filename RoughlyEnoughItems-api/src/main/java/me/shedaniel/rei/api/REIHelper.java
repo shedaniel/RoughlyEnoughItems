@@ -32,6 +32,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -59,11 +60,15 @@ public interface REIHelper {
     
     boolean isDarkThemeEnabled();
     
+    @Nullable
     TextFieldWidget getSearchTextField();
     
+    @NotNull
+    @ApiStatus.Internal
     List<ItemStack> getInventoryStacks();
     
     void queueTooltip(@Nullable Tooltip tooltip);
     
+    @NotNull
     ResourceLocation getDefaultDisplayTexture();
 }

@@ -26,6 +26,7 @@ package me.shedaniel.rei.api;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
@@ -36,6 +37,7 @@ public interface RecipeDisplay {
     /**
      * @return a list of inputs
      */
+    @NotNull
     List<List<EntryStack>> getInputEntries();
     
     /**
@@ -43,6 +45,7 @@ public interface RecipeDisplay {
      */
     @Deprecated
     @ApiStatus.ScheduledForRemoval
+    @NotNull
     default List<EntryStack> getOutputEntries() {
         return Collections.emptyList();
     }
@@ -50,6 +53,7 @@ public interface RecipeDisplay {
     /**
      * @return a list of outputs
      */
+    @NotNull
     default List<List<EntryStack>> getResultingEntries() {
         return CollectionUtils.map(getOutputEntries(), Collections::singletonList);
     }
@@ -59,6 +63,7 @@ public interface RecipeDisplay {
      *
      * @return the list of required items
      */
+    @NotNull
     default List<List<EntryStack>> getRequiredEntries() {
         return Collections.emptyList();
     }
@@ -68,6 +73,7 @@ public interface RecipeDisplay {
      *
      * @return the identifier of the category
      */
+    @NotNull
     ResourceLocation getRecipeCategory();
     
     /**
@@ -75,6 +81,7 @@ public interface RecipeDisplay {
      *
      * @return the recipe location
      */
+    @NotNull
     default Optional<ResourceLocation> getRecipeLocation() {
         return Optional.empty();
     }

@@ -31,6 +31,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -58,12 +59,12 @@ public class DefaultInformationDisplay implements RecipeDisplay {
     }
     
     @Override
-    public List<List<EntryStack>> getInputEntries() {
+    public @NotNull List<List<EntryStack>> getInputEntries() {
         return Collections.singletonList(entryStacks);
     }
     
     @Override
-    public List<List<EntryStack>> getResultingEntries() {
+    public @NotNull List<List<EntryStack>> getResultingEntries() {
         return Collections.singletonList(entryStacks);
     }
     
@@ -95,7 +96,7 @@ public class DefaultInformationDisplay implements RecipeDisplay {
     }
     
     @Override
-    public ResourceLocation getRecipeCategory() {
+    public @NotNull ResourceLocation getRecipeCategory() {
         return DefaultPlugin.INFO;
     }
 }

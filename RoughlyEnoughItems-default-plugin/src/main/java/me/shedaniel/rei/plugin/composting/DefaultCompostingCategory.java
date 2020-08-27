@@ -43,6 +43,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Blocks;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -50,22 +51,22 @@ import java.util.*;
 public class DefaultCompostingCategory implements RecipeCategory<DefaultCompostingDisplay> {
     
     @Override
-    public ResourceLocation getIdentifier() {
+    public @NotNull ResourceLocation getIdentifier() {
         return DefaultPlugin.COMPOSTING;
     }
     
     @Override
-    public EntryStack getLogo() {
+    public @NotNull EntryStack getLogo() {
         return EntryStack.create(Blocks.COMPOSTER);
     }
     
     @Override
-    public String getCategoryName() {
+    public @NotNull String getCategoryName() {
         return I18n.get("category.rei.composting");
     }
     
     @Override
-    public RecipeEntry getSimpleRenderer(DefaultCompostingDisplay recipe) {
+    public @NotNull RecipeEntry getSimpleRenderer(DefaultCompostingDisplay recipe) {
         return new RecipeEntry() {
             private Component text = new TranslatableComponent("text.rei.composting.page", recipe.getPage() + 1);
             
@@ -82,7 +83,7 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
     }
     
     @Override
-    public List<Widget> setupDisplay(DefaultCompostingDisplay display, Rectangle bounds) {
+    public @NotNull List<Widget> setupDisplay(DefaultCompostingDisplay display, Rectangle bounds) {
         List<Widget> widgets = Lists.newArrayList();
         Point startingPoint = new Point(bounds.x + bounds.width - 55, bounds.y + 110);
         List<EntryStack> stacks = new ArrayList<>(display.getRequiredEntries().get(0));

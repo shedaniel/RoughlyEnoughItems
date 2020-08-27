@@ -33,6 +33,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.crafting.Recipe;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
@@ -42,7 +43,7 @@ import java.util.Optional;
 public interface DefaultCraftingDisplay extends TransferRecipeDisplay {
     
     @Override
-    default ResourceLocation getRecipeCategory() {
+    default @NotNull ResourceLocation getRecipeCategory() {
         return DefaultPlugin.CRAFTING;
     }
     

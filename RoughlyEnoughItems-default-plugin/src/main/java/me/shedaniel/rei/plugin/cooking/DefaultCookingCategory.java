@@ -38,6 +38,7 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;
 import java.util.Collections;
@@ -66,7 +67,7 @@ public class DefaultCookingCategory implements TransferRecipeCategory<DefaultCoo
     }
     
     @Override
-    public List<Widget> setupDisplay(DefaultCookingDisplay display, Rectangle bounds) {
+    public @NotNull List<Widget> setupDisplay(DefaultCookingDisplay display, Rectangle bounds) {
         Point startPoint = new Point(bounds.getCenterX() - 41, bounds.y + 10);
         double cookingTime = display.getCookingTime();
         DecimalFormat df = new DecimalFormat("###.##");
@@ -83,7 +84,7 @@ public class DefaultCookingCategory implements TransferRecipeCategory<DefaultCoo
     }
     
     @Override
-    public RecipeEntry getSimpleRenderer(DefaultCookingDisplay recipe) {
+    public @NotNull RecipeEntry getSimpleRenderer(DefaultCookingDisplay recipe) {
         return SimpleRecipeEntry.from(Collections.singletonList(recipe.getInputEntries().get(0)), recipe.getResultingEntries());
     }
     
@@ -93,17 +94,17 @@ public class DefaultCookingCategory implements TransferRecipeCategory<DefaultCoo
     }
     
     @Override
-    public ResourceLocation getIdentifier() {
+    public @NotNull ResourceLocation getIdentifier() {
         return identifier;
     }
     
     @Override
-    public EntryStack getLogo() {
+    public @NotNull EntryStack getLogo() {
         return logo;
     }
     
     @Override
-    public String getCategoryName() {
+    public @NotNull String getCategoryName() {
         return I18n.get(categoryName);
     }
 }

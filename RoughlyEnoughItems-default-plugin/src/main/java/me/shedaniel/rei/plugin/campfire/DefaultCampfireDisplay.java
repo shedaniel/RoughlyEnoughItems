@@ -34,6 +34,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
@@ -63,27 +64,27 @@ public class DefaultCampfireDisplay implements RecipeDisplay {
     }
     
     @Override
-    public Optional<ResourceLocation> getRecipeLocation() {
+    public @NotNull Optional<ResourceLocation> getRecipeLocation() {
         return Optional.ofNullable(display).map(AbstractCookingRecipe::getId);
     }
     
     @Override
-    public List<List<EntryStack>> getInputEntries() {
+    public @NotNull List<List<EntryStack>> getInputEntries() {
         return inputs;
     }
     
     @Override
-    public List<List<EntryStack>> getResultingEntries() {
+    public @NotNull List<List<EntryStack>> getResultingEntries() {
         return Collections.singletonList(output);
     }
     
     @Override
-    public List<List<EntryStack>> getRequiredEntries() {
+    public @NotNull List<List<EntryStack>> getRequiredEntries() {
         return inputs;
     }
     
     @Override
-    public ResourceLocation getRecipeCategory() {
+    public @NotNull ResourceLocation getRecipeCategory() {
         return DefaultPlugin.CAMPFIRE;
     }
     

@@ -53,22 +53,22 @@ import java.util.Objects;
 
 public class DefaultBeaconBaseCategory implements RecipeCategory<DefaultBeaconBaseDisplay> {
     @Override
-    public ResourceLocation getIdentifier() {
+    public @NotNull ResourceLocation getIdentifier() {
         return DefaultPlugin.BEACON;
     }
     
     @Override
-    public String getCategoryName() {
+    public @NotNull String getCategoryName() {
         return I18n.get("category.rei.beacon_base");
     }
     
     @Override
-    public EntryStack getLogo() {
+    public @NotNull EntryStack getLogo() {
         return EntryStack.create(Blocks.BEACON);
     }
     
     @Override
-    public RecipeEntry getSimpleRenderer(DefaultBeaconBaseDisplay recipe) {
+    public @NotNull RecipeEntry getSimpleRenderer(DefaultBeaconBaseDisplay recipe) {
         String name = getCategoryName();
         return new RecipeEntry() {
             @Override
@@ -84,7 +84,7 @@ public class DefaultBeaconBaseCategory implements RecipeCategory<DefaultBeaconBa
     }
     
     @Override
-    public List<Widget> setupDisplay(DefaultBeaconBaseDisplay display, Rectangle bounds) {
+    public @NotNull List<Widget> setupDisplay(DefaultBeaconBaseDisplay display, Rectangle bounds) {
         List<Widget> widgets = Lists.newArrayList();
         widgets.add(Widgets.createSlot(new Point(bounds.getCenterX() - 8, bounds.y + 3)).entry(getLogo()));
         Rectangle rectangle = new Rectangle(bounds.getCenterX() - (bounds.width / 2) - 1, bounds.y + 23, bounds.width + 2, bounds.height - 28);

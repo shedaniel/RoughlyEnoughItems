@@ -29,6 +29,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
+import org.jetbrains.annotations.NotNull;
 
 @Environment(EnvType.CLIENT)
 public class DefaultSmeltingDisplay extends DefaultCookingDisplay {
@@ -38,7 +39,7 @@ public class DefaultSmeltingDisplay extends DefaultCookingDisplay {
     }
     
     @Override
-    public ResourceLocation getRecipeCategory() {
+    public @NotNull ResourceLocation getRecipeCategory() {
         return DefaultPlugin.SMELTING;
     }
 }

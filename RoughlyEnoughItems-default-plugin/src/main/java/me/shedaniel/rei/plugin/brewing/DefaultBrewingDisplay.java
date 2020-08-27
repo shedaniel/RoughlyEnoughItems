@@ -35,6 +35,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -60,17 +61,17 @@ public class DefaultBrewingDisplay implements RecipeDisplay {
     }
     
     @Override
-    public List<List<EntryStack>> getInputEntries() {
+    public @NotNull List<List<EntryStack>> getInputEntries() {
         return Lists.newArrayList(Collections.singletonList(input), reactant);
     }
     
     @Override
-    public List<List<EntryStack>> getResultingEntries() {
+    public @NotNull List<List<EntryStack>> getResultingEntries() {
         return Collections.singletonList(Collections.singletonList(output));
     }
     
     @Override
-    public ResourceLocation getRecipeCategory() {
+    public @NotNull ResourceLocation getRecipeCategory() {
         return DefaultPlugin.BREWING;
     }
     
@@ -84,7 +85,7 @@ public class DefaultBrewingDisplay implements RecipeDisplay {
     }
     
     @Override
-    public List<List<EntryStack>> getRequiredEntries() {
+    public @NotNull List<List<EntryStack>> getRequiredEntries() {
         return getInputEntries();
     }
 }

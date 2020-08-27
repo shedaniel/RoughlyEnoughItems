@@ -57,6 +57,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashSet;
@@ -95,15 +96,17 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
     }
     
     @Override
+    @Nullable
     public TextFieldWidget getSearchTextField() {
         return searchField;
     }
     
     @Override
-    public List<ItemStack> getInventoryStacks() {
+    public @NotNull List<ItemStack> getInventoryStacks() {
         return inventoryStacks;
     }
     
+    @Nullable
     public static OverlaySearchField getSearchField() {
         return (OverlaySearchField) getInstance().getSearchTextField();
     }
@@ -215,7 +218,7 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
     }
     
     @Override
-    public ResourceLocation getDefaultDisplayTexture() {
+    public @NotNull ResourceLocation getDefaultDisplayTexture() {
         return isDarkThemeEnabled() ? DISPLAY_TEXTURE_DARK : DISPLAY_TEXTURE;
     }
     
