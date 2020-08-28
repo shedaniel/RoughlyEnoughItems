@@ -49,6 +49,7 @@ public interface BuiltinPlugin {
     ResourceLocation BEACON = new ResourceLocation("minecraft", "plugins/beacon");
     ResourceLocation TILLING = new ResourceLocation("minecraft", "plugins/tilling");
     ResourceLocation PATHING = new ResourceLocation("minecraft", "plugins/pathing");
+    ResourceLocation BEACON_PAYMENT = new ResourceLocation("minecraft", "plugins/beacon_payment");
     ResourceLocation INFO = new ResourceLocation("roughlyenoughitems", "plugins/information");
     
     static BuiltinPlugin getInstance() {

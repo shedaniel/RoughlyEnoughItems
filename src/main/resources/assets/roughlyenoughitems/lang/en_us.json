@@ -33,6 +33,7 @@
   "category.rei.beacon_base": "Beacon Base",
   "category.rei.tilling": "Tilling",
   "category.rei.pathing": "Pathing",
+  "category.rei.beacon_payment": "Beacon Payment",
   "category.rei.information": "Information",
   "text.rei.composting.chance": "§e%d%% Chance",
   "text.rei.composting.page": "Page %d",
