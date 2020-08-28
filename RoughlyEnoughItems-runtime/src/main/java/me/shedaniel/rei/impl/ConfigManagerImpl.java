@@ -29,6 +29,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix4f;
 import me.sargunvohra.mcmods.autoconfig1u.AutoConfig;
 import me.sargunvohra.mcmods.autoconfig1u.annotation.ConfigEntry;
 import me.sargunvohra.mcmods.autoconfig1u.gui.ConfigScreenProvider;
@@ -44,11 +45,13 @@ import me.shedaniel.clothconfig2.api.Modifier;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.clothconfig2.gui.entries.KeyCodeEntry;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.api.EntryRegistry;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
+import me.shedaniel.rei.gui.WarningAndErrorScreen;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.gui.config.entry.FilteringEntry;
 import me.shedaniel.rei.gui.config.entry.NoFilteringEntry;
@@ -61,8 +64,11 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.CommonComponents;
@@ -70,8 +76,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Tuple;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -177,8 +185,13 @@ public class ConfigManagerImpl implements ConfigManager {
     @Override
     public Screen getConfigScreen(Screen parent) {
         try {
-            if (FabricLoader.getInstance().isModLoaded("optifabric")) {
-                return new ConfigErrorScreen(parent, new TranslatableComponent("text.rei.config.optifine.title"), new TranslatableComponent("text.rei.config.optifine.description"));
+            if (!detectWorkingOptifabric()) {
+                List<Tuple<String, String>> warnings = Lists.newArrayList();
+                warnings.add(new Tuple<>(I18n.get("text.rei.config.optifine.title"), null));
+                warnings.add(new Tuple<>(I18n.get("text.rei.config.optifine.description"), null));
+                WarningAndErrorScreen screen = new WarningAndErrorScreen("config screen", warnings, Collections.emptyList(), Minecraft.getInstance()::setScreen);
+                screen.setParent(parent);
+                return screen;
             }
             ConfigScreenProvider<ConfigObjectImpl> provider = (ConfigScreenProvider<ConfigObjectImpl>) AutoConfig.getConfigScreen(ConfigObjectImpl.class, parent);
             provider.setI13nFunction(manager -> "config.roughlyenoughitems");
@@ -196,7 +209,7 @@ public class ConfigManagerImpl implements ConfigManager {
                     }));
                 }).setSavingRunnable(() -> {
                     saveConfig();
-                    ((EntryRegistryImpl) EntryRegistry.getInstance()).refilter();
+                    EntryRegistry.getInstance().refilter();
                     if (ScreenHelper.getSearchField() != null)
                         ContainerScreenOverlay.getEntryListWidget().updateSearch(ScreenHelper.getSearchField().getText(), true);
                 }).build();
@@ -206,6 +219,16 @@ public class ConfigManagerImpl implements ConfigManager {
             e.printStackTrace();
         }
         return null;
+    }
+    
+    private boolean detectWorkingOptifabric() {
+        try {
+            String renderText = FabricLoader.getInstance().getMappingResolver().mapMethodName("intermediary", "net.minecraft.class_327", "method_1724", "(Ljava/lang/String;FFIZLnet/minecraft/class_1159;Lnet/minecraft/class_4597;ZII)F");
+            Method method = Font.class.getDeclaredMethod(renderText, String.class, Float.TYPE, Float.TYPE, Integer.TYPE, Boolean.TYPE, Matrix4f.class, MultiBufferSource.class, Boolean.TYPE, Integer.TYPE, Integer.TYPE);
+            return !java.lang.reflect.Modifier.isPrivate(method.getModifiers());
+        } catch (Throwable ignored) {
+            return false;
+        }
     }
     
     public static class ConfigErrorScreen extends Screen {
@@ -227,8 +250,8 @@ public class ConfigManagerImpl implements ConfigManager {
         @Override
         public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
             this.renderBackground(matrices);
-            this.drawCenteredString(matrices, this.font, this.title, this.width / 2, 90, 16777215);
-            this.drawCenteredString(matrices, this.font, this.message, this.width / 2, 110, 16777215);
+            drawCenteredString(matrices, this.font, this.title, this.width / 2, 90, 16777215);
+            drawCenteredString(matrices, this.font, this.message, this.width / 2, 110, 16777215);
             super.render(matrices, mouseX, mouseY, delta);
         }
         
