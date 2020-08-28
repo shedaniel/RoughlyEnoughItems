@@ -39,22 +39,30 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.util.LazyLoadedValue;
 import net.minecraft.util.Tuple;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
+import java.util.function.Consumer;
 
 @ApiStatus.Internal
 public class WarningAndErrorScreen extends Screen {
-    public static final LazyLoadedValue<WarningAndErrorScreen> INSTANCE = new LazyLoadedValue<>(WarningAndErrorScreen::new);
     private AbstractWidget buttonExit;
     private StringEntryListWidget listWidget;
+    private String action;
     private Screen parent;
+    private List<Tuple<String, String>> warnings;
+    private List<Tuple<String, String>> errors;
+    private Consumer<Screen> onContinue;
     
-    private WarningAndErrorScreen() {
+    public WarningAndErrorScreen(String action, List<Tuple<String, String>> warnings, List<Tuple<String, String>> errors, Consumer<Screen> onContinue) {
         super(NarratorChatListener.NO_TITLE);
+        this.action = action;
+        this.warnings = warnings;
+        this.errors = errors;
+        this.onContinue = onContinue;
     }
     
     @Override
@@ -84,9 +92,9 @@ public class WarningAndErrorScreen extends Screen {
         listWidget.max = 80;
         listWidget.creditsClearEntries();
         listWidget.creditsAddEntry(new EmptyItem());
-        if (!RoughlyEnoughItemsState.getWarnings().isEmpty())
-            listWidget.creditsAddEntry(new TextItem(new TextComponent("Warnings:").withStyle(ChatFormatting.RED).getVisualOrderText()));
-        for (Tuple<String, String> pair : RoughlyEnoughItemsState.getWarnings()) {
+        if (!warnings.isEmpty())
+            listWidget.creditsAddEntry(new TextItem(new TextComponent("Warnings:").withStyle(ChatFormatting.GOLD).getVisualOrderText()));
+        for (Tuple<String, String> pair : warnings) {
             addText(new TextComponent(pair.getA()));
             if (pair.getB() != null)
                 addLink(new TextComponent(pair.getB()), pair.getB());
@@ -94,12 +102,12 @@ public class WarningAndErrorScreen extends Screen {
                 listWidget.creditsAddEntry(new EmptyItem());
             }
         }
-        if (!RoughlyEnoughItemsState.getWarnings().isEmpty() && !RoughlyEnoughItemsState.getErrors().isEmpty()) {
+        if (!warnings.isEmpty() && !errors.isEmpty()) {
             listWidget.creditsAddEntry(new EmptyItem());
         }
-        if (!RoughlyEnoughItemsState.getErrors().isEmpty())
+        if (!errors.isEmpty())
             listWidget.creditsAddEntry(new TextItem(new TextComponent("Errors:").withStyle(ChatFormatting.RED).getVisualOrderText()));
-        for (Tuple<String, String> pair : RoughlyEnoughItemsState.getErrors()) {
+        for (Tuple<String, String> pair : errors) {
             addText(new TextComponent(pair.getA()));
             if (pair.getB() != null)
                 addLink(new TextComponent(pair.getB()), pair.getB());
@@ -111,17 +119,8 @@ public class WarningAndErrorScreen extends Screen {
             listWidget.max = Math.max(listWidget.max, child.getWidth());
         }
         children.add(buttonExit = new Button(width / 2 - 100, height - 26, 200, 20,
-                new TextComponent(RoughlyEnoughItemsState.getErrors().isEmpty() ? "Continue" : "Exit"),
-                button -> {
-                    if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
-                        RoughlyEnoughItemsState.clear();
-                        RoughlyEnoughItemsState.continues();
-                        Minecraft.getInstance().setScreen(parent);
-                        setParent(null);
-                    } else {
-                        Minecraft.getInstance().stop();
-                    }
-                }));
+                new TextComponent(errors.isEmpty() ? "Continue" : "Exit"),
+                button -> onContinue.accept(parent)));
     }
     
     @Override
@@ -134,9 +133,9 @@ public class WarningAndErrorScreen extends Screen {
         this.renderDirtBackground(0);
         this.listWidget.render(matrices, int_1, int_2, float_1);
         if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
-            this.drawCenteredString(matrices, this.font, "Warnings during Roughly Enough Items' initialization", this.width / 2, 16, 16777215);
+            drawCenteredString(matrices, this.font, "Warnings during Roughly Enough Items' " + action, this.width / 2, 16, 16777215);
         } else {
-            this.drawCenteredString(matrices, this.font, "Errors during Roughly Enough Items' initialization", this.width / 2, 16, 16777215);
+            drawCenteredString(matrices, this.font, "Errors during Roughly Enough Items' " + action, this.width / 2, 16, 16777215);
         }
         super.render(matrices, int_1, int_2, float_1);
         this.buttonExit.render(matrices, int_1, int_2, float_1);

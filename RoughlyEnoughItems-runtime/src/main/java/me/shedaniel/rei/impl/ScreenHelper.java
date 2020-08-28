@@ -260,7 +260,15 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
     public void onInitializeClient() {
         ClothClientHooks.SCREEN_INIT_PRE.register((client, screen, screenHooks) -> {
             if ((!RoughlyEnoughItemsState.getErrors().isEmpty() || !RoughlyEnoughItemsState.getWarnings().isEmpty()) && !(screen instanceof WarningAndErrorScreen)) {
-                WarningAndErrorScreen warningAndErrorScreen = WarningAndErrorScreen.INSTANCE.get();
+                WarningAndErrorScreen warningAndErrorScreen = new WarningAndErrorScreen("initialization", RoughlyEnoughItemsState.getWarnings(), RoughlyEnoughItemsState.getErrors(), (parent) -> {
+                    if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
+                        RoughlyEnoughItemsState.clear();
+                        RoughlyEnoughItemsState.continues();
+                        Minecraft.getInstance().setScreen(parent);
+                    } else {
+                        Minecraft.getInstance().stop();
+                    }
+                });
                 warningAndErrorScreen.setParent(screen);
                 try {
                     if (client.screen != null) client.screen.removed();
