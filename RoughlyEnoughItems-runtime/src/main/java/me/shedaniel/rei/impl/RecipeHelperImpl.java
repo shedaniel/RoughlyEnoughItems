@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.*;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
@@ -42,6 +43,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -77,7 +79,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     private boolean arePluginsLoading = false;
     
     @Override
-    public List<EntryStack> findCraftableEntriesByItems(List<EntryStack> inventoryItems) {
+    public List<EntryStack> findCraftableEntriesByItems(Iterable<EntryStack> inventoryItems) {
         List<EntryStack> craftables = new ArrayList<>();
         for (List<RecipeDisplay> value : recipeDisplays.values())
             for (RecipeDisplay recipeDisplay : Lists.newArrayList(value)) {
@@ -149,7 +151,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     
     @Override
     public Map<RecipeCategory<?>, List<RecipeDisplay>> buildMapFor(ClientHelper.ViewSearchBuilder builder) {
-        long start = Util.getNanos();
+        Stopwatch stopwatch = Stopwatch.createStarted();
         Set<ResourceLocation> categories = builder.getCategories();
         List<EntryStack> recipesFor = builder.getRecipesFor();
         List<EntryStack> usagesFor = builder.getUsagesFor();
@@ -244,9 +246,8 @@ public class RecipeHelperImpl implements RecipeHelper {
             }
         }
         
-        long end = Util.getNanos();
-        String message = String.format("Built Recipe View in %dμs for %d categories, %d recipes for, %d usages for and %d live recipe generators.",
-                (end - start) / 1000, categories.size(), recipesFor.size(), usagesFor.size(), liveRecipeGenerators.size());
+        String message = String.format("Built Recipe View in %s for %d categories, %d recipes for, %d usages for and %d live recipe generators.",
+                stopwatch.stop().toString(), categories.size(), recipesFor.size(), usagesFor.size(), liveRecipeGenerators.size());
         if (ConfigObject.getInstance().doDebugSearchTimeRequired()) {
             RoughlyEnoughItemsCore.LOGGER.info(message);
         } else {
@@ -305,24 +306,20 @@ public class RecipeHelperImpl implements RecipeHelper {
             autoCraftAreaSupplierMap.put(category, rectangle);
     }
     
-    private void startSection(Object[] sectionData, String section) {
-        sectionData[0] = Util.getNanos();
-        sectionData[2] = section;
+    private void startSection(MutablePair<Stopwatch, String> sectionData, String section) {
+        sectionData.setRight(section);
         RoughlyEnoughItemsCore.LOGGER.debug("Reloading Section: \"%s\"", section);
+        sectionData.getLeft().start();
     }
     
-    private void endSection(Object[] sectionData) {
-        sectionData[1] = Util.getNanos();
-        long time = (long) sectionData[1] - (long) sectionData[0];
-        String section = (String) sectionData[2];
-        if (time >= 1000000) {
-            RoughlyEnoughItemsCore.LOGGER.debug("Reloading Section: \"%s\" done in %.2fms", section, time / 1000000.0F);
-        } else {
-            RoughlyEnoughItemsCore.LOGGER.debug("Reloading Section: \"%s\" done in %.2fμs", section, time / 1000.0F);
-        }
+    private void endSection(MutablePair<Stopwatch, String> sectionData) {
+        sectionData.getLeft().stop();
+        String section = sectionData.getRight();
+        RoughlyEnoughItemsCore.LOGGER.debug("Reloading Section: \"%s\" done in %s", section, sectionData.getLeft().toString());
+        sectionData.getLeft().reset();
     }
     
-    private void pluginSection(Object[] sectionData, String sectionName, List<REIPluginV0> list, Consumer<REIPluginV0> consumer) {
+    private void pluginSection(MutablePair<Stopwatch, String> sectionData, String sectionName, List<REIPluginV0> list, Consumer<REIPluginV0> consumer) {
         for (REIPluginV0 plugin : list) {
             try {
                 startSection(sectionData, sectionName + " for " + plugin.getPluginIdentifier().toString());
@@ -345,7 +342,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     
     public void recipesLoaded(RecipeManager recipeManager) {
         long startTime = Util.getMillis();
-        Object[] sectionData = {0L, 0L, ""};
+        MutablePair<Stopwatch, String> sectionData = new MutablePair<>(Stopwatch.createUnstarted(), "");
         
         startSection(sectionData, "reset-data");
         arePluginsLoading = true;
@@ -401,14 +398,16 @@ public class RecipeHelperImpl implements RecipeHelper {
         startSection(sectionData, "recipe-functions");
         if (!recipeFunctions.isEmpty()) {
             @SuppressWarnings("rawtypes") List<Recipe> allSortedRecipes = getAllSortedRecipes();
-            Collections.reverse(allSortedRecipes);
-            for (RecipeFunction recipeFunction : recipeFunctions) {
-                try {
-                    for (Recipe<?> recipe : CollectionUtils.filter(allSortedRecipes, recipe -> recipeFunction.recipeFilter.test(recipe))) {
-                        registerDisplay(recipeFunction.category, (RecipeDisplay) recipeFunction.mappingFunction.apply(recipe), 0);
+            for (int i = allSortedRecipes.size() - 1; i >= 0; i--) {
+                Recipe recipe = allSortedRecipes.get(i);
+                for (RecipeFunction recipeFunction : recipeFunctions) {
+                    try {
+                        if (recipeFunction.recipeFilter.test(recipe)) {
+                            registerDisplay(recipeFunction.category, (RecipeDisplay) recipeFunction.mappingFunction.apply(recipe), 0);
+                        }
+                    } catch (Throwable e) {
+                        RoughlyEnoughItemsCore.LOGGER.error("Failed to add recipes!", e);
                     }
-                } catch (Throwable e) {
-                    RoughlyEnoughItemsCore.LOGGER.error("Failed to add recipes!", e);
                 }
             }
         }

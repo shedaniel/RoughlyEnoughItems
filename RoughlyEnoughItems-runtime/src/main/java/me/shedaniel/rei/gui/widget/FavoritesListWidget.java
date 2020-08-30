@@ -201,7 +201,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
                 boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
                 Set<Integer> workingItems = checkCraftable ? Sets.newHashSet() : null;
                 if (checkCraftable)
-                    workingItems.addAll(CollectionUtils.map(RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)), EntryStack::hashIgnoreAmount));
+                    workingItems.addAll(CollectionUtils.map(RecipeHelper.getInstance().findCraftableEntriesByItems(ScreenHelper.inventoryStacks), EntryStack::hashIgnoreAmount));
                 for (EntryStack stack : ConfigObject.getInstance().getFavorites()) {
                     if (listWidget.canLastSearchTermsBeAppliedTo(stack)) {
                         if (checkCraftable && !workingItems.contains(stack.hashIgnoreAmount()))
@@ -222,7 +222,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
                 boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
                 Set<Integer> workingItems = checkCraftable ? Sets.newHashSet() : null;
                 if (checkCraftable)
-                    workingItems.addAll(CollectionUtils.map(RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)), EntryStack::hashIgnoreAmount));
+                    workingItems.addAll(CollectionUtils.map(RecipeHelper.getInstance().findCraftableEntriesByItems(ScreenHelper.inventoryStacks), EntryStack::hashIgnoreAmount));
                 for (EntryStack stack : ConfigObject.getInstance().getFavorites()) {
                     if (checkCraftable && !workingItems.contains(stack.hashIgnoreAmount()))
                         continue;

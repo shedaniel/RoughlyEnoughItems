@@ -65,6 +65,8 @@ import org.jetbrains.annotations.Nullable;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static me.shedaniel.rei.impl.Internals.attachInstance;
 
@@ -206,10 +208,15 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     @Override
     public List<ItemStack> getInventoryItemsTypes() {
-        List<ItemStack> inventoryStacks = new ArrayList<>(Minecraft.getInstance().player.inventory.items);
-        inventoryStacks.addAll(Minecraft.getInstance().player.inventory.armor);
-        inventoryStacks.addAll(Minecraft.getInstance().player.inventory.offhand);
-        return inventoryStacks;
+        return Minecraft.getInstance().player.inventory.compartments.stream().flatMap(Collection::stream).collect(Collectors.toList());
+    }
+    
+    @ApiStatus.Internal
+    public Set<EntryStack> _getInventoryItemsTypes() {
+        return Minecraft.getInstance().player.inventory.compartments.stream()
+                .flatMap(Collection::stream)
+                .map(EntryStack::create)
+                .collect(Collectors.toSet());
     }
     
     @ApiStatus.ScheduledForRemoval
@@ -269,7 +276,20 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         modNameCache.put("global", "Global");
     }
     
-    public static final class ViewSearchBuilder implements ClientHelper.ViewSearchBuilder {
+    private static abstract class AbstractViewSearchBuilder implements ClientHelper.ViewSearchBuilder {
+        @Override
+        public ClientHelper.ViewSearchBuilder fillPreferredOpenedCategory() {
+            if (getPreferredOpenedCategory() == null) {
+                Screen currentScreen = Minecraft.getInstance().screen;
+                if (currentScreen instanceof RecipeScreen) {
+                    setPreferredOpenedCategory(((RecipeScreen) currentScreen).getCurrentCategory());
+                }
+            }
+            return this;
+        }
+    }
+    
+    public static final class ViewSearchBuilder extends AbstractViewSearchBuilder {
         @NotNull private final Set<ResourceLocation> categories = new HashSet<>();
         @NotNull private final List<EntryStack> recipesFor = new ArrayList<>();
         @NotNull private final List<EntryStack> usagesFor = new ArrayList<>();
@@ -333,17 +353,6 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         }
         
         @Override
-        public ClientHelper.ViewSearchBuilder fillPreferredOpenedCategory() {
-            if (getPreferredOpenedCategory() == null) {
-                Screen currentScreen = Minecraft.getInstance().screen;
-                if (currentScreen instanceof RecipeScreen) {
-                    setPreferredOpenedCategory(((RecipeScreen) currentScreen).getCurrentCategory());
-                }
-            }
-            return this;
-        }
-        
-        @Override
         public ClientHelper.ViewSearchBuilder setInputNotice(@Nullable EntryStack stack) {
             this.inputNotice = stack;
             return this;
@@ -374,7 +383,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         }
     }
     
-    public static final class LegacyWrapperViewSearchBuilder implements ClientHelper.ViewSearchBuilder {
+    public static final class LegacyWrapperViewSearchBuilder extends AbstractViewSearchBuilder {
         @NotNull private final Map<RecipeCategory<?>, List<RecipeDisplay>> map;
         @Nullable private ResourceLocation preferredOpenedCategory = null;
         @Nullable private EntryStack inputNotice;
@@ -429,17 +438,6 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         @Override
         public ResourceLocation getPreferredOpenedCategory() {
             return this.preferredOpenedCategory;
-        }
-        
-        @Override
-        public ClientHelper.ViewSearchBuilder fillPreferredOpenedCategory() {
-            if (getPreferredOpenedCategory() == null) {
-                Screen currentScreen = Minecraft.getInstance().screen;
-                if (currentScreen instanceof RecipeScreen) {
-                    setPreferredOpenedCategory(((RecipeScreen) currentScreen).getCurrentCategory());
-                }
-            }
-            return this;
         }
         
         @Override

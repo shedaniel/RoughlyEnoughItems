@@ -65,6 +65,8 @@ public interface ClientHelper {
      */
     void setCheating(boolean cheating);
     
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     List<ItemStack> getInventoryItemsTypes();
     
     /**

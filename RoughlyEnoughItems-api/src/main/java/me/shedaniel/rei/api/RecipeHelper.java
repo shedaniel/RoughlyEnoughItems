@@ -81,7 +81,17 @@ public interface RecipeHelper {
      * @param inventoryItems the materials
      * @return the list of craftable entries
      */
-    List<EntryStack> findCraftableEntriesByItems(List<EntryStack> inventoryItems);
+    List<EntryStack> findCraftableEntriesByItems(Iterable<EntryStack> inventoryItems);
+    
+    /**
+     * Gets all craftable items from materials.
+     *
+     * @param inventoryItems the materials
+     * @return the list of craftable entries
+     */
+    default List<EntryStack> findCraftableEntriesByItems(List<EntryStack> inventoryItems) {
+        return findCraftableEntriesByItems((Iterable<EntryStack>) inventoryItems);
+    }
     
     /**
      * Registers a category

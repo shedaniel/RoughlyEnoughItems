@@ -58,9 +58,8 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static me.shedaniel.rei.impl.Internals.attachInstance;
 
@@ -71,7 +70,7 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
     private static final ResourceLocation DISPLAY_TEXTURE_DARK = new ResourceLocation("roughlyenoughitems", "textures/gui/display_dark.png");
     private OverlaySearchField searchField;
     @ApiStatus.Internal
-    public static List<ItemStack> inventoryStacks = Lists.newArrayList();
+    public static Set<EntryStack> inventoryStacks = Sets.newHashSet();
     private static ContainerScreenOverlay overlay;
     private static AbstractContainerScreen<?> previousContainerScreen = null;
     private static LinkedHashSet<RecipeScreen> lastRecipeScreen = Sets.newLinkedHashSetWithExpectedSize(5);
@@ -101,7 +100,10 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
     
     @Override
     public @NotNull List<ItemStack> getInventoryStacks() {
-        return inventoryStacks;
+        return inventoryStacks.stream()
+                .map(EntryStack::getItemStack)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
     
     @Nullable
