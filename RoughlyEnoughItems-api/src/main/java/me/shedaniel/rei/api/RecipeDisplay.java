@@ -42,9 +42,10 @@ public interface RecipeDisplay {
     
     /**
      * @return a list of outputs
+     * @deprecated Use {@link RecipeDisplay#getResultingEntries()}
      */
     @Deprecated
-    @ApiStatus.ScheduledForRemoval
+    @ApiStatus.ScheduledForRemoval(inVersion = "1.17")
     @NotNull
     default List<EntryStack> getOutputEntries() {
         return Collections.emptyList();

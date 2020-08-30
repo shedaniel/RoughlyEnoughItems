@@ -23,13 +23,14 @@
 
 package me.shedaniel.rei.impl;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryRegistry;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.impl.filtering.FilteringContextImpl;
+import me.shedaniel.rei.impl.filtering.FilteringContextType;
 import me.shedaniel.rei.impl.filtering.FilteringRule;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.fabricmc.api.EnvType;
@@ -43,6 +44,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @ApiStatus.Internal
@@ -86,21 +88,37 @@ public class EntryRegistryImpl implements EntryRegistry {
     @Override
     @ApiStatus.Experimental
     public void refilter() {
-        long started = System.currentTimeMillis();
+        Stopwatch stopwatch = Stopwatch.createStarted();
         
         FilteringContextImpl context = new FilteringContextImpl(entries);
         List<FilteringRule<?>> rules = ((ConfigObjectImpl) ConfigObject.getInstance()).getFilteringRules();
+        Stopwatch innerStopwatch = Stopwatch.createStarted();
         for (int i = rules.size() - 1; i >= 0; i--) {
-            context.handleResult(rules.get(i).processFilteredStacks(context));
+            innerStopwatch.reset().start();
+            FilteringRule<?> rule = rules.get(i);
+            context.handleResult(rule.processFilteredStacks(context));
+            RoughlyEnoughItemsCore.LOGGER.debug("Refiltered rule [%s] in %s.", FilteringRule.REGISTRY.getKey(rule).toString(), innerStopwatch.stop().toString());
         }
         
-        Set<AmountIgnoredEntryStackWrapper> set = CollectionUtils.mapParallel(entries, AmountIgnoredEntryStackWrapper::new, Sets::newLinkedHashSet);
-        set.removeAll(CollectionUtils.mapParallel(context.getHiddenStacks(), AmountIgnoredEntryStackWrapper::new, Sets::newHashSet));
-        preFilteredList.clear();
-        preFilteredList.addAll(CollectionUtils.mapParallel(set, AmountIgnoredEntryStackWrapper::unwrap));
+        Set<AmountIgnoredEntryStackWrapper> hiddenStacks = context.stacks.get(FilteringContextType.HIDDEN);
+        if (hiddenStacks.isEmpty()) {
+            preFilteredList.clear();
+            preFilteredList.addAll(entries);
+        } else {
+            preFilteredList.clear();
+            preFilteredList.addAll(entries.parallelStream()
+                    .map(AmountIgnoredEntryStackWrapper::new)
+                    .filter(not(hiddenStacks::contains))
+                    .map(AmountIgnoredEntryStackWrapper::unwrap)
+                    .collect(Collectors.toList()));
+        }
         
-        long time = System.currentTimeMillis() - started;
-        RoughlyEnoughItemsCore.LOGGER.info("Refiltered %d entries with %d rules in %dms.", entries.size() - preFilteredList.size(), rules.size(), time);
+        RoughlyEnoughItemsCore.LOGGER.debug("Refiltered %d entries with %d rules in %s.", entries.size() - preFilteredList.size(), rules.size(), stopwatch.stop().toString());
+    }
+    
+    static <T> Predicate<T> not(Predicate<? super T> target) {
+        Objects.requireNonNull(target);
+        return (Predicate<T>) target.negate();
     }
     
     public void reset() {

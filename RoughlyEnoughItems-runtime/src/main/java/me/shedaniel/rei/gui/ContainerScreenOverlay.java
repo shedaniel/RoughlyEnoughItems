@@ -74,10 +74,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 @ApiStatus.Internal
 public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverlay {
@@ -498,7 +495,6 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        List<ItemStack> currentStacks = ClientHelper.getInstance().getInventoryItemsTypes();
         if (shouldReInit) {
             ENTRY_LIST_WIDGET.updateSearch(ScreenHelper.getSearchField().getText(), true);
             init();
@@ -510,9 +506,12 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
                 }
             }
         }
-        if (ConfigManager.getInstance().isCraftableOnlyEnabled() && ((currentStacks.size() != ScreenHelper.inventoryStacks.size()) || !hasSameListContent(new LinkedList<>(ScreenHelper.inventoryStacks), currentStacks))) {
-            ScreenHelper.inventoryStacks = currentStacks;
-            ENTRY_LIST_WIDGET.updateSearch(ScreenHelper.getSearchField().getText(), true);
+        if (ConfigManager.getInstance().isCraftableOnlyEnabled()) {
+            Set<EntryStack> currentStacks = ClientHelperImpl.getInstance()._getInventoryItemsTypes();
+            if (!currentStacks.equals(ScreenHelper.inventoryStacks)) {
+                ScreenHelper.inventoryStacks = currentStacks;
+                ENTRY_LIST_WIDGET.updateSearch(ScreenHelper.getSearchField().getText(), true);
+            }
         }
         if (OverlaySearchField.isSearching) {
             matrices.pushPose();
@@ -594,12 +593,6 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
         tooltipHeight = lines.size() <= 1 ? 8 : lines.size() * 10;
         tooltipLines = lines;
         ScreenHelper.drawHoveringWidget(matrices, mouseX, mouseY, renderTooltipCallback, tooltipWidth, tooltipHeight, 0);
-    }
-    
-    private boolean hasSameListContent(List<ItemStack> list1, List<ItemStack> list2) {
-        list1.sort(Comparator.comparing(Object::toString));
-        list2.sort(Comparator.comparing(Object::toString));
-        return CollectionUtils.mapAndJoinToString(list1, Object::toString, "").equals(CollectionUtils.mapAndJoinToString(list2, Object::toString, ""));
     }
     
     public void addTooltip(@Nullable Tooltip tooltip) {

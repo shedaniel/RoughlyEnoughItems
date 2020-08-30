@@ -65,6 +65,8 @@ public interface REIHelper {
     
     @NotNull
     @ApiStatus.Internal
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     List<ItemStack> getInventoryStacks();
     
     void queueTooltip(@Nullable Tooltip tooltip);

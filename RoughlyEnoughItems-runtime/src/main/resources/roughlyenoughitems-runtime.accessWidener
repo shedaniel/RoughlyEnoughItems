@@ -11,3 +11,4 @@ accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScr
 accessible field net/minecraft/client/gui/components/ImageButton resourceLocation Lnet/minecraft/resources/ResourceLocation;
 accessible method net/minecraft/client/gui/GuiComponent innerBlit (Lcom/mojang/math/Matrix4f;IIIIIFFFF)V
 accessible field net/minecraft/world/item/CreativeModeTab langId Ljava/lang/String;
+accessible field net/minecraft/world/entity/player/Inventory compartments Ljava/util/List;

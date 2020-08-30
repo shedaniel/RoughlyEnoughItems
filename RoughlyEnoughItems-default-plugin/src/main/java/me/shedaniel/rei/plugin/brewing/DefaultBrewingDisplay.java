@@ -80,7 +80,7 @@ public class DefaultBrewingDisplay implements RecipeDisplay {
         for (int i = 0; i < slot * 2; i++)
             stack.add(EntryStack.empty());
         for (int i = 0; i < 6 - slot * 2; i++)
-            stack.addAll(getOutputEntries());
+            stack.add(output);
         return stack;
     }
     

@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.gui.widget;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -429,7 +430,7 @@ public class EntryListWidget extends WidgetWithBounds {
     }
     
     public void updateSearch(String searchTerm, boolean ignoreLastSearch) {
-        long started = System.nanoTime();
+        Stopwatch stopwatch = Stopwatch.createStarted();
         if (ignoreLastSearch || this.lastSearchTerm == null || !this.lastSearchTerm.equals(searchTerm)) {
             this.lastSearchTerm = searchTerm;
             this.lastSearchArguments = SearchArgument.processSearchTerm(searchTerm);
@@ -437,7 +438,7 @@ public class EntryListWidget extends WidgetWithBounds {
             boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
             Set<Integer> workingItems = checkCraftable ? Sets.newHashSet() : null;
             if (checkCraftable)
-                workingItems.addAll(CollectionUtils.map(RecipeHelper.getInstance().findCraftableEntriesByItems(CollectionUtils.map(ScreenHelper.inventoryStacks, EntryStack::create)), EntryStack::hashIgnoreAmount));
+                workingItems.addAll(CollectionUtils.map(RecipeHelper.getInstance().findCraftableEntriesByItems(ScreenHelper.inventoryStacks), EntryStack::hashIgnoreAmount));
             List<EntryStack> stacks = EntryRegistry.getInstance().getPreFilteredList();
             if (stacks instanceof CopyOnWriteArrayList && !stacks.isEmpty()) {
                 if (ConfigObject.getInstance().shouldAsyncSearch()) {
@@ -488,10 +489,8 @@ public class EntryListWidget extends WidgetWithBounds {
         FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
         if (favoritesListWidget != null)
             favoritesListWidget.updateSearch(this, searchTerm);
-        long ended = System.nanoTime();
-        long time = ended - started;
         if (ConfigObject.getInstance().doDebugSearchTimeRequired())
-            RoughlyEnoughItemsCore.LOGGER.info("Search Used: %.2fms", time * 1e-6);
+            RoughlyEnoughItemsCore.LOGGER.info("Search Used: %s", stopwatch.stop().toString());
         updateEntriesPosition();
     }
     

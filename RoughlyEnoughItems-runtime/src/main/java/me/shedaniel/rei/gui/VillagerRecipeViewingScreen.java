@@ -290,10 +290,10 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
     }
     
     @Override
-    public boolean mouseScrolled(double double_1, double double_2, double double_3) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
         double height = scrolling.getMaxScrollHeight();
-        if (scrollListBounds.contains(double_1, double_2) && height > scrollListBounds.height - 2) {
-            scrolling.offset(ClothConfigInitializer.getScrollStep() * -double_3, true);
+        if (scrollListBounds.contains(mouseX, mouseY) && height > scrollListBounds.height - 2) {
+            scrolling.offset(ClothConfigInitializer.getScrollStep() * -amount, true);
             if (scrollBarAlphaFuture == 0)
                 scrollBarAlphaFuture = 1f;
             if (System.currentTimeMillis() - scrollBarAlphaFutureTime > 300f)
@@ -301,10 +301,19 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
             return true;
         }
         for (GuiEventListener listener : children())
-            if (listener.mouseScrolled(double_1, double_2, double_3))
+            if (listener.mouseScrolled(mouseX, mouseY, amount))
                 return true;
+        int tabSize = ConfigObject.getInstance().isUsingCompactTabs() ? 24 : 28;
+        if (mouseX >= bounds.x && mouseX <= bounds.getMaxX() && mouseY >= bounds.y - tabSize && mouseY < bounds.y) {
+            if (amount < 0) selectedCategoryIndex++;
+            else if (amount > 0) selectedCategoryIndex--;
+            if (selectedCategoryIndex < 0) selectedCategoryIndex = categories.size() - 1;
+            else if (selectedCategoryIndex >= categories.size()) selectedCategoryIndex = 0;
+            ClientHelperImpl.getInstance().openRecipeViewingScreen(categoryMap, categories.get(selectedCategoryIndex).getIdentifier(), ingredientStackToNotice, resultStackToNotice);
+            return true;
+        }
         if (bounds.contains(PointHelper.ofMouse())) {
-            if (double_3 < 0 && categoryMap.get(categories.get(selectedCategoryIndex)).size() > 1) {
+            if (amount < 0 && categoryMap.get(categories.get(selectedCategoryIndex)).size() > 1) {
                 selectedRecipeIndex++;
                 if (selectedRecipeIndex >= categoryMap.get(categories.get(selectedCategoryIndex)).size())
                     selectedRecipeIndex = 0;
@@ -318,7 +327,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
                 return true;
             }
         }
-        return super.mouseScrolled(double_1, double_2, double_3);
+        return super.mouseScrolled(mouseX, mouseY, amount);
     }
     
     @Override
