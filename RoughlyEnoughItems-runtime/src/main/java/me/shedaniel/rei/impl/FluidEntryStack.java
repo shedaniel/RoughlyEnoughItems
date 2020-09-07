@@ -115,7 +115,7 @@ public class FluidEntryStack extends AbstractEntryStack {
     @Override
     public boolean equalsIgnoreTagsAndAmount(EntryStack stack) {
         if (stack.getType() == Type.ITEM)
-            return equalsIgnoreTagsAndAmount(EntryStack.copyItemToFluid(stack));
+            return EntryStack.copyItemToFluids(stack).anyMatch(this::equalsIgnoreTagsAndAmount);
         if (stack.getType() != Type.FLUID)
             return false;
         return this.stack.getFluid() == stack.getFluid();
@@ -124,7 +124,7 @@ public class FluidEntryStack extends AbstractEntryStack {
     @Override
     public boolean equalsIgnoreTags(EntryStack stack) {
         if (stack.getType() == Type.ITEM)
-            return equalsIgnoreTags(EntryStack.copyItemToFluid(stack));
+            return EntryStack.copyItemToFluids(stack).anyMatch(this::equalsIgnoreTags);
         if (stack.getType() != Type.FLUID)
             return false;
         return this.stack.getFluid() == stack.getFluid() && this.stack.getAmount() == stack.getAmount();
@@ -133,7 +133,7 @@ public class FluidEntryStack extends AbstractEntryStack {
     @Override
     public boolean equalsIgnoreAmount(EntryStack stack) {
         if (stack.getType() == Type.ITEM)
-            return equalsIgnoreAmount(EntryStack.copyItemToFluid(stack));
+            return EntryStack.copyItemToFluids(stack).anyMatch(this::equalsIgnoreAmount);
         if (stack.getType() != Type.FLUID)
             return false;
         return this.stack.getFluid() == stack.getFluid() && Objects.equals(this.stack.getTag(), stack.getFluidStack().getTag());

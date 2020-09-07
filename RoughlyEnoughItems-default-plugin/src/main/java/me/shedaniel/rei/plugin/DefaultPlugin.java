@@ -29,6 +29,7 @@ import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.plugins.REIPlugin;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.plugin.autocrafting.DefaultRecipeBookHandler;
@@ -89,10 +90,9 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ITag;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tileentity.FurnaceTileEntity;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.IItemProvider;
-import net.minecraft.util.LazyValue;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Unit;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.ITextComponent;
@@ -102,15 +102,16 @@ import net.minecraftforge.common.brewing.BrewingRecipe;
 import net.minecraftforge.common.brewing.BrewingRecipeRegistry;
 import net.minecraftforge.common.brewing.IBrewingRecipe;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandlerItem;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.registries.IRegistryDelegate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static me.shedaniel.rei.impl.Internals.attachInstance;
 
@@ -137,8 +138,6 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
     public static final ResourceLocation INFO = BuiltinPlugin.INFO;
     private static final ResourceLocation DISPLAY_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/display.png");
     private static final ResourceLocation DISPLAY_TEXTURE_DARK = new ResourceLocation("roughlyenoughitems", "textures/gui/display_dark.png");
-    private static final List<LazyValue<DefaultBrewingDisplay>> BREWING_DISPLAYS = Lists.newArrayList();
-    private static final List<DefaultInformationDisplay> INFO_DISPLAYS = Lists.newArrayList();
     
     public static ResourceLocation getDisplayTexture() {
         return REIHelper.getInstance().getDefaultDisplayTexture();
@@ -151,15 +150,15 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
     @Deprecated
     @ApiStatus.ScheduledForRemoval
     public static void registerBrewingDisplay(DefaultBrewingDisplay recipe) {
-        BREWING_DISPLAYS.add(new LazyValue<>(() -> recipe));
+        RecipeHelper.getInstance().registerDisplay(recipe);
     }
     
     public static void registerBrewingRecipe(RegisteredBrewingRecipe recipe) {
-        BREWING_DISPLAYS.add(new LazyValue<>(() -> new DefaultBrewingDisplay(recipe.input, recipe.ingredient, recipe.output)));
+        RecipeHelper.getInstance().registerDisplay(new DefaultBrewingDisplay(recipe.input, recipe.ingredient, recipe.output));
     }
     
     public static void registerInfoDisplay(DefaultInformationDisplay display) {
-        INFO_DISPLAYS.add(display);
+        RecipeHelper.getInstance().registerDisplay(display);
     }
     
     @Override
@@ -175,11 +174,6 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
     @Override
     public ResourceLocation getPluginIdentifier() {
         return PLUGIN;
-    }
-    
-    @Override
-    public void preRegister() {
-        INFO_DISPLAYS.clear();
     }
     
     @Override
@@ -246,9 +240,6 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
         recipeHelper.registerRecipes(CAMPFIRE, CampfireCookingRecipe.class, DefaultCampfireDisplay::new);
         recipeHelper.registerRecipes(STONE_CUTTING, StonecuttingRecipe.class, DefaultStoneCuttingDisplay::new);
         recipeHelper.registerRecipes(SMITHING, SmithingRecipe.class, DefaultSmithingDisplay::new);
-        for (LazyValue<DefaultBrewingDisplay> display : BREWING_DISPLAYS) {
-            recipeHelper.registerDisplay(display.get());
-        }
         // switch to ForgeHooks#getBurnTime
         for (Map.Entry<Item, Integer> entry : FurnaceTileEntity.getFuel().entrySet()) {
             recipeHelper.registerDisplay(new DefaultFuelDisplay(EntryStack.create(entry.getKey()), entry.getValue()));
@@ -301,32 +292,70 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
         }
         Set<Potion> potions = Sets.newLinkedHashSet();
         for (Ingredient container : PotionBrewing.ALLOWED_CONTAINERS) {
-            for (PotionBrewing.MixPredicate<Potion> mix : PotionBrewing.POTION_MIXES) {
+            for (Object mix : PotionBrewing.POTION_MIXES) {
+                IRegistryDelegate<Potion> from = mixGetFrom(mix);
+                Ingredient ingredient = mixGetIngredient(mix);
+                IRegistryDelegate<Potion> to = mixGetTo(mix);
                 Ingredient base = Ingredient.of(Arrays.stream(container.getItems())
                         .map(ItemStack::copy)
-                        .map(stack -> PotionUtils.setPotion(stack, mix.from.get())));
+                        .map(stack -> PotionUtils.setPotion(stack, from.get())));
                 ItemStack output = Arrays.stream(container.getItems())
                         .map(ItemStack::copy)
-                        .map(stack -> PotionUtils.setPotion(stack, mix.to.get()))
+                        .map(stack -> PotionUtils.setPotion(stack, to.get()))
                         .findFirst().orElse(ItemStack.EMPTY);
-                registerBrewingRecipe(base, mix.ingredient, output);
-                potions.add(mix.from.get());
-                potions.add(mix.to.get());
+                registerBrewingRecipe(base, ingredient, output);
+                potions.add(from.get());
+                potions.add(to.get());
             }
         }
         for (Potion potion : potions) {
-            for (PotionBrewing.MixPredicate<Potion> potionMix : PotionBrewing.POTION_MIXES) {
-                Ingredient base = Ingredient.of(PotionUtils.setPotion(new ItemStack(potionMix.from.get()), potion));
-                Ingredient output = Ingredient.of(PotionUtils.setPotion(new ItemStack(potionMix.to.get()), potion));
-                registerBrewingRecipe(base, potionMix.ingredient, output);
+            for (Object mix : PotionBrewing.CONTAINER_MIXES) {
+                IRegistryDelegate<Item> from = mixGetFrom(mix);
+                Ingredient ingredient = mixGetIngredient(mix);
+                IRegistryDelegate<Item> to = mixGetTo(mix);
+                Ingredient base = Ingredient.of(PotionUtils.setPotion(new ItemStack(from.get()), potion));
+                ItemStack output = PotionUtils.setPotion(new ItemStack(to.get()), potion);
+                registerBrewingRecipe(base, ingredient, output);
             }
+        }
+    }
+    
+    private static final Class<Object> MIX_PREDICATE;
+    
+    static {
+        try {
+            MIX_PREDICATE = (Class<Object>) Class.forName("net.minecraft.potion.PotionBrewing$MixPredicate");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    private static <T> IRegistryDelegate<T> mixGetFrom(Object mix) {
+        try {
+            return ObfuscationReflectionHelper.getPrivateValue(MIX_PREDICATE, mix, "field_185198_a");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    private static Ingredient mixGetIngredient(Object mix) {
+        try {
+            return ObfuscationReflectionHelper.getPrivateValue(MIX_PREDICATE, mix, "field_185199_b");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    private static <T> IRegistryDelegate<T> mixGetTo(Object mix) {
+        try {
+            return ObfuscationReflectionHelper.getPrivateValue(MIX_PREDICATE, mix, "field_185200_c");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
     
     @Override
     public void postRegister() {
-        for (DefaultInformationDisplay display : INFO_DISPLAYS)
-            RecipeHelper.getInstance().registerDisplay(display);
         // TODO Turn this into an API
         // Sit tight! This will be a fast journey!
         long time = System.currentTimeMillis();
@@ -413,23 +442,19 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
         recipeHelper.registerScreenClickArea(new Rectangle(78, 32, 28, 23), FurnaceScreen.class, SMELTING);
         recipeHelper.registerScreenClickArea(new Rectangle(78, 32, 28, 23), SmokerScreen.class, SMOKING);
         recipeHelper.registerScreenClickArea(new Rectangle(78, 32, 28, 23), BlastFurnaceScreen.class, BLASTING);
-        // TODO rewrite fluid support
-//        FluidSupportProvider.getInstance().registerFluidProvider(new FluidSupportProvider.FluidProvider() {
-//            @Override
-//            public @NotNull EntryStack itemToFluid(@NotNull EntryStack itemStack) {
-//                Item item = itemStack.getItem();
-//                IFluidHandlerItem fluidHandlerItem = itemStack.getItemStack().getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).orElse(null);
-//                if (fluidHandlerItem != null && fluidHandlerItem.getTanks() > 0) {
-//                    List<EntryStack> entryStacks = Lists.newArrayList();
-//                    for (int i = 0; i < fluidHandlerItem.getTanks(); i++) {
-//                        FluidStack tank = fluidHandlerItem.getFluidInTank(i);
-//                        if (!tank.isEmpty()) entryStacks.add(EntryStack.create(tank.copy()));
-//                    }
-//                    if (!entryStacks.isEmpty()) return ActionResult.success(entryStacks);
-//                }
-//                return ActionResult.pass(Collections.emptyList());
-//            }
-//        });
+        FluidSupportProvider.getInstance().registerProvider(itemStack -> {
+            Item item = itemStack.getItem();
+            IFluidHandlerItem fluidHandlerItem = itemStack.getItemStack().getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).orElse(null);
+            if (fluidHandlerItem != null && fluidHandlerItem.getTanks() > 0) {
+                List<EntryStack> entryStacks = Lists.newArrayList();
+                for (int i = 0; i < fluidHandlerItem.getTanks(); i++) {
+                    FluidStack tank = fluidHandlerItem.getFluidInTank(i);
+                    if (!tank.isEmpty()) entryStacks.add(EntryStack.create(tank.copy()));
+                }
+                if (!entryStacks.isEmpty()) return ActionResult.success(entryStacks.stream());
+            }
+            return ActionResult.pass(null);
+        });
 //        SubsetsRegistry subsetsRegistry = SubsetsRegistry.INSTANCE;
 //        subsetsRegistry.registerPathEntry("roughlyenoughitems:food", EntryStack.create(Items.MILK_BUCKET));
 //        subsetsRegistry.registerPathEntry("roughlyenoughitems:food/roughlyenoughitems:cookies", EntryStack.create(Items.COOKIE));

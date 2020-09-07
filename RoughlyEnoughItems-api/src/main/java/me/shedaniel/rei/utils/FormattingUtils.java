@@ -30,7 +30,7 @@ public final class FormattingUtils {
         for (char c : string.toCharArray()) {
             if (lastSpecial) {
                 lastSpecial = false;
-                if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || c == 'r' || (c >= 'A' && c <= 'F') || c == 'R')) {
+                if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'k' && c <= 'o') || c == 'r' || (c >= 'A' && c <= 'F') || (c >= 'K' && c <= 'O') || c == 'R')) {
                     builder.append('§');
                     builder.append(c);
                 }

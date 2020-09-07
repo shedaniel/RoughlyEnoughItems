@@ -52,6 +52,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 @OnlyIn(Dist.CLIENT)
 public interface EntryStack extends TextRepresentable {
@@ -196,8 +197,14 @@ public interface EntryStack extends TextRepresentable {
         return copyItemToFluid(stack);
     }
     
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     static EntryStack copyItemToFluid(EntryStack stack) {
         return FluidSupportProvider.getInstance().itemToFluid(stack);
+    }
+    
+    static Stream<EntryStack> copyItemToFluids(EntryStack stack) {
+        return FluidSupportProvider.getInstance().itemToFluids(stack);
     }
     
     Optional<ResourceLocation> getIdentifier();

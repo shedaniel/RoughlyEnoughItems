@@ -25,10 +25,15 @@ package me.shedaniel.rei.api.fluid;
 
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.impl.Internals;
+import net.minecraft.util.ActionResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
+import java.util.stream.Stream;
 
 /**
  * Experimental library, scheduled to change if needed.
@@ -40,13 +45,13 @@ public interface FluidSupportProvider {
     @ApiStatus.ScheduledForRemoval
     FluidSupportProvider INSTANCE = new FluidSupportProvider() {
         @Override
-        public void registerFluidProvider(@NotNull FluidProvider provider) {
-            getInstance().registerFluidProvider(provider);
+        public void registerProvider(@NotNull Provider provider) {
+            getInstance().registerProvider(provider);
         }
         
         @Override
-        public @NotNull EntryStack itemToFluid(@NotNull EntryStack itemStack) {
-            return getInstance().itemToFluid(itemStack);
+        public @NotNull Stream<EntryStack> itemToFluids(@NotNull EntryStack itemStack) {
+            return getInstance().itemToFluids(itemStack);
         }
     };
     
@@ -54,7 +59,21 @@ public interface FluidSupportProvider {
         return Internals.getFluidSupportProvider();
     }
     
-    void registerFluidProvider(@NotNull FluidProvider provider);
+    /**
+     * @deprecated Please switch to {@link FluidSupportProvider#registerProvider(Provider)}
+     */
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
+    default void registerFluidProvider(@NotNull FluidProvider provider) {
+        registerProvider(itemStack -> {
+            EntryStack stack = Objects.requireNonNull(provider.itemToFluid(itemStack));
+            if (!stack.isEmpty())
+                return ActionResult.success(Stream.of(stack));
+            return ActionResult.pass(null);
+        });
+    }
+    
+    void registerProvider(@NotNull Provider provider);
     
     @Deprecated
     @ApiStatus.ScheduledForRemoval
@@ -64,8 +83,15 @@ public interface FluidSupportProvider {
     }
     
     @NotNull
-    EntryStack itemToFluid(@NotNull EntryStack itemStack);
+    default EntryStack itemToFluid(@NotNull EntryStack itemStack) {
+        return itemToFluids(itemStack).findFirst().orElse(EntryStack.empty());
+    }
     
+    @NotNull
+    Stream<EntryStack> itemToFluids(@NotNull EntryStack itemStack);
+    
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     interface FluidProvider {
         @Deprecated
         @ApiStatus.ScheduledForRemoval
@@ -74,9 +100,17 @@ public interface FluidSupportProvider {
             return EntryStack.empty();
         }
         
+        @Deprecated
+        @ApiStatus.ScheduledForRemoval
         @NotNull
         default EntryStack itemToFluid(@NotNull EntryStack itemStack) {
             return EntryStack.empty();
         }
+    }
+    
+    @FunctionalInterface
+    interface Provider {
+        @NotNull
+        ActionResult<@Nullable Stream<@NotNull EntryStack>> itemToFluid(@NotNull EntryStack itemStack);
     }
 }
