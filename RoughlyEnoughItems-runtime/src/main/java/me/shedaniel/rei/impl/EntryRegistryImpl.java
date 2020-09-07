@@ -33,11 +33,12 @@ import me.shedaniel.rei.impl.filtering.FilteringContextImpl;
 import me.shedaniel.rei.impl.filtering.FilteringContextType;
 import me.shedaniel.rei.impl.filtering.FilteringRule;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraft.util.NonNullList;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.registry.Registry;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -53,7 +54,8 @@ public class EntryRegistryImpl implements EntryRegistry {
     
     private final List<EntryStack> preFilteredList = Lists.newCopyOnWriteArrayList();
     private final List<EntryStack> entries = Lists.newCopyOnWriteArrayList();
-    private final List<AmountIgnoredEntryStackWrapper> reloadingRegistry = Lists.newArrayList();
+    @Nullable
+    private List<AmountIgnoredEntryStackWrapper> reloadingRegistry;
     private boolean reloading;
     
     private static EntryStack findFirstOrNullEqualsEntryIgnoreAmount(Collection<EntryStack> list, EntryStack obj) {
@@ -70,7 +72,7 @@ public class EntryRegistryImpl implements EntryRegistry {
         reloadingRegistry.removeIf(AmountIgnoredEntryStackWrapper::isEmpty);
         entries.clear();
         entries.addAll(CollectionUtils.map(reloadingRegistry, AmountIgnoredEntryStackWrapper::unwrap));
-        reloadingRegistry.clear();
+        reloadingRegistry = null;
     }
     
     @Override
@@ -121,9 +123,11 @@ public class EntryRegistryImpl implements EntryRegistry {
         return (Predicate<T>) target.negate();
     }
     
-    public void reset() {
+    public void resetToReloadStart() {
         entries.clear();
-        reloadingRegistry.clear();
+        if (reloadingRegistry != null)
+            reloadingRegistry.clear();
+        reloadingRegistry = Lists.newArrayListWithCapacity(Registry.ITEM.keySet().size() + 100);
         preFilteredList.clear();
         reloading = true;
     }

@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.impl;
 
-import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import me.shedaniel.rei.api.EntryStack;
 import net.minecraft.client.gui.AbstractGui;
@@ -33,33 +33,38 @@ import java.util.Map;
 
 @ApiStatus.Internal
 public abstract class AbstractEntryStack extends AbstractGui implements EntryStack {
-    private Reference2ObjectMap<Settings<?>, Object> settings = new Reference2ObjectOpenHashMap<>();
+    private static final Map<Settings<?>, Object> EMPTY_SETTINGS = Reference2ObjectMaps.emptyMap();
+    private Map<Settings<?>, Object> settings = null;
     
     @Override
     public <T> EntryStack setting(Settings<T> settings, T value) {
+        if (this.settings == null)
+            this.settings = new Reference2ObjectOpenHashMap<>(4);
         this.settings.put(settings, value);
         return this;
     }
     
     @Override
     public <T> EntryStack removeSetting(Settings<T> settings) {
-        this.settings.remove(settings);
+        if (this.settings != null && this.settings.remove(settings) != null && this.settings.isEmpty()) {
+            this.settings = null;
+        }
         return this;
     }
     
     @Override
     public EntryStack clearSettings() {
-        this.settings.clear();
+        this.settings = null;
         return this;
     }
     
     protected Map<Settings<?>, Object> getSettings() {
-        return settings;
+        return this.settings == null ? EMPTY_SETTINGS : this.settings;
     }
     
     @Override
     public <T> T get(Settings<T> settings) {
-        Object o = this.settings.get(settings);
+        Object o = this.settings == null ? null : this.settings.get(settings);
         if (o == null)
             return settings.getDefaultValue();
         return (T) o;

@@ -374,7 +374,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         plugins.sort(Comparator.comparingInt(REIPluginEntry::getPriority).reversed());
         RoughlyEnoughItemsCore.LOGGER.info("Reloading REI, registered %d plugins: %s", plugins.size(), plugins.stream().map(REIPluginEntry::getPluginIdentifier).map(ResourceLocation::toString).collect(Collectors.joining(", ")));
         Collections.reverse(plugins);
-        entryRegistry.reset();
+        entryRegistry.resetToReloadStart();
         List<REIPluginV0> reiPluginV0s = new ArrayList<>();
         endSection(sectionData);
         for (REIPluginEntry plugin : plugins) {
