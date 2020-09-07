@@ -36,6 +36,7 @@ import me.shedaniel.rei.utils.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.Registry;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
@@ -53,7 +54,8 @@ public class EntryRegistryImpl implements EntryRegistry {
     
     private final List<EntryStack> preFilteredList = Lists.newCopyOnWriteArrayList();
     private final List<EntryStack> entries = Lists.newCopyOnWriteArrayList();
-    private final List<AmountIgnoredEntryStackWrapper> reloadingRegistry = Lists.newArrayList();
+    @Nullable
+    private List<AmountIgnoredEntryStackWrapper> reloadingRegistry;
     private boolean reloading;
     
     private static EntryStack findFirstOrNullEqualsEntryIgnoreAmount(Collection<EntryStack> list, EntryStack obj) {
@@ -70,7 +72,7 @@ public class EntryRegistryImpl implements EntryRegistry {
         reloadingRegistry.removeIf(AmountIgnoredEntryStackWrapper::isEmpty);
         entries.clear();
         entries.addAll(CollectionUtils.map(reloadingRegistry, AmountIgnoredEntryStackWrapper::unwrap));
-        reloadingRegistry.clear();
+        reloadingRegistry = null;
     }
     
     @Override
@@ -121,9 +123,11 @@ public class EntryRegistryImpl implements EntryRegistry {
         return (Predicate<T>) target.negate();
     }
     
-    public void reset() {
+    public void resetToReloadStart() {
         entries.clear();
-        reloadingRegistry.clear();
+        if (reloadingRegistry != null)
+            reloadingRegistry.clear();
+        reloadingRegistry = Lists.newArrayListWithCapacity(Registry.ITEM.keySet().size() + 100);
         preFilteredList.clear();
         reloading = true;
     }
