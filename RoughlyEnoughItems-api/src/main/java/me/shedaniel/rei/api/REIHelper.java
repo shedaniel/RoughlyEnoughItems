@@ -26,11 +26,11 @@ package me.shedaniel.rei.api;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import me.shedaniel.rei.impl.Internals;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -38,7 +38,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public interface REIHelper {
     
     /**
@@ -51,10 +51,10 @@ public interface REIHelper {
     @ApiStatus.Experimental
     Optional<REIOverlay> getOverlay();
     
-    AbstractContainerScreen<?> getPreviousContainerScreen();
+    ContainerScreen<?> getPreviousContainerScreen();
     
     @Deprecated
-    default AbstractContainerScreen<?> getPreviousHandledScreen() {
+    default ContainerScreen<?> getPreviousHandledScreen() {
         return getPreviousContainerScreen();
     }
     

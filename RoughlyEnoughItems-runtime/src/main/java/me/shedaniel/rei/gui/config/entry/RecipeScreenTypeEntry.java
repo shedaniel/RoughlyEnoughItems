@@ -24,18 +24,18 @@
 package me.shedaniel.rei.gui.config.entry;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import me.shedaniel.clothconfig2.forge.gui.entries.TooltipListEntry;
 import me.shedaniel.rei.gui.PreRecipeViewingScreen;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
+import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.chat.NarratorChatListener;
-import net.minecraft.client.gui.components.AbstractButton;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.client.gui.widget.Widget;
+import net.minecraft.client.gui.widget.button.AbstractButton;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 
 import java.util.List;
 import java.util.Optional;
@@ -47,7 +47,7 @@ public class RecipeScreenTypeEntry extends TooltipListEntry<RecipeScreenType> {
     private RecipeScreenType type;
     private RecipeScreenType defaultValue;
     private Consumer<RecipeScreenType> save;
-    private final AbstractWidget buttonWidget = new AbstractButton(0, 0, 0, 20, NarratorChatListener.NO_TITLE) {
+    private final Widget buttonWidget = new AbstractButton(0, 0, 0, 20, NarratorChatListener.NO_TITLE) {
         @Override
         public void onPress() {
             Minecraft.getInstance().setScreen(new PreRecipeViewingScreen(getConfigScreen(), type, false, original -> {
@@ -57,15 +57,15 @@ public class RecipeScreenTypeEntry extends TooltipListEntry<RecipeScreenType> {
         }
         
         @Override
-        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-            setMessage(new TranslatableComponent("config.roughlyenoughitems.recipeScreenType.config", type.toString()));
+        public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+            setMessage(new TranslationTextComponent("config.roughlyenoughitems.recipeScreenType.config", type.toString()));
             super.render(matrices, mouseX, mouseY, delta);
         }
     };
-    private final List<GuiEventListener> children = ImmutableList.of(buttonWidget);
+    private final List<IGuiEventListener> children = ImmutableList.of(buttonWidget);
     
     @SuppressWarnings("deprecation")
-    public RecipeScreenTypeEntry(int width, Component fieldName, RecipeScreenType type, RecipeScreenType defaultValue, Consumer<RecipeScreenType> save) {
+    public RecipeScreenTypeEntry(int width, ITextComponent fieldName, RecipeScreenType type, RecipeScreenType defaultValue, Consumer<RecipeScreenType> save) {
         super(fieldName, null);
         this.original = type;
         this.width = width;
@@ -95,14 +95,14 @@ public class RecipeScreenTypeEntry extends TooltipListEntry<RecipeScreenType> {
     }
     
     @Override
-    public List<? extends GuiEventListener> children() {
+    public List<? extends IGuiEventListener> children() {
         return children;
     }
     
     @Override
-    public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+    public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
         super.render(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
-        Window window = Minecraft.getInstance().getWindow();
+        MainWindow window = Minecraft.getInstance().getWindow();
         this.buttonWidget.active = this.isEditable();
         this.buttonWidget.y = y;
         this.buttonWidget.x = x + entryWidth / 2 - width / 2;

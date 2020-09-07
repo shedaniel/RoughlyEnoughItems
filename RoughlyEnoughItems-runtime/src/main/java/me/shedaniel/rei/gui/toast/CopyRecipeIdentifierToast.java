@@ -23,17 +23,17 @@
 
 package me.shedaniel.rei.gui.toast;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.toasts.Toast;
-import net.minecraft.client.gui.components.toasts.ToastComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.gui.toasts.IToast;
+import net.minecraft.client.gui.toasts.ToastGui;
+import net.minecraft.util.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.Internal
-public class CopyRecipeIdentifierToast implements Toast {
+public class CopyRecipeIdentifierToast implements IToast {
     
     protected static final ResourceLocation TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/toasts.png");
     private String title;
@@ -50,7 +50,7 @@ public class CopyRecipeIdentifierToast implements Toast {
     }
     
     @Override
-    public Visibility render(PoseStack matrices, ToastComponent toastManager, long var2) {
+    public Visibility render(MatrixStack matrices, ToastGui toastManager, long var2) {
         toastManager.getMinecraft().getTextureManager().bind(TEXTURE);
         RenderSystem.color3f(1.0F, 1.0F, 1.0F);
         toastManager.blit(matrices, 0, 0, 0, 0, 160, 32);

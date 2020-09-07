@@ -25,16 +25,16 @@ package me.shedaniel.rei.impl.search;
 
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.EntryStack;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.util.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
 
 @ApiStatus.Internal
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public final class ModArgument extends Argument {
     public static final ModArgument INSTANCE = new ModArgument();
     

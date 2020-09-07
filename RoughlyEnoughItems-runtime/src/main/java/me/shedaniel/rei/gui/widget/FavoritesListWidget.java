@@ -25,14 +25,14 @@ package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.clothconfig2.ClothConfigInitializer;
-import me.shedaniel.clothconfig2.api.ScissorsHandler;
-import me.shedaniel.clothconfig2.api.ScrollingContainer;
-import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import me.shedaniel.clothconfig2.forge.ClothConfigInitializer;
+import me.shedaniel.clothconfig2.forge.api.PointHelper;
+import me.shedaniel.clothconfig2.forge.api.ScissorsHandler;
+import me.shedaniel.clothconfig2.forge.api.ScrollingContainer;
+import me.shedaniel.clothconfig2.forge.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.widgets.Tooltip;
@@ -41,10 +41,10 @@ import me.shedaniel.rei.impl.OptimalEntryStack;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.util.Mth;
-import net.minecraft.world.item.Item;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.item.Item;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.TranslationTextComponent;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -67,7 +67,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
         
         @Override
         public int getMaxScrollHeight() {
-            return Mth.ceil((favorites.size() + blockedCount) / (innerBounds.width / (float) entrySize())) * entrySize();
+            return MathHelper.ceil((favorites.size() + blockedCount) / (innerBounds.width / (float) entrySize())) * entrySize();
         }
         
         @Override
@@ -84,7 +84,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
     private boolean draggingScrollBar = false;
     
     private static Rectangle updateInnerBounds(Rectangle bounds) {
-        int width = Math.max(Mth.floor((bounds.width - 2 - 6) / (float) entrySize()), 1);
+        int width = Math.max(MathHelper.floor((bounds.width - 2 - 6) / (float) entrySize()), 1);
         if (!ConfigObject.getInstance().isLeftHandSidePanel())
             return new Rectangle((int) (bounds.getCenterX() - width * (entrySize() / 2f) + 3), bounds.y, width * entrySize(), bounds.height);
         return new Rectangle((int) (bounds.getCenterX() - width * (entrySize() / 2f) - 3), bounds.y, width * entrySize(), bounds.height);
@@ -106,14 +106,14 @@ public class FavoritesListWidget extends WidgetWithBounds {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (bounds.isEmpty())
             return;
         boolean fastEntryRendering = ConfigObject.getInstance().doesFastEntryRendering();
         for (EntryListEntry entry : entries)
             entry.clearStacks();
         ScissorsHandler.INSTANCE.scissor(bounds);
-        int skip = Math.max(0, Mth.floor(scrolling.scrollAmount / (float) entrySize()));
+        int skip = Math.max(0, MathHelper.floor(scrolling.scrollAmount / (float) entrySize()));
         int nextIndex = skip * innerBounds.width / entrySize();
         int[] i = {nextIndex};
         blockedCount = 0;
@@ -159,13 +159,13 @@ public class FavoritesListWidget extends WidgetWithBounds {
                     }
                 }
             }
-            Tooltip.create(new TranslatableComponent("text.rei.delete_items")).queue();
+            Tooltip.create(new TranslationTextComponent("text.rei.delete_items")).queue();
         }
     }
     
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int int_1, double double_3, double double_4) {
-        if (scrolling.mouseDragged(mouseX, mouseY, int_1, double_3, double_4, ConfigObject.getInstance().doesSnapToRows(), entrySize()))
+        if (scrolling.handleMouseDrag(mouseX, mouseY, int_1, double_3, double_4, ConfigObject.getInstance().doesSnapToRows(), entrySize()))
             return true;
         return super.mouseDragged(mouseX, mouseY, int_1, double_3, double_4);
     }
@@ -206,7 +206,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
                     if (listWidget.canLastSearchTermsBeAppliedTo(stack)) {
                         if (checkCraftable && !workingItems.contains(stack.hashIgnoreAmount()))
                             continue;
-                        list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
+                        list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE));
                     }
                 }
                 EntryPanelOrdering ordering = ConfigObject.getInstance().getItemListOrdering();
@@ -226,7 +226,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
                 for (EntryStack stack : ConfigObject.getInstance().getFavorites()) {
                     if (checkCraftable && !workingItems.contains(stack.hashIgnoreAmount()))
                         continue;
-                    list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
+                    list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE));
                 }
                 EntryPanelOrdering ordering = ConfigObject.getInstance().getItemListOrdering();
                 if (ordering == EntryPanelOrdering.NAME)
@@ -283,7 +283,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
             for (Widget widget : children())
                 if (widget.mouseReleased(mouseX, mouseY, button))
                     return true;
-            LocalPlayer player = minecraft.player;
+            ClientPlayerEntity player = minecraft.player;
             if (ClientHelper.getInstance().isCheating() && player != null && player.inventory != null && !player.inventory.getCarried().isEmpty() && RoughlyEnoughItemsCore.canDeleteItems()) {
                 ClientHelper.getInstance().sendDeletePacket();
                 return true;

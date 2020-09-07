@@ -23,9 +23,9 @@
 
 package me.shedaniel.rei;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Tuple;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
@@ -48,7 +48,7 @@ public class RoughlyEnoughItemsState {
     private static List<Runnable> continueCallbacks = new ArrayList<>();
     
     public static void error(String reason) {
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER || FabricLoader.getInstance().isDevelopmentEnvironment())
+        if (FMLEnvironment.dist == Dist.DEDICATED_SERVER || !FMLEnvironment.production)
             throw new RuntimeException(reason);
         if (RoughlyEnoughItemsState.errorSet.add(reason + " " + null)) {
             RoughlyEnoughItemsState.errors.add(new Tuple<>(reason, null));
@@ -57,7 +57,7 @@ public class RoughlyEnoughItemsState {
     }
     
     public static void error(String reason, String link) {
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER || FabricLoader.getInstance().isDevelopmentEnvironment())
+        if (FMLEnvironment.dist == Dist.DEDICATED_SERVER || !FMLEnvironment.production)
             throw new RuntimeException(reason + " " + link);
         if (RoughlyEnoughItemsState.errorSet.add(reason + " " + link)) {
             RoughlyEnoughItemsState.errors.add(new Tuple<>(reason, link));

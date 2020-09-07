@@ -23,19 +23,19 @@
 
 package me.shedaniel.rei.impl;
 
-import com.mojang.blaze3d.platform.InputConstants;
-import me.sargunvohra.mcmods.autoconfig1u.ConfigData;
-import me.sargunvohra.mcmods.autoconfig1u.annotation.Config;
-import me.sargunvohra.mcmods.autoconfig1u.annotation.ConfigEntry;
-import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.Comment;
-import me.shedaniel.clothconfig2.api.Modifier;
-import me.shedaniel.clothconfig2.api.ModifierKeyCode;
+import net.minecraft.client.util.InputMappings;
+import me.shedaniel.autoconfig1u.ConfigData;
+import me.shedaniel.autoconfig1u.annotation.Config;
+import me.shedaniel.autoconfig1u.annotation.ConfigEntry;
+import me.shedaniel.autoconfig1u.shadowed.blue.endless.jankson.Comment;
+import me.shedaniel.clothconfig2.forge.api.Modifier;
+import me.shedaniel.clothconfig2.forge.api.ModifierKeyCode;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.gui.config.*;
 import me.shedaniel.rei.impl.filtering.FilteringRule;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.annotation.ElementType;
@@ -47,7 +47,7 @@ import java.util.List;
 
 @ApiStatus.Internal
 @Config(name = "roughlyenoughitems/config")
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     @ConfigEntry.Category("basics") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
@@ -102,11 +102,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @Override
     public boolean isToastDisplayedOnCopyIdentifier() {
         return advanced.accessibility.toastDisplayedOnCopyIdentifier;
-    }
-    
-    @Override
-    public boolean doesRenderEntryEnchantmentGlint() {
-        return advanced.miscellaneous.renderEntryEnchantmentGlint;
     }
     
     @Override
@@ -370,14 +365,14 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     public static class KeyBindings {
-        private ModifierKeyCode recipeKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(82), Modifier.none());
-        private ModifierKeyCode usageKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(85), Modifier.none());
-        private ModifierKeyCode hideKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(79), Modifier.of(false, true, false));
+        private ModifierKeyCode recipeKeybind = ModifierKeyCode.of(InputMappings.Type.KEYSYM.getOrCreate(82), Modifier.none());
+        private ModifierKeyCode usageKeybind = ModifierKeyCode.of(InputMappings.Type.KEYSYM.getOrCreate(85), Modifier.none());
+        private ModifierKeyCode hideKeybind = ModifierKeyCode.of(InputMappings.Type.KEYSYM.getOrCreate(79), Modifier.of(false, true, false));
         private ModifierKeyCode previousPageKeybind = ModifierKeyCode.unknown();
         private ModifierKeyCode nextPageKeybind = ModifierKeyCode.unknown();
         private ModifierKeyCode focusSearchFieldKeybind = ModifierKeyCode.unknown();
         private ModifierKeyCode copyRecipeIdentifierKeybind = ModifierKeyCode.unknown();
-        private ModifierKeyCode favoriteKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(65), Modifier.none());
+        private ModifierKeyCode favoriteKeybind = ModifierKeyCode.of(InputMappings.Type.KEYSYM.getOrCreate(65), Modifier.none());
         private ModifierKeyCode exportImageKeybind = ModifierKeyCode.unknown();
     }
     
@@ -464,7 +459,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         public static class Miscellaneous {
             @Comment("Declares whether arrows in containers should be clickable.") private boolean clickableRecipeArrows = true;
             private boolean registerRecipesInAnotherThread = true;
-            @Comment("Whether REI should render entry's enchantment glint") private boolean renderEntryEnchantmentGlint = true;
             private boolean newFastEntryRendering = true;
         }
         

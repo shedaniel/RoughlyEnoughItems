@@ -27,10 +27,10 @@ import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -38,23 +38,23 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class DefaultInformationDisplay implements RecipeDisplay {
     private List<EntryStack> entryStacks;
-    private List<Component> texts;
-    private Component name;
+    private List<ITextComponent> texts;
+    private ITextComponent name;
     
-    protected DefaultInformationDisplay(List<EntryStack> entryStacks, Component name) {
+    protected DefaultInformationDisplay(List<EntryStack> entryStacks, ITextComponent name) {
         this.entryStacks = entryStacks;
         this.name = name;
         this.texts = Lists.newArrayList();
     }
     
-    public static DefaultInformationDisplay createFromEntries(List<EntryStack> entryStacks, Component name) {
+    public static DefaultInformationDisplay createFromEntries(List<EntryStack> entryStacks, ITextComponent name) {
         return new DefaultInformationDisplay(entryStacks, name);
     }
     
-    public static DefaultInformationDisplay createFromEntry(EntryStack entryStack, Component name) {
+    public static DefaultInformationDisplay createFromEntry(EntryStack entryStack, ITextComponent name) {
         return createFromEntries(Collections.singletonList(entryStack), name);
     }
     
@@ -68,17 +68,17 @@ public class DefaultInformationDisplay implements RecipeDisplay {
         return Collections.singletonList(entryStacks);
     }
     
-    public DefaultInformationDisplay line(Component line) {
+    public DefaultInformationDisplay line(ITextComponent line) {
         texts.add(line);
         return this;
     }
     
-    public DefaultInformationDisplay lines(Component... lines) {
+    public DefaultInformationDisplay lines(ITextComponent... lines) {
         texts.addAll(Arrays.asList(lines));
         return this;
     }
     
-    public DefaultInformationDisplay lines(Collection<Component> lines) {
+    public DefaultInformationDisplay lines(Collection<ITextComponent> lines) {
         texts.addAll(lines);
         return this;
     }
@@ -87,11 +87,11 @@ public class DefaultInformationDisplay implements RecipeDisplay {
         return entryStacks;
     }
     
-    Component getName() {
+    ITextComponent getName() {
         return name;
     }
     
-    List<Component> getTexts() {
+    List<ITextComponent> getTexts() {
         return texts;
     }
     

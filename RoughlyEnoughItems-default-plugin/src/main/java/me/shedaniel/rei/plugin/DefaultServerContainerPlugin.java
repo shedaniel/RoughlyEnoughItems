@@ -23,18 +23,20 @@
 
 package me.shedaniel.rei.plugin;
 
+import me.shedaniel.rei.api.BuiltinPlugin;
+import me.shedaniel.rei.api.plugins.REIContainerPlugin;
 import me.shedaniel.rei.plugin.containers.CraftingContainerInfoWrapper;
 import me.shedaniel.rei.server.ContainerInfoHandler;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.*;
+import net.minecraft.inventory.container.*;
 
+@REIContainerPlugin
 public class DefaultServerContainerPlugin implements Runnable {
     @Override
     public void run() {
-        ContainerInfoHandler.registerContainerInfo(new ResourceLocation("minecraft", "plugins/crafting"), CraftingContainerInfoWrapper.create(CraftingMenu.class));
-        ContainerInfoHandler.registerContainerInfo(new ResourceLocation("minecraft", "plugins/crafting"), CraftingContainerInfoWrapper.create(InventoryMenu.class));
-        ContainerInfoHandler.registerContainerInfo(new ResourceLocation("minecraft", "plugins/smelting"), CraftingContainerInfoWrapper.create(FurnaceMenu.class));
-        ContainerInfoHandler.registerContainerInfo(new ResourceLocation("minecraft", "plugins/smoking"), CraftingContainerInfoWrapper.create(SmokerMenu.class));
-        ContainerInfoHandler.registerContainerInfo(new ResourceLocation("minecraft", "plugins/blasting"), CraftingContainerInfoWrapper.create(BlastFurnaceMenu.class));
+        ContainerInfoHandler.registerContainerInfo(BuiltinPlugin.CRAFTING, CraftingContainerInfoWrapper.create(WorkbenchContainer.class));
+        ContainerInfoHandler.registerContainerInfo(BuiltinPlugin.CRAFTING, CraftingContainerInfoWrapper.create(PlayerContainer.class));
+        ContainerInfoHandler.registerContainerInfo(BuiltinPlugin.SMELTING, CraftingContainerInfoWrapper.create(FurnaceContainer.class));
+        ContainerInfoHandler.registerContainerInfo(BuiltinPlugin.SMOKING, CraftingContainerInfoWrapper.create(SmokerContainer.class));
+        ContainerInfoHandler.registerContainerInfo(BuiltinPlugin.BLASTING, CraftingContainerInfoWrapper.create(BlastFurnaceContainer.class));
     }
 }

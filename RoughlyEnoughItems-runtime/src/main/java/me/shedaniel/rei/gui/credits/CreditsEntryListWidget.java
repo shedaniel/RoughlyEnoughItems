@@ -23,12 +23,12 @@
 
 package me.shedaniel.rei.gui.credits;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import me.shedaniel.clothconfig2.forge.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.IReorderingProcessor;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
@@ -39,7 +39,7 @@ public class CreditsEntryListWidget extends DynamicNewSmoothScrollingEntryListWi
     private boolean inFocus;
     
     public CreditsEntryListWidget(Minecraft client, int width, int height, int startY, int endY) {
-        super(client, width, height, startY, endY, GuiComponent.BACKGROUND_LOCATION);
+        super(client, width, height, startY, endY, AbstractGui.BACKGROUND_LOCATION);
     }
     
     @Override
@@ -85,14 +85,14 @@ public class CreditsEntryListWidget extends DynamicNewSmoothScrollingEntryListWi
     }
     
     public static class TextCreditsItem extends CreditsItem {
-        private Component text;
+        private ITextComponent text;
         
-        public TextCreditsItem(Component text) {
+        public TextCreditsItem(ITextComponent text) {
             this.text = text;
         }
         
         @Override
-        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+        public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
             Minecraft.getInstance().font.drawShadow(matrices, text.getVisualOrderText(), x + 5, y + 5, -1);
         }
         
@@ -108,21 +108,21 @@ public class CreditsEntryListWidget extends DynamicNewSmoothScrollingEntryListWi
     }
     
     public static class TranslationCreditsItem extends CreditsItem {
-        private Component language;
-        private List<FormattedCharSequence> translators;
+        private ITextComponent language;
+        private List<IReorderingProcessor> translators;
         private int maxWidth;
         
-        public TranslationCreditsItem(Component language, Component translators, int width, int maxWidth) {
+        public TranslationCreditsItem(ITextComponent language, ITextComponent translators, int width, int maxWidth) {
             this.language = language;
             this.translators = Minecraft.getInstance().font.split(translators, width);
             this.maxWidth = maxWidth;
         }
         
         @Override
-        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+        public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
             Minecraft.getInstance().font.drawShadow(matrices, language.getVisualOrderText(), x + 5, y + 5, -1);
             int yy = y + 5;
-            for (FormattedCharSequence translator : translators) {
+            for (IReorderingProcessor translator : translators) {
                 Minecraft.getInstance().font.drawShadow(matrices, translator, x + 5 + maxWidth, yy, -1);
                 yy += 12;
             }

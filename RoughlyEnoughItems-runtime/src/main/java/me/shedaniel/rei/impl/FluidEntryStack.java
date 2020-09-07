@@ -24,67 +24,49 @@
 package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.math.Matrix4f;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.fractions.Fraction;
 import me.shedaniel.rei.api.widgets.Tooltip;
-import me.shedaniel.rei.utils.CollectionUtils;
 import me.shedaniel.rei.utils.FormattingUtils;
-import me.shedaniel.rei.utils.ImmutableLiteralText;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderState;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.model.RenderMaterial;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.core.Registry;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.Fluids;
-import org.apache.commons.lang3.StringUtils;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.fluids.FluidAttributes;
+import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @ApiStatus.Internal
 public class FluidEntryStack extends AbstractEntryStack {
-    private static final Fraction IGNORE_AMOUNT = Fraction.of(ThreadLocalRandom.current().nextLong(), ThreadLocalRandom.current().nextLong(Long.MAX_VALUE)).simplify();
-    private Fluid fluid;
-    private Fraction amount;
-    private int hashIgnoreAmount;
-    private int hash;
+    private FluidStack stack;
     
-    public FluidEntryStack(Fluid fluid) {
-        this(fluid, IGNORE_AMOUNT);
-    }
-    
-    public FluidEntryStack(Fluid fluid, Fraction amount) {
-        this.fluid = fluid;
-        this.amount = amount;
-        
-        rehash();
-    }
-    
-    private void rehash() {
-        hashIgnoreAmount = 31 + getType().ordinal();
-        hashIgnoreAmount = 31 * hashIgnoreAmount + fluid.hashCode();
-        
-        hash = 31 * hashIgnoreAmount + amount.hashCode();
+    public FluidEntryStack(FluidStack stack) {
+        this.stack = stack;
     }
     
     @Override
@@ -98,18 +80,13 @@ public class FluidEntryStack extends AbstractEntryStack {
     }
     
     @Override
-    public Fraction getAccurateAmount() {
-        return amount;
+    public int getAmount() {
+        return stack.getAmount();
     }
     
     @Override
-    public void setAmount(Fraction amount) {
-        this.amount = amount.equals(IGNORE_AMOUNT) ? IGNORE_AMOUNT : max(amount, Fraction.empty());
-        if (isEmpty()) {
-            fluid = Fluids.EMPTY;
-        }
-        
-        rehash();
+    public void setAmount(int amount) {
+        stack.setAmount(amount);
     }
     
     private <T extends Comparable<T>> T max(T o1, T o2) {
@@ -118,12 +95,12 @@ public class FluidEntryStack extends AbstractEntryStack {
     
     @Override
     public boolean isEmpty() {
-        return (!amount.equals(IGNORE_AMOUNT) && !amount.isGreaterThan(Fraction.empty())) || fluid == Fluids.EMPTY;
+        return stack.isEmpty();
     }
     
     @Override
     public EntryStack copy() {
-        EntryStack stack = EntryStack.create(fluid, amount);
+        EntryStack stack = EntryStack.create(this.stack.copy());
         for (Map.Entry<Settings<?>, Object> entry : getSettings().entrySet()) {
             stack.setting((Settings<? super Object>) entry.getKey(), entry.getValue());
         }
@@ -132,7 +109,7 @@ public class FluidEntryStack extends AbstractEntryStack {
     
     @Override
     public Object getObject() {
-        return fluid;
+        return this.stack;
     }
     
     @Override
@@ -141,7 +118,7 @@ public class FluidEntryStack extends AbstractEntryStack {
             return equalsIgnoreTagsAndAmount(EntryStack.copyItemToFluid(stack));
         if (stack.getType() != Type.FLUID)
             return false;
-        return fluid == stack.getFluid();
+        return this.stack.getFluid() == stack.getFluid();
     }
     
     @Override
@@ -150,7 +127,7 @@ public class FluidEntryStack extends AbstractEntryStack {
             return equalsIgnoreTags(EntryStack.copyItemToFluid(stack));
         if (stack.getType() != Type.FLUID)
             return false;
-        return fluid == stack.getFluid() && (amount.equals(IGNORE_AMOUNT) || stack.getAccurateAmount().equals(IGNORE_AMOUNT) || amount.equals(stack.getAccurateAmount()));
+        return this.stack.getFluid() == stack.getFluid() && this.stack.getAmount() == stack.getAmount();
     }
     
     @Override
@@ -159,34 +136,41 @@ public class FluidEntryStack extends AbstractEntryStack {
             return equalsIgnoreAmount(EntryStack.copyItemToFluid(stack));
         if (stack.getType() != Type.FLUID)
             return false;
-        return fluid == stack.getFluid();
+        return this.stack.getFluid() == stack.getFluid() && Objects.equals(this.stack.getTag(), stack.getFluidStack().getTag());
     }
     
     @Override
     public boolean equalsAll(EntryStack stack) {
         if (stack.getType() != Type.FLUID)
             return false;
-        return fluid == stack.getFluid() && (amount.equals(IGNORE_AMOUNT) || stack.getAccurateAmount().equals(IGNORE_AMOUNT) || amount.equals(stack.getAccurateAmount()));
+        return this.stack.getFluid() == stack.getFluid() && this.stack.getAmount() == stack.getAmount() && Objects.equals(this.stack.getTag(), stack.getFluidStack().getTag());
     }
     
     @Override
     public int hashOfAll() {
-        return hash;
+        return stack.hashCode();
     }
     
     @Override
     public int hashIgnoreAmountAndTags() {
-        return hashIgnoreAmount;
+        return 31 + getFluid().hashCode();
     }
     
     @Override
     public int hashIgnoreTags() {
-        return hash;
+        int code = hashIgnoreAmountAndTags();
+        code = 31 * code + stack.getAmount();
+        return code;
     }
     
     @Override
     public int hashIgnoreAmount() {
-        return hashIgnoreAmount;
+        int code = hashIgnoreAmountAndTags();
+        code = 31 * code;
+        CompoundNBT tag = stack.getTag();
+        if (tag != null)
+            code = 31 * code + tag.hashCode();
+        return code;
     }
     
     @Nullable
@@ -194,18 +178,18 @@ public class FluidEntryStack extends AbstractEntryStack {
     public Tooltip getTooltip(Point point) {
         if (!get(Settings.TOOLTIP_ENABLED).get() || isEmpty())
             return null;
-        List<Component> toolTip = Lists.newArrayList(asFormattedText());
-        if (!amount.isLessThan(Fraction.empty()) && !amount.equals(IGNORE_AMOUNT)) {
+        List<ITextComponent> toolTip = Lists.newArrayList(asFormattedText());
+        if (stack.getAmount() > 0) {
             String amountTooltip = get(Settings.Fluid.AMOUNT_TOOLTIP).apply(this);
             if (amountTooltip != null)
-                toolTip.addAll(Stream.of(amountTooltip.split("\n")).map(TextComponent::new).collect(Collectors.toList()));
+                toolTip.addAll(Stream.of(amountTooltip.split("\n")).map(StringTextComponent::new).collect(Collectors.toList()));
         }
         toolTip.addAll(get(Settings.TOOLTIP_APPEND_EXTRA).apply(this));
         if (get(Settings.TOOLTIP_APPEND_MOD).get() && ConfigObject.getInstance().shouldAppendModNames()) {
-            ResourceLocation id = Registry.FLUID.getKey(fluid);
+            ResourceLocation id = Registry.FLUID.getKey(stack.getFluid());
             final String modId = ClientHelper.getInstance().getModFromIdentifier(id);
             boolean alreadyHasMod = false;
-            for (Component s : toolTip)
+            for (ITextComponent s : toolTip)
                 if (FormattingUtils.stripFormatting(s.getString()).equalsIgnoreCase(modId)) {
                     alreadyHasMod = true;
                     break;
@@ -216,38 +200,45 @@ public class FluidEntryStack extends AbstractEntryStack {
         return Tooltip.create(toolTip);
     }
     
-    @SuppressWarnings("deprecation")
+    public static RenderType createFluid(ResourceLocation location) {
+        return RenderType.create(
+                "roughlyenoughitems:fluid_type",
+                DefaultVertexFormats.POSITION_TEX_COLOR, 7, 256, true, false,
+                RenderType.State.builder()
+                        .setShadeModelState(RenderState.SMOOTH_SHADE)
+                        .setLightmapState(RenderState.LIGHTMAP)
+                        .setTextureState(new RenderState.TextureState(location, false, false))
+                        .setTransparencyState(RenderState.TRANSLUCENT_TRANSPARENCY)
+                        .createCompositeState(false));
+    }
+    
     @Override
-    public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
         if (get(Settings.RENDER).get()) {
-            SimpleFluidRenderer.FluidRenderingData renderingData = SimpleFluidRenderer.fromFluid(fluid);
-            if (renderingData != null) {
-                TextureAtlasSprite sprite = renderingData.getSprite();
-                int color = renderingData.getColor();
-                int a = 255;
-                int r = (color >> 16 & 255);
-                int g = (color >> 8 & 255);
-                int b = (color & 255);
-                Minecraft.getInstance().getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
-                Tesselator tess = Tesselator.getInstance();
-                BufferBuilder bb = tess.getBuilder();
-                Matrix4f matrix = matrices.last().pose();
-                bb.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-                bb.vertex(matrix, bounds.getMaxX(), bounds.y, getZ()).uv(sprite.getU1(), sprite.getV0()).color(r, g, b, a).endVertex();
-                bb.vertex(matrix, bounds.x, bounds.y, getZ()).uv(sprite.getU0(), sprite.getV0()).color(r, g, b, a).endVertex();
-                bb.vertex(matrix, bounds.x, bounds.getMaxY(), getZ()).uv(sprite.getU0(), sprite.getV1()).color(r, g, b, a).endVertex();
-                bb.vertex(matrix, bounds.getMaxX(), bounds.getMaxY(), getZ()).uv(sprite.getU1(), sprite.getV1()).color(r, g, b, a).endVertex();
-                tess.end();
-            }
+            FluidAttributes attributes = stack.getFluid().getAttributes();
+            ResourceLocation texture = attributes.getStillTexture();
+            RenderMaterial blockMaterial = ForgeHooksClient.getBlockMaterial(texture);
+            TextureAtlasSprite sprite = blockMaterial.sprite();
+            int color = attributes.getColor(Minecraft.getInstance().level, BlockPos.ZERO);
+            int a = 255;
+            int r = (color >> 16 & 255);
+            int g = (color >> 8 & 255);
+            int b = (color & 255);
+            Minecraft.getInstance().getTextureManager().bind(texture);
+            IRenderTypeBuffer.Impl source = Minecraft.getInstance().renderBuffers().bufferSource();
+            IVertexBuilder builder = blockMaterial.buffer(source, FluidEntryStack::createFluid);
+            Matrix4f matrix = matrices.last().pose();
+            builder.vertex(matrix, bounds.getMaxX(), bounds.y, getZ()).uv(sprite.getU1(), sprite.getV0()).color(r, g, b, a).endVertex();
+            builder.vertex(matrix, bounds.x, bounds.y, getZ()).uv(sprite.getU0(), sprite.getV0()).color(r, g, b, a).endVertex();
+            builder.vertex(matrix, bounds.x, bounds.getMaxY(), getZ()).uv(sprite.getU0(), sprite.getV1()).color(r, g, b, a).endVertex();
+            builder.vertex(matrix, bounds.getMaxX(), bounds.getMaxY(), getZ()).uv(sprite.getU1(), sprite.getV1()).color(r, g, b, a).endVertex();
+            source.endBatch();
         }
     }
     
     @NotNull
     @Override
-    public Component asFormattedText() {
-        ResourceLocation id = Registry.FLUID.getKey(fluid);
-        if (I18n.exists("block." + id.toString().replaceFirst(":", ".")))
-            return new ImmutableLiteralText(I18n.get("block." + id.toString().replaceFirst(":", ".")));
-        return new ImmutableLiteralText(CollectionUtils.mapAndJoinToString(id.getPath().split("_"), StringUtils::capitalize, " "));
+    public ITextComponent asFormattedText() {
+        return stack.getDisplayName();
     }
 }

@@ -25,15 +25,16 @@ package me.shedaniel.rei.gui.widget;
 
 import me.shedaniel.math.Point;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
+import net.minecraft.client.gui.FocusableGui;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.IRenderable;
 
 /**
  * The base class for a screen widget
  *
  * @see WidgetWithBounds for a widget with bounds
  */
-public abstract class Widget extends AbstractContainerEventHandler implements net.minecraft.client.gui.components.Widget {
+public abstract class Widget extends FocusableGui implements IRenderable {
     
     /**
      * The Minecraft Client instance
@@ -42,7 +43,7 @@ public abstract class Widget extends AbstractContainerEventHandler implements ne
     /**
      * The font for rendering text
      */
-    protected final Font font = minecraft.font;
+    protected final FontRenderer font = minecraft.font;
     
     public int getZ() {
         return this.getBlitOffset();

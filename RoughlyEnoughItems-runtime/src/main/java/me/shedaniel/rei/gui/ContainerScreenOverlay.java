@@ -24,15 +24,11 @@
 package me.shedaniel.rei.gui;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector4f;
+import me.shedaniel.clothconfig2.forge.api.PointHelper;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.widgets.Button;
@@ -48,33 +44,39 @@ import me.shedaniel.rei.impl.InternalWidgets;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.Weather;
 import me.shedaniel.rei.utils.CollectionUtils;
+import net.minecraft.block.Blocks;
+import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.SimpleSound;
+import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.chat.NarratorChatListener;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.ItemRenderer;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.client.world.ClientWorld;
+import net.minecraft.inventory.container.Slot;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.IReorderingProcessor;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvents;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector4f;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.GameType;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
 @ApiStatus.Internal
 public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverlay {
@@ -88,8 +90,8 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
     public boolean shouldReInit = false;
     private int tooltipWidth;
     private int tooltipHeight;
-    private List<FormattedCharSequence> tooltipLines;
-    public final TriConsumer<PoseStack, Point, Float> renderTooltipCallback = (matrices, mouse, aFloat) -> {
+    private List<IReorderingProcessor> tooltipLines;
+    public final TriConsumer<MatrixStack, Point, Float> renderTooltipCallback = (matrices, mouse, aFloat) -> {
         RenderSystem.disableRescaleNormal();
         RenderSystem.disableDepthTest();
         matrices.pushPose();
@@ -106,7 +108,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
         this.fillGradient(matrices, x - 3, y - 3, x + tooltipWidth + 3, y - 3 + 1, 1347420415, 1347420415);
         this.fillGradient(matrices, x - 3, y + tooltipHeight + 2, x + tooltipWidth + 3, y + tooltipHeight + 3, 1344798847, 1344798847);
         int currentY = y;
-        MultiBufferSource.BufferSource immediate = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        IRenderTypeBuffer.Impl immediate = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
         Matrix4f matrix = matrices.last().pose();
         for (int lineIndex = 0; lineIndex < tooltipLines.size(); lineIndex++) {
             font.drawInBatch(tooltipLines.get(lineIndex), x, currentY, -1, true, matrix, immediate, false, 0, 15728880);
@@ -118,7 +120,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
         RenderSystem.enableRescaleNormal();
     };
     private Rectangle bounds;
-    private Window window;
+    private MainWindow window;
     private Button leftButton, rightButton;
     @ApiStatus.Experimental
     private Rectangle subsetsButtonBounds;
@@ -204,7 +206,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
         this.widgets.add(ScreenHelper.getSearchField());
         ScreenHelper.getSearchField().setChangedListener(s -> ENTRY_LIST_WIDGET.updateSearch(s, false));
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-            widgets.add(leftButton = Widgets.createButton(new Rectangle(bounds.x, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TranslatableComponent("text.rei.left_arrow"))
+            widgets.add(leftButton = Widgets.createButton(new Rectangle(bounds.x, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TranslationTextComponent("text.rei.left_arrow"))
                     .onClick(button -> {
                         ENTRY_LIST_WIDGET.previousPage();
                         if (ENTRY_LIST_WIDGET.getPage() < 0)
@@ -214,7 +216,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
                     .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y))
                     .tooltipLine(I18n.get("text.rei.previous_page"))
                     .focusable(false));
-            widgets.add(rightButton = Widgets.createButton(new Rectangle(bounds.x + bounds.width - 18, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TranslatableComponent("text.rei.right_arrow"))
+            widgets.add(rightButton = Widgets.createButton(new Rectangle(bounds.x + bounds.width - 18, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TranslationTextComponent("text.rei.right_arrow"))
                     .onClick(button -> {
                         ENTRY_LIST_WIDGET.nextPage();
                         if (ENTRY_LIST_WIDGET.getPage() >= ENTRY_LIST_WIDGET.getTotalPages())
@@ -286,7 +288,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
                                 removeGameModeMenu();
                             }
                         }
-                        button.setText(new TextComponent(getGameModeShortText(getCurrentGameMode())));
+                        button.setText(new StringTextComponent(getGameModeShortText(getCurrentGameMode())));
                     })
                     .focusable(false)
                     .tooltipLine(I18n.get("text.rei.gamemode_button.tooltip.all"))
@@ -319,7 +321,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
         }
         subsetsButtonBounds = getSubsetsButtonBounds();
         if (ConfigObject.getInstance().isSubsetsEnabled()) {
-            widgets.add(InternalWidgets.wrapLateRenderable(InternalWidgets.wrapTranslate(Widgets.createButton(subsetsButtonBounds, ((ClientHelperImpl) ClientHelper.getInstance()).isAprilFools.get() ? new TranslatableComponent("text.rei.tiny_potato") : new TranslatableComponent("text.rei.subsets"))
+            widgets.add(InternalWidgets.wrapLateRenderable(InternalWidgets.wrapTranslate(Widgets.createButton(subsetsButtonBounds, ((ClientHelperImpl) ClientHelper.getInstance()).isAprilFools.get() ? new TranslationTextComponent("text.rei.tiny_potato") : new TranslationTextComponent("text.rei.subsets"))
                     .onClick(button -> {
                         if (subsetsMenu == null) {
                             wrappedSubsetsMenu = InternalWidgets.wrapTranslate(InternalWidgets.wrapLateRenderable(this.subsetsMenu = Menu.createSubsetsMenuFromRegistry(new Point(this.subsetsButtonBounds.x, this.subsetsButtonBounds.getMaxY()))), 0, 0, 400);
@@ -337,7 +339,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
                 ENTRY_LIST_WIDGET.updateEntriesPosition();
             }).tooltipLine(I18n.get("text.rei.go_back_first_page")).focusable(false).onRender((matrices, label) -> {
                 label.setClickable(ENTRY_LIST_WIDGET.getTotalPages() > 1);
-                label.setText(new TextComponent(String.format("%s/%s", ENTRY_LIST_WIDGET.getPage() + 1, Math.max(ENTRY_LIST_WIDGET.getTotalPages(), 1))));
+                label.setText(new StringTextComponent(String.format("%s/%s", ENTRY_LIST_WIDGET.getPage() + 1, Math.max(ENTRY_LIST_WIDGET.getTotalPages(), 1))));
             }));
         }
         if (ConfigObject.getInstance().isCraftableFilterEnabled()) {
@@ -377,7 +379,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
                 VillagerRecipeViewingScreen widget = (VillagerRecipeViewingScreen) Minecraft.getInstance().screen;
                 return new Rectangle(widget.bounds.x, 3, widget.bounds.width, 18);
             }
-            return new Rectangle(REIHelper.getInstance().getPreviousContainerScreen().leftPos, 3, REIHelper.getInstance().getPreviousContainerScreen().imageWidth, 18);
+            return new Rectangle(REIHelper.getInstance().getPreviousContainerScreen().getGuiLeft(), 3, REIHelper.getInstance().getPreviousContainerScreen().getXSize(), 18);
         }
         return null;
     }
@@ -395,7 +397,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
     }
     
     private Weather getCurrentWeather() {
-        ClientLevel world = Minecraft.getInstance().level;
+        ClientWorld world = Minecraft.getInstance().level;
         if (world.isThundering())
             return Weather.THUNDER;
         if (world.getLevelData().isRaining())
@@ -494,7 +496,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (shouldReInit) {
             ENTRY_LIST_WIDGET.updateSearch(ScreenHelper.getSearchField().getText(), true);
             init();
@@ -516,9 +518,9 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
         if (OverlaySearchField.isSearching) {
             matrices.pushPose();
             matrices.translate(0, 0, 200f);
-            if (Minecraft.getInstance().screen instanceof AbstractContainerScreen) {
-                AbstractContainerScreen<?> containerScreen = (AbstractContainerScreen<?>) Minecraft.getInstance().screen;
-                int x = containerScreen.leftPos, y = containerScreen.topPos;
+            if (Minecraft.getInstance().screen instanceof ContainerScreen) {
+                ContainerScreen<?> containerScreen = (ContainerScreen<?>) Minecraft.getInstance().screen;
+                int x = containerScreen.getGuiLeft(), y = containerScreen.getGuiTop();
                 for (Slot slot : containerScreen.getMenu().slots)
                     if (!slot.hasItem() || !ENTRY_LIST_WIDGET.canLastSearchTermsBeAppliedTo(EntryStack.create(slot.getItem())))
                         fillGradient(matrices, x + slot.x, y + slot.y, x + slot.x + 16, y + slot.y + 16, -601874400, -601874400);
@@ -527,19 +529,19 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
         }
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.renderWidgets(matrices, mouseX, mouseY, delta);
-        if (Minecraft.getInstance().screen instanceof AbstractContainerScreen && ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
-            AbstractContainerScreen<?> containerScreen = (AbstractContainerScreen<?>) Minecraft.getInstance().screen;
+        if (Minecraft.getInstance().screen instanceof ContainerScreen && ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
+            ContainerScreen<?> containerScreen = (ContainerScreen<?>) Minecraft.getInstance().screen;
             for (RecipeHelper.ScreenClickArea area : RecipeHelper.getInstance().getScreenClickAreas())
                 if (area.getScreenClass().equals(Minecraft.getInstance().screen.getClass()))
-                    if (area.getRectangle().contains(mouseX - containerScreen.leftPos, mouseY - containerScreen.topPos)) {
+                    if (area.getRectangle().contains(mouseX - containerScreen.getGuiLeft(), mouseY - containerScreen.getGuiTop())) {
                         String collect = CollectionUtils.mapAndJoinToString(area.getCategories(), identifier -> RecipeHelper.getInstance().getCategory(identifier).getCategoryName(), ", ");
-                        TOOLTIPS.add(Tooltip.create(new TranslatableComponent("text.rei.view_recipes_for", collect)));
+                        TOOLTIPS.add(Tooltip.create(new TranslationTextComponent("text.rei.view_recipes_for", collect)));
                         break;
                     }
         }
     }
     
-    public void lateRender(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void lateRender(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (ScreenHelper.isOverlayVisible()) {
             ScreenHelper.getSearchField().laterRender(matrices, mouseX, mouseY, delta);
             for (Widget widget : widgets) {
@@ -575,18 +577,18 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
         AFTER_RENDER.clear();
     }
     
-    public void renderTooltip(PoseStack matrices, Tooltip tooltip) {
+    public void renderTooltip(MatrixStack matrices, Tooltip tooltip) {
         renderTooltip(matrices, tooltip.getText(), tooltip.getX(), tooltip.getY());
     }
     
-    public void renderTooltip(PoseStack matrices, List<Component> lines, int mouseX, int mouseY) {
+    public void renderTooltip(MatrixStack matrices, List<ITextComponent> lines, int mouseX, int mouseY) {
         if (lines.isEmpty())
             return;
-        List<FormattedCharSequence> orderedTexts = CollectionUtils.map(lines, Component::getVisualOrderText);
+        List<IReorderingProcessor> orderedTexts = CollectionUtils.map(lines, ITextComponent::getVisualOrderText);
         renderTooltipInner(matrices, orderedTexts, mouseX, mouseY);
     }
     
-    public void renderTooltipInner(PoseStack matrices, List<FormattedCharSequence> lines, int mouseX, int mouseY) {
+    public void renderTooltipInner(MatrixStack matrices, List<IReorderingProcessor> lines, int mouseX, int mouseY) {
         if (lines.isEmpty())
             return;
         tooltipWidth = lines.stream().map(font::width).max(Integer::compareTo).get();
@@ -600,7 +602,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
             TOOLTIPS.add(tooltip);
     }
     
-    public void renderWidgets(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void renderWidgets(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (!ScreenHelper.isOverlayVisible())
             return;
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
@@ -654,7 +656,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
         if (ScreenHelper.isOverlayVisible()) {
             if (ScreenHelper.getSearchField().keyPressed(keyCode, scanCode, modifiers))
                 return true;
-            for (GuiEventListener listener : widgets)
+            for (IGuiEventListener listener : widgets)
                 if (listener != ScreenHelper.getSearchField() && listener.keyPressed(keyCode, scanCode, modifiers))
                     return true;
         }
@@ -698,7 +700,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
             return false;
         if (ScreenHelper.getSearchField().charTyped(char_1, int_1))
             return true;
-        for (GuiEventListener listener : widgets)
+        for (IGuiEventListener listener : widgets)
             if (listener != ScreenHelper.getSearchField() && listener.charTyped(char_1, int_1))
                 return true;
         return false;
@@ -764,17 +766,17 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
                 removeGameModeMenu();
             }
         }
-        if (Minecraft.getInstance().screen instanceof AbstractContainerScreen && ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
-            AbstractContainerScreen<?> containerScreen = (AbstractContainerScreen<?>) Minecraft.getInstance().screen;
+        if (Minecraft.getInstance().screen instanceof ContainerScreen && ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
+            ContainerScreen<?> containerScreen = (ContainerScreen<?>) Minecraft.getInstance().screen;
             for (RecipeHelper.ScreenClickArea area : RecipeHelper.getInstance().getScreenClickAreas())
                 if (area.getScreenClass().equals(containerScreen.getClass()))
-                    if (area.getRectangle().contains(mouseX - containerScreen.leftPos, mouseY - containerScreen.topPos)) {
+                    if (area.getRectangle().contains(mouseX - containerScreen.getGuiLeft(), mouseY - containerScreen.getGuiTop())) {
                         ClientHelper.getInstance().executeViewAllRecipesFromCategories(Arrays.asList(area.getCategories()));
-                        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                        Minecraft.getInstance().getSoundManager().play(SimpleSound.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                         return true;
                     }
         }
-        for (GuiEventListener element : widgets)
+        for (IGuiEventListener element : widgets)
             if (element != wrappedSubsetsMenu && element != wrappedWeatherMenu && element != wrappedGameModeMenu && element.mouseClicked(mouseX, mouseY, button)) {
                 this.setFocused(element);
                 if (button == 0)
@@ -806,9 +808,9 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
     
     public boolean isNotInExclusionZones(double mouseX, double mouseY) {
         for (OverlayDecider decider : DisplayHelper.getInstance().getSortedOverlayDeciders(Minecraft.getInstance().screen.getClass())) {
-            InteractionResult in = decider.isInZone(mouseX, mouseY);
-            if (in != InteractionResult.PASS)
-                return in == InteractionResult.SUCCESS;
+            ActionResultType in = decider.isInZone(mouseX, mouseY);
+            if (in != ActionResultType.PASS)
+                return in == ActionResultType.SUCCESS;
         }
         return true;
     }

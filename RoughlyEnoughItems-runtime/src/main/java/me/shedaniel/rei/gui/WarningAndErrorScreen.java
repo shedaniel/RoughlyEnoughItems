@@ -23,23 +23,23 @@
 
 package me.shedaniel.rei.gui;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import me.shedaniel.clothconfig2.forge.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
 import me.shedaniel.rei.RoughlyEnoughItemsState;
-import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.audio.SimpleSound;
+import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.chat.NarratorChatListener;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.Widget;
+import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.util.IReorderingProcessor;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.Tuple;
+import net.minecraft.util.Util;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.net.URI;
@@ -49,7 +49,7 @@ import java.util.function.Consumer;
 
 @ApiStatus.Internal
 public class WarningAndErrorScreen extends Screen {
-    private AbstractWidget buttonExit;
+    private Widget buttonExit;
     private StringEntryListWidget listWidget;
     private String action;
     private Screen parent;
@@ -74,14 +74,14 @@ public class WarningAndErrorScreen extends Screen {
         this.parent = parent;
     }
     
-    private void addText(Component string) {
-        for (FormattedCharSequence s : font.split(string, width - 80)) {
+    private void addText(ITextComponent string) {
+        for (IReorderingProcessor s : font.split(string, width - 80)) {
             listWidget.creditsAddEntry(new TextItem(s));
         }
     }
     
-    private void addLink(Component string, String link) {
-        for (FormattedCharSequence s : font.split(string, width - 80)) {
+    private void addLink(ITextComponent string, String link) {
+        for (IReorderingProcessor s : font.split(string, width - 80)) {
             listWidget.creditsAddEntry(new LinkItem(s, link));
         }
     }
@@ -93,11 +93,11 @@ public class WarningAndErrorScreen extends Screen {
         listWidget.creditsClearEntries();
         listWidget.creditsAddEntry(new EmptyItem());
         if (!warnings.isEmpty())
-            listWidget.creditsAddEntry(new TextItem(new TextComponent("Warnings:").withStyle(ChatFormatting.GOLD).getVisualOrderText()));
+            listWidget.creditsAddEntry(new TextItem(new StringTextComponent("Warnings:").withStyle(TextFormatting.GOLD).getVisualOrderText()));
         for (Tuple<String, String> pair : warnings) {
-            addText(new TextComponent(pair.getA()));
+            addText(new StringTextComponent(pair.getA()));
             if (pair.getB() != null)
-                addLink(new TextComponent(pair.getB()), pair.getB());
+                addLink(new StringTextComponent(pair.getB()), pair.getB());
             for (int i = 0; i < 2; i++) {
                 listWidget.creditsAddEntry(new EmptyItem());
             }
@@ -106,11 +106,11 @@ public class WarningAndErrorScreen extends Screen {
             listWidget.creditsAddEntry(new EmptyItem());
         }
         if (!errors.isEmpty())
-            listWidget.creditsAddEntry(new TextItem(new TextComponent("Errors:").withStyle(ChatFormatting.RED).getVisualOrderText()));
+            listWidget.creditsAddEntry(new TextItem(new StringTextComponent("Errors:").withStyle(TextFormatting.RED).getVisualOrderText()));
         for (Tuple<String, String> pair : errors) {
-            addText(new TextComponent(pair.getA()));
+            addText(new StringTextComponent(pair.getA()));
             if (pair.getB() != null)
-                addLink(new TextComponent(pair.getB()), pair.getB());
+                addLink(new StringTextComponent(pair.getB()), pair.getB());
             for (int i = 0; i < 2; i++) {
                 listWidget.creditsAddEntry(new EmptyItem());
             }
@@ -119,7 +119,7 @@ public class WarningAndErrorScreen extends Screen {
             listWidget.max = Math.max(listWidget.max, child.getWidth());
         }
         children.add(buttonExit = new Button(width / 2 - 100, height - 26, 200, 20,
-                new TextComponent(errors.isEmpty() ? "Continue" : "Exit"),
+                new StringTextComponent(errors.isEmpty() ? "Continue" : "Exit"),
                 button -> onContinue.accept(parent)));
     }
     
@@ -129,7 +129,7 @@ public class WarningAndErrorScreen extends Screen {
     }
     
     @Override
-    public void render(PoseStack matrices, int int_1, int int_2, float float_1) {
+    public void render(MatrixStack matrices, int int_1, int int_2, float float_1) {
         this.renderDirtBackground(0);
         this.listWidget.render(matrices, int_1, int_2, float_1);
         if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
@@ -146,7 +146,7 @@ public class WarningAndErrorScreen extends Screen {
         private int max = 80;
         
         public StringEntryListWidget(Minecraft client, int width, int height, int startY, int endY) {
-            super(client, width, height, startY, endY, GuiComponent.BACKGROUND_LOCATION);
+            super(client, width, height, startY, endY, AbstractGui.BACKGROUND_LOCATION);
         }
         
         @Override
@@ -194,7 +194,7 @@ public class WarningAndErrorScreen extends Screen {
     
     private static class EmptyItem extends StringItem {
         @Override
-        public void render(PoseStack matrixStack, int i, int i1, int i2, int i3, int i4, int i5, int i6, boolean b, float v) {
+        public void render(MatrixStack matrixStack, int i, int i1, int i2, int i3, int i4, int i5, int i6, boolean b, float v) {
             
         }
         
@@ -210,14 +210,14 @@ public class WarningAndErrorScreen extends Screen {
     }
     
     private static class TextItem extends StringItem {
-        private FormattedCharSequence text;
+        private IReorderingProcessor text;
         
-        public TextItem(FormattedCharSequence text) {
+        public TextItem(IReorderingProcessor text) {
             this.text = text;
         }
         
         @Override
-        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+        public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
             Minecraft.getInstance().font.drawShadow(matrices, text, x + 5, y, -1);
         }
         
@@ -238,22 +238,22 @@ public class WarningAndErrorScreen extends Screen {
     }
     
     private class LinkItem extends StringItem {
-        private FormattedCharSequence text;
+        private IReorderingProcessor text;
         private String link;
         private boolean contains;
         
-        public LinkItem(FormattedCharSequence text, String link) {
+        public LinkItem(IReorderingProcessor text, String link) {
             this.text = text;
             this.link = link;
         }
         
         @Override
-        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+        public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
             contains = mouseX >= x && mouseX <= x + entryWidth && mouseY >= y && mouseY <= y + entryHeight;
             if (contains) {
-                WarningAndErrorScreen.this.renderTooltip(matrices, new TextComponent("Click to open link."), mouseX, mouseY);
+                WarningAndErrorScreen.this.renderTooltip(matrices, new StringTextComponent("Click to open link."), mouseX, mouseY);
                 Minecraft.getInstance().font.drawShadow(matrices, characterVisitor -> {
-                    return text.accept((charIndex, style, codePoint) -> characterVisitor.accept(charIndex, style.applyFormat(ChatFormatting.UNDERLINE), codePoint));
+                    return text.accept((charIndex, style, codePoint) -> characterVisitor.accept(charIndex, style.applyFormat(TextFormatting.UNDERLINE), codePoint));
                 }, x + 5, y, 0xff1fc3ff);
             } else {
                 Minecraft.getInstance().font.drawShadow(matrices, text, x + 5, y, 0xff1fc3ff);
@@ -278,7 +278,7 @@ public class WarningAndErrorScreen extends Screen {
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             if (contains && button == 0) {
-                Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                Minecraft.getInstance().getSoundManager().play(SimpleSound.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 try {
                     Util.getPlatform().openUri(new URI(link));
                     return true;

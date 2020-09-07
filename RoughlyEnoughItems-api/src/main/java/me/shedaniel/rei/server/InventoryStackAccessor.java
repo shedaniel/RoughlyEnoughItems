@@ -23,14 +23,14 @@
 
 package me.shedaniel.rei.server;
 
-import net.minecraft.world.Container;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.item.ItemStack;
 
 public class InventoryStackAccessor implements StackAccessor {
-    protected Container inventory;
+    protected IInventory inventory;
     protected int index;
     
-    public InventoryStackAccessor(Container inventory, int index) {
+    public InventoryStackAccessor(IInventory inventory, int index) {
         this.inventory = inventory;
         this.index = index;
     }

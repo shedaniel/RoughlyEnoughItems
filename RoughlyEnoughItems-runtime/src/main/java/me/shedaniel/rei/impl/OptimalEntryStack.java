@@ -23,10 +23,10 @@
 
 package me.shedaniel.rei.impl;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
@@ -40,15 +40,15 @@ public interface OptimalEntryStack {
         return getClass().hashCode();
     }
     
-    default void optimisedRenderStart(PoseStack matrices, float delta) {
+    default void optimisedRenderStart(MatrixStack matrices, float delta) {
     }
     
-    default void optimisedRenderBase(PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
+    default void optimisedRenderBase(MatrixStack matrices, IRenderTypeBuffer.Impl immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
     }
     
-    default void optimisedRenderOverlay(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+    default void optimisedRenderOverlay(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
     }
     
-    default void optimisedRenderEnd(PoseStack matrices, float delta) {
+    default void optimisedRenderEnd(MatrixStack matrices, float delta) {
     }
 }

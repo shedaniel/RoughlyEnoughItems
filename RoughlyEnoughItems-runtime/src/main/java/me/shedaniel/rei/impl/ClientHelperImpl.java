@@ -33,31 +33,29 @@ import me.shedaniel.rei.gui.RecipeScreen;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.ModContainer;
-import net.fabricmc.loader.api.metadata.ModMetadata;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
-import net.minecraft.core.Registry;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.LazyLoadedValue;
-import net.minecraft.util.Mth;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.client.gui.screen.inventory.CreativeScreen;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.LazyValue;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.ModContainer;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.forgespi.language.IModInfo;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -66,16 +64,15 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static me.shedaniel.rei.impl.Internals.attachInstance;
 
 @ApiStatus.Internal
-@Environment(EnvType.CLIENT)
-public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
+@OnlyIn(Dist.CLIENT)
+public class ClientHelperImpl implements ClientHelper {
     
     private static ClientHelperImpl instance;
-    @ApiStatus.Internal public final LazyLoadedValue<Boolean> isYog = new LazyLoadedValue<>(() -> {
+    @ApiStatus.Internal public final LazyValue<Boolean> isYog = new LazyValue<>(() -> {
         try {
             if (Minecraft.getInstance().getUser().getGameProfile().getId().equals(UUID.fromString("f9546389-9415-4358-9c29-2c26b25bff5b")))
                 return true;
@@ -83,7 +80,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         }
         return false;
     });
-    @ApiStatus.Internal public final LazyLoadedValue<Boolean> isAprilFools = new LazyLoadedValue<>(() -> {
+    @ApiStatus.Internal public final LazyValue<Boolean> isAprilFools = new LazyValue<>(() -> {
         try {
             LocalDateTime now = LocalDateTime.now();
             return now.getMonthValue() == 4 && now.getDayOfMonth() == 1;
@@ -103,19 +100,19 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     }
     
     @Override
-    public Component getFormattedModFromItem(Item item) {
+    public ITextComponent getFormattedModFromItem(Item item) {
         String mod = getModFromItem(item);
         if (mod.isEmpty())
             return NarratorChatListener.NO_TITLE;
-        return new TextComponent(mod).withStyle(ChatFormatting.BLUE, ChatFormatting.ITALIC);
+        return new StringTextComponent(mod).withStyle(TextFormatting.BLUE, TextFormatting.ITALIC);
     }
     
     @Override
-    public Component getFormattedModFromIdentifier(ResourceLocation identifier) {
+    public ITextComponent getFormattedModFromIdentifier(ResourceLocation identifier) {
         String mod = getModFromIdentifier(identifier);
         if (mod.isEmpty())
             return NarratorChatListener.NO_TITLE;
-        return new TextComponent(mod).withStyle(ChatFormatting.BLUE, ChatFormatting.ITALIC);
+        return new StringTextComponent(mod).withStyle(TextFormatting.BLUE, TextFormatting.ITALIC);
     }
     
     @Override
@@ -132,7 +129,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         String any = modNameCache.getOrDefault(modid, null);
         if (any != null)
             return any;
-        String s = FabricLoader.getInstance().getModContainer(modid).map(ModContainer::getMetadata).map(ModMetadata::getName).orElse(modid);
+        String s = ModList.get().getModContainerById(modid).map(ModContainer::getModInfo).map(IModInfo::getDisplayName).orElse(modid);
         modNameCache.put(modid, s);
         return s;
     }
@@ -150,14 +147,14 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     @Override
     public void sendDeletePacket() {
-        if (Minecraft.getInstance().screen instanceof CreativeModeInventoryScreen) {
+        if (Minecraft.getInstance().screen instanceof CreativeScreen) {
             Minecraft.getInstance().player.inventory.setCarried(ItemStack.EMPTY);
-            ((CreativeModeInventoryScreen) Minecraft.getInstance().screen).isQuickCrafting = false;
+            ((CreativeScreen) Minecraft.getInstance().screen).isQuickCrafting = false;
             return;
         }
-        ClientSidePacketRegistry.INSTANCE.sendToServer(RoughlyEnoughItemsNetwork.DELETE_ITEMS_PACKET, new FriendlyByteBuf(Unpooled.buffer()));
-        if (Minecraft.getInstance().screen instanceof AbstractContainerScreen) {
-            ((AbstractContainerScreen<?>) Minecraft.getInstance().screen).isQuickCrafting = false;
+        NetworkingManager.sendToServer(RoughlyEnoughItemsNetwork.DELETE_ITEMS_PACKET, new PacketBuffer(Unpooled.buffer()));
+        if (Minecraft.getInstance().screen instanceof ContainerScreen) {
+            ((ContainerScreen<?>) Minecraft.getInstance().screen).isQuickCrafting = false;
         }
     }
     
@@ -168,24 +165,24 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         if (Minecraft.getInstance().player == null) return false;
         if (Minecraft.getInstance().player.inventory == null) return false;
         ItemStack cheatedStack = entry.getItemStack().copy();
-        if (ConfigObject.getInstance().isGrabbingItems() && Minecraft.getInstance().screen instanceof CreativeModeInventoryScreen) {
-            Inventory inventory = Minecraft.getInstance().player.inventory;
+        if (ConfigObject.getInstance().isGrabbingItems() && Minecraft.getInstance().screen instanceof CreativeScreen) {
+            PlayerInventory inventory = Minecraft.getInstance().player.inventory;
             EntryStack stack = entry.copy();
             if (!inventory.getCarried().isEmpty() && EntryStack.create(inventory.getCarried()).equalsIgnoreAmount(stack)) {
-                stack.setAmount(Mth.clamp(stack.getAmount() + inventory.getCarried().getCount(), 1, stack.getItemStack().getMaxStackSize()));
+                stack.setAmount(MathHelper.clamp(stack.getAmount() + inventory.getCarried().getCount(), 1, stack.getItemStack().getMaxStackSize()));
             } else if (!inventory.getCarried().isEmpty()) {
                 return false;
             }
             inventory.setCarried(stack.getItemStack().copy());
             return true;
         } else if (RoughlyEnoughItemsCore.canUsePackets()) {
-            Inventory inventory = Minecraft.getInstance().player.inventory;
+            PlayerInventory inventory = Minecraft.getInstance().player.inventory;
             EntryStack stack = entry.copy();
             if (!inventory.getCarried().isEmpty() && !EntryStack.create(inventory.getCarried()).equalsIgnoreAmount(stack)) {
                 return false;
             }
             try {
-                ClientSidePacketRegistry.INSTANCE.sendToServer(ConfigObject.getInstance().isGrabbingItems() ? RoughlyEnoughItemsNetwork.CREATE_ITEMS_GRAB_PACKET : RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(cheatedStack));
+                NetworkingManager.sendToServer(ConfigObject.getInstance().isGrabbingItems() ? RoughlyEnoughItemsNetwork.CREATE_ITEMS_GRAB_PACKET : RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET, new PacketBuffer(Unpooled.buffer()).writeItem(cheatedStack));
                 return true;
             } catch (Exception e) {
                 return false;
@@ -199,7 +196,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
             String madeUpCommand = og.replaceAll("\\{player_name}", Minecraft.getInstance().player.getScoreboardName()).replaceAll("\\{item_name}", identifier.getPath()).replaceAll("\\{item_identifier}", identifier.toString()).replaceAll("\\{nbt}", tagMessage).replaceAll("\\{count}", String.valueOf(cheatedStack.getCount()));
             if (madeUpCommand.length() > 256) {
                 madeUpCommand = og.replaceAll("\\{player_name}", Minecraft.getInstance().player.getScoreboardName()).replaceAll("\\{item_name}", identifier.getPath()).replaceAll("\\{item_identifier}", identifier.toString()).replaceAll("\\{nbt}", "").replaceAll("\\{count}", String.valueOf(cheatedStack.getCount()));
-                Minecraft.getInstance().player.displayClientMessage(new TranslatableComponent("text.rei.too_long_nbt"), false);
+                Minecraft.getInstance().player.displayClientMessage(new TranslationTextComponent("text.rei.too_long_nbt"), false);
             }
             Minecraft.getInstance().player.chat(madeUpCommand);
             return true;
@@ -263,11 +260,10 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     @Override
     public boolean canUseMovePackets() {
-        return ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.MOVE_ITEMS_PACKET);
+        return NetworkingManager.canServerReceive(RoughlyEnoughItemsNetwork.MOVE_ITEMS_PACKET);
     }
     
-    @Override
-    public void onInitializeClient() {
+    public ClientHelperImpl() {
         ClientHelperImpl.instance = this;
         attachInstance(instance, ClientHelper.class);
         attachInstance((Supplier<ClientHelper.ViewSearchBuilder>) ViewSearchBuilder::new, "viewSearchBuilder");
@@ -296,7 +292,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         @Nullable private ResourceLocation preferredOpenedCategory = null;
         @Nullable private EntryStack inputNotice;
         @Nullable private EntryStack outputNotice;
-        @NotNull private final LazyLoadedValue<Map<RecipeCategory<?>, List<RecipeDisplay>>> map = new LazyLoadedValue<>(() -> RecipeHelper.getInstance().buildMapFor(this));
+        @NotNull private final LazyValue<Map<RecipeCategory<?>, List<RecipeDisplay>>> map = new LazyValue<>(() -> RecipeHelper.getInstance().buildMapFor(this));
         
         @Override
         public ClientHelper.ViewSearchBuilder addCategory(ResourceLocation category) {

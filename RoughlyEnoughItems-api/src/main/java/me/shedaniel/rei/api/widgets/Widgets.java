@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.api.widgets;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import me.shedaniel.math.Dimension;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -31,15 +31,16 @@ import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.DrawableConsumer;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.impl.Internals;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvents;
+import net.minecraft.client.audio.SimpleSound;
+import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.gui.IRenderable;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvents;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -48,7 +49,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public final class Widgets {
     private Widgets() {}
     
@@ -58,27 +59,27 @@ public final class Widgets {
     }
     
     @NotNull
-    public static Widget wrapVanillaWidget(@NotNull GuiEventListener element) {
+    public static Widget wrapVanillaWidget(@NotNull IGuiEventListener element) {
         return new VanillaWrappedWidget(element);
     }
     
     private static class VanillaWrappedWidget extends Widget {
-        private GuiEventListener element;
+        private IGuiEventListener element;
         
-        public VanillaWrappedWidget(GuiEventListener element) {
+        public VanillaWrappedWidget(IGuiEventListener element) {
             this.element = Objects.requireNonNull(element);
         }
         
         @Override
-        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-            if (element instanceof GuiComponent)
-                ((GuiComponent) element).setBlitOffset(getZ());
-            if (element instanceof net.minecraft.client.gui.components.Widget)
-                ((net.minecraft.client.gui.components.Widget) element).render(matrices, mouseX, mouseY, delta);
+        public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+            if (element instanceof AbstractGui)
+                ((AbstractGui) element).setBlitOffset(getZ());
+            if (element instanceof IRenderable)
+                ((IRenderable) element).render(matrices, mouseX, mouseY, delta);
         }
         
         @Override
-        public List<? extends GuiEventListener> children() {
+        public List<? extends IGuiEventListener> children() {
             return Collections.singletonList(element);
         }
     }
@@ -129,12 +130,12 @@ public final class Widgets {
     }
     
     @NotNull
-    public static Label createLabel(@NotNull Point point, @NotNull Component text) {
+    public static Label createLabel(@NotNull Point point, @NotNull ITextComponent text) {
         return Internals.getWidgetsProvider().createLabel(point, text);
     }
     
     @NotNull
-    public static Label createClickableLabel(@NotNull Point point, @NotNull Component text, @Nullable Consumer<Label> onClick) {
+    public static Label createClickableLabel(@NotNull Point point, @NotNull ITextComponent text, @Nullable Consumer<Label> onClick) {
         return createLabel(point, text).clickable().onClick(onClick);
     }
     
@@ -202,11 +203,11 @@ public final class Widgets {
     }
     
     @NotNull
-    public static Button createButton(@NotNull Rectangle bounds, @NotNull Component text) {
+    public static Button createButton(@NotNull Rectangle bounds, @NotNull ITextComponent text) {
         return Internals.getWidgetsProvider().createButton(bounds, text);
     }
     
     public static void produceClickSound() {
-        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+        Minecraft.getInstance().getSoundManager().play(SimpleSound.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
     }
 }

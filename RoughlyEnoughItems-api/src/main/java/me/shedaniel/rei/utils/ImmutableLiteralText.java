@@ -23,21 +23,17 @@
 
 package me.shedaniel.rei.utils;
 
-import net.minecraft.locale.Language;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.IReorderingProcessor;
+import net.minecraft.util.text.*;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public final class ImmutableLiteralText implements Component {
+public final class ImmutableLiteralText implements ITextComponent {
     public static final ImmutableLiteralText EMPTY = new ImmutableLiteralText("");
     private final String content;
-    private FormattedCharSequence orderedText;
+    private IReorderingProcessor orderedText;
     
     public ImmutableLiteralText(String content) {
         this.content = content;
@@ -54,34 +50,34 @@ public final class ImmutableLiteralText implements Component {
     }
     
     @Override
-    public List<Component> getSiblings() {
+    public List<ITextComponent> getSiblings() {
         return Collections.emptyList();
     }
     
     @Override
-    public MutableComponent plainCopy() {
-        return new TextComponent(content);
+    public IFormattableTextComponent plainCopy() {
+        return new StringTextComponent(content);
     }
     
     @Override
-    public MutableComponent copy() {
+    public IFormattableTextComponent copy() {
         return plainCopy();
     }
     
     @Override
-    public <T> Optional<T> visit(ContentConsumer<T> visitor) {
+    public <T> Optional<T> visit(ITextAcceptor<T> visitor) {
         return visitSelf(visitor);
     }
     
     @Override
-    public <T> Optional<T> visit(StyledContentConsumer<T> styledVisitor, Style style) {
+    public <T> Optional<T> visit(IStyledTextAcceptor<T> styledVisitor, Style style) {
         return visitSelf(styledVisitor, style);
     }
     
     @Override
-    public FormattedCharSequence getVisualOrderText() {
+    public IReorderingProcessor getVisualOrderText() {
         if (orderedText == null) {
-            orderedText = Language.getInstance().getVisualOrder(this);
+            orderedText = LanguageMap.getInstance().getVisualOrder(this);
         }
         return orderedText;
     }

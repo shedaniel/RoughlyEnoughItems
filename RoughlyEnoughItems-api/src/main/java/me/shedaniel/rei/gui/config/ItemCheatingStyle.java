@@ -23,15 +23,15 @@
 
 package me.shedaniel.rei.gui.config;
 
-import me.shedaniel.clothconfig2.gui.entries.SelectionListEntry;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.client.resources.language.I18n;
+import me.shedaniel.clothconfig2.forge.gui.entries.SelectionListEntry;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.client.resources.I18n;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public enum ItemCheatingStyle implements SelectionListEntry.Translatable {
     GRAB,
     GIVE;

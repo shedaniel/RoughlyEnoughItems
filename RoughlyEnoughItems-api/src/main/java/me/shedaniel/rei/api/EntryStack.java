@@ -25,26 +25,27 @@ package me.shedaniel.rei.api;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.JsonOps;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
-import me.shedaniel.rei.api.fractions.Fraction;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.impl.Internals;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.core.Registry;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.TagParser;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.level.ItemLike;
-import net.minecraft.world.level.material.Fluid;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.fluid.Fluid;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.NBTDynamicOps;
+import net.minecraft.util.IItemProvider;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -52,40 +53,28 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public interface EntryStack extends TextRepresentable {
     
     static EntryStack empty() {
         return Internals.getEntryStackProvider().empty();
     }
     
-    static EntryStack create(Fluid fluid) {
-        return Internals.getEntryStackProvider().fluid(fluid);
-    }
-    
-    static EntryStack create(Fluid fluid, int amount) {
-        return create(fluid, Fraction.ofWhole(amount));
-    }
-    
-    static EntryStack create(Fluid fluid, double amount) {
-        return create(fluid, Fraction.from(amount));
-    }
-    
-    static EntryStack create(Fluid fluid, Fraction amount) {
-        return Internals.getEntryStackProvider().fluid(fluid, amount);
+    static EntryStack create(FluidStack stack) {
+        return Internals.getEntryStackProvider().fluid(stack);
     }
     
     static EntryStack create(ItemStack stack) {
         return Internals.getEntryStackProvider().item(stack);
     }
     
-    static EntryStack create(ItemLike item) {
+    static EntryStack create(IItemProvider item) {
         return create(new ItemStack(item));
     }
     
-    static List<EntryStack> ofItems(Collection<ItemLike> stacks) {
+    static List<EntryStack> ofItems(Collection<IItemProvider> stacks) {
         List<EntryStack> result = new ArrayList<>(stacks.size());
-        for (ItemLike stack : stacks) {
+        for (IItemProvider stack : stacks) {
             result.add(create(stack));
         }
         return result;
@@ -140,9 +129,9 @@ public interface EntryStack extends TextRepresentable {
             JsonObject obj = jsonElement.getAsJsonObject();
             switch (obj.getAsJsonPrimitive("type").getAsString()) {
                 case "stack":
-                    return EntryStack.create(ItemStack.of(TagParser.parseTag(obj.get("nbt").getAsString())));
+                    return EntryStack.create(ItemStack.of((CompoundNBT) Dynamic.convert(JsonOps.INSTANCE, NBTDynamicOps.INSTANCE, obj.get("nbt").getAsJsonObject())));
                 case "fluid":
-                    return EntryStack.create(Registry.FLUID.get(ResourceLocation.tryParse(obj.get("id").getAsString())));
+                    return EntryStack.create(FluidStack.loadFluidStackFromNBT((CompoundNBT) Dynamic.convert(JsonOps.INSTANCE, NBTDynamicOps.INSTANCE, obj.get("nbt").getAsJsonObject())));
                 case "empty":
                     return EntryStack.empty();
                 default:
@@ -162,7 +151,7 @@ public interface EntryStack extends TextRepresentable {
                 case ITEM:
                     JsonObject obj1 = new JsonObject();
                     obj1.addProperty("type", "stack");
-                    obj1.addProperty("nbt", getItemStack().save(new CompoundTag()).toString());
+                    obj1.addProperty("nbt", getItemStack().save(new CompoundNBT()).toString());
                     return obj1;
                 case FLUID:
                     Optional<ResourceLocation> optionalIdentifier = getIdentifier();
@@ -215,25 +204,9 @@ public interface EntryStack extends TextRepresentable {
     
     EntryStack.Type getType();
     
-    default int getAmount() {
-        return getAccurateAmount().intValue();
-    }
+    int getAmount();
     
-    Fraction getAccurateAmount();
-    
-    default double getFloatingAmount() {
-        return getAccurateAmount().doubleValue();
-    }
-    
-    default void setAmount(int amount) {
-        setAmount(Fraction.ofWhole(amount));
-    }
-    
-    default void setFloatingAmount(double amount) {
-        setAmount(Fraction.from(amount));
-    }
-    
-    void setAmount(Fraction amount);
+    void setAmount(int amount);
     
     boolean isEmpty();
     
@@ -295,9 +268,15 @@ public interface EntryStack extends TextRepresentable {
         return null;
     }
     
+    default FluidStack getFluidStack() {
+        if (getType() == Type.FLUID)
+            return (FluidStack) getObject();
+        return null;
+    }
+    
     default Fluid getFluid() {
         if (getType() == Type.FLUID)
-            return (Fluid) getObject();
+            return ((FluidStack) getObject()).getFluid();
         return null;
     }
     
@@ -318,7 +297,7 @@ public interface EntryStack extends TextRepresentable {
         return null;
     }
     
-    void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta);
+    void render(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta);
     
     enum Type {
         ITEM,
@@ -336,7 +315,7 @@ public interface EntryStack extends TextRepresentable {
         public static final Settings<Supplier<Boolean>> TOOLTIP_ENABLED = new Settings<>(TRUE);
         public static final Settings<Supplier<Boolean>> TOOLTIP_APPEND_MOD = new Settings<>(TRUE);
         public static final Settings<Supplier<Boolean>> RENDER_COUNTS = new Settings<>(TRUE);
-        public static final Settings<Function<EntryStack, List<Component>>> TOOLTIP_APPEND_EXTRA = new Settings<>(stack -> Collections.emptyList());
+        public static final Settings<Function<EntryStack, List<ITextComponent>>> TOOLTIP_APPEND_EXTRA = new Settings<>(stack -> Collections.emptyList());
         public static final Settings<Function<EntryStack, String>> COUNTS = new Settings<>(stack -> null);
         
         private T defaultValue;
@@ -349,24 +328,12 @@ public interface EntryStack extends TextRepresentable {
             return defaultValue;
         }
         
-        public static class Item {
-            public static final Settings<Supplier<Boolean>> RENDER_ENCHANTMENT_GLINT = new Settings<>(TRUE);
-            
-            private Item() {
-            }
-        }
-        
         public static class Fluid {
             // Return null to disable
-            public static final Settings<Function<EntryStack, String>> AMOUNT_TOOLTIP = new Settings<>(stack -> I18n.get("tooltip.rei.fluid_amount", stack.simplifyAmount().getAccurateAmount()));
+            public static final Settings<Function<EntryStack, String>> AMOUNT_TOOLTIP = new Settings<>(stack -> I18n.get("tooltip.rei.fluid_amount", stack.getAmount()));
             
             private Fluid() {
             }
         }
-    }
-    
-    default EntryStack simplifyAmount() {
-        setAmount(getAccurateAmount().simplify());
-        return this;
     }
 }

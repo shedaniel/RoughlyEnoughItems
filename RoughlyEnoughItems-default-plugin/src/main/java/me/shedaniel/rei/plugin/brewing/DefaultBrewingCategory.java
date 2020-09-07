@@ -32,19 +32,19 @@ import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.item.Items;
+import net.minecraft.block.Blocks;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class DefaultBrewingCategory implements RecipeCategory<DefaultBrewingDisplay> {
     
     @Override
@@ -70,7 +70,7 @@ public class DefaultBrewingCategory implements RecipeCategory<DefaultBrewingDisp
         widgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
             Minecraft.getInstance().getTextureManager().bind(REIHelper.getInstance().getDefaultDisplayTexture());
             helper.blit(matrices, startPoint.x, startPoint.y, 0, 108, 103, 59);
-            int width = Mth.ceil(System.currentTimeMillis() / 250d % 18d);
+            int width = MathHelper.ceil(System.currentTimeMillis() / 250d % 18d);
             helper.blit(matrices, startPoint.x + 44, startPoint.y + 28, 103, 163, width, 4);
         }));
         widgets.add(Widgets.createSlot(new Point(startPoint.x + 1, startPoint.y + 1)).entry(EntryStack.create(Items.BLAZE_POWDER)).disableBackground().markInput());

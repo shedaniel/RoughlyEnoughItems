@@ -24,10 +24,10 @@
 package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.math.impl.PointHelper;
+import me.shedaniel.clothconfig2.forge.api.PointHelper;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.widgets.Button;
 import me.shedaniel.rei.api.widgets.Widgets;
@@ -36,14 +36,14 @@ import me.shedaniel.rei.gui.widget.LateRenderable;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.ChatFormatting;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.util.text.ITextComponent;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -53,12 +53,12 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public final class InternalWidgets {
     private InternalWidgets() {}
     
-    public static Widget createAutoCraftingButtonWidget(Rectangle displayBounds, Rectangle rectangle, Component text, Supplier<RecipeDisplay> displaySupplier, List<Widget> setupDisplay, RecipeCategory<?> category) {
-        AbstractContainerScreen<?> containerScreen = REIHelper.getInstance().getPreviousContainerScreen();
+    public static Widget createAutoCraftingButtonWidget(Rectangle displayBounds, Rectangle rectangle, ITextComponent text, Supplier<RecipeDisplay> displaySupplier, List<Widget> setupDisplay, RecipeCategory<?> category) {
+        ContainerScreen<?> containerScreen = REIHelper.getInstance().getPreviousContainerScreen();
         boolean[] visible = {false};
         List<String>[] errorTooltip = new List[]{null};
         Button autoCraftingButton = Widgets.createButton(rectangle, text)
@@ -151,11 +151,11 @@ public final class InternalWidgets {
                             str += I18n.get("text.auto_craft.move_items");
                     } else {
                         if (errorTooltip[0].size() > 1)
-                            str += ChatFormatting.RED.toString() + I18n.get("error.rei.multi.errors") + "\n";
-                        str += CollectionUtils.mapAndJoinToString(errorTooltip[0], s -> ChatFormatting.RED.toString() + (errorTooltip[0].size() > 1 ? "- " : "") + I18n.get(s), "\n");
+                            str += TextFormatting.RED.toString() + I18n.get("error.rei.multi.errors") + "\n";
+                        str += CollectionUtils.mapAndJoinToString(errorTooltip[0], s -> TextFormatting.RED.toString() + (errorTooltip[0].size() > 1 ? "- " : "") + I18n.get(s), "\n");
                     }
                     if (Minecraft.getInstance().options.advancedItemTooltips) {
-                        str += displaySupplier.get().getRecipeLocation().isPresent() ? I18n.get("text.rei.recipe_id", ChatFormatting.GRAY.toString(), displaySupplier.get().getRecipeLocation().get().toString()) : "";
+                        str += displaySupplier.get().getRecipeLocation().isPresent() ? I18n.get("text.rei.recipe_id", TextFormatting.GRAY.toString(), displaySupplier.get().getRecipeLocation().get().toString()) : "";
                     }
                     return str;
                 });
@@ -166,12 +166,12 @@ public final class InternalWidgets {
             }
             
             @Override
-            public List<? extends GuiEventListener> children() {
+            public List<? extends IGuiEventListener> children() {
                 return Collections.singletonList(autoCraftingButton);
             }
             
             @Override
-            public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+            public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
                 autoCraftingButton.render(matrices, mouseX, mouseY, delta);
             }
             
@@ -225,7 +225,7 @@ public final class InternalWidgets {
         }
         
         @Override
-        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
             for (Widget widget : widgets) {
                 widget.setZ(getZ());
                 widget.render(matrices, mouseX, mouseY, delta);
@@ -233,7 +233,7 @@ public final class InternalWidgets {
         }
         
         @Override
-        public List<? extends GuiEventListener> children() {
+        public List<? extends IGuiEventListener> children() {
             return widgets;
         }
         
@@ -255,13 +255,13 @@ public final class InternalWidgets {
         }
         
         @Override
-        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
             this.widget.setZ(getZ());
             this.widget.render(matrices, mouseX, mouseY, delta);
         }
         
         @Override
-        public List<? extends GuiEventListener> children() {
+        public List<? extends IGuiEventListener> children() {
             return Collections.singletonList(this.widget);
         }
         
@@ -284,7 +284,7 @@ public final class InternalWidgets {
         }
         
         @Override
-        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
             this.widget.setZ(getZ());
             this.widget.render(matrices, mouseX, mouseY, delta);
         }
@@ -295,7 +295,7 @@ public final class InternalWidgets {
         }
         
         @Override
-        public List<? extends GuiEventListener> children() {
+        public List<? extends IGuiEventListener> children() {
             return Collections.singletonList(this.widget);
         }
         
@@ -322,7 +322,7 @@ public final class InternalWidgets {
         }
         
         @Override
-        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
             matrices.pushPose();
             matrices.translate(x, y, z);
             this.widget.setZ(getZ());
@@ -336,7 +336,7 @@ public final class InternalWidgets {
         }
         
         @Override
-        public List<? extends GuiEventListener> children() {
+        public List<? extends IGuiEventListener> children() {
             return Collections.singletonList(this.widget);
         }
         

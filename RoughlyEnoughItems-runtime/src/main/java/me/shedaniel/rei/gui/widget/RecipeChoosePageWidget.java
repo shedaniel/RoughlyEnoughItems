@@ -24,8 +24,8 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.MainWindow;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
@@ -34,8 +34,8 @@ import me.shedaniel.rei.api.widgets.Panel;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.util.Mth;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -64,7 +64,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     }
     
     private static Point getPointFromConfig() {
-        Window window = Minecraft.getInstance().getWindow();
+        MainWindow window = Minecraft.getInstance().getWindow();
         return new Point(window.getGuiScaledWidth() * .5, window.getGuiScaledHeight() * .5);
     }
     
@@ -110,7 +110,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
         this.widgets.add(base2 = Widgets.createCategoryBase(bounds));
         this.widgets.add(new Widget() {
             
-            private TranslatableComponent text;
+            private TranslationTextComponent text;
             
             @Override
             public List<Widget> children() {
@@ -118,8 +118,8 @@ public class RecipeChoosePageWidget extends DraggableWidget {
             }
             
             @Override
-            public void render(PoseStack matrices, int i, int i1, float v) {
-                text = new TranslatableComponent("text.rei.choose_page");
+            public void render(MatrixStack matrices, int i, int i1, float v) {
+                text = new TranslationTextComponent("text.rei.choose_page");
                 font.draw(matrices, text.getVisualOrderText(), bounds.x + 5, bounds.y + 5, REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF404040);
                 String endString = String.format(" /%d", maxPage);
                 int width = font.width(endString);
@@ -143,9 +143,9 @@ public class RecipeChoosePageWidget extends DraggableWidget {
             return stringBuilder_1.toString();
         };
         textFieldWidget.setText(String.valueOf(currentPage + 1));
-        widgets.add(btnDone = Widgets.createButton(new Rectangle(bounds.x + bounds.width - 45, bounds.y + bounds.height + 3, 40, 20), new TranslatableComponent("gui.done"))
+        widgets.add(btnDone = Widgets.createButton(new Rectangle(bounds.x + bounds.width - 45, bounds.y + bounds.height + 3, 40, 20), new TranslationTextComponent("gui.done"))
                 .onClick(button -> {
-                    recipeViewingScreen.page = Mth.clamp(getIntFromString(textFieldWidget.getText()).orElse(0) - 1, 0, recipeViewingScreen.getTotalPages(recipeViewingScreen.getSelectedCategory()) - 1);
+                    recipeViewingScreen.page = MathHelper.clamp(getIntFromString(textFieldWidget.getText()).orElse(0) - 1, 0, recipeViewingScreen.getTotalPages(recipeViewingScreen.getSelectedCategory()) - 1);
                     recipeViewingScreen.choosePageActivated = false;
                     recipeViewingScreen.init();
                 }));
@@ -153,8 +153,8 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     }
     
     @Override
-    public Point processMidPoint(Point midPoint, Point mouse, Point startPoint, Window window, int relateX, int relateY) {
-        return new Point(Mth.clamp(mouse.x - relateX, getDragBounds().width / 2, window.getGuiScaledWidth() - getDragBounds().width / 2), Mth.clamp(mouse.y - relateY, 20, window.getGuiScaledHeight() - 50));
+    public Point processMidPoint(Point midPoint, Point mouse, Point startPoint, MainWindow window, int relateX, int relateY) {
+        return new Point(MathHelper.clamp(mouse.x - relateX, getDragBounds().width / 2, window.getGuiScaledWidth() - getDragBounds().width / 2), MathHelper.clamp(mouse.y - relateY, 20, window.getGuiScaledHeight() - 50));
     }
     
     @Override
@@ -163,7 +163,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     }
     
     @Override
-    public void render(PoseStack matrices, int i, int i1, float v) {
+    public void render(MatrixStack matrices, int i, int i1, float v) {
         matrices.pushPose();
         matrices.translate(0, 0, 800);
         for (Widget widget : widgets) {
@@ -183,7 +183,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (int_1 == 335 || int_1 == 257) {
-            recipeViewingScreen.page = Mth.clamp(getIntFromString(textFieldWidget.getText()).orElse(0) - 1, 0, recipeViewingScreen.getTotalPages(recipeViewingScreen.getSelectedCategory()) - 1);
+            recipeViewingScreen.page = MathHelper.clamp(getIntFromString(textFieldWidget.getText()).orElse(0) - 1, 0, recipeViewingScreen.getTotalPages(recipeViewingScreen.getSelectedCategory()) - 1);
             recipeViewingScreen.choosePageActivated = false;
             recipeViewingScreen.init();
             return true;

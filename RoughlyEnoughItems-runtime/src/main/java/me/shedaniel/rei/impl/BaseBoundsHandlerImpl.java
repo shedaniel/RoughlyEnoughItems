@@ -28,12 +28,12 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.BaseBoundsHandler;
 import me.shedaniel.rei.api.DisplayHelper;
 import me.shedaniel.rei.gui.config.DisplayPanelLocation;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.Tuple;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.util.ActionResultType;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Comparator;
@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
     
     private static final Comparator<? super Rectangle> RECTANGLE_COMPARER = Comparator.comparingLong(Rectangle::hashCode);
@@ -60,15 +60,15 @@ public class BaseBoundsHandlerImpl implements BaseBoundsHandler {
     }
     
     @Override
-    public InteractionResult isInZone(double mouseX, double mouseY) {
+    public ActionResultType isInZone(double mouseX, double mouseY) {
         Class<? extends Screen> screenClass = Minecraft.getInstance().screen.getClass();
         for (Tuple<Tuple<Class<?>, Float>, Supplier<List<Rectangle>>> pair : list) {
             if (pair.getA().getA().isAssignableFrom(screenClass))
                 for (Rectangle zone : pair.getB().get())
                     if (zone.contains(mouseX, mouseY))
-                        return InteractionResult.FAIL;
+                        return ActionResultType.FAIL;
         }
-        return InteractionResult.PASS;
+        return ActionResultType.PASS;
     }
     
     @Override

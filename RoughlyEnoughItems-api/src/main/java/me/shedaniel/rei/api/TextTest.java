@@ -23,16 +23,16 @@
 
 package me.shedaniel.rei.api;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.ScheduledForRemoval(inVersion = "1.17")
 @Deprecated
 public class TextTest {
     public static void main(String[] args) {
-        MutableComponent text = new TextComponent("adaw").append("dawdwdaw").withStyle(ChatFormatting.RED);
+        IFormattableTextComponent text = new StringTextComponent("adaw").append("dawdwdaw").withStyle(TextFormatting.RED);
         System.out.println(text.getString());
         System.out.println(text.getString());
     }

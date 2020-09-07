@@ -26,15 +26,14 @@ package me.shedaniel.rei.server;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.minecraft.core.NonNullList;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.Container;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.level.ItemLike;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.util.IItemProvider;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.ResourceLocation;
 
 import java.util.Iterator;
 import java.util.List;
@@ -42,23 +41,23 @@ import java.util.Objects;
 
 public class InputSlotCrafter<C extends Container> implements RecipeGridAligner<Integer>, ContainerContext {
     
-    protected AbstractContainerMenu container;
+    protected Container container;
     protected ContainerInfo containerInfo;
     private List<StackAccessor> gridStacks;
     private List<StackAccessor> inventoryStacks;
-    private ServerPlayer player;
+    private ServerPlayerEntity player;
     
-    private InputSlotCrafter(AbstractContainerMenu container, ContainerInfo<? extends AbstractContainerMenu> containerInfo) {
+    private InputSlotCrafter(Container container, ContainerInfo<? extends Container> containerInfo) {
         this.container = container;
         this.containerInfo = containerInfo;
     }
     
-    public static <C extends Container> void start(ResourceLocation category, AbstractContainerMenu craftingContainer_1, ServerPlayer player, NonNullList<List<ItemStack>> map, boolean hasShift) {
-        ContainerInfo<? extends AbstractContainerMenu> containerInfo = Objects.requireNonNull(ContainerInfoHandler.getContainerInfo(category, craftingContainer_1.getClass()), "Container Info does not exist on the server!");
+    public static <C extends Container> void start(ResourceLocation category, Container craftingContainer_1, ServerPlayerEntity player, NonNullList<List<ItemStack>> map, boolean hasShift) {
+        ContainerInfo<? extends Container> containerInfo = Objects.requireNonNull(ContainerInfoHandler.getContainerInfo(category, craftingContainer_1.getClass()), "Container Info does not exist on the server!");
         new InputSlotCrafter<C>(craftingContainer_1, containerInfo).fillInputSlots(player, map, hasShift);
     }
     
-    private void fillInputSlots(ServerPlayer player, NonNullList<List<ItemStack>> map, boolean hasShift) {
+    private void fillInputSlots(ServerPlayerEntity player, NonNullList<List<ItemStack>> map, boolean hasShift) {
         this.player = player;
         this.inventoryStacks = this.containerInfo.getInventoryStacks(this);
         this.gridStacks = this.containerInfo.getGridStacks(this);
@@ -71,7 +70,7 @@ public class InputSlotCrafter<C extends Container> implements RecipeGridAligner<
         this.containerInfo.getRecipeFinderPopulator().populate(this).accept(recipeFinder);
         NonNullList<Ingredient> ingredients = NonNullList.create();
         for (List<ItemStack> itemStacks : map) {
-            ingredients.add(Ingredient.of(CollectionUtils.map(itemStacks, ItemStack::getItem).toArray(new ItemLike[0])));
+            ingredients.add(Ingredient.of(CollectionUtils.map(itemStacks, ItemStack::getItem).toArray(new IItemProvider[0])));
         }
         
         if (recipeFinder.findRecipe(ingredients, null)) {
@@ -186,12 +185,12 @@ public class InputSlotCrafter<C extends Container> implements RecipeGridAligner<
     }
     
     @Override
-    public AbstractContainerMenu getContainer() {
+    public Container getContainer() {
         return container;
     }
     
     @Override
-    public Player getPlayerEntity() {
+    public PlayerEntity getPlayerEntity() {
         return player;
     }
     

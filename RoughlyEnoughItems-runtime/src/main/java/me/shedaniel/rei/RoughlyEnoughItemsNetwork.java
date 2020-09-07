@@ -25,28 +25,27 @@ package me.shedaniel.rei;
 
 import com.google.common.collect.Lists;
 import io.netty.buffer.Unpooled;
-import me.shedaniel.math.api.Executor;
+import me.shedaniel.rei.api.plugins.REIContainerPlugin;
+import me.shedaniel.rei.impl.NetworkingManager;
 import me.shedaniel.rei.server.InputSlotCrafter;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
-import net.minecraft.core.NonNullList;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Mth;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.inventory.RecipeBookMenu;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.PlayerContainer;
+import net.minecraft.inventory.container.RecipeBookContainer;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Util;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
+import org.objectweb.asm.Type;
 
 import java.util.List;
 
-public class RoughlyEnoughItemsNetwork implements ModInitializer {
+public class RoughlyEnoughItemsNetwork {
     
     public static final ResourceLocation DELETE_ITEMS_PACKET = new ResourceLocation("roughlyenoughitems", "delete_item");
     public static final ResourceLocation CREATE_ITEMS_PACKET = new ResourceLocation("roughlyenoughitems", "create_item");
@@ -55,100 +54,92 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
     public static final ResourceLocation MOVE_ITEMS_PACKET = new ResourceLocation("roughlyenoughitems", "move_items");
     public static final ResourceLocation NOT_ENOUGH_ITEMS_PACKET = new ResourceLocation("roughlyenoughitems", "og_not_enough");
     
-    @Override
-    public void onInitialize() {
-        boolean loaded = FabricLoader.getInstance().isModLoaded("fabric-networking-v0");
-        if (!loaded) {
-            RoughlyEnoughItemsState.error("Fabric API is not installed!", "https://www.curseforge.com/minecraft/mc-mods/fabric-api/files/all");
-            return;
-        }
-        Executor.run(() -> () -> {
-            FabricLoader.getInstance().getEntrypoints("rei_containers", Runnable.class).forEach(Runnable::run);
-            ServerSidePacketRegistry.INSTANCE.register(DELETE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
-                ServerPlayer player = (ServerPlayer) packetContext.getPlayer();
-                if (player.getServer().getProfilePermissions(player.getGameProfile()) < player.getServer().getOperatorUserPermissionLevel()) {
-                    player.displayClientMessage(new TranslatableComponent("text.rei.no_permission_cheat").withStyle(ChatFormatting.RED), false);
-                    return;
-                }
-                if (!player.inventory.getCarried().isEmpty()) {
-                    player.inventory.setCarried(ItemStack.EMPTY);
-                    player.broadcastCarriedItem();
-                }
-            });
-            ServerSidePacketRegistry.INSTANCE.register(CREATE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
-                ServerPlayer player = (ServerPlayer) packetContext.getPlayer();
-                if (player.getServer().getProfilePermissions(player.getGameProfile()) < player.getServer().getOperatorUserPermissionLevel()) {
-                    player.displayClientMessage(new TranslatableComponent("text.rei.no_permission_cheat").withStyle(ChatFormatting.RED), false);
-                    return;
-                }
-                ItemStack stack = packetByteBuf.readItem();
-                if (player.inventory.add(stack.copy())) {
-                    ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(stack.copy()).writeUtf(player.getScoreboardName(), 32767));
-                } else
-                    player.displayClientMessage(new TranslatableComponent("text.rei.failed_cheat_items"), false);
-            });
-            ServerSidePacketRegistry.INSTANCE.register(CREATE_ITEMS_GRAB_PACKET, (packetContext, packetByteBuf) -> {
-                ServerPlayer player = (ServerPlayer) packetContext.getPlayer();
-                if (player.getServer().getProfilePermissions(player.getGameProfile()) < player.getServer().getOperatorUserPermissionLevel()) {
-                    player.displayClientMessage(new TranslatableComponent("text.rei.no_permission_cheat").withStyle(ChatFormatting.RED), false);
-                    return;
-                }
-                
-                Inventory inventory = player.inventory;
-                ItemStack itemStack = packetByteBuf.readItem();
-                ItemStack stack = itemStack.copy();
-                if (!inventory.getCarried().isEmpty() && ItemStack.isSameIgnoreDurability(inventory.getCarried(), stack) && ItemStack.tagMatches(inventory.getCarried(), stack)) {
-                    stack.setCount(Mth.clamp(stack.getCount() + inventory.getCarried().getCount(), 1, stack.getMaxStackSize()));
-                } else if (!inventory.getCarried().isEmpty()) {
-                    return;
-                }
-                inventory.setCarried(stack.copy());
+    public static void onInitialize() {
+        RoughlyEnoughItemsInit.scanAnnotation(Type.getType(REIContainerPlugin.class), Runnable::run);
+        NetworkingManager.registerC2SHandler(DELETE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
+            ServerPlayerEntity player = packetContext.getSender();
+            if (player.getServer().getProfilePermissions(player.getGameProfile()) < player.getServer().getOperatorUserPermissionLevel()) {
+                player.displayClientMessage(new TranslationTextComponent("text.rei.no_permission_cheat").withStyle(TextFormatting.RED), false);
+                return;
+            }
+            if (!player.inventory.getCarried().isEmpty()) {
+                player.inventory.setCarried(ItemStack.EMPTY);
                 player.broadcastCarriedItem();
-                ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(itemStack.copy()).writeUtf(player.getScoreboardName(), 32767));
-            });
-            ServerSidePacketRegistry.INSTANCE.register(MOVE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
-                ResourceLocation category = packetByteBuf.readResourceLocation();
-                ServerPlayer player = (ServerPlayer) packetContext.getPlayer();
-                AbstractContainerMenu container = player.containerMenu;
-                InventoryMenu playerContainer = player.inventoryMenu;
+            }
+        });
+        NetworkingManager.registerC2SHandler(CREATE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
+            ServerPlayerEntity player = packetContext.getSender();
+            if (player.getServer().getProfilePermissions(player.getGameProfile()) < player.getServer().getOperatorUserPermissionLevel()) {
+                player.displayClientMessage(new TranslationTextComponent("text.rei.no_permission_cheat").withStyle(TextFormatting.RED), false);
+                return;
+            }
+            ItemStack stack = packetByteBuf.readItem();
+            if (player.inventory.add(stack.copy())) {
+                NetworkingManager.sendToPlayer(player, RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, new PacketBuffer(Unpooled.buffer()).writeItem(stack.copy()).writeUtf(player.getScoreboardName(), 32767));
+            } else
+                player.displayClientMessage(new TranslationTextComponent("text.rei.failed_cheat_items"), false);
+        });
+        NetworkingManager.registerC2SHandler(CREATE_ITEMS_GRAB_PACKET, (packetContext, packetByteBuf) -> {
+            ServerPlayerEntity player = packetContext.getSender();
+            if (player.getServer().getProfilePermissions(player.getGameProfile()) < player.getServer().getOperatorUserPermissionLevel()) {
+                player.displayClientMessage(new TranslationTextComponent("text.rei.no_permission_cheat").withStyle(TextFormatting.RED), false);
+                return;
+            }
+            
+            PlayerInventory inventory = player.inventory;
+            ItemStack itemStack = packetByteBuf.readItem();
+            ItemStack stack = itemStack.copy();
+            if (!inventory.getCarried().isEmpty() && ItemStack.isSameIgnoreDurability(inventory.getCarried(), stack) && ItemStack.tagMatches(inventory.getCarried(), stack)) {
+                stack.setCount(MathHelper.clamp(stack.getCount() + inventory.getCarried().getCount(), 1, stack.getMaxStackSize()));
+            } else if (!inventory.getCarried().isEmpty()) {
+                return;
+            }
+            inventory.setCarried(stack.copy());
+            player.broadcastCarriedItem();
+            NetworkingManager.sendToPlayer(player, RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, new PacketBuffer(Unpooled.buffer()).writeItem(itemStack.copy()).writeUtf(player.getScoreboardName(), 32767));
+        });
+        NetworkingManager.registerC2SHandler(MOVE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
+            ResourceLocation category = packetByteBuf.readResourceLocation();
+            ServerPlayerEntity player = packetContext.getSender();
+            Container container = player.containerMenu;
+            PlayerContainer playerContainer = player.inventoryMenu;
+            try {
+                boolean shift = packetByteBuf.readBoolean();
+                NonNullList<List<ItemStack>> input = NonNullList.create();
+                int mapSize = packetByteBuf.readInt();
+                for (int i = 0; i < mapSize; i++) {
+                    List<ItemStack> list = Lists.newArrayList();
+                    int count = packetByteBuf.readInt();
+                    for (int j = 0; j < count; j++) {
+                        list.add(packetByteBuf.readItem());
+                    }
+                    input.add(list);
+                }
                 try {
-                    boolean shift = packetByteBuf.readBoolean();
-                    NonNullList<List<ItemStack>> input = NonNullList.create();
-                    int mapSize = packetByteBuf.readInt();
-                    for (int i = 0; i < mapSize; i++) {
-                        List<ItemStack> list = Lists.newArrayList();
-                        int count = packetByteBuf.readInt();
-                        for (int j = 0; j < count; j++) {
-                            list.add(packetByteBuf.readItem());
+                    InputSlotCrafter.start(category, container, player, input, shift);
+                } catch (InputSlotCrafter.NotEnoughMaterialsException e) {
+                    if (!(container instanceof RecipeBookContainer))
+                        return;
+                    PacketBuffer buf = new PacketBuffer(Unpooled.buffer());
+                    buf.writeInt(input.size());
+                    for (List<ItemStack> stacks : input) {
+                        buf.writeInt(stacks.size());
+                        for (ItemStack stack : stacks) {
+                            buf.writeItem(stack);
                         }
-                        input.add(list);
                     }
-                    try {
-                        InputSlotCrafter.start(category, container, player, input, shift);
-                    } catch (InputSlotCrafter.NotEnoughMaterialsException e) {
-                        if (!(container instanceof RecipeBookMenu))
-                            return;
-                        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-                        buf.writeInt(input.size());
-                        for (List<ItemStack> stacks : input) {
-                            buf.writeInt(stacks.size());
-                            for (ItemStack stack : stacks) {
-                                buf.writeItem(stack);
-                            }
-                        }
-                        if (ServerSidePacketRegistry.INSTANCE.canPlayerReceive(player, NOT_ENOUGH_ITEMS_PACKET)) {
-                            ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, NOT_ENOUGH_ITEMS_PACKET, buf);
-                        }
-                    } catch (IllegalStateException e) {
-                        player.sendMessage(new TranslatableComponent(e.getMessage()).withStyle(ChatFormatting.RED), Util.NIL_UUID);
-                    } catch (Exception e) {
-                        player.sendMessage(new TranslatableComponent("error.rei.internal.error", e.getMessage()).withStyle(ChatFormatting.RED), Util.NIL_UUID);
-                        e.printStackTrace();
+                    if (NetworkingManager.canPlayerReceive(player, NOT_ENOUGH_ITEMS_PACKET)) {
+                        NetworkingManager.sendToPlayer(player, NOT_ENOUGH_ITEMS_PACKET, buf);
                     }
+                } catch (IllegalStateException e) {
+                    player.sendMessage(new TranslationTextComponent(e.getMessage()).withStyle(TextFormatting.RED), Util.NIL_UUID);
                 } catch (Exception e) {
+                    player.sendMessage(new TranslationTextComponent("error.rei.internal.error", e.getMessage()).withStyle(TextFormatting.RED), Util.NIL_UUID);
                     e.printStackTrace();
                 }
-            });
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         });
     }
     

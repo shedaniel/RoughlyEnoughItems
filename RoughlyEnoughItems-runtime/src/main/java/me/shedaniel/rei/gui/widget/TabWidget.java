@@ -23,16 +23,16 @@
 
 package me.shedaniel.rei.gui.widget;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.RecipeCategory;
 import me.shedaniel.rei.api.widgets.Tooltip;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -106,7 +106,7 @@ public class TabWidget extends WidgetWithBounds {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (shown) {
             minecraft.getTextureManager().bind(REIHelper.getInstance().isDarkThemeEnabled() ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
             this.blit(matrices, bounds.x, bounds.y + 2, u + (selected ? bounds.width : 0), v, bounds.width, (selected ? bounds.height + 2 : bounds.height - 1));
@@ -120,9 +120,9 @@ public class TabWidget extends WidgetWithBounds {
     
     private void drawTooltip() {
         if (this.minecraft.options.advancedItemTooltips)
-            Tooltip.create(new TextComponent(categoryName), new TextComponent(category.getIdentifier().toString()).withStyle(ChatFormatting.DARK_GRAY), ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())).queue();
+            Tooltip.create(new StringTextComponent(categoryName), new StringTextComponent(category.getIdentifier().toString()).withStyle(TextFormatting.DARK_GRAY), ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())).queue();
         else
-            Tooltip.create(new TextComponent(categoryName), ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())).queue();
+            Tooltip.create(new StringTextComponent(categoryName), ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())).queue();
     }
     
     @NotNull

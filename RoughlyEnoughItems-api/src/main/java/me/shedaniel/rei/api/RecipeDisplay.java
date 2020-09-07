@@ -24,7 +24,7 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 

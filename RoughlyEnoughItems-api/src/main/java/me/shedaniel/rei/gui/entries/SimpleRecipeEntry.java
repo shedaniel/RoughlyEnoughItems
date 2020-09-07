@@ -24,18 +24,17 @@
 package me.shedaniel.rei.gui.entries;
 
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.fractions.Fraction;
 import me.shedaniel.rei.api.widgets.Slot;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -43,7 +42,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -62,14 +61,14 @@ public class SimpleRecipeEntry extends RecipeEntry {
     }
     
     private static List<List<EntryStack>> simplify(List<List<EntryStack>> original) {
-        Map<List<EntryStack>, AtomicReference<Fraction>> inputCounter = Maps.newLinkedHashMap();
-        original.stream().collect(Collectors.groupingBy(stacks -> CollectionUtils.mapAndMax(stacks, EntryStack::getAccurateAmount, Fraction::compareTo).orElse(Fraction.empty())))
-                .forEach((fraction, value) -> {
-                    if (!fraction.equals(Fraction.empty())) {
+        Map<List<EntryStack>, AtomicInteger> inputCounter = Maps.newLinkedHashMap();
+        original.stream().collect(Collectors.groupingBy(stacks -> CollectionUtils.mapAndMax(stacks, EntryStack::getAmount, Integer::compareTo).orElse(0)))
+                .forEach((amount, value) -> {
+                    if (amount > 0) {
                         value.forEach(stackList -> {
                             List<EntryStack> stacks = inputCounter.keySet().stream().filter(s -> equalsList(stackList, s)).findFirst().orElse(stackList);
-                            AtomicReference<Fraction> reference = inputCounter.computeIfAbsent(stacks, s -> new AtomicReference<>(Fraction.empty()));
-                            reference.set(reference.get().add(fraction));
+                            AtomicInteger reference = inputCounter.computeIfAbsent(stacks, s -> new AtomicInteger(0));
+                            reference.getAndAdd(amount);
                         });
                     }
                 });
@@ -114,7 +113,7 @@ public class SimpleRecipeEntry extends RecipeEntry {
     }
     
     @Override
-    public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
         int xx = bounds.x + 4, yy = bounds.y + 2;
         int j = 0;
         int itemsPerLine = getItemsPerLine();
@@ -163,11 +162,11 @@ public class SimpleRecipeEntry extends RecipeEntry {
     }
     
     public int getItemsHeight() {
-        return Mth.ceil(((float) inputWidgets.size()) / (getItemsPerLine() - 2));
+        return MathHelper.ceil(((float) inputWidgets.size()) / (getItemsPerLine() - 2));
     }
     
     public int getItemsPerLine() {
-        return Mth.floor((getWidth() - 4f) / 18f);
+        return MathHelper.floor((getWidth() - 4f) / 18f);
     }
     
 }

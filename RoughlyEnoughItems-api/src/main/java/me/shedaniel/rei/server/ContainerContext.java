@@ -23,13 +23,13 @@
 
 package me.shedaniel.rei.server;
 
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.container.Container;
 
-public interface ContainerContext<T extends AbstractContainerMenu> {
+public interface ContainerContext<T extends Container> {
     T getContainer();
     
-    Player getPlayerEntity();
+    PlayerEntity getPlayerEntity();
     
     ContainerInfo<T> getContainerInfo();
     

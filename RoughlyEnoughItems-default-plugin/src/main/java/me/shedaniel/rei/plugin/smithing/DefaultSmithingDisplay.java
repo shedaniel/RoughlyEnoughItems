@@ -27,10 +27,10 @@ import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.crafting.UpgradeRecipe;
+import net.minecraft.item.crafting.SmithingRecipe;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,7 +38,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class DefaultSmithingDisplay implements RecipeDisplay {
     @NotNull
     private List<List<EntryStack>> input;
@@ -47,7 +47,7 @@ public class DefaultSmithingDisplay implements RecipeDisplay {
     @Nullable
     private ResourceLocation location;
     
-    public DefaultSmithingDisplay(@NotNull UpgradeRecipe recipe) {
+    public DefaultSmithingDisplay(@NotNull SmithingRecipe recipe) {
         this(
                 Lists.newArrayList(
                         EntryStack.ofIngredient(recipe.base),

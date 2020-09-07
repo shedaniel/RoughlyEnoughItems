@@ -24,18 +24,18 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.widgets.Tooltip;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.Mth;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.audio.SimpleSound;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvents;
+import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -64,16 +64,16 @@ public abstract class ButtonWidget extends WidgetWithBounds {
     private Rectangle bounds;
     private Supplier<String> tooltipSupplier;
     
-    protected ButtonWidget(Rectangle rectangle, Component text) {
+    protected ButtonWidget(Rectangle rectangle, ITextComponent text) {
         this.bounds = Objects.requireNonNull(rectangle);
         this.text = Objects.requireNonNull(text).getString();
     }
     
     public static ButtonWidget create(Rectangle point, String text, Consumer<ButtonWidget> onClick) {
-        return create(point, new TextComponent(text), onClick);
+        return create(point, new StringTextComponent(text), onClick);
     }
     
-    public static ButtonWidget create(Rectangle point, Component text, Consumer<ButtonWidget> onClick) {
+    public static ButtonWidget create(Rectangle point, ITextComponent text, Consumer<ButtonWidget> onClick) {
         ButtonWidget[] widget = {null};
         widget[0] = new ButtonWidget(point, text) {
             @Override
@@ -127,7 +127,7 @@ public abstract class ButtonWidget extends WidgetWithBounds {
         return int_1;
     }
     
-    protected void renderBackground(PoseStack matrices, int x, int y, int width, int height, int textureOffset) {
+    protected void renderBackground(MatrixStack matrices, int x, int y, int width, int height, int textureOffset) {
         minecraft.getTextureManager().bind(REIHelper.getInstance().isDarkThemeEnabled() ? BUTTON_LOCATION_DARK : BUTTON_LOCATION);
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.enableBlend();
@@ -140,18 +140,18 @@ public abstract class ButtonWidget extends WidgetWithBounds {
         blit(matrices, x + width - 4, y + height - 4, getBlitOffset(), 252, textureOffset * 80 + 76, 4, 4, 512, 256);
         
         //Sides
-        blit(matrices, x + 4, y, getBlitOffset(), 4, textureOffset * 80, Mth.ceil((width - 8) / 2f), 4, 512, 256);
-        blit(matrices, x + 4, y + height - 4, getBlitOffset(), 4, textureOffset * 80 + 76, Mth.ceil((width - 8) / 2f), 4, 512, 256);
-        blit(matrices, x + 4 + Mth.ceil((width - 8) / 2f), y + height - 4, getBlitOffset(), 252 - Mth.floor((width - 8) / 2f), textureOffset * 80 + 76, Mth.floor((width - 8) / 2f), 4, 512, 256);
-        blit(matrices, x + 4 + Mth.ceil((width - 8) / 2f), y, getBlitOffset(), 252 - Mth.floor((width - 8) / 2f), textureOffset * 80, Mth.floor((width - 8) / 2f), 4, 512, 256);
+        blit(matrices, x + 4, y, getBlitOffset(), 4, textureOffset * 80, MathHelper.ceil((width - 8) / 2f), 4, 512, 256);
+        blit(matrices, x + 4, y + height - 4, getBlitOffset(), 4, textureOffset * 80 + 76, MathHelper.ceil((width - 8) / 2f), 4, 512, 256);
+        blit(matrices, x + 4 + MathHelper.ceil((width - 8) / 2f), y + height - 4, getBlitOffset(), 252 - MathHelper.floor((width - 8) / 2f), textureOffset * 80 + 76, MathHelper.floor((width - 8) / 2f), 4, 512, 256);
+        blit(matrices, x + 4 + MathHelper.ceil((width - 8) / 2f), y, getBlitOffset(), 252 - MathHelper.floor((width - 8) / 2f), textureOffset * 80, MathHelper.floor((width - 8) / 2f), 4, 512, 256);
         for (int i = y + 4; i < y + height - 4; i += 76) {
-            blit(matrices, x, i, getBlitOffset(), 0, 4 + textureOffset * 80, Mth.ceil(width / 2f), Mth.clamp(y + height - 4 - i, 0, 76), 512, 256);
-            blit(matrices, x + Mth.ceil(width / 2f), i, getBlitOffset(), 256 - Mth.floor(width / 2f), 4 + textureOffset * 80, Mth.floor(width / 2f), Mth.clamp(y + height - 4 - i, 0, 76), 512, 256);
+            blit(matrices, x, i, getBlitOffset(), 0, 4 + textureOffset * 80, MathHelper.ceil(width / 2f), MathHelper.clamp(y + height - 4 - i, 0, 76), 512, 256);
+            blit(matrices, x + MathHelper.ceil(width / 2f), i, getBlitOffset(), 256 - MathHelper.floor(width / 2f), 4 + textureOffset * 80, MathHelper.floor(width / 2f), MathHelper.clamp(y + height - 4 - i, 0, 76), 512, 256);
         }
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;
         renderBackground(matrices, x, y, width, height, this.getTextureId(isHovered(mouseX, mouseY)));
         
@@ -166,9 +166,9 @@ public abstract class ButtonWidget extends WidgetWithBounds {
         
         if (getTooltips().isPresent())
             if (!focused && containsMouse(mouseX, mouseY))
-                Tooltip.create(Stream.of(getTooltips().get().split("\n")).map(TextComponent::new).collect(Collectors.toList())).queue();
+                Tooltip.create(Stream.of(getTooltips().get().split("\n")).map(StringTextComponent::new).collect(Collectors.toList())).queue();
             else if (focused)
-                Tooltip.create(new Point(x + width / 2, y + height / 2), Stream.of(getTooltips().get().split("\n")).map(TextComponent::new).collect(Collectors.toList())).queue();
+                Tooltip.create(new Point(x + width / 2, y + height / 2), Stream.of(getTooltips().get().split("\n")).map(StringTextComponent::new).collect(Collectors.toList())).queue();
     }
     
     public boolean isHovered(int mouseX, int mouseY) {
@@ -184,14 +184,14 @@ public abstract class ButtonWidget extends WidgetWithBounds {
     }
     
     @Override
-    public List<? extends GuiEventListener> children() {
+    public List<? extends IGuiEventListener> children() {
         return Collections.emptyList();
     }
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (isMouseOver(mouseX, mouseY) && enabled && button == 0) {
-            minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            minecraft.getSoundManager().play(SimpleSound.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             onPressed();
             return true;
         }
@@ -204,7 +204,7 @@ public abstract class ButtonWidget extends WidgetWithBounds {
             if (int_1 != 257 && int_1 != 32 && int_1 != 335) {
                 return false;
             } else {
-                minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                minecraft.getSoundManager().play(SimpleSound.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 this.onPressed();
                 return true;
             }

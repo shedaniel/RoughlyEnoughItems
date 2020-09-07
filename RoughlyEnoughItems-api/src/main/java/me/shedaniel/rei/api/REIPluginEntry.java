@@ -23,25 +23,12 @@
 
 package me.shedaniel.rei.api;
 
-import net.fabricmc.loader.api.SemanticVersion;
-import net.fabricmc.loader.util.version.VersionParsingException;
-import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.ApiStatus;
+import net.minecraft.util.ResourceLocation;
 
 /**
  * Get base class of a REI plugin.
  */
 public interface REIPluginEntry {
-    
-    /**
-     * @return the minimum version for the REI plugin to load
-     * @deprecated deprecated due to the lack of need of this method, please declare conflicts with fabric.mod.json
-     */
-    @ApiStatus.ScheduledForRemoval
-    @Deprecated
-    default SemanticVersion getMinimumVersion() throws VersionParsingException {
-        return null;
-    }
     
     /**
      * @return the priority of the plugin, the smaller the number, the earlier it is called.

@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.api;
 
-import net.minecraft.world.InteractionResult;
+import net.minecraft.util.ActionResultType;
 
 public interface DisplayVisibilityHandler {
     
@@ -46,6 +46,6 @@ public interface DisplayVisibilityHandler {
      * @param display  the display of the recipe
      * @return the visibility
      */
-    InteractionResult handleDisplay(RecipeCategory<?> category, RecipeDisplay display);
+    ActionResultType handleDisplay(RecipeCategory<?> category, RecipeDisplay display);
     
 }

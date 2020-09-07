@@ -25,23 +25,24 @@ package me.shedaniel.rei.plugin.containers;
 
 import me.shedaniel.rei.server.ContainerInfo;
 import me.shedaniel.rei.server.RecipeFinder;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.RecipeBookMenu;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.RecipeBookContainer;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.RecipeItemHelper;
 
-public class CraftingContainerInfoWrapper<T extends RecipeBookMenu<?>> implements ContainerInfo<T> {
-    private Class<? extends RecipeBookMenu<?>> containerClass;
+public class CraftingContainerInfoWrapper<T extends RecipeBookContainer<?>> implements ContainerInfo<T> {
+    private Class<? extends RecipeBookContainer<?>> containerClass;
     
     public CraftingContainerInfoWrapper(Class<T> containerClass) {
         this.containerClass = containerClass;
     }
     
-    public static <R extends RecipeBookMenu<?>> ContainerInfo<R> create(Class<R> containerClass) {
+    public static <R extends RecipeBookContainer<?>> ContainerInfo<R> create(Class<R> containerClass) {
         return new CraftingContainerInfoWrapper<>(containerClass);
     }
     
     @Override
-    public Class<? extends AbstractContainerMenu> getContainerClass() {
+    public Class<? extends Container> getContainerClass() {
         return containerClass;
     }
     
@@ -67,7 +68,7 @@ public class CraftingContainerInfoWrapper<T extends RecipeBookMenu<?>> implement
     
     @Override
     public void populateRecipeFinder(T container, RecipeFinder var1) {
-        container.fillCraftSlotsStackedContents(new net.minecraft.world.entity.player.StackedContents() {
+        container.fillCraftSlotsStackedContents(new RecipeItemHelper() {
             @Override
             public void accountSimpleStack(ItemStack itemStack_1) {
                 var1.addNormalItem(itemStack_1);

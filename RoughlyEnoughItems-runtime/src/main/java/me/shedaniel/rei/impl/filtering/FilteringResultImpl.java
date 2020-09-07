@@ -26,13 +26,13 @@ package me.shedaniel.rei.impl.filtering;
 import com.google.common.collect.Sets;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.impl.AmountIgnoredEntryStackWrapper;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.List;
 import java.util.Set;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class FilteringResultImpl implements FilteringResult {
     private final Set<AmountIgnoredEntryStackWrapper> hiddenStacks, shownStacks;
     

@@ -26,28 +26,27 @@ package me.shedaniel.rei.plugin.stonecutting;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.core.NonNullList;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.SingleItemRecipe;
-import net.minecraft.world.item.crafting.StonecutterRecipe;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.item.crafting.StonecuttingRecipe;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class DefaultStoneCuttingDisplay implements RecipeDisplay {
     
     private List<List<EntryStack>> inputs;
     private List<EntryStack> output;
-    private StonecutterRecipe display;
+    private StonecuttingRecipe display;
     
-    public DefaultStoneCuttingDisplay(StonecutterRecipe recipe) {
+    public DefaultStoneCuttingDisplay(StonecuttingRecipe recipe) {
         this(recipe.getIngredients(), recipe.getResultItem());
         this.display = recipe;
     }
@@ -59,7 +58,7 @@ public class DefaultStoneCuttingDisplay implements RecipeDisplay {
     
     @Override
     public @NotNull Optional<ResourceLocation> getRecipeLocation() {
-        return Optional.ofNullable(display).map(SingleItemRecipe::getId);
+        return Optional.ofNullable(display).map(StonecuttingRecipe::getId);
     }
     
     @Override

@@ -33,10 +33,10 @@ import me.shedaniel.rei.impl.search.Argument;
 import me.shedaniel.rei.impl.search.ArgumentsRegistry;
 import me.shedaniel.rei.impl.search.MatchStatus;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
+import net.minecraft.util.text.ITextComponent;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -46,7 +46,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @ApiStatus.Internal
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class SearchArgument {
     public static final String SPACE = " ", EMPTY = "";
     private static final SearchArgument ALWAYS = new SearchArgument(AlwaysMatchingArgument.INSTANCE, EMPTY, true);
@@ -120,7 +120,7 @@ public class SearchArgument {
     public static String tryGetEntryStackTooltip(EntryStack stack) {
         Tooltip tooltip = stack.getTooltip(new Point());
         if (tooltip != null)
-            return CollectionUtils.mapAndJoinToString(tooltip.getText(), Component::getString, "\n");
+            return CollectionUtils.mapAndJoinToString(tooltip.getText(), ITextComponent::getString, "\n");
         return "";
     }
     

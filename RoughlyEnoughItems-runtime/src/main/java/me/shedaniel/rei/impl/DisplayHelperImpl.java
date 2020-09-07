@@ -25,15 +25,15 @@ package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.platform.Window;
+import net.minecraft.client.MainWindow;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.BaseBoundsHandler;
 import me.shedaniel.rei.api.DisplayHelper;
 import me.shedaniel.rei.api.OverlayDecider;
 import me.shedaniel.rei.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -43,7 +43,7 @@ import java.util.List;
 import java.util.Map;
 
 @ApiStatus.Internal
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class DisplayHelperImpl implements DisplayHelper {
     
     private static final Comparator<OverlayDecider> BOUNDS_HANDLER_COMPARATOR = Comparator.comparingDouble(OverlayDecider::getPriority).reversed();
@@ -114,7 +114,7 @@ public class DisplayHelperImpl implements DisplayHelper {
     
     @Override
     public <T> Rectangle getOverlayBounds(DisplayPanelLocation location, T screen) {
-        Window window = Minecraft.getInstance().getWindow();
+        MainWindow window = Minecraft.getInstance().getWindow();
         int scaledWidth = window.getGuiScaledWidth();
         int scaledHeight = window.getGuiScaledHeight();
         for (OverlayDecider decider : getSortedOverlayDeciders(screen.getClass())) {

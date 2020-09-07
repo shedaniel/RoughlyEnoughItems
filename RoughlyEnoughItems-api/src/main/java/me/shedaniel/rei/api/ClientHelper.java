@@ -25,12 +25,12 @@ package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.impl.Internals;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -40,7 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public interface ClientHelper {
     
     /**
@@ -148,7 +148,7 @@ public interface ClientHelper {
      * @param item the item to find
      * @return the mod name with blue and italic formatting
      */
-    Component getFormattedModFromItem(Item item);
+    ITextComponent getFormattedModFromItem(Item item);
     
     /**
      * Gets the formatted mod from an identifier
@@ -156,7 +156,7 @@ public interface ClientHelper {
      * @param identifier the identifier to find
      * @return the mod name with blue and italic formatting
      */
-    Component getFormattedModFromIdentifier(ResourceLocation identifier);
+    ITextComponent getFormattedModFromIdentifier(ResourceLocation identifier);
     
     /**
      * Gets the mod from an identifier

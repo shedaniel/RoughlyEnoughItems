@@ -32,13 +32,13 @@ import me.shedaniel.rei.impl.filtering.AbstractFilteringRule;
 import me.shedaniel.rei.impl.filtering.FilteringContext;
 import me.shedaniel.rei.impl.filtering.FilteringResult;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -52,7 +52,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class SearchFilteringRule extends AbstractFilteringRule<SearchFilteringRule> {
     private String filter;
     private List<SearchArgument.SearchArguments> arguments;
@@ -68,14 +68,14 @@ public class SearchFilteringRule extends AbstractFilteringRule<SearchFilteringRu
     }
     
     @Override
-    public CompoundTag toTag(CompoundTag tag) {
+    public CompoundNBT toTag(CompoundNBT tag) {
         tag.putString("filter", filter);
         tag.putBoolean("show", show);
         return tag;
     }
     
     @Override
-    public SearchFilteringRule createFromTag(CompoundTag tag) {
+    public SearchFilteringRule createFromTag(CompoundNBT tag) {
         String filter = tag.getString("filter");
         boolean show = tag.getBoolean("show");
         return new SearchFilteringRule(filter, SearchArgument.processSearchTerm(filter), show);
@@ -128,13 +128,13 @@ public class SearchFilteringRule extends AbstractFilteringRule<SearchFilteringRu
     }
     
     @Override
-    public Component getTitle() {
-        return new TranslatableComponent("rule.roughlyenoughitems.filtering.search");
+    public ITextComponent getTitle() {
+        return new TranslationTextComponent("rule.roughlyenoughitems.filtering.search");
     }
     
     @Override
-    public Component getSubtitle() {
-        return new TranslatableComponent("rule.roughlyenoughitems.filtering.search.subtitle");
+    public ITextComponent getSubtitle() {
+        return new TranslationTextComponent("rule.roughlyenoughitems.filtering.search.subtitle");
     }
     
     @Override
@@ -146,16 +146,16 @@ public class SearchFilteringRule extends AbstractFilteringRule<SearchFilteringRu
             @Override
             public void addEntries(Consumer<RuleEntry> entryConsumer) {
                 addEmpty(entryConsumer, 10);
-                addText(entryConsumer, new TranslatableComponent("rule.roughlyenoughitems.filtering.search.filter").withStyle(ChatFormatting.GRAY));
+                addText(entryConsumer, new TranslationTextComponent("rule.roughlyenoughitems.filtering.search.filter").withStyle(TextFormatting.GRAY));
                 entryConsumer.accept(entry = new TextFieldRuleEntry(width - 36, rule, widget -> {
                     widget.setMaxLength(9999);
                     if (entry != null) widget.setValue(entry.getWidget().getValue());
                     else widget.setValue(rule.filter);
                 }));
                 addEmpty(entryConsumer, 10);
-                addText(entryConsumer, new TranslatableComponent("rule.roughlyenoughitems.filtering.search.show").withStyle(ChatFormatting.GRAY));
+                addText(entryConsumer, new TranslationTextComponent("rule.roughlyenoughitems.filtering.search.show").withStyle(TextFormatting.GRAY));
                 entryConsumer.accept(show = new BooleanRuleEntry(width - 36, show == null ? rule.show : show.getBoolean(), rule, bool -> {
-                    return new TranslatableComponent("rule.roughlyenoughitems.filtering.search.show." + bool);
+                    return new TranslationTextComponent("rule.roughlyenoughitems.filtering.search.show." + bool);
                 }));
             }
             

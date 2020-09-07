@@ -23,22 +23,21 @@
 
 package me.shedaniel.rei.impl;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.fractions.Fraction;
 import me.shedaniel.rei.api.widgets.Tooltip;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
 @ApiStatus.Internal
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class EmptyEntryStack implements EntryStack {
     
     @ApiStatus.Internal
@@ -63,12 +62,7 @@ public class EmptyEntryStack implements EntryStack {
     }
     
     @Override
-    public Fraction getAccurateAmount() {
-        return Fraction.empty();
-    }
-    
-    @Override
-    public void setAmount(Fraction amount) {
+    public void setAmount(int amount) {
         
     }
     
@@ -148,7 +142,7 @@ public class EmptyEntryStack implements EntryStack {
     }
     
     @Override
-    public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
         
     }
     

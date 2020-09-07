@@ -25,13 +25,13 @@ package me.shedaniel.rei.api;
 
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.impl.Internals;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.item.crafting.RecipeManager;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -42,7 +42,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public interface RecipeHelper {
     
     /**
@@ -73,7 +73,7 @@ public interface RecipeHelper {
     /**
      * @return a list of sorted recipes
      */
-    List<Recipe> getAllSortedRecipes();
+    List<IRecipe> getAllSortedRecipes();
     
     /**
      * Gets all craftable items from materials.
@@ -251,7 +251,7 @@ public interface RecipeHelper {
      */
     boolean isDisplayVisible(RecipeDisplay display);
     
-    <T extends Recipe<?>> void registerRecipes(ResourceLocation category, Predicate<Recipe> recipeFilter, Function<T, RecipeDisplay> mappingFunction);
+    <T extends IRecipe<?>> void registerRecipes(ResourceLocation category, Predicate<IRecipe> recipeFilter, Function<T, RecipeDisplay> mappingFunction);
     
     /**
      * Registers a live recipe generator.
@@ -261,11 +261,11 @@ public interface RecipeHelper {
      */
     void registerLiveRecipeGenerator(LiveRecipeGenerator<?> liveRecipeGenerator);
     
-    void registerScreenClickArea(Rectangle rectangle, Class<? extends AbstractContainerScreen<?>> screenClass, ResourceLocation... categories);
+    void registerScreenClickArea(Rectangle rectangle, Class<? extends ContainerScreen<?>> screenClass, ResourceLocation... categories);
     
-    <T extends Recipe<?>> void registerRecipes(ResourceLocation category, Class<T> recipeClass, Function<T, RecipeDisplay> mappingFunction);
+    <T extends IRecipe<?>> void registerRecipes(ResourceLocation category, Class<T> recipeClass, Function<T, RecipeDisplay> mappingFunction);
     
-    <T extends Recipe<?>> void registerRecipes(ResourceLocation category, Function<Recipe, Boolean> recipeFilter, Function<T, RecipeDisplay> mappingFunction);
+    <T extends IRecipe<?>> void registerRecipes(ResourceLocation category, Function<IRecipe, Boolean> recipeFilter, Function<T, RecipeDisplay> mappingFunction);
     
     List<RecipeHelper.ScreenClickArea> getScreenClickAreas();
     
@@ -273,7 +273,7 @@ public interface RecipeHelper {
     boolean arePluginsLoading();
     
     interface ScreenClickArea {
-        Class<? extends AbstractContainerScreen> getScreenClass();
+        Class<? extends ContainerScreen> getScreenClass();
         
         Rectangle getRectangle();
         

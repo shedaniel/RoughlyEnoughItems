@@ -1,16 +1,5 @@
-pluginManagement {
-    repositories {
-        jcenter()
-        maven {
-            name = 'Fabric'
-            url = 'https://maven.fabricmc.net/'
-        }
-        gradlePluginPortal()
-    }
-}
-
 rootProject.name = "RoughlyEnoughItems"
 
-include "RoughlyEnoughItems-api"
-include "RoughlyEnoughItems-default-plugin"
-include "RoughlyEnoughItems-runtime"
+//include "RoughlyEnoughItems-api"
+//include "RoughlyEnoughItems-default-plugin"
+//include "RoughlyEnoughItems-runtime"

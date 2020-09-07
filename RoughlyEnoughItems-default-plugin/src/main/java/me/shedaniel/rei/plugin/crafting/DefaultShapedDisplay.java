@@ -24,18 +24,18 @@
 package me.shedaniel.rei.plugin.crafting;
 
 import me.shedaniel.rei.api.EntryStack;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.ShapedRecipe;
+import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.item.crafting.ShapedRecipe;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class DefaultShapedDisplay implements DefaultCraftingDisplay {
     
     private ShapedRecipe display;
@@ -74,7 +74,7 @@ public class DefaultShapedDisplay implements DefaultCraftingDisplay {
     }
     
     @Override
-    public Optional<Recipe<?>> getOptionalRecipe() {
+    public Optional<IRecipe<?>> getOptionalRecipe() {
         return Optional.ofNullable(display);
     }
     

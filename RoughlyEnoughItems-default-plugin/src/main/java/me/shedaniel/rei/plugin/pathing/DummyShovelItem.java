@@ -23,16 +23,16 @@
 
 package me.shedaniel.rei.plugin.pathing;
 
-import net.minecraft.world.item.ShovelItem;
-import net.minecraft.world.item.Tier;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.item.IItemTier;
+import net.minecraft.item.ShovelItem;
 
 import java.util.Map;
 
 public class DummyShovelItem extends ShovelItem {
-    protected DummyShovelItem(Tier toolMaterial_1, float float_1, float float_2, Properties item$Settings_1) {
-        super(toolMaterial_1, float_1, float_2, item$Settings_1);
+    public DummyShovelItem(IItemTier p_i48469_1_, float p_i48469_2_, float p_i48469_3_, Properties p_i48469_4_) {
+        super(p_i48469_1_, p_i48469_2_, p_i48469_3_, p_i48469_4_);
     }
     
     public static Map<Block, BlockState> getPathBlocksMap() {

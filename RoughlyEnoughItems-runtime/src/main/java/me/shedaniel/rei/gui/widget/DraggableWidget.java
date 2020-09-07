@@ -23,12 +23,12 @@
 
 package me.shedaniel.rei.gui.widget;
 
-import com.mojang.blaze3d.platform.Window;
+import net.minecraft.client.MainWindow;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.math.impl.PointHelper;
+import me.shedaniel.clothconfig2.forge.api.PointHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.IGuiEventListener;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
@@ -70,19 +70,19 @@ public abstract class DraggableWidget extends WidgetWithBounds {
                     dragged = true;
                 }
             } else {
-                Window window = minecraft.getWindow();
+                MainWindow window = minecraft.getWindow();
                 midPoint = processMidPoint(midPoint, mouse, startPoint, window, relateX, relateY);
                 updateWidgets(midPoint);
             }
             return true;
         }
-        for (GuiEventListener listener : children())
+        for (IGuiEventListener listener : children())
             if (listener.mouseDragged(double_1, double_2, int_1, double_3, double_4))
                 return true;
         return false;
     }
     
-    public abstract Point processMidPoint(Point midPoint, Point mouse, Point startPoint, Window window, int relateX, int relateY);
+    public abstract Point processMidPoint(Point midPoint, Point mouse, Point startPoint, MainWindow window, int relateX, int relateY);
     
     @Override
     public boolean mouseReleased(double double_1, double double_2, int int_1) {
@@ -92,7 +92,7 @@ public abstract class DraggableWidget extends WidgetWithBounds {
                 onMouseReleaseMidPoint(getMidPoint());
                 return true;
             }
-        for (GuiEventListener listener : children())
+        for (IGuiEventListener listener : children())
             if (listener.mouseReleased(double_1, double_2, int_1))
                 return true;
         return false;

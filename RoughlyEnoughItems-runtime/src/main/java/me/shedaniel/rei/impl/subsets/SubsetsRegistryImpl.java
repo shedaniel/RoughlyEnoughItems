@@ -29,9 +29,9 @@ import com.google.common.collect.Sets;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.subsets.SubsetsRegistry;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.util.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -40,7 +40,7 @@ import java.util.*;
 
 @ApiStatus.Experimental
 @ApiStatus.Internal
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class SubsetsRegistryImpl implements SubsetsRegistry {
     private final Map<String, Set<EntryStack>> entryPaths = Maps.newHashMap();
     

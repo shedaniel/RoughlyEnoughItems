@@ -31,9 +31,9 @@ import me.shedaniel.rei.impl.filtering.AbstractFilteringRule;
 import me.shedaniel.rei.impl.filtering.FilteringContext;
 import me.shedaniel.rei.impl.filtering.FilteringResult;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -41,12 +41,12 @@ import java.util.stream.Collectors;
 
 public class ManualFilteringRule extends AbstractFilteringRule<ManualFilteringRule> {
     @Override
-    public CompoundTag toTag(CompoundTag tag) {
+    public CompoundNBT toTag(CompoundNBT tag) {
         return tag;
     }
     
     @Override
-    public ManualFilteringRule createFromTag(CompoundTag tag) {
+    public ManualFilteringRule createFromTag(CompoundNBT tag) {
         return new ManualFilteringRule();
     }
     
@@ -64,13 +64,13 @@ public class ManualFilteringRule extends AbstractFilteringRule<ManualFilteringRu
     }
     
     @Override
-    public Component getTitle() {
-        return new TranslatableComponent("rule.roughlyenoughitems.filtering.manual");
+    public ITextComponent getTitle() {
+        return new TranslationTextComponent("rule.roughlyenoughitems.filtering.manual");
     }
     
     @Override
-    public Component getSubtitle() {
-        return new TranslatableComponent("rule.roughlyenoughitems.filtering.manual.subtitle");
+    public ITextComponent getSubtitle() {
+        return new TranslationTextComponent("rule.roughlyenoughitems.filtering.manual.subtitle");
     }
     
     @Override

@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.gui.modules.entries;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
@@ -34,9 +34,9 @@ import me.shedaniel.rei.gui.modules.MenuEntry;
 import me.shedaniel.rei.impl.EntryRegistryImpl;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.sounds.SoundEvents;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.audio.SimpleSound;
+import net.minecraft.util.SoundEvents;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collections;
@@ -76,7 +76,7 @@ public class EntryStackSubsetsMenuEntry extends MenuEntry {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (isFiltered()) {
             if (selected) {
                 fill(matrices, x, y, x + width, y + 18, -26215);
@@ -91,7 +91,7 @@ public class EntryStackSubsetsMenuEntry extends MenuEntry {
             if (RoughlyEnoughItemsCore.isLeftModePressed && !clickedLast) {
                 clickedLast = true;
                 if (!getParent().scrolling.draggingScrollBar) {
-                    minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                    minecraft.getSoundManager().play(SimpleSound.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                     List<EntryStack> filteredStacks = ConfigObject.getInstance().getFilteredStacks();
                     if (isFiltered()) {
                         filteredStacks.removeIf(next -> next.equalsIgnoreAmount(stack));
@@ -126,7 +126,7 @@ public class EntryStackSubsetsMenuEntry extends MenuEntry {
     }
     
     @Override
-    public List<? extends GuiEventListener> children() {
+    public List<? extends IGuiEventListener> children() {
         return Collections.emptyList();
     }
     

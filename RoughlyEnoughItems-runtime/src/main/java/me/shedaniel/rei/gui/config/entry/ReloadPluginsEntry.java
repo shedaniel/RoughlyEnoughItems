@@ -24,19 +24,19 @@
 package me.shedaniel.rei.gui.config.entry;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import me.shedaniel.clothconfig2.forge.api.AbstractConfigListEntry;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.RecipeHelper;
 import me.shedaniel.rei.gui.ConfigReloadingScreen;
+import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.chat.NarratorChatListener;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.client.gui.widget.Widget;
+import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.util.Unit;
+import net.minecraft.util.text.TranslationTextComponent;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
@@ -45,21 +45,21 @@ import java.util.Optional;
 @ApiStatus.Internal
 public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
     private int width;
-    private AbstractWidget buttonWidget = new Button(0, 0, 0, 20, NarratorChatListener.NO_TITLE, button -> RoughlyEnoughItemsCore.syncRecipes(null)) {
+    private Widget buttonWidget = new Button(0, 0, 0, 20, NarratorChatListener.NO_TITLE, button -> RoughlyEnoughItemsCore.syncRecipes(null)) {
         @Override
-        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
             if (RecipeHelper.getInstance().arePluginsLoading()) {
                 Minecraft.getInstance().setScreen(new ConfigReloadingScreen(Minecraft.getInstance().screen));
             } else
                 super.render(matrices, mouseX, mouseY, delta);
         }
     };
-    private List<GuiEventListener> children = ImmutableList.of(buttonWidget);
+    private List<IGuiEventListener> children = ImmutableList.of(buttonWidget);
     
     public ReloadPluginsEntry(int width) {
         super(NarratorChatListener.NO_TITLE, false);
         this.width = width;
-        buttonWidget.setMessage(new TranslatableComponent("text.rei.reload_config"));
+        buttonWidget.setMessage(new TranslationTextComponent("text.rei.reload_config"));
     }
     
     @Override
@@ -78,9 +78,8 @@ public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
     }
     
     @Override
-    public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-        super.render(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
-        Window window = Minecraft.getInstance().getWindow();
+    public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+        MainWindow window = Minecraft.getInstance().getWindow();
         this.buttonWidget.active = this.isEditable();
         this.buttonWidget.y = y;
         this.buttonWidget.x = x + entryWidth / 2 - width / 2;
@@ -89,7 +88,7 @@ public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
     }
     
     @Override
-    public List<? extends GuiEventListener> children() {
+    public List<? extends IGuiEventListener> children() {
         return children;
     }
 }

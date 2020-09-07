@@ -33,11 +33,11 @@ import me.shedaniel.rei.impl.filtering.FilteringContextImpl;
 import me.shedaniel.rei.impl.filtering.FilteringContextType;
 import me.shedaniel.rei.impl.filtering.FilteringRule;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.core.NonNullList;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.util.NonNullList;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @ApiStatus.Internal
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class EntryRegistryImpl implements EntryRegistry {
     
     private final List<EntryStack> preFilteredList = Lists.newCopyOnWriteArrayList();

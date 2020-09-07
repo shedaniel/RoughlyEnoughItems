@@ -23,19 +23,19 @@
 
 package me.shedaniel.rei.gui;
 
-import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.platform.Lighting;
-import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.gui.toast.ExportRecipeIdentifierToast;
 import me.shedaniel.rei.gui.widget.Widget;
-import net.minecraft.Util;
+import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.texture.NativeImage;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.client.shader.Framebuffer;
+import net.minecraft.util.Util;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.io.File;
@@ -74,8 +74,8 @@ public final class RecipeDisplayExporter extends Widget {
     private void exportRecipe(Rectangle rectangle, List<Widget> widgets) {
         RenderSystem.pushMatrix();
         Minecraft client = Minecraft.getInstance();
-        Window window = client.getWindow();
-        RenderTarget framebuffer = new RenderTarget(window.getWidth(), window.getHeight(), true, false);
+        MainWindow window = client.getWindow();
+        Framebuffer framebuffer = new Framebuffer(window.getWidth(), window.getHeight(), true, false);
         framebuffer.bindWrite(true);
         RenderSystem.viewport(0, 0, window.getWidth(), window.getHeight());
         RenderSystem.clear(256, Minecraft.ON_OSX);
@@ -85,8 +85,8 @@ public final class RecipeDisplayExporter extends Widget {
         RenderSystem.matrixMode(5888);
         RenderSystem.loadIdentity();
         RenderSystem.translatef(0.0F, 0.0F, -2000.0F);
-        Lighting.setupFor3DItems();
-        PoseStack matrices = new PoseStack();
+        RenderHelper.setupFor3DItems();
+        MatrixStack matrices = new MatrixStack();
         for (Widget widget : widgets) {
             widget.render(matrices, -1, -1, 0);
         }
@@ -120,12 +120,12 @@ public final class RecipeDisplayExporter extends Widget {
     }
     
     @Override
-    public void render(PoseStack matrixStack, int mouseY, int i, float f) {
+    public void render(MatrixStack matrixStack, int mouseY, int i, float f) {
         
     }
     
     @Override
-    public List<? extends GuiEventListener> children() {
+    public List<? extends IGuiEventListener> children() {
         return null;
     }
 }

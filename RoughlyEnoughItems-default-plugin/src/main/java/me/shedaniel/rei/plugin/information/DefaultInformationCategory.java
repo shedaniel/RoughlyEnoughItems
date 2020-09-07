@@ -24,12 +24,11 @@
 package me.shedaniel.rei.plugin.information;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix4f;
-import me.shedaniel.clothconfig2.ClothConfigInitializer;
-import me.shedaniel.clothconfig2.api.ScissorsHandler;
-import me.shedaniel.clothconfig2.api.ScrollingContainer;
+import me.shedaniel.clothconfig2.forge.ClothConfigInitializer;
+import me.shedaniel.clothconfig2.forge.api.ScissorsHandler;
+import me.shedaniel.clothconfig2.forge.api.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
@@ -41,33 +40,38 @@ import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import me.shedaniel.rei.impl.RenderingEntry;
 import me.shedaniel.rei.plugin.DefaultPlugin;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldVertexBufferUploader;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.util.IReorderingProcessor;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.ITextProperties;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class DefaultInformationCategory implements RecipeCategory<DefaultInformationDisplay> {
     protected static void innerBlit(Matrix4f matrix4f, int xStart, int xEnd, int yStart, int yEnd, int z, float uStart, float uEnd, float vStart, float vEnd) {
-        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-        bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
+        BufferBuilder bufferBuilder = Tessellator.getInstance().getBuilder();
+        bufferBuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
         bufferBuilder.vertex(matrix4f, xStart, yEnd, z).uv(uStart, vEnd).endVertex();
         bufferBuilder.vertex(matrix4f, xEnd, yEnd, z).uv(uEnd, vEnd).endVertex();
         bufferBuilder.vertex(matrix4f, xEnd, yStart, z).uv(uEnd, vStart).endVertex();
         bufferBuilder.vertex(matrix4f, xStart, yStart, z).uv(uStart, vStart).endVertex();
         bufferBuilder.end();
         RenderSystem.enableAlphaTest();
-        BufferUploader.end(bufferBuilder);
+        WorldVertexBufferUploader.end(bufferBuilder);
     }
     
     @Override
@@ -82,7 +86,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
     
     @Override
     public @NotNull RecipeEntry getSimpleRenderer(DefaultInformationDisplay recipe) {
-        FormattedCharSequence name = recipe.getName().getVisualOrderText();
+        IReorderingProcessor name = recipe.getName().getVisualOrderText();
         return new RecipeEntry() {
             @Override
             public int getHeight() {
@@ -90,7 +94,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
             }
             
             @Override
-            public void render(PoseStack matrices, Rectangle rectangle, int mouseX, int mouseY, float delta) {
+            public void render(MatrixStack matrices, Rectangle rectangle, int mouseX, int mouseY, float delta) {
                 Minecraft.getInstance().font.draw(matrices, name, rectangle.x + 5, rectangle.y + 6, -1);
             }
         };
@@ -100,7 +104,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
     public @NotNull EntryStack getLogo() {
         return new RenderingEntry() {
             @Override
-            public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+            public void render(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
                 Minecraft.getInstance().getTextureManager().bind(REIHelper.getInstance().getDefaultDisplayTexture());
                 matrices.pushPose();
                 matrices.translate(-1.2f, -1, 0);
@@ -134,7 +138,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
     
     private static class ScrollableTextWidget extends WidgetWithBounds {
         private Rectangle bounds;
-        private List<FormattedCharSequence> texts;
+        private List<IReorderingProcessor> texts;
         private final ScrollingContainer scrolling = new ScrollingContainer() {
             @Override
             public Rectangle getBounds() {
@@ -145,17 +149,17 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
             @Override
             public int getMaxScrollHeight() {
                 int i = 2;
-                for (FormattedCharSequence entry : texts) {
+                for (IReorderingProcessor entry : texts) {
                     i += entry == null ? 4 : font.lineHeight;
                 }
                 return i;
             }
         };
         
-        public ScrollableTextWidget(Rectangle bounds, List<Component> texts) {
+        public ScrollableTextWidget(Rectangle bounds, List<ITextComponent> texts) {
             this.bounds = Objects.requireNonNull(bounds);
             this.texts = Lists.newArrayList();
-            for (FormattedText text : texts) {
+            for (ITextProperties text : texts) {
                 if (!this.texts.isEmpty())
                     this.texts.add(null);
                 this.texts.addAll(Minecraft.getInstance().font.split(text, bounds.width - 11));
@@ -180,7 +184,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
         
         @Override
         public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-            if (scrolling.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
+            if (scrolling.handleMouseDrag(mouseX, mouseY, button, deltaX, deltaY))
                 return true;
             return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
         }
@@ -192,12 +196,12 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
         }
         
         @Override
-        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        public void render(@NotNull MatrixStack matrices, int mouseX, int mouseY, float delta) {
             scrolling.updatePosition(delta);
             Rectangle innerBounds = scrolling.getScissorBounds();
             ScissorsHandler.INSTANCE.scissor(innerBounds);
             int currentY = (int) -scrolling.scrollAmount + innerBounds.y;
-            for (FormattedCharSequence text : texts) {
+            for (IReorderingProcessor text : texts) {
                 if (text != null && currentY + font.lineHeight >= innerBounds.y && currentY <= innerBounds.getMaxY()) {
                     font.draw(matrices, text, innerBounds.x + 2, currentY + 2, REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF090909);
                 }
@@ -210,7 +214,7 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
         }
         
         @Override
-        public List<? extends GuiEventListener> children() {
+        public @NotNull List<? extends IGuiEventListener> children() {
             return Collections.emptyList();
         }
     }

@@ -24,16 +24,16 @@
 package me.shedaniel.rei.plugin.beacon_payment;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
-import net.minecraft.world.level.block.Blocks;
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.block.Blocks;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
-import me.shedaniel.clothconfig2.ClothConfigInitializer;
-import me.shedaniel.clothconfig2.api.ScissorsHandler;
-import me.shedaniel.clothconfig2.api.ScrollingContainer;
+import me.shedaniel.clothconfig2.forge.ClothConfigInitializer;
+import me.shedaniel.clothconfig2.forge.api.ScissorsHandler;
+import me.shedaniel.clothconfig2.forge.api.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
@@ -78,7 +78,7 @@ public class DefaultBeaconPaymentCategory implements RecipeCategory<DefaultBeaco
             }
             
             @Override
-            public void render(PoseStack matrices, Rectangle rectangle, int mouseX, int mouseY, float delta) {
+            public void render(MatrixStack matrices, Rectangle rectangle, int mouseX, int mouseY, float delta) {
                 Minecraft.getInstance().font.draw(matrices, name, rectangle.x + 5, rectangle.y + 6, -1);
             }
         };
@@ -116,7 +116,7 @@ public class DefaultBeaconPaymentCategory implements RecipeCategory<DefaultBeaco
             
             @Override
             public int getMaxScrollHeight() {
-                return Mth.ceil(widgets.size() / 8f) * 18;
+                return MathHelper.ceil(widgets.size() / 8f) * 18;
             }
         };
         
@@ -149,17 +149,17 @@ public class DefaultBeaconPaymentCategory implements RecipeCategory<DefaultBeaco
         
         @Override
         public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-            if (scrolling.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
+            if (scrolling.handleMouseDrag(mouseX, mouseY, button, deltaX, deltaY))
                 return true;
             return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
         }
         
         @Override
-        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
             scrolling.updatePosition(delta);
             Rectangle innerBounds = scrolling.getScissorBounds();
             ScissorsHandler.INSTANCE.scissor(innerBounds);
-            for (int y = 0; y < Mth.ceil(widgets.size() / 8f); y++) {
+            for (int y = 0; y < MathHelper.ceil(widgets.size() / 8f); y++) {
                 for (int x = 0; x < 8; x++) {
                     int index = y * 8 + x;
                     if (widgets.size() <= index)
@@ -176,7 +176,7 @@ public class DefaultBeaconPaymentCategory implements RecipeCategory<DefaultBeaco
         }
         
         @Override
-        public List<? extends GuiEventListener> children() {
+        public List<? extends IGuiEventListener> children() {
             return widgets;
         }
     }

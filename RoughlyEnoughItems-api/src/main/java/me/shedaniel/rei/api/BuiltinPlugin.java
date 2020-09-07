@@ -24,10 +24,10 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.impl.Internals;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.Ingredient;
 
 import java.util.Collections;
 import java.util.List;
@@ -56,11 +56,11 @@ public interface BuiltinPlugin {
         return Internals.getBuiltinPlugin();
     }
     
-    void registerBrewingRecipe(ItemStack input, Ingredient ingredient, ItemStack output);
+    void registerBrewingRecipe(Ingredient input, Ingredient ingredient, ItemStack output);
     
-    void registerInformation(List<EntryStack> entryStacks, Component name, UnaryOperator<List<Component>> textBuilder);
+    void registerInformation(List<EntryStack> entryStacks, ITextComponent name, UnaryOperator<List<ITextComponent>> textBuilder);
     
-    default void registerInformation(EntryStack entryStack, Component name, UnaryOperator<List<Component>> textBuilder) {
+    default void registerInformation(EntryStack entryStack, ITextComponent name, UnaryOperator<List<ITextComponent>> textBuilder) {
         registerInformation(Collections.singletonList(entryStack), name, textBuilder);
     }
 }

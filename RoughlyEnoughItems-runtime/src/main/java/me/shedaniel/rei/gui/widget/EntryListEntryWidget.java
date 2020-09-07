@@ -23,13 +23,13 @@
 
 package me.shedaniel.rei.gui.widget;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryStack;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.world.item.Item;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.item.Item;
 
 import static me.shedaniel.rei.gui.widget.EntryListWidget.entrySize;
 
@@ -43,13 +43,13 @@ public class EntryListEntryWidget extends EntryWidget {
     }
     
     @Override
-    protected void drawHighlighted(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    protected void drawHighlighted(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (!getCurrentEntry().isEmpty())
             super.drawHighlighted(matrices, mouseX, mouseY, delta);
     }
     
     @Override
-    public void queueTooltip(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void queueTooltip(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (ClientHelper.getInstance().isCheating() && !minecraft.player.inventory.getCarried().isEmpty()) {
             return;
         }

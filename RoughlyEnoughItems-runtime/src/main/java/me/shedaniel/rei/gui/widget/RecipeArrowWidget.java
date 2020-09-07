@@ -23,13 +23,13 @@
 
 package me.shedaniel.rei.gui.widget;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.util.Mth;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -70,17 +70,17 @@ public class RecipeArrowWidget extends WidgetWithBounds {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         Minecraft.getInstance().getTextureManager().bind(REIHelper.getInstance().getDefaultDisplayTexture());
         blit(matrices, x, y, 106, 91, 24, 17);
         if (animated) {
-            int width = Mth.ceil((System.currentTimeMillis() / (time / 24) % 24d) / 1f);
+            int width = MathHelper.ceil((System.currentTimeMillis() / (time / 24) % 24d) / 1f);
             blit(matrices, x, y, 82, 91, width, 17);
         }
     }
     
     @Override
-    public List<? extends GuiEventListener> children() {
+    public List<? extends IGuiEventListener> children() {
         return Collections.emptyList();
     }
 }

@@ -26,10 +26,10 @@ package me.shedaniel.rei.gui.modules;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.clothconfig2.ClothConfigInitializer;
-import me.shedaniel.clothconfig2.api.ScissorsHandler;
-import me.shedaniel.clothconfig2.api.ScrollingContainer;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import me.shedaniel.clothconfig2.forge.ClothConfigInitializer;
+import me.shedaniel.clothconfig2.forge.api.ScissorsHandler;
+import me.shedaniel.clothconfig2.forge.api.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
@@ -42,11 +42,11 @@ import me.shedaniel.rei.gui.modules.entries.SubSubsetsMenuEntry;
 import me.shedaniel.rei.gui.widget.LateRenderable;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.core.Registry;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -99,7 +99,7 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
             // Item Groups group
             Map<String, Object> itemGroups = getOrCreateSubEntryInMap(entries, "roughlyenoughitems:item_groups");
             for (Item item : Registry.ITEM) {
-                CreativeModeTab group = item.getItemCategory();
+                ItemGroup group = item.getItemCategory();
                 if (group == null)
                     continue;
                 List<ItemStack> list;
@@ -210,7 +210,7 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         Rectangle bounds = getBounds();
         Rectangle innerBounds = getInnerBounds();
         fill(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), containsMouse(mouseX, mouseY) ? (REIHelper.getInstance().isDarkThemeEnabled() ? -17587 : -1) : -6250336);
@@ -250,7 +250,7 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
     
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (scrolling.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
+        if (scrolling.handleMouseDrag(mouseX, mouseY, button, deltaX, deltaY))
             return true;
         return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
     }

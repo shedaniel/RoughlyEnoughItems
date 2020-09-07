@@ -23,13 +23,13 @@
 
 package me.shedaniel.rei.server;
 
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.item.ItemStack;
 
 import java.util.List;
 
 @FunctionalInterface
-public interface DumpHandler<T extends AbstractContainerMenu> {
+public interface DumpHandler<T extends Container> {
     boolean dump(ContainerContext<T> context, ItemStack stackToInsert);
     
     static StackAccessor getOccupiedSlotWithRoomForStack(ItemStack stack, List<StackAccessor> inventoryStacks) {

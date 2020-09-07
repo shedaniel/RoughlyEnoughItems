@@ -27,13 +27,13 @@ import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -41,28 +41,34 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class DefaultBrewingDisplay implements RecipeDisplay {
     
-    private EntryStack input, output;
-    private List<EntryStack> reactant;
+    private EntryStack output;
+    private List<EntryStack> input, reactant;
     
     @ApiStatus.Internal
-    public DefaultBrewingDisplay(ItemStack input, Ingredient reactant, ItemStack output) {
-        this.input = EntryStack.create(input).setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, stack -> Collections.singletonList(new TranslatableComponent("category.rei.brewing.input").withStyle(ChatFormatting.YELLOW)));
+    public DefaultBrewingDisplay(Ingredient input, Ingredient reactant, ItemStack output) {
+        ItemStack[] inputItems = input.getItems();
+        this.input = new ArrayList<>(inputItems.length);
+        for (ItemStack inputItem : inputItems) {
+            EntryStack entryStack = EntryStack.create(inputItem);
+            entryStack.setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> Collections.singletonList(new TranslationTextComponent("category.rei.brewing.input").withStyle(TextFormatting.YELLOW)));
+            this.input.add(entryStack);
+        }
         ItemStack[] reactantStacks = reactant.getItems();
         this.reactant = new ArrayList<>(reactantStacks.length);
         for (ItemStack stack : reactantStacks) {
             EntryStack entryStack = EntryStack.create(stack);
-            entryStack.setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> Collections.singletonList(new TranslatableComponent("category.rei.brewing.reactant").withStyle(ChatFormatting.YELLOW)));
+            entryStack.setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> Collections.singletonList(new TranslationTextComponent("category.rei.brewing.reactant").withStyle(TextFormatting.YELLOW)));
             this.reactant.add(entryStack);
         }
-        this.output = EntryStack.create(output).setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, stack -> Collections.singletonList(new TranslatableComponent("category.rei.brewing.result").withStyle(ChatFormatting.YELLOW)));
+        this.output = EntryStack.create(output).setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, stack -> Collections.singletonList(new TranslationTextComponent("category.rei.brewing.result").withStyle(TextFormatting.YELLOW)));
     }
     
     @Override
     public @NotNull List<List<EntryStack>> getInputEntries() {
-        return Lists.newArrayList(Collections.singletonList(input), reactant);
+        return Lists.newArrayList(input, reactant);
     }
     
     @Override

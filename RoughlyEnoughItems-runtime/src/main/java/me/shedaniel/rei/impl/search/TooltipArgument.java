@@ -25,15 +25,15 @@ package me.shedaniel.rei.impl.search;
 
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.impl.SearchArgument;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
 
 @ApiStatus.Internal
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public final class TooltipArgument extends Argument {
     public static final TooltipArgument INSTANCE = new TooltipArgument();
     

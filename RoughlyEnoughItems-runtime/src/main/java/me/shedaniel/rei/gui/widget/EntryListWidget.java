@@ -26,16 +26,14 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.math.Matrix4f;
-import me.shedaniel.clothconfig2.ClothConfigInitializer;
-import me.shedaniel.clothconfig2.api.ScissorsHandler;
-import me.shedaniel.clothconfig2.api.ScrollingContainer;
-import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import me.shedaniel.clothconfig2.forge.ClothConfigInitializer;
+import me.shedaniel.clothconfig2.forge.api.PointHelper;
+import me.shedaniel.clothconfig2.forge.api.ScissorsHandler;
+import me.shedaniel.clothconfig2.forge.api.ScrollingContainer;
+import me.shedaniel.clothconfig2.forge.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.widgets.Tooltip;
@@ -46,15 +44,17 @@ import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.SearchArgument;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.util.Mth;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -64,18 +64,16 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.*;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @ApiStatus.Internal
 public class EntryListWidget extends WidgetWithBounds {
     
-    static final Supplier<Boolean> RENDER_ENCHANTMENT_GLINT = ConfigObject.getInstance()::doesRenderEntryEnchantmentGlint;
     static final Comparator<? super EntryStack> ENTRY_NAME_COMPARER = Comparator.comparing(stack -> stack.asFormatStrippedText().getString());
     static final Comparator<? super EntryStack> ENTRY_GROUP_COMPARER = Comparator.comparingInt(stack -> {
         if (stack.getType() == EntryStack.Type.ITEM) {
-            CreativeModeTab group = stack.getItem().getItemCategory();
+            ItemGroup group = stack.getItem().getItemCategory();
             if (group != null)
                 return group.getId();
         }
@@ -92,7 +90,7 @@ public class EntryListWidget extends WidgetWithBounds {
         
         @Override
         public int getMaxScrollHeight() {
-            return Mth.ceil((allStacks.size() + blockedCount) / (innerBounds.width / (float) entrySize())) * entrySize();
+            return MathHelper.ceil((allStacks.size() + blockedCount) / (innerBounds.width / (float) entrySize())) * entrySize();
         }
     };
     protected int blockedCount;
@@ -111,19 +109,19 @@ public class EntryListWidget extends WidgetWithBounds {
     private String lastSearchTerm = null;
     
     public static int entrySize() {
-        return Mth.ceil(SIZE * ConfigObject.getInstance().getEntrySize());
+        return MathHelper.ceil(SIZE * ConfigObject.getInstance().getEntrySize());
     }
     
     static boolean notSteppingOnExclusionZones(int left, int top, Rectangle listArea) {
         Minecraft instance = Minecraft.getInstance();
         for (OverlayDecider decider : DisplayHelper.getInstance().getSortedOverlayDeciders(instance.screen.getClass())) {
-            InteractionResult fit = decider.isInZone(left, top);
-            if (fit == InteractionResult.FAIL)
+            ActionResultType fit = decider.isInZone(left, top);
+            if (fit == ActionResultType.FAIL)
                 return false;
-            InteractionResult fit2 = decider.isInZone(left + 18, top + 18);
-            if (fit2 == InteractionResult.FAIL)
+            ActionResultType fit2 = decider.isInZone(left + 18, top + 18);
+            if (fit2 == ActionResultType.FAIL)
                 return false;
-            if (fit == InteractionResult.SUCCESS && fit2 == InteractionResult.SUCCESS)
+            if (fit == ActionResultType.SUCCESS && fit2 == ActionResultType.SUCCESS)
                 return true;
         }
         return true;
@@ -131,13 +129,13 @@ public class EntryListWidget extends WidgetWithBounds {
     
     private static Rectangle updateInnerBounds(Rectangle bounds) {
         if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-            int width = Math.max(Mth.floor((bounds.width - 2 - 6) / (float) entrySize()), 1);
+            int width = Math.max(MathHelper.floor((bounds.width - 2 - 6) / (float) entrySize()), 1);
             if (ConfigObject.getInstance().isLeftHandSidePanel())
                 return new Rectangle((int) (bounds.getCenterX() - width * (entrySize() / 2f) + 3), bounds.y, width * entrySize(), bounds.height);
             return new Rectangle((int) (bounds.getCenterX() - width * (entrySize() / 2f) - 3), bounds.y, width * entrySize(), bounds.height);
         }
-        int width = Math.max(Mth.floor((bounds.width - 2) / (float) entrySize()), 1);
-        int height = Math.max(Mth.floor((bounds.height - 2) / (float) entrySize()), 1);
+        int width = Math.max(MathHelper.floor((bounds.width - 2) / (float) entrySize()), 1);
+        int height = Math.max(MathHelper.floor((bounds.height - 2) / (float) entrySize()), 1);
         return new Rectangle((int) (bounds.getCenterX() - width * (entrySize() / 2f)), (int) (bounds.getCenterY() - height * (entrySize() / 2f)), width * entrySize(), height * entrySize());
     }
     
@@ -175,10 +173,10 @@ public class EntryListWidget extends WidgetWithBounds {
     public int getTotalPages() {
         if (ConfigObject.getInstance().isEntryListWidgetScrolled())
             return 1;
-        return Mth.ceil(allStacks.size() / (float) entries.size());
+        return MathHelper.ceil(allStacks.size() / (float) entries.size());
     }
     
-    public static void renderEntries(boolean debugTime, int[] size, long[] time, boolean fastEntryRendering, PoseStack matrices, int mouseX, int mouseY, float delta, List<EntryListEntryWidget> entries) {
+    public static void renderEntries(boolean debugTime, int[] size, long[] time, boolean fastEntryRendering, MatrixStack matrices, int mouseX, int mouseY, float delta, List<EntryListEntryWidget> entries) {
         if (entries.isEmpty()) return;
         EntryListEntryWidget firstWidget = entries.get(0);
         EntryStack first = firstWidget.getCurrentEntry();
@@ -186,7 +184,7 @@ public class EntryListWidget extends WidgetWithBounds {
             OptimalEntryStack firstStack = (OptimalEntryStack) first;
             firstStack.optimisedRenderStart(matrices, delta);
             long l = debugTime ? System.nanoTime() : 0;
-            MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
+            IRenderTypeBuffer.Impl immediate = Minecraft.getInstance().renderBuffers().bufferSource();
             for (EntryListEntryWidget listEntry : entries) {
                 EntryStack currentEntry = listEntry.getCurrentEntry();
                 currentEntry.setZ(100);
@@ -220,7 +218,7 @@ public class EntryListWidget extends WidgetWithBounds {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         int[] size = {0};
         long[] time = {0};
         long totalTimeStart = debugTime ? System.nanoTime() : 0;
@@ -230,7 +228,7 @@ public class EntryListWidget extends WidgetWithBounds {
                 entry.clearStacks();
             ScissorsHandler.INSTANCE.scissor(bounds);
             
-            int skip = Math.max(0, Mth.floor(scrolling.scrollAmount / (float) entrySize()));
+            int skip = Math.max(0, MathHelper.floor(scrolling.scrollAmount / (float) entrySize()));
             int nextIndex = skip * innerBounds.width / entrySize();
             int[] i = {nextIndex};
             blockedCount = 0;
@@ -291,10 +289,10 @@ public class EntryListWidget extends WidgetWithBounds {
             }
             int z = getZ();
             setZ(500);
-            Component debugText = new TextComponent(String.format("%d entries, avg. %.0fns, ttl. %.2fms, %s fps", size[0], lastAverageDebugTime, lastTotalDebugTime, minecraft.fpsString.split(" ")[0]));
+            ITextComponent debugText = new StringTextComponent(String.format("%d entries, avg. %.0fns, ttl. %.2fms, %s fps", size[0], lastAverageDebugTime, lastTotalDebugTime, minecraft.fpsString.split(" ")[0]));
             int stringWidth = font.width(debugText);
             fillGradient(matrices, Math.min(bounds.x, minecraft.screen.width - stringWidth - 2), bounds.y, bounds.x + stringWidth + 2, bounds.y + font.lineHeight + 2, -16777216, -16777216);
-            MultiBufferSource.BufferSource immediate = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+            IRenderTypeBuffer.Impl immediate = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
             matrices.pushPose();
             matrices.translate(0.0D, 0.0D, getZ());
             Matrix4f matrix = matrices.last().pose();
@@ -319,7 +317,7 @@ public class EntryListWidget extends WidgetWithBounds {
                     }
                 }
             }
-            Tooltip.create(new TranslatableComponent("text.rei.delete_items")).queue();
+            Tooltip.create(new TranslationTextComponent("text.rei.delete_items")).queue();
         }
     }
     
@@ -331,7 +329,7 @@ public class EntryListWidget extends WidgetWithBounds {
     
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dx, double dy) {
-        if (scrolling.mouseDragged(mouseX, mouseY, button, dx, dy, ConfigObject.getInstance().doesSnapToRows(), entrySize()))
+        if (scrolling.handleMouseDrag(mouseX, mouseY, button, dx, dy, ConfigObject.getInstance().doesSnapToRows(), entrySize()))
             return true;
         return super.mouseDragged(mouseX, mouseY, button, dx, dy);
     }
@@ -450,7 +448,7 @@ public class EntryListWidget extends WidgetWithBounds {
                                 if (canLastSearchTermsBeAppliedTo(stack)) {
                                     if (workingItems != null && !workingItems.contains(stack.hashIgnoreAmount()))
                                         continue;
-                                    filtered.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
+                                    filtered.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE));
                                 }
                             }
                             return filtered;
@@ -471,7 +469,7 @@ public class EntryListWidget extends WidgetWithBounds {
                         if (canLastSearchTermsBeAppliedTo(stack)) {
                             if (workingItems != null && !workingItems.contains(stack.hashIgnoreAmount()))
                                 continue;
-                            list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
+                            list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE));
                         }
                     }
                 }
@@ -521,7 +519,7 @@ public class EntryListWidget extends WidgetWithBounds {
             for (Widget widget : children())
                 if (widget.mouseReleased(mouseX, mouseY, button))
                     return true;
-            LocalPlayer player = minecraft.player;
+            ClientPlayerEntity player = minecraft.player;
             if (ClientHelper.getInstance().isCheating() && player != null && player.inventory != null && !player.inventory.getCarried().isEmpty() && RoughlyEnoughItemsCore.canDeleteItems()) {
                 ClientHelper.getInstance().sendDeletePacket();
                 return true;

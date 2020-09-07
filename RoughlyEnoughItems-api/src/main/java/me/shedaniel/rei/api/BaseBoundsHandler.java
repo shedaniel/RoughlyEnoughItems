@@ -24,13 +24,13 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.math.Rectangle;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.List;
 import java.util.function.Supplier;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public interface BaseBoundsHandler extends OverlayDecider {
     
     static BaseBoundsHandler getInstance() {

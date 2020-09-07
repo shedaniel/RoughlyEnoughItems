@@ -26,12 +26,12 @@ package me.shedaniel.rei.plugin;
 import com.google.common.collect.Ordering;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
-import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.client.gui.DisplayEffectsScreen;
+import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.potion.EffectInstance;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,23 +39,23 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class DefaultPotionEffectExclusionZones implements Supplier<List<Rectangle>> {
     @Override
     public List<Rectangle> get() {
-        if (!(REIHelper.getInstance().getPreviousContainerScreen() instanceof EffectRenderingInventoryScreen) || !((EffectRenderingInventoryScreen<?>) REIHelper.getInstance().getPreviousContainerScreen()).doRenderEffects)
+        if (!(REIHelper.getInstance().getPreviousContainerScreen() instanceof DisplayEffectsScreen) || !((DisplayEffectsScreen<?>) REIHelper.getInstance().getPreviousContainerScreen()).doRenderEffects)
             return Collections.emptyList();
-        Collection<MobEffectInstance> activePotionEffects = Minecraft.getInstance().player.getActiveEffects();
+        Collection<EffectInstance> activePotionEffects = Minecraft.getInstance().player.getActiveEffects();
         if (activePotionEffects.isEmpty())
             return Collections.emptyList();
-        AbstractContainerScreen<?> containerScreen = REIHelper.getInstance().getPreviousContainerScreen();
+        ContainerScreen<?> containerScreen = REIHelper.getInstance().getPreviousContainerScreen();
         List<Rectangle> list = new ArrayList<>();
-        int x = containerScreen.leftPos - 124;
-        int y = containerScreen.topPos;
+        int x = containerScreen.getGuiLeft() - 124;
+        int y = containerScreen.getGuiTop();
         int height = 33;
         if (activePotionEffects.size() > 5)
             height = 132 / (activePotionEffects.size() - 1);
-        for (MobEffectInstance instance : Ordering.natural().sortedCopy(activePotionEffects)) {
+        for (EffectInstance instance : Ordering.natural().sortedCopy(activePotionEffects)) {
             list.add(new Rectangle(x, y, 166, height));
             y += height;
         }

@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.server;
 
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.inventory.container.Slot;
+import net.minecraft.item.ItemStack;
 
 public class SlotStackAccessor implements StackAccessor {
     protected Slot slot;

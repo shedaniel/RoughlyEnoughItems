@@ -23,22 +23,22 @@
 
 package me.shedaniel.rei.gui.config.entry;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import me.shedaniel.clothconfig2.forge.gui.widget.DynamicElementListWidget;
 import me.shedaniel.rei.impl.filtering.FilteringRule;
 import me.shedaniel.rei.impl.filtering.rules.ManualFilteringRule;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.locale.Language;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvents;
+import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.audio.SimpleSound;
+import net.minecraft.util.text.LanguageMap;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.ITextProperties;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvents;
 
 import java.util.Arrays;
 import java.util.List;
@@ -53,7 +53,7 @@ public class FilteringRulesScreen extends Screen {
     Screen parent;
     
     public FilteringRulesScreen(FilteringEntry entry) {
-        super(new TranslatableComponent("config.roughlyenoughitems.filteringRulesScreen"));
+        super(new TranslationTextComponent("config.roughlyenoughitems.filteringRulesScreen"));
         this.entry = entry;
     }
     
@@ -61,14 +61,14 @@ public class FilteringRulesScreen extends Screen {
     protected void init() {
         super.init();
         {
-            Component backText = new TextComponent("↩ ").append(new TranslatableComponent("gui.back"));
+            ITextComponent backText = new StringTextComponent("↩ ").append(new TranslationTextComponent("gui.back"));
             addButton(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
                 minecraft.setScreen(parent);
                 this.parent = null;
             }));
         }
         {
-            Component addText = new TextComponent(" + ");
+            ITextComponent addText = new StringTextComponent(" + ");
             addButton(new Button(width - 4 - 20, 4, 20, 20, addText, button -> {
                 FilteringAddRuleScreen screen = new FilteringAddRuleScreen(entry);
                 screen.parent = this;
@@ -89,7 +89,7 @@ public class FilteringRulesScreen extends Screen {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         this.rulesList.render(matrices, mouseX, mouseY, delta);
         super.render(matrices, mouseX, mouseY, delta);
         this.font.drawShadow(matrices, this.title.getVisualOrderText(), this.width / 2.0F - this.font.width(this.title) / 2.0F, 12.0F, -1);
@@ -134,7 +134,7 @@ public class FilteringRulesScreen extends Screen {
                 return true;
             RuleEntry item = getItemAtPosition(double_1, double_2);
             if (item != null) {
-                client.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                client.getSoundManager().play(SimpleSound.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 selectItem(item);
                 this.setFocused(item);
                 this.setDragging(true);
@@ -184,19 +184,19 @@ public class FilteringRulesScreen extends Screen {
         public DefaultRuleEntry(FilteringRule<?> rule, FilteringEntry entry, BiFunction<FilteringEntry, Screen, Screen> screenFunction) {
             super(rule);
             this.screenFunction = (screenFunction == null ? rule.createEntryScreen().orElse(null) : screenFunction);
-            configureButton = new Button(0, 0, 20, 20, Component.nullToEmpty(null), button -> {
+            configureButton = new Button(0, 0, 20, 20, ITextComponent.nullToEmpty(null), button -> {
                 entry.edited = true;
                 Minecraft.getInstance().setScreen(this.screenFunction.apply(entry, Minecraft.getInstance().screen));
             }) {
                 @Override
-                protected void renderBg(PoseStack matrices, Minecraft client, int mouseX, int mouseY) {
+                protected void renderBg(MatrixStack matrices, Minecraft client, int mouseX, int mouseY) {
                     super.renderBg(matrices, client, mouseX, mouseY);
                     Minecraft.getInstance().getTextureManager().bind(CHEST_GUI_TEXTURE);
                     blit(matrices, x + 3, y + 3, 0, 0, 14, 14);
                 }
             };
             {
-                Component deleteText = new TranslatableComponent("config.roughlyenoughitems.filteringRulesScreen.delete");
+                ITextComponent deleteText = new TranslationTextComponent("config.roughlyenoughitems.filteringRulesScreen.delete");
                 deleteButton = new Button(0, 0, Minecraft.getInstance().font.width(deleteText) + 10, 20, deleteText, button -> {
                     final Screen screen = Minecraft.getInstance().screen;
                     entry.edited = true;
@@ -209,24 +209,24 @@ public class FilteringRulesScreen extends Screen {
         }
         
         @Override
-        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
+        public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
             Minecraft client = Minecraft.getInstance();
             {
-                Component title = getRule().getTitle();
+                ITextComponent title = getRule().getTitle();
                 int i = client.font.width(title);
                 if (i > entryWidth - 28) {
-                    FormattedText titleTrimmed = FormattedText.composite(client.font.substrByWidth(title, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));
-                    client.font.drawShadow(matrices, Language.getInstance().getVisualOrder(titleTrimmed), x + 2, y + 1, 16777215);
+                    ITextProperties titleTrimmed = ITextProperties.composite(client.font.substrByWidth(title, entryWidth - 28 - client.font.width("...")), ITextProperties.of("..."));
+                    client.font.drawShadow(matrices, LanguageMap.getInstance().getVisualOrder(titleTrimmed), x + 2, y + 1, 16777215);
                 } else {
                     client.font.drawShadow(matrices, title.getVisualOrderText(), x + 2, y + 1, 16777215);
                 }
             }
             {
-                Component subtitle = getRule().getSubtitle();
+                ITextComponent subtitle = getRule().getSubtitle();
                 int i = client.font.width(subtitle);
                 if (i > entryWidth - 28) {
-                    FormattedText subtitleTrimmed = FormattedText.composite(client.font.substrByWidth(subtitle, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));
-                    client.font.drawShadow(matrices, Language.getInstance().getVisualOrder(subtitleTrimmed), x + 2, y + 12, 8421504);
+                    ITextProperties subtitleTrimmed = ITextProperties.composite(client.font.substrByWidth(subtitle, entryWidth - 28 - client.font.width("...")), ITextProperties.of("..."));
+                    client.font.drawShadow(matrices, LanguageMap.getInstance().getVisualOrder(subtitleTrimmed), x + 2, y + 12, 8421504);
                 } else {
                     client.font.drawShadow(matrices, subtitle.getVisualOrderText(), x + 2, y + 12, 8421504);
                 }
@@ -240,7 +240,7 @@ public class FilteringRulesScreen extends Screen {
         }
         
         @Override
-        public List<? extends GuiEventListener> children() {
+        public List<? extends IGuiEventListener> children() {
             return Arrays.asList(configureButton, deleteButton);
         }
     }

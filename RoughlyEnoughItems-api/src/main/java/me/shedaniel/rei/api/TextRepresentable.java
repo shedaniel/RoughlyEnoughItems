@@ -23,29 +23,29 @@
 
 package me.shedaniel.rei.api;
 
-import me.shedaniel.math.impl.PointHelper;
+import me.shedaniel.clothconfig2.forge.api.PointHelper;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.utils.FormattingUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public interface TextRepresentable {
     @NotNull
-    default Component asFormattedText() {
+    default ITextComponent asFormattedText() {
         if (this instanceof EntryStack) {
             Tooltip tooltip = ((EntryStack) this).getTooltip(PointHelper.ofMouse());
             if (tooltip != null && !tooltip.getText().isEmpty())
                 return tooltip.getText().get(0);
         }
-        return new TextComponent("");
+        return new StringTextComponent("");
     }
     
     @NotNull
-    default Component asFormatStrippedText() {
-        return new TextComponent(FormattingUtils.stripFormatting(asFormattedText().getString()));
+    default ITextComponent asFormatStrippedText() {
+        return new StringTextComponent(FormattingUtils.stripFormatting(asFormattedText().getString()));
     }
 }

@@ -24,17 +24,17 @@
 package me.shedaniel.rei.impl.widgets;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.util.math.vector.Matrix4f;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.widgets.Panel;
 import me.shedaniel.rei.gui.config.RecipeBorderType;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
-import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.util.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -63,7 +63,7 @@ public final class PanelWidget extends Panel {
         this.bounds = Objects.requireNonNull(bounds);
     }
     
-    public static void render(PoseStack matrices, @NotNull Rectangle bounds, int color) {
+    public static void render(MatrixStack matrices, @NotNull Rectangle bounds, int color) {
         TEMP.bounds.setBounds(Objects.requireNonNull(bounds));
         TEMP.color = color;
         TEMP.render(matrices, 0, 0, 0);
@@ -128,7 +128,7 @@ public final class PanelWidget extends Panel {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (!getRendering().test(this))
             return;
         float alpha = ((color >> 24) & 0xFF) / 255f;
@@ -151,17 +151,17 @@ public final class PanelWidget extends Panel {
         
         Matrix4f matrix = matrices.last().pose();
         // Sides
-        GuiComponent.innerBlit(matrix, x + 8, x + width - 8, y, y + 8, getZ(), (114 + xTextureOffset) / 256f, (248 + xTextureOffset) / 256f, (124 + yTextureOffset) / 256f, (132 + yTextureOffset) / 256f);
-        GuiComponent.innerBlit(matrix, x + 8, x + width - 8, y + height - 8, y + height, getZ(), (114 + xTextureOffset) / 256f, (248 + xTextureOffset) / 256f, (182 + yTextureOffset) / 256f, (190 + yTextureOffset) / 256f);
-        GuiComponent.innerBlit(matrix, x, x + 8, y + 8, y + height - 8, getZ(), (106 + xTextureOffset) / 256f, (114 + xTextureOffset) / 256f, (132 + yTextureOffset) / 256f, (182 + yTextureOffset) / 256f);
-        GuiComponent.innerBlit(matrix, x + width - 8, x + width, y + 8, y + height - 8, getZ(), (248 + xTextureOffset) / 256f, (256 + xTextureOffset) / 256f, (132 + yTextureOffset) / 256f, (182 + yTextureOffset) / 256f);
+        AbstractGui.innerBlit(matrix, x + 8, x + width - 8, y, y + 8, getZ(), (114 + xTextureOffset) / 256f, (248 + xTextureOffset) / 256f, (124 + yTextureOffset) / 256f, (132 + yTextureOffset) / 256f);
+        AbstractGui.innerBlit(matrix, x + 8, x + width - 8, y + height - 8, y + height, getZ(), (114 + xTextureOffset) / 256f, (248 + xTextureOffset) / 256f, (182 + yTextureOffset) / 256f, (190 + yTextureOffset) / 256f);
+        AbstractGui.innerBlit(matrix, x, x + 8, y + 8, y + height - 8, getZ(), (106 + xTextureOffset) / 256f, (114 + xTextureOffset) / 256f, (132 + yTextureOffset) / 256f, (182 + yTextureOffset) / 256f);
+        AbstractGui.innerBlit(matrix, x + width - 8, x + width, y + 8, y + height - 8, getZ(), (248 + xTextureOffset) / 256f, (256 + xTextureOffset) / 256f, (132 + yTextureOffset) / 256f, (182 + yTextureOffset) / 256f);
         
         // Center
-        GuiComponent.innerBlit(matrix, x + 8, x + width - 8, y + 8, y + height - 8, getZ(), (114 + xTextureOffset) / 256f, (248 + xTextureOffset) / 256f, (132 + yTextureOffset) / 256f, (182 + yTextureOffset) / 256f);
+        AbstractGui.innerBlit(matrix, x + 8, x + width - 8, y + 8, y + height - 8, getZ(), (114 + xTextureOffset) / 256f, (248 + xTextureOffset) / 256f, (132 + yTextureOffset) / 256f, (182 + yTextureOffset) / 256f);
     }
     
     @Override
-    public List<? extends GuiEventListener> children() {
+    public List<? extends IGuiEventListener> children() {
         return Collections.emptyList();
     }
 }

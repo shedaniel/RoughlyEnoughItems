@@ -24,7 +24,7 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.server.ContainerInfo;
-import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.inventory.container.Container;
 
 import java.util.List;
 
@@ -40,6 +40,6 @@ public interface TransferRecipeDisplay extends RecipeDisplay {
      */
     int getHeight();
     
-    List<List<EntryStack>> getOrganisedInputEntries(ContainerInfo<AbstractContainerMenu> containerInfo, AbstractContainerMenu container);
+    List<List<EntryStack>> getOrganisedInputEntries(ContainerInfo<Container> containerInfo, Container container);
     
 }

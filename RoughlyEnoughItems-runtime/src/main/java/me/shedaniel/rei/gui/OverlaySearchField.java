@@ -24,18 +24,18 @@
 package me.shedaniel.rei.gui;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.client.util.InputMappings;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import me.shedaniel.math.Point;
-import me.shedaniel.math.impl.PointHelper;
+import me.shedaniel.clothconfig2.forge.api.PointHelper;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.sounds.SoundEvents;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.client.audio.SimpleSound;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.Tuple;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -73,7 +73,7 @@ public class OverlaySearchField extends TextFieldWidget {
         }
     }
     
-    public void laterRender(PoseStack matrices, int int_1, int int_2, float float_1) {
+    public void laterRender(MatrixStack matrices, int int_1, int int_2, float float_1) {
         RenderSystem.disableDepthTest();
         setEditableColor(isMain && ContainerScreenOverlay.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty() ? 16733525 : isSearching && isMain ? -852212 : (containsMouse(PointHelper.ofMouse()) || isFocused()) ? (REIHelper.getInstance().isDarkThemeEnabled() ? -17587 : -1) : -6250336);
         setSuggestion(!isFocused() && getText().isEmpty() ? I18n.get("text.rei.search.field.suggestion") : null);
@@ -82,7 +82,7 @@ public class OverlaySearchField extends TextFieldWidget {
     }
     
     @Override
-    protected void renderSuggestion(PoseStack matrices, int x, int y) {
+    protected void renderSuggestion(MatrixStack matrices, int x, int y) {
         if (containsMouse(PointHelper.ofMouse()) || isFocused())
             this.font.drawShadow(matrices, this.font.plainSubstrByWidth(this.getSuggestion(), this.getWidth()), x, y, REIHelper.getInstance().isDarkThemeEnabled() ? 0xccddaa3d : 0xddeaeaea);
         else
@@ -90,7 +90,7 @@ public class OverlaySearchField extends TextFieldWidget {
     }
     
     @Override
-    public void renderBorder(PoseStack matrices) {
+    public void renderBorder(MatrixStack matrices) {
         if (isMain && isSearching) {
             fill(matrices, this.getBounds().x - 1, this.getBounds().y - 1, this.getBounds().x + this.getBounds().width + 1, this.getBounds().y + this.getBounds().height + 1, -852212);
         } else if (isMain && ContainerScreenOverlay.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty()) {
@@ -121,7 +121,7 @@ public class OverlaySearchField extends TextFieldWidget {
             else if (getManhattanDistance(lastClickedDetails.getB(), new Point(double_1, double_2)) <= 25) {
                 lastClickedDetails = null;
                 isSearching = !isSearching;
-                minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                minecraft.getSoundManager().play(SimpleSound.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             } else {
                 lastClickedDetails = new Tuple<>(System.currentTimeMillis(), new Point(double_1, double_2));
             }
@@ -159,7 +159,7 @@ public class OverlaySearchField extends TextFieldWidget {
     
     @Override
     public boolean charTyped(char char_1, int int_1) {
-        if (System.currentTimeMillis() - keybindFocusTime < 1000 && InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), keybindFocusKey)) {
+        if (System.currentTimeMillis() - keybindFocusTime < 1000 && InputMappings.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), keybindFocusKey)) {
             keybindFocusTime = -1;
             keybindFocusKey = -1;
             return true;
@@ -173,7 +173,7 @@ public class OverlaySearchField extends TextFieldWidget {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
     }
     
 }

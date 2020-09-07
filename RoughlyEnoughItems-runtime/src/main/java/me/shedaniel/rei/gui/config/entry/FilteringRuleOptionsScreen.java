@@ -23,19 +23,19 @@
 
 package me.shedaniel.rei.gui.config.entry;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import me.shedaniel.clothconfig2.forge.gui.widget.DynamicElementListWidget;
 import me.shedaniel.rei.impl.filtering.FilteringRule;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.util.IReorderingProcessor;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.ITextProperties;
+import net.minecraft.util.text.TranslationTextComponent;
 
 import java.util.Collections;
 import java.util.List;
@@ -49,7 +49,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
     public T rule;
     
     public FilteringRuleOptionsScreen(FilteringEntry entry, T rule, Screen screen) {
-        super(new TranslatableComponent("config.roughlyenoughitems.filteringRulesScreen"));
+        super(new TranslationTextComponent("config.roughlyenoughitems.filteringRulesScreen"));
         this.entry = entry;
         this.rule = rule;
         this.parent = screen;
@@ -60,7 +60,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         super.init();
         if (rulesList != null) save();
         {
-            Component doneText = new TranslatableComponent("gui.done");
+            ITextComponent doneText = new TranslationTextComponent("gui.done");
             int width = Minecraft.getInstance().font.width(doneText);
             addButton(new Button(this.width - 4 - width - 10, 4, width + 10, 20, doneText, button -> {
                 save();
@@ -75,8 +75,8 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
     
     public abstract void save();
     
-    public void addText(Consumer<RuleEntry> entryConsumer, FormattedText text) {
-        for (FormattedCharSequence s : font.split(text, width - 80)) {
+    public void addText(Consumer<RuleEntry> entryConsumer, ITextProperties text) {
+        for (IReorderingProcessor s : font.split(text, width - 80)) {
             entryConsumer.accept(new TextRuleEntry(rule, s));
         }
     }
@@ -86,7 +86,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         this.rulesList.render(matrices, mouseX, mouseY, delta);
         super.render(matrices, mouseX, mouseY, delta);
         this.font.drawShadow(matrices, this.title.getVisualOrderText(), this.width / 2.0F - this.font.width(this.title) / 2.0F, 12.0F, -1);
@@ -126,15 +126,15 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
     }
     
     public static class TextRuleEntry extends RuleEntry {
-        private final FormattedCharSequence text;
+        private final IReorderingProcessor text;
         
-        public TextRuleEntry(FilteringRule<?> rule, FormattedCharSequence text) {
+        public TextRuleEntry(FilteringRule<?> rule, IReorderingProcessor text) {
             super(rule);
             this.text = text;
         }
         
         @Override
-        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
+        public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
             Minecraft.getInstance().font.drawShadow(matrices, text, x + 5, y, -1);
         }
         
@@ -144,7 +144,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         }
         
         @Override
-        public List<? extends GuiEventListener> children() {
+        public List<? extends IGuiEventListener> children() {
             return Collections.emptyList();
         }
     }
@@ -158,7 +158,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         }
         
         @Override
-        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
+        public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
         }
         
         @Override
@@ -167,22 +167,22 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         }
         
         @Override
-        public List<? extends GuiEventListener> children() {
+        public List<? extends IGuiEventListener> children() {
             return Collections.emptyList();
         }
     }
     
     public static class TextFieldRuleEntry extends RuleEntry {
-        private final EditBox widget;
+        private final TextFieldWidget widget;
         
-        public TextFieldRuleEntry(int width, FilteringRule<?> rule, Consumer<EditBox> widgetConsumer) {
+        public TextFieldRuleEntry(int width, FilteringRule<?> rule, Consumer<TextFieldWidget> widgetConsumer) {
             super(rule);
-            this.widget = new EditBox(Minecraft.getInstance().font, 0, 0, width, 18, Component.nullToEmpty(""));
+            this.widget = new TextFieldWidget(Minecraft.getInstance().font, 0, 0, width, 18, ITextComponent.nullToEmpty(""));
             widgetConsumer.accept(widget);
         }
         
         @Override
-        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
+        public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
             widget.x = x + 2;
             widget.y = y + 2;
             widget.render(matrices, mouseX, mouseY, delta);
@@ -193,12 +193,12 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
             return 20;
         }
         
-        public EditBox getWidget() {
+        public TextFieldWidget getWidget() {
             return widget;
         }
         
         @Override
-        public List<? extends GuiEventListener> children() {
+        public List<? extends IGuiEventListener> children() {
             return Collections.singletonList(widget);
         }
     }
@@ -207,7 +207,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         private boolean b;
         private final Button widget;
         
-        public BooleanRuleEntry(int width, boolean b, FilteringRule<?> rule, Function<Boolean, Component> textFunction) {
+        public BooleanRuleEntry(int width, boolean b, FilteringRule<?> rule, Function<Boolean, ITextComponent> textFunction) {
             super(rule);
             this.b = b;
             this.widget = new Button(0, 0, 100, 20, textFunction.apply(b), button -> {
@@ -221,7 +221,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         }
         
         @Override
-        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
+        public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
             widget.x = x + 2;
             widget.y = y;
             widget.render(matrices, mouseX, mouseY, delta);
@@ -233,7 +233,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         }
         
         @Override
-        public List<? extends GuiEventListener> children() {
+        public List<? extends IGuiEventListener> children() {
             return Collections.singletonList(widget);
         }
     }

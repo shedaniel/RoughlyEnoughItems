@@ -27,18 +27,16 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.impl.Internals;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.util.ActionResultType;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.function.Supplier;
 
-import static net.minecraft.world.InteractionResult.PASS;
-
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public interface DisplayHelper {
     
     /**
@@ -166,20 +164,20 @@ public interface DisplayHelper {
          * @return whether the item slot can fit
          * @see BaseBoundsHandler#registerExclusionZones(Class, Supplier) for easier api
          */
-        default InteractionResult canItemSlotWidgetFit(int left, int top, T screen, Rectangle fullBounds) {
-            InteractionResult fit = isInZone(left, top);
-            if (fit == InteractionResult.FAIL)
-                return InteractionResult.FAIL;
-            InteractionResult fit2 = isInZone(left + 18, top + 18);
-            if (fit2 == InteractionResult.FAIL)
-                return InteractionResult.FAIL;
-            if (fit == InteractionResult.SUCCESS && fit2 == InteractionResult.SUCCESS)
-                return InteractionResult.SUCCESS;
-            return PASS;
+        default ActionResultType canItemSlotWidgetFit(int left, int top, T screen, Rectangle fullBounds) {
+            ActionResultType fit = isInZone(left, top);
+            if (fit == ActionResultType.FAIL)
+                return ActionResultType.FAIL;
+            ActionResultType fit2 = isInZone(left + 18, top + 18);
+            if (fit2 == ActionResultType.FAIL)
+                return ActionResultType.FAIL;
+            if (fit == ActionResultType.SUCCESS && fit2 == ActionResultType.SUCCESS)
+                return ActionResultType.SUCCESS;
+            return ActionResultType.PASS;
         }
         
         @Override
-        default InteractionResult isInZone(double mouseX, double mouseY) {
+        default ActionResultType isInZone(double mouseX, double mouseY) {
             return OverlayDecider.super.isInZone(mouseX, mouseY);
         }
         

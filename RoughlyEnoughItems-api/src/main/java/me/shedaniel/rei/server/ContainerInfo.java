@@ -23,19 +23,19 @@
 
 package me.shedaniel.rei.server;
 
-import net.minecraft.core.NonNullList;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.Slot;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
 
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public interface ContainerInfo<T extends AbstractContainerMenu> {
-    Class<? extends AbstractContainerMenu> getContainerClass();
+public interface ContainerInfo<T extends Container> {
+    Class<? extends Container> getContainerClass();
     
     default StackAccessor getStack(ContainerContext<T> context, int slotIndex) {
         return new SlotStackAccessor(context.getContainer().getSlot(slotIndex));
@@ -47,7 +47,7 @@ public interface ContainerInfo<T extends AbstractContainerMenu> {
             for (StackAccessor gridStack : getGridStacks(context)) {
                 GridCleanHandler.returnSlotToPlayerInventory(context, gridStack);
             }
-
+            
             clearCraftingSlots(container);
         };
     }
@@ -88,7 +88,7 @@ public interface ContainerInfo<T extends AbstractContainerMenu> {
     }
     
     default List<StackAccessor> getInventoryStacks(ContainerContext<T> context) {
-        Inventory inventory = context.getPlayerEntity().inventory;
+        PlayerInventory inventory = context.getPlayerEntity().inventory;
         return IntStream.range(0, inventory.items.size())
                 .mapToObj(index -> (StackAccessor) new InventoryStackAccessor(inventory, index))
                 .collect(Collectors.toList());
@@ -103,7 +103,7 @@ public interface ContainerInfo<T extends AbstractContainerMenu> {
             defaultedList.add(slot.getItem());
         }
         
-        ((ServerPlayer) context.getPlayerEntity()).refreshContainer(context.getPlayerEntity().containerMenu, defaultedList);
+        ((ServerPlayerEntity) context.getPlayerEntity()).refreshContainer(context.getPlayerEntity().containerMenu, defaultedList);
     }
     
     int getCraftingResultSlotIndex(T container);

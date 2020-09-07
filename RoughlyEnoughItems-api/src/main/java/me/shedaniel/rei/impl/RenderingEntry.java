@@ -24,15 +24,14 @@
 package me.shedaniel.rei.impl;
 
 import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.fractions.Fraction;
-import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.util.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Optional;
 
 @ApiStatus.OverrideOnly
-public abstract class RenderingEntry extends GuiComponent implements EntryStack {
+public abstract class RenderingEntry extends AbstractGui implements EntryStack {
     @Override
     public Optional<ResourceLocation> getIdentifier() {
         return Optional.empty();
@@ -49,17 +48,7 @@ public abstract class RenderingEntry extends GuiComponent implements EntryStack 
     }
     
     @Override
-    public Fraction getAccurateAmount() {
-        return Fraction.empty();
-    }
-    
-    @Override
-    public void setAmount(Fraction amount) {
-        
-    }
-    
-    @Override
-    public void setFloatingAmount(double amount) {
+    public void setAmount(int amount) {
         
     }
     

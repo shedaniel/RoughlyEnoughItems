@@ -26,30 +26,30 @@ package me.shedaniel.rei.plugin.crafting;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.IRecipe;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class DefaultCustomDisplay implements DefaultCraftingDisplay {
     
     private List<List<EntryStack>> input;
     private List<EntryStack> output;
-    private Recipe<?> possibleRecipe;
+    private IRecipe<?> possibleRecipe;
     private int width, height;
     
-    public DefaultCustomDisplay(List<List<ItemStack>> input, List<ItemStack> output, Recipe<?> possibleRecipe) {
+    public DefaultCustomDisplay(List<List<ItemStack>> input, List<ItemStack> output, IRecipe<?> possibleRecipe) {
         this(possibleRecipe, CollectionUtils.map(input, EntryStack::ofItemStacks), EntryStack.ofItemStacks(output));
     }
     
-    public DefaultCustomDisplay(Recipe<?> possibleRecipe, List<List<EntryStack>> input, List<EntryStack> output) {
+    public DefaultCustomDisplay(IRecipe<?> possibleRecipe, List<List<EntryStack>> input, List<EntryStack> output) {
         this.input = input;
         this.output = output;
         this.possibleRecipe = possibleRecipe;
@@ -71,13 +71,13 @@ public class DefaultCustomDisplay implements DefaultCraftingDisplay {
         this(input, output, null);
     }
     
-    protected Optional<Recipe<?>> getRecipe() {
+    protected Optional<IRecipe<?>> getRecipe() {
         return Optional.ofNullable(possibleRecipe);
     }
     
     @Override
     public @NotNull Optional<ResourceLocation> getRecipeLocation() {
-        return getRecipe().map(Recipe::getId);
+        return getRecipe().map(IRecipe::getId);
     }
     
     @Override
@@ -106,7 +106,7 @@ public class DefaultCustomDisplay implements DefaultCraftingDisplay {
     }
     
     @Override
-    public Optional<Recipe<?>> getOptionalRecipe() {
+    public Optional<IRecipe<?>> getOptionalRecipe() {
         return Optional.ofNullable(possibleRecipe);
     }
     

@@ -23,13 +23,13 @@
 
 package me.shedaniel.rei.api.widgets;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.ITextProperties;
+import net.minecraft.util.text.StringTextComponent;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -106,14 +106,14 @@ public abstract class Label extends WidgetWithBounds {
      * @return the consumer before render, null if not set.
      */
     @Nullable
-    public abstract BiConsumer<PoseStack, Label> getOnRender();
+    public abstract BiConsumer<MatrixStack, Label> getOnRender();
     
     /**
      * Sets the consumer before render.
      *
      * @param onRender the consumer before render.
      */
-    public abstract void setOnRender(@Nullable BiConsumer<PoseStack, Label> onRender);
+    public abstract void setOnRender(@Nullable BiConsumer<MatrixStack, Label> onRender);
     
     /**
      * Sets the consumer before render.
@@ -122,7 +122,7 @@ public abstract class Label extends WidgetWithBounds {
      * @return the label itself.
      */
     @NotNull
-    public final Label onRender(@Nullable BiConsumer<PoseStack, Label> onRender) {
+    public final Label onRender(@Nullable BiConsumer<MatrixStack, Label> onRender) {
         setOnRender(onRender);
         return this;
     }
@@ -299,26 +299,26 @@ public abstract class Label extends WidgetWithBounds {
     @NotNull
     @ApiStatus.ScheduledForRemoval
     @Deprecated
-    public Component getText() {
-        return new TextComponent("");
+    public ITextComponent getText() {
+        return new StringTextComponent("");
     }
     
-    public abstract FormattedText getMessage();
+    public abstract ITextProperties getMessage();
     
-    public final void setText(@NotNull Component text) {
+    public final void setText(@NotNull ITextComponent text) {
         setMessage(text);
     }
     
-    public abstract void setMessage(@NotNull FormattedText message);
+    public abstract void setMessage(@NotNull ITextProperties message);
     
     @NotNull
-    public final Label text(@NotNull Component text) {
+    public final Label text(@NotNull ITextComponent text) {
         setText(text);
         return this;
     }
     
     @NotNull
-    public final Label message(@NotNull FormattedText message) {
+    public final Label message(@NotNull ITextProperties message) {
         setMessage(message);
         return this;
     }

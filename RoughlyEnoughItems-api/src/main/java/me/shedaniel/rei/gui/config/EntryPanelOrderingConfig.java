@@ -23,11 +23,11 @@
 
 package me.shedaniel.rei.gui.config;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.client.resources.I18n;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public enum EntryPanelOrderingConfig {
     REGISTRY_ASCENDING(EntryPanelOrdering.REGISTRY, true),
     NAME_ASCENDING(EntryPanelOrdering.NAME, true),

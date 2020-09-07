@@ -26,13 +26,13 @@ package me.shedaniel.rei.impl;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import me.shedaniel.rei.api.EntryStack;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.AbstractGui;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Map;
 
 @ApiStatus.Internal
-public abstract class AbstractEntryStack extends GuiComponent implements EntryStack {
+public abstract class AbstractEntryStack extends AbstractGui implements EntryStack {
     private Reference2ObjectMap<Settings<?>, Object> settings = new Reference2ObjectOpenHashMap<>();
     
     @Override

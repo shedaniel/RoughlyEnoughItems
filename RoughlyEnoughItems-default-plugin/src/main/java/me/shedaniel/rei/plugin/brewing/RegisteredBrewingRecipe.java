@@ -23,16 +23,16 @@
 
 package me.shedaniel.rei.plugin.brewing;
 
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.Ingredient;
 
 public class RegisteredBrewingRecipe {
     
-    public final ItemStack input;
+    public final Ingredient input;
     public final Ingredient ingredient;
     public final ItemStack output;
     
-    public RegisteredBrewingRecipe(ItemStack input, Ingredient ingredient, ItemStack output) {
+    public RegisteredBrewingRecipe(Ingredient input, Ingredient ingredient, ItemStack output) {
         this.input = input;
         this.ingredient = ingredient;
         this.output = output;

@@ -28,18 +28,18 @@ import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.TransferRecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import me.shedaniel.rei.server.ContainerInfo;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.item.crafting.IRecipe;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public interface DefaultCraftingDisplay extends TransferRecipeDisplay {
     
     @Override
@@ -57,10 +57,10 @@ public interface DefaultCraftingDisplay extends TransferRecipeDisplay {
         return 2;
     }
     
-    Optional<Recipe<?>> getOptionalRecipe();
+    Optional<IRecipe<?>> getOptionalRecipe();
     
     @Override
-    default List<List<EntryStack>> getOrganisedInputEntries(ContainerInfo<AbstractContainerMenu> containerInfo, AbstractContainerMenu container) {
+    default List<List<EntryStack>> getOrganisedInputEntries(ContainerInfo<Container> containerInfo, Container container) {
         List<List<EntryStack>> list = Lists.newArrayListWithCapacity(containerInfo.getCraftingWidth(container) * containerInfo.getCraftingHeight(container));
         for (int i = 0; i < containerInfo.getCraftingWidth(container) * containerInfo.getCraftingHeight(container); i++) {
             list.add(Collections.emptyList());

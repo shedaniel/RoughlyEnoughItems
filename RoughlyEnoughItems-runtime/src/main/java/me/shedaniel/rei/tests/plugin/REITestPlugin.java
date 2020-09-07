@@ -26,20 +26,20 @@ package me.shedaniel.rei.tests.plugin;
 import me.shedaniel.rei.api.EntryRegistry;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.core.Registry;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.TestOnly;
 
 import java.util.Random;
 
 @TestOnly
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class REITestPlugin implements REIPluginV0 {
     
     private Random random = new Random();
@@ -71,7 +71,7 @@ public class REITestPlugin implements REIPluginV0 {
     }
     
     public EntryStack transformStack(EntryStack stack) {
-        CompoundTag tag = stack.getItemStack().getOrCreateTag();
+        CompoundNBT tag = stack.getItemStack().getOrCreateTag();
         tag.putInt("Whatever", random.nextInt(Integer.MAX_VALUE));
         return stack;
     }

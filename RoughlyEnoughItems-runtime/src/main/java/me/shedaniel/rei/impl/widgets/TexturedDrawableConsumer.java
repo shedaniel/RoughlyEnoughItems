@@ -23,13 +23,17 @@
 
 package me.shedaniel.rei.impl.widgets;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix4f;
 import me.shedaniel.rei.api.DrawableConsumer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldVertexBufferUploader;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.Matrix4f;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.opengl.GL11;
 
@@ -55,7 +59,7 @@ public final class TexturedDrawableConsumer implements DrawableConsumer {
     }
     
     @Override
-    public void render(@NotNull GuiComponent helper, @NotNull PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(@NotNull AbstractGui helper, @NotNull MatrixStack matrices, int mouseX, int mouseY, float delta) {
         Minecraft.getInstance().getTextureManager().bind(identifier);
         innerBlit(matrices.last().pose(), x, x + width, y, y + height, helper.getBlitOffset(), uWidth, vHeight, u, v, textureWidth, textureHeight);
     }
@@ -65,14 +69,14 @@ public final class TexturedDrawableConsumer implements DrawableConsumer {
     }
     
     protected static void innerBlit(Matrix4f matrix, int xStart, int xEnd, int yStart, int yEnd, int z, float uStart, float uEnd, float vStart, float vEnd) {
-        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-        bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormat.POSITION_TEX);
+        BufferBuilder bufferBuilder = Tessellator.getInstance().getBuilder();
+        bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
         bufferBuilder.vertex(matrix, xStart, yEnd, z).uv(uStart, vEnd).endVertex();
         bufferBuilder.vertex(matrix, xEnd, yEnd, z).uv(uEnd, vEnd).endVertex();
         bufferBuilder.vertex(matrix, xEnd, yStart, z).uv(uEnd, vStart).endVertex();
         bufferBuilder.vertex(matrix, xStart, yStart, z).uv(uStart, vStart).endVertex();
         bufferBuilder.end();
         RenderSystem.enableAlphaTest();
-        BufferUploader.end(bufferBuilder);
+        WorldVertexBufferUploader.end(bufferBuilder);
     }
 }

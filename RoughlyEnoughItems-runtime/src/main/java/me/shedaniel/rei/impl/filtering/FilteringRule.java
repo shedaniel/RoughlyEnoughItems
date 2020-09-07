@@ -27,15 +27,15 @@ import com.mojang.serialization.Lifecycle;
 import me.shedaniel.rei.gui.config.entry.FilteringEntry;
 import me.shedaniel.rei.impl.filtering.rules.ManualFilteringRule;
 import me.shedaniel.rei.impl.filtering.rules.SearchFilteringRule;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.core.MappedRegistry;
-import net.minecraft.core.Registry;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.SimpleRegistry;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -44,32 +44,32 @@ import java.util.function.BiFunction;
 
 @ApiStatus.Internal
 @ApiStatus.Experimental
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public interface FilteringRule<T extends FilteringRule<?>> {
-    ResourceKey<Registry<FilteringRule<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(new ResourceLocation("roughlyenoughitems", "filtering_rule"));
+    RegistryKey<Registry<FilteringRule<?>>> REGISTRY_KEY = RegistryKey.createRegistryKey(new ResourceLocation("roughlyenoughitems", "filtering_rule"));
     Registry<FilteringRule<?>> REGISTRY = createRegistry();
     
     @ApiStatus.Internal
     static Registry<FilteringRule<?>> createRegistry() {
-        MappedRegistry<FilteringRule<?>> registry = new MappedRegistry<>(REGISTRY_KEY, Lifecycle.stable());
+        SimpleRegistry<FilteringRule<?>> registry = new SimpleRegistry<>(REGISTRY_KEY, Lifecycle.stable());
         Registry.register(registry, new ResourceLocation("roughlyenoughitems", "search"), new SearchFilteringRule());
         Registry.register(registry, new ResourceLocation("roughlyenoughitems", "manual"), new ManualFilteringRule());
         return registry;
     }
     
-    static CompoundTag toTag(FilteringRule<?> rule, CompoundTag tag) {
+    static CompoundNBT toTag(FilteringRule<?> rule, CompoundNBT tag) {
         tag.putString("id", REGISTRY.getKey(rule).toString());
-        tag.put("rule", rule.toTag(new CompoundTag()));
+        tag.put("rule", rule.toTag(new CompoundNBT()));
         return tag;
     }
     
-    static FilteringRule<?> fromTag(CompoundTag tag) {
+    static FilteringRule<?> fromTag(CompoundNBT tag) {
         return REGISTRY.get(ResourceLocation.tryParse(tag.getString("id"))).createFromTag(tag.getCompound("rule"));
     }
     
-    CompoundTag toTag(CompoundTag tag);
+    CompoundNBT toTag(CompoundNBT tag);
     
-    T createFromTag(CompoundTag tag);
+    T createFromTag(CompoundNBT tag);
     
     @NotNull
     FilteringResult processFilteredStacks(@NotNull FilteringContext context);
@@ -79,12 +79,12 @@ public interface FilteringRule<T extends FilteringRule<?>> {
         return Optional.empty();
     }
     
-    default Component getTitle() {
-        return Component.nullToEmpty(FilteringRule.REGISTRY.getKey(this).toString());
+    default ITextComponent getTitle() {
+        return ITextComponent.nullToEmpty(FilteringRule.REGISTRY.getKey(this).toString());
     }
     
-    default Component getSubtitle() {
-        return Component.nullToEmpty(null);
+    default ITextComponent getSubtitle() {
+        return ITextComponent.nullToEmpty(null);
     }
     
     T createNew();

@@ -27,17 +27,17 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
-import me.shedaniel.rei.api.fractions.Fraction;
 import me.shedaniel.rei.api.subsets.SubsetsRegistry;
 import me.shedaniel.rei.api.widgets.*;
 import me.shedaniel.rei.gui.widget.Widget;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.material.Fluid;
+import net.minecraft.fluid.Fluid;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.ITextProperties;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -60,7 +60,7 @@ public final class Internals {
     private static Supplier<DisplayHelper> displayHelper = Internals::throwNotSetup;
     private static Supplier<WidgetsProvider> widgetsProvider = Internals::throwNotSetup;
     private static Supplier<ClientHelper.ViewSearchBuilder> viewSearchBuilder = Internals::throwNotSetup;
-    private static BiFunction<@Nullable Point, Collection<Component>, Tooltip> tooltipProvider = (point, texts) -> throwNotSetup();
+    private static BiFunction<@Nullable Point, Collection<ITextComponent>, Tooltip> tooltipProvider = (point, texts) -> throwNotSetup();
     private static Supplier<BuiltinPlugin> builtinPlugin = Internals::throwNotSetup;
     
     private static <T> T throwNotSetup() {
@@ -124,7 +124,7 @@ public final class Internals {
     }
     
     @NotNull
-    public static Tooltip createTooltip(@Nullable Point point, Collection<Component> texts) {
+    public static Tooltip createTooltip(@Nullable Point point, Collection<ITextComponent> texts) {
         return tooltipProvider.apply(point, texts);
     }
     
@@ -157,14 +157,12 @@ public final class Internals {
     public interface EntryStackProvider {
         EntryStack empty();
         
-        EntryStack fluid(Fluid fluid);
-        
-        EntryStack fluid(Fluid fluid, Fraction amount);
+        EntryStack fluid(FluidStack stack);
         
         EntryStack item(ItemStack stack);
     }
     
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public interface WidgetsProvider {
         boolean isRenderingPanel(Panel panel);
         
@@ -172,11 +170,11 @@ public final class Internals {
         
         Slot createSlot(Point point);
         
-        Button createButton(Rectangle bounds, Component text);
+        Button createButton(Rectangle bounds, ITextComponent text);
         
         Panel createPanelWidget(Rectangle bounds);
         
-        Label createLabel(Point point, FormattedText text);
+        Label createLabel(Point point, ITextProperties text);
         
         Arrow createArrow(Rectangle rectangle);
         

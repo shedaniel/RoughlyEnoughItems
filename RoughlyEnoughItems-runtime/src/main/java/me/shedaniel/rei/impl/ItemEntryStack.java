@@ -24,10 +24,9 @@
 package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
 import me.shedaniel.math.Point;
@@ -35,27 +34,26 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.fractions.Fraction;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.utils.FormattingUtils;
 import me.shedaniel.rei.utils.ImmutableLiteralText;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.model.IBakedModel;
+import net.minecraft.client.renderer.model.ItemCameraTransforms;
+import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.core.Registry;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.text.ITextComponent;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -88,18 +86,8 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     }
     
     @Override
-    public Fraction getAccurateAmount() {
-        return Fraction.ofWhole(itemStack.getCount());
-    }
-    
-    @Override
-    public void setAmount(Fraction amount) {
-        itemStack.setCount(amount.intValue());
-    }
-    
-    @Override
-    public void setFloatingAmount(double amount) {
-        itemStack.setCount(Mth.floor(amount));
+    public void setAmount(int amount) {
+        itemStack.setCount(amount);
     }
     
     @Override
@@ -172,12 +160,12 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
         if (itemStack.getItem() != stack.getItem())
             return false;
         ItemStack otherStack = stack.getItemStack();
-        CompoundTag o1 = itemStack.getTag();
-        CompoundTag o2 = otherStack.getTag();
+        CompoundNBT o1 = itemStack.getTag();
+        CompoundNBT o2 = otherStack.getTag();
         return o1 == o2 || ((o1 != null && o2 != null) && equalsTagWithoutCount(o1, o2));
     }
     
-    private boolean equalsTagWithoutCount(CompoundTag o1, CompoundTag o2) {
+    private boolean equalsTagWithoutCount(CompoundNBT o1, CompoundNBT o2) {
         int o1Size = 0;
         int o2Size = 0;
         for (String key : o1.getAllKeys()) {
@@ -199,8 +187,8 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
             for (String key : o1.getAllKeys()) {
                 if (key.equals("Count"))
                     continue;
-                Tag value = o1.get(key);
-                Tag otherValue = o2.get(key);
+                INBT value = o1.get(key);
+                INBT otherValue = o2.get(key);
                 if (!equalsTag(value, otherValue))
                     return false;
             }
@@ -211,21 +199,21 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
         return true;
     }
     
-    private boolean equalsTag(Tag tag, Tag otherTag) {
+    private boolean equalsTag(INBT tag, INBT otherTag) {
         if (tag == null || otherTag == null) {
             return tag == otherTag;
         }
-        if (tag instanceof ListTag && otherTag instanceof ListTag)
-            return equalsList((ListTag) tag, (ListTag) otherTag);
+        if (tag instanceof ListNBT && otherTag instanceof ListNBT)
+            return equalsList((ListNBT) tag, (ListNBT) otherTag);
         return tag.equals(otherTag);
     }
     
-    private boolean equalsList(ListTag listTag, ListTag otherListTag) {
+    private boolean equalsList(ListNBT listTag, ListNBT otherListTag) {
         if (listTag.size() != otherListTag.size())
             return false;
         for (int i = 0; i < listTag.size(); i++) {
-            Tag value = listTag.get(i);
-            Tag otherValue = otherListTag.get(i);
+            INBT value = listTag.get(i);
+            INBT otherValue = otherListTag.get(i);
             if (!equalsTag(value, otherValue))
                 return false;
         }
@@ -280,12 +268,12 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     public Tooltip getTooltip(Point point) {
         if (isEmpty() || !get(Settings.TOOLTIP_ENABLED).get())
             return null;
-        List<Component> toolTip = tryGetItemStackToolTip(true);
+        List<ITextComponent> toolTip = tryGetItemStackToolTip(true);
         toolTip.addAll(get(Settings.TOOLTIP_APPEND_EXTRA).apply(this));
         if (get(Settings.TOOLTIP_APPEND_MOD).get() && ConfigObject.getInstance().shouldAppendModNames()) {
             final String modId = ClientHelper.getInstance().getModFromItem(getItem());
             boolean alreadyHasMod = false;
-            for (Component s : toolTip)
+            for (ITextComponent s : toolTip)
                 if (FormattingUtils.stripFormatting(s.getString()).equalsIgnoreCase(modId)) {
                     alreadyHasMod = true;
                     break;
@@ -297,9 +285,9 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     }
     
     @Override
-    public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
         optimisedRenderStart(matrices, delta);
-        MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
+        IRenderTypeBuffer.Impl immediate = Minecraft.getInstance().renderBuffers().bufferSource();
         optimisedRenderBase(matrices, immediate, bounds, mouseX, mouseY, delta);
         immediate.endBatch();
         optimisedRenderOverlay(matrices, bounds, mouseX, mouseY, delta);
@@ -307,14 +295,14 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     }
     
     @Override
-    public void optimisedRenderStart(PoseStack matrices, float delta) {
+    public void optimisedRenderStart(MatrixStack matrices, float delta) {
         optimisedRenderStart(matrices, delta, true);
     }
     
     @SuppressWarnings("deprecation")
-    public void optimisedRenderStart(PoseStack matrices, float delta, boolean isOptimised) {
-        Minecraft.getInstance().getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
-        Minecraft.getInstance().getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS).setFilter(false, false);
+    public void optimisedRenderStart(MatrixStack matrices, float delta, boolean isOptimised) {
+        Minecraft.getInstance().getTextureManager().bind(AtlasTexture.LOCATION_BLOCKS);
+        Minecraft.getInstance().getTextureManager().getTexture(AtlasTexture.LOCATION_BLOCKS).setFilter(false, false);
         RenderSystem.pushMatrix();
         RenderSystem.enableRescaleNormal();
         RenderSystem.enableAlphaTest();
@@ -325,29 +313,29 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
         if (isOptimised) {
             boolean sideLit = getModelFromStack(itemStack).usesBlockLight();
             if (!sideLit)
-                Lighting.setupForFlatItems();
+                RenderHelper.setupForFlatItems();
         }
     }
     
     @Override
-    public void optimisedRenderEnd(PoseStack matrices, float delta) {
+    public void optimisedRenderEnd(MatrixStack matrices, float delta) {
         optimisedRenderEnd(matrices, delta, true);
     }
     
     @SuppressWarnings("deprecation")
-    public void optimisedRenderEnd(PoseStack matrices, float delta, boolean isOptimised) {
+    public void optimisedRenderEnd(MatrixStack matrices, float delta, boolean isOptimised) {
         RenderSystem.enableDepthTest();
         RenderSystem.disableAlphaTest();
         RenderSystem.disableRescaleNormal();
         if (isOptimised) {
             boolean sideLit = getModelFromStack(itemStack).usesBlockLight();
             if (!sideLit)
-                Lighting.setupFor3DItems();
+                RenderHelper.setupFor3DItems();
         }
         RenderSystem.popMatrix();
     }
     
-    private BakedModel getModelFromStack(ItemStack stack) {
+    private IBakedModel getModelFromStack(ItemStack stack) {
         return Minecraft.getInstance().getItemRenderer().getModel(stack, null, null);
     }
     
@@ -357,21 +345,19 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     }
     
     @Override
-    public void optimisedRenderBase(PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
+    public void optimisedRenderBase(MatrixStack matrices, IRenderTypeBuffer.Impl immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
         if (!isEmpty() && get(Settings.RENDER).get()) {
             ItemStack stack = getItemStack();
-            ((ItemStackHook) (Object) stack).rei_setRenderEnchantmentGlint(get(Settings.Item.RENDER_ENCHANTMENT_GLINT).get());
             matrices.pushPose();
             matrices.translate(bounds.getCenterX(), bounds.getCenterY(), 100.0F + getZ());
             matrices.scale(bounds.getWidth(), (bounds.getWidth() + bounds.getHeight()) / -2f, bounds.getHeight());
-            Minecraft.getInstance().getItemRenderer().render(stack, ItemTransforms.TransformType.GUI, false, matrices, immediate, 15728880, OverlayTexture.NO_OVERLAY, getModelFromStack(stack));
+            Minecraft.getInstance().getItemRenderer().render(stack, ItemCameraTransforms.TransformType.GUI, false, matrices, immediate, 15728880, OverlayTexture.NO_OVERLAY, getModelFromStack(stack));
             matrices.popPose();
-            ((ItemStackHook) (Object) stack).rei_setRenderEnchantmentGlint(false);
         }
     }
     
     @Override
-    public void optimisedRenderOverlay(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+    public void optimisedRenderOverlay(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
         if (!isEmpty() && get(Settings.RENDER).get()) {
             Minecraft.getInstance().getItemRenderer().blitOffset = getZ();
             Minecraft.getInstance().getItemRenderer().renderGuiItemDecorations(Minecraft.getInstance().font, getItemStack(), bounds.x, bounds.y, get(Settings.RENDER_COUNTS).get() ? get(Settings.COUNTS).apply(this) : "");
@@ -382,7 +368,7 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     private static final ReferenceSet<Item> SEARCH_BLACKLISTED = new ReferenceOpenHashSet<>();
     
     @Override
-    public @NotNull Component asFormattedText() {
+    public @NotNull ITextComponent asFormattedText() {
         if (!SEARCH_BLACKLISTED.contains(itemStack.getItem()))
             try {
                 return itemStack.getHoverName();
@@ -398,10 +384,10 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
         return new ImmutableLiteralText("ERROR");
     }
     
-    private List<Component> tryGetItemStackToolTip(boolean careAboutAdvanced) {
+    private List<ITextComponent> tryGetItemStackToolTip(boolean careAboutAdvanced) {
         if (!SEARCH_BLACKLISTED.contains(itemStack.getItem()))
             try {
-                return itemStack.getTooltipLines(Minecraft.getInstance().player, Minecraft.getInstance().options.advancedItemTooltips && careAboutAdvanced ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
+                return itemStack.getTooltipLines(Minecraft.getInstance().player, Minecraft.getInstance().options.advancedItemTooltips && careAboutAdvanced ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL);
             } catch (Throwable e) {
                 e.printStackTrace();
                 SEARCH_BLACKLISTED.add(itemStack.getItem());

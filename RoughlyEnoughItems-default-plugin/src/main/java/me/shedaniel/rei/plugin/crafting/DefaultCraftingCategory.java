@@ -24,7 +24,7 @@
 package me.shedaniel.rei.plugin.crafting;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -37,12 +37,12 @@ import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import me.shedaniel.rei.server.ContainerInfo;
 import me.shedaniel.rei.server.ContainerInfoHandler;
-import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.block.Blocks;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -95,8 +95,8 @@ public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCr
     }
     
     @Override
-    public void renderRedSlots(PoseStack matrices, List<Widget> widgets, Rectangle bounds, DefaultCraftingDisplay display, IntList redSlots) {
-        ContainerInfo<AbstractContainerMenu> info = (ContainerInfo<AbstractContainerMenu>) ContainerInfoHandler.getContainerInfo(getIdentifier(), REIHelper.getInstance().getPreviousContainerScreen().getMenu().getClass());
+    public void renderRedSlots(MatrixStack matrices, List<Widget> widgets, Rectangle bounds, DefaultCraftingDisplay display, IntList redSlots) {
+        ContainerInfo<Container> info = (ContainerInfo<Container>) ContainerInfoHandler.getContainerInfo(getIdentifier(), REIHelper.getInstance().getPreviousContainerScreen().getMenu().getClass());
         if (info == null)
             return;
         matrices.pushPose();
@@ -106,8 +106,8 @@ public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCr
         for (Integer slot : redSlots) {
             int i = slot;
             int x = i % width;
-            int y = Mth.floor(i / (float) width);
-            GuiComponent.fill(matrices, startPoint.x + 1 + x * 18, startPoint.y + 1 + y * 18, startPoint.x + 1 + x * 18 + 16, startPoint.y + 1 + y * 18 + 16, 0x60ff0000);
+            int y = MathHelper.floor(i / (float) width);
+            AbstractGui.fill(matrices, startPoint.x + 1 + x * 18, startPoint.y + 1 + y * 18, startPoint.x + 1 + x * 18 + 16, startPoint.y + 1 + y * 18 + 16, 0x60ff0000);
         }
         matrices.popPose();
     }

@@ -24,24 +24,22 @@
 package me.shedaniel.rei.gui.credits;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import me.shedaniel.rei.gui.credits.CreditsEntryListWidget.TextCreditsItem;
 import me.shedaniel.rei.gui.credits.CreditsEntryListWidget.TranslationCreditsItem;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.ImmutableLiteralText;
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.metadata.CustomValue;
 import net.minecraft.client.gui.chat.NarratorChatListener;
-import net.minecraft.client.gui.components.AbstractButton;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.client.gui.widget.button.AbstractButton;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.util.Tuple;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.fml.ModList;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -54,7 +52,7 @@ public class CreditsScreen extends Screen {
     private CreditsEntryListWidget entryListWidget;
     
     public CreditsScreen(Screen parent) {
-        super(new TextComponent(""));
+        super(new StringTextComponent(""));
         this.parent = parent;
     }
     
@@ -62,7 +60,7 @@ public class CreditsScreen extends Screen {
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (int_1 == 256 && this.shouldCloseOnEsc()) {
             this.minecraft.setScreen(parent);
-            if (parent instanceof AbstractContainerScreen)
+            if (parent instanceof ContainerScreen)
                 ScreenHelper.getLastOverlay().init();
             return true;
         }
@@ -75,22 +73,22 @@ public class CreditsScreen extends Screen {
         entryListWidget.creditsClearEntries();
         List<Tuple<String, String>> translators = Lists.newArrayList();
         Exception[] exception = {null};
-        FabricLoader.getInstance().getModContainer("roughlyenoughitems-runtime").ifPresent(rei -> {
-            try {
-                if (rei.getMetadata().containsCustomValue("rei:translators")) {
-                    CustomValue.CvObject jsonObject = rei.getMetadata().getCustomValue("rei:translators").getAsObject();
-                    jsonObject.forEach(entry -> {
-                        CustomValue value = entry.getValue();
-                        String behind = value.getType() == CustomValue.CvType.ARRAY ? Lists.newArrayList(value.getAsArray().iterator()).stream().map(CustomValue::getAsString).sorted(String::compareToIgnoreCase).collect(Collectors.joining(", ")) : value.getAsString();
-                        translators.add(new Tuple<>(entry.getKey(), behind));
-                    });
-                }
-                translators.sort(Comparator.comparing(Tuple::getA, String::compareToIgnoreCase));
-            } catch (Exception e) {
-                exception[0] = e;
-                e.printStackTrace();
-            }
-        });
+//        FabricLoader.getInstance().getModContainer("roughlyenoughitems-runtime").ifPresent(rei -> {
+//            try {
+//                if (rei.getMetadata().containsCustomValue("rei:translators")) {
+//                    CustomValue.CvObject jsonObject = rei.getMetadata().getCustomValue("rei:translators").getAsObject();
+//                    jsonObject.forEach(entry -> {
+//                        CustomValue value = entry.getValue();
+//                        String behind = value.getType() == CustomValue.CvType.ARRAY ? Lists.newArrayList(value.getAsArray().iterator()).stream().map(CustomValue::getAsString).sorted(String::compareToIgnoreCase).collect(Collectors.joining(", ")) : value.getAsString();
+//                        translators.add(new Tuple<>(entry.getKey(), behind));
+//                    });
+//                }
+//                translators.sort(Comparator.comparing(Tuple::getA, String::compareToIgnoreCase));
+//            } catch (Exception e) {
+//                exception[0] = e;
+//                e.printStackTrace();
+//            }
+//        });
         List<Tuple<String, String>> translatorsMapped = translators.stream().map(pair -> {
             return new Tuple<>(
                     "  " + (I18n.exists("language.roughlyenoughitems." + pair.getA().toLowerCase(Locale.ROOT).replace(' ', '_')) ? I18n.get("language.roughlyenoughitems." + pair.getA().toLowerCase(Locale.ROOT).replace(' ', '_')) : pair.getA()),
@@ -98,7 +96,7 @@ public class CreditsScreen extends Screen {
             );
         }).collect(Collectors.toList());
         int i = width - 80 - 6;
-        for (String line : String.format("§lRoughly Enough Items (v%s)\n§7Originally a fork for Almost Enough Items.\n\n§lLanguage Translation\n%s\n\n§lLicense\n§7Roughly Enough Items is licensed under MIT.", FabricLoader.getInstance().getModContainer("roughlyenoughitems").map(mod -> mod.getMetadata().getVersion().getFriendlyString()).orElse("Unknown"), "%translators%").split("\n"))
+        for (String line : String.format("§lRoughly Enough Items (v%s)\n§7Originally a fork for Almost Enough Items.\n\n§lLanguage Translation\n%s\n\n§lLicense\n§7Roughly Enough Items is licensed under MIT.", ModList.get().getModContainerById("roughlyenoughitems").map(mod -> mod.getModInfo().getVersion().toString()).orElse("Unknown"), "%translators%").split("\n"))
             if (line.equalsIgnoreCase("%translators%")) {
                 if (exception[0] != null) {
                     entryListWidget.creditsAddEntry(new TextCreditsItem(new ImmutableLiteralText("Failed to get translators: " + exception[0].toString())));
@@ -107,16 +105,16 @@ public class CreditsScreen extends Screen {
                 } else {
                     int maxWidth = translatorsMapped.stream().mapToInt(pair -> font.width(pair.getA())).max().orElse(0) + 5;
                     for (Tuple<String, String> pair : translatorsMapped) {
-                        entryListWidget.creditsAddEntry(new TranslationCreditsItem(new TranslatableComponent(pair.getA()), new TranslatableComponent(pair.getB()), i - maxWidth - 10, maxWidth));
+                        entryListWidget.creditsAddEntry(new TranslationCreditsItem(new TranslationTextComponent(pair.getA()), new TranslationTextComponent(pair.getB()), i - maxWidth - 10, maxWidth));
                     }
                 }
             } else entryListWidget.creditsAddEntry(new TextCreditsItem(new ImmutableLiteralText(line)));
         entryListWidget.creditsAddEntry(new TextCreditsItem(NarratorChatListener.NO_TITLE));
-        children.add(buttonDone = new AbstractButton(width / 2 - 100, height - 26, 200, 20, new TranslatableComponent("gui.done")) {
+        children.add(buttonDone = new AbstractButton(width / 2 - 100, height - 26, 200, 20, new TranslationTextComponent("gui.done")) {
             @Override
             public void onPress() {
                 CreditsScreen.this.minecraft.setScreen(parent);
-                if (parent instanceof AbstractContainerScreen)
+                if (parent instanceof ContainerScreen)
                     ScreenHelper.getLastOverlay().init();
             }
         });
@@ -130,7 +128,7 @@ public class CreditsScreen extends Screen {
     }
     
     @Override
-    public void render(PoseStack matrices, int int_1, int int_2, float float_1) {
+    public void render(MatrixStack matrices, int int_1, int int_2, float float_1) {
         this.renderDirtBackground(0);
         this.entryListWidget.render(matrices, int_1, int_2, float_1);
         this.drawCenteredString(matrices, this.font, I18n.get("text.rei.credits"), this.width / 2, 16, 16777215);

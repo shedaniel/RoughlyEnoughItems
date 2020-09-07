@@ -24,13 +24,13 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.gui.config.RecipeBorderType;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -76,7 +76,7 @@ public class PanelWidget extends WidgetWithBounds {
     }
     
     public void render() {
-        render(new PoseStack(), 0, 0, 0);
+        render(new MatrixStack(), 0, 0, 0);
     }
     
     public int getColor() {
@@ -88,7 +88,7 @@ public class PanelWidget extends WidgetWithBounds {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (!isRendering())
             return;
         float alpha = ((color >> 24) & 0xFF) / 255f;

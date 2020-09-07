@@ -24,7 +24,7 @@
 package me.shedaniel.rei.plugin.composting;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
@@ -33,21 +33,21 @@ import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.entries.RecipeEntry;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.ChatFormatting;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.block.Blocks;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class DefaultCompostingCategory implements RecipeCategory<DefaultCompostingDisplay> {
     
     @Override
@@ -68,7 +68,7 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
     @Override
     public @NotNull RecipeEntry getSimpleRenderer(DefaultCompostingDisplay recipe) {
         return new RecipeEntry() {
-            private Component text = new TranslatableComponent("text.rei.composting.page", recipe.getPage() + 1);
+            private ITextComponent text = new TranslationTextComponent("text.rei.composting.page", recipe.getPage() + 1);
             
             @Override
             public int getHeight() {
@@ -76,7 +76,7 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
             }
             
             @Override
-            public void render(PoseStack matrices, Rectangle rectangle, int mouseX, int mouseY, float delta) {
+            public void render(MatrixStack matrices, Rectangle rectangle, int mouseX, int mouseY, float delta) {
                 Minecraft.getInstance().font.draw(matrices, text.getVisualOrderText(), rectangle.x + 5, rectangle.y + 6, -1);
             }
         };
@@ -93,7 +93,7 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
                 EntryStack[] entryStack = {stacks.size() > i ? stacks.get(i) : EntryStack.empty()};
                 if (!entryStack[0].isEmpty()) {
                     display.getInputMap().entrySet().parallelStream().filter(entry -> entry.getKey() != null && Objects.equals(entry.getKey().asItem(), entryStack[0].getItem())).findAny().map(Map.Entry::getValue).ifPresent(chance -> {
-                        entryStack[0] = entryStack[0].setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> Collections.singletonList(new TranslatableComponent("text.rei.composting.chance", Mth.fastFloor(chance * 100)).withStyle(ChatFormatting.YELLOW)));
+                        entryStack[0] = entryStack[0].setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> Collections.singletonList(new TranslationTextComponent("text.rei.composting.chance", MathHelper.fastFloor(chance * 100)).withStyle(TextFormatting.YELLOW)));
                     });
                 }
                 widgets.add(Widgets.createSlot(new Point(bounds.getCenterX() - 72 + x * 18, bounds.y + 3 + y * 18)).entry(entryStack[0]).markInput());

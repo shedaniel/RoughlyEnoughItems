@@ -23,24 +23,25 @@
 
 package me.shedaniel.rei.gui.widget;
 
-import com.mojang.blaze3d.platform.InputConstants;
+import me.shedaniel.clothconfig2.forge.api.PointHelper;
+import net.minecraft.client.util.InputMappings;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.clothconfig2.api.ModifierKeyCode;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import me.shedaniel.clothconfig2.forge.api.ModifierKeyCode;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.math.impl.PointHelper;
+import me.shedaniel.clothconfig2.forge.api.PointHelper;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.widgets.Slot;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -254,7 +255,7 @@ public class EntryWidget extends Slot {
             return EntryStack.empty();
         if (entryStacks.size() == 1)
             return entryStacks.get(0);
-        return entryStacks.get(Mth.floor((System.currentTimeMillis() / 500 % (double) entryStacks.size()) / 1f));
+        return entryStacks.get(MathHelper.floor((System.currentTimeMillis() / 500 % (double) entryStacks.size()) / 1f));
     }
     
     @NotNull
@@ -278,7 +279,7 @@ public class EntryWidget extends Slot {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         drawBackground(matrices, mouseX, mouseY, delta);
         drawCurrentEntry(matrices, mouseX, mouseY, delta);
         
@@ -299,30 +300,30 @@ public class EntryWidget extends Slot {
         return highlight;
     }
     
-    protected void drawBackground(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    protected void drawBackground(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (background) {
             minecraft.getTextureManager().bind(REIHelper.getInstance().isDarkThemeEnabled() ? RECIPE_GUI_DARK : RECIPE_GUI);
             blit(matrices, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
         }
     }
     
-    protected void drawCurrentEntry(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    protected void drawCurrentEntry(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         EntryStack entry = getCurrentEntry();
         entry.setZ(100);
         entry.render(matrices, getInnerBounds(), mouseX, mouseY, delta);
     }
     
-    protected void queueTooltip(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    protected void queueTooltip(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         Tooltip tooltip = getCurrentTooltip(new Point(mouseX, mouseY));
         if (tooltip != null) {
             if (interactableFavorites && ConfigObject.getInstance().doDisplayFavoritesTooltip() && !ConfigObject.getInstance().getFavoriteKeyCode().isUnknown()) {
                 String name = ConfigObject.getInstance().getFavoriteKeyCode().getLocalizedName().getString();
                 if (reverseFavoritesAction())
                     tooltip.getText().addAll(Stream.of(I18n.get("text.rei.remove_favorites_tooltip", name).split("\n"))
-                            .map(TextComponent::new).collect(Collectors.toList()));
+                            .map(StringTextComponent::new).collect(Collectors.toList()));
                 else
                     tooltip.getText().addAll(Stream.of(I18n.get("text.rei.favorites_tooltip", name).split("\n"))
-                            .map(TextComponent::new).collect(Collectors.toList()));
+                            .map(StringTextComponent::new).collect(Collectors.toList()));
             }
             tooltip.queue();
         }
@@ -333,7 +334,7 @@ public class EntryWidget extends Slot {
         return getCurrentEntry().getTooltip(point);
     }
     
-    protected void drawHighlighted(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    protected void drawHighlighted(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         RenderSystem.disableDepthTest();
         RenderSystem.colorMask(true, true, true, false);
         int color = REIHelper.getInstance().isDarkThemeEnabled() ? -1877929711 : -2130706433;
@@ -346,7 +347,7 @@ public class EntryWidget extends Slot {
     }
     
     @Override
-    public List<? extends GuiEventListener> children() {
+    public List<? extends IGuiEventListener> children() {
         return Collections.emptyList();
     }
     
@@ -384,9 +385,9 @@ public class EntryWidget extends Slot {
                     return true;
                 }
             }
-            if ((ConfigObject.getInstance().getRecipeKeybind().getType() != InputConstants.Type.MOUSE && button == 0) || ConfigObject.getInstance().getRecipeKeybind().matchesMouse(button))
+            if ((ConfigObject.getInstance().getRecipeKeybind().getType() != InputMappings.Type.MOUSE && button == 0) || ConfigObject.getInstance().getRecipeKeybind().matchesMouse(button))
                 return ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addRecipesFor(getCurrentEntry()).setOutputNotice(getCurrentEntry()).fillPreferredOpenedCategory());
-            else if ((ConfigObject.getInstance().getUsageKeybind().getType() != InputConstants.Type.MOUSE && button == 1) || ConfigObject.getInstance().getUsageKeybind().matchesMouse(button))
+            else if ((ConfigObject.getInstance().getUsageKeybind().getType() != InputMappings.Type.MOUSE && button == 1) || ConfigObject.getInstance().getUsageKeybind().matchesMouse(button))
                 return ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addUsagesFor(getCurrentEntry()).setInputNotice(getCurrentEntry()).fillPreferredOpenedCategory());
         }
         return false;

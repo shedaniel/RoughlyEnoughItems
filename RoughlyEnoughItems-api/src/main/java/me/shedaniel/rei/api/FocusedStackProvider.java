@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.api;
 
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.util.ActionResult;
 import org.jetbrains.annotations.NotNull;
 
 public interface FocusedStackProvider {
@@ -36,5 +36,5 @@ public interface FocusedStackProvider {
     }
     
     @NotNull
-    InteractionResultHolder<EntryStack> provide(Screen screen);
+    ActionResult<EntryStack> provide(Screen screen);
 }

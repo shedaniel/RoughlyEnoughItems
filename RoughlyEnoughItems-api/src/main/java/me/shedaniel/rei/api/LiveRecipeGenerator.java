@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.api;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ResourceLocation;
 
 import java.util.List;
 import java.util.Optional;

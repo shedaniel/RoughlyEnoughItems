@@ -25,8 +25,8 @@ package me.shedaniel.rei.api.fluid;
 
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.impl.Internals;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,7 +34,7 @@ import org.jetbrains.annotations.NotNull;
  * Experimental library, scheduled to change if needed.
  */
 @ApiStatus.Experimental
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public interface FluidSupportProvider {
     @Deprecated
     @ApiStatus.ScheduledForRemoval

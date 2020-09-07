@@ -25,12 +25,14 @@ package me.shedaniel.rei.gui.widget;
 
 
 import com.google.common.collect.Lists;
+import me.shedaniel.clothconfig2.forge.api.PointHelper;
 import me.shedaniel.math.Point;
-import me.shedaniel.math.api.Executor;
-import me.shedaniel.math.impl.PointHelper;
+import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.widgets.Tooltip;
-import net.fabricmc.api.EnvType;
-import net.minecraft.network.chat.Component;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -45,45 +47,48 @@ import java.util.List;
 public class QueuedTooltip implements Tooltip {
     
     private Point location;
-    private List<Component> text;
+    private List<ITextComponent> text;
     
-    private QueuedTooltip(Point location, Collection<Component> text) {
+    private QueuedTooltip(Point location, Collection<ITextComponent> text) {
         this.location = location;
-        if (this.location == null) {
-            Executor.runIfEnv(EnvType.CLIENT, () -> () -> {
-                this.location = PointHelper.ofMouse();
-            });
+        if (this.location == null && FMLEnvironment.dist == Dist.CLIENT) {
+            applyMouseClient();
         }
         this.text = Lists.newArrayList(text);
     }
     
+    @OnlyIn(Dist.CLIENT)
+    private void applyMouseClient() {
+        this.location = PointHelper.ofMouse();
+    }
+    
     @NotNull
-    public static QueuedTooltip create(Point location, List<Component> text) {
+    public static QueuedTooltip create(Point location, List<ITextComponent> text) {
         return new QueuedTooltip(location, text);
     }
     
     @NotNull
-    public static QueuedTooltip create(Point location, Collection<Component> text) {
+    public static QueuedTooltip create(Point location, Collection<ITextComponent> text) {
         return new QueuedTooltip(location, text);
     }
     
     @NotNull
-    public static QueuedTooltip create(Point location, Component... text) {
+    public static QueuedTooltip create(Point location, ITextComponent... text) {
         return QueuedTooltip.create(location, Arrays.asList(text));
     }
     
     @NotNull
-    public static QueuedTooltip create(List<Component> text) {
+    public static QueuedTooltip create(List<ITextComponent> text) {
         return QueuedTooltip.create(null, text);
     }
     
     @NotNull
-    public static QueuedTooltip create(Collection<Component> text) {
+    public static QueuedTooltip create(Collection<ITextComponent> text) {
         return QueuedTooltip.create(null, text);
     }
     
     @NotNull
-    public static QueuedTooltip create(Component... text) {
+    public static QueuedTooltip create(ITextComponent... text) {
         return QueuedTooltip.create(null, text);
     }
     
@@ -98,12 +103,19 @@ public class QueuedTooltip implements Tooltip {
     }
     
     @Override
-    public List<Component> getText() {
+    public List<ITextComponent> getText() {
         return text;
     }
     
     @Override
     public void queue() {
-        Tooltip.super.queue();
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            queueClient();
+        }
+    }
+    
+    @OnlyIn(Dist.CLIENT)
+    private void queueClient() {
+        REIHelper.getInstance().queueTooltip(this);
     }
 }

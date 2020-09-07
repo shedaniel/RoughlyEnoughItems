@@ -29,18 +29,18 @@ import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.api.TransferRecipeDisplay;
 import me.shedaniel.rei.plugin.cooking.DefaultCookingDisplay;
 import me.shedaniel.rei.plugin.crafting.DefaultCraftingDisplay;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.world.inventory.CraftingMenu;
-import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.inventory.RecipeBookMenu;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.client.gui.recipebook.IRecipeShownListener;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.inventory.container.PlayerContainer;
+import net.minecraft.inventory.container.RecipeBookContainer;
+import net.minecraft.inventory.container.WorkbenchContainer;
+import net.minecraft.item.crafting.IRecipe;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class DefaultRecipeBookHandler implements AutoTransferHandler {
     @NotNull
     @Override
@@ -48,23 +48,23 @@ public class DefaultRecipeBookHandler implements AutoTransferHandler {
         if (context.getRecipe() instanceof TransferRecipeDisplay && ClientHelper.getInstance().canUseMovePackets())
             return Result.createNotApplicable();
         RecipeDisplay display = context.getRecipe();
-        if (!(context.getContainer() instanceof RecipeBookMenu))
+        if (!(context.getContainer() instanceof RecipeBookContainer))
             return Result.createNotApplicable();
-        RecipeBookMenu<?> container = (RecipeBookMenu<?>) context.getContainer();
+        RecipeBookContainer<?> container = (RecipeBookContainer<?>) context.getContainer();
         if (display instanceof DefaultCraftingDisplay) {
             DefaultCraftingDisplay craftingDisplay = (DefaultCraftingDisplay) display;
             if (craftingDisplay.getOptionalRecipe().isPresent()) {
                 int h = -1, w = -1;
-                if (container instanceof CraftingMenu) {
+                if (container instanceof WorkbenchContainer) {
                     h = 3;
                     w = 3;
-                } else if (container instanceof InventoryMenu) {
+                } else if (container instanceof PlayerContainer) {
                     h = 2;
                     w = 2;
                 }
                 if (h == -1 || w == -1)
                     return Result.createNotApplicable();
-                Recipe<?> recipe = (craftingDisplay).getOptionalRecipe().get();
+                IRecipe<?> recipe = (craftingDisplay).getOptionalRecipe().get();
                 if (craftingDisplay.getHeight() > h || craftingDisplay.getWidth() > w)
                     return Result.createFailed(I18n.get("error.rei.transfer.too_small", h, w));
                 if (!context.getMinecraft().player.getRecipeBook().contains(recipe))
@@ -72,22 +72,22 @@ public class DefaultRecipeBookHandler implements AutoTransferHandler {
                 if (!context.isActuallyCrafting())
                     return Result.createSuccessful();
                 context.getMinecraft().setScreen(context.getContainerScreen());
-                if (context.getContainerScreen() instanceof RecipeUpdateListener)
-                    ((RecipeUpdateListener) context.getContainerScreen()).getRecipeBookComponent().ghostRecipe.clear();
+                if (context.getContainerScreen() instanceof IRecipeShownListener)
+                    ((IRecipeShownListener) context.getContainerScreen()).getRecipeBookComponent().ghostRecipe.clear();
                 context.getMinecraft().gameMode.handlePlaceRecipe(container.containerId, recipe, Screen.hasShiftDown());
                 return Result.createSuccessful();
             }
         } else if (display instanceof DefaultCookingDisplay) {
             DefaultCookingDisplay defaultDisplay = (DefaultCookingDisplay) display;
             if (defaultDisplay.getOptionalRecipe().isPresent()) {
-                Recipe<?> recipe = (defaultDisplay).getOptionalRecipe().get();
+                IRecipe<?> recipe = (defaultDisplay).getOptionalRecipe().get();
                 if (!context.getMinecraft().player.getRecipeBook().contains(recipe))
                     return Result.createFailed(I18n.get("error.rei.recipe.not.unlocked"));
                 if (!context.isActuallyCrafting())
                     return Result.createSuccessful();
                 context.getMinecraft().setScreen(context.getContainerScreen());
-                if (context.getContainerScreen() instanceof RecipeUpdateListener)
-                    ((RecipeUpdateListener) context.getContainerScreen()).getRecipeBookComponent().ghostRecipe.clear();
+                if (context.getContainerScreen() instanceof IRecipeShownListener)
+                    ((IRecipeShownListener) context.getContainerScreen()).getRecipeBookComponent().ghostRecipe.clear();
                 context.getMinecraft().gameMode.handlePlaceRecipe(container.containerId, recipe, Screen.hasShiftDown());
                 return Result.createSuccessful();
             }

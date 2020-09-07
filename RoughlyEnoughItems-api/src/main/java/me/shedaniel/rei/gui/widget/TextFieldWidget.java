@@ -23,20 +23,20 @@
 
 package me.shedaniel.rei.gui.widget;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.math.Matrix4f;
+import me.shedaniel.clothconfig2.forge.api.PointHelper;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.REIHelper;
-import net.minecraft.SharedConstants;
-import net.minecraft.Util;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.util.Mth;
-import net.minecraft.world.level.block.entity.TickableBlockEntity;
+import net.minecraft.client.gui.screen.IScreen;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.SharedConstants;
+import net.minecraft.util.Util;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Matrix4f;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -51,7 +51,7 @@ import java.util.function.Predicate;
  * @see net.minecraft.client.gui.widget.TextFieldWidget
  */
 @ApiStatus.Internal
-public class TextFieldWidget extends WidgetWithBounds implements TickableBlockEntity {
+public class TextFieldWidget extends WidgetWithBounds implements IScreen {
     
     public Function<String, String> stripInvalid;
     protected int focusedTicks;
@@ -400,7 +400,7 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableBlockEn
             }
             
             if (this.focused && boolean_1 && int_1 == 0) {
-                int int_2 = Mth.floor(double_1) - this.bounds.x;
+                int int_2 = MathHelper.floor(double_1) - this.bounds.x;
                 if (this.hasBorder) {
                     int_2 -= 4;
                 }
@@ -414,7 +414,7 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableBlockEn
         }
     }
     
-    public void renderBorder(PoseStack matrices) {
+    public void renderBorder(MatrixStack matrices) {
         if (this.hasBorder()) {
             if (containsMouse(PointHelper.ofMouse()) || focused)
                 fill(matrices, this.bounds.x - 1, this.bounds.y - 1, this.bounds.x + this.bounds.width + 1, this.bounds.y + this.bounds.height + 1, REIHelper.getInstance().isDarkThemeEnabled() ? -17587 : -1);
@@ -425,7 +425,7 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableBlockEn
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (this.isVisible()) {
             renderBorder(matrices);
             
@@ -477,11 +477,11 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableBlockEn
         }
     }
     
-    protected void renderSuggestion(PoseStack matrices, int x, int y) {
+    protected void renderSuggestion(MatrixStack matrices, int x, int y) {
         this.font.drawShadow(matrices, this.font.plainSubstrByWidth(this.suggestion, this.getWidth()), x, y, -8355712);
     }
     
-    protected void renderSelection(PoseStack matrices, int x1, int y1, int x2, int y2, int color) {
+    protected void renderSelection(MatrixStack matrices, int x1, int y1, int x2, int y2, int color) {
         int tmp;
         if (x1 < x2) {
             tmp = x1;
@@ -506,7 +506,7 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableBlockEn
         int r = (color >> 16 & 255);
         int g = (color >> 8 & 255);
         int b = (color & 255);
-        Tesselator tessellator = Tesselator.getInstance();
+        Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuilder();
         RenderSystem.disableTexture();
         RenderSystem.enableBlend();
@@ -514,7 +514,7 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableBlockEn
         RenderSystem.blendFuncSeparate(770, 771, 1, 0);
         RenderSystem.shadeModel(7425);
         Matrix4f matrix = matrices.last().pose();
-        buffer.begin(7, DefaultVertexFormat.POSITION_COLOR);
+        buffer.begin(7, DefaultVertexFormats.POSITION_COLOR);
         buffer.vertex(matrix, x1, y2, getBlitOffset() + 50f).color(r, g, b, 120).endVertex();
         buffer.vertex(matrix, x2, y2, getBlitOffset() + 50f).color(r, g, b, 120).endVertex();
         buffer.vertex(matrix, x2, y1, getBlitOffset() + 50f).color(r, g, b, 120).endVertex();
@@ -543,7 +543,7 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableBlockEn
     }
     
     public void setSelectionStart(int int_1) {
-        this.selectionStart = Mth.clamp(int_1, 0, this.text.length());
+        this.selectionStart = MathHelper.clamp(int_1, 0, this.text.length());
     }
     
     public boolean hasBorder() {
@@ -591,7 +591,7 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableBlockEn
     
     public void setSelectionEnd(int i) {
         int j = this.text.length();
-        this.selectionEnd = Mth.clamp(i, 0, j);
+        this.selectionEnd = MathHelper.clamp(i, 0, j);
         if (this.font != null) {
             if (this.firstCharacterIndex > j) {
                 this.firstCharacterIndex = j;
@@ -610,7 +610,7 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableBlockEn
                 this.firstCharacterIndex -= this.firstCharacterIndex - this.selectionEnd;
             }
             
-            this.firstCharacterIndex = Mth.clamp(this.firstCharacterIndex, 0, j);
+            this.firstCharacterIndex = MathHelper.clamp(this.firstCharacterIndex, 0, j);
         }
         
     }

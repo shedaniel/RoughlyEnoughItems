@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.server;
 
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.item.ItemStack;
 
 public interface StackAccessor {
     ItemStack getItemStack();

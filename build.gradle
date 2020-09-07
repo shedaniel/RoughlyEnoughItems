@@ -1,14 +1,24 @@
+buildscript {
+    repositories {
+        maven { url = 'https://files.minecraftforge.net/maven' }
+        maven { url "https://dist.creeper.host/Sponge/maven" }
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+    }
+}
+
 plugins {
-    id("fabric-loom") version("0.5-SNAPSHOT") apply false
     id("maven-publish")
     id("java")
     id("java-library")
     id("net.minecrell.licenser") version("0.4.1")
     id("com.matthewprenger.cursegradle") version("1.4.0")
-    id("net.corda.plugins.jar-filter") version("5.0.8") apply false
+    id("net.corda.plugins.jar-filter") version("4.0.48") apply false
+    id("com.github.johnrengelman.shadow") version("4.0.4") apply false
 }
-
-import net.fabricmc.loom.task.RemapJarTask
 
 import java.text.SimpleDateFormat
 
@@ -16,28 +26,35 @@ archivesBaseName = "RoughlyEnoughItems"
 version = project.mod_version
 group = "me.shedaniel"
 
+sourceSets {
+    main {
+        java {
+            srcDir 'RoughlyEnoughItems-api/src/main/java'
+            srcDir 'RoughlyEnoughItems-default-plugin/src/main/java'
+            srcDir 'RoughlyEnoughItems-runtime/src/main/java'
+        }
+        resources {
+            srcDir 'RoughlyEnoughItems-runtime/src/main/resources'
+        }
+    }
+}
+
 allprojects {
+    apply plugin: 'net.minecraftforge.gradle'
     apply plugin: 'maven-publish'
     apply plugin: 'maven'
-    apply plugin: 'fabric-loom'
     apply plugin: 'net.minecrell.licenser'
     apply plugin: 'net.corda.plugins.jar-filter'
+    apply plugin: 'com.github.johnrengelman.shadow'
 
     sourceCompatibility = targetCompatibility = 1.8
 
-    sourceSets {
-        testmod {
-            compileClasspath += main.compileClasspath
-            runtimeClasspath += main.runtimeClasspath
-        }
-    }
-
-    loom {
-        shareCaches = true
+    configurations {
+        shadow
     }
 
     repositories {
-        maven { url "https://dl.bintray.com/shedaniel/shedaniel-mods" }
+        maven { url "https://dl.bintray.com/shedaniel/autoconfig1u" }
         mavenLocal()
     }
 
@@ -59,32 +76,46 @@ allprojects {
         }
     }
 
+    minecraft {
+        mappings channel: 'official', version: rootProject.minecraft_version
+        accessTransformer = rootProject.file('src/main/resources/META-INF/accesstransformer.cfg')
+
+        runs {
+            client {
+                workingDirectory project.file('run')
+
+                mods {
+                    create(project.name) {
+                        source sourceSets.main
+                    }
+                }
+            }
+
+            server {
+                workingDirectory project.file('run')
+
+                mods {
+                    create(project.name) {
+                        source sourceSets.main
+                    }
+                }
+            }
+        }
+    }
+
     dependencies {
-        minecraft("com.mojang:minecraft:${project.minecraft_version}")
-        mappings(minecraft.officialMojangMappings())
-        modApi("net.fabricmc:fabric-loader:${project.fabricloader_version}")
-        modApi("net.fabricmc.fabric-api:fabric-api:${project.fabric_api}") {
-            exclude(module: "fabric-biomes-v1")
+        minecraft("net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}")
+        compile(fg.deobf("me.shedaniel.cloth:cloth-config-forge:${cloth_config_version}"))
+        runtimeOnly(fg.deobf("me.shedaniel:autoconfig1u-forge:${autoconfig1u}")) {
+            transitive = false
         }
-        modApi("me.shedaniel.cloth.api:cloth-client-events-v0:${cloth_client_events_v0_version}") {
-            transitive(false)
+        compileOnly("me.shedaniel:autoconfig1u-forge:${autoconfig1u}") {
+            transitive = false
         }
-        modApi("me.shedaniel.cloth:config-2:${cloth_config_version}") {
-            exclude(module: "fabric-api")
+        shadow("me.shedaniel:autoconfig1u-forge:${autoconfig1u}") {
+            transitive = false
         }
-        modApi("me.sargunvohra.mcmods:autoconfig1u:${project.autoconfig1u}") {
-            exclude(module: "fabric-api")
-        }
-        modApi("org.jetbrains:annotations:19.0.0")
-        modCompileOnly("io.github.prospector:modmenu:${modmenu_version}") {
-            transitive(false)
-        }
-        modRuntime("io.github.prospector:modmenu:${modmenu_version}") {
-            transitive(false)
-        }
-        modRuntime("me.shedaniel:SmoothScrollingEverywhere:3.0.3-unstable") {
-            transitive(false)
-        }
+        compile("org.jetbrains:annotations:19.0.0")
     }
 
     tasks.withType(JavaCompile) {
@@ -101,18 +132,6 @@ subprojects {
     group = rootProject.group
     version = rootProject.version
 
-    dependencies {
-        testmodCompile sourceSets.main.output
-    }
-
-    task remapMavenJar(type: Copy, dependsOn: remapJar) {
-        afterEvaluate {
-            from("${project.buildDir}/libs/$archivesBaseName-${version}.jar")
-            into("${project.buildDir}/libs/")
-            rename { String fn -> "$archivesBaseName-${version}-maven.jar" }
-        }
-    }
-
     configurations {
         dev
         remapped
@@ -122,18 +141,18 @@ subprojects {
         classifier("dev")
     }
 
-    remapJar {
-        input.set(file("${project.buildDir}/filtered-libs/$archivesBaseName-${version}-dev-filtered.jar"))
-        classifier(null)
-    }
-
-    artifacts {
-        dev file: file("${project.buildDir}/libs/$archivesBaseName-${version}-dev.jar"), type: "jar", builtBy: jar
-        remapped file: file("${project.buildDir}/libs/$archivesBaseName-${version}.jar"), type: "jar", builtBy: remapJar
-    }
+//    remapJar {
+//        input.set(file("${project.buildDir}/filtered-libs/$archivesBaseName-${version}-dev-filtered.jar"))
+//        classifier(null)
+//    }
+//
+//    artifacts {
+//        dev file: file("${project.buildDir}/libs/$archivesBaseName-${version}-dev.jar"), type: "jar", builtBy: jar
+//        remapped file: file("${project.buildDir}/libs/$archivesBaseName-${version}.jar"), type: "jar", builtBy: remapJar
+//    }
 
     task jarFilter(type: net.corda.gradle.jarfilter.JarFilterTask) {
-        jars jar
+        jars build
         annotations {
             forRemove = [
                     "org.jetbrains.annotations.NotNull",
@@ -148,18 +167,18 @@ subprojects {
         }
     }
 
-    remapJar.dependsOn("jarFilter")
+//    remapJar.dependsOn("jarFilter")
 
     publishing {
         publications {
             create("${archivesBaseName}_mavenJava", MavenPublication) {
                 afterEvaluate {
-                    artifact(file("${project.buildDir}/libs/$archivesBaseName-${version}-maven.jar")) {
-                        builtBy remapMavenJar
-                    }
-                    artifact(sourcesJar) {
-                        builtBy remapSourcesJar
-                    }
+//                    artifact(file("${project.buildDir}/libs/$archivesBaseName-${version}-maven.jar")) {
+//                        builtBy remapMavenJar
+//                    }
+//                    artifact(sourcesJar) {
+//                        builtBy remapSourcesJar
+//                    }
                 }
             }
         }
@@ -180,7 +199,7 @@ subprojects {
 
 task licenseFormatAll
 subprojects { licenseFormatAll.dependsOn("${path}:licenseFormat") }
-subprojects { rootProject.remapJar.dependsOn("${path}:remapJar") }
+/*subprojects { rootProject.remapJar.dependsOn("${path}:remapJar") }
 
 task remapMavenJar(type: RemapJarTask, dependsOn: jar) {
     afterEvaluate {
@@ -188,42 +207,14 @@ task remapMavenJar(type: RemapJarTask, dependsOn: jar) {
         archiveName = "${archivesBaseName}-${version}-maven.jar"
         addNestedDependencies.set(false)
     }
-}
-
-sourceSets {
-    testmod
-}
+}*/
 
 dependencies {
     afterEvaluate {
         subprojects.each {
-            compile project(path: ":${it.name}", configuration: "dev")
-            include project(path: ":${it.name}", configuration: "remapped")
-
-            testmodCompile project("${it.name}:").sourceSets.testmod.output
+            compile project(path: ":${it.name}")
+//            include project(path: ":${it.name}", configuration: "remapped")
         }
-
-        def listAdded = new ArrayList(Arrays.asList((api_exculde as String).split(',')))
-        def eachDep = { dep ->
-            for (apiIncludeDepStr in (api_include as String).split(',')) {
-                if (apiIncludeDepStr.isEmpty()) continue
-                def apiIncludeGroup = apiIncludeDepStr.split(':')[0]
-                def apiIncludeDep = apiIncludeDepStr.split(':')[1]
-                if (dep.module.id.group == apiIncludeGroup && dep.module.id.name.startsWith(apiIncludeDep)) {
-                    def version = dep.module.id.version.indexOf('@') >= 0 ? dep.module.id.version.substring(0, dep.module.id.version.indexOf('@')) : dep.module.id.version
-                    def mavenDep = "${dep.module.id.group}:${dep.module.id.name}:$version"
-                    if (!(mavenDep in listAdded)) {
-                        include(mavenDep) {
-                            transitive = false
-                        }
-                        listAdded.add(mavenDep)
-                    }
-                    break
-                }
-            }
-        }
-        rootProject.configurations.compile.resolvedConfiguration.firstLevelModuleDependencies.each eachDep
-        rootProject.configurations.runtimeClasspath.resolvedConfiguration.firstLevelModuleDependencies.each eachDep
     }
 }
 
@@ -269,7 +260,7 @@ curseforge {
             addGameVersion "1.16-Snapshot"
             addGameVersion "1.16.2"
             addGameVersion "Java 8"
-            addGameVersion "Fabric"
+            addGameVersion "Forge"
             relations {
                 requiredDependency "fabric-api"
                 embeddedLibrary "cloth-api"
@@ -277,10 +268,10 @@ curseforge {
                 embeddedLibrary "auto-config-updated-api"
             }
             mainArtifact(file("${project.buildDir}/libs/${project.archivesBaseName}-${project.version}.jar")) {
-                displayName = "[Fabric $project.supported_version] v$project.version"
+                displayName = "[Forge $project.supported_version] v$project.version"
             }
             addArtifact(file("${project.buildDir}/libs/${project.archivesBaseName}-${project.version}-sources.jar")) {
-                displayName = "[Fabric $project.supported_version] v$project.version Sources"
+                displayName = "[Forge $project.supported_version] v$project.version Sources"
             }
             afterEvaluate {
                 uploadTask.dependsOn("build")
@@ -296,12 +287,12 @@ curseforge {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact(file("${project.buildDir}/libs/$archivesBaseName-${version}-maven.jar")) {
-                builtBy remapMavenJar
-            }
-            artifact(sourcesJar) {
-                builtBy remapSourcesJar
-            }
+//            artifact(file("${project.buildDir}/libs/$archivesBaseName-${version}-maven.jar")) {
+//                builtBy remapMavenJar
+//            }
+//            artifact(sourcesJar) {
+//                builtBy remapSourcesJar
+//            }
             pom.withXml {
                 def depsNode = asNode().appendNode("dependencies")
                 subprojects.each {
@@ -310,18 +301,6 @@ publishing {
                     depNode.appendNode("artifactId", it.name)
                     depNode.appendNode("version", it.version)
                     depNode.appendNode("scope", "compile")
-                }
-            }
-        }
-    }
-
-    repositories {
-        if (project.hasProperty('danielshe_pass')) {
-            maven {
-                url = "http://deploy.modmuss50.me/"
-                credentials {
-                    username = "danielshe"
-                    password = project.getProperty('danielshe_pass')
                 }
             }
         }

@@ -26,32 +26,32 @@ package me.shedaniel.rei.plugin;
 import com.google.common.collect.Lists;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
-import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
-import net.minecraft.world.inventory.RecipeBookMenu;
+import net.minecraft.client.gui.recipebook.IRecipeShownListener;
+import net.minecraft.client.gui.recipebook.RecipeBookGui;
+import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.inventory.container.RecipeBookContainer;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class DefaultRecipeBookExclusionZones implements Supplier<List<Rectangle>> {
     
     @Override
     public List<Rectangle> get() {
-        if (!(Minecraft.getInstance().screen instanceof RecipeUpdateListener) || !(REIHelper.getInstance().getPreviousContainerScreen().getMenu() instanceof RecipeBookMenu) ||
-            !Minecraft.getInstance().player.getRecipeBook().isOpen(((RecipeBookMenu<?>) REIHelper.getInstance().getPreviousContainerScreen().getMenu()).getRecipeBookType()))
+        if (!(Minecraft.getInstance().screen instanceof IRecipeShownListener) || !(REIHelper.getInstance().getPreviousContainerScreen().getMenu() instanceof RecipeBookContainer) ||
+            !Minecraft.getInstance().player.getRecipeBook().isOpen(((RecipeBookContainer<?>) REIHelper.getInstance().getPreviousContainerScreen().getMenu()).getRecipeBookType()))
             return Collections.emptyList();
-        RecipeBookComponent recipeBookWidget = ((RecipeUpdateListener) Minecraft.getInstance().screen).getRecipeBookComponent();
-        AbstractContainerScreen<?> containerScreen = REIHelper.getInstance().getPreviousContainerScreen();
-        List<Rectangle> l = Lists.newArrayList(new Rectangle(containerScreen.leftPos - 4 - 145, containerScreen.topPos, 4 + 145 + 30, containerScreen.imageHeight));
+        RecipeBookGui recipeBookWidget = ((IRecipeShownListener) Minecraft.getInstance().screen).getRecipeBookComponent();
+        ContainerScreen<?> containerScreen = REIHelper.getInstance().getPreviousContainerScreen();
+        List<Rectangle> l = Lists.newArrayList(new Rectangle(containerScreen.getGuiLeft() - 4 - 145, containerScreen.getGuiTop(), 4 + 145 + 30, containerScreen.getYSize()));
         int size = recipeBookWidget.tabButtons.size();
         if (size > 0)
-            l.add(new Rectangle(containerScreen.leftPos - 4 - 145 - 30, containerScreen.topPos, 30, size * 27));
+            l.add(new Rectangle(containerScreen.getGuiLeft() - 4 - 145 - 30, containerScreen.getGuiTop(), 30, size * 27));
         return l;
     }
     

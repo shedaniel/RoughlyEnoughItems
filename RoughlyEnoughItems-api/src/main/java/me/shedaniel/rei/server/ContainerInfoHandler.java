@@ -24,25 +24,25 @@
 package me.shedaniel.rei.server;
 
 import com.google.common.collect.Maps;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.util.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Map;
 
 public class ContainerInfoHandler {
-    private static final Map<String, Map<Class<? extends AbstractContainerMenu>, ContainerInfo<? extends AbstractContainerMenu>>> containerInfoMap = Maps.newLinkedHashMap();
+    private static final Map<String, Map<Class<? extends Container>, ContainerInfo<? extends Container>>> containerInfoMap = Maps.newLinkedHashMap();
     
-    public static void registerContainerInfo(ResourceLocation category, ContainerInfo<? extends AbstractContainerMenu> containerInfo) {
+    public static void registerContainerInfo(ResourceLocation category, ContainerInfo<? extends Container> containerInfo) {
         registerScreenWithHandlerInfo(category, containerInfo);
     }
     
     /**
-     * @deprecated Use {@link #registerContainerInfo(Identifier, ContainerInfo)}
+     * @deprecated Use {@link #registerContainerInfo(ResourceLocation, ContainerInfo)}
      */
     @Deprecated
     @ApiStatus.ScheduledForRemoval
-    public static void registerScreenWithHandlerInfo(ResourceLocation category, ContainerInfo<? extends AbstractContainerMenu> containerInfo) {
+    public static void registerScreenWithHandlerInfo(ResourceLocation category, ContainerInfo<? extends Container> containerInfo) {
         if (!containerInfoMap.containsKey(category.toString()))
             containerInfoMap.put(category.toString(), Maps.newLinkedHashMap());
         containerInfoMap.get(category.toString()).put(containerInfo.getContainerClass(), containerInfo);
@@ -52,13 +52,13 @@ public class ContainerInfoHandler {
         return containerInfoMap.containsKey(category.toString()) && !containerInfoMap.get(category.toString()).isEmpty();
     }
     
-    public static ContainerInfo<? extends AbstractContainerMenu> getContainerInfo(ResourceLocation category, Class<?> containerClass) {
+    public static ContainerInfo<? extends Container> getContainerInfo(ResourceLocation category, Class<?> containerClass) {
         if (!isCategoryHandled(category))
             return null;
-        Map<Class<? extends AbstractContainerMenu>, ContainerInfo<? extends AbstractContainerMenu>> infoMap = containerInfoMap.get(category.toString());
+        Map<Class<? extends Container>, ContainerInfo<? extends Container>> infoMap = containerInfoMap.get(category.toString());
         if (infoMap.containsKey(containerClass))
             return infoMap.get(containerClass);
-        for (Map.Entry<Class<? extends AbstractContainerMenu>, ContainerInfo<? extends AbstractContainerMenu>> entry : infoMap.entrySet())
+        for (Map.Entry<Class<? extends Container>, ContainerInfo<? extends Container>> entry : infoMap.entrySet())
             if (entry.getKey().isAssignableFrom(containerClass))
                 return entry.getValue();
         return null;

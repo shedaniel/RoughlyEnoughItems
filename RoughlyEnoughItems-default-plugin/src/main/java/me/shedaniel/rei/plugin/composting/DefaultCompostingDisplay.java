@@ -27,25 +27,25 @@ import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ItemLike;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.IItemProvider;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class DefaultCompostingDisplay implements RecipeDisplay {
     private List<EntryStack> order;
-    private Map<ItemLike, Float> inputMap;
+    private Map<IItemProvider, Float> inputMap;
     private List<EntryStack> output;
     private int page;
     
-    public DefaultCompostingDisplay(int page, List<ItemLike> order, Map<ItemLike, Float> inputMap, ItemStack output) {
+    public DefaultCompostingDisplay(int page, List<IItemProvider> order, Map<IItemProvider, Float> inputMap, ItemStack output) {
         this.page = page;
         this.order = EntryStack.ofItems(order);
         this.inputMap = inputMap;
@@ -61,7 +61,7 @@ public class DefaultCompostingDisplay implements RecipeDisplay {
         return CollectionUtils.map(order, Collections::singletonList);
     }
     
-    public Map<ItemLike, Float> getInputMap() {
+    public Map<IItemProvider, Float> getInputMap() {
         return inputMap;
     }
     

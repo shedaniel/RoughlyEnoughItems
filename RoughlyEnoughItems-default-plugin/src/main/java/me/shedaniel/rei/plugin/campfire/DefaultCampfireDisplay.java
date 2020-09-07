@@ -26,21 +26,20 @@ package me.shedaniel.rei.plugin.campfire;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.core.NonNullList;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.AbstractCookingRecipe;
-import net.minecraft.world.item.crafting.CampfireCookingRecipe;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.CampfireCookingRecipe;
+import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class DefaultCampfireDisplay implements RecipeDisplay {
     
     private List<List<EntryStack>> inputs;
@@ -65,7 +64,7 @@ public class DefaultCampfireDisplay implements RecipeDisplay {
     
     @Override
     public @NotNull Optional<ResourceLocation> getRecipeLocation() {
-        return Optional.ofNullable(display).map(AbstractCookingRecipe::getId);
+        return Optional.ofNullable(display).map(CampfireCookingRecipe::getId);
     }
     
     @Override

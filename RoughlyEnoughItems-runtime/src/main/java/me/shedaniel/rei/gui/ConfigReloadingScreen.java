@@ -23,12 +23,12 @@
 
 package me.shedaniel.rei.gui;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import me.shedaniel.rei.api.RecipeHelper;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.gui.chat.NarratorChatListener;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.resources.I18n;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
@@ -47,7 +47,7 @@ public class ConfigReloadingScreen extends Screen {
     }
     
     @Override
-    public void render(PoseStack matrices, int int_1, int int_2, float float_1) {
+    public void render(MatrixStack matrices, int int_1, int int_2, float float_1) {
         this.renderDirtBackground(0);
         if (!RecipeHelper.getInstance().arePluginsLoading())
             minecraft.setScreen(parent);

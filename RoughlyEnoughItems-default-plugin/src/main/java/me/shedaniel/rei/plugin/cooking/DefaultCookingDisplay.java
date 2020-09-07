@@ -26,31 +26,20 @@ package me.shedaniel.rei.plugin.cooking;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.TransferRecipeDisplay;
 import me.shedaniel.rei.server.ContainerInfo;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.crafting.AbstractCookingRecipe;
-import net.minecraft.world.level.block.entity.FurnaceBlockEntity;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.item.crafting.AbstractCookingRecipe;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public abstract class DefaultCookingDisplay implements TransferRecipeDisplay {
-    private static List<EntryStack> fuel;
-    
-    static {
-        fuel = FurnaceBlockEntity.getFuel().keySet().stream().map(Item::getDefaultInstance).map(EntryStack::create).map(e -> e.setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, stack -> Collections.singletonList(new TranslatableComponent("category.rei.smelting.fuel").withStyle(ChatFormatting.YELLOW)))).collect(Collectors.toList());
-    }
-    
     private AbstractCookingRecipe recipe;
     private List<List<EntryStack>> input;
     private List<EntryStack> output;
@@ -63,10 +52,6 @@ public abstract class DefaultCookingDisplay implements TransferRecipeDisplay {
         this.output = Collections.singletonList(EntryStack.create(recipe.getResultItem()));
         this.xp = recipe.getExperience();
         this.cookTime = recipe.getCookingTime();
-    }
-    
-    public static List<EntryStack> getFuel() {
-        return fuel;
     }
     
     @Override
@@ -113,7 +98,7 @@ public abstract class DefaultCookingDisplay implements TransferRecipeDisplay {
     }
     
     @Override
-    public List<List<EntryStack>> getOrganisedInputEntries(ContainerInfo<AbstractContainerMenu> containerInfo, AbstractContainerMenu container) {
+    public List<List<EntryStack>> getOrganisedInputEntries(ContainerInfo<Container> containerInfo, Container container) {
         return input;
     }
     

@@ -29,8 +29,8 @@ import com.google.common.collect.Sets;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.impl.AmountIgnoredEntryStackWrapper;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.Collection;
 import java.util.List;
@@ -41,7 +41,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class FilteringContextImpl implements FilteringContext {
     public final Map<FilteringContextType, Set<AmountIgnoredEntryStackWrapper>> stacks;
     private final Map<FilteringContextType, Collection<EntryStack>> cachedStacks;

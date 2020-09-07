@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.api;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.gui.widget.Widget;
@@ -33,5 +33,5 @@ import java.util.List;
 
 public interface TransferRecipeCategory<T extends RecipeDisplay> extends RecipeCategory<T> {
     @ApiStatus.OverrideOnly
-    void renderRedSlots(PoseStack matrices, List<Widget> widgets, Rectangle bounds, T display, IntList redSlots);
+    void renderRedSlots(MatrixStack matrices, List<Widget> widgets, Rectangle bounds, T display, IntList redSlots);
 }

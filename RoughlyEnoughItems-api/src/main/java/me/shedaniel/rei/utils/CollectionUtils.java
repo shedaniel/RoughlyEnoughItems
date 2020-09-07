@@ -27,9 +27,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.UnmodifiableIterator;
 import me.shedaniel.rei.api.EntryStack;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.util.Mth;
+import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.*;
 import java.util.function.Function;
@@ -80,7 +80,7 @@ public class CollectionUtils {
         return false;
     }
     
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public static boolean anyMatchEqualsAll(List<EntryStack> list, EntryStack stack) {
         for (EntryStack t : list) {
             if (t.equalsAll(stack))
@@ -89,7 +89,7 @@ public class CollectionUtils {
         return false;
     }
     
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public static boolean anyMatchEqualsEntryIgnoreAmount(List<EntryStack> list, EntryStack stack) {
         for (EntryStack t : list) {
             if (t.equalsIgnoreAmount(stack))
@@ -98,7 +98,7 @@ public class CollectionUtils {
         return false;
     }
     
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public static EntryStack firstOrNullEqualsAll(List<EntryStack> list, EntryStack stack) {
         for (EntryStack t : list) {
             if (t.equalsAll(stack))
@@ -107,7 +107,7 @@ public class CollectionUtils {
         return null;
     }
     
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public static EntryStack findFirstOrNullEqualsEntryIgnoreAmount(Collection<EntryStack> list, EntryStack stack) {
         for (EntryStack t : list) {
             if (t.equalsIgnoreAmount(stack))
@@ -281,7 +281,7 @@ public class CollectionUtils {
     public static <T> Iterable<Iterable<T>> partition(List<T> list, int size) {
         return () -> new UnmodifiableIterator<Iterable<T>>() {
             int i = 0;
-            int partitionSize = Mth.ceil(list.size() / (float) size);
+            int partitionSize = MathHelper.ceil(list.size() / (float) size);
             
             @Override
             public boolean hasNext() {

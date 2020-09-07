@@ -23,19 +23,19 @@
 
 package me.shedaniel.rei.impl.widgets;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.clothconfig2.api.LazyResettable;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import me.shedaniel.clothconfig2.forge.api.LazyResettable;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.widgets.Label;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.locale.Language;
-import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.util.IReorderingProcessor;
+import net.minecraft.util.text.ITextProperties;
+import net.minecraft.util.text.LanguageMap;
+import net.minecraft.util.text.StringTextComponent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -60,11 +60,12 @@ public final class LabelWidget extends Label {
     @NotNull private Point point;
     @Nullable private Function<Label, @Nullable String> tooltip;
     @Nullable private Consumer<Label> onClick;
-    @Nullable private BiConsumer<PoseStack, Label> onRender;
-    @NotNull private FormattedText text;
-    @NotNull private final LazyResettable<FormattedCharSequence> orderedText = new LazyResettable<>(() -> Language.getInstance().getVisualOrder(getMessage()));
+    @Nullable private BiConsumer<MatrixStack, Label> onRender;
+    @NotNull private ITextProperties text;
+    @NotNull
+    private final LazyResettable<IReorderingProcessor> orderedText = new LazyResettable<>(() -> LanguageMap.getInstance().getVisualOrder(getMessage()));
     
-    public LabelWidget(@NotNull Point point, @NotNull FormattedText text) {
+    public LabelWidget(@NotNull Point point, @NotNull ITextProperties text) {
         Objects.requireNonNull(this.point = point);
         Objects.requireNonNull(this.text = text);
     }
@@ -92,12 +93,12 @@ public final class LabelWidget extends Label {
     
     @Nullable
     @Override
-    public final BiConsumer<PoseStack, Label> getOnRender() {
+    public final BiConsumer<MatrixStack, Label> getOnRender() {
         return onRender;
     }
     
     @Override
-    public final void setOnRender(@Nullable BiConsumer<PoseStack, Label> onRender) {
+    public final void setOnRender(@Nullable BiConsumer<MatrixStack, Label> onRender) {
         this.onRender = onRender;
     }
     
@@ -175,12 +176,12 @@ public final class LabelWidget extends Label {
     }
     
     @Override
-    public FormattedText getMessage() {
+    public ITextProperties getMessage() {
         return text;
     }
     
     @Override
-    public void setMessage(@NotNull FormattedText message) {
+    public void setMessage(@NotNull ITextProperties message) {
         this.text = Objects.requireNonNull(message);
         this.orderedText.reset();
     }
@@ -198,7 +199,7 @@ public final class LabelWidget extends Label {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (getOnRender() != null)
             getOnRender().accept(matrices, this);
         int color = getColor();
@@ -231,9 +232,9 @@ public final class LabelWidget extends Label {
             String tooltip = getTooltip();
             if (tooltip != null) {
                 if (!focused && containsMouse(mouseX, mouseY))
-                    Tooltip.create(Stream.of(tooltip.split("\n")).map(TextComponent::new).collect(Collectors.toList())).queue();
+                    Tooltip.create(Stream.of(tooltip.split("\n")).map(StringTextComponent::new).collect(Collectors.toList())).queue();
                 else if (focused)
-                    Tooltip.create(point, Stream.of(tooltip.split("\n")).map(TextComponent::new).collect(Collectors.toList())).queue();
+                    Tooltip.create(point, Stream.of(tooltip.split("\n")).map(StringTextComponent::new).collect(Collectors.toList())).queue();
             }
         }
     }
@@ -274,7 +275,7 @@ public final class LabelWidget extends Label {
     }
     
     @Override
-    public List<? extends GuiEventListener> children() {
+    public List<? extends IGuiEventListener> children() {
         return Collections.emptyList();
     }
 }

@@ -25,13 +25,11 @@ package me.shedaniel.rei;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import me.shedaniel.cloth.api.client.events.v0.ClothClientHooks;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.math.api.Executor;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
-import me.shedaniel.rei.api.fractions.Fraction;
+import me.shedaniel.rei.api.plugins.REIPlugin;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.api.subsets.SubsetsRegistry;
 import me.shedaniel.rei.api.widgets.*;
@@ -43,45 +41,42 @@ import me.shedaniel.rei.impl.*;
 import me.shedaniel.rei.impl.subsets.SubsetsRegistryImpl;
 import me.shedaniel.rei.impl.widgets.*;
 import me.shedaniel.rei.tests.plugin.REITestPlugin;
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.ImageButton;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.gui.screens.inventory.CraftingScreen;
-import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
-import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.client.gui.screens.recipebook.GhostRecipe;
-import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
-import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.inventory.CraftingMenu;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeManager;
-import net.minecraft.world.level.material.Fluid;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.gui.recipebook.GhostRecipe;
+import net.minecraft.client.gui.recipebook.IRecipeShownListener;
+import net.minecraft.client.gui.recipebook.RecipeBookGui;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.client.gui.screen.inventory.CraftingScreen;
+import net.minecraft.client.gui.screen.inventory.CreativeScreen;
+import net.minecraft.client.gui.screen.inventory.InventoryScreen;
+import net.minecraft.client.gui.widget.button.ImageButton;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.inventory.container.Slot;
+import net.minecraft.inventory.container.WorkbenchContainer;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.item.crafting.RecipeManager;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.ITextProperties;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.client.event.RecipesUpdatedEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fluids.FluidStack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
+import org.objectweb.asm.Type;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -91,8 +86,8 @@ import java.util.function.BiFunction;
 import static me.shedaniel.rei.impl.Internals.attachInstance;
 
 @ApiStatus.Internal
-@Environment(EnvType.CLIENT)
-public class RoughlyEnoughItemsCore implements ClientModInitializer {
+@OnlyIn(Dist.CLIENT)
+public class RoughlyEnoughItemsCore {
     
     @ApiStatus.Internal public static final Logger LOGGER = LogManager.getFormatterLogger("REI");
     private static final Map<ResourceLocation, REIPluginEntry> plugins = Maps.newHashMap();
@@ -101,6 +96,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     public static boolean isLeftModePressed = false;
     
     static {
+        new ClientHelperImpl();
         attachInstance(new RecipeHelperImpl(), RecipeHelper.class);
         attachInstance(new EntryRegistryImpl(), EntryRegistry.class);
         attachInstance(new DisplayHelperImpl(), DisplayHelper.class);
@@ -113,13 +109,8 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             }
             
             @Override
-            public EntryStack fluid(Fluid fluid) {
-                return new FluidEntryStack(fluid);
-            }
-            
-            @Override
-            public EntryStack fluid(Fluid fluid, Fraction amount) {
-                return new FluidEntryStack(fluid, amount);
+            public EntryStack fluid(FluidStack stack) {
+                return new FluidEntryStack(stack);
             }
             
             @Override
@@ -144,7 +135,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             }
             
             @Override
-            public Button createButton(Rectangle bounds, Component text) {
+            public Button createButton(Rectangle bounds, ITextComponent text) {
                 return new ButtonWidget(bounds, text);
             }
             
@@ -154,7 +145,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             }
             
             @Override
-            public Label createLabel(Point point, FormattedText text) {
+            public Label createLabel(Point point, ITextProperties text) {
                 return new LabelWidget(point, text);
             }
             
@@ -178,7 +169,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                 return new FillRectangleDrawableConsumer(rectangle, color);
             }
         }, Internals.WidgetsProvider.class);
-        attachInstance((BiFunction<@Nullable Point, Collection<Component>, Tooltip>) QueuedTooltip::create, "tooltipProvider");
+        attachInstance((BiFunction<@Nullable Point, Collection<ITextComponent>, Tooltip>) QueuedTooltip::create, "tooltipProvider");
     }
     
     /**
@@ -223,7 +214,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     }
     
     public static boolean canUsePackets() {
-        return ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET) && ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.CREATE_ITEMS_GRAB_PACKET) && ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.DELETE_ITEMS_PACKET);
+        return NetworkingManager.canServerReceive(RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET) && NetworkingManager.canServerReceive(RoughlyEnoughItemsNetwork.CREATE_ITEMS_GRAB_PACKET) && NetworkingManager.canServerReceive(RoughlyEnoughItemsNetwork.DELETE_ITEMS_PACKET);
     }
     
     @ApiStatus.Internal
@@ -252,111 +243,60 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         return hasPermissionToUsePackets() || Minecraft.getInstance().gameMode.hasInfiniteItems();
     }
     
-    @SuppressWarnings("deprecation")
-    @Override
-    public void onInitializeClient() {
+    public RoughlyEnoughItemsCore() {
+        new ScreenHelper();
         attachInstance(new ConfigManagerImpl(), ConfigManager.class);
         
-        detectFabricLoader();
-        registerClothEvents();
         discoverPluginEntries();
-        for (ModContainer modContainer : FabricLoader.getInstance().getAllMods()) {
-            if (modContainer.getMetadata().containsCustomElement("roughlyenoughitems:plugins"))
-                RoughlyEnoughItemsCore.LOGGER.error("REI plugin from " + modContainer.getMetadata().getId() + " is not loaded because it is too old!");
-        }
+        registerEvents();
         
-        boolean networkingLoaded = FabricLoader.getInstance().isModLoaded("fabric-networking-v0");
-        if (!networkingLoaded) {
-            RoughlyEnoughItemsState.error("Fabric API is not installed!", "https://www.curseforge.com/minecraft/mc-mods/fabric-api/files/all");
-            return;
-        }
-        Executor.run(() -> () -> {
-            ClientSidePacketRegistry.INSTANCE.register(RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, (packetContext, packetByteBuf) -> {
-                ItemStack stack = packetByteBuf.readItem();
-                String player = packetByteBuf.readUtf(32767);
-                packetContext.getPlayer().displayClientMessage(new TextComponent(I18n.get("text.rei.cheat_items").replaceAll("\\{item_name}", EntryStack.create(stack.copy()).asFormattedText().getString()).replaceAll("\\{item_count}", stack.copy().getCount() + "").replaceAll("\\{player_name}", player)), false);
-            });
-            ClientSidePacketRegistry.INSTANCE.register(RoughlyEnoughItemsNetwork.NOT_ENOUGH_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
-                Screen currentScreen = Minecraft.getInstance().screen;
-                if (currentScreen instanceof CraftingScreen) {
-                    RecipeBookComponent recipeBookGui = ((RecipeUpdateListener) currentScreen).getRecipeBookComponent();
-                    GhostRecipe ghostSlots = recipeBookGui.ghostRecipe;
-                    ghostSlots.clear();
-                    
-                    List<List<ItemStack>> input = Lists.newArrayList();
-                    int mapSize = packetByteBuf.readInt();
-                    for (int i = 0; i < mapSize; i++) {
-                        List<ItemStack> list = Lists.newArrayList();
-                        int count = packetByteBuf.readInt();
-                        for (int j = 0; j < count; j++) {
-                            list.add(packetByteBuf.readItem());
-                        }
-                        input.add(list);
-                    }
-                    
-                    ghostSlots.addIngredient(Ingredient.of(Items.STONE), 381203812, 12738291);
-                    CraftingMenu container = ((CraftingScreen) currentScreen).getMenu();
-                    for (int i = 0; i < input.size(); i++) {
-                        List<ItemStack> stacks = input.get(i);
-                        if (!stacks.isEmpty()) {
-                            Slot slot = container.getSlot(i + container.getResultSlotIndex() + 1);
-                            ghostSlots.addIngredient(Ingredient.of(stacks.toArray(new ItemStack[0])), slot.x, slot.y);
-                        }
-                    }
-                }
-            });
+        NetworkingManager.registerS2CHandler(RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, (packetContext, packetByteBuf) -> {
+            ItemStack stack = packetByteBuf.readItem();
+            String player = packetByteBuf.readUtf(32767);
+            Minecraft.getInstance().player.displayClientMessage(new StringTextComponent(I18n.get("text.rei.cheat_items").replaceAll("\\{item_name}", EntryStack.create(stack.copy()).asFormattedText().getString()).replaceAll("\\{item_count}", stack.copy().getCount() + "").replaceAll("\\{player_name}", player)), false);
         });
-    }
-    
-    private void detectFabricLoader() {
-        Executor.run(() -> () -> {
-            try {
-                FabricLoader instance = FabricLoader.getInstance();
-                for (Field field : instance.getClass().getDeclaredFields()) {
-                    if (Logger.class.isAssignableFrom(field.getType())) {
-                        field.setAccessible(true);
-                        Logger logger = (Logger) field.get(instance);
-                        if (logger.getName().toLowerCase(Locale.ROOT).contains("subsystem")) {
-                            File reiConfigFolder = new File(instance.getConfigDirectory(), "roughlyenoughitems");
-                            File ignoreFile = new File(reiConfigFolder, ".ignoresubsystem");
-                            if (!ignoreFile.exists()) {
-                                RoughlyEnoughItemsState.warn("Subsystem is detected (probably though Aristois), please contact support from them if anything happens.");
-                                RoughlyEnoughItemsState.onContinue(() -> {
-                                    try {
-                                        reiConfigFolder.mkdirs();
-                                        ignoreFile.createNewFile();
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                    }
-                                });
-                            }
-                        }
+        NetworkingManager.registerS2CHandler(RoughlyEnoughItemsNetwork.NOT_ENOUGH_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
+            Screen currentScreen = Minecraft.getInstance().screen;
+            if (currentScreen instanceof CraftingScreen) {
+                RecipeBookGui recipeBookGui = ((IRecipeShownListener) currentScreen).getRecipeBookComponent();
+                GhostRecipe ghostSlots = recipeBookGui.ghostRecipe;
+                ghostSlots.clear();
+                
+                List<List<ItemStack>> input = Lists.newArrayList();
+                int mapSize = packetByteBuf.readInt();
+                for (int i = 0; i < mapSize; i++) {
+                    List<ItemStack> list = Lists.newArrayList();
+                    int count = packetByteBuf.readInt();
+                    for (int j = 0; j < count; j++) {
+                        list.add(packetByteBuf.readItem());
+                    }
+                    input.add(list);
+                }
+                
+                ghostSlots.addIngredient(Ingredient.of(Items.STONE), 381203812, 12738291);
+                WorkbenchContainer container = ((CraftingScreen) currentScreen).getMenu();
+                for (int i = 0; i < input.size(); i++) {
+                    List<ItemStack> stacks = input.get(i);
+                    if (!stacks.isEmpty()) {
+                        Slot slot = container.getSlot(i + container.getResultSlotIndex() + 1);
+                        ghostSlots.addIngredient(Ingredient.of(stacks.toArray(new ItemStack[0])), slot.x, slot.y);
                     }
                 }
-            } catch (Throwable ignored) {
             }
         });
     }
     
     private void discoverPluginEntries() {
-        for (REIPluginEntry reiPlugin : FabricLoader.getInstance().getEntrypoints("rei_plugins", REIPluginEntry.class)) {
+        RoughlyEnoughItemsInit.<REIPluginEntry>scanAnnotation(Type.getType(REIPlugin.class), plugin -> {
             try {
-                if (!REIPluginV0.class.isAssignableFrom(reiPlugin.getClass()))
+                if (!REIPluginV0.class.isAssignableFrom(plugin.getClass()))
                     throw new IllegalArgumentException("REI plugin is too old!");
-                registerPlugin(reiPlugin);
+                registerPlugin(plugin);
             } catch (Exception e) {
                 e.printStackTrace();
-                RoughlyEnoughItemsCore.LOGGER.error("Can't load REI plugins from %s: %s", reiPlugin.getClass(), e.getLocalizedMessage());
+                RoughlyEnoughItemsCore.LOGGER.error("Can't load REI plugins from %s: %s", plugin.getClass(), e.getLocalizedMessage());
             }
-        }
-        for (REIPluginV0 reiPlugin : FabricLoader.getInstance().getEntrypoints("rei_plugins_v0", REIPluginV0.class)) {
-            try {
-                registerPlugin(reiPlugin);
-            } catch (Exception e) {
-                e.printStackTrace();
-                RoughlyEnoughItemsCore.LOGGER.error("Can't load REI plugins from %s: %s", reiPlugin.getClass(), e.getLocalizedMessage());
-            }
-        }
+        });
         
         // Test Only
         loadTestPlugins();
@@ -378,110 +318,106 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             for (OverlayDecider decider : DisplayHelper.getInstance().getAllOverlayDeciders()) {
                 if (!decider.isHandingScreen(screen))
                     continue;
-                InteractionResult result = decider.shouldScreenBeOverlayed(screen);
-                if (result != InteractionResult.PASS)
-                    return result == InteractionResult.FAIL || REIHelper.getInstance().getPreviousContainerScreen() == null;
+                ActionResultType result = decider.shouldScreenBeOverlayed(screen);
+                if (result != ActionResultType.PASS)
+                    return result == ActionResultType.FAIL || REIHelper.getInstance().getPreviousContainerScreen() == null;
             }
         } catch (ConcurrentModificationException ignored) {
         }
         return true;
     }
     
-    private void registerClothEvents() {
+    private void registerEvents() {
+        IEventBus bus = MinecraftForge.EVENT_BUS;
         final ResourceLocation recipeButtonTex = new ResourceLocation("textures/gui/recipe_button.png");
         long[] lastSync = {-1};
-        ClothClientHooks.SYNC_RECIPES.register((minecraftClient, recipeManager, synchronizeRecipesS2CPacket) -> syncRecipes(lastSync));
-        ClothClientHooks.SCREEN_ADD_BUTTON.register((minecraftClient, screen, abstractButtonWidget) -> {
-            if (ConfigObject.getInstance().doesDisableRecipeBook() && screen instanceof AbstractContainerScreen && abstractButtonWidget instanceof ImageButton)
-                if (((ImageButton) abstractButtonWidget).resourceLocation.equals(recipeButtonTex))
-                    return InteractionResult.FAIL;
-            return InteractionResult.PASS;
-        });
-        ClothClientHooks.SCREEN_INIT_POST.register((minecraftClient, screen, screenHooks) -> {
+        bus.<RecipesUpdatedEvent>addListener(event -> syncRecipes(lastSync));
+        bus.<GuiScreenEvent.InitGuiEvent.Post>addListener(event -> {
+            Screen screen = event.getGui();
+            if (ConfigObject.getInstance().doesDisableRecipeBook() && screen instanceof ContainerScreen) {
+                for (net.minecraft.client.gui.widget.Widget widget : Lists.newArrayList(event.getWidgetList())) {
+                    if (widget instanceof ImageButton) {
+                        if (((ImageButton) widget).resourceLocation.equals(recipeButtonTex))
+                            event.removeWidget(widget);
+                    }
+                }
+            }
             if (shouldReturn(screen))
                 return;
-            if (screen instanceof InventoryScreen && minecraftClient.gameMode.hasInfiniteItems())
+            if (screen instanceof InventoryScreen && Minecraft.getInstance().gameMode.hasInfiniteItems())
                 return;
-            if (screen instanceof AbstractContainerScreen)
-                ScreenHelper.setPreviousContainerScreen((AbstractContainerScreen<?>) screen);
+            if (screen instanceof ContainerScreen)
+                ScreenHelper.setPreviousContainerScreen((ContainerScreen<?>) screen);
             boolean alreadyAdded = false;
-            for (GuiEventListener element : Lists.newArrayList(screenHooks.cloth$getChildren()))
+            for (IGuiEventListener element : Lists.newArrayList(screen.children()))
                 if (ContainerScreenOverlay.class.isAssignableFrom(element.getClass()))
                     if (alreadyAdded)
-                        screenHooks.cloth$getChildren().remove(element);
+                        screen.children().remove(element);
                     else
                         alreadyAdded = true;
             if (!alreadyAdded)
-                screenHooks.cloth$getChildren().add(ScreenHelper.getLastOverlay(true, false));
+                ((List) screen.children()).add(ScreenHelper.getLastOverlay(true, false));
         });
-        ClothClientHooks.SCREEN_RENDER_POST.register((matrices, minecraftClient, screen, i, i1, v) -> {
-            if (shouldReturn(screen))
+        bus.<GuiScreenEvent.DrawScreenEvent.Post>addListener(event -> {
+            if (shouldReturn(event.getGui()))
                 return;
-            ScreenHelper.getLastOverlay().render(matrices, i, i1, v);
+            ScreenHelper.getLastOverlay().render(event.getMatrixStack(), event.getMouseX(), event.getMouseY(), event.getRenderPartialTicks());
         });
-        ClothClientHooks.SCREEN_MOUSE_DRAGGED.register((minecraftClient, screen, v, v1, i, v2, v3) -> {
-            if (shouldReturn(screen))
-                return InteractionResult.PASS;
-            if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().mouseDragged(v, v1, i, v2, v3))
-                return InteractionResult.SUCCESS;
-            return InteractionResult.PASS;
+        bus.<GuiScreenEvent.MouseDragEvent.Pre>addListener(event -> {
+            if (shouldReturn(event.getGui()))
+                return;
+            if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().mouseDragged(event.getMouseX(), event.getMouseY(), event.getMouseButton(), event.getDragX(), event.getDragY()))
+                event.setCanceled(true);
         });
-        ClothClientHooks.SCREEN_MOUSE_CLICKED.register((minecraftClient, screen, v, v1, i) -> {
+        bus.<GuiScreenEvent.MouseClickedEvent.Pre>addListener(event -> {
             isLeftModePressed = true;
-            if (ScreenHelper.getOptionalOverlay().isPresent())
-                if (screen instanceof CreativeModeInventoryScreen)
-                    if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().mouseClicked(v, v1, i)) {
-                        screen.setFocused(ScreenHelper.getLastOverlay());
-                        if (i == 0)
-                            screen.setDragging(true);
-                        return InteractionResult.SUCCESS;
-                    }
-            return InteractionResult.PASS;
+            if (!(event.getGui() instanceof CreativeScreen))
+                return;
+            if (ScreenHelper.getOptionalOverlay().isPresent() && ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().mouseClicked(event.getMouseX(), event.getMouseY(), event.getButton())) {
+                event.getGui().setFocused(ScreenHelper.getLastOverlay());
+                if (event.getButton() == 0)
+                    event.getGui().setDragging(true);
+                event.setCanceled(true);
+            }
         });
-        ClothClientHooks.SCREEN_MOUSE_RELEASED.register((minecraftClient, screen, v, v1, i) -> {
+        bus.<GuiScreenEvent.MouseReleasedEvent.Pre>addListener(event -> {
             isLeftModePressed = false;
-            if (shouldReturn(screen))
-                return InteractionResult.PASS;
+            if (shouldReturn(event.getGui()))
+                return;
             if (ScreenHelper.getOptionalOverlay().isPresent())
-                if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().mouseReleased(v, v1, i)) {
-                    return InteractionResult.SUCCESS;
-                }
-            return InteractionResult.PASS;
+                if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().mouseReleased(event.getMouseX(), event.getMouseY(), event.getButton()))
+                    event.setCanceled(true);
         });
-        ClothClientHooks.SCREEN_MOUSE_SCROLLED.register((minecraftClient, screen, v, v1, v2) -> {
-            if (shouldReturn(screen))
-                return InteractionResult.PASS;
-            if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().mouseScrolled(v, v1, v2))
-                return InteractionResult.SUCCESS;
-            return InteractionResult.PASS;
+        bus.<GuiScreenEvent.MouseScrollEvent.Pre>addListener(event -> {
+            if (shouldReturn(event.getGui()))
+                return;
+            if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().mouseScrolled(event.getMouseX(), event.getMouseY(), event.getScrollDelta()))
+                event.setCanceled(true);
         });
-        ClothClientHooks.SCREEN_CHAR_TYPED.register((minecraftClient, screen, character, keyCode) -> {
-            if (shouldReturn(screen))
-                return InteractionResult.PASS;
-            if (ScreenHelper.getLastOverlay().charTyped(character, keyCode))
-                return InteractionResult.SUCCESS;
-            return InteractionResult.PASS;
+        bus.<GuiScreenEvent.KeyboardCharTypedEvent.Pre>addListener(event -> {
+            if (shouldReturn(event.getGui()))
+                return;
+            if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().charTyped(event.getCodePoint(), event.getModifiers()))
+                event.setCanceled(true);
         });
-        ClothClientHooks.SCREEN_LATE_RENDER.register((matrices, minecraftClient, screen, i, i1, v) -> {
-            if (shouldReturn(screen))
+        bus.<GuiScreenEvent.DrawScreenEvent.Post>addListener(event -> {
+            if (shouldReturn(event.getGui()))
                 return;
             if (!ScreenHelper.isOverlayVisible())
                 return;
-            ScreenHelper.getLastOverlay().lateRender(matrices, i, i1, v);
+            ScreenHelper.getLastOverlay().lateRender(event.getMatrixStack(), event.getMouseX(), event.getMouseY(), event.getRenderPartialTicks());
         });
-        ClothClientHooks.SCREEN_KEY_PRESSED.register((minecraftClient, screen, i, i1, i2) -> {
-            if (shouldReturn(screen))
-                return InteractionResult.PASS;
-            if (screen instanceof AbstractContainerScreen && ConfigObject.getInstance().doesDisableRecipeBook() && ConfigObject.getInstance().doesFixTabCloseContainer())
-                if (i == 258 && minecraftClient.options.keyInventory.matches(i, i1)) {
-                    minecraftClient.player.closeContainer();
-                    return InteractionResult.SUCCESS;
+        bus.<GuiScreenEvent.KeyboardKeyPressedEvent.Pre>addListener(event -> {
+            if (shouldReturn(event.getGui()))
+                return;
+            if (event.getGui() instanceof ContainerScreen && ConfigObject.getInstance().doesDisableRecipeBook() && ConfigObject.getInstance().doesFixTabCloseContainer())
+                if (event.getKeyCode() == 258 && Minecraft.getInstance().options.keyInventory.matches(event.getKeyCode(), event.getScanCode())) {
+                    Minecraft.getInstance().player.closeContainer();
+                    event.setCanceled(true);
+                    return;
                 }
-            if (screen.getFocused() != null && screen.getFocused() instanceof EditBox || (screen.getFocused() instanceof RecipeBookComponent && ((RecipeBookComponent) screen.getFocused()).searchBox != null && ((RecipeBookComponent) screen.getFocused()).searchBox.isFocused()))
-                return InteractionResult.PASS;
-            if (ScreenHelper.getLastOverlay().keyPressed(i, i1, i2))
-                return InteractionResult.SUCCESS;
-            return InteractionResult.PASS;
+            if (ScreenHelper.getLastOverlay().keyPressed(event.getKeyCode(), event.getScanCode(), event.getModifiers()))
+                event.setCanceled(true);
         });
     }
     

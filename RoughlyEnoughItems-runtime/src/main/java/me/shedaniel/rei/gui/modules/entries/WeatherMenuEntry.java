@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.gui.modules.entries;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.widgets.Tooltip;
@@ -31,11 +31,11 @@ import me.shedaniel.rei.gui.modules.MenuEntry;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.Weather;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.sounds.SoundEvents;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.client.audio.SimpleSound;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.util.SoundEvents;
 
 import java.util.Collections;
 import java.util.List;
@@ -71,7 +71,7 @@ public class WeatherMenuEntry extends MenuEntry {
     }
     
     @Override
-    public List<? extends GuiEventListener> children() {
+    public List<? extends IGuiEventListener> children() {
         return Collections.emptyList();
     }
     
@@ -86,12 +86,12 @@ public class WeatherMenuEntry extends MenuEntry {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (selected) {
             fill(matrices, x, y, x + width, y + 12, -12237499);
         }
         if (selected && containsMouse) {
-            REIHelper.getInstance().queueTooltip(Tooltip.create(new TranslatableComponent("text.rei.weather_button.tooltip.entry", text)));
+            REIHelper.getInstance().queueTooltip(Tooltip.create(new TranslationTextComponent("text.rei.weather_button.tooltip.entry", text)));
         }
         font.draw(matrices, text, x + 2, y + 2, selected ? 16777215 : 8947848);
     }
@@ -100,7 +100,7 @@ public class WeatherMenuEntry extends MenuEntry {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (rendering && mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + 12) {
             Minecraft.getInstance().player.chat(ConfigObject.getInstance().getWeatherCommand().replaceAll("\\{weather}", weather.name().toLowerCase(Locale.ROOT)));
-            minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            minecraft.getSoundManager().play(SimpleSound.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             ScreenHelper.getLastOverlay().removeWeatherMenu();
             return true;
         }

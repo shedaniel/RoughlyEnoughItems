@@ -23,15 +23,15 @@
 
 package me.shedaniel.rei.plugin.stripping;
 
-import net.minecraft.world.item.AxeItem;
-import net.minecraft.world.item.Tier;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.block.Block;
+import net.minecraft.item.AxeItem;
+import net.minecraft.item.IItemTier;
 
 import java.util.Map;
 
 public class DummyAxeItem extends AxeItem {
-    protected DummyAxeItem(Tier toolMaterial_1, float float_1, float float_2, Properties item$Settings_1) {
-        super(toolMaterial_1, float_1, float_2, item$Settings_1);
+    public DummyAxeItem(IItemTier p_i48530_1_, float p_i48530_2_, float p_i48530_3_, Properties p_i48530_4_) {
+        super(p_i48530_1_, p_i48530_2_, p_i48530_3_, p_i48530_4_);
     }
     
     public static Map<Block, Block> getStrippedBlocksMap() {

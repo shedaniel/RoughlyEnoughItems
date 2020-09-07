@@ -24,8 +24,8 @@
 package me.shedaniel.rei.gui.modules.entries;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.clothconfig2.api.ScissorsHandler;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import me.shedaniel.clothconfig2.forge.api.ScissorsHandler;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.*;
@@ -37,11 +37,11 @@ import me.shedaniel.rei.gui.widget.TabWidget;
 import me.shedaniel.rei.impl.EntryRegistryImpl;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.Mth;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.audio.SimpleSound;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.SoundEvents;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.Tuple;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -110,11 +110,11 @@ public class SubSubsetsMenuEntry extends MenuEntry {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         double filteredRatio = getFilteredRatio();
         if (filteredRatio > 0) {
             filteredRatio = filteredRatio * 0.85 + 0.15;
-            fill(matrices, x, y, x + width, y + 12, (16711680 | Mth.ceil(filteredRatio * 255.0) << 24) + (selected ? 39321 : 0));
+            fill(matrices, x, y, x + width, y + 12, (16711680 | MathHelper.ceil(filteredRatio * 255.0) << 24) + (selected ? 39321 : 0));
         } else if (selected) {
             fill(matrices, x, y, x + width, y + 12, -12237499);
         }
@@ -132,7 +132,7 @@ public class SubSubsetsMenuEntry extends MenuEntry {
             } else clickedBefore = false;
             if (clickedBefore) {
                 if (rendering && mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + 12 && !entries.isEmpty()) {
-                    REIHelper.getInstance().queueTooltip(Tooltip.create(new TextComponent("Click again to filter everything in this group.")));
+                    REIHelper.getInstance().queueTooltip(Tooltip.create(new StringTextComponent("Click again to filter everything in this group.")));
                 } else clickedBefore = false;
             }
         } else clickedBefore = false;
@@ -158,7 +158,7 @@ public class SubSubsetsMenuEntry extends MenuEntry {
             } else {
                 clickedBefore = true;
             }
-            minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            minecraft.getSoundManager().play(SimpleSound.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             return true;
         }
         return super.mouseClicked(mouseX, mouseY, button);
@@ -224,7 +224,7 @@ public class SubSubsetsMenuEntry extends MenuEntry {
     }
     
     @Override
-    public List<? extends GuiEventListener> children() {
+    public List<? extends IGuiEventListener> children() {
         if (subsetsMenu != null && !subsetsMenu.children().isEmpty() && selected) {
             return Collections.singletonList(subsetsMenu);
         }

@@ -23,15 +23,15 @@
 
 package me.shedaniel.rei.api;
 
-import me.shedaniel.clothconfig2.api.ModifierKeyCode;
+import me.shedaniel.clothconfig2.forge.api.ModifierKeyCode;
 import me.shedaniel.rei.gui.config.*;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 
-@Environment(EnvType.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public interface ConfigObject {
     
     /**
@@ -58,8 +58,6 @@ public interface ConfigObject {
     boolean isGrabbingItems();
     
     boolean isToastDisplayedOnCopyIdentifier();
-    
-    boolean doesRenderEntryEnchantmentGlint();
     
     boolean isEntryListWidgetScrolled();
     
