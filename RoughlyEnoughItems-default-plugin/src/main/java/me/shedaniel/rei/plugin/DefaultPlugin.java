@@ -89,15 +89,14 @@ import net.minecraft.potion.PotionUtils;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ITag;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.tileentity.FurnaceTileEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.IItemProvider;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.brewing.BrewingRecipe;
 import net.minecraftforge.common.brewing.BrewingRecipeRegistry;
 import net.minecraftforge.common.brewing.IBrewingRecipe;
@@ -105,6 +104,7 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IRegistryDelegate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -178,7 +178,7 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
     
     @Override
     public void registerEntries(EntryRegistry entryRegistry) {
-        for (Item item : Registry.ITEM) {
+        for (Item item : ForgeRegistries.ITEMS) {
             List<ItemStack> stacks = null;
             try {
                 stacks = entryRegistry.appendStacksForItem(item);
@@ -193,7 +193,7 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
         }
         EntryStack stack = EntryStack.create(Items.ENCHANTED_BOOK);
         List<EntryStack> enchantments = new ArrayList<>();
-        for (Enchantment enchantment : Registry.ENCHANTMENT) {
+        for (Enchantment enchantment : ForgeRegistries.ENCHANTMENTS) {
             for (int i = enchantment.getMinLevel(); i <= enchantment.getMaxLevel(); i++) {
                 Map<Enchantment, Integer> map = new HashMap<>();
                 map.put(enchantment, i);
@@ -203,7 +203,7 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
             }
         }
         entryRegistry.registerEntriesAfter(stack, enchantments);
-        for (Fluid fluid : Registry.FLUID) {
+        for (Fluid fluid : ForgeRegistries.FLUIDS) {
             if (!fluid.defaultFluidState().isEmpty() && fluid.defaultFluidState().isSource())
                 entryRegistry.registerEntry(EntryStack.create(new FluidStack(fluid, 1000)));
         }
@@ -240,10 +240,14 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
         recipeHelper.registerRecipes(CAMPFIRE, CampfireCookingRecipe.class, DefaultCampfireDisplay::new);
         recipeHelper.registerRecipes(STONE_CUTTING, StonecuttingRecipe.class, DefaultStoneCuttingDisplay::new);
         recipeHelper.registerRecipes(SMITHING, SmithingRecipe.class, DefaultSmithingDisplay::new);
-        // switch to ForgeHooks#getBurnTime
-        for (Map.Entry<Item, Integer> entry : FurnaceTileEntity.getFuel().entrySet()) {
-            recipeHelper.registerDisplay(new DefaultFuelDisplay(EntryStack.create(entry.getKey()), entry.getValue()));
-        }
+        EntryRegistry.getInstance().getEntryStacks()
+                .filter(stack -> stack.getType() == EntryStack.Type.ITEM)
+                .forEach(stack -> {
+                    int burnTime = ForgeHooks.getBurnTime(stack.getItemStack());
+                    if (burnTime > 0) {
+                        recipeHelper.registerDisplay(new DefaultFuelDisplay(stack, burnTime));
+                    }
+                });
         List<EntryStack> arrowStack = Collections.singletonList(EntryStack.create(Items.ARROW));
         EntryRegistry.getInstance().getEntryStacks().filter(entry -> entry.getItem() == Items.LINGERING_POTION).forEach(entry -> {
             List<List<EntryStack>> input = new ArrayList<>();
@@ -274,13 +278,13 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
                     thisStacks.add(stacks.get(j));
             recipeHelper.registerDisplay(new DefaultCompostingDisplay(MathHelper.floor(i / 48f), thisStacks, map, new ItemStack(Items.BONE_MEAL)));
         }
-        DummyAxeItem.getStrippedBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getKey(b.getKey()))).forEach(set -> {
+        DummyAxeItem.getStrippedBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> ForgeRegistries.BLOCKS.getKey(b.getKey()))).forEach(set -> {
             recipeHelper.registerDisplay(new DefaultStrippingDisplay(EntryStack.create(set.getKey()), EntryStack.create(set.getValue())));
         });
-        DummyHoeItem.getTilledBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getKey(b.getKey()))).forEach(set -> {
+        DummyHoeItem.getTilledBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> ForgeRegistries.BLOCKS.getKey(b.getKey()))).forEach(set -> {
             recipeHelper.registerDisplay(new DefaultTillingDisplay(EntryStack.create(set.getKey()), EntryStack.create(set.getValue().getBlock())));
         });
-        DummyShovelItem.getPathBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getKey(b.getKey()))).forEach(set -> {
+        DummyShovelItem.getPathBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> ForgeRegistries.BLOCKS.getKey(b.getKey()))).forEach(set -> {
             recipeHelper.registerDisplay(new DefaultPathingDisplay(EntryStack.create(set.getKey()), EntryStack.create(set.getValue().getBlock())));
         });
         recipeHelper.registerDisplay(new DefaultBeaconBaseDisplay(CollectionUtils.map(Lists.newArrayList(BlockTags.BEACON_BASE_BLOCKS.getValues()), ItemStack::new)));

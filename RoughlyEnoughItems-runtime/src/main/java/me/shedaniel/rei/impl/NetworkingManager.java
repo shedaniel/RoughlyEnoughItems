@@ -79,7 +79,6 @@ public class NetworkingManager {
             if (context.getPacketHandled()) return;
             PacketBuffer buffer = new PacketBuffer(event.getPayload().copy());
             ResourceLocation type = buffer.readResourceLocation();
-            System.out.println(type);
             BiConsumer<NetworkEvent.Context, PacketBuffer> consumer = map.get(type);
             
             if (consumer != null) {
