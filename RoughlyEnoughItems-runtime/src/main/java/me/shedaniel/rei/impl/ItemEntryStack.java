@@ -63,6 +63,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @ApiStatus.Internal
 public class ItemEntryStack extends AbstractEntryStack implements OptimalEntryStack {
@@ -128,29 +129,28 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
      * 2: ignore amount
      * 3: all
      */
-    private Boolean compareIfFluid(EntryStack stack, int type) {
-        EntryStack fluid = EntryStack.copyItemToFluid(this);
-        if (fluid.isEmpty()) return null;
+    private boolean compareIfFluid(EntryStack stack, int type) {
+        Stream<EntryStack> fluids = EntryStack.copyItemToFluids(this);
+        Stream<EntryStack> stacks = Stream.empty();
         if (stack.getType() == Type.ITEM)
-            stack = EntryStack.copyItemToFluid(stack);
-        if (stack.isEmpty()) return null;
+            stacks = EntryStack.copyItemToFluids(stack);
         switch (type) {
             case 0:
-                return fluid.equalsIgnoreTagsAndAmount(stack);
+                return stacks.anyMatch(entryStack -> fluids.anyMatch(entryStack::equalsIgnoreTagsAndAmount));
             case 1:
-                return fluid.equalsIgnoreTags(stack);
+                return stacks.anyMatch(entryStack -> fluids.anyMatch(entryStack::equalsIgnoreTags));
             case 2:
-                return fluid.equalsIgnoreAmount(stack);
+                return stacks.anyMatch(entryStack -> fluids.anyMatch(entryStack::equalsIgnoreAmount));
             case 3:
-                return fluid.equalsAll(stack);
+                return stacks.anyMatch(entryStack -> fluids.anyMatch(entryStack::equalsAll));
         }
-        return null;
+        
+        return false;
     }
     
     @Override
     public boolean equalsIgnoreTagsAndAmount(EntryStack stack) {
-        Boolean ifFluid = compareIfFluid(stack, 0);
-        if (ifFluid != null) return ifFluid;
+        if (compareIfFluid(stack, 0)) return true;
         if (stack.getType() != Type.ITEM)
             return false;
         return itemStack.getItem() == stack.getItem();
@@ -165,8 +165,7 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     
     @Override
     public boolean equalsIgnoreAmount(EntryStack stack) {
-        Boolean ifFluid = compareIfFluid(stack, 2);
-        if (ifFluid != null) return ifFluid;
+        if (compareIfFluid(stack, 2)) return true;
         if (stack.getType() != Type.ITEM)
             return false;
         if (itemStack.getItem() != stack.getItem())
@@ -234,8 +233,7 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     
     @Override
     public boolean equalsIgnoreTags(EntryStack stack) {
-        Boolean ifFluid = compareIfFluid(stack, 1);
-        if (ifFluid != null) return ifFluid;
+        if (compareIfFluid(stack, 1)) return true;
         if (stack.getType() != Type.ITEM)
             return false;
         if (itemStack.getItem() != stack.getItem())
