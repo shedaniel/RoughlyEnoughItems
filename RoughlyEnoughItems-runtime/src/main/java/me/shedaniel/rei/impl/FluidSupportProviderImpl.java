@@ -26,35 +26,46 @@ package me.shedaniel.rei.impl;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 @ApiStatus.Experimental
 @ApiStatus.Internal
 public class FluidSupportProviderImpl implements FluidSupportProvider {
-    private final List<FluidProvider> providers = Lists.newCopyOnWriteArrayList();
+    private final List<Provider> providers = Lists.newCopyOnWriteArrayList();
     
     public void reset() {
         providers.clear();
     }
     
     @Override
-    public void registerFluidProvider(@NotNull FluidProvider provider) {
+    public void registerProvider(@NotNull Provider provider) {
         providers.add(Objects.requireNonNull(provider, "Registered provider is null!"));
     }
     
     @Override
-    public @NotNull EntryStack itemToFluid(@NotNull EntryStack itemStack) {
-        if (itemStack.isEmpty()) return EntryStack.empty();
+    public @NotNull Stream<EntryStack> itemToFluids(@NotNull EntryStack itemStack) {
+        if (itemStack.isEmpty()) return Stream.empty();
         if (itemStack.getType() != EntryStack.Type.ITEM)
             throw new IllegalArgumentException("EntryStack must be item!");
-        for (FluidProvider provider : providers) {
-            EntryStack stack = Objects.requireNonNull(provider.itemToFluid(itemStack));
-            if (!stack.isEmpty()) return stack;
+        for (Provider provider : providers) {
+            InteractionResultHolder<@Nullable Stream<@NotNull EntryStack>> resultHolder = Objects.requireNonNull(provider.itemToFluid(itemStack));
+            Stream<@NotNull EntryStack> stream = resultHolder.getObject();
+            if (stream != null) {
+                if (resultHolder.getResult().consumesAction()) {
+                    return stream;
+                } else if (resultHolder.getResult() == InteractionResult.FAIL) {
+                    return Stream.empty();
+                }
+            }
         }
-        return EntryStack.empty();
+        return Stream.empty();
     }
 }

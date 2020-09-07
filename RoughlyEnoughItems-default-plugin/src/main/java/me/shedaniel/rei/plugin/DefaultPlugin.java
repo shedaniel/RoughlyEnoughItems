@@ -81,6 +81,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.util.LazyLoadedValue;
 import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.crafting.*;
@@ -93,10 +94,10 @@ import net.minecraft.world.level.material.Fluid;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
 
 import static me.shedaniel.rei.impl.Internals.attachInstance;
 
@@ -370,14 +371,11 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
         recipeHelper.registerScreenClickArea(new Rectangle(78, 32, 28, 23), FurnaceScreen.class, SMELTING);
         recipeHelper.registerScreenClickArea(new Rectangle(78, 32, 28, 23), SmokerScreen.class, SMOKING);
         recipeHelper.registerScreenClickArea(new Rectangle(78, 32, 28, 23), BlastFurnaceScreen.class, BLASTING);
-        FluidSupportProvider.getInstance().registerFluidProvider(new FluidSupportProvider.FluidProvider() {
-            @Override
-            public @NotNull EntryStack itemToFluid(@NotNull EntryStack itemStack) {
-                Item item = itemStack.getItem();
-                if (item instanceof BucketItem)
-                    return EntryStack.create(((BucketItem) item).content, 1000);
-                return EntryStack.empty();
-            }
+        FluidSupportProvider.getInstance().registerProvider(itemStack -> {
+            Item item = itemStack.getItem();
+            if (item instanceof BucketItem)
+                return InteractionResultHolder.success(Stream.of(EntryStack.create(((BucketItem) item).content, 1000)));
+            return InteractionResultHolder.pass(null);
         });
 //        SubsetsRegistry subsetsRegistry = SubsetsRegistry.INSTANCE;
 //        subsetsRegistry.registerPathEntry("roughlyenoughitems:food", EntryStack.create(Items.MILK_BUCKET));
