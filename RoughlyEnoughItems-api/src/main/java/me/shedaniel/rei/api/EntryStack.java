@@ -133,10 +133,13 @@ public interface EntryStack extends TextRepresentable {
             if (ingredient.isEmpty()) return Collections.emptyList();
             return Collections.singletonList(ofIngredient(ingredient));
         }
+        boolean emptyFlag = true;
         List<List<EntryStack>> result = new ArrayList<>(ingredients.size());
-        for (Ingredient ingredient : ingredients) {
-            if (!ingredient.isEmpty())
-                result.add(ofIngredient(ingredient));
+        for (int i = ingredients.size() - 1; i >= 0; i--) {
+            Ingredient ingredient = ingredients.get(i);
+            if (emptyFlag && ingredient.isEmpty()) continue;
+            result.add(0, ofIngredient(ingredient));
+            emptyFlag = false;
         }
         return ImmutableList.copyOf(result);
     }
