@@ -23,9 +23,12 @@
 
 package me.shedaniel.rei.api;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.vertex.PoseStack;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
@@ -85,36 +88,57 @@ public interface EntryStack extends TextRepresentable {
     }
     
     static List<EntryStack> ofItems(Collection<ItemLike> stacks) {
-        List<EntryStack> result = new ArrayList<>(stacks.size());
+        if (stacks.size() == 0) return Collections.emptyList();
+        if (stacks.size() == 1) return Collections.singletonList(create(stacks.iterator().next()));
+        EntryStack[] result = new EntryStack[stacks.size()];
+        int i = 0;
         for (ItemLike stack : stacks) {
-            result.add(create(stack));
+            result[i] = create(stack);
+            i++;
         }
-        return result;
+        return Arrays.asList(result);
     }
     
     static List<EntryStack> ofItemStacks(Collection<ItemStack> stacks) {
+        if (stacks.size() == 0) return Collections.emptyList();
+        if (stacks.size() == 1) {
+            ItemStack stack = stacks.iterator().next();
+            if (stack.isEmpty()) return Collections.emptyList();
+            return Collections.singletonList(create(stack));
+        }
         List<EntryStack> result = new ArrayList<>(stacks.size());
         for (ItemStack stack : stacks) {
             result.add(create(stack));
         }
-        return result;
+        return ImmutableList.copyOf(result);
     }
     
     static List<EntryStack> ofIngredient(Ingredient ingredient) {
+        if (ingredient.isEmpty()) return Collections.emptyList();
         ItemStack[] matchingStacks = ingredient.getItems();
+        if (matchingStacks.length == 0) return Collections.emptyList();
+        if (matchingStacks.length == 1) return Collections.singletonList(create(matchingStacks[0]));
         List<EntryStack> result = new ArrayList<>(matchingStacks.length);
         for (ItemStack matchingStack : matchingStacks) {
-            result.add(create(matchingStack));
+            if (!matchingStack.isEmpty())
+                result.add(create(matchingStack));
         }
-        return result;
+        return ImmutableList.copyOf(result);
     }
     
     static List<List<EntryStack>> ofIngredients(List<Ingredient> ingredients) {
+        if (ingredients.size() == 0) return Collections.emptyList();
+        if (ingredients.size() == 1) {
+            Ingredient ingredient = ingredients.get(0);
+            if (ingredient.isEmpty()) return Collections.emptyList();
+            return Collections.singletonList(ofIngredient(ingredient));
+        }
         List<List<EntryStack>> result = new ArrayList<>(ingredients.size());
         for (Ingredient ingredient : ingredients) {
-            result.add(ofIngredient(ingredient));
+            if (!ingredient.isEmpty())
+                result.add(ofIngredient(ingredient));
         }
-        return result;
+        return ImmutableList.copyOf(result);
     }
     
     @Deprecated
@@ -246,6 +270,11 @@ public interface EntryStack extends TextRepresentable {
     
     EntryStack copy();
     
+    @ApiStatus.Internal
+    default EntryStack rewrap() {
+        return copy();
+    }
+    
     Object getObject();
     
     boolean equals(EntryStack stack, boolean ignoreTags, boolean ignoreAmount);
@@ -335,6 +364,9 @@ public interface EntryStack extends TextRepresentable {
     }
     
     class Settings<T> {
+        @ApiStatus.Internal
+        private static final Short2ObjectMap<Settings<?>> ID_TO_SETTINGS = new Short2ObjectOpenHashMap<>();
+        
         public static final Supplier<Boolean> TRUE = () -> true;
         public static final Supplier<Boolean> FALSE = () -> false;
         public static final Settings<Supplier<Boolean>> RENDER = new Settings<>(TRUE);
@@ -346,17 +378,34 @@ public interface EntryStack extends TextRepresentable {
         public static final Settings<Function<EntryStack, List<Component>>> TOOLTIP_APPEND_EXTRA = new Settings<>(stack -> Collections.emptyList());
         public static final Settings<Function<EntryStack, String>> COUNTS = new Settings<>(stack -> null);
         
+        private static short nextId;
         private T defaultValue;
+        private short id;
         
+        @ApiStatus.Internal
         public Settings(T defaultValue) {
             this.defaultValue = defaultValue;
+            this.id = nextId++;
+            ID_TO_SETTINGS.put(this.id, this);
+        }
+        
+        @ApiStatus.Internal
+        public static <T> Settings<T> getById(short id) {
+            return (Settings<T>) ID_TO_SETTINGS.get(id);
         }
         
         public T getDefaultValue() {
             return defaultValue;
         }
         
+        @ApiStatus.Internal
+        public short getId() {
+            return id;
+        }
+        
         public static class Item {
+            @Deprecated
+            @ApiStatus.ScheduledForRemoval
             public static final Settings<Supplier<Boolean>> RENDER_ENCHANTMENT_GLINT = new Settings<>(TRUE);
             
             private Item() {

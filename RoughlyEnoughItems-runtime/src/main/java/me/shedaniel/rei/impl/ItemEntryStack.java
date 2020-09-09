@@ -30,6 +30,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.ClientHelper;
@@ -61,7 +62,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -110,9 +110,18 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     
     @Override
     public EntryStack copy() {
-        EntryStack stack = EntryStack.create(getItemStack().copy());
-        for (Map.Entry<Settings<?>, Object> entry : getSettings().entrySet()) {
-            stack.setting((Settings<? super Object>) entry.getKey(), entry.getValue());
+        EntryStack stack = EntryStack.create(itemStack.copy());
+        for (Short2ObjectMap.Entry<Object> entry : getSettings().short2ObjectEntrySet()) {
+            stack.setting(EntryStack.Settings.getById(entry.getShortKey()), entry.getValue());
+        }
+        return stack;
+    }
+    
+    @Override
+    public EntryStack rewrap() {
+        EntryStack stack = EntryStack.create(itemStack);
+        for (Short2ObjectMap.Entry<Object> entry : getSettings().short2ObjectEntrySet()) {
+            stack.setting(EntryStack.Settings.getById(entry.getShortKey()), entry.getValue());
         }
         return stack;
     }
@@ -358,13 +367,11 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     public void optimisedRenderBase(PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
         if (!isEmpty() && get(Settings.RENDER).get()) {
             ItemStack stack = getItemStack();
-            ((ItemStackHook) (Object) stack).rei_setRenderEnchantmentGlint(get(Settings.Item.RENDER_ENCHANTMENT_GLINT).get());
             matrices.pushPose();
             matrices.translate(bounds.getCenterX(), bounds.getCenterY(), 100.0F + getZ());
             matrices.scale(bounds.getWidth(), (bounds.getWidth() + bounds.getHeight()) / -2f, bounds.getHeight());
             Minecraft.getInstance().getItemRenderer().render(stack, ItemTransforms.TransformType.GUI, false, matrices, immediate, 15728880, OverlayTexture.NO_OVERLAY, getModelFromStack(stack));
             matrices.popPose();
-            ((ItemStackHook) (Object) stack).rei_setRenderEnchantmentGlint(false);
         }
     }
     

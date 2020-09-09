@@ -30,9 +30,6 @@
       "me.shedaniel.rei.gui.plugin.DefaultRuntimePlugin"
     ]
   },
-  "mixins": [
-    "mixin.roughlyenoughitems-runtime.json"
-  ],
   "accessWidener": "roughlyenoughitems-runtime.accessWidener",
   "custom": {
     "modmenu:parent": "roughlyenoughitems",

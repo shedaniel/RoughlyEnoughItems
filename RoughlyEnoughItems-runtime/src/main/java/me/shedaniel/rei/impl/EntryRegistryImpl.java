@@ -78,7 +78,7 @@ public class EntryRegistryImpl implements EntryRegistry {
     @Override
     @NotNull
     public Stream<EntryStack> getEntryStacks() {
-        return entries.stream();
+        return reloading ? reloadingRegistry.stream().map(AmountIgnoredEntryStackWrapper::unwrap) : entries.stream();
     }
     
     @Override

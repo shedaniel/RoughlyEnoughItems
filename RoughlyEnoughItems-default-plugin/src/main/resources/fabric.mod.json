@@ -23,9 +23,6 @@
     ]
   },
   "accessWidener": "roughlyenoughitems-default-plugin.accessWidener",
-  "mixins": [
-    "mixin.roughlyenoughitems-default-plugin.json"
-  ],
   "custom": {
     "modmenu:parent": "roughlyenoughitems"
   }

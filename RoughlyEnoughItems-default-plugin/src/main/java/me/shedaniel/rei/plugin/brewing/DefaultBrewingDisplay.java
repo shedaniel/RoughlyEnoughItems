@@ -44,12 +44,18 @@ import java.util.List;
 @Environment(EnvType.CLIENT)
 public class DefaultBrewingDisplay implements RecipeDisplay {
     
-    private EntryStack input, output;
-    private List<EntryStack> reactant;
+    private EntryStack output;
+    private List<EntryStack> reactant, input;
     
     @ApiStatus.Internal
-    public DefaultBrewingDisplay(ItemStack input, Ingredient reactant, ItemStack output) {
-        this.input = EntryStack.create(input).setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, stack -> Collections.singletonList(new TranslatableComponent("category.rei.brewing.input").withStyle(ChatFormatting.YELLOW)));
+    public DefaultBrewingDisplay(Ingredient input, Ingredient reactant, ItemStack output) {
+        ItemStack[] inputItems = input.getItems();
+        this.input = new ArrayList<>(inputItems.length);
+        for (ItemStack inputItem : inputItems) {
+            EntryStack entryStack = EntryStack.create(inputItem);
+            entryStack.setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> Collections.singletonList(new TranslatableComponent("category.rei.brewing.input").withStyle(ChatFormatting.YELLOW)));
+            this.input.add(entryStack);
+        }
         ItemStack[] reactantStacks = reactant.getItems();
         this.reactant = new ArrayList<>(reactantStacks.length);
         for (ItemStack stack : reactantStacks) {
@@ -62,7 +68,7 @@ public class DefaultBrewingDisplay implements RecipeDisplay {
     
     @Override
     public @NotNull List<List<EntryStack>> getInputEntries() {
-        return Lists.newArrayList(Collections.singletonList(input), reactant);
+        return Lists.newArrayList(input, reactant);
     }
     
     @Override

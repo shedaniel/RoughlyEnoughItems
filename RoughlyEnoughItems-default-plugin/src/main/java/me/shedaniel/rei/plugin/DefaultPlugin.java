@@ -23,9 +23,12 @@
 
 package me.shedaniel.rei.plugin;
 
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
+import it.unimi.dsi.fastutil.objects.ReferenceSet;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
@@ -79,10 +82,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.Tag;
-import net.minecraft.util.LazyLoadedValue;
-import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -123,8 +126,6 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
     public static final ResourceLocation INFO = BuiltinPlugin.INFO;
     private static final ResourceLocation DISPLAY_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/display.png");
     private static final ResourceLocation DISPLAY_TEXTURE_DARK = new ResourceLocation("roughlyenoughitems", "textures/gui/display_dark.png");
-    private static final List<LazyLoadedValue<DefaultBrewingDisplay>> BREWING_DISPLAYS = Lists.newArrayList();
-    private static final List<DefaultInformationDisplay> INFO_DISPLAYS = Lists.newArrayList();
     
     public static ResourceLocation getDisplayTexture() {
         return REIHelper.getInstance().getDefaultDisplayTexture();
@@ -137,19 +138,19 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
     @Deprecated
     @ApiStatus.ScheduledForRemoval
     public static void registerBrewingDisplay(DefaultBrewingDisplay recipe) {
-        BREWING_DISPLAYS.add(new LazyLoadedValue<>(() -> recipe));
+        RecipeHelper.getInstance().registerDisplay(recipe);
     }
     
     public static void registerBrewingRecipe(RegisteredBrewingRecipe recipe) {
-        BREWING_DISPLAYS.add(new LazyLoadedValue<>(() -> new DefaultBrewingDisplay(recipe.input, recipe.ingredient, recipe.output)));
+        RecipeHelper.getInstance().registerDisplay(new DefaultBrewingDisplay(recipe.input, recipe.ingredient, recipe.output));
     }
     
     public static void registerInfoDisplay(DefaultInformationDisplay display) {
-        INFO_DISPLAYS.add(display);
+        RecipeHelper.getInstance().registerDisplay(display);
     }
     
     @Override
-    public void registerBrewingRecipe(ItemStack input, Ingredient ingredient, ItemStack output) {
+    public void registerBrewingRecipe(Ingredient input, Ingredient ingredient, ItemStack output) {
         registerBrewingRecipe(new RegisteredBrewingRecipe(input, ingredient, output));
     }
     
@@ -161,11 +162,6 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
     @Override
     public ResourceLocation getPluginIdentifier() {
         return PLUGIN;
-    }
-    
-    @Override
-    public void preRegister() {
-        INFO_DISPLAYS.clear();
     }
     
     @Override
@@ -232,41 +228,36 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
         recipeHelper.registerRecipes(CAMPFIRE, CampfireCookingRecipe.class, DefaultCampfireDisplay::new);
         recipeHelper.registerRecipes(STONE_CUTTING, StonecutterRecipe.class, DefaultStoneCuttingDisplay::new);
         recipeHelper.registerRecipes(SMITHING, UpgradeRecipe.class, DefaultSmithingDisplay::new);
-        for (LazyLoadedValue<DefaultBrewingDisplay> display : BREWING_DISPLAYS) {
-            recipeHelper.registerDisplay(display.get());
-        }
         for (Map.Entry<Item, Integer> entry : AbstractFurnaceBlockEntity.getFuel().entrySet()) {
             recipeHelper.registerDisplay(new DefaultFuelDisplay(EntryStack.create(entry.getKey()), entry.getValue()));
         }
         List<EntryStack> arrowStack = Collections.singletonList(EntryStack.create(Items.ARROW));
+        ReferenceSet<Potion> registeredPotions = new ReferenceOpenHashSet<>();
         EntryRegistry.getInstance().getEntryStacks().filter(entry -> entry.getItem() == Items.LINGERING_POTION).forEach(entry -> {
-            List<List<EntryStack>> input = new ArrayList<>();
-            for (int i = 0; i < 4; i++)
-                input.add(arrowStack);
-            input.add(Collections.singletonList(EntryStack.create(entry.getItemStack())));
-            for (int i = 0; i < 4; i++)
-                input.add(arrowStack);
-            ItemStack outputStack = new ItemStack(Items.TIPPED_ARROW, 8);
-            PotionUtils.setPotion(outputStack, PotionUtils.getPotion(entry.getItemStack()));
-            PotionUtils.setCustomEffects(outputStack, PotionUtils.getCustomEffects(entry.getItemStack()));
-            List<EntryStack> output = Collections.singletonList(EntryStack.create(outputStack).addSetting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE));
-            recipeHelper.registerDisplay(new DefaultCustomDisplay(null, input, output));
+            Potion potion = PotionUtils.getPotion(entry.getItemStack());
+            if (registeredPotions.add(potion)) {
+                List<List<EntryStack>> input = new ArrayList<>();
+                for (int i = 0; i < 4; i++)
+                    input.add(arrowStack);
+                input.add(Collections.singletonList(EntryStack.create(entry.getItemStack())));
+                for (int i = 0; i < 4; i++)
+                    input.add(arrowStack);
+                ItemStack outputStack = new ItemStack(Items.TIPPED_ARROW, 8);
+                PotionUtils.setPotion(outputStack, potion);
+                PotionUtils.setCustomEffects(outputStack, PotionUtils.getCustomEffects(entry.getItemStack()));
+                List<EntryStack> output = Collections.singletonList(EntryStack.create(outputStack).addSetting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE));
+                recipeHelper.registerDisplay(new DefaultCustomDisplay(null, input, output));
+            }
         });
-        Map<ItemLike, Float> map = Maps.newLinkedHashMap();
         if (ComposterBlock.COMPOSTABLES.isEmpty())
             ComposterBlock.bootStrap();
-        for (Object2FloatMap.Entry<ItemLike> entry : ComposterBlock.COMPOSTABLES.object2FloatEntrySet()) {
-            if (entry.getFloatValue() > 0)
-                map.put(entry.getKey(), entry.getFloatValue());
-        }
-        List<ItemLike> stacks = Lists.newArrayList(map.keySet());
-        stacks.sort(Comparator.comparing(map::get));
-        for (int i = 0; i < stacks.size(); i += Mth.clamp(48, 1, stacks.size() - i)) {
-            List<ItemLike> thisStacks = Lists.newArrayList();
-            for (int j = i; j < i + 48; j++)
-                if (j < stacks.size())
-                    thisStacks.add(stacks.get(j));
-            recipeHelper.registerDisplay(new DefaultCompostingDisplay(Mth.floor(i / 48f), thisStacks, map, new ItemStack(Items.BONE_MEAL)));
+        Object2FloatMap<ItemLike> compostables = ComposterBlock.COMPOSTABLES;
+        int i = 0;
+        Iterator<List<Object2FloatMap.Entry<ItemLike>>> iterator = Iterators.partition(compostables.object2FloatEntrySet().stream().sorted(Map.Entry.comparingByValue()).iterator(), 48);
+        while (iterator.hasNext()) {
+            List<Object2FloatMap.Entry<ItemLike>> entries = iterator.next();
+            recipeHelper.registerDisplay(new DefaultCompostingDisplay(i, entries, compostables, new ItemStack(Items.BONE_MEAL)));
+            i++;
         }
         DummyAxeItem.getStrippedBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getKey(b.getKey()))).forEach(set -> {
             recipeHelper.registerDisplay(new DefaultStrippingDisplay(EntryStack.create(set.getKey()), EntryStack.create(set.getValue())));
@@ -279,12 +270,38 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
         });
         recipeHelper.registerDisplay(new DefaultBeaconBaseDisplay(CollectionUtils.map(Lists.newArrayList(BlockTags.BEACON_BASE_BLOCKS.getValues()), ItemStack::new)));
         recipeHelper.registerDisplay(new DefaultBeaconPaymentDisplay(CollectionUtils.map(Lists.newArrayList(ItemTags.BEACON_PAYMENT_ITEMS.getValues()), ItemStack::new)));
+        Set<Potion> potions = Sets.newLinkedHashSet();
+        for (Ingredient container : PotionBrewing.ALLOWED_CONTAINERS) {
+            for (PotionBrewing.Mix<Potion> mix : PotionBrewing.POTION_MIXES) {
+                Potion from = mix.from;
+                Ingredient ingredient = mix.ingredient;
+                Potion to = mix.to;
+                Ingredient base = Ingredient.of(Arrays.stream(container.getItems())
+                        .map(ItemStack::copy)
+                        .map(stack -> PotionUtils.setPotion(stack, from)));
+                ItemStack output = Arrays.stream(container.getItems())
+                        .map(ItemStack::copy)
+                        .map(stack -> PotionUtils.setPotion(stack, to))
+                        .findFirst().orElse(ItemStack.EMPTY);
+                registerBrewingRecipe(base, ingredient, output);
+                potions.add(from);
+                potions.add(to);
+            }
+        }
+        for (Potion potion : potions) {
+            for (PotionBrewing.Mix<Item> mix : PotionBrewing.CONTAINER_MIXES) {
+                Item from = mix.from;
+                Ingredient ingredient = mix.ingredient;
+                Item to = mix.to;
+                Ingredient base = Ingredient.of(PotionUtils.setPotion(new ItemStack(from), potion));
+                ItemStack output = PotionUtils.setPotion(new ItemStack(to), potion);
+                registerBrewingRecipe(base, ingredient, output);
+            }
+        }
     }
     
     @Override
     public void postRegister() {
-        for (DefaultInformationDisplay display : INFO_DISPLAYS)
-            RecipeHelper.getInstance().registerDisplay(display);
         // TODO Turn this into an API
         // Sit tight! This will be a fast journey!
         long time = System.currentTimeMillis();
