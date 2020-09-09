@@ -24,10 +24,10 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.impl.Internals;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
 
 import java.util.Collections;
 import java.util.List;
@@ -54,6 +54,10 @@ public interface BuiltinPlugin {
     
     static BuiltinPlugin getInstance() {
         return Internals.getBuiltinPlugin();
+    }
+    
+    default void registerBrewingRecipe(ItemStack input, Ingredient ingredient, ItemStack output) {
+        registerBrewingRecipe(Ingredient.of(input), ingredient, output);
     }
     
     void registerBrewingRecipe(Ingredient input, Ingredient ingredient, ItemStack output);
