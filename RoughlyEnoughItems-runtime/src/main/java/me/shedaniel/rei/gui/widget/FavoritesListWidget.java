@@ -24,8 +24,9 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.mojang.blaze3d.vertex.PoseStack;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.ScrollingContainer;
@@ -51,7 +52,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -199,14 +199,14 @@ public class FavoritesListWidget extends WidgetWithBounds {
             if (ConfigObject.getInstance().doSearchFavorites()) {
                 List<EntryStack> list = Lists.newArrayList();
                 boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
-                Set<Integer> workingItems = checkCraftable ? Sets.newHashSet() : null;
+                IntSet workingItems = checkCraftable ? new IntOpenHashSet() : null;
                 if (checkCraftable)
                     workingItems.addAll(CollectionUtils.map(RecipeHelper.getInstance().findCraftableEntriesByItems(ScreenHelper.inventoryStacks), EntryStack::hashIgnoreAmount));
                 for (EntryStack stack : ConfigObject.getInstance().getFavorites()) {
                     if (listWidget.canLastSearchTermsBeAppliedTo(stack)) {
                         if (checkCraftable && !workingItems.contains(stack.hashIgnoreAmount()))
                             continue;
-                        list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
+                        list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE));
                     }
                 }
                 EntryPanelOrdering ordering = ConfigObject.getInstance().getItemListOrdering();
@@ -220,13 +220,13 @@ public class FavoritesListWidget extends WidgetWithBounds {
             } else {
                 List<EntryStack> list = Lists.newArrayList();
                 boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
-                Set<Integer> workingItems = checkCraftable ? Sets.newHashSet() : null;
+                IntSet workingItems = checkCraftable ? new IntOpenHashSet() : null;
                 if (checkCraftable)
                     workingItems.addAll(CollectionUtils.map(RecipeHelper.getInstance().findCraftableEntriesByItems(ScreenHelper.inventoryStacks), EntryStack::hashIgnoreAmount));
                 for (EntryStack stack : ConfigObject.getInstance().getFavorites()) {
                     if (checkCraftable && !workingItems.contains(stack.hashIgnoreAmount()))
                         continue;
-                    list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
+                    list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE));
                 }
                 EntryPanelOrdering ordering = ConfigObject.getInstance().getItemListOrdering();
                 if (ordering == EntryPanelOrdering.NAME)

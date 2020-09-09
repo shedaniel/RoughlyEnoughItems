@@ -25,10 +25,11 @@ package me.shedaniel.rei.gui.widget;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.ScrollingContainer;
@@ -62,16 +63,13 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.*;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @ApiStatus.Internal
 public class EntryListWidget extends WidgetWithBounds {
     
-    static final Supplier<Boolean> RENDER_ENCHANTMENT_GLINT = ConfigObject.getInstance()::doesRenderEntryEnchantmentGlint;
     static final Comparator<? super EntryStack> ENTRY_NAME_COMPARER = Comparator.comparing(stack -> stack.asFormatStrippedText().getString());
     static final Comparator<? super EntryStack> ENTRY_GROUP_COMPARER = Comparator.comparingInt(stack -> {
         if (stack.getType() == EntryStack.Type.ITEM) {
@@ -436,7 +434,7 @@ public class EntryListWidget extends WidgetWithBounds {
             this.lastSearchArguments = SearchArgument.processSearchTerm(searchTerm);
             List<EntryStack> list = Lists.newArrayList();
             boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
-            Set<Integer> workingItems = checkCraftable ? Sets.newHashSet() : null;
+            IntSet workingItems = checkCraftable ? new IntOpenHashSet() : null;
             if (checkCraftable)
                 workingItems.addAll(CollectionUtils.map(RecipeHelper.getInstance().findCraftableEntriesByItems(ScreenHelper.inventoryStacks), EntryStack::hashIgnoreAmount));
             List<EntryStack> stacks = EntryRegistry.getInstance().getPreFilteredList();
@@ -450,7 +448,7 @@ public class EntryListWidget extends WidgetWithBounds {
                                 if (canLastSearchTermsBeAppliedTo(stack)) {
                                     if (workingItems != null && !workingItems.contains(stack.hashIgnoreAmount()))
                                         continue;
-                                    filtered.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
+                                    filtered.add(stack.rewrap().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE));
                                 }
                             }
                             return filtered;
@@ -471,7 +469,7 @@ public class EntryListWidget extends WidgetWithBounds {
                         if (canLastSearchTermsBeAppliedTo(stack)) {
                             if (workingItems != null && !workingItems.contains(stack.hashIgnoreAmount()))
                                 continue;
-                            list.add(stack.copy().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.Item.RENDER_ENCHANTMENT_GLINT, RENDER_ENCHANTMENT_GLINT));
+                            list.add(stack.rewrap().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE));
                         }
                     }
                 }

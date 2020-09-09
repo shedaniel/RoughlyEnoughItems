@@ -86,17 +86,19 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
     public @NotNull List<Widget> setupDisplay(DefaultCompostingDisplay display, Rectangle bounds) {
         List<Widget> widgets = Lists.newArrayList();
         Point startingPoint = new Point(bounds.x + bounds.width - 55, bounds.y + 110);
-        List<EntryStack> stacks = new ArrayList<>(display.getRequiredEntries().get(0));
+        List<List<EntryStack>> stacks = new ArrayList<>(display.getInputEntries());
         int i = 0;
         for (int y = 0; y < 6; y++)
             for (int x = 0; x < 8; x++) {
-                EntryStack[] entryStack = {stacks.size() > i ? stacks.get(i) : EntryStack.empty()};
-                if (!entryStack[0].isEmpty()) {
-                    display.getInputMap().entrySet().parallelStream().filter(entry -> entry.getKey() != null && Objects.equals(entry.getKey().asItem(), entryStack[0].getItem())).findAny().map(Map.Entry::getValue).ifPresent(chance -> {
-                        entryStack[0] = entryStack[0].setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> Collections.singletonList(new TranslatableComponent("text.rei.composting.chance", Mth.fastFloor(chance * 100)).withStyle(ChatFormatting.YELLOW)));
+                List<EntryStack> entryStack = stacks.size() > i ? stacks.get(i) : Collections.emptyList();
+                if (!entryStack.isEmpty()) {
+                    display.getInputMap().object2FloatEntrySet().stream().filter(entry -> entry.getKey() != null && Objects.equals(entry.getKey().asItem(), entryStack.get(0).getItem())).findAny().map(Map.Entry::getValue).ifPresent(chance -> {
+                        for (EntryStack stack : entryStack) {
+                            stack.setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> Collections.singletonList(new TranslatableComponent("text.rei.composting.chance", Mth.fastFloor(chance * 100)).withStyle(ChatFormatting.YELLOW)));
+                        }
                     });
                 }
-                widgets.add(Widgets.createSlot(new Point(bounds.getCenterX() - 72 + x * 18, bounds.y + 3 + y * 18)).entry(entryStack[0]).markInput());
+                widgets.add(Widgets.createSlot(new Point(bounds.getCenterX() - 72 + x * 18, bounds.y + 3 + y * 18)).entries(entryStack).markInput());
                 i++;
             }
         widgets.add(Widgets.createArrow(new Point(startingPoint.x - 1, startingPoint.y + 7)));

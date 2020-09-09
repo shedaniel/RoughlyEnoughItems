@@ -23,31 +23,50 @@
 
 package me.shedaniel.rei.impl;
 
-import it.unimi.dsi.fastutil.objects.Reference2ObjectMaps;
-import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectMaps;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import me.shedaniel.rei.api.EntryStack;
 import net.minecraft.client.gui.GuiComponent;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.Map;
-
 @ApiStatus.Internal
 public abstract class AbstractEntryStack extends GuiComponent implements EntryStack {
-    private static final Map<Settings<?>, Object> EMPTY_SETTINGS = Reference2ObjectMaps.emptyMap();
-    private Map<Settings<?>, Object> settings = null;
+    private static final Short2ObjectMap<Object> EMPTY_SETTINGS = Short2ObjectMaps.emptyMap();
+    private Short2ObjectMap<Object> settings = null;
     
     @Override
     public <T> EntryStack setting(Settings<T> settings, T value) {
+        short settingsId = settings.getId();
         if (this.settings == null)
-            this.settings = new Reference2ObjectOpenHashMap<>(4);
-        this.settings.put(settings, value);
+            this.settings = Short2ObjectMaps.singleton(settingsId, value);
+        else {
+            if (this.settings.size() == 1) {
+                if (this.settings.containsKey(settingsId)) {
+                    this.settings = Short2ObjectMaps.singleton(settingsId, value);
+                    return this;
+                } else {
+                    Short2ObjectMap<Object> singletonSettings = this.settings;
+                    this.settings = new Short2ObjectOpenHashMap<>(4, 1);
+                    this.settings.putAll(singletonSettings);
+                }
+            }
+            this.settings.put(settingsId, value);
+        }
         return this;
     }
     
     @Override
     public <T> EntryStack removeSetting(Settings<T> settings) {
-        if (this.settings != null && this.settings.remove(settings) != null && this.settings.isEmpty()) {
-            this.settings = null;
+        if (this.settings != null) {
+            short settingsId = settings.getId();
+            if (this.settings.size() == 1) {
+                if (this.settings.containsKey(settingsId)) {
+                    this.settings = null;
+                }
+            } else if (this.settings.remove(settingsId) != null && this.settings.isEmpty()) {
+                this.settings = null;
+            }
         }
         return this;
     }
@@ -58,13 +77,13 @@ public abstract class AbstractEntryStack extends GuiComponent implements EntrySt
         return this;
     }
     
-    protected Map<Settings<?>, Object> getSettings() {
+    protected Short2ObjectMap<Object> getSettings() {
         return this.settings == null ? EMPTY_SETTINGS : this.settings;
     }
     
     @Override
     public <T> T get(Settings<T> settings) {
-        Object o = this.settings == null ? null : this.settings.get(settings);
+        Object o = this.settings == null ? null : this.settings.get(settings.getId());
         if (o == null)
             return settings.getDefaultValue();
         return (T) o;

@@ -8,9 +8,25 @@ plugins {
     id("net.corda.plugins.jar-filter") version("5.0.8") apply false
 }
 
+import net.fabricmc.loom.LoomGradleExtension
 import net.fabricmc.loom.task.RemapJarTask
+import net.fabricmc.loom.util.DownloadUtil
+import net.fabricmc.loom.util.MinecraftVersionInfo
+import net.fabricmc.lorenztiny.TinyMappingsReader
+import net.fabricmc.mapping.tree.TinyMappingFactory
+import org.cadixdev.lorenz.MappingSet
+import org.cadixdev.lorenz.io.TextMappingsWriter
+import org.cadixdev.lorenz.io.proguard.ProGuardReader
+import org.cadixdev.lorenz.model.*
+import org.zeroturnaround.zip.ByteSource
+import org.zeroturnaround.zip.ZipEntrySource
+import org.zeroturnaround.zip.ZipUtil
 
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import java.nio.file.Path
 import java.text.SimpleDateFormat
+import java.util.function.Consumer
 
 archivesBaseName = "RoughlyEnoughItems"
 version = project.mod_version
@@ -61,7 +77,7 @@ allprojects {
 
     dependencies {
         minecraft("com.mojang:minecraft:${project.minecraft_version}")
-        mappings(minecraft.officialMojangMappings())
+        mappings(new MojangMappingsDependency(project, loom))
         modApi("net.fabricmc:fabric-loader:${project.fabricloader_version}")
         modApi("net.fabricmc.fabric-api:fabric-api:${project.fabric_api}") {
             exclude(module: "fabric-biomes-v1")
@@ -324,6 +340,225 @@ publishing {
                     password = project.getProperty('danielshe_pass')
                 }
             }
+        }
+    }
+}
+
+/*
+The following code is licensed under MIT License.
+
+Copyright (c) 2016 FabricMC
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+class MojangMappingsDependency implements SelfResolvingDependency {
+    private final Project project
+    private final LoomGradleExtension extension
+
+    MojangMappingsDependency(Project project, LoomGradleExtension extension) {
+        this.project = project
+        this.extension = extension
+    }
+
+    @Override
+    Set<File> resolve() {
+        Path mappingsDir = extension.getMappingsProvider().getMappingsDir()
+        Path mappingsFile = mappingsDir.resolve(String.format("net.mojang.minecraft-mappings-%s.tiny", getVersion()))
+        Path clientMappings = mappingsDir.resolve(String.format("net.mojang.minecraft.mappings-%s-client.map", getVersion()))
+        Path serverMappings = mappingsDir.resolve(String.format("net.mojang.minecraft.mappings-%s-server.map", getVersion()))
+
+        if (!Files.exists(mappingsFile) || project.getGradle().getStartParameter().isRefreshDependencies()) {
+            MappingSet mappingSet
+
+            try {
+                mappingSet = getMappingsSet(clientMappings, serverMappings)
+
+                Writer writer = new StringWriter()
+                new TinyWriter(writer, "intermediary", "named").write(mappingSet)
+                Files.deleteIfExists(mappingsFile)
+
+                ZipUtil.pack([
+                        new ByteSource("mappings/mappings.tiny", writer.toString().getBytes(StandardCharsets.UTF_8))
+                ] as ZipEntrySource[], mappingsFile.toFile())
+                writer.close()
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to resolve Mojang mappings", e)
+            }
+        }
+
+        return Collections.singleton(mappingsFile.toFile())
+    }
+
+    private MappingSet getMappingsSet(Path clientMappings, Path serverMappings) throws IOException {
+        MinecraftVersionInfo versionInfo = extension.getMinecraftProvider().getVersionInfo()
+
+        if (versionInfo.downloads.get("client_mappings") == null) {
+            throw new RuntimeException("Failed to find official mojang mappings for " + getVersion())
+        }
+
+        String clientMappingsUrl = versionInfo.downloads.get("client_mappings").url
+        String serverMappingsUrl = versionInfo.downloads.get("server_mappings").url
+
+        DownloadUtil.downloadIfChanged(new URL(clientMappingsUrl), clientMappings.toFile(), project.getLogger())
+        DownloadUtil.downloadIfChanged(new URL(serverMappingsUrl), serverMappings.toFile(), project.getLogger())
+
+        MappingSet mappings = MappingSet.create()
+
+        BufferedReader clientBufferedReader = Files.newBufferedReader(clientMappings, StandardCharsets.UTF_8)
+        BufferedReader serverBufferedReader = Files.newBufferedReader(serverMappings, StandardCharsets.UTF_8)
+        ProGuardReader proGuardReaderClient = new ProGuardReader(clientBufferedReader)
+        ProGuardReader proGuardReaderServer = new ProGuardReader(serverBufferedReader)
+        proGuardReaderClient.read(mappings)
+        proGuardReaderServer.read(mappings)
+
+        clientBufferedReader.close()
+        serverBufferedReader.close()
+        proGuardReaderClient.close()
+        proGuardReaderServer.close()
+
+        MappingSet officialToNamed = mappings.reverse()
+        MappingSet intermediaryToOfficial
+
+        BufferedReader reader = Files.newBufferedReader(extension.getMappingsProvider().getIntermediaryTiny(), StandardCharsets.UTF_8)
+        intermediaryToOfficial = new TinyMappingsReader(TinyMappingFactory.loadWithDetection(reader), "intermediary", "official").read()
+        reader.close()
+
+        MappingSet intermediaryToMojang = MappingSet.create()
+
+        // Merging. Don't use MappingSet#merge
+        iterateClasses(intermediaryToOfficial, { inputMappings ->
+            officialToNamed.getClassMapping(inputMappings.getFullDeobfuscatedName())
+                    .ifPresent({ namedClass ->
+                        ClassMapping mojangClassMapping = intermediaryToMojang.getOrCreateClassMapping(inputMappings.getFullObfuscatedName())
+                                .setDeobfuscatedName(namedClass.getFullDeobfuscatedName())
+
+                        for (FieldMapping fieldMapping : inputMappings.getFieldMappings()) {
+                            namedClass.getFieldMapping(fieldMapping.getDeobfuscatedName())
+                                    .ifPresent({ namedField ->
+                                        mojangClassMapping.getOrCreateFieldMapping(fieldMapping.getSignature())
+                                                .setDeobfuscatedName(namedField.getDeobfuscatedName())
+                                    })
+                        }
+
+                        for (MethodMapping methodMapping : inputMappings.getMethodMappings()) {
+                            namedClass.getMethodMapping(methodMapping.getDeobfuscatedSignature())
+                                    .ifPresent({ namedMethod ->
+                                        mojangClassMapping.getOrCreateMethodMapping(methodMapping.getSignature())
+                                                .setDeobfuscatedName(namedMethod.getDeobfuscatedName())
+                                    })
+                        }
+                    })
+        })
+
+        return intermediaryToMojang
+    }
+
+    @Override
+    Set<File> resolve(boolean transitive) {
+        return resolve()
+    }
+
+    @Override
+    TaskDependency getBuildDependencies() {
+        return { Collections.emptySet() }
+    }
+
+    @Override
+    String getGroup() {
+        return "net.mojang.minecraft"
+    }
+
+    @Override
+    String getName() {
+        return "mappings"
+    }
+
+    @Override
+    String getVersion() {
+        return extension.getMinecraftProvider().getMinecraftVersion()
+    }
+
+    @Override
+    boolean contentEquals(Dependency dependency) {
+        if (dependency instanceof MojangMappingsDependency) {
+            return ((MojangMappingsDependency) dependency).extension.getMinecraftProvider().getMinecraftVersion() == getVersion()
+        }
+
+        return false
+    }
+
+    @Override
+    Dependency copy() {
+        return new MojangMappingsDependency(project, extension)
+    }
+
+    @Override
+    String getReason() {
+        return null
+    }
+
+    @Override
+    void because(String s) {
+    }
+
+    private static void iterateClasses(MappingSet mappings, Closure<ClassMapping> consumer) {
+        for (TopLevelClassMapping classMapping : mappings.getTopLevelClassMappings()) {
+            iterateClass(classMapping, consumer)
+        }
+    }
+
+    private static void iterateClass(ClassMapping classMapping, Consumer<ClassMapping> consumer) {
+        consumer.accept(classMapping)
+
+        for (InnerClassMapping innerClassMapping : classMapping.getInnerClassMappings()) {
+            iterateClass(innerClassMapping, consumer)
+        }
+    }
+
+    private static class TinyWriter extends TextMappingsWriter {
+        private final String namespaceFrom
+        private final String namespaceTo
+
+        protected TinyWriter(Writer writer, String namespaceFrom, String namespaceTo) {
+            super(writer)
+            this.namespaceFrom = namespaceFrom
+            this.namespaceTo = namespaceTo
+        }
+
+        @Override
+        void write(MappingSet mappings) {
+            writer.println("tiny\t2\t0\t" + namespaceFrom + "\t" + namespaceTo)
+
+            iterateClasses(mappings, { classMapping ->
+                writer.println("c\t" + classMapping.getFullObfuscatedName() + "\t" + classMapping.getFullDeobfuscatedName())
+
+                for (FieldMapping fieldMapping : classMapping.getFieldMappings()) {
+                    fieldMapping.getType().ifPresent({ fieldType ->
+                        writer.println("\tf\t" + fieldType + "\t" + fieldMapping.getObfuscatedName() + "\t" + fieldMapping.getDeobfuscatedName())
+                    })
+                }
+
+                for (MethodMapping methodMapping : classMapping.getMethodMappings()) {
+                    writer.println("\tm\t" + methodMapping.getSignature().getDescriptor() + "\t" + methodMapping.getObfuscatedName() + "\t" + methodMapping.getDeobfuscatedName())
+                }
+            })
         }
     }
 }

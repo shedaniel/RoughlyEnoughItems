@@ -59,6 +59,8 @@ public interface ConfigObject {
     
     boolean isToastDisplayedOnCopyIdentifier();
     
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     boolean doesRenderEntryEnchantmentGlint();
     
     boolean isEntryListWidgetScrolled();

@@ -106,7 +106,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     @Override
     public boolean doesRenderEntryEnchantmentGlint() {
-        return advanced.miscellaneous.renderEntryEnchantmentGlint;
+        return true;
     }
     
     @Override
@@ -464,7 +464,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         public static class Miscellaneous {
             @Comment("Declares whether arrows in containers should be clickable.") private boolean clickableRecipeArrows = true;
             private boolean registerRecipesInAnotherThread = true;
-            @Comment("Whether REI should render entry's enchantment glint") private boolean renderEntryEnchantmentGlint = true;
             private boolean newFastEntryRendering = true;
         }
         

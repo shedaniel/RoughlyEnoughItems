@@ -29,6 +29,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.ClientHelper;
@@ -55,7 +56,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -124,8 +124,8 @@ public class FluidEntryStack extends AbstractEntryStack {
     @Override
     public EntryStack copy() {
         EntryStack stack = EntryStack.create(fluid, amount);
-        for (Map.Entry<Settings<?>, Object> entry : getSettings().entrySet()) {
-            stack.setting((Settings<? super Object>) entry.getKey(), entry.getValue());
+        for (Short2ObjectMap.Entry<Object> entry : getSettings().short2ObjectEntrySet()) {
+            stack.setting(EntryStack.Settings.getById(entry.getShortKey()), entry.getValue());
         }
         return stack;
     }

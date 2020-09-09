@@ -309,7 +309,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     private void startSection(MutablePair<Stopwatch, String> sectionData, String section) {
         sectionData.setRight(section);
         RoughlyEnoughItemsCore.LOGGER.debug("Reloading Section: \"%s\"", section);
-        sectionData.getLeft().start();
+        sectionData.getLeft().reset().start();
     }
     
     private void endSection(MutablePair<Stopwatch, String> sectionData) {
@@ -321,13 +321,13 @@ public class RecipeHelperImpl implements RecipeHelper {
     
     private void pluginSection(MutablePair<Stopwatch, String> sectionData, String sectionName, List<REIPluginV0> list, Consumer<REIPluginV0> consumer) {
         for (REIPluginV0 plugin : list) {
+            startSection(sectionData, sectionName + " for " + plugin.getPluginIdentifier().toString());
             try {
-                startSection(sectionData, sectionName + " for " + plugin.getPluginIdentifier().toString());
                 consumer.accept(plugin);
-                endSection(sectionData);
             } catch (Throwable e) {
                 RoughlyEnoughItemsCore.LOGGER.error(plugin.getPluginIdentifier().toString() + " plugin failed to " + sectionName + "!", e);
             }
+            endSection(sectionData);
         }
     }
     
@@ -378,16 +378,16 @@ public class RecipeHelperImpl implements RecipeHelper {
         List<REIPluginV0> reiPluginV0s = new ArrayList<>();
         endSection(sectionData);
         for (REIPluginEntry plugin : plugins) {
+            startSection(sectionData, "pre-register for " + plugin.getPluginIdentifier().toString());
             try {
                 if (plugin instanceof REIPluginV0) {
-                    startSection(sectionData, "pre-register for " + plugin.getPluginIdentifier().toString());
                     ((REIPluginV0) plugin).preRegister();
                     reiPluginV0s.add((REIPluginV0) plugin);
-                    endSection(sectionData);
                 }
             } catch (Throwable e) {
                 RoughlyEnoughItemsCore.LOGGER.error(plugin.getPluginIdentifier().toString() + " plugin failed to pre register!", e);
             }
+            endSection(sectionData);
         }
         pluginSection(sectionData, "register-bounds", reiPluginV0s, plugin -> plugin.registerBounds(displayHelper));
         pluginSection(sectionData, "register-entries", reiPluginV0s, plugin -> plugin.registerEntries(entryRegistry));

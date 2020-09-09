@@ -56,7 +56,11 @@ public interface BuiltinPlugin {
         return Internals.getBuiltinPlugin();
     }
     
-    void registerBrewingRecipe(ItemStack input, Ingredient ingredient, ItemStack output);
+    default void registerBrewingRecipe(ItemStack input, Ingredient ingredient, ItemStack output) {
+        registerBrewingRecipe(Ingredient.of(input), ingredient, output);
+    }
+    
+    void registerBrewingRecipe(Ingredient input, Ingredient ingredient, ItemStack output);
     
     void registerInformation(List<EntryStack> entryStacks, Component name, UnaryOperator<List<Component>> textBuilder);
     
