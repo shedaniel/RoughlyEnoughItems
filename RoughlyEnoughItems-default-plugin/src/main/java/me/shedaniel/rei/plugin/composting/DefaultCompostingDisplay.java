@@ -23,33 +23,41 @@
 
 package me.shedaniel.rei.plugin.composting;
 
+import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
-import me.shedaniel.rei.utils.CollectionUtils;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IItemProvider;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 @OnlyIn(Dist.CLIENT)
 public class DefaultCompostingDisplay implements RecipeDisplay {
-    private List<EntryStack> order;
-    private Map<IItemProvider, Float> inputMap;
-    private List<EntryStack> output;
+    private List<List<EntryStack>> inputs;
+    private Object2FloatMap<IItemProvider> inputMap;
+    private List<List<EntryStack>> output;
     private int page;
     
-    public DefaultCompostingDisplay(int page, List<IItemProvider> order, Map<IItemProvider, Float> inputMap, ItemStack output) {
+    public DefaultCompostingDisplay(int page, List<Object2FloatMap.Entry<IItemProvider>> inputs, Object2FloatMap<IItemProvider> map, ItemStack output) {
         this.page = page;
-        this.order = EntryStack.ofItems(order);
-        this.inputMap = inputMap;
-        this.output = EntryStack.ofItemStacks(Collections.singletonList(output));
+        {
+            List<EntryStack>[] result = new List[inputs.size()];
+            int i = 0;
+            for (Object2FloatMap.Entry<IItemProvider> entry : inputs) {
+                result[i] = Collections.singletonList(EntryStack.create(entry.getKey()));
+                i++;
+            }
+            this.inputs = Arrays.asList(result);
+        }
+        this.inputMap = map;
+        this.output = Collections.singletonList(Collections.singletonList(EntryStack.create(output)));
     }
     
     public int getPage() {
@@ -58,16 +66,16 @@ public class DefaultCompostingDisplay implements RecipeDisplay {
     
     @Override
     public @NotNull List<List<EntryStack>> getInputEntries() {
-        return CollectionUtils.map(order, Collections::singletonList);
+        return inputs;
     }
     
-    public Map<IItemProvider, Float> getInputMap() {
+    public Object2FloatMap<IItemProvider> getInputMap() {
         return inputMap;
     }
     
     @Override
     public @NotNull List<List<EntryStack>> getResultingEntries() {
-        return Collections.singletonList(output);
+        return output;
     }
     
     @Override
@@ -77,6 +85,6 @@ public class DefaultCompostingDisplay implements RecipeDisplay {
     
     @Override
     public @NotNull List<List<EntryStack>> getRequiredEntries() {
-        return Collections.singletonList(order);
+        return inputs;
     }
 }

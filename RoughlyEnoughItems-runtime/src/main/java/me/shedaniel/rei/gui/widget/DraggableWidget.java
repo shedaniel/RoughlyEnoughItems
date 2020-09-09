@@ -23,10 +23,10 @@
 
 package me.shedaniel.rei.gui.widget;
 
-import net.minecraft.client.MainWindow;
+import me.shedaniel.clothconfig2.forge.api.PointHelper;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.clothconfig2.forge.api.PointHelper;
+import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.IGuiEventListener;
 import org.jetbrains.annotations.ApiStatus;

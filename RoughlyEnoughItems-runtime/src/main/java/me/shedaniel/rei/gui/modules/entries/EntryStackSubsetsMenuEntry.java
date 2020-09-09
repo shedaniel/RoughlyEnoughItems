@@ -34,8 +34,8 @@ import me.shedaniel.rei.gui.modules.MenuEntry;
 import me.shedaniel.rei.impl.EntryRegistryImpl;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.audio.SimpleSound;
+import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.util.SoundEvents;
 import org.jetbrains.annotations.ApiStatus;
 

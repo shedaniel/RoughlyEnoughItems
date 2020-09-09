@@ -25,10 +25,10 @@ package me.shedaniel.rei.gui;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import me.shedaniel.rei.api.RecipeHelper;
-import net.minecraft.util.Util;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.util.Util;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal

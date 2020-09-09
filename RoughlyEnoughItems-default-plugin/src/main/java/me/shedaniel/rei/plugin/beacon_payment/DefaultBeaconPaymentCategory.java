@@ -23,14 +23,8 @@
 
 package me.shedaniel.rei.plugin.beacon_payment;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.IGuiEventListener;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.block.Blocks;
+import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
-
 import me.shedaniel.clothconfig2.forge.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.forge.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.forge.api.ScrollingContainer;
@@ -46,9 +40,14 @@ import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import me.shedaniel.rei.utils.CollectionUtils;
+import net.minecraft.block.Blocks;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.NotNull;
 
-import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Objects;
 

@@ -25,16 +25,16 @@ package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import net.minecraft.client.MainWindow;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.BaseBoundsHandler;
 import me.shedaniel.rei.api.DisplayHelper;
 import me.shedaniel.rei.api.OverlayDecider;
 import me.shedaniel.rei.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.utils.CollectionUtils;
+import net.minecraft.client.MainWindow;
+import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collections;

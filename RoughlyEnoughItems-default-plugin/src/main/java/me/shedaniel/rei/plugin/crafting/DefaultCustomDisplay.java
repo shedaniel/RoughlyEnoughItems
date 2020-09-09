@@ -23,16 +23,17 @@
 
 package me.shedaniel.rei.plugin.crafting;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.BitSet;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -50,21 +51,21 @@ public class DefaultCustomDisplay implements DefaultCraftingDisplay {
     }
     
     public DefaultCustomDisplay(IRecipe<?> possibleRecipe, List<List<EntryStack>> input, List<EntryStack> output) {
-        this.input = input;
-        this.output = output;
+        this.input = ImmutableList.copyOf(input);
+        this.output = ImmutableList.copyOf(output);
         this.possibleRecipe = possibleRecipe;
-        List<Boolean> row = Lists.newArrayList(false, false, false);
-        List<Boolean> column = Lists.newArrayList(false, false, false);
+        BitSet row = new BitSet(3);
+        BitSet column = new BitSet(3);
         for (int i = 0; i < 9; i++)
             if (i < this.input.size()) {
                 List<EntryStack> stacks = this.input.get(i);
                 if (stacks.stream().anyMatch(stack -> !stack.isEmpty())) {
-                    row.set((i - (i % 3)) / 3, true);
-                    column.set(i % 3, true);
+                    row.set((i - (i % 3)) / 3);
+                    column.set(i % 3);
                 }
             }
-        this.width = (int) column.stream().filter(Boolean::booleanValue).count();
-        this.height = (int) row.stream().filter(Boolean::booleanValue).count();
+        this.width = row.cardinality();
+        this.height = column.cardinality();
     }
     
     public DefaultCustomDisplay(List<List<ItemStack>> input, List<ItemStack> output) {

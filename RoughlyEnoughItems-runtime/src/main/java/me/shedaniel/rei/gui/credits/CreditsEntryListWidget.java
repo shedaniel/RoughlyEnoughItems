@@ -27,8 +27,8 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import me.shedaniel.clothconfig2.forge.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.IReorderingProcessor;
+import net.minecraft.util.text.ITextComponent;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;

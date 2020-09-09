@@ -23,9 +23,9 @@
 
 package me.shedaniel.rei.gui.config;
 
+import net.minecraft.client.resources.I18n;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraft.client.resources.I18n;
 
 import java.util.Locale;
 

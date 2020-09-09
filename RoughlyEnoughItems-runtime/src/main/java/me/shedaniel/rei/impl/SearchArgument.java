@@ -33,10 +33,10 @@ import me.shedaniel.rei.impl.search.Argument;
 import me.shedaniel.rei.impl.search.ArgumentsRegistry;
 import me.shedaniel.rei.impl.search.MatchStatus;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.ApiStatus;
 

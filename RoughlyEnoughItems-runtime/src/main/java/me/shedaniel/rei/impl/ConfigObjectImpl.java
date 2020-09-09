@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl;
 
-import net.minecraft.client.util.InputMappings;
 import me.shedaniel.autoconfig1u.ConfigData;
 import me.shedaniel.autoconfig1u.annotation.Config;
 import me.shedaniel.autoconfig1u.annotation.ConfigEntry;
@@ -34,6 +33,7 @@ import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.gui.config.*;
 import me.shedaniel.rei.impl.filtering.FilteringRule;
+import net.minecraft.client.util.InputMappings;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.ApiStatus;

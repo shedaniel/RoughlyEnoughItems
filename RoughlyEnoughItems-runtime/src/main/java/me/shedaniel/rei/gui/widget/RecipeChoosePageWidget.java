@@ -24,7 +24,6 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.google.common.collect.Lists;
-import net.minecraft.client.MainWindow;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -33,9 +32,10 @@ import me.shedaniel.rei.api.widgets.Button;
 import me.shedaniel.rei.api.widgets.Panel;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
+import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.TranslationTextComponent;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 

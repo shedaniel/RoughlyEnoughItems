@@ -24,17 +24,17 @@
 package me.shedaniel.rei.gui;
 
 import com.google.common.collect.Lists;
-import net.minecraft.client.util.InputMappings;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.matrix.MatrixStack;
-import me.shedaniel.math.Point;
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.clothconfig2.forge.api.PointHelper;
+import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.client.audio.SimpleSound;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.client.util.InputMappings;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.Tuple;
 import org.jetbrains.annotations.ApiStatus;

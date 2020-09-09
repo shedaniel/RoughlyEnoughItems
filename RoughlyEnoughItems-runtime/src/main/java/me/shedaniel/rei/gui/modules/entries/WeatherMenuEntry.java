@@ -31,11 +31,11 @@ import me.shedaniel.rei.gui.modules.MenuEntry;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.Weather;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.client.audio.SimpleSound;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.SoundEvents;
+import net.minecraft.util.text.TranslationTextComponent;
 
 import java.util.Collections;
 import java.util.List;

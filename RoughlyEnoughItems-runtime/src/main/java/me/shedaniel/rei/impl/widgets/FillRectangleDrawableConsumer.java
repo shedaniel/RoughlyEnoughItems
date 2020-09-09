@@ -23,14 +23,14 @@
 
 package me.shedaniel.rei.impl.widgets;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.renderer.Tessellator;
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.DrawableConsumer;
 import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import org.jetbrains.annotations.NotNull;
 
 public final class FillRectangleDrawableConsumer implements DrawableConsumer {

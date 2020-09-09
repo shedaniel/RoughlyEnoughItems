@@ -36,11 +36,11 @@ import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
 import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.impl.RenderingEntry;
 import me.shedaniel.rei.plugin.autocrafting.DefaultCategoryHandler;
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 

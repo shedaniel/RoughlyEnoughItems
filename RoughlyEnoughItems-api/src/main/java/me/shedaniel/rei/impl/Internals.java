@@ -30,7 +30,6 @@ import me.shedaniel.rei.api.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.subsets.SubsetsRegistry;
 import me.shedaniel.rei.api.widgets.*;
 import me.shedaniel.rei.gui.widget.Widget;
-import net.minecraft.fluid.Fluid;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;

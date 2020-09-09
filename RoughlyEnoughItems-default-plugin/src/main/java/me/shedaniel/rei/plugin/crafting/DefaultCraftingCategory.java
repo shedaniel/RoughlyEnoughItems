@@ -37,12 +37,12 @@ import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import me.shedaniel.rei.server.ContainerInfo;
 import me.shedaniel.rei.server.ContainerInfoHandler;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.inventory.container.Container;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.block.Blocks;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

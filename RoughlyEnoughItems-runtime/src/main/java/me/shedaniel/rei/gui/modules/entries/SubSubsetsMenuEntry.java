@@ -37,12 +37,12 @@ import me.shedaniel.rei.gui.widget.TabWidget;
 import me.shedaniel.rei.impl.EntryRegistryImpl;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.audio.SimpleSound;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.Tuple;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.StringTextComponent;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collections;

@@ -23,10 +23,12 @@
 
 package me.shedaniel.rei.plugin;
 
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
+import it.unimi.dsi.fastutil.objects.ReferenceSet;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
@@ -92,7 +94,6 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.IItemProvider;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -249,34 +250,32 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
                     }
                 });
         List<EntryStack> arrowStack = Collections.singletonList(EntryStack.create(Items.ARROW));
+        ReferenceSet<Potion> registeredPotions = new ReferenceOpenHashSet<>();
         EntryRegistry.getInstance().getEntryStacks().filter(entry -> entry.getItem() == Items.LINGERING_POTION).forEach(entry -> {
-            List<List<EntryStack>> input = new ArrayList<>();
-            for (int i = 0; i < 4; i++)
-                input.add(arrowStack);
-            input.add(Collections.singletonList(EntryStack.create(entry.getItemStack())));
-            for (int i = 0; i < 4; i++)
-                input.add(arrowStack);
-            ItemStack outputStack = new ItemStack(Items.TIPPED_ARROW, 8);
-            PotionUtils.setPotion(outputStack, PotionUtils.getPotion(entry.getItemStack()));
-            PotionUtils.setCustomEffects(outputStack, PotionUtils.getCustomEffects(entry.getItemStack()));
-            List<EntryStack> output = Collections.singletonList(EntryStack.create(outputStack).addSetting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE));
-            recipeHelper.registerDisplay(new DefaultCustomDisplay(null, input, output));
+            Potion potion = PotionUtils.getPotion(entry.getItemStack());
+            if (registeredPotions.add(potion)) {
+                List<List<EntryStack>> input = new ArrayList<>();
+                for (int i = 0; i < 4; i++)
+                    input.add(arrowStack);
+                input.add(Collections.singletonList(EntryStack.create(entry.getItemStack())));
+                for (int i = 0; i < 4; i++)
+                    input.add(arrowStack);
+                ItemStack outputStack = new ItemStack(Items.TIPPED_ARROW, 8);
+                PotionUtils.setPotion(outputStack, potion);
+                PotionUtils.setCustomEffects(outputStack, PotionUtils.getCustomEffects(entry.getItemStack()));
+                List<EntryStack> output = Collections.singletonList(EntryStack.create(outputStack).addSetting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE));
+                recipeHelper.registerDisplay(new DefaultCustomDisplay(null, input, output));
+            }
         });
-        Map<IItemProvider, Float> map = Maps.newLinkedHashMap();
         if (ComposterBlock.COMPOSTABLES.isEmpty())
             ComposterBlock.bootStrap();
-        for (Object2FloatMap.Entry<IItemProvider> entry : ComposterBlock.COMPOSTABLES.object2FloatEntrySet()) {
-            if (entry.getFloatValue() > 0)
-                map.put(entry.getKey(), entry.getFloatValue());
-        }
-        List<IItemProvider> stacks = Lists.newArrayList(map.keySet());
-        stacks.sort(Comparator.comparing(map::get));
-        for (int i = 0; i < stacks.size(); i += MathHelper.clamp(48, 1, stacks.size() - i)) {
-            List<IItemProvider> thisStacks = Lists.newArrayList();
-            for (int j = i; j < i + 48; j++)
-                if (j < stacks.size())
-                    thisStacks.add(stacks.get(j));
-            recipeHelper.registerDisplay(new DefaultCompostingDisplay(MathHelper.floor(i / 48f), thisStacks, map, new ItemStack(Items.BONE_MEAL)));
+        Object2FloatMap<IItemProvider> compostables = ComposterBlock.COMPOSTABLES;
+        int i = 0;
+        Iterator<List<Object2FloatMap.Entry<IItemProvider>>> iterator = Iterators.partition(compostables.object2FloatEntrySet().stream().sorted(Map.Entry.comparingByValue()).iterator(), 48);
+        while (iterator.hasNext()) {
+            List<Object2FloatMap.Entry<IItemProvider>> entries = iterator.next();
+            recipeHelper.registerDisplay(new DefaultCompostingDisplay(i, entries, compostables, new ItemStack(Items.BONE_MEAL)));
+            i++;
         }
         DummyAxeItem.getStrippedBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> ForgeRegistries.BLOCKS.getKey(b.getKey()))).forEach(set -> {
             recipeHelper.registerDisplay(new DefaultStrippingDisplay(EntryStack.create(set.getKey()), EntryStack.create(set.getValue())));

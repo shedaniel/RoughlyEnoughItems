@@ -26,6 +26,7 @@ package me.shedaniel.rei.impl;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.ClientHelper;
@@ -55,7 +56,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -101,8 +101,17 @@ public class FluidEntryStack extends AbstractEntryStack {
     @Override
     public EntryStack copy() {
         EntryStack stack = EntryStack.create(this.stack.copy());
-        for (Map.Entry<Settings<?>, Object> entry : getSettings().entrySet()) {
-            stack.setting((Settings<? super Object>) entry.getKey(), entry.getValue());
+        for (Short2ObjectMap.Entry<Object> entry : getSettings().short2ObjectEntrySet()) {
+            stack.setting(EntryStack.Settings.getById(entry.getShortKey()), entry.getValue());
+        }
+        return stack;
+    }
+    
+    @Override
+    public EntryStack rewrap() {
+        EntryStack stack = EntryStack.create(this.stack);
+        for (Short2ObjectMap.Entry<Object> entry : getSettings().short2ObjectEntrySet()) {
+            stack.setting(EntryStack.Settings.getById(entry.getShortKey()), entry.getValue());
         }
         return stack;
     }
@@ -216,7 +225,7 @@ public class FluidEntryStack extends AbstractEntryStack {
     public void render(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
         if (get(Settings.RENDER).get()) {
             FluidAttributes attributes = stack.getFluid().getAttributes();
-            ResourceLocation texture = attributes.getStillTexture();
+            ResourceLocation texture = attributes.getStillTexture(stack);
             RenderMaterial blockMaterial = ForgeHooksClient.getBlockMaterial(texture);
             TextureAtlasSprite sprite = blockMaterial.sprite();
             int color = attributes.getColor(Minecraft.getInstance().level, BlockPos.ZERO);
@@ -224,7 +233,6 @@ public class FluidEntryStack extends AbstractEntryStack {
             int r = (color >> 16 & 255);
             int g = (color >> 8 & 255);
             int b = (color & 255);
-            Minecraft.getInstance().getTextureManager().bind(texture);
             IRenderTypeBuffer.Impl source = Minecraft.getInstance().renderBuffers().bufferSource();
             IVertexBuilder builder = blockMaterial.buffer(source, FluidEntryStack::createFluid);
             Matrix4f matrix = matrices.last().pose();

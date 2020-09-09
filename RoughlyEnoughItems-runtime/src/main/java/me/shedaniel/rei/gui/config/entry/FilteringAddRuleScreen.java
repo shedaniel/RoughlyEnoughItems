@@ -28,15 +28,11 @@ import me.shedaniel.clothconfig2.forge.gui.widget.DynamicElementListWidget;
 import me.shedaniel.rei.impl.filtering.FilteringRule;
 import me.shedaniel.rei.impl.filtering.rules.ManualFilteringRule;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.util.text.LanguageMap;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.ITextProperties;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.*;
 
 import java.util.Collections;
 import java.util.List;
