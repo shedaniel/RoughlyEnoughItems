@@ -80,10 +80,7 @@ import net.minecraft.client.gui.screen.inventory.*;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.fluid.Fluid;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.PotionItem;
+import net.minecraft.item.*;
 import net.minecraft.item.crafting.*;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionBrewing;
@@ -416,22 +413,34 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
         recipeHelper.registerWorkingStations(SMITHING, EntryStack.create(Items.SMITHING_TABLE));
         recipeHelper.registerWorkingStations(BEACON, EntryStack.create(Items.BEACON));
         recipeHelper.registerWorkingStations(BEACON_PAYMENT, EntryStack.create(Items.BEACON));
-        ITag<Item> axes = Minecraft.getInstance().getConnection().getTags().getItems().getTag(new ResourceLocation("fabric", "axes"));
-        if (axes != null) {
-            for (Item item : axes.getValues()) {
+        Set<Item> axes = Sets.newHashSet(), hoes = Sets.newHashSet(), shovels = Sets.newHashSet();
+        EntryRegistry.getInstance().getEntryStacks().filter(stack -> stack.getType() == EntryStack.Type.ITEM).map(EntryStack::getItem).forEach(item -> {
+            if (item instanceof AxeItem && axes.add(item)) {
                 recipeHelper.registerWorkingStations(STRIPPING, EntryStack.create(item));
             }
-        }
-        ITag<Item> hoes = Minecraft.getInstance().getConnection().getTags().getItems().getTag(new ResourceLocation("fabric", "hoes"));
-        if (hoes != null) {
-            for (Item item : hoes.getValues()) {
+            if (item instanceof HoeItem && hoes.add(item)) {
                 recipeHelper.registerWorkingStations(TILLING, EntryStack.create(item));
             }
-        }
-        ITag<Item> shovels = Minecraft.getInstance().getConnection().getTags().getItems().getTag(new ResourceLocation("fabric", "shovels"));
-        if (shovels != null) {
-            for (Item item : shovels.getValues()) {
+            if (item instanceof ShovelItem && shovels.add(item)) {
                 recipeHelper.registerWorkingStations(PATHING, EntryStack.create(item));
+            }
+        });
+        ITag<Item> axesTag = Minecraft.getInstance().getConnection().getTags().getItems().getTag(new ResourceLocation("c", "axes"));
+        if (axesTag != null) {
+            for (Item item : axesTag.getValues()) {
+                if (axes.add(item)) recipeHelper.registerWorkingStations(STRIPPING, EntryStack.create(item));
+            }
+        }
+        ITag<Item> hoesTag = Minecraft.getInstance().getConnection().getTags().getItems().getTag(new ResourceLocation("c", "hoes"));
+        if (hoesTag != null) {
+            for (Item item : hoesTag.getValues()) {
+                if (hoes.add(item)) recipeHelper.registerWorkingStations(TILLING, EntryStack.create(item));
+            }
+        }
+        ITag<Item> shovelsTag = Minecraft.getInstance().getConnection().getTags().getItems().getTag(new ResourceLocation("c", "shovels"));
+        if (shovelsTag != null) {
+            for (Item item : shovelsTag.getValues()) {
+                if (shovels.add(item)) recipeHelper.registerWorkingStations(PATHING, EntryStack.create(item));
             }
         }
         recipeHelper.removeAutoCraftButton(FUEL);
