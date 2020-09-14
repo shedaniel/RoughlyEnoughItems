@@ -130,7 +130,7 @@ tasks.withType(JavaCompile) {
 }
 
 task jarFilter(type: net.corda.gradle.jarfilter.JarFilterTask) {
-    jars jar
+    jars build
     annotations {
         forRemove = [
                 "org.jetbrains.annotations.NotNull",
@@ -146,25 +146,15 @@ task jarFilter(type: net.corda.gradle.jarfilter.JarFilterTask) {
 }
 
 shadowJar {
-    manifest {
-        inheritFrom project.jar.manifest
-    }
+    relocate("me.shedaniel.autoconfig1u", "me.shedaniel.rei.shadowed.me.shedaniel.autoconfig1u")
 
-    dependencies {
-        include(dependency("me.shedaniel.cloth:basic-math:0.5.1"))
-    }
-
-    appendix = ''
-    classifier = ''
+    setConfigurations([project.configurations.getByName("shadow")])
+    classifier(null)
 }
 
 reobf {
     shadowJar {}
 }
-
-shadowJar.finalizedBy('reobfJar')
-tasks.reobfShadowJar.mustRunAfter shadowJar
-tasks.build.dependsOn reobfShadowJar
 
 task deobfJar(type: Jar, dependsOn: 'jar') {
     from "build/source/main"
