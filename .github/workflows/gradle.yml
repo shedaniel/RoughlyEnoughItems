@@ -12,4 +12,7 @@ jobs:
         with:
           java-version: 1.8
       - name: Build with Gradle
-        run: ./gradlew build --stacktrace
+        run: ./gradlew bintrayUpload --stacktrace
+        env:
+          BINTRAY_USER: shedaniel
+          BINTRAY_KEY: ${{ secrets.BINTRAY_KEY }}
