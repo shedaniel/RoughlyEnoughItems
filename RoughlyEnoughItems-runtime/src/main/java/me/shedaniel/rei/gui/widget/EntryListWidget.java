@@ -112,31 +112,42 @@ public class EntryListWidget extends WidgetWithBounds {
         return Mth.ceil(SIZE * ConfigObject.getInstance().getEntrySize());
     }
     
-    static boolean notSteppingOnExclusionZones(int left, int top, Rectangle listArea) {
+    static boolean notSteppingOnExclusionZones(int left, int top, int width, int height, Rectangle listArea) {
         Minecraft instance = Minecraft.getInstance();
         for (OverlayDecider decider : DisplayHelper.getInstance().getSortedOverlayDeciders(instance.screen.getClass())) {
-            InteractionResult fit = decider.isInZone(left, top);
-            if (fit == InteractionResult.FAIL)
-                return false;
-            InteractionResult fit2 = decider.isInZone(left + 18, top + 18);
-            if (fit2 == InteractionResult.FAIL)
-                return false;
-            if (fit == InteractionResult.SUCCESS && fit2 == InteractionResult.SUCCESS)
-                return true;
+            InteractionResult fit = canItemSlotWidgetFit(left, top, width, height, decider);
+            if (fit != InteractionResult.PASS)
+                return fit == InteractionResult.SUCCESS;
         }
         return true;
     }
     
+    private static InteractionResult canItemSlotWidgetFit(int left, int top, int width, int height, OverlayDecider decider) {
+        InteractionResult fit;
+        fit = decider.isInZone(left, top);
+        if (fit != InteractionResult.PASS)
+            return fit;
+        fit = decider.isInZone(left + width, top);
+        if (fit != InteractionResult.PASS)
+            return fit;
+        fit = decider.isInZone(left, top + height);
+        if (fit != InteractionResult.PASS)
+            return fit;
+        fit = decider.isInZone(left + width, top + height);
+        return fit;
+    }
+    
     private static Rectangle updateInnerBounds(Rectangle bounds) {
+        int entrySize = entrySize();
         if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-            int width = Math.max(Mth.floor((bounds.width - 2 - 6) / (float) entrySize()), 1);
+            int width = Math.max(Mth.floor((bounds.width - 2 - 6) / (float) entrySize), 1);
             if (ConfigObject.getInstance().isLeftHandSidePanel())
-                return new Rectangle((int) (bounds.getCenterX() - width * (entrySize() / 2f) + 3), bounds.y, width * entrySize(), bounds.height);
-            return new Rectangle((int) (bounds.getCenterX() - width * (entrySize() / 2f) - 3), bounds.y, width * entrySize(), bounds.height);
+                return new Rectangle((int) (bounds.getCenterX() - width * (entrySize / 2f) + 3), bounds.y, width * entrySize, bounds.height);
+            return new Rectangle((int) (bounds.getCenterX() - width * (entrySize / 2f) - 3), bounds.y, width * entrySize, bounds.height);
         }
-        int width = Math.max(Mth.floor((bounds.width - 2) / (float) entrySize()), 1);
-        int height = Math.max(Mth.floor((bounds.height - 2) / (float) entrySize()), 1);
-        return new Rectangle((int) (bounds.getCenterX() - width * (entrySize() / 2f)), (int) (bounds.getCenterY() - height * (entrySize() / 2f)), width * entrySize(), height * entrySize());
+        int width = Math.max(Mth.floor((bounds.width - 2) / (float) entrySize), 1);
+        int height = Math.max(Mth.floor((bounds.height - 2) / (float) entrySize), 1);
+        return new Rectangle((int) (bounds.getCenterX() - width * (entrySize / 2f)), (int) (bounds.getCenterY() - height * (entrySize / 2f)), width * entrySize, height * entrySize);
     }
     
     @Override
@@ -234,9 +245,11 @@ public class EntryListWidget extends WidgetWithBounds {
             blockedCount = 0;
             
             Stream<EntryListEntry> entryStream = this.entries.stream().skip(nextIndex).filter(entry -> {
-                entry.getBounds().y = (int) (entry.backupY - scrolling.scrollAmount);
-                if (entry.getBounds().y > bounds.getMaxY()) return false;
-                if (notSteppingOnExclusionZones(entry.getBounds().x, entry.getBounds().y, innerBounds)) {
+                Rectangle entryBounds = entry.getBounds();
+                
+                entryBounds.y = (int) (entry.backupY - scrolling.scrollAmount);
+                if (entryBounds.y > this.bounds.getMaxY()) return false;
+                if (notSteppingOnExclusionZones(entryBounds.x, entryBounds.y, entryBounds.width, entryBounds.height, innerBounds)) {
                     EntryStack stack = allStacks.get(i[0]++);
                     if (!stack.isEmpty()) {
                         entry.entry(stack);
@@ -368,17 +381,20 @@ public class EntryListWidget extends WidgetWithBounds {
     }
     
     public void updateEntriesPosition() {
+        int entrySize = entrySize();
         this.innerBounds = updateInnerBounds(bounds);
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
             this.renders = Lists.newArrayList();
             page = Math.max(page, 0);
             List<EntryListEntry> entries = Lists.newArrayList();
-            int width = innerBounds.width / entrySize();
-            int height = innerBounds.height / entrySize();
+            int width = innerBounds.width / entrySize;
+            int height = innerBounds.height / entrySize;
             for (int currentY = 0; currentY < height; currentY++) {
                 for (int currentX = 0; currentX < width; currentX++) {
-                    if (notSteppingOnExclusionZones(currentX * entrySize() + innerBounds.x, currentY * entrySize() + innerBounds.y, innerBounds)) {
-                        entries.add((EntryListEntry) new EntryListEntry(currentX * entrySize() + innerBounds.x, currentY * entrySize() + innerBounds.y).noBackground());
+                    int slotX = currentX * entrySize + innerBounds.x;
+                    int slotY = currentY * entrySize + innerBounds.y;
+                    if (notSteppingOnExclusionZones(slotX - 1, slotY - 1, entrySize, entrySize, innerBounds)) {
+                        entries.add((EntryListEntry) new EntryListEntry(slotX, slotY, entrySize).noBackground());
                     }
                 }
             }
@@ -393,16 +409,16 @@ public class EntryListWidget extends WidgetWithBounds {
             this.widgets.addAll(entries);
         } else {
             page = 0;
-            int width = innerBounds.width / entrySize();
-            int pageHeight = innerBounds.height / entrySize();
+            int width = innerBounds.width / entrySize;
+            int pageHeight = innerBounds.height / entrySize;
             int slotsToPrepare = Math.max(allStacks.size() * 3, width * pageHeight * 3);
             int currentX = 0;
             int currentY = 0;
             List<EntryListEntry> entries = Lists.newArrayList();
             for (int i = 0; i < slotsToPrepare; i++) {
-                int xPos = currentX * entrySize() + innerBounds.x;
-                int yPos = currentY * entrySize() + innerBounds.y;
-                entries.add((EntryListEntry) new EntryListEntry(xPos, yPos).noBackground());
+                int xPos = currentX * entrySize + innerBounds.x;
+                int yPos = currentY * entrySize + innerBounds.y;
+                entries.add((EntryListEntry) new EntryListEntry(xPos, yPos, entrySize).noBackground());
                 currentX++;
                 if (currentX >= width) {
                     currentX = 0;
@@ -531,8 +547,8 @@ public class EntryListWidget extends WidgetWithBounds {
     }
     
     private class EntryListEntry extends EntryListEntryWidget {
-        private EntryListEntry(int x, int y) {
-            super(new Point(x, y));
+        private EntryListEntry(int x, int y, int entrySize) {
+            super(new Point(x, y), entrySize);
         }
         
         @Override

@@ -32,6 +32,7 @@ import it.unimi.dsi.fastutil.objects.ReferenceSet;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
+import me.shedaniel.rei.api.fractions.Fraction;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.plugin.autocrafting.DefaultRecipeBookHandler;
 import me.shedaniel.rei.plugin.beacon.DefaultBeaconBaseCategory;
@@ -403,7 +404,7 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
         FluidSupportProvider.getInstance().registerProvider(itemStack -> {
             Item item = itemStack.getItem();
             if (item instanceof BucketItem)
-                return InteractionResultHolder.success(Stream.of(EntryStack.create(((BucketItem) item).content, 1000)));
+                return InteractionResultHolder.success(Stream.of(EntryStack.create(((BucketItem) item).content, Fraction.ofWhole(1))));
             return InteractionResultHolder.pass(null);
         });
 //        SubsetsRegistry subsetsRegistry = SubsetsRegistry.INSTANCE;

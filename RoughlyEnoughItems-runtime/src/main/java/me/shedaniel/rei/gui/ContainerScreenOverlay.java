@@ -74,7 +74,10 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 @ApiStatus.Internal
 public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverlay {
@@ -319,7 +322,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
         }
         subsetsButtonBounds = getSubsetsButtonBounds();
         if (ConfigObject.getInstance().isSubsetsEnabled()) {
-            widgets.add(InternalWidgets.wrapLateRenderable(InternalWidgets.wrapTranslate(Widgets.createButton(subsetsButtonBounds, ((ClientHelperImpl) ClientHelper.getInstance()).isAprilFools.get() ? new TranslatableComponent("text.rei.tiny_potato") : new TranslatableComponent("text.rei.subsets"))
+            widgets.add(InternalWidgets.wrapLateRenderable(InternalWidgets.wrapTranslate(Widgets.createButton(subsetsButtonBounds, ClientHelperImpl.getInstance().isAprilFools.get() ? new TranslatableComponent("text.rei.tiny_potato") : new TranslatableComponent("text.rei.subsets"))
                     .onClick(button -> {
                         if (subsetsMenu == null) {
                             wrappedSubsetsMenu = InternalWidgets.wrapTranslate(InternalWidgets.wrapLateRenderable(this.subsetsMenu = Menu.createSubsetsMenuFromRegistry(new Point(this.subsetsButtonBounds.x, this.subsetsButtonBounds.getMaxY()))), 0, 0, 400);
@@ -338,7 +341,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
             }).tooltipLine(I18n.get("text.rei.go_back_first_page")).focusable(false).onRender((matrices, label) -> {
                 label.setClickable(ENTRY_LIST_WIDGET.getTotalPages() > 1);
                 label.setText(new TextComponent(String.format("%s/%s", ENTRY_LIST_WIDGET.getPage() + 1, Math.max(ENTRY_LIST_WIDGET.getTotalPages(), 1))));
-            }));
+            }).rainbow(new Random().nextFloat() < 1.0E-4D || ClientHelperImpl.getInstance().isAprilFools.get()));
         }
         if (ConfigObject.getInstance().isCraftableFilterEnabled()) {
             Rectangle area = getCraftableToggleArea();
@@ -589,10 +592,10 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
     public void renderTooltipInner(PoseStack matrices, List<FormattedCharSequence> lines, int mouseX, int mouseY) {
         if (lines.isEmpty())
             return;
-        tooltipWidth = lines.stream().map(font::width).max(Integer::compareTo).get();
-        tooltipHeight = lines.size() <= 1 ? 8 : lines.size() * 10;
-        tooltipLines = lines;
-        ScreenHelper.drawHoveringWidget(matrices, mouseX, mouseY, renderTooltipCallback, tooltipWidth, tooltipHeight, 0);
+        matrices.pushPose();
+        matrices.translate(0, 0, 500);
+        minecraft.screen.renderTooltip(matrices, lines, mouseX, mouseY);
+        matrices.popPose();
     }
     
     public void addTooltip(@Nullable Tooltip tooltip) {

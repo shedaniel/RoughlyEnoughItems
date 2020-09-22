@@ -38,8 +38,8 @@ import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.fractions.Fraction;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.utils.CollectionUtils;
-import me.shedaniel.rei.utils.FormattingUtils;
 import me.shedaniel.rei.utils.ImmutableLiteralText;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -200,18 +200,12 @@ public class FluidEntryStack extends AbstractEntryStack {
             if (amountTooltip != null)
                 toolTip.addAll(Stream.of(amountTooltip.split("\n")).map(TextComponent::new).collect(Collectors.toList()));
         }
+        if (Minecraft.getInstance().options.advancedItemTooltips) {
+            toolTip.add((new TextComponent(Registry.FLUID.getKey(this.getFluid()).toString())).withStyle(ChatFormatting.DARK_GRAY));
+        }
         toolTip.addAll(get(Settings.TOOLTIP_APPEND_EXTRA).apply(this));
         if (get(Settings.TOOLTIP_APPEND_MOD).get() && ConfigObject.getInstance().shouldAppendModNames()) {
-            ResourceLocation id = Registry.FLUID.getKey(fluid);
-            final String modId = ClientHelper.getInstance().getModFromIdentifier(id);
-            boolean alreadyHasMod = false;
-            for (Component s : toolTip)
-                if (FormattingUtils.stripFormatting(s.getString()).equalsIgnoreCase(modId)) {
-                    alreadyHasMod = true;
-                    break;
-                }
-            if (!alreadyHasMod)
-                toolTip.add(ClientHelper.getInstance().getFormattedModFromIdentifier(id));
+            ClientHelper.getInstance().appendModIdToTooltips(toolTip, Registry.FLUID.getKey(getFluid()).getNamespace());
         }
         return Tooltip.create(toolTip);
     }

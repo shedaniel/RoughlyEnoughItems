@@ -327,17 +327,18 @@ public class FilteringScreen extends Screen {
     }
     
     public void updateEntriesPosition() {
+        int entrySize = entrySize();
         this.innerBounds = updateInnerBounds(getBounds());
-        int width = innerBounds.width / entrySize();
-        int pageHeight = innerBounds.height / entrySize();
+        int width = innerBounds.width / entrySize;
+        int pageHeight = innerBounds.height / entrySize;
         int slotsToPrepare = Math.max(entryStacks.size() * 3, width * pageHeight * 3);
         int currentX = 0;
         int currentY = 0;
         List<EntryListEntry> entries = Lists.newArrayList();
         for (int i = 0; i < slotsToPrepare; i++) {
-            int xPos = currentX * entrySize() + innerBounds.x;
-            int yPos = currentY * entrySize() + innerBounds.y;
-            entries.add(new EntryListEntry(xPos, yPos));
+            int xPos = currentX * entrySize + innerBounds.x;
+            int yPos = currentY * entrySize + innerBounds.y;
+            entries.add(new EntryListEntry(xPos, yPos, entrySize));
             currentX++;
             if (currentX >= width) {
                 currentX = 0;
@@ -453,10 +454,10 @@ public class FilteringScreen extends Screen {
         private boolean filtered = false;
         private boolean dirty = true;
         
-        private EntryListEntry(int x, int y) {
+        private EntryListEntry(int x, int y, int entrySize) {
             super(new Point(x, y));
             this.backupY = y;
-            getBounds().width = getBounds().height = entrySize();
+            getBounds().width = getBounds().height = entrySize;
             interactableFavorites(false);
             interactable(false);
             noHighlight();

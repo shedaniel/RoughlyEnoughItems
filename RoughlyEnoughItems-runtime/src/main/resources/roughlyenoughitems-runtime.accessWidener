@@ -12,3 +12,6 @@ accessible field net/minecraft/client/gui/components/ImageButton resourceLocatio
 accessible method net/minecraft/client/gui/GuiComponent innerBlit (Lcom/mojang/math/Matrix4f;IIIIIFFFF)V
 accessible field net/minecraft/world/item/CreativeModeTab langId Ljava/lang/String;
 accessible field net/minecraft/world/entity/player/Inventory compartments Ljava/util/List;
+accessible class net/minecraft/client/gui/Font$StringRenderOutput
+accessible field net/minecraft/client/gui/Font SHADOW_OFFSET Lcom/mojang/math/Vector3f;
+accessible field net/minecraft/client/StringSplitter widthProvider Lnet/minecraft/client/StringSplitter$WidthProvider;
