@@ -40,7 +40,7 @@
   "text.rei.config": "設定",
   "text.rei.config_tooltip": "設定画面を開く\n§7チートモードをShift+左ボタンで切り替え",
   "text.rei.config.optifine.title": "Failed to open REI config screen",
-  "text.rei.config.optifine.description": "The configuration screen is incompatible with OptiFine / OptiFabric.",
+  "text.rei.config.optifine.description": "The configuration screen is incompatible with your instance of OptiFine / OptiFabric.",
   "text.rei.cheat_items": "{player_name}に[{item_name}§f]を{item_count} 個与えました",
   "text.rei.failed_cheat_items": "§cアイテムを提供できませんでした。",
   "ordering.rei.ascending": "昇順",
