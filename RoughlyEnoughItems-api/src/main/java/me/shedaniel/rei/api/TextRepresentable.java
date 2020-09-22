@@ -26,10 +26,10 @@ package me.shedaniel.rei.api;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.utils.FormattingUtils;
+import me.shedaniel.rei.utils.ImmutableLiteralText;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import org.jetbrains.annotations.NotNull;
 
 @Environment(EnvType.CLIENT)
@@ -41,11 +41,11 @@ public interface TextRepresentable {
             if (tooltip != null && !tooltip.getText().isEmpty())
                 return tooltip.getText().get(0);
         }
-        return new TextComponent("");
+        return ImmutableLiteralText.EMPTY;
     }
     
     @NotNull
     default Component asFormatStrippedText() {
-        return new TextComponent(FormattingUtils.stripFormatting(asFormattedText().getString()));
+        return new ImmutableLiteralText(FormattingUtils.stripFormatting(asFormattedText().getString()));
     }
 }

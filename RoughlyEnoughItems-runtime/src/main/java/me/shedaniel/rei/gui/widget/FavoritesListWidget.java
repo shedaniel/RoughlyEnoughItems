@@ -84,10 +84,11 @@ public class FavoritesListWidget extends WidgetWithBounds {
     private boolean draggingScrollBar = false;
     
     private static Rectangle updateInnerBounds(Rectangle bounds) {
-        int width = Math.max(Mth.floor((bounds.width - 2 - 6) / (float) entrySize()), 1);
+        int entrySize = entrySize();
+        int width = Math.max(Mth.floor((bounds.width - 2 - 6) / (float) entrySize), 1);
         if (!ConfigObject.getInstance().isLeftHandSidePanel())
-            return new Rectangle((int) (bounds.getCenterX() - width * (entrySize() / 2f) + 3), bounds.y, width * entrySize(), bounds.height);
-        return new Rectangle((int) (bounds.getCenterX() - width * (entrySize() / 2f) - 3), bounds.y, width * entrySize(), bounds.height);
+            return new Rectangle((int) (bounds.getCenterX() - width * (entrySize / 2f) + 3), bounds.y, width * entrySize, bounds.height);
+        return new Rectangle((int) (bounds.getCenterX() - width * (entrySize / 2f) - 3), bounds.y, width * entrySize, bounds.height);
     }
     
     @Override
@@ -119,9 +120,11 @@ public class FavoritesListWidget extends WidgetWithBounds {
         blockedCount = 0;
         
         Stream<EntryListEntry> entryStream = this.entries.stream().skip(nextIndex).filter(entry -> {
-            entry.getBounds().y = (int) (entry.backupY - scrolling.scrollAmount);
-            if (entry.getBounds().y > bounds.getMaxY()) return false;
-            if (notSteppingOnExclusionZones(entry.getBounds().x, entry.getBounds().y, innerBounds)) {
+            Rectangle entryBounds = entry.getBounds();
+            
+            entryBounds.y = (int) (entry.backupY - scrolling.scrollAmount);
+            if (entryBounds.y > this.bounds.getMaxY()) return false;
+            if (notSteppingOnExclusionZones(entryBounds.x, entryBounds.y, entryBounds.width, entryBounds.height, innerBounds)) {
                 EntryStack stack = favorites.get(i[0]++);
                 if (!stack.isEmpty()) {
                     entry.entry(stack);
@@ -242,17 +245,18 @@ public class FavoritesListWidget extends WidgetWithBounds {
     }
     
     public void updateEntriesPosition() {
+        int entrySize = entrySize();
         this.innerBounds = updateInnerBounds(bounds);
-        int width = innerBounds.width / entrySize();
-        int pageHeight = innerBounds.height / entrySize();
+        int width = innerBounds.width / entrySize;
+        int pageHeight = innerBounds.height / entrySize;
         int slotsToPrepare = Math.max(favorites.size() * 3, width * pageHeight * 3);
         int currentX = 0;
         int currentY = 0;
         List<EntryListEntry> entries = Lists.newArrayList();
         for (int i = 0; i < slotsToPrepare; i++) {
-            int xPos = currentX * entrySize() + innerBounds.x;
-            int yPos = currentY * entrySize() + innerBounds.y;
-            entries.add((EntryListEntry) new EntryListEntry(xPos, yPos).noBackground());
+            int xPos = currentX * entrySize + innerBounds.x;
+            int yPos = currentY * entrySize + innerBounds.y;
+            entries.add((EntryListEntry) new EntryListEntry(xPos, yPos, entrySize).noBackground());
             currentX++;
             if (currentX >= width) {
                 currentX = 0;
@@ -295,8 +299,8 @@ public class FavoritesListWidget extends WidgetWithBounds {
     }
     
     private class EntryListEntry extends EntryListEntryWidget {
-        private EntryListEntry(int x, int y) {
-            super(new Point(x, y));
+        private EntryListEntry(int x, int y, int entrySize) {
+            super(new Point(x, y), entrySize);
         }
         
         @Override

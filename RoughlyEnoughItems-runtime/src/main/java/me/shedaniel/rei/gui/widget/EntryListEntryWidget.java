@@ -31,15 +31,13 @@ import me.shedaniel.rei.api.EntryStack;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.item.Item;
 
-import static me.shedaniel.rei.gui.widget.EntryListWidget.entrySize;
-
 public class EntryListEntryWidget extends EntryWidget {
     public int backupY;
     
-    protected EntryListEntryWidget(Point point) {
+    protected EntryListEntryWidget(Point point, int entrySize) {
         super(point);
         this.backupY = point.y;
-        getBounds().width = getBounds().height = entrySize();
+        getBounds().width = getBounds().height = entrySize;
     }
     
     @Override

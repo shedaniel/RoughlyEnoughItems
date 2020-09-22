@@ -34,20 +34,22 @@
   "custom": {
     "modmenu:parent": "roughlyenoughitems",
     "rei:translators": {
-      "English": "shedaniel",
+      "English": ["shedaniel"],
       "Japanese": ["swordglowsblue", "hinataaki"],
-      "Chinese Simplified": ["XuyuEre", "shedaniel", "SciUniv_Moring", "Takakura-Anri", "liushuyu", "lkxian17084", "MynameisTT"],
+      "Chinese Simplified": ["XuyuEre", "shedaniel", "SciUniv_Moring", "Takakura-Anri", "liushuyu", "lkxian17084", "MynameisTT", "detiam", "Snapshot_light", "JerryHan", "WarrenWN", "Lograthmic"],
       "Chinese Traditional": ["hugoalh", "gxy17886", "shedaniel", "961111ray"],
       "French": ["Yanis48", "Koockies", "dagdar", "samnamstyle123"],
-      "German": ["MelanX", "guntram7", "tabmeier12", "Siphalor", "M-S-72"],
+      "German": ["MelanX", "guntram7", "tabmeier12", "Siphalor", "M-S-72", "SirClaver", "bugginggg", "wohlhabend", "Eiim", "valoeghese", "luro02"],
       "Estonian": ["Madis0"],
       "Portuguese": ["thiagokenis", "KewaiiGamer"],
-      "Portuguese Brazilian": ["thiagokenis", "joaoh1", "yuriob262", "Pinkstyles", "felipemk67"],
+      "Portuguese Brazilian": ["thiagokenis", "joaoh1", "yuriob262", "Pinkstyles", "felipemk67", "Stevolaff", "stann0x"],
       "LOLCAT": ["shedaniel", "RaxedMC", "lkxian17084"],
       "Upside Down English": ["shedaniel", "magnusk28", "scarzdz"],
       "Bulgarian": ["geniiii", "Dremski"],
-      "Russian": ["MrYonter", "kwmika1girl", "LimyChitou", "Great_Manalal", "s3rbug", "TheByKotik", "ebogish", "xqr.", "scarzdz", "JCat", "map788", "kyrtion"],
-      "Polish": ["mikolajkazmierczak", "Piteriuz"]
+      "Russian": ["MrYonter", "kwmika1girl", "LimyChitou", "Great_Manalal", "s3rbug", "TheByKotik", "ebogish", "xqr.", "scarzdz", "JCat", "map788", "kyrtion", "CanslerW", "MinerChAI", "nef1k"],
+      "Polish": ["mikolajkazmierczak", "Piteriuz", "BeetMacol"],
+      "Norwegian": ["CanslerW"],
+      "Turkish": ["NOYB"]
     }
   }
 }

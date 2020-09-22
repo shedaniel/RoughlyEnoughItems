@@ -25,12 +25,18 @@ package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.impl.Internals;
 import me.shedaniel.rei.utils.CollectionUtils;
+import me.shedaniel.rei.utils.FormattingUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -135,7 +141,11 @@ public interface ClientHelper {
      * @param item the item to find
      * @return the mod name
      */
-    String getModFromItem(Item item);
+    default String getModFromItem(Item item) {
+        if (item.equals(Items.AIR))
+            return "";
+        return getModFromIdentifier(Registry.ITEM.getKey(item));
+    }
     
     /**
      * Tries to delete the player's cursor item
@@ -148,7 +158,12 @@ public interface ClientHelper {
      * @param item the item to find
      * @return the mod name with blue and italic formatting
      */
-    Component getFormattedModFromItem(Item item);
+    default Component getFormattedModFromItem(Item item) {
+        String mod = getModFromItem(item);
+        if (mod.isEmpty())
+            return NarratorChatListener.NO_TITLE;
+        return new TextComponent(mod).withStyle(ChatFormatting.BLUE, ChatFormatting.ITALIC);
+    }
     
     /**
      * Gets the formatted mod from an identifier
@@ -156,7 +171,38 @@ public interface ClientHelper {
      * @param identifier the identifier to find
      * @return the mod name with blue and italic formatting
      */
-    Component getFormattedModFromIdentifier(ResourceLocation identifier);
+    default Component getFormattedModFromIdentifier(ResourceLocation identifier) {
+        String mod = getModFromIdentifier(identifier);
+        if (mod.isEmpty())
+            return NarratorChatListener.NO_TITLE;
+        return new TextComponent(mod).withStyle(ChatFormatting.BLUE, ChatFormatting.ITALIC);
+    }
+    
+    /**
+     * Gets the mod from a modid
+     *
+     * @param modid the modid of the mod
+     * @return the mod name with blue and italic formatting
+     */
+    default Component getFormattedModFromModId(String modid) {
+        String mod = getModFromModId(modid);
+        if (mod.isEmpty())
+            return NarratorChatListener.NO_TITLE;
+        return new TextComponent(mod).withStyle(ChatFormatting.BLUE, ChatFormatting.ITALIC);
+    }
+    
+    default List<Component> appendModIdToTooltips(List<Component> components, String modId) {
+        final String modName = ClientHelper.getInstance().getModFromModId(modId);
+        boolean alreadyHasMod = false;
+        for (Component s : components)
+            if (FormattingUtils.stripFormatting(s.getString()).equalsIgnoreCase(modName)) {
+                alreadyHasMod = true;
+                break;
+            }
+        if (!alreadyHasMod)
+            components.add(ClientHelper.getInstance().getFormattedModFromModId(modId));
+        return components;
+    }
     
     /**
      * Gets the mod from an identifier

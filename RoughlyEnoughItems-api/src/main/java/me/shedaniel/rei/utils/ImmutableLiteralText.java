@@ -34,7 +34,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public final class ImmutableLiteralText implements Component {
+public final class ImmutableLiteralText implements MutableComponent {
     public static final ImmutableLiteralText EMPTY = new ImmutableLiteralText("");
     private final String content;
     private FormattedCharSequence orderedText;
@@ -60,7 +60,7 @@ public final class ImmutableLiteralText implements Component {
     
     @Override
     public MutableComponent plainCopy() {
-        return new TextComponent(content);
+        return this;
     }
     
     @Override
@@ -84,5 +84,15 @@ public final class ImmutableLiteralText implements Component {
             orderedText = Language.getInstance().getVisualOrder(this);
         }
         return orderedText;
+    }
+    
+    @Override
+    public MutableComponent setStyle(Style style) {
+        return new TextComponent(content).withStyle(style);
+    }
+    
+    @Override
+    public MutableComponent append(Component component) {
+        return new TextComponent(content).append(component);
     }
 }

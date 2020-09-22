@@ -31,6 +31,7 @@ import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.widgets.Label;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
+import me.shedaniel.rei.impl.TextTransformations;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.FormattedText;
@@ -62,6 +63,7 @@ public final class LabelWidget extends Label {
     @Nullable private Consumer<Label> onClick;
     @Nullable private BiConsumer<PoseStack, Label> onRender;
     @NotNull private FormattedText text;
+    private boolean rainbow;
     @NotNull private final LazyResettable<FormattedCharSequence> orderedText = new LazyResettable<>(() -> Language.getInstance().getVisualOrder(getMessage()));
     
     public LabelWidget(@NotNull Point point, @NotNull FormattedText text) {
@@ -185,6 +187,11 @@ public final class LabelWidget extends Label {
         this.orderedText.reset();
     }
     
+    @Override
+    public void setRainbow(boolean rainbow) {
+        this.rainbow = rainbow;
+    }
+    
     @NotNull
     @Override
     public final Rectangle getBounds() {
@@ -205,26 +212,28 @@ public final class LabelWidget extends Label {
         if (isClickable() && isHovered(mouseX, mouseY))
             color = getHoveredColor();
         Point pos = getPoint();
-        int width = font.width(orderedText.get());
+        FormattedCharSequence sequence = orderedText.get();
+        if (rainbow) sequence = TextTransformations.applyRainbow(sequence, pos.x, pos.y);
+        int width = font.width(sequence);
         switch (getHorizontalAlignment()) {
             case LEFT_ALIGNED:
                 if (hasShadow())
-                    font.drawShadow(matrices, orderedText.get(), pos.x, pos.y, color);
+                    font.drawShadow(matrices, sequence, pos.x, pos.y, color);
                 else
-                    font.draw(matrices, orderedText.get(), pos.x, pos.y, color);
+                    font.draw(matrices, sequence, pos.x, pos.y, color);
                 break;
             case RIGHT_ALIGNED:
                 if (hasShadow())
-                    font.drawShadow(matrices, orderedText.get(), pos.x - width, pos.y, color);
+                    font.drawShadow(matrices, sequence, pos.x - width, pos.y, color);
                 else
-                    font.draw(matrices, orderedText.get(), pos.x - width, pos.y, color);
+                    font.draw(matrices, sequence, pos.x - width, pos.y, color);
                 break;
             case CENTER:
             default:
                 if (hasShadow())
-                    font.drawShadow(matrices, orderedText.get(), pos.x - width / 2f, pos.y, color);
+                    font.drawShadow(matrices, sequence, pos.x - width / 2f, pos.y, color);
                 else
-                    font.draw(matrices, orderedText.get(), pos.x - width / 2f, pos.y, color);
+                    font.draw(matrices, sequence, pos.x - width / 2f, pos.y, color);
                 break;
         }
         if (isHovered(mouseX, mouseY)) {

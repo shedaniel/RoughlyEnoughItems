@@ -145,7 +145,7 @@ public final class InternalWidgets {
                 .tooltipSupplier(button -> {
                     String str = "";
                     if (errorTooltip[0] == null) {
-                        if (((ClientHelperImpl) ClientHelper.getInstance()).isYog.get())
+                        if (ClientHelperImpl.getInstance().isYog.get())
                             str += I18n.get("text.auto_craft.move_items.yog");
                         else
                             str += I18n.get("text.auto_craft.move_items");

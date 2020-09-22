@@ -36,8 +36,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static net.minecraft.world.InteractionResult.PASS;
-
 @Environment(EnvType.CLIENT)
 public interface DisplayHelper {
     
@@ -167,15 +165,18 @@ public interface DisplayHelper {
          * @see BaseBoundsHandler#registerExclusionZones(Class, Supplier) for easier api
          */
         default InteractionResult canItemSlotWidgetFit(int left, int top, T screen, Rectangle fullBounds) {
-            InteractionResult fit = isInZone(left, top);
-            if (fit == InteractionResult.FAIL)
-                return InteractionResult.FAIL;
-            InteractionResult fit2 = isInZone(left + 18, top + 18);
-            if (fit2 == InteractionResult.FAIL)
-                return InteractionResult.FAIL;
-            if (fit == InteractionResult.SUCCESS && fit2 == InteractionResult.SUCCESS)
-                return InteractionResult.SUCCESS;
-            return PASS;
+            InteractionResult fit;
+            fit = isInZone(left, top);
+            if (fit != InteractionResult.PASS)
+                return fit;
+            fit = isInZone(left + 18, top);
+            if (fit != InteractionResult.PASS)
+                return fit;
+            fit = isInZone(left, top + 18);
+            if (fit != InteractionResult.PASS)
+                return fit;
+            fit = isInZone(left + 18, top + 18);
+            return fit;
         }
         
         @Override

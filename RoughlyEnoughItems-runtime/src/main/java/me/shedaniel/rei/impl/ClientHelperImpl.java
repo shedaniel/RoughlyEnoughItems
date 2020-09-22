@@ -40,24 +40,17 @@ import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
-import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.LazyLoadedValue;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -66,7 +59,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static me.shedaniel.rei.impl.Internals.attachInstance;
 
@@ -100,29 +92,6 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     @ApiStatus.Internal
     public static ClientHelperImpl getInstance() {
         return instance;
-    }
-    
-    @Override
-    public Component getFormattedModFromItem(Item item) {
-        String mod = getModFromItem(item);
-        if (mod.isEmpty())
-            return NarratorChatListener.NO_TITLE;
-        return new TextComponent(mod).withStyle(ChatFormatting.BLUE, ChatFormatting.ITALIC);
-    }
-    
-    @Override
-    public Component getFormattedModFromIdentifier(ResourceLocation identifier) {
-        String mod = getModFromIdentifier(identifier);
-        if (mod.isEmpty())
-            return NarratorChatListener.NO_TITLE;
-        return new TextComponent(mod).withStyle(ChatFormatting.BLUE, ChatFormatting.ITALIC);
-    }
-    
-    @Override
-    public String getModFromItem(Item item) {
-        if (item.equals(Items.AIR))
-            return "";
-        return getModFromIdentifier(Registry.ITEM.getKey(item));
     }
     
     @Override
@@ -296,7 +265,8 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         @Nullable private ResourceLocation preferredOpenedCategory = null;
         @Nullable private EntryStack inputNotice;
         @Nullable private EntryStack outputNotice;
-        @NotNull private final LazyLoadedValue<Map<RecipeCategory<?>, List<RecipeDisplay>>> map = new LazyLoadedValue<>(() -> RecipeHelper.getInstance().buildMapFor(this));
+        @NotNull
+        private final LazyLoadedValue<Map<RecipeCategory<?>, List<RecipeDisplay>>> map = new LazyLoadedValue<>(() -> RecipeHelper.getInstance().buildMapFor(this));
         
         @Override
         public ClientHelper.ViewSearchBuilder addCategory(ResourceLocation category) {
