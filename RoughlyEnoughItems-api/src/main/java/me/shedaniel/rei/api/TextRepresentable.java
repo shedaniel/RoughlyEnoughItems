@@ -26,8 +26,8 @@ package me.shedaniel.rei.api;
 import me.shedaniel.clothconfig2.forge.api.PointHelper;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.utils.FormattingUtils;
+import me.shedaniel.rei.utils.ImmutableLiteralText;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
@@ -41,11 +41,11 @@ public interface TextRepresentable {
             if (tooltip != null && !tooltip.getText().isEmpty())
                 return tooltip.getText().get(0);
         }
-        return new StringTextComponent("");
+        return ImmutableLiteralText.EMPTY;
     }
     
     @NotNull
     default ITextComponent asFormatStrippedText() {
-        return new StringTextComponent(FormattingUtils.stripFormatting(asFormattedText().getString()));
+        return new ImmutableLiteralText(FormattingUtils.stripFormatting(asFormattedText().getString()));
     }
 }

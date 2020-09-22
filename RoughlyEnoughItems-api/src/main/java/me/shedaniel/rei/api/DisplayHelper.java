@@ -165,15 +165,18 @@ public interface DisplayHelper {
          * @see BaseBoundsHandler#registerExclusionZones(Class, Supplier) for easier api
          */
         default ActionResultType canItemSlotWidgetFit(int left, int top, T screen, Rectangle fullBounds) {
-            ActionResultType fit = isInZone(left, top);
-            if (fit == ActionResultType.FAIL)
-                return ActionResultType.FAIL;
-            ActionResultType fit2 = isInZone(left + 18, top + 18);
-            if (fit2 == ActionResultType.FAIL)
-                return ActionResultType.FAIL;
-            if (fit == ActionResultType.SUCCESS && fit2 == ActionResultType.SUCCESS)
-                return ActionResultType.SUCCESS;
-            return ActionResultType.PASS;
+            ActionResultType fit;
+            fit = isInZone(left, top);
+            if (fit != ActionResultType.PASS)
+                return fit;
+            fit = isInZone(left + 18, top);
+            if (fit != ActionResultType.PASS)
+                return fit;
+            fit = isInZone(left, top + 18);
+            if (fit != ActionResultType.PASS)
+                return fit;
+            fit = isInZone(left + 18, top + 18);
+            return fit;
         }
         
         @Override

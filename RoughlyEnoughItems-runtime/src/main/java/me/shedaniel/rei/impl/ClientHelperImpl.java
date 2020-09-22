@@ -100,29 +100,6 @@ public class ClientHelperImpl implements ClientHelper {
     }
     
     @Override
-    public ITextComponent getFormattedModFromItem(Item item) {
-        String mod = getModFromItem(item);
-        if (mod.isEmpty())
-            return NarratorChatListener.NO_TITLE;
-        return new StringTextComponent(mod).withStyle(TextFormatting.BLUE, TextFormatting.ITALIC);
-    }
-    
-    @Override
-    public ITextComponent getFormattedModFromIdentifier(ResourceLocation identifier) {
-        String mod = getModFromIdentifier(identifier);
-        if (mod.isEmpty())
-            return NarratorChatListener.NO_TITLE;
-        return new StringTextComponent(mod).withStyle(TextFormatting.BLUE, TextFormatting.ITALIC);
-    }
-    
-    @Override
-    public String getModFromItem(Item item) {
-        if (item.equals(Items.AIR))
-            return "";
-        return getModFromIdentifier(Registry.ITEM.getKey(item));
-    }
-    
-    @Override
     public String getModFromModId(String modid) {
         if (modid == null)
             return "";
@@ -292,7 +269,8 @@ public class ClientHelperImpl implements ClientHelper {
         @Nullable private ResourceLocation preferredOpenedCategory = null;
         @Nullable private EntryStack inputNotice;
         @Nullable private EntryStack outputNotice;
-        @NotNull private final LazyValue<Map<RecipeCategory<?>, List<RecipeDisplay>>> map = new LazyValue<>(() -> RecipeHelper.getInstance().buildMapFor(this));
+        @NotNull
+        private final LazyValue<Map<RecipeCategory<?>, List<RecipeDisplay>>> map = new LazyValue<>(() -> RecipeHelper.getInstance().buildMapFor(this));
         
         @Override
         public ClientHelper.ViewSearchBuilder addCategory(ResourceLocation category) {

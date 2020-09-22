@@ -377,7 +377,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     public static class Appearance {
-        @UseSpecialRecipeTypeScreen private RecipeScreenType recipeScreenType = RecipeScreenType.UNSET;
+        @UseSpecialRecipeTypeScreen private RecipeScreenType recipeScreenType = RecipeScreenType.ORIGINAL;
         @Comment("Declares the appearance of REI windows.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
         private AppearanceTheme theme = AppearanceTheme.LIGHT;
         @ConfigEntry.Gui.CollapsibleObject(startExpanded = true)

@@ -311,6 +311,8 @@ public abstract class Label extends WidgetWithBounds {
     
     public abstract void setMessage(@NotNull ITextProperties message);
     
+    public abstract void setRainbow(boolean rainbow);
+    
     @NotNull
     public final Label text(@NotNull ITextComponent text) {
         setText(text);
@@ -320,6 +322,12 @@ public abstract class Label extends WidgetWithBounds {
     @NotNull
     public final Label message(@NotNull ITextProperties message) {
         setMessage(message);
+        return this;
+    }
+    
+    @NotNull
+    public final Label rainbow(boolean rainbow) {
+        setRainbow(rainbow);
         return this;
     }
 }

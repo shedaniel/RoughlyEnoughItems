@@ -33,7 +33,6 @@ import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.widgets.Tooltip;
-import me.shedaniel.rei.utils.FormattingUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderState;
@@ -48,6 +47,7 @@ import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
@@ -193,18 +193,12 @@ public class FluidEntryStack extends AbstractEntryStack {
             if (amountTooltip != null)
                 toolTip.addAll(Stream.of(amountTooltip.split("\n")).map(StringTextComponent::new).collect(Collectors.toList()));
         }
+        if (Minecraft.getInstance().options.advancedItemTooltips) {
+            toolTip.add((new StringTextComponent(Registry.FLUID.getKey(this.getFluid()).toString())).withStyle(TextFormatting.DARK_GRAY));
+        }
         toolTip.addAll(get(Settings.TOOLTIP_APPEND_EXTRA).apply(this));
         if (get(Settings.TOOLTIP_APPEND_MOD).get() && ConfigObject.getInstance().shouldAppendModNames()) {
-            ResourceLocation id = Registry.FLUID.getKey(stack.getFluid());
-            final String modId = ClientHelper.getInstance().getModFromIdentifier(id);
-            boolean alreadyHasMod = false;
-            for (ITextComponent s : toolTip)
-                if (FormattingUtils.stripFormatting(s.getString()).equalsIgnoreCase(modId)) {
-                    alreadyHasMod = true;
-                    break;
-                }
-            if (!alreadyHasMod)
-                toolTip.add(ClientHelper.getInstance().getFormattedModFromIdentifier(id));
+            ClientHelper.getInstance().appendModIdToTooltips(toolTip, Registry.FLUID.getKey(getFluid()).getNamespace());
         }
         return Tooltip.create(toolTip);
     }

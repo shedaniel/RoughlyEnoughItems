@@ -70,12 +70,12 @@ public class DefaultRuntimePlugin implements REIPluginV0 {
             
             @Override
             public boolean isEmpty() {
-                return !((ClientHelperImpl) ClientHelper.getInstance()).isAprilFools.get();
+                return !ClientHelperImpl.getInstance().isAprilFools.get();
             }
             
             @Override
             public @Nullable Tooltip getTooltip(Point point) {
-                return Tooltip.create(new StringTextComponent("Kibby"));
+                return Tooltip.create(new StringTextComponent("Kirby"), ClientHelper.getInstance().getFormattedModFromModId("Dream Land"));
             }
         });
     }

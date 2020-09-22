@@ -25,12 +25,20 @@ package me.shedaniel.rei.gui.credits;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import me.shedaniel.clothconfig2.forge.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
+import me.shedaniel.rei.impl.TextTransformations;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.util.IReorderingProcessor;
+import net.minecraft.util.SoundEvents;
+import net.minecraft.util.Util;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 @ApiStatus.Internal
@@ -139,4 +147,66 @@ public class CreditsEntryListWidget extends DynamicNewSmoothScrollingEntryListWi
         }
     }
     
+    public static class LinkItem extends CreditsItem {
+        private ITextComponent text;
+        private List<IReorderingProcessor> textSplit;
+        private String link;
+        private boolean contains;
+        private boolean rainbow;
+        
+        public LinkItem(ITextComponent text, String link, int width, boolean rainbow) {
+            this.text = text;
+            this.textSplit = Minecraft.getInstance().font.split(text, width);
+            this.link = link;
+            this.rainbow = rainbow;
+        }
+        
+        @Override
+        public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+            contains = mouseX >= x && mouseX <= x + entryWidth && mouseY >= y && mouseY <= y + entryHeight;
+            if (contains) {
+                Minecraft.getInstance().screen.renderTooltip(matrices, new StringTextComponent("Click to open link."), mouseX, mouseY);
+                int yy = y;
+                for (IReorderingProcessor textSp : textSplit) {
+                    IReorderingProcessor underlined = characterVisitor -> {
+                        return textSp.accept((charIndex, style, codePoint) -> characterVisitor.accept(charIndex, style.applyFormat(TextFormatting.UNDERLINE), codePoint));
+                    };
+                    if (rainbow) underlined = TextTransformations.applyRainbow(underlined, x + 5, yy);
+                    Minecraft.getInstance().font.drawShadow(matrices, underlined, x + 5, yy, 0xff1fc3ff);
+                    yy += 12;
+                }
+            } else {
+                int yy = y;
+                for (IReorderingProcessor textSp : textSplit) {
+                    if (rainbow) textSp = TextTransformations.applyRainbow(textSp, x + 5, yy);
+                    Minecraft.getInstance().font.drawShadow(matrices, textSp, x + 5, yy, 0xff1fc3ff);
+                    yy += 12;
+                }
+            }
+        }
+        
+        @Override
+        public int getItemHeight() {
+            return 12 * textSplit.size();
+        }
+        
+        @Override
+        public boolean changeFocus(boolean boolean_1) {
+            return false;
+        }
+        
+        @Override
+        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            if (contains && button == 0) {
+                Minecraft.getInstance().getSoundManager().play(SimpleSound.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                try {
+                    Util.getPlatform().openUri(new URI(link));
+                    return true;
+                } catch (URISyntaxException e) {
+                    e.printStackTrace();
+                }
+            }
+            return false;
+        }
+    }
 }

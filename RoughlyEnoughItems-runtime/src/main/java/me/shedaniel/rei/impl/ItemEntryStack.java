@@ -36,7 +36,6 @@ import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.widgets.Tooltip;
-import me.shedaniel.rei.utils.FormattingUtils;
 import me.shedaniel.rei.utils.ImmutableLiteralText;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -278,15 +277,7 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
         List<ITextComponent> toolTip = tryGetItemStackToolTip(true);
         toolTip.addAll(get(Settings.TOOLTIP_APPEND_EXTRA).apply(this));
         if (get(Settings.TOOLTIP_APPEND_MOD).get() && ConfigObject.getInstance().shouldAppendModNames()) {
-            final String modId = ClientHelper.getInstance().getModFromItem(getItem());
-            boolean alreadyHasMod = false;
-            for (ITextComponent s : toolTip)
-                if (FormattingUtils.stripFormatting(s.getString()).equalsIgnoreCase(modId)) {
-                    alreadyHasMod = true;
-                    break;
-                }
-            if (!alreadyHasMod)
-                toolTip.add(ClientHelper.getInstance().getFormattedModFromItem(getItem()));
+            ClientHelper.getInstance().appendModIdToTooltips(toolTip, Registry.ITEM.getKey(getItem()).getNamespace());
         }
         return Tooltip.create(toolTip);
     }
