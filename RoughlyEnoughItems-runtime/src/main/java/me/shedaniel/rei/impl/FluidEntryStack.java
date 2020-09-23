@@ -37,20 +37,16 @@ import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.fractions.Fraction;
 import me.shedaniel.rei.api.widgets.Tooltip;
-import me.shedaniel.rei.utils.CollectionUtils;
-import me.shedaniel.rei.utils.ImmutableLiteralText;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -239,9 +235,6 @@ public class FluidEntryStack extends AbstractEntryStack {
     @NotNull
     @Override
     public Component asFormattedText() {
-        ResourceLocation id = Registry.FLUID.getKey(fluid);
-        if (I18n.exists("block." + id.toString().replaceFirst(":", ".")))
-            return new ImmutableLiteralText(I18n.get("block." + id.toString().replaceFirst(":", ".")));
-        return new ImmutableLiteralText(CollectionUtils.mapAndJoinToString(id.getPath().split("_"), StringUtils::capitalize, " "));
+        return fluid.defaultFluidState().createLegacyBlock().getBlock().getName();
     }
 }
