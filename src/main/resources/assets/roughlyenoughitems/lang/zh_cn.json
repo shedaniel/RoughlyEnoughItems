@@ -40,7 +40,7 @@
   "text.rei.config": "配置",
   "text.rei.config_tooltip": "打开配置\n§7按住 Shift 键单击以切换作弊模式",
   "text.rei.config.optifine.title": "打开 REI 配置界面失败",
-  "text.rei.config.optifine.description": "配置界面与 OptiFine / OptiFabric 不兼容。",
+  "text.rei.config.optifine.description": "配置屏幕与您的 OptiFine / OptiFabric的实例不兼容。",
   "text.rei.cheat_items": "已将 {item_count} 个 [{item_name}§f] 给予 {player_name}",
   "text.rei.failed_cheat_items": "§c物品给予失败",
   "ordering.rei.ascending": "顺序",
