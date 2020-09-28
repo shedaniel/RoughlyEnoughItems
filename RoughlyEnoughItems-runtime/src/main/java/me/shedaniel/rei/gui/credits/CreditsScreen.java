@@ -24,6 +24,10 @@
 package me.shedaniel.rei.gui.credits;
 
 import com.google.common.collect.Lists;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.internal.Streams;
+import com.google.gson.stream.JsonReader;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import me.shedaniel.rei.gui.credits.CreditsEntryListWidget.TextCreditsItem;
 import me.shedaniel.rei.gui.credits.CreditsEntryListWidget.TranslationCreditsItem;
@@ -34,19 +38,32 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.gui.widget.button.AbstractButton;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.util.LazyValue;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.fml.ModList;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @ApiStatus.Internal
 public class CreditsScreen extends Screen {
-    
+    private static final LazyValue<Tuple<JsonObject, Exception>> TRANSLATORS = new LazyValue<>(() -> {
+        try (InputStream stream = CreditsScreen.class.getClassLoader().getResourceAsStream("rei_translators.json")) {
+            return new Tuple<>(Streams.parse(new JsonReader(new InputStreamReader(stream, StandardCharsets.UTF_8))).getAsJsonObject(), null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Tuple<>(null, e);
+        }
+    });
     private Screen parent;
     private AbstractButton buttonDone;
     private CreditsEntryListWidget entryListWidget;
@@ -73,22 +90,22 @@ public class CreditsScreen extends Screen {
         entryListWidget.creditsClearEntries();
         List<Tuple<String, String>> translators = Lists.newArrayList();
         Exception[] exception = {null};
-//        FabricLoader.getInstance().getModContainer("roughlyenoughitems-runtime").ifPresent(rei -> {
-//            try {
-//                if (rei.getMetadata().containsCustomValue("rei:translators")) {
-//                    CustomValue.CvObject jsonObject = rei.getMetadata().getCustomValue("rei:translators").getAsObject();
-//                    jsonObject.forEach(entry -> {
-//                        CustomValue value = entry.getValue();
-//                        String behind = value.getType() == CustomValue.CvType.ARRAY ? Lists.newArrayList(value.getAsArray().iterator()).stream().map(CustomValue::getAsString).sorted(String::compareToIgnoreCase).collect(Collectors.joining(", ")) : value.getAsString();
-//                        translators.add(new Tuple<>(entry.getKey(), behind));
-//                    });
-//                }
-//                translators.sort(Comparator.comparing(Tuple::getA, String::compareToIgnoreCase));
-//            } catch (Exception e) {
-//                exception[0] = e;
-//                e.printStackTrace();
-//            }
-//        });
+        Tuple<JsonObject, Exception> tuple = TRANSLATORS.get();
+        if (tuple.getB() != null) {
+            exception[0] = tuple.getB();
+        } else {
+            try {
+                for (Map.Entry<String, JsonElement> entry : tuple.getA().entrySet()) {
+                    JsonElement value = entry.getValue();
+                    String behind = value.isJsonArray() ? Lists.newArrayList(value.getAsJsonArray().iterator()).stream().map(JsonElement::getAsString).sorted(String::compareToIgnoreCase).collect(Collectors.joining(", ")) : value.getAsString();
+                    translators.add(new Tuple<>(entry.getKey(), behind));
+                }
+                translators.sort(Comparator.comparing(Tuple::getA, String::compareToIgnoreCase));
+            } catch (Exception e) {
+                e.printStackTrace();
+                exception[0] = e;
+            }
+        }
         List<Tuple<String, String>> translatorsMapped = translators.stream().map(pair -> {
             return new Tuple<>(
                     "  " + (I18n.exists("language.roughlyenoughitems." + pair.getA().toLowerCase(Locale.ROOT).replace(' ', '_')) ? I18n.get("language.roughlyenoughitems." + pair.getA().toLowerCase(Locale.ROOT).replace(' ', '_')) : pair.getA()),

@@ -57,6 +57,7 @@ import me.shedaniel.rei.impl.filtering.FilteringRule;
 import me.shedaniel.rei.impl.filtering.rules.ManualFilteringRule;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.DialogTexts;
+import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.util.InputMappings;
@@ -140,7 +141,7 @@ public class ConfigManagerImpl implements ConfigManager {
                 , (field) -> field.getType() == List.class, ConfigObjectImpl.UseFilteringScreen.class);
         saveConfig();
         RoughlyEnoughItemsCore.LOGGER.info("Config loaded.");
-    
+        
         ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (minecraft, screen) -> getConfigScreen(screen));
     }
     
@@ -190,9 +191,11 @@ public class ConfigManagerImpl implements ConfigManager {
                     builder.getOrCreateCategory(new TranslationTextComponent("config.roughlyenoughitems.advanced")).getEntries().add(0, new ReloadPluginsEntry(220));
                 }
                 return builder.setAfterInitConsumer(screen -> {
-                    screen.buttons.add(new Button(screen.width - 104, 4, 100, 20, new TranslationTextComponent("text.rei.credits"), button -> {
+                    Button creditsButton = new Button(screen.width - 104, 4, 100, 20, new TranslationTextComponent("text.rei.credits"), button -> {
                         Minecraft.getInstance().setScreen(new CreditsScreen(screen));
-                    }));
+                    });
+                    screen.buttons.add(creditsButton);
+                    ((List<IGuiEventListener>) screen.children()).add(creditsButton);
                 }).setSavingRunnable(() -> {
                     saveConfig();
                     EntryRegistry.getInstance().refilter();
