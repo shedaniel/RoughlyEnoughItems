@@ -47,7 +47,7 @@ public abstract class AbstractEntryStack extends GuiComponent implements EntrySt
                     return this;
                 } else {
                     Short2ObjectMap<Object> singletonSettings = this.settings;
-                    this.settings = new Short2ObjectOpenHashMap<>(4, 1);
+                    this.settings = new Short2ObjectOpenHashMap<>(2);
                     this.settings.putAll(singletonSettings);
                 }
             }
