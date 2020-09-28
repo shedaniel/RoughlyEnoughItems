@@ -35,7 +35,7 @@ version = project.mod_version + "+" + buildTime()
 group = "me.shedaniel"
 
 def buildTime() {
-    def df = new SimpleDateFormat("yyyyMMdd-HHmm") // you can change it
+    def df = new SimpleDateFormat("yyyyMMdd-HHmm")
     df.setTimeZone(TimeZone.getTimeZone("UTC"))
     return df.format(new Date())
 }
@@ -67,7 +67,7 @@ repositories {
 
 afterEvaluate {
     processResources {
-        filesMatching('fabric.mod.json') {
+        filesMatching('META-INF/mods.toml') {
             expand 'version': project.version
         }
         inputs.property "version", project.version

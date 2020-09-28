@@ -6,7 +6,7 @@ authors="shedaniel"
 license="MIT"
 [[mods]]
     modId="roughlyenoughitems"
-    version="${file.jarVersion}"
+    version="${version}"
     displayName="Roughly Enough Items"
     description='''
 To allow players to view items and recipes.
