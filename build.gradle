@@ -30,7 +30,7 @@ apply plugin: 'com.github.johnrengelman.shadow'
 
 import java.text.SimpleDateFormat
 
-archivesBaseName = "RoughlyEnoughItems"
+archivesBaseName = "RoughlyEnoughItems-Forge"
 version = project.mod_version + "+" + buildTime()
 group = "me.shedaniel"
 
