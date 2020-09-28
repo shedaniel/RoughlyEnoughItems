@@ -261,19 +261,60 @@ public interface RecipeHelper {
      */
     void registerLiveRecipeGenerator(LiveRecipeGenerator<?> liveRecipeGenerator);
     
-    void registerScreenClickArea(Rectangle rectangle, Class<? extends ContainerScreen<?>> screenClass, ResourceLocation... categories);
+    /**
+     * @deprecated Use {@link #registerContainerClickArea(Rectangle, Class, ResourceLocation...)} for the same result.
+     */
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
+    default void registerScreenClickArea(Rectangle rectangle, Class<? extends ContainerScreen<?>> screenClass, ResourceLocation... categories) {
+        registerContainerClickArea(rectangle, screenClass, categories);
+    }
+    
+    /**
+     * Registers a click area for a container screen.
+     *
+     * @param rectangle   The click area that is offset to the container screen's top left corner.
+     * @param screenClass The class of the screen.
+     * @param categories  The categories of result.
+     * @param <T>         The screen type to be registered to.
+     */
+    default <T extends ContainerScreen<?>> void registerContainerClickArea(Rectangle rectangle, Class<T> screenClass, ResourceLocation... categories) {
+        registerContainerClickArea(screen -> rectangle, screenClass, categories);
+    }
+    
+    /**
+     * Registers a click area for a container screen.
+     *
+     * @param rectangleSupplier The click area supplier that is offset to the container screen's top left corner.
+     * @param screenClass       The class of the screen.
+     * @param categories        The categories of result.
+     * @param <T>               The screen type to be registered to.
+     */
+    <T extends ContainerScreen<?>> void registerContainerClickArea(ScreenClickAreaProvider<T> rectangleSupplier, Class<T> screenClass, ResourceLocation... categories);
+    
+    /**
+     * Registers a click area for a screen.
+     *
+     * @param rectangleSupplier The click area supplier that is offset to the window's top left corner.
+     * @param screenClass       The class of the screen.
+     * @param categories        The categories of result.
+     * @param <T>               The screen type to be registered to.
+     */
+    <T extends Screen> void registerClickArea(ScreenClickAreaProvider<T> rectangleSupplier, Class<T> screenClass, ResourceLocation... categories);
     
     <T extends IRecipe<?>> void registerRecipes(ResourceLocation category, Class<T> recipeClass, Function<T, RecipeDisplay> mappingFunction);
     
     <T extends IRecipe<?>> void registerRecipes(ResourceLocation category, Function<IRecipe, Boolean> recipeFilter, Function<T, RecipeDisplay> mappingFunction);
     
+    @ApiStatus.Internal
     List<RecipeHelper.ScreenClickArea> getScreenClickAreas();
     
     @ApiStatus.Internal
     boolean arePluginsLoading();
     
+    @ApiStatus.Internal
     interface ScreenClickArea {
-        Class<? extends ContainerScreen> getScreenClass();
+        Class<? extends Screen> getScreenClass();
         
         Rectangle getRectangle();
         

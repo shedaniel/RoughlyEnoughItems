@@ -52,6 +52,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -594,8 +595,17 @@ public class RecipeHelperImpl implements RecipeHelper {
     }
     
     @Override
-    public void registerScreenClickArea(Rectangle rectangle, Class<? extends ContainerScreen<?>> screenClass, ResourceLocation... categories) {
-        this.screenClickAreas.add(new ScreenClickAreaImpl(screenClass, rectangle, categories));
+    public <T extends ContainerScreen<?>> void registerContainerClickArea(ScreenClickAreaProvider<T> rectangleSupplier, Class<T> screenClass, ResourceLocation... categories) {
+        registerClickArea(screen -> {
+            Rectangle rectangle = rectangleSupplier.provide(screen).clone();
+            rectangle.translate(screen.leftPos, screen.topPos);
+            return rectangle;
+        }, screenClass, categories);
+    }
+    
+    @Override
+    public <T extends Screen> void registerClickArea(ScreenClickAreaProvider<T> rectangleSupplier, Class<T> screenClass, ResourceLocation... categories) {
+        this.screenClickAreas.add(new ScreenClickAreaImpl(screenClass, () -> rectangleSupplier.provide((T) Minecraft.getInstance().screen), categories));
     }
     
     @Override
@@ -626,24 +636,27 @@ public class RecipeHelperImpl implements RecipeHelper {
     }
     
     private static class ScreenClickAreaImpl implements ScreenClickArea {
-        private Class<? extends ContainerScreen<?>> screenClass;
-        private Rectangle rectangle;
+        private Class<? extends Screen> screenClass;
+        private Supplier<Rectangle> rectangleSupplier;
         private ResourceLocation[] categories;
         
-        private ScreenClickAreaImpl(Class<? extends ContainerScreen<?>> screenClass, Rectangle rectangle, ResourceLocation[] categories) {
+        private ScreenClickAreaImpl(Class<? extends Screen> screenClass, Supplier<Rectangle> rectangleSupplier, ResourceLocation[] categories) {
             this.screenClass = screenClass;
-            this.rectangle = rectangle;
+            this.rectangleSupplier = rectangleSupplier;
             this.categories = categories;
         }
         
-        public Class<? extends ContainerScreen<?>> getScreenClass() {
+        @Override
+        public Class<? extends Screen> getScreenClass() {
             return screenClass;
         }
         
+        @Override
         public Rectangle getRectangle() {
-            return rectangle;
+            return rectangleSupplier.get();
         }
         
+        @Override
         public ResourceLocation[] getCategories() {
             return categories;
         }
