@@ -33,6 +33,7 @@ import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.api.subsets.SubsetsRegistry;
 import me.shedaniel.rei.impl.subsets.SubsetsRegistryImpl;
 import me.shedaniel.rei.utils.CollectionUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.item.crafting.IRecipe;
@@ -598,7 +599,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     public <T extends ContainerScreen<?>> void registerContainerClickArea(ScreenClickAreaProvider<T> rectangleSupplier, Class<T> screenClass, ResourceLocation... categories) {
         registerClickArea(screen -> {
             Rectangle rectangle = rectangleSupplier.provide(screen).clone();
-            rectangle.translate(screen.leftPos, screen.topPos);
+            rectangle.translate(screen.getGuiLeft(), screen.getGuiTop());
             return rectangle;
         }, screenClass, categories);
     }

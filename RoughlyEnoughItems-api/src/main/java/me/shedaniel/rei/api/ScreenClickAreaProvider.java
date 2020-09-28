@@ -24,7 +24,7 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.math.Rectangle;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screen.Screen;
 import org.jetbrains.annotations.NotNull;
 
 @FunctionalInterface
