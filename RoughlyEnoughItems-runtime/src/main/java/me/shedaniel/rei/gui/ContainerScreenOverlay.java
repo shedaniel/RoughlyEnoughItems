@@ -74,10 +74,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 @ApiStatus.Internal
 public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverlay {
@@ -530,15 +527,20 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
         }
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.renderWidgets(matrices, mouseX, mouseY, delta);
-        if (Minecraft.getInstance().screen instanceof AbstractContainerScreen && ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
-            AbstractContainerScreen<?> containerScreen = (AbstractContainerScreen<?>) Minecraft.getInstance().screen;
+        if (ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
+            List<ResourceLocation> categories = null;
+            Screen screen = Minecraft.getInstance().screen;
             for (RecipeHelper.ScreenClickArea area : RecipeHelper.getInstance().getScreenClickAreas())
-                if (area.getScreenClass().equals(Minecraft.getInstance().screen.getClass()))
-                    if (area.getRectangle().contains(mouseX - containerScreen.leftPos, mouseY - containerScreen.topPos)) {
-                        String collect = CollectionUtils.mapAndJoinToString(area.getCategories(), identifier -> RecipeHelper.getInstance().getCategory(identifier).getCategoryName(), ", ");
-                        TOOLTIPS.add(Tooltip.create(new TranslatableComponent("text.rei.view_recipes_for", collect)));
-                        break;
+                if (area.getScreenClass().equals(screen.getClass()))
+                    if (area.getRectangle().contains(mouseX, mouseY)) {
+                        if (categories == null) {
+                            categories = new ArrayList<>(Arrays.asList(area.getCategories()));
+                        } else categories.addAll(Arrays.asList(area.getCategories()));
                     }
+            if (categories != null && !categories.isEmpty()) {
+                String collect = CollectionUtils.mapAndJoinToString(categories, identifier -> RecipeHelper.getInstance().getCategory(identifier).getCategoryName(), ", ");
+                Tooltip.create(new TranslatableComponent("text.rei.view_recipes_for", collect)).queue();
+            }
         }
     }
     
@@ -767,15 +769,21 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
                 removeGameModeMenu();
             }
         }
-        if (Minecraft.getInstance().screen instanceof AbstractContainerScreen && ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
-            AbstractContainerScreen<?> containerScreen = (AbstractContainerScreen<?>) Minecraft.getInstance().screen;
+        if (ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
+            List<ResourceLocation> categories = null;
+            Screen screen = Minecraft.getInstance().screen;
             for (RecipeHelper.ScreenClickArea area : RecipeHelper.getInstance().getScreenClickAreas())
-                if (area.getScreenClass().equals(containerScreen.getClass()))
-                    if (area.getRectangle().contains(mouseX - containerScreen.leftPos, mouseY - containerScreen.topPos)) {
-                        ClientHelper.getInstance().executeViewAllRecipesFromCategories(Arrays.asList(area.getCategories()));
-                        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-                        return true;
+                if (area.getScreenClass().equals(screen.getClass()))
+                    if (area.getRectangle().contains(mouseX, mouseY)) {
+                        if (categories == null) {
+                            categories = new ArrayList<>(Arrays.asList(area.getCategories()));
+                        } else categories.addAll(Arrays.asList(area.getCategories()));
                     }
+            if (categories != null && !categories.isEmpty()) {
+                ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addCategories(categories).fillPreferredOpenedCategory());
+                Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                return true;
+            }
         }
         for (GuiEventListener element : widgets)
             if (element != wrappedSubsetsMenu && element != wrappedWeatherMenu && element != wrappedGameModeMenu && element.mouseClicked(mouseX, mouseY, button)) {

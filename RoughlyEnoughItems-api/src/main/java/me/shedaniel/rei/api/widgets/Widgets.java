@@ -165,7 +165,7 @@ public final class Widgets {
     
     @NotNull
     public static Panel createCategoryBase(@NotNull Rectangle rectangle) {
-        return Internals.getWidgetsProvider().createPanelWidget(rectangle).yTextureOffset(ConfigObject.getInstance().getRecipeBorderType().getYOffset()).rendering(Widgets::shouldSlotBaseRender);
+        return Internals.getWidgetsProvider().createPanelWidget(rectangle).rendering(Widgets::shouldSlotBaseRender);
     }
     
     private static boolean shouldRecipeBaseRender(@NotNull Panel panel) {
