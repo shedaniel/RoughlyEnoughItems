@@ -128,7 +128,7 @@ public class CreditsScreen extends Screen {
             } else entryListWidget.creditsAddEntry(new TextCreditsItem(new ImmutableLiteralText(line)));
         entryListWidget.creditsAddEntry(new TextCreditsItem(NarratorChatListener.NO_TITLE));
         entryListWidget.creditsAddEntry(new CreditsEntryListWidget.LinkItem(new ImmutableLiteralText("Visit the project at GitHub."), "https://www.github.com/shedaniel/RoughlyEnoughItems", entryListWidget.getItemWidth(), false));
-        entryListWidget.creditsAddEntry(new CreditsEntryListWidget.LinkItem(new ImmutableLiteralText("Visit the project page at CurseForge."), "https://www.curseforge.com/minecraft/mc-mods/roughly-enough-items", entryListWidget.getItemWidth(), false));
+        entryListWidget.creditsAddEntry(new CreditsEntryListWidget.LinkItem(new ImmutableLiteralText("Visit the project page at CurseForge."), "https://www.curseforge.com/minecraft/mc-mods/roughly-enough-items-forge", entryListWidget.getItemWidth(), false));
         entryListWidget.creditsAddEntry(new CreditsEntryListWidget.LinkItem(new ImmutableLiteralText("Support the project via Patreon!"), "https://patreon.com/shedaniel", entryListWidget.getItemWidth(), true));
         entryListWidget.creditsAddEntry(new TextCreditsItem(NarratorChatListener.NO_TITLE));
         children.add(buttonDone = new AbstractButton(width / 2 - 100, height - 26, 200, 20, new TranslationTextComponent("gui.done")) {
