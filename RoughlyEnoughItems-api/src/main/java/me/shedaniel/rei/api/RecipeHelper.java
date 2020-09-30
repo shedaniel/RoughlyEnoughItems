@@ -36,6 +36,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -302,17 +303,33 @@ public interface RecipeHelper {
      */
     <T extends Screen> void registerClickArea(ScreenClickAreaProvider<T> rectangleSupplier, Class<T> screenClass, ResourceLocation... categories);
     
+    /**
+     * Registers a click area handler for a screen. A handler allows more specific implementation of click areas.
+     *
+     * @param screenClass The class of the screen.
+     * @param handler     The click area handler that is offset to the window's top left corner.
+     * @param <T>         The screen type to be registered to.
+     * @see #registerClickArea(ScreenClickAreaProvider, Class, ResourceLocation...) for a simpler way to handle areas without custom categories.
+     */
+    <T extends Screen> void registerClickArea(Class<T> screenClass, ClickAreaHandler<T> handler);
+    
     <T extends Recipe<?>> void registerRecipes(ResourceLocation category, Class<T> recipeClass, Function<T, RecipeDisplay> mappingFunction);
     
     <T extends Recipe<?>> void registerRecipes(ResourceLocation category, Function<Recipe, Boolean> recipeFilter, Function<T, RecipeDisplay> mappingFunction);
     
     @ApiStatus.Internal
-    List<RecipeHelper.ScreenClickArea> getScreenClickAreas();
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
+    default List<RecipeHelper.ScreenClickArea> getScreenClickAreas() {
+        return Collections.emptyList();
+    }
     
     @ApiStatus.Internal
     boolean arePluginsLoading();
     
     @ApiStatus.Internal
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
     interface ScreenClickArea {
         Class<? extends Screen> getScreenClass();
         

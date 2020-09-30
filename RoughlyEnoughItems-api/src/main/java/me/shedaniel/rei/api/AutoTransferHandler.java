@@ -48,6 +48,7 @@ public interface AutoTransferHandler {
     @NotNull
     Result handle(@NotNull Context context);
     
+    @ApiStatus.NonExtendable
     interface Result {
         /**
          * Creates a successful result, no further handlers will be called.
@@ -169,6 +170,7 @@ public interface AutoTransferHandler {
         IntList getIntegers();
     }
     
+    @ApiStatus.NonExtendable
     interface Context {
         static Context create(boolean actuallyCrafting, AbstractContainerScreen<?> containerScreen, RecipeDisplay recipeDisplay) {
             return new ContextImpl(actuallyCrafting, containerScreen, () -> recipeDisplay);
