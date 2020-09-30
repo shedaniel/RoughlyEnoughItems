@@ -43,10 +43,7 @@ import me.shedaniel.rei.gui.modules.Menu;
 import me.shedaniel.rei.gui.modules.entries.GameModeMenuEntry;
 import me.shedaniel.rei.gui.modules.entries.WeatherMenuEntry;
 import me.shedaniel.rei.gui.widget.*;
-import me.shedaniel.rei.impl.ClientHelperImpl;
-import me.shedaniel.rei.impl.InternalWidgets;
-import me.shedaniel.rei.impl.ScreenHelper;
-import me.shedaniel.rei.impl.Weather;
+import me.shedaniel.rei.impl.*;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
@@ -75,6 +72,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @ApiStatus.Internal
 public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverlay {
@@ -530,13 +528,27 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
         if (ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
             List<ResourceLocation> categories = null;
             Screen screen = Minecraft.getInstance().screen;
-            for (RecipeHelper.ScreenClickArea area : RecipeHelper.getInstance().getScreenClickAreas())
-                if (area.getScreenClass().equals(screen.getClass()))
-                    if (area.getRectangle().contains(mouseX, mouseY)) {
+            ClickAreaHandler.ClickAreaContext context = new ClickAreaHandler.ClickAreaContext<Screen>() {
+                @Override
+                public Screen getScreen() {
+                    return screen;
+                }
+                
+                @Override
+                public Point getMousePosition() {
+                    return new Point(mouseX, mouseY);
+                }
+            };
+            for (Map.Entry<Class<? extends Screen>, ClickAreaHandler<?>> area : ((RecipeHelperImpl) RecipeHelper.getInstance()).getClickAreas().entries()) {
+                if (area.getKey().equals(screen.getClass())) {
+                    ClickAreaHandler.Result result = area.getValue().handle(context);
+                    if (result.isSuccessful()) {
                         if (categories == null) {
-                            categories = new ArrayList<>(Arrays.asList(area.getCategories()));
-                        } else categories.addAll(Arrays.asList(area.getCategories()));
+                            categories = result.getCategories().collect(Collectors.toList());
+                        } else categories.addAll(result.getCategories().collect(Collectors.toList()));
                     }
+                }
+            }
             if (categories != null && !categories.isEmpty()) {
                 String collect = CollectionUtils.mapAndJoinToString(categories, identifier -> RecipeHelper.getInstance().getCategory(identifier).getCategoryName(), ", ");
                 Tooltip.create(new TranslatableComponent("text.rei.view_recipes_for", collect)).queue();
@@ -772,13 +784,27 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
         if (ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
             List<ResourceLocation> categories = null;
             Screen screen = Minecraft.getInstance().screen;
-            for (RecipeHelper.ScreenClickArea area : RecipeHelper.getInstance().getScreenClickAreas())
-                if (area.getScreenClass().equals(screen.getClass()))
-                    if (area.getRectangle().contains(mouseX, mouseY)) {
+            ClickAreaHandler.ClickAreaContext context = new ClickAreaHandler.ClickAreaContext<Screen>() {
+                @Override
+                public Screen getScreen() {
+                    return screen;
+                }
+                
+                @Override
+                public Point getMousePosition() {
+                    return new Point(mouseX, mouseY);
+                }
+            };
+            for (Map.Entry<Class<? extends Screen>, ClickAreaHandler<?>> area : ((RecipeHelperImpl) RecipeHelper.getInstance()).getClickAreas().entries()) {
+                if (area.getKey().equals(screen.getClass())) {
+                    ClickAreaHandler.Result result = area.getValue().handle(context);
+                    if (result.isSuccessful()) {
                         if (categories == null) {
-                            categories = new ArrayList<>(Arrays.asList(area.getCategories()));
-                        } else categories.addAll(Arrays.asList(area.getCategories()));
+                            categories = result.getCategories().collect(Collectors.toList());
+                        } else categories.addAll(result.getCategories().collect(Collectors.toList()));
                     }
+                }
+            }
             if (categories != null && !categories.isEmpty()) {
                 ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addCategories(categories).fillPreferredOpenedCategory());
                 Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));

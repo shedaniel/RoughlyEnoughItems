@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -44,8 +43,7 @@ import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.event.client.ClientTickCallback;
-import net.fabricmc.fabric.api.screenhandler.v1.ScreenHandlerRegistry;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -288,7 +286,7 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
             return;
         }
         Executor.run(() -> () -> {
-            ClientTickCallback.EVENT.register(minecraftClient -> {
+            ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
                 if (isOverlayVisible() && getSearchField() != null)
                     getSearchField().tick();
             });
