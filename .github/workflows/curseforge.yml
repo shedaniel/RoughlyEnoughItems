@@ -3,10 +3,7 @@ name: CF CI
 on:
   push:
     branches:
-      - 3.x
-      - 4.x-unstable
-      - 4.x
-      - 5.x
+      - 5.x-forge
 
 jobs:
   build:
@@ -18,11 +15,6 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
-      - name: Clean Gradle
-        run: ./gradlew clean --refresh-dependencies --stacktrace
-        env:
-          danielshe_curse_api_key: ${{ secrets.CF_API_KEY }}
-          BRANCH_NAME: ${{ github.ref }}
       - name: Upload to CurseForge
         run: ./gradlew build releaseOnCf --stacktrace
         env:
