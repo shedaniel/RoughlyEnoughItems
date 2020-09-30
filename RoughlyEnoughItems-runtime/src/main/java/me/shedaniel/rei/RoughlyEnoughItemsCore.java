@@ -82,6 +82,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static me.shedaniel.rei.impl.Internals.attachInstance;
 
@@ -170,6 +172,25 @@ public class RoughlyEnoughItemsCore {
             }
         }, Internals.WidgetsProvider.class);
         attachInstance((BiFunction<@Nullable Point, Collection<ITextComponent>, Tooltip>) QueuedTooltip::create, "tooltipProvider");
+        attachInstance((Function<@Nullable Boolean, ClickAreaHandler.Result>) successful -> new ClickAreaHandler.Result() {
+            private List<ResourceLocation> categories = Lists.newArrayList();
+        
+            @Override
+            public ClickAreaHandler.Result category(ResourceLocation category) {
+                this.categories.add(category);
+                return this;
+            }
+        
+            @Override
+            public boolean isSuccessful() {
+                return successful;
+            }
+        
+            @Override
+            public Stream<ResourceLocation> getCategories() {
+                return categories.stream();
+            }
+        }, "clickAreaHandlerResult");
     }
     
     /**

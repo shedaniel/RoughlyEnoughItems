@@ -44,6 +44,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
@@ -59,6 +60,7 @@ public final class Internals {
     private static Supplier<DisplayHelper> displayHelper = Internals::throwNotSetup;
     private static Supplier<WidgetsProvider> widgetsProvider = Internals::throwNotSetup;
     private static Supplier<ClientHelper.ViewSearchBuilder> viewSearchBuilder = Internals::throwNotSetup;
+    private static Function<@NotNull Boolean, ClickAreaHandler.Result> clickAreaHandlerResult = (result) -> throwNotSetup();
     private static BiFunction<@Nullable Point, Collection<ITextComponent>, Tooltip> tooltipProvider = (point, texts) -> throwNotSetup();
     private static Supplier<BuiltinPlugin> builtinPlugin = Internals::throwNotSetup;
     
@@ -120,6 +122,11 @@ public final class Internals {
     @NotNull
     public static ClientHelper.ViewSearchBuilder createViewSearchBuilder() {
         return viewSearchBuilder.get();
+    }
+    
+    @NotNull
+    public static ClickAreaHandler.Result createClickAreaHandlerResult(boolean applicable) {
+        return clickAreaHandlerResult.apply(applicable);
     }
     
     @NotNull

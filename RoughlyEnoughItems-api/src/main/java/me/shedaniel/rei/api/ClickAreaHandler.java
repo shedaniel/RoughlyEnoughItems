@@ -23,24 +23,46 @@
 
 package me.shedaniel.rei.api;
 
-import me.shedaniel.math.Rectangle;
+import me.shedaniel.math.Point;
+import me.shedaniel.rei.impl.Internals;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.ResourceLocation;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.ApiStatus;
 
-import java.util.Arrays;
-import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 @FunctionalInterface
-public interface ScreenClickAreaProvider<T extends Screen> {
-    @NotNull
-    Rectangle provide(@NotNull T screen);
+public interface ClickAreaHandler<T extends Screen> {
+    Result handle(ClickAreaContext<T> context);
     
-    default ClickAreaHandler<T> toHandler(Supplier<ResourceLocation[]> categories) {
-        return context -> {
-            return provide(context.getScreen()).contains(context.getMousePosition())
-                    ? ClickAreaHandler.Result.success().categories(Arrays.asList(categories.get()))
-                    : ClickAreaHandler.Result.fail();
-        };
+    @ApiStatus.NonExtendable
+    interface ClickAreaContext<T extends Screen> {
+        T getScreen();
+        
+        Point getMousePosition();
+    }
+    
+    @ApiStatus.NonExtendable
+    interface Result {
+        static Result success() {
+            return Internals.createClickAreaHandlerResult(true);
+        }
+        
+        static Result fail() {
+            return Internals.createClickAreaHandlerResult(false);
+        }
+        
+        Result category(ResourceLocation category);
+        
+        default Result categories(Iterable<ResourceLocation> categories) {
+            for (ResourceLocation category : categories) {
+                category(category);
+            }
+            return this;
+        }
+        
+        boolean isSuccessful();
+        
+        Stream<ResourceLocation> getCategories();
     }
 }

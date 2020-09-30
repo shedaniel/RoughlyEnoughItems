@@ -53,7 +53,6 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -69,7 +68,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     private final List<FocusedStackProvider> focusedStackProviders = Lists.newArrayList();
     private final List<AutoTransferHandler> autoTransferHandlers = Lists.newArrayList();
     private final List<RecipeFunction> recipeFunctions = Lists.newArrayList();
-    private final List<ScreenClickArea> screenClickAreas = Lists.newArrayList();
+    private final Multimap<Class<? extends Screen>, ClickAreaHandler<?>> screenClickAreas = HashMultimap.create();
     private final int[] recipeCount = {0};
     private final Map<ResourceLocation, List<RecipeDisplay>> recipeDisplays = Maps.newHashMap();
     private final BiMap<RecipeCategory<?>, ResourceLocation> categories = HashBiMap.create();
@@ -606,7 +605,12 @@ public class RecipeHelperImpl implements RecipeHelper {
     
     @Override
     public <T extends Screen> void registerClickArea(ScreenClickAreaProvider<T> rectangleSupplier, Class<T> screenClass, ResourceLocation... categories) {
-        this.screenClickAreas.add(new ScreenClickAreaImpl(screenClass, () -> rectangleSupplier.provide((T) Minecraft.getInstance().screen), categories));
+        registerClickArea(screenClass, rectangleSupplier.toHandler(() -> categories));
+    }
+    
+    @Override
+    public <T extends Screen> void registerClickArea(Class<T> screenClass, ClickAreaHandler<T> handler) {
+        this.screenClickAreas.put(screenClass, handler);
     }
     
     @Override
@@ -631,36 +635,8 @@ public class RecipeHelperImpl implements RecipeHelper {
         liveRecipeGenerators.add((LiveRecipeGenerator<RecipeDisplay>) liveRecipeGenerator);
     }
     
-    @Override
-    public List<ScreenClickArea> getScreenClickAreas() {
+    public Multimap<Class<? extends Screen>, ClickAreaHandler<?>> getClickAreas() {
         return screenClickAreas;
-    }
-    
-    private static class ScreenClickAreaImpl implements ScreenClickArea {
-        private Class<? extends Screen> screenClass;
-        private Supplier<Rectangle> rectangleSupplier;
-        private ResourceLocation[] categories;
-        
-        private ScreenClickAreaImpl(Class<? extends Screen> screenClass, Supplier<Rectangle> rectangleSupplier, ResourceLocation[] categories) {
-            this.screenClass = screenClass;
-            this.rectangleSupplier = rectangleSupplier;
-            this.categories = categories;
-        }
-        
-        @Override
-        public Class<? extends Screen> getScreenClass() {
-            return screenClass;
-        }
-        
-        @Override
-        public Rectangle getRectangle() {
-            return rectangleSupplier.get();
-        }
-        
-        @Override
-        public ResourceLocation[] getCategories() {
-            return categories;
-        }
     }
     
     @SuppressWarnings("rawtypes")
