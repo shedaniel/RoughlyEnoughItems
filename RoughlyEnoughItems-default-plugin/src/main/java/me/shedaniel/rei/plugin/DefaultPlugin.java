@@ -109,6 +109,8 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 import java.util.function.UnaryOperator;
 
 import static me.shedaniel.rei.impl.Internals.attachInstance;
@@ -192,12 +194,18 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
         EntryStack stack = EntryStack.create(Items.ENCHANTED_BOOK);
         List<EntryStack> enchantments = new ArrayList<>();
         for (Enchantment enchantment : ForgeRegistries.ENCHANTMENTS) {
-            for (int i = enchantment.getMinLevel(); i <= enchantment.getMaxLevel(); i++) {
+            IntConsumer consumer = level -> {
                 Map<Enchantment, Integer> map = new HashMap<>();
-                map.put(enchantment, i);
+                map.put(enchantment, level);
                 ItemStack itemStack = new ItemStack(Items.ENCHANTED_BOOK);
                 EnchantmentHelper.setEnchantments(map, itemStack);
                 enchantments.add(EntryStack.create(itemStack).setting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE));
+            };
+            if (enchantment.getMaxLevel() - enchantment.getMinLevel() >= 10) {
+                consumer.accept(enchantment.getMinLevel());
+                consumer.accept(enchantment.getMaxLevel());
+            } else {
+                for (int i = enchantment.getMinLevel(); i <= enchantment.getMaxLevel(); i++) consumer.accept(i);
             }
         }
         entryRegistry.registerEntriesAfter(stack, enchantments);
