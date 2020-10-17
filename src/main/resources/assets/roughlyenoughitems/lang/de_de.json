@@ -148,7 +148,6 @@
   "config.roughlyenoughitems.filteredEntries.loadWorldFirst": "Zuerst eine Welt laden!",
   "config.roughlyenoughitems.accessibility.entrySize": "Eintragsgröße:",
   "config.roughlyenoughitems.search.asyncSearch": "Asynchrone Suche",
-  "config.roughlyenoughitems.search.numberAsyncSearch": "Asynchrone Gruppen Größe:",
   "config.roughlyenoughitems.accessibility.useCompactTabs": "Kompakte Tabs:",
   "config.roughlyenoughitems.theme": "Erscheinungsbild:",
   "config.roughlyenoughitems.theme.dark": "Dunkles Design",
