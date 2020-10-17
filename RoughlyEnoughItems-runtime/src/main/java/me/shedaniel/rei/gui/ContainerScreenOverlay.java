@@ -364,7 +364,6 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
         }
     }
     
-    @ApiStatus.Experimental
     private Rectangle getSubsetsButtonBounds() {
         if (ConfigObject.getInstance().isSubsetsEnabled()) {
             if (Minecraft.getInstance().screen instanceof RecipeViewingScreen) {
@@ -511,7 +510,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
                 ENTRY_LIST_WIDGET.updateSearch(ScreenHelper.getSearchField().getText(), true);
             }
         }
-        if (OverlaySearchField.isSearching) {
+        if (OverlaySearchField.isHighlighting) {
             matrices.pushPose();
             matrices.translate(0, 0, 200f);
             if (Minecraft.getInstance().screen instanceof ContainerScreen) {
