@@ -162,8 +162,9 @@ public interface ConfigObject {
     @ApiStatus.Experimental
     boolean doDebugSearchTimeRequired();
     
-    @ApiStatus.Experimental
     boolean isSubsetsEnabled();
+    
+    boolean isInventoryHighlightingAllowed();
     
     boolean shouldResizeDynamically();
 }
