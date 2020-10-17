@@ -151,7 +151,6 @@
   "config.roughlyenoughitems.filteredEntries.loadWorldFirst": "Carregue o mundo primeiro!",
   "config.roughlyenoughitems.accessibility.entrySize": "Tamanho da entrada:",
   "config.roughlyenoughitems.search.asyncSearch": "Pesquisa assimétrica:",
-  "config.roughlyenoughitems.search.numberAsyncSearch": "Tamanho assimétrico do grupo:",
   "config.roughlyenoughitems.accessibility.useCompactTabs": "Abas compactas:",
   "config.roughlyenoughitems.theme": "Tema:",
   "config.roughlyenoughitems.theme.dark": "Escuro",
