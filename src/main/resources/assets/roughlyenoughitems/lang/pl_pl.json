@@ -124,7 +124,6 @@
   "config.roughlyenoughitems.filteredEntries.show": "Pokaż zaznaczone",
   "config.roughlyenoughitems.filteredEntries.loadWorldFirst": "Najpierw załaduj świat!",
   "config.roughlyenoughitems.accessibility.entrySize": "Rozmiar przedmiotu na liście:",
-  "config.roughlyenoughitems.search.numberAsyncSearch": "Rozmiar Grupy Asynchronicznej:",
   "config.roughlyenoughitems.accessibility.useCompactTabs": "Kompaktowe karty:",
   "config.roughlyenoughitems.theme": "Motyw:",
   "config.roughlyenoughitems.theme.dark": "Ciemny",
