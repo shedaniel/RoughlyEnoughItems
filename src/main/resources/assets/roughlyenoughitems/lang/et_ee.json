@@ -152,7 +152,6 @@
   "config.roughlyenoughitems.filteredEntries.loadWorldFirst": "Laadi kõigepealt maailm!",
   "config.roughlyenoughitems.accessibility.entrySize": "Üksuse suurus:",
   "config.roughlyenoughitems.search.asyncSearch": "Asünkroonne otsing:",
-  "config.roughlyenoughitems.search.numberAsyncSearch": "Asünkroonne grupisuurus:",
   "config.roughlyenoughitems.accessibility.useCompactTabs": "Kompaktsed kaardid:",
   "config.roughlyenoughitems.theme": "Välimuse teema:",
   "config.roughlyenoughitems.theme.dark": "Tume teema",
