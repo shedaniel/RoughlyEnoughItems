@@ -29,6 +29,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.impl.PointHelper;
+import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import me.shedaniel.rei.impl.ScreenHelper;
@@ -44,7 +45,7 @@ import java.util.List;
 @ApiStatus.Internal
 public class OverlaySearchField extends TextFieldWidget {
     
-    public static boolean isSearching = false;
+    public static boolean isHighlighting = false;
     public long keybindFocusTime = -1;
     public int keybindFocusKey = -1;
     public boolean isMain = true;
@@ -75,7 +76,7 @@ public class OverlaySearchField extends TextFieldWidget {
     
     public void laterRender(PoseStack matrices, int int_1, int int_2, float float_1) {
         RenderSystem.disableDepthTest();
-        setEditableColor(isMain && ContainerScreenOverlay.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty() ? 16733525 : isSearching && isMain ? -852212 : (containsMouse(PointHelper.ofMouse()) || isFocused()) ? (REIHelper.getInstance().isDarkThemeEnabled() ? -17587 : -1) : -6250336);
+        setEditableColor(isMain && ContainerScreenOverlay.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty() ? 16733525 : isHighlighting && isMain ? -852212 : (containsMouse(PointHelper.ofMouse()) || isFocused()) ? (REIHelper.getInstance().isDarkThemeEnabled() ? -17587 : -1) : -6250336);
         setSuggestion(!isFocused() && getText().isEmpty() ? I18n.get("text.rei.search.field.suggestion") : null);
         super.render(matrices, int_1, int_2, float_1);
         RenderSystem.enableDepthTest();
@@ -91,7 +92,8 @@ public class OverlaySearchField extends TextFieldWidget {
     
     @Override
     public void renderBorder(PoseStack matrices) {
-        if (isMain && isSearching) {
+        isHighlighting = isHighlighting && ConfigObject.getInstance().isInventoryHighlightingAllowed();
+        if (isMain && isHighlighting) {
             fill(matrices, this.getBounds().x - 1, this.getBounds().y - 1, this.getBounds().x + this.getBounds().width + 1, this.getBounds().y + this.getBounds().height + 1, -852212);
         } else if (isMain && ContainerScreenOverlay.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty()) {
             fill(matrices, this.getBounds().x - 1, this.getBounds().y - 1, this.getBounds().x + this.getBounds().width + 1, this.getBounds().y + this.getBounds().height + 1, -43691);
@@ -109,23 +111,23 @@ public class OverlaySearchField extends TextFieldWidget {
     }
     
     @Override
-    public boolean mouseClicked(double double_1, double double_2, int int_1) {
-        boolean contains = containsMouse(double_1, double_2);
-        if (isVisible() && contains && int_1 == 1)
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        boolean contains = containsMouse(mouseX, mouseY);
+        if (isVisible() && contains && button == 1)
             setText("");
-        if (contains && int_1 == 0 && isMain)
+        if (contains && button == 0 && isMain && ConfigObject.getInstance().isInventoryHighlightingAllowed())
             if (lastClickedDetails == null)
-                lastClickedDetails = new Tuple<>(System.currentTimeMillis(), new Point(double_1, double_2));
+                lastClickedDetails = new Tuple<>(System.currentTimeMillis(), new Point(mouseX, mouseY));
             else if (System.currentTimeMillis() - lastClickedDetails.getA() > 1500)
                 lastClickedDetails = null;
-            else if (getManhattanDistance(lastClickedDetails.getB(), new Point(double_1, double_2)) <= 25) {
+            else if (getManhattanDistance(lastClickedDetails.getB(), new Point(mouseX, mouseY)) <= 25) {
                 lastClickedDetails = null;
-                isSearching = !isSearching;
+                isHighlighting = !isHighlighting;
                 minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             } else {
-                lastClickedDetails = new Tuple<>(System.currentTimeMillis(), new Point(double_1, double_2));
+                lastClickedDetails = new Tuple<>(System.currentTimeMillis(), new Point(mouseX, mouseY));
             }
-        return super.mouseClicked(double_1, double_2, int_1);
+        return super.mouseClicked(mouseX, mouseY, button);
     }
     
     @Override

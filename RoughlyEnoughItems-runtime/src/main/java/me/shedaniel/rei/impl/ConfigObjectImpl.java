@@ -328,9 +328,13 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
-    @ApiStatus.Experimental
     public boolean isSubsetsEnabled() {
         return functionality.isSubsetsEnabled;
+    }
+    
+    @Override
+    public boolean isInventoryHighlightingAllowed() {
+        return functionality.allowInventoryHighlighting;
     }
     
     @Override
@@ -404,6 +408,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     public static class Functionality {
         @Comment("Declares whether REI should remove the recipe book.") private boolean disableRecipeBook = false;
         @Comment("Declares whether subsets is enabled.") private boolean isSubsetsEnabled = false;
+        private boolean allowInventoryHighlighting = true;
     }
     
     public static class Advanced {
