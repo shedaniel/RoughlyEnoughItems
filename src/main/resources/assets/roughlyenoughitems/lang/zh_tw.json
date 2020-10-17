@@ -150,7 +150,6 @@
   "config.roughlyenoughitems.filteredEntries.loadWorldFirst": "請先載入世界！",
   "config.roughlyenoughitems.accessibility.entrySize": "物品大小：",
   "config.roughlyenoughitems.search.asyncSearch": "非同步的搜尋：",
-  "config.roughlyenoughitems.search.numberAsyncSearch": "搜尋組數量：",
   "config.roughlyenoughitems.accessibility.useCompactTabs": "簡潔分類標籤：",
   "config.roughlyenoughitems.theme": "外觀主題:",
   "config.roughlyenoughitems.theme.dark": "暗主題",
