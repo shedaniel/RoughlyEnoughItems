@@ -113,12 +113,13 @@
   "config.roughlyenoughitems.itemCheatingMode.rei_like": "Normal",
   "config.roughlyenoughitems.filteringRulesScreen": "Özelleştirilmiş Filtreleme Kuralları",
   "config.roughlyenoughitems.filteringRulesScreen.new": "Filtreleme Kuralı Oluştur",
-  "config.roughlyenoughitems.filteringRulesScreen.delete": "Sil",
-  "rule.roughlyenoughitems.filtering.manual": "Manuel Filtreleme",
-  "rule.roughlyenoughitems.filtering.manual.subtitle": "Neyin saklanacağını ve gösterileceğini manuel olarak seç.",
+  "config.roughlyenoughitems.filteringRulesScreen.delete": "Kaldır",
+  "rule.roughlyenoughitems.filtering.manual": "Elle Filtreleme",
+  "rule.roughlyenoughitems.filtering.manual.subtitle": "Saklanacak ve gösterilecek şeyleri elle seç.",
+  "rule.roughlyenoughitems.filtering.search": "Arama Filtresi",
   "rule.roughlyenoughitems.filtering.search.subtitle": "Arama filtresi kullanarak filtrele.",
   "rule.roughlyenoughitems.filtering.search.filter": "Arama Filtresi:",
-  "rule.roughlyenoughitems.filtering.search.show": "Göster/Gizle:",
+  "rule.roughlyenoughitems.filtering.search.show": "Göster / Gizle:",
   "rule.roughlyenoughitems.filtering.search.show.true": "Göster",
   "rule.roughlyenoughitems.filtering.search.show.false": "Gizle"
 }
