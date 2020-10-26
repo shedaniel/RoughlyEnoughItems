@@ -27,8 +27,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.vertex.PoseStack;
-import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
-import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.JsonOps;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
@@ -40,9 +40,11 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -166,9 +168,11 @@ public interface EntryStack extends TextRepresentable {
     static EntryStack readFromJson(JsonElement jsonElement) {
         try {
             JsonObject obj = jsonElement.getAsJsonObject();
-            switch (obj.getAsJsonPrimitive("type").getAsString()) {
+            switch (GsonHelper.getAsString(obj, "type")) {
                 case "stack":
                     return EntryStack.create(ItemStack.of(TagParser.parseTag(obj.get("nbt").getAsString())));
+                case "item":
+                    return EntryStack.create(ItemStack.of((CompoundTag) Dynamic.convert(JsonOps.INSTANCE, NbtOps.INSTANCE, obj)));
                 case "fluid":
                     return EntryStack.create(Registry.FLUID.get(ResourceLocation.tryParse(obj.get("id").getAsString())));
                 case "empty":
@@ -188,9 +192,8 @@ public interface EntryStack extends TextRepresentable {
         try {
             switch (getType()) {
                 case ITEM:
-                    JsonObject obj1 = new JsonObject();
-                    obj1.addProperty("type", "stack");
-                    obj1.addProperty("nbt", getItemStack().save(new CompoundTag()).toString());
+                    JsonObject obj1 = Dynamic.convert(NbtOps.INSTANCE, JsonOps.INSTANCE, getItemStack().save(new CompoundTag())).getAsJsonObject();
+                    obj1.addProperty("type", "item");
                     return obj1;
                 case FLUID:
                     Optional<ResourceLocation> optionalIdentifier = getIdentifier();
@@ -368,7 +371,7 @@ public interface EntryStack extends TextRepresentable {
     
     class Settings<T> {
         @ApiStatus.Internal
-        private static final Short2ObjectMap<Settings<?>> ID_TO_SETTINGS = new Short2ObjectOpenHashMap<>();
+        private static final List<Settings<?>> SETTINGS = new ArrayList<>();
         
         public static final Supplier<Boolean> TRUE = () -> true;
         public static final Supplier<Boolean> FALSE = () -> false;
@@ -389,12 +392,12 @@ public interface EntryStack extends TextRepresentable {
         public Settings(T defaultValue) {
             this.defaultValue = defaultValue;
             this.id = nextId++;
-            ID_TO_SETTINGS.put(this.id, this);
+            SETTINGS.add(this);
         }
         
         @ApiStatus.Internal
         public static <T> Settings<T> getById(short id) {
-            return (Settings<T>) ID_TO_SETTINGS.get(id);
+            return (Settings<T>) SETTINGS.get(id);
         }
         
         public T getDefaultValue() {

@@ -56,6 +56,10 @@ import java.util.stream.Collectors;
 @ApiStatus.Experimental
 @ApiStatus.Internal
 public class Menu extends WidgetWithBounds implements LateRenderable {
+    public static final UUID SUBSETS = UUID.randomUUID();
+    public static final UUID WEATHER = UUID.randomUUID();
+    public static final UUID GAME_TYPE = UUID.randomUUID();
+    
     public final Point menuStartPoint;
     private final List<MenuEntry> entries = Lists.newArrayList();
     public final ScrollingContainer scrolling = new ScrollingContainer() {
@@ -245,7 +249,7 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (scrolling.updateDraggingState(mouseX, mouseY, button))
             return true;
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(mouseX, mouseY, button) || getInnerBounds().contains(mouseX, mouseY);
     }
     
     @Override

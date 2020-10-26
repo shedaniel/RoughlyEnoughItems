@@ -36,8 +36,10 @@ import me.sargunvohra.mcmods.autoconfig1u.gui.ConfigScreenProvider;
 import me.sargunvohra.mcmods.autoconfig1u.gui.registry.GuiRegistry;
 import me.sargunvohra.mcmods.autoconfig1u.serializer.JanksonConfigSerializer;
 import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.Jankson;
+import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.JsonNull;
 import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.JsonObject;
 import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.JsonPrimitive;
+import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.impl.SyntaxError;
 import me.sargunvohra.mcmods.autoconfig1u.util.Utils;
 import me.shedaniel.cloth.api.client.events.v0.ScreenHooks;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
@@ -45,11 +47,11 @@ import me.shedaniel.clothconfig2.api.Modifier;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.clothconfig2.gui.entries.KeyCodeEntry;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.api.EntryRegistry;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.REIHelper;
+import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.WarningAndErrorScreen;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
@@ -83,6 +85,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import static me.sargunvohra.mcmods.autoconfig1u.util.Utils.getUnsafely;
 import static me.sargunvohra.mcmods.autoconfig1u.util.Utils.setUnsafely;
@@ -96,6 +99,7 @@ public class ConfigManagerImpl implements ConfigManager {
     
     public ConfigManagerImpl() {
         this.craftableOnly = false;
+        Jankson jankson = Jankson.builder().build();
         AutoConfig.register(ConfigObjectImpl.class, (definition, configClass) -> new JanksonConfigSerializer<>(definition, configClass, Jankson.builder().registerPrimitiveTypeAdapter(InputConstants.Key.class, it -> {
             return it instanceof String ? InputConstants.getKey((String) it) : null;
         }).registerSerializer(InputConstants.Key.class, (it, marshaller) -> new JsonPrimitive(it.getName())).registerTypeAdapter(ModifierKeyCode.class, o -> {
@@ -110,9 +114,29 @@ public class ConfigManagerImpl implements ConfigManager {
             object.put("modifier", new JsonPrimitive(keyCode.getModifier().getValue()));
             return object;
         }).registerSerializer(EntryStack.class, (stack, marshaller) -> {
-            return new JsonPrimitive(gson.toJson(stack.toJson()));
+            try {
+                return jankson.load(gson.toJson(stack.toJson()));
+            } catch (SyntaxError syntaxError) {
+                syntaxError.printStackTrace();
+                return JsonNull.INSTANCE;
+            }
         }).registerPrimitiveTypeAdapter(EntryStack.class, it -> {
             return it instanceof String ? EntryStack.readFromJson(gson.fromJson((String) it, JsonElement.class)) : null;
+        }).registerTypeAdapter(EntryStack.class, it -> {
+            return EntryStack.readFromJson(gson.fromJson(it.toString(), JsonElement.class));
+        }).registerSerializer(FavoriteEntry.class, (favoriteEntry, marshaller) -> {
+            try {
+                return jankson.load(favoriteEntry.toJson(new com.google.gson.JsonObject()).toString());
+            } catch (SyntaxError syntaxError) {
+                syntaxError.printStackTrace();
+                return JsonNull.INSTANCE;
+            }
+        }).registerTypeAdapter(FavoriteEntry.class, it -> {
+            com.google.gson.JsonObject object = gson.fromJson(it.toString(), com.google.gson.JsonObject.class);
+            return FavoriteEntry.delegate(() -> FavoriteEntry.fromJson(object), () -> object);
+        }).registerPrimitiveTypeAdapter(FavoriteEntry.class, it -> {
+            com.google.gson.JsonObject object = gson.fromJson(it.toString(), com.google.gson.JsonObject.class);
+            return FavoriteEntry.delegate(() -> FavoriteEntry.fromJson(object), () -> object);
         }).registerSerializer(FilteringRule.class, (rule, marshaller) -> {
             return new JsonPrimitive(FilteringRule.toTag(rule, new CompoundTag()).toString());
         }).registerPrimitiveTypeAdapter(FilteringRule.class, it -> {
@@ -152,8 +176,8 @@ public class ConfigManagerImpl implements ConfigManager {
     
     @Override
     public void saveConfig() {
-        if (getConfig().getFavorites() != null)
-            getConfig().getFavorites().removeIf(EntryStack::isEmpty);
+        if (getConfig().getFavoriteEntries() != null)
+            getConfig().getFavoriteEntries().removeIf(Objects::isNull);
         if (getConfig().getFilteredStacks() != null) {
             getConfig().getFilteredStacks().removeIf(EntryStack::isEmpty);
             for (EntryStack stack : getConfig().getFilteredStacks()) {

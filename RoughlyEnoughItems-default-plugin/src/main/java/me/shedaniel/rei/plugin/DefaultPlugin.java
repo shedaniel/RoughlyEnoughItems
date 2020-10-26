@@ -31,6 +31,8 @@ import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.favorites.FavoriteEntry;
+import me.shedaniel.rei.api.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.fractions.Fraction;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
@@ -52,6 +54,7 @@ import me.shedaniel.rei.plugin.crafting.DefaultCraftingCategory;
 import me.shedaniel.rei.plugin.crafting.DefaultCustomDisplay;
 import me.shedaniel.rei.plugin.crafting.DefaultShapedDisplay;
 import me.shedaniel.rei.plugin.crafting.DefaultShapelessDisplay;
+import me.shedaniel.rei.plugin.favorites.GameModeFavoriteEntry;
 import me.shedaniel.rei.plugin.fuel.DefaultFuelCategory;
 import me.shedaniel.rei.plugin.fuel.DefaultFuelDisplay;
 import me.shedaniel.rei.plugin.information.DefaultInformationCategory;
@@ -79,6 +82,7 @@ import net.minecraft.client.gui.screens.inventory.*;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
@@ -91,6 +95,7 @@ import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.ComposterBlock;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
@@ -418,6 +423,10 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
 //        SubsetsRegistry subsetsRegistry = SubsetsRegistry.INSTANCE;
 //        subsetsRegistry.registerPathEntry("roughlyenoughitems:food", EntryStack.create(Items.MILK_BUCKET));
 //        subsetsRegistry.registerPathEntry("roughlyenoughitems:food/roughlyenoughitems:cookies", EntryStack.create(Items.COOKIE));
+    
+        FavoriteEntryType.registry().register(GameModeFavoriteEntry.ID, GameModeFavoriteEntry.Type.INSTANCE);
+        FavoriteEntryType.registry().getOrCrateSection(new TranslatableComponent(GameModeFavoriteEntry.TRANSLATION_KEY))
+                .add(Arrays.stream(GameType.values()).<FavoriteEntry>map(GameModeFavoriteEntry.Type.INSTANCE::fromArgs).toArray(FavoriteEntry[]::new));
     }
     
     @Override

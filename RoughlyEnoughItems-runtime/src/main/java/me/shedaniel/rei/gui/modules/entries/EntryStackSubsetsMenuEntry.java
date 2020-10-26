@@ -31,7 +31,6 @@ import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.modules.Menu;
 import me.shedaniel.rei.gui.modules.MenuEntry;
-import me.shedaniel.rei.impl.EntryRegistryImpl;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -102,7 +101,7 @@ public class EntryStackSubsetsMenuEntry extends MenuEntry {
                     if (subsetsMenu != null)
                         recalculateFilter(subsetsMenu);
                     ConfigManager.getInstance().saveConfig();
-                    ((EntryRegistryImpl) EntryRegistry.getInstance()).refilter();
+                    EntryRegistry.getInstance().refilter();
                     if (ScreenHelper.getSearchField() != null)
                         ContainerScreenOverlay.getEntryListWidget().updateSearch(ScreenHelper.getSearchField().getText(), true);
                 }

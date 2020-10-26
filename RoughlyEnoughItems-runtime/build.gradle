@@ -1,9 +1,14 @@
 archivesBaseName = "RoughlyEnoughItems-runtime"
 
+repositories {
+    maven { url "https://mod-buildcraft.com/maven" }
+}
+
 loom {
     accessWidener = file("src/main/resources/roughlyenoughitems-runtime.accessWidener")
 }
 
 dependencies {
     compile project(path: ':RoughlyEnoughItems-api', configuration: 'dev')
+    modCompileOnly("alexiil.mc.lib:libblockattributes-fluids:0.8.3-pre.3")
 }

@@ -35,6 +35,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.widgets.Button;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
@@ -72,11 +73,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @ApiStatus.Internal
 public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverlay {
-    
     private static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private static final List<Tooltip> TOOLTIPS = Lists.newArrayList();
     private static final List<Runnable> AFTER_RENDER = Lists.newArrayList();
@@ -120,22 +122,9 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
     private Button leftButton, rightButton;
     @ApiStatus.Experimental
     private Rectangle subsetsButtonBounds;
-    @ApiStatus.Experimental
-    @Nullable
-    private Menu subsetsMenu = null;
-    private Widget wrappedSubsetsMenu = null;
     
     @Nullable
-    private Menu weatherMenu = null;
-    private Widget wrappedWeatherMenu = null;
-    private boolean renderWeatherMenu = false;
-    private Button weatherButton = null;
-    
-    @Nullable
-    private Menu gameModeMenu = null;
-    private Widget wrappedGameModeMenu = null;
-    private boolean renderGameModeMenu = false;
-    private Button gameModeButton = null;
+    private ContainerScreenOverlay.OverlayMenu overlayMenu = null;
     
     public static EntryListWidget getEntryListWidget() {
         return ENTRY_LIST_WIDGET;
@@ -146,26 +135,67 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
         return favoritesListWidget;
     }
     
-    @ApiStatus.Experimental
+    private static class OverlayMenu {
+        @NotNull
+        private UUID uuid;
+        @NotNull
+        private Menu menu;
+        @NotNull
+        private Widget wrappedMenu;
+        @NotNull
+        private Predicate<Point> inBounds;
+        
+        public OverlayMenu(@NotNull UUID uuid, @NotNull Menu menu, @NotNull Widget wrappedMenu, @NotNull Predicate<Point> inBounds) {
+            this.uuid = uuid;
+            this.menu = menu;
+            this.wrappedMenu = wrappedMenu;
+            this.inBounds = inBounds.or(point -> menu.getBounds().contains(point));
+        }
+    }
+    
+    public boolean isMenuOpened(UUID uuid) {
+        return overlayMenu != null && overlayMenu.uuid.equals(uuid);
+    }
+    
+    public boolean isAnyMenuOpened() {
+        return overlayMenu != null;
+    }
+    
+    public boolean isMenuInBounds(UUID uuid) {
+        return isMenuOpened(uuid) && overlayMenu.inBounds.test(PointHelper.ofMouse());
+    }
+    
+    private void proceedOpenMenu(UUID uuid, Runnable runnable) {
+        proceedOpenMenuOrElse(uuid, runnable, menu -> {});
+    }
+    
+    private void proceedOpenMenuOrElse(UUID uuid, Runnable runnable, Consumer<OverlayMenu> orElse) {
+        if (overlayMenu == null || !overlayMenu.uuid.equals(uuid)) {
+            removeOverlayMenu();
+            runnable.run();
+        } else {
+            orElse.accept(this.overlayMenu);
+        }
+    }
+    
+    public void openMenu(UUID uuid, Menu menu, Predicate<Point> inPoint) {
+        this.overlayMenu = new OverlayMenu(uuid, menu, InternalWidgets.wrapTranslate(menu, 0, 0, 400), inPoint);
+    }
+    
+    @ApiStatus.Internal
     @Nullable
     public Menu getSubsetsMenu() {
-        return subsetsMenu;
+        if (isMenuOpened(Menu.SUBSETS))
+            return this.overlayMenu.menu;
+        throw new IllegalStateException("Subsets menu accessed when subsets are not opened!");
     }
     
-    public void removeWeatherMenu() {
-        this.renderWeatherMenu = false;
-        Widget tmpWeatherMenu = wrappedWeatherMenu;
-        AFTER_RENDER.add(() -> this.widgets.remove(tmpWeatherMenu));
-        this.weatherMenu = null;
-        this.wrappedWeatherMenu = null;
-    }
-    
-    public void removeGameModeMenu() {
-        this.renderGameModeMenu = false;
-        Widget tmpGameModeMenu = wrappedGameModeMenu;
-        AFTER_RENDER.add(() -> this.widgets.remove(tmpGameModeMenu));
-        this.gameModeMenu = null;
-        this.wrappedGameModeMenu = null;
+    @ApiStatus.Internal
+    public void removeOverlayMenu() {
+        OverlayMenu tmpOverlayMenu = this.overlayMenu;
+        if (tmpOverlayMenu != null)
+            AFTER_RENDER.add(() -> this.widgets.remove(tmpOverlayMenu.wrappedMenu));
+        this.overlayMenu = null;
     }
     
     @Override
@@ -181,17 +211,14 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
         this.shouldReInit = false;
         //Update Variables
         this.children().clear();
-        this.wrappedSubsetsMenu = null;
-        this.subsetsMenu = null;
-        this.weatherMenu = null;
-        this.renderWeatherMenu = false;
-        this.weatherButton = null;
+        this.removeOverlayMenu();
         this.window = Minecraft.getInstance().getWindow();
         this.bounds = DisplayHelper.getInstance().getOverlayBounds(ConfigObject.getInstance().getDisplayPanelLocation(), Minecraft.getInstance().screen);
         widgets.add(ENTRY_LIST_WIDGET);
         if (ConfigObject.getInstance().isFavoritesEnabled()) {
             if (favoritesListWidget == null)
                 favoritesListWidget = new FavoritesListWidget();
+//            favoritesListWidget.favoritePanel.resetRows();
             widgets.add(favoritesListWidget);
         }
         ENTRY_LIST_WIDGET.updateArea(ScreenHelper.getSearchField() == null ? "" : null);
@@ -268,20 +295,21 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
         ));
         tmp.setZ(600);
         if (ConfigObject.getInstance().doesShowUtilsButtons()) {
-            widgets.add(gameModeButton = Widgets.createButton(ConfigObject.getInstance().isLowerConfigButton() ? new Rectangle(ConfigObject.getInstance().isLeftHandSidePanel() ? window.getGuiScaledWidth() - 30 : 10, 10, 20, 20) : new Rectangle(ConfigObject.getInstance().isLeftHandSidePanel() ? window.getGuiScaledWidth() - 55 : 35, 10, 20, 20), NarratorChatListener.NO_TITLE)
+            widgets.add(Widgets.createButton(ConfigObject.getInstance().isLowerConfigButton() ? new Rectangle(ConfigObject.getInstance().isLeftHandSidePanel() ? window.getGuiScaledWidth() - 30 : 10, 10, 20, 20) : new Rectangle(ConfigObject.getInstance().isLeftHandSidePanel() ? window.getGuiScaledWidth() - 55 : 35, 10, 20, 20), NarratorChatListener.NO_TITLE)
                     .onRender((matrices, button) -> {
-                        boolean tmpRender = renderGameModeMenu;
-                        renderGameModeMenu = !renderWeatherMenu && (button.isFocused() || button.containsMouse(PointHelper.ofMouse()) || (wrappedGameModeMenu != null && wrappedGameModeMenu.containsMouse(PointHelper.ofMouse())));
-                        if (tmpRender != renderGameModeMenu) {
-                            if (renderGameModeMenu) {
-                                this.gameModeMenu = new Menu(new Point(button.getBounds().x, button.getBounds().getMaxY()),
-                                        CollectionUtils.filterAndMap(Arrays.asList(GameType.values()), mode -> mode != GameType.NOT_SET, GameModeMenuEntry::new));
-                                if (ConfigObject.getInstance().isLeftHandSidePanel())
-                                    this.gameModeMenu.menuStartPoint.x -= this.gameModeMenu.getBounds().width - this.gameModeButton.getBounds().width;
-                                this.wrappedGameModeMenu = InternalWidgets.wrapTranslate(InternalWidgets.wrapLateRenderable(gameModeMenu), 0, 0, 600);
-                                AFTER_RENDER.add(() -> this.widgets.add(wrappedGameModeMenu));
-                            } else {
-                                removeGameModeMenu();
+                        boolean isOpened = isMenuOpened(Menu.GAME_TYPE);
+                        if (isOpened || !isAnyMenuOpened()) {
+                            boolean inBounds = (button.isFocused() || button.containsMouse(PointHelper.ofMouse())) || isMenuInBounds(Menu.GAME_TYPE);
+                            if (isOpened != inBounds) {
+                                if (inBounds) {
+                                    Menu menu = new Menu(new Point(button.getBounds().x, button.getBounds().getMaxY()),
+                                            CollectionUtils.filterAndMap(Arrays.asList(GameType.values()), mode -> mode != GameType.NOT_SET, GameModeMenuEntry::new));
+                                    if (ConfigObject.getInstance().isLeftHandSidePanel())
+                                        menu.menuStartPoint.x -= menu.getBounds().width - button.getBounds().width;
+                                    openMenu(Menu.GAME_TYPE, menu, point -> button.isFocused() && button.containsMouse(PointHelper.ofMouse()));
+                                } else {
+                                    removeOverlayMenu();
+                                }
                             }
                         }
                         button.setText(new TextComponent(getGameModeShortText(getCurrentGameMode())));
@@ -289,20 +317,22 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
                     .focusable(false)
                     .tooltipLine(I18n.get("text.rei.gamemode_button.tooltip.all"))
                     .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y)));
+            Button weatherButton;
             widgets.add(weatherButton = Widgets.createButton(new Rectangle(ConfigObject.getInstance().isLeftHandSidePanel() ? window.getGuiScaledWidth() - 30 : 10, 35, 20, 20), NarratorChatListener.NO_TITLE)
                     .onRender((matrices, button) -> {
-                        boolean tmpRender = renderWeatherMenu;
-                        renderWeatherMenu = !renderGameModeMenu && (button.isFocused() || button.containsMouse(PointHelper.ofMouse()) || (wrappedWeatherMenu != null && wrappedWeatherMenu.containsMouse(PointHelper.ofMouse())));
-                        if (tmpRender != renderWeatherMenu) {
-                            if (renderWeatherMenu) {
-                                this.weatherMenu = new Menu(new Point(button.getBounds().x, button.getBounds().getMaxY()),
-                                        CollectionUtils.map(Weather.values(), WeatherMenuEntry::new));
-                                if (ConfigObject.getInstance().isLeftHandSidePanel())
-                                    this.weatherMenu.menuStartPoint.x -= this.weatherMenu.getBounds().width - this.weatherButton.getBounds().width;
-                                this.wrappedWeatherMenu = InternalWidgets.wrapTranslate(InternalWidgets.wrapLateRenderable(weatherMenu), 0, 0, 400);
-                                AFTER_RENDER.add(() -> this.widgets.add(wrappedWeatherMenu));
-                            } else {
-                                removeWeatherMenu();
+                        boolean isOpened = isMenuOpened(Menu.WEATHER);
+                        if (isOpened || !isAnyMenuOpened()) {
+                            boolean inBounds = (button.isFocused() || button.containsMouse(PointHelper.ofMouse())) || isMenuInBounds(Menu.WEATHER);
+                            if (isOpened != inBounds) {
+                                if (inBounds) {
+                                    Menu menu = new Menu(new Point(button.getBounds().x, button.getBounds().getMaxY()),
+                                            CollectionUtils.map(Weather.values(), WeatherMenuEntry::new));
+                                    if (ConfigObject.getInstance().isLeftHandSidePanel())
+                                        menu.menuStartPoint.x -= menu.getBounds().width - button.getBounds().width;
+                                    openMenu(Menu.WEATHER, menu, point -> button.isFocused() && button.containsMouse(PointHelper.ofMouse()));
+                                } else {
+                                    removeOverlayMenu();
+                                }
                             }
                         }
                     })
@@ -319,14 +349,11 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
         if (ConfigObject.getInstance().isSubsetsEnabled()) {
             widgets.add(InternalWidgets.wrapLateRenderable(InternalWidgets.wrapTranslate(Widgets.createButton(subsetsButtonBounds, ClientHelperImpl.getInstance().isAprilFools.get() ? new TranslatableComponent("text.rei.tiny_potato") : new TranslatableComponent("text.rei.subsets"))
                     .onClick(button -> {
-                        if (subsetsMenu == null) {
-                            wrappedSubsetsMenu = InternalWidgets.wrapTranslate(InternalWidgets.wrapLateRenderable(this.subsetsMenu = Menu.createSubsetsMenuFromRegistry(new Point(this.subsetsButtonBounds.x, this.subsetsButtonBounds.getMaxY()))), 0, 0, 400);
-                            this.widgets.add(this.wrappedSubsetsMenu);
-                        } else {
-                            this.widgets.remove(this.wrappedSubsetsMenu);
-                            this.subsetsMenu = null;
-                            this.wrappedSubsetsMenu = null;
-                        }
+                        proceedOpenMenuOrElse(Menu.SUBSETS, () -> {
+                            openMenu(Menu.SUBSETS, Menu.createSubsetsMenuFromRegistry(new Point(this.subsetsButtonBounds.x, this.subsetsButtonBounds.getMaxY())), point -> true);
+                        }, menu -> {
+                            removeOverlayMenu();
+                        });
                     }), 0, 0, 600)));
         }
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
@@ -559,24 +586,15 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
         if (ScreenHelper.isOverlayVisible()) {
             ScreenHelper.getSearchField().laterRender(matrices, mouseX, mouseY, delta);
             for (Widget widget : widgets) {
-                if (widget instanceof LateRenderable && wrappedSubsetsMenu != widget && wrappedWeatherMenu != widget && wrappedGameModeMenu != widget)
+                if (widget instanceof LateRenderable && (overlayMenu == null || overlayMenu.wrappedMenu != widget))
                     widget.render(matrices, mouseX, mouseY, delta);
             }
         }
-        if (wrappedWeatherMenu != null) {
-            if (wrappedWeatherMenu.containsMouse(mouseX, mouseY)) {
+        if (overlayMenu != null) {
+            if (overlayMenu.wrappedMenu.containsMouse(mouseX, mouseY)) {
                 TOOLTIPS.clear();
             }
-            wrappedWeatherMenu.render(matrices, mouseX, mouseY, delta);
-        } else if (wrappedGameModeMenu != null) {
-            if (wrappedGameModeMenu.containsMouse(mouseX, mouseY)) {
-                TOOLTIPS.clear();
-            }
-            wrappedGameModeMenu.render(matrices, mouseX, mouseY, delta);
-        }
-        if (wrappedSubsetsMenu != null) {
-            TOOLTIPS.clear();
-            wrappedSubsetsMenu.render(matrices, mouseX, mouseY, delta);
+            overlayMenu.wrappedMenu.render(matrices, mouseX, mouseY, delta);
         }
         Screen currentScreen = Minecraft.getInstance().screen;
         if (!(currentScreen instanceof RecipeViewingScreen) || !((RecipeViewingScreen) currentScreen).choosePageActivated)
@@ -633,11 +651,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
         if (!ScreenHelper.isOverlayVisible())
             return false;
-        if (wrappedSubsetsMenu != null && wrappedSubsetsMenu.mouseScrolled(mouseX, mouseY, amount))
-            return true;
-        if (wrappedWeatherMenu != null && wrappedWeatherMenu.mouseScrolled(mouseX, mouseY, amount))
-            return true;
-        if (wrappedGameModeMenu != null && wrappedGameModeMenu.mouseScrolled(mouseX, mouseY, amount))
+        if (overlayMenu != null && overlayMenu.wrappedMenu.mouseScrolled(mouseX, mouseY, amount))
             return true;
         if (isInside(PointHelper.ofMouse())) {
             if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
@@ -657,9 +671,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
         }
         for (Widget widget : widgets)
             if (widget != ENTRY_LIST_WIDGET && (favoritesListWidget == null || widget != favoritesListWidget)
-                && (wrappedSubsetsMenu == null || widget != wrappedSubsetsMenu)
-                && (wrappedWeatherMenu == null || widget != wrappedWeatherMenu)
-                && (wrappedGameModeMenu == null || widget != wrappedGameModeMenu)
+                && (overlayMenu == null || widget != overlayMenu.wrappedMenu)
                 && widget.mouseScrolled(mouseX, mouseY, amount))
                 return true;
         return false;
@@ -686,9 +698,9 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
             } else if (ConfigObject.getInstance().getUsageKeybind().matchesKey(keyCode, scanCode)) {
                 return ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addUsagesFor(stack).setInputNotice(stack).fillPreferredOpenedCategory());
             } else if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(keyCode, scanCode)) {
-                stack.setAmount(127);
-                if (!CollectionUtils.anyMatchEqualsEntryIgnoreAmount(ConfigObject.getInstance().getFavorites(), stack))
-                    ConfigObject.getInstance().getFavorites().add(stack);
+                FavoriteEntry favoriteEntry = FavoriteEntry.fromEntryStack(stack);
+                if (!ConfigObject.getInstance().getFavoriteEntries().contains(favoriteEntry))
+                    ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
                 ConfigManager.getInstance().saveConfig();
                 FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
                 if (favoritesListWidget != null)
@@ -739,9 +751,9 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
             } else if (ConfigObject.getInstance().getUsageKeybind().matchesMouse(button)) {
                 return ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addUsagesFor(stack).setInputNotice(stack).fillPreferredOpenedCategory());
             } else if (ConfigObject.getInstance().getFavoriteKeyCode().matchesMouse(button)) {
-                stack.setAmount(127);
-                if (!CollectionUtils.anyMatchEqualsEntryIgnoreAmount(ConfigObject.getInstance().getFavorites(), stack))
-                    ConfigObject.getInstance().getFavorites().add(stack);
+                FavoriteEntry favoriteEntry = FavoriteEntry.fromEntryStack(stack);
+                if (!ConfigObject.getInstance().getFavoriteEntries().contains(favoriteEntry))
+                    ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
                 ConfigManager.getInstance().saveConfig();
                 FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
                 if (favoritesListWidget != null)
@@ -751,33 +763,16 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
         }
         if (!ScreenHelper.isOverlayVisible())
             return false;
-        if (wrappedSubsetsMenu != null && wrappedSubsetsMenu.mouseClicked(mouseX, mouseY, button)) {
-            this.setFocused(wrappedSubsetsMenu);
-            if (button == 0)
-                this.setDragging(true);
-            ScreenHelper.getSearchField().setFocused(false);
-            return true;
-        }
-        if (wrappedWeatherMenu != null) {
-            if (wrappedWeatherMenu.mouseClicked(mouseX, mouseY, button)) {
-                this.setFocused(wrappedWeatherMenu);
+        if (overlayMenu != null) {
+            if (overlayMenu.wrappedMenu.mouseClicked(mouseX, mouseY, button)) {
+                if (overlayMenu != null) this.setFocused(overlayMenu.wrappedMenu);
+                else this.setFocused(null);
                 if (button == 0)
                     this.setDragging(true);
                 ScreenHelper.getSearchField().setFocused(false);
                 return true;
-            } else if (!wrappedWeatherMenu.containsMouse(mouseX, mouseY) && !weatherButton.containsMouse(mouseX, mouseY)) {
-                removeWeatherMenu();
-            }
-        }
-        if (wrappedGameModeMenu != null) {
-            if (wrappedGameModeMenu.mouseClicked(mouseX, mouseY, button)) {
-                this.setFocused(wrappedGameModeMenu);
-                if (button == 0)
-                    this.setDragging(true);
-                ScreenHelper.getSearchField().setFocused(false);
-                return true;
-            } else if (!wrappedGameModeMenu.containsMouse(mouseX, mouseY) && !gameModeButton.containsMouse(mouseX, mouseY)) {
-                removeGameModeMenu();
+            } else if (!overlayMenu.inBounds.test(new Point(mouseX, mouseY))) {
+                removeOverlayMenu();
             }
         }
         if (ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
@@ -811,7 +806,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
             }
         }
         for (GuiEventListener element : widgets)
-            if (element != wrappedSubsetsMenu && element != wrappedWeatherMenu && element != wrappedGameModeMenu && element.mouseClicked(mouseX, mouseY, button)) {
+            if ((overlayMenu == null || element != overlayMenu.wrappedMenu) && element.mouseClicked(mouseX, mouseY, button)) {
                 this.setFocused(element);
                 if (button == 0)
                     this.setDragging(true);

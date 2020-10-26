@@ -26,15 +26,15 @@ package me.shedaniel.rei.utils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.UnmodifiableIterator;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.rei.api.EntryStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.util.Mth;
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -158,6 +158,14 @@ public class CollectionUtils {
         List<R> l = new ArrayList<>(list.size() + 1);
         for (T t : list) {
             l.add(function.apply(t));
+        }
+        return l;
+    }
+    
+    public static <T> IntList mapToInt(Collection<T> list, ToIntFunction<T> function) {
+        IntList l = new IntArrayList(list.size() + 1);
+        for (T t : list) {
+            l.add(function.applyAsInt(t));
         }
         return l;
     }
