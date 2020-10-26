@@ -24,11 +24,13 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.clothconfig2.forge.api.ModifierKeyCode;
+import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.gui.config.*;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.Collections;
 import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
@@ -56,6 +58,8 @@ public interface ConfigObject {
     boolean isUsingDarkTheme();
     
     boolean isGrabbingItems();
+    
+    boolean isReducedMotion();
     
     boolean isToastDisplayedOnCopyIdentifier();
     
@@ -119,7 +123,11 @@ public interface ConfigObject {
     
     boolean doDebugRenderTimeRequired();
     
-    boolean doSearchFavorites();
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
+    default boolean doSearchFavorites() {
+        return false;
+    }
     
     ModifierKeyCode getFavoriteKeyCode();
     
@@ -145,7 +153,14 @@ public interface ConfigObject {
     
     boolean isLowerConfigButton();
     
-    List<EntryStack> getFavorites();
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
+    default List<EntryStack> getFavorites() {
+        return Collections.emptyList();
+    }
+    
+    @ApiStatus.Experimental
+    List<FavoriteEntry> getFavoriteEntries();
     
     List<EntryStack> getFilteredStacks();
     

@@ -31,7 +31,7 @@ import me.shedaniel.rei.api.EntryStack;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.item.Item;
 
-public class EntryListEntryWidget extends EntryWidget {
+public abstract class EntryListEntryWidget extends EntryWidget {
     public int backupY;
     
     protected EntryListEntryWidget(Point point, int entrySize) {
@@ -58,21 +58,28 @@ public class EntryListEntryWidget extends EntryWidget {
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (!interactable)
             return super.mouseReleased(mouseX, mouseY, button);
-        if (containsMouse(mouseX, mouseY) && ClientHelper.getInstance().isCheating()) {
-            EntryStack entry = getCurrentEntry().copy();
-            if (!entry.isEmpty() && wasClicked()) {
-                if (entry.getType() == EntryStack.Type.FLUID) {
-                    Item bucketItem = entry.getFluid().getBucket();
-                    if (bucketItem != null) {
-                        entry = EntryStack.create(bucketItem);
-                    }
-                }
-                if (entry.getType() == EntryStack.Type.ITEM)
-                    entry.setAmount(button != 1 && !Screen.hasShiftDown() ? 1 : entry.getItemStack().getMaxStackSize());
-                return ClientHelper.getInstance().tryCheatingEntry(entry);
-            }
+        if (containsMouse(mouseX, mouseY) && wasClicked() && doAction(mouseX, mouseY, button)) {
+            return true;
         }
         return super.mouseReleased(mouseX, mouseY, button);
+    }
+    
+    protected boolean doAction(double mouseX, double mouseY, int button) {
+        if (!ClientHelper.getInstance().isCheating()) return false;
+        EntryStack entry = getCurrentEntry().copy();
+        if (!entry.isEmpty()) {
+            if (entry.getType() == EntryStack.Type.FLUID) {
+                Item bucketItem = entry.getFluid().getBucket();
+                if (bucketItem != null) {
+                    entry = EntryStack.create(bucketItem);
+                }
+            }
+            if (entry.getType() == EntryStack.Type.ITEM)
+                entry.setAmount(button != 1 && !Screen.hasShiftDown() ? 1 : entry.getItemStack().getMaxStackSize());
+            return ClientHelper.getInstance().tryCheatingEntry(entry);
+        }
+        
+        return false;
     }
     
     @Override

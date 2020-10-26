@@ -197,7 +197,6 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
                 return true;
         if (keyCode == 256 || this.minecraft.options.keyInventory.matches(keyCode, scanCode)) {
             Minecraft.getInstance().setScreen(REIHelper.getInstance().getPreviousContainerScreen());
-            ScreenHelper.getLastOverlay().init();
             return true;
         }
         if (keyCode == 259) {
@@ -359,7 +358,6 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
         }
         
         children.addAll(tabs);
-        children.add(ScreenHelper.getLastOverlay(true, false));
         children.addAll(widgets);
         children.addAll(preWidgets);
     }
@@ -428,8 +426,6 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
             if (tab.isSelected())
                 tab.render(matrices, mouseX, mouseY, delta);
         }
-        ScreenHelper.getLastOverlay().render(matrices, mouseX, mouseY, delta);
-        ScreenHelper.getLastOverlay().lateRender(matrices, mouseX, mouseY, delta);
         {
             ModifierKeyCode export = ConfigObject.getInstance().getExportImageKeybind();
             if (export.matchesCurrentKey() || export.matchesCurrentMouse()) {

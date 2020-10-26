@@ -31,6 +31,7 @@ import me.shedaniel.clothconfig2.forge.api.Modifier;
 import me.shedaniel.clothconfig2.forge.api.ModifierKeyCode;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.gui.config.*;
 import me.shedaniel.rei.impl.filtering.FilteringRule;
 import net.minecraft.client.util.InputMappings;
@@ -97,6 +98,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @Override
     public boolean isGrabbingItems() {
         return basics.cheatingStyle == ItemCheatingStyle.GRAB;
+    }
+    
+    @Override
+    public boolean isReducedMotion() {
+        return basics.reducedMotion;
     }
     
     @Override
@@ -225,11 +231,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
-    public boolean doSearchFavorites() {
-        return advanced.search.searchFavorites;
-    }
-    
-    @Override
     public ModifierKeyCode getFavoriteKeyCode() {
         return basics.keyBindings.favoriteKeybind == null ? ModifierKeyCode.unknown() : basics.keyBindings.favoriteKeybind;
     }
@@ -290,7 +291,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
-    public List<EntryStack> getFavorites() {
+    public List<FavoriteEntry> getFavoriteEntries() {
         return basics.favorites;
     }
     
@@ -358,7 +359,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     public static class Basics {
-        @ConfigEntry.Gui.Excluded public List<EntryStack> favorites = new ArrayList<>();
+        @ConfigEntry.Gui.Excluded public List<FavoriteEntry> favorites = new ArrayList<>();
         @Comment("Declares whether cheating mode is on.") private boolean cheating = false;
         private boolean favoritesEnabled = true;
         @ConfigEntry.Gui.CollapsibleObject(startExpanded = true)
@@ -366,6 +367,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         @Comment("Declares whether REI is visible.") @ConfigEntry.Gui.Excluded private boolean overlayVisible = true;
         @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
         private ItemCheatingStyle cheatingStyle = ItemCheatingStyle.GRAB;
+        private boolean reducedMotion = false;
     }
     
     public static class KeyBindings {
@@ -448,7 +450,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         }
         
         public static class Search {
-            @Comment("Declares whether favorites will be searched.") private boolean searchFavorites = false;
             @Comment("Declares whether search time should be debugged.") private boolean debugSearchTimeRequired = false;
             @Comment("Declares whether REI should search async.") private boolean asyncSearch = true;
             @Comment("Declares how many entries should be grouped one async search.") @ConfigEntry.BoundedDiscrete(min = 25, max = 400)

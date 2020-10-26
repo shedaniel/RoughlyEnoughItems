@@ -155,9 +155,11 @@ public interface EntryStack extends TextRepresentable {
     static EntryStack readFromJson(JsonElement jsonElement) {
         try {
             JsonObject obj = jsonElement.getAsJsonObject();
-            switch (obj.getAsJsonPrimitive("type").getAsString()) {
+            switch (GsonHelper.getAsString(obj, "type")) {
                 case "stack":
                     return EntryStack.create(ItemStack.of((CompoundNBT) Dynamic.convert(JsonOps.INSTANCE, NBTDynamicOps.INSTANCE, obj.get("nbt").getAsJsonObject())));
+                case "item":
+                    return EntryStack.create(ItemStack.of((CompoundNBT) Dynamic.convert(JsonOps.INSTANCE, NbtOps.INSTANCE, obj)));
                 case "fluid":
                     return EntryStack.create(FluidStack.loadFluidStackFromNBT((CompoundNBT) Dynamic.convert(JsonOps.INSTANCE, NBTDynamicOps.INSTANCE, obj.get("nbt").getAsJsonObject())));
                 case "empty":
@@ -177,9 +179,8 @@ public interface EntryStack extends TextRepresentable {
         try {
             switch (getType()) {
                 case ITEM:
-                    JsonObject obj1 = new JsonObject();
-                    obj1.addProperty("type", "stack");
-                    obj1.addProperty("nbt", getItemStack().save(new CompoundNBT()).toString());
+                    JsonObject obj1 = Dynamic.convert(NbtOps.INSTANCE, JsonOps.INSTANCE, getItemStack().save(new CompoundNBT())).getAsJsonObject();
+                    obj1.addProperty("type", "item");
                     return obj1;
                 case FLUID:
                     Optional<ResourceLocation> optionalIdentifier = getIdentifier();
@@ -347,7 +348,7 @@ public interface EntryStack extends TextRepresentable {
     
     class Settings<T> {
         @ApiStatus.Internal
-        private static final Short2ObjectMap<Settings<?>> ID_TO_SETTINGS = new Short2ObjectOpenHashMap<>();
+        private static final List<Settings<?>> SETTINGS = new ArrayList<>();
         
         public static final Supplier<Boolean> TRUE = () -> true;
         public static final Supplier<Boolean> FALSE = () -> false;
@@ -368,12 +369,12 @@ public interface EntryStack extends TextRepresentable {
         public Settings(T defaultValue) {
             this.defaultValue = defaultValue;
             this.id = nextId++;
-            ID_TO_SETTINGS.put(this.id, this);
+            SETTINGS.add(this);
         }
         
         @ApiStatus.Internal
         public static <T> Settings<T> getById(short id) {
-            return (Settings<T>) ID_TO_SETTINGS.get(id);
+            return (Settings<T>) SETTINGS.get(id);
         }
         
         public T getDefaultValue() {

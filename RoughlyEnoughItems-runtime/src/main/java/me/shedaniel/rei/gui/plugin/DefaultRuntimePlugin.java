@@ -28,11 +28,15 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.plugins.REIPlugin;
+import me.shedaniel.rei.api.favorites.FavoriteEntry;
+import me.shedaniel.rei.api.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.api.widgets.Panel;
 import me.shedaniel.rei.api.widgets.Tooltip;
+import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
+import me.shedaniel.rei.gui.widget.FavoritesListWidget;
 import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.impl.RenderingEntry;
 import me.shedaniel.rei.plugin.autocrafting.DefaultCategoryHandler;
@@ -89,6 +93,14 @@ public class DefaultRuntimePlugin implements REIPluginV0 {
                 return Collections.emptyList();
             return Collections.singletonList(widget.getBounds().clone());
         });
+        /*baseBoundsHandler.registerExclusionZones(Screen.class, () -> {
+            FavoritesListWidget widget = ContainerScreenOverlay.getFavoritesListWidget();
+            if (widget != null) {
+                if (widget.favoritePanelButton.isVisible())
+                    return Collections.singletonList(widget.favoritePanelButton.bounds);
+            }
+            return Collections.emptyList();
+        });*/
         displayHelper.registerProvider(new DisplayHelper.DisplayBoundsProvider<RecipeViewingScreen>() {
             @Override
             public Rectangle getScreenBounds(RecipeViewingScreen screen) {
@@ -98,6 +110,11 @@ public class DefaultRuntimePlugin implements REIPluginV0 {
             @Override
             public Class<?> getBaseSupportedClass() {
                 return RecipeViewingScreen.class;
+            }
+            
+            @Override
+            public InteractionResult shouldScreenBeOverlayed(Class<?> screen) {
+                return InteractionResult.SUCCESS;
             }
         });
         displayHelper.registerProvider(new DisplayHelper.DisplayBoundsProvider<VillagerRecipeViewingScreen>() {
@@ -110,11 +127,111 @@ public class DefaultRuntimePlugin implements REIPluginV0 {
             public Class<?> getBaseSupportedClass() {
                 return VillagerRecipeViewingScreen.class;
             }
+            
+            @Override
+            public InteractionResult shouldScreenBeOverlayed(Class<?> screen) {
+                return InteractionResult.SUCCESS;
+            }
         });
     }
     
     @Override
     public void registerOthers(RecipeHelper recipeHelper) {
         recipeHelper.registerAutoCraftingHandler(new DefaultCategoryHandler());
+        FavoriteEntryType.registry().register(EntryStackFavoriteType.INSTANCE.id, EntryStackFavoriteType.INSTANCE);
+    }
+    
+    private enum EntryStackFavoriteType implements FavoriteEntryType<EntryStackFavoriteEntry> {
+        INSTANCE(FavoriteEntryType.ENTRY_STACK);
+        
+        private final String key = "data";
+        private ResourceLocation id;
+        
+        EntryStackFavoriteType(ResourceLocation id) {
+            this.id = id;
+        }
+        
+        @Override
+        public @NotNull EntryStackFavoriteEntry fromJson(@NotNull JsonObject object) {
+            return new EntryStackFavoriteEntry(EntryStack.readFromJson(GsonHelper.getAsJsonObject(object, key)));
+        }
+        
+        @Override
+        public @NotNull EntryStackFavoriteEntry fromArgs(Object... args) {
+            return new EntryStackFavoriteEntry((EntryStack) args[0]);
+        }
+        
+        @Override
+        public @NotNull JsonObject toJson(@NotNull EntryStackFavoriteEntry entry, @NotNull JsonObject object) {
+            object.add(key, entry.stack.toJson());
+            return object;
+        }
+    }
+    
+    private static class EntryStackFavoriteEntry extends FavoriteEntry {
+        private static final Function<EntryStack, String> CANCEL_FLUID_AMOUNT = s -> null;
+        private final EntryStack stack;
+        private final int hashIgnoreAmount;
+        
+        public EntryStackFavoriteEntry(EntryStack stack) {
+            this.stack = stack.copy();
+            this.stack.setAmount(127);
+            if (this.stack.getType() == EntryStack.Type.ITEM)
+                this.stack.setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE);
+            else if (this.stack.getType() == EntryStack.Type.ITEM)
+                this.stack.setting(EntryStack.Settings.Fluid.AMOUNT_TOOLTIP, CANCEL_FLUID_AMOUNT);
+            this.hashIgnoreAmount = stack.hashIgnoreAmount();
+        }
+        
+        @Override
+        public boolean isInvalid() {
+            return this.stack.isEmpty();
+        }
+        
+        @Override
+        public EntryStack getWidget(boolean showcase) {
+            return this.stack;
+        }
+    
+        @Override
+        public boolean doAction(int button) {
+            if (!ClientHelper.getInstance().isCheating()) return false;
+            EntryStack entry = stack.copy();
+            if (!entry.isEmpty()) {
+                if (entry.getType() == EntryStack.Type.FLUID) {
+                    Item bucketItem = entry.getFluid().getBucket();
+                    if (bucketItem != null) {
+                        entry = EntryStack.create(bucketItem);
+                    }
+                }
+                if (entry.getType() == EntryStack.Type.ITEM)
+                    entry.setAmount(button != 1 && !Screen.hasShiftDown() ? 1 : entry.getItemStack().getMaxStackSize());
+                return ClientHelper.getInstance().tryCheatingEntry(entry);
+            }
+    
+            return false;
+        }
+    
+        @Override
+        public int hashIgnoreAmount() {
+            return hashIgnoreAmount;
+        }
+        
+        @Override
+        public FavoriteEntry copy() {
+            return new EntryStackFavoriteEntry(stack.copy());
+        }
+        
+        @Override
+        public ResourceLocation getType() {
+            return EntryStackFavoriteType.INSTANCE.id;
+        }
+        
+        @Override
+        public boolean isSame(FavoriteEntry other) {
+            if (!(other instanceof EntryStackFavoriteEntry)) return false;
+            EntryStackFavoriteEntry that = (EntryStackFavoriteEntry) other;
+            return stack.equalsIgnoreAmount(that.stack);
+        }
     }
 }

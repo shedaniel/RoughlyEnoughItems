@@ -34,7 +34,6 @@ import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.modules.Menu;
 import me.shedaniel.rei.gui.modules.MenuEntry;
 import me.shedaniel.rei.gui.widget.TabWidget;
-import me.shedaniel.rei.impl.EntryRegistryImpl;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SimpleSound;
@@ -152,7 +151,7 @@ public class SubSubsetsMenuEntry extends MenuEntry {
                 Menu subsetsMenu = ScreenHelper.getLastOverlay().getSubsetsMenu();
                 setFiltered(filteredStacks, subsetsMenu, this, !(getFilteredRatio() > 0));
                 ConfigManager.getInstance().saveConfig();
-                ((EntryRegistryImpl) EntryRegistry.getInstance()).refilter();
+                EntryRegistry.getInstance().refilter();
                 if (ScreenHelper.getSearchField() != null)
                     ContainerScreenOverlay.getEntryListWidget().updateSearch(ScreenHelper.getSearchField().getText(), true);
             } else {

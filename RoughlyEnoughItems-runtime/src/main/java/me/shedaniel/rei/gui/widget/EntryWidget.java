@@ -30,6 +30,7 @@ import me.shedaniel.clothconfig2.forge.api.PointHelper;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.widgets.Slot;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
@@ -292,11 +293,11 @@ public class EntryWidget extends Slot {
     }
     
     public final boolean hasTooltips() {
-        return tooltips;
+        return isTooltipsEnabled();
     }
     
     public final boolean hasHighlight() {
-        return highlight;
+        return isHighlightEnabled();
     }
     
     protected void drawBackground(MatrixStack matrices, int mouseX, int mouseY, float delta) {
@@ -370,13 +371,12 @@ public class EntryWidget extends Slot {
         if (wasClicked() && containsMouse(mouseX, mouseY)) {
             if (interactableFavorites && ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(PointHelper.ofMouse()) && !getCurrentEntry().isEmpty()) {
                 ModifierKeyCode keyCode = ConfigObject.getInstance().getFavoriteKeyCode();
-                EntryStack entry = getCurrentEntry().copy();
-                entry.setAmount(127);
                 if (keyCode.matchesMouse(button)) {
+                    FavoriteEntry favoriteEntry = asFavoriteEntry();
                     if (reverseFavoritesAction())
-                        ConfigObject.getInstance().getFavorites().removeIf(entry::equalsIgnoreAmount);
-                    else if (!CollectionUtils.anyMatchEqualsEntryIgnoreAmount(ConfigObject.getInstance().getFavorites(), entry))
-                        ConfigObject.getInstance().getFavorites().add(entry);
+                        ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
+                    else if (!ConfigObject.getInstance().getFavoriteEntries().contains(favoriteEntry))
+                        ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
                     ConfigManager.getInstance().saveConfig();
                     FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
                     if (favoritesListWidget != null)
@@ -390,6 +390,11 @@ public class EntryWidget extends Slot {
                 return ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addUsagesFor(getCurrentEntry()).setInputNotice(getCurrentEntry()).fillPreferredOpenedCategory());
         }
         return false;
+    }
+    
+    @ApiStatus.Internal
+    protected FavoriteEntry asFavoriteEntry() {
+        return FavoriteEntry.fromEntryStack(getCurrentEntry().copy());
     }
     
     @ApiStatus.Internal
@@ -408,13 +413,12 @@ public class EntryWidget extends Slot {
         if (containsMouse(PointHelper.ofMouse())) {
             if (interactableFavorites && ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(PointHelper.ofMouse()) && !getCurrentEntry().isEmpty()) {
                 ModifierKeyCode keyCode = ConfigObject.getInstance().getFavoriteKeyCode();
-                EntryStack entry = getCurrentEntry().copy();
-                entry.setAmount(127);
                 if (keyCode.matchesKey(int_1, int_2)) {
+                    FavoriteEntry favoriteEntry = asFavoriteEntry();
                     if (reverseFavoritesAction())
-                        ConfigObject.getInstance().getFavorites().removeIf(entry::equalsIgnoreAmount);
-                    else if (!CollectionUtils.anyMatchEqualsEntryIgnoreAmount(ConfigObject.getInstance().getFavorites(), entry))
-                        ConfigObject.getInstance().getFavorites().add(entry);
+                        ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
+                    else if (!ConfigObject.getInstance().getFavoriteEntries().contains(favoriteEntry))
+                        ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
                     ConfigManager.getInstance().saveConfig();
                     FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
                     if (favoritesListWidget != null)

@@ -25,9 +25,16 @@ package me.shedaniel.rei;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import me.shedaniel.cloth.api.client.events.v0.ClothClientHooks;
+import me.shedaniel.clothconfig2.api.LazyResettable;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.favorites.FavoriteEntry;
+import me.shedaniel.rei.api.favorites.FavoriteEntryType;
+import me.shedaniel.rei.api.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.plugins.REIPlugin;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
@@ -74,6 +81,7 @@ import net.minecraftforge.fluids.FluidStack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Type;
 
@@ -83,6 +91,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static me.shedaniel.rei.impl.Internals.attachInstance;
@@ -171,6 +180,94 @@ public class RoughlyEnoughItemsCore {
                 return new FillRectangleDrawableConsumer(rectangle, color);
             }
         }, Internals.WidgetsProvider.class);
+        attachInstance((Supplier<FavoriteEntryType.Registry>) FavoriteEntryTypeRegistryImpl::getInstance, "favoriteEntryTypeRegistry");
+        attachInstance((BiFunction<Supplier<FavoriteEntry>, Supplier<JsonObject>, FavoriteEntry>) (supplier, toJson) -> new FavoriteEntry() {
+            LazyResettable<FavoriteEntry> value = new LazyResettable<>(supplier);
+            
+            @Override
+            public FavoriteEntry getUnwrapped() {
+                FavoriteEntry entry = value.get();
+                if (entry == null) {
+                    value.reset();
+                }
+                return Objects.requireNonNull(entry).getUnwrapped();
+            }
+    
+            @Override
+            public UUID getUuid() {
+                return getUnwrapped().getUuid();
+            }
+    
+            @Override
+            public boolean isInvalid() {
+                try {
+                    return getUnwrapped().isInvalid();
+                } catch (Exception e) {
+                    return true;
+                }
+            }
+            
+            @Override
+            public EntryStack getWidget(boolean showcase) {
+                return getUnwrapped().getWidget(showcase);
+            }
+            
+            @Override
+            public boolean doAction(int button) {
+                return getUnwrapped().doAction(button);
+            }
+    
+            @Override
+            public @NotNull Optional<Supplier<Collection<@NotNull FavoriteMenuEntry>>> getMenuEntries() {
+                return getUnwrapped().getMenuEntries();
+            }
+    
+            @Override
+            public int hashIgnoreAmount() {
+                return getUnwrapped().hashIgnoreAmount();
+            }
+            
+            @Override
+            public FavoriteEntry copy() {
+                return FavoriteEntry.delegate(supplier, toJson);
+            }
+            
+            @Override
+            public ResourceLocation getType() {
+                return getUnwrapped().getType();
+            }
+            
+            @Override
+            public @NotNull JsonObject toJson(@NotNull JsonObject to) {
+                if (toJson == null) {
+                    return getUnwrapped().toJson(to);
+                }
+                
+                JsonObject object = toJson.get();
+                for (Map.Entry<String, JsonElement> entry : object.entrySet()) {
+                    to.add(entry.getKey(), entry.getValue());
+                }
+                return to;
+            }
+            
+            @Override
+            public boolean isSame(FavoriteEntry other) {
+                return getUnwrapped().isSame(other.getUnwrapped());
+            }
+        }, "delegateFavoriteEntry");
+        attachInstance((Function<JsonObject, FavoriteEntry>) (object) -> {
+            String type = GsonHelper.getAsString(object, FavoriteEntry.TYPE_KEY);
+            switch (type) {
+                case "stack":
+                case "item":
+                case "fluid":
+                case "empty":
+                    return FavoriteEntry.fromEntryStack(EntryStack.readFromJson(object));
+                default:
+                    ResourceLocation id = new ResourceLocation(type);
+                    return Objects.requireNonNull(Objects.requireNonNull(FavoriteEntryType.registry().get(id)).fromJson(object));
+            }
+        }, "favoriteEntryFromJson");
         attachInstance((BiFunction<@Nullable Point, Collection<ITextComponent>, Tooltip>) QueuedTooltip::create, "tooltipProvider");
         attachInstance((Function<@Nullable Boolean, ClickAreaHandler.Result>) successful -> new ClickAreaHandler.Result() {
             private List<ResourceLocation> categories = Lists.newArrayList();
@@ -180,12 +277,12 @@ public class RoughlyEnoughItemsCore {
                 this.categories.add(category);
                 return this;
             }
-        
+            
             @Override
             public boolean isSuccessful() {
                 return successful;
             }
-        
+            
             @Override
             public Stream<ResourceLocation> getCategories() {
                 return categories.stream();
