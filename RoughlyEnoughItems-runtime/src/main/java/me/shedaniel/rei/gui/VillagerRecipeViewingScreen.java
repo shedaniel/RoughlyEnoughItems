@@ -248,8 +248,6 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
         this.children.addAll(buttonList);
         this.widgets.addAll(tabs);
         this.children.addAll(widgets);
-        this.children.add(ScreenHelper.getLastOverlay(true, false));
-        ScreenHelper.getLastOverlay().init();
     }
     
     @Override
@@ -360,7 +358,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
         for (Widget widget : widgets) {
             widget.render(matrices, mouseX, mouseY, delta);
         }
-        ScreenHelper.getLastOverlay().render(matrices, mouseX, mouseY, delta);
+        super.render(matrices, mouseX, mouseY, delta);
         RenderSystem.pushMatrix();
         ScissorsHandler.INSTANCE.scissor(scrolling.getBounds());
         for (Button button : buttonList) {
@@ -380,7 +378,6 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
         scrolling.renderScrollBar(0, scrollBarAlpha, REIHelper.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
         ScissorsHandler.INSTANCE.removeLastScissor();
         RenderSystem.popMatrix();
-        ScreenHelper.getLastOverlay().lateRender(matrices, mouseX, mouseY, delta);
     }
     
     @Override
@@ -436,7 +433,6 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
                 return true;
         if (keyCode == 256 || this.minecraft.options.keyInventory.matches(keyCode, scanCode)) {
             Minecraft.getInstance().setScreen(REIHelper.getInstance().getPreviousContainerScreen());
-            ScreenHelper.getLastOverlay().init();
             return true;
         }
         if (keyCode == 259) {

@@ -363,6 +363,7 @@ public class RecipeHelperImpl implements RecipeHelper {
         DisplayHelperImpl displayHelper = (DisplayHelperImpl) DisplayHelper.getInstance();
         EntryRegistryImpl entryRegistry = (EntryRegistryImpl) EntryRegistry.getInstance();
         
+        FavoriteEntryTypeRegistryImpl.getInstance().clear();
         ((SubsetsRegistryImpl) SubsetsRegistry.getInstance()).reset();
         ((FluidSupportProviderImpl) FluidSupportProvider.getInstance()).reset();
         displayHelper.resetData();

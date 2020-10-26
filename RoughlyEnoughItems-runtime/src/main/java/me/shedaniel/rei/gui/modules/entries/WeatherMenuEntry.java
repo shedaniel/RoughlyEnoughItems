@@ -101,7 +101,7 @@ public class WeatherMenuEntry extends MenuEntry {
         if (rendering && mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + 12) {
             Minecraft.getInstance().player.chat(ConfigObject.getInstance().getWeatherCommand().replaceAll("\\{weather}", weather.name().toLowerCase(Locale.ROOT)));
             minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-            ScreenHelper.getLastOverlay().removeWeatherMenu();
+            ScreenHelper.getLastOverlay().removeOverlayMenu();
             return true;
         }
         return super.mouseClicked(mouseX, mouseY, button);

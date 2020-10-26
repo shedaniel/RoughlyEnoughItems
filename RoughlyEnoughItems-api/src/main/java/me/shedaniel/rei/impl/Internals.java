@@ -23,9 +23,12 @@
 
 package me.shedaniel.rei.impl;
 
+import com.google.gson.JsonObject;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.favorites.FavoriteEntry;
+import me.shedaniel.rei.api.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.fractions.Fraction;
 import me.shedaniel.rei.api.subsets.SubsetsRegistry;
@@ -61,6 +64,9 @@ public final class Internals {
     private static Supplier<DisplayHelper> displayHelper = Internals::throwNotSetup;
     private static Supplier<WidgetsProvider> widgetsProvider = Internals::throwNotSetup;
     private static Supplier<ClientHelper.ViewSearchBuilder> viewSearchBuilder = Internals::throwNotSetup;
+    private static Supplier<FavoriteEntryType.Registry> favoriteEntryTypeRegistry = Internals::throwNotSetup;
+    private static BiFunction<Supplier<FavoriteEntry>, Supplier<JsonObject>, FavoriteEntry> delegateFavoriteEntry = (supplier, toJson) -> throwNotSetup();
+    private static Function<JsonObject, FavoriteEntry> favoriteEntryFromJson = (object) -> throwNotSetup();
     private static Function<@NotNull Boolean, ClickAreaHandler.Result> clickAreaHandlerResult = (result) -> throwNotSetup();
     private static BiFunction<@Nullable Point, Collection<Component>, Tooltip> tooltipProvider = (point, texts) -> throwNotSetup();
     private static Supplier<BuiltinPlugin> builtinPlugin = Internals::throwNotSetup;
@@ -125,6 +131,10 @@ public final class Internals {
         return viewSearchBuilder.get();
     }
     
+    public static FavoriteEntryType.Registry getFavoriteEntryTypeRegistry() {
+        return favoriteEntryTypeRegistry.get();
+    }
+    
     @NotNull
     public static ClickAreaHandler.Result createClickAreaHandlerResult(boolean applicable) {
         return clickAreaHandlerResult.apply(applicable);
@@ -159,6 +169,14 @@ public final class Internals {
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+    }
+    
+    public static FavoriteEntry delegateFavoriteEntry(Supplier<FavoriteEntry> supplier, Supplier<JsonObject> toJoin) {
+        return delegateFavoriteEntry.apply(supplier, toJoin);
+    }
+    
+    public static FavoriteEntry favoriteEntryFromJson(JsonObject object) {
+        return favoriteEntryFromJson.apply(object);
     }
     
     public interface EntryStackProvider {
