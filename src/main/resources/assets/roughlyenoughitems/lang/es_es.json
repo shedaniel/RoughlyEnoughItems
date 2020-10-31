@@ -1,1 +1,19 @@
-{}
+{
+  "text.rei.cheating_limited_creative_enabled": "§aTrucos activados (usando creativo)",
+  "category.rei.smithing": "Herrería",
+  "text.rei.config.optifine.title": "Error al abrir la pantalla de configuración de REI",
+  "config.roughlyenoughitems.cheatingStyle": "Estilo de trucos:",
+  "config.roughlyenoughitems.cheatingStyle.grab": "Coger",
+  "config.roughlyenoughitems.cheatingStyle.give": "Entregar",
+  "config.roughlyenoughitems.filteringRulesScreen": "Reglas de filtrado personalizadas",
+  "config.roughlyenoughitems.filteringRulesScreen.new": "Crear una regla de filtrado",
+  "config.roughlyenoughitems.filteringRulesScreen.delete": "Eliminar",
+  "rule.roughlyenoughitems.filtering.manual": "Filtro manual",
+  "rule.roughlyenoughitems.filtering.manual.subtitle": "Selecciona manualmente qué ocultar y qué mostrar.",
+  "rule.roughlyenoughitems.filtering.search": "Filtro de búsqueda",
+  "rule.roughlyenoughitems.filtering.search.subtitle": "Filtrar utilizando filtros de búsqueda.",
+  "rule.roughlyenoughitems.filtering.search.filter": "Filtro de búsqueda:",
+  "rule.roughlyenoughitems.filtering.search.show": "Mostrar / Ocultar:",
+  "rule.roughlyenoughitems.filtering.search.show.true": "Mostrar",
+  "rule.roughlyenoughitems.filtering.search.show.false": "Ocultar"
+}
