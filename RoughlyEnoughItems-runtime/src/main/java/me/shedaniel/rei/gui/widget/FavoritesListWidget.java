@@ -26,8 +26,8 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.ints.*;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import me.shedaniel.clothconfig2.forge.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.forge.api.PointHelper;
 import me.shedaniel.clothconfig2.forge.api.ScissorsHandler;
@@ -50,10 +50,9 @@ import me.shedaniel.rei.impl.OptimalEntryStack;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.item.Item;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.util.Tuple;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.TranslationTextComponent;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -184,7 +183,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
         }
     }
     
-    private void renderAddFavorite(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    private void renderAddFavorite(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 //        this.favoritePanel.render(matrices, mouseX, mouseY, delta);
 //        this.favoritePanelButton.render(matrices, mouseX, mouseY, delta);
     }
@@ -357,7 +356,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
             double x = lastTouchedEntry.x.doubleValue();
             double y = lastTouchedEntry.y.doubleValue();
             
-            return Mth.clamp(entriesPoints.stream()
+            return MathHelper.clamp(entriesPoints.stream()
                             .filter(value -> {
                                 double otherY = value.getB().y;
                                 
@@ -576,19 +575,19 @@ public class FavoritesListWidget extends WidgetWithBounds {
         }
         
         @Override
-        public void queueTooltip(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        public void queueTooltip(MatrixStack matrices, int mouseX, int mouseY, float delta) {
             if (lastTouchedEntry == null || !lastTouchedEntry.dragged)
                 super.queueTooltip(matrices, mouseX, mouseY, delta);
         }
         
         @Override
-        protected void drawHighlighted(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        protected void drawHighlighted(MatrixStack matrices, int mouseX, int mouseY, float delta) {
             if (lastTouchedEntry == null || !lastTouchedEntry.dragged)
                 super.drawHighlighted(matrices, mouseX, mouseY, delta);
         }
         
         @Override
-        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
             Optional<ContainerScreenOverlay> overlayOptional = ScreenHelper.getOptionalOverlay();
             Optional<Supplier<Collection<@NotNull FavoriteMenuEntry>>> menuEntries = favoriteEntry.getMenuEntries();
             if (Math.abs(entry.x.doubleValue() - entry.x.target()) < 1 && Math.abs(entry.y.doubleValue() - entry.y.target()) < 1 && overlayOptional.isPresent() && menuEntries.isPresent()) {
@@ -607,12 +606,12 @@ public class FavoritesListWidget extends WidgetWithBounds {
                             Menu menu = new Menu(new Point(getBounds().x, getBounds().getMaxY()),
                                     CollectionUtils.map(menuEntries.get().get(), entry -> new MenuEntry() {
                                         @Override
-                                        public List<? extends GuiEventListener> children() {
+                                        public List<? extends IGuiEventListener> children() {
                                             return Collections.singletonList(entry);
                                         }
                                         
                                         @Override
-                                        public void render(PoseStack poseStack, int i, int j, float f) {
+                                        public void render(MatrixStack poseStack, int i, int j, float f) {
                                             entry.render(poseStack, i, j, f);
                                         }
                                         

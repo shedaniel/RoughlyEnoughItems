@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.plugin.favorites;
 
-import me.shedaniel.clothconfig2.api.ScrollingContainer;
-import net.minecraft.Util;
+import me.shedaniel.clothconfig2.forge.api.ScrollingContainer;
+import net.minecraft.util.Util;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal

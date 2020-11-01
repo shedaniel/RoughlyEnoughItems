@@ -23,32 +23,37 @@
 
 package me.shedaniel.rei.gui.plugin;
 
+import com.google.gson.JsonObject;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.api.plugins.REIPlugin;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.favorites.FavoriteEntryType;
+import me.shedaniel.rei.api.plugins.REIPlugin;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.api.widgets.Panel;
 import me.shedaniel.rei.api.widgets.Tooltip;
-import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
-import me.shedaniel.rei.gui.widget.FavoritesListWidget;
 import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.impl.RenderingEntry;
 import me.shedaniel.rei.plugin.autocrafting.DefaultCategoryHandler;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.item.Item;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
+import java.util.function.Function;
 
 @ApiStatus.Internal
 @OnlyIn(Dist.CLIENT)
@@ -113,8 +118,8 @@ public class DefaultRuntimePlugin implements REIPluginV0 {
             }
             
             @Override
-            public InteractionResult shouldScreenBeOverlayed(Class<?> screen) {
-                return InteractionResult.SUCCESS;
+            public ActionResultType shouldScreenBeOverlayed(Class<?> screen) {
+                return ActionResultType.SUCCESS;
             }
         });
         displayHelper.registerProvider(new DisplayHelper.DisplayBoundsProvider<VillagerRecipeViewingScreen>() {
@@ -129,8 +134,8 @@ public class DefaultRuntimePlugin implements REIPluginV0 {
             }
             
             @Override
-            public InteractionResult shouldScreenBeOverlayed(Class<?> screen) {
-                return InteractionResult.SUCCESS;
+            public ActionResultType shouldScreenBeOverlayed(Class<?> screen) {
+                return ActionResultType.SUCCESS;
             }
         });
     }
@@ -153,7 +158,7 @@ public class DefaultRuntimePlugin implements REIPluginV0 {
         
         @Override
         public @NotNull EntryStackFavoriteEntry fromJson(@NotNull JsonObject object) {
-            return new EntryStackFavoriteEntry(EntryStack.readFromJson(GsonHelper.getAsJsonObject(object, key)));
+            return new EntryStackFavoriteEntry(EntryStack.readFromJson(JSONUtils.getAsJsonObject(object, key)));
         }
         
         @Override
@@ -192,7 +197,7 @@ public class DefaultRuntimePlugin implements REIPluginV0 {
         public EntryStack getWidget(boolean showcase) {
             return this.stack;
         }
-    
+        
         @Override
         public boolean doAction(int button) {
             if (!ClientHelper.getInstance().isCheating()) return false;
@@ -208,10 +213,10 @@ public class DefaultRuntimePlugin implements REIPluginV0 {
                     entry.setAmount(button != 1 && !Screen.hasShiftDown() ? 1 : entry.getItemStack().getMaxStackSize());
                 return ClientHelper.getInstance().tryCheatingEntry(entry);
             }
-    
+            
             return false;
         }
-    
+        
         @Override
         public int hashIgnoreAmount() {
             return hashIgnoreAmount;

@@ -27,8 +27,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import me.shedaniel.cloth.api.client.events.v0.ClothClientHooks;
-import me.shedaniel.clothconfig2.api.LazyResettable;
+import me.shedaniel.clothconfig2.forge.api.LazyResettable;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.*;
@@ -67,6 +66,7 @@ import net.minecraft.item.Items;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.RecipeManager;
 import net.minecraft.util.ActionResultType;
+import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.ITextProperties;
@@ -192,12 +192,12 @@ public class RoughlyEnoughItemsCore {
                 }
                 return Objects.requireNonNull(entry).getUnwrapped();
             }
-    
+            
             @Override
             public UUID getUuid() {
                 return getUnwrapped().getUuid();
             }
-    
+            
             @Override
             public boolean isInvalid() {
                 try {
@@ -216,12 +216,12 @@ public class RoughlyEnoughItemsCore {
             public boolean doAction(int button) {
                 return getUnwrapped().doAction(button);
             }
-    
+            
             @Override
             public @NotNull Optional<Supplier<Collection<@NotNull FavoriteMenuEntry>>> getMenuEntries() {
                 return getUnwrapped().getMenuEntries();
             }
-    
+            
             @Override
             public int hashIgnoreAmount() {
                 return getUnwrapped().hashIgnoreAmount();
@@ -256,7 +256,7 @@ public class RoughlyEnoughItemsCore {
             }
         }, "delegateFavoriteEntry");
         attachInstance((Function<JsonObject, FavoriteEntry>) (object) -> {
-            String type = GsonHelper.getAsString(object, FavoriteEntry.TYPE_KEY);
+            String type = JSONUtils.getAsString(object, FavoriteEntry.TYPE_KEY);
             switch (type) {
                 case "stack":
                 case "item":
@@ -271,7 +271,7 @@ public class RoughlyEnoughItemsCore {
         attachInstance((BiFunction<@Nullable Point, Collection<ITextComponent>, Tooltip>) QueuedTooltip::create, "tooltipProvider");
         attachInstance((Function<@Nullable Boolean, ClickAreaHandler.Result>) successful -> new ClickAreaHandler.Result() {
             private List<ResourceLocation> categories = Lists.newArrayList();
-        
+            
             @Override
             public ClickAreaHandler.Result category(ResourceLocation category) {
                 this.categories.add(category);

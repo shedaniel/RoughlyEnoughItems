@@ -25,8 +25,8 @@ package me.shedaniel.rei.api.favorites;
 
 import com.google.gson.JsonObject;
 import me.shedaniel.rei.impl.Internals;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -60,7 +60,7 @@ public interface FavoriteEntryType<T extends FavoriteEntry> {
         ResourceLocation getId(FavoriteEntryType<?> type);
         
         @NotNull
-        Section getOrCrateSection(Component text);
+        Section getOrCrateSection(ITextComponent text);
         
         @NotNull
         Iterable<Section> sections();
@@ -71,7 +71,7 @@ public interface FavoriteEntryType<T extends FavoriteEntry> {
         void add(@NotNull FavoriteEntry... entries);
         
         @NotNull
-        Component getText();
+        ITextComponent getText();
         
         @NotNull
         List<FavoriteEntry> getEntries();

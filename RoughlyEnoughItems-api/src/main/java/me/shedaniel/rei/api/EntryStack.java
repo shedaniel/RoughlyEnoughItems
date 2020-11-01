@@ -29,8 +29,6 @@ import com.google.gson.JsonObject;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
-import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
-import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
@@ -44,6 +42,7 @@ import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTDynamicOps;
 import net.minecraft.util.IItemProvider;
+import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
@@ -155,11 +154,11 @@ public interface EntryStack extends TextRepresentable {
     static EntryStack readFromJson(JsonElement jsonElement) {
         try {
             JsonObject obj = jsonElement.getAsJsonObject();
-            switch (GsonHelper.getAsString(obj, "type")) {
+            switch (JSONUtils.getAsString(obj, "type")) {
                 case "stack":
                     return EntryStack.create(ItemStack.of((CompoundNBT) Dynamic.convert(JsonOps.INSTANCE, NBTDynamicOps.INSTANCE, obj.get("nbt").getAsJsonObject())));
                 case "item":
-                    return EntryStack.create(ItemStack.of((CompoundNBT) Dynamic.convert(JsonOps.INSTANCE, NbtOps.INSTANCE, obj)));
+                    return EntryStack.create(ItemStack.of((CompoundNBT) Dynamic.convert(JsonOps.INSTANCE, NBTDynamicOps.INSTANCE, obj)));
                 case "fluid":
                     return EntryStack.create(FluidStack.loadFluidStackFromNBT((CompoundNBT) Dynamic.convert(JsonOps.INSTANCE, NBTDynamicOps.INSTANCE, obj.get("nbt").getAsJsonObject())));
                 case "empty":
@@ -179,7 +178,7 @@ public interface EntryStack extends TextRepresentable {
         try {
             switch (getType()) {
                 case ITEM:
-                    JsonObject obj1 = Dynamic.convert(NbtOps.INSTANCE, JsonOps.INSTANCE, getItemStack().save(new CompoundNBT())).getAsJsonObject();
+                    JsonObject obj1 = Dynamic.convert(NBTDynamicOps.INSTANCE, JsonOps.INSTANCE, getItemStack().save(new CompoundNBT())).getAsJsonObject();
                     obj1.addProperty("type", "item");
                     return obj1;
                 case FLUID:

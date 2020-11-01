@@ -28,8 +28,8 @@ import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.favorites.FavoriteEntryType;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -43,7 +43,7 @@ import java.util.Map;
 public class FavoriteEntryTypeRegistryImpl implements FavoriteEntryType.Registry {
     private static final FavoriteEntryTypeRegistryImpl INSTANCE = new FavoriteEntryTypeRegistryImpl();
     private final BiMap<ResourceLocation, FavoriteEntryType<?>> registry = HashBiMap.create();
-    private final Map<Component, FavoriteEntryType.Section> sections = Maps.newLinkedHashMap();
+    private final Map<ITextComponent, FavoriteEntryType.Section> sections = Maps.newLinkedHashMap();
     
     public static FavoriteEntryTypeRegistryImpl getInstance() {
         return INSTANCE;
@@ -65,7 +65,7 @@ public class FavoriteEntryTypeRegistryImpl implements FavoriteEntryType.Registry
     }
     
     @Override
-    public FavoriteEntryType.@NotNull Section getOrCrateSection(Component text) {
+    public FavoriteEntryType.@NotNull Section getOrCrateSection(ITextComponent text) {
         return sections.computeIfAbsent(text, SectionImpl::new);
     }
     
@@ -80,10 +80,10 @@ public class FavoriteEntryTypeRegistryImpl implements FavoriteEntryType.Registry
     }
     
     private static class SectionImpl implements FavoriteEntryType.Section {
-        private final Component text;
+        private final ITextComponent text;
         private final List<FavoriteEntry> entries = new ArrayList<>();
         
-        public SectionImpl(Component text) {
+        public SectionImpl(ITextComponent text) {
             this.text = text;
         }
         
@@ -94,7 +94,7 @@ public class FavoriteEntryTypeRegistryImpl implements FavoriteEntryType.Registry
         
         @NotNull
         @Override
-        public Component getText() {
+        public ITextComponent getText() {
             return text;
         }
         

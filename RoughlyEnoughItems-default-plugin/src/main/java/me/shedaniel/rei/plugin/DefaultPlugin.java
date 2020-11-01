@@ -95,6 +95,8 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.IItemProvider;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.GameType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ForgeHooks;
@@ -483,7 +485,7 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
 //        subsetsRegistry.registerPathEntry("roughlyenoughitems:food/roughlyenoughitems:cookies", EntryStack.create(Items.COOKIE));
     
         FavoriteEntryType.registry().register(GameModeFavoriteEntry.ID, GameModeFavoriteEntry.Type.INSTANCE);
-        FavoriteEntryType.registry().getOrCrateSection(new TranslatableComponent(GameModeFavoriteEntry.TRANSLATION_KEY))
+        FavoriteEntryType.registry().getOrCrateSection(new TranslationTextComponent(GameModeFavoriteEntry.TRANSLATION_KEY))
                 .add(Arrays.stream(GameType.values()).<FavoriteEntry>map(GameModeFavoriteEntry.Type.INSTANCE::fromArgs).toArray(FavoriteEntry[]::new));
     }
     

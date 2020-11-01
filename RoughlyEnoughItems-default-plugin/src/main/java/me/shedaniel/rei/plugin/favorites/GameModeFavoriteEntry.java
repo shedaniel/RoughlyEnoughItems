@@ -24,8 +24,8 @@
 package me.shedaniel.rei.plugin.favorites;
 
 import com.google.gson.JsonObject;
-import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.clothconfig2.api.ScissorsHandler;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import me.shedaniel.clothconfig2.forge.api.ScissorsHandler;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.ConfigObject;
@@ -37,18 +37,18 @@ import me.shedaniel.rei.api.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.impl.RenderingEntry;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.world.level.GameType;
+import net.minecraft.client.audio.SimpleSound;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.util.JSONUtils;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvents;
+import net.minecraft.util.Util;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.GameType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -78,7 +78,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
             private long nextSwitch = -1;
             
             @Override
-            public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+            public void render(MatrixStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
                 int color = bounds.contains(mouseX, mouseY) ? 0xFFEEEEEE : 0xFFAAAAAA;
                 fillGradient(matrices, bounds.getX(), bounds.getY(), bounds.getMaxX(), bounds.getY() + 1, color, color);
                 fillGradient(matrices, bounds.getX(), bounds.getMaxY() - 1, bounds.getMaxX(), bounds.getMaxY(), color, color);
@@ -116,17 +116,17 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
                 }
             }
             
-            private void renderGameModeText(PoseStack matrices, GameType type, int centerX, int centerY, int color) {
-                Component s = new TranslatableComponent("text.rei.short_gamemode." + type.getName());
-                Font font = Minecraft.getInstance().font;
+            private void renderGameModeText(MatrixStack matrices, GameType type, int centerX, int centerY, int color) {
+                ITextComponent s = new TranslationTextComponent("text.rei.short_gamemode." + type.getName());
+                FontRenderer font = Minecraft.getInstance().font;
                 font.draw(matrices, s, centerX - font.width(s) / 2 + (type == GameType.NOT_SET ? 0 : 0.5f), centerY - 3.5f, color);
             }
             
             @Override
             public @Nullable Tooltip getTooltip(Point mouse) {
                 if (gameMode == GameType.NOT_SET)
-                    return Tooltip.create(mouse, new TranslatableComponent("text.rei.gamemode_button.tooltip.all"));
-                return Tooltip.create(mouse, new TranslatableComponent("text.rei.gamemode_button.tooltip.entry", gameMode.getDisplayName().getString()));
+                    return Tooltip.create(mouse, new TranslationTextComponent("text.rei.gamemode_button.tooltip.all"));
+                return Tooltip.create(mouse, new TranslationTextComponent("text.rei.gamemode_button.tooltip.entry", gameMode.getDisplayName().getString()));
             }
         };
     }
@@ -139,7 +139,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
                 type = GameType.byId(Minecraft.getInstance().gameMode.getPlayerMode().getId() + 1 % 4);
             }
             Minecraft.getInstance().player.chat(ConfigObject.getInstance().getGamemodeCommand().replaceAll("\\{gamemode}", type.name().toLowerCase(Locale.ROOT)));
-            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            Minecraft.getInstance().getSoundManager().play(SimpleSound.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             return true;
         }
         return false;
@@ -183,7 +183,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
         
         @Override
         public @NotNull GameModeFavoriteEntry fromJson(@NotNull JsonObject object) {
-            return new GameModeFavoriteEntry(GameType.valueOf(GsonHelper.getAsString(object, KEY)));
+            return new GameModeFavoriteEntry(GameType.valueOf(JSONUtils.getAsString(object, KEY)));
         }
         
         @Override
@@ -228,7 +228,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
         }
         
         @Override
-        public List<? extends GuiEventListener> children() {
+        public List<? extends IGuiEventListener> children() {
             return Collections.emptyList();
         }
         
@@ -243,17 +243,17 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
         }
         
         @Override
-        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
             boolean disabled = this.minecraft.gameMode.getPlayerMode() == gameMode;
             if (selected && !disabled) {
                 fill(matrices, x, y, x + width, y + 12, -12237499);
             }
             if (!disabled && selected && containsMouse) {
-                REIHelper.getInstance().queueTooltip(Tooltip.create(new TranslatableComponent("text.rei.gamemode_button.tooltip.entry", text)));
+                REIHelper.getInstance().queueTooltip(Tooltip.create(new TranslationTextComponent("text.rei.gamemode_button.tooltip.entry", text)));
             }
             String s = text;
             if (disabled) {
-                s = ChatFormatting.STRIKETHROUGH.toString() + s;
+                s = TextFormatting.STRIKETHROUGH.toString() + s;
             }
             font.draw(matrices, s, x + 2, y + 2, selected && !disabled ? 16777215 : 8947848);
         }
@@ -263,7 +263,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
             boolean disabled = this.minecraft.gameMode.getPlayerMode() == gameMode;
             if (!disabled && rendering && mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + 12) {
                 Minecraft.getInstance().player.chat(ConfigObject.getInstance().getGamemodeCommand().replaceAll("\\{gamemode}", gameMode.name().toLowerCase(Locale.ROOT)));
-                minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                minecraft.getSoundManager().play(SimpleSound.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 closeMenu();
                 return true;
             }

@@ -26,7 +26,7 @@ package me.shedaniel.rei.api.favorites;
 import com.google.gson.JsonObject;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.impl.Internals;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
