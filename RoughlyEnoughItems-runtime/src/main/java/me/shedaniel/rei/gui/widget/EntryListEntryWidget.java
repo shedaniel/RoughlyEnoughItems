@@ -58,8 +58,14 @@ public abstract class EntryListEntryWidget extends EntryWidget {
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (!interactable)
             return super.mouseReleased(mouseX, mouseY, button);
-        if (containsMouse(mouseX, mouseY) && wasClicked() && doAction(mouseX, mouseY, button)) {
-            return true;
+        if (containsMouse(mouseX, mouseY)) {
+            if (wasClicked()) {
+                if (doAction(mouseX, mouseY, button)) {
+                    return true;
+                } else {
+                    wasClicked = true;
+                }
+            }
         }
         return super.mouseReleased(mouseX, mouseY, button);
     }
