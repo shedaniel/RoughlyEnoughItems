@@ -58,14 +58,20 @@ public class RoughlyEnoughItemsState {
     }
     
     public static void checkRequiredFabricModules() {
-        ImmutableSet<String> requiredModules = ImmutableSet.<String>builder()
-                .add("fabric-api-base")
-                .add("fabric-resource-loader-v0")
-                .add("fabric-networking-v0")
-                .add("fabric-lifecycle-events-v1")
-                .add("fabric-lifecycle-events-v1")
-                .add("fabric-rendering-fluids-v1")
-                .build();
+        ImmutableSet<String> requiredModules = FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT ?
+                ImmutableSet.<String>builder()
+                        .add("fabric-api-base")
+                        .add("fabric-resource-loader-v0")
+                        .add("fabric-networking-v0")
+                        .add("fabric-lifecycle-events-v1")
+                        .add("fabric-rendering-fluids-v1")
+                        .build() :
+                ImmutableSet.<String>builder()
+                        .add("fabric-api-base")
+                        .add("fabric-resource-loader-v0")
+                        .add("fabric-networking-v0")
+                        .add("fabric-lifecycle-events-v1")
+                        .build();
         for (String module : requiredModules) {
             boolean moduleLoaded = FabricLoader.getInstance().isModLoaded(module);
             if (!moduleLoaded) {
