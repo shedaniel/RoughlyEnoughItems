@@ -32,6 +32,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
@@ -182,8 +183,10 @@ public interface AutoTransferHandler {
         
         boolean isActuallyCrafting();
         
+        @Nullable
         AbstractContainerScreen<?> getContainerScreen();
-        
+    
+        @Nullable
         @Deprecated
         @ApiStatus.ScheduledForRemoval
         default AbstractContainerScreen<?> getHandledScreen() {
@@ -191,15 +194,17 @@ public interface AutoTransferHandler {
         }
         
         RecipeDisplay getRecipe();
-        
+    
+        @Nullable
         @Deprecated
         @ApiStatus.ScheduledForRemoval
         default AbstractContainerMenu getScreenHandler() {
             return getContainer();
         }
-        
+    
+        @Nullable
         default AbstractContainerMenu getContainer() {
-            return getHandledScreen().getMenu();
+            return getContainerScreen() == null ? null : getContainerScreen().getMenu();
         }
     }
     

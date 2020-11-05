@@ -61,6 +61,8 @@ public class DefaultCategoryHandler implements AutoTransferHandler {
             return Result.createNotApplicable();
         TransferRecipeDisplay recipe = (TransferRecipeDisplay) context.getRecipe();
         AbstractContainerScreen<?> containerScreen = context.getContainerScreen();
+        if (containerScreen == null)
+            return Result.createNotApplicable();
         AbstractContainerMenu container = context.getContainer();
         ContainerInfo<AbstractContainerMenu> containerInfo = (ContainerInfo<AbstractContainerMenu>) ContainerInfoHandler.getContainerInfo(recipe.getRecipeCategory(), container.getClass());
         if (containerInfo == null)

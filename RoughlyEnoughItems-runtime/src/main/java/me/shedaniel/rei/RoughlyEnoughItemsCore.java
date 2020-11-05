@@ -383,11 +383,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                 RoughlyEnoughItemsCore.LOGGER.error("REI plugin from " + modContainer.getMetadata().getId() + " is not loaded because it is too old!");
         }
         
-        boolean networkingLoaded = FabricLoader.getInstance().isModLoaded("fabric-networking-v0");
-        if (!networkingLoaded) {
-            RoughlyEnoughItemsState.error("Fabric API is not installed!", "https://www.curseforge.com/minecraft/mc-mods/fabric-api/files/all");
-            return;
-        }
+        RoughlyEnoughItemsState.checkRequiredFabricModules();
         Executor.run(() -> () -> {
             ClientSidePacketRegistry.INSTANCE.register(RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, (packetContext, packetByteBuf) -> {
                 ItemStack stack = packetByteBuf.readItem();
@@ -495,6 +491,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     
     private boolean shouldReturn(Screen screen) {
         if (screen == null) return true;
+        if (screen != Minecraft.getInstance().screen) return true;
         return shouldReturn(screen.getClass());
     }
     

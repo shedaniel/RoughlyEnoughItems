@@ -79,9 +79,11 @@ allprojects {
         minecraft("com.mojang:minecraft:${project.minecraft_version}")
         mappings(new MojangMappingsDependency(project, loom))
         modApi("net.fabricmc:fabric-loader:${project.fabricloader_version}")
-        modApi("net.fabricmc.fabric-api:fabric-api:${project.fabric_api}") {
-            exclude(module: "fabric-biomes-v1")
-        }
+        modApi(fabricApi.module("fabric-api-base", project.fabric_api))
+        modApi(fabricApi.module("fabric-resource-loader-v0", project.fabric_api))
+        modApi(fabricApi.module("fabric-networking-v0", project.fabric_api))
+        modApi(fabricApi.module("fabric-lifecycle-events-v1", project.fabric_api))
+        modApi(fabricApi.module("fabric-rendering-fluids-v1", project.fabric_api))
         modApi("me.shedaniel.cloth.api:cloth-client-events-v0:${cloth_client_events_v0_version}") {
             transitive(false)
         }
@@ -285,6 +287,7 @@ curseforge {
             addGameVersion "1.16-Snapshot"
             addGameVersion "1.16.2"
             addGameVersion "1.16.3"
+            addGameVersion "1.16.4"
             addGameVersion "Java 8"
             addGameVersion "Fabric"
             relations {

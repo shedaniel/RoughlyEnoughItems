@@ -15,3 +15,8 @@ accessible field net/minecraft/world/entity/player/Inventory compartments Ljava/
 accessible class net/minecraft/client/gui/Font$StringRenderOutput
 accessible field net/minecraft/client/gui/Font SHADOW_OFFSET Lcom/mojang/math/Vector3f;
 accessible field net/minecraft/client/StringSplitter widthProvider Lnet/minecraft/client/StringSplitter$WidthProvider;
+accessible method net/minecraft/client/gui/screens/Screen isValidCharacterForName (Ljava/lang/String;CI)Z
+accessible method net/minecraft/client/gui/screens/Screen insertText (Ljava/lang/String;Z)V
+accessible method net/minecraft/client/gui/screens/Screen addWidget (Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;
+accessible method net/minecraft/client/gui/screens/Screen addButton (Lnet/minecraft/client/gui/components/AbstractWidget;)Lnet/minecraft/client/gui/components/AbstractWidget;
+accessible method net/minecraft/client/gui/screens/Screen init ()V

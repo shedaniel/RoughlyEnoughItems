@@ -141,6 +141,13 @@ public class EntryListWidget extends WidgetWithBounds {
     }
     
     private static Rectangle updateInnerBounds(Rectangle bounds) {
+        bounds = bounds.clone();
+        int widthReduction = (int) Math.round(bounds.width * (1 - ConfigObject.getInstance().getHorizontalEntriesBoundaries()));
+        int heightReduction = (int) Math.round(bounds.width * (1 - ConfigObject.getInstance().getVerticalEntriesBoundaries()));
+        bounds.x += widthReduction;
+        bounds.width -= widthReduction;
+        bounds.y += heightReduction / 2;
+        bounds.height -= heightReduction;
         int entrySize = entrySize();
         if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
             int width = Math.max(Mth.floor((bounds.width - 2 - 6) / (float) entrySize), 1);

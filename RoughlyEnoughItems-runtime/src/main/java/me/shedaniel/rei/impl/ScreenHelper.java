@@ -172,6 +172,7 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
      */
     @Deprecated
     @ApiStatus.ScheduledForRemoval
+    @Nullable
     public static AbstractContainerScreen<?> getLastHandledScreen() {
         return previousContainerScreen;
     }
@@ -280,11 +281,7 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
                 previousContainerScreen = (AbstractContainerScreen<?>) screen;
             return InteractionResult.PASS;
         });
-        boolean loaded = FabricLoader.getInstance().isModLoaded("fabric-events-lifecycle-v0");
-        if (!loaded) {
-            RoughlyEnoughItemsState.error("Fabric API is not installed!", "https://www.curseforge.com/minecraft/mc-mods/fabric-api/files/all");
-            return;
-        }
+        RoughlyEnoughItemsState.checkRequiredFabricModules();
         Executor.run(() -> () -> {
             ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
                 if (isOverlayVisible() && getSearchField() != null)
