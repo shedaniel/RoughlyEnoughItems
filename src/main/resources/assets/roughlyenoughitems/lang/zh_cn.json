@@ -208,6 +208,8 @@
   "config.roughlyenoughitems.scrollingEntryListWidget": "条目列表操作：",
   "config.roughlyenoughitems.scrollingEntryListWidget.boolean.true": "滚动",
   "config.roughlyenoughitems.scrollingEntryListWidget.boolean.false": "分页",
+  "config.roughlyenoughitems.horizontalEntriesBoundaries": "水平条目边界：",
+  "config.roughlyenoughitems.verticalEntriesBoundaries": "垂直条目边界：",
   "config.roughlyenoughitems.filteringScreen": "自定义过滤器",
   "config.roughlyenoughitems.filteringRulesScreen": "自定义过滤规则",
   "config.roughlyenoughitems.filteringRulesScreen.new": "创建过滤规则",
