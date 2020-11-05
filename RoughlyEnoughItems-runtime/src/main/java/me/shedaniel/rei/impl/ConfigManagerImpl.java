@@ -50,6 +50,8 @@ import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
+import me.shedaniel.rei.gui.TransformingScreen;
+import me.shedaniel.rei.gui.WarningAndErrorScreen;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.gui.config.entry.FilteringEntry;
 import me.shedaniel.rei.gui.config.entry.NoFilteringEntry;
@@ -152,7 +154,7 @@ public class ConfigManagerImpl implements ConfigManager {
             ConfigObjectImpl.UsePercentage bounds = field.getAnnotation(ConfigObjectImpl.UsePercentage.class);
             return Collections.singletonList(ConfigEntryBuilder.create().startIntSlider(new TranslationTextComponent(i13n), MathHelper.ceil(Utils.getUnsafely(field, config, 0.0) * 100), MathHelper.ceil(bounds.min() * 100), MathHelper.ceil(bounds.max() * 100)).setDefaultValue(() -> MathHelper.ceil((double) Utils.getUnsafely(field, defaults) * 100)).setSaveConsumer((newValue) -> {
                 Utils.setUnsafely(field, config, newValue / 100d);
-            }).setTextGetter(integer -> new StringTextComponent(String.format("Size: %d%%", integer))).build());
+            }).setTextGetter(integer -> new StringTextComponent(bounds.prefix() + String.format("%d%%", integer))).build());
         }, (field) -> field.getType() == Double.TYPE || field.getType() == Double.class, ConfigObjectImpl.UsePercentage.class);
         
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) ->
@@ -211,7 +213,7 @@ public class ConfigManagerImpl implements ConfigManager {
             provider.setCategoryFunction((baseI13n, categoryName) -> String.format("%s.%s", baseI13n, categoryName));
             provider.setBuildFunction(builder -> {
                 builder.setGlobalized(true);
-                builder.setGlobalizedExpanded(true);
+                builder.setGlobalizedExpanded(false);
                 if (Minecraft.getInstance().getConnection() != null && Minecraft.getInstance().getConnection().getRecipeManager() != null) {
                     builder.getOrCreateCategory(new TranslationTextComponent("config.roughlyenoughitems.advanced")).getEntries().add(0, new ReloadPluginsEntry(220));
                 }
@@ -228,7 +230,12 @@ public class ConfigManagerImpl implements ConfigManager {
                         ContainerScreenOverlay.getEntryListWidget().updateSearch(ScreenHelper.getSearchField().getText(), true);
                 }).build();
             });
-            return provider.get();
+            MutableLong current = new MutableLong();
+            return new TransformingScreen(provider.get(),
+                    parent,
+                    () -> current.setValue(Util.getMillis() + (getConfig().isReducedMotion() ? -3000 : 0)),
+                    () -> 0, () -> (1 - EasingMethod.EasingMethodImpl.EXPO.apply(Mth.clamp((Util.getMillis() - current.getValue()) / 750.0, 0, 1)))
+                                   * Minecraft.getInstance().getWindow().getGuiScaledHeight() * 1.3);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -246,7 +253,7 @@ public class ConfigManagerImpl implements ConfigManager {
         }
         
         @Override
-        protected void init() {
+        public void init() {
             super.init();
             this.addButton(new Button(this.width / 2 - 100, 140, 200, 20, DialogTexts.GUI_CANCEL, button -> this.minecraft.setScreen(parent)));
         }

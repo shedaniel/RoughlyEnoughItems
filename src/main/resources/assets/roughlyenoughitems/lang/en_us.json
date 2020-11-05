@@ -208,6 +208,8 @@
   "config.roughlyenoughitems.scrollingEntryListWidget": "Entry List Action:",
   "config.roughlyenoughitems.scrollingEntryListWidget.boolean.true": "Scrolled",
   "config.roughlyenoughitems.scrollingEntryListWidget.boolean.false": "Paginated",
+  "config.roughlyenoughitems.horizontalEntriesBoundaries": "Horizontal Entries Boundaries:",
+  "config.roughlyenoughitems.verticalEntriesBoundaries": "Vertical Entries Boundaries:",
   "config.roughlyenoughitems.filteringScreen": "Customized Filtering",
   "config.roughlyenoughitems.filteringRulesScreen": "Customized Filtering Rules",
   "config.roughlyenoughitems.filteringRulesScreen.new": "Create Filtering Rule",

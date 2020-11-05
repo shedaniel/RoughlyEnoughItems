@@ -178,4 +178,10 @@ public interface ConfigObject {
     boolean isInventoryHighlightingAllowed();
     
     boolean shouldResizeDynamically();
+    
+    @ApiStatus.Experimental
+    double getHorizontalEntriesBoundaries();
+    
+    @ApiStatus.Experimental
+    double getVerticalEntriesBoundaries();
 }

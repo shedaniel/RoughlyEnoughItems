@@ -170,6 +170,7 @@ public class ScreenHelper implements REIHelper {
      */
     @Deprecated
     @ApiStatus.ScheduledForRemoval
+    @Nullable
     public static ContainerScreen<?> getLastHandledScreen() {
         return previousContainerScreen;
     }

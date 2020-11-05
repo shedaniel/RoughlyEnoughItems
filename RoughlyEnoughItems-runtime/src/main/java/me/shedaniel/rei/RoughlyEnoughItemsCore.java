@@ -428,6 +428,7 @@ public class RoughlyEnoughItemsCore {
     
     private boolean shouldReturn(Screen screen) {
         if (screen == null) return true;
+        if (screen != Minecraft.getInstance().screen) return true;
         return shouldReturn(screen.getClass());
     }
     

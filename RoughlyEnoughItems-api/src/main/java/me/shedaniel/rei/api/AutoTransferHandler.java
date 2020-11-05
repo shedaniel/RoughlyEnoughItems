@@ -32,6 +32,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
@@ -182,8 +183,10 @@ public interface AutoTransferHandler {
         
         boolean isActuallyCrafting();
         
+        @Nullable
         ContainerScreen<?> getContainerScreen();
-        
+    
+        @Nullable
         @Deprecated
         @ApiStatus.ScheduledForRemoval
         default ContainerScreen<?> getHandledScreen() {
@@ -191,15 +194,17 @@ public interface AutoTransferHandler {
         }
         
         RecipeDisplay getRecipe();
-        
+    
+        @Nullable
         @Deprecated
         @ApiStatus.ScheduledForRemoval
         default Container getScreenHandler() {
             return getContainer();
         }
-        
+    
+        @Nullable
         default Container getContainer() {
-            return getHandledScreen().getMenu();
+            return getContainerScreen() == null ? null : getContainerScreen().getMenu();
         }
     }
     

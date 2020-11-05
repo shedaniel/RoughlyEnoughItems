@@ -401,7 +401,9 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
                 VillagerRecipeViewingScreen widget = (VillagerRecipeViewingScreen) Minecraft.getInstance().screen;
                 return new Rectangle(widget.bounds.x, 3, widget.bounds.width, 18);
             }
-            return new Rectangle(REIHelper.getInstance().getPreviousContainerScreen().getGuiLeft(), 3, REIHelper.getInstance().getPreviousContainerScreen().getXSize(), 18);
+            ContainerScreen<?> containerScreen = REIHelper.getInstance().getPreviousContainerScreen();
+            if (containerScreen != null)
+                return new Rectangle(containerScreen.getGuiLeft(), 3, containerScreen.getXSize(), 18);
         }
         return null;
     }

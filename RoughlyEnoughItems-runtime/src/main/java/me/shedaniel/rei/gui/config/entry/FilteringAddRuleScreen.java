@@ -50,7 +50,7 @@ public class FilteringAddRuleScreen extends Screen {
     }
     
     @Override
-    protected void init() {
+    public void init() {
         super.init();
         {
             ITextComponent backText = new StringTextComponent("↩ ").append(new TranslationTextComponent("gui.back"));

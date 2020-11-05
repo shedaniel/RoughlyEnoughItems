@@ -56,7 +56,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
     }
     
     @Override
-    protected void init() {
+    public void init() {
         super.init();
         if (rulesList != null) save();
         {

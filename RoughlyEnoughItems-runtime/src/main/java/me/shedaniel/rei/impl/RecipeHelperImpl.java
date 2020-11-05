@@ -131,7 +131,7 @@ public class RecipeHelperImpl implements RecipeHelper {
     
     @Override
     public List<List<EntryStack>> getWorkingStations(ResourceLocation category) {
-        return categoryWorkingStations.get(category);
+        return categoryWorkingStations.getOrDefault(category, Collections.emptyList());
     }
     
     @Override

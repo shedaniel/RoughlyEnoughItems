@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei;
 
+import net.fabricmc.api.EnvType;
 import net.minecraft.util.Tuple;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLEnvironment;
