@@ -190,8 +190,14 @@ public class FavoritesListWidget extends WidgetWithBounds {
     
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int int_1, double double_3, double double_4) {
-        if (lastTouchedEntry != null) {
-            lastTouchedEntry.dragged = true;
+        if (lastTouchedEntry != null && !lastTouchedEntry.dragged) {
+            Point startPoint = lastTouchedEntry.startedDraggingPosition;
+            double xDistance = Math.abs(startPoint.x - mouseX);
+            double yDistance = Math.abs(startPoint.y - mouseY);
+            double requiredDistance = entrySize() * .4;
+            if (xDistance * xDistance + yDistance * yDistance > requiredDistance * requiredDistance) {
+                lastTouchedEntry.dragged = true;
+            }
         }
         if (scrolling.mouseDragged(mouseX, mouseY, int_1, double_3, double_4, ConfigObject.getInstance().doesSnapToRows(), entrySize()))
             return true;
@@ -381,6 +387,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
             Entry entry = lastTouchedEntry;
             double x = entry.x.doubleValue();
             double y = entry.y.doubleValue();
+            entry.startedDraggingPosition = null;
             
             boolean contains = currentBounds.contains(PointHelper.ofMouse());
             if (contains || !entry.madeUp) {
@@ -441,6 +448,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
             for (Entry entry : entries.values()) {
                 if (entry.getWidget().containsMouse(mouseX, mouseY)) {
                     lastTouchedEntry = entry;
+                    lastTouchedEntry.startedDraggingPosition = new Point(mouseX, mouseY);
                     break;
                 }
             }
@@ -492,6 +500,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
         private FavoriteEntry entry;
         private final EntryListEntry widget;
         private boolean hidden;
+        private Point startedDraggingPosition;
         private boolean dragged;
         private boolean madeUp;
         private Animator x = new Animator();

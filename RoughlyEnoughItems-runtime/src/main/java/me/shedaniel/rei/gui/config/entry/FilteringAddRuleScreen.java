@@ -54,7 +54,7 @@ public class FilteringAddRuleScreen extends Screen {
     }
     
     @Override
-    protected void init() {
+    public void init() {
         super.init();
         {
             Component backText = new TextComponent("↩ ").append(new TranslatableComponent("gui.back"));

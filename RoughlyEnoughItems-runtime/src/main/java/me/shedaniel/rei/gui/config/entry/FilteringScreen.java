@@ -172,7 +172,7 @@ public class FilteringScreen extends Screen {
     }
     
     @Override
-    protected void init() {
+    public void init() {
         super.init();
         Rectangle bounds = getBounds();
         updateSearch(this.searchField.getText());

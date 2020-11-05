@@ -51,6 +51,8 @@ public class DefaultRecipeBookHandler implements AutoTransferHandler {
         if (!(context.getContainer() instanceof RecipeBookMenu))
             return Result.createNotApplicable();
         RecipeBookMenu<?> container = (RecipeBookMenu<?>) context.getContainer();
+        if (container == null)
+            return Result.createNotApplicable();
         if (display instanceof DefaultCraftingDisplay) {
             DefaultCraftingDisplay craftingDisplay = (DefaultCraftingDisplay) display;
             if (craftingDisplay.getOptionalRecipe().isPresent()) {

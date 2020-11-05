@@ -37,6 +37,7 @@ import me.shedaniel.rei.gui.config.*;
 import me.shedaniel.rei.impl.filtering.FilteringRule;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.annotation.ElementType;
@@ -343,6 +344,18 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         return advanced.accessibility.resizeDynamically;
     }
     
+    @ApiStatus.Experimental
+    @Override
+    public double getHorizontalEntriesBoundaries() {
+        return Mth.clamp(appearance.horizontalEntriesBoundaries, 0.1,1);
+    }
+    
+    @ApiStatus.Experimental
+    @Override
+    public double getVerticalEntriesBoundaries() {
+        return Mth.clamp(appearance.verticalEntriesBoundaries, 0.1,1);
+    }
+    
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD})
     @interface DontApplyFieldName {}
@@ -361,6 +374,8 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         double min();
         
         double max();
+        
+        String prefix() default "Size: ";
     }
     
     public static class Basics {
@@ -405,6 +420,9 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
             @Comment("Declares whether the craftable filter button is enabled.") private boolean enableCraftableOnlyButton = false;
             @Comment("Declares whether the utils buttons are shown.") private boolean showUtilsButtons = false;
         }
+    
+        @UsePercentage(min = 0.1, max = 1.0, prefix = "Limit: ") private double horizontalEntriesBoundaries = 1.0;
+        @UsePercentage(min = 0.1, max = 1.0, prefix = "Limit: ") private double verticalEntriesBoundaries = 1.0;
     }
     
     public static class Functionality {

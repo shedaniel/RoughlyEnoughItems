@@ -57,11 +57,7 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
     
     @Override
     public void onInitialize() {
-        boolean loaded = FabricLoader.getInstance().isModLoaded("fabric-networking-v0");
-        if (!loaded) {
-            RoughlyEnoughItemsState.error("Fabric API is not installed!", "https://www.curseforge.com/minecraft/mc-mods/fabric-api/files/all");
-            return;
-        }
+        RoughlyEnoughItemsState.checkRequiredFabricModules();
         Executor.run(() -> () -> {
             FabricLoader.getInstance().getEntrypoints("rei_containers", Runnable.class).forEach(Runnable::run);
             ServerSidePacketRegistry.INSTANCE.register(DELETE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {

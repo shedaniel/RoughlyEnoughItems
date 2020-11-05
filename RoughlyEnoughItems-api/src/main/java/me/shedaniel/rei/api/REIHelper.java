@@ -51,8 +51,10 @@ public interface REIHelper {
     @ApiStatus.Experimental
     Optional<REIOverlay> getOverlay();
     
+    @Nullable
     AbstractContainerScreen<?> getPreviousContainerScreen();
     
+    @Nullable
     @Deprecated
     default AbstractContainerScreen<?> getPreviousHandledScreen() {
         return getPreviousContainerScreen();
