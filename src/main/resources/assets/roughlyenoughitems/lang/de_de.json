@@ -98,6 +98,8 @@
   "text.rei.view_recipes_for": "Rezepte für %s anzeigen",
   "text.rei.subsets": "Ubtergruppen",
   "text.rei.tiny_potato": "Kleine Kartöffelchen",
+  "text.rei.add_favorite_widget": "Hinzufügen...",
+  "favorite.section.gamemode": "Spielmodus",
   "tooltip.rei.fluid_amount": "§7%d Einheit",
   "msg.rei.copied_recipe_id": "Rezept-Identifizierer kopiert",
   "msg.rei.recipe_id_details": "Rezept-ID: %s",
