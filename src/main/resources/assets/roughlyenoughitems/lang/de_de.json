@@ -127,6 +127,7 @@
   "config.roughlyenoughitems.cheatingStyle": "Cheating Style:",
   "config.roughlyenoughitems.cheatingStyle.grab": "Nehmen",
   "config.roughlyenoughitems.cheatingStyle.give": "Geben",
+  "config.roughlyenoughitems.reducedMotion": "Weniger Animationen",
   "config.roughlyenoughitems.recipeScreenType": "Art des Rezept-Bildschirms:",
   "config.roughlyenoughitems.recipeScreenType.config": "Art des Rezept-Bildschirms: %s",
   "config.roughlyenoughitems.recipeScreenType.unset": "Nicht Gesetzt",
