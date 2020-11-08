@@ -4,6 +4,7 @@
   "text.rei.cheating_enabled": "§cチートモードを使う",
   "text.rei.cheating_limited_enabled": "§bチートモードを使う (コマンドを使用)",
   "text.rei.cheating_enabled_no_perms": "§7チートモードを§c使う §7(権限がない)",
+  "text.rei.cheating_limited_creative_enabled": "§aチートモードが有効です (クリエイティブのみ)",
   "text.rei.no_permission_cheat": "チートモードでアイテムを取得する場合は、オペレーターの権限が必要です",
   "text.rei.search.field.suggestion": "検索...",
   "category.rei.crafting": "クラフト",
