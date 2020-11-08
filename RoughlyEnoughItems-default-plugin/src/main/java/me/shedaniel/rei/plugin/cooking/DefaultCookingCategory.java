@@ -57,7 +57,7 @@ public class DefaultCookingCategory implements TransferRecipeCategory<DefaultCoo
     
     @Override
     public void renderRedSlots(MatrixStack matrices, List<Widget> widgets, Rectangle bounds, DefaultCookingDisplay display, IntList redSlots) {
-        Point startPoint = new Point(bounds.getCenterX() - 41, bounds.getCenterY() - 27);
+        Point startPoint = new Point(bounds.getCenterX() - 41, bounds.y + 10);
         matrices.pushPose();
         matrices.translate(0, 0, 400);
         if (redSlots.contains(0)) {

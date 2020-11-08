@@ -27,6 +27,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.ScissorsScreen;
 import me.shedaniel.math.Rectangle;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
 
@@ -46,8 +47,11 @@ public class TransformingScreen extends DelegateScreen implements ScissorsScreen
     }
     
     @Override
-    public void init() {
-        super.init();
+    public void init(Minecraft minecraft, int i, int j) {
+        super.init(minecraft, i, j);
+        if (lastScreen != null) {
+            lastScreen.init(minecraft, i, j);
+        }
     }
     
     @Override
