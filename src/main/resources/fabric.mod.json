@@ -16,7 +16,7 @@
     "fabricloader": "*",
     "cloth-client-events-v0": ">=1.0.2",
     "cloth-basic-math": "*",
-    "cloth-config2": ">=4-",
+    "cloth-config2": ">=4.8.3",
     "minecraft": "~1.16.2-rc.1"
   },
   "license": "MIT",
