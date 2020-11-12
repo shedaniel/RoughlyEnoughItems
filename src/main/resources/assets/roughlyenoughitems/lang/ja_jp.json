@@ -85,6 +85,8 @@
   "config.roughlyenoughitems.keyBindings.usageKeybind": "用途の表示：",
   "config.roughlyenoughitems.keyBindings.nextPageKeybind": "次のページ:",
   "config.roughlyenoughitems.keyBindings.previousPageKeybind": "前のページ:",
+  "config.roughlyenoughitems.cheatingStyle": "チート方式",
+  "config.roughlyenoughitems.cheatingStyle.grab": "グラブ",
   "config.roughlyenoughitems.cheatingStyle.give": "あげる",
   "config.roughlyenoughitems.recipeScreenType": "レシピ画面のタイプ:",
   "config.roughlyenoughitems.recipeScreenType.config": "レシピ画面タイプ: %s",
