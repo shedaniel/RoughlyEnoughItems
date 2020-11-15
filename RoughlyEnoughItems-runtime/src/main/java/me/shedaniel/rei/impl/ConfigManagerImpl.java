@@ -221,7 +221,16 @@ public class ConfigManagerImpl implements ConfigManager {
                 screen.setParent(parent);
                 return screen;
             }
-            ConfigScreenProvider<ConfigObjectImpl> provider = (ConfigScreenProvider<ConfigObjectImpl>) AutoConfig.getConfigScreen(ConfigObjectImpl.class, parent);
+            TransformingScreen parentTranslated;
+            {
+                MutableLong current = new MutableLong(0);
+                parentTranslated = new TransformingScreen(true, null,
+                        null,
+                        () -> current.setValue(current.getValue() == 0 ? Util.getMillis() + (getConfig().isReducedMotion() ? -3000 : 0) : current.getValue()),
+                        () -> 0, () -> (EasingMethod.EasingMethodImpl.EXPO.apply(Mth.clamp((Util.getMillis() - current.getValue()) / 750.0, 0, 1)))
+                                       * Minecraft.getInstance().getWindow().getGuiScaledHeight(), () -> Util.getMillis() - current.getValue() > 800);
+            }
+            ConfigScreenProvider<ConfigObjectImpl> provider = (ConfigScreenProvider<ConfigObjectImpl>) AutoConfig.getConfigScreen(ConfigObjectImpl.class, parentTranslated);
             provider.setI13nFunction(manager -> "config.roughlyenoughitems");
             provider.setOptionFunction((baseI13n, field) -> field.isAnnotationPresent(ConfigObjectImpl.DontApplyFieldName.class) ? baseI13n : String.format("%s.%s", baseI13n, field.getName()));
             provider.setCategoryFunction((baseI13n, categoryName) -> String.format("%s.%s", baseI13n, categoryName));
@@ -233,7 +242,15 @@ public class ConfigManagerImpl implements ConfigManager {
                 }
                 return builder.setAfterInitConsumer(screen -> {
                     ((ScreenHooks) screen).cloth$addButtonWidget(new Button(screen.width - 104, 4, 100, 20, new TranslatableComponent("text.rei.credits"), button -> {
-                        Minecraft.getInstance().setScreen(new CreditsScreen(screen));
+                        MutableLong current = new MutableLong(0);
+                        CreditsScreen creditsScreen = new CreditsScreen(screen);
+                        Minecraft.getInstance().setScreen(new TransformingScreen(false, creditsScreen,
+                                screen,
+                                () -> current.setValue(current.getValue() == 0 ? Util.getMillis() + (getConfig().isReducedMotion() ? -3000 : 0) : current.getValue()),
+                                () -> (1 - EasingMethod.EasingMethodImpl.EXPO.apply(Mth.clamp((Util.getMillis() - current.getValue()) / 750.0, 0, 1)))
+                                      * Minecraft.getInstance().getWindow().getGuiScaledWidth() * 1.3,
+                                () -> 0,
+                                () -> Util.getMillis() - current.getValue() > 800));
                     }));
                 }).setSavingRunnable(() -> {
                     saveConfig();
@@ -242,12 +259,14 @@ public class ConfigManagerImpl implements ConfigManager {
                         ContainerScreenOverlay.getEntryListWidget().updateSearch(ScreenHelper.getSearchField().getText(), true);
                 }).build();
             });
-            MutableLong current = new MutableLong();
-            return new TransformingScreen(provider.get(),
+            Screen configScreen = provider.get();
+            parentTranslated.setLastScreen(configScreen);
+            MutableLong current = new MutableLong(0);
+            return new TransformingScreen(false, configScreen,
                     parent,
-                    () -> current.setValue(Util.getMillis() + (getConfig().isReducedMotion() ? -3000 : 0)),
+                    () -> current.setValue(current.getValue() == 0 ? Util.getMillis() + (getConfig().isReducedMotion() ? -3000 : 0) : current.getValue()),
                     () -> 0, () -> (1 - EasingMethod.EasingMethodImpl.EXPO.apply(Mth.clamp((Util.getMillis() - current.getValue()) / 750.0, 0, 1)))
-                                   * Minecraft.getInstance().getWindow().getGuiScaledHeight() * 1.3);
+                                   * Minecraft.getInstance().getWindow().getGuiScaledHeight() * 1.3, () -> Util.getMillis() - current.getValue() > 800);
         } catch (Exception e) {
             e.printStackTrace();
         }

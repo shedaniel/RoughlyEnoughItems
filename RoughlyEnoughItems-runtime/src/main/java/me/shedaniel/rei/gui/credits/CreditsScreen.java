@@ -25,21 +25,26 @@ package me.shedaniel.rei.gui.credits;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
+import me.shedaniel.clothconfig2.impl.EasingMethod;
+import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.gui.TransformingScreen;
 import me.shedaniel.rei.gui.credits.CreditsEntryListWidget.TextCreditsItem;
 import me.shedaniel.rei.gui.credits.CreditsEntryListWidget.TranslationCreditsItem;
-import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.utils.ImmutableLiteralText;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.CustomValue;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractButton;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.Mth;
 import net.minecraft.util.Tuple;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Comparator;
@@ -62,9 +67,7 @@ public class CreditsScreen extends Screen {
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (int_1 == 256 && this.shouldCloseOnEsc()) {
-            this.minecraft.setScreen(parent);
-            if (parent instanceof AbstractContainerScreen)
-                ScreenHelper.getLastOverlay().init();
+            openPrevious();
             return true;
         }
         return super.keyPressed(int_1, int_2, int_3);
@@ -117,14 +120,18 @@ public class CreditsScreen extends Screen {
         entryListWidget.creditsAddEntry(new CreditsEntryListWidget.LinkItem(new ImmutableLiteralText("Visit the project page at CurseForge."), "https://www.curseforge.com/minecraft/mc-mods/roughly-enough-items", entryListWidget.getItemWidth(), false));
         entryListWidget.creditsAddEntry(new CreditsEntryListWidget.LinkItem(new ImmutableLiteralText("Support the project via Patreon!"), "https://patreon.com/shedaniel", entryListWidget.getItemWidth(), true));
         entryListWidget.creditsAddEntry(new TextCreditsItem(NarratorChatListener.NO_TITLE));
-        children.add(buttonDone = new AbstractButton(width / 2 - 100, height - 26, 200, 20, new TranslatableComponent("gui.done")) {
-            @Override
-            public void onPress() {
-                CreditsScreen.this.minecraft.setScreen(parent);
-                if (parent instanceof AbstractContainerScreen)
-                    ScreenHelper.getLastOverlay().init();
-            }
-        });
+        children.add(buttonDone = new Button(width / 2 - 100, height - 26, 200, 20, new TranslatableComponent("gui.done"), button -> openPrevious()));
+    }
+    
+    private void openPrevious() {
+        MutableLong current = new MutableLong(0);
+        Minecraft.getInstance().setScreen(new TransformingScreen(true, parent,
+                this,
+                () -> current.setValue(current.getValue() == 0 ? Util.getMillis() + (ConfigObject.getInstance().isReducedMotion() ? -3000 : 0) : current.getValue()),
+                () -> EasingMethod.EasingMethodImpl.EXPO.apply(Mth.clamp((Util.getMillis() - current.getValue()) / 750.0, 0, 1))
+                      * Minecraft.getInstance().getWindow().getGuiScaledWidth(),
+                () -> 0,
+                () -> Util.getMillis() - current.getValue() > 800));
     }
     
     @Override
