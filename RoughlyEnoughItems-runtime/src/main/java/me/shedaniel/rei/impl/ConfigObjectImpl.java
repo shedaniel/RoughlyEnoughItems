@@ -341,7 +341,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     @Override
     public boolean shouldResizeDynamically() {
-        return advanced.accessibility.resizeDynamically;
+        return false;
     }
     
     @ApiStatus.Experimental
@@ -469,7 +469,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
             @Comment("Declares how the scrollbar in villager screen should act.") private boolean villagerScreenPermanentScrollBar = false;
             private boolean toastDisplayedOnCopyIdentifier = true;
             @Comment("Declares whether REI should use compact tabs for categories.") private boolean useCompactTabs = true;
-            @Comment("Declares whether REI should resize its recipe window dynamically") private boolean resizeDynamically = false;
         }
         
         public static class Search {
