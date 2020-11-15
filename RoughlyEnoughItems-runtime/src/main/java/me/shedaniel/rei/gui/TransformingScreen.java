@@ -27,28 +27,59 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.ScissorsScreen;
 import me.shedaniel.math.Rectangle;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 public class TransformingScreen extends DelegateScreen implements ScissorsScreen {
     private final DoubleSupplier xTransformer;
     private final DoubleSupplier yTransformer;
-    private final Screen lastScreen;
+    private Screen lastScreen;
+    private final BooleanSupplier finished;
+    private Runnable init;
+    private boolean renderingLastScreen = false;
+    private boolean translatingLast;
     
-    public TransformingScreen(Screen parent, Screen lastScreen, Runnable init, DoubleSupplier xTransformer, DoubleSupplier yTransformer) {
+    public TransformingScreen(boolean translatingLast, Screen parent, Screen lastScreen, Runnable init, DoubleSupplier xTransformer, DoubleSupplier yTransformer, BooleanSupplier finished) {
         super(parent);
+        this.translatingLast = translatingLast;
         this.lastScreen = lastScreen;
+        this.init = init;
         this.xTransformer = xTransformer;
         this.yTransformer = yTransformer;
-        init.run();
+        this.finished = finished;
+    }
+    
+    public void setParentScreen(Screen parent) {
+        this.parent = parent;
+    }
+    
+    public void setLastScreen(Screen lastScreen) {
+        this.lastScreen = lastScreen;
     }
     
     @Override
     public void init(Minecraft minecraft, int i, int j) {
         super.init(minecraft, i, j);
+        if (init != null) {
+            init.run();
+            init = null;
+            
+            if (parent != null) {
+                minecraft.mouseHandler.releaseMouse();
+                KeyMapping.releaseAll();
+            } else {
+                minecraft.getSoundManager().resume();
+                minecraft.mouseHandler.grabMouse();
+                minecraft.screen = this;
+            }
+            
+            minecraft.updateTitle();
+        }
         if (lastScreen != null) {
             lastScreen.init(minecraft, i, j);
         }
@@ -56,21 +87,54 @@ public class TransformingScreen extends DelegateScreen implements ScissorsScreen
     
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
-        if (lastScreen != null) {
+        if (!translatingLast) {
+            renderingLastScreen = true;
+            if (lastScreen != null) {
+                RenderSystem.pushMatrix();
+                RenderSystem.translated(0, 0, -400);
+                lastScreen.render(poseStack, -1, -1, 0);
+                RenderSystem.popMatrix();
+            }
+            renderingLastScreen = false;
+            RenderSystem.pushMatrix();
+            RenderSystem.translated(xTransformer.getAsDouble(), yTransformer.getAsDouble(), 0);
+            super.render(poseStack, i, j, f);
+            RenderSystem.popMatrix();
+        } else {
             RenderSystem.pushMatrix();
             RenderSystem.translated(0, 0, -400);
-            lastScreen.render(poseStack, -1, -1, 0);
+            super.render(poseStack, i, j, f);
             RenderSystem.popMatrix();
+            renderingLastScreen = true;
+            if (lastScreen != null) {
+                RenderSystem.pushMatrix();
+                RenderSystem.translated(xTransformer.getAsDouble(), yTransformer.getAsDouble(), 0);
+                lastScreen.render(poseStack, -1, -1, 0);
+                RenderSystem.popMatrix();
+            }
+            renderingLastScreen = false;
         }
-        RenderSystem.pushMatrix();
-        RenderSystem.translated(xTransformer.getAsDouble(), yTransformer.getAsDouble(), 0);
-        super.render(poseStack, i, j, f);
-        RenderSystem.popMatrix();
+    }
+    
+    @Override
+    public void tick() {
+        if (finished.getAsBoolean()) {
+            if (parent != null) {
+                parent.removed();
+            }
+            
+            Minecraft.getInstance().screen = parent;
+            if (parent != null) {
+                Minecraft.getInstance().noRender = false;
+            }
+        } else {
+            super.tick();
+        }
     }
     
     @Override
     public @Nullable Rectangle handleScissor(@Nullable Rectangle rectangle) {
-        if (rectangle != null)
+        if (renderingLastScreen == translatingLast && rectangle != null)
             rectangle.translate((int) xTransformer.getAsDouble(), (int) yTransformer.getAsDouble());
         return rectangle;
     }
