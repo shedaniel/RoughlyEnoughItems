@@ -223,8 +223,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
         int largestHeight = Math.max(height - 34 - 30, 100);
         int maxWidthDisplay = CollectionUtils.mapAndMax(getCurrentDisplayed(), selectedCategory::getDisplayWidth, Comparator.naturalOrder()).orElse(150);
         int guiWidth = Math.max(maxWidthDisplay + 40, 190);
-        int guiHeight = Mth.floor(Mth.clamp((double) (selectedCategory.getDisplayHeight() + 4) * (getRecipesPerPage() + 1) + 36, 100, largestHeight));
-        if (!ConfigObject.getInstance().shouldResizeDynamically()) guiHeight = largestHeight;
+        int guiHeight = largestHeight;
         this.tabsPerPage = Math.max(5, Mth.floor((guiWidth - 20d) / tabSize));
         if (this.categoryPages == -1) {
             this.categoryPages = Math.max(0, categories.indexOf(selectedCategory) / tabsPerPage);
@@ -557,14 +556,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
                 recipeBack.onClick();
             return recipeBack.isEnabled();
         }
-        for (GuiEventListener entry : children())
-            if (entry.mouseClicked(mouseX, mouseY, button)) {
-                setFocused(entry);
-                if (button == 0)
-                    setDragging(true);
-                return true;
-            }
-        return false;
+        return super.mouseClicked(mouseX, mouseY, button);
     }
     
     @Override
