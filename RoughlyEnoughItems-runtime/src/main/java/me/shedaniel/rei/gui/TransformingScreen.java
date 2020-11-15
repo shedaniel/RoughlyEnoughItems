@@ -23,13 +23,14 @@
 
 package me.shedaniel.rei.gui;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.clothconfig2.api.ScissorsScreen;
+import me.shedaniel.clothconfig2.forge.api.ScissorsScreen;
 import me.shedaniel.math.Rectangle;
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.settings.KeyBinding;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BooleanSupplier;
@@ -63,7 +64,7 @@ public class TransformingScreen extends DelegateScreen implements ScissorsScreen
     }
     
     @Override
-    public void init(Minecraft minecraft, int i, int j) {
+    public void init(@NotNull Minecraft minecraft, int i, int j) {
         super.init(minecraft, i, j);
         if (init != null) {
             init.run();
@@ -71,7 +72,7 @@ public class TransformingScreen extends DelegateScreen implements ScissorsScreen
             
             if (parent != null) {
                 minecraft.mouseHandler.releaseMouse();
-                KeyMapping.releaseAll();
+                KeyBinding.releaseAll();
             } else {
                 minecraft.getSoundManager().resume();
                 minecraft.mouseHandler.grabMouse();
@@ -86,7 +87,7 @@ public class TransformingScreen extends DelegateScreen implements ScissorsScreen
     }
     
     @Override
-    public void render(PoseStack poseStack, int i, int j, float f) {
+    public void render(MatrixStack poseStack, int i, int j, float f) {
         if (!translatingLast) {
             renderingLastScreen = true;
             if (lastScreen != null) {

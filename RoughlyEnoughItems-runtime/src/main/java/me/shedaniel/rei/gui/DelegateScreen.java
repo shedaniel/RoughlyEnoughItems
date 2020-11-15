@@ -23,18 +23,21 @@
 
 package me.shedaniel.rei.gui;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import me.shedaniel.autoconfig1u.shadowed.blue.endless.jankson.annotation.NonnullByDefault;
 import me.shedaniel.rei.utils.ImmutableLiteralText;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.Widget;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
@@ -42,6 +45,7 @@ import java.util.Optional;
 
 @ApiStatus.Internal
 @ApiStatus.Experimental
+@NonnullByDefault
 public class DelegateScreen extends Screen {
     protected Screen parent;
     
@@ -51,7 +55,7 @@ public class DelegateScreen extends Screen {
     }
     
     @Override
-    public Component getTitle() {
+    public ITextComponent getTitle() {
         return parent == null ? ImmutableLiteralText.EMPTY : parent.getTitle();
     }
     
@@ -78,23 +82,31 @@ public class DelegateScreen extends Screen {
     }
     
     @Override
-    public <T extends AbstractWidget> T addButton(T abstractWidget) {
+    public <T extends Widget> T addButton(T abstractWidget) {
         if (parent != null) {
-            return parent.addButton(abstractWidget);
+            try {
+                return (T) ObfuscationReflectionHelper.findMethod(Screen.class, "func_230480_a_", Widget.class).invoke(parent, abstractWidget);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
         }
         return abstractWidget;
     }
     
     @Override
-    public <T extends GuiEventListener> T addWidget(T guiEventListener) {
+    public <T extends IGuiEventListener> T addWidget(T guiEventListener) {
         if (parent != null) {
-            return parent.addWidget(guiEventListener);
+            try {
+                return (T) ObfuscationReflectionHelper.findMethod(Screen.class, "func_230481_d_", IGuiEventListener.class).invoke(parent, guiEventListener);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
         }
         return guiEventListener;
     }
     
     @Override
-    public List<Component> getTooltipFromItem(ItemStack itemStack) {
+    public List<ITextComponent> getTooltipFromItem(ItemStack itemStack) {
         if (parent == null) {
             return super.getTooltipFromItem(itemStack);
         }
@@ -104,7 +116,11 @@ public class DelegateScreen extends Screen {
     @Override
     public void insertText(String string, boolean bl) {
         if (parent != null) {
-            parent.insertText(string, bl);
+            try {
+                ObfuscationReflectionHelper.findMethod(Screen.class, "func_231155_a_", String.class, Boolean.TYPE).invoke(parent, string, bl);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
     
@@ -128,7 +144,7 @@ public class DelegateScreen extends Screen {
     }
     
     @Override
-    public List<? extends GuiEventListener> children() {
+    public List<? extends IGuiEventListener> children() {
         return parent == null ? Collections.emptyList() : parent.children();
     }
     
@@ -153,7 +169,14 @@ public class DelegateScreen extends Screen {
     
     @Override
     public boolean isValidCharacterForName(String string, char c, int i) {
-        return parent != null && parent.isValidCharacterForName(string, c, i);
+        if (parent != null) {
+            try {
+                return (boolean) ObfuscationReflectionHelper.findMethod(Screen.class, "func_231154_a_", String.class, Character.TYPE, Integer.TYPE).invoke(parent, string, c, i);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return false;
     }
     
     @Override
@@ -170,12 +193,12 @@ public class DelegateScreen extends Screen {
     
     @Nullable
     @Override
-    public GuiEventListener getFocused() {
+    public IGuiEventListener getFocused() {
         return parent == null ? null : parent.getFocused();
     }
     
     @Override
-    public void setFocused(@Nullable GuiEventListener guiEventListener) {
+    public void setFocused(@Nullable IGuiEventListener guiEventListener) {
         if (parent != null) {
             parent.setFocused(guiEventListener);
         }
@@ -224,14 +247,14 @@ public class DelegateScreen extends Screen {
     }
     
     @Override
-    public void setInitialFocus(@Nullable GuiEventListener guiEventListener) {
+    public void setInitialFocus(@Nullable IGuiEventListener guiEventListener) {
         if (parent != null) {
             parent.setInitialFocus(guiEventListener);
         }
     }
     
     @Override
-    public void magicalSpecialHackyFocus(@Nullable GuiEventListener guiEventListener) {
+    public void magicalSpecialHackyFocus(@Nullable IGuiEventListener guiEventListener) {
         if (parent != null) {
             parent.magicalSpecialHackyFocus(guiEventListener);
         }
@@ -261,22 +284,31 @@ public class DelegateScreen extends Screen {
         if (parent != null) {
             parent.init(minecraft, i, j);
         }
+        this.minecraft = minecraft;
+        this.itemRenderer = minecraft.getItemRenderer();
+        this.font = minecraft.font;
+        this.width = i;
+        this.height = j;
     }
     
     @Override
     public void init() {
         if (parent != null) {
-            parent.init();
+            try {
+                ObfuscationReflectionHelper.findMethod(Screen.class, "func_231160_c_").invoke(parent);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
     
     @Override
-    public Optional<GuiEventListener> getChildAt(double d, double e) {
+    public Optional<IGuiEventListener> getChildAt(double d, double e) {
         return parent == null ? Optional.empty() : parent.getChildAt(d, e);
     }
     
     @Override
-    public void render(PoseStack poseStack, int i, int j, float f) {
+    public void render(MatrixStack poseStack, int i, int j, float f) {
         if (parent != null) {
             parent.render(poseStack, i, j, f);
         }

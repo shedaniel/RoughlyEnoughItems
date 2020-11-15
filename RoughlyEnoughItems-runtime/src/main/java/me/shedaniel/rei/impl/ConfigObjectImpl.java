@@ -35,6 +35,7 @@ import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.gui.config.*;
 import me.shedaniel.rei.impl.filtering.FilteringRule;
 import net.minecraft.client.util.InputMappings;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.ApiStatus;
@@ -341,13 +342,13 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @ApiStatus.Experimental
     @Override
     public double getHorizontalEntriesBoundaries() {
-        return Mth.clamp(appearance.horizontalEntriesBoundaries, 0.1,1);
+        return MathHelper.clamp(appearance.horizontalEntriesBoundaries, 0.1,1);
     }
     
     @ApiStatus.Experimental
     @Override
     public double getVerticalEntriesBoundaries() {
-        return Mth.clamp(appearance.verticalEntriesBoundaries, 0.1,1);
+        return MathHelper.clamp(appearance.verticalEntriesBoundaries, 0.1,1);
     }
     
     @Retention(RetentionPolicy.RUNTIME)

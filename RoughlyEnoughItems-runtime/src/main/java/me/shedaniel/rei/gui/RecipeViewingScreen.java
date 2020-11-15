@@ -236,7 +236,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
             this.bounds.setSize(this.bounds.getWidth(), this.bounds.getHeight() - 10);
         }
         this.page = MathHelper.clamp(page, 0, getTotalPages(selectedCategory) - 1);
-        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x, bounds.y - 16, 10, 10), new TranslatableComponent("text.rei.left_arrow"))
+        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x, bounds.y - 16, 10, 10), new TranslationTextComponent("text.rei.left_arrow"))
                 .onClick(button -> {
                     categoryPages--;
                     if (categoryPages < 0)

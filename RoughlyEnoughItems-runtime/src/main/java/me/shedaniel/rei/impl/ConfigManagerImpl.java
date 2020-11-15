@@ -216,7 +216,7 @@ public class ConfigManagerImpl implements ConfigManager {
                 parentTranslated = new TransformingScreen(true, null,
                         null,
                         () -> current.setValue(current.getValue() == 0 ? Util.getMillis() + (getConfig().isReducedMotion() ? -3000 : 0) : current.getValue()),
-                        () -> 0, () -> (EasingMethod.EasingMethodImpl.EXPO.apply(Mth.clamp((Util.getMillis() - current.getValue()) / 750.0, 0, 1)))
+                        () -> 0, () -> (EasingMethod.EasingMethodImpl.EXPO.apply(MathHelper.clamp((Util.getMillis() - current.getValue()) / 750.0, 0, 1)))
                                        * Minecraft.getInstance().getWindow().getGuiScaledHeight(), () -> Util.getMillis() - current.getValue() > 800);
             }
             ConfigScreenProvider<ConfigObjectImpl> provider = (ConfigScreenProvider<ConfigObjectImpl>) AutoConfig.getConfigScreen(ConfigObjectImpl.class, parentTranslated);
@@ -230,13 +230,13 @@ public class ConfigManagerImpl implements ConfigManager {
                     builder.getOrCreateCategory(new TranslationTextComponent("config.roughlyenoughitems.advanced")).getEntries().add(0, new ReloadPluginsEntry(220));
                 }
                 return builder.setAfterInitConsumer(screen -> {
-                    Button creditsButton = new Button(screen.width - 104, 4, 100, 20, new TranslatableComponent("text.rei.credits"), button -> {
+                    Button creditsButton = new Button(screen.width - 104, 4, 100, 20, new TranslationTextComponent("text.rei.credits"), button -> {
                         MutableLong current = new MutableLong(0);
                         CreditsScreen creditsScreen = new CreditsScreen(screen);
                         Minecraft.getInstance().setScreen(new TransformingScreen(false, creditsScreen,
                                 screen,
                                 () -> current.setValue(current.getValue() == 0 ? Util.getMillis() + (getConfig().isReducedMotion() ? -3000 : 0) : current.getValue()),
-                                () -> (1 - EasingMethod.EasingMethodImpl.EXPO.apply(Mth.clamp((Util.getMillis() - current.getValue()) / 750.0, 0, 1)))
+                                () -> (1 - EasingMethod.EasingMethodImpl.EXPO.apply(MathHelper.clamp((Util.getMillis() - current.getValue()) / 750.0, 0, 1)))
                                       * Minecraft.getInstance().getWindow().getGuiScaledWidth() * 1.3,
                                 () -> 0,
                                 () -> Util.getMillis() - current.getValue() > 800));
@@ -256,7 +256,7 @@ public class ConfigManagerImpl implements ConfigManager {
             return new TransformingScreen(false, configScreen,
                     parent,
                     () -> current.setValue(current.getValue() == 0 ? Util.getMillis() + (getConfig().isReducedMotion() ? -3000 : 0) : current.getValue()),
-                    () -> 0, () -> (1 - EasingMethod.EasingMethodImpl.EXPO.apply(Mth.clamp((Util.getMillis() - current.getValue()) / 750.0, 0, 1)))
+                    () -> 0, () -> (1 - EasingMethod.EasingMethodImpl.EXPO.apply(MathHelper.clamp((Util.getMillis() - current.getValue()) / 750.0, 0, 1)))
                                    * Minecraft.getInstance().getWindow().getGuiScaledHeight() * 1.3, () -> Util.getMillis() - current.getValue() > 800);
         } catch (Exception e) {
             e.printStackTrace();
