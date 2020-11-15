@@ -550,16 +550,14 @@ public class EntryListWidget extends WidgetWithBounds {
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (containsMouse(mouseX, mouseY)) {
-            for (Widget widget : children())
-                if (widget.mouseReleased(mouseX, mouseY, button))
-                    return true;
             ClientPlayerEntity player = minecraft.player;
             if (ClientHelper.getInstance().isCheating() && player != null && player.inventory != null && !player.inventory.getCarried().isEmpty() && RoughlyEnoughItemsCore.canDeleteItems()) {
                 ClientHelper.getInstance().sendDeletePacket();
                 return true;
             }
-            if (player != null && player.inventory != null && !player.inventory.getCarried().isEmpty() && RoughlyEnoughItemsCore.hasPermissionToUsePackets())
-                return false;
+            for (Widget widget : children())
+                if (widget.mouseReleased(mouseX, mouseY, button))
+                    return true;
         }
         return false;
     }

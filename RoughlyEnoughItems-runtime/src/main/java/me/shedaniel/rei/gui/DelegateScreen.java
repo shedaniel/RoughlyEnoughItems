@@ -24,6 +24,7 @@
 package me.shedaniel.rei.gui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import me.shedaniel.rei.utils.ImmutableLiteralText;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -35,6 +36,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,200 +46,239 @@ public class DelegateScreen extends Screen {
     protected Screen parent;
     
     public DelegateScreen(Screen parent) {
-        super(parent.getTitle());
+        super(parent == null ? null : parent.getTitle());
         this.parent = parent;
     }
     
     @Override
     public Component getTitle() {
-        return parent.getTitle();
+        return parent == null ? ImmutableLiteralText.EMPTY : parent.getTitle();
     }
     
     @Override
     public String getNarrationMessage() {
-        return parent.getNarrationMessage();
+        return parent == null ? "" : parent.getNarrationMessage();
     }
     
     @Override
     public boolean keyPressed(int i, int j, int k) {
-        return parent.keyPressed(i, j, k);
+        return parent != null && parent.keyPressed(i, j, k);
     }
     
     @Override
     public boolean shouldCloseOnEsc() {
-        return parent.shouldCloseOnEsc();
+        return parent == null || parent.shouldCloseOnEsc();
     }
     
     @Override
     public void onClose() {
-        parent.onClose();
+        if (parent != null) {
+            parent.onClose();
+        }
     }
     
     @Override
     public <T extends AbstractWidget> T addButton(T abstractWidget) {
-        return parent.addButton(abstractWidget);
+        if (parent != null) {
+            return parent.addButton(abstractWidget);
+        }
+        return abstractWidget;
     }
     
     @Override
     public <T extends GuiEventListener> T addWidget(T guiEventListener) {
-        return parent.addWidget(guiEventListener);
+        if (parent != null) {
+            return parent.addWidget(guiEventListener);
+        }
+        return guiEventListener;
     }
     
     @Override
     public List<Component> getTooltipFromItem(ItemStack itemStack) {
+        if (parent == null) {
+            return super.getTooltipFromItem(itemStack);
+        }
         return parent.getTooltipFromItem(itemStack);
     }
     
     @Override
     public void insertText(String string, boolean bl) {
-        parent.insertText(string, bl);
+        if (parent != null) {
+            parent.insertText(string, bl);
+        }
     }
     
     @Override
     public boolean handleComponentClicked(@Nullable Style style) {
-        return parent.handleComponentClicked(style);
+        return parent != null && parent.handleComponentClicked(style);
     }
     
     @Override
     public void sendMessage(String string) {
-        parent.sendMessage(string);
+        if (parent != null) {
+            parent.sendMessage(string);
+        }
     }
     
     @Override
     public void sendMessage(String string, boolean bl) {
-        parent.sendMessage(string, bl);
+        if (parent != null) {
+            parent.sendMessage(string, bl);
+        }
     }
     
     @Override
     public List<? extends GuiEventListener> children() {
-        return parent.children();
+        return parent == null ? Collections.emptyList() : parent.children();
     }
     
     @Override
     public void tick() {
-        parent.tick();
+        if (parent != null) {
+            parent.tick();
+        }
     }
     
     @Override
     public void removed() {
-        parent.removed();
+        if (parent != null) {
+            parent.removed();
+        }
     }
     
     @Override
     public boolean isPauseScreen() {
-        return parent.isPauseScreen();
+        return parent != null && parent.isPauseScreen();
     }
     
     @Override
     public boolean isValidCharacterForName(String string, char c, int i) {
-        return parent.isValidCharacterForName(string, c, i);
+        return parent != null && parent.isValidCharacterForName(string, c, i);
     }
     
     @Override
     public boolean isMouseOver(double d, double e) {
-        return parent.isMouseOver(d, e);
+        return parent != null && parent.isMouseOver(d, e);
     }
     
     @Override
     public void onFilesDrop(List<Path> list) {
-        parent.onFilesDrop(list);
+        if (parent != null) {
+            parent.onFilesDrop(list);
+        }
     }
     
     @Nullable
     @Override
     public GuiEventListener getFocused() {
-        return parent.getFocused();
+        return parent == null ? null : parent.getFocused();
     }
     
     @Override
     public void setFocused(@Nullable GuiEventListener guiEventListener) {
-        parent.setFocused(guiEventListener);
+        if (parent != null) {
+            parent.setFocused(guiEventListener);
+        }
     }
     
     @Override
     public int getBlitOffset() {
-        return parent.getBlitOffset();
+        return parent == null ? 0 : parent.getBlitOffset();
     }
     
     @Override
     public void setBlitOffset(int i) {
-        parent.setBlitOffset(i);
+        if (parent != null) {
+            parent.setBlitOffset(i);
+        }
     }
     
     @Override
     public boolean mouseClicked(double d, double e, int i) {
-        return parent.mouseClicked(d, e, i);
+        return parent != null && parent.mouseClicked(d, e, i);
     }
     
     @Override
     public boolean mouseReleased(double d, double e, int i) {
-        return parent.mouseReleased(d, e, i);
+        return parent != null && parent.mouseReleased(d, e, i);
     }
     
     @Override
     public boolean mouseDragged(double d, double e, int i, double f, double g) {
-        return parent.mouseDragged(d, e, i, f, g);
+        return parent != null && parent.mouseDragged(d, e, i, f, g);
     }
     
     @Override
     public boolean mouseScrolled(double d, double e, double f) {
-        return parent.mouseScrolled(d, e, f);
+        return parent != null && parent.mouseScrolled(d, e, f);
     }
     
     @Override
     public boolean keyReleased(int i, int j, int k) {
-        return parent.keyReleased(i, j, k);
+        return parent != null && parent.keyReleased(i, j, k);
     }
     
     @Override
     public boolean charTyped(char c, int i) {
-        return parent.charTyped(c, i);
+        return parent != null && parent.charTyped(c, i);
     }
     
     @Override
     public void setInitialFocus(@Nullable GuiEventListener guiEventListener) {
-        parent.setInitialFocus(guiEventListener);
+        if (parent != null) {
+            parent.setInitialFocus(guiEventListener);
+        }
     }
     
     @Override
     public void magicalSpecialHackyFocus(@Nullable GuiEventListener guiEventListener) {
-        parent.magicalSpecialHackyFocus(guiEventListener);
+        if (parent != null) {
+            parent.magicalSpecialHackyFocus(guiEventListener);
+        }
     }
     
     @Override
     public boolean changeFocus(boolean bl) {
-        return parent.changeFocus(bl);
+        return parent != null && parent.changeFocus(bl);
     }
     
     @Override
     public void mouseMoved(double d, double e) {
-        parent.mouseMoved(d, e);
+        if (parent != null) {
+            parent.mouseMoved(d, e);
+        }
     }
     
     @Override
     public void resize(Minecraft minecraft, int i, int j) {
-        parent.resize(minecraft, i, j);
+        if (parent != null) {
+            parent.resize(minecraft, i, j);
+        }
     }
     
     @Override
     public void init(Minecraft minecraft, int i, int j) {
-        parent.init(minecraft, i, j);
+        if (parent != null) {
+            parent.init(minecraft, i, j);
+        }
     }
     
     @Override
     public void init() {
-        parent.init();
+        if (parent != null) {
+            parent.init();
+        }
     }
     
     @Override
     public Optional<GuiEventListener> getChildAt(double d, double e) {
-        return parent.getChildAt(d, e);
+        return parent == null ? Optional.empty() : parent.getChildAt(d, e);
     }
     
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
-        parent.render(poseStack, i, j, f);
+        if (parent != null) {
+            parent.render(poseStack, i, j, f);
+        }
     }
-    
-    
 }

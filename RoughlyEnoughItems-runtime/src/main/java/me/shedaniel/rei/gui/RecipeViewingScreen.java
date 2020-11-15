@@ -81,11 +81,8 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
     private final Map<RecipeCategory<?>, List<RecipeDisplay>> categoriesMap;
     private final List<RecipeCategory<?>> categories;
     private final RecipeCategory<RecipeDisplay> selectedCategory;
-    public int guiWidth;
-    public int guiHeight;
     public int page;
     public int categoryPages = -1;
-    public int largestWidth, largestHeight;
     public boolean choosePageActivated = false;
     public RecipeChoosePageWidget recipeChoosePageWidget;
     private int tabsPerPage = 5;
@@ -98,8 +95,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
     
     public RecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> categoriesMap, @Nullable ResourceLocation category) {
         super(NarratorChatListener.NO_TITLE);
-        MainWindow window = Minecraft.getInstance().getWindow();
-        this.bounds = new Rectangle(window.getGuiScaledWidth() / 2 - guiWidth / 2, window.getGuiScaledHeight() / 2 - guiHeight / 2, 176, 150);
+        this.bounds = new Rectangle(0, 0, 176, 150);
         this.categoriesMap = categoriesMap;
         this.categories = Lists.newArrayList(categoriesMap.keySet());
         RecipeCategory<?> selected = categories.get(0);
@@ -224,19 +220,23 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
         this.tabs.clear();
         this.preWidgets.clear();
         this.widgets.clear();
-        this.largestWidth = width - 100;
-        this.largestHeight = Math.max(height - 34 - 30, 100);
+        int largestWidth = width - 100;
+        int largestHeight = Math.max(height - 34 - 30, 100);
         int maxWidthDisplay = CollectionUtils.mapAndMax(getCurrentDisplayed(), selectedCategory::getDisplayWidth, Comparator.naturalOrder()).orElse(150);
-        this.guiWidth = Math.max(maxWidthDisplay + 40, 190);
-        this.guiHeight = MathHelper.floor(MathHelper.clamp((double) (selectedCategory.getDisplayHeight() + 4) * (getRecipesPerPage() + 1) + 36, 100, largestHeight));
-        if (!ConfigObject.getInstance().shouldResizeDynamically()) this.guiHeight = largestHeight;
+        int guiWidth = Math.max(maxWidthDisplay + 40, 190);
+        int guiHeight = MathHelper.floor(MathHelper.clamp((double) (selectedCategory.getDisplayHeight() + 4) * (getRecipesPerPage() + 1) + 36, 100, largestHeight));
+        if (!ConfigObject.getInstance().shouldResizeDynamically()) guiHeight = largestHeight;
         this.tabsPerPage = Math.max(5, MathHelper.floor((guiWidth - 20d) / tabSize));
         if (this.categoryPages == -1) {
             this.categoryPages = Math.max(0, categories.indexOf(selectedCategory) / tabsPerPage);
         }
         this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - guiHeight / 2, guiWidth, guiHeight);
+        if (ConfigObject.getInstance().isSubsetsEnabled()) {
+            this.bounds.setLocation(this.bounds.getX(), this.bounds.getY() + 15);
+            this.bounds.setSize(this.bounds.getWidth(), this.bounds.getHeight() - 10);
+        }
         this.page = MathHelper.clamp(page, 0, getTotalPages(selectedCategory) - 1);
-        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x, bounds.y - 16, 10, 10), new TranslationTextComponent("text.rei.left_arrow"))
+        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x, bounds.y - 16, 10, 10), new TranslatableComponent("text.rei.left_arrow"))
                 .onClick(button -> {
                     categoryPages--;
                     if (categoryPages < 0)
@@ -391,12 +391,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
         if (selectedCategory.getFixedRecipesPerPage() > 0)
             return selectedCategory.getFixedRecipesPerPage() - 1;
         int height = selectedCategory.getDisplayHeight();
-        return MathHelper.clamp(MathHelper.floor(((double) largestHeight - 36) / ((double) height + 4)) - 1, 0, Math.min(ConfigObject.getInstance().getMaxRecipePerPage() - 1, selectedCategory.getMaximumRecipePerPage() - 1));
-    }
-    
-    private int getRecipesPerPageByHeight() {
-        int height = selectedCategory.getDisplayHeight();
-        return MathHelper.clamp(MathHelper.floor(((double) guiHeight - 36) / ((double) height + 4)), 0, Math.min(ConfigObject.getInstance().getMaxRecipePerPage() - 1, selectedCategory.getMaximumRecipePerPage() - 1));
+        return MathHelper.clamp(MathHelper.floor(((double) this.bounds.getHeight() - 36) / ((double) height + 4)) - 1, 0, Math.min(ConfigObject.getInstance().getMaxRecipePerPage() - 1, selectedCategory.getMaximumRecipePerPage() - 1));
     }
     
     @Override

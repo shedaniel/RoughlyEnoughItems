@@ -256,7 +256,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
         widgets.add(tmp = InternalWidgets.wrapLateRenderable(InternalWidgets.mergeWidgets(
                 Widgets.createButton(configButtonArea, NarratorChatListener.NO_TITLE)
                         .onClick(button -> {
-                            if (Screen.hasShiftDown()) {
+                            if (Screen.hasShiftDown() || Screen.hasControlDown()) {
                                 ClientHelper.getInstance().setCheating(!ClientHelper.getInstance().isCheating());
                                 return;
                             }
