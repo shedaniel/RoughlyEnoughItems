@@ -177,6 +177,8 @@ public interface ConfigObject {
     
     boolean isInventoryHighlightingAllowed();
     
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     boolean shouldResizeDynamically();
     
     @ApiStatus.Experimental
