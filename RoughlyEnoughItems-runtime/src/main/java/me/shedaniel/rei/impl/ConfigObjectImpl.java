@@ -286,6 +286,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         return advanced.accessibility.entrySize;
     }
     
+    public boolean setEntrySize(double entrySize) {
+        double original = advanced.accessibility.entrySize;
+        return (advanced.accessibility.entrySize = Mth.clamp(entrySize, 0.25, 4)) != original;
+    }
+    
     @Override
     public boolean isUsingCompactTabs() {
         return advanced.accessibility.useCompactTabs;

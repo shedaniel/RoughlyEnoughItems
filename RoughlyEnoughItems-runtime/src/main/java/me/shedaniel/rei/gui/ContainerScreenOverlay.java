@@ -221,7 +221,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
 //            favoritesListWidget.favoritePanel.resetRows();
             widgets.add(favoritesListWidget);
         }
-        ENTRY_LIST_WIDGET.updateArea(ScreenHelper.getSearchField() == null ? "" : null);
+        ENTRY_LIST_WIDGET.updateArea(ScreenHelper.getSearchField() == null ? "" : ScreenHelper.getSearchField().getText());
         if (ScreenHelper.getSearchField() == null) {
             ScreenHelper.setSearchField(new OverlaySearchField(0, 0, 0, 0));
         }
@@ -656,7 +656,10 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
         if (overlayMenu != null && overlayMenu.wrappedMenu.mouseScrolled(mouseX, mouseY, amount))
             return true;
         if (isInside(PointHelper.ofMouse())) {
-            if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
+            if (ENTRY_LIST_WIDGET.mouseScrolled(mouseX, mouseY, amount)) {
+                return true;
+            }
+            if (!Screen.hasControlDown() && !ConfigObject.getInstance().isEntryListWidgetScrolled()) {
                 if (amount > 0 && leftButton.isEnabled())
                     leftButton.onClick();
                 else if (amount < 0 && rightButton.isEnabled())
@@ -664,8 +667,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
                 else
                     return false;
                 return true;
-            } else if (ENTRY_LIST_WIDGET.mouseScrolled(mouseX, mouseY, amount))
-                return true;
+            }
         }
         if (isNotInExclusionZones(PointHelper.getMouseX(), PointHelper.getMouseY())) {
             if (favoritesListWidget != null && favoritesListWidget.mouseScrolled(mouseX, mouseY, amount))
