@@ -36,21 +36,17 @@ import me.shedaniel.clothconfig2.forge.gui.widget.DynamicNewSmoothScrollingEntry
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.ConfigManager;
-import me.shedaniel.rei.api.ConfigObject;
-import me.shedaniel.rei.api.DisplayHelper;
-import me.shedaniel.rei.api.REIHelper;
+import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.modules.Menu;
 import me.shedaniel.rei.gui.modules.MenuEntry;
-import me.shedaniel.rei.impl.Animator;
-import me.shedaniel.rei.impl.OptimalEntryStack;
-import me.shedaniel.rei.impl.ScreenHelper;
+import me.shedaniel.rei.impl.*;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
@@ -108,11 +104,20 @@ public class FavoritesListWidget extends WidgetWithBounds {
     @Override
     public boolean mouseScrolled(double double_1, double double_2, double double_3) {
         if (currentBounds.contains(double_1, double_2)) {
+            if (Screen.hasControlDown()) {
+                ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
+                if (config.setEntrySize(config.getEntrySize() + double_3 * 0.075)) {
+                    ConfigManager.getInstance().saveConfig();
+                    REIHelper.getInstance().getOverlay().ifPresent(REIOverlay::queueReloadOverlay);
+                    return true;
+                }
+            } else {
 //            if (favoritePanel.mouseScrolled(double_1, double_2, double_3)) {
 //                return true;
 //            }
-            scrolling.offset(ClothConfigInitializer.getScrollStep() * -double_3, true);
-            return true;
+                scrolling.offset(ClothConfigInitializer.getScrollStep() * -double_3, true);
+                return true;
+            }
         }
         return super.mouseScrolled(double_1, double_2, double_3);
     }

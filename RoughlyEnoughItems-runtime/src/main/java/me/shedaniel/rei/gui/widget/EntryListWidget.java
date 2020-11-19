@@ -41,11 +41,10 @@ import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.config.EntryPanelOrdering;
-import me.shedaniel.rei.impl.OptimalEntryStack;
-import me.shedaniel.rei.impl.ScreenHelper;
-import me.shedaniel.rei.impl.SearchArgument;
+import me.shedaniel.rei.impl.*;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.Tessellator;
@@ -162,9 +161,18 @@ public class EntryListWidget extends WidgetWithBounds {
     
     @Override
     public boolean mouseScrolled(double double_1, double double_2, double double_3) {
-        if (ConfigObject.getInstance().isEntryListWidgetScrolled() && bounds.contains(double_1, double_2)) {
-            scrolling.offset(ClothConfigInitializer.getScrollStep() * -double_3, true);
-            return true;
+        if (bounds.contains(double_1, double_2)) {
+            if (Screen.hasControlDown()) {
+                ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
+                if (config.setEntrySize(config.getEntrySize() + double_3 * 0.075)) {
+                    ConfigManager.getInstance().saveConfig();
+                    REIHelper.getInstance().getOverlay().ifPresent(REIOverlay::queueReloadOverlay);
+                    return true;
+                }
+            } else if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
+                scrolling.offset(ClothConfigInitializer.getScrollStep() * -double_3, true);
+                return true;
+            }
         }
         return super.mouseScrolled(double_1, double_2, double_3);
     }
@@ -385,15 +393,13 @@ public class EntryListWidget extends WidgetWithBounds {
         return false;
     }
     
-    public void updateArea(@Nullable String searchTerm) {
+    public void updateArea(@NotNull String searchTerm) {
         this.bounds = ScreenHelper.getItemListArea(ScreenHelper.getLastOverlay().getBounds());
         FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
         if (favoritesListWidget != null)
             favoritesListWidget.updateFavoritesBounds(searchTerm);
-        if (searchTerm != null)
+        if (searchTerm != null || allStacks == null || (ConfigObject.getInstance().isFavoritesEnabled() && favoritesListWidget == null))
             updateSearch(searchTerm, true);
-        else if (allStacks == null || favoritesListWidget == null)
-            updateSearch("", true);
         else
             updateEntriesPosition();
     }

@@ -45,10 +45,7 @@ import me.shedaniel.clothconfig2.forge.api.ModifierKeyCode;
 import me.shedaniel.clothconfig2.forge.gui.entries.KeyCodeEntry;
 import me.shedaniel.clothconfig2.forge.impl.EasingMethod;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.ConfigManager;
-import me.shedaniel.rei.api.EntryRegistry;
-import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.REIHelper;
+import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.TransformingScreen;
@@ -78,6 +75,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraft.world.InteractionResult;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -92,11 +90,13 @@ import static me.shedaniel.autoconfig1u.util.Utils.setUnsafely;
 @ApiStatus.Internal
 @OnlyIn(Dist.CLIENT)
 public class ConfigManagerImpl implements ConfigManager {
-    
+    private static ConfigManagerImpl instance;
     private boolean craftableOnly;
     private final Gson gson = new GsonBuilder().create();
+    private ConfigObjectImpl object;
     
     public ConfigManagerImpl() {
+        ConfigManagerImpl.instance = this;
         this.craftableOnly = false;
         Jankson jankson = Jankson.builder().build();
         AutoConfig.register(ConfigObjectImpl.class, (definition, configClass) -> new JanksonConfigSerializer<>(definition, configClass, Jankson.builder().registerPrimitiveTypeAdapter(InputMappings.Input.class, it -> {
@@ -175,6 +175,10 @@ public class ConfigManagerImpl implements ConfigManager {
         ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (minecraft, screen) -> getConfigScreen(screen));
     }
     
+    public static ConfigManagerImpl getInstance() {
+        return instance;
+    }
+    
     @Override
     public void saveConfig() {
         if (getConfig().getFavoriteEntries() != null)
@@ -193,7 +197,10 @@ public class ConfigManagerImpl implements ConfigManager {
     
     @Override
     public ConfigObjectImpl getConfig() {
-        return AutoConfig.getConfigHolder(ConfigObjectImpl.class).getConfig();
+        if (object == null) {
+            object = AutoConfig.getConfigHolder(ConfigObjectImpl.class).getConfig();
+        }
+        return object;
     }
     
     @Override
