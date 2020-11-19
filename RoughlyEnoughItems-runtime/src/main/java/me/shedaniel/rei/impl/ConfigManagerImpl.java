@@ -48,10 +48,7 @@ import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.clothconfig2.gui.entries.KeyCodeEntry;
 import me.shedaniel.clothconfig2.impl.EasingMethod;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.ConfigManager;
-import me.shedaniel.rei.api.EntryRegistry;
-import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.REIHelper;
+import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.TransformingScreen;
@@ -82,6 +79,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Tuple;
+import net.minecraft.world.InteractionResult;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -97,11 +95,13 @@ import static me.sargunvohra.mcmods.autoconfig1u.util.Utils.setUnsafely;
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public class ConfigManagerImpl implements ConfigManager {
-    
+    private static ConfigManagerImpl instance;
     private boolean craftableOnly;
     private final Gson gson = new GsonBuilder().create();
+    private ConfigObjectImpl object;
     
     public ConfigManagerImpl() {
+        ConfigManagerImpl.instance = this;
         this.craftableOnly = false;
         Jankson jankson = Jankson.builder().build();
         AutoConfig.register(ConfigObjectImpl.class, (definition, configClass) -> new JanksonConfigSerializer<>(definition, configClass, Jankson.builder().registerPrimitiveTypeAdapter(InputConstants.Key.class, it -> {
@@ -178,6 +178,10 @@ public class ConfigManagerImpl implements ConfigManager {
         RoughlyEnoughItemsCore.LOGGER.info("Config loaded.");
     }
     
+    public static ConfigManagerImpl getInstance() {
+        return instance;
+    }
+    
     @Override
     public void saveConfig() {
         if (getConfig().getFavoriteEntries() != null)
@@ -191,12 +195,19 @@ public class ConfigManagerImpl implements ConfigManager {
         if (getConfig().getFilteringRules().stream().noneMatch(filteringRule -> filteringRule instanceof ManualFilteringRule)) {
             getConfig().getFilteringRules().add(new ManualFilteringRule());
         }
-        ((me.sargunvohra.mcmods.autoconfig1u.ConfigManager<ConfigObjectImpl>) AutoConfig.getConfigHolder(ConfigObjectImpl.class)).save();
+        AutoConfig.getConfigHolder(ConfigObjectImpl.class).save();
+        AutoConfig.getConfigHolder(ConfigObjectImpl.class).registerLoadListener((configHolder, configObject) -> {
+            object = configObject;
+            return InteractionResult.PASS;
+        });
     }
     
     @Override
     public ConfigObjectImpl getConfig() {
-        return AutoConfig.getConfigHolder(ConfigObjectImpl.class).getConfig();
+        if (object == null) {
+            object = AutoConfig.getConfigHolder(ConfigObjectImpl.class).getConfig();
+        }
+        return object;
     }
     
     @Override
