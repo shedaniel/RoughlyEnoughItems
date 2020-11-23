@@ -1,3 +1,21 @@
 {
-  "text.rei.cheating_limited_creative_enabled": "§aЧіти увімкнено (Увімкнен Творчий режим)"
+  "text.rei.cheating_limited_creative_enabled": "§aЧіти увімкнено (Увімкнен Творчий режим)",
+  "category.rei.smithing": "Кування",
+  "category.rei.beacon_base": "Основа для маяка",
+  "text.rei.config.optifine.title": "Не вдалося відкрити екран конфігурації REI",
+  "text.rei.gamemode_button.tooltip.all": "Змінити режим гри",
+  "config.roughlyenoughitems.cheatingStyle": "Вид читерства",
+  "config.roughlyenoughitems.cheatingStyle.grab": "Візьміть",
+  "config.roughlyenoughitems.cheatingStyle.give": "Видати",
+  "config.roughlyenoughitems.filteringRulesScreen": "Правила фільтрації, які налаштовуються",
+  "config.roughlyenoughitems.filteringRulesScreen.new": "Створити правило фільтрації",
+  "config.roughlyenoughitems.filteringRulesScreen.delete": "Видалити",
+  "rule.roughlyenoughitems.filtering.manual": "Ручне фільтрування",
+  "rule.roughlyenoughitems.filtering.manual.subtitle": "Виберіть вручну, що приховати і що показати.",
+  "rule.roughlyenoughitems.filtering.search": "Фільтрація пошуку",
+  "rule.roughlyenoughitems.filtering.search.subtitle": "Фільтр використовується в пошуку.",
+  "rule.roughlyenoughitems.filtering.search.filter": "Фільтр пошуку:\n",
+  "rule.roughlyenoughitems.filtering.search.show": "Показати / Приховати:",
+  "rule.roughlyenoughitems.filtering.search.show.true": "Показати",
+  "rule.roughlyenoughitems.filtering.search.show.false": "Приховати"
 }
