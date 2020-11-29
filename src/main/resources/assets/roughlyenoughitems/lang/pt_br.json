@@ -98,6 +98,8 @@
   "text.rei.view_recipes_for": "Ver receitas para %s",
   "text.rei.subsets": "Subconjuntos",
   "text.rei.tiny_potato": "Batatinhas",
+  "text.rei.add_favorite_widget": "Adicionar...",
+  "favorite.section.gamemode": "Modo de jogo",
   "tooltip.rei.fluid_amount": "§7%d unidade(s)",
   "msg.rei.copied_recipe_id": "ID da receita copiado",
   "msg.rei.recipe_id_details": "ID da receita: %s",
