@@ -98,7 +98,6 @@
   "msg.rei.exported_recipe.desc": "Revisa la carpeta 'rei_exports'.",
   "subsets.rei.roughlyenoughitems.all_entries": "Todas las entradas",
   "subsets.rei.roughlyenoughitems.item_groups": "Pestañas creativas",
-  "_comment": "Configurar información extra",
   "config.roughlyenoughitems.title": "Configuración de Roughly Enough Items",
   "config.roughlyenoughitems.basics": "Básicos",
   "config.roughlyenoughitems.appearance": "Apariencia",
