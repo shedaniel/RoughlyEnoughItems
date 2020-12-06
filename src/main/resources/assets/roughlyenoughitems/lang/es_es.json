@@ -12,6 +12,7 @@
   "category.rei.smelting": "Fundir",
   "category.rei.smelting.fuel": "Combustible",
   "category.rei.fuel": "Combustible",
+  "category.rei.fuel.time": "Tiempo de Quema: %d ticks",
   "category.rei.fuel.time_short": "%d ticks",
   "category.rei.fuel.time_short.items": "%s objeto(s)",
   "category.rei.cooking.xp": "%f XP",
