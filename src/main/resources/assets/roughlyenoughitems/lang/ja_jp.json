@@ -71,7 +71,6 @@
   "text.rei.recipe_screen_type.selection.sub": "設定画面でいつでも設定を変更できます。",
   "text.rei.view_recipes_for": "%sのレシピを表示",
   "subsets.rei.roughlyenoughitems.all_entries": "全項目",
-  "_comment": "Tooltipsの設定",
   "config.roughlyenoughitems.title": "Roughly Enough Itemsの設定",
   "config.roughlyenoughitems.basics": "基本",
   "config.roughlyenoughitems.appearance": "外観",
