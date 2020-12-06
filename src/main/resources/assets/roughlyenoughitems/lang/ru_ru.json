@@ -108,7 +108,6 @@
   "msg.rei.exported_recipe.desc": "Проверьте папку 'rei_exports'.",
   "subsets.rei.roughlyenoughitems.all_entries": "Все записи",
   "subsets.rei.roughlyenoughitems.item_groups": "Вкладки творческого режима",
-  "_comment": "Конфигурация подсказок",
   "config.roughlyenoughitems.title": "Конфигурация Roughly Enough Items",
   "config.roughlyenoughitems.basics": "Основы",
   "config.roughlyenoughitems.appearance": "Оформление",
