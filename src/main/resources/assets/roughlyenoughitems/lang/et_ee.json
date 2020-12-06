@@ -108,7 +108,6 @@
   "msg.rei.exported_recipe.desc": "Vaata kausta \"rei_exports\".",
   "subsets.rei.roughlyenoughitems.all_entries": "Kõik üksused",
   "subsets.rei.roughlyenoughitems.item_groups": "Loomingulise kaardid",
-  "_comment": "Seadistuse vihjetekstid",
   "config.roughlyenoughitems.title": "Roughly Enough Items seadistus",
   "config.roughlyenoughitems.basics": "Põhiline",
   "config.roughlyenoughitems.appearance": "Välimus",
