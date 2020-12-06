@@ -36,7 +36,6 @@ import me.shedaniel.rei.api.widgets.Slot;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.impl.ScreenHelper;
-import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.TextComponent;
@@ -54,7 +53,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class EntryWidget extends Slot {
-    
+    @ApiStatus.Internal
+    public static long stackDisplayOffset = 0;
     protected static final ResourceLocation RECIPE_GUI = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
     protected static final ResourceLocation RECIPE_GUI_DARK = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
     
@@ -255,7 +255,7 @@ public class EntryWidget extends Slot {
             return EntryStack.empty();
         if (entryStacks.size() == 1)
             return entryStacks.get(0);
-        return entryStacks.get(Mth.floor((System.currentTimeMillis() / 500 % (double) entryStacks.size()) / 1f));
+        return entryStacks.get(Mth.floor(((System.currentTimeMillis() + stackDisplayOffset) / 1000 % (double) entryStacks.size())));
     }
     
     @NotNull
@@ -362,6 +362,20 @@ public class EntryWidget extends Slot {
         if (containsMouse(mouseX, mouseY))
             this.wasClicked = true;
         return super.mouseClicked(mouseX, mouseY, button);
+    }
+    
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        if (ScreenHelper.isWithinRecipeViewingScreen && entryStacks.size() > 1 && containsMouse(mouseX, mouseY)) {
+            if (amount < 0) {
+                EntryWidget.stackDisplayOffset += 500;
+                return true;
+            } else if (amount > 0) {
+                EntryWidget.stackDisplayOffset -= 500;
+                return true;
+            }
+        }
+        return false;
     }
     
     @Override

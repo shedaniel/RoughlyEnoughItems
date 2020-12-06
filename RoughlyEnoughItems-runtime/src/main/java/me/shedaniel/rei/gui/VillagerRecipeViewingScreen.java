@@ -62,7 +62,6 @@ import java.util.Optional;
 
 @ApiStatus.Internal
 public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen {
-    
     private final Map<RecipeCategory<?>, List<RecipeDisplay>> categoryMap;
     private final List<RecipeCategory<?>> categories;
     private final List<Widget> widgets = Lists.newArrayList();
@@ -298,9 +297,14 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
                 scrollBarAlphaFutureTime = System.currentTimeMillis();
             return true;
         }
-        for (GuiEventListener listener : children())
-            if (listener.mouseScrolled(mouseX, mouseY, amount))
+        ScreenHelper.isWithinRecipeViewingScreen = true;
+        for (GuiEventListener listener : children()) {
+            if (listener.mouseScrolled(mouseX, mouseY, amount)) {
+                ScreenHelper.isWithinRecipeViewingScreen = false;
                 return true;
+            }
+        }
+        ScreenHelper.isWithinRecipeViewingScreen = false;
         int tabSize = ConfigObject.getInstance().isUsingCompactTabs() ? 24 : 28;
         if (mouseX >= bounds.x && mouseX <= bounds.getMaxX() && mouseY >= bounds.y - tabSize && mouseY < bounds.y) {
             if (amount < 0) selectedCategoryIndex++;
