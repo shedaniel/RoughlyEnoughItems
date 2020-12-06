@@ -23,8 +23,9 @@
 
 package me.shedaniel.rei;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import me.shedaniel.clothconfig2.forge.api.LazyResettable;
@@ -99,9 +100,8 @@ import static me.shedaniel.rei.impl.Internals.attachInstance;
 @ApiStatus.Internal
 @OnlyIn(Dist.CLIENT)
 public class RoughlyEnoughItemsCore {
-    
     @ApiStatus.Internal public static final Logger LOGGER = LogManager.getFormatterLogger("REI");
-    private static final Map<ResourceLocation, REIPluginEntry> plugins = Maps.newHashMap();
+    private static final BiMap<ResourceLocation, REIPluginEntry> PLUGINS = HashBiMap.create();
     private static final ExecutorService SYNC_RECIPES = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "REI-SyncRecipes"));
     @ApiStatus.Experimental
     public static boolean isLeftModePressed = false;
@@ -298,20 +298,17 @@ public class RoughlyEnoughItemsCore {
      */
     @ApiStatus.Internal
     public static REIPluginEntry registerPlugin(REIPluginEntry plugin) {
-        plugins.put(plugin.getPluginIdentifier(), plugin);
+        PLUGINS.put(plugin.getPluginIdentifier(), plugin);
         RoughlyEnoughItemsCore.LOGGER.debug("Registered plugin %s from %s", plugin.getPluginIdentifier().toString(), plugin.getClass().getSimpleName());
         return plugin;
     }
     
     public static List<REIPluginEntry> getPlugins() {
-        return new LinkedList<>(plugins.values());
+        return new ArrayList<>(PLUGINS.values());
     }
     
     public static Optional<ResourceLocation> getPluginIdentifier(REIPluginEntry plugin) {
-        for (ResourceLocation identifier : plugins.keySet())
-            if (identifier != null && plugins.get(identifier).equals(plugin))
-                return Optional.of(identifier);
-        return Optional.empty();
+        return Optional.ofNullable(PLUGINS.inverse().get(plugin));
     }
     
     public static boolean hasPermissionToUsePackets() {

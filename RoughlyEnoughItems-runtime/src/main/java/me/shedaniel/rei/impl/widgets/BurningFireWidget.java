@@ -68,7 +68,7 @@ public final class BurningFireWidget extends BurningFire {
         Minecraft.getInstance().getTextureManager().bind(REIHelper.getInstance().getDefaultDisplayTexture());
         blit(matrices, getX(), getY(), 1, 74, 14, 14);
         if (getAnimationDuration() > 0) {
-            int height = 14 - MathHelper.ceil((System.currentTimeMillis() / (animationDuration / 14) % 14d) / 1f);
+            int height = 14 - MathHelper.ceil((System.currentTimeMillis() / (animationDuration / 14) % 14d));
             blit(matrices, getX(), getY() + 14 - height, 82, 77 + (14 - height), 14, height);
         }
     }

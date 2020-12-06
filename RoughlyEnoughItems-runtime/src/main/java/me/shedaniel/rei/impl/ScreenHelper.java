@@ -62,6 +62,8 @@ import static me.shedaniel.rei.impl.Internals.attachInstance;
 @ApiStatus.Internal
 @OnlyIn(Dist.CLIENT)
 public class ScreenHelper implements REIHelper {
+    @ApiStatus.Internal
+    public static boolean isWithinRecipeViewingScreen = false;
     private static final ResourceLocation DISPLAY_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/display.png");
     private static final ResourceLocation DISPLAY_TEXTURE_DARK = new ResourceLocation("roughlyenoughitems", "textures/gui/display_dark.png");
     private OverlaySearchField searchField;

@@ -72,7 +72,6 @@ import java.util.function.Supplier;
 
 @ApiStatus.Internal
 public class RecipeViewingScreen extends Screen implements RecipeScreen {
-    
     public static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private final List<Widget> preWidgets = Lists.newArrayList();
     private final List<Widget> widgets = Lists.newArrayList();
@@ -519,10 +518,15 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
     }
     
     @Override
-    public boolean mouseScrolled(double i, double j, double amount) {
-        for (IGuiEventListener listener : children())
-            if (listener.mouseScrolled(i, j, amount))
+    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        ScreenHelper.isWithinRecipeViewingScreen = true;
+        for (IGuiEventListener listener : children()) {
+            if (listener.mouseScrolled(mouseX, mouseY, amount)) {
+                ScreenHelper.isWithinRecipeViewingScreen = false;
                 return true;
+            }
+        }
+        ScreenHelper.isWithinRecipeViewingScreen = false;
         if (getBounds().contains(PointHelper.ofMouse())) {
             if (amount > 0 && recipeBack.isEnabled())
                 recipeBack.onClick();
@@ -535,7 +539,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
             else if (amount < 0 && categoryNext.isEnabled())
                 categoryNext.onClick();
         }
-        return super.mouseScrolled(i, j, amount);
+        return super.mouseScrolled(mouseX, mouseY, amount);
     }
     
     @Override
