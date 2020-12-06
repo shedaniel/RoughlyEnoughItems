@@ -208,6 +208,8 @@
   "config.roughlyenoughitems.scrollingEntryListWidget": "Esemenimekirja tegevus:",
   "config.roughlyenoughitems.scrollingEntryListWidget.boolean.true": "Keritav",
   "config.roughlyenoughitems.scrollingEntryListWidget.boolean.false": "Lehekülgedega",
+  "config.roughlyenoughitems.horizontalEntriesBoundaries": "Horisontaalsete üksuste piirded:",
+  "config.roughlyenoughitems.verticalEntriesBoundaries": "Vertikaalsete üksuste piirded:",
   "config.roughlyenoughitems.filteringScreen": "Kohandatud filtreerimine",
   "config.roughlyenoughitems.filteringRulesScreen": "Kohandatud filtreerimisreeglid",
   "config.roughlyenoughitems.filteringRulesScreen.new": "Loo filtreerimisreegel",
