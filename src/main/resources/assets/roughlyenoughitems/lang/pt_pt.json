@@ -89,7 +89,6 @@
   "tooltip.rei.fluid_amount": "§7%d Unidade(s)",
   "msg.rei.copied_recipe_id": "Copiado Identificador de Receita",
   "msg.rei.recipe_id_details": "ID de Receita: %s",
-  "_comment": "Don't change / translate the credit down below if you are doing it :)",
   "config.roughlyenoughitems.title": "Configuração deo Roughly Enough Items",
   "config.roughlyenoughitems.appearance": "Aparência",
   "config.roughlyenoughitems.cheating": "Batotas:",
