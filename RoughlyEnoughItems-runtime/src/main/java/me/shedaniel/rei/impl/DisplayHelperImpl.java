@@ -45,47 +45,12 @@ import java.util.Map;
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public class DisplayHelperImpl implements DisplayHelper {
-    
     private static final Comparator<OverlayDecider> BOUNDS_HANDLER_COMPARATOR = Comparator.comparingDouble(OverlayDecider::getPriority).reversed();
-    private static final DisplayBoundsHandler<Object> EMPTY = new DisplayBoundsHandler<Object>() {
-        @Override
-        public Class<Object> getBaseSupportedClass() {
-            return null;
-        }
-        
-        @Override
-        public Rectangle getLeftBounds(Object screen) {
-            return new Rectangle();
-        }
-        
-        @Override
-        public Rectangle getRightBounds(Object screen) {
-            return new Rectangle();
-        }
-        
-        @Override
-        public float getPriority() {
-            return -10f;
-        }
-    };
     
     private List<OverlayDecider> screenDisplayBoundsHandlers = Lists.newArrayList();
-    private Map<Class<?>, DisplayBoundsHandler<?>> handlerCache = Maps.newHashMap();
     private Map<Class<?>, List<OverlayDecider>> deciderSortedCache = Maps.newHashMap();
-    private Map<Class<?>, List<DisplayBoundsHandler<?>>> handlerSortedCache = Maps.newHashMap();
     private BaseBoundsHandler baseBoundsHandler;
     private Class<?> tempScreen;
-    
-    @SuppressWarnings("rawtypes")
-    @Override
-    public List<DisplayBoundsHandler<?>> getSortedBoundsHandlers(Class<?> screenClass) {
-        List<DisplayBoundsHandler<?>> possibleCached = handlerSortedCache.get(screenClass);
-        if (possibleCached != null)
-            return possibleCached;
-        tempScreen = screenClass;
-        handlerSortedCache.put(screenClass, (List) CollectionUtils.castAndMap(CollectionUtils.filter(screenDisplayBoundsHandlers, this::filterResponsible), DisplayBoundsHandler.class));
-        return handlerSortedCache.get(screenClass);
-    }
     
     @Override
     public List<OverlayDecider> getSortedOverlayDeciders(Class<?> screenClass) {
@@ -93,23 +58,13 @@ public class DisplayHelperImpl implements DisplayHelper {
         if (possibleCached != null)
             return possibleCached;
         tempScreen = screenClass;
-        deciderSortedCache.put(screenClass, (List) CollectionUtils.filter(screenDisplayBoundsHandlers, this::filterResponsible));
+        deciderSortedCache.put(screenClass, CollectionUtils.filter(screenDisplayBoundsHandlers, this::filterResponsible));
         return deciderSortedCache.get(screenClass);
     }
     
     @Override
     public List<OverlayDecider> getAllOverlayDeciders() {
         return Collections.unmodifiableList(screenDisplayBoundsHandlers);
-    }
-    
-    @Override
-    public DisplayBoundsHandler<?> getResponsibleBoundsHandler(Class<?> screenClass) {
-        DisplayBoundsHandler<?> possibleCached = handlerCache.get(screenClass);
-        if (possibleCached != null)
-            return possibleCached;
-        List<DisplayBoundsHandler<?>> handlers = getSortedBoundsHandlers(screenClass);
-        handlerCache.put(screenClass, handlers.isEmpty() ? EMPTY : handlers.get(0));
-        return handlerCache.get(screenClass);
     }
     
     @Override
@@ -127,8 +82,6 @@ public class DisplayHelperImpl implements DisplayHelper {
                     if (scaledWidth - containerBounds.getMaxX() < 10) continue;
                     return new Rectangle(containerBounds.getMaxX() + 2, 0, scaledWidth - containerBounds.getMaxX() - 4, scaledHeight);
                 }
-            } else if (decider instanceof DisplayBoundsHandler) {
-                return location == DisplayPanelLocation.LEFT ? ((DisplayBoundsHandler<T>) decider).getLeftBounds(screen) : ((DisplayBoundsHandler<T>) decider).getRightBounds(screen);
             }
         }
         return new Rectangle();
@@ -163,9 +116,6 @@ public class DisplayHelperImpl implements DisplayHelper {
     @ApiStatus.Experimental
     @Override
     public void resetCache() {
-        handlerCache.clear();
         deciderSortedCache.clear();
-        handlerSortedCache.clear();
     }
-    
 }

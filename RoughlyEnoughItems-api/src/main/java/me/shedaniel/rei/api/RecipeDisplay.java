@@ -23,9 +23,7 @@
 
 package me.shedaniel.rei.api;
 
-import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -42,22 +40,9 @@ public interface RecipeDisplay {
     
     /**
      * @return a list of outputs
-     * @deprecated Use {@link RecipeDisplay#getResultingEntries()}
-     */
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval(inVersion = "1.17")
-    @NotNull
-    default List<EntryStack> getOutputEntries() {
-        return Collections.emptyList();
-    }
-    
-    /**
-     * @return a list of outputs
      */
     @NotNull
-    default List<List<EntryStack>> getResultingEntries() {
-        return CollectionUtils.map(getOutputEntries(), Collections::singletonList);
-    }
+    List<List<EntryStack>> getResultingEntries();
     
     /**
      * Gets the required items used in craftable filters

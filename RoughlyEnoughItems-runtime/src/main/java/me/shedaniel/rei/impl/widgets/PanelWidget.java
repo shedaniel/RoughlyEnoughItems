@@ -35,7 +35,6 @@ import me.shedaniel.rei.gui.config.RecipeScreenType;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -68,18 +67,6 @@ public final class PanelWidget extends Panel {
         TEMP.color = color;
         TEMP.render(matrices, 0, 0, 0);
     }
-    
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    @Override
-    public int getInnerColor() {
-        return REIHelper.getInstance().isDarkThemeEnabled() ? -13750738 : -3750202;
-    }
-    
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    @Override
-    public void setInnerColor(int innerColor) {}
     
     @Override
     public int getXTextureOffset() {

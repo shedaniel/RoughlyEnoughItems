@@ -146,24 +146,6 @@ public interface EntryStack extends TextRepresentable {
         return ImmutableList.copyOf(result);
     }
     
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    static List<EntryStack> create(Collection<ItemStack> stacks) {
-        return ofItemStacks(stacks);
-    }
-    
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    static List<EntryStack> create(Ingredient ingredient) {
-        return ofIngredient(ingredient);
-    }
-    
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    static List<List<EntryStack>> create(List<Ingredient> ingredients) {
-        return ofIngredients(ingredients);
-    }
-    
     @ApiStatus.Internal
     static EntryStack readFromJson(JsonElement jsonElement) {
         try {
@@ -214,34 +196,6 @@ public interface EntryStack extends TextRepresentable {
             e.printStackTrace();
             return null;
         }
-    }
-    
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    static EntryStack copyFluidToBucket(EntryStack stack) {
-        return copyFluidToItem(stack);
-    }
-    
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    static EntryStack copyFluidToItem(EntryStack stack) {
-        Item bucketItem = stack.getFluid().getBucket();
-        if (bucketItem != null) {
-            return EntryStack.create(bucketItem);
-        }
-        return EntryStack.empty();
-    }
-    
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    static EntryStack copyBucketToFluid(EntryStack stack) {
-        return copyItemToFluid(stack);
-    }
-    
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    static EntryStack copyItemToFluid(EntryStack stack) {
-        return FluidSupportProvider.getInstance().itemToFluid(stack);
     }
     
     static Stream<EntryStack> copyItemToFluids(EntryStack stack) {
@@ -407,15 +361,6 @@ public interface EntryStack extends TextRepresentable {
         @ApiStatus.Internal
         public short getId() {
             return id;
-        }
-        
-        public static class Item {
-            @Deprecated
-            @ApiStatus.ScheduledForRemoval
-            public static final Settings<Supplier<Boolean>> RENDER_ENCHANTMENT_GLINT = new Settings<>(TRUE);
-            
-            private Item() {
-            }
         }
         
         public static class Fluid {

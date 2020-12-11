@@ -59,17 +59,6 @@ public interface AutoTransferHandler {
         }
         
         /**
-         * Creates a successful result, no further handlers will be called.
-         * Will return to the previous screen rather than staying open.
-         *
-         * @deprecated use {@link #blocksFurtherHandling(boolean)}
-         */
-        @Deprecated
-        static Result createSuccessfulReturningToScreen() {
-            return createSuccessful().blocksFurtherHandling(true);
-        }
-        
-        /**
          * Creates a passing result, further handlers will be called.
          * This will also mark the handler as not applicable.
          */
@@ -185,23 +174,9 @@ public interface AutoTransferHandler {
         
         @Nullable
         AbstractContainerScreen<?> getContainerScreen();
-    
-        @Nullable
-        @Deprecated
-        @ApiStatus.ScheduledForRemoval
-        default AbstractContainerScreen<?> getHandledScreen() {
-            return getContainerScreen();
-        }
         
         RecipeDisplay getRecipe();
-    
-        @Nullable
-        @Deprecated
-        @ApiStatus.ScheduledForRemoval
-        default AbstractContainerMenu getScreenHandler() {
-            return getContainer();
-        }
-    
+        
         @Nullable
         default AbstractContainerMenu getContainer() {
             return getContainerScreen() == null ? null : getContainerScreen().getMenu();

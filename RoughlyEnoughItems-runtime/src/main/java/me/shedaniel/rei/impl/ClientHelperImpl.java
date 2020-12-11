@@ -95,14 +95,14 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     }
     
     @Override
-    public String getModFromModId(String modid) {
-        if (modid == null)
+    public String getModFromModId(String modId) {
+        if (modId == null)
             return "";
-        String any = modNameCache.getOrDefault(modid, null);
+        String any = modNameCache.getOrDefault(modId, null);
         if (any != null)
             return any;
-        String s = FabricLoader.getInstance().getModContainer(modid).map(ModContainer::getMetadata).map(ModMetadata::getName).orElse(modid);
-        modNameCache.put(modid, s);
+        String s = FabricLoader.getInstance().getModContainer(modId).map(ModContainer::getMetadata).map(ModMetadata::getName).orElse(modId);
+        modNameCache.put(modId, s);
         return s;
     }
     
@@ -175,11 +175,6 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         }
     }
     
-    @Override
-    public List<ItemStack> getInventoryItemsTypes() {
-        return Minecraft.getInstance().player.getInventory().compartments.stream().flatMap(Collection::stream).collect(Collectors.toList());
-    }
-    
     @ApiStatus.Internal
     public Set<EntryStack> _getInventoryItemsTypes() {
         return Minecraft.getInstance().player.getInventory().compartments.stream()
@@ -188,15 +183,6 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
                 .collect(Collectors.toSet());
     }
     
-    @ApiStatus.ScheduledForRemoval
-    @Deprecated
-    @Override
-    public void openRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map) {
-        openRecipeViewingScreen(map, null, null, null);
-    }
-    
-    @ApiStatus.ScheduledForRemoval
-    @Deprecated
     @ApiStatus.Internal
     public void openRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map, @Nullable ResourceLocation category, @Nullable EntryStack ingredientNotice, @Nullable EntryStack resultNotice) {
         openView(new LegacyWrapperViewSearchBuilder(map).setPreferredOpenedCategory(category).setInputNotice(ingredientNotice).setOutputNotice(resultNotice).fillPreferredOpenedCategory());

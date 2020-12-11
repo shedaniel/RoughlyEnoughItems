@@ -258,7 +258,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
                     ClientHelperImpl.getInstance().openRecipeViewingScreen(categoriesMap, categories.get(currentCategoryIndex).getIdentifier(), ingredientStackToNotice, resultStackToNotice);
                 }).tooltipLine(I18n.get("text.rei.previous_category")));
         widgets.add(Widgets.createClickableLabel(new Point(bounds.getCenterX(), bounds.getY() + 7), new TextComponent(selectedCategory.getCategoryName()), clickableLabelWidget -> {
-            ClientHelper.getInstance().executeViewAllRecipesKeyBind();
+            ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addAllCategories().fillPreferredOpenedCategory());
         }).tooltipLine(I18n.get("text.rei.view_all_categories")));
         widgets.add(categoryNext = Widgets.createButton(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 5, 12, 12), new TranslatableComponent("text.rei.right_arrow"))
                 .onClick(button -> {

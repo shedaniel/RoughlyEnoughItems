@@ -36,7 +36,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Environment(EnvType.CLIENT)
@@ -48,18 +47,6 @@ public interface EntryRegistry {
     @NotNull
     static EntryRegistry getInstance() {
         return Internals.getEntryRegistry();
-    }
-    
-    /**
-     * Gets the current modifiable stacks list
-     *
-     * @return a stacks list
-     */
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    @NotNull
-    default List<EntryStack> getStacksList() {
-        return getEntryStacks().collect(Collectors.toList());
     }
     
     @NotNull
@@ -94,26 +81,6 @@ public interface EntryRegistry {
      * @param stack      the stack to register
      */
     void registerEntryAfter(@Nullable EntryStack afterEntry, @NotNull EntryStack stack);
-    
-    /**
-     * Registers an new stack to the entry list
-     *
-     * @param afterEntry           the stack to put after
-     * @param stack                the stack to register
-     * @param checkAlreadyContains whether the list should check if it is already on the list
-     * @see #queueRegisterEntryAfter(EntryStack, Collection) for a faster method
-     */
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    default void registerEntryAfter(@Nullable EntryStack afterEntry, @NotNull EntryStack stack, boolean checkAlreadyContains) {
-        registerEntryAfter(afterEntry, stack);
-    }
-    
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    default void queueRegisterEntryAfter(@Nullable EntryStack afterEntry, @NotNull Collection<@NotNull ? extends EntryStack> stacks) {
-        registerEntriesAfter(afterEntry, stacks);
-    }
     
     /**
      * Registers multiple stacks to the item list

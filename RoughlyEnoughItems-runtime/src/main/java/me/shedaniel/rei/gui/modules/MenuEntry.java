@@ -29,6 +29,7 @@ import org.jetbrains.annotations.ApiStatus;
 @ApiStatus.Experimental
 @ApiStatus.Internal
 public abstract class MenuEntry extends Widget {
+    @ApiStatus.Internal
     @Deprecated
     Menu parent = null;
     

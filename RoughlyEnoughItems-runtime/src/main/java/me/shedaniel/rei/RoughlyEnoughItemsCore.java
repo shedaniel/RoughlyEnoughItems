@@ -151,7 +151,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             
             @Override
             public me.shedaniel.rei.api.widgets.Slot createSlot(Point point) {
-                return EntryWidget.create(point);
+                return new EntryWidget(point);
             }
             
             @Override

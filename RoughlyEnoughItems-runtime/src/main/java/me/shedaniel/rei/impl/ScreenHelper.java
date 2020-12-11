@@ -44,20 +44,19 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.item.ItemStack;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.LinkedHashSet;
+import java.util.Optional;
+import java.util.Set;
 
 import static me.shedaniel.rei.impl.Internals.attachInstance;
 
@@ -96,14 +95,6 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
     @Nullable
     public TextFieldWidget getSearchTextField() {
         return searchField;
-    }
-    
-    @Override
-    public @NotNull List<ItemStack> getInventoryStacks() {
-        return inventoryStacks.stream()
-                .map(EntryStack::getItemStack)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
     }
     
     @Nullable
@@ -169,16 +160,6 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
         return getLastOverlay(false, false);
     }
     
-    /**
-     * @see REIHelper#getPreviousContainerScreen()
-     */
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    @Nullable
-    public static AbstractContainerScreen<?> getLastHandledScreen() {
-        return previousContainerScreen;
-    }
-    
     @Override
     public AbstractContainerScreen<?> getPreviousContainerScreen() {
         return previousContainerScreen;
@@ -203,19 +184,9 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
         consumer.accept(matrices, new Point(actualX, actualY), delta);
     }
     
-    /**
-     * @deprecated Please switch to {@link REIHelper#isDarkThemeEnabled()}
-     */
-    @Deprecated
-    @ApiStatus.Internal
-    @ApiStatus.ScheduledForRemoval
-    public static boolean isDarkModeEnabled() {
-        return ConfigObject.getInstance().isUsingDarkTheme();
-    }
-    
     @Override
     public boolean isDarkThemeEnabled() {
-        return isDarkModeEnabled();
+        return ConfigObject.getInstance().isUsingDarkTheme();
     }
     
     @Override

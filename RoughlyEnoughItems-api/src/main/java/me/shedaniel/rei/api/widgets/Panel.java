@@ -25,35 +25,11 @@ package me.shedaniel.rei.api.widgets;
 
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Predicate;
 
 public abstract class Panel extends WidgetWithBounds {
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    public abstract int getInnerColor();
-    
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    public abstract void setInnerColor(int innerColor);
-    
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    @NotNull
-    public final Panel innerColor(int innerColor) {
-        setInnerColor(innerColor);
-        return this;
-    }
-    
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    @NotNull
-    public final Panel innerColor(int lightColor, int darkColor) {
-        return innerColor(REIHelper.getInstance().isDarkThemeEnabled() ? darkColor : lightColor);
-    }
-    
     public abstract int getXTextureOffset();
     
     public abstract void setXTextureOffset(int xTextureOffset);
