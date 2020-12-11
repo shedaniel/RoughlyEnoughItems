@@ -39,40 +39,6 @@ import java.util.Set;
 @ApiStatus.Experimental
 @Environment(EnvType.CLIENT)
 public interface SubsetsRegistry {
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    SubsetsRegistry INSTANCE = new SubsetsRegistry() {
-        @Override
-        public @NotNull List<String> getEntryPaths(@NotNull EntryStack stack) {
-            return getInstance().getEntryPaths(stack);
-        }
-        
-        @Override
-        public @Nullable Set<EntryStack> getPathEntries(@NotNull String path) {
-            return getInstance().getPathEntries(path);
-        }
-        
-        @Override
-        public @NotNull Set<EntryStack> getOrCreatePathEntries(@NotNull String path) {
-            return getInstance().getOrCreatePathEntries(path);
-        }
-        
-        @Override
-        public @NotNull Set<String> getPaths() {
-            return getInstance().getPaths();
-        }
-        
-        @Override
-        public void registerPathEntry(@NotNull String path, @NotNull EntryStack stack) {
-            getInstance().registerPathEntry(path, stack);
-        }
-        
-        @Override
-        public void registerPathEntries(@NotNull String path, @NotNull Collection<EntryStack> stacks) {
-            getInstance().registerPathEntries(path, stacks);
-        }
-    };
-    
     static SubsetsRegistry getInstance() {
         return Internals.getSubsetsRegistry();
     }

@@ -30,12 +30,10 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
@@ -54,22 +52,10 @@ public interface REIHelper {
     @Nullable
     AbstractContainerScreen<?> getPreviousContainerScreen();
     
-    @Nullable
-    @Deprecated
-    default AbstractContainerScreen<?> getPreviousHandledScreen() {
-        return getPreviousContainerScreen();
-    }
-    
     boolean isDarkThemeEnabled();
     
     @Nullable
     TextFieldWidget getSearchTextField();
-    
-    @NotNull
-    @ApiStatus.Internal
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    List<ItemStack> getInventoryStacks();
     
     void queueTooltip(@Nullable Tooltip tooltip);
     

@@ -39,7 +39,6 @@ import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -80,20 +79,8 @@ public class SimpleRecipeEntry extends RecipeEntry {
         })).collect(Collectors.toList());
     }
     
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    public static RecipeEntry create(Supplier<List<List<EntryStack>>> input, Supplier<List<EntryStack>> output) {
-        return create(input.get(), output.get());
-    }
-    
     public static RecipeEntry from(Supplier<List<List<EntryStack>>> input, Supplier<List<List<EntryStack>>> output) {
         return from(input.get(), output.get());
-    }
-    
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    public static RecipeEntry create(List<List<EntryStack>> input, List<EntryStack> output) {
-        return from(input, CollectionUtils.map(output, Collections::singletonList));
     }
     
     public static RecipeEntry from(List<List<EntryStack>> input, List<List<EntryStack>> output) {

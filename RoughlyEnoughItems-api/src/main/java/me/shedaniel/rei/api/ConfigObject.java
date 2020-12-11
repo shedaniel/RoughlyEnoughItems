@@ -30,7 +30,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.Collections;
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
@@ -63,10 +62,6 @@ public interface ConfigObject {
     
     boolean isToastDisplayedOnCopyIdentifier();
     
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    boolean doesRenderEntryEnchantmentGlint();
-    
     boolean isEntryListWidgetScrolled();
     
     boolean shouldAppendModNames();
@@ -74,10 +69,6 @@ public interface ConfigObject {
     RecipeScreenType getRecipeScreenType();
     
     void setRecipeScreenType(RecipeScreenType recipeScreenType);
-    
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    boolean isLoadingDefaultPlugin();
     
     SearchFieldLocation getSearchFieldLocation();
     
@@ -117,21 +108,9 @@ public interface ConfigObject {
     
     boolean doDisplayFavoritesTooltip();
     
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    default boolean doDisplayFavoritesOnTheLeft() {
-        return true;
-    }
-    
     boolean doesFastEntryRendering();
     
     boolean doDebugRenderTimeRequired();
-    
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    default boolean doSearchFavorites() {
-        return false;
-    }
     
     ModifierKeyCode getFavoriteKeyCode();
     
@@ -157,12 +136,6 @@ public interface ConfigObject {
     
     boolean isLowerConfigButton();
     
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    default List<EntryStack> getFavorites() {
-        return Collections.emptyList();
-    }
-    
     @ApiStatus.Experimental
     List<FavoriteEntry> getFavoriteEntries();
     
@@ -180,10 +153,6 @@ public interface ConfigObject {
     boolean isSubsetsEnabled();
     
     boolean isInventoryHighlightingAllowed();
-    
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    boolean shouldResizeDynamically();
     
     @ApiStatus.Experimental
     double getHorizontalEntriesBoundaries();

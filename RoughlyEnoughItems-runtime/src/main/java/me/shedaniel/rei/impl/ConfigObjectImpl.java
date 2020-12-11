@@ -112,11 +112,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
-    public boolean doesRenderEntryEnchantmentGlint() {
-        return true;
-    }
-    
-    @Override
     public boolean isEntryListWidgetScrolled() {
         return appearance.scrollingEntryListWidget;
     }
@@ -134,11 +129,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @Override
     public void setRecipeScreenType(RecipeScreenType recipeScreenType) {
         appearance.recipeScreenType = recipeScreenType;
-    }
-    
-    @Override
-    public boolean isLoadingDefaultPlugin() {
-        return true;
     }
     
     @Override
@@ -342,11 +332,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @Override
     public boolean isInventoryHighlightingAllowed() {
         return functionality.allowInventoryHighlighting;
-    }
-    
-    @Override
-    public boolean shouldResizeDynamically() {
-        return false;
     }
     
     @ApiStatus.Experimental

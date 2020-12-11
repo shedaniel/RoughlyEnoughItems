@@ -37,7 +37,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -71,22 +70,6 @@ public interface ClientHelper {
      */
     void setCheating(boolean cheating);
     
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    List<ItemStack> getInventoryItemsTypes();
-    
-    /**
-     * Opens a recipe viewing screen:
-     * Opens {@link me.shedaniel.rei.gui.PreRecipeViewingScreen} if not set
-     * Opens {@link me.shedaniel.rei.gui.RecipeViewingScreen} if set to default
-     * Opens {@link me.shedaniel.rei.gui.VillagerRecipeViewingScreen} if set to villager
-     *
-     * @param map the map of recipes
-     */
-    @ApiStatus.ScheduledForRemoval
-    @Deprecated
-    void openRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map);
-    
     /**
      * Tries to cheat stack using either packets or commands.
      *
@@ -97,42 +80,6 @@ public interface ClientHelper {
     
     default boolean tryCheatingStack(ItemStack stack) {
         return tryCheatingEntry(EntryStack.create(stack));
-    }
-    
-    /**
-     * Finds recipe for the stack and opens the recipe screen.
-     *
-     * @param stack the stack to find recipe for
-     * @return whether the stack has any recipes to show
-     */
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    default boolean executeRecipeKeyBind(EntryStack stack) {
-        return openView(ViewSearchBuilder.builder().addRecipesFor(stack).setOutputNotice(stack).fillPreferredOpenedCategory());
-    }
-    
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    default boolean executeRecipeKeyBind(ItemStack stack) {
-        return executeRecipeKeyBind(EntryStack.create(stack));
-    }
-    
-    /**
-     * Finds usage for the stack and opens the recipe screen.
-     *
-     * @param stack the stack to find usage for
-     * @return whether the stack has any usages to show
-     */
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    default boolean executeUsageKeyBind(EntryStack stack) {
-        return openView(ViewSearchBuilder.builder().addUsagesFor(stack).setInputNotice(stack).fillPreferredOpenedCategory());
-    }
-    
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    default boolean executeUsageKeyBind(ItemStack stack) {
-        return executeUsageKeyBind(EntryStack.create(stack));
     }
     
     /**
@@ -219,33 +166,10 @@ public interface ClientHelper {
     /**
      * Gets the mod from a modid
      *
-     * @param modid the modid of the mod
+     * @param modId the modid of the mod
      * @return the mod name
      */
-    String getModFromModId(String modid);
-    
-    /**
-     * Finds all recipes and open them in a recipe screen.
-     *
-     * @return whether there are any recipes to show
-     */
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    default boolean executeViewAllRecipesKeyBind() {
-        return openView(ViewSearchBuilder.builder().addAllCategories().fillPreferredOpenedCategory());
-    }
-    
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    default boolean executeViewAllRecipesFromCategory(ResourceLocation category) {
-        return openView(ViewSearchBuilder.builder().addCategory(category).fillPreferredOpenedCategory());
-    }
-    
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    default boolean executeViewAllRecipesFromCategories(List<ResourceLocation> categories) {
-        return openView(ViewSearchBuilder.builder().addCategories(categories).fillPreferredOpenedCategory());
-    }
+    String getModFromModId(String modId);
     
     boolean openView(ViewSearchBuilder builder);
     

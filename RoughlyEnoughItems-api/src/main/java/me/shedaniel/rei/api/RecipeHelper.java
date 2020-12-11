@@ -36,7 +36,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -137,19 +136,6 @@ public interface RecipeHelper {
      * @param display the recipe display
      */
     void registerDisplay(RecipeDisplay display);
-    
-    /**
-     * Registers a recipe display.
-     *
-     * @param categoryIdentifier the category to display in
-     * @param display            the recipe display
-     * @deprecated Use {@link RecipeHelper#registerDisplay(RecipeDisplay)}
-     */
-    @ApiStatus.ScheduledForRemoval
-    @Deprecated
-    default void registerDisplay(ResourceLocation categoryIdentifier, RecipeDisplay display) {
-        registerDisplay(display);
-    }
     
     Map<RecipeCategory<?>, List<RecipeDisplay>> buildMapFor(ClientHelper.ViewSearchBuilder builder);
     
@@ -263,15 +249,6 @@ public interface RecipeHelper {
     void registerLiveRecipeGenerator(LiveRecipeGenerator<?> liveRecipeGenerator);
     
     /**
-     * @deprecated Use {@link #registerContainerClickArea(Rectangle, Class, ResourceLocation...)} for the same result.
-     */
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    default void registerScreenClickArea(Rectangle rectangle, Class<? extends AbstractContainerScreen<?>> screenClass, ResourceLocation... categories) {
-        registerContainerClickArea(rectangle, screenClass, categories);
-    }
-    
-    /**
      * Registers a click area for a container screen.
      *
      * @param rectangle   The click area that is offset to the container screen's top left corner.
@@ -318,25 +295,6 @@ public interface RecipeHelper {
     <T extends Recipe<?>> void registerRecipes(ResourceLocation category, Function<Recipe, Boolean> recipeFilter, Function<T, RecipeDisplay> mappingFunction);
     
     @ApiStatus.Internal
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
-    default List<RecipeHelper.ScreenClickArea> getScreenClickAreas() {
-        return Collections.emptyList();
-    }
-    
-    @ApiStatus.Internal
     boolean arePluginsLoading();
-    
-    @ApiStatus.Internal
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval(inVersion = "6.0")
-    interface ScreenClickArea {
-        Class<? extends Screen> getScreenClass();
-        
-        Rectangle getRectangle();
-        
-        ResourceLocation[] getCategories();
-    }
-    
 }
 

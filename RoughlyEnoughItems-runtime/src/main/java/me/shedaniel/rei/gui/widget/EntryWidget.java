@@ -69,33 +69,13 @@ public class EntryWidget extends Slot {
     private Rectangle bounds;
     private List<EntryStack> entryStacks;
     
-    protected EntryWidget(int x, int y) {
+    public EntryWidget(int x, int y) {
         this(new Point(x, y));
     }
     
-    protected EntryWidget(Point point) {
+    public EntryWidget(Point point) {
         this.bounds = new Rectangle(point.x - 1, point.y - 1, 18, 18);
         this.entryStacks = new ArrayList<>();
-    }
-    
-    /**
-     * @see me.shedaniel.rei.api.widgets.Widgets#createSlot(me.shedaniel.math.Point)
-     */
-    @ApiStatus.ScheduledForRemoval
-    @Deprecated
-    @NotNull
-    public static EntryWidget create(int x, int y) {
-        return create(new Point(x, y));
-    }
-    
-    /**
-     * @see me.shedaniel.rei.api.widgets.Widgets#createSlot(me.shedaniel.math.Point)
-     */
-    @ApiStatus.ScheduledForRemoval
-    @Deprecated
-    @NotNull
-    public static EntryWidget create(Point point) {
-        return new EntryWidget(point);
     }
     
     @Override

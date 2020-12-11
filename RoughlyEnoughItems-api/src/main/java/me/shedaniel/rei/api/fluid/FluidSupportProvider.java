@@ -32,7 +32,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
@@ -41,72 +40,14 @@ import java.util.stream.Stream;
 @ApiStatus.Experimental
 @Environment(EnvType.CLIENT)
 public interface FluidSupportProvider {
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    FluidSupportProvider INSTANCE = new FluidSupportProvider() {
-        @Override
-        public void registerProvider(@NotNull Provider provider) {
-            getInstance().registerProvider(provider);
-        }
-        
-        @Override
-        public @NotNull Stream<EntryStack> itemToFluids(@NotNull EntryStack itemStack) {
-            return getInstance().itemToFluids(itemStack);
-        }
-    };
-    
     static FluidSupportProvider getInstance() {
         return Internals.getFluidSupportProvider();
     }
     
-    /**
-     * @deprecated Please switch to {@link FluidSupportProvider#registerProvider(Provider)}
-     */
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    default void registerFluidProvider(@NotNull FluidProvider provider) {
-        registerProvider(itemStack -> {
-            EntryStack stack = Objects.requireNonNull(provider.itemToFluid(itemStack));
-            if (!stack.isEmpty())
-                return InteractionResultHolder.success(Stream.of(stack));
-            return InteractionResultHolder.pass(null);
-        });
-    }
-    
     void registerProvider(@NotNull Provider provider);
-    
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    @NotNull
-    default EntryStack fluidToItem(@NotNull EntryStack fluidStack) {
-        return EntryStack.empty();
-    }
-    
-    @NotNull
-    default EntryStack itemToFluid(@NotNull EntryStack itemStack) {
-        return itemToFluids(itemStack).findFirst().orElse(EntryStack.empty());
-    }
     
     @NotNull
     Stream<EntryStack> itemToFluids(@NotNull EntryStack itemStack);
-    
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    interface FluidProvider {
-        @Deprecated
-        @ApiStatus.ScheduledForRemoval
-        @NotNull
-        default EntryStack fluidToItem(@NotNull EntryStack fluidStack) {
-            return EntryStack.empty();
-        }
-        
-        @Deprecated
-        @ApiStatus.ScheduledForRemoval
-        @NotNull
-        default EntryStack itemToFluid(@NotNull EntryStack itemStack) {
-            return EntryStack.empty();
-        }
-    }
     
     @FunctionalInterface
     interface Provider {

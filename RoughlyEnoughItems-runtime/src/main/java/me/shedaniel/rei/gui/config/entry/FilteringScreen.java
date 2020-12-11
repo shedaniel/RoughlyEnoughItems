@@ -309,11 +309,11 @@ public class FilteringScreen extends Screen {
     public void updateSearch(String searchTerm) {
         lastSearchArguments = SearchArgument.processSearchTerm(searchTerm);
         Set<EntryStack> list = Sets.newLinkedHashSet();
-        for (EntryStack stack : EntryRegistry.getInstance().getStacksList()) {
+        EntryRegistry.getInstance().getEntryStacks().forEach(stack -> {
             if (canLastSearchTermsBeAppliedTo(stack)) {
                 list.add(stack.copy().setting(EntryStack.Settings.CHECK_AMOUNT, EntryStack.Settings.FALSE).setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE));
             }
-        }
+        });
         
         entryStacks = Lists.newArrayList(list);
         updateEntriesPosition();

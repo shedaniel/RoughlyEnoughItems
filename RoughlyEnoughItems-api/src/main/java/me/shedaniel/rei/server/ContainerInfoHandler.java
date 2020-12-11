@@ -26,7 +26,6 @@ package me.shedaniel.rei.server;
 import com.google.common.collect.Maps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Map;
 
@@ -34,15 +33,6 @@ public class ContainerInfoHandler {
     private static final Map<String, Map<Class<? extends AbstractContainerMenu>, ContainerInfo<? extends AbstractContainerMenu>>> containerInfoMap = Maps.newLinkedHashMap();
     
     public static void registerContainerInfo(ResourceLocation category, ContainerInfo<? extends AbstractContainerMenu> containerInfo) {
-        registerScreenWithHandlerInfo(category, containerInfo);
-    }
-    
-    /**
-     * @deprecated Use {@link #registerContainerInfo(Identifier, ContainerInfo)}
-     */
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    public static void registerScreenWithHandlerInfo(ResourceLocation category, ContainerInfo<? extends AbstractContainerMenu> containerInfo) {
         if (!containerInfoMap.containsKey(category.toString()))
             containerInfoMap.put(category.toString(), Maps.newLinkedHashMap());
         containerInfoMap.get(category.toString()).put(containerInfo.getContainerClass(), containerInfo);

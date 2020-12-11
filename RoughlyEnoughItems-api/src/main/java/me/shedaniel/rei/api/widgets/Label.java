@@ -29,8 +29,6 @@ import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.TextComponent;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -294,13 +292,6 @@ public abstract class Label extends WidgetWithBounds {
     public final Label point(@NotNull Point point) {
         setPoint(point);
         return this;
-    }
-    
-    @NotNull
-    @ApiStatus.ScheduledForRemoval
-    @Deprecated
-    public Component getText() {
-        return new TextComponent("");
     }
     
     public abstract FormattedText getMessage();

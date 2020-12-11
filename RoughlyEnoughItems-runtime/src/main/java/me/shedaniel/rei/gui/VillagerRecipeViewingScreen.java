@@ -241,7 +241,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
                 .enabled(categories.size() > tabsPerPage));
         
         this.widgets.add(Widgets.createClickableLabel(new Point(bounds.x + 4 + scrollListBounds.width / 2, bounds.y + 6), new TextComponent(categories.get(selectedCategoryIndex).getCategoryName()), label -> {
-            ClientHelper.getInstance().executeViewAllRecipesKeyBind();
+            ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addAllCategories().fillPreferredOpenedCategory());
         }).tooltipLine(I18n.get("text.rei.view_all_categories")).noShadow().color(0xFF404040, 0xFFBBBBBB).hoveredColor(0xFF0041FF, 0xFFFFBD4D));
         
         this.children.addAll(buttonList);

@@ -105,7 +105,6 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
@@ -113,6 +112,7 @@ import java.util.stream.Stream;
 import static me.shedaniel.rei.impl.Internals.attachInstance;
 
 @Environment(EnvType.CLIENT)
+@ApiStatus.Internal
 public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
     private static final Logger LOGGER = LogManager.getFormatterLogger("REI/DefaultPlugin");
     public static final ResourceLocation CRAFTING = BuiltinPlugin.CRAFTING;
@@ -141,12 +141,6 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
     
     public DefaultPlugin() {
         attachInstance(this, BuiltinPlugin.class);
-    }
-    
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    public static void registerBrewingDisplay(DefaultBrewingDisplay recipe) {
-        RecipeHelper.getInstance().registerDisplay(recipe);
     }
     
     public static void registerBrewingRecipe(RegisteredBrewingRecipe recipe) {
