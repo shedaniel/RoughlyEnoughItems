@@ -88,14 +88,14 @@ public interface ContainerInfo<T extends AbstractContainerMenu> {
     }
     
     default List<StackAccessor> getInventoryStacks(ContainerContext<T> context) {
-        Inventory inventory = context.getPlayerEntity().inventory;
+        Inventory inventory = context.getPlayerEntity().getInventory();
         return IntStream.range(0, inventory.items.size())
                 .mapToObj(index -> (StackAccessor) new InventoryStackAccessor(inventory, index))
                 .collect(Collectors.toList());
     }
     
     default void markDirty(ContainerContext<T> context) {
-        context.getPlayerEntity().inventory.setChanged();
+        context.getPlayerEntity().getInventory().setChanged();
         context.getContainer().broadcastChanges();
         
         NonNullList<ItemStack> defaultedList = NonNullList.create();

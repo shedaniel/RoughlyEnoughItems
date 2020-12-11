@@ -24,19 +24,16 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.REIHelper;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
+import net.minecraft.client.gui.components.TickableWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.block.entity.TickableBlockEntity;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -51,7 +48,7 @@ import java.util.function.Predicate;
  * @see net.minecraft.client.gui.widget.TextFieldWidget
  */
 @ApiStatus.Internal
-public class TextFieldWidget extends WidgetWithBounds implements TickableBlockEntity {
+public class TextFieldWidget extends WidgetWithBounds implements TickableWidget {
     
     public Function<String, String> stripInvalid;
     protected int focusedTicks;
@@ -514,7 +511,7 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableBlockEn
         RenderSystem.blendFuncSeparate(770, 771, 1, 0);
         RenderSystem.shadeModel(7425);
         Matrix4f matrix = matrices.last().pose();
-        buffer.begin(7, DefaultVertexFormat.POSITION_COLOR);
+        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         buffer.vertex(matrix, x1, y2, getBlitOffset() + 50f).color(r, g, b, 120).endVertex();
         buffer.vertex(matrix, x2, y2, getBlitOffset() + 50f).color(r, g, b, 120).endVertex();
         buffer.vertex(matrix, x2, y1, getBlitOffset() + 50f).color(r, g, b, 120).endVertex();

@@ -66,8 +66,8 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
                     player.displayClientMessage(new TranslatableComponent("text.rei.no_permission_cheat").withStyle(ChatFormatting.RED), false);
                     return;
                 }
-                if (!player.inventory.getCarried().isEmpty()) {
-                    player.inventory.setCarried(ItemStack.EMPTY);
+                if (!player.getInventory().getCarried().isEmpty()) {
+                    player.getInventory().setCarried(ItemStack.EMPTY);
                     player.broadcastCarriedItem();
                 }
             });
@@ -78,7 +78,7 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
                     return;
                 }
                 ItemStack stack = packetByteBuf.readItem();
-                if (player.inventory.add(stack.copy())) {
+                if (player.getInventory().add(stack.copy())) {
                     ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(stack.copy()).writeUtf(player.getScoreboardName(), 32767));
                 } else
                     player.displayClientMessage(new TranslatableComponent("text.rei.failed_cheat_items"), false);
@@ -90,7 +90,7 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
                     return;
                 }
                 
-                Inventory inventory = player.inventory;
+                Inventory inventory = player.getInventory();
                 ItemStack itemStack = packetByteBuf.readItem();
                 ItemStack stack = itemStack.copy();
                 if (!inventory.getCarried().isEmpty() && ItemStack.isSameIgnoreDurability(inventory.getCarried(), stack) && ItemStack.tagMatches(inventory.getCarried(), stack)) {

@@ -346,7 +346,7 @@ public class ItemEntryStack extends AbstractEntryStack implements OptimalEntrySt
     }
     
     private BakedModel getModelFromStack(ItemStack stack) {
-        return Minecraft.getInstance().getItemRenderer().getModel(stack, null, null);
+        return Minecraft.getInstance().getItemRenderer().getModel(stack, null, null, 0);
     }
     
     @Override
