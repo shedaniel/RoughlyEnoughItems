@@ -120,7 +120,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     @Override
     public void sendDeletePacket() {
         if (Minecraft.getInstance().screen instanceof CreativeModeInventoryScreen) {
-            Minecraft.getInstance().player.inventory.setCarried(ItemStack.EMPTY);
+            Minecraft.getInstance().player.getInventory().setCarried(ItemStack.EMPTY);
             ((CreativeModeInventoryScreen) Minecraft.getInstance().screen).isQuickCrafting = false;
             return;
         }
@@ -135,10 +135,10 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         if (entry.getType() != EntryStack.Type.ITEM)
             return false;
         if (Minecraft.getInstance().player == null) return false;
-        if (Minecraft.getInstance().player.inventory == null) return false;
+        if (Minecraft.getInstance().player.getInventory() == null) return false;
         ItemStack cheatedStack = entry.getItemStack().copy();
         if (ConfigObject.getInstance().isGrabbingItems() && Minecraft.getInstance().screen instanceof CreativeModeInventoryScreen) {
-            Inventory inventory = Minecraft.getInstance().player.inventory;
+            Inventory inventory = Minecraft.getInstance().player.getInventory();
             EntryStack stack = entry.copy();
             if (!inventory.getCarried().isEmpty() && EntryStack.create(inventory.getCarried()).equalsIgnoreAmount(stack)) {
                 stack.setAmount(Mth.clamp(stack.getAmount() + inventory.getCarried().getCount(), 1, stack.getItemStack().getMaxStackSize()));
@@ -148,7 +148,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
             inventory.setCarried(stack.getItemStack().copy());
             return true;
         } else if (RoughlyEnoughItemsCore.canUsePackets()) {
-            Inventory inventory = Minecraft.getInstance().player.inventory;
+            Inventory inventory = Minecraft.getInstance().player.getInventory();
             EntryStack stack = entry.copy();
             if (!inventory.getCarried().isEmpty() && !EntryStack.create(inventory.getCarried()).equalsIgnoreAmount(stack)) {
                 return false;
@@ -177,12 +177,12 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     @Override
     public List<ItemStack> getInventoryItemsTypes() {
-        return Minecraft.getInstance().player.inventory.compartments.stream().flatMap(Collection::stream).collect(Collectors.toList());
+        return Minecraft.getInstance().player.getInventory().compartments.stream().flatMap(Collection::stream).collect(Collectors.toList());
     }
     
     @ApiStatus.Internal
     public Set<EntryStack> _getInventoryItemsTypes() {
-        return Minecraft.getInstance().player.inventory.compartments.stream()
+        return Minecraft.getInstance().player.getInventory().compartments.stream()
                 .flatMap(Collection::stream)
                 .map(EntryStack::create)
                 .collect(Collectors.toSet());

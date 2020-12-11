@@ -24,10 +24,7 @@
 package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
 import me.shedaniel.math.Point;
@@ -222,7 +219,7 @@ public class FluidEntryStack extends AbstractEntryStack {
                 Tesselator tess = Tesselator.getInstance();
                 BufferBuilder bb = tess.getBuilder();
                 Matrix4f matrix = matrices.last().pose();
-                bb.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
+                bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
                 bb.vertex(matrix, bounds.getMaxX(), bounds.y, getZ()).uv(sprite.getU1(), sprite.getV0()).color(r, g, b, a).endVertex();
                 bb.vertex(matrix, bounds.x, bounds.y, getZ()).uv(sprite.getU0(), sprite.getV0()).color(r, g, b, a).endVertex();
                 bb.vertex(matrix, bounds.x, bounds.getMaxY(), getZ()).uv(sprite.getU0(), sprite.getV1()).color(r, g, b, a).endVertex();

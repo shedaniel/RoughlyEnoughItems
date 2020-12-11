@@ -303,7 +303,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
                             if (isOpened != inBounds) {
                                 if (inBounds) {
                                     Menu menu = new Menu(new Point(button.getBounds().x, button.getBounds().getMaxY()),
-                                            CollectionUtils.filterAndMap(Arrays.asList(GameType.values()), mode -> mode != GameType.NOT_SET, GameModeMenuEntry::new));
+                                            CollectionUtils.map(GameType.values(), GameModeMenuEntry::new));
                                     if (ConfigObject.getInstance().isLeftHandSidePanel())
                                         menu.menuStartPoint.x -= menu.getBounds().width - button.getBounds().width;
                                     openMenu(Menu.GAME_TYPE, menu, point -> button.isFocused() && button.containsMouse(PointHelper.ofMouse()));
@@ -435,22 +435,6 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
     
     private String getGameModeText(GameType gameMode) {
         return I18n.get("selectWorld.gameMode." + gameMode.getName());
-    }
-    
-    private GameType getNextGameMode(boolean reverse) {
-        try {
-            GameType current = getCurrentGameMode();
-            int next = current.getId() + 1;
-            if (reverse)
-                next -= 2;
-            if (next > 3)
-                next = 0;
-            if (next < 0)
-                next = 3;
-            return GameType.byId(next);
-        } catch (Exception e) {
-            return GameType.NOT_SET;
-        }
     }
     
     private GameType getCurrentGameMode() {
