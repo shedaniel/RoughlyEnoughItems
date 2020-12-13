@@ -24,16 +24,19 @@
 package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
+import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @ApiStatus.Experimental
@@ -51,21 +54,19 @@ public class FluidSupportProviderImpl implements FluidSupportProvider {
     }
     
     @Override
-    public @NotNull Stream<EntryStack> itemToFluids(@NotNull EntryStack itemStack) {
-        if (itemStack.isEmpty()) return Stream.empty();
-        if (itemStack.getType() != EntryStack.Type.ITEM)
-            throw new IllegalArgumentException("EntryStack must be item!");
+    public @NotNull Optional<Stream<EntryStack<FluidStack>>> itemToFluids(@NotNull EntryStack<? extends ItemStack> itemStack) {
+        if (itemStack.isEmpty()) return Optional.empty();
         for (Provider provider : providers) {
-            InteractionResultHolder<@Nullable Stream<@NotNull EntryStack>> resultHolder = Objects.requireNonNull(provider.itemToFluid(itemStack));
-            Stream<@NotNull EntryStack> stream = resultHolder.getObject();
+            InteractionResultHolder<@Nullable Stream<@NotNull EntryStack<FluidStack>>> resultHolder = Objects.requireNonNull(provider.itemToFluid(itemStack));
+            Stream<@NotNull EntryStack<FluidStack>> stream = resultHolder.getObject();
             if (stream != null) {
                 if (resultHolder.getResult().consumesAction()) {
-                    return stream;
+                    return Optional.of(stream);
                 } else if (resultHolder.getResult() == InteractionResult.FAIL) {
-                    return Stream.empty();
+                    return Optional.empty();
                 }
             }
         }
-        return Stream.empty();
+        return Optional.empty();
     }
 }

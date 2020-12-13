@@ -37,8 +37,10 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.entry.BatchEntryRenderer;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.favorites.FavoriteMenuEntry;
+import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.modules.Menu;
 import me.shedaniel.rei.gui.modules.MenuEntry;
@@ -166,7 +168,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
                 .filter(entry -> entry.getBounds().getMaxY() >= this.currentBounds.getY() && entry.getBounds().y <= this.currentBounds.getMaxY());
         
         if (fastEntryRendering) {
-            for (List<EntryListEntry> entries : entryStream.collect(Collectors.groupingBy(entryListEntry -> OptimalEntryStack.groupingHashFrom(entryListEntry.getCurrentEntry()))).values()) {
+            for (List<EntryListEntry> entries : entryStream.collect(Collectors.groupingBy(entryListEntry -> BatchEntryRenderer.getBatchIdFrom(entryListEntry.getCurrentEntry()))).values()) {
                 renderEntries(true, matrices, mouseX, mouseY, delta, entries);
             }
         } else {
@@ -284,9 +286,6 @@ public class FavoritesListWidget extends WidgetWithBounds {
     public void updateEntriesPosition(Predicate<Entry> animated) {
         int entrySize = entrySize();
         this.blockedCount = 0;
-//        if (favoritePanel.getBounds().height > 20)
-//            this.currentBounds.setBounds(this.fullBounds.x, this.fullBounds.y, this.fullBounds.width, this.fullBounds.height - (this.fullBounds.getMaxY() - this.favoritePanel.bounds.y) - 4);
-//        else this.currentBounds.setBounds(this.fullBounds);
         this.currentBounds.setBounds(this.fullBounds);
         this.innerBounds = updateInnerBounds(currentBounds);
         int width = innerBounds.width / entrySize;
@@ -570,7 +569,18 @@ public class FavoritesListWidget extends WidgetWithBounds {
             super(new Point(x, y), entrySize);
             this.entry = entry;
             this.favoriteEntry = favoriteEntry;
-            this.clearEntries().entry(this.favoriteEntry.getWidget(false));
+            Renderer renderer = this.favoriteEntry.getRenderer(false);
+            this.clearEntries().entry(new RenderingEntry() {
+                @Override
+                public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+                    renderer.render(matrices, bounds, mouseX, mouseY, delta);
+                }
+                
+                @Override
+                public @Nullable Tooltip getTooltip(Point mouse) {
+                    return renderer.getTooltip(mouse);
+                }
+            });
         }
         
         @Override

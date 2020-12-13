@@ -26,9 +26,10 @@ package me.shedaniel.rei.plugin.brewing;
 import com.google.common.collect.Lists;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.RecipeCategory;
+import me.shedaniel.rei.api.Renderer;
+import me.shedaniel.rei.api.entry.EntryStacks;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
@@ -46,15 +47,14 @@ import java.util.List;
 
 @Environment(EnvType.CLIENT)
 public class DefaultBrewingCategory implements RecipeCategory<DefaultBrewingDisplay> {
-    
     @Override
     public @NotNull ResourceLocation getIdentifier() {
         return DefaultPlugin.BREWING;
     }
     
     @Override
-    public @NotNull EntryStack getLogo() {
-        return EntryStack.create(Blocks.BREWING_STAND);
+    public @NotNull Renderer getLogo() {
+        return EntryStacks.of(Blocks.BREWING_STAND);
     }
     
     @Override
@@ -73,7 +73,7 @@ public class DefaultBrewingCategory implements RecipeCategory<DefaultBrewingDisp
             int width = Mth.ceil(System.currentTimeMillis() / 250d % 18d);
             helper.blit(matrices, startPoint.x + 44, startPoint.y + 28, 103, 163, width, 4);
         }));
-        widgets.add(Widgets.createSlot(new Point(startPoint.x + 1, startPoint.y + 1)).entry(EntryStack.create(Items.BLAZE_POWDER)).disableBackground().markInput());
+        widgets.add(Widgets.createSlot(new Point(startPoint.x + 1, startPoint.y + 1)).entry(EntryStacks.of(Items.BLAZE_POWDER)).disableBackground().markInput());
         widgets.add(Widgets.createSlot(new Point(startPoint.x + 40, startPoint.y + 1)).entries(display.getInputEntries().get(0)).disableBackground().markInput());
         widgets.add(Widgets.createSlot(new Point(startPoint.x + 63, startPoint.y + 1)).entries(display.getInputEntries().get(1)).disableBackground().markInput());
         widgets.add(Widgets.createSlot(new Point(startPoint.x + 40, startPoint.y + 35)).entries(display.getOutput(0)).disableBackground().markOutput());

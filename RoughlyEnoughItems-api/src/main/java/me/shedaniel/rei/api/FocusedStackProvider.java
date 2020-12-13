@@ -36,5 +36,5 @@ public interface FocusedStackProvider {
     }
     
     @NotNull
-    InteractionResultHolder<EntryStack> provide(Screen screen);
+    InteractionResultHolder<EntryStack<?>> provide(Screen screen);
 }

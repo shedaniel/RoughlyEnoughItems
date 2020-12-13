@@ -49,7 +49,7 @@ public final class ModArgument extends Argument {
     }
     
     @Override
-    public boolean matches(Object[] data, EntryStack stack, String searchText, Object searchData) {
+    public boolean matches(Object[] data, EntryStack<?> stack, String searchText, Object searchData) {
         if (data[getDataOrdinal()] == null) {
             data[getDataOrdinal()] = new String[]{
                     stack.getIdentifier().map(ResourceLocation::getNamespace).orElse("").toLowerCase(Locale.ROOT),

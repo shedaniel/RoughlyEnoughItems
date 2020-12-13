@@ -139,7 +139,7 @@ public interface ConfigObject {
     @ApiStatus.Experimental
     List<FavoriteEntry> getFavoriteEntries();
     
-    List<EntryStack> getFilteredStacks();
+    List<EntryStack<?>> getFilteredStacks();
     
     @ApiStatus.Experimental
     boolean shouldAsyncSearch();

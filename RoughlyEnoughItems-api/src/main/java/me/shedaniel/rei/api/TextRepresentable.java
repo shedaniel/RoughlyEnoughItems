@@ -23,8 +23,6 @@
 
 package me.shedaniel.rei.api;
 
-import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.utils.FormattingUtils;
 import me.shedaniel.rei.utils.ImmutableLiteralText;
 import net.fabricmc.api.EnvType;
@@ -36,11 +34,6 @@ import org.jetbrains.annotations.NotNull;
 public interface TextRepresentable {
     @NotNull
     default Component asFormattedText() {
-        if (this instanceof EntryStack) {
-            Tooltip tooltip = ((EntryStack) this).getTooltip(PointHelper.ofMouse());
-            if (tooltip != null && !tooltip.getText().isEmpty())
-                return tooltip.getText().get(0);
-        }
         return ImmutableLiteralText.EMPTY;
     }
     

@@ -36,7 +36,7 @@ import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.widgets.Button;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
-import me.shedaniel.rei.gui.entries.RecipeEntry;
+import me.shedaniel.rei.gui.entries.RecipeRenderer;
 import me.shedaniel.rei.gui.widget.TabWidget;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.impl.ClientHelperImpl;
@@ -66,7 +66,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
     private final List<RecipeCategory<?>> categories;
     private final List<Widget> widgets = Lists.newArrayList();
     private final List<Button> buttonList = Lists.newArrayList();
-    private final List<RecipeEntry> recipeRenderers = Lists.newArrayList();
+    private final List<RecipeRenderer> recipeRenderers = Lists.newArrayList();
     private final List<TabWidget> tabs = Lists.newArrayList();
     public Rectangle bounds, scrollListBounds;
     private int tabsPerPage = 8;
@@ -91,8 +91,8 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
     private float scrollBarAlphaFuture = 0;
     private long scrollBarAlphaFutureTime = -1;
     private int tabsPage = -1;
-    private EntryStack ingredientStackToNotice = EntryStack.empty();
-    private EntryStack resultStackToNotice = EntryStack.empty();
+    private EntryStack<?> ingredientStackToNotice = EntryStack.empty();
+    private EntryStack<?> resultStackToNotice = EntryStack.empty();
     
     public VillagerRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> categoryMap, @Nullable ResourceLocation category) {
         super(NarratorChatListener.NO_TITLE);
@@ -114,12 +114,12 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
     }
     
     @Override
-    public void addIngredientStackToNotice(EntryStack stack) {
+    public void addIngredientStackToNotice(EntryStack<?> stack) {
         ingredientStackToNotice = stack;
     }
     
     @Override
-    public void addResultStackToNotice(EntryStack stack) {
+    public void addResultStackToNotice(EntryStack<?> stack) {
         resultStackToNotice = stack;
     }
     
@@ -156,7 +156,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
         }
         this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - guiHeight / 2, guiWidth, guiHeight);
         
-        List<List<EntryStack>> workingStations = RecipeHelper.getInstance().getWorkingStations(category.getIdentifier());
+        List<List<? extends EntryStack<?>>> workingStations = RecipeHelper.getInstance().getWorkingStations(category.getIdentifier());
         if (!workingStations.isEmpty()) {
             int ww = Mth.floor((bounds.width - 16) / 18f);
             int w = Math.min(ww, workingStations.size());
@@ -166,7 +166,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
             widgets.add(Widgets.createCategoryBase(new Rectangle(xx - 5, bounds.y + bounds.height - 5, 10 + w * 16, 12 + h * 16)));
             widgets.add(Widgets.createSlotBase(new Rectangle(xx - 1, yy - 1, 2 + w * 16, 2 + h * 16)));
             int index = 0;
-            for (List<EntryStack> workingStation : workingStations) {
+            for (List<? extends EntryStack<?>> workingStation : workingStations) {
                 widgets.add(new RecipeViewingScreen.WorkstationSlotWidget(xx, yy, workingStation));
                 index++;
                 xx += 16;
@@ -194,9 +194,9 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
         int index = 0;
         for (RecipeDisplay recipeDisplay : categoryMap.get(category)) {
             int finalIndex = index;
-            RecipeEntry recipeEntry;
-            recipeRenderers.add(recipeEntry = category.getSimpleRenderer(recipeDisplay));
-            buttonList.add(Widgets.createButton(new Rectangle(bounds.x + 5, 0, recipeEntry.getWidth(), recipeEntry.getHeight()), NarratorChatListener.NO_TITLE)
+            RecipeRenderer recipeRenderer;
+            recipeRenderers.add(recipeRenderer = category.getSimpleRenderer(recipeDisplay));
+            buttonList.add(Widgets.createButton(new Rectangle(bounds.x + 5, 0, recipeRenderer.getWidth(), recipeRenderer.getHeight()), NarratorChatListener.NO_TITLE)
                     .onClick(button -> {
                         selectedRecipeIndex = finalIndex;
                         VillagerRecipeViewingScreen.this.init();

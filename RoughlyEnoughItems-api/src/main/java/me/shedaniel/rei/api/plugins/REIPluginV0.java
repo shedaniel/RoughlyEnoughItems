@@ -27,10 +27,18 @@ import me.shedaniel.rei.api.DisplayHelper;
 import me.shedaniel.rei.api.EntryRegistry;
 import me.shedaniel.rei.api.REIPluginEntry;
 import me.shedaniel.rei.api.RecipeHelper;
+import me.shedaniel.rei.api.entry.EntryTypeRegistry;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.OverrideOnly
 public interface REIPluginV0 extends REIPluginEntry {
+    /**
+     * Registers the types of entries
+     */
+    @ApiStatus.OverrideOnly
+    default void registerEntryTypes(EntryTypeRegistry registry) {
+        
+    }
     
     /**
      * Registers entries on the item panel

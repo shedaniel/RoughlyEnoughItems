@@ -31,6 +31,7 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
+import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.ScrollingContainer;
@@ -40,6 +41,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.entry.*;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.config.EntryPanelOrdering;
@@ -56,6 +58,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.ApiStatus;
@@ -71,10 +74,10 @@ import java.util.stream.Stream;
 @ApiStatus.Internal
 public class EntryListWidget extends WidgetWithBounds {
     
-    static final Comparator<? super EntryStack> ENTRY_NAME_COMPARER = Comparator.comparing(stack -> stack.asFormatStrippedText().getString());
-    static final Comparator<? super EntryStack> ENTRY_GROUP_COMPARER = Comparator.comparingInt(stack -> {
-        if (stack.getType() == EntryStack.Type.ITEM) {
-            CreativeModeTab group = stack.getItem().getItemCategory();
+    static final Comparator<? super EntryStack<?>> ENTRY_NAME_COMPARER = Comparator.comparing(stack -> stack.asFormatStrippedText().getString());
+    static final Comparator<? super EntryStack<?>> ENTRY_GROUP_COMPARER = Comparator.comparingInt(stack -> {
+        if (stack.getType() == VanillaEntryTypes.ITEM) {
+            CreativeModeTab group = ((ItemStack) stack.getValue()).getItem().getItemCategory();
             if (group != null)
                 return group.getId();
         }
@@ -102,7 +105,7 @@ public class EntryListWidget extends WidgetWithBounds {
     private double totalDebugTime;
     private float totalDebugTimeDelta;
     private Rectangle bounds, innerBounds;
-    private List<EntryStack> allStacks = null;
+    private List<EntryStack<?>> allStacks = null;
     private List<EntryListEntry> entries = Collections.emptyList();
     private List<Widget> renders = Collections.emptyList();
     private List<Widget> widgets = Collections.emptyList();
@@ -215,30 +218,34 @@ public class EntryListWidget extends WidgetWithBounds {
     public static <T extends EntryListEntryWidget> void renderEntries(boolean debugTime, MutableInt size, MutableLong time, boolean fastEntryRendering, PoseStack matrices, int mouseX, int mouseY, float delta, Iterable<T> entries) {
         T firstWidget = Iterables.getFirst(entries, null);
         if (firstWidget == null) return;
+        @SuppressWarnings("rawtypes")
         EntryStack first = firstWidget.getCurrentEntry();
-        if (fastEntryRendering && first instanceof OptimalEntryStack) {
-            OptimalEntryStack firstStack = (OptimalEntryStack) first;
-            firstStack.optimisedRenderStart(matrices, delta);
+        EntryRenderer<?> renderer = first.getRenderer();
+        if (fastEntryRendering && renderer instanceof BatchEntryRenderer) {
+            BatchEntryRenderer<?> firstRenderer = (BatchEntryRenderer<?>) renderer;
+            firstRenderer.startBatch(first, matrices, delta);
             long l = debugTime ? System.nanoTime() : 0;
             MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
             for (T listEntry : entries) {
+                @SuppressWarnings("rawtypes")
                 EntryStack currentEntry = listEntry.getCurrentEntry();
                 currentEntry.setZ(100);
                 listEntry.drawBackground(matrices, mouseX, mouseY, delta);
-                ((OptimalEntryStack) currentEntry).optimisedRenderBase(matrices, immediate, listEntry.getInnerBounds(), mouseX, mouseY, delta);
+                firstRenderer.renderBase(currentEntry, matrices, immediate, listEntry.getInnerBounds(), mouseX, mouseY, delta);
                 if (debugTime && !currentEntry.isEmpty()) size.increment();
             }
             immediate.endBatch();
             for (T listEntry : entries) {
+                @SuppressWarnings("rawtypes")
                 EntryStack currentEntry = listEntry.getCurrentEntry();
-                ((OptimalEntryStack) currentEntry).optimisedRenderOverlay(matrices, listEntry.getInnerBounds(), mouseX, mouseY, delta);
+                firstRenderer.renderOverlay(currentEntry, matrices, listEntry.getInnerBounds(), mouseX, mouseY, delta);
                 if (listEntry.containsMouse(mouseX, mouseY)) {
                     listEntry.queueTooltip(matrices, mouseX, mouseY, delta);
                     listEntry.drawHighlighted(matrices, mouseX, mouseY, delta);
                 }
             }
             if (debugTime) time.add(System.nanoTime() - l);
-            firstStack.optimisedRenderEnd(matrices, delta);
+            firstRenderer.endBatch(first, matrices, delta);
         } else {
             for (T entry : entries) {
                 if (entry.getCurrentEntry().isEmpty())
@@ -275,7 +282,7 @@ public class EntryListWidget extends WidgetWithBounds {
                 entryBounds.y = (int) (entry.backupY - scrolling.scrollAmount);
                 if (entryBounds.y > this.bounds.getMaxY()) return false;
                 if (notSteppingOnExclusionZones(entryBounds.x, entryBounds.y, entryBounds.width, entryBounds.height, innerBounds)) {
-                    EntryStack stack = allStacks.get(i[0]++);
+                    EntryStack<?> stack = allStacks.get(i[0]++);
                     if (!stack.isEmpty()) {
                         entry.entry(stack);
                         return true;
@@ -287,7 +294,7 @@ public class EntryListWidget extends WidgetWithBounds {
             }).limit(Math.max(0, allStacks.size() - i[0]));
             
             if (fastEntryRendering) {
-                for (List<EntryListEntry> entries : entryStream.collect(Collectors.groupingBy(entryListEntry -> OptimalEntryStack.groupingHashFrom(entryListEntry.getCurrentEntry()))).values()) {
+                for (List<EntryListEntry> entries : entryStream.collect(Collectors.groupingBy(entryListEntry -> BatchEntryRenderer.getBatchIdFrom(entryListEntry.getCurrentEntry()))).values()) {
                     renderEntries(debugTime, size, time, fastEntryRendering, matrices, mouseX, mouseY, delta, entries);
                 }
             } else {
@@ -302,7 +309,7 @@ public class EntryListWidget extends WidgetWithBounds {
                 widget.render(matrices, mouseX, mouseY, delta);
             }
             if (fastEntryRendering) {
-                entries.stream().collect(Collectors.groupingBy(entryListEntry -> OptimalEntryStack.groupingHashFrom(entryListEntry.getCurrentEntry()))).forEach((integer, entries) -> {
+                entries.stream().collect(Collectors.groupingBy(entryListEntry -> BatchEntryRenderer.getBatchIdFrom(entryListEntry.getCurrentEntry()))).forEach((integer, entries) -> {
                     renderEntries(debugTime, size, time, fastEntryRendering, matrices, mouseX, mouseY, delta, entries);
                 });
             } else {
@@ -341,11 +348,11 @@ public class EntryListWidget extends WidgetWithBounds {
         }
         
         if (containsMouse(mouseX, mouseY) && ClientHelper.getInstance().isCheating() && !minecraft.player.getInventory().getCarried().isEmpty() && RoughlyEnoughItemsCore.canDeleteItems()) {
-            EntryStack stack = EntryStack.create(minecraft.player.getInventory().getCarried().copy());
-            if (stack.getType() == EntryStack.Type.FLUID) {
-                Item bucketItem = stack.getFluid().getBucket();
+            EntryStack<?> stack = EntryStacks.of(minecraft.player.getInventory().getCarried().copy());
+            if (stack.getValueType() == FluidStack.class) {
+                Item bucketItem = ((FluidStack) stack.getValue()).getFluid().getBucket();
                 if (bucketItem != null) {
-                    stack = EntryStack.create(bucketItem);
+                    stack = EntryStacks.of(bucketItem);
                 }
             }
             for (Widget child : children()) {
@@ -422,9 +429,9 @@ public class EntryListWidget extends WidgetWithBounds {
                 }
             }
             page = Math.max(Math.min(page, getTotalPages() - 1), 0);
-            List<EntryStack> subList = allStacks.stream().skip(Math.max(0, page * entries.size())).limit(Math.max(0, entries.size() - Math.max(0, -page * entries.size()))).collect(Collectors.toList());
+            List<EntryStack<?>> subList = allStacks.stream().skip(Math.max(0, page * entries.size())).limit(Math.max(0, entries.size() - Math.max(0, -page * entries.size()))).collect(Collectors.toList());
             for (int i = 0; i < subList.size(); i++) {
-                EntryStack stack = subList.get(i);
+                EntryStack<?> stack = subList.get(i);
                 entries.get(i + Math.max(0, -page * entries.size())).clearStacks().entry(stack);
             }
             this.entries = entries;
@@ -458,7 +465,7 @@ public class EntryListWidget extends WidgetWithBounds {
     }
     
     @ApiStatus.Internal
-    public List<EntryStack> getAllStacks() {
+    public List<EntryStack<?>> getAllStacks() {
         return allStacks;
     }
     
@@ -471,21 +478,21 @@ public class EntryListWidget extends WidgetWithBounds {
         if (ignoreLastSearch || this.lastSearchTerm == null || !this.lastSearchTerm.equals(searchTerm)) {
             this.lastSearchTerm = searchTerm;
             this.lastSearchArguments = SearchArgument.processSearchTerm(searchTerm);
-            List<EntryStack> list = Lists.newArrayList();
+            List<EntryStack<?>> list = Lists.newArrayList();
             boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
             IntSet workingItems = checkCraftable ? new IntOpenHashSet() : null;
             if (checkCraftable)
-                workingItems.addAll(CollectionUtils.map(RecipeHelper.getInstance().findCraftableEntriesByItems(ScreenHelper.inventoryStacks), EntryStack::hashIgnoreAmount));
-            List<EntryStack> stacks = EntryRegistry.getInstance().getPreFilteredList();
+                workingItems.addAll(CollectionUtils.map(RecipeHelper.getInstance().findCraftableEntriesByItems(ScreenHelper.inventoryStacks), EntryStacks::hashIgnoreCount));
+            List<EntryStack<?>> stacks = EntryRegistry.getInstance().getPreFilteredList();
             if (stacks instanceof CopyOnWriteArrayList && !stacks.isEmpty()) {
                 if (ConfigObject.getInstance().shouldAsyncSearch()) {
-                    List<CompletableFuture<List<EntryStack>>> completableFutures = Lists.newArrayList();
-                    for (Iterable<EntryStack> partitionStacks : CollectionUtils.partition(stacks, ConfigObject.getInstance().getAsyncSearchPartitionSize())) {
+                    List<CompletableFuture<List<EntryStack<?>>>> completableFutures = Lists.newArrayList();
+                    for (Iterable<EntryStack<?>> partitionStacks : CollectionUtils.partition(stacks, ConfigObject.getInstance().getAsyncSearchPartitionSize())) {
                         completableFutures.add(CompletableFuture.supplyAsync(() -> {
-                            List<EntryStack> filtered = Lists.newArrayList();
-                            for (EntryStack stack : partitionStacks) {
+                            List<EntryStack<?>> filtered = Lists.newArrayList();
+                            for (EntryStack<?> stack : partitionStacks) {
                                 if (canLastSearchTermsBeAppliedTo(stack)) {
-                                    if (workingItems != null && !workingItems.contains(stack.hashIgnoreAmount()))
+                                    if (workingItems != null && !workingItems.contains(stack.hash(ComparisonContext.IGNORE_COUNT)))
                                         continue;
                                     filtered.add(stack.rewrap().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE));
                                 }
@@ -498,15 +505,15 @@ public class EntryListWidget extends WidgetWithBounds {
                     } catch (InterruptedException | ExecutionException | TimeoutException e) {
                         e.printStackTrace();
                     }
-                    for (CompletableFuture<List<EntryStack>> future : completableFutures) {
-                        List<EntryStack> now = future.getNow(null);
+                    for (CompletableFuture<List<EntryStack<?>>> future : completableFutures) {
+                        List<EntryStack<?>> now = future.getNow(null);
                         if (now != null)
                             list.addAll(now);
                     }
                 } else {
-                    for (EntryStack stack : stacks) {
+                    for (EntryStack<?> stack : stacks) {
                         if (canLastSearchTermsBeAppliedTo(stack)) {
-                            if (workingItems != null && !workingItems.contains(stack.hashIgnoreAmount()))
+                            if (workingItems != null && !workingItems.contains(stack.hash(ComparisonContext.IGNORE_COUNT)))
                                 continue;
                             list.add(stack.rewrap().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE));
                         }
@@ -531,7 +538,7 @@ public class EntryListWidget extends WidgetWithBounds {
         updateEntriesPosition();
     }
     
-    public boolean canLastSearchTermsBeAppliedTo(EntryStack stack) {
+    public boolean canLastSearchTermsBeAppliedTo(EntryStack<?> stack) {
         return lastSearchArguments.isEmpty() || SearchArgument.canSearchTermsBeAppliedTo(stack, lastSearchArguments);
     }
     

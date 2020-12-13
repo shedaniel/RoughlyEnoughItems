@@ -30,7 +30,9 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.REIHelper;
+import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.api.TransferRecipeCategory;
+import me.shedaniel.rei.api.entry.EntryStacks;
 import me.shedaniel.rei.api.widgets.Slot;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.widget.Widget;
@@ -48,7 +50,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCraftingDisplay> {
-    
     public static int getSlotWithSize(DefaultCraftingDisplay recipeDisplay, int num, int craftingGridWidth) {
         int x = num % recipeDisplay.getWidth();
         int y = (num - x) / recipeDisplay.getWidth();
@@ -61,8 +62,8 @@ public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCr
     }
     
     @Override
-    public @NotNull EntryStack getLogo() {
-        return EntryStack.create(Blocks.CRAFTING_TABLE);
+    public @NotNull Renderer getLogo() {
+        return EntryStacks.of(Blocks.CRAFTING_TABLE);
     }
     
     @Override
@@ -77,7 +78,7 @@ public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCr
         widgets.add(Widgets.createRecipeBase(bounds));
         widgets.add(Widgets.createArrow(new Point(startPoint.x + 60, startPoint.y + 18)));
         widgets.add(Widgets.createResultSlotBackground(new Point(startPoint.x + 95, startPoint.y + 19)));
-        List<List<EntryStack>> input = display.getInputEntries();
+        List<? extends List<? extends EntryStack<?>>> input = display.getInputEntries();
         List<Slot> slots = Lists.newArrayList();
         for (int y = 0; y < 3; y++)
             for (int x = 0; x < 3; x++)

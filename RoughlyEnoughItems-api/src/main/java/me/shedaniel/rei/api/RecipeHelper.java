@@ -59,7 +59,7 @@ public interface RecipeHelper {
     
     @Nullable
     @ApiStatus.Internal
-    EntryStack getScreenFocusedStack(Screen screen);
+    EntryStack<?> getScreenFocusedStack(Screen screen);
     
     List<AutoTransferHandler> getSortedAutoCraftingHandler();
     
@@ -73,7 +73,7 @@ public interface RecipeHelper {
     /**
      * @return a list of sorted recipes
      */
-    List<Recipe> getAllSortedRecipes();
+    List<Recipe<?>> getAllSortedRecipes();
     
     /**
      * Gets all craftable items from materials.
@@ -81,7 +81,7 @@ public interface RecipeHelper {
      * @param inventoryItems the materials
      * @return the list of craftable entries
      */
-    List<EntryStack> findCraftableEntriesByItems(Iterable<EntryStack> inventoryItems);
+    List<EntryStack<?>> findCraftableEntriesByItems(Iterable<? extends EntryStack<?>> inventoryItems);
     
     /**
      * Gets all craftable items from materials.
@@ -89,8 +89,8 @@ public interface RecipeHelper {
      * @param inventoryItems the materials
      * @return the list of craftable entries
      */
-    default List<EntryStack> findCraftableEntriesByItems(List<EntryStack> inventoryItems) {
-        return findCraftableEntriesByItems((Iterable<EntryStack>) inventoryItems);
+    default List<EntryStack<?>> findCraftableEntriesByItems(List<? extends EntryStack<?>> inventoryItems) {
+        return findCraftableEntriesByItems((Iterable<? extends EntryStack<?>>) inventoryItems);
     }
     
     /**
@@ -118,7 +118,7 @@ public interface RecipeHelper {
      * @param category        the category
      * @param workingStations the working stations
      */
-    void registerWorkingStations(ResourceLocation category, List<EntryStack>... workingStations);
+    void registerWorkingStations(ResourceLocation category, List<? extends EntryStack<?>>... workingStations);
     
     /**
      * Registers the working stations of a category
@@ -126,9 +126,9 @@ public interface RecipeHelper {
      * @param category        the category
      * @param workingStations the working stations
      */
-    void registerWorkingStations(ResourceLocation category, EntryStack... workingStations);
+    void registerWorkingStations(ResourceLocation category, EntryStack<?>... workingStations);
     
-    List<List<EntryStack>> getWorkingStations(ResourceLocation category);
+    List<List<? extends EntryStack<?>>> getWorkingStations(ResourceLocation category);
     
     /**
      * Registers a recipe display.
@@ -145,7 +145,7 @@ public interface RecipeHelper {
      * @param stack the stack to be crafted
      * @return the map of recipes
      */
-    Map<RecipeCategory<?>, List<RecipeDisplay>> getRecipesFor(EntryStack stack);
+    Map<RecipeCategory<?>, List<RecipeDisplay>> getRecipesFor(EntryStack<?> stack);
     
     RecipeCategory<?> getCategory(ResourceLocation identifier);
     
@@ -169,7 +169,7 @@ public interface RecipeHelper {
      * @param stack the stack to be used
      * @return the map of recipes
      */
-    Map<RecipeCategory<?>, List<RecipeDisplay>> getUsagesFor(EntryStack stack);
+    Map<RecipeCategory<?>, List<RecipeDisplay>> getUsagesFor(EntryStack<?> stack);
     
     /**
      * Gets the optional of the auto crafting button area from a category
@@ -238,8 +238,6 @@ public interface RecipeHelper {
      */
     boolean isDisplayVisible(RecipeDisplay display);
     
-    <T extends Recipe<?>> void registerRecipes(ResourceLocation category, Predicate<Recipe> recipeFilter, Function<T, RecipeDisplay> mappingFunction);
-    
     /**
      * Registers a live recipe generator.
      *
@@ -290,9 +288,11 @@ public interface RecipeHelper {
      */
     <T extends Screen> void registerClickArea(Class<T> screenClass, ClickAreaHandler<T> handler);
     
-    <T extends Recipe<?>> void registerRecipes(ResourceLocation category, Class<T> recipeClass, Function<T, RecipeDisplay> mappingFunction);
+    default <T extends Recipe<?>> void registerRecipes(ResourceLocation category, Class<T> recipeClass, Function<T, RecipeDisplay> mappingFunction) {
+        registerRecipes(category, recipe -> recipeClass.isAssignableFrom(recipe.getClass()), mappingFunction);
+    }
     
-    <T extends Recipe<?>> void registerRecipes(ResourceLocation category, Function<Recipe, Boolean> recipeFilter, Function<T, RecipeDisplay> mappingFunction);
+    <T extends Recipe<?>> void registerRecipes(ResourceLocation category, Predicate<Recipe<?>> recipeFilter, Function<T, RecipeDisplay> mappingFunction);
     
     @ApiStatus.Internal
     boolean arePluginsLoading();

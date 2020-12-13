@@ -28,7 +28,7 @@ import io.netty.buffer.Unpooled;
 import me.shedaniel.math.api.Executor;
 import me.shedaniel.rei.server.InputSlotCrafter;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -36,7 +36,6 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -47,7 +46,6 @@ import net.minecraft.world.item.ItemStack;
 import java.util.List;
 
 public class RoughlyEnoughItemsNetwork implements ModInitializer {
-    
     public static final ResourceLocation DELETE_ITEMS_PACKET = new ResourceLocation("roughlyenoughitems", "delete_item");
     public static final ResourceLocation CREATE_ITEMS_PACKET = new ResourceLocation("roughlyenoughitems", "create_item");
     public static final ResourceLocation CREATE_ITEMS_GRAB_PACKET = new ResourceLocation("roughlyenoughitems", "create_item_grab");
@@ -60,8 +58,7 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
         RoughlyEnoughItemsState.checkRequiredFabricModules();
         Executor.run(() -> () -> {
             FabricLoader.getInstance().getEntrypoints("rei_containers", Runnable.class).forEach(Runnable::run);
-            ServerSidePacketRegistry.INSTANCE.register(DELETE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
-                ServerPlayer player = (ServerPlayer) packetContext.getPlayer();
+            ServerPlayNetworking.registerGlobalReceiver(DELETE_ITEMS_PACKET, (server, player, handler, buf, responseSender) -> {
                 if (player.getServer().getProfilePermissions(player.getGameProfile()) < player.getServer().getOperatorUserPermissionLevel()) {
                     player.displayClientMessage(new TranslatableComponent("text.rei.no_permission_cheat").withStyle(ChatFormatting.RED), false);
                     return;
@@ -71,27 +68,25 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
                     player.broadcastCarriedItem();
                 }
             });
-            ServerSidePacketRegistry.INSTANCE.register(CREATE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
-                ServerPlayer player = (ServerPlayer) packetContext.getPlayer();
+            ServerPlayNetworking.registerGlobalReceiver(CREATE_ITEMS_PACKET, (server, player, handler, buf, responseSender) -> {
                 if (player.getServer().getProfilePermissions(player.getGameProfile()) < player.getServer().getOperatorUserPermissionLevel()) {
                     player.displayClientMessage(new TranslatableComponent("text.rei.no_permission_cheat").withStyle(ChatFormatting.RED), false);
                     return;
                 }
-                ItemStack stack = packetByteBuf.readItem();
+                ItemStack stack = buf.readItem();
                 if (player.getInventory().add(stack.copy())) {
-                    ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(stack.copy()).writeUtf(player.getScoreboardName(), 32767));
+                    responseSender.sendPacket(RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(stack.copy()).writeUtf(player.getScoreboardName(), 32767));
                 } else
                     player.displayClientMessage(new TranslatableComponent("text.rei.failed_cheat_items"), false);
             });
-            ServerSidePacketRegistry.INSTANCE.register(CREATE_ITEMS_GRAB_PACKET, (packetContext, packetByteBuf) -> {
-                ServerPlayer player = (ServerPlayer) packetContext.getPlayer();
+            ServerPlayNetworking.registerGlobalReceiver(CREATE_ITEMS_GRAB_PACKET, (server, player, handler, buf, responseSender) -> {
                 if (player.getServer().getProfilePermissions(player.getGameProfile()) < player.getServer().getOperatorUserPermissionLevel()) {
                     player.displayClientMessage(new TranslatableComponent("text.rei.no_permission_cheat").withStyle(ChatFormatting.RED), false);
                     return;
                 }
                 
                 Inventory inventory = player.getInventory();
-                ItemStack itemStack = packetByteBuf.readItem();
+                ItemStack itemStack = buf.readItem();
                 ItemStack stack = itemStack.copy();
                 if (!inventory.getCarried().isEmpty() && ItemStack.isSameIgnoreDurability(inventory.getCarried(), stack) && ItemStack.tagMatches(inventory.getCarried(), stack)) {
                     stack.setCount(Mth.clamp(stack.getCount() + inventory.getCarried().getCount(), 1, stack.getMaxStackSize()));
@@ -100,11 +95,10 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
                 }
                 inventory.setCarried(stack.copy());
                 player.broadcastCarriedItem();
-                ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(itemStack.copy()).writeUtf(player.getScoreboardName(), 32767));
+                responseSender.sendPacket(RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(itemStack.copy()).writeUtf(player.getScoreboardName(), 32767));
             });
-            ServerSidePacketRegistry.INSTANCE.register(MOVE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
+            ServerPlayNetworking.registerGlobalReceiver(MOVE_ITEMS_PACKET, (server, player, handler, packetByteBuf, responseSender) -> {
                 ResourceLocation category = packetByteBuf.readResourceLocation();
-                ServerPlayer player = (ServerPlayer) packetContext.getPlayer();
                 AbstractContainerMenu container = player.containerMenu;
                 InventoryMenu playerContainer = player.inventoryMenu;
                 try {
@@ -132,9 +126,7 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
                                 buf.writeItem(stack);
                             }
                         }
-                        if (ServerSidePacketRegistry.INSTANCE.canPlayerReceive(player, NOT_ENOUGH_ITEMS_PACKET)) {
-                            ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, NOT_ENOUGH_ITEMS_PACKET, buf);
-                        }
+                        responseSender.sendPacket(NOT_ENOUGH_ITEMS_PACKET, buf);
                     } catch (IllegalStateException e) {
                         player.sendMessage(new TranslatableComponent(e.getMessage()).withStyle(ChatFormatting.RED), Util.NIL_UUID);
                     } catch (Exception e) {

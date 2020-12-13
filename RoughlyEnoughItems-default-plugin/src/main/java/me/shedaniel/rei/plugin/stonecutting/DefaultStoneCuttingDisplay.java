@@ -25,6 +25,7 @@ package me.shedaniel.rei.plugin.stonecutting;
 
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeDisplay;
+import me.shedaniel.rei.api.entry.EntryStacks;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -42,9 +43,8 @@ import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
 public class DefaultStoneCuttingDisplay implements RecipeDisplay {
-    
-    private List<List<EntryStack>> inputs;
-    private List<EntryStack> output;
+    private List<? extends List<? extends EntryStack<?>>> inputs;
+    private List<? extends EntryStack<?>> output;
     private StonecutterRecipe display;
     
     public DefaultStoneCuttingDisplay(StonecutterRecipe recipe) {
@@ -53,8 +53,8 @@ public class DefaultStoneCuttingDisplay implements RecipeDisplay {
     }
     
     public DefaultStoneCuttingDisplay(NonNullList<Ingredient> ingredients, ItemStack output) {
-        this.inputs = EntryStack.ofIngredients(ingredients);
-        this.output = Collections.singletonList(EntryStack.create(output));
+        this.inputs = EntryStacks.ofIngredients(ingredients);
+        this.output = Collections.singletonList(EntryStacks.of(output));
     }
     
     @Override
@@ -63,12 +63,12 @@ public class DefaultStoneCuttingDisplay implements RecipeDisplay {
     }
     
     @Override
-    public @NotNull List<List<EntryStack>> getInputEntries() {
+    public @NotNull List<? extends List<? extends EntryStack<?>>> getInputEntries() {
         return inputs;
     }
     
     @Override
-    public @NotNull List<List<EntryStack>> getResultingEntries() {
+    public @NotNull List<? extends List<? extends EntryStack<?>>> getResultingEntries() {
         return Collections.singletonList(output);
     }
     
@@ -78,7 +78,7 @@ public class DefaultStoneCuttingDisplay implements RecipeDisplay {
     }
     
     @Override
-    public @NotNull List<List<EntryStack>> getRequiredEntries() {
+    public @NotNull List<? extends List<? extends EntryStack<?>>> getRequiredEntries() {
         return getInputEntries();
     }
 }

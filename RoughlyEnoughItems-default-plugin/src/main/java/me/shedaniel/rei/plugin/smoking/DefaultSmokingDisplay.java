@@ -30,7 +30,6 @@ import net.minecraft.world.item.crafting.SmokingRecipe;
 import org.jetbrains.annotations.NotNull;
 
 public class DefaultSmokingDisplay extends DefaultCookingDisplay {
-    
     public DefaultSmokingDisplay(SmokingRecipe recipe) {
         super(recipe);
     }

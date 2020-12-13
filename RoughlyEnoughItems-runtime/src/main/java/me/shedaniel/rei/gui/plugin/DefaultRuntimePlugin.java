@@ -25,16 +25,22 @@ package me.shedaniel.rei.gui.plugin;
 
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.vertex.PoseStack;
+import me.shedaniel.architectury.fluid.FluidStack;
+import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.entry.*;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.favorites.FavoriteEntryType;
+import me.shedaniel.rei.api.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.api.widgets.Panel;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
+import me.shedaniel.rei.gui.plugin.entry.FluidEntryDefinition;
+import me.shedaniel.rei.gui.plugin.entry.ItemEntryDefinition;
 import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.impl.RenderingEntry;
 import me.shedaniel.rei.plugin.autocrafting.DefaultCategoryHandler;
@@ -46,13 +52,17 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
+import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
@@ -62,6 +72,19 @@ public class DefaultRuntimePlugin implements REIPluginV0 {
     @Override
     public ResourceLocation getPluginIdentifier() {
         return PLUGIN;
+    }
+    
+    @Override
+    public void registerEntryTypes(EntryTypeRegistry registry) {
+        registry.register(VanillaEntryTypes.ITEM, new ItemEntryDefinition());
+        registry.register(VanillaEntryTypes.FLUID, new FluidEntryDefinition());
+        registry.registerBridge(VanillaEntryTypes.ITEM, VanillaEntryTypes.FLUID, input -> {
+            Optional<Stream<EntryStack<FluidStack>>> stream = FluidSupportProvider.getInstance().itemToFluids(input);
+            if (!stream.isPresent()) {
+                return InteractionResultHolder.pass(Stream.empty());
+            }
+            return InteractionResultHolder.success(stream.get());
+        });
     }
     
     @Override
@@ -116,7 +139,7 @@ public class DefaultRuntimePlugin implements REIPluginV0 {
             }
             
             @Override
-            public InteractionResult shouldScreenBeOverlayed(Class<?> screen) {
+            public InteractionResult shouldScreenBeOverlaid(Class<?> screen) {
                 return InteractionResult.SUCCESS;
             }
         });
@@ -132,7 +155,7 @@ public class DefaultRuntimePlugin implements REIPluginV0 {
             }
             
             @Override
-            public InteractionResult shouldScreenBeOverlayed(Class<?> screen) {
+            public InteractionResult shouldScreenBeOverlaid(Class<?> screen) {
                 return InteractionResult.SUCCESS;
             }
         });
@@ -161,7 +184,7 @@ public class DefaultRuntimePlugin implements REIPluginV0 {
         
         @Override
         public @NotNull EntryStackFavoriteEntry fromArgs(Object... args) {
-            return new EntryStackFavoriteEntry((EntryStack) args[0]);
+            return new EntryStackFavoriteEntry((EntryStack<?>) args[0]);
         }
         
         @Override
@@ -172,18 +195,18 @@ public class DefaultRuntimePlugin implements REIPluginV0 {
     }
     
     private static class EntryStackFavoriteEntry extends FavoriteEntry {
-        private static final Function<EntryStack, String> CANCEL_FLUID_AMOUNT = s -> null;
-        private final EntryStack stack;
+        private static final Function<EntryStack<?>, String> CANCEL_FLUID_AMOUNT = s -> null;
+        private final EntryStack<?> stack;
         private final int hashIgnoreAmount;
         
-        public EntryStackFavoriteEntry(EntryStack stack) {
+        public EntryStackFavoriteEntry(EntryStack<?> stack) {
             this.stack = stack.copy();
-            this.stack.setAmount(127);
-            if (this.stack.getType() == EntryStack.Type.ITEM)
+            this.stack.setAmount(Fraction.ofWhole(127));
+            if (this.stack.getType() == VanillaEntryTypes.ITEM)
                 this.stack.setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE);
-            else if (this.stack.getType() == EntryStack.Type.ITEM)
+            else if (this.stack.getType() == VanillaEntryTypes.FLUID)
                 this.stack.setting(EntryStack.Settings.Fluid.AMOUNT_TOOLTIP, CANCEL_FLUID_AMOUNT);
-            this.hashIgnoreAmount = stack.hashIgnoreAmount();
+            this.hashIgnoreAmount = stack.hash(ComparisonContext.IGNORE_COUNT);
         }
         
         @Override
@@ -192,29 +215,29 @@ public class DefaultRuntimePlugin implements REIPluginV0 {
         }
         
         @Override
-        public EntryStack getWidget(boolean showcase) {
+        public Renderer getRenderer(boolean showcase) {
             return this.stack;
         }
-    
+        
         @Override
         public boolean doAction(int button) {
             if (!ClientHelper.getInstance().isCheating()) return false;
-            EntryStack entry = stack.copy();
+            EntryStack<?> entry = stack.copy();
             if (!entry.isEmpty()) {
-                if (entry.getType() == EntryStack.Type.FLUID) {
-                    Item bucketItem = entry.getFluid().getBucket();
+                if (entry.getValueType() == FluidStack.class) {
+                    Item bucketItem = ((FluidStack) entry.getValue()).getFluid().getBucket();
                     if (bucketItem != null) {
-                        entry = EntryStack.create(bucketItem);
+                        entry = EntryStacks.of(bucketItem);
                     }
                 }
-                if (entry.getType() == EntryStack.Type.ITEM)
-                    entry.setAmount(button != 1 && !Screen.hasShiftDown() ? 1 : entry.getItemStack().getMaxStackSize());
+                if (entry.getType() == VanillaEntryTypes.ITEM)
+                    entry.setAmount(Fraction.ofWhole(button != 1 && !Screen.hasShiftDown() ? 1 : ((ItemStack) entry.getValue()).getMaxStackSize()));
                 return ClientHelper.getInstance().tryCheatingEntry(entry);
             }
-    
+            
             return false;
         }
-    
+        
         @Override
         public int hashIgnoreAmount() {
             return hashIgnoreAmount;
@@ -234,7 +257,7 @@ public class DefaultRuntimePlugin implements REIPluginV0 {
         public boolean isSame(FavoriteEntry other) {
             if (!(other instanceof EntryStackFavoriteEntry)) return false;
             EntryStackFavoriteEntry that = (EntryStackFavoriteEntry) other;
-            return stack.equalsIgnoreAmount(that.stack);
+            return EntryStacks.equals(stack, that.stack, ComparisonContext.IGNORE_COUNT);
         }
     }
 }

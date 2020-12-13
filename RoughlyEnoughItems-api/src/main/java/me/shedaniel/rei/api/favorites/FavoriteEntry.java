@@ -25,6 +25,7 @@ package me.shedaniel.rei.api.favorites;
 
 import com.google.gson.JsonObject;
 import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.Renderer;
 import me.shedaniel.rei.impl.Internals;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
@@ -71,7 +72,7 @@ public abstract class FavoriteEntry {
     
     public abstract boolean isInvalid();
     
-    public abstract EntryStack getWidget(boolean showcase);
+    public abstract Renderer getRenderer(boolean showcase);
     
     public abstract boolean doAction(int button);
     

@@ -31,17 +31,17 @@ import java.util.Collection;
 @ApiStatus.Internal
 @ApiStatus.Experimental
 public interface FilteringContext {
-    Collection<EntryStack> getStacks(FilteringContextType type);
+    Collection<EntryStack<?>> getStacks(FilteringContextType type);
     
-    default Collection<EntryStack> getShownStacks() {
+    default Collection<EntryStack<?>> getShownStacks() {
         return getStacks(FilteringContextType.SHOWN);
     }
     
-    default Collection<EntryStack> getUnsetStacks() {
+    default Collection<EntryStack<?>> getUnsetStacks() {
         return getStacks(FilteringContextType.DEFAULT);
     }
     
-    default Collection<EntryStack> getHiddenStacks() {
+    default Collection<EntryStack<?>> getHiddenStacks() {
         return getStacks(FilteringContextType.HIDDEN);
     }
 }

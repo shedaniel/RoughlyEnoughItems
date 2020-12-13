@@ -25,48 +25,34 @@ package me.shedaniel.rei.plugin.cooking;
 
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.TransferRecipeDisplay;
+import me.shedaniel.rei.api.entry.EntryStacks;
 import me.shedaniel.rei.server.ContainerInfo;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
-import net.minecraft.world.level.block.entity.FurnaceBlockEntity;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Environment(EnvType.CLIENT)
 public abstract class DefaultCookingDisplay implements TransferRecipeDisplay {
-    private static List<EntryStack> fuel;
-    
-    static {
-        fuel = FurnaceBlockEntity.getFuel().keySet().stream().map(Item::getDefaultInstance).map(EntryStack::create).map(e -> e.setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, stack -> Collections.singletonList(new TranslatableComponent("category.rei.smelting.fuel").withStyle(ChatFormatting.YELLOW)))).collect(Collectors.toList());
-    }
-    
     private AbstractCookingRecipe recipe;
-    private List<List<EntryStack>> input;
-    private List<EntryStack> output;
+    private List<? extends List<? extends EntryStack<?>>> input;
+    private List<EntryStack<?>> output;
     private float xp;
     private double cookTime;
     
     public DefaultCookingDisplay(AbstractCookingRecipe recipe) {
         this.recipe = recipe;
-        this.input = EntryStack.ofIngredients(recipe.getIngredients());
-        this.output = Collections.singletonList(EntryStack.create(recipe.getResultItem()));
+        this.input = EntryStacks.ofIngredients(recipe.getIngredients());
+        this.output = Collections.singletonList(EntryStacks.of(recipe.getResultItem()));
         this.xp = recipe.getExperience();
         this.cookTime = recipe.getCookingTime();
-    }
-    
-    public static List<EntryStack> getFuel() {
-        return fuel;
     }
     
     @Override
@@ -75,17 +61,17 @@ public abstract class DefaultCookingDisplay implements TransferRecipeDisplay {
     }
     
     @Override
-    public @NotNull List<List<EntryStack>> getInputEntries() {
+    public @NotNull List<? extends List<? extends EntryStack<?>>> getInputEntries() {
         return input;
     }
     
     @Override
-    public @NotNull List<List<EntryStack>> getResultingEntries() {
+    public @NotNull List<? extends List<? extends EntryStack<?>>> getResultingEntries() {
         return Collections.singletonList(output);
     }
     
     @Override
-    public @NotNull List<List<EntryStack>> getRequiredEntries() {
+    public @NotNull List<? extends List<? extends EntryStack<?>>> getRequiredEntries() {
         return input;
     }
     
@@ -113,8 +99,7 @@ public abstract class DefaultCookingDisplay implements TransferRecipeDisplay {
     }
     
     @Override
-    public List<List<EntryStack>> getOrganisedInputEntries(ContainerInfo<AbstractContainerMenu> containerInfo, AbstractContainerMenu container) {
+    public List<? extends List<? extends EntryStack<?>>> getOrganisedInputEntries(ContainerInfo<AbstractContainerMenu> containerInfo, AbstractContainerMenu container) {
         return input;
     }
-    
 }

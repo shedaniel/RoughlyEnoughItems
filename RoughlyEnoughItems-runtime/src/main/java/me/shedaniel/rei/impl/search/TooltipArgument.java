@@ -48,7 +48,7 @@ public final class TooltipArgument extends Argument {
     }
     
     @Override
-    public boolean matches(Object[] data, EntryStack stack, String searchText, Object searchData) {
+    public boolean matches(Object[] data, EntryStack<?> stack, String searchText, Object searchData) {
         if (data[getDataOrdinal()] == null) {
             data[getDataOrdinal()] = SearchArgument.tryGetEntryStackTooltip(stack).toLowerCase(Locale.ROOT);
         }

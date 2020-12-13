@@ -25,9 +25,12 @@ package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Maps;
 import io.netty.buffer.Unpooled;
+import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.entry.EntryStacks;
+import me.shedaniel.rei.api.entry.VanillaEntryTypes;
 import me.shedaniel.rei.gui.PreRecipeViewingScreen;
 import me.shedaniel.rei.gui.RecipeScreen;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
@@ -36,7 +39,7 @@ import me.shedaniel.rei.gui.config.RecipeScreenType;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
@@ -65,7 +68,6 @@ import static me.shedaniel.rei.impl.Internals.attachInstance;
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
-    
     private static ClientHelperImpl instance;
     @ApiStatus.Internal public final LazyLoadedValue<Boolean> isYog = new LazyLoadedValue<>(() -> {
         try {
@@ -124,39 +126,40 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
             ((CreativeModeInventoryScreen) Minecraft.getInstance().screen).isQuickCrafting = false;
             return;
         }
-        ClientSidePacketRegistry.INSTANCE.sendToServer(RoughlyEnoughItemsNetwork.DELETE_ITEMS_PACKET, new FriendlyByteBuf(Unpooled.buffer()));
+        ClientPlayNetworking.send(RoughlyEnoughItemsNetwork.DELETE_ITEMS_PACKET, new FriendlyByteBuf(Unpooled.buffer()));
         if (Minecraft.getInstance().screen instanceof AbstractContainerScreen) {
             ((AbstractContainerScreen<?>) Minecraft.getInstance().screen).isQuickCrafting = false;
         }
     }
     
     @Override
-    public boolean tryCheatingEntry(EntryStack entry) {
-        if (entry.getType() != EntryStack.Type.ITEM)
+    public boolean tryCheatingEntry(EntryStack<?> e) {
+        if (e.getType() != VanillaEntryTypes.ITEM)
             return false;
+        EntryStack<ItemStack> entry = (EntryStack<ItemStack>) e;
         if (Minecraft.getInstance().player == null) return false;
         if (Minecraft.getInstance().player.getInventory() == null) return false;
-        ItemStack cheatedStack = entry.getItemStack().copy();
+        ItemStack cheatedStack = entry.getValue().copy();
         if (ConfigObject.getInstance().isGrabbingItems() && Minecraft.getInstance().screen instanceof CreativeModeInventoryScreen) {
             Inventory inventory = Minecraft.getInstance().player.getInventory();
-            EntryStack stack = entry.copy();
-            if (!inventory.getCarried().isEmpty() && EntryStack.create(inventory.getCarried()).equalsIgnoreAmount(stack)) {
-                stack.setAmount(Mth.clamp(stack.getAmount() + inventory.getCarried().getCount(), 1, stack.getItemStack().getMaxStackSize()));
+            EntryStack<ItemStack> stack = entry.copy();
+            if (!inventory.getCarried().isEmpty() && EntryStacks.equalsIgnoreCount(EntryStacks.of(inventory.getCarried()), stack)) {
+                stack.setAmount(Fraction.ofWhole(Mth.clamp(stack.getAmount().intValue() + inventory.getCarried().getCount(), 1, stack.getValue().getMaxStackSize())));
             } else if (!inventory.getCarried().isEmpty()) {
                 return false;
             }
-            inventory.setCarried(stack.getItemStack().copy());
+            inventory.setCarried(stack.getValue().copy());
             return true;
         } else if (RoughlyEnoughItemsCore.canUsePackets()) {
             Inventory inventory = Minecraft.getInstance().player.getInventory();
-            EntryStack stack = entry.copy();
-            if (!inventory.getCarried().isEmpty() && !EntryStack.create(inventory.getCarried()).equalsIgnoreAmount(stack)) {
+            EntryStack<ItemStack> stack = entry.copy();
+            if (!inventory.getCarried().isEmpty() && !EntryStacks.equalsIgnoreCount(EntryStacks.of(inventory.getCarried()), stack)) {
                 return false;
             }
             try {
-                ClientSidePacketRegistry.INSTANCE.sendToServer(ConfigObject.getInstance().isGrabbingItems() ? RoughlyEnoughItemsNetwork.CREATE_ITEMS_GRAB_PACKET : RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(cheatedStack));
+                ClientPlayNetworking.send(ConfigObject.getInstance().isGrabbingItems() ? RoughlyEnoughItemsNetwork.CREATE_ITEMS_GRAB_PACKET : RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(cheatedStack));
                 return true;
-            } catch (Exception e) {
+            } catch (Exception exception) {
                 return false;
             }
         } else {
@@ -176,15 +179,15 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     }
     
     @ApiStatus.Internal
-    public Set<EntryStack> _getInventoryItemsTypes() {
+    public Set<EntryStack<?>> _getInventoryItemsTypes() {
         return Minecraft.getInstance().player.getInventory().compartments.stream()
                 .flatMap(Collection::stream)
-                .map(EntryStack::create)
+                .map(EntryStacks::of)
                 .collect(Collectors.toSet());
     }
     
     @ApiStatus.Internal
-    public void openRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map, @Nullable ResourceLocation category, @Nullable EntryStack ingredientNotice, @Nullable EntryStack resultNotice) {
+    public void openRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map, @Nullable ResourceLocation category, @Nullable EntryStack<?> ingredientNotice, @Nullable EntryStack<?> resultNotice) {
         openView(new LegacyWrapperViewSearchBuilder(map).setPreferredOpenedCategory(category).setInputNotice(ingredientNotice).setOutputNotice(resultNotice).fillPreferredOpenedCategory());
     }
     
@@ -218,7 +221,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     @Override
     public boolean canUseMovePackets() {
-        return ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.MOVE_ITEMS_PACKET);
+        return ClientPlayNetworking.canSend(RoughlyEnoughItemsNetwork.MOVE_ITEMS_PACKET);
     }
     
     @Override
@@ -246,11 +249,11 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     public static final class ViewSearchBuilder extends AbstractViewSearchBuilder {
         @NotNull private final Set<ResourceLocation> categories = new HashSet<>();
-        @NotNull private final List<EntryStack> recipesFor = new ArrayList<>();
-        @NotNull private final List<EntryStack> usagesFor = new ArrayList<>();
+        @NotNull private final List<EntryStack<?>> recipesFor = new ArrayList<>();
+        @NotNull private final List<EntryStack<?>> usagesFor = new ArrayList<>();
         @Nullable private ResourceLocation preferredOpenedCategory = null;
-        @Nullable private EntryStack inputNotice;
-        @Nullable private EntryStack outputNotice;
+        @Nullable private EntryStack<?> inputNotice;
+        @Nullable private EntryStack<?> outputNotice;
         @NotNull
         private final LazyLoadedValue<Map<RecipeCategory<?>, List<RecipeDisplay>>> map = new LazyLoadedValue<>(() -> RecipeHelper.getInstance().buildMapFor(this));
         
@@ -273,26 +276,26 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         }
         
         @Override
-        public ClientHelper.ViewSearchBuilder addRecipesFor(EntryStack stack) {
+        public ClientHelper.ViewSearchBuilder addRecipesFor(EntryStack<?> stack) {
             this.recipesFor.add(stack);
             return this;
         }
         
         @Override
         @NotNull
-        public List<EntryStack> getRecipesFor() {
+        public List<EntryStack<?>> getRecipesFor() {
             return recipesFor;
         }
         
         @Override
-        public ClientHelper.ViewSearchBuilder addUsagesFor(EntryStack stack) {
+        public ClientHelper.ViewSearchBuilder addUsagesFor(EntryStack<?> stack) {
             this.usagesFor.add(stack);
             return this;
         }
         
         @Override
         @NotNull
-        public List<EntryStack> getUsagesFor() {
+        public List<EntryStack<?>> getUsagesFor() {
             return usagesFor;
         }
         
@@ -309,26 +312,26 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         }
         
         @Override
-        public ClientHelper.ViewSearchBuilder setInputNotice(@Nullable EntryStack stack) {
+        public ClientHelper.ViewSearchBuilder setInputNotice(@Nullable EntryStack<?> stack) {
             this.inputNotice = stack;
             return this;
         }
         
         @Nullable
         @Override
-        public EntryStack getInputNotice() {
+        public EntryStack<?> getInputNotice() {
             return inputNotice;
         }
         
         @Override
-        public ClientHelper.ViewSearchBuilder setOutputNotice(@Nullable EntryStack stack) {
+        public ClientHelper.ViewSearchBuilder setOutputNotice(@Nullable EntryStack<?> stack) {
             this.outputNotice = stack;
             return this;
         }
         
         @Nullable
         @Override
-        public EntryStack getOutputNotice() {
+        public EntryStack<?> getOutputNotice() {
             return outputNotice;
         }
         
@@ -342,8 +345,8 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     public static final class LegacyWrapperViewSearchBuilder extends AbstractViewSearchBuilder {
         @NotNull private final Map<RecipeCategory<?>, List<RecipeDisplay>> map;
         @Nullable private ResourceLocation preferredOpenedCategory = null;
-        @Nullable private EntryStack inputNotice;
-        @Nullable private EntryStack outputNotice;
+        @Nullable private EntryStack<?> inputNotice;
+        @Nullable private EntryStack<?> outputNotice;
         
         public LegacyWrapperViewSearchBuilder(@NotNull Map<RecipeCategory<?>, List<RecipeDisplay>> map) {
             this.map = map;
@@ -365,22 +368,22 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         }
         
         @Override
-        public ClientHelper.ViewSearchBuilder addRecipesFor(EntryStack stack) {
+        public ClientHelper.ViewSearchBuilder addRecipesFor(EntryStack<?> stack) {
             return this;
         }
         
         @Override
-        public @NotNull List<EntryStack> getRecipesFor() {
+        public @NotNull List<EntryStack<?>> getRecipesFor() {
             return Collections.emptyList();
         }
         
         @Override
-        public ClientHelper.ViewSearchBuilder addUsagesFor(EntryStack stack) {
+        public ClientHelper.ViewSearchBuilder addUsagesFor(EntryStack<?> stack) {
             return this;
         }
         
         @Override
-        public @NotNull List<EntryStack> getUsagesFor() {
+        public @NotNull List<EntryStack<?>> getUsagesFor() {
             return Collections.emptyList();
         }
         
@@ -397,26 +400,26 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         }
         
         @Override
-        public ClientHelper.ViewSearchBuilder setInputNotice(@Nullable EntryStack stack) {
+        public ClientHelper.ViewSearchBuilder setInputNotice(@Nullable EntryStack<?> stack) {
             this.inputNotice = stack;
             return this;
         }
         
         @Nullable
         @Override
-        public EntryStack getInputNotice() {
+        public EntryStack<?> getInputNotice() {
             return inputNotice;
         }
         
         @Override
-        public ClientHelper.ViewSearchBuilder setOutputNotice(@Nullable EntryStack stack) {
+        public ClientHelper.ViewSearchBuilder setOutputNotice(@Nullable EntryStack<?> stack) {
             this.outputNotice = stack;
             return this;
         }
         
         @Nullable
         @Override
-        public EntryStack getOutputNotice() {
+        public EntryStack<?> getOutputNotice() {
             return outputNotice;
         }
         

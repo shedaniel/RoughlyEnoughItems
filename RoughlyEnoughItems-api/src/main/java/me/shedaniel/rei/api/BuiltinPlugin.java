@@ -62,9 +62,9 @@ public interface BuiltinPlugin {
     
     void registerBrewingRecipe(Ingredient input, Ingredient ingredient, ItemStack output);
     
-    void registerInformation(List<EntryStack> entryStacks, Component name, UnaryOperator<List<Component>> textBuilder);
+    void registerInformation(List<? extends EntryStack<?>> entryStacks, Component name, UnaryOperator<List<Component>> textBuilder);
     
-    default void registerInformation(EntryStack entryStack, Component name, UnaryOperator<List<Component>> textBuilder) {
+    default void registerInformation(EntryStack<?> entryStack, Component name, UnaryOperator<List<Component>> textBuilder) {
         registerInformation(Collections.singletonList(entryStack), name, textBuilder);
     }
 }

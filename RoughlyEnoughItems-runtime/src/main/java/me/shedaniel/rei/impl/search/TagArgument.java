@@ -23,11 +23,13 @@
 
 package me.shedaniel.rei.impl.search;
 
+import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.rei.api.EntryStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,10 +52,10 @@ public final class TagArgument extends Argument {
     }
     
     @Override
-    public boolean matches(Object[] data, EntryStack stack, String searchText, Object searchData) {
+    public boolean matches(Object[] data, EntryStack<?> stack, String searchText, Object searchData) {
         if (data[getDataOrdinal()] == null) {
-            if (stack.getType() == EntryStack.Type.ITEM) {
-                Collection<ResourceLocation> tagsFor = minecraft.getConnection().getTags().getItems().getMatchingTags(stack.getItem());
+            if (stack.getValueType() == ItemStack.class) {
+                Collection<ResourceLocation> tagsFor = minecraft.getConnection().getTags().getItems().getMatchingTags(((ItemStack) stack.getValue()).getItem());
                 data[getDataOrdinal()] = new String[tagsFor.size()];
                 int i = 0;
                 
@@ -61,8 +63,8 @@ public final class TagArgument extends Argument {
                     ((String[]) data[getDataOrdinal()])[i] = identifier.toString();
                     i++;
                 }
-            } else if (stack.getType() == EntryStack.Type.FLUID) {
-                Collection<ResourceLocation> tagsFor = minecraft.getConnection().getTags().getFluids().getMatchingTags(stack.getFluid());
+            } else if (stack.getValueType() == FluidStack.class) {
+                Collection<ResourceLocation> tagsFor = minecraft.getConnection().getTags().getFluids().getMatchingTags(((FluidStack) stack.getValue()).getFluid());
                 data[getDataOrdinal()] = new String[tagsFor.size()];
                 int i = 0;
                 

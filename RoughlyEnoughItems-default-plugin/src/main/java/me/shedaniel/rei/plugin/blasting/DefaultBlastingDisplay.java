@@ -33,7 +33,6 @@ import org.jetbrains.annotations.NotNull;
 
 @Environment(EnvType.CLIENT)
 public class DefaultBlastingDisplay extends DefaultCookingDisplay {
-    
     public DefaultBlastingDisplay(BlastingRecipe recipe) {
         super(recipe);
     }

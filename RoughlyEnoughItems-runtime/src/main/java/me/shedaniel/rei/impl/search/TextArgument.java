@@ -47,7 +47,7 @@ public final class TextArgument extends Argument {
     }
     
     @Override
-    public boolean matches(Object[] data, EntryStack stack, String searchText, Object searchData) {
+    public boolean matches(Object[] data, EntryStack<?> stack, String searchText, Object searchData) {
         if (data[getDataOrdinal()] == null) {
             data[getDataOrdinal()] = stack.asFormatStrippedText().getString().toLowerCase(Locale.ROOT);
         }

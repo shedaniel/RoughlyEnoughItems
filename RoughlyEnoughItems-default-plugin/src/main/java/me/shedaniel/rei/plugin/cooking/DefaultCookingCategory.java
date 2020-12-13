@@ -31,8 +31,8 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.TransferRecipeCategory;
 import me.shedaniel.rei.api.widgets.Widgets;
-import me.shedaniel.rei.gui.entries.RecipeEntry;
-import me.shedaniel.rei.gui.entries.SimpleRecipeEntry;
+import me.shedaniel.rei.gui.entries.RecipeRenderer;
+import me.shedaniel.rei.gui.entries.SimpleRecipeRenderer;
 import me.shedaniel.rei.gui.widget.Widget;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.resources.language.I18n;
@@ -46,10 +46,10 @@ import java.util.List;
 
 public class DefaultCookingCategory implements TransferRecipeCategory<DefaultCookingDisplay> {
     private ResourceLocation identifier;
-    private EntryStack logo;
+    private EntryStack<?> logo;
     private String categoryName;
     
-    public DefaultCookingCategory(ResourceLocation identifier, EntryStack logo, String categoryName) {
+    public DefaultCookingCategory(ResourceLocation identifier, EntryStack<?> logo, String categoryName) {
         this.identifier = identifier;
         this.logo = logo;
         this.categoryName = categoryName;
@@ -84,8 +84,8 @@ public class DefaultCookingCategory implements TransferRecipeCategory<DefaultCoo
     }
     
     @Override
-    public @NotNull RecipeEntry getSimpleRenderer(DefaultCookingDisplay recipe) {
-        return SimpleRecipeEntry.from(Collections.singletonList(recipe.getInputEntries().get(0)), recipe.getResultingEntries());
+    public @NotNull RecipeRenderer getSimpleRenderer(DefaultCookingDisplay recipe) {
+        return SimpleRecipeRenderer.from(Collections.singletonList(recipe.getInputEntries().get(0)), recipe.getResultingEntries());
     }
     
     @Override

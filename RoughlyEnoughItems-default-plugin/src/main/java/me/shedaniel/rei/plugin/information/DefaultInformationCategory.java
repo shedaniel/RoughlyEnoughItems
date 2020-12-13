@@ -32,14 +32,14 @@ import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.RecipeCategory;
+import me.shedaniel.rei.api.Renderer;
+import me.shedaniel.rei.api.entry.AbstractRenderer;
 import me.shedaniel.rei.api.widgets.Widgets;
-import me.shedaniel.rei.gui.entries.RecipeEntry;
+import me.shedaniel.rei.gui.entries.RecipeRenderer;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
-import me.shedaniel.rei.impl.RenderingEntry;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -81,9 +81,9 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
     }
     
     @Override
-    public @NotNull RecipeEntry getSimpleRenderer(DefaultInformationDisplay recipe) {
+    public @NotNull RecipeRenderer getSimpleRenderer(DefaultInformationDisplay recipe) {
         FormattedCharSequence name = recipe.getName().getVisualOrderText();
-        return new RecipeEntry() {
+        return new RecipeRenderer() {
             @Override
             public int getHeight() {
                 return 10 + Minecraft.getInstance().font.lineHeight;
@@ -97,8 +97,9 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
     }
     
     @Override
-    public @NotNull EntryStack getLogo() {
-        return new RenderingEntry() {
+    @NotNull
+    public Renderer getLogo() {
+        return new AbstractRenderer() {
             @Override
             public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
                 Minecraft.getInstance().getTextureManager().bind(REIHelper.getInstance().getDefaultDisplayTexture());
@@ -112,7 +113,8 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
     }
     
     @Override
-    public @NotNull List<Widget> setupDisplay(DefaultInformationDisplay recipeDisplay, Rectangle bounds) {
+    @NotNull
+    public List<Widget> setupDisplay(DefaultInformationDisplay recipeDisplay, Rectangle bounds) {
         List<Widget> widgets = Lists.newArrayList();
         widgets.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.y + 3), recipeDisplay.getName()).noShadow().color(0xFF404040, 0xFFBBBBBB));
         widgets.add(Widgets.createSlot(new Point(bounds.getCenterX() - 8, bounds.y + 15)).entries(recipeDisplay.getEntryStacks()));

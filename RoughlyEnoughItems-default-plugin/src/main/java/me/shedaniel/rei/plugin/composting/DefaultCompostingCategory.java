@@ -29,8 +29,10 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeCategory;
+import me.shedaniel.rei.api.Renderer;
+import me.shedaniel.rei.api.entry.EntryStacks;
 import me.shedaniel.rei.api.widgets.Widgets;
-import me.shedaniel.rei.gui.entries.RecipeEntry;
+import me.shedaniel.rei.gui.entries.RecipeRenderer;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
@@ -56,8 +58,8 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
     }
     
     @Override
-    public @NotNull EntryStack getLogo() {
-        return EntryStack.create(Blocks.COMPOSTER);
+    public @NotNull Renderer getLogo() {
+        return EntryStacks.of(Blocks.COMPOSTER);
     }
     
     @Override
@@ -66,8 +68,8 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
     }
     
     @Override
-    public @NotNull RecipeEntry getSimpleRenderer(DefaultCompostingDisplay recipe) {
-        return new RecipeEntry() {
+    public @NotNull RecipeRenderer getSimpleRenderer(DefaultCompostingDisplay recipe) {
+        return new RecipeRenderer() {
             private Component text = new TranslatableComponent("text.rei.composting.page", recipe.getPage() + 1);
             
             @Override
@@ -86,14 +88,14 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
     public @NotNull List<Widget> setupDisplay(DefaultCompostingDisplay display, Rectangle bounds) {
         List<Widget> widgets = Lists.newArrayList();
         Point startingPoint = new Point(bounds.x + bounds.width - 55, bounds.y + 110);
-        List<List<EntryStack>> stacks = new ArrayList<>(display.getInputEntries());
+        List<List<? extends EntryStack<?>>> stacks = new ArrayList<>(display.getInputEntries());
         int i = 0;
         for (int y = 0; y < 6; y++)
             for (int x = 0; x < 8; x++) {
-                List<EntryStack> entryStack = stacks.size() > i ? stacks.get(i) : Collections.emptyList();
+                List<? extends EntryStack<?>> entryStack = stacks.size() > i ? stacks.get(i) : Collections.emptyList();
                 if (!entryStack.isEmpty()) {
-                    display.getInputMap().object2FloatEntrySet().stream().filter(entry -> entry.getKey() != null && Objects.equals(entry.getKey().asItem(), entryStack.get(0).getItem())).findAny().map(Map.Entry::getValue).ifPresent(chance -> {
-                        for (EntryStack stack : entryStack) {
+                    display.getInputMap().object2FloatEntrySet().stream().filter(entry -> entry.getKey() != null && Objects.equals(entry.getKey().asItem(), entryStack.get(0).getValue())).findAny().map(Map.Entry::getValue).ifPresent(chance -> {
+                        for (EntryStack<?> stack : entryStack) {
                             stack.setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> Collections.singletonList(new TranslatableComponent("text.rei.composting.chance", Mth.fastFloor(chance * 100)).withStyle(ChatFormatting.YELLOW)));
                         }
                     });

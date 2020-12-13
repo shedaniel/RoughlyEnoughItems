@@ -32,7 +32,7 @@ import static net.minecraft.world.InteractionResult.PASS;
 public interface OverlayDecider {
     boolean isHandingScreen(Class<?> screen);
     
-    default InteractionResult shouldScreenBeOverlayed(Class<?> screen) {
+    default InteractionResult shouldScreenBeOverlaid(Class<?> screen) {
         return InteractionResult.PASS;
     }
     

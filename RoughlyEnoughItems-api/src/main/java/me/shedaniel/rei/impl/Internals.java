@@ -27,10 +27,12 @@ import com.google.gson.JsonObject;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.entry.EntryDefinition;
+import me.shedaniel.rei.api.entry.EntryType;
+import me.shedaniel.rei.api.entry.EntryTypeRegistry;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
-import me.shedaniel.rei.api.fractions.Fraction;
 import me.shedaniel.rei.api.subsets.SubsetsRegistry;
 import me.shedaniel.rei.api.widgets.*;
 import me.shedaniel.rei.gui.widget.Widget;
@@ -39,8 +41,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.material.Fluid;
+import net.minecraft.util.Unit;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -65,6 +66,8 @@ public final class Internals {
     private static Supplier<WidgetsProvider> widgetsProvider = Internals::throwNotSetup;
     private static Supplier<ClientHelper.ViewSearchBuilder> viewSearchBuilder = Internals::throwNotSetup;
     private static Supplier<FavoriteEntryType.Registry> favoriteEntryTypeRegistry = Internals::throwNotSetup;
+    private static Supplier<EntryTypeRegistry> entryTypeRegistry = Internals::throwNotSetup;
+    private static Function<ResourceLocation, EntryType<?>> entryTypeDeferred = (object) -> throwNotSetup();
     private static BiFunction<Supplier<FavoriteEntry>, Supplier<JsonObject>, FavoriteEntry> delegateFavoriteEntry = (supplier, toJson) -> throwNotSetup();
     private static Function<JsonObject, FavoriteEntry> favoriteEntryFromJson = (object) -> throwNotSetup();
     private static Function<@NotNull Boolean, ClickAreaHandler.Result> clickAreaHandlerResult = (result) -> throwNotSetup();
@@ -179,14 +182,22 @@ public final class Internals {
         return favoriteEntryFromJson.apply(object);
     }
     
+    public static EntryTypeRegistry getEntryTypeRegistry() {
+        return entryTypeRegistry.get();
+    }
+    
+    public static EntryType<?> deferEntryType(ResourceLocation id) {
+        return entryTypeDeferred.apply(id);
+    }
+    
     public interface EntryStackProvider {
-        EntryStack empty();
+        EntryStack<Unit> empty();
         
-        EntryStack fluid(Fluid fluid);
+        <T> EntryStack<T> of(EntryDefinition<T> definition, T value);
         
-        EntryStack fluid(Fluid fluid, Fraction amount);
+        EntryType<Unit> emptyType(ResourceLocation id);
         
-        EntryStack item(ItemStack stack);
+        EntryType<Unit> renderingType(ResourceLocation id);
     }
     
     @Environment(EnvType.CLIENT)

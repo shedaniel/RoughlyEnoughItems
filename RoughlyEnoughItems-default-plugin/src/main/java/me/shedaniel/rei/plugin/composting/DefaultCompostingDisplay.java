@@ -26,6 +26,7 @@ package me.shedaniel.rei.plugin.composting;
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeDisplay;
+import me.shedaniel.rei.api.entry.EntryStacks;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -40,24 +41,24 @@ import java.util.List;
 
 @Environment(EnvType.CLIENT)
 public class DefaultCompostingDisplay implements RecipeDisplay {
-    private List<List<EntryStack>> inputs;
+    private List<List<EntryStack<?>>> inputs;
     private Object2FloatMap<ItemLike> inputMap;
-    private List<List<EntryStack>> output;
+    private List<List<EntryStack<?>>> output;
     private int page;
     
     public DefaultCompostingDisplay(int page, List<Object2FloatMap.Entry<ItemLike>> inputs, Object2FloatMap<ItemLike> map, ItemStack output) {
         this.page = page;
         {
-            List<EntryStack>[] result = new List[inputs.size()];
+            List<EntryStack<?>>[] result = new List[inputs.size()];
             int i = 0;
             for (Object2FloatMap.Entry<ItemLike> entry : inputs) {
-                result[i] = Collections.singletonList(EntryStack.create(entry.getKey()));
+                result[i] = Collections.singletonList(EntryStacks.of(entry.getKey()));
                 i++;
             }
             this.inputs = Arrays.asList(result);
         }
         this.inputMap = map;
-        this.output = Collections.singletonList(Collections.singletonList(EntryStack.create(output)));
+        this.output = Collections.singletonList(Collections.singletonList(EntryStacks.of(output)));
     }
     
     public int getPage() {
@@ -65,7 +66,7 @@ public class DefaultCompostingDisplay implements RecipeDisplay {
     }
     
     @Override
-    public @NotNull List<List<EntryStack>> getInputEntries() {
+    public @NotNull List<? extends List<? extends EntryStack<?>>> getInputEntries() {
         return inputs;
     }
     
@@ -74,7 +75,7 @@ public class DefaultCompostingDisplay implements RecipeDisplay {
     }
     
     @Override
-    public @NotNull List<List<EntryStack>> getResultingEntries() {
+    public @NotNull List<? extends List<? extends EntryStack<?>>> getResultingEntries() {
         return output;
     }
     
@@ -84,7 +85,7 @@ public class DefaultCompostingDisplay implements RecipeDisplay {
     }
     
     @Override
-    public @NotNull List<List<EntryStack>> getRequiredEntries() {
+    public @NotNull List<? extends List<? extends EntryStack<?>>> getRequiredEntries() {
         return inputs;
     }
 }

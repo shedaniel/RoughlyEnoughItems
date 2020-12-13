@@ -34,11 +34,11 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.api.Executor;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.entry.*;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
-import me.shedaniel.rei.api.fractions.Fraction;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.api.subsets.SubsetsRegistry;
 import me.shedaniel.rei.api.widgets.*;
@@ -47,13 +47,14 @@ import me.shedaniel.rei.gui.widget.EntryWidget;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.impl.*;
+import me.shedaniel.rei.impl.entry.EmptyEntryDefinition;
 import me.shedaniel.rei.impl.subsets.SubsetsRegistryImpl;
 import me.shedaniel.rei.impl.widgets.*;
 import me.shedaniel.rei.tests.plugin.REITestPlugin;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.Minecraft;
@@ -74,6 +75,7 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.util.Unit;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.inventory.Slot;
@@ -81,18 +83,15 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeManager;
-import net.minecraft.world.level.material.Fluid;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.BiFunction;
@@ -112,6 +111,16 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     public static boolean isLeftModePressed = false;
     
     static {
+        attachInstance(EntryTypeRegistryImpl.getInstance(), EntryTypeRegistry.class);
+        Map<ResourceLocation, EntryType<?>> typeCache = new ConcurrentHashMap<>();
+        attachInstance((Function<ResourceLocation, EntryType<?>>) id -> {
+            if (id.equals(BuiltinEntryTypes.EMPTY_ID)) {
+                return BuiltinEntryTypes.EMPTY;
+            } else if (id.equals(BuiltinEntryTypes.RENDERING_ID)) {
+                return BuiltinEntryTypes.RENDERING;
+            }
+            return typeCache.computeIfAbsent(id, EntryTypeDeferred::new);
+        }, "entryTypeDeferred");
         attachInstance(new RecipeHelperImpl(), RecipeHelper.class);
         attachInstance(new EntryRegistryImpl(), EntryRegistry.class);
         attachInstance(new DisplayHelperImpl(), DisplayHelper.class);
@@ -119,23 +128,43 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         attachInstance(new SubsetsRegistryImpl(), SubsetsRegistry.class);
         attachInstance(new Internals.EntryStackProvider() {
             @Override
-            public EntryStack empty() {
-                return EmptyEntryStack.EMPTY;
+            public EntryStack<Unit> empty() {
+                return TypedEntryStack.EMPTY;
             }
             
             @Override
-            public EntryStack fluid(Fluid fluid) {
-                return new FluidEntryStack(fluid);
+            public <T> EntryStack<T> of(EntryDefinition<T> definition, T value) {
+                return new TypedEntryStack<>(definition, value);
             }
             
             @Override
-            public EntryStack fluid(Fluid fluid, Fraction amount) {
-                return new FluidEntryStack(fluid, amount);
+            public EntryType<Unit> emptyType(ResourceLocation id) {
+                return new EntryType<Unit>() {
+                    @Override
+                    public @NotNull ResourceLocation getId() {
+                        return id;
+                    }
+    
+                    @Override
+                    public @NotNull EntryDefinition<Unit> getDefinition() {
+                        return EmptyEntryDefinition.EMPTY;
+                    }
+                };
             }
             
             @Override
-            public EntryStack item(ItemStack stack) {
-                return new ItemEntryStack(stack);
+            public EntryType<Unit> renderingType(ResourceLocation id) {
+                return new EntryType<Unit>() {
+                    @Override
+                    public @NotNull ResourceLocation getId() {
+                        return id;
+                    }
+        
+                    @Override
+                    public @NotNull EntryDefinition<Unit> getDefinition() {
+                        return EmptyEntryDefinition.RENDERING;
+                    }
+                };
             }
         }, Internals.EntryStackProvider.class);
         attachInstance(new Internals.WidgetsProvider() {
@@ -201,12 +230,12 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                 }
                 return Objects.requireNonNull(entry).getUnwrapped();
             }
-    
+            
             @Override
             public UUID getUuid() {
                 return getUnwrapped().getUuid();
             }
-    
+            
             @Override
             public boolean isInvalid() {
                 try {
@@ -217,20 +246,20 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             }
             
             @Override
-            public EntryStack getWidget(boolean showcase) {
-                return getUnwrapped().getWidget(showcase);
+            public Renderer getRenderer(boolean showcase) {
+                return getUnwrapped().getRenderer(showcase);
             }
             
             @Override
             public boolean doAction(int button) {
                 return getUnwrapped().doAction(button);
             }
-    
+            
             @Override
             public @NotNull Optional<Supplier<Collection<@NotNull FavoriteMenuEntry>>> getMenuEntries() {
                 return getUnwrapped().getMenuEntries();
             }
-    
+            
             @Override
             public int hashIgnoreAmount() {
                 return getUnwrapped().hashIgnoreAmount();
@@ -338,7 +367,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     }
     
     public static boolean canUsePackets() {
-        return ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET) && ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.CREATE_ITEMS_GRAB_PACKET) && ClientSidePacketRegistry.INSTANCE.canServerReceive(RoughlyEnoughItemsNetwork.DELETE_ITEMS_PACKET);
+        return ClientPlayNetworking.canSend(RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET) && ClientPlayNetworking.canSend(RoughlyEnoughItemsNetwork.CREATE_ITEMS_GRAB_PACKET) && ClientPlayNetworking.canSend(RoughlyEnoughItemsNetwork.DELETE_ITEMS_PACKET);
     }
     
     @ApiStatus.Internal
@@ -372,7 +401,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     public void onInitializeClient() {
         attachInstance(new ConfigManagerImpl(), ConfigManager.class);
         
-        detectFabricLoader();
+        IssuesDetector.detect();
         registerClothEvents();
         discoverPluginEntries();
         for (ModContainer modContainer : FabricLoader.getInstance().getAllMods()) {
@@ -382,12 +411,14 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         
         RoughlyEnoughItemsState.checkRequiredFabricModules();
         Executor.run(() -> () -> {
-            ClientSidePacketRegistry.INSTANCE.register(RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, (packetContext, packetByteBuf) -> {
-                ItemStack stack = packetByteBuf.readItem();
-                String player = packetByteBuf.readUtf(32767);
-                packetContext.getPlayer().displayClientMessage(new TextComponent(I18n.get("text.rei.cheat_items").replaceAll("\\{item_name}", EntryStack.create(stack.copy()).asFormattedText().getString()).replaceAll("\\{item_count}", stack.copy().getCount() + "").replaceAll("\\{player_name}", player)), false);
+            ClientPlayNetworking.registerGlobalReceiver(RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, (client, handler, buf, responseSender) -> {
+                ItemStack stack = buf.readItem();
+                String player = buf.readUtf(32767);
+                if (client.player != null) {
+                    client.player.displayClientMessage(new TextComponent(I18n.get("text.rei.cheat_items").replaceAll("\\{item_name}", EntryStacks.of(stack.copy()).asFormattedText().getString()).replaceAll("\\{item_count}", stack.copy().getCount() + "").replaceAll("\\{player_name}", player)), false);
+                }
             });
-            ClientSidePacketRegistry.INSTANCE.register(RoughlyEnoughItemsNetwork.NOT_ENOUGH_ITEMS_PACKET, (packetContext, packetByteBuf) -> {
+            ClientPlayNetworking.registerGlobalReceiver(RoughlyEnoughItemsNetwork.NOT_ENOUGH_ITEMS_PACKET, (client, handler, buf, responseSender) -> {
                 Screen currentScreen = Minecraft.getInstance().screen;
                 if (currentScreen instanceof CraftingScreen) {
                     RecipeBookComponent recipeBookGui = ((RecipeUpdateListener) currentScreen).getRecipeBookComponent();
@@ -395,12 +426,12 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                     ghostSlots.clear();
                     
                     List<List<ItemStack>> input = Lists.newArrayList();
-                    int mapSize = packetByteBuf.readInt();
+                    int mapSize = buf.readInt();
                     for (int i = 0; i < mapSize; i++) {
                         List<ItemStack> list = Lists.newArrayList();
-                        int count = packetByteBuf.readInt();
+                        int count = buf.readInt();
                         for (int j = 0; j < count; j++) {
-                            list.add(packetByteBuf.readItem());
+                            list.add(buf.readItem());
                         }
                         input.add(list);
                     }
@@ -416,36 +447,6 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                     }
                 }
             });
-        });
-    }
-    
-    private void detectFabricLoader() {
-        Executor.run(() -> () -> {
-            try {
-                FabricLoader instance = FabricLoader.getInstance();
-                for (Field field : instance.getClass().getDeclaredFields()) {
-                    if (Logger.class.isAssignableFrom(field.getType())) {
-                        field.setAccessible(true);
-                        Logger logger = (Logger) field.get(instance);
-                        if (logger.getName().toLowerCase(Locale.ROOT).contains("subsystem")) {
-                            File reiConfigFolder = new File(instance.getConfigDirectory(), "roughlyenoughitems");
-                            File ignoreFile = new File(reiConfigFolder, ".ignoresubsystem");
-                            if (!ignoreFile.exists()) {
-                                RoughlyEnoughItemsState.warn("Subsystem is detected (probably though Aristois), please contact support from them if anything happens.");
-                                RoughlyEnoughItemsState.onContinue(() -> {
-                                    try {
-                                        reiConfigFolder.mkdirs();
-                                        ignoreFile.createNewFile();
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                    }
-                                });
-                            }
-                        }
-                    }
-                }
-            } catch (Throwable ignored) {
-            }
         });
     }
     
@@ -497,7 +498,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             for (OverlayDecider decider : DisplayHelper.getInstance().getAllOverlayDeciders()) {
                 if (!decider.isHandingScreen(screen))
                     continue;
-                InteractionResult result = decider.shouldScreenBeOverlayed(screen);
+                InteractionResult result = decider.shouldScreenBeOverlaid(screen);
                 if (result != InteractionResult.PASS)
                     return result == InteractionResult.FAIL || REIHelper.getInstance().getPreviousContainerScreen() == null;
             }

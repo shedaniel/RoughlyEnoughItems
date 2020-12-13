@@ -65,7 +65,7 @@ public final class RegexArgument extends Argument {
     }
     
     @Override
-    public boolean matches(Object[] data, EntryStack stack, String searchText, Object searchData) {
+    public boolean matches(Object[] data, EntryStack<?> stack, String searchText, Object searchData) {
         Pattern pattern = (Pattern) searchData;
         if (pattern == null) return false;
         if (data[getDataOrdinal()] == null) {

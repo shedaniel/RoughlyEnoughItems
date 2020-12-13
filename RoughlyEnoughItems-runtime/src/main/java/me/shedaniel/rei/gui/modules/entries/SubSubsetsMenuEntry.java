@@ -29,6 +29,7 @@ import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.entry.EntryStacks;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.modules.Menu;
@@ -147,7 +148,7 @@ public class SubSubsetsMenuEntry extends MenuEntry {
         if (rendering && mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + 12 && !entries.isEmpty()) {
             if (clickedBefore) {
                 clickedBefore = false;
-                List<EntryStack> filteredStacks = ConfigObject.getInstance().getFilteredStacks();
+                List<EntryStack<?>> filteredStacks = ConfigObject.getInstance().getFilteredStacks();
                 Menu subsetsMenu = ScreenHelper.getLastOverlay().getSubsetsMenu();
                 setFiltered(filteredStacks, subsetsMenu, this, !(getFilteredRatio() > 0));
                 ConfigManager.getInstance().saveConfig();
@@ -163,12 +164,12 @@ public class SubSubsetsMenuEntry extends MenuEntry {
         return super.mouseClicked(mouseX, mouseY, button);
     }
     
-    private void setFiltered(List<EntryStack> filteredStacks, Menu subsetsMenu, SubSubsetsMenuEntry subSubsetsMenuEntry, boolean filtered) {
+    private void setFiltered(List<EntryStack<?>> filteredStacks, Menu subsetsMenu, SubSubsetsMenuEntry subSubsetsMenuEntry, boolean filtered) {
         for (MenuEntry entry : subSubsetsMenuEntry.entries) {
             if (entry instanceof EntryStackSubsetsMenuEntry) {
                 if (((EntryStackSubsetsMenuEntry) entry).isFiltered() != filtered) {
                     if (!filtered) {
-                        filteredStacks.removeIf(next -> next.equalsIgnoreAmount(((EntryStackSubsetsMenuEntry) entry).stack));
+                        filteredStacks.removeIf(next -> EntryStacks.equalsIgnoreCount(next, ((EntryStackSubsetsMenuEntry) entry).stack));
                     } else {
                         filteredStacks.add(((EntryStackSubsetsMenuEntry) entry).stack.copy());
                     }
@@ -187,7 +188,7 @@ public class SubSubsetsMenuEntry extends MenuEntry {
     }
     
     public Tuple<Integer, Integer> getFilteredRatioPair() {
-        List<EntryStack> filteredStacks = ConfigObject.getInstance().getFilteredStacks();
+        List<EntryStack<?>> filteredStacks = ConfigObject.getInstance().getFilteredStacks();
         if (lastListHash != filteredStacks.hashCode()) {
             int size = 0;
             int filtered = 0;

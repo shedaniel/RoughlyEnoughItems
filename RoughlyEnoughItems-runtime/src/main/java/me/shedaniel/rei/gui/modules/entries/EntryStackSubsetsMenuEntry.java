@@ -28,6 +28,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.entry.EntryStacks;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.modules.Menu;
 import me.shedaniel.rei.gui.modules.MenuEntry;
@@ -91,9 +92,9 @@ public class EntryStackSubsetsMenuEntry extends MenuEntry {
                 clickedLast = true;
                 if (!getParent().scrolling.draggingScrollBar) {
                     minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-                    List<EntryStack> filteredStacks = ConfigObject.getInstance().getFilteredStacks();
+                    List<EntryStack<?>> filteredStacks = ConfigObject.getInstance().getFilteredStacks();
                     if (isFiltered()) {
-                        filteredStacks.removeIf(next -> next.equalsIgnoreAmount(stack));
+                        filteredStacks.removeIf(next -> EntryStacks.equalsIgnoreCount(next, stack));
                     } else {
                         filteredStacks.add(stack.copy());
                     }
@@ -114,7 +115,7 @@ public class EntryStackSubsetsMenuEntry extends MenuEntry {
         for (MenuEntry child : menu.children()) {
             if (child instanceof SubSubsetsMenuEntry && ((SubSubsetsMenuEntry) child).getSubsetsMenu() != null)
                 recalculateFilter(((SubSubsetsMenuEntry) child).getSubsetsMenu());
-            else if (child instanceof EntryStackSubsetsMenuEntry && ((EntryStackSubsetsMenuEntry) child).stack.equalsIgnoreAmount(stack))
+            else if (child instanceof EntryStackSubsetsMenuEntry && EntryStacks.equalsIgnoreCount(((EntryStackSubsetsMenuEntry) child).stack, stack))
                 ((EntryStackSubsetsMenuEntry) child).isFiltered = null;
         }
     }
@@ -131,7 +132,7 @@ public class EntryStackSubsetsMenuEntry extends MenuEntry {
     
     public boolean isFiltered() {
         if (isFiltered == null) {
-            List<EntryStack> filteredStacks = ConfigObject.getInstance().getFilteredStacks();
+            List<EntryStack<?>> filteredStacks = ConfigObject.getInstance().getFilteredStacks();
             isFiltered = CollectionUtils.findFirstOrNullEqualsEntryIgnoreAmount(filteredStacks, stack) != null;
         }
         return isFiltered;

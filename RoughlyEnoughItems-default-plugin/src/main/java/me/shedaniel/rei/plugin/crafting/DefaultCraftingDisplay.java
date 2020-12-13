@@ -23,11 +23,11 @@
 
 package me.shedaniel.rei.plugin.crafting;
 
-import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.TransferRecipeDisplay;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import me.shedaniel.rei.server.ContainerInfo;
+import me.shedaniel.rei.utils.EntryStackCompoundList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
@@ -41,7 +41,6 @@ import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
 public interface DefaultCraftingDisplay extends TransferRecipeDisplay {
-    
     @Override
     default @NotNull ResourceLocation getRecipeCategory() {
         return DefaultPlugin.CRAFTING;
@@ -60,13 +59,13 @@ public interface DefaultCraftingDisplay extends TransferRecipeDisplay {
     Optional<Recipe<?>> getOptionalRecipe();
     
     @Override
-    default List<List<EntryStack>> getOrganisedInputEntries(ContainerInfo<AbstractContainerMenu> containerInfo, AbstractContainerMenu container) {
-        List<List<EntryStack>> list = Lists.newArrayListWithCapacity(containerInfo.getCraftingWidth(container) * containerInfo.getCraftingHeight(container));
+    default List<? extends List<? extends EntryStack<?>>> getOrganisedInputEntries(ContainerInfo<AbstractContainerMenu> containerInfo, AbstractContainerMenu container) {
+        EntryStackCompoundList list = new EntryStackCompoundList(containerInfo.getCraftingWidth(container) * containerInfo.getCraftingHeight(container));
         for (int i = 0; i < containerInfo.getCraftingWidth(container) * containerInfo.getCraftingHeight(container); i++) {
             list.add(Collections.emptyList());
         }
         for (int i = 0; i < getInputEntries().size(); i++) {
-            List<EntryStack> stacks = getInputEntries().get(i);
+            List<? extends EntryStack<?>> stacks = getInputEntries().get(i);
             list.set(DefaultCraftingCategory.getSlotWithSize(this, i, containerInfo.getCraftingWidth(container)), stacks);
         }
         return list;

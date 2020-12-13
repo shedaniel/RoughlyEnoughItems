@@ -27,12 +27,13 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeCategory;
+import me.shedaniel.rei.api.Renderer;
+import me.shedaniel.rei.api.entry.EntryStacks;
 import me.shedaniel.rei.api.widgets.Slot;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
-import me.shedaniel.rei.gui.entries.RecipeEntry;
+import me.shedaniel.rei.gui.entries.RecipeRenderer;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
@@ -69,8 +70,8 @@ public class DefaultFuelCategory implements RecipeCategory<DefaultFuelDisplay> {
     }
     
     @Override
-    public @NotNull EntryStack getLogo() {
-        return EntryStack.create(Items.COAL);
+    public @NotNull Renderer getLogo() {
+        return EntryStacks.of(Items.COAL);
     }
     
     @Override
@@ -87,10 +88,10 @@ public class DefaultFuelCategory implements RecipeCategory<DefaultFuelDisplay> {
     }
     
     @Override
-    public @NotNull RecipeEntry getSimpleRenderer(DefaultFuelDisplay recipe) {
+    public @NotNull RecipeRenderer getSimpleRenderer(DefaultFuelDisplay recipe) {
         Slot slot = Widgets.createSlot(new Point(0, 0)).entries(recipe.getInputEntries().get(0)).disableBackground().disableHighlight();
         String burnItems = DECIMAL_FORMAT.format(recipe.getFuelTime() / 200d);
-        return new RecipeEntry() {
+        return new RecipeRenderer() {
             private TranslatableComponent text = new TranslatableComponent("category.rei.fuel.time_short.items", burnItems);
             
             @Override

@@ -36,6 +36,7 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.EntryRegistry;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.REIHelper;
+import me.shedaniel.rei.api.entry.EntryStacks;
 import me.shedaniel.rei.api.subsets.SubsetsRegistry;
 import me.shedaniel.rei.gui.modules.entries.EntryStackSubsetsMenuEntry;
 import me.shedaniel.rei.gui.modules.entries.SubSubsetsMenuEntry;
@@ -90,12 +91,12 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
     
     public static Menu createSubsetsMenuFromRegistry(Point menuStartPoint) {
         EntryRegistry instance = EntryRegistry.getInstance();
-        List<EntryStack> stacks = instance.getEntryStacks().collect(Collectors.toList());
+        List<? extends EntryStack<?>> stacks = instance.getEntryStacks().collect(Collectors.toList());
         Map<String, Object> entries = Maps.newHashMap();
         {
             // All Entries group
             Map<String, Object> allEntries = getOrCreateSubEntryInMap(entries, "roughlyenoughitems:all_entries");
-            for (EntryStack stack : stacks) {
+            for (EntryStack<?> stack : stacks) {
                 putEntryInMap(allEntries, stack);
             }
         }
@@ -111,7 +112,7 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
                     list = instance.appendStacksForItem(item);
                     Map<String, Object> groupMenu = getOrCreateSubEntryInMap(itemGroups, "_item_group_" + group.langId);
                     for (ItemStack stack : list) {
-                        putEntryInMap(groupMenu, EntryStack.create(stack));
+                        putEntryInMap(groupMenu, EntryStacks.of(stack));
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -125,8 +126,8 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
             for (String pathSegment : pathSegments) {
                 lastMap = getOrCreateSubEntryInMap(lastMap, pathSegment);
             }
-            for (EntryStack entry : SubsetsRegistry.getInstance().getPathEntries(path)) {
-                EntryStack firstStack = CollectionUtils.findFirstOrNullEqualsEntryIgnoreAmount(stacks, entry);
+            for (EntryStack<?> entry : SubsetsRegistry.getInstance().getPathEntries(path)) {
+                EntryStack<?> firstStack = CollectionUtils.findFirstOrNullEqualsEntryIgnoreAmount(stacks, entry);
                 if (firstStack != null)
                     putEntryInMap(lastMap, firstStack);
             }
@@ -145,8 +146,8 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
         }
     }
     
-    private static void putEntryInMap(Map<String, Object> parent, EntryStack stack) {
-        Set<EntryStack> items = (Set<EntryStack>) parent.get("items");
+    private static void putEntryInMap(Map<String, Object> parent, EntryStack<?> stack) {
+        Set<EntryStack<?>> items = (Set<EntryStack<?>>) parent.get("items");
         if (items == null) {
             items = Sets.newLinkedHashSet();
             parent.put("items", items);
@@ -158,8 +159,8 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
         List<MenuEntry> entries = Lists.newArrayList();
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             if (entry.getKey().equals("items")) {
-                Set<EntryStack> items = (Set<EntryStack>) entry.getValue();
-                for (EntryStack item : items) {
+                Set<EntryStack<?>> items = (Set<EntryStack<?>>) entry.getValue();
+                for (EntryStack<?> item : items) {
                     entries.add(new EntryStackSubsetsMenuEntry(item));
                 }
             } else {

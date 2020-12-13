@@ -36,7 +36,7 @@ import java.util.Set;
 public class FilteringResultImpl implements FilteringResult {
     private final Set<AmountIgnoredEntryStackWrapper> hiddenStacks, shownStacks;
     
-    public FilteringResultImpl(List<EntryStack> hiddenStacks, List<EntryStack> shownStacks) {
+    public FilteringResultImpl(List<? extends EntryStack<?>> hiddenStacks, List<? extends EntryStack<?>> shownStacks) {
         this.hiddenStacks = Sets.newHashSetWithExpectedSize(hiddenStacks.size());
         this.shownStacks = Sets.newHashSetWithExpectedSize(shownStacks.size());
         hide(hiddenStacks);

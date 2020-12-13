@@ -308,7 +308,7 @@ public class FilteringScreen extends Screen {
     
     public void updateSearch(String searchTerm) {
         lastSearchArguments = SearchArgument.processSearchTerm(searchTerm);
-        Set<EntryStack> list = Sets.newLinkedHashSet();
+        Set<EntryStack<?>> list = Sets.newLinkedHashSet();
         EntryRegistry.getInstance().getEntryStacks().forEach(stack -> {
             if (canLastSearchTermsBeAppliedTo(stack)) {
                 list.add(stack.copy().setting(EntryStack.Settings.CHECK_AMOUNT, EntryStack.Settings.FALSE).setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE));
@@ -319,7 +319,7 @@ public class FilteringScreen extends Screen {
         updateEntriesPosition();
     }
     
-    public boolean canLastSearchTermsBeAppliedTo(EntryStack stack) {
+    public boolean canLastSearchTermsBeAppliedTo(EntryStack<?> stack) {
         return lastSearchArguments.isEmpty() || SearchArgument.canSearchTermsBeAppliedTo(stack, lastSearchArguments);
     }
     
@@ -482,7 +482,7 @@ public class FilteringScreen extends Screen {
         }
         
         @Override
-        public EntryStack getCurrentEntry() {
+        public EntryStack<?> getCurrentEntry() {
             return super.getCurrentEntry();
         }
         

@@ -84,7 +84,7 @@ public class SearchFilteringRule extends AbstractFilteringRule<SearchFilteringRu
     @NotNull
     @Override
     public FilteringResult processFilteredStacks(@NotNull FilteringContext context) {
-        List<CompletableFuture<List<EntryStack>>> completableFutures = Lists.newArrayList();
+        List<CompletableFuture<List<EntryStack<?>>>> completableFutures = Lists.newArrayList();
         processList(context.getUnsetStacks(), completableFutures);
         if (show) processList(context.getHiddenStacks(), completableFutures);
         else processList(context.getShownStacks(), completableFutures);
@@ -94,8 +94,8 @@ public class SearchFilteringRule extends AbstractFilteringRule<SearchFilteringRu
             e.printStackTrace();
         }
         FilteringResult result = FilteringResult.create();
-        for (CompletableFuture<List<EntryStack>> future : completableFutures) {
-            List<EntryStack> now = future.getNow(null);
+        for (CompletableFuture<List<EntryStack<?>>> future : completableFutures) {
+            List<EntryStack<?>> now = future.getNow(null);
             if (now != null) {
                 if (show) {
                     result.show(now);
@@ -112,11 +112,11 @@ public class SearchFilteringRule extends AbstractFilteringRule<SearchFilteringRu
         return new SearchFilteringRule("", Collections.singletonList(SearchArgument.SearchArguments.ALWAYS), true);
     }
     
-    private void processList(Collection<EntryStack> stacks, List<CompletableFuture<List<EntryStack>>> completableFutures) {
-        for (Iterable<EntryStack> partitionStacks : CollectionUtils.partition((List<EntryStack>) stacks, 100)) {
+    private void processList(Collection<EntryStack<?>> stacks, List<CompletableFuture<List<EntryStack<?>>>> completableFutures) {
+        for (Iterable<EntryStack<?>> partitionStacks : CollectionUtils.partition((List<EntryStack<?>>) stacks, 100)) {
             completableFutures.add(CompletableFuture.supplyAsync(() -> {
-                List<EntryStack> output = Lists.newArrayList();
-                for (EntryStack stack : partitionStacks) {
+                List<EntryStack<?>> output = Lists.newArrayList();
+                for (EntryStack<?> stack : partitionStacks) {
                     boolean shown = SearchArgument.canSearchTermsBeAppliedTo(stack, arguments);
                     if (shown) {
                         output.add(stack);

@@ -50,10 +50,10 @@ public interface EntryRegistry {
     }
     
     @NotNull
-    Stream<EntryStack> getEntryStacks();
+    Stream<EntryStack<?>> getEntryStacks();
     
     @NotNull
-    List<EntryStack> getPreFilteredList();
+    List<EntryStack<?>> getPreFilteredList();
     
     @ApiStatus.Experimental
     void refilter();
@@ -70,7 +70,7 @@ public interface EntryRegistry {
     @NotNull
     ItemStack[] getAllStacksFromItem(@NotNull Item item);
     
-    default void registerEntry(@NotNull EntryStack stack) {
+    default void registerEntry(@NotNull EntryStack<?> stack) {
         registerEntryAfter(null, stack);
     }
     
@@ -80,7 +80,7 @@ public interface EntryRegistry {
      * @param afterEntry the stack to put after
      * @param stack      the stack to register
      */
-    void registerEntryAfter(@Nullable EntryStack afterEntry, @NotNull EntryStack stack);
+    void registerEntryAfter(@Nullable EntryStack<?> afterEntry, @NotNull EntryStack<?> stack);
     
     /**
      * Registers multiple stacks to the item list
@@ -88,7 +88,7 @@ public interface EntryRegistry {
      * @param afterStack the stack to put after
      * @param stacks     the stacks to register
      */
-    default void registerEntriesAfter(@Nullable EntryStack afterStack, @NotNull EntryStack... stacks) {
+    default void registerEntriesAfter(@Nullable EntryStack<?> afterStack, @NotNull EntryStack<?>... stacks) {
         registerEntriesAfter(afterStack, Arrays.asList(stacks));
     }
     
@@ -98,14 +98,14 @@ public interface EntryRegistry {
      * @param afterStack the stack to put after
      * @param stacks     the stacks to register
      */
-    void registerEntriesAfter(@Nullable EntryStack afterStack, @NotNull Collection<@NotNull ? extends EntryStack> stacks);
+    void registerEntriesAfter(@Nullable EntryStack<?> afterStack, @NotNull Collection<@NotNull ? extends EntryStack<?>> stacks);
     
     /**
      * Registers multiple stacks to the item list
      *
      * @param stacks the stacks to register
      */
-    default void registerEntries(@NotNull EntryStack... stacks) {
+    default void registerEntries(@NotNull EntryStack<?>... stacks) {
         registerEntriesAfter(null, stacks);
     }
     
@@ -115,11 +115,11 @@ public interface EntryRegistry {
      * @param stack the stack to check
      * @return whether the stack has been registered
      */
-    boolean alreadyContain(EntryStack stack);
+    boolean alreadyContain(EntryStack<?> stack);
     
     @ApiStatus.Experimental
-    void removeEntry(EntryStack stack);
+    void removeEntry(EntryStack<?> stack);
     
     @ApiStatus.Experimental
-    void removeEntryIf(Predicate<EntryStack> stackPredicate);
+    void removeEntryIf(Predicate<EntryStack<?>> stackPredicate);
 }

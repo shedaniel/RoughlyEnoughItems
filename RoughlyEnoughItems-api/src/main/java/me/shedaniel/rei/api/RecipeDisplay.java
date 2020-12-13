@@ -36,13 +36,13 @@ public interface RecipeDisplay {
      * @return a list of inputs
      */
     @NotNull
-    List<List<EntryStack>> getInputEntries();
+    List<? extends List<? extends EntryStack<?>>> getInputEntries();
     
     /**
      * @return a list of outputs
      */
     @NotNull
-    List<List<EntryStack>> getResultingEntries();
+    List<? extends List<? extends EntryStack<?>>> getResultingEntries();
     
     /**
      * Gets the required items used in craftable filters
@@ -50,7 +50,7 @@ public interface RecipeDisplay {
      * @return the list of required items
      */
     @NotNull
-    default List<List<EntryStack>> getRequiredEntries() {
+    default List<? extends List<? extends EntryStack<?>>> getRequiredEntries() {
         return Collections.emptyList();
     }
     
@@ -71,5 +71,4 @@ public interface RecipeDisplay {
     default Optional<ResourceLocation> getRecipeLocation() {
         return Optional.empty();
     }
-    
 }
