@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.plugin.beacon_payment;
+package me.shedaniel.rei.plugin.beacon.base;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -30,12 +30,14 @@ import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.RecipeCategory;
+import me.shedaniel.rei.api.Renderer;
+import me.shedaniel.rei.api.entry.EntryStacks;
 import me.shedaniel.rei.api.widgets.Slot;
+import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
-import me.shedaniel.rei.gui.entries.RecipeEntry;
+import me.shedaniel.rei.gui.entries.RecipeRenderer;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import me.shedaniel.rei.plugin.DefaultPlugin;
@@ -47,30 +49,33 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
 
-public class DefaultBeaconPaymentCategory implements RecipeCategory<DefaultBeaconPaymentDisplay> {
+public class DefaultBeaconBaseCategory implements RecipeCategory<DefaultBeaconBaseDisplay> {
     @Override
     public @NotNull ResourceLocation getIdentifier() {
-        return DefaultPlugin.BEACON_PAYMENT;
+        return DefaultPlugin.BEACON;
     }
     
     @Override
-    public @NotNull String getCategoryName() {
-        return I18n.get("category.rei.beacon_payment");
+    @NotNull
+    public String getCategoryName() {
+        return I18n.get("category.rei.beacon_base");
     }
     
     @Override
-    public @NotNull EntryStack getLogo() {
-        return EntryStack.create(Blocks.BEACON);
+    @NotNull
+    public Renderer getLogo() {
+        return EntryStacks.of(Blocks.BEACON);
     }
     
     @Override
-    public @NotNull RecipeEntry getSimpleRenderer(DefaultBeaconPaymentDisplay recipe) {
+    public @NotNull RecipeRenderer getSimpleRenderer(DefaultBeaconBaseDisplay recipe) {
         String name = getCategoryName();
-        return new RecipeEntry() {
+        return new RecipeRenderer() {
             @Override
             public int getHeight() {
                 return 10 + Minecraft.getInstance().font.lineHeight;
@@ -84,9 +89,9 @@ public class DefaultBeaconPaymentCategory implements RecipeCategory<DefaultBeaco
     }
     
     @Override
-    public @NotNull List<Widget> setupDisplay(DefaultBeaconPaymentDisplay display, Rectangle bounds) {
+    public @NotNull List<Widget> setupDisplay(DefaultBeaconBaseDisplay display, Rectangle bounds) {
         List<Widget> widgets = Lists.newArrayList();
-        widgets.add(Widgets.createSlot(new Point(bounds.getCenterX() - 8, bounds.y + 3)).entry(getLogo()));
+        widgets.add(Widgets.createSlot(new Point(bounds.getCenterX() - 8, bounds.y + 3)).entry(EntryStacks.of(Blocks.BEACON)));
         Rectangle rectangle = new Rectangle(bounds.getCenterX() - (bounds.width / 2) - 1, bounds.y + 23, bounds.width + 2, bounds.height - 28);
         widgets.add(Widgets.createSlotBase(rectangle));
         widgets.add(new ScrollableSlotsWidget(rectangle, CollectionUtils.map(display.getEntries(), t -> Widgets.createSlot(new Point(0, 0)).disableBackground().entry(t))));

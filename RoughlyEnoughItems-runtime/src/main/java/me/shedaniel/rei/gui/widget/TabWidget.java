@@ -25,10 +25,7 @@ package me.shedaniel.rei.gui.widget;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.RecipeCategory;
+import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.TextComponent;
@@ -48,7 +45,7 @@ public class TabWidget extends WidgetWithBounds {
     public static final ResourceLocation CHEST_GUI_TEXTURE_DARK = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
     
     public boolean shown = false, selected = false;
-    public EntryStack logo;
+    public Renderer renderer;
     public int id;
     public String categoryName;
     public Rectangle bounds;
@@ -75,13 +72,13 @@ public class TabWidget extends WidgetWithBounds {
         return button == 0 && containsMouse(mouseX, mouseY) && onClick.test(this);
     }
     
-    public void setRenderer(RecipeCategory<?> category, EntryStack logo, String categoryName, boolean selected) {
-        if (logo == null) {
+    public void setRenderer(RecipeCategory<?> category, Renderer renderer, String categoryName, boolean selected) {
+        if (renderer == null) {
             shown = false;
-            this.logo = null;
+            this.renderer = null;
         } else {
             shown = true;
-            this.logo = logo;
+            this.renderer = renderer;
         }
         this.category = category;
         this.selected = selected;
@@ -110,8 +107,8 @@ public class TabWidget extends WidgetWithBounds {
         if (shown) {
             minecraft.getTextureManager().bind(REIHelper.getInstance().isDarkThemeEnabled() ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
             this.blit(matrices, bounds.x, bounds.y + 2, u + (selected ? bounds.width : 0), v, bounds.width, (selected ? bounds.height + 2 : bounds.height - 1));
-            logo.setZ(100);
-            logo.render(matrices, new Rectangle(bounds.getCenterX() - 8, bounds.getCenterY() - 5, 16, 16), mouseX, mouseY, delta);
+            renderer.setZ(100);
+            renderer.render(matrices, new Rectangle(bounds.getCenterX() - 8, bounds.getCenterY() - 5, 16, 16), mouseX, mouseY, delta);
             if (containsMouse(mouseX, mouseY)) {
                 drawTooltip();
             }

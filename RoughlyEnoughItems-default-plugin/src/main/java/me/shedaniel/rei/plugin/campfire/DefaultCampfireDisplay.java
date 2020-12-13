@@ -25,6 +25,7 @@ package me.shedaniel.rei.plugin.campfire;
 
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeDisplay;
+import me.shedaniel.rei.api.entry.EntryStacks;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -42,9 +43,8 @@ import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
 public class DefaultCampfireDisplay implements RecipeDisplay {
-    
-    private List<List<EntryStack>> inputs;
-    private List<EntryStack> output;
+    private List<? extends List<? extends EntryStack<?>>> inputs;
+    private List<? extends EntryStack<?>> output;
     private int cookTime;
     private CampfireCookingRecipe display;
     
@@ -54,8 +54,8 @@ public class DefaultCampfireDisplay implements RecipeDisplay {
     }
     
     public DefaultCampfireDisplay(NonNullList<Ingredient> ingredients, ItemStack output, int cookTime) {
-        this.inputs = EntryStack.ofIngredients(ingredients);
-        this.output = Collections.singletonList(EntryStack.create(output));
+        this.inputs = EntryStacks.ofIngredients(ingredients);
+        this.output = Collections.singletonList(EntryStacks.of(output));
         this.cookTime = cookTime;
     }
     
@@ -69,17 +69,17 @@ public class DefaultCampfireDisplay implements RecipeDisplay {
     }
     
     @Override
-    public @NotNull List<List<EntryStack>> getInputEntries() {
+    public @NotNull List<? extends List<? extends EntryStack<?>>> getInputEntries() {
         return inputs;
     }
     
     @Override
-    public @NotNull List<List<EntryStack>> getResultingEntries() {
+    public @NotNull List<? extends List<? extends EntryStack<?>>> getResultingEntries() {
         return Collections.singletonList(output);
     }
     
     @Override
-    public @NotNull List<List<EntryStack>> getRequiredEntries() {
+    public @NotNull List<? extends List<? extends EntryStack<?>>> getRequiredEntries() {
         return inputs;
     }
     

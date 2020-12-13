@@ -26,6 +26,7 @@ package me.shedaniel.rei.plugin.smithing;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeDisplay;
+import me.shedaniel.rei.api.entry.EntryStacks;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -41,42 +42,42 @@ import java.util.Optional;
 @Environment(EnvType.CLIENT)
 public class DefaultSmithingDisplay implements RecipeDisplay {
     @NotNull
-    private List<List<EntryStack>> input;
+    private List<? extends List<? extends EntryStack<?>>> input;
     @NotNull
-    private List<EntryStack> output;
+    private List<? extends List<? extends EntryStack<?>>> output;
     @Nullable
     private ResourceLocation location;
     
     public DefaultSmithingDisplay(@NotNull UpgradeRecipe recipe) {
         this(
                 Lists.newArrayList(
-                        EntryStack.ofIngredient(recipe.base),
-                        EntryStack.ofIngredient(recipe.addition)
+                        EntryStacks.ofIngredient(recipe.base),
+                        EntryStacks.ofIngredient(recipe.addition)
                 ),
-                Collections.singletonList(EntryStack.create(recipe.getResultItem())),
+                Collections.singletonList(EntryStacks.of(recipe.getResultItem())),
                 recipe.getId()
         );
     }
     
-    public DefaultSmithingDisplay(@NotNull List<List<EntryStack>> input, @NotNull List<EntryStack> output, @Nullable ResourceLocation location) {
+    public DefaultSmithingDisplay(@NotNull List<? extends List<? extends EntryStack<?>>> input, @NotNull List<EntryStack<?>> output, @Nullable ResourceLocation location) {
         this.input = input;
-        this.output = output;
         if (this.input.size() != 2) throw new IllegalArgumentException("input must have 2 entries.");
+        this.output = Collections.singletonList(output);
         this.location = location;
     }
     
     @Override
-    public @NotNull List<List<EntryStack>> getInputEntries() {
+    public @NotNull List<? extends List<? extends EntryStack<?>>> getInputEntries() {
         return input;
     }
     
     @Override
-    public @NotNull List<List<EntryStack>> getResultingEntries() {
-        return Collections.singletonList(output);
+    public @NotNull List<? extends List<? extends EntryStack<?>>> getResultingEntries() {
+        return output;
     }
     
     @Override
-    public @NotNull List<List<EntryStack>> getRequiredEntries() {
+    public @NotNull List<? extends List<? extends EntryStack<?>>> getRequiredEntries() {
         return getInputEntries();
     }
     

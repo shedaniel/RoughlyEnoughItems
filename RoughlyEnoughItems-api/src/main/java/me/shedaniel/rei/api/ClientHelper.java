@@ -35,7 +35,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -76,11 +75,7 @@ public interface ClientHelper {
      * @param stack the stack to cheat in
      * @return whether it failed
      */
-    boolean tryCheatingEntry(EntryStack stack);
-    
-    default boolean tryCheatingStack(ItemStack stack) {
-        return tryCheatingEntry(EntryStack.create(stack));
-    }
+    boolean tryCheatingEntry(EntryStack<?> stack);
     
     /**
      * Gets the mod from an item
@@ -190,13 +185,13 @@ public interface ClientHelper {
         
         @NotNull Set<ResourceLocation> getCategories();
         
-        ViewSearchBuilder addRecipesFor(EntryStack stack);
+        ViewSearchBuilder addRecipesFor(EntryStack<?> stack);
         
-        @NotNull List<EntryStack> getRecipesFor();
+        @NotNull List<EntryStack<?>> getRecipesFor();
         
-        ViewSearchBuilder addUsagesFor(EntryStack stack);
+        ViewSearchBuilder addUsagesFor(EntryStack<?> stack);
         
-        @NotNull List<EntryStack> getUsagesFor();
+        @NotNull List<EntryStack<?>> getUsagesFor();
         
         ViewSearchBuilder setPreferredOpenedCategory(@Nullable ResourceLocation category);
         
@@ -205,15 +200,15 @@ public interface ClientHelper {
         
         ViewSearchBuilder fillPreferredOpenedCategory();
         
-        ViewSearchBuilder setInputNotice(@Nullable EntryStack stack);
+        ViewSearchBuilder setInputNotice(@Nullable EntryStack<?> stack);
         
         @Nullable
-        EntryStack getInputNotice();
+        EntryStack<?> getInputNotice();
         
-        ViewSearchBuilder setOutputNotice(@Nullable EntryStack stack);
+        ViewSearchBuilder setOutputNotice(@Nullable EntryStack<?> stack);
         
         @Nullable
-        EntryStack getOutputNotice();
+        EntryStack<?> getOutputNotice();
         
         @NotNull
         Map<RecipeCategory<?>, List<RecipeDisplay>> buildMap();

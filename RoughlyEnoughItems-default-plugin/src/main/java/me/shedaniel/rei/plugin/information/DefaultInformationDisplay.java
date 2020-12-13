@@ -40,31 +40,31 @@ import java.util.List;
 
 @Environment(EnvType.CLIENT)
 public class DefaultInformationDisplay implements RecipeDisplay {
-    private List<EntryStack> entryStacks;
+    private List<? extends EntryStack<?>> entryStacks;
     private List<Component> texts;
     private Component name;
     
-    protected DefaultInformationDisplay(List<EntryStack> entryStacks, Component name) {
+    protected DefaultInformationDisplay(List<? extends EntryStack<?>> entryStacks, Component name) {
         this.entryStacks = entryStacks;
         this.name = name;
         this.texts = Lists.newArrayList();
     }
     
-    public static DefaultInformationDisplay createFromEntries(List<EntryStack> entryStacks, Component name) {
+    public static DefaultInformationDisplay createFromEntries(List<? extends EntryStack<?>> entryStacks, Component name) {
         return new DefaultInformationDisplay(entryStacks, name);
     }
     
-    public static DefaultInformationDisplay createFromEntry(EntryStack entryStack, Component name) {
+    public static DefaultInformationDisplay createFromEntry(EntryStack<?> entryStack, Component name) {
         return createFromEntries(Collections.singletonList(entryStack), name);
     }
     
     @Override
-    public @NotNull List<List<EntryStack>> getInputEntries() {
+    public @NotNull List<? extends List<? extends EntryStack<?>>> getInputEntries() {
         return Collections.singletonList(entryStacks);
     }
     
     @Override
-    public @NotNull List<List<EntryStack>> getResultingEntries() {
+    public @NotNull List<? extends List<? extends EntryStack<?>>> getResultingEntries() {
         return Collections.singletonList(entryStacks);
     }
     
@@ -83,7 +83,7 @@ public class DefaultInformationDisplay implements RecipeDisplay {
         return this;
     }
     
-    List<EntryStack> getEntryStacks() {
+    List<? extends EntryStack<?>> getEntryStacks() {
         return entryStacks;
     }
     

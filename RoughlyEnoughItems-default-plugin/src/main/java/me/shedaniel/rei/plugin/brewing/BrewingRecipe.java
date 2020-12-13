@@ -27,7 +27,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Ingredient;
 
 public class BrewingRecipe {
-    
     public final Item input;
     public final Ingredient ingredient;
     public final Item output;
@@ -37,5 +36,4 @@ public class BrewingRecipe {
         this.ingredient = ingredient;
         this.output = output;
     }
-    
 }

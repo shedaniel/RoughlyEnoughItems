@@ -59,7 +59,7 @@ public abstract class Argument {
         return dataOrdinal;
     }
     
-    public abstract boolean matches(Object[] data, EntryStack stack, String searchText, Object searchData);
+    public abstract boolean matches(Object[] data, EntryStack<?> stack, String searchText, Object searchData);
     
     public Object prepareSearchData(String searchText) {
         return null;

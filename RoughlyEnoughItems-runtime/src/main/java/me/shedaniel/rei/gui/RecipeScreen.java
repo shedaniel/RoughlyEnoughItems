@@ -30,10 +30,10 @@ import org.jetbrains.annotations.ApiStatus;
 @ApiStatus.Internal
 public interface RecipeScreen {
     @ApiStatus.Internal
-    void addIngredientStackToNotice(EntryStack stack);
+    void addIngredientStackToNotice(EntryStack<?> stack);
     
     @ApiStatus.Internal
-    void addResultStackToNotice(EntryStack stack);
+    void addResultStackToNotice(EntryStack<?> stack);
     
     @ApiStatus.Internal
     ResourceLocation getCurrentCategory();

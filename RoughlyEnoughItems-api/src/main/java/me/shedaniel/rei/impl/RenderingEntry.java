@@ -23,43 +23,38 @@
 
 package me.shedaniel.rei.impl;
 
+import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.fractions.Fraction;
+import me.shedaniel.rei.api.entry.BuiltinEntryTypes;
+import me.shedaniel.rei.api.entry.ComparisonContext;
+import me.shedaniel.rei.api.entry.EntryDefinition;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Unit;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
 @ApiStatus.OverrideOnly
-public abstract class RenderingEntry extends GuiComponent implements EntryStack {
+public abstract class RenderingEntry extends GuiComponent implements EntryStack<Unit> {
+    @Override
+    public @NotNull EntryDefinition<Unit> getDefinition() {
+        return BuiltinEntryTypes.RENDERING.getDefinition();
+    }
+    
     @Override
     public Optional<ResourceLocation> getIdentifier() {
         return Optional.empty();
     }
     
     @Override
-    public Type getType() {
-        return Type.RENDER;
-    }
-    
-    @Override
-    public int getAmount() {
-        return 0;
-    }
-    
-    @Override
-    public Fraction getAccurateAmount() {
-        return Fraction.empty();
+    public Fraction getAmount() {
+        return Fraction.zero();
     }
     
     @Override
     public void setAmount(Fraction amount) {
-        
-    }
-    
-    @Override
-    public void setFloatingAmount(double amount) {
         
     }
     
@@ -69,38 +64,23 @@ public abstract class RenderingEntry extends GuiComponent implements EntryStack 
     }
     
     @Override
-    public EntryStack copy() {
+    public EntryStack<Unit> copy() {
         return this;
     }
     
     @Override
-    public Object getObject() {
-        return null;
+    public Unit getValue() {
+        return Unit.INSTANCE;
     }
     
     @Override
-    public boolean equals(EntryStack stack, boolean ignoreTags, boolean ignoreAmount) {
-        return stack == this;
+    public boolean equals(EntryStack<Unit> other, ComparisonContext context) {
+        return this == other;
     }
     
     @Override
-    public boolean equalsIgnoreTagsAndAmount(EntryStack stack) {
-        return stack == this;
-    }
-    
-    @Override
-    public boolean equalsIgnoreTags(EntryStack stack) {
-        return stack == this;
-    }
-    
-    @Override
-    public boolean equalsIgnoreAmount(EntryStack stack) {
-        return stack == this;
-    }
-    
-    @Override
-    public boolean equalsAll(EntryStack stack) {
-        return stack == this;
+    public int hash(ComparisonContext context) {
+        return System.identityHashCode(this);
     }
     
     @Override
@@ -114,22 +94,17 @@ public abstract class RenderingEntry extends GuiComponent implements EntryStack 
     }
     
     @Override
-    public <T> EntryStack setting(Settings<T> settings, T value) {
+    public <R> EntryStack<Unit> setting(Settings<R> settings, R value) {
         return this;
     }
     
     @Override
-    public <T> EntryStack removeSetting(Settings<T> settings) {
+    public <R> EntryStack<Unit> removeSetting(Settings<R> settings) {
         return this;
     }
     
     @Override
-    public EntryStack clearSettings() {
-        return this;
-    }
-    
-    @Override
-    public <T> EntryStack addSetting(Settings<T> settings, T value) {
+    public EntryStack<Unit> clearSettings() {
         return this;
     }
     

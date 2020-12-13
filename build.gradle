@@ -34,7 +34,6 @@ group = "me.shedaniel"
 
 allprojects {
     apply plugin: 'maven-publish'
-    apply plugin: 'maven'
     apply plugin: 'fabric-loom'
     apply plugin: 'net.minecrell.licenser'
     apply plugin: 'net.corda.plugins.jar-filter'
@@ -47,6 +46,7 @@ allprojects {
 
     repositories {
         maven { url "https://dl.bintray.com/shedaniel/shedaniel-mods" }
+        maven { url "https://dl.bintray.com/shedaniel/cloth" }
         mavenLocal()
     }
 
@@ -74,7 +74,7 @@ allprojects {
         modApi("net.fabricmc:fabric-loader:${project.fabricloader_version}")
         modApi(fabricApi.module("fabric-api-base", project.fabric_api))
         modApi(fabricApi.module("fabric-resource-loader-v0", project.fabric_api))
-        modApi(fabricApi.module("fabric-networking-v0", project.fabric_api))
+        modApi(fabricApi.module("fabric-networking-api-v1", project.fabric_api))
         modApi(fabricApi.module("fabric-lifecycle-events-v1", project.fabric_api))
         modApi(fabricApi.module("fabric-rendering-fluids-v1", project.fabric_api))
         modApi("me.shedaniel.cloth.api:cloth-client-events-v0:${cloth_client_events_v0_version}") {
@@ -96,6 +96,11 @@ allprojects {
         modRuntime("me.shedaniel:SmoothScrollingEverywhere:3.0.3-unstable") {
             transitive(false)
         }
+        modCompileOnly("me.shedaniel:architectury:${architectury_version}") {
+            exclude(module: "fabric-api")
+        }
+        modRuntime("me.shedaniel:architectury:${architectury_version}:fabric")
+        modRuntime("net.fabricmc.fabric-api:fabric-api:${project.fabric_api}")
     }
 
     tasks.withType(JavaCompile) {
@@ -130,7 +135,7 @@ subprojects {
     }
 
     remapJar {
-        input.set(file("${project.buildDir}/filtered-libs/$archivesBaseName-${version}-dev-filtered.jar"))
+        input.set(file("${project.buildDir}/filtered-libs/$archivesBaseName-${project.version}-dev-filtered.jar"))
         classifier(null)
     }
 
@@ -191,8 +196,8 @@ subprojects { rootProject.remapJar.dependsOn("${path}:remapJar") }
 
 task remapMavenJar(type: RemapJarTask, dependsOn: jar) {
     afterEvaluate {
-        input.set(file("${project.buildDir}/libs/${archivesBaseName}-${version}-dev.jar"))
-        archiveName = "${archivesBaseName}-${version}-maven.jar"
+        input.set(file("${project.buildDir}/libs/${archivesBaseName}-${project.version}-dev.jar"))
+        archiveFileName = "${archivesBaseName}-${project.version}-maven.jar"
         addNestedDependencies.set(false)
     }
 }
@@ -200,7 +205,7 @@ task remapMavenJar(type: RemapJarTask, dependsOn: jar) {
 dependencies {
     afterEvaluate {
         subprojects.each {
-            compile project(path: ":${it.name}", configuration: "dev")
+            implementation project(path: ":${it.name}", configuration: "dev")
             include project(path: ":${it.name}", configuration: "remapped")
         }
 
@@ -223,7 +228,7 @@ dependencies {
                 }
             }
         }
-        rootProject.configurations.compile.resolvedConfiguration.firstLevelModuleDependencies.each eachDep
+        rootProject.configurations.compileClasspath.resolvedConfiguration.firstLevelModuleDependencies.each eachDep
         rootProject.configurations.runtimeClasspath.resolvedConfiguration.firstLevelModuleDependencies.each eachDep
     }
 }

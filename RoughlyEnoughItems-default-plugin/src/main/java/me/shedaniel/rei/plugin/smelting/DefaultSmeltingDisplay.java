@@ -33,7 +33,6 @@ import org.jetbrains.annotations.NotNull;
 
 @Environment(EnvType.CLIENT)
 public class DefaultSmeltingDisplay extends DefaultCookingDisplay {
-    
     public DefaultSmeltingDisplay(SmeltingRecipe recipe) {
         super(recipe);
     }

@@ -29,33 +29,32 @@ import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
 public class DefaultFuelDisplay implements RecipeDisplay {
-    private EntryStack fuel;
+    private EntryStack<?> fuel;
     private int fuelTime;
     
-    public DefaultFuelDisplay(EntryStack fuel, int fuelTime) {
+    public DefaultFuelDisplay(EntryStack<?> fuel, int fuelTime) {
         this.fuel = fuel;
         this.fuelTime = fuelTime;
     }
     
     @Override
-    public @NotNull List<List<EntryStack>> getInputEntries() {
+    public List<? extends List<? extends EntryStack<?>>> getInputEntries() {
         return Collections.singletonList(Collections.singletonList(fuel));
     }
     
     @Override
-    public @NotNull List<List<EntryStack>> getResultingEntries() {
+    public List<? extends List<? extends EntryStack<?>>> getResultingEntries() {
         return Collections.emptyList();
     }
     
     @Override
-    public @NotNull ResourceLocation getRecipeCategory() {
+    public ResourceLocation getRecipeCategory() {
         return DefaultPlugin.FUEL;
     }
     

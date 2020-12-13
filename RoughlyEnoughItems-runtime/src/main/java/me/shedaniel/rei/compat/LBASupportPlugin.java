@@ -26,10 +26,10 @@ package me.shedaniel.rei.compat;
 import alexiil.mc.lib.attributes.fluid.FluidAttributes;
 import alexiil.mc.lib.attributes.fluid.GroupedFluidInvView;
 import alexiil.mc.lib.attributes.fluid.amount.FluidAmount;
-import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.rei.api.RecipeHelper;
+import me.shedaniel.rei.api.entry.EntryStacks;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
-import me.shedaniel.rei.api.fractions.Fraction;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResultHolder;
@@ -44,14 +44,14 @@ public class LBASupportPlugin implements REIPluginV0 {
     
     @Override
     public void registerOthers(RecipeHelper recipeHelper) {
-        FluidSupportProvider.getInstance().registerProvider(itemStack -> {
-            GroupedFluidInvView view = FluidAttributes.GROUPED_INV_VIEW.get(itemStack.getItemStack());
+        FluidSupportProvider.getInstance().registerProvider(entry -> {
+            GroupedFluidInvView view = FluidAttributes.GROUPED_INV_VIEW.get(entry.getValue());
             if (view.getStoredFluids().size() > 0)
                 return InteractionResultHolder.success(view.getStoredFluids().stream()
                         .filter(fluidKey -> !fluidKey.isEmpty() && fluidKey.getRawFluid() != null)
                         .map(fluidKey -> {
                             FluidAmount amount = view.getAmount_F(fluidKey);
-                            return EntryStack.create(fluidKey.getRawFluid(), Fraction.of(amount.whole, amount.numerator, amount.denominator));
+                            return EntryStacks.of(fluidKey.getRawFluid(), Fraction.of(amount.whole, amount.numerator, amount.denominator));
                         }));
             return InteractionResultHolder.pass(Stream.empty());
         });

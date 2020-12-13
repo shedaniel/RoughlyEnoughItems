@@ -25,8 +25,8 @@ package me.shedaniel.rei.api;
 
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.widgets.Widgets;
-import me.shedaniel.rei.gui.entries.RecipeEntry;
-import me.shedaniel.rei.gui.entries.SimpleRecipeEntry;
+import me.shedaniel.rei.gui.entries.RecipeRenderer;
+import me.shedaniel.rei.gui.entries.SimpleRecipeRenderer;
 import me.shedaniel.rei.gui.widget.Widget;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -54,7 +54,7 @@ public interface RecipeCategory<T extends RecipeDisplay> {
      * @return the renderer of the icon
      */
     @NotNull
-    default EntryStack getLogo() {
+    default Renderer getLogo() {
         return EntryStack.empty();
     }
     
@@ -74,8 +74,8 @@ public interface RecipeCategory<T extends RecipeDisplay> {
      */
     @ApiStatus.OverrideOnly
     @NotNull
-    default RecipeEntry getSimpleRenderer(T recipe) {
-        return SimpleRecipeEntry.from(recipe::getInputEntries, recipe::getResultingEntries);
+    default RecipeRenderer getSimpleRenderer(T recipe) {
+        return SimpleRecipeRenderer.from(recipe::getInputEntries, recipe::getResultingEntries);
     }
     
     /**

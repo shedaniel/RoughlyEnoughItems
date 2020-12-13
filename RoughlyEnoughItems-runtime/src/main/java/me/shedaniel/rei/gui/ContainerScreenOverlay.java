@@ -35,6 +35,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.entry.EntryStacks;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.widgets.Button;
 import me.shedaniel.rei.api.widgets.Tooltip;
@@ -517,7 +518,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
             }
         }
         if (ConfigManager.getInstance().isCraftableOnlyEnabled()) {
-            Set<EntryStack> currentStacks = ClientHelperImpl.getInstance()._getInventoryItemsTypes();
+            Set<EntryStack<?>> currentStacks = ClientHelperImpl.getInstance()._getInventoryItemsTypes();
             if (!currentStacks.equals(ScreenHelper.inventoryStacks)) {
                 ScreenHelper.inventoryStacks = currentStacks;
                 ENTRY_LIST_WIDGET.updateSearch(ScreenHelper.getSearchField().getText(), true);
@@ -530,7 +531,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
                 AbstractContainerScreen<?> containerScreen = (AbstractContainerScreen<?>) Minecraft.getInstance().screen;
                 int x = containerScreen.leftPos, y = containerScreen.topPos;
                 for (Slot slot : containerScreen.getMenu().slots)
-                    if (!slot.hasItem() || !ENTRY_LIST_WIDGET.canLastSearchTermsBeAppliedTo(EntryStack.create(slot.getItem())))
+                    if (!slot.hasItem() || !ENTRY_LIST_WIDGET.canLastSearchTermsBeAppliedTo(EntryStacks.of(slot.getItem())))
                         fillGradient(matrices, x + slot.x, y + slot.y, x + slot.x + 16, y + slot.y + 16, -601874400, -601874400);
             }
             matrices.popPose();
@@ -678,7 +679,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
             ScreenHelper.toggleOverlayVisible();
             return true;
         }
-        EntryStack stack = RecipeHelper.getInstance().getScreenFocusedStack(Minecraft.getInstance().screen);
+        EntryStack<?> stack = RecipeHelper.getInstance().getScreenFocusedStack(Minecraft.getInstance().screen);
         if (stack != null && !stack.isEmpty()) {
             stack = stack.copy();
             if (ConfigObject.getInstance().getRecipeKeybind().matchesKey(keyCode, scanCode)) {
@@ -731,7 +732,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
             ScreenHelper.toggleOverlayVisible();
             return true;
         }
-        EntryStack stack = RecipeHelper.getInstance().getScreenFocusedStack(Minecraft.getInstance().screen);
+        EntryStack<?> stack = RecipeHelper.getInstance().getScreenFocusedStack(Minecraft.getInstance().screen);
         if (stack != null && !stack.isEmpty()) {
             stack = stack.copy();
             if (ConfigObject.getInstance().getRecipeKeybind().matchesMouse(button)) {

@@ -23,14 +23,22 @@
 
 package me.shedaniel.rei.gui.entries;
 
-import me.shedaniel.rei.impl.RenderingEntry;
+import me.shedaniel.math.Point;
+import me.shedaniel.rei.api.entry.AbstractRenderer;
+import me.shedaniel.rei.api.widgets.Tooltip;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.OverrideOnly
-public abstract class RecipeEntry extends RenderingEntry {
+public abstract class RecipeRenderer extends AbstractRenderer {
     public abstract int getHeight();
     
     public final int getWidth() {
         return 100;
+    }
+    
+    @Override
+    public @Nullable Tooltip getTooltip(Point mouse) {
+        return null;
     }
 }

@@ -29,6 +29,7 @@ import com.google.common.collect.UnmodifiableIterator;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.entry.EntryStacks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.util.Mth;
@@ -84,36 +85,28 @@ public class CollectionUtils {
     }
     
     @Environment(EnvType.CLIENT)
-    public static boolean anyMatchEqualsAll(List<EntryStack> list, EntryStack stack) {
-        for (EntryStack t : list) {
-            if (t.equalsAll(stack))
-                return true;
-        }
-        return false;
+    public static boolean anyMatchEqualsAll(List<? extends EntryStack<?>> list, EntryStack<?> stack) {
+        return firstOrNullEqualsAll(list, stack) != null;
     }
     
     @Environment(EnvType.CLIENT)
-    public static boolean anyMatchEqualsEntryIgnoreAmount(List<EntryStack> list, EntryStack stack) {
-        for (EntryStack t : list) {
-            if (t.equalsIgnoreAmount(stack))
-                return true;
-        }
-        return false;
+    public static boolean anyMatchEqualsEntryIgnoreAmount(List<? extends EntryStack<?>> list, EntryStack<?> stack) {
+        return findFirstOrNullEqualsEntryIgnoreAmount(list, stack) != null;
     }
     
     @Environment(EnvType.CLIENT)
-    public static EntryStack firstOrNullEqualsAll(List<EntryStack> list, EntryStack stack) {
-        for (EntryStack t : list) {
-            if (t.equalsAll(stack))
+    public static EntryStack<?> firstOrNullEqualsAll(List<? extends EntryStack<?>> list, EntryStack<?> stack) {
+        for (EntryStack<?> t : list) {
+            if (EntryStacks.equalsExact(t, stack))
                 return t;
         }
         return null;
     }
     
     @Environment(EnvType.CLIENT)
-    public static EntryStack findFirstOrNullEqualsEntryIgnoreAmount(Collection<EntryStack> list, EntryStack stack) {
-        for (EntryStack t : list) {
-            if (t.equalsIgnoreAmount(stack))
+    public static EntryStack<?> findFirstOrNullEqualsEntryIgnoreAmount(Collection<? extends EntryStack<?>> list, EntryStack<?> stack) {
+        for (EntryStack<?> t : list) {
+            if (EntryStacks.equalsIgnoreCount(t, stack))
                 return t;
         }
         return null;

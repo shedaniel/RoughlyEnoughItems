@@ -44,9 +44,9 @@ import java.util.concurrent.TimeoutException;
 @Environment(EnvType.CLIENT)
 public class FilteringContextImpl implements FilteringContext {
     public final Map<FilteringContextType, Set<AmountIgnoredEntryStackWrapper>> stacks;
-    private final Map<FilteringContextType, Collection<EntryStack>> cachedStacks;
+    private final Map<FilteringContextType, Collection<EntryStack<?>>> cachedStacks;
     
-    public FilteringContextImpl(List<EntryStack> allStacks) {
+    public FilteringContextImpl(List<EntryStack<?>> allStacks) {
         this.stacks = Maps.newHashMap();
         this.cachedStacks = Maps.newHashMap();
         for (FilteringContextType type : FilteringContextType.values()) {
@@ -73,7 +73,7 @@ public class FilteringContextImpl implements FilteringContext {
     }
     
     @Override
-    public Collection<EntryStack> getStacks(FilteringContextType type) {
+    public Collection<EntryStack<?>> getStacks(FilteringContextType type) {
         return cachedStacks.get(type);
     }
     

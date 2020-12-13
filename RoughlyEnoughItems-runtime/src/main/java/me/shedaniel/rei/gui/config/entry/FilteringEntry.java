@@ -29,6 +29,7 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.entry.EntryStacks;
 import me.shedaniel.rei.impl.filtering.FilteringRule;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
@@ -61,7 +62,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
     public FilteringEntry(int width, List<EntryStack> configFiltered, List<FilteringRule<?>> rules, List<EntryStack> defaultValue, Consumer<List<EntryStack>> saveConsumer, Consumer<List<FilteringRule<?>>> rulesSaveConsumer) {
         super(NarratorChatListener.NO_TITLE, false);
         this.width = width;
-        this.configFiltered = new TreeSet<>(Comparator.comparing(EntryStack::hashIgnoreAmount));
+        this.configFiltered = new TreeSet<>(Comparator.comparing(EntryStacks::hashIgnoreCount));
         this.configFiltered.addAll(configFiltered);
         this.rules = Lists.newArrayList(rules);
         this.defaultValue = defaultValue;

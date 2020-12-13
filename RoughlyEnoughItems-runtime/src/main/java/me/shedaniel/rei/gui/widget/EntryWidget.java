@@ -67,7 +67,7 @@ public class EntryWidget extends Slot {
     protected boolean interactableFavorites = true;
     protected boolean wasClicked = false;
     private Rectangle bounds;
-    private List<EntryStack> entryStacks;
+    private List<EntryStack<?>> entryStacks;
     
     public EntryWidget(int x, int y) {
         this(new Point(x, y));
@@ -218,19 +218,19 @@ public class EntryWidget extends Slot {
     
     @NotNull
     @Override
-    public EntryWidget entry(EntryStack stack) {
+    public EntryWidget entry(EntryStack<?> stack) {
         entryStacks.add(stack);
         return this;
     }
     
     @NotNull
     @Override
-    public EntryWidget entries(Collection<EntryStack> stacks) {
+    public EntryWidget entries(Collection<? extends EntryStack<?>> stacks) {
         entryStacks.addAll(stacks);
         return this;
     }
     
-    protected EntryStack getCurrentEntry() {
+    protected EntryStack<?> getCurrentEntry() {
         if (entryStacks.isEmpty())
             return EntryStack.empty();
         if (entryStacks.size() == 1)
@@ -238,13 +238,8 @@ public class EntryWidget extends Slot {
         return entryStacks.get(Mth.floor(((System.currentTimeMillis() + stackDisplayOffset) / 1000 % (double) entryStacks.size())));
     }
     
-    @NotNull
     @Override
-    public List<EntryStack> getEntries() {
-        return entryStacks;
-    }
-    
-    public List<EntryStack> entries() {
+    public @NotNull List<EntryStack<?>> getEntries() {
         return entryStacks;
     }
     
@@ -392,7 +387,7 @@ public class EntryWidget extends Slot {
     }
     
     @ApiStatus.Internal
-    protected boolean cancelDeleteItems(EntryStack stack) {
+    protected boolean cancelDeleteItems(EntryStack<?> stack) {
         return false;
     }
     

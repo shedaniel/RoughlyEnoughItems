@@ -297,7 +297,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
-    public List<EntryStack> getFilteredStacks() {
+    public List<EntryStack<?>> getFilteredStacks() {
         return advanced.filtering.filteredStacks;
     }
     
@@ -481,7 +481,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         }
         
         public static class Filtering {
-            @UseFilteringScreen private List<EntryStack> filteredStacks = new ArrayList<>();
+            @UseFilteringScreen private List<EntryStack<?>> filteredStacks = new ArrayList<>();
             @ConfigEntry.Gui.Excluded public List<FilteringRule<?>> filteringRules = new ArrayList<>();
         }
     }

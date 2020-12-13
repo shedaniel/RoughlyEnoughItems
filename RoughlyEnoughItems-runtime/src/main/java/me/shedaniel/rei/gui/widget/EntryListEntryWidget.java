@@ -24,12 +24,17 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import me.shedaniel.architectury.fluid.FluidStack;
+import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.entry.ComparisonContext;
+import me.shedaniel.rei.api.entry.EntryStacks;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 public abstract class EntryListEntryWidget extends EntryWidget {
     public int backupY;
@@ -72,16 +77,17 @@ public abstract class EntryListEntryWidget extends EntryWidget {
     
     protected boolean doAction(double mouseX, double mouseY, int button) {
         if (!ClientHelper.getInstance().isCheating()) return false;
-        EntryStack entry = getCurrentEntry().copy();
+        EntryStack<?> entry = getCurrentEntry().copy();
         if (!entry.isEmpty()) {
-            if (entry.getType() == EntryStack.Type.FLUID) {
-                Item bucketItem = entry.getFluid().getBucket();
+            if (entry.getValueType() == FluidStack.class) {
+                FluidStack value = (FluidStack) entry.getValue();
+                Item bucketItem = value.getFluid().getBucket();
                 if (bucketItem != null) {
-                    entry = EntryStack.create(bucketItem);
+                    entry = EntryStacks.of(bucketItem);
                 }
             }
-            if (entry.getType() == EntryStack.Type.ITEM)
-                entry.setAmount(button != 1 && !Screen.hasShiftDown() ? 1 : entry.getItemStack().getMaxStackSize());
+            if (entry.getValueType() == ItemStack.class)
+                entry.setAmount(Fraction.ofWhole(button != 1 && !Screen.hasShiftDown() ? 1 : ((ItemStack) entry.getValue()).getMaxStackSize()));
             return ClientHelper.getInstance().tryCheatingEntry(entry);
         }
         
@@ -89,19 +95,20 @@ public abstract class EntryListEntryWidget extends EntryWidget {
     }
     
     @Override
-    protected boolean cancelDeleteItems(EntryStack stack) {
+    protected boolean cancelDeleteItems(EntryStack<?> stack) {
         if (!interactable || !ConfigObject.getInstance().isGrabbingItems())
             return super.cancelDeleteItems(stack);
         if (ClientHelper.getInstance().isCheating()) {
-            EntryStack entry = getCurrentEntry().copy();
+            EntryStack<?> entry = getCurrentEntry().copy();
             if (!entry.isEmpty()) {
-                if (entry.getType() == EntryStack.Type.FLUID) {
-                    Item bucketItem = entry.getFluid().getBucket();
+                if (entry.getValueType() == FluidStack.class) {
+                    FluidStack value = (FluidStack) entry.getValue();
+                    Item bucketItem = value.getFluid().getBucket();
                     if (bucketItem != null) {
-                        entry = EntryStack.create(bucketItem);
+                        entry = EntryStacks.of(bucketItem);
                     }
                 }
-                return entry.equalsIgnoreAmount(stack);
+                return EntryStacks.equals(entry, stack, ComparisonContext.IGNORE_COUNT);
             }
         }
         return super.cancelDeleteItems(stack);

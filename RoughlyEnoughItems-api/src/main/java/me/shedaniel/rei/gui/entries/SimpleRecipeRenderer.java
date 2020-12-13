@@ -25,10 +25,12 @@ package me.shedaniel.rei.gui.entries;
 
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.PoseStack;
+import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.fractions.Fraction;
+import me.shedaniel.rei.api.entry.ComparisonContext;
+import me.shedaniel.rei.api.entry.EntryStacks;
 import me.shedaniel.rei.api.widgets.Slot;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
@@ -46,56 +48,53 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class SimpleRecipeEntry extends RecipeEntry {
-    
-    private static final Comparator<EntryStack> ENTRY_COMPARATOR = Comparator.comparingLong(EntryStack::hashCode);
+public class SimpleRecipeRenderer extends RecipeRenderer {
+    private static final Comparator<EntryStack<?>> ENTRY_COMPARATOR = Comparator.comparingLong(EntryStacks::hashExact);
     private static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private List<Slot> inputWidgets;
     private List<Slot> outputWidgets;
     
     @ApiStatus.Internal
-    protected SimpleRecipeEntry(List<List<EntryStack>> input, List<List<EntryStack>> output) {
+    protected SimpleRecipeRenderer(List<? extends List<? extends EntryStack<?>>> input, List<? extends List<? extends EntryStack<?>>> output) {
         this.inputWidgets = simplify(input).stream().filter(stacks -> !stacks.isEmpty()).map(stacks -> Widgets.createSlot(new Point(0, 0)).entries(stacks).disableBackground().disableHighlight().disableTooltips()).collect(Collectors.toList());
         this.outputWidgets = CollectionUtils.map(simplify(output), outputStacks ->
                 Widgets.createSlot(new Point(0, 0)).entries(CollectionUtils.filter(outputStacks, stack -> !stack.isEmpty())).disableBackground().disableHighlight().disableTooltips());
     }
     
-    private static List<List<EntryStack>> simplify(List<List<EntryStack>> original) {
-        Map<List<EntryStack>, AtomicReference<Fraction>> inputCounter = Maps.newLinkedHashMap();
-        original.stream().collect(Collectors.groupingBy(stacks -> CollectionUtils.mapAndMax(stacks, EntryStack::getAccurateAmount, Fraction::compareTo).orElse(Fraction.empty())))
+    private static List<? extends List<? extends EntryStack<?>>> simplify(List<? extends List<? extends EntryStack<?>>> original) {
+        Map<List<? extends EntryStack<?>>, AtomicReference<Fraction>> inputCounter = Maps.newLinkedHashMap();
+        original.stream().collect(Collectors.groupingBy(stacks -> CollectionUtils.mapAndMax(stacks, EntryStack::getAmount, Fraction::compareTo).orElse(Fraction.zero())))
                 .forEach((fraction, value) -> {
-                    if (!fraction.equals(Fraction.empty())) {
+                    if (!fraction.equals(Fraction.zero())) {
                         value.forEach(stackList -> {
-                            List<EntryStack> stacks = inputCounter.keySet().stream().filter(s -> equalsList(stackList, s)).findFirst().orElse(stackList);
-                            AtomicReference<Fraction> reference = inputCounter.computeIfAbsent(stacks, s -> new AtomicReference<>(Fraction.empty()));
+                            List<? extends EntryStack<?>> stacks = inputCounter.keySet().stream().filter(s -> equalsList(stackList, s)).findFirst().orElse(stackList);
+                            AtomicReference<Fraction> reference = inputCounter.computeIfAbsent(stacks, s -> new AtomicReference<>(Fraction.zero()));
                             reference.set(reference.get().add(fraction));
                         });
                     }
                 });
         return inputCounter.entrySet().stream().map(entry -> CollectionUtils.map(entry.getKey(), stack -> {
-            EntryStack s = stack.copy();
+            EntryStack<?> s = stack.copy();
             s.setAmount(entry.getValue().get());
             return s;
         })).collect(Collectors.toList());
     }
     
-    public static RecipeEntry from(Supplier<List<List<EntryStack>>> input, Supplier<List<List<EntryStack>>> output) {
+    public static RecipeRenderer from(Supplier<List<? extends List<? extends EntryStack<?>>>> input, Supplier<List<? extends List<? extends EntryStack<?>>>> output) {
         return from(input.get(), output.get());
     }
     
-    public static RecipeEntry from(List<List<EntryStack>> input, List<List<EntryStack>> output) {
-        return new SimpleRecipeEntry(input, output);
+    public static RecipeRenderer from(List<? extends List<? extends EntryStack<?>>> input, List<? extends List<? extends EntryStack<?>>> output) {
+        return new SimpleRecipeRenderer(input, output);
     }
     
-    public static boolean equalsList(List<EntryStack> list_1, List<EntryStack> list_2) {
-        List<EntryStack> stacks_1 = list_1.stream().distinct().sorted(ENTRY_COMPARATOR).collect(Collectors.toList());
-        List<EntryStack> stacks_2 = list_2.stream().distinct().sorted(ENTRY_COMPARATOR).collect(Collectors.toList());
-        if (stacks_1.equals(stacks_2))
-            return true;
-        if (stacks_1.size() != stacks_2.size())
+    public static boolean equalsList(List<? extends EntryStack<?>> left, List<? extends EntryStack<?>> right) {
+        List<EntryStack<?>> leftStacks = left.stream().distinct().sorted(ENTRY_COMPARATOR).collect(Collectors.toList());
+        List<EntryStack<?>> rightStacks = right.stream().distinct().sorted(ENTRY_COMPARATOR).collect(Collectors.toList());
+        if (leftStacks.size() != rightStacks.size())
             return false;
-        for (int i = 0; i < stacks_1.size(); i++)
-            if (!stacks_1.get(i).equalsIgnoreTagsAndAmount(stacks_2.get(i)))
+        for (int i = 0; i < leftStacks.size(); i++)
+            if (!EntryStacks.equalsExact(leftStacks.get(i), rightStacks.get(i)))
                 return false;
         return true;
     }

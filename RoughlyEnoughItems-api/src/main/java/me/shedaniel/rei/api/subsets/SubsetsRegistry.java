@@ -47,22 +47,22 @@ public interface SubsetsRegistry {
      * Gets all paths an entry is in, note that this is a really slow call as it looks through all paths.
      */
     @NotNull
-    List<String> getEntryPaths(@NotNull EntryStack stack);
+    List<String> getEntryPaths(@NotNull EntryStack<?> stack);
     
     @Nullable
-    Set<EntryStack> getPathEntries(@NotNull String path);
+    Set<EntryStack<?>> getPathEntries(@NotNull String path);
     
     @NotNull
-    Set<EntryStack> getOrCreatePathEntries(@NotNull String path);
+    Set<EntryStack<?>> getOrCreatePathEntries(@NotNull String path);
     
     @NotNull
     Set<String> getPaths();
     
-    void registerPathEntry(@NotNull String path, @NotNull EntryStack stack);
+    void registerPathEntry(@NotNull String path, @NotNull EntryStack<?> stack);
     
-    void registerPathEntries(@NotNull String path, @NotNull Collection<EntryStack> stacks);
+    void registerPathEntries(@NotNull String path, @NotNull Collection<? extends EntryStack<?>> stacks);
     
-    default void registerPathEntries(@NotNull String path, @NotNull EntryStack... stacks) {
+    default void registerPathEntries(@NotNull String path, @NotNull EntryStack<?>... stacks) {
         registerPathEntries(path, Arrays.asList(stacks));
     }
 }

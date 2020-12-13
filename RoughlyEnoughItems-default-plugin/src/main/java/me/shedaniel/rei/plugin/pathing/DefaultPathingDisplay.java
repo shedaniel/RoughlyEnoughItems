@@ -25,6 +25,7 @@ package me.shedaniel.rei.plugin.pathing;
 
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeDisplay;
+import me.shedaniel.rei.api.entry.EntryStacks;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -37,33 +38,33 @@ import java.util.List;
 
 @Environment(EnvType.CLIENT)
 public class DefaultPathingDisplay implements RecipeDisplay {
-    private EntryStack in, out;
+    private EntryStack<?> in, out;
     
-    public DefaultPathingDisplay(EntryStack in, EntryStack out) {
+    public DefaultPathingDisplay(EntryStack<?> in, EntryStack<?> out) {
         this.in = in;
         this.out = out;
     }
     
     public DefaultPathingDisplay(ItemStack in, ItemStack out) {
-        this.in = EntryStack.create(in);
-        this.out = EntryStack.create(out);
+        this.in = EntryStacks.of(in);
+        this.out = EntryStacks.of(out);
     }
     
-    public final EntryStack getIn() {
+    public final EntryStack<?> getIn() {
         return in;
     }
     
-    public final EntryStack getOut() {
+    public final EntryStack<?> getOut() {
         return out;
     }
     
     @Override
-    public @NotNull List<List<EntryStack>> getInputEntries() {
+    public @NotNull List<? extends List<? extends EntryStack<?>>> getInputEntries() {
         return Collections.singletonList(Collections.singletonList(in));
     }
     
     @Override
-    public @NotNull List<List<EntryStack>> getResultingEntries() {
+    public @NotNull List<? extends List<? extends EntryStack<?>>> getResultingEntries() {
         return Collections.singletonList(Collections.singletonList(out));
     }
     
@@ -73,7 +74,7 @@ public class DefaultPathingDisplay implements RecipeDisplay {
     }
     
     @Override
-    public @NotNull List<List<EntryStack>> getRequiredEntries() {
+    public @NotNull List<? extends List<? extends EntryStack<?>>> getRequiredEntries() {
         return getInputEntries();
     }
 }

@@ -24,6 +24,7 @@
 package me.shedaniel.rei.plugin.crafting;
 
 import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.entry.EntryStacks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
@@ -37,15 +38,14 @@ import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
 public class DefaultShapedDisplay implements DefaultCraftingDisplay {
-    
     private ShapedRecipe display;
-    private List<List<EntryStack>> input;
-    private List<EntryStack> output;
+    private List<? extends List<? extends EntryStack<?>>> input;
+    private List<? extends EntryStack<?>> output;
     
     public DefaultShapedDisplay(ShapedRecipe recipe) {
         this.display = recipe;
-        this.input = EntryStack.ofIngredients(recipe.getIngredients());
-        this.output = Collections.singletonList(EntryStack.create(recipe.getResultItem()));
+        this.input = EntryStacks.ofIngredients(recipe.getIngredients());
+        this.output = Collections.singletonList(EntryStacks.of(recipe.getResultItem()));
     }
     
     @Override
@@ -54,17 +54,17 @@ public class DefaultShapedDisplay implements DefaultCraftingDisplay {
     }
     
     @Override
-    public @NotNull List<List<EntryStack>> getInputEntries() {
+    public @NotNull List<? extends List<? extends EntryStack<?>>> getInputEntries() {
         return input;
     }
     
     @Override
-    public @NotNull List<List<EntryStack>> getResultingEntries() {
+    public @NotNull List<? extends List<? extends EntryStack<?>>> getResultingEntries() {
         return Collections.singletonList(output);
     }
     
     @Override
-    public @NotNull List<List<EntryStack>> getRequiredEntries() {
+    public @NotNull List<? extends List<? extends EntryStack<?>>> getRequiredEntries() {
         return input;
     }
     

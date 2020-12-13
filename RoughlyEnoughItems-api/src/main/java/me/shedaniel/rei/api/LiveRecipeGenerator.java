@@ -35,11 +35,11 @@ public interface LiveRecipeGenerator<T extends RecipeDisplay> {
      */
     ResourceLocation getCategoryIdentifier();
     
-    default Optional<List<T>> getRecipeFor(EntryStack entry) {
+    default Optional<List<T>> getRecipeFor(EntryStack<?> entry) {
         return Optional.empty();
     }
     
-    default Optional<List<T>> getUsageFor(EntryStack entry) {
+    default Optional<List<T>> getUsageFor(EntryStack<?> entry) {
         return Optional.empty();
     }
     

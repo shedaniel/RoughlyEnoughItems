@@ -23,20 +23,27 @@
 
 package me.shedaniel.rei.impl;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMaps;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
+import me.shedaniel.math.Point;
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.EntryStack;
-import net.minecraft.client.gui.GuiComponent;
+import me.shedaniel.rei.api.entry.AbstractRenderer;
+import me.shedaniel.rei.api.entry.ComparisonContext;
+import me.shedaniel.rei.api.entry.EntryStacks;
+import me.shedaniel.rei.api.widgets.Tooltip;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.Internal
-public abstract class AbstractEntryStack extends GuiComponent implements EntryStack {
+public abstract class AbstractEntryStack<A> extends AbstractRenderer implements EntryStack<A> {
     private static final Short2ObjectMap<Object> EMPTY_SETTINGS = Short2ObjectMaps.emptyMap();
     private Short2ObjectMap<Object> settings = null;
     
     @Override
-    public <T> EntryStack setting(Settings<T> settings, T value) {
+    public <T> EntryStack<A> setting(Settings<T> settings, T value) {
         short settingsId = settings.getId();
         if (this.settings == null)
             this.settings = Short2ObjectMaps.singleton(settingsId, value);
@@ -57,7 +64,7 @@ public abstract class AbstractEntryStack extends GuiComponent implements EntrySt
     }
     
     @Override
-    public <T> EntryStack removeSetting(Settings<T> settings) {
+    public <T> EntryStack<A> removeSetting(Settings<T> settings) {
         if (this.settings != null) {
             short settingsId = settings.getId();
             if (this.settings.size() == 1) {
@@ -72,7 +79,7 @@ public abstract class AbstractEntryStack extends GuiComponent implements EntrySt
     }
     
     @Override
-    public EntryStack clearSettings() {
+    public EntryStack<A> clearSettings() {
         this.settings = null;
         return this;
     }
@@ -90,46 +97,25 @@ public abstract class AbstractEntryStack extends GuiComponent implements EntrySt
     }
     
     @Override
-    public boolean equals(EntryStack stack, boolean ignoreTags, boolean ignoreAmount) {
-        if (ignoreTags && ignoreAmount)
-            return equalsIgnoreTagsAndAmount(stack);
-        if (ignoreAmount)
-            return equalsIgnoreAmount(stack);
-        if (ignoreTags)
-            return equalsIgnoreTags(stack);
-        return equalsAll(stack);
+    public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+        this.getDefinition().getRenderer().render(this, matrices, bounds, mouseX, mouseY, delta);
     }
     
     @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof EntryStack))
-            return false;
-        EntryStack stack = (EntryStack) obj;
-        boolean checkTags = get(Settings.CHECK_TAGS).get() || stack.get(Settings.CHECK_TAGS).get();
-        boolean checkAmount = get(Settings.CHECK_AMOUNT).get() || stack.get(Settings.CHECK_AMOUNT).get();
-        return equals(stack, !checkTags, !checkAmount);
+    public @Nullable Tooltip getTooltip(Point mouse) {
+        return this.getDefinition().getRenderer().getTooltip(this, mouse);
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AbstractEntryStack)) return false;
+        AbstractEntryStack<?> that = (AbstractEntryStack<?>) o;
+        return EntryStacks.equalsExact(this, that);
     }
     
     @Override
     public int hashCode() {
-        boolean checkTags = get(Settings.CHECK_TAGS).get();
-        boolean checkAmount = get(Settings.CHECK_AMOUNT).get();
-        if (!checkAmount && !checkTags)
-            return hashIgnoreAmountAndTags();
-        if (!checkAmount)
-            return hashIgnoreAmount();
-        if (!checkTags)
-            return hashIgnoreTags();
-        return hashOfAll();
-    }
-    
-    @Override
-    public int getZ() {
-        return getBlitOffset();
-    }
-    
-    @Override
-    public void setZ(int z) {
-        setBlitOffset(z);
+        return hash(ComparisonContext.EXACT);
     }
 }

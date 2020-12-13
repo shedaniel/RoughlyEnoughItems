@@ -21,10 +21,11 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.plugin.beacon;
+package me.shedaniel.rei.plugin.beacon.base;
 
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeDisplay;
+import me.shedaniel.rei.api.entry.EntryStacks;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -37,24 +38,23 @@ import java.util.List;
 
 @Environment(EnvType.CLIENT)
 public class DefaultBeaconBaseDisplay implements RecipeDisplay {
-    
-    private List<EntryStack> entries;
+    private List<? extends EntryStack<?>> entries;
     
     public DefaultBeaconBaseDisplay(List<ItemStack> entries) {
-        this.entries = EntryStack.ofItemStacks(entries);
+        this.entries = EntryStacks.ofItemStacks(entries);
     }
     
     @Override
-    public @NotNull List<List<EntryStack>> getInputEntries() {
+    public @NotNull List<? extends List<? extends EntryStack<?>>> getInputEntries() {
         return Collections.singletonList(entries);
     }
     
-    public List<EntryStack> getEntries() {
+    public List<? extends EntryStack<?>> getEntries() {
         return entries;
     }
     
     @Override
-    public @NotNull List<List<EntryStack>> getResultingEntries() {
+    public @NotNull List<? extends List<? extends EntryStack<?>>> getResultingEntries() {
         return Collections.emptyList();
     }
     

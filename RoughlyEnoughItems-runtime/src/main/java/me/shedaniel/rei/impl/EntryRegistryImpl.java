@@ -29,6 +29,7 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryRegistry;
 import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.entry.EntryStacks;
 import me.shedaniel.rei.impl.filtering.FilteringContextImpl;
 import me.shedaniel.rei.impl.filtering.FilteringContextType;
 import me.shedaniel.rei.impl.filtering.FilteringRule;
@@ -51,20 +52,11 @@ import java.util.stream.Stream;
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public class EntryRegistryImpl implements EntryRegistry {
-    
-    private final List<EntryStack> preFilteredList = Lists.newCopyOnWriteArrayList();
-    private final List<EntryStack> entries = Lists.newCopyOnWriteArrayList();
+    private final List<EntryStack<?>> preFilteredList = Lists.newCopyOnWriteArrayList();
+    private final List<EntryStack<?>> entries = Lists.newCopyOnWriteArrayList();
     @Nullable
     private List<AmountIgnoredEntryStackWrapper> reloadingRegistry;
     private boolean reloading;
-    
-    private static EntryStack findFirstOrNullEqualsEntryIgnoreAmount(Collection<EntryStack> list, EntryStack obj) {
-        for (EntryStack t : list) {
-            if (t.equalsIgnoreAmount(obj))
-                return t;
-        }
-        return null;
-    }
     
     public void finishReload() {
         reloading = false;
@@ -77,13 +69,13 @@ public class EntryRegistryImpl implements EntryRegistry {
     
     @Override
     @NotNull
-    public Stream<EntryStack> getEntryStacks() {
+    public Stream<EntryStack<?>> getEntryStacks() {
         return reloading ? reloadingRegistry.stream().map(AmountIgnoredEntryStackWrapper::unwrap) : entries.stream();
     }
     
     @Override
     @NotNull
-    public List<EntryStack> getPreFilteredList() {
+    public List<EntryStack<?>> getPreFilteredList() {
         return preFilteredList;
     }
     
@@ -152,7 +144,7 @@ public class EntryRegistryImpl implements EntryRegistry {
     }
     
     @Override
-    public void registerEntryAfter(@Nullable EntryStack afterEntry, @NotNull EntryStack stack) {
+    public void registerEntryAfter(@Nullable EntryStack<?> afterEntry, @NotNull EntryStack<?> stack) {
         if (reloading) {
             int index = afterEntry != null ? reloadingRegistry.lastIndexOf(new AmountIgnoredEntryStackWrapper(afterEntry)) : -1;
             if (index >= 0) {
@@ -167,7 +159,7 @@ public class EntryRegistryImpl implements EntryRegistry {
     }
     
     @Override
-    public void registerEntriesAfter(@Nullable EntryStack afterEntry, @NotNull Collection<@NotNull ? extends EntryStack> stacks) {
+    public void registerEntriesAfter(@Nullable EntryStack<?> afterEntry, @NotNull Collection<@NotNull ? extends EntryStack<?>> stacks) {
         if (reloading) {
             int index = afterEntry != null ? reloadingRegistry.lastIndexOf(new AmountIgnoredEntryStackWrapper(afterEntry)) : -1;
             if (index >= 0) {
@@ -182,15 +174,15 @@ public class EntryRegistryImpl implements EntryRegistry {
     }
     
     @Override
-    public boolean alreadyContain(EntryStack stack) {
+    public boolean alreadyContain(EntryStack<?> stack) {
         if (reloading) {
-            return reloadingRegistry.parallelStream().anyMatch(s -> s.unwrap().equalsAll(stack));
+            return reloadingRegistry.parallelStream().anyMatch(s -> EntryStacks.equalsExact(s.unwrap(), stack));
         }
-        return entries.parallelStream().anyMatch(s -> s.equalsAll(stack));
+        return entries.parallelStream().anyMatch(s -> EntryStacks.equalsExact(s, stack));
     }
     
     @Override
-    public void removeEntry(EntryStack stack) {
+    public void removeEntry(EntryStack<?> stack) {
         if (reloading) {
             reloadingRegistry.remove(new AmountIgnoredEntryStackWrapper(stack));
         } else {
@@ -199,7 +191,7 @@ public class EntryRegistryImpl implements EntryRegistry {
     }
     
     @Override
-    public void removeEntryIf(Predicate<EntryStack> stackPredicate) {
+    public void removeEntryIf(Predicate<EntryStack<?>> stackPredicate) {
         if (reloading) {
             reloadingRegistry.removeIf(wrapper -> stackPredicate.test(wrapper.unwrap()));
         } else {

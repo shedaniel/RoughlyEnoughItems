@@ -23,15 +23,18 @@
 
 package me.shedaniel.rei.api.fluid;
 
+import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.impl.Internals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -47,11 +50,11 @@ public interface FluidSupportProvider {
     void registerProvider(@NotNull Provider provider);
     
     @NotNull
-    Stream<EntryStack> itemToFluids(@NotNull EntryStack itemStack);
+    Optional<Stream<EntryStack<FluidStack>>> itemToFluids(@NotNull EntryStack<? extends ItemStack> itemStack);
     
     @FunctionalInterface
     interface Provider {
         @NotNull
-        InteractionResultHolder<@Nullable Stream<@NotNull EntryStack>> itemToFluid(@NotNull EntryStack itemStack);
+        InteractionResultHolder<@Nullable Stream<@NotNull EntryStack<FluidStack>>> itemToFluid(@NotNull EntryStack<? extends ItemStack> itemStack);
     }
 }

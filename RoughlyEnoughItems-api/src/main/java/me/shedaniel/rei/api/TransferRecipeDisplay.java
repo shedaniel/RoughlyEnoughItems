@@ -40,6 +40,5 @@ public interface TransferRecipeDisplay extends RecipeDisplay {
      */
     int getHeight();
     
-    List<List<EntryStack>> getOrganisedInputEntries(ContainerInfo<AbstractContainerMenu> containerInfo, AbstractContainerMenu container);
-    
+    List<? extends List<? extends EntryStack<?>>> getOrganisedInputEntries(ContainerInfo<AbstractContainerMenu> containerInfo, AbstractContainerMenu container);
 }

@@ -144,13 +144,13 @@ public abstract class Slot extends WidgetWithBounds {
     public abstract Slot clearEntries();
     
     @NotNull
-    public abstract Slot entry(EntryStack stack);
+    public abstract Slot entry(EntryStack<?> stack);
     
     @NotNull
-    public abstract Slot entries(Collection<EntryStack> stacks);
+    public abstract Slot entries(Collection<? extends EntryStack<?>> stacks);
     
     @NotNull
-    public abstract List<EntryStack> getEntries();
+    public abstract List<EntryStack<?>> getEntries();
     
     @Nullable
     public Tooltip getCurrentTooltip(Point point) {

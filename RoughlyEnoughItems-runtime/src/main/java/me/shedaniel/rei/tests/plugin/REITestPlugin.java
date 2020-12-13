@@ -25,6 +25,7 @@ package me.shedaniel.rei.tests.plugin;
 
 import me.shedaniel.rei.api.EntryRegistry;
 import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.entry.EntryStacks;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -59,19 +60,19 @@ public class REITestPlugin implements REIPluginV0 {
         int times = 10;
         for (Item item : Registry.ITEM) {
             for (int i = 0; i < times; i++)
-                entryRegistry.registerEntryAfter(EntryStack.create(item), transformStack(EntryStack.create(item)));
+                entryRegistry.registerEntryAfter(EntryStacks.of(item), transformStack(EntryStacks.of(item)));
             try {
                 for (ItemStack stack : entryRegistry.appendStacksForItem(item)) {
                     for (int i = 0; i < times; i++)
-                        entryRegistry.registerEntry(transformStack(EntryStack.create(stack)));
+                        entryRegistry.registerEntry(transformStack(EntryStacks.of(stack)));
                 }
             } catch (Exception ignored) {
             }
         }
     }
     
-    public EntryStack transformStack(EntryStack stack) {
-        CompoundTag tag = stack.getItemStack().getOrCreateTag();
+    public EntryStack<ItemStack> transformStack(EntryStack<ItemStack> stack) {
+        CompoundTag tag = stack.getValue().getOrCreateTag();
         tag.putInt("Whatever", random.nextInt(Integer.MAX_VALUE));
         return stack;
     }

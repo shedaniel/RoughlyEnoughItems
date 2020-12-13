@@ -69,7 +69,7 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
     private static final ResourceLocation DISPLAY_TEXTURE_DARK = new ResourceLocation("roughlyenoughitems", "textures/gui/display_dark.png");
     private OverlaySearchField searchField;
     @ApiStatus.Internal
-    public static Set<EntryStack> inventoryStacks = Sets.newHashSet();
+    public static Set<EntryStack<?>> inventoryStacks = Sets.newHashSet();
     private static ContainerScreenOverlay overlay;
     private static AbstractContainerScreen<?> previousContainerScreen = null;
     private static LinkedHashSet<RecipeScreen> lastRecipeScreen = Sets.newLinkedHashSetWithExpectedSize(5);

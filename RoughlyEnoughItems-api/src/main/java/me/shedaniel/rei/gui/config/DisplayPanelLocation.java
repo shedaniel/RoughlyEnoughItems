@@ -42,7 +42,7 @@ public enum DisplayPanelLocation implements SelectionListEntry.Translatable {
     }
     
     @Override
-    public @NotNull String getKey() {
+    public String getKey() {
         return I18n.get("config.roughlyenoughitems.accessibility.displayPanelLocation." + name().toLowerCase(Locale.ROOT));
     }
 }

@@ -43,7 +43,7 @@ public interface FilteringResult {
         return create(Lists.newArrayList(), Lists.newArrayList());
     }
     
-    static FilteringResult create(List<EntryStack> hiddenStacks, List<EntryStack> shownStacks) {
+    static FilteringResult create(List<? extends EntryStack<?>> hiddenStacks, List<? extends EntryStack<?>> shownStacks) {
         return new FilteringResultImpl(hiddenStacks, shownStacks);
     }
     
@@ -51,22 +51,22 @@ public interface FilteringResult {
     
     Set<AmountIgnoredEntryStackWrapper> getShownStacks();
     
-    default FilteringResult hide(EntryStack stack) {
+    default FilteringResult hide(EntryStack<?> stack) {
         getHiddenStacks().add(new AmountIgnoredEntryStackWrapper(stack));
         return this;
     }
     
-    default FilteringResult hide(Collection<EntryStack> stacks) {
+    default FilteringResult hide(Collection<? extends EntryStack<?>> stacks) {
         getHiddenStacks().addAll(CollectionUtils.map(stacks, AmountIgnoredEntryStackWrapper::new));
         return this;
     }
     
-    default FilteringResult show(EntryStack stack) {
+    default FilteringResult show(EntryStack<?> stack) {
         getShownStacks().add(new AmountIgnoredEntryStackWrapper(stack));
         return this;
     }
     
-    default FilteringResult show(Collection<EntryStack> stacks) {
+    default FilteringResult show(Collection<? extends EntryStack<?>> stacks) {
         getShownStacks().addAll(CollectionUtils.map(stacks, AmountIgnoredEntryStackWrapper::new));
         return this;
     }

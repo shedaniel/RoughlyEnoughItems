@@ -29,13 +29,13 @@ import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.ConfigObject;
-import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.REIHelper;
+import me.shedaniel.rei.api.Renderer;
+import me.shedaniel.rei.api.entry.AbstractRenderer;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.widgets.Tooltip;
-import me.shedaniel.rei.impl.RenderingEntry;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -72,8 +72,8 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
     }
     
     @Override
-    public EntryStack getWidget(boolean showcase) {
-        return new RenderingEntry() {
+    public Renderer getRenderer(boolean showcase) {
+        return new AbstractRenderer() {
             private Animator notSetOffset = new Animator(0);
             private Rectangle notSetScissorArea = new Rectangle();
             private long nextSwitch = -1;

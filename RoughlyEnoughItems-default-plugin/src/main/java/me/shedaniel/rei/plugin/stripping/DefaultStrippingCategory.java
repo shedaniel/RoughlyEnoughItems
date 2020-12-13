@@ -26,8 +26,9 @@ package me.shedaniel.rei.plugin.stripping;
 import com.google.common.collect.Lists;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.RecipeCategory;
+import me.shedaniel.rei.api.Renderer;
+import me.shedaniel.rei.api.entry.EntryStacks;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
@@ -46,8 +47,8 @@ public class DefaultStrippingCategory implements RecipeCategory<DefaultStripping
     }
     
     @Override
-    public @NotNull EntryStack getLogo() {
-        return EntryStack.create(Items.IRON_AXE);
+    public @NotNull Renderer getLogo() {
+        return EntryStacks.of(Items.IRON_AXE);
     }
     
     @Override

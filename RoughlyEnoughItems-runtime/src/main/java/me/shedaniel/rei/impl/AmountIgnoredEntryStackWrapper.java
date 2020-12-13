@@ -24,6 +24,7 @@
 package me.shedaniel.rei.impl;
 
 import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.entry.ComparisonContext;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.ApiStatus;
@@ -33,12 +34,12 @@ import java.util.Objects;
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public class AmountIgnoredEntryStackWrapper {
-    private final EntryStack stack;
+    private final EntryStack<?> stack;
     private int hash;
     
-    public AmountIgnoredEntryStackWrapper(EntryStack stack) {
+    public AmountIgnoredEntryStackWrapper(EntryStack<?> stack) {
         this.stack = Objects.requireNonNull(stack);
-        this.hash = stack.hashIgnoreAmount();
+        this.hash = stack.hash(ComparisonContext.IGNORE_COUNT);
     }
     
     @Override
@@ -55,7 +56,7 @@ public class AmountIgnoredEntryStackWrapper {
         return stack.isEmpty();
     }
     
-    public EntryStack unwrap() {
+    public EntryStack<?> unwrap() {
         return stack;
     }
 }

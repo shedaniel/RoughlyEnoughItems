@@ -25,6 +25,7 @@ package me.shedaniel.rei.plugin.crafting;
 
 import com.google.common.collect.ImmutableList;
 import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.entry.EntryStacks;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -40,17 +41,16 @@ import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
 public class DefaultCustomDisplay implements DefaultCraftingDisplay {
-    
-    private List<List<EntryStack>> input;
-    private List<EntryStack> output;
+    private List<? extends List<? extends EntryStack<?>>> input;
+    private List<? extends EntryStack<?>> output;
     private Recipe<?> possibleRecipe;
     private int width, height;
     
     public DefaultCustomDisplay(List<List<ItemStack>> input, List<ItemStack> output, Recipe<?> possibleRecipe) {
-        this(possibleRecipe, CollectionUtils.map(input, EntryStack::ofItemStacks), EntryStack.ofItemStacks(output));
+        this(possibleRecipe, CollectionUtils.map(input, EntryStacks::ofItemStacks), EntryStacks.ofItemStacks(output));
     }
     
-    public DefaultCustomDisplay(Recipe<?> possibleRecipe, List<List<EntryStack>> input, List<EntryStack> output) {
+    public DefaultCustomDisplay(Recipe<?> possibleRecipe, List<? extends List<? extends EntryStack<?>>> input, List<? extends EntryStack<?>> output) {
         this.input = ImmutableList.copyOf(input);
         this.output = ImmutableList.copyOf(output);
         this.possibleRecipe = possibleRecipe;
@@ -58,7 +58,7 @@ public class DefaultCustomDisplay implements DefaultCraftingDisplay {
         BitSet column = new BitSet(3);
         for (int i = 0; i < 9; i++)
             if (i < this.input.size()) {
-                List<EntryStack> stacks = this.input.get(i);
+                List<? extends EntryStack<?>> stacks = this.input.get(i);
                 if (stacks.stream().anyMatch(stack -> !stack.isEmpty())) {
                     row.set((i - (i % 3)) / 3);
                     column.set(i % 3);
@@ -82,17 +82,17 @@ public class DefaultCustomDisplay implements DefaultCraftingDisplay {
     }
     
     @Override
-    public @NotNull List<List<EntryStack>> getInputEntries() {
+    public @NotNull List<? extends List<? extends EntryStack<?>>> getInputEntries() {
         return input;
     }
     
     @Override
-    public @NotNull List<List<EntryStack>> getResultingEntries() {
+    public @NotNull List<? extends List<? extends EntryStack<?>>> getResultingEntries() {
         return Collections.singletonList(output);
     }
     
     @Override
-    public @NotNull List<List<EntryStack>> getRequiredEntries() {
+    public @NotNull List<? extends List<? extends EntryStack<?>>> getRequiredEntries() {
         return input;
     }
     
