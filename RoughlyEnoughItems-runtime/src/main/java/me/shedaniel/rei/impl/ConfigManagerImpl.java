@@ -235,11 +235,12 @@ public class ConfigManagerImpl implements ConfigManager {
             TransformingScreen parentTranslated;
             {
                 MutableLong current = new MutableLong(0);
-                parentTranslated = new TransformingScreen(true, null,
+                parentTranslated = new TransformingScreen(true, parent,
                         null,
                         () -> current.setValue(current.getValue() == 0 ? Util.getMillis() + (getConfig().isReducedMotion() ? -3000 : 0) : current.getValue()),
                         () -> 0, () -> (EasingMethod.EasingMethodImpl.EXPO.apply(Mth.clamp((Util.getMillis() - current.getValue()) / 750.0, 0, 1)))
                                        * Minecraft.getInstance().getWindow().getGuiScaledHeight(), () -> Util.getMillis() - current.getValue() > 800);
+                parentTranslated.setInitAfter(true);
             }
             ConfigScreenProvider<ConfigObjectImpl> provider = (ConfigScreenProvider<ConfigObjectImpl>) AutoConfig.getConfigScreen(ConfigObjectImpl.class, parentTranslated);
             provider.setI13nFunction(manager -> "config.roughlyenoughitems");
