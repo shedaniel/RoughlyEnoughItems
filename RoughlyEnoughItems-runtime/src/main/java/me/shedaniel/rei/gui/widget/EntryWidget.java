@@ -368,10 +368,10 @@ public class EntryWidget extends Slot {
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
         if (ScreenHelper.isWithinRecipeViewingScreen && entryStacks.size() > 1 && containsMouse(mouseX, mouseY)) {
             if (amount < 0) {
-                EntryWidget.stackDisplayOffset += 500;
+                EntryWidget.stackDisplayOffset = ((System.currentTimeMillis() + stackDisplayOffset) / 1000 - 1) * 1000;
                 return true;
             } else if (amount > 0) {
-                EntryWidget.stackDisplayOffset -= 500;
+                EntryWidget.stackDisplayOffset = ((System.currentTimeMillis() + stackDisplayOffset) / 1000 + 1) * 1000;
                 return true;
             }
         }

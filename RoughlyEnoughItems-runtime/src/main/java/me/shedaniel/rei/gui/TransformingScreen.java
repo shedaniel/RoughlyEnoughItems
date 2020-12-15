@@ -45,6 +45,7 @@ public class TransformingScreen extends DelegateScreen implements ScissorsScreen
     private Runnable init;
     private boolean renderingLastScreen = false;
     private boolean translatingLast;
+    private boolean initAfter = false;
     
     public TransformingScreen(boolean translatingLast, Screen parent, Screen lastScreen, Runnable init, DoubleSupplier xTransformer, DoubleSupplier yTransformer, BooleanSupplier finished) {
         super(Minecraft.getInstance().level == null && parent == null ? new TitleScreen() : parent);
@@ -54,6 +55,10 @@ public class TransformingScreen extends DelegateScreen implements ScissorsScreen
         this.xTransformer = xTransformer;
         this.yTransformer = yTransformer;
         this.finished = finished;
+    }
+    
+    public void setInitAfter(boolean initAfter) {
+        this.initAfter = initAfter;
     }
     
     public void setParentScreen(Screen parent) {
@@ -128,6 +133,9 @@ public class TransformingScreen extends DelegateScreen implements ScissorsScreen
             Minecraft.getInstance().screen = parent;
             if (parent != null) {
                 Minecraft.getInstance().noRender = false;
+                if (initAfter) {
+                    parent.init(Minecraft.getInstance(), Minecraft.getInstance().getWindow().getGuiScaledWidth(), Minecraft.getInstance().getWindow().getGuiScaledHeight());
+                }
             }
         } else {
             super.tick();
