@@ -37,5 +37,4 @@ public enum EntryPanelOrdering {
     public String getNameTranslationKey() {
         return nameTranslationKey;
     }
-    
 }

@@ -30,17 +30,22 @@ import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.api.entry.*;
+import me.shedaniel.rei.api.entry.ComparisonContext;
+import me.shedaniel.rei.api.entry.EntryStacks;
+import me.shedaniel.rei.api.entry.EntryTypeRegistry;
+import me.shedaniel.rei.api.entry.VanillaEntryTypes;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.api.widgets.Panel;
 import me.shedaniel.rei.api.widgets.Tooltip;
+import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
 import me.shedaniel.rei.gui.plugin.entry.FluidEntryDefinition;
 import me.shedaniel.rei.gui.plugin.entry.ItemEntryDefinition;
+import me.shedaniel.rei.gui.widget.FavoritesListWidget;
 import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.impl.RenderingEntry;
 import me.shedaniel.rei.plugin.autocrafting.DefaultCategoryHandler;
@@ -119,14 +124,14 @@ public class DefaultRuntimePlugin implements REIPluginV0 {
                 return Collections.emptyList();
             return Collections.singletonList(widget.getBounds().clone());
         });
-        /*baseBoundsHandler.registerExclusionZones(Screen.class, () -> {
+        baseBoundsHandler.registerExclusionZones(Screen.class, () -> {
             FavoritesListWidget widget = ContainerScreenOverlay.getFavoritesListWidget();
             if (widget != null) {
                 if (widget.favoritePanelButton.isVisible())
                     return Collections.singletonList(widget.favoritePanelButton.bounds);
             }
             return Collections.emptyList();
-        });*/
+        });
         displayHelper.registerProvider(new DisplayHelper.DisplayBoundsProvider<RecipeViewingScreen>() {
             @Override
             public Rectangle getScreenBounds(RecipeViewingScreen screen) {

@@ -206,7 +206,7 @@ public class RecipeHelperImpl implements RecipeHelper {
             }
             for (EntryStack<?> stack : usagesFor) {
                 if (isStackWorkStationOfCategory(categoryId, stack)) {
-                    set.addAll(allRecipesFromCategory);
+                    set.addAll(CollectionUtils.filter(allRecipesFromCategory, this::isDisplayVisible));
                     break;
                 }
             }
