@@ -24,7 +24,9 @@
 package me.shedaniel.rei.plugin.favorites;
 
 import com.google.gson.JsonObject;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.Matrix4f;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -37,33 +39,33 @@ import me.shedaniel.rei.api.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.GsonHelper;
-import net.minecraft.world.level.GameType;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Supplier;
 
-public class GameModeFavoriteEntry extends FavoriteEntry {
-    public static final ResourceLocation ID = new ResourceLocation("roughlyenoughitems", "gamemode");
-    public static final String TRANSLATION_KEY = "favorite.section.gamemode";
-    public static final String KEY = "mode";
+public class WeatherFavoriteEntry extends FavoriteEntry {
+    public static final ResourceLocation ID = new ResourceLocation("roughlyenoughitems", "weather");
+    public static final String TRANSLATION_KEY = "favorite.section.weather";
+    private static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
+    public static final String KEY = "type";
     @Nullable
-    private final GameType gameMode;
+    private final Weather weather;
     
-    public GameModeFavoriteEntry(@Nullable GameType gameMode) {
-        this.gameMode = gameMode;
+    public WeatherFavoriteEntry(@Nullable Weather weather) {
+        this.weather = weather;
     }
     
     @Override
@@ -81,23 +83,21 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
             @Override
             public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
                 int color = bounds.contains(mouseX, mouseY) ? 0xFFEEEEEE : 0xFFAAAAAA;
-                fillGradient(matrices, bounds.getX(), bounds.getY(), bounds.getMaxX(), bounds.getY() + 1, color, color);
-                fillGradient(matrices, bounds.getX(), bounds.getMaxY() - 1, bounds.getMaxX(), bounds.getMaxY(), color, color);
-                fillGradient(matrices, bounds.getX(), bounds.getY(), bounds.getX() + 1, bounds.getMaxY(), color, color);
-                fillGradient(matrices, bounds.getMaxX() - 1, bounds.getY(), bounds.getMaxX(), bounds.getMaxY(), color, color);
                 if (bounds.width > 4 && bounds.height > 4) {
-                    if (gameMode == null) {
+                    if (weather == null) {
+                        matrices.pushPose();
                         updateAnimator(delta);
-                        notSetScissorArea.setBounds(bounds.x + 2, bounds.y + 2, bounds.width - 4, bounds.height - 4);
-                        ScissorsHandler.INSTANCE.scissor(notSetScissorArea);
+                        notSetScissorArea.setBounds(bounds.x, bounds.y, bounds.width, bounds.height);
+//                        ScissorsHandler.INSTANCE.scissor(notSetScissorArea);
                         int offset = Math.round(notSetOffset.floatValue() * bounds.getHeight());
-                        for (int i = 0; i <= 3; i++) {
-                            GameType type = GameType.byId(i);
-                            renderGameModeText(matrices, type, bounds.getCenterX(), bounds.getCenterY() + bounds.getHeight() * i - offset, color);
+                        for (int i = 0; i <= 2; i++) {
+                            Weather type = Weather.byId(i);
+                            renderWeatherIcon(matrices, type, bounds.getCenterX(), bounds.getCenterY() + bounds.getHeight() * i - offset, color);
                         }
-                        ScissorsHandler.INSTANCE.removeLastScissor();
+//                        ScissorsHandler.INSTANCE.removeLastScissor();
+                        matrices.popPose();
                     } else {
-                        renderGameModeText(matrices, gameMode, bounds.getCenterX(), bounds.getCenterY(), color);
+                        renderWeatherIcon(matrices, weather, bounds.getCenterX(), bounds.getCenterY(), color);
                     }
                 }
             }
@@ -110,24 +110,44 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
                     }
                     if (Util.getMillis() - nextSwitch > 1000) {
                         nextSwitch = Util.getMillis();
-                        notSetOffset.setTo(((int) notSetOffset.target() + 1) % 4, 500);
+                        notSetOffset.setTo(((int) notSetOffset.target() + 1) % 3, 500);
                     }
                 } else {
-                    notSetOffset.setTo((Minecraft.getInstance().gameMode.getPlayerMode().getId() + 1) % 4, 500);
+                    notSetOffset.setTo((Minecraft.getInstance().gameMode.getPlayerMode().getId() + 1) % 3, 500);
                 }
             }
             
-            private void renderGameModeText(PoseStack matrices, GameType type, int centerX, int centerY, int color) {
-                Component s = new TranslatableComponent("text.rei.short_gamemode." + type.getName());
-                Font font = Minecraft.getInstance().font;
-                font.draw(matrices, s, centerX - font.width(s) / 2f + 1, centerY - 3.5f, color);
+            private void renderWeatherIcon(PoseStack matrices, Weather type, int centerX, int centerY, int color) {
+                Minecraft.getInstance().getTextureManager().bind(CHEST_GUI_TEXTURE);
+                Minecraft.getInstance().getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
+                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+                Matrix4f matrix = matrices.last().pose();
+                float j = centerX - 6.5f;
+                float i = j + 14;
+                float k = centerY - 6.5f;
+                float l = k + 14;
+                float m = getZ();
+                float f = type.getId() * 14 / 256f;
+                float g = f + 14 / 256f;
+                float h = 14 / 256f;
+                float n = h + 14 / 256f;
+    
+                BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+                bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+                bufferBuilder.vertex(matrix, i, l, m).uv(f, n).endVertex();
+                bufferBuilder.vertex(matrix, j, l, m).uv(g, n).endVertex();
+                bufferBuilder.vertex(matrix, j, k, m).uv(g, h).endVertex();
+                bufferBuilder.vertex(matrix, i, k, m).uv(f, h).endVertex();
+                bufferBuilder.end();
+                RenderSystem.enableAlphaTest();
+                BufferUploader.end(bufferBuilder);
             }
             
             @Override
             public @Nullable Tooltip getTooltip(Point mouse) {
-                if (gameMode == null)
-                    return Tooltip.create(mouse, new TranslatableComponent("text.rei.gamemode_button.tooltip.dropdown"));
-                return Tooltip.create(mouse, new TranslatableComponent("text.rei.gamemode_button.tooltip.entry", gameMode.getLongDisplayName().getString()));
+                if (weather == null)
+                    return Tooltip.create(mouse, new TranslatableComponent("text.rei.weather_button.tooltip.dropdown"));
+                return Tooltip.create(mouse, new TranslatableComponent("text.rei.weather_button.tooltip.entry", new TranslatableComponent(weather.getTranslateKey())));
             }
         };
     }
@@ -135,12 +155,10 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
     @Override
     public boolean doAction(int button) {
         if (button == 0) {
-            GameType mode = gameMode;
-            if (mode == null) {
-                mode = GameType.byId(Minecraft.getInstance().gameMode.getPlayerMode().getId() + 1 % 4);
+            if (weather != null) {
+                Minecraft.getInstance().player.chat(ConfigObject.getInstance().getWeatherCommand().replaceAll("\\{weather}", weather.name().toLowerCase(Locale.ROOT)));
+                Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             }
-            Minecraft.getInstance().player.chat(ConfigObject.getInstance().getGamemodeCommand().replaceAll("\\{gamemode}", mode.name().toLowerCase(Locale.ROOT)));
-            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             return true;
         }
         return false;
@@ -148,18 +166,18 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
     
     @Override
     public @NotNull Optional<Supplier<Collection<@NotNull FavoriteMenuEntry>>> getMenuEntries() {
-        if (gameMode == null)
+        if (weather == null)
             return Optional.of(this::_getMenuEntries);
         return Optional.empty();
     }
     
     private Collection<FavoriteMenuEntry> _getMenuEntries() {
-        return CollectionUtils.map(GameType.values(), GameModeMenuEntry::new);
+        return CollectionUtils.map(Weather.values(), WeatherMenuEntry::new);
     }
     
     @Override
     public int hashIgnoreAmount() {
-        return gameMode == null ? -1 : gameMode.ordinal();
+        return weather == null ? -1 : weather.ordinal();
     }
     
     @Override
@@ -174,43 +192,78 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
     
     @Override
     public boolean isSame(FavoriteEntry other) {
-        if (!(other instanceof GameModeFavoriteEntry)) return false;
-        GameModeFavoriteEntry that = (GameModeFavoriteEntry) other;
-        return Objects.equals(gameMode, that.gameMode);
+        if (!(other instanceof WeatherFavoriteEntry)) return false;
+        WeatherFavoriteEntry that = (WeatherFavoriteEntry) other;
+        return Objects.equals(weather, that.weather);
     }
     
-    public enum Type implements FavoriteEntryType<GameModeFavoriteEntry> {
+    public enum Type implements FavoriteEntryType<WeatherFavoriteEntry> {
         INSTANCE;
         
         @Override
-        public @NotNull GameModeFavoriteEntry fromJson(@NotNull JsonObject object) {
+        public @NotNull WeatherFavoriteEntry fromJson(@NotNull JsonObject object) {
             String stringValue = GsonHelper.getAsString(object, KEY);
-            GameType type = stringValue.equals("NOT_SET") ? null : GameType.valueOf(stringValue);
-            return new GameModeFavoriteEntry(type);
+            Weather type = stringValue.equals("NOT_SET") ? null : Weather.valueOf(stringValue);
+            return new WeatherFavoriteEntry(type);
         }
         
         @Override
-        public @NotNull GameModeFavoriteEntry fromArgs(Object... args) {
-            return new GameModeFavoriteEntry((GameType) args[0]);
+        public @NotNull WeatherFavoriteEntry fromArgs(Object... args) {
+            return new WeatherFavoriteEntry((Weather) args[0]);
         }
         
         @Override
-        public @NotNull JsonObject toJson(@NotNull GameModeFavoriteEntry entry, @NotNull JsonObject object) {
-            object.addProperty(KEY, entry.gameMode == null ? "NOT_SET" : entry.gameMode.name());
+        public @NotNull JsonObject toJson(@NotNull WeatherFavoriteEntry entry, @NotNull JsonObject object) {
+            object.addProperty(KEY, entry.weather == null ? "NOT_SET" : entry.weather.name());
             return object;
         }
     }
     
-    public static class GameModeMenuEntry extends FavoriteMenuEntry {
+    @ApiStatus.Internal
+    public enum Weather {
+        CLEAR(0, "text.rei.weather.clear"),
+        RAIN(1, "text.rei.weather.rain"),
+        THUNDER(2, "text.rei.weather.thunder");
+        
+        private final int id;
+        private final String translateKey;
+        
+        Weather(int id, String translateKey) {
+            this.id = id;
+            this.translateKey = translateKey;
+        }
+        
+        public static Weather byId(int id) {
+            return byId(id, CLEAR);
+        }
+        
+        public static Weather byId(int id, Weather defaultWeather) {
+            for (Weather weather : values()) {
+                if (weather.id == id)
+                    return weather;
+            }
+            return defaultWeather;
+        }
+        
+        public int getId() {
+            return id;
+        }
+        
+        public String getTranslateKey() {
+            return translateKey;
+        }
+    }
+    
+    public static class WeatherMenuEntry extends FavoriteMenuEntry {
         public final String text;
-        public final GameType gameMode;
+        public final Weather weather;
         private int x, y, width;
         private boolean selected, containsMouse, rendering;
         private int textWidth = -69;
         
-        public GameModeMenuEntry(GameType gameMode) {
-            this.text = gameMode.getLongDisplayName().getString();
-            this.gameMode = gameMode;
+        public WeatherMenuEntry(Weather weather) {
+            this.text = I18n.get(weather.getTranslateKey());
+            this.weather = weather;
         }
         
         private int getTextWidth() {
@@ -247,25 +300,19 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
         
         @Override
         public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-            boolean disabled = this.minecraft.gameMode.getPlayerMode() == gameMode;
-            if (selected && !disabled) {
+            if (selected) {
                 fill(matrices, x, y, x + width, y + 12, -12237499);
             }
-            if (!disabled && selected && containsMouse) {
-                REIHelper.getInstance().queueTooltip(Tooltip.create(new TranslatableComponent("text.rei.gamemode_button.tooltip.entry", text)));
+            if (selected && containsMouse) {
+                REIHelper.getInstance().queueTooltip(Tooltip.create(new TranslatableComponent("text.rei.weather_button.tooltip.entry", text)));
             }
-            String s = text;
-            if (disabled) {
-                s = ChatFormatting.STRIKETHROUGH.toString() + s;
-            }
-            font.draw(matrices, s, x + 2, y + 2, selected && !disabled ? 16777215 : 8947848);
+            font.draw(matrices, text, x + 2, y + 2, selected ? 16777215 : 8947848);
         }
         
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            boolean disabled = this.minecraft.gameMode.getPlayerMode() == gameMode;
-            if (!disabled && rendering && mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + 12) {
-                Minecraft.getInstance().player.chat(ConfigObject.getInstance().getGamemodeCommand().replaceAll("\\{gamemode}", gameMode.name().toLowerCase(Locale.ROOT)));
+            if (rendering && mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + 12) {
+                Minecraft.getInstance().player.chat(ConfigObject.getInstance().getWeatherCommand().replaceAll("\\{weather}", weather.name().toLowerCase(Locale.ROOT)));
                 minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 closeMenu();
                 return true;

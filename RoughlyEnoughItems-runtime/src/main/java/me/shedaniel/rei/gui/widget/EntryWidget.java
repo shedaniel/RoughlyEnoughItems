@@ -283,7 +283,7 @@ public class EntryWidget extends Slot {
     }
     
     protected void drawCurrentEntry(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        EntryStack entry = getCurrentEntry();
+        EntryStack<?> entry = getCurrentEntry();
         entry.setZ(100);
         entry.render(matrices, getInnerBounds(), mouseX, mouseY, delta);
     }

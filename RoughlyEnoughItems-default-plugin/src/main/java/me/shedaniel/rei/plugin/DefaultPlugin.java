@@ -56,6 +56,7 @@ import me.shedaniel.rei.plugin.crafting.DefaultCustomDisplay;
 import me.shedaniel.rei.plugin.crafting.DefaultShapedDisplay;
 import me.shedaniel.rei.plugin.crafting.DefaultShapelessDisplay;
 import me.shedaniel.rei.plugin.favorites.GameModeFavoriteEntry;
+import me.shedaniel.rei.plugin.favorites.WeatherFavoriteEntry;
 import me.shedaniel.rei.plugin.fuel.DefaultFuelCategory;
 import me.shedaniel.rei.plugin.fuel.DefaultFuelDisplay;
 import me.shedaniel.rei.plugin.information.DefaultInformationCategory;
@@ -423,7 +424,16 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
         
         FavoriteEntryType.registry().register(GameModeFavoriteEntry.ID, GameModeFavoriteEntry.Type.INSTANCE);
         FavoriteEntryType.registry().getOrCrateSection(new TranslatableComponent(GameModeFavoriteEntry.TRANSLATION_KEY))
-                .add(Arrays.stream(GameType.values()).<FavoriteEntry>map(GameModeFavoriteEntry.Type.INSTANCE::fromArgs).toArray(FavoriteEntry[]::new));
+                .add(Stream.concat(
+                        Arrays.stream(GameType.values()),
+                        Stream.of((GameType) null)
+                ).<FavoriteEntry>map(GameModeFavoriteEntry.Type.INSTANCE::fromArgs).toArray(FavoriteEntry[]::new));
+        FavoriteEntryType.registry().register(WeatherFavoriteEntry.ID, WeatherFavoriteEntry.Type.INSTANCE);
+        FavoriteEntryType.registry().getOrCrateSection(new TranslatableComponent(WeatherFavoriteEntry.TRANSLATION_KEY))
+                .add(Stream.concat(
+                        Arrays.stream(WeatherFavoriteEntry.Weather.values()),
+                        Stream.of((WeatherFavoriteEntry.Weather) null)
+                ).<FavoriteEntry>map(WeatherFavoriteEntry.Type.INSTANCE::fromArgs).toArray(FavoriteEntry[]::new));
     }
     
     @Override

@@ -29,8 +29,14 @@ import java.text.SimpleDateFormat
 import java.util.function.Consumer
 
 archivesBaseName = "RoughlyEnoughItems"
-version = project.mod_version
+version = project.mod_version + (unstable == "true" ? "-unstable-" + buildTime() : "")
 group = "me.shedaniel"
+
+static def buildTime() {
+    def df = new SimpleDateFormat("yyyyMMdd")
+    df.setTimeZone(TimeZone.getTimeZone("UTC"))
+    return df.format(new Date())
+}
 
 allprojects {
     apply plugin: 'maven-publish'

@@ -37,6 +37,7 @@ public enum AppearanceTheme implements SelectionListEntry.Translatable {
     DARK;
     
     @Override
+    @NotNull
     public String getKey() {
         return I18n.get("config.roughlyenoughitems.theme." + name().toLowerCase(Locale.ROOT));
     }

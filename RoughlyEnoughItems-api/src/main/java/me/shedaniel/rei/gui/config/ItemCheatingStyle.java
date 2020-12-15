@@ -37,7 +37,8 @@ public enum ItemCheatingStyle implements SelectionListEntry.Translatable {
     GIVE;
     
     @Override
-    public @NotNull String getKey() {
+    @NotNull
+    public String getKey() {
         return I18n.get("config.roughlyenoughitems.cheatingStyle." + name().toLowerCase(Locale.ROOT));
     }
 }

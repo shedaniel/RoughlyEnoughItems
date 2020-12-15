@@ -26,9 +26,11 @@ package me.shedaniel.rei.gui.widget;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
 import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
+import me.shedaniel.clothconfig2.api.LazyResettable;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.ScrollingContainer;
 import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
@@ -39,6 +41,7 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.entry.BatchEntryRenderer;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
+import me.shedaniel.rei.api.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
@@ -46,9 +49,14 @@ import me.shedaniel.rei.gui.modules.Menu;
 import me.shedaniel.rei.gui.modules.MenuEntry;
 import me.shedaniel.rei.impl.*;
 import me.shedaniel.rei.utils.CollectionUtils;
+import me.shedaniel.rei.utils.ImmutableLiteralText;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Tuple;
 import org.jetbrains.annotations.ApiStatus;
@@ -91,9 +99,9 @@ public class FavoritesListWidget extends WidgetWithBounds {
     private List<EntryListEntry> entriesList = Lists.newArrayList();
     private List<Widget> children = Lists.newArrayList();
     private Entry lastTouchedEntry = null;
-
-//    public final AddFavoritePanel favoritePanel = new AddFavoritePanel(this);
-//    public final ToggleAddFavoritePanelButton favoritePanelButton = new ToggleAddFavoritePanelButton(this);
+    
+    public final AddFavoritePanel favoritePanel = new AddFavoritePanel(this);
+    public final ToggleAddFavoritePanelButton favoritePanelButton = new ToggleAddFavoritePanelButton(this);
     
     private static Rectangle updateInnerBounds(Rectangle bounds) {
         int entrySize = entrySize();
@@ -114,9 +122,9 @@ public class FavoritesListWidget extends WidgetWithBounds {
                     return true;
                 }
             } else {
-//            if (favoritePanel.mouseScrolled(double_1, double_2, double_3)) {
-//                return true;
-//            }
+                if (favoritePanel.mouseScrolled(double_1, double_2, double_3)) {
+                    return true;
+                }
                 scrolling.offset(ClothConfigInitializer.getScrollStep() * -double_3, true);
                 return true;
             }
@@ -191,8 +199,8 @@ public class FavoritesListWidget extends WidgetWithBounds {
     }
     
     private void renderAddFavorite(PoseStack matrices, int mouseX, int mouseY, float delta) {
-//        this.favoritePanel.render(matrices, mouseX, mouseY, delta);
-//        this.favoritePanelButton.render(matrices, mouseX, mouseY, delta);
+        this.favoritePanel.render(matrices, mouseX, mouseY, delta);
+        this.favoritePanelButton.render(matrices, mouseX, mouseY, delta);
     }
     
     @Override
@@ -278,15 +286,17 @@ public class FavoritesListWidget extends WidgetWithBounds {
         this.entriesList = Stream.concat(entries.values().stream().map(Entry::getWidget), removedEntries.values().stream().map(Entry::getWidget)).collect(Collectors.toList());
         this.children = Stream.<Stream<Widget>>of(
                 entries.values().stream().map(Entry::getWidget),
-                removedEntries.values().stream().map(Entry::getWidget)
-//                Stream.of(favoritePanelButton, favoritePanel)
+                removedEntries.values().stream().map(Entry::getWidget),
+                Stream.of(favoritePanelButton, favoritePanel)
         ).flatMap(Function.identity()).collect(Collectors.toList());
     }
     
     public void updateEntriesPosition(Predicate<Entry> animated) {
         int entrySize = entrySize();
         this.blockedCount = 0;
-        this.currentBounds.setBounds(this.fullBounds);
+        if (favoritePanel.getBounds().height > 20)
+            this.currentBounds.setBounds(this.fullBounds.x, this.fullBounds.y, this.fullBounds.width, this.fullBounds.height - (this.fullBounds.getMaxY() - this.favoritePanel.bounds.y) - 4);
+        else this.currentBounds.setBounds(this.fullBounds);
         this.innerBounds = updateInnerBounds(currentBounds);
         int width = innerBounds.width / entrySize;
         int currentX = 0;
@@ -456,7 +466,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
                     break;
                 }
             }
-        } /*else if (favoritePanel.bounds.contains(mouseX, mouseY)) {
+        } else if (favoritePanel.bounds.contains(mouseX, mouseY)) {
             back:
             for (AddFavoritePanel.Row row : favoritePanel.rows.get()) {
                 if (row instanceof AddFavoritePanel.SectionEntriesRow) {
@@ -476,7 +486,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
                     }
                 }
             }
-        }*/
+        }
         for (Widget widget : children())
             if (widget.mouseClicked(mouseX, mouseY, int_1))
                 return true;
@@ -561,6 +571,23 @@ public class FavoritesListWidget extends WidgetWithBounds {
         }
     }
     
+    private static EntryStack<?> wrapRendererInStack(Renderer renderer) {
+        if (renderer instanceof EntryStack) {
+            return (EntryStack<?>) renderer;
+        }
+        return new RenderingEntry() {
+            @Override
+            public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+                renderer.render(matrices, bounds, mouseX, mouseY, delta);
+            }
+            
+            @Override
+            public @Nullable Tooltip getTooltip(Point mouse) {
+                return renderer.getTooltip(mouse);
+            }
+        };
+    }
+    
     private class EntryListEntry extends EntryListEntryWidget {
         private final Entry entry;
         private final FavoriteEntry favoriteEntry;
@@ -569,18 +596,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
             super(new Point(x, y), entrySize);
             this.entry = entry;
             this.favoriteEntry = favoriteEntry;
-            Renderer renderer = this.favoriteEntry.getRenderer(false);
-            this.clearEntries().entry(new RenderingEntry() {
-                @Override
-                public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-                    renderer.render(matrices, bounds, mouseX, mouseY, delta);
-                }
-                
-                @Override
-                public @Nullable Tooltip getTooltip(Point mouse) {
-                    return renderer.getTooltip(mouse);
-                }
-            });
+            this.clearEntries().entry(wrapRendererInStack(this.favoriteEntry.getRenderer(false)));
         }
         
         @Override
@@ -683,7 +699,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
         }
     }
     
-    /*public static class ToggleAddFavoritePanelButton extends WidgetWithBounds {
+    public static class ToggleAddFavoritePanelButton extends WidgetWithBounds {
         private final FavoritesListWidget widget;
         public boolean wasClicked = false;
         public final Animator alpha = new Animator(0);
@@ -895,7 +911,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
             
             @Override
             public int getRowHeight() {
-                return Mth.ceil((entries.size() + blockedCount) / (scrollBounds.width / (float) entrySize())) * entrySize();
+                return Mth.ceil((entries.size() + blockedCount) / (scrollBounds.width / (float) entrySize())) * entrySize() + 5;
             }
             
             @Override
@@ -929,7 +945,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
                 protected SectionFavoriteWidget(Point point, int entrySize, FavoriteEntry entry) {
                     super(point, entrySize);
                     this.entry = entry;
-                    entry(entry.getWidget(true));
+                    entry(wrapRendererInStack(entry.getRenderer(true)));
                     noBackground();
                 }
                 
@@ -951,6 +967,16 @@ public class FavoritesListWidget extends WidgetWithBounds {
                     double offsetSize = (entrySize() - this.size.doubleValue() / 100) / 2;
                     this.getBounds().x = (int) Math.round(x.doubleValue() + offsetSize);
                     this.getBounds().y = (int) Math.round(y.doubleValue() + offsetSize) - (int) scroller.scrollAmount;
+                }
+    
+                @Override
+                public @Nullable Tooltip getCurrentTooltip(Point point) {
+                    Tooltip tooltip = super.getCurrentTooltip(point);
+                    if (tooltip != null) {
+                        tooltip.getText().add(ImmutableLiteralText.EMPTY);
+                        tooltip.getText().add(new TranslatableComponent("tooltip.rei.drag_to_add_favorites"));
+                    }
+                    return tooltip;
                 }
             }
             
@@ -983,5 +1009,5 @@ public class FavoritesListWidget extends WidgetWithBounds {
                 }
             }
         }
-    }*/
+    }
 }

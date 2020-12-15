@@ -37,6 +37,7 @@ public enum ConfigButtonPosition implements SelectionListEntry.Translatable {
     LOWER;
     
     @Override
+    @NotNull
     public String getKey() {
         return I18n.get("config.roughlyenoughitems.layout.configButtonLocation." + name().toLowerCase(Locale.ROOT));
     }
