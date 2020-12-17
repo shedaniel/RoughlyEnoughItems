@@ -207,6 +207,8 @@
   "config.roughlyenoughitems.scrollingEntryListWidget": "Sposób przeglądania przedmiotów:",
   "config.roughlyenoughitems.scrollingEntryListWidget.boolean.true": "Pasek przewijania",
   "config.roughlyenoughitems.scrollingEntryListWidget.boolean.false": "Ponumerowane strony",
+  "config.roughlyenoughitems.horizontalEntriesBoundaries": "Pozioma granica okna:",
+  "config.roughlyenoughitems.verticalEntriesBoundaries": "Pionowa granica okna",
   "config.roughlyenoughitems.filteringScreen": "Niestandardowe filtrowanie",
   "config.roughlyenoughitems.filteringRulesScreen": "Dostosowane reguły filtrowania",
   "config.roughlyenoughitems.filteringRulesScreen.new": "Utwórz regułę filtrowania",
