@@ -24,6 +24,7 @@
 package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
+import com.google.common.io.BaseEncoding;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -42,10 +43,14 @@ import me.shedaniel.autoconfig1u.util.Utils;
 import me.shedaniel.clothconfig2.forge.api.ConfigEntryBuilder;
 import me.shedaniel.clothconfig2.forge.api.Modifier;
 import me.shedaniel.clothconfig2.forge.api.ModifierKeyCode;
+import me.shedaniel.clothconfig2.gui.GlobalizedClothConfigScreen;
 import me.shedaniel.clothconfig2.forge.gui.entries.KeyCodeEntry;
 import me.shedaniel.clothconfig2.forge.impl.EasingMethod;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.ConfigManager;
+import me.shedaniel.rei.api.EntryRegistry;
+import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.TransformingScreen;
@@ -60,6 +65,7 @@ import me.shedaniel.rei.impl.filtering.FilteringRule;
 import me.shedaniel.rei.impl.filtering.rules.ManualFilteringRule;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.DialogTexts;
+import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.button.Button;
@@ -79,6 +85,8 @@ import net.minecraft.world.InteractionResult;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.lang.reflect.Method;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -251,6 +259,24 @@ public class ConfigManagerImpl implements ConfigManager {
                     });
                     screen.buttons.add(creditsButton);
                     ((List<IGuiEventListener>) screen.children()).add(creditsButton);
+                    LocalDateTime now = LocalDateTime.now();
+                    if (now.getMonthValue() == 12 && now.getDayOfMonth() >= 24 && now.getDayOfMonth() <= 26) {
+                        ((GlobalizedClothConfigScreen) screen).listWidget.bottom -= 10;
+                        ((ScreenHooks) screen).cloth$addButtonWidget(new AbstractButton(0, screen.height - 40, screen.width, 10, new TextComponent(new String(BaseEncoding.base64().decode("TWVycnkgQ2hyaXN0bWFz")))) {
+                            @Override
+                            public void onPress() { 
+                            }
+                            
+                            @Override
+                            public void renderButton(PoseStack poseStack, int i, int j, float f) {
+                                int color = this.active ? 16777215 : 10526880;
+                                Font font = Minecraft.getInstance().font;
+                                int centerX = this.x + this.width / 2 - font.width(getMessage()) / 2;
+                                int textY = this.y + (this.height - 8) / 2;
+                                font.drawShadow(poseStack, TextTransformations.applyRainbow(getMessage().getVisualOrderText(), centerX, textY), centerX, textY, color | Mth.ceil(this.alpha * 255.0F) << 24);
+                            }
+                        });
+                    }
                 }).setSavingRunnable(() -> {
                     saveConfig();
                     EntryRegistry.getInstance().refilter();
