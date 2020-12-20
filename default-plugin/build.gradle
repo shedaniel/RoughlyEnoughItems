@@ -1,0 +1,9 @@
+archivesBaseName = "default-plugin"
+
+loom {
+    accessWidener = file("src/main/resources/roughlyenoughitems-default-plugin.accessWidener")
+}
+
+dependencies {
+    compile project(path: ":api", configuration: "dev")
+}

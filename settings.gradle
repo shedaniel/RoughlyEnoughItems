@@ -11,6 +11,8 @@ pluginManagement {
 
 rootProject.name = "RoughlyEnoughItems"
 
-include "RoughlyEnoughItems-api"
-include "RoughlyEnoughItems-default-plugin"
-include "RoughlyEnoughItems-runtime"
+include "api"
+include "default-plugin"
+include "runtime"
+
+//include "jei-compatibility-layer"
