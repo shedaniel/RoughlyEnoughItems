@@ -139,6 +139,7 @@
   "config.roughlyenoughitems.isSubsetsEnabled": "Sous-ensembles activés :",
   "config.roughlyenoughitems.miscellaneous.renderEntryEnchantmentGlint": "Afficher l'aura des enchantements :",
   "config.roughlyenoughitems.layout.configButtonLocation": "Position du bouton de configuration :",
+  "config.roughlyenoughitems.layout.configButtonLocation.upper": "Haut",
   "config.roughlyenoughitems.filteredEntries.selectAll": "Sélect. tout",
   "config.roughlyenoughitems.filteredEntries.selectNone": "Désélect. tout",
   "config.roughlyenoughitems.filteredEntries.hide": "Masquer",
