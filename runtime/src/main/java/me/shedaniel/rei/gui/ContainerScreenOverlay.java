@@ -228,7 +228,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
         }
         ScreenHelper.getSearchField().getBounds().setBounds(getSearchFieldArea());
         this.widgets.add(ScreenHelper.getSearchField());
-        ScreenHelper.getSearchField().setChangedListener(s -> ENTRY_LIST_WIDGET.updateSearch(s, false));
+        ScreenHelper.getSearchField().setResponder(s -> ENTRY_LIST_WIDGET.updateSearch(s, false));
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
             widgets.add(leftButton = Widgets.createButton(new Rectangle(bounds.x, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TranslatableComponent("text.rei.left_arrow"))
                     .onClick(button -> {

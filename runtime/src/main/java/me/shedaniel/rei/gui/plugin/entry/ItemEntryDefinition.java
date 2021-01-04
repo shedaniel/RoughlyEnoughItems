@@ -52,12 +52,16 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagCollection;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -209,6 +213,12 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack> {
             e.printStackTrace();
         }
         return new ImmutableLiteralText("ERROR");
+    }
+    
+    @Override
+    public @NotNull Collection<ResourceLocation> getTagsFor(EntryStack<ItemStack> entry, ItemStack value) {
+        TagCollection<Item> collection = Minecraft.getInstance().getConnection().getTags().get(Registry.ITEM_REGISTRY);
+        return collection == null ? Collections.emptyList() : collection.getMatchingTags(value.getItem());
     }
     
     private List<Component> tryGetItemStackToolTip(EntryStack<ItemStack> entry, ItemStack value, boolean careAboutAdvanced) {

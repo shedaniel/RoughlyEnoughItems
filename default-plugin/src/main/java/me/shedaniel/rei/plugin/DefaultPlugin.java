@@ -90,6 +90,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagCollection;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.alchemy.Potion;
@@ -383,19 +384,20 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
                 recipeHelper.registerWorkingStations(PATHING, EntryStacks.of(item));
             }
         });
-        Tag<Item> axesTag = Minecraft.getInstance().getConnection().getTags().getItems().getTag(new ResourceLocation("c", "axes"));
+        TagCollection<Item> itemTagCollection = Minecraft.getInstance().getConnection().getTags().getOrEmpty(Registry.ITEM_REGISTRY);
+        Tag<Item> axesTag = itemTagCollection.getTag(new ResourceLocation("c", "axes"));
         if (axesTag != null) {
             for (Item item : axesTag.getValues()) {
                 if (axes.add(item)) recipeHelper.registerWorkingStations(STRIPPING, EntryStacks.of(item));
             }
         }
-        Tag<Item> hoesTag = Minecraft.getInstance().getConnection().getTags().getItems().getTag(new ResourceLocation("c", "hoes"));
+        Tag<Item> hoesTag = itemTagCollection.getTag(new ResourceLocation("c", "hoes"));
         if (hoesTag != null) {
             for (Item item : hoesTag.getValues()) {
                 if (hoes.add(item)) recipeHelper.registerWorkingStations(TILLING, EntryStacks.of(item));
             }
         }
-        Tag<Item> shovelsTag = Minecraft.getInstance().getConnection().getTags().getItems().getTag(new ResourceLocation("c", "shovels"));
+        Tag<Item> shovelsTag = itemTagCollection.getTag(new ResourceLocation("c", "shovels"));
         if (shovelsTag != null) {
             for (Item item : shovelsTag.getValues()) {
                 if (shovels.add(item)) recipeHelper.registerWorkingStations(PATHING, EntryStacks.of(item));

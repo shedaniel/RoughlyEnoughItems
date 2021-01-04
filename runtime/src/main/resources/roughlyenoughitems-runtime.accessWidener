@@ -20,3 +20,4 @@ accessible method net/minecraft/client/gui/screens/Screen insertText (Ljava/lang
 accessible method net/minecraft/client/gui/screens/Screen addWidget (Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;
 accessible method net/minecraft/client/gui/screens/Screen addButton (Lnet/minecraft/client/gui/components/AbstractWidget;)Lnet/minecraft/client/gui/components/AbstractWidget;
 accessible method net/minecraft/client/gui/screens/Screen init ()V
+accessible method net/minecraft/tags/TagContainer get (Lnet/minecraft/resources/ResourceKey;)Lnet/minecraft/tags/TagCollection;

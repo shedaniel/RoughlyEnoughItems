@@ -39,6 +39,8 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 
 @ApiStatus.Internal
@@ -117,6 +119,11 @@ public enum EmptyEntryDefinition implements EntryDefinition<Unit> {
     @Override
     public @NotNull Component asFormattedText(EntryStack<Unit> entry, Unit value) {
         return ImmutableLiteralText.EMPTY;
+    }
+    
+    @Override
+    public @NotNull Collection<ResourceLocation> getTagsFor(EntryStack<Unit> entry, Unit value) {
+        return Collections.emptyList();
     }
     
     private enum EmptyRenderer implements EntryRenderer<Unit> {

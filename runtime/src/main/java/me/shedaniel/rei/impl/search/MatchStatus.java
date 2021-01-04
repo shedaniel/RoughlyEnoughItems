@@ -32,7 +32,7 @@ import java.util.Objects;
 @ApiStatus.Internal
 public final class MatchStatus {
     private static final MatchStatus UNMATCHED = new MatchStatus(MatchType.UNMATCHED, null, false);
-    private final MatchType type;
+    private MatchType type;
     @Nullable
     private final String text;
     private final boolean preserveCasing;
@@ -48,11 +48,11 @@ public final class MatchStatus {
     }
     
     public static MatchStatus invertMatched(@NotNull String text) {
-        return invertMatched(text, false);
+        return matched(text, false).invert();
     }
     
     public static MatchStatus invertMatched(@NotNull String text, boolean preserveCasing) {
-        return new MatchStatus(MatchType.INVERT_MATCHED, Objects.requireNonNull(text), preserveCasing);
+        return matched(Objects.requireNonNull(text), preserveCasing).invert();
     }
     
     public static MatchStatus matched(@NotNull String text) {
@@ -61,6 +61,17 @@ public final class MatchStatus {
     
     public static MatchStatus matched(@NotNull String text, boolean preserveCasing) {
         return new MatchStatus(MatchType.MATCHED, Objects.requireNonNull(text), preserveCasing);
+    }
+    
+    public static MatchStatus result(@NotNull String text, boolean preserveCasing, boolean inverted) {
+        return new MatchStatus(!inverted ? MatchType.MATCHED : MatchType.INVERT_MATCHED, Objects.requireNonNull(text), preserveCasing);
+    }
+    
+    public MatchStatus invert() {
+        if (isMatched()) {
+            this.type = isInverted() ? MatchType.MATCHED : MatchType.INVERT_MATCHED;
+        }
+        return this;
     }
     
     public boolean isMatched() {
