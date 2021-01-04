@@ -150,7 +150,9 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         } else if (RoughlyEnoughItemsCore.canUsePackets()) {
             Inventory inventory = Minecraft.getInstance().player.inventory;
             EntryStack stack = entry.copy();
-            if (!inventory.getCarried().isEmpty() && !EntryStack.create(inventory.getCarried()).equalsIgnoreAmount(stack)) {
+            if (!inventory.getCarried().isEmpty() && EntryStack.create(inventory.getCarried()).equalsIgnoreAmount(stack)) {
+                stack.setAmount(Mth.clamp(stack.getAmount() + inventory.getCarried().getCount(), 1, stack.getItemStack().getMaxStackSize()));
+            } else if (!inventory.getCarried().isEmpty()) {
                 return false;
             }
             try {
