@@ -34,22 +34,15 @@ import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.gui.screen.inventory.CreativeScreen;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.LazyValue;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -155,7 +148,9 @@ public class ClientHelperImpl implements ClientHelper {
         } else if (RoughlyEnoughItemsCore.canUsePackets()) {
             PlayerInventory inventory = Minecraft.getInstance().player.inventory;
             EntryStack stack = entry.copy();
-            if (!inventory.getCarried().isEmpty() && !EntryStack.create(inventory.getCarried()).equalsIgnoreAmount(stack)) {
+            if (!inventory.getCarried().isEmpty() && EntryStack.create(inventory.getCarried()).equalsIgnoreAmount(stack)) {
+                stack.setAmount(MathHelper.clamp(stack.getAmount() + inventory.getCarried().getCount(), 1, stack.getItemStack().getMaxStackSize()));
+            } else if (!inventory.getCarried().isEmpty()) {
                 return false;
             }
             try {

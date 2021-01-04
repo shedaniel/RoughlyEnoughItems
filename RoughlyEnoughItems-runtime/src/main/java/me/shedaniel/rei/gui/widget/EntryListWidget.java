@@ -556,7 +556,23 @@ public class EntryListWidget extends WidgetWithBounds {
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (containsMouse(mouseX, mouseY)) {
             ClientPlayerEntity player = minecraft.player;
+            cancelDelete:
             if (ClientHelper.getInstance().isCheating() && player != null && player.inventory != null && !player.inventory.getCarried().isEmpty() && RoughlyEnoughItemsCore.canDeleteItems()) {
+                EntryStack stack = EntryStack.create(minecraft.player.inventory.getCarried().copy());
+                if (stack.getType() == EntryStack.Type.FLUID) {
+                    Item bucketItem = stack.getFluid().getBucket();
+                    if (bucketItem != null) {
+                        stack = EntryStack.create(bucketItem);
+                    }
+                }
+                for (Widget child : children()) {
+                    if (child.containsMouse(mouseX, mouseY) && child instanceof EntryWidget) {
+                        if (((EntryWidget) child).cancelDeleteItems(stack)) {
+                            break cancelDelete;
+                        }
+                    }
+                }
+                
                 ClientHelper.getInstance().sendDeletePacket();
                 return true;
             }
