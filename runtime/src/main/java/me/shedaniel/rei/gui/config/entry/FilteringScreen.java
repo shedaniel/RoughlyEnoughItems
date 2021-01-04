@@ -173,18 +173,19 @@ public class FilteringScreen extends Screen {
         super.init();
         Rectangle bounds = getBounds();
         updateSearch(this.searchField.getText());
-        this.searchField.getBounds().setBounds(bounds.getCenterX() - 75, bounds.getMaxY() - 22, 150, 18);
         this.selectAllButton.x = 2;
         this.selectAllButton.y = bounds.getMaxY() - 22;
         this.selectNoneButton.x = 4 + selectAllButton.getWidth();
         this.selectNoneButton.y = bounds.getMaxY() - 22;
+        int searchFieldWidth = Math.max(bounds.width - (selectNoneButton.x + selectNoneButton.getWidth() + hideButton.getWidth() + showButton.getWidth() + 12), 100);
+        this.searchField.getBounds().setBounds(selectNoneButton.x + selectNoneButton.getWidth() + 4, bounds.getMaxY() - 21, searchFieldWidth, 18);
         this.hideButton.x = bounds.getMaxX() - hideButton.getWidth() - showButton.getWidth() - 4;
         this.hideButton.y = bounds.getMaxY() - 22;
         this.showButton.x = bounds.getMaxX() - showButton.getWidth() - 2;
         this.showButton.y = bounds.getMaxY() - 22;
         this.backButton.x = 4;
         this.backButton.y = 4;
-        this.searchField.setChangedListener(this::updateSearch);
+        this.searchField.setResponder(this::updateSearch);
     }
     
     protected void renderHoleBackground(PoseStack matrices, int y1, int y2, int tint, int alpha1, int alpha2) {

@@ -26,11 +26,13 @@ package me.shedaniel.rei.impl.search;
 import me.shedaniel.rei.api.EntryStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.util.Unit;
+import org.apache.commons.lang3.mutable.Mutable;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
-public final class AlwaysMatchingArgument extends Argument {
+public final class AlwaysMatchingArgument extends Argument<Unit, Unit> {
     public static final AlwaysMatchingArgument INSTANCE = new AlwaysMatchingArgument();
     
     @Override
@@ -39,8 +41,13 @@ public final class AlwaysMatchingArgument extends Argument {
     }
     
     @Override
-    public boolean matches(Object[] data, EntryStack<?> stack, String searchText, Object searchData) {
+    public boolean matches(Mutable<Unit> data, EntryStack<?> stack, String searchText, Unit filterData) {
         return true;
+    }
+    
+    @Override
+    public Unit prepareSearchFilter(String searchText) {
+        return Unit.INSTANCE;
     }
     
     @Override

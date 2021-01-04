@@ -31,6 +31,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.Optional;
 
 public interface EntryDefinition<T> {
@@ -68,6 +69,9 @@ public interface EntryDefinition<T> {
     
     @NotNull
     Component asFormattedText(EntryStack<T> entry, T value);
+    
+    @NotNull
+    Collection<ResourceLocation> getTagsFor(EntryStack<T> entry, T value);
     
     @ApiStatus.NonExtendable
     @NotNull

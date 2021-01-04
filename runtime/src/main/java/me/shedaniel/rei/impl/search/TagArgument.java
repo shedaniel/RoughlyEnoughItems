@@ -23,23 +23,29 @@
 
 package me.shedaniel.rei.impl.search;
 
-import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.entry.EntryDefinition;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.util.Unit;
+import org.apache.commons.lang3.mutable.Mutable;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
-public final class TagArgument extends Argument {
+public final class TagArgument extends Argument<Unit, String[]> {
     public static final TagArgument INSTANCE = new TagArgument();
     private static final Minecraft minecraft = Minecraft.getInstance();
+    private static final String[] EMPTY_ARRAY = new String[0];
+    private static final Style STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x9efff4));
     
     @Override
     public String getName() {
@@ -52,34 +58,37 @@ public final class TagArgument extends Argument {
     }
     
     @Override
-    public boolean matches(Object[] data, EntryStack<?> stack, String searchText, Object searchData) {
-        if (data[getDataOrdinal()] == null) {
-            if (stack.getValueType() == ItemStack.class) {
-                Collection<ResourceLocation> tagsFor = minecraft.getConnection().getTags().getItems().getMatchingTags(((ItemStack) stack.getValue()).getItem());
-                data[getDataOrdinal()] = new String[tagsFor.size()];
+    public @NotNull Style getHighlightedStyle() {
+        return STYLE;
+    }
+    
+    @Override
+    public boolean matches(Mutable<String[]> data, EntryStack<?> stack, String searchText, Unit filterData) {
+        if (data.getValue() == null) {
+            Collection<ResourceLocation> tags = ((EntryDefinition<Object>) stack.getDefinition()).getTagsFor((EntryStack<Object>) stack, stack.getValue());
+            if (tags.isEmpty()) {
+                data.setValue(EMPTY_ARRAY);
+            } else {
+                data.setValue(new String[tags.size()]);
                 int i = 0;
                 
-                for (ResourceLocation identifier : tagsFor) {
-                    ((String[]) data[getDataOrdinal()])[i] = identifier.toString();
+                for (ResourceLocation identifier : tags) {
+                    data.getValue()[i] = identifier.toString();
                     i++;
                 }
-            } else if (stack.getValueType() == FluidStack.class) {
-                Collection<ResourceLocation> tagsFor = minecraft.getConnection().getTags().getFluids().getMatchingTags(((FluidStack) stack.getValue()).getFluid());
-                data[getDataOrdinal()] = new String[tagsFor.size()];
-                int i = 0;
-                
-                for (ResourceLocation identifier : tagsFor) {
-                    ((String[]) data[getDataOrdinal()])[i] = identifier.toString();
-                    i++;
-                }
-            } else
-                data[getDataOrdinal()] = new String[0];
+            }
         }
-        String[] tags = (String[]) data[getDataOrdinal()];
-        for (String tag : tags)
-            if (tag.isEmpty() || tag.contains(searchText))
+        for (String tag : data.getValue()) {
+            if (tag.isEmpty() || tag.contains(searchText)) {
                 return true;
+            }
+        }
         return false;
+    }
+    
+    @Override
+    public Unit prepareSearchFilter(String searchText) {
+        return Unit.INSTANCE;
     }
     
     private TagArgument() {

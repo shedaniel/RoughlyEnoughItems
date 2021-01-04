@@ -45,12 +45,12 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagCollection;
+import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -134,6 +134,12 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack> {
     @Override
     public @NotNull Component asFormattedText(EntryStack<FluidStack> entry, FluidStack value) {
         return value.getFluid().defaultFluidState().createLegacyBlock().getBlock().getName();
+    }
+    
+    @Override
+    public @NotNull Collection<ResourceLocation> getTagsFor(EntryStack<FluidStack> entry, FluidStack value) {
+        TagCollection<Fluid> collection = Minecraft.getInstance().getConnection().getTags().get(Registry.FLUID_REGISTRY);
+        return collection == null ? Collections.emptyList() : collection.getMatchingTags(value.getFluid());
     }
     
     public static class FluidEntryRenderer extends AbstractEntryRenderer<FluidStack> {

@@ -26,7 +26,12 @@ package me.shedaniel.rei.impl.search;
 import me.shedaniel.rei.api.EntryStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
+import org.apache.commons.lang3.mutable.Mutable;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,8 +39,9 @@ import java.util.regex.PatternSyntaxException;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
-public final class RegexArgument extends Argument {
+public final class RegexArgument extends Argument<@Nullable Pattern, String> {
     public static final RegexArgument INSTANCE = new RegexArgument();
+    private static final Style STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xbfffa8));
     
     @Override
     public String getName() {
@@ -51,12 +57,13 @@ public final class RegexArgument extends Argument {
             matchText = matchText.substring(1);
         }
         if (matchText.length() >= 3 && matchText.startsWith("r/") && matchText.endsWith("/"))
-            return !inverted ? MatchStatus.matched(matchText.substring(2, matchText.length() - 1), true) : MatchStatus.invertMatched(matchText.substring(2, matchText.length() - 1), true);
+            return MatchStatus.result(matchText.substring(2, matchText.length() - 1), true, inverted);
         return MatchStatus.unmatched();
     }
     
     @Override
-    public Object prepareSearchData(String searchText) {
+    @Nullable
+    public Pattern prepareSearchFilter(String searchText) {
         try {
             return Pattern.compile(searchText);
         } catch (PatternSyntaxException ignored) {
@@ -65,14 +72,17 @@ public final class RegexArgument extends Argument {
     }
     
     @Override
-    public boolean matches(Object[] data, EntryStack<?> stack, String searchText, Object searchData) {
-        Pattern pattern = (Pattern) searchData;
-        if (pattern == null) return false;
-        if (data[getDataOrdinal()] == null) {
-            String name = stack.asFormatStrippedText().getString();
-            data[getDataOrdinal()] = name;
+    public @NotNull Style getHighlightedStyle() {
+        return STYLE;
+    }
+    
+    @Override
+    public boolean matches(Mutable<String> data, EntryStack<?> stack, String searchText, @Nullable Pattern filterData) {
+        if (filterData == null) return false;
+        if (data.getValue() == null) {
+            data.setValue(stack.asFormatStrippedText().getString());
         }
-        Matcher matcher = pattern.matcher((String) data[getDataOrdinal()]);
+        Matcher matcher = filterData.matcher(data.getValue());
         return matcher != null && matcher.matches();
     }
     
