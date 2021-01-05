@@ -57,10 +57,8 @@ import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.TransformingScreen;
 import me.shedaniel.rei.gui.WarningAndErrorScreen;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
-import me.shedaniel.rei.gui.config.entry.FilteringEntry;
-import me.shedaniel.rei.gui.config.entry.NoFilteringEntry;
-import me.shedaniel.rei.gui.config.entry.RecipeScreenTypeEntry;
-import me.shedaniel.rei.gui.config.entry.ReloadPluginsEntry;
+import me.shedaniel.rei.gui.config.SyntaxHighlightingMode;
+import me.shedaniel.rei.gui.config.entry.*;
 import me.shedaniel.rei.gui.credits.CreditsScreen;
 import me.shedaniel.rei.impl.filtering.FilteringRule;
 import me.shedaniel.rei.impl.filtering.rules.ManualFilteringRule;
@@ -171,6 +169,9 @@ public class ConfigManagerImpl implements ConfigManager {
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) ->
                         Collections.singletonList(new RecipeScreenTypeEntry(220, new TranslatableComponent(i13n), getUnsafely(field, config, RecipeScreenType.UNSET), getUnsafely(field, defaults), type -> setUnsafely(field, config, type)))
                 , (field) -> field.getType() == RecipeScreenType.class, ConfigObjectImpl.UseSpecialRecipeTypeScreen.class);
+        guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) ->
+                        Collections.singletonList(new SearchFilterSyntaxHighlightingEntry( new TranslatableComponent(i13n), getUnsafely(field, config, SyntaxHighlightingMode.COLORFUL), getUnsafely(field, defaults), type -> setUnsafely(field, config, type)))
+                , (field) -> field.getType() == SyntaxHighlightingMode.class, ConfigObjectImpl.UseSpecialSearchFilterSyntaxHighlightingScreen.class);
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) ->
                         REIHelper.getInstance().getPreviousContainerScreen() == null || Minecraft.getInstance().getConnection() == null || Minecraft.getInstance().getConnection().getRecipeManager() == null ?
                                 Collections.singletonList(new NoFilteringEntry(220, getUnsafely(field, config, new ArrayList<>()), getUnsafely(field, defaults), list -> setUnsafely(field, config, list)))

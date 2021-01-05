@@ -159,4 +159,7 @@ public interface ConfigObject {
     
     @ApiStatus.Experimental
     double getVerticalEntriesBoundaries();
+    
+    @ApiStatus.Experimental
+    SyntaxHighlightingMode getSyntaxHighlightingMode();
 }

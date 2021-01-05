@@ -346,6 +346,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         return Mth.clamp(appearance.verticalEntriesBoundaries, 0.1,1);
     }
     
+    @Override
+    public SyntaxHighlightingMode getSyntaxHighlightingMode() {
+        return appearance.syntaxHighlightingMode;
+    }
+    
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD})
     @interface DontApplyFieldName {}
@@ -353,6 +358,10 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD})
     @interface UseSpecialRecipeTypeScreen {}
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD})
+    @interface UseSpecialSearchFilterSyntaxHighlightingScreen {}
     
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD})
@@ -413,6 +422,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
         @UsePercentage(min = 0.1, max = 1.0, prefix = "Limit: ") private double horizontalEntriesBoundaries = 1.0;
         @UsePercentage(min = 0.1, max = 1.0, prefix = "Limit: ") private double verticalEntriesBoundaries = 1.0;
+        @UseSpecialSearchFilterSyntaxHighlightingScreen private SyntaxHighlightingMode syntaxHighlightingMode = SyntaxHighlightingMode.COLORFUL;
     }
     
     public static class Functionality {

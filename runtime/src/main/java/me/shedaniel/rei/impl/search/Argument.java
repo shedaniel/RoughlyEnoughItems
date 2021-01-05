@@ -53,9 +53,9 @@ public abstract class Argument<T, R> {
     public MatchStatus matchesArgumentPrefix(String text) {
         String prefix = getPrefix();
         if (prefix == null) return MatchStatus.unmatched();
-        if (text.startsWith("-" + prefix)) return MatchStatus.invertMatched(text.substring(1 + prefix.length()));
-        if (text.startsWith(prefix + "-")) return MatchStatus.invertMatched(text.substring(1 + prefix.length()));
-        if (text.startsWith(prefix)) return MatchStatus.matched(text.substring(prefix.length()));
+        if (text.startsWith("-" + prefix)) return MatchStatus.invertMatched(text.substring(1 + prefix.length())).grammar(0, prefix.length() + 1);
+        if (text.startsWith(prefix + "-")) return MatchStatus.invertMatched(text.substring(1 + prefix.length())).grammar(0, prefix.length() + 1);
+        if (text.startsWith(prefix)) return MatchStatus.matched(text.substring(prefix.length())).grammar(0, prefix.length());
         return MatchStatus.unmatched();
     }
     

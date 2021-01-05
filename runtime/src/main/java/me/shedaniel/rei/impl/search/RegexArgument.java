@@ -57,7 +57,9 @@ public final class RegexArgument extends Argument<@Nullable Pattern, String> {
             matchText = matchText.substring(1);
         }
         if (matchText.length() >= 3 && matchText.startsWith("r/") && matchText.endsWith("/"))
-            return MatchStatus.result(matchText.substring(2, matchText.length() - 1), true, inverted);
+            return MatchStatus.result(matchText.substring(2, matchText.length() - 1), true, inverted)
+                    .grammar(0, inverted ? 3 : 2)
+                    .grammar(text.length() - 1, text.length());
         return MatchStatus.unmatched();
     }
     
