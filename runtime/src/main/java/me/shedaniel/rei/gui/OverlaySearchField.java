@@ -31,6 +31,7 @@ import me.shedaniel.math.Color;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.gui.config.SyntaxHighlightingMode;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import me.shedaniel.rei.impl.OverlaySearchFieldSyntaxHighlighter;
 import me.shedaniel.rei.impl.ScreenHelper;
@@ -74,23 +75,29 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     
     @Override
     public FormattedCharSequence format(TextFieldWidget widget, String text, int index) {
+        boolean isPlain = ConfigObject.getInstance().getSyntaxHighlightingMode() == SyntaxHighlightingMode.PLAIN || ConfigObject.getInstance().getSyntaxHighlightingMode() == SyntaxHighlightingMode.PLAIN_UNDERSCORED;
+        boolean hasUnderscore = ConfigObject.getInstance().getSyntaxHighlightingMode() == SyntaxHighlightingMode.PLAIN_UNDERSCORED || ConfigObject.getInstance().getSyntaxHighlightingMode() == SyntaxHighlightingMode.COLORFUL_UNDERSCORED;
         return TextTransformations.forwardWithTransformation(text, (s, charIndex, c) -> {
             byte arg = highlighter.highlighted[charIndex + index];
-            Style style;
+            Style style = Style.EMPTY;
             if (arg > 0) {
-                Argument<?, ?> argument = ArgumentsRegistry.ARGUMENT_LIST.get(arg - 1);
-                style = argument.getHighlightedStyle();
+                Argument<?, ?> argument = ArgumentsRegistry.ARGUMENT_LIST.get((arg - 1) / 2);
+                if (!isPlain) {
+                    style = argument.getHighlightedStyle();
+                }
                 if (argument instanceof TextArgument) {
                     if (isMain && ContainerScreenOverlay.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty()) {
                         style = ERROR_STYLE;
                     }
+                } else if (hasUnderscore && arg % 2 == 1) {
+                    style = style.withUnderlined(true);
                 }
-            } else if (arg == -1) {
-                style = SPLITTER_STYLE;
-            } else if (arg == -2) {
-                style = QUOTES_STYLE;
-            } else {
-                style = Style.EMPTY;
+            } else if (!isPlain) {
+                if (arg == -1) {
+                    style = SPLITTER_STYLE;
+                } else if (arg == -2) {
+                    style = QUOTES_STYLE;
+                }
             }
             
             

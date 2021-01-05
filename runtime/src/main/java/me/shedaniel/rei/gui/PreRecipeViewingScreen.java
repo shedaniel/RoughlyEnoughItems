@@ -53,7 +53,6 @@ import java.util.List;
 
 @ApiStatus.Internal
 public class PreRecipeViewingScreen extends Screen {
-    
     private static final ResourceLocation IDENTIFIER = new ResourceLocation("roughlyenoughitems", "textures/gui/screenshot.png");
     private final List<Widget> widgets;
     protected long start;

@@ -189,8 +189,8 @@ public class FilteringScreen extends Screen {
     }
     
     protected void renderHoleBackground(PoseStack matrices, int y1, int y2, int tint, int alpha1, int alpha2) {
-        Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder buffer = tessellator.getBuilder();
+        Tesselator tesselator = Tesselator.getInstance();
+        BufferBuilder buffer = tesselator.getBuilder();
         this.minecraft.getTextureManager().bind(BACKGROUND_LOCATION);
         Matrix4f matrix = matrices.last().pose();
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
@@ -200,7 +200,7 @@ public class FilteringScreen extends Screen {
         buffer.vertex(matrix, this.width, y2, 0.0F).uv(this.width / 32.0F, y2 / 32.0F).color(tint, tint, tint, alpha2).endVertex();
         buffer.vertex(matrix, this.width, y1, 0.0F).uv(this.width / 32.0F, y1 / 32.0F).color(tint, tint, tint, alpha1).endVertex();
         buffer.vertex(matrix, 0, y1, 0.0F).uv(0.0F, y1 / 32.0F).color(tint, tint, tint, alpha1).endVertex();
-        tessellator.end();
+        tesselator.end();
     }
     
     @Override

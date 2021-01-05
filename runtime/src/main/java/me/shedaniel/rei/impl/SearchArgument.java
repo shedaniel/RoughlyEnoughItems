@@ -37,6 +37,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.IntRange;
 import net.minecraft.util.Unit;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.Mutable;
@@ -44,6 +45,7 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -87,6 +89,8 @@ public class SearchArgument<T, R> {
         void addQuote(int index);
         
         void addSplitter(int index);
+        
+        void addPart(SearchArgument<?, ?> argument, Collection<IntRange> grammarRanges, int index);
     }
     
     @ApiStatus.Internal
@@ -107,8 +111,9 @@ public class SearchArgument<T, R> {
                 for (Argument<?, ?> argument : ArgumentsRegistry.ARGUMENT_LIST) {
                     MatchStatus status = argument.matchesArgumentPrefix(term);
                     if (status.isMatched()) {
+                        SearchArgument<?, ?> searchArgument;
                         if (terms.group(1) != null) {
-                            arguments.add(new SearchArgument<>(argument, status.getText(), !status.isInverted(), terms.start(1) + tokenStartIndex, terms.end(1) + tokenStartIndex, !status.shouldPreserveCasing()));
+                            arguments.add(searchArgument = new SearchArgument<>(argument, status.getText(), !status.isInverted(), terms.start(1) + tokenStartIndex, terms.end(1) + tokenStartIndex, !status.shouldPreserveCasing()));
                             if (sink != null) {
                                 sink.addQuote(terms.start() + tokenStartIndex);
                                 if (terms.end() - 1 + tokenStartIndex < searchTerm.length()) {
@@ -116,7 +121,10 @@ public class SearchArgument<T, R> {
                                 }
                             }
                         } else {
-                            arguments.add(new SearchArgument<>(argument, status.getText(), !status.isInverted(), terms.start(2) + tokenStartIndex, terms.end(2) + tokenStartIndex, !status.shouldPreserveCasing()));
+                            arguments.add(searchArgument = new SearchArgument<>(argument, status.getText(), !status.isInverted(), terms.start(2) + tokenStartIndex, terms.end(2) + tokenStartIndex, !status.shouldPreserveCasing()));
+                        }
+                        if (sink != null) {
+                            sink.addPart(searchArgument, status.grammarRanges(), terms.start() + tokenStartIndex);
                         }
                         break;
                     }

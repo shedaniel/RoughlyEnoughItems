@@ -23,10 +23,13 @@
 
 package me.shedaniel.rei.impl.search;
 
+import net.minecraft.util.IntRange;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @ApiStatus.Internal
@@ -36,6 +39,7 @@ public final class MatchStatus {
     @Nullable
     private final String text;
     private final boolean preserveCasing;
+    private final List<IntRange> grammarRanges = new ArrayList<>();
     
     private MatchStatus(MatchType type, @Nullable String text, boolean preserveCasing) {
         this.type = type;
@@ -65,6 +69,17 @@ public final class MatchStatus {
     
     public static MatchStatus result(@NotNull String text, boolean preserveCasing, boolean inverted) {
         return new MatchStatus(!inverted ? MatchType.MATCHED : MatchType.INVERT_MATCHED, Objects.requireNonNull(text), preserveCasing);
+    }
+    
+    public List<IntRange> grammarRanges() {
+        return grammarRanges;
+    }
+    
+    public MatchStatus grammar(int start, int end) {
+        if (end - 1 >= start) {
+            this.grammarRanges.add(IntRange.of(start,  end - 1));
+        }
+        return this;
     }
     
     public MatchStatus invert() {
