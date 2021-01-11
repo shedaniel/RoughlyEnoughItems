@@ -16,5 +16,19 @@
   "config.roughlyenoughitems.miscellaneous.clickableRecipeArrows": "Klikkbare oppskriftspiler:",
   "config.roughlyenoughitems.isSubsetsEnabled": "Undersett aktivert:",
   "config.roughlyenoughitems.miscellaneous.renderEntryEnchantmentGlint": "Gjengi fortryllelse hint:",
-  "config.roughlyenoughitems.layout.configButtonLocation": "Posisjon for konfigurasjonsknapp:"
+  "config.roughlyenoughitems.layout.configButtonLocation": "Posisjon for konfigurasjonsknapp:",
+  "config.roughlyenoughitems.filteringScreen": "Customized Filtering",
+  "language.roughlyenoughitems.english": "English",
+  "language.roughlyenoughitems.japanese": "Japanese",
+  "language.roughlyenoughitems.chinese_traditional": "Tradisjonell kinesisk",
+  "language.roughlyenoughitems.french": "Fransk",
+  "language.roughlyenoughitems.german": "Tyskland\n",
+  "language.roughlyenoughitems.estonian": "Estland",
+  "language.roughlyenoughitems.portuguese": "Portugisisk",
+  "language.roughlyenoughitems.portuguese_brazilian": "Portugisisk (Brasil)",
+  "language.roughlyenoughitems.lolcat": "LOLCAT",
+  "language.roughlyenoughitems.upside_down_english": "Engelsk opp-ned",
+  "language.roughlyenoughitems.bulgarian": "Bulgarsk",
+  "language.roughlyenoughitems.russian": "Russisk",
+  "language.roughlyenoughitems.polish": "Polsk"
 }
