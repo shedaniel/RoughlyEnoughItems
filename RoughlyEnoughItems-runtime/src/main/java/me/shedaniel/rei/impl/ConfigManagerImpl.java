@@ -43,7 +43,7 @@ import me.shedaniel.autoconfig1u.util.Utils;
 import me.shedaniel.clothconfig2.forge.api.ConfigEntryBuilder;
 import me.shedaniel.clothconfig2.forge.api.Modifier;
 import me.shedaniel.clothconfig2.forge.api.ModifierKeyCode;
-import me.shedaniel.clothconfig2.gui.GlobalizedClothConfigScreen;
+import me.shedaniel.clothconfig2.forge.gui.GlobalizedClothConfigScreen;
 import me.shedaniel.clothconfig2.forge.gui.entries.KeyCodeEntry;
 import me.shedaniel.clothconfig2.forge.impl.EasingMethod;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
@@ -54,7 +54,6 @@ import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.TransformingScreen;
-import me.shedaniel.rei.gui.WarningAndErrorScreen;
 import me.shedaniel.rei.gui.config.RecipeScreenType;
 import me.shedaniel.rei.gui.config.entry.FilteringEntry;
 import me.shedaniel.rei.gui.config.entry.NoFilteringEntry;
@@ -65,9 +64,10 @@ import me.shedaniel.rei.impl.filtering.FilteringRule;
 import me.shedaniel.rei.impl.filtering.rules.ManualFilteringRule;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.DialogTexts;
-import net.minecraft.client.gui.components.AbstractButton;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.button.AbstractButton;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.nbt.CompoundNBT;
@@ -81,11 +81,9 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraft.world.InteractionResult;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -262,20 +260,22 @@ public class ConfigManagerImpl implements ConfigManager {
                     LocalDateTime now = LocalDateTime.now();
                     if (now.getMonthValue() == 12 && now.getDayOfMonth() >= 24 && now.getDayOfMonth() <= 26) {
                         ((GlobalizedClothConfigScreen) screen).listWidget.bottom -= 10;
-                        ((ScreenHooks) screen).cloth$addButtonWidget(new AbstractButton(0, screen.height - 40, screen.width, 10, new TextComponent(new String(BaseEncoding.base64().decode("TWVycnkgQ2hyaXN0bWFz")))) {
+                        AbstractButton button = new AbstractButton(0, screen.height - 40, screen.width, 10, new StringTextComponent(new String(BaseEncoding.base64().decode("TWVycnkgQ2hyaXN0bWFz")))) {
                             @Override
-                            public void onPress() { 
+                            public void onPress() {
                             }
                             
                             @Override
-                            public void renderButton(PoseStack poseStack, int i, int j, float f) {
+                            public void renderButton(MatrixStack poseStack, int i, int j, float f) {
                                 int color = this.active ? 16777215 : 10526880;
-                                Font font = Minecraft.getInstance().font;
+                                FontRenderer font = Minecraft.getInstance().font;
                                 int centerX = this.x + this.width / 2 - font.width(getMessage()) / 2;
                                 int textY = this.y + (this.height - 8) / 2;
-                                font.drawShadow(poseStack, TextTransformations.applyRainbow(getMessage().getVisualOrderText(), centerX, textY), centerX, textY, color | Mth.ceil(this.alpha * 255.0F) << 24);
+                                font.drawShadow(poseStack, TextTransformations.applyRainbow(getMessage().getVisualOrderText(), centerX, textY), centerX, textY, color | MathHelper.ceil(this.alpha * 255.0F) << 24);
                             }
-                        });
+                        };
+                        screen.buttons.add(button);
+                        ((List<IGuiEventListener>) screen.children()).add(button);
                     }
                 }).setSavingRunnable(() -> {
                     saveConfig();

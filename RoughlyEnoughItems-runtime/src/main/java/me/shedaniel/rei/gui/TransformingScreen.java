@@ -28,10 +28,10 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.clothconfig2.forge.api.ScissorsScreen;
 import me.shedaniel.math.Rectangle;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.DeathScreen;
+import net.minecraft.client.gui.screen.MainMenuScreen;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.TitleScreen;
-import net.minecraft.client.gui.screen.multiplayer.JoinMultiplayerScreen;
+import net.minecraft.client.settings.KeyBinding;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BooleanSupplier;
@@ -48,7 +48,7 @@ public class TransformingScreen extends DelegateScreen implements ScissorsScreen
     private boolean initAfter = false;
     
     public TransformingScreen(boolean translatingLast, Screen parent, Screen lastScreen, Runnable init, DoubleSupplier xTransformer, DoubleSupplier yTransformer, BooleanSupplier finished) {
-        super(Minecraft.getInstance().level == null && parent == null ? new TitleScreen() : parent);
+        super(Minecraft.getInstance().level == null && parent == null ? new MainMenuScreen() : parent);
         this.translatingLast = translatingLast;
         this.lastScreen = lastScreen;
         this.init = init;

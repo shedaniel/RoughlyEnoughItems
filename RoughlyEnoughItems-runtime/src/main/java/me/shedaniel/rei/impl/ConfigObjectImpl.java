@@ -283,7 +283,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     public boolean setEntrySize(double entrySize) {
         double original = advanced.accessibility.entrySize;
-        return (advanced.accessibility.entrySize = Mth.clamp(entrySize, 0.25, 4)) != original;
+        return (advanced.accessibility.entrySize = MathHelper.clamp(entrySize, 0.25, 4)) != original;
     }
     
     @Override
