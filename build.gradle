@@ -234,6 +234,7 @@ curseforge {
             addGameVersion "1.16.2"
             addGameVersion "1.16.3"
             addGameVersion "1.16.4"
+            addGameVersion "1.16.5"
             addGameVersion "Java 8"
             addGameVersion "Forge"
             relations {
