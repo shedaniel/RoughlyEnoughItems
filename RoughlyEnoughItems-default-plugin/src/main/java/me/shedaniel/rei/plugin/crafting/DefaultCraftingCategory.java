@@ -82,7 +82,7 @@ public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCr
         for (int y = 0; y < 3; y++)
             for (int x = 0; x < 3; x++)
                 slots.add(Widgets.createSlot(new Point(startPoint.x + 1 + x * 18, startPoint.y + 1 + y * 18)).markInput());
-        for (int i = 0; i < input.size(); i++) {
+        for (int i = 0; i < input.size() && i < 9; i++) {
             if (display instanceof DefaultShapedDisplay) {
                 if (!input.get(i).isEmpty())
                     slots.get(getSlotWithSize(display, i, 3)).entries(input.get(i));
