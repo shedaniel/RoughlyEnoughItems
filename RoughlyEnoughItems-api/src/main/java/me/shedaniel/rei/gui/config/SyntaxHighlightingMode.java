@@ -21,46 +21,23 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.search;
+package me.shedaniel.rei.gui.config;
 
-import me.shedaniel.rei.api.EntryStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraft.util.Unit;
-import org.apache.commons.lang3.mutable.Mutable;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.resources.language.I18n;
 
 import java.util.Locale;
 
-@ApiStatus.Internal
-@OnlyIn(Dist.CLIENT)
-public final class TextArgument extends Argument<Unit, String> {
-    public static final TextArgument INSTANCE = new TextArgument();
+@Environment(EnvType.CLIENT)
+public enum SyntaxHighlightingMode {
+    PLAIN,
+    PLAIN_UNDERSCORED,
+    COLORFUL,
+    COLORFUL_UNDERSCORED;
     
     @Override
-    public String getName() {
-        return "text";
-    }
-    
-    @Override
-    public @Nullable String getPrefix() {
-        return "";
-    }
-    
-    @Override
-    public boolean matches(Mutable<String> data, EntryStack stack, String searchText, Unit filterData) {
-        if (data.getValue() == null) {
-            data.setValue(stack.asFormatStrippedText().getString().toLowerCase(Locale.ROOT));
-        }
-        return data.getValue().contains(searchText);
-    }
-    
-    @Override
-    public Unit prepareSearchFilter(String searchText) {
-        return null;
-    }
-    
-    private TextArgument() {
+    public String toString() {
+        return I18n.get("config.roughlyenoughitems.syntaxHighlightingMode." + name().toLowerCase(Locale.ROOT));
     }
 }

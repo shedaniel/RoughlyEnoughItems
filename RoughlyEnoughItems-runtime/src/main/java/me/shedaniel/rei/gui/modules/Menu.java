@@ -42,6 +42,7 @@ import me.shedaniel.rei.gui.modules.entries.SubSubsetsMenuEntry;
 import me.shedaniel.rei.gui.widget.LateRenderable;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import me.shedaniel.rei.utils.CollectionUtils;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -262,7 +263,7 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
         if (getInnerBounds().contains(mouseX, mouseY)) {
-            scrolling.offset(ClothConfigInitializer.getScrollStep() * -amount, true);
+            scrolling.offset(ClothConfigInitializer.getScrollStep() * -amount * (Screen.hasAltDown() ? 3 : 1), true);
             return true;
         }
         for (MenuEntry child : children()) {

@@ -115,7 +115,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
 //            if (favoritePanel.mouseScrolled(double_1, double_2, double_3)) {
 //                return true;
 //            }
-                scrolling.offset(ClothConfigInitializer.getScrollStep() * -double_3, true);
+                scrolling.offset(ClothConfigInitializer.getScrollStep() * -double_3 * (Screen.hasAltDown() ? 3 : 1), true);
                 return true;
             }
         }

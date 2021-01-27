@@ -66,7 +66,7 @@ public final class ArrowWidget extends Arrow {
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         Minecraft.getInstance().getTextureManager().bind(REIHelper.getInstance().getDefaultDisplayTexture());
-        blit(matrices, getX(), getY(), 106, 91, 24, 17);
+        blit(matrices, getX(), getY(), 82, 60, 24, 17);
         if (getAnimationDuration() > 0) {
             int width = MathHelper.ceil((System.currentTimeMillis() / (animationDuration / 24) % 24d) / 1f);
             blit(matrices, getX(), getY(), 82, 91, width, 17);

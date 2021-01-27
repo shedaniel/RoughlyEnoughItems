@@ -169,7 +169,7 @@ public class EntryListWidget extends WidgetWithBounds {
                     return true;
                 }
             } else if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-                scrolling.offset(ClothConfigInitializer.getScrollStep() * -double_3, true);
+                scrolling.offset(ClothConfigInitializer.getScrollStep() * -double_3 * (Screen.hasAltDown() ? 3 : 1), true);
                 return true;
             }
         }

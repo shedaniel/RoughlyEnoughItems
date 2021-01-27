@@ -176,11 +176,12 @@ public class FilteringScreen extends Screen {
         super.init();
         Rectangle bounds = getBounds();
         updateSearch(this.searchField.getText());
-        this.searchField.getBounds().setBounds(bounds.getCenterX() - 75, bounds.getMaxY() - 22, 150, 18);
         this.selectAllButton.x = 2;
         this.selectAllButton.y = bounds.getMaxY() - 22;
         this.selectNoneButton.x = 4 + selectAllButton.getWidth();
         this.selectNoneButton.y = bounds.getMaxY() - 22;
+        int searchFieldWidth = Math.max(bounds.width - (selectNoneButton.x + selectNoneButton.getWidth() + hideButton.getWidth() + showButton.getWidth() + 12), 100);
+        this.searchField.getBounds().setBounds(selectNoneButton.x + selectNoneButton.getWidth() + 4, bounds.getMaxY() - 21, searchFieldWidth, 18);
         this.hideButton.x = bounds.getMaxX() - hideButton.getWidth() - showButton.getWidth() - 4;
         this.hideButton.y = bounds.getMaxY() - 22;
         this.showButton.x = bounds.getMaxX() - showButton.getWidth() - 2;
@@ -442,7 +443,7 @@ public class FilteringScreen extends Screen {
     @Override
     public boolean mouseScrolled(double double_1, double double_2, double double_3) {
         if (getBounds().contains(double_1, double_2)) {
-            scrolling.offset(ClothConfigInitializer.getScrollStep() * -double_3, true);
+            scrolling.offset(ClothConfigInitializer.getScrollStep() * -double_3 * (Screen.hasAltDown() ? 3 : 1), true);
             return true;
         }
         super.mouseScrolled(double_1, double_2, double_3);

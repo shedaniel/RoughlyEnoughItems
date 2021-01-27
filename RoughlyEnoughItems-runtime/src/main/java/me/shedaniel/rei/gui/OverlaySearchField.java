@@ -27,25 +27,41 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.clothconfig2.forge.api.PointHelper;
+import me.shedaniel.math.Color;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.REIHelper;
+import me.shedaniel.rei.gui.config.SyntaxHighlightingMode;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
+import me.shedaniel.rei.impl.OverlaySearchFieldSyntaxHighlighter;
 import me.shedaniel.rei.impl.ScreenHelper;
+import me.shedaniel.rei.impl.TextTransformations;
+import me.shedaniel.rei.impl.search.Argument;
+import me.shedaniel.rei.impl.search.ArgumentsRegistry;
+import me.shedaniel.rei.impl.search.TextArgument;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.InputMappings;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.SoundEvents;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Tuple;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 @ApiStatus.Internal
-public class OverlaySearchField extends TextFieldWidget {
+public class OverlaySearchField extends TextFieldWidget implements TextFieldWidget.TextFormatter {
     
     public static boolean isHighlighting = false;
+    private static final Style SPLITTER_STYLE = Style.EMPTY.withColor(ChatFormatting.GRAY);
+    private static final Style QUOTES_STYLE = Style.EMPTY.withColor(ChatFormatting.GOLD);
+    private static final Style ERROR_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xff5555));
+    private final OverlaySearchFieldSyntaxHighlighter highlighter = new OverlaySearchFieldSyntaxHighlighter(this);
     public long keybindFocusTime = -1;
     public int keybindFocusKey = -1;
     public boolean isMain = true;
@@ -55,6 +71,48 @@ public class OverlaySearchField extends TextFieldWidget {
     public OverlaySearchField(int x, int y, int width, int height) {
         super(x, y, width, height);
         setMaxLength(10000);
+        setFormatter(this);
+        super.setChangedListener(highlighter);
+    }
+    
+    @Override
+    public FormattedCharSequence format(TextFieldWidget widget, String text, int index) {
+        boolean isPlain = ConfigObject.getInstance().getSyntaxHighlightingMode() == SyntaxHighlightingMode.PLAIN || ConfigObject.getInstance().getSyntaxHighlightingMode() == SyntaxHighlightingMode.PLAIN_UNDERSCORED;
+        boolean hasUnderscore = ConfigObject.getInstance().getSyntaxHighlightingMode() == SyntaxHighlightingMode.PLAIN_UNDERSCORED || ConfigObject.getInstance().getSyntaxHighlightingMode() == SyntaxHighlightingMode.COLORFUL_UNDERSCORED;
+        return TextTransformations.forwardWithTransformation(text, (s, charIndex, c) -> {
+            byte arg = highlighter.highlighted[charIndex + index];
+            Style style = Style.EMPTY;
+            if (arg > 0) {
+                Argument<?, ?> argument = ArgumentsRegistry.ARGUMENT_LIST.get((arg - 1) / 2);
+                if (isMain && ContainerScreenOverlay.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty()) {
+                    style = ERROR_STYLE;
+                }
+                if (!isPlain) {
+                    style = argument.getHighlightedStyle();
+                }
+                if (!(argument instanceof TextArgument) && hasUnderscore && arg % 2 == 1) {
+                    style = style.withUnderlined(true);
+                }
+            } else if (!isPlain) {
+                if (arg == -1) {
+                    style = SPLITTER_STYLE;
+                } else if (arg == -2) {
+                    style = QUOTES_STYLE;
+                }
+            }
+            
+            
+            if (containsMouse(PointHelper.ofMouse()) || isFocused()) {
+                return style;
+            }
+            int color = this.editable ? this.editableColor : this.notEditableColor;
+            return style.withColor(TextColor.fromRgb(Color.ofOpaque(style.getColor() == null ? color : style.getColor().getValue()).brighter(0.75).getColor()));
+        });
+    }
+    
+    @Override
+    public void setChangedListener(Consumer<String> responder) {
+        super.setChangedListener(highlighter.andThen(responder));
     }
     
     @Override

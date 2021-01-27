@@ -26,16 +26,17 @@ package me.shedaniel.rei.impl.search;
 import me.shedaniel.rei.api.EntryStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.network.chat.Style;
+import org.apache.commons.lang3.mutable.Mutable;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.Internal
 @OnlyIn(Dist.CLIENT)
-public abstract class Argument {
+public abstract class Argument<T, R> {
     public Argument() {
     }
-    
-    private int dataOrdinal = -1;
     
     public abstract String getName();
     
@@ -44,24 +45,21 @@ public abstract class Argument {
         return null;
     }
     
+    @NotNull
+    public Style getHighlightedStyle() {
+        return Style.EMPTY;
+    }
+    
     public MatchStatus matchesArgumentPrefix(String text) {
         String prefix = getPrefix();
         if (prefix == null) return MatchStatus.unmatched();
-        if (text.startsWith("-" + prefix)) return MatchStatus.invertMatched(text.substring(1 + prefix.length()));
-        if (text.startsWith(prefix + "-")) return MatchStatus.invertMatched(text.substring(1 + prefix.length()));
-        return text.startsWith(prefix) ? MatchStatus.matched(text.substring(prefix.length())) : MatchStatus.unmatched();
+        if (text.startsWith("-" + prefix)) return MatchStatus.invertMatched(text.substring(1 + prefix.length())).grammar(0, prefix.length() + 1);
+        if (text.startsWith(prefix + "-")) return MatchStatus.invertMatched(text.substring(1 + prefix.length())).grammar(0, prefix.length() + 1);
+        if (text.startsWith(prefix)) return MatchStatus.matched(text.substring(prefix.length())).grammar(0, prefix.length());
+        return MatchStatus.unmatched();
     }
     
-    public final int getDataOrdinal() {
-        if (dataOrdinal == -1) {
-            dataOrdinal = ArgumentsRegistry.ARGUMENT_LIST.indexOf(this);
-        }
-        return dataOrdinal;
-    }
+    public abstract boolean matches(Mutable<R> data, EntryStack stack, String searchText, T filterData);
     
-    public abstract boolean matches(Object[] data, EntryStack stack, String searchText, Object searchData);
-    
-    public Object prepareSearchData(String searchText) {
-        return null;
-    }
+    public abstract T prepareSearchFilter(String searchText);
 }
