@@ -21,40 +21,23 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.search;
+package me.shedaniel.rei.gui.config;
 
-import me.shedaniel.rei.api.EntryStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.util.Unit;
-import org.apache.commons.lang3.mutable.Mutable;
-import org.jetbrains.annotations.ApiStatus;
+import net.minecraft.client.resources.language.I18n;
 
-@ApiStatus.Internal
+import java.util.Locale;
+
 @Environment(EnvType.CLIENT)
-public final class AlwaysMatchingArgument extends Argument<Unit, Unit> {
-    public static final AlwaysMatchingArgument INSTANCE = new AlwaysMatchingArgument();
+public enum SyntaxHighlightingMode {
+    PLAIN,
+    PLAIN_UNDERSCORED,
+    COLORFUL,
+    COLORFUL_UNDERSCORED;
     
     @Override
-    public String getName() {
-        return "always";
-    }
-    
-    @Override
-    public boolean matches(Mutable<Unit> data, EntryStack stack, String searchText, Unit filterData) {
-        return true;
-    }
-    
-    @Override
-    public Unit prepareSearchFilter(String searchText) {
-        return Unit.INSTANCE;
-    }
-    
-    @Override
-    public MatchStatus matchesArgumentPrefix(String text) {
-        return MatchStatus.unmatched();
-    }
-    
-    private AlwaysMatchingArgument() {
+    public String toString() {
+        return I18n.get("config.roughlyenoughitems.syntaxHighlightingMode." + name().toLowerCase(Locale.ROOT));
     }
 }

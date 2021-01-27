@@ -338,6 +338,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
             int innerWidth = Mth.ceil(workingStations.size() / ((float) hh));
             int xx = bounds.x - (8 + innerWidth * 16) + 6;
             int yy = bounds.y + 16;
+//            int yy = bounds.y + 36;
             preWidgets.add(workingStationsBaseWidget = Widgets.createCategoryBase(new Rectangle(xx - 5, yy - 5, 15 + innerWidth * 16, 10 + actualHeight * 16)));
             preWidgets.add(Widgets.createSlotBase(new Rectangle(xx - 1, yy - 1, innerWidth * 16 + 2, actualHeight * 16 + 2)));
             int index = 0;
@@ -352,6 +353,23 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
                     xx -= 16;
                 }
             }
+        }
+    
+        if (false) {
+            int innerWidth = 10;
+            innerWidth = 19;
+            int actualHeight = 10;
+//            Rectangle base = new Rectangle(bounds.x - (8 + innerWidth) + 6 - 5, bounds.getMaxY() - 26, 15 + innerWidth, 10 + actualHeight);
+            Rectangle base = new Rectangle(bounds.x - (8 + innerWidth) + 6 - 5, bounds.y + 8, 15 + innerWidth, 10 + actualHeight);
+            preWidgets.add(Widgets.createCategoryBase(base));
+            int border = 5;
+            preWidgets.add(Widgets.createButton(new Rectangle(base.x + border, base.y + border, 10, 10), new ImmutableLiteralText("<"))
+                    .tooltipLines("Go back in history", " ", "§7You may alternatively press backspace.")
+                    .onClick(button -> minecraft.setScreen(ScreenHelper.getLastRecipeScreen()))
+                    .enabled(ScreenHelper.hasLastRecipeScreen()));
+            preWidgets.add(Widgets.createButton(new Rectangle(base.x + border + 9, base.y + border, 10, 10), new ImmutableLiteralText(">"))
+                    .tooltipLines("Go forward in history", " ", "§7You may alternatively press backspace.")
+                    .onClick(button -> minecraft.setScreen(ScreenHelper.getLastRecipeScreen())));
         }
         
         children.addAll(tabs);

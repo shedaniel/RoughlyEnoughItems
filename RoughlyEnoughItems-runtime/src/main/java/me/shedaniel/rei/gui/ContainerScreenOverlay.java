@@ -89,34 +89,6 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
     private int tooltipWidth;
     private int tooltipHeight;
     private List<FormattedCharSequence> tooltipLines;
-    public final TriConsumer<PoseStack, Point, Float> renderTooltipCallback = (matrices, mouse, aFloat) -> {
-        RenderSystem.disableRescaleNormal();
-        RenderSystem.disableDepthTest();
-        matrices.pushPose();
-        matrices.translate(0, 0, 999);
-        int x = mouse.x;
-        int y = mouse.y;
-        this.fillGradient(matrices, x - 3, y - 4, x + tooltipWidth + 3, y - 3, -267386864, -267386864);
-        this.fillGradient(matrices, x - 3, y + tooltipHeight + 3, x + tooltipWidth + 3, y + tooltipHeight + 4, -267386864, -267386864);
-        this.fillGradient(matrices, x - 3, y - 3, x + tooltipWidth + 3, y + tooltipHeight + 3, -267386864, -267386864);
-        this.fillGradient(matrices, x - 4, y - 3, x - 3, y + tooltipHeight + 3, -267386864, -267386864);
-        this.fillGradient(matrices, x + tooltipWidth + 3, y - 3, x + tooltipWidth + 4, y + tooltipHeight + 3, -267386864, -267386864);
-        this.fillGradient(matrices, x - 3, y - 3 + 1, x - 3 + 1, y + tooltipHeight + 3 - 1, 1347420415, 1344798847);
-        this.fillGradient(matrices, x + tooltipWidth + 2, y - 3 + 1, x + tooltipWidth + 3, y + tooltipHeight + 3 - 1, 1347420415, 1344798847);
-        this.fillGradient(matrices, x - 3, y - 3, x + tooltipWidth + 3, y - 3 + 1, 1347420415, 1347420415);
-        this.fillGradient(matrices, x - 3, y + tooltipHeight + 2, x + tooltipWidth + 3, y + tooltipHeight + 3, 1344798847, 1344798847);
-        int currentY = y;
-        MultiBufferSource.BufferSource immediate = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        Matrix4f matrix = matrices.last().pose();
-        for (int lineIndex = 0; lineIndex < tooltipLines.size(); lineIndex++) {
-            font.drawInBatch(tooltipLines.get(lineIndex), x, currentY, -1, true, matrix, immediate, false, 0, 15728880);
-            currentY += lineIndex == 0 ? 12 : 10;
-        }
-        immediate.endBatch();
-        matrices.popPose();
-        RenderSystem.enableDepthTest();
-        RenderSystem.enableRescaleNormal();
-    };
     private Rectangle bounds;
     private Window window;
     private Button leftButton, rightButton;

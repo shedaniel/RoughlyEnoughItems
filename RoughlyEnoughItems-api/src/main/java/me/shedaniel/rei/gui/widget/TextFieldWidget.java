@@ -35,6 +35,8 @@ import me.shedaniel.rei.api.REIHelper;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Style;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.TickableBlockEntity;
 import org.jetbrains.annotations.ApiStatus;
@@ -42,7 +44,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -61,7 +62,7 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableBlockEn
     protected int selectionEnd;
     protected int editableColor;
     protected int notEditableColor;
-    protected BiFunction<String, Integer, String> renderTextProvider;
+    protected TextFormatter formatter;
     private Rectangle bounds;
     private String text;
     private int maxLength;
@@ -84,9 +85,7 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableBlockEn
         this.notEditableColor = 7368816;
         this.visible = true;
         this.textPredicate = s -> true;
-        this.renderTextProvider = (string_1, integer_1) -> {
-            return string_1;
-        };
+        this.formatter = TextFormatter.DEFAULT;
         this.bounds = rectangle;
         this.stripInvalid = SharedConstants::filterText;
     }
@@ -113,8 +112,8 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableBlockEn
         this.changedListener = biConsumer_1;
     }
     
-    public void setRenderTextProvider(BiFunction<String, Integer, String> biFunction_1) {
-        this.renderTextProvider = biFunction_1;
+    public void setFormatter(TextFormatter formatter) {
+        this.formatter = formatter;
     }
     
     @Override
@@ -444,7 +443,7 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableBlockEn
             
             if (!string_1.isEmpty()) {
                 String string_2 = boolean_1 ? string_1.substring(0, int_4) : string_1;
-                int_8 = this.font.drawShadow(matrices, this.renderTextProvider.apply(string_2, this.firstCharacterIndex), (float) x, (float) y, color);
+                int_8 = this.font.drawShadow(matrices, this.formatter.format(this, string_2, this.firstCharacterIndex), (float) x, (float) y, color);
             }
             
             boolean isCursorInsideText = this.selectionStart < this.text.length() || this.text.length() >= this.getMaxLength();
@@ -457,7 +456,7 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableBlockEn
             int_9--;
             
             if (!string_1.isEmpty() && boolean_1 && int_4 < string_1.length()) {
-                this.font.drawShadow(matrices, this.renderTextProvider.apply(string_1.substring(int_4), this.selectionStart), (float) int_8, (float) y, color);
+                this.font.drawShadow(matrices, this.formatter.format(this, string_1.substring(int_4), this.selectionStart), (float) int_8, (float) y, color);
             }
             
             if (!isCursorInsideText && text.isEmpty() && this.suggestion != null) {
@@ -631,4 +630,11 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableBlockEn
         return index > this.text.length() ? this.bounds.x : this.bounds.x + this.font.width(this.text.substring(0, index));
     }
     
+    public interface TextFormatter {
+        TextFormatter DEFAULT = (widget, text, index) -> {
+            return FormattedCharSequence.forward(text, Style.EMPTY);
+        };
+        
+        FormattedCharSequence format(TextFieldWidget widget, String text, int index);
+    }
 }

@@ -27,17 +27,25 @@ import me.shedaniel.rei.api.EntryStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Unit;
+import org.apache.commons.lang3.mutable.Mutable;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.Collections;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
-public final class TagArgument extends Argument {
+public final class TagArgument extends Argument<Unit, String[]> {
     public static final TagArgument INSTANCE = new TagArgument();
     private static final Minecraft minecraft = Minecraft.getInstance();
+    private static final String[] EMPTY_ARRAY = new String[0];
+    private static final Style STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x9efff4));
     
     @Override
     public String getName() {
@@ -50,34 +58,44 @@ public final class TagArgument extends Argument {
     }
     
     @Override
-    public boolean matches(Object[] data, EntryStack stack, String searchText, Object searchData) {
-        if (data[getDataOrdinal()] == null) {
+    public @NotNull Style getHighlightedStyle() {
+        return STYLE;
+    }
+    
+    @Override
+    public boolean matches(Mutable<String[]> data, EntryStack stack, String searchText, Unit filterData) {
+        if (data.getValue() == null) {
+            Collection<ResourceLocation> tags = Collections.emptyList();
             if (stack.getType() == EntryStack.Type.ITEM) {
-                Collection<ResourceLocation> tagsFor = minecraft.getConnection().getTags().getItems().getMatchingTags(stack.getItem());
-                data[getDataOrdinal()] = new String[tagsFor.size()];
-                int i = 0;
+                tags = minecraft.getConnection().getTags().getItems().getMatchingTags(stack.getItem());
                 
-                for (ResourceLocation identifier : tagsFor) {
-                    ((String[]) data[getDataOrdinal()])[i] = identifier.toString();
-                    i++;
-                }
             } else if (stack.getType() == EntryStack.Type.FLUID) {
-                Collection<ResourceLocation> tagsFor = minecraft.getConnection().getTags().getFluids().getMatchingTags(stack.getFluid());
-                data[getDataOrdinal()] = new String[tagsFor.size()];
+                tags = minecraft.getConnection().getTags().getFluids().getMatchingTags(stack.getFluid());
+            }
+            
+            if (tags.isEmpty()) {
+                data.setValue(EMPTY_ARRAY);
+            } else {
+                data.setValue(new String[tags.size()]);
                 int i = 0;
                 
-                for (ResourceLocation identifier : tagsFor) {
-                    ((String[]) data[getDataOrdinal()])[i] = identifier.toString();
+                for (ResourceLocation identifier : tags) {
+                    data.getValue()[i] = identifier.toString();
                     i++;
                 }
-            } else
-                data[getDataOrdinal()] = new String[0];
+            }
         }
-        String[] tags = (String[]) data[getDataOrdinal()];
-        for (String tag : tags)
-            if (tag.isEmpty() || tag.contains(searchText))
+        for (String tag : data.getValue()) {
+            if (tag.isEmpty() || tag.contains(searchText)) {
                 return true;
+            }
+        }
         return false;
+    }
+    
+    @Override
+    public Unit prepareSearchFilter(String searchText) {
+        return Unit.INSTANCE;
     }
     
     private TagArgument() {

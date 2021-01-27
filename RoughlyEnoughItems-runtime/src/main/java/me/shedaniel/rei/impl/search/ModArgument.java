@@ -27,16 +27,23 @@ import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.EntryStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Unit;
+import org.apache.commons.lang3.mutable.Mutable;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
+import java.util.Optional;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
-public final class ModArgument extends Argument {
+public final class ModArgument extends Argument<Unit, ModArgument.@Nullable ModInfoPair> {
     public static final ModArgument INSTANCE = new ModArgument();
+    private static final Style STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xffa8f3));
     
     @Override
     public String getName() {
@@ -49,21 +56,45 @@ public final class ModArgument extends Argument {
     }
     
     @Override
-    public boolean matches(Object[] data, EntryStack stack, String searchText, Object searchData) {
-        if (data[getDataOrdinal()] == null) {
-            data[getDataOrdinal()] = new String[]{
-                    stack.getIdentifier().map(ResourceLocation::getNamespace).orElse("").toLowerCase(Locale.ROOT),
+    public boolean matches(Mutable<@Nullable ModInfoPair> data, EntryStack stack, String searchText, Unit filterData) {
+        if (data.getValue() == null) {
+            Optional<ResourceLocation> id = stack.getIdentifier();
+            data.setValue(id.isPresent() ? new ModInfoPair(
+                    id.get().getNamespace(),
                     null
-            };
+            ) : ModInfoPair.EMPTY);
         }
-        String[] strings = (String[]) data[getDataOrdinal()];
-        if (strings[0].isEmpty() || strings[0].contains(searchText)) return true;
-        if (strings[1] == null) {
-            strings[1] = ClientHelper.getInstance().getModFromModId(strings[0]).toLowerCase(Locale.ROOT);
+        ModInfoPair pair = data.getValue();
+        if (pair.modId == null || pair.modId.contains(searchText)) return true;
+        if (pair.modName == null) {
+            pair.modName = ClientHelper.getInstance().getModFromModId(pair.modId).toLowerCase(Locale.ROOT);
         }
-        return strings[1].isEmpty() || strings[1].contains(searchText);
+        return pair.modName.isEmpty() || pair.modName.contains(searchText);
+    }
+    
+    @Override
+    public Unit prepareSearchFilter(String searchText) {
+        return Unit.INSTANCE;
+    }
+    
+    @Override
+    public @NotNull Style getHighlightedStyle() {
+        return STYLE;
     }
     
     private ModArgument() {
+    }
+    
+    protected static class ModInfoPair {
+        private static final ModInfoPair EMPTY = new ModInfoPair(null, null);
+        @Nullable
+        private final String modId;
+        @Nullable
+        private String modName;
+        
+        public ModInfoPair(@Nullable String modId, @Nullable String modName) {
+            this.modId = modId;
+            this.modName = modName;
+        }
     }
 }
