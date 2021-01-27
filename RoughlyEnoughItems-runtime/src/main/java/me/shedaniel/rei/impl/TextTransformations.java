@@ -26,6 +26,7 @@ package me.shedaniel.rei.impl;
 import me.shedaniel.math.Color;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.ApiStatus;
@@ -40,5 +41,59 @@ public class TextTransformations {
             combinedX[0] += Minecraft.getInstance().font.getSplitter().widthProvider.getWidth(codePoint, style);
             return sink.accept(charIndex, style.withColor(TextColor.fromRgb(rgb)), codePoint);
         });
+    }
+    
+    public static FormattedCharSequence forwardWithTransformation(String text, CharSequenceTransformer transformer) {
+        if (text.isEmpty()) {
+            return FormattedCharSequence.EMPTY;
+        }
+        return sink -> {
+            int length = text.length();
+            
+            for (int charIndex = 0; charIndex < length; ++charIndex) {
+                char c = text.charAt(charIndex);
+                
+                if (Character.isHighSurrogate(c)) {
+                    if (charIndex + 1 >= length) {
+                        // Broken?
+                        if (!sink.accept(charIndex, Style.EMPTY, 65533)) {
+                            return false;
+                        }
+                        break;
+                    }
+                    
+                    char forward = text.charAt(charIndex + 1);
+                    if (Character.isLowSurrogate(forward)) {
+                        // Combine them together
+                        if (!sink.accept(charIndex, Style.EMPTY, Character.toCodePoint(c, forward))) {
+                            return false;
+                        }
+                        
+                        charIndex++;
+                    } else {
+                        // Broken?
+                        if (!sink.accept(charIndex, Style.EMPTY, 65533)) {
+                            return false;
+                        }
+                    }
+                } else if (Character.isSurrogate(c)) {
+                    // This is weird, broken?
+                    if (!sink.accept(charIndex, Style.EMPTY, 65533)) {
+                        return false;
+                    }
+                } else {
+                    if (!sink.accept(charIndex, transformer.apply(text, charIndex, c), c)) {
+                        return false;
+                    }
+                }
+            }
+            
+            return true;
+        };
+    }
+    
+    @FunctionalInterface
+    public interface CharSequenceTransformer {
+        Style apply(String text, int charIndex, char c);
     }
 }

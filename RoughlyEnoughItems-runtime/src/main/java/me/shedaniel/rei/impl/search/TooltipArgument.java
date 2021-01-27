@@ -27,15 +27,21 @@ import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.impl.SearchArgument;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.util.Unit;
+import org.apache.commons.lang3.mutable.Mutable;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
-public final class TooltipArgument extends Argument {
+public final class TooltipArgument extends Argument<Unit, String> {
     public static final TooltipArgument INSTANCE = new TooltipArgument();
+    private static final Style STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xffe0ad));
     
     @Override
     public String getName() {
@@ -48,12 +54,22 @@ public final class TooltipArgument extends Argument {
     }
     
     @Override
-    public boolean matches(Object[] data, EntryStack stack, String searchText, Object searchData) {
-        if (data[getDataOrdinal()] == null) {
-            data[getDataOrdinal()] = SearchArgument.tryGetEntryStackTooltip(stack).toLowerCase(Locale.ROOT);
+    public @NotNull Style getHighlightedStyle() {
+        return STYLE;
+    }
+    
+    @Override
+    public boolean matches(Mutable<String> data, EntryStack stack, String searchText, Unit filterData) {
+        if (data.getValue() == null) {
+            data.setValue(SearchArgument.tryGetEntryStackTooltip(stack).toLowerCase(Locale.ROOT));
         }
-        String tooltip = (String) data[getDataOrdinal()];
+        String tooltip = data.getValue();
         return tooltip.isEmpty() || tooltip.contains(searchText);
+    }
+    
+    @Override
+    public Unit prepareSearchFilter(String searchText) {
+        return Unit.INSTANCE;
     }
     
     private TooltipArgument() {

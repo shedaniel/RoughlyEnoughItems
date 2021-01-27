@@ -37,9 +37,15 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.IntRange;
+import net.minecraft.util.Unit;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.mutable.Mutable;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -47,38 +53,79 @@ import java.util.regex.Pattern;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
-public class SearchArgument {
+public class SearchArgument<T, R> {
     public static final String SPACE = " ", EMPTY = "";
-    private static final SearchArgument ALWAYS = new SearchArgument(AlwaysMatchingArgument.INSTANCE, EMPTY, true);
-    private Argument argument;
+    private static final SearchArgument<Unit, Unit> ALWAYS = new SearchArgument<>(AlwaysMatchingArgument.INSTANCE, EMPTY, true, -1, -1);
+    private Argument<T, R> argument;
     private String text;
-    private Object data;
+    private T filterData;
     private boolean regular;
+    private final int start;
+    private final int end;
     private static final Pattern SPLIT_PATTERN = Pattern.compile("(?:\"([^\"]*)\")|([^\\s]+)");
     
-    public SearchArgument(Argument argument, String text, boolean regular) {
-        this(argument, text, regular, true);
+    public SearchArgument(Argument<T, R> argument, String text, boolean regular, int start, int end) {
+        this(argument, text, regular, start, end, true);
     }
     
-    public SearchArgument(Argument argument, String text, boolean regular, boolean lowercase) {
+    public SearchArgument(Argument<T, R> argument, String text, boolean regular, int start, int end, boolean lowercase) {
         this.argument = argument;
         this.text = lowercase ? text.toLowerCase(Locale.ROOT) : text;
         this.regular = regular;
-        this.data = null;
+        this.filterData = null;
+        this.start = start;
+        this.end = end;
+    }
+    
+    public int start() {
+        return start;
+    }
+    
+    public int end() {
+        return end;
+    }
+    
+    public interface ProcessedSink {
+        void addQuote(int index);
+        
+        void addSplitter(int index);
+    
+        void addPart(SearchArgument<?, ?> argument, Collection<IntRange> grammarRanges, int index);
     }
     
     @ApiStatus.Internal
     public static List<SearchArgument.SearchArguments> processSearchTerm(String searchTerm) {
+        return processSearchTerm(searchTerm, null);
+    }
+    
+    @ApiStatus.Internal
+    public static List<SearchArgument.SearchArguments> processSearchTerm(String searchTerm, @Nullable ProcessedSink sink) {
         List<SearchArgument.SearchArguments> searchArguments = Lists.newArrayList();
-        for (String split : StringUtils.splitByWholeSeparatorPreserveAllTokens(searchTerm, "|")) {
-            Matcher terms = SPLIT_PATTERN.matcher(split);
-            List<SearchArgument> arguments = Lists.newArrayList();
+        int tokenStartIndex = 0;
+        String[] allTokens = StringUtils.splitByWholeSeparatorPreserveAllTokens(searchTerm, "|");
+        for (String token : allTokens) {
+            Matcher terms = SPLIT_PATTERN.matcher(token);
+            List<SearchArgument<?, ?>> arguments = Lists.newArrayList();
             while (terms.find()) {
                 String term = MoreObjects.firstNonNull(terms.group(1), terms.group(2));
-                for (Argument argument : ArgumentsRegistry.ARGUMENT_LIST) {
+                for (Argument<?, ?> argument : ArgumentsRegistry.ARGUMENT_LIST) {
                     MatchStatus status = argument.matchesArgumentPrefix(term);
                     if (status.isMatched()) {
-                        arguments.add(new SearchArgument(argument, status.getText(), !status.isInverted(), !status.shouldPreserveCasing()));
+                        SearchArgument<?, ?> searchArgument;
+                        if (terms.group(1) != null) {
+                            arguments.add(searchArgument = new SearchArgument<>(argument, status.getText(), !status.isInverted(), terms.start(1) + tokenStartIndex, terms.end(1) + tokenStartIndex, !status.shouldPreserveCasing()));
+                            if (sink != null) {
+                                sink.addQuote(terms.start() + tokenStartIndex);
+                                if (terms.end() - 1 + tokenStartIndex < searchTerm.length()) {
+                                    sink.addQuote(terms.end() - 1 + tokenStartIndex);
+                                }
+                            }
+                        } else {
+                            arguments.add(searchArgument = new SearchArgument<>(argument, status.getText(), !status.isInverted(), terms.start(2) + tokenStartIndex, terms.end(2) + tokenStartIndex, !status.shouldPreserveCasing()));
+                        }
+                        if (sink != null) {
+                            sink.addPart(searchArgument, status.grammarRanges(), terms.start() + tokenStartIndex);
+                        }
                         break;
                     }
                 }
@@ -88,10 +135,15 @@ public class SearchArgument {
             } else {
                 searchArguments.add(new SearchArgument.SearchArguments(arguments.toArray(new SearchArgument[0])));
             }
+            tokenStartIndex += 1 + token.length();
+            if (sink != null && tokenStartIndex - 1 < searchTerm.length()) {
+                sink.addSplitter(tokenStartIndex - 1);
+            }
         }
         for (SearchArguments arguments : searchArguments) {
-            for (SearchArgument argument : arguments.getArguments()) {
-                argument.data = argument.argument.prepareSearchData(argument.getText());
+            for (SearchArgument<?, ?> argument : arguments.getArguments()) {
+                //noinspection RedundantCast
+                ((SearchArgument<Object, Object>) argument).filterData = argument.argument.prepareSearchFilter(argument.getText());
             }
         }
         return searchArguments;
@@ -102,11 +154,12 @@ public class SearchArgument {
         if (searchArguments.isEmpty())
             return true;
         Minecraft minecraft = Minecraft.getInstance();
-        Object[] data = new Object[ArgumentsRegistry.ARGUMENT_LIST.size()];
+        Mutable<?> mutable = new MutableObject<>();
         for (SearchArgument.SearchArguments arguments : searchArguments) {
             boolean applicable = true;
-            for (SearchArgument argument : arguments.getArguments()) {
-                if (argument.getArgument().matches(data, stack, argument.getText(), argument.data) != argument.isRegular()) {
+            for (SearchArgument<?, ?> argument : arguments.getArguments()) {
+                mutable.setValue(null);
+                if (matches(argument.getArgument(), mutable, stack, argument.getText(), argument.filterData) != argument.isRegular()) {
                     applicable = false;
                     break;
                 }
@@ -117,6 +170,10 @@ public class SearchArgument {
         return false;
     }
     
+    private static <T, R, Z, B> boolean matches(Argument<T, B> argument, Mutable<Z> data, EntryStack stack, String filter, R filterData) {
+        return argument.matches((Mutable<B>) data, stack, filter, (T) filterData);
+    }
+    
     public static String tryGetEntryStackTooltip(EntryStack stack) {
         Tooltip tooltip = stack.getTooltip(new Point());
         if (tooltip != null)
@@ -124,7 +181,7 @@ public class SearchArgument {
         return "";
     }
     
-    public Argument getArgument() {
+    public Argument<?, ?> getArgument() {
         return argument;
     }
     
@@ -142,14 +199,14 @@ public class SearchArgument {
     }
     
     public static class SearchArguments {
-        public static final SearchArguments ALWAYS = new SearchArguments(new SearchArgument[]{SearchArgument.ALWAYS});
-        private SearchArgument[] arguments;
+        public static final SearchArguments ALWAYS = new SearchArguments(SearchArgument.ALWAYS);
+        private SearchArgument<?, ?>[] arguments;
         
-        public SearchArguments(SearchArgument[] arguments) {
+        public SearchArguments(SearchArgument<?, ?>... arguments) {
             this.arguments = arguments;
         }
         
-        public SearchArgument[] getArguments() {
+        public SearchArgument<?, ?>[] getArguments() {
             return arguments;
         }
         
@@ -157,5 +214,4 @@ public class SearchArgument {
             return this == ALWAYS;
         }
     }
-    
 }

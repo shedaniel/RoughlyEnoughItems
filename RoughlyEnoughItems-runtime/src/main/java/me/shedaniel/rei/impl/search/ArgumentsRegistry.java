@@ -32,8 +32,8 @@ import java.util.Map;
 
 @ApiStatus.Internal
 public final class ArgumentsRegistry {
-    public static final Map<String, Argument> ARGUMENTS = Maps.newHashMap();
-    public static final List<Argument> ARGUMENT_LIST = Lists.newArrayList();
+    public static final Map<String, Argument<?, ?>> ARGUMENTS = Maps.newHashMap();
+    public static final List<Argument<?, ?>> ARGUMENT_LIST = Lists.newArrayList();
     
     static {
         register(AlwaysMatchingArgument.INSTANCE);
@@ -44,7 +44,7 @@ public final class ArgumentsRegistry {
         register(TextArgument.INSTANCE);
     }
     
-    private static void register(Argument argument) {
+    private static void register(Argument<?, ?> argument) {
         ARGUMENTS.put(argument.getName(), argument);
         ARGUMENT_LIST.add(argument);
     }

@@ -57,6 +57,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
 
@@ -290,7 +291,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
         double height = scrolling.getMaxScrollHeight();
         if (scrollListBounds.contains(mouseX, mouseY) && height > scrollListBounds.height - 2) {
-            scrolling.offset(ClothConfigInitializer.getScrollStep() * -amount, true);
+            scrolling.offset(ClothConfigInitializer.getScrollStep() * -amount * (Screen.hasAltDown() ? 3 : 1), true);
             if (scrollBarAlphaFuture == 0)
                 scrollBarAlphaFuture = 1f;
             if (System.currentTimeMillis() - scrollBarAlphaFutureTime > 300f)
@@ -320,16 +321,33 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
                 if (selectedRecipeIndex >= categoryMap.get(categories.get(selectedCategoryIndex)).size())
                     selectedRecipeIndex = 0;
                 init();
+                scrollToSelected();
                 return true;
             } else if (categoryMap.get(categories.get(selectedCategoryIndex)).size() > 1) {
                 selectedRecipeIndex--;
                 if (selectedRecipeIndex < 0)
                     selectedRecipeIndex = categoryMap.get(categories.get(selectedCategoryIndex)).size() - 1;
                 init();
+                scrollToSelected();
                 return true;
             }
         }
         return super.mouseScrolled(mouseX, mouseY, amount);
+    }
+    
+    private void scrollToSelected() {
+        int yy = 0;
+        ListIterator<Button> iterator = buttonList.listIterator();
+        while (iterator.hasNext()) {
+            Button button = iterator.next();
+        
+            if (iterator.nextIndex() - 1 == selectedRecipeIndex) {
+                scrolling.scrollTo(Mth.clamp(yy - scrolling.getBounds().height / 2 + button.getBounds().height / 2, 0, scrolling.getMaxScroll()), true);
+                break;
+            }
+        
+            yy += button.getBounds().height;
+        }
     }
     
     @Override

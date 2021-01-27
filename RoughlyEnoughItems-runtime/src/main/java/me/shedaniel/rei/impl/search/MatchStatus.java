@@ -23,19 +23,23 @@
 
 package me.shedaniel.rei.impl.search;
 
+import net.minecraft.util.IntRange;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @ApiStatus.Internal
 public final class MatchStatus {
     private static final MatchStatus UNMATCHED = new MatchStatus(MatchType.UNMATCHED, null, false);
-    private final MatchType type;
+    private MatchType type;
     @Nullable
     private final String text;
     private final boolean preserveCasing;
+    private final List<IntRange> grammarRanges = new ArrayList<>();
     
     private MatchStatus(MatchType type, @Nullable String text, boolean preserveCasing) {
         this.type = type;
@@ -48,11 +52,11 @@ public final class MatchStatus {
     }
     
     public static MatchStatus invertMatched(@NotNull String text) {
-        return invertMatched(text, false);
+        return matched(text, false).invert();
     }
     
     public static MatchStatus invertMatched(@NotNull String text, boolean preserveCasing) {
-        return new MatchStatus(MatchType.INVERT_MATCHED, Objects.requireNonNull(text), preserveCasing);
+        return matched(Objects.requireNonNull(text), preserveCasing).invert();
     }
     
     public static MatchStatus matched(@NotNull String text) {
@@ -61,6 +65,28 @@ public final class MatchStatus {
     
     public static MatchStatus matched(@NotNull String text, boolean preserveCasing) {
         return new MatchStatus(MatchType.MATCHED, Objects.requireNonNull(text), preserveCasing);
+    }
+    
+    public static MatchStatus result(@NotNull String text, boolean preserveCasing, boolean inverted) {
+        return new MatchStatus(!inverted ? MatchType.MATCHED : MatchType.INVERT_MATCHED, Objects.requireNonNull(text), preserveCasing);
+    }
+    
+    public List<IntRange> grammarRanges() {
+        return grammarRanges;
+    }
+    
+    public MatchStatus grammar(int start, int end) {
+        if (end - 1 >= start) {
+            this.grammarRanges.add(IntRange.of(start,  end - 1));
+        }
+        return this;
+    }
+    
+    public MatchStatus invert() {
+        if (isMatched()) {
+            this.type = isInverted() ? MatchType.MATCHED : MatchType.INVERT_MATCHED;
+        }
+        return this;
     }
     
     public boolean isMatched() {
