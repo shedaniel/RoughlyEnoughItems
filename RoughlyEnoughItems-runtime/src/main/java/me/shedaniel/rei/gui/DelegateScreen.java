@@ -279,25 +279,28 @@ public class DelegateScreen extends Screen {
         }
     }
     
+    private boolean init = true;
+    
     @Override
     public void init(Minecraft minecraft, int i, int j) {
         if (parent != null) {
             parent.init(minecraft, i, j);
         }
-        this.minecraft = minecraft;
-        this.itemRenderer = minecraft.getItemRenderer();
-        this.font = minecraft.font;
-        this.width = i;
-        this.height = j;
+        init = false;
+        super.init(minecraft, i, j);
     }
     
     @Override
     public void init() {
         if (parent != null) {
-            try {
-                ObfuscationReflectionHelper.findMethod(Screen.class, "func_231160_c_").invoke(parent);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new RuntimeException(e);
+            if (init) {
+                try {
+                    ObfuscationReflectionHelper.findMethod(Screen.class, "func_231160_c_").invoke(parent);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                init = true;
             }
         }
     }
