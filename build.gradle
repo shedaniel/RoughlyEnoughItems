@@ -77,6 +77,7 @@ allprojects {
         modApi(fabricApi.module("fabric-networking-v0", project.fabric_api))
         modApi(fabricApi.module("fabric-lifecycle-events-v1", project.fabric_api))
         modApi(fabricApi.module("fabric-rendering-fluids-v1", project.fabric_api))
+        modRuntime("net.fabricmc.fabric-api:fabric-api:${project.fabric_api}")
         modApi("me.shedaniel.cloth.api:cloth-client-events-v0:${cloth_client_events_v0_version}") {
             transitive(false)
         }
