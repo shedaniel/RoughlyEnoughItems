@@ -34,11 +34,11 @@ import me.shedaniel.rei.impl.search.ArgumentsRegistry;
 import me.shedaniel.rei.impl.search.MatchStatus;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.RangedInteger;
+import net.minecraft.util.Unit;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraft.util.IntRange;
-import net.minecraft.util.Unit;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
@@ -89,8 +89,8 @@ public class SearchArgument<T, R> {
         void addQuote(int index);
         
         void addSplitter(int index);
-    
-        void addPart(SearchArgument<?, ?> argument, Collection<IntRange> grammarRanges, int index);
+        
+        void addPart(SearchArgument<?, ?> argument, Collection<RangedInteger> grammarRanges, int index);
     }
     
     @ApiStatus.Internal

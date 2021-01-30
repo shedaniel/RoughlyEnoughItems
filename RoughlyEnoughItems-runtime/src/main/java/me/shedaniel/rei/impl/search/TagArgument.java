@@ -26,13 +26,12 @@ package me.shedaniel.rei.impl.search;
 import me.shedaniel.rei.api.EntryStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Unit;
+import net.minecraft.util.text.Color;
+import net.minecraft.util.text.Style;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraft.util.Unit;
 import org.apache.commons.lang3.mutable.Mutable;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -46,7 +45,7 @@ public final class TagArgument extends Argument<Unit, String[]> {
     public static final TagArgument INSTANCE = new TagArgument();
     private static final Minecraft minecraft = Minecraft.getInstance();
     private static final String[] EMPTY_ARRAY = new String[0];
-    private static final Style STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x9efff4));
+    private static final Style STYLE = Style.EMPTY.withColor(Color.fromRgb(0x9efff4));
     
     @Override
     public String getName() {

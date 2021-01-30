@@ -26,11 +26,11 @@ package me.shedaniel.rei.impl.search;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.EntryStack;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraft.util.Unit;
+import net.minecraft.util.text.Color;
+import net.minecraft.util.text.Style;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -43,7 +43,7 @@ import java.util.Optional;
 @OnlyIn(Dist.CLIENT)
 public final class ModArgument extends Argument<Unit, ModArgument.@Nullable ModInfoPair> {
     public static final ModArgument INSTANCE = new ModArgument();
-    private static final Style STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xffa8f3));
+    private static final Style STYLE = Style.EMPTY.withColor(Color.fromRgb(0xffa8f3));
     
     @Override
     public String getName() {

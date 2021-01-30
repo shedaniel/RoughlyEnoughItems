@@ -25,9 +25,9 @@ package me.shedaniel.rei.impl;
 
 import me.shedaniel.math.Color;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Style;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.Util;
+import net.minecraft.util.text.Style;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
@@ -42,9 +42,9 @@ public class TextTransformations {
         });
     }
     
-    public static FormattedCharSequence forwardWithTransformation(String text, CharSequenceTransformer transformer) {
+    public static IReorderingProcessor forwardWithTransformation(String text, CharSequenceTransformer transformer) {
         if (text.isEmpty()) {
-            return FormattedCharSequence.EMPTY;
+            return IReorderingProcessor.EMPTY;
         }
         return sink -> {
             int length = text.length();

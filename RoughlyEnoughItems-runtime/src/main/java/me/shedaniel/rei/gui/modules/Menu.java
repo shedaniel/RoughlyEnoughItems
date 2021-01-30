@@ -42,7 +42,7 @@ import me.shedaniel.rei.gui.modules.entries.SubSubsetsMenuEntry;
 import me.shedaniel.rei.gui.widget.LateRenderable;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import me.shedaniel.rei.utils.CollectionUtils;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;

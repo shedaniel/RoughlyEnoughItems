@@ -24,10 +24,10 @@
 package me.shedaniel.rei.impl.search;
 
 import me.shedaniel.rei.api.EntryStack;
+import net.minecraft.util.text.Color;
+import net.minecraft.util.text.Style;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -41,7 +41,7 @@ import java.util.regex.PatternSyntaxException;
 @OnlyIn(Dist.CLIENT)
 public final class RegexArgument extends Argument<@Nullable Pattern, String> {
     public static final RegexArgument INSTANCE = new RegexArgument();
-    private static final Style STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xbfffa8));
+    private static final Style STYLE = Style.EMPTY.withColor(Color.fromRgb(0xbfffa8));
     
     @Override
     public String getName() {

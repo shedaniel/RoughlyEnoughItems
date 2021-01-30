@@ -39,16 +39,15 @@ import me.shedaniel.rei.impl.TextTransformations;
 import me.shedaniel.rei.impl.search.Argument;
 import me.shedaniel.rei.impl.search.ArgumentsRegistry;
 import me.shedaniel.rei.impl.search.TextArgument;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.InputMappings;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
+import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.SoundEvents;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Tuple;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextFormatting;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
@@ -58,9 +57,9 @@ import java.util.function.Consumer;
 public class OverlaySearchField extends TextFieldWidget implements TextFieldWidget.TextFormatter {
     
     public static boolean isHighlighting = false;
-    private static final Style SPLITTER_STYLE = Style.EMPTY.withColor(ChatFormatting.GRAY);
-    private static final Style QUOTES_STYLE = Style.EMPTY.withColor(ChatFormatting.GOLD);
-    private static final Style ERROR_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xff5555));
+    private static final Style SPLITTER_STYLE = Style.EMPTY.withColor(TextFormatting.GRAY);
+    private static final Style QUOTES_STYLE = Style.EMPTY.withColor(TextFormatting.GOLD);
+    private static final Style ERROR_STYLE = Style.EMPTY.withColor(net.minecraft.util.text.Color.fromRgb(0xff5555));
     private final OverlaySearchFieldSyntaxHighlighter highlighter = new OverlaySearchFieldSyntaxHighlighter(this);
     public long keybindFocusTime = -1;
     public int keybindFocusKey = -1;
@@ -76,7 +75,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     }
     
     @Override
-    public FormattedCharSequence format(TextFieldWidget widget, String text, int index) {
+    public IReorderingProcessor format(TextFieldWidget widget, String text, int index) {
         boolean isPlain = ConfigObject.getInstance().getSyntaxHighlightingMode() == SyntaxHighlightingMode.PLAIN || ConfigObject.getInstance().getSyntaxHighlightingMode() == SyntaxHighlightingMode.PLAIN_UNDERSCORED;
         boolean hasUnderscore = ConfigObject.getInstance().getSyntaxHighlightingMode() == SyntaxHighlightingMode.PLAIN_UNDERSCORED || ConfigObject.getInstance().getSyntaxHighlightingMode() == SyntaxHighlightingMode.COLORFUL_UNDERSCORED;
         return TextTransformations.forwardWithTransformation(text, (s, charIndex, c) -> {
@@ -106,7 +105,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
                 return style;
             }
             int color = this.editable ? this.editableColor : this.notEditableColor;
-            return style.withColor(TextColor.fromRgb(Color.ofOpaque(style.getColor() == null ? color : style.getColor().getValue()).brighter(0.75).getColor()));
+            return style.withColor(net.minecraft.util.text.Color.fromRgb(Color.ofOpaque(style.getColor() == null ? color : style.getColor().getValue()).brighter(0.75).getColor()));
         });
     }
     

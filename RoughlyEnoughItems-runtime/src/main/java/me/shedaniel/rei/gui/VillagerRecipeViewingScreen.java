@@ -342,7 +342,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
             Button button = iterator.next();
         
             if (iterator.nextIndex() - 1 == selectedRecipeIndex) {
-                scrolling.scrollTo(Mth.clamp(yy - scrolling.getBounds().height / 2 + button.getBounds().height / 2, 0, scrolling.getMaxScroll()), true);
+                scrolling.scrollTo(MathHelper.clamp(yy - scrolling.getBounds().height / 2 + button.getBounds().height / 2, 0, scrolling.getMaxScroll()), true);
                 break;
             }
         

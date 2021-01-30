@@ -33,12 +33,12 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.SharedConstants;
 import net.minecraft.util.Util;
-import net.minecraft.network.chat.Style;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.text.Style;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -632,9 +632,9 @@ public class TextFieldWidget extends WidgetWithBounds implements IScreen {
     
     public interface TextFormatter {
         TextFormatter DEFAULT = (widget, text, index) -> {
-            return FormattedCharSequence.forward(text, Style.EMPTY);
+            return IReorderingProcessor.forward(text, Style.EMPTY);
         };
         
-        FormattedCharSequence format(TextFieldWidget widget, String text, int index);
+        IReorderingProcessor format(TextFieldWidget widget, String text, int index);
     }
 }

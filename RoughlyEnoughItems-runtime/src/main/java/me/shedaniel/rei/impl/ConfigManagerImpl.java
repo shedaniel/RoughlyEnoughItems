@@ -168,7 +168,7 @@ public class ConfigManagerImpl implements ConfigManager {
                         Collections.singletonList(new RecipeScreenTypeEntry(220, new TranslationTextComponent(i13n), getUnsafely(field, config, RecipeScreenType.UNSET), getUnsafely(field, defaults), type -> setUnsafely(field, config, type)))
                 , (field) -> field.getType() == RecipeScreenType.class, ConfigObjectImpl.UseSpecialRecipeTypeScreen.class);
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) ->
-                        Collections.singletonList(new SearchFilterSyntaxHighlightingEntry( new TranslatableComponent(i13n), getUnsafely(field, config, SyntaxHighlightingMode.COLORFUL), getUnsafely(field, defaults), type -> setUnsafely(field, config, type)))
+                        Collections.singletonList(new SearchFilterSyntaxHighlightingEntry( new TranslationTextComponent(i13n), getUnsafely(field, config, SyntaxHighlightingMode.COLORFUL), getUnsafely(field, defaults), type -> setUnsafely(field, config, type)))
                 , (field) -> field.getType() == SyntaxHighlightingMode.class, ConfigObjectImpl.UseSpecialSearchFilterSyntaxHighlightingScreen.class);
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) ->
                         REIHelper.getInstance().getPreviousContainerScreen() == null || Minecraft.getInstance().getConnection() == null || Minecraft.getInstance().getConnection().getRecipeManager() == null ?

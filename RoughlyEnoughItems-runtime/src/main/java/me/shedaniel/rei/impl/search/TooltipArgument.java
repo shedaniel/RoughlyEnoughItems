@@ -25,11 +25,11 @@ package me.shedaniel.rei.impl.search;
 
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.impl.SearchArgument;
+import net.minecraft.util.Unit;
+import net.minecraft.util.text.Color;
+import net.minecraft.util.text.Style;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
-import net.minecraft.util.Unit;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -41,7 +41,7 @@ import java.util.Locale;
 @OnlyIn(Dist.CLIENT)
 public final class TooltipArgument extends Argument<Unit, String> {
     public static final TooltipArgument INSTANCE = new TooltipArgument();
-    private static final Style STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xffe0ad));
+    private static final Style STYLE = Style.EMPTY.withColor(Color.fromRgb(0xffe0ad));
     
     @Override
     public String getName() {

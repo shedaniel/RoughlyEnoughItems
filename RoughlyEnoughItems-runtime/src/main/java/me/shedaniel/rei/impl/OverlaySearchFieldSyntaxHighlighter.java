@@ -25,7 +25,7 @@ package me.shedaniel.rei.impl;
 
 import me.shedaniel.rei.gui.OverlaySearchField;
 import me.shedaniel.rei.impl.search.ArgumentsRegistry;
-import net.minecraft.util.IntRange;
+import net.minecraft.util.RangedInteger;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collection;
@@ -56,12 +56,12 @@ public class OverlaySearchFieldSyntaxHighlighter implements Consumer<String> {
             }
             
             @Override
-            public void addPart(SearchArgument<?, ?> argument, Collection<IntRange> grammarRanges, int index) {
+            public void addPart(SearchArgument<?, ?> argument, Collection<RangedInteger> grammarRanges, int index) {
                 int argIndex = ArgumentsRegistry.ARGUMENT_LIST.indexOf(argument.getArgument()) * 2 + 1;
                 for (int i = argument.start(); i < argument.end(); i++) {
                     highlighted[i] = (byte) argIndex;
                 }
-                for (IntRange grammarRange : grammarRanges) {
+                for (RangedInteger grammarRange : grammarRanges) {
                     for (int i = grammarRange.getMinInclusive(); i <= grammarRange.getMaxInclusive(); i++) {
                         highlighted[i + index] = (byte) (argIndex + 1);
                     }
