@@ -29,6 +29,8 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
@@ -61,12 +63,13 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @ApiStatus.Internal
 public class EntryListWidget extends WidgetWithBounds {
@@ -260,38 +263,59 @@ public class EntryListWidget extends WidgetWithBounds {
         long totalTimeStart = debugTime ? System.nanoTime() : 0;
         boolean fastEntryRendering = ConfigObject.getInstance().doesFastEntryRendering();
         if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-            for (EntryListEntry entry : entries)
-                entry.clearStacks();
             ScissorsHandler.INSTANCE.scissor(bounds);
             
             int skip = Math.max(0, Mth.floor(scrolling.scrollAmount / (float) entrySize()));
             int nextIndex = skip * innerBounds.width / entrySize();
-            int[] i = {nextIndex};
+            int i = nextIndex;
+            int cont = nextIndex;
             blockedCount = 0;
             
-            Stream<EntryListEntry> entryStream = this.entries.stream().skip(nextIndex).filter(entry -> {
+            Int2ObjectMap<List<EntryListEntry>> grouping = new Int2ObjectOpenHashMap<>();
+            List<EntryListEntry> toRender = new ArrayList<>();
+            Consumer<EntryListEntry> add;
+            
+            if (fastEntryRendering) {
+                add = entry -> {
+                    int hash = OptimalEntryStack.groupingHashFrom(entry.getCurrentEntry());
+                    List<EntryListEntry> entries = grouping.get(hash);
+                    
+                    if (entries == null) {
+                        grouping.put(hash, entries = new ArrayList<>());
+                    }
+                    
+                    entries.add(entry);
+                };
+            } else {
+                add = toRender::add;
+            }
+            
+            for (; cont < entries.size(); cont++) {
+                EntryListEntry entry = entries.get(cont);
+                
                 Rectangle entryBounds = entry.getBounds();
                 
                 entryBounds.y = (int) (entry.backupY - scrolling.scrollAmount);
-                if (entryBounds.y > this.bounds.getMaxY()) return false;
+                if (entryBounds.y > this.bounds.getMaxY()) break;
+                if (allStacks.size() <= i) break;
                 if (notSteppingOnExclusionZones(entryBounds.x, entryBounds.y, entryBounds.width, entryBounds.height, innerBounds)) {
-                    EntryStack stack = allStacks.get(i[0]++);
+                    EntryStack stack = allStacks.get(i++);
                     if (!stack.isEmpty()) {
+                        entry.clearStacks();
                         entry.entry(stack);
-                        return true;
+                        add.accept(entry);
                     }
                 } else {
                     blockedCount++;
                 }
-                return false;
-            }).limit(Math.max(0, allStacks.size() - i[0]));
+            }
             
             if (fastEntryRendering) {
-                for (List<EntryListEntry> entries : entryStream.collect(Collectors.groupingBy(entryListEntry -> OptimalEntryStack.groupingHashFrom(entryListEntry.getCurrentEntry()))).values()) {
+                for (List<EntryListEntry> entries : grouping.values()) {
                     renderEntries(debugTime, size, time, fastEntryRendering, matrices, mouseX, mouseY, delta, entries);
                 }
             } else {
-                renderEntries(debugTime, size, time, fastEntryRendering, matrices, mouseX, mouseY, delta, entryStream.collect(Collectors.toList()));
+                renderEntries(debugTime, size, time, fastEntryRendering, matrices, mouseX, mouseY, delta, toRender);
             }
             
             updatePosition(delta);

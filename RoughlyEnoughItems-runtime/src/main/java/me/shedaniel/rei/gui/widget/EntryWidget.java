@@ -226,7 +226,7 @@ public class EntryWidget extends Slot {
     }
     
     public EntryWidget clearStacks() {
-        entryStacks.clear();
+        entryStacks = Collections.emptyList();
         return this;
     }
     
@@ -239,14 +239,26 @@ public class EntryWidget extends Slot {
     @NotNull
     @Override
     public EntryWidget entry(EntryStack stack) {
-        entryStacks.add(stack);
+        if (entryStacks.isEmpty()) {
+            entryStacks = Collections.singletonList(stack);
+        } else {
+            if (!(entryStacks instanceof ArrayList)) {
+                entryStacks = new ArrayList<>(entryStacks);
+            }
+            entryStacks.add(stack);
+        }
         return this;
     }
     
     @NotNull
     @Override
     public EntryWidget entries(Collection<EntryStack> stacks) {
-        entryStacks.addAll(stacks);
+        if (!stacks.isEmpty()) {
+            if (!(entryStacks instanceof ArrayList)) {
+                entryStacks = new ArrayList<>(entryStacks);
+            }
+            entryStacks.addAll(stacks);
+        }
         return this;
     }
     
