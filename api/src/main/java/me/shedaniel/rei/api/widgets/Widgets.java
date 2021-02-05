@@ -28,7 +28,7 @@ import me.shedaniel.math.Dimension;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.ConfigObject;
-import me.shedaniel.rei.api.DrawableConsumer;
+import me.shedaniel.rei.api.util.DrawableConsumer;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.impl.Internals;
 import net.fabricmc.api.EnvType;

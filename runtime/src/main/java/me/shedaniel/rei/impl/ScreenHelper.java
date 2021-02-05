@@ -33,6 +33,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.api.Executor;
 import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.OverlaySearchField;
@@ -201,9 +202,9 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
     
     public static SearchFieldLocation getContextualSearchFieldLocation() {
         Window window = Minecraft.getInstance().getWindow();
-        for (OverlayDecider decider : DisplayHelper.getInstance().getSortedOverlayDeciders(Minecraft.getInstance().screen.getClass())) {
-            if (decider instanceof DisplayHelper.DisplayBoundsProvider) {
-                Rectangle containerBounds = ((DisplayHelper.DisplayBoundsProvider<Screen>) decider).getScreenBounds(Minecraft.getInstance().screen);
+        for (OverlayDecider decider : DisplayBoundsRegistry.getInstance().getSortedOverlayDeciders(Minecraft.getInstance().screen.getClass())) {
+            if (decider instanceof DisplayBoundsRegistry.DisplayBoundsProvider) {
+                Rectangle containerBounds = ((DisplayBoundsRegistry.DisplayBoundsProvider<Screen>) decider).getScreenBounds(Minecraft.getInstance().screen);
                 if (window.getGuiScaledHeight() - 20 <= containerBounds.getMaxY())
                     return SearchFieldLocation.BOTTOM_SIDE;
                 else break;

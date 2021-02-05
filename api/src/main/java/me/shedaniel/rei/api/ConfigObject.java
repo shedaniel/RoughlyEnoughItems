@@ -25,6 +25,7 @@ package me.shedaniel.rei.api;
 
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
+import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.gui.config.*;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

@@ -39,10 +39,13 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.api.entry.BatchEntryRenderer;
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.ingredient.entry.BatchEntryRenderer;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.favorites.FavoriteMenuEntry;
+import me.shedaniel.rei.api.ingredient.util.EntryStacks;
+import me.shedaniel.rei.api.util.Renderer;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.modules.Menu;
@@ -240,7 +243,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
     }
     
     public void updateFavoritesBounds(@Nullable String searchTerm) {
-        this.fullBounds = ScreenHelper.getFavoritesListArea(DisplayHelper.getInstance().getOverlayBounds(ConfigObject.getInstance().getDisplayPanelLocation().mirror(), Minecraft.getInstance().screen));
+        this.fullBounds = ScreenHelper.getFavoritesListArea(DisplayBoundsRegistry.getInstance().getOverlayBounds(ConfigObject.getInstance().getDisplayPanelLocation().mirror(), Minecraft.getInstance().screen));
     }
     
     public void updateSearch(EntryListWidget listWidget, String searchTerm) {
@@ -571,23 +574,6 @@ public class FavoritesListWidget extends WidgetWithBounds {
         }
     }
     
-    private static EntryStack<?> wrapRendererInStack(Renderer renderer) {
-        if (renderer instanceof EntryStack) {
-            return (EntryStack<?>) renderer;
-        }
-        return new RenderingEntry() {
-            @Override
-            public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-                renderer.render(matrices, bounds, mouseX, mouseY, delta);
-            }
-            
-            @Override
-            public @Nullable Tooltip getTooltip(Point mouse) {
-                return renderer.getTooltip(mouse);
-            }
-        };
-    }
-    
     private class EntryListEntry extends EntryListEntryWidget {
         private final Entry entry;
         private final FavoriteEntry favoriteEntry;
@@ -596,7 +582,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
             super(new Point(x, y), entrySize);
             this.entry = entry;
             this.favoriteEntry = favoriteEntry;
-            this.clearEntries().entry(wrapRendererInStack(this.favoriteEntry.getRenderer(false)));
+            this.clearEntries().entry(EntryStacks.of(this.favoriteEntry.getRenderer(false)));
         }
         
         @Override
@@ -945,7 +931,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
                 protected SectionFavoriteWidget(Point point, int entrySize, FavoriteEntry entry) {
                     super(point, entrySize);
                     this.entry = entry;
-                    entry(wrapRendererInStack(entry.getRenderer(true)));
+                    entry(EntryStacks.of(entry.getRenderer(true)));
                     noBackground();
                 }
                 

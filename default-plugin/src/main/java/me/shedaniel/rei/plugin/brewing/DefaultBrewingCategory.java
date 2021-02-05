@@ -27,9 +27,9 @@ import com.google.common.collect.Lists;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.RecipeCategory;
-import me.shedaniel.rei.api.Renderer;
-import me.shedaniel.rei.api.entry.EntryStacks;
+import me.shedaniel.rei.api.registry.category.DisplayCategory;
+import me.shedaniel.rei.api.util.Renderer;
+import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
@@ -46,7 +46,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
-public class DefaultBrewingCategory implements RecipeCategory<DefaultBrewingDisplay> {
+public class DefaultBrewingCategory implements DisplayCategory<DefaultBrewingDisplay> {
     @Override
     public @NotNull ResourceLocation getIdentifier() {
         return DefaultPlugin.BREWING;

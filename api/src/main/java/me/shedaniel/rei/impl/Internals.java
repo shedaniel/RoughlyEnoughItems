@@ -27,13 +27,16 @@ import com.google.gson.JsonObject;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.api.entry.EntryDefinition;
-import me.shedaniel.rei.api.entry.EntryType;
-import me.shedaniel.rei.api.entry.EntryTypeRegistry;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.ingredient.entry.EntryDefinition;
+import me.shedaniel.rei.api.ingredient.entry.EntryType;
+import me.shedaniel.rei.api.ingredient.entry.EntryTypeRegistry;
 import me.shedaniel.rei.api.subsets.SubsetsRegistry;
+import me.shedaniel.rei.api.util.DrawableConsumer;
+import me.shedaniel.rei.api.util.Renderer;
 import me.shedaniel.rei.api.widgets.*;
 import me.shedaniel.rei.gui.widget.Widget;
 import net.fabricmc.api.EnvType;
@@ -56,13 +59,13 @@ import java.util.function.Supplier;
 public final class Internals {
     private static Supplier<ConfigManager> configManager = Internals::throwNotSetup;
     private static Supplier<ClientHelper> clientHelper = Internals::throwNotSetup;
-    private static Supplier<RecipeHelper> recipeHelper = Internals::throwNotSetup;
+    private static Supplier<RecipeRegistry> recipeHelper = Internals::throwNotSetup;
     private static Supplier<REIHelper> reiHelper = Internals::throwNotSetup;
     private static Supplier<FluidSupportProvider> fluidSupportProvider = Internals::throwNotSetup;
     private static Supplier<EntryStackProvider> entryStackProvider = Internals::throwNotSetup;
     private static Supplier<SubsetsRegistry> subsetsRegistry = Internals::throwNotSetup;
     private static Supplier<EntryRegistry> entryRegistry = Internals::throwNotSetup;
-    private static Supplier<DisplayHelper> displayHelper = Internals::throwNotSetup;
+    private static Supplier<DisplayBoundsRegistry> displayHelper = Internals::throwNotSetup;
     private static Supplier<WidgetsProvider> widgetsProvider = Internals::throwNotSetup;
     private static Supplier<ClientHelper.ViewSearchBuilder> viewSearchBuilder = Internals::throwNotSetup;
     private static Supplier<FavoriteEntryType.Registry> favoriteEntryTypeRegistry = Internals::throwNotSetup;
@@ -89,7 +92,7 @@ public final class Internals {
     }
     
     @NotNull
-    public static RecipeHelper getRecipeHelper() {
+    public static RecipeRegistry getRecipeHelper() {
         return recipeHelper.get();
     }
     
@@ -120,7 +123,7 @@ public final class Internals {
     }
     
     @NotNull
-    public static DisplayHelper getDisplayHelper() {
+    public static DisplayBoundsRegistry getDisplayHelper() {
         return displayHelper.get();
     }
     
@@ -197,7 +200,7 @@ public final class Internals {
         
         EntryType<Unit> emptyType(ResourceLocation id);
         
-        EntryType<Unit> renderingType(ResourceLocation id);
+        EntryType<Renderer> renderingType(ResourceLocation id);
     }
     
     @Environment(EnvType.CLIENT)

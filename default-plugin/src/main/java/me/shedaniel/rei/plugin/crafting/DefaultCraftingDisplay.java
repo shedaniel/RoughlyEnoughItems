@@ -23,11 +23,10 @@
 
 package me.shedaniel.rei.plugin.crafting;
 
-import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.TransferRecipeDisplay;
+import me.shedaniel.rei.api.TransferDisplay;
+import me.shedaniel.rei.api.ingredient.EntryIngredient;
+import me.shedaniel.rei.api.server.ContainerInfo;
 import me.shedaniel.rei.plugin.DefaultPlugin;
-import me.shedaniel.rei.server.ContainerInfo;
-import me.shedaniel.rei.utils.EntryStackCompoundList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
@@ -35,12 +34,12 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.crafting.Recipe;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
-public interface DefaultCraftingDisplay extends TransferRecipeDisplay {
+public interface DefaultCraftingDisplay extends TransferDisplay {
     @Override
     default @NotNull ResourceLocation getRecipeCategory() {
         return DefaultPlugin.CRAFTING;
@@ -59,13 +58,13 @@ public interface DefaultCraftingDisplay extends TransferRecipeDisplay {
     Optional<Recipe<?>> getOptionalRecipe();
     
     @Override
-    default List<? extends List<? extends EntryStack<?>>> getOrganisedInputEntries(ContainerInfo<AbstractContainerMenu> containerInfo, AbstractContainerMenu container) {
-        EntryStackCompoundList list = new EntryStackCompoundList(containerInfo.getCraftingWidth(container) * containerInfo.getCraftingHeight(container));
+    default List<EntryIngredient> getOrganisedInputEntries(ContainerInfo<AbstractContainerMenu> containerInfo, AbstractContainerMenu container) {
+        List<EntryIngredient> list = new ArrayList<>(containerInfo.getCraftingWidth(container) * containerInfo.getCraftingHeight(container));
         for (int i = 0; i < containerInfo.getCraftingWidth(container) * containerInfo.getCraftingHeight(container); i++) {
-            list.add(Collections.emptyList());
+            list.add(EntryIngredient.empty());
         }
         for (int i = 0; i < getInputEntries().size(); i++) {
-            List<? extends EntryStack<?>> stacks = getInputEntries().get(i);
+            EntryIngredient stacks = getInputEntries().get(i);
             list.set(DefaultCraftingCategory.getSlotWithSize(this, i, containerInfo.getCraftingWidth(container)), stacks);
         }
         return list;

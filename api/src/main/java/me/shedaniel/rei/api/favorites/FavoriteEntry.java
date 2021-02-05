@@ -24,8 +24,8 @@
 package me.shedaniel.rei.api.favorites;
 
 import com.google.gson.JsonObject;
-import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.Renderer;
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.util.Renderer;
 import me.shedaniel.rei.impl.Internals;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
@@ -52,7 +52,7 @@ public abstract class FavoriteEntry {
     }
     
     @NotNull
-    public static FavoriteEntry fromEntryStack(@NotNull EntryStack stack) {
+    public static FavoriteEntry fromEntryStack(@NotNull EntryStack<?> stack) {
         return delegate(() -> FavoriteEntryType.registry().get(FavoriteEntryType.ENTRY_STACK).fromArgs(stack), null);
     }
     

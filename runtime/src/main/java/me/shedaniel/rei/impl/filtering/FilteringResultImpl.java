@@ -24,7 +24,7 @@
 package me.shedaniel.rei.impl.filtering;
 
 import com.google.common.collect.Sets;
-import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.impl.AmountIgnoredEntryStackWrapper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

@@ -24,7 +24,7 @@
 package me.shedaniel.rei.impl.widgets;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.rei.api.DrawableConsumer;
+import me.shedaniel.rei.api.util.DrawableConsumer;
 import me.shedaniel.rei.gui.widget.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import org.jetbrains.annotations.NotNull;

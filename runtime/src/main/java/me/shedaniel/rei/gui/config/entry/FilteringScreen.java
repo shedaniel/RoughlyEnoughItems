@@ -37,7 +37,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryRegistry;
-import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.OverlaySearchField;

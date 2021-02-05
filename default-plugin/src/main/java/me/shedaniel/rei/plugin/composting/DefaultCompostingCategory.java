@@ -27,12 +27,12 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.RecipeCategory;
-import me.shedaniel.rei.api.Renderer;
-import me.shedaniel.rei.api.entry.EntryStacks;
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.registry.category.DisplayCategory;
+import me.shedaniel.rei.api.util.Renderer;
+import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.widgets.Widgets;
-import me.shedaniel.rei.gui.entries.RecipeRenderer;
+import me.shedaniel.rei.gui.entries.DisplayRenderer;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
@@ -50,7 +50,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 @Environment(EnvType.CLIENT)
-public class DefaultCompostingCategory implements RecipeCategory<DefaultCompostingDisplay> {
+public class DefaultCompostingCategory implements DisplayCategory<DefaultCompostingDisplay> {
     
     @Override
     public @NotNull ResourceLocation getIdentifier() {
@@ -68,9 +68,9 @@ public class DefaultCompostingCategory implements RecipeCategory<DefaultComposti
     }
     
     @Override
-    public @NotNull RecipeRenderer getSimpleRenderer(DefaultCompostingDisplay recipe) {
-        return new RecipeRenderer() {
-            private Component text = new TranslatableComponent("text.rei.composting.page", recipe.getPage() + 1);
+    public @NotNull DisplayRenderer getDisplayRenderer(DefaultCompostingDisplay display) {
+        return new DisplayRenderer() {
+            private Component text = new TranslatableComponent("text.rei.composting.page", display.getPage() + 1);
             
             @Override
             public int getHeight() {

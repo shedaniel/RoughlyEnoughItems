@@ -23,15 +23,16 @@
 
 package me.shedaniel.rei.api.plugins;
 
-import me.shedaniel.rei.api.DisplayHelper;
+import me.shedaniel.rei.api.DisplayBoundsRegistry;
 import me.shedaniel.rei.api.EntryRegistry;
-import me.shedaniel.rei.api.REIPluginEntry;
-import me.shedaniel.rei.api.RecipeHelper;
-import me.shedaniel.rei.api.entry.EntryTypeRegistry;
+import me.shedaniel.rei.api.REIPlugin;
+import me.shedaniel.rei.api.RecipeRegistry;
+import me.shedaniel.rei.api.ingredient.entry.EntryTypeRegistry;
+import me.shedaniel.rei.api.registry.CategoryRegistry;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.OverrideOnly
-public interface REIPluginV0 extends REIPluginEntry {
+public interface REIPluginV0 extends REIPlugin {
     /**
      * Registers the types of entries
      */
@@ -43,46 +44,46 @@ public interface REIPluginV0 extends REIPluginEntry {
     /**
      * Registers entries on the item panel
      *
-     * @param entryRegistry the helper class
+     * @param registry the helper class
      */
     @ApiStatus.OverrideOnly
-    default void registerEntries(EntryRegistry entryRegistry) {
+    default void registerEntries(EntryRegistry registry) {
     }
     
     /**
      * Registers categories
      *
-     * @param recipeHelper the helper class
+     * @param registry the helper class
      */
     @ApiStatus.OverrideOnly
-    default void registerPluginCategories(RecipeHelper recipeHelper) {
+    default void registerCategories(CategoryRegistry registry) {
     }
     
     /**
      * Registers displays for categories
      *
-     * @param recipeHelper the helper class
+     * @param registry the helper class
      */
     @ApiStatus.OverrideOnly
-    default void registerRecipeDisplays(RecipeHelper recipeHelper) {
+    default void registerDisplays(RecipeRegistry registry) {
     }
     
     /**
      * Registers bounds handlers
      *
-     * @param displayHelper the helper class
+     * @param registry the helper class
      */
     @ApiStatus.OverrideOnly
-    default void registerBounds(DisplayHelper displayHelper) {
+    default void registerBounds(DisplayBoundsRegistry registry) {
     }
     
     /**
      * Register other stuff
      *
-     * @param recipeHelper the helper class
+     * @param registry the helper class
      */
     @ApiStatus.OverrideOnly
-    default void registerOthers(RecipeHelper recipeHelper) {
+    default void registerOthers(RecipeRegistry registry) {
     }
     
     @ApiStatus.OverrideOnly

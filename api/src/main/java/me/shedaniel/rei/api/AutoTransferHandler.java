@@ -37,7 +37,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Supplier;
 
 @Environment(EnvType.CLIENT)
-public interface AutoTransferHandler {
+public interface AutoTransferHandler extends Comparable<AutoTransferHandler> {
     
     /**
      * @return the priority of this handler, higher priorities will be called first.
@@ -48,6 +48,11 @@ public interface AutoTransferHandler {
     
     @NotNull
     Result handle(@NotNull Context context);
+    
+    @Override
+    default int compareTo(@NotNull AutoTransferHandler o) {
+        return Double.compare(getPriority(), o.getPriority());
+    }
     
     @ApiStatus.NonExtendable
     interface Result {
@@ -90,7 +95,7 @@ public interface AutoTransferHandler {
          * Creates a passing result, further handlers will be called.
          *
          * @param errorKey The error itself
-         * @param redSlots A list of slots to be marked as red. Will be passed to {@link TransferRecipeCategory}.
+         * @param redSlots A list of slots to be marked as red. Will be passed to {@link TransferDisplayCategory}.
          */
         static Result createFailed(String errorKey, IntList redSlots) {
             return new ResultImpl(errorKey, redSlots, 1744764928);
@@ -102,7 +107,7 @@ public interface AutoTransferHandler {
          *
          * @param errorKey The error itself
          * @param color    A special color for the button
-         * @param redSlots A list of slots to be marked as red. Will be passed to {@link TransferRecipeCategory}.
+         * @param redSlots A list of slots to be marked as red. Will be passed to {@link TransferDisplayCategory}.
          */
         static Result createFailedCustomButtonColor(String errorKey, IntList redSlots, int color) {
             return new ResultImpl(errorKey, redSlots, color);
@@ -155,15 +160,15 @@ public interface AutoTransferHandler {
         String getErrorKey();
         
         /**
-         * @return a list of slots to be marked as red. Will be passed to {@link TransferRecipeCategory}.
+         * @return a list of slots to be marked as red. Will be passed to {@link TransferDisplayCategory}.
          */
         IntList getIntegers();
     }
     
     @ApiStatus.NonExtendable
     interface Context {
-        static Context create(boolean actuallyCrafting, AbstractContainerScreen<?> containerScreen, RecipeDisplay recipeDisplay) {
-            return new ContextImpl(actuallyCrafting, containerScreen, () -> recipeDisplay);
+        static Context create(boolean actuallyCrafting, AbstractContainerScreen<?> containerScreen, Display display) {
+            return new ContextImpl(actuallyCrafting, containerScreen, () -> display);
         }
         
         default Minecraft getMinecraft() {
@@ -175,7 +180,7 @@ public interface AutoTransferHandler {
         @Nullable
         AbstractContainerScreen<?> getContainerScreen();
         
-        RecipeDisplay getRecipe();
+        Display getRecipe();
         
         @Nullable
         default AbstractContainerMenu getContainer() {
@@ -259,9 +264,9 @@ public interface AutoTransferHandler {
     final class ContextImpl implements Context {
         private boolean actuallyCrafting;
         private AbstractContainerScreen<?> containerScreen;
-        private Supplier<RecipeDisplay> recipeDisplaySupplier;
+        private Supplier<Display> recipeDisplaySupplier;
         
-        private ContextImpl(boolean actuallyCrafting, AbstractContainerScreen<?> containerScreen, Supplier<RecipeDisplay> recipeDisplaySupplier) {
+        private ContextImpl(boolean actuallyCrafting, AbstractContainerScreen<?> containerScreen, Supplier<Display> recipeDisplaySupplier) {
             this.actuallyCrafting = actuallyCrafting;
             this.containerScreen = containerScreen;
             this.recipeDisplaySupplier = recipeDisplaySupplier;
@@ -278,7 +283,7 @@ public interface AutoTransferHandler {
         }
         
         @Override
-        public RecipeDisplay getRecipe() {
+        public Display getRecipe() {
             return recipeDisplaySupplier.get();
         }
     }

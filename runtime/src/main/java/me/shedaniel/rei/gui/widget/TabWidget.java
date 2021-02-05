@@ -26,6 +26,8 @@ package me.shedaniel.rei.gui.widget;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.registry.category.DisplayCategory;
+import me.shedaniel.rei.api.util.Renderer;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.TextComponent;
@@ -49,7 +51,7 @@ public class TabWidget extends WidgetWithBounds {
     public int id;
     public String categoryName;
     public Rectangle bounds;
-    public RecipeCategory<?> category;
+    public DisplayCategory<?> category;
     public int u, v;
     @Nullable
     private Predicate<TabWidget> onClick;
@@ -72,7 +74,7 @@ public class TabWidget extends WidgetWithBounds {
         return button == 0 && containsMouse(mouseX, mouseY) && onClick.test(this);
     }
     
-    public void setRenderer(RecipeCategory<?> category, Renderer renderer, String categoryName, boolean selected) {
+    public void setRenderer(DisplayCategory<?> category, Renderer renderer, String categoryName, boolean selected) {
         if (renderer == null) {
             shown = false;
             this.renderer = null;

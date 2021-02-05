@@ -23,9 +23,11 @@
 
 package me.shedaniel.rei.api;
 
+import me.shedaniel.rei.api.registry.category.DisplayCategory;
 import net.minecraft.world.InteractionResult;
+import org.jetbrains.annotations.NotNull;
 
-public interface DisplayVisibilityHandler {
+public interface DisplayVisibilityHandler extends Comparable<DisplayVisibilityHandler> {
     
     /**
      * Gets the priority of the handler, the higher the priority, the earlier this is called.
@@ -46,6 +48,10 @@ public interface DisplayVisibilityHandler {
      * @param display  the display of the recipe
      * @return the visibility
      */
-    InteractionResult handleDisplay(RecipeCategory<?> category, RecipeDisplay display);
+    InteractionResult handleDisplay(DisplayCategory<?> category, Display display);
     
+    @Override
+    default int compareTo(@NotNull DisplayVisibilityHandler o) {
+        return Double.compare(getPriority(), o.getPriority());
+    }
 }

@@ -30,14 +30,16 @@ import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.api.entry.ComparisonContext;
-import me.shedaniel.rei.api.entry.EntryStacks;
-import me.shedaniel.rei.api.entry.EntryTypeRegistry;
-import me.shedaniel.rei.api.entry.VanillaEntryTypes;
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.ingredient.entry.ComparisonContext;
+import me.shedaniel.rei.api.ingredient.util.EntryStacks;
+import me.shedaniel.rei.api.ingredient.entry.EntryTypeRegistry;
+import me.shedaniel.rei.api.ingredient.entry.VanillaEntryTypes;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
+import me.shedaniel.rei.api.util.Renderer;
 import me.shedaniel.rei.api.widgets.Panel;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
@@ -93,8 +95,8 @@ public class DefaultRuntimePlugin implements REIPluginV0 {
     }
     
     @Override
-    public void registerEntries(EntryRegistry entryRegistry) {
-        entryRegistry.registerEntry(new RenderingEntry() {
+    public void registerEntries(EntryRegistry registry) {
+        registry.registerEntry(new RenderingEntry() {
             private ResourceLocation id = new ResourceLocation("roughlyenoughitems", "textures/gui/kirb.png");
             
             @Override
@@ -116,15 +118,15 @@ public class DefaultRuntimePlugin implements REIPluginV0 {
     }
     
     @Override
-    public void registerBounds(DisplayHelper displayHelper) {
-        BaseBoundsHandler baseBoundsHandler = BaseBoundsHandler.getInstance();
-        baseBoundsHandler.registerExclusionZones(RecipeViewingScreen.class, () -> {
+    public void registerBounds(DisplayBoundsRegistry registry) {
+        ExclusionZones exclusionZones = ExclusionZones.getInstance();
+        exclusionZones.register(RecipeViewingScreen.class, () -> {
             Panel widget = ((RecipeViewingScreen) Minecraft.getInstance().screen).getWorkingStationsBaseWidget();
             if (widget == null)
                 return Collections.emptyList();
             return Collections.singletonList(widget.getBounds().clone());
         });
-        baseBoundsHandler.registerExclusionZones(Screen.class, () -> {
+        exclusionZones.register(Screen.class, () -> {
             FavoritesListWidget widget = ContainerScreenOverlay.getFavoritesListWidget();
             if (widget != null) {
                 if (widget.favoritePanelButton.isVisible())
@@ -132,7 +134,7 @@ public class DefaultRuntimePlugin implements REIPluginV0 {
             }
             return Collections.emptyList();
         });
-        displayHelper.registerProvider(new DisplayHelper.DisplayBoundsProvider<RecipeViewingScreen>() {
+        registry.registerProvider(new DisplayBoundsRegistry.DisplayBoundsProvider<RecipeViewingScreen>() {
             @Override
             public Rectangle getScreenBounds(RecipeViewingScreen screen) {
                 return screen.getBounds();
@@ -148,7 +150,7 @@ public class DefaultRuntimePlugin implements REIPluginV0 {
                 return InteractionResult.SUCCESS;
             }
         });
-        displayHelper.registerProvider(new DisplayHelper.DisplayBoundsProvider<VillagerRecipeViewingScreen>() {
+        registry.registerProvider(new DisplayBoundsRegistry.DisplayBoundsProvider<VillagerRecipeViewingScreen>() {
             @Override
             public Rectangle getScreenBounds(VillagerRecipeViewingScreen screen) {
                 return screen.bounds;
@@ -167,8 +169,8 @@ public class DefaultRuntimePlugin implements REIPluginV0 {
     }
     
     @Override
-    public void registerOthers(RecipeHelper recipeHelper) {
-        recipeHelper.registerAutoCraftingHandler(new DefaultCategoryHandler());
+    public void registerOthers(RecipeRegistry registry) {
+        registry.registerAutoCraftingHandler(new DefaultCategoryHandler());
         FavoriteEntryType.registry().register(EntryStackFavoriteType.INSTANCE.id, EntryStackFavoriteType.INSTANCE);
     }
     

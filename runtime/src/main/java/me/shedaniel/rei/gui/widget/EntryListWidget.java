@@ -41,7 +41,9 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.api.entry.*;
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.ingredient.entry.*;
+import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.config.EntryPanelOrdering;
@@ -118,7 +120,7 @@ public class EntryListWidget extends WidgetWithBounds {
     
     static boolean notSteppingOnExclusionZones(int left, int top, int width, int height, Rectangle listArea) {
         Minecraft instance = Minecraft.getInstance();
-        for (OverlayDecider decider : DisplayHelper.getInstance().getSortedOverlayDeciders(instance.screen.getClass())) {
+        for (OverlayDecider decider : DisplayBoundsRegistry.getInstance().getSortedOverlayDeciders(instance.screen.getClass())) {
             InteractionResult fit = canItemSlotWidgetFit(left, top, width, height, decider);
             if (fit != InteractionResult.PASS)
                 return fit == InteractionResult.SUCCESS;
@@ -482,7 +484,7 @@ public class EntryListWidget extends WidgetWithBounds {
             boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
             IntSet workingItems = checkCraftable ? new IntOpenHashSet() : null;
             if (checkCraftable)
-                workingItems.addAll(CollectionUtils.map(RecipeHelper.getInstance().findCraftableEntriesByItems(ScreenHelper.inventoryStacks), EntryStacks::hashIgnoreCount));
+                workingItems.addAll(CollectionUtils.map(RecipeRegistry.getInstance().findCraftableEntriesByItems(ScreenHelper.inventoryStacks), EntryStacks::hashIgnoreCount));
             List<EntryStack<?>> stacks = EntryRegistry.getInstance().getPreFilteredList();
             if (stacks instanceof CopyOnWriteArrayList && !stacks.isEmpty()) {
                 if (ConfigObject.getInstance().shouldAsyncSearch()) {

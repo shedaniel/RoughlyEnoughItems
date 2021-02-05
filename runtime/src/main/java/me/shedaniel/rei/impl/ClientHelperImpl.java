@@ -29,8 +29,10 @@ import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.api.entry.EntryStacks;
-import me.shedaniel.rei.api.entry.VanillaEntryTypes;
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.ingredient.util.EntryStacks;
+import me.shedaniel.rei.api.ingredient.entry.VanillaEntryTypes;
+import me.shedaniel.rei.api.registry.category.DisplayCategory;
 import me.shedaniel.rei.gui.PreRecipeViewingScreen;
 import me.shedaniel.rei.gui.RecipeScreen;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
@@ -187,13 +189,13 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     }
     
     @ApiStatus.Internal
-    public void openRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> map, @Nullable ResourceLocation category, @Nullable EntryStack<?> ingredientNotice, @Nullable EntryStack<?> resultNotice) {
+    public void openRecipeViewingScreen(Map<DisplayCategory<?>, List<Display>> map, @Nullable ResourceLocation category, @Nullable EntryStack<?> ingredientNotice, @Nullable EntryStack<?> resultNotice) {
         openView(new LegacyWrapperViewSearchBuilder(map).setPreferredOpenedCategory(category).setInputNotice(ingredientNotice).setOutputNotice(resultNotice).fillPreferredOpenedCategory());
     }
     
     @Override
     public boolean openView(ClientHelper.ViewSearchBuilder builder) {
-        Map<RecipeCategory<?>, List<RecipeDisplay>> map = builder.buildMap();
+        Map<DisplayCategory<?>, List<Display>> map = builder.buildMap();
         if (map.isEmpty()) return false;
         Screen screen;
         if (ConfigObject.getInstance().getRecipeScreenType() == RecipeScreenType.VILLAGER) {
@@ -255,7 +257,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         @Nullable private EntryStack<?> inputNotice;
         @Nullable private EntryStack<?> outputNotice;
         @NotNull
-        private final LazyLoadedValue<Map<RecipeCategory<?>, List<RecipeDisplay>>> map = new LazyLoadedValue<>(() -> RecipeHelper.getInstance().buildMapFor(this));
+        private final LazyLoadedValue<Map<DisplayCategory<?>, List<Display>>> map = new LazyLoadedValue<>(() -> RecipeRegistry.getInstance().buildMapFor(this));
         
         @Override
         public ClientHelper.ViewSearchBuilder addCategory(ResourceLocation category) {
@@ -337,18 +339,18 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         
         @NotNull
         @Override
-        public Map<RecipeCategory<?>, List<RecipeDisplay>> buildMap() {
+        public Map<DisplayCategory<?>, List<Display>> buildMap() {
             return this.map.get();
         }
     }
     
     public static final class LegacyWrapperViewSearchBuilder extends AbstractViewSearchBuilder {
-        @NotNull private final Map<RecipeCategory<?>, List<RecipeDisplay>> map;
+        @NotNull private final Map<DisplayCategory<?>, List<Display>> map;
         @Nullable private ResourceLocation preferredOpenedCategory = null;
         @Nullable private EntryStack<?> inputNotice;
         @Nullable private EntryStack<?> outputNotice;
         
-        public LegacyWrapperViewSearchBuilder(@NotNull Map<RecipeCategory<?>, List<RecipeDisplay>> map) {
+        public LegacyWrapperViewSearchBuilder(@NotNull Map<DisplayCategory<?>, List<Display>> map) {
             this.map = map;
         }
         
@@ -424,7 +426,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         }
         
         @Override
-        public @NotNull Map<RecipeCategory<?>, List<RecipeDisplay>> buildMap() {
+        public @NotNull Map<DisplayCategory<?>, List<Display>> buildMap() {
             return this.map;
         }
     }

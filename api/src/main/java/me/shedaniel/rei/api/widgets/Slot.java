@@ -24,7 +24,7 @@
 package me.shedaniel.rei.api.widgets;
 
 import me.shedaniel.math.Point;
-import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

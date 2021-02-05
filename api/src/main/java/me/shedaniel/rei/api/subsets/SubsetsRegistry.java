@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.api.subsets;
 
-import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.impl.Internals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

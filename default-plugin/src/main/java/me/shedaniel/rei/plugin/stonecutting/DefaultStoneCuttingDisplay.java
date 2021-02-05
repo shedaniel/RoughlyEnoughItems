@@ -23,9 +23,9 @@
 
 package me.shedaniel.rei.plugin.stonecutting;
 
-import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.RecipeDisplay;
-import me.shedaniel.rei.api.entry.EntryStacks;
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.Display;
+import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
-public class DefaultStoneCuttingDisplay implements RecipeDisplay {
+public class DefaultStoneCuttingDisplay implements Display {
     private List<? extends List<? extends EntryStack<?>>> inputs;
     private List<? extends EntryStack<?>> output;
     private StonecutterRecipe display;

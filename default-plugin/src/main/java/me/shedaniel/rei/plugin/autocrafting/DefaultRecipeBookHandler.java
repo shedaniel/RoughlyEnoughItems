@@ -25,8 +25,8 @@ package me.shedaniel.rei.plugin.autocrafting;
 
 import me.shedaniel.rei.api.AutoTransferHandler;
 import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.RecipeDisplay;
-import me.shedaniel.rei.api.TransferRecipeDisplay;
+import me.shedaniel.rei.api.Display;
+import me.shedaniel.rei.api.TransferDisplay;
 import me.shedaniel.rei.plugin.cooking.DefaultCookingDisplay;
 import me.shedaniel.rei.plugin.crafting.DefaultCraftingDisplay;
 import net.fabricmc.api.EnvType;
@@ -45,9 +45,9 @@ public class DefaultRecipeBookHandler implements AutoTransferHandler {
     @NotNull
     @Override
     public Result handle(@NotNull Context context) {
-        if (context.getRecipe() instanceof TransferRecipeDisplay && ClientHelper.getInstance().canUseMovePackets())
+        if (context.getRecipe() instanceof TransferDisplay && ClientHelper.getInstance().canUseMovePackets())
             return Result.createNotApplicable();
-        RecipeDisplay display = context.getRecipe();
+        Display display = context.getRecipe();
         if (!(context.getContainer() instanceof RecipeBookMenu))
             return Result.createNotApplicable();
         RecipeBookMenu<?> container = (RecipeBookMenu<?>) context.getContainer();

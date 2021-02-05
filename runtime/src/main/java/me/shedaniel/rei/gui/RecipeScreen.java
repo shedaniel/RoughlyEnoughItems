@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.gui;
 
-import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.ingredient.EntryStack;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 

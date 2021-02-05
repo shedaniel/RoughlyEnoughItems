@@ -28,11 +28,12 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.TransferRecipeCategory;
+import me.shedaniel.rei.api.ingredient.EntryIngredient;
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.TransferDisplayCategory;
 import me.shedaniel.rei.api.widgets.Widgets;
-import me.shedaniel.rei.gui.entries.RecipeRenderer;
-import me.shedaniel.rei.gui.entries.SimpleRecipeRenderer;
+import me.shedaniel.rei.gui.entries.DisplayRenderer;
+import me.shedaniel.rei.gui.entries.SimpleDisplayRenderer;
 import me.shedaniel.rei.gui.widget.Widget;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.resources.language.I18n;
@@ -44,7 +45,7 @@ import java.text.DecimalFormat;
 import java.util.Collections;
 import java.util.List;
 
-public class DefaultCookingCategory implements TransferRecipeCategory<DefaultCookingDisplay> {
+public class DefaultCookingCategory implements TransferDisplayCategory<DefaultCookingDisplay> {
     private ResourceLocation identifier;
     private EntryStack<?> logo;
     private String categoryName;
@@ -84,8 +85,8 @@ public class DefaultCookingCategory implements TransferRecipeCategory<DefaultCoo
     }
     
     @Override
-    public @NotNull RecipeRenderer getSimpleRenderer(DefaultCookingDisplay recipe) {
-        return SimpleRecipeRenderer.from(Collections.singletonList(recipe.getInputEntries().get(0)), recipe.getResultingEntries());
+    public @NotNull DisplayRenderer getDisplayRenderer(DefaultCookingDisplay display) {
+        return SimpleDisplayRenderer.from(Collections.singletonList(display.getInputEntries().get(0)), display.getResultingEntries());
     }
     
     @Override

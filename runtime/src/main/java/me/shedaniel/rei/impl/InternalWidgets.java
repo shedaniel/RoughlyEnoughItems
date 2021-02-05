@@ -29,6 +29,7 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.registry.category.DisplayCategory;
 import me.shedaniel.rei.api.widgets.Button;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.toast.CopyRecipeIdentifierToast;
@@ -57,7 +58,7 @@ import java.util.function.Supplier;
 public final class InternalWidgets {
     private InternalWidgets() {}
     
-    public static Widget createAutoCraftingButtonWidget(Rectangle displayBounds, Rectangle rectangle, Component text, Supplier<RecipeDisplay> displaySupplier, List<Widget> setupDisplay, RecipeCategory<?> category) {
+    public static Widget createAutoCraftingButtonWidget(Rectangle displayBounds, Rectangle rectangle, Component text, Supplier<Display> displaySupplier, List<Widget> setupDisplay, DisplayCategory<?> category) {
         AbstractContainerScreen<?> containerScreen = REIHelper.getInstance().getPreviousContainerScreen();
         boolean[] visible = {false};
         List<String>[] errorTooltip = new List[]{null};
@@ -65,7 +66,7 @@ public final class InternalWidgets {
                 .focusable(false)
                 .onClick(button -> {
                     AutoTransferHandler.Context context = AutoTransferHandler.Context.create(true, containerScreen, displaySupplier.get());
-                    for (AutoTransferHandler autoTransferHandler : RecipeHelper.getInstance().getSortedAutoCraftingHandler())
+                    for (AutoTransferHandler autoTransferHandler : RecipeRegistry.getInstance().getSortedAutoCraftingHandler())
                         try {
                             AutoTransferHandler.Result result = autoTransferHandler.handle(context);
                             if (result.isBlocking()) {
@@ -87,7 +88,7 @@ public final class InternalWidgets {
                     visible[0] = false;
                     IntList redSlots = null;
                     AutoTransferHandler.Context context = AutoTransferHandler.Context.create(false, containerScreen, displaySupplier.get());
-                    for (AutoTransferHandler autoTransferHandler : RecipeHelper.getInstance().getSortedAutoCraftingHandler()) {
+                    for (AutoTransferHandler autoTransferHandler : RecipeRegistry.getInstance().getSortedAutoCraftingHandler()) {
                         try {
                             AutoTransferHandler.Result result = autoTransferHandler.handle(context);
                             if (result.isApplicable())
@@ -121,8 +122,8 @@ public final class InternalWidgets {
                         }
                         error.add("error.rei.no.handlers.applicable");
                     }
-                    if ((button.containsMouse(PointHelper.ofMouse()) || button.isFocused()) && category instanceof TransferRecipeCategory && redSlots != null) {
-                        ((TransferRecipeCategory<RecipeDisplay>) category).renderRedSlots(matrices, setupDisplay, displayBounds, displaySupplier.get(), redSlots);
+                    if ((button.containsMouse(PointHelper.ofMouse()) || button.isFocused()) && category instanceof TransferDisplayCategory && redSlots != null) {
+                        ((TransferDisplayCategory<Display>) category).renderRedSlots(matrices, setupDisplay, displayBounds, displaySupplier.get(), redSlots);
                     }
                     errorTooltip[0] = error == null || error.isEmpty() ? null : Lists.newArrayList();
                     if (errorTooltip[0] != null) {

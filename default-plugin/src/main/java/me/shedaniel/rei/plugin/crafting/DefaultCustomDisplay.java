@@ -24,8 +24,9 @@
 package me.shedaniel.rei.plugin.crafting;
 
 import com.google.common.collect.ImmutableList;
-import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.entry.EntryStacks;
+import me.shedaniel.rei.api.ingredient.EntryIngredient;
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.ingredient.util.EntryIngredients;
 import me.shedaniel.rei.utils.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -41,18 +42,18 @@ import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
 public class DefaultCustomDisplay implements DefaultCraftingDisplay {
-    private List<? extends List<? extends EntryStack<?>>> input;
-    private List<? extends EntryStack<?>> output;
+    private List<EntryIngredient> input;
+    private EntryIngredient output;
     private Recipe<?> possibleRecipe;
     private int width, height;
     
     public DefaultCustomDisplay(List<List<ItemStack>> input, List<ItemStack> output, Recipe<?> possibleRecipe) {
-        this(possibleRecipe, CollectionUtils.map(input, EntryStacks::ofItemStacks), EntryStacks.ofItemStacks(output));
+        this(possibleRecipe, CollectionUtils.map(input, EntryIngredients::ofItemStacks), EntryIngredients.ofItemStacks(output));
     }
     
-    public DefaultCustomDisplay(Recipe<?> possibleRecipe, List<? extends List<? extends EntryStack<?>>> input, List<? extends EntryStack<?>> output) {
+    public DefaultCustomDisplay(Recipe<?> possibleRecipe, List<EntryIngredient> input, EntryIngredient output) {
         this.input = ImmutableList.copyOf(input);
-        this.output = ImmutableList.copyOf(output);
+        this.output = output;
         this.possibleRecipe = possibleRecipe;
         BitSet row = new BitSet(3);
         BitSet column = new BitSet(3);
@@ -82,18 +83,13 @@ public class DefaultCustomDisplay implements DefaultCraftingDisplay {
     }
     
     @Override
-    public @NotNull List<? extends List<? extends EntryStack<?>>> getInputEntries() {
+    public @NotNull List<EntryIngredient> getInputEntries() {
         return input;
     }
     
     @Override
-    public @NotNull List<? extends List<? extends EntryStack<?>>> getResultingEntries() {
+    public @NotNull List<EntryIngredient> getResultingEntries() {
         return Collections.singletonList(output);
-    }
-    
-    @Override
-    public @NotNull List<? extends List<? extends EntryStack<?>>> getRequiredEntries() {
-        return input;
     }
     
     @Override

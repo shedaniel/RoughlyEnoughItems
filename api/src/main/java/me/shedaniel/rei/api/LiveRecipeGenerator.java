@@ -23,12 +23,13 @@
 
 package me.shedaniel.rei.api;
 
+import me.shedaniel.rei.api.ingredient.EntryStack;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface LiveRecipeGenerator<T extends RecipeDisplay> {
+public interface LiveRecipeGenerator<T extends Display> {
     
     /**
      * @return the identifier of the category the recipes goes to.

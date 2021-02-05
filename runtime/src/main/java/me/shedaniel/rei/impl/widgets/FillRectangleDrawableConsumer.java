@@ -26,7 +26,7 @@ package me.shedaniel.rei.impl.widgets;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.DrawableConsumer;
+import me.shedaniel.rei.api.util.DrawableConsumer;
 import net.minecraft.client.gui.GuiComponent;
 import org.jetbrains.annotations.NotNull;
 

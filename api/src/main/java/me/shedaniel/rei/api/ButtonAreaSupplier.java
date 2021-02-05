@@ -46,5 +46,4 @@ public interface ButtonAreaSupplier {
     default String getButtonText() {
         return "+";
     }
-    
 }

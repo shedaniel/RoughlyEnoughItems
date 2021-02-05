@@ -24,8 +24,8 @@
 package me.shedaniel.rei.tests.plugin;
 
 import me.shedaniel.rei.api.EntryRegistry;
-import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.entry.EntryStacks;
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -56,15 +56,15 @@ public class REITestPlugin implements REIPluginV0 {
     }
     
     @Override
-    public void registerEntries(EntryRegistry entryRegistry) {
+    public void registerEntries(EntryRegistry registry) {
         int times = 10;
         for (Item item : Registry.ITEM) {
             for (int i = 0; i < times; i++)
-                entryRegistry.registerEntryAfter(EntryStacks.of(item), transformStack(EntryStacks.of(item)));
+                registry.registerEntryAfter(EntryStacks.of(item), transformStack(EntryStacks.of(item)));
             try {
-                for (ItemStack stack : entryRegistry.appendStacksForItem(item)) {
+                for (ItemStack stack : registry.appendStacksForItem(item)) {
                     for (int i = 0; i < times; i++)
-                        entryRegistry.registerEntry(transformStack(EntryStacks.of(stack)));
+                        registry.registerEntry(transformStack(EntryStacks.of(stack)));
                 }
             } catch (Exception ignored) {
             }

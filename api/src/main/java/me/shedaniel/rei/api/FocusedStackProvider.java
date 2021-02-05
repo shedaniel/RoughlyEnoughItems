@@ -23,11 +23,12 @@
 
 package me.shedaniel.rei.api;
 
+import me.shedaniel.rei.api.ingredient.EntryStack;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.InteractionResultHolder;
 import org.jetbrains.annotations.NotNull;
 
-public interface FocusedStackProvider {
+public interface FocusedStackProvider extends Comparable<FocusedStackProvider> {
     /**
      * @return the priority of this handler, higher priorities will be called first.
      */
@@ -37,4 +38,9 @@ public interface FocusedStackProvider {
     
     @NotNull
     InteractionResultHolder<EntryStack<?>> provide(Screen screen);
+    
+    @Override
+    default int compareTo(@NotNull FocusedStackProvider o) {
+        return Double.compare(getPriority(), o.getPriority());
+    }
 }
