@@ -28,20 +28,14 @@ import alexiil.mc.lib.attributes.fluid.GroupedFluidInvView;
 import alexiil.mc.lib.attributes.fluid.amount.FluidAmount;
 import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.rei.api.RecipeRegistry;
-import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
+import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResultHolder;
 
 import java.util.stream.Stream;
 
 public class LBASupportPlugin implements REIPluginV0 {
-    @Override
-    public ResourceLocation getPluginIdentifier() {
-        return new ResourceLocation("roughlyenoughitems", "lba_support");
-    }
-    
     @Override
     public void registerOthers(RecipeRegistry registry) {
         FluidSupportProvider.getInstance().registerProvider(entry -> {

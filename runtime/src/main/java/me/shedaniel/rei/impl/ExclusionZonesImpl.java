@@ -27,7 +27,7 @@ import com.google.common.collect.Lists;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.ExclusionZones;
 import me.shedaniel.rei.api.DisplayBoundsRegistry;
-import me.shedaniel.rei.gui.config.DisplayPanelLocation;
+import me.shedaniel.rei.api.gui.config.DisplayPanelLocation;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;

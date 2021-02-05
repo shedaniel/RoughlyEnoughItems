@@ -26,7 +26,7 @@ package me.shedaniel.rei.impl.filtering;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.impl.AmountIgnoredEntryStackWrapper;
-import me.shedaniel.rei.utils.CollectionUtils;
+import me.shedaniel.rei.api.util.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.ApiStatus;

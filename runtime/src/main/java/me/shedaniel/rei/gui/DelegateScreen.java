@@ -24,7 +24,7 @@
 package me.shedaniel.rei.gui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.rei.utils.ImmutableLiteralText;
+import me.shedaniel.rei.api.util.ImmutableLiteralText;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;

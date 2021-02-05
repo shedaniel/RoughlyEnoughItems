@@ -32,7 +32,7 @@ import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.impl.filtering.AbstractFilteringRule;
 import me.shedaniel.rei.impl.filtering.FilteringContext;
 import me.shedaniel.rei.impl.filtering.FilteringResult;
-import me.shedaniel.rei.utils.CollectionUtils;
+import me.shedaniel.rei.api.util.CollectionUtils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;

@@ -37,8 +37,8 @@ import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.entry.*;
-import me.shedaniel.rei.api.widgets.Tooltip;
-import me.shedaniel.rei.utils.ImmutableLiteralText;
+import me.shedaniel.rei.api.util.ImmutableLiteralText;
+import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
@@ -237,7 +237,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack> {
         public int getBatchId(EntryStack<ItemStack> entry) {
             return 1738923 + (getModelFromStack(entry.getValue()).usesBlockLight() ? 1 : 0);
         }
-    
+        
         private BakedModel getModelFromStack(ItemStack stack) {
             return Minecraft.getInstance().getItemRenderer().getModel(stack, null, null, 0);
         }

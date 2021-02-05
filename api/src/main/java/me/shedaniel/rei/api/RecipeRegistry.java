@@ -25,7 +25,8 @@ package me.shedaniel.rei.api;
 
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.registry.category.DisplayCategory;
+import me.shedaniel.rei.api.registry.display.Display;
+import me.shedaniel.rei.api.registry.display.DisplayCategory;
 import me.shedaniel.rei.impl.Internals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

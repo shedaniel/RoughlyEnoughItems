@@ -31,7 +31,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.gui.toast.ExportRecipeIdentifierToast;
-import me.shedaniel.rei.gui.widget.Widget;
+import me.shedaniel.rei.api.gui.widgets.Widget;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;

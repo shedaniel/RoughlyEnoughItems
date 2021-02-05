@@ -28,7 +28,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.subsets.SubsetsRegistry;
-import me.shedaniel.rei.utils.CollectionUtils;
+import me.shedaniel.rei.api.util.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;

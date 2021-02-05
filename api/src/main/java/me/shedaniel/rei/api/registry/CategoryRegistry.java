@@ -1,34 +1,46 @@
 package me.shedaniel.rei.api.registry;
 
-import me.shedaniel.rei.api.registry.category.DisplayCategory;
 import me.shedaniel.rei.api.ingredient.EntryIngredient;
 import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.registry.display.Display;
+import me.shedaniel.rei.api.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.util.CollectionUtils;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
 import java.util.function.Consumer;
 
-public interface CategoryRegistry {
+public interface CategoryRegistry extends Reloadable {
+    static CategoryRegistry getInstance() {
+        
+    }
+    
     /**
      * Registers a category
      *
      * @param category the category to register
      */
-    void register(DisplayCategory<?> category);
+    <T extends Display> void register(DisplayCategory<T> category);
     
-    default void register(Iterable<DisplayCategory<?>> categories) {
+    default <T extends Display> void register(Iterable<DisplayCategory<T>> categories) {
         for (DisplayCategory<?> category : categories) {
             register(category);
         }
     }
     
-    default void register(DisplayCategory<?>... categories) {
+    default <T extends Display> void register(DisplayCategory<T>... categories) {
         for (DisplayCategory<?> category : categories) {
             register(category);
         }
     }
     
-    void configure(ResourceLocation category, Consumer<RecipeCategoryConfiguration> action);
+    DisplayCategoryConfiguration<?> get(ResourceLocation category);
+    
+    <T extends Display> DisplayCategoryConfiguration<T> get(ResourceLocation category, Class<T> displayClass);
+    
+    void configure(ResourceLocation category, Consumer<DisplayCategoryConfiguration<?>> action);
+    
+    <T extends Display> void configure(ResourceLocation category, Class<T> displayClass, Consumer<DisplayCategoryConfiguration<T>> action);
     
     default void registerWorkingStations(ResourceLocation category, EntryIngredient... stations) {
         configure(category, config -> config.registerWorkingStations(stations));
@@ -38,17 +50,25 @@ public interface CategoryRegistry {
         configure(category, config -> config.registerWorkingStations(stations));
     }
     
-    interface RecipeCategoryConfiguration {
+    interface DisplayCategoryConfiguration<T extends Display> {
+        /**
+         * Registers the working stations of a category
+         *
+         * @param stations the working stations
+         */
         void registerWorkingStations(EntryIngredient... stations);
         
         /**
          * Registers the working stations of a category
          *
-         * @param category the category
          * @param stations the working stations
          */
-        void registerWorkingStations(EntryStack<?>... stations);
+        default void registerWorkingStations(EntryStack<?>... stations) {
+            registerWorkingStations(CollectionUtils.map(stations, EntryIngredient::of).toArray(new EntryIngredient[0]));
+        }
+        
+        List<EntryIngredient> getWorkingStations();
+        
+        DisplayCategory<T> getCategory();
     }
-    
-    List<EntryIngredient> getWorkingStations(ResourceLocation category);
 }

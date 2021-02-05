@@ -24,6 +24,7 @@
 package me.shedaniel.rei.impl;
 
 import me.shedaniel.clothconfig2.api.ScrollingContainer;
+import me.shedaniel.clothconfig2.impl.EasingMethod;
 import net.minecraft.Util;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -65,9 +66,9 @@ public final class Animator extends Number {
     public void update(double delta) {
         if (duration != 0) {
             if (amount < target)
-                this.amount = Math.min(ScrollingContainer.ease(amount, target + (target - amount), Math.min(((double) Util.getMillis() - start) / duration * delta * 3.0D, 1.0D), v -> v), target);
+                this.amount = Math.min(ScrollingContainer.ease(amount, target + (target - amount), Math.min(((double) Util.getMillis() - start) / duration * delta * 3.0D, 1.0D), EasingMethod.EasingMethodImpl.LINEAR), target);
             else if (amount > target)
-                this.amount = Math.max(ScrollingContainer.ease(amount, target - (amount - target), Math.min(((double) Util.getMillis() - start) / duration * delta * 3.0D, 1.0D), v -> v), target);
+                this.amount = Math.max(ScrollingContainer.ease(amount, target - (amount - target), Math.min(((double) Util.getMillis() - start) / duration * delta * 3.0D, 1.0D), EasingMethod.EasingMethodImpl.LINEAR), target);
         }
     }
     

@@ -31,7 +31,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.apache.logging.log4j.LogManager;
@@ -48,11 +47,6 @@ public class REITestPlugin implements REIPluginV0 {
     @Override
     public void preRegister() {
         LogManager.getLogger().error("REI Test Plugin is enabled! If you see this unintentionally, please report this!");
-    }
-    
-    @Override
-    public ResourceLocation getPluginIdentifier() {
-        return new ResourceLocation("roughlyenoughitems:test_dev_plugin");
     }
     
     @Override

@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.api;
 
-import me.shedaniel.rei.api.widgets.Tooltip;
-import me.shedaniel.rei.gui.widget.TextFieldWidget;
+import me.shedaniel.rei.api.gui.widgets.TextField;
+import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.impl.Internals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -55,7 +55,7 @@ public interface REIHelper {
     boolean isDarkThemeEnabled();
     
     @Nullable
-    TextFieldWidget getSearchTextField();
+    TextField getSearchTextField();
     
     void queueTooltip(@Nullable Tooltip tooltip);
     

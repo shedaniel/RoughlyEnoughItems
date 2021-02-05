@@ -33,14 +33,17 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.ingredient.EntryIngredient;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.registry.category.DisplayCategory;
-import me.shedaniel.rei.api.widgets.Button;
-import me.shedaniel.rei.api.widgets.Tooltip;
-import me.shedaniel.rei.api.widgets.Widgets;
-import me.shedaniel.rei.gui.entries.DisplayRenderer;
+import me.shedaniel.rei.api.registry.CategoryRegistry;
+import me.shedaniel.rei.api.registry.display.Display;
+import me.shedaniel.rei.api.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.gui.widgets.Button;
+import me.shedaniel.rei.api.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.gui.widgets.Widgets;
+import me.shedaniel.rei.api.gui.DisplayRenderer;
 import me.shedaniel.rei.gui.widget.TabWidget;
-import me.shedaniel.rei.gui.widget.Widget;
+import me.shedaniel.rei.api.gui.widgets.Widget;
 import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.impl.InternalWidgets;
 import me.shedaniel.rei.impl.ScreenHelper;
@@ -158,7 +161,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
         }
         this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - guiHeight / 2, guiWidth, guiHeight);
         
-        List<List<? extends EntryStack<?>>> workingStations = RecipeRegistry.getInstance().getWorkingStations(category.getIdentifier());
+        List<EntryIngredient> workingStations = CategoryRegistry.getInstance().getWorkingStations(category.getIdentifier());
         if (!workingStations.isEmpty()) {
             int ww = Mth.floor((bounds.width - 16) / 18f);
             int w = Math.min(ww, workingStations.size());
@@ -168,7 +171,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
             widgets.add(Widgets.createCategoryBase(new Rectangle(xx - 5, bounds.y + bounds.height - 5, 10 + w * 16, 12 + h * 16)));
             widgets.add(Widgets.createSlotBase(new Rectangle(xx - 1, yy - 1, 2 + w * 16, 2 + h * 16)));
             int index = 0;
-            for (List<? extends EntryStack<?>> workingStation : workingStations) {
+            for (EntryIngredient workingStation : workingStations) {
                 widgets.add(new RecipeViewingScreen.WorkstationSlotWidget(xx, yy, workingStation));
                 index++;
                 xx += 16;

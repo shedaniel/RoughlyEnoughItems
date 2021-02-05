@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.api.ingredient.entry;
 
-import me.shedaniel.rei.api.util.Renderer;
+import me.shedaniel.rei.api.gui.Renderer;
 import net.minecraft.client.gui.GuiComponent;
 
 public abstract class AbstractRenderer extends GuiComponent implements Renderer {

@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.api.ingredient.entry;
 
-import me.shedaniel.rei.api.util.Renderer;
+import me.shedaniel.rei.api.gui.Renderer;
 import me.shedaniel.rei.impl.Internals;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Unit;

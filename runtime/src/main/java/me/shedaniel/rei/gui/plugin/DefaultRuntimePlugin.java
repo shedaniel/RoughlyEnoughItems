@@ -30,26 +30,25 @@ import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.ComparisonContext;
-import me.shedaniel.rei.api.ingredient.util.EntryStacks;
-import me.shedaniel.rei.api.ingredient.entry.EntryTypeRegistry;
-import me.shedaniel.rei.api.ingredient.entry.VanillaEntryTypes;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
+import me.shedaniel.rei.api.gui.Renderer;
+import me.shedaniel.rei.api.gui.widgets.Panel;
+import me.shedaniel.rei.api.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.ingredient.entry.AbstractRenderer;
+import me.shedaniel.rei.api.ingredient.entry.ComparisonContext;
+import me.shedaniel.rei.api.ingredient.entry.EntryTypeRegistry;
+import me.shedaniel.rei.api.ingredient.entry.VanillaEntryTypes;
+import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
-import me.shedaniel.rei.api.util.Renderer;
-import me.shedaniel.rei.api.widgets.Panel;
-import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
 import me.shedaniel.rei.gui.plugin.entry.FluidEntryDefinition;
 import me.shedaniel.rei.gui.plugin.entry.ItemEntryDefinition;
 import me.shedaniel.rei.gui.widget.FavoritesListWidget;
-import me.shedaniel.rei.impl.ClientHelperImpl;
-import me.shedaniel.rei.impl.RenderingEntry;
 import me.shedaniel.rei.plugin.autocrafting.DefaultCategoryHandler;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -77,11 +76,6 @@ public class DefaultRuntimePlugin implements REIPluginV0 {
     public static final ResourceLocation PLUGIN = new ResourceLocation("roughlyenoughitems", "default_runtime_plugin");
     
     @Override
-    public ResourceLocation getPluginIdentifier() {
-        return PLUGIN;
-    }
-    
-    @Override
     public void registerEntryTypes(EntryTypeRegistry registry) {
         registry.register(VanillaEntryTypes.ITEM, new ItemEntryDefinition());
         registry.register(VanillaEntryTypes.FLUID, new FluidEntryDefinition());
@@ -96,7 +90,7 @@ public class DefaultRuntimePlugin implements REIPluginV0 {
     
     @Override
     public void registerEntries(EntryRegistry registry) {
-        registry.registerEntry(new RenderingEntry() {
+        registry.registerEntry(EntryStacks.of(new AbstractRenderer() {
             private ResourceLocation id = new ResourceLocation("roughlyenoughitems", "textures/gui/kirb.png");
             
             @Override
@@ -106,15 +100,10 @@ public class DefaultRuntimePlugin implements REIPluginV0 {
             }
             
             @Override
-            public boolean isEmpty() {
-                return !ClientHelperImpl.getInstance().isAprilFools.get();
-            }
-            
-            @Override
             public @Nullable Tooltip getTooltip(Point point) {
                 return Tooltip.create(new TextComponent("Kirby"), ClientHelper.getInstance().getFormattedModFromModId("Dream Land"));
             }
-        });
+        }));
     }
     
     @Override

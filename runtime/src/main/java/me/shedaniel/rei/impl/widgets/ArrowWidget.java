@@ -26,7 +26,7 @@ package me.shedaniel.rei.impl.widgets;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.widgets.Arrow;
+import me.shedaniel.rei.api.gui.widgets.Arrow;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.util.Mth;

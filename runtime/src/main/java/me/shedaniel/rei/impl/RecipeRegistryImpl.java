@@ -33,10 +33,14 @@ import me.shedaniel.rei.api.ingredient.EntryIngredient;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
-import me.shedaniel.rei.api.registry.category.DisplayCategory;
+import me.shedaniel.rei.api.registry.CategoryRegistry;
+import me.shedaniel.rei.api.registry.ParentReloadable;
+import me.shedaniel.rei.api.registry.Reloadable;
+import me.shedaniel.rei.api.registry.display.Display;
+import me.shedaniel.rei.api.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.subsets.SubsetsRegistry;
+import me.shedaniel.rei.api.util.CollectionUtils;
 import me.shedaniel.rei.impl.subsets.SubsetsRegistryImpl;
-import me.shedaniel.rei.utils.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -58,14 +62,13 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
-public class RecipeRegistryImpl implements RecipeRegistry {
-    @SuppressWarnings("rawtypes")
-    private static final Comparator<Recipe> RECIPE_COMPARATOR = Comparator.comparing((Recipe o) -> o.getId().getNamespace()).thenComparing(o -> o.getId().getPath());
+public class RecipeRegistryImpl implements RecipeRegistry, ParentReloadable {
+    private static final Comparator<Recipe<?>> RECIPE_COMPARATOR = Comparator.comparing((Recipe<?> o) -> o.getId().getNamespace()).thenComparing(o -> o.getId().getPath());
     
+    private final List<Reloadable> reloadables = new ArrayList<>();
     private final List<FocusedStackProvider> focusedStackProviders = Lists.newArrayList();
     private final List<AutoTransferHandler> autoTransferHandlers = Lists.newArrayList();
     private final List<RecipeFunction<?>> recipeFunctions = Lists.newArrayList();
@@ -74,11 +77,14 @@ public class RecipeRegistryImpl implements RecipeRegistry {
     private final Map<ResourceLocation, List<Display>> recipeDisplays = Maps.newHashMap();
     private final BiMap<DisplayCategory<?>, ResourceLocation> categories = HashBiMap.create();
     private final Map<ResourceLocation, ButtonAreaSupplier> autoCraftAreaSupplierMap = Maps.newHashMap();
-    private final Map<ResourceLocation, List<List<? extends EntryStack<?>>>> categoryWorkingStations = Maps.newHashMap();
     private final List<DisplayVisibilityHandler> displayVisibilityHandlers = Lists.newArrayList();
     private final List<LiveRecipeGenerator<Display>> liveRecipeGenerators = Lists.newArrayList();
     private RecipeManager recipeManager;
     private boolean arePluginsLoading = false;
+    
+    public RecipeRegistryImpl() {
+        reloadables.add(CategoryRegistry.getInstance());
+    }
     
     @Override
     public List<EntryStack<?>> findCraftableEntriesByItems(Iterable<? extends EntryStack<?>> inventoryItems) {
@@ -110,29 +116,6 @@ public class RecipeRegistryImpl implements RecipeRegistry {
     @Override
     public boolean arePluginsLoading() {
         return arePluginsLoading;
-    }
-    
-    @Override
-    public void registerCategory(DisplayCategory<?> category) {
-        categories.put(category, category.getIdentifier());
-        recipeDisplays.put(category.getIdentifier(), Lists.newArrayList());
-        categoryWorkingStations.put(category.getIdentifier(), Lists.newArrayList());
-    }
-    
-    @SafeVarargs
-    @Override
-    public final void registerWorkingStations(ResourceLocation category, List<? extends EntryStack<?>>... workingStations) {
-        categoryWorkingStations.get(category).addAll(Arrays.asList(workingStations));
-    }
-    
-    @Override
-    public void registerWorkingStations(ResourceLocation category, EntryStack<?>... workingStations) {
-        categoryWorkingStations.get(category).addAll(Stream.of(workingStations).map(Collections::singletonList).collect(Collectors.toList()));
-    }
-    
-    @Override
-    public List<List<? extends EntryStack<?>>> getWorkingStations(ResourceLocation category) {
-        return categoryWorkingStations.getOrDefault(category, Collections.emptyList());
     }
     
     @Override
@@ -347,6 +330,9 @@ public class RecipeRegistryImpl implements RecipeRegistry {
         MutablePair<Stopwatch, String> sectionData = new MutablePair<>(Stopwatch.createUnstarted(), "");
         
         startSection(sectionData, "reset-data");
+        for (Reloadable reloadable : reloadables) {
+            reloadable.resetData();
+        }
         arePluginsLoading = true;
         ScreenHelper.clearLastRecipeScreenData();
         recipeCount.setValue(0);
@@ -355,7 +341,6 @@ public class RecipeRegistryImpl implements RecipeRegistry {
         this.categories.clear();
         this.autoCraftAreaSupplierMap.clear();
         this.screenClickAreas.clear();
-        this.categoryWorkingStations.clear();
         this.recipeFunctions.clear();
         this.displayVisibilityHandlers.clear();
         this.liveRecipeGenerators.clear();

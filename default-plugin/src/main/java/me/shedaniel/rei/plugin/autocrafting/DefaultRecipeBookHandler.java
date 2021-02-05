@@ -25,8 +25,8 @@ package me.shedaniel.rei.plugin.autocrafting;
 
 import me.shedaniel.rei.api.AutoTransferHandler;
 import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.Display;
-import me.shedaniel.rei.api.TransferDisplay;
+import me.shedaniel.rei.api.registry.display.Display;
+import me.shedaniel.rei.api.registry.display.TransferDisplay;
 import me.shedaniel.rei.plugin.cooking.DefaultCookingDisplay;
 import me.shedaniel.rei.plugin.crafting.DefaultCraftingDisplay;
 import net.fabricmc.api.EnvType;

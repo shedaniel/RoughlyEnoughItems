@@ -24,7 +24,7 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.gui.config.DisplayPanelLocation;
+import me.shedaniel.rei.api.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.impl.Internals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
