@@ -30,7 +30,7 @@ import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
 import me.shedaniel.rei.api.AutoTransferHandler;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.TransferDisplay;
+import me.shedaniel.rei.api.registry.display.TransferDisplay;
 import me.shedaniel.rei.api.ingredient.entry.VanillaEntryTypes;
 import me.shedaniel.rei.api.server.ContainerContext;
 import me.shedaniel.rei.api.server.ContainerInfo;

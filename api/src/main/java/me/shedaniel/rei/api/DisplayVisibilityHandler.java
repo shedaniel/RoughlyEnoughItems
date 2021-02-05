@@ -23,7 +23,8 @@
 
 package me.shedaniel.rei.api;
 
-import me.shedaniel.rei.api.registry.category.DisplayCategory;
+import me.shedaniel.rei.api.registry.display.Display;
+import me.shedaniel.rei.api.registry.display.DisplayCategory;
 import net.minecraft.world.InteractionResult;
 import org.jetbrains.annotations.NotNull;
 

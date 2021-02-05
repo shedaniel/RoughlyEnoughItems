@@ -34,21 +34,24 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.ingredient.EntryIngredient;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.registry.category.DisplayCategory;
-import me.shedaniel.rei.api.widgets.Button;
-import me.shedaniel.rei.api.widgets.Panel;
-import me.shedaniel.rei.api.widgets.Widgets;
+import me.shedaniel.rei.api.registry.CategoryRegistry;
+import me.shedaniel.rei.api.registry.display.Display;
+import me.shedaniel.rei.api.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.util.ImmutableLiteralText;
+import me.shedaniel.rei.api.gui.widgets.Button;
+import me.shedaniel.rei.api.gui.widgets.Panel;
+import me.shedaniel.rei.api.gui.widgets.Widgets;
 import me.shedaniel.rei.gui.widget.EntryWidget;
 import me.shedaniel.rei.gui.widget.RecipeChoosePageWidget;
 import me.shedaniel.rei.gui.widget.TabWidget;
-import me.shedaniel.rei.gui.widget.Widget;
+import me.shedaniel.rei.api.gui.widgets.Widget;
 import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.impl.InternalWidgets;
 import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.widgets.PanelWidget;
-import me.shedaniel.rei.utils.CollectionUtils;
-import me.shedaniel.rei.utils.ImmutableLiteralText;
+import me.shedaniel.rei.api.util.CollectionUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -332,7 +335,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
             recipeChoosePageWidget = null;
         
         workingStationsBaseWidget = null;
-        List<List<? extends EntryStack<?>>> workingStations = RecipeRegistry.getInstance().getWorkingStations(selectedCategory.getIdentifier());
+        List<EntryIngredient> workingStations = CategoryRegistry.getInstance().getWorkingStations(selectedCategory.getIdentifier());
         if (!workingStations.isEmpty()) {
             int hh = Mth.floor((bounds.height - 16) / 18f);
             int actualHeight = Math.min(hh, workingStations.size());
@@ -343,7 +346,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
             preWidgets.add(Widgets.createSlotBase(new Rectangle(xx - 1, yy - 1, innerWidth * 16 + 2, actualHeight * 16 + 2)));
             int index = 0;
             xx += (innerWidth - 1) * 16;
-            for (List<? extends EntryStack<?>> workingStation : workingStations) {
+            for (EntryIngredient workingStation : workingStations) {
                 preWidgets.add(new WorkstationSlotWidget(xx, yy, workingStation));
                 index++;
                 yy += 16;
@@ -572,7 +575,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
     }
     
     public static class WorkstationSlotWidget extends EntryWidget {
-        public WorkstationSlotWidget(int x, int y, List<? extends EntryStack<?>> widgets) {
+        public WorkstationSlotWidget(int x, int y, EntryIngredient widgets) {
             super(new Point(x, y));
             entries(widgets);
             noBackground();

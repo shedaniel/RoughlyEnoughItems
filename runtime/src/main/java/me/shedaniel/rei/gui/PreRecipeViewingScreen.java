@@ -30,10 +30,10 @@ import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWi
 import me.shedaniel.clothconfig2.impl.EasingMethod;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.widgets.Widgets;
-import me.shedaniel.rei.gui.config.RecipeScreenType;
-import me.shedaniel.rei.gui.widget.Widget;
-import me.shedaniel.rei.gui.widget.WidgetWithBounds;
+import me.shedaniel.rei.api.gui.widgets.Widgets;
+import me.shedaniel.rei.api.gui.config.RecipeScreenType;
+import me.shedaniel.rei.api.gui.widgets.Widget;
+import me.shedaniel.rei.api.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;

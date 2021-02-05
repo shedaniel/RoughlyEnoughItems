@@ -24,10 +24,11 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.registry.category.DisplayCategory;
+import me.shedaniel.rei.api.registry.display.Display;
+import me.shedaniel.rei.api.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.util.CollectionUtils;
+import me.shedaniel.rei.api.util.FormattingUtils;
 import me.shedaniel.rei.impl.Internals;
-import me.shedaniel.rei.utils.CollectionUtils;
-import me.shedaniel.rei.utils.FormattingUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;

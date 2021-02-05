@@ -42,13 +42,13 @@ import me.shedaniel.rei.api.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.api.subsets.SubsetsRegistry;
-import me.shedaniel.rei.api.util.DrawableConsumer;
-import me.shedaniel.rei.api.util.Renderer;
-import me.shedaniel.rei.api.widgets.*;
+import me.shedaniel.rei.api.gui.DrawableConsumer;
+import me.shedaniel.rei.api.gui.Renderer;
+import me.shedaniel.rei.api.gui.widgets.*;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.widget.EntryWidget;
 import me.shedaniel.rei.gui.widget.QueuedTooltip;
-import me.shedaniel.rei.gui.widget.Widget;
+import me.shedaniel.rei.api.gui.widgets.Widget;
 import me.shedaniel.rei.impl.*;
 import me.shedaniel.rei.impl.entry.EmptyEntryDefinition;
 import me.shedaniel.rei.impl.subsets.SubsetsRegistryImpl;
@@ -184,7 +184,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             }
             
             @Override
-            public me.shedaniel.rei.api.widgets.Slot createSlot(Point point) {
+            public me.shedaniel.rei.api.gui.widgets.Slot createSlot(Point point) {
                 return new EntryWidget(point);
             }
             

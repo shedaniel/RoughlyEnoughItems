@@ -25,13 +25,13 @@ package me.shedaniel.rei.impl.filtering.rules;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.gui.config.entry.FilteringEntry;
-import me.shedaniel.rei.gui.config.entry.FilteringRuleOptionsScreen;
+import me.shedaniel.rei.api.gui.config.entry.FilteringEntry;
+import me.shedaniel.rei.api.gui.config.entry.FilteringRuleOptionsScreen;
 import me.shedaniel.rei.impl.SearchArgument;
 import me.shedaniel.rei.impl.filtering.AbstractFilteringRule;
 import me.shedaniel.rei.impl.filtering.FilteringContext;
 import me.shedaniel.rei.impl.filtering.FilteringResult;
-import me.shedaniel.rei.utils.CollectionUtils;
+import me.shedaniel.rei.api.util.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;

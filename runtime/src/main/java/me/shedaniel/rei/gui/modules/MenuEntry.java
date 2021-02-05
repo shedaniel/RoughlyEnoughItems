@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.gui.modules;
 
-import me.shedaniel.rei.gui.widget.Widget;
+import me.shedaniel.rei.api.gui.widgets.Widget;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Experimental

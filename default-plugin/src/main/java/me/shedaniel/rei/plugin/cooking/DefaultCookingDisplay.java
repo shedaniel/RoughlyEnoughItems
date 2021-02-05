@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.plugin.cooking;
 
-import me.shedaniel.rei.api.TransferDisplay;
+import me.shedaniel.rei.api.registry.display.TransferDisplay;
 import me.shedaniel.rei.api.ingredient.EntryIngredient;
 import me.shedaniel.rei.api.ingredient.util.EntryIngredients;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;

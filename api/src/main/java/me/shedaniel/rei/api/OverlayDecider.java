@@ -24,7 +24,7 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.gui.config.DisplayPanelLocation;
+import me.shedaniel.rei.api.gui.config.DisplayPanelLocation;
 import net.minecraft.world.InteractionResult;
 
 import static net.minecraft.world.InteractionResult.PASS;

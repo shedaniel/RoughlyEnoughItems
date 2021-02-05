@@ -28,7 +28,7 @@ import com.google.common.collect.Lists;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.api.Executor;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.widgets.Tooltip;
+import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import net.fabricmc.api.EnvType;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;

@@ -33,7 +33,7 @@ import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.impl.filtering.FilteringContextImpl;
 import me.shedaniel.rei.impl.filtering.FilteringContextType;
 import me.shedaniel.rei.impl.filtering.FilteringRule;
-import me.shedaniel.rei.utils.CollectionUtils;
+import me.shedaniel.rei.api.util.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.NonNullList;

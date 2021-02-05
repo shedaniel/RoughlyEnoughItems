@@ -34,7 +34,7 @@ import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.entry.*;
-import me.shedaniel.rei.api.widgets.Tooltip;
+import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.impl.SimpleFluidRenderer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;

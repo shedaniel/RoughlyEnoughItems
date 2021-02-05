@@ -24,7 +24,7 @@
 package me.shedaniel.rei.impl.filtering;
 
 import com.mojang.serialization.Lifecycle;
-import me.shedaniel.rei.gui.config.entry.FilteringEntry;
+import me.shedaniel.rei.api.gui.config.entry.FilteringEntry;
 import me.shedaniel.rei.impl.filtering.rules.ManualFilteringRule;
 import me.shedaniel.rei.impl.filtering.rules.SearchFilteringRule;
 import net.fabricmc.api.EnvType;

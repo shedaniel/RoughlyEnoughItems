@@ -33,14 +33,15 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.api.Executor;
 import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.gui.widgets.TextField;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.widgets.Tooltip;
+import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.OverlaySearchField;
 import me.shedaniel.rei.gui.RecipeScreen;
 import me.shedaniel.rei.gui.WarningAndErrorScreen;
-import me.shedaniel.rei.gui.config.SearchFieldLocation;
-import me.shedaniel.rei.gui.widget.TextFieldWidget;
+import me.shedaniel.rei.api.gui.config.SearchFieldLocation;
+import me.shedaniel.rei.impl.widgets.TextFieldWidget;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -94,7 +95,7 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
     
     @Override
     @Nullable
-    public TextFieldWidget getSearchTextField() {
+    public TextField getSearchTextField() {
         return searchField;
     }
     

@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.plugin.crafting;
 
-import me.shedaniel.rei.api.TransferDisplay;
+import me.shedaniel.rei.api.registry.display.TransferDisplay;
 import me.shedaniel.rei.api.ingredient.EntryIngredient;
 import me.shedaniel.rei.api.server.ContainerInfo;
 import me.shedaniel.rei.plugin.DefaultPlugin;

@@ -24,6 +24,7 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.registry.display.Display;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;

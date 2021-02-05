@@ -33,7 +33,7 @@ import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
-import me.shedaniel.rei.gui.config.*;
+import me.shedaniel.rei.api.gui.config.*;
 import me.shedaniel.rei.impl.filtering.FilteringRule;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

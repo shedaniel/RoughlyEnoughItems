@@ -28,7 +28,7 @@ import com.google.gson.JsonObject;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
 import me.shedaniel.architectury.utils.Fraction;
-import me.shedaniel.rei.api.util.Renderer;
+import me.shedaniel.rei.api.gui.Renderer;
 import me.shedaniel.rei.api.util.TextRepresentable;
 import me.shedaniel.rei.api.ingredient.entry.ComparisonContext;
 import me.shedaniel.rei.api.ingredient.entry.EntryDefinition;

@@ -24,7 +24,7 @@
 package me.shedaniel.rei.plugin.stripping;
 
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.Display;
+import me.shedaniel.rei.api.registry.display.Display;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;

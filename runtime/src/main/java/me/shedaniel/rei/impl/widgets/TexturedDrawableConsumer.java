@@ -26,7 +26,7 @@ package me.shedaniel.rei.impl.widgets;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
-import me.shedaniel.rei.api.util.DrawableConsumer;
+import me.shedaniel.rei.api.gui.DrawableConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.resources.ResourceLocation;

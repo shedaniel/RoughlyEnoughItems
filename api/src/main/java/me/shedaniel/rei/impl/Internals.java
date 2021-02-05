@@ -30,15 +30,16 @@ import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
+import me.shedaniel.rei.api.gui.DrawableConsumer;
+import me.shedaniel.rei.api.gui.Renderer;
+import me.shedaniel.rei.api.gui.widgets.*;
+import me.shedaniel.rei.api.ingredient.EntryIngredient;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.entry.EntryDefinition;
 import me.shedaniel.rei.api.ingredient.entry.EntryType;
 import me.shedaniel.rei.api.ingredient.entry.EntryTypeRegistry;
+import me.shedaniel.rei.api.plugins.BuiltinPlugin;
 import me.shedaniel.rei.api.subsets.SubsetsRegistry;
-import me.shedaniel.rei.api.util.DrawableConsumer;
-import me.shedaniel.rei.api.util.Renderer;
-import me.shedaniel.rei.api.widgets.*;
-import me.shedaniel.rei.gui.widget.Widget;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
@@ -63,6 +64,7 @@ public final class Internals {
     private static Supplier<REIHelper> reiHelper = Internals::throwNotSetup;
     private static Supplier<FluidSupportProvider> fluidSupportProvider = Internals::throwNotSetup;
     private static Supplier<EntryStackProvider> entryStackProvider = Internals::throwNotSetup;
+    private static Supplier<EntryIngredientProvider> entryIngredientProvider = Internals::throwNotSetup;
     private static Supplier<SubsetsRegistry> subsetsRegistry = Internals::throwNotSetup;
     private static Supplier<EntryRegistry> entryRegistry = Internals::throwNotSetup;
     private static Supplier<DisplayBoundsRegistry> displayHelper = Internals::throwNotSetup;
@@ -110,6 +112,11 @@ public final class Internals {
     @NotNull
     public static EntryStackProvider getEntryStackProvider() {
         return entryStackProvider.get();
+    }
+    
+    @NotNull
+    public static EntryIngredientProvider getEntryIngredientProvider() {
+        return entryIngredientProvider.get();
     }
     
     @NotNull
@@ -201,6 +208,16 @@ public final class Internals {
         EntryType<Unit> emptyType(ResourceLocation id);
         
         EntryType<Renderer> renderingType(ResourceLocation id);
+    }
+    
+    public interface EntryIngredientProvider {
+        EntryIngredient empty();
+        
+        <T> EntryIngredient of(EntryStack<T> stack);
+        
+        <T> EntryIngredient of(EntryStack<T>... stacks);
+        
+        <T> EntryIngredient of(Iterable<EntryStack<T>> stacks);
     }
     
     @Environment(EnvType.CLIENT)

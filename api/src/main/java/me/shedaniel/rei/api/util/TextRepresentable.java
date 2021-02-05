@@ -23,8 +23,6 @@
 
 package me.shedaniel.rei.api.util;
 
-import me.shedaniel.rei.utils.FormattingUtils;
-import me.shedaniel.rei.utils.ImmutableLiteralText;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
