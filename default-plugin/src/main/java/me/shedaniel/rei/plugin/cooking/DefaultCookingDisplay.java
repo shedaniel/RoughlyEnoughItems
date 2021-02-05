@@ -23,10 +23,11 @@
 
 package me.shedaniel.rei.plugin.cooking;
 
-import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.TransferRecipeDisplay;
-import me.shedaniel.rei.api.entry.EntryStacks;
-import me.shedaniel.rei.server.ContainerInfo;
+import me.shedaniel.rei.api.TransferDisplay;
+import me.shedaniel.rei.api.ingredient.EntryIngredient;
+import me.shedaniel.rei.api.ingredient.util.EntryIngredients;
+import me.shedaniel.rei.api.ingredient.util.EntryStacks;
+import me.shedaniel.rei.api.server.ContainerInfo;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
@@ -40,17 +41,17 @@ import java.util.List;
 import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
-public abstract class DefaultCookingDisplay implements TransferRecipeDisplay {
+public abstract class DefaultCookingDisplay implements TransferDisplay {
     private AbstractCookingRecipe recipe;
-    private List<? extends List<? extends EntryStack<?>>> input;
-    private List<EntryStack<?>> output;
+    private List<EntryIngredient> input;
+    private EntryIngredient output;
     private float xp;
     private double cookTime;
     
     public DefaultCookingDisplay(AbstractCookingRecipe recipe) {
         this.recipe = recipe;
-        this.input = EntryStacks.ofIngredients(recipe.getIngredients());
-        this.output = Collections.singletonList(EntryStacks.of(recipe.getResultItem()));
+        this.input = EntryIngredients.ofIngredients(recipe.getIngredients());
+        this.output = EntryIngredient.of(EntryStacks.of(recipe.getResultItem()));
         this.xp = recipe.getExperience();
         this.cookTime = recipe.getCookingTime();
     }
@@ -61,18 +62,13 @@ public abstract class DefaultCookingDisplay implements TransferRecipeDisplay {
     }
     
     @Override
-    public @NotNull List<? extends List<? extends EntryStack<?>>> getInputEntries() {
+    public @NotNull List<EntryIngredient> getInputEntries() {
         return input;
     }
     
     @Override
-    public @NotNull List<? extends List<? extends EntryStack<?>>> getResultingEntries() {
+    public @NotNull List<EntryIngredient> getResultingEntries() {
         return Collections.singletonList(output);
-    }
-    
-    @Override
-    public @NotNull List<? extends List<? extends EntryStack<?>>> getRequiredEntries() {
-        return input;
     }
     
     public float getXp() {
@@ -99,7 +95,7 @@ public abstract class DefaultCookingDisplay implements TransferRecipeDisplay {
     }
     
     @Override
-    public List<? extends List<? extends EntryStack<?>>> getOrganisedInputEntries(ContainerInfo<AbstractContainerMenu> containerInfo, AbstractContainerMenu container) {
+    public List<EntryIngredient> getOrganisedInputEntries(ContainerInfo<AbstractContainerMenu> containerInfo, AbstractContainerMenu container) {
         return input;
     }
 }

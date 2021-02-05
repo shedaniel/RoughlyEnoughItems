@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.api;
 
+import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.impl.Internals;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -42,7 +43,6 @@ public interface BuiltinPlugin {
     ResourceLocation STONE_CUTTING = new ResourceLocation("minecraft", "plugins/stone_cutting");
     ResourceLocation STRIPPING = new ResourceLocation("minecraft", "plugins/stripping");
     ResourceLocation BREWING = new ResourceLocation("minecraft", "plugins/brewing");
-    ResourceLocation PLUGIN = new ResourceLocation("roughlyenoughitems", "default_plugin");
     ResourceLocation COMPOSTING = new ResourceLocation("minecraft", "plugins/composting");
     ResourceLocation FUEL = new ResourceLocation("minecraft", "plugins/fuel");
     ResourceLocation SMITHING = new ResourceLocation("minecraft", "plugins/smithing");

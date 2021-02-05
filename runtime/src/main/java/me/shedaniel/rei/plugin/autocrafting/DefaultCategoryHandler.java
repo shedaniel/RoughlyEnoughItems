@@ -29,13 +29,13 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
 import me.shedaniel.rei.api.AutoTransferHandler;
 import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.TransferRecipeDisplay;
-import me.shedaniel.rei.api.entry.VanillaEntryTypes;
-import me.shedaniel.rei.server.ContainerContext;
-import me.shedaniel.rei.server.ContainerInfo;
-import me.shedaniel.rei.server.ContainerInfoHandler;
-import me.shedaniel.rei.server.RecipeFinder;
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.TransferDisplay;
+import me.shedaniel.rei.api.ingredient.entry.VanillaEntryTypes;
+import me.shedaniel.rei.api.server.ContainerContext;
+import me.shedaniel.rei.api.server.ContainerInfo;
+import me.shedaniel.rei.api.server.ContainerInfoHandler;
+import me.shedaniel.rei.api.server.RecipeFinder;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -57,9 +57,9 @@ public class DefaultCategoryHandler implements AutoTransferHandler {
     @NotNull
     @Override
     public Result handle(@NotNull Context context) {
-        if (!(context.getRecipe() instanceof TransferRecipeDisplay))
+        if (!(context.getRecipe() instanceof TransferDisplay))
             return Result.createNotApplicable();
-        TransferRecipeDisplay recipe = (TransferRecipeDisplay) context.getRecipe();
+        TransferDisplay recipe = (TransferDisplay) context.getRecipe();
         AbstractContainerScreen<?> containerScreen = context.getContainerScreen();
         if (containerScreen == null)
             return Result.createNotApplicable();

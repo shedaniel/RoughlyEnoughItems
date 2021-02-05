@@ -24,7 +24,7 @@
 package me.shedaniel.rei.impl.search;
 
 import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.ingredient.EntryStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Style;

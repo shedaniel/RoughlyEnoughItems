@@ -27,8 +27,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.entry.*;
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.ingredient.entry.*;
+import me.shedaniel.rei.api.util.Renderer;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.utils.ImmutableLiteralText;
 import net.minecraft.nbt.CompoundTag;
@@ -42,87 +43,96 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 @ApiStatus.Internal
-public enum EmptyEntryDefinition implements EntryDefinition<Unit> {
-    EMPTY(BuiltinEntryTypes.EMPTY, true),
-    RENDERING(BuiltinEntryTypes.RENDERING, false);
+public enum EmptyEntryDefinition implements EntryDefinition<Object> {
+    EMPTY(BuiltinEntryTypes.EMPTY, true, () -> Unit.INSTANCE, EmptyRenderer.INSTANCE),
+    RENDERING(BuiltinEntryTypes.RENDERING, false, EmptyEntryDefinition::throwRendering, DeferredRenderer.INSTANCE);
     
-    private final EntryType<Unit> type;
+    private static <T> T throwRendering() {
+        throw new IllegalStateException("Can not create rendering type from NBT tag!");
+    }
+    
+    private final EntryType<Object> type;
     private final boolean empty;
+    private final Supplier<Object> defaultValue;
+    private final EntryRenderer<Object> renderer;
     
-    EmptyEntryDefinition(EntryType<Unit> type, boolean empty) {
-        this.type = type;
+    <T> EmptyEntryDefinition(EntryType<T> type, boolean empty, Supplier<T> defaultValue, EntryRenderer<T> renderer) {
+        this.type = (EntryType<Object>) type;
         this.empty = empty;
+        this.defaultValue = (Supplier<Object>) defaultValue;
+        this.renderer = (EntryRenderer<Object>) renderer;
     }
     
     @Override
-    public @NotNull Class<Unit> getValueType() {
-        return Unit.class;
+    public @NotNull Class<Object> getValueType() {
+        return Object.class;
     }
     
     @Override
-    public @NotNull EntryType<Unit> getType() {
+    public @NotNull EntryType<Object> getType() {
         return type;
     }
     
     @Override
-    public @NotNull EntryRenderer<Unit> getRenderer() {
-        return EmptyRenderer.INSTANCE;
+    public @NotNull EntryRenderer<Object> getRenderer() {
+        return renderer;
     }
     
     @Override
-    public @NotNull Optional<ResourceLocation> getIdentifier(EntryStack<Unit> entry, Unit value) {
+    public @NotNull Optional<ResourceLocation> getIdentifier(EntryStack<Object> entry, Object value) {
         return Optional.empty();
     }
     
     @Override
-    public @NotNull Fraction getAmount(EntryStack<Unit> entry, Unit value) {
+    public @NotNull Fraction getAmount(EntryStack<Object> entry, Object value) {
         return Fraction.zero();
     }
     
     @Override
-    public void setAmount(EntryStack<Unit> entry, Unit value, Fraction amount) {
+    public void setAmount(EntryStack<Object> entry, Object value, Fraction amount) {
         
     }
     
     @Override
-    public boolean isEmpty(EntryStack<Unit> entry, Unit value) {
+    public boolean isEmpty(EntryStack<Object> entry, Object value) {
         return empty;
     }
     
     @Override
-    public @NotNull Unit copy(EntryStack<Unit> entry, Unit value) {
+    public @NotNull Object copy(EntryStack<Object> entry, Object value) {
         return value;
     }
     
     @Override
-    public int hash(EntryStack<Unit> entry, Unit value, ComparisonContext context) {
+    public int hash(EntryStack<Object> entry, Object value, ComparisonContext context) {
         return ordinal();
     }
     
     @Override
-    public boolean equals(Unit o1, Unit o2, ComparisonContext context) {
+    public boolean equals(Object o1, Object o2, ComparisonContext context) {
         return true;
     }
     
     @Override
-    public @NotNull CompoundTag toTag(EntryStack<Unit> entry, Unit value) {
+    public @NotNull CompoundTag toTag(EntryStack<Object> entry, Object value) {
         return new CompoundTag();
     }
     
     @Override
-    public @NotNull Unit fromTag(@NotNull CompoundTag tag) {
-        return Unit.INSTANCE;
+    public @NotNull Object fromTag(@NotNull CompoundTag tag) {
+        return defaultValue.get();
     }
     
     @Override
-    public @NotNull Component asFormattedText(EntryStack<Unit> entry, Unit value) {
+    public @NotNull Component asFormattedText(EntryStack<Object> entry, Object value) {
         return ImmutableLiteralText.EMPTY;
     }
     
     @Override
-    public @NotNull Collection<ResourceLocation> getTagsFor(EntryStack<Unit> entry, Unit value) {
+    public @NotNull Collection<ResourceLocation> getTagsFor(EntryStack<Object> entry, Object value) {
         return Collections.emptyList();
     }
     
@@ -137,6 +147,20 @@ public enum EmptyEntryDefinition implements EntryDefinition<Unit> {
         @Override
         public @Nullable Tooltip getTooltip(EntryStack<Unit> entry, Point mouse) {
             return null;
+        }
+    }
+    
+    private enum DeferredRenderer implements EntryRenderer<Renderer> {
+        INSTANCE;
+        
+        @Override
+        public void render(EntryStack<Renderer> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+            entry.getValue().render(matrices, bounds, mouseX, mouseY, delta);
+        }
+        
+        @Override
+        public @Nullable Tooltip getTooltip(EntryStack<Renderer> entry, Point mouse) {
+            return entry.getValue().getTooltip(mouse);
         }
     }
 }

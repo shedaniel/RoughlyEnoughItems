@@ -34,6 +34,8 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.registry.category.DisplayCategory;
 import me.shedaniel.rei.api.widgets.Button;
 import me.shedaniel.rei.api.widgets.Panel;
 import me.shedaniel.rei.api.widgets.Widgets;
@@ -76,9 +78,9 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
     private final List<Widget> widgets = Lists.newArrayList();
     private final Map<Rectangle, List<Widget>> recipeBounds = Maps.newHashMap();
     private final List<TabWidget> tabs = Lists.newArrayList();
-    private final Map<RecipeCategory<?>, List<RecipeDisplay>> categoriesMap;
-    private final List<RecipeCategory<?>> categories;
-    private final RecipeCategory<RecipeDisplay> selectedCategory;
+    private final Map<DisplayCategory<?>, List<Display>> categoriesMap;
+    private final List<DisplayCategory<?>> categories;
+    private final DisplayCategory<Display> selectedCategory;
     public int page;
     public int categoryPages = -1;
     public boolean choosePageActivated = false;
@@ -91,21 +93,21 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
     private EntryStack<?> ingredientStackToNotice = EntryStack.empty();
     private EntryStack<?> resultStackToNotice = EntryStack.empty();
     
-    public RecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> categoriesMap, @Nullable ResourceLocation category) {
+    public RecipeViewingScreen(Map<DisplayCategory<?>, List<Display>> categoriesMap, @Nullable ResourceLocation category) {
         super(NarratorChatListener.NO_TITLE);
         this.bounds = new Rectangle(0, 0, 176, 150);
         this.categoriesMap = categoriesMap;
         this.categories = Lists.newArrayList(categoriesMap.keySet());
-        RecipeCategory<?> selected = categories.get(0);
+        DisplayCategory<?> selected = categories.get(0);
         if (category != null) {
-            for (RecipeCategory<?> recipeCategory : categories) {
-                if (recipeCategory.getIdentifier().equals(category)) {
-                    selected = recipeCategory;
+            for (DisplayCategory<?> displayCategory : categories) {
+                if (displayCategory.getIdentifier().equals(category)) {
+                    selected = displayCategory;
                     break;
                 }
             }
         }
-        this.selectedCategory = (RecipeCategory<RecipeDisplay>) selected;
+        this.selectedCategory = (DisplayCategory<Display>) selected;
     }
     
     @ApiStatus.Internal
@@ -308,12 +310,12 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
                 tab.setRenderer(categories.get(j), categories.get(j).getLogo(), categories.get(j).getCategoryName(), tab.getId() + categoryPages * tabsPerPage == categories.indexOf(selectedCategory));
             }
         }
-        Optional<ButtonAreaSupplier> supplier = RecipeHelper.getInstance().getAutoCraftButtonArea(selectedCategory);
+        Optional<ButtonAreaSupplier> supplier = RecipeRegistry.getInstance().getAutoCraftButtonArea(selectedCategory);
         int recipeHeight = selectedCategory.getDisplayHeight();
-        List<RecipeDisplay> currentDisplayed = getCurrentDisplayed();
+        List<Display> currentDisplayed = getCurrentDisplayed();
         for (int i = 0; i < currentDisplayed.size(); i++) {
-            final RecipeDisplay display = currentDisplayed.get(i);
-            final Supplier<RecipeDisplay> displaySupplier = () -> display;
+            final Display display = currentDisplayed.get(i);
+            final Supplier<Display> displaySupplier = () -> display;
             int displayWidth = selectedCategory.getDisplayWidth(displaySupplier.get());
             final Rectangle displayBounds = new Rectangle(getBounds().getCenterX() - displayWidth / 2, getBounds().getCenterY() + 16 - recipeHeight * (getRecipesPerPage() + 1) / 2 - 2 * (getRecipesPerPage() + 1) + recipeHeight * i + 4 * i, displayWidth, recipeHeight);
             List<Widget> setupDisplay = selectedCategory.setupDisplay(display, displayBounds);
@@ -330,7 +332,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
             recipeChoosePageWidget = null;
         
         workingStationsBaseWidget = null;
-        List<List<? extends EntryStack<?>>> workingStations = RecipeHelper.getInstance().getWorkingStations(selectedCategory.getIdentifier());
+        List<List<? extends EntryStack<?>>> workingStations = RecipeRegistry.getInstance().getWorkingStations(selectedCategory.getIdentifier());
         if (!workingStations.isEmpty()) {
             int hh = Mth.floor((bounds.height - 16) / 18f);
             int actualHeight = Math.min(hh, workingStations.size());
@@ -362,8 +364,8 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
         return widgets;
     }
     
-    public List<RecipeDisplay> getCurrentDisplayed() {
-        List<RecipeDisplay> list = Lists.newArrayList();
+    public List<Display> getCurrentDisplayed() {
+        List<Display> list = Lists.newArrayList();
         int recipesPerPage = getRecipesPerPage();
         for (int i = 0; i <= recipesPerPage; i++)
             if (page * (recipesPerPage + 1) + i < categoriesMap.get(selectedCategory).size())
@@ -371,7 +373,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
         return list;
     }
     
-    public RecipeCategory<RecipeDisplay> getSelectedCategory() {
+    public DisplayCategory<Display> getSelectedCategory() {
         return selectedCategory;
     }
     
@@ -463,7 +465,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
         return super.keyReleased(keyCode, scanCode, modifiers);
     }
     
-    public int getTotalPages(RecipeCategory<RecipeDisplay> category) {
+    public int getTotalPages(DisplayCategory<Display> category) {
         return Mth.ceil(categoriesMap.get(category).size() / (double) (getRecipesPerPage() + 1));
     }
     

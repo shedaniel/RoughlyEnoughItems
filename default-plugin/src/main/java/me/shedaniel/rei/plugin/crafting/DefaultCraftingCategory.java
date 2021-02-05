@@ -28,17 +28,17 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.Renderer;
-import me.shedaniel.rei.api.TransferRecipeCategory;
-import me.shedaniel.rei.api.entry.EntryStacks;
+import me.shedaniel.rei.api.util.Renderer;
+import me.shedaniel.rei.api.TransferDisplayCategory;
+import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.widgets.Slot;
 import me.shedaniel.rei.api.widgets.Widgets;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
-import me.shedaniel.rei.server.ContainerInfo;
-import me.shedaniel.rei.server.ContainerInfoHandler;
+import me.shedaniel.rei.api.server.ContainerInfo;
+import me.shedaniel.rei.api.server.ContainerInfoHandler;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
@@ -49,7 +49,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class DefaultCraftingCategory implements TransferRecipeCategory<DefaultCraftingDisplay> {
+public class DefaultCraftingCategory implements TransferDisplayCategory<DefaultCraftingDisplay> {
     public static int getSlotWithSize(DefaultCraftingDisplay recipeDisplay, int num, int craftingGridWidth) {
         int x = num % recipeDisplay.getWidth();
         int y = (num - x) / recipeDisplay.getWidth();

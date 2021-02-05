@@ -23,8 +23,7 @@
 
 package me.shedaniel.rei;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -34,13 +33,17 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.api.Executor;
 import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.api.entry.*;
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.ingredient.entry.*;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
+import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.plugins.REIPluginV0;
 import me.shedaniel.rei.api.subsets.SubsetsRegistry;
+import me.shedaniel.rei.api.util.DrawableConsumer;
+import me.shedaniel.rei.api.util.Renderer;
 import me.shedaniel.rei.api.widgets.*;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.widget.EntryWidget;
@@ -105,7 +108,7 @@ import static me.shedaniel.rei.impl.Internals.attachInstance;
 @Environment(EnvType.CLIENT)
 public class RoughlyEnoughItemsCore implements ClientModInitializer {
     @ApiStatus.Internal public static final Logger LOGGER = LogManager.getFormatterLogger("REI");
-    private static final BiMap<ResourceLocation, REIPluginEntry> PLUGINS = HashBiMap.create();
+    private static final List<REIPlugin> PLUGINS = new ArrayList<>();
     private static final ExecutorService SYNC_RECIPES = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "REI-SyncRecipes"));
     @ApiStatus.Experimental
     public static boolean isLeftModePressed = false;
@@ -121,9 +124,9 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             }
             return typeCache.computeIfAbsent(id, EntryTypeDeferred::new);
         }, "entryTypeDeferred");
-        attachInstance(new RecipeHelperImpl(), RecipeHelper.class);
+        attachInstance(new RecipeRegistryImpl(), RecipeRegistry.class);
         attachInstance(new EntryRegistryImpl(), EntryRegistry.class);
-        attachInstance(new DisplayHelperImpl(), DisplayHelper.class);
+        attachInstance(new DisplayBoundsRegistryImpl(), DisplayBoundsRegistry.class);
         attachInstance(new FluidSupportProviderImpl(), FluidSupportProvider.class);
         attachInstance(new SubsetsRegistryImpl(), SubsetsRegistry.class);
         attachInstance(new Internals.EntryStackProvider() {
@@ -145,24 +148,26 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                         return id;
                     }
     
+                    @SuppressWarnings("rawtypes")
                     @Override
                     public @NotNull EntryDefinition<Unit> getDefinition() {
-                        return EmptyEntryDefinition.EMPTY;
+                        return (EntryDefinition) EmptyEntryDefinition.EMPTY;
                     }
                 };
             }
             
             @Override
-            public EntryType<Unit> renderingType(ResourceLocation id) {
-                return new EntryType<Unit>() {
+            public EntryType<Renderer> renderingType(ResourceLocation id) {
+                return new EntryType<Renderer>() {
                     @Override
                     public @NotNull ResourceLocation getId() {
                         return id;
                     }
-        
+    
+                    @SuppressWarnings("rawtypes")
                     @Override
-                    public @NotNull EntryDefinition<Unit> getDefinition() {
-                        return EmptyEntryDefinition.RENDERING;
+                    public @NotNull EntryDefinition<Renderer> getDefinition() {
+                        return (EntryDefinition) EmptyEntryDefinition.RENDERING;
                     }
                 };
             }
@@ -335,18 +340,14 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
      * @return the plugin itself
      */
     @ApiStatus.Internal
-    public static REIPluginEntry registerPlugin(REIPluginEntry plugin) {
-        PLUGINS.put(plugin.getPluginIdentifier(), plugin);
-        RoughlyEnoughItemsCore.LOGGER.debug("Registered plugin %s from %s", plugin.getPluginIdentifier().toString(), plugin.getClass().getSimpleName());
+    public static <T extends REIPlugin> T registerPlugin(T plugin) {
+        PLUGINS.add(plugin);
+        RoughlyEnoughItemsCore.LOGGER.debug("Registered plugin %s", plugin.getPluginName());
         return plugin;
     }
     
-    public static List<REIPluginEntry> getPlugins() {
-        return new ArrayList<>(PLUGINS.values());
-    }
-    
-    public static Optional<ResourceLocation> getPluginIdentifier(REIPluginEntry plugin) {
-        return Optional.ofNullable(PLUGINS.inverse().get(plugin));
+    public static List<REIPlugin> getPlugins() {
+        return Collections.unmodifiableList(PLUGINS);
     }
     
     public static boolean hasPermissionToUsePackets() {
@@ -381,9 +382,9 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         }
         RecipeManager recipeManager = Minecraft.getInstance().getConnection().getRecipeManager();
         if (ConfigObject.getInstance().doesRegisterRecipesInAnotherThread()) {
-            CompletableFuture.runAsync(() -> ((RecipeHelperImpl) RecipeHelper.getInstance()).tryRecipesLoaded(recipeManager), SYNC_RECIPES);
+            CompletableFuture.runAsync(() -> ((RecipeRegistryImpl) RecipeRegistry.getInstance()).tryRecipesLoaded(recipeManager), SYNC_RECIPES);
         } else {
-            ((RecipeHelperImpl) RecipeHelper.getInstance()).tryRecipesLoaded(recipeManager);
+            ((RecipeRegistryImpl) RecipeRegistry.getInstance()).tryRecipesLoaded(recipeManager);
         }
     }
     
@@ -451,7 +452,10 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     }
     
     private void discoverPluginEntries() {
-        for (REIPluginEntry reiPlugin : FabricLoader.getInstance().getEntrypoints("rei_plugins", REIPluginEntry.class)) {
+        for (REIPlugin reiPlugin : Iterables.concat(
+                FabricLoader.getInstance().getEntrypoints("rei_plugins", REIPlugin.class),
+                FabricLoader.getInstance().getEntrypoints("rei", REIPlugin.class)
+        )) {
             try {
                 if (!REIPluginV0.class.isAssignableFrom(reiPlugin.getClass()))
                     throw new IllegalArgumentException("REI plugin is too old!");
@@ -480,7 +484,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         }
         if (FabricLoader.getInstance().isModLoaded("libblockattributes-fluids")) {
             try {
-                registerPlugin((REIPluginEntry) Class.forName("me.shedaniel.rei.compat.LBASupportPlugin").getConstructor().newInstance());
+                registerPlugin((REIPlugin) Class.forName("me.shedaniel.rei.compat.LBASupportPlugin").getConstructor().newInstance());
             } catch (Throwable throwable) {
                 throwable.printStackTrace();
             }
@@ -495,7 +499,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     
     private boolean shouldReturn(Class<?> screen) {
         try {
-            for (OverlayDecider decider : DisplayHelper.getInstance().getAllOverlayDeciders()) {
+            for (OverlayDecider decider : DisplayBoundsRegistry.getInstance().getAllOverlayDeciders()) {
                 if (!decider.isHandingScreen(screen))
                     continue;
                 InteractionResult result = decider.shouldScreenBeOverlaid(screen);

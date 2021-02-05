@@ -31,13 +31,12 @@ import me.shedaniel.clothconfig2.api.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.RecipeCategory;
-import me.shedaniel.rei.api.Renderer;
-import me.shedaniel.rei.api.entry.EntryStacks;
+import me.shedaniel.rei.api.registry.category.DisplayCategory;
+import me.shedaniel.rei.api.util.Renderer;
+import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.widgets.Slot;
-import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
-import me.shedaniel.rei.gui.entries.RecipeRenderer;
+import me.shedaniel.rei.gui.entries.DisplayRenderer;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import me.shedaniel.rei.plugin.DefaultPlugin;
@@ -49,12 +48,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
 
-public class DefaultBeaconBaseCategory implements RecipeCategory<DefaultBeaconBaseDisplay> {
+public class DefaultBeaconBaseCategory implements DisplayCategory<DefaultBeaconBaseDisplay> {
     @Override
     public @NotNull ResourceLocation getIdentifier() {
         return DefaultPlugin.BEACON;
@@ -73,9 +71,9 @@ public class DefaultBeaconBaseCategory implements RecipeCategory<DefaultBeaconBa
     }
     
     @Override
-    public @NotNull RecipeRenderer getSimpleRenderer(DefaultBeaconBaseDisplay recipe) {
+    public @NotNull DisplayRenderer getDisplayRenderer(DefaultBeaconBaseDisplay display) {
         String name = getCategoryName();
-        return new RecipeRenderer() {
+        return new DisplayRenderer() {
             @Override
             public int getHeight() {
                 return 10 + Minecraft.getInstance().font.lineHeight;

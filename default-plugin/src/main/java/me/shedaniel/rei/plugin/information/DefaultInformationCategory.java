@@ -33,11 +33,11 @@ import me.shedaniel.clothconfig2.api.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.RecipeCategory;
-import me.shedaniel.rei.api.Renderer;
-import me.shedaniel.rei.api.entry.AbstractRenderer;
+import me.shedaniel.rei.api.registry.category.DisplayCategory;
+import me.shedaniel.rei.api.util.Renderer;
+import me.shedaniel.rei.api.ingredient.entry.AbstractRenderer;
 import me.shedaniel.rei.api.widgets.Widgets;
-import me.shedaniel.rei.gui.entries.RecipeRenderer;
+import me.shedaniel.rei.gui.entries.DisplayRenderer;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.gui.widget.WidgetWithBounds;
 import me.shedaniel.rei.plugin.DefaultPlugin;
@@ -57,7 +57,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Environment(EnvType.CLIENT)
-public class DefaultInformationCategory implements RecipeCategory<DefaultInformationDisplay> {
+public class DefaultInformationCategory implements DisplayCategory<DefaultInformationDisplay> {
     protected static void innerBlit(Matrix4f matrix4f, int xStart, int xEnd, int yStart, int yEnd, int z, float uStart, float uEnd, float vStart, float vEnd) {
         BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
@@ -81,9 +81,9 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
     }
     
     @Override
-    public @NotNull RecipeRenderer getSimpleRenderer(DefaultInformationDisplay recipe) {
-        FormattedCharSequence name = recipe.getName().getVisualOrderText();
-        return new RecipeRenderer() {
+    public @NotNull DisplayRenderer getDisplayRenderer(DefaultInformationDisplay display) {
+        FormattedCharSequence name = display.getName().getVisualOrderText();
+        return new DisplayRenderer() {
             @Override
             public int getHeight() {
                 return 10 + Minecraft.getInstance().font.lineHeight;
@@ -114,13 +114,13 @@ public class DefaultInformationCategory implements RecipeCategory<DefaultInforma
     
     @Override
     @NotNull
-    public List<Widget> setupDisplay(DefaultInformationDisplay recipeDisplay, Rectangle bounds) {
+    public List<Widget> setupDisplay(DefaultInformationDisplay display, Rectangle bounds) {
         List<Widget> widgets = Lists.newArrayList();
-        widgets.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.y + 3), recipeDisplay.getName()).noShadow().color(0xFF404040, 0xFFBBBBBB));
-        widgets.add(Widgets.createSlot(new Point(bounds.getCenterX() - 8, bounds.y + 15)).entries(recipeDisplay.getEntryStacks()));
+        widgets.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.y + 3), display.getName()).noShadow().color(0xFF404040, 0xFFBBBBBB));
+        widgets.add(Widgets.createSlot(new Point(bounds.getCenterX() - 8, bounds.y + 15)).entries(display.getEntryStacks()));
         Rectangle rectangle = new Rectangle(bounds.getCenterX() - (bounds.width / 2), bounds.y + 35, bounds.width, bounds.height - 40);
         widgets.add(Widgets.createSlotBase(rectangle));
-        widgets.add(new ScrollableTextWidget(rectangle, recipeDisplay.getTexts()));
+        widgets.add(new ScrollableTextWidget(rectangle, display.getTexts()));
         return widgets;
     }
     

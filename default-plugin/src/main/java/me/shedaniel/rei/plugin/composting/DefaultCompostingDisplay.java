@@ -24,9 +24,9 @@
 package me.shedaniel.rei.plugin.composting;
 
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
-import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.RecipeDisplay;
-import me.shedaniel.rei.api.entry.EntryStacks;
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.Display;
+import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -40,7 +40,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
-public class DefaultCompostingDisplay implements RecipeDisplay {
+public class DefaultCompostingDisplay implements Display {
     private List<List<EntryStack<?>>> inputs;
     private Object2FloatMap<ItemLike> inputMap;
     private List<List<EntryStack<?>>> output;

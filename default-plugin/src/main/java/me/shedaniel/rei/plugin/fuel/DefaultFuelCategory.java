@@ -27,13 +27,13 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.RecipeCategory;
-import me.shedaniel.rei.api.Renderer;
-import me.shedaniel.rei.api.entry.EntryStacks;
+import me.shedaniel.rei.api.registry.category.DisplayCategory;
+import me.shedaniel.rei.api.util.Renderer;
+import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.widgets.Slot;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
-import me.shedaniel.rei.gui.entries.RecipeRenderer;
+import me.shedaniel.rei.gui.entries.DisplayRenderer;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
@@ -50,7 +50,7 @@ import java.text.DecimalFormat;
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
-public class DefaultFuelCategory implements RecipeCategory<DefaultFuelDisplay> {
+public class DefaultFuelCategory implements DisplayCategory<DefaultFuelDisplay> {
     
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.##");
     
@@ -75,23 +75,23 @@ public class DefaultFuelCategory implements RecipeCategory<DefaultFuelDisplay> {
     }
     
     @Override
-    public @NotNull List<Widget> setupDisplay(DefaultFuelDisplay recipeDisplay, Rectangle bounds) {
+    public @NotNull List<Widget> setupDisplay(DefaultFuelDisplay display, Rectangle bounds) {
         Point startPoint = new Point(bounds.getCenterX() - 41, bounds.getCenterY() - 17);
-        String burnItems = DECIMAL_FORMAT.format(recipeDisplay.getFuelTime() / 200d);
+        String burnItems = DECIMAL_FORMAT.format(display.getFuelTime() / 200d);
         List<Widget> widgets = Lists.newArrayList();
         widgets.add(Widgets.createRecipeBase(bounds));
         widgets.add(Widgets.createLabel(new Point(bounds.x + 26, bounds.getMaxY() - 15), new TranslatableComponent("category.rei.fuel.time.items", burnItems))
                 .color(0xFF404040, 0xFFBBBBBB).noShadow().leftAligned());
-        widgets.add(Widgets.createBurningFire(new Point(bounds.x + 6, startPoint.y + 1)).animationDurationTicks(recipeDisplay.getFuelTime()));
-        widgets.add(Widgets.createSlot(new Point(bounds.x + 6, startPoint.y + 18)).entries(recipeDisplay.getInputEntries().get(0)).markInput());
+        widgets.add(Widgets.createBurningFire(new Point(bounds.x + 6, startPoint.y + 1)).animationDurationTicks(display.getFuelTime()));
+        widgets.add(Widgets.createSlot(new Point(bounds.x + 6, startPoint.y + 18)).entries(display.getInputEntries().get(0)).markInput());
         return widgets;
     }
     
     @Override
-    public @NotNull RecipeRenderer getSimpleRenderer(DefaultFuelDisplay recipe) {
-        Slot slot = Widgets.createSlot(new Point(0, 0)).entries(recipe.getInputEntries().get(0)).disableBackground().disableHighlight();
-        String burnItems = DECIMAL_FORMAT.format(recipe.getFuelTime() / 200d);
-        return new RecipeRenderer() {
+    public @NotNull DisplayRenderer getDisplayRenderer(DefaultFuelDisplay display) {
+        Slot slot = Widgets.createSlot(new Point(0, 0)).entries(display.getInputEntries().get(0)).disableBackground().disableHighlight();
+        String burnItems = DECIMAL_FORMAT.format(display.getFuelTime() / 200d);
+        return new DisplayRenderer() {
             private TranslatableComponent text = new TranslatableComponent("category.rei.fuel.time_short.items", burnItems);
             
             @Override

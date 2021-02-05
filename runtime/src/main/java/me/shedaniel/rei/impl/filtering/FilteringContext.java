@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.impl.filtering;
 
-import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.ingredient.EntryStack;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collection;

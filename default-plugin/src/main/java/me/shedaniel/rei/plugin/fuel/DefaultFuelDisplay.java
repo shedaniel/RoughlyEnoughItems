@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.plugin.fuel;
 
-import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.RecipeDisplay;
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.Display;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -34,7 +34,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
-public class DefaultFuelDisplay implements RecipeDisplay {
+public class DefaultFuelDisplay implements Display {
     private EntryStack<?> fuel;
     private int fuelTime;
     

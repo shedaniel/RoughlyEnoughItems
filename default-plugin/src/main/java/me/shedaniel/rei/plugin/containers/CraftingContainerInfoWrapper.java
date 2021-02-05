@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.plugin.containers;
 
-import me.shedaniel.rei.server.ContainerInfo;
-import me.shedaniel.rei.server.RecipeFinder;
+import me.shedaniel.rei.api.server.ContainerInfo;
+import me.shedaniel.rei.api.server.RecipeFinder;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.ItemStack;

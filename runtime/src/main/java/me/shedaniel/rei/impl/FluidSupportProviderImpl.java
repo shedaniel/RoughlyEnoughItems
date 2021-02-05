@@ -25,7 +25,7 @@ package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.architectury.fluid.FluidStack;
-import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;

@@ -26,7 +26,7 @@ package me.shedaniel.rei;
 import com.google.common.collect.Lists;
 import io.netty.buffer.Unpooled;
 import me.shedaniel.math.api.Executor;
-import me.shedaniel.rei.server.InputSlotCrafter;
+import me.shedaniel.rei.api.server.InputSlotCrafter;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;

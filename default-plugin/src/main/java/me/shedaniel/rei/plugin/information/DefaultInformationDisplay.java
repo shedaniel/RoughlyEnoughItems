@@ -24,8 +24,8 @@
 package me.shedaniel.rei.plugin.information;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.api.RecipeDisplay;
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.Display;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -39,7 +39,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
-public class DefaultInformationDisplay implements RecipeDisplay {
+public class DefaultInformationDisplay implements Display {
     private List<? extends EntryStack<?>> entryStacks;
     private List<Component> texts;
     private Component name;

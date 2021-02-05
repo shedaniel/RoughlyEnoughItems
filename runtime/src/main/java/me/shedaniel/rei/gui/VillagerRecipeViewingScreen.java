@@ -33,10 +33,12 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.registry.category.DisplayCategory;
 import me.shedaniel.rei.api.widgets.Button;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.api.widgets.Widgets;
-import me.shedaniel.rei.gui.entries.RecipeRenderer;
+import me.shedaniel.rei.gui.entries.DisplayRenderer;
 import me.shedaniel.rei.gui.widget.TabWidget;
 import me.shedaniel.rei.gui.widget.Widget;
 import me.shedaniel.rei.impl.ClientHelperImpl;
@@ -62,11 +64,11 @@ import java.util.Optional;
 
 @ApiStatus.Internal
 public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen {
-    private final Map<RecipeCategory<?>, List<RecipeDisplay>> categoryMap;
-    private final List<RecipeCategory<?>> categories;
+    private final Map<DisplayCategory<?>, List<Display>> categoryMap;
+    private final List<DisplayCategory<?>> categories;
     private final List<Widget> widgets = Lists.newArrayList();
     private final List<Button> buttonList = Lists.newArrayList();
-    private final List<RecipeRenderer> recipeRenderers = Lists.newArrayList();
+    private final List<DisplayRenderer> displayRenderers = Lists.newArrayList();
     private final List<TabWidget> tabs = Lists.newArrayList();
     public Rectangle bounds, scrollListBounds;
     private int tabsPerPage = 8;
@@ -94,7 +96,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
     private EntryStack<?> ingredientStackToNotice = EntryStack.empty();
     private EntryStack<?> resultStackToNotice = EntryStack.empty();
     
-    public VillagerRecipeViewingScreen(Map<RecipeCategory<?>, List<RecipeDisplay>> categoryMap, @Nullable ResourceLocation category) {
+    public VillagerRecipeViewingScreen(Map<DisplayCategory<?>, List<Display>> categoryMap, @Nullable ResourceLocation category) {
         super(NarratorChatListener.NO_TITLE);
         this.categoryMap = categoryMap;
         this.categories = Lists.newArrayList(categoryMap.keySet());
@@ -142,12 +144,12 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
         this.children.clear();
         this.widgets.clear();
         this.buttonList.clear();
-        this.recipeRenderers.clear();
+        this.displayRenderers.clear();
         this.tabs.clear();
         int largestWidth = width - 100;
         int largestHeight = height - 40;
-        RecipeCategory<RecipeDisplay> category = (RecipeCategory<RecipeDisplay>) categories.get(selectedCategoryIndex);
-        RecipeDisplay display = categoryMap.get(category).get(selectedRecipeIndex);
+        DisplayCategory<Display> category = (DisplayCategory<Display>) categories.get(selectedCategoryIndex);
+        Display display = categoryMap.get(category).get(selectedRecipeIndex);
         int guiWidth = Mth.clamp(category.getDisplayWidth(display) + 30, 0, largestWidth) + 100;
         int guiHeight = Mth.clamp(category.getDisplayHeight() + 40, 166, largestHeight);
         this.tabsPerPage = Math.max(5, Mth.floor((guiWidth - 20d) / tabSize));
@@ -156,7 +158,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
         }
         this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - guiHeight / 2, guiWidth, guiHeight);
         
-        List<List<? extends EntryStack<?>>> workingStations = RecipeHelper.getInstance().getWorkingStations(category.getIdentifier());
+        List<List<? extends EntryStack<?>>> workingStations = RecipeRegistry.getInstance().getWorkingStations(category.getIdentifier());
         if (!workingStations.isEmpty()) {
             int ww = Mth.floor((bounds.width - 16) / 18f);
             int w = Math.min(ww, workingStations.size());
@@ -187,16 +189,16 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
         RecipeViewingScreen.transformIngredientNotice(setupDisplay, ingredientStackToNotice);
         RecipeViewingScreen.transformResultNotice(setupDisplay, resultStackToNotice);
         this.widgets.addAll(setupDisplay);
-        Optional<ButtonAreaSupplier> supplier = RecipeHelper.getInstance().getAutoCraftButtonArea(category);
+        Optional<ButtonAreaSupplier> supplier = RecipeRegistry.getInstance().getAutoCraftButtonArea(category);
         if (supplier.isPresent() && supplier.get().get(recipeBounds) != null)
             this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(recipeBounds, supplier.get().get(recipeBounds), new TextComponent(supplier.get().getButtonText()), () -> display, setupDisplay, category));
         
         int index = 0;
-        for (RecipeDisplay recipeDisplay : categoryMap.get(category)) {
+        for (Display recipeDisplay : categoryMap.get(category)) {
             int finalIndex = index;
-            RecipeRenderer recipeRenderer;
-            recipeRenderers.add(recipeRenderer = category.getSimpleRenderer(recipeDisplay));
-            buttonList.add(Widgets.createButton(new Rectangle(bounds.x + 5, 0, recipeRenderer.getWidth(), recipeRenderer.getHeight()), NarratorChatListener.NO_TITLE)
+            DisplayRenderer displayRenderer;
+            displayRenderers.add(displayRenderer = category.getDisplayRenderer(recipeDisplay));
+            buttonList.add(Widgets.createButton(new Rectangle(bounds.x + 5, 0, displayRenderer.getWidth(), displayRenderer.getHeight()), NarratorChatListener.NO_TITLE)
                     .onClick(button -> {
                         selectedRecipeIndex = finalIndex;
                         VillagerRecipeViewingScreen.this.init();
@@ -211,7 +213,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
         for (int i = 0; i < tabsPerPage; i++) {
             int j = i + tabsPage * tabsPerPage;
             if (categories.size() > j) {
-                RecipeCategory<?> tabCategory = categories.get(j);
+                DisplayCategory<?> tabCategory = categories.get(j);
                 TabWidget tab;
                 tabs.add(tab = TabWidget.create(i, tabSize, bounds.x + bounds.width / 2 - Math.min(categories.size() - tabsPage * tabsPerPage, tabsPerPage) * tabSize / 2, bounds.y, 0, tabV, widget -> {
                     Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
@@ -374,9 +376,9 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
         }
         for (int i = 0; i < buttonList.size(); i++) {
             if (buttonList.get(i).getBounds().getMaxY() > scrollListBounds.getMinY() && buttonList.get(i).getBounds().getMinY() < scrollListBounds.getMaxY()) {
-                recipeRenderers.get(i).setZ(1);
-                recipeRenderers.get(i).render(matrices, buttonList.get(i).getBounds(), mouseX, mouseY, delta);
-                Optional.ofNullable(recipeRenderers.get(i).getTooltip(new Point(mouseX, mouseY))).ifPresent(Tooltip::queue);
+                displayRenderers.get(i).setZ(1);
+                displayRenderers.get(i).render(matrices, buttonList.get(i).getBounds(), mouseX, mouseY, delta);
+                Optional.ofNullable(displayRenderers.get(i).getTooltip(new Point(mouseX, mouseY))).ifPresent(Tooltip::queue);
             }
         }
         scrolling.renderScrollBar(0, scrollBarAlpha, REIHelper.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);

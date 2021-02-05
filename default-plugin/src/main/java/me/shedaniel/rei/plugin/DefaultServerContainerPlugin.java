@@ -24,7 +24,7 @@
 package me.shedaniel.rei.plugin;
 
 import me.shedaniel.rei.plugin.containers.CraftingContainerInfoWrapper;
-import me.shedaniel.rei.server.ContainerInfoHandler;
+import me.shedaniel.rei.api.server.ContainerInfoHandler;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.*;
 

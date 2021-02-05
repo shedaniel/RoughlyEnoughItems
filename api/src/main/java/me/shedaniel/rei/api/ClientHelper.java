@@ -23,6 +23,8 @@
 
 package me.shedaniel.rei.api;
 
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.registry.category.DisplayCategory;
 import me.shedaniel.rei.impl.Internals;
 import me.shedaniel.rei.utils.CollectionUtils;
 import me.shedaniel.rei.utils.FormattingUtils;
@@ -180,7 +182,7 @@ public interface ClientHelper {
         ViewSearchBuilder addCategories(Collection<ResourceLocation> categories);
         
         default ViewSearchBuilder addAllCategories() {
-            return addCategories(CollectionUtils.map(RecipeHelper.getInstance().getAllCategories(), RecipeCategory::getIdentifier));
+            return addCategories(CollectionUtils.map(RecipeRegistry.getInstance().getAllCategories(), DisplayCategory::getIdentifier));
         }
         
         @NotNull Set<ResourceLocation> getCategories();
@@ -211,6 +213,6 @@ public interface ClientHelper {
         EntryStack<?> getOutputNotice();
         
         @NotNull
-        Map<RecipeCategory<?>, List<RecipeDisplay>> buildMap();
+        Map<DisplayCategory<?>, List<Display>> buildMap();
     }
 }

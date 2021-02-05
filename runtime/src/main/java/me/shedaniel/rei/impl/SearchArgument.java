@@ -26,7 +26,7 @@ package me.shedaniel.rei.impl;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import me.shedaniel.math.Point;
-import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.impl.search.AlwaysMatchingArgument;
 import me.shedaniel.rei.impl.search.Argument;

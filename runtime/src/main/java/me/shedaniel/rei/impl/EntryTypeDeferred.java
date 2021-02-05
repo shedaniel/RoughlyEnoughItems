@@ -23,15 +23,14 @@
 
 package me.shedaniel.rei.impl;
 
-import me.shedaniel.rei.api.entry.EntryDefinition;
-import me.shedaniel.rei.api.entry.EntryType;
-import me.shedaniel.rei.api.entry.EntryTypeRegistry;
+import me.shedaniel.rei.api.ingredient.entry.EntryDefinition;
+import me.shedaniel.rei.api.ingredient.entry.EntryType;
+import me.shedaniel.rei.api.ingredient.entry.EntryTypeRegistry;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.WeakReference;
-import java.util.concurrent.atomic.AtomicReference;
 
 @ApiStatus.Internal
 public class EntryTypeDeferred<T> implements EntryType<T> {
