@@ -29,7 +29,10 @@ import java.text.SimpleDateFormat
 import java.util.function.Consumer
 
 archivesBaseName = "RoughlyEnoughItems"
-version = project.mod_version
+
+def runNumber = (System.getenv("GITHUB_RUN_NUMBER") == null ? "9999" : System.getenv("GITHUB_RUN_NUMBER"))
+version = rootProject.base_version + "." + runNumber
+
 group = "me.shedaniel"
 
 allprojects {
@@ -173,12 +176,12 @@ subprojects {
         }
 
         repositories {
-            if (project.hasProperty('danielshe_pass')) {
+            if (System.getenv("MAVEN_PASS") != null) {
                 maven {
-                    url = "http://deploy.modmuss50.me/"
+                    url = "https://deploy.shedaniel.me/"
                     credentials {
-                        username = "danielshe"
-                        password = project.getProperty('danielshe_pass')
+                        username = "shedaniel"
+                        password = System.getenv("MAVEN_PASS")
                     }
                 }
             }
