@@ -2,6 +2,10 @@ name: CF CI
 
 on:
   push:
+    paths:
+      - '**.gradle'
+      - '**.properties'
+      - '**/src/**'
     branches:
       - 3.x
       - 4.x-unstable
@@ -23,8 +27,9 @@ jobs:
         env:
           danielshe_curse_api_key: ${{ secrets.CF_API_KEY }}
           BRANCH_NAME: ${{ github.ref }}
-      - name: Upload to CurseForge
-        run: ./gradlew build releaseOnCf --stacktrace
+      - name: Upload to CurseForge and Maven
+        run: ./gradlew build publish releaseOnCf --stacktrace
         env:
           danielshe_curse_api_key: ${{ secrets.CF_API_KEY }}
           BRANCH_NAME: ${{ github.ref }}
+          MAVEN_PASS: ${{ secrets.MAVEN_PASS }}
