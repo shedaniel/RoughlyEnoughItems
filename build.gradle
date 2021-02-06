@@ -333,12 +333,12 @@ publishing {
     }
 
     repositories {
-        if (project.hasProperty('danielshe_pass')) {
+        if (System.getenv("MAVEN_PASS") != null) {
             maven {
-                url = "http://deploy.modmuss50.me/"
+                url = "https://deploy.shedaniel.me/"
                 credentials {
-                    username = "danielshe"
-                    password = project.getProperty('danielshe_pass')
+                    username = "shedaniel"
+                    password = System.getenv("MAVEN_PASS")
                 }
             }
         }
