@@ -1,32 +1,15 @@
 plugins {
-    id("fabric-loom") version("0.5-SNAPSHOT") apply false
+    id("forgified-fabric-loom") version("0.6.66") apply false
     id("maven-publish")
     id("java")
     id("java-library")
     id("net.minecrell.licenser") version("0.4.1")
     id("com.matthewprenger.cursegradle") version("1.4.0")
-    id("net.corda.plugins.jar-filter") version("5.0.8") apply false
 }
 
-import net.fabricmc.loom.LoomGradleExtension
 import net.fabricmc.loom.task.RemapJarTask
-import net.fabricmc.loom.util.DownloadUtil
-import net.fabricmc.loom.util.MinecraftVersionInfo
-import net.fabricmc.lorenztiny.TinyMappingsReader
-import net.fabricmc.mapping.tree.TinyMappingFactory
-import org.cadixdev.lorenz.MappingSet
-import org.cadixdev.lorenz.io.TextMappingsWriter
-import org.cadixdev.lorenz.io.proguard.ProGuardReader
-import org.cadixdev.lorenz.model.*
-import org.zeroturnaround.zip.ByteSource
-import org.zeroturnaround.zip.ZipEntrySource
-import org.zeroturnaround.zip.ZipUtil
 
-import java.nio.charset.StandardCharsets
-import java.nio.file.Files
-import java.nio.file.Path
 import java.text.SimpleDateFormat
-import java.util.function.Consumer
 
 archivesBaseName = "RoughlyEnoughItems"
 
@@ -43,43 +26,40 @@ static def buildTime() {
 
 allprojects {
     apply plugin: 'maven-publish'
-    apply plugin: 'fabric-loom'
+    apply plugin: 'forgified-fabric-loom'
     apply plugin: 'net.minecrell.licenser'
-    apply plugin: 'net.corda.plugins.jar-filter'
 
     sourceCompatibility = targetCompatibility = 1.8
 
     loom {
-        shareCaches = true
+        silentMojangMappingsLicense()
+//        shareCaches = true
     }
 
     repositories {
-        maven { url "https://dl.bintray.com/shedaniel/shedaniel-mods" }
-        maven { url "https://dl.bintray.com/shedaniel/cloth" }
-        mavenLocal()
+        maven { url "https://maven.shedaniel.me" }
+        maven { url "https://maven.terraformersmc.com/releases" }
     }
 
-    afterEvaluate {
-        processResources {
-            filesMatching('fabric.mod.json') {
-                expand 'version': project.version
-            }
-            inputs.property "version", project.version
+    processResources {
+        filesMatching('fabric.mod.json') {
+            expand 'version': project.version
         }
+        inputs.property "version", project.version
+    }
 
-        license {
-            header rootProject.file('HEADER')
-            include '**/*.java'
-        }
+    license {
+        header rootProject.file('HEADER')
+        include '**/*.java'
+    }
 
-        jar {
-            from rootProject.file("LICENSE")
-        }
+    jar {
+        from rootProject.file("LICENSE")
     }
 
     dependencies {
         minecraft("com.mojang:minecraft:${project.minecraft_version}")
-        mappings(new MojangMappingsDependency(project, loom))
+        mappings(loom.officialMojangMappings())
         modApi("net.fabricmc:fabric-loader:${project.fabricloader_version}")
         modApi(fabricApi.module("fabric-api-base", project.fabric_api))
         modApi(fabricApi.module("fabric-resource-loader-v0", project.fabric_api))
@@ -89,17 +69,14 @@ allprojects {
         modApi("me.shedaniel.cloth.api:cloth-client-events-v0:${cloth_client_events_v0_version}") {
             transitive(false)
         }
-        modApi("me.shedaniel.cloth:config-2:${cloth_config_version}") {
-            exclude(module: "fabric-api")
-        }
-        modApi("me.sargunvohra.mcmods:autoconfig1u:${project.autoconfig1u}") {
+        modApi("me.shedaniel.cloth:cloth-config:${cloth_config_version}:fabric") {
             exclude(module: "fabric-api")
         }
         modApi("org.jetbrains:annotations:19.0.0")
-        modCompileOnly("io.github.prospector:modmenu:${modmenu_version}") {
+        modCompileOnly("com.terraformersmc:modmenu:${modmenu_version}") {
             transitive(false)
         }
-        modRuntime("io.github.prospector:modmenu:${modmenu_version}") {
+        modRuntime("com.terraformersmc:modmenu:${modmenu_version}") {
             transitive(false)
         }
         modRuntime("me.shedaniel:SmoothScrollingEverywhere:3.0.3-unstable") {
@@ -144,7 +121,6 @@ subprojects {
     }
 
     remapJar {
-        input.set(file("${project.buildDir}/filtered-libs/$archivesBaseName-${project.version}-dev-filtered.jar"))
         classifier(null)
     }
 
@@ -152,24 +128,6 @@ subprojects {
         dev file: file("${project.buildDir}/libs/$archivesBaseName-${version}-dev.jar"), type: "jar", builtBy: jar
         remapped file: file("${project.buildDir}/libs/$archivesBaseName-${version}.jar"), type: "jar", builtBy: remapJar
     }
-
-    task jarFilter(type: net.corda.gradle.jarfilter.JarFilterTask) {
-        jars jar
-        annotations {
-            forRemove = [
-                    "org.jetbrains.annotations.NotNull",
-                    "org.jetbrains.annotations.Nullable",
-                    "org.jetbrains.annotations.ApiStatus\$Experimental",
-                    "org.jetbrains.annotations.ApiStatus\$Internal",
-                    "org.jetbrains.annotations.ApiStatus\$ScheduledForRemoval",
-                    "org.jetbrains.annotations.ApiStatus\$AvailableSince",
-                    "org.jetbrains.annotations.ApiStatus\$NonExtendable",
-                    "org.jetbrains.annotations.ApiStatus\$OverrideOnly"
-            ]
-        }
-    }
-
-    remapJar.dependsOn("jarFilter")
 
     publishing {
         publications {
@@ -204,41 +162,15 @@ subprojects { licenseFormatAll.dependsOn("${path}:licenseFormat") }
 subprojects { rootProject.remapJar.dependsOn("${path}:remapJar") }
 
 task remapMavenJar(type: RemapJarTask, dependsOn: jar) {
-    afterEvaluate {
-        input.set(file("${project.buildDir}/libs/${archivesBaseName}-${project.version}-dev.jar"))
-        archiveFileName = "${archivesBaseName}-${project.version}-maven.jar"
-        addNestedDependencies.set(false)
-    }
+    input.set(file("${project.buildDir}/libs/${archivesBaseName}-${project.version}-dev.jar"))
+    archiveFileName = "${archivesBaseName}-${project.version}-maven.jar"
+    addNestedDependencies.set(false)
 }
 
 dependencies {
-    afterEvaluate {
-        subprojects.each {
-            implementation project(path: ":${it.name}", configuration: "dev")
-            include project(path: ":${it.name}", configuration: "remapped")
-        }
-
-        def listAdded = new ArrayList(Arrays.asList((api_exculde as String).split(',')))
-        def eachDep = { dep ->
-            for (apiIncludeDepStr in (api_include as String).split(',')) {
-                if (apiIncludeDepStr.isEmpty()) continue
-                def apiIncludeGroup = apiIncludeDepStr.split(':')[0]
-                def apiIncludeDep = apiIncludeDepStr.split(':')[1]
-                if (dep.module.id.group == apiIncludeGroup && dep.module.id.name.startsWith(apiIncludeDep)) {
-                    def version = dep.module.id.version.indexOf('@') >= 0 ? dep.module.id.version.substring(0, dep.module.id.version.indexOf('@')) : dep.module.id.version
-                    def mavenDep = "${dep.module.id.group}:${dep.module.id.name}:$version"
-                    if (!(mavenDep in listAdded)) {
-                        include(mavenDep) {
-                            transitive = false
-                        }
-                        listAdded.add(mavenDep)
-                    }
-                    break
-                }
-            }
-        }
-        rootProject.configurations.compileClasspath.resolvedConfiguration.firstLevelModuleDependencies.each eachDep
-        rootProject.configurations.runtimeClasspath.resolvedConfiguration.firstLevelModuleDependencies.each eachDep
+    subprojects.each {
+        compile project(path: ":${it.name}", configuration: "dev")
+        include project(path: ":${it.name}", configuration: "remapped")
     }
 }
 
@@ -299,9 +231,7 @@ curseforge {
             addArtifact(file("${project.buildDir}/libs/${project.archivesBaseName}-${project.version}-sources.jar")) {
                 displayName = "[Fabric $project.supported_version] v$project.version Sources"
             }
-            afterEvaluate {
-                uploadTask.dependsOn("build")
-            }
+            uploadTask.dependsOn("build")
         }
     }
     options {
@@ -341,225 +271,6 @@ publishing {
                     password = System.getenv("MAVEN_PASS")
                 }
             }
-        }
-    }
-}
-
-/*
-The following code is licensed under MIT License.
-
-Copyright (c) 2016 FabricMC
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-        in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
-
-class MojangMappingsDependency implements SelfResolvingDependency {
-    private final Project project
-    private final LoomGradleExtension extension
-
-    MojangMappingsDependency(Project project, LoomGradleExtension extension) {
-        this.project = project
-        this.extension = extension
-    }
-
-    @Override
-    Set<File> resolve() {
-        Path mappingsDir = extension.getMappingsProvider().getMappingsDir()
-        Path mappingsFile = mappingsDir.resolve(String.format("net.mojang.minecraft-mappings-%s.tiny", getVersion()))
-        Path clientMappings = mappingsDir.resolve(String.format("net.mojang.minecraft.mappings-%s-client.map", getVersion()))
-        Path serverMappings = mappingsDir.resolve(String.format("net.mojang.minecraft.mappings-%s-server.map", getVersion()))
-
-        if (!Files.exists(mappingsFile) || project.getGradle().getStartParameter().isRefreshDependencies()) {
-            MappingSet mappingSet
-
-            try {
-                mappingSet = getMappingsSet(clientMappings, serverMappings)
-
-                Writer writer = new StringWriter()
-                new TinyWriter(writer, "intermediary", "named").write(mappingSet)
-                Files.deleteIfExists(mappingsFile)
-
-                ZipUtil.pack([
-                        new ByteSource("mappings/mappings.tiny", writer.toString().getBytes(StandardCharsets.UTF_8))
-                ] as ZipEntrySource[], mappingsFile.toFile())
-                writer.close()
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to resolve Mojang mappings", e)
-            }
-        }
-
-        return Collections.singleton(mappingsFile.toFile())
-    }
-
-    private MappingSet getMappingsSet(Path clientMappings, Path serverMappings) throws IOException {
-        MinecraftVersionInfo versionInfo = extension.getMinecraftProvider().getVersionInfo()
-
-        if (versionInfo.downloads.get("client_mappings") == null) {
-            throw new RuntimeException("Failed to find official mojang mappings for " + getVersion())
-        }
-
-        String clientMappingsUrl = versionInfo.downloads.get("client_mappings").url
-        String serverMappingsUrl = versionInfo.downloads.get("server_mappings").url
-
-        DownloadUtil.downloadIfChanged(new URL(clientMappingsUrl), clientMappings.toFile(), project.getLogger())
-        DownloadUtil.downloadIfChanged(new URL(serverMappingsUrl), serverMappings.toFile(), project.getLogger())
-
-        MappingSet mappings = MappingSet.create()
-
-        BufferedReader clientBufferedReader = Files.newBufferedReader(clientMappings, StandardCharsets.UTF_8)
-        BufferedReader serverBufferedReader = Files.newBufferedReader(serverMappings, StandardCharsets.UTF_8)
-        ProGuardReader proGuardReaderClient = new ProGuardReader(clientBufferedReader)
-        ProGuardReader proGuardReaderServer = new ProGuardReader(serverBufferedReader)
-        proGuardReaderClient.read(mappings)
-        proGuardReaderServer.read(mappings)
-
-        clientBufferedReader.close()
-        serverBufferedReader.close()
-        proGuardReaderClient.close()
-        proGuardReaderServer.close()
-
-        MappingSet officialToNamed = mappings.reverse()
-        MappingSet intermediaryToOfficial
-
-        BufferedReader reader = Files.newBufferedReader(extension.getMappingsProvider().getIntermediaryTiny(), StandardCharsets.UTF_8)
-        intermediaryToOfficial = new TinyMappingsReader(TinyMappingFactory.loadWithDetection(reader), "intermediary", "official").read()
-        reader.close()
-
-        MappingSet intermediaryToMojang = MappingSet.create()
-
-        // Merging. Don't use MappingSet#merge
-        iterateClasses(intermediaryToOfficial, { inputMappings ->
-            officialToNamed.getClassMapping(inputMappings.getFullDeobfuscatedName())
-                    .ifPresent({ namedClass ->
-                        ClassMapping mojangClassMapping = intermediaryToMojang.getOrCreateClassMapping(inputMappings.getFullObfuscatedName())
-                                .setDeobfuscatedName(namedClass.getFullDeobfuscatedName())
-
-                        for (FieldMapping fieldMapping : inputMappings.getFieldMappings()) {
-                            namedClass.getFieldMapping(fieldMapping.getDeobfuscatedName())
-                                    .ifPresent({ namedField ->
-                                        mojangClassMapping.getOrCreateFieldMapping(fieldMapping.getSignature())
-                                                .setDeobfuscatedName(namedField.getDeobfuscatedName())
-                                    })
-                        }
-
-                        for (MethodMapping methodMapping : inputMappings.getMethodMappings()) {
-                            namedClass.getMethodMapping(methodMapping.getDeobfuscatedSignature())
-                                    .ifPresent({ namedMethod ->
-                                        mojangClassMapping.getOrCreateMethodMapping(methodMapping.getSignature())
-                                                .setDeobfuscatedName(namedMethod.getDeobfuscatedName())
-                                    })
-                        }
-                    })
-        })
-
-        return intermediaryToMojang
-    }
-
-    @Override
-    Set<File> resolve(boolean transitive) {
-        return resolve()
-    }
-
-    @Override
-    TaskDependency getBuildDependencies() {
-        return { Collections.emptySet() }
-    }
-
-    @Override
-    String getGroup() {
-        return "net.mojang.minecraft"
-    }
-
-    @Override
-    String getName() {
-        return "mappings"
-    }
-
-    @Override
-    String getVersion() {
-        return extension.getMinecraftProvider().getMinecraftVersion()
-    }
-
-    @Override
-    boolean contentEquals(Dependency dependency) {
-        if (dependency instanceof MojangMappingsDependency) {
-            return ((MojangMappingsDependency) dependency).extension.getMinecraftProvider().getMinecraftVersion() == getVersion()
-        }
-
-        return false
-    }
-
-    @Override
-    Dependency copy() {
-        return new MojangMappingsDependency(project, extension)
-    }
-
-    @Override
-    String getReason() {
-        return null
-    }
-
-    @Override
-    void because(String s) {
-    }
-
-    private static void iterateClasses(MappingSet mappings, Closure<ClassMapping> consumer) {
-        for (TopLevelClassMapping classMapping : mappings.getTopLevelClassMappings()) {
-            iterateClass(classMapping, consumer)
-        }
-    }
-
-    private static void iterateClass(ClassMapping classMapping, Consumer<ClassMapping> consumer) {
-        consumer.accept(classMapping)
-
-        for (InnerClassMapping innerClassMapping : classMapping.getInnerClassMappings()) {
-            iterateClass(innerClassMapping, consumer)
-        }
-    }
-
-    private static class TinyWriter extends TextMappingsWriter {
-        private final String namespaceFrom
-        private final String namespaceTo
-
-        protected TinyWriter(Writer writer, String namespaceFrom, String namespaceTo) {
-            super(writer)
-            this.namespaceFrom = namespaceFrom
-            this.namespaceTo = namespaceTo
-        }
-
-        @Override
-        void write(MappingSet mappings) {
-            writer.println("tiny\t2\t0\t" + namespaceFrom + "\t" + namespaceTo)
-
-            iterateClasses(mappings, { classMapping ->
-                writer.println("c\t" + classMapping.getFullObfuscatedName() + "\t" + classMapping.getFullDeobfuscatedName())
-
-                for (FieldMapping fieldMapping : classMapping.getFieldMappings()) {
-                    fieldMapping.getType().ifPresent({ fieldType ->
-                        writer.println("\tf\t" + fieldType + "\t" + fieldMapping.getObfuscatedName() + "\t" + fieldMapping.getDeobfuscatedName())
-                    })
-                }
-
-                for (MethodMapping methodMapping : classMapping.getMethodMappings()) {
-                    writer.println("\tm\t" + methodMapping.getSignature().getDescriptor() + "\t" + methodMapping.getObfuscatedName() + "\t" + methodMapping.getDeobfuscatedName())
-                }
-            })
         }
     }
 }
