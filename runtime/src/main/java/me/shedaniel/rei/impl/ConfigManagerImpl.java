@@ -30,18 +30,18 @@ import com.google.gson.JsonElement;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
-import me.sargunvohra.mcmods.autoconfig1u.AutoConfig;
-import me.sargunvohra.mcmods.autoconfig1u.annotation.ConfigEntry;
-import me.sargunvohra.mcmods.autoconfig1u.gui.ConfigScreenProvider;
-import me.sargunvohra.mcmods.autoconfig1u.gui.registry.GuiRegistry;
-import me.sargunvohra.mcmods.autoconfig1u.serializer.JanksonConfigSerializer;
-import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.Jankson;
-import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.JsonNull;
-import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.JsonObject;
-import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.JsonPrimitive;
-import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.impl.SyntaxError;
-import me.sargunvohra.mcmods.autoconfig1u.util.Utils;
+import me.shedaniel.autoconfig.AutoConfig;
+import me.shedaniel.autoconfig.annotation.ConfigEntry;
+import me.shedaniel.autoconfig.gui.ConfigScreenProvider;
+import me.shedaniel.autoconfig.gui.registry.GuiRegistry;
+import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
+import me.shedaniel.autoconfig.util.Utils;
 import me.shedaniel.cloth.api.client.events.v0.ScreenHooks;
+import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Jankson;
+import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.JsonNull;
+import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.JsonObject;
+import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.JsonPrimitive;
+import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.api.SyntaxError;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import me.shedaniel.clothconfig2.api.Modifier;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
@@ -90,8 +90,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import static me.sargunvohra.mcmods.autoconfig1u.util.Utils.getUnsafely;
-import static me.sargunvohra.mcmods.autoconfig1u.util.Utils.setUnsafely;
+import static me.shedaniel.autoconfig.util.Utils.getUnsafely;
+import static me.shedaniel.autoconfig.util.Utils.setUnsafely;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
@@ -162,7 +162,7 @@ public class ConfigManagerImpl implements ConfigManager {
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> {
             ConfigObjectImpl.UsePercentage bounds = field.getAnnotation(ConfigObjectImpl.UsePercentage.class);
             return Collections.singletonList(ConfigEntryBuilder.create().startIntSlider(new TranslatableComponent(i13n), Mth.ceil(Utils.getUnsafely(field, config, 0.0) * 100), Mth.ceil(bounds.min() * 100), Mth.ceil(bounds.max() * 100)).setDefaultValue(() -> Mth.ceil((double) Utils.getUnsafely(field, defaults) * 100)).setSaveConsumer((newValue) -> {
-                Utils.setUnsafely(field, config, newValue / 100d);
+                setUnsafely(field, config, newValue / 100d);
             }).setTextGetter(integer -> new TextComponent(bounds.prefix() + String.format("%d%%", integer))).build());
         }, (field) -> field.getType() == Double.TYPE || field.getType() == Double.class, ConfigObjectImpl.UsePercentage.class);
         
