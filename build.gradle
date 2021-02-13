@@ -222,7 +222,9 @@ curseforge {
             addArtifact(file("${project.buildDir}/libs/${project.archivesBaseName}-${project.version}-sources.jar")) {
                 displayName = "[Fabric $project.supported_version] v$project.version Sources"
             }
-            uploadTask.dependsOn("build")
+            afterEvaluate {
+                uploadTask.dependsOn("build")
+            }
         }
     }
     options {
