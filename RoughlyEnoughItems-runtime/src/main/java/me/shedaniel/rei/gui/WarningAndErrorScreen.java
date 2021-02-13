@@ -24,8 +24,8 @@
 package me.shedaniel.rei.gui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
 import me.shedaniel.rei.RoughlyEnoughItemsState;
+import me.shedaniel.rei.impl.DynamicErrorFreeEntryListWidget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -141,7 +141,7 @@ public class WarningAndErrorScreen extends Screen {
         this.buttonExit.render(matrices, int_1, int_2, float_1);
     }
     
-    private static class StringEntryListWidget extends DynamicNewSmoothScrollingEntryListWidget<StringItem> {
+    private static class StringEntryListWidget extends DynamicErrorFreeEntryListWidget<StringItem> {
         private boolean inFocus;
         private int max = 80;
         
@@ -188,7 +188,7 @@ public class WarningAndErrorScreen extends Screen {
         }
     }
     
-    private abstract static class StringItem extends DynamicNewSmoothScrollingEntryListWidget.Entry<StringItem> {
+    private abstract static class StringItem extends DynamicErrorFreeEntryListWidget.Entry<StringItem> {
         public abstract int getWidth();
     }
     

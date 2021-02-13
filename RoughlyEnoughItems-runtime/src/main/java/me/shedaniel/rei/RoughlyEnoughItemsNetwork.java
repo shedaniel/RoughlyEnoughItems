@@ -57,7 +57,6 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
     
     @Override
     public void onInitialize() {
-        RoughlyEnoughItemsState.checkRequiredFabricModules();
         Executor.run(() -> () -> {
             FabricLoader.getInstance().getEntrypoints("rei_containers", Runnable.class).forEach(Runnable::run);
             ServerSidePacketRegistry.INSTANCE.register(DELETE_ITEMS_PACKET, (packetContext, packetByteBuf) -> {

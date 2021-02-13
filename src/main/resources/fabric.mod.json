@@ -14,10 +14,11 @@
   },
   "depends": {
     "fabricloader": "*",
-    "cloth-client-events-v0": ">=1.0.2",
-    "cloth-basic-math": "*",
-    "cloth-config2": ">=4.8.3",
+    "cloth-client-events-v0": ">=1.5.47",
     "minecraft": "~1.16.2-rc.1"
+  },
+  "breaks": {
+    "cloth-config2": "<4.10.9"
   },
   "license": "MIT",
   "icon": "icon.png"

@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei;
 
-import com.google.common.collect.ImmutableSet;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Tuple;
@@ -54,30 +53,6 @@ public class RoughlyEnoughItemsState {
         if (RoughlyEnoughItemsState.errorSet.add(reason + " " + null)) {
             RoughlyEnoughItemsState.errors.add(new Tuple<>(reason, null));
             LOGGER.error(reason);
-        }
-    }
-    
-    public static void checkRequiredFabricModules() {
-        ImmutableSet<String> requiredModules = FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT ?
-                ImmutableSet.<String>builder()
-                        .add("fabric-api-base")
-                        .add("fabric-resource-loader-v0")
-                        .add("fabric-networking-v0")
-                        .add("fabric-lifecycle-events-v1")
-                        .add("fabric-rendering-fluids-v1")
-                        .build() :
-                ImmutableSet.<String>builder()
-                        .add("fabric-api-base")
-                        .add("fabric-resource-loader-v0")
-                        .add("fabric-networking-v0")
-                        .add("fabric-lifecycle-events-v1")
-                        .build();
-        for (String module : requiredModules) {
-            boolean moduleLoaded = FabricLoader.getInstance().isModLoaded(module);
-            if (!moduleLoaded) {
-                RoughlyEnoughItemsState.error("Fabric API is not installed!", "https://www.curseforge.com/minecraft/mc-mods/fabric-api/files/all");
-                return;
-            }
         }
     }
     
