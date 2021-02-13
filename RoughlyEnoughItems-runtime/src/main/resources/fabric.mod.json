@@ -15,13 +15,8 @@
   "license": "MIT",
   "icon": "icon.png",
   "entrypoints": {
-    "client": [
-      "me.shedaniel.rei.RoughlyEnoughItemsCore",
-      "me.shedaniel.rei.impl.ClientHelperImpl",
-      "me.shedaniel.rei.impl.ScreenHelper"
-    ],
     "main": [
-      "me.shedaniel.rei.RoughlyEnoughItemsNetwork"
+      "me.shedaniel.rei.RoughlyEnoughItemsInitializer"
     ],
     "modmenu": [
       "me.shedaniel.rei.REIModMenuEntryPoint"

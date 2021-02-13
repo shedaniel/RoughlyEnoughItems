@@ -191,15 +191,14 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         }, Internals.WidgetsProvider.class);
         attachInstance((Supplier<FavoriteEntryType.Registry>) FavoriteEntryTypeRegistryImpl::getInstance, "favoriteEntryTypeRegistry");
         attachInstance((BiFunction<Supplier<FavoriteEntry>, Supplier<JsonObject>, FavoriteEntry>) (supplier, toJson) -> new FavoriteEntry() {
-            LazyResettable<FavoriteEntry> value = new LazyResettable<>(supplier);
+            FavoriteEntry value = null;
             
             @Override
             public FavoriteEntry getUnwrapped() {
-                FavoriteEntry entry = value.get();
-                if (entry == null) {
-                    value.reset();
+                if (this.value == null) {
+                    this.value = supplier.get();
                 }
-                return Objects.requireNonNull(entry).getUnwrapped();
+                return Objects.requireNonNull(value).getUnwrapped();
             }
     
             @Override
@@ -380,7 +379,6 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
                 RoughlyEnoughItemsCore.LOGGER.error("REI plugin from " + modContainer.getMetadata().getId() + " is not loaded because it is too old!");
         }
         
-        RoughlyEnoughItemsState.checkRequiredFabricModules();
         Executor.run(() -> () -> {
             ClientSidePacketRegistry.INSTANCE.register(RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, (packetContext, packetByteBuf) -> {
                 ItemStack stack = packetByteBuf.readItem();

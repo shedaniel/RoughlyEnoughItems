@@ -31,20 +31,17 @@ import me.shedaniel.cloth.api.client.events.v0.ClothClientHooks;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.api.Executor;
-import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.widgets.Tooltip;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.OverlaySearchField;
 import me.shedaniel.rei.gui.RecipeScreen;
-import me.shedaniel.rei.gui.WarningAndErrorScreen;
 import me.shedaniel.rei.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.gui.widget.TextFieldWidget;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -262,28 +259,10 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
     @Override
     public void onInitializeClient() {
         ClothClientHooks.SCREEN_INIT_PRE.register((client, screen, screenHooks) -> {
-            if ((!RoughlyEnoughItemsState.getErrors().isEmpty() || !RoughlyEnoughItemsState.getWarnings().isEmpty()) && !(screen instanceof WarningAndErrorScreen)) {
-                WarningAndErrorScreen warningAndErrorScreen = new WarningAndErrorScreen("initialization", RoughlyEnoughItemsState.getWarnings(), RoughlyEnoughItemsState.getErrors(), (parent) -> {
-                    if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
-                        RoughlyEnoughItemsState.clear();
-                        RoughlyEnoughItemsState.continues();
-                        Minecraft.getInstance().setScreen(parent);
-                    } else {
-                        Minecraft.getInstance().stop();
-                    }
-                });
-                warningAndErrorScreen.setParent(screen);
-                try {
-                    if (client.screen != null) client.screen.removed();
-                } catch (Throwable ignored) {
-                }
-                client.screen = null;
-                client.setScreen(warningAndErrorScreen);
-            } else if (previousContainerScreen != screen && screen instanceof AbstractContainerScreen)
+            if (previousContainerScreen != screen && screen instanceof AbstractContainerScreen)
                 previousContainerScreen = (AbstractContainerScreen<?>) screen;
             return InteractionResult.PASS;
         });
-        RoughlyEnoughItemsState.checkRequiredFabricModules();
         Executor.run(() -> () -> {
             ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
                 if (isOverlayVisible() && getSearchField() != null)
