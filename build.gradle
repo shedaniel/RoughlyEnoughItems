@@ -221,9 +221,8 @@ curseforge {
             addGameVersion "Fabric"
             relations {
                 requiredDependency "fabric-api"
+                requiredDependency "cloth-config"
                 embeddedLibrary "cloth-api"
-                embeddedLibrary "cloth-config"
-                embeddedLibrary "auto-config-updated-api"
             }
             mainArtifact(file("${project.buildDir}/libs/${project.archivesBaseName}-${project.version}.jar")) {
                 displayName = "[Fabric $project.supported_version] v$project.version"
