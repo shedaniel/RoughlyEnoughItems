@@ -24,10 +24,10 @@
 package me.shedaniel.rei.impl;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import me.sargunvohra.mcmods.autoconfig1u.ConfigData;
-import me.sargunvohra.mcmods.autoconfig1u.annotation.Config;
-import me.sargunvohra.mcmods.autoconfig1u.annotation.ConfigEntry;
-import me.sargunvohra.mcmods.autoconfig1u.shadowed.blue.endless.jankson.Comment;
+import me.shedaniel.autoconfig.ConfigData;
+import me.shedaniel.autoconfig.annotation.Config;
+import me.shedaniel.autoconfig.annotation.ConfigEntry;
+import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Comment;
 import me.shedaniel.clothconfig2.api.Modifier;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.rei.api.ConfigObject;
@@ -352,13 +352,13 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @ApiStatus.Experimental
     @Override
     public double getHorizontalEntriesBoundaries() {
-        return Mth.clamp(appearance.horizontalEntriesBoundaries, 0.1,1);
+        return Mth.clamp(appearance.horizontalEntriesBoundaries, 0.1, 1);
     }
     
     @ApiStatus.Experimental
     @Override
     public double getVerticalEntriesBoundaries() {
-        return Mth.clamp(appearance.verticalEntriesBoundaries, 0.1,1);
+        return Mth.clamp(appearance.verticalEntriesBoundaries, 0.1, 1);
     }
     
     @Override
@@ -434,7 +434,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
             @Comment("Declares whether the craftable filter button is enabled.") private boolean enableCraftableOnlyButton = false;
             @Comment("Declares whether the utils buttons are shown.") private boolean showUtilsButtons = false;
         }
-    
+        
         @UsePercentage(min = 0.1, max = 1.0, prefix = "Limit: ") private double horizontalEntriesBoundaries = 1.0;
         @UsePercentage(min = 0.1, max = 1.0, prefix = "Limit: ") private double verticalEntriesBoundaries = 1.0;
         @UseSpecialSearchFilterSyntaxHighlightingScreen private SyntaxHighlightingMode syntaxHighlightingMode = SyntaxHighlightingMode.COLORFUL;
