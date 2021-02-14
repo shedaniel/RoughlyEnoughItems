@@ -68,7 +68,7 @@ allprojects {
         include("me.shedaniel.cloth.api:cloth-client-events-v0:${cloth_client_events_v0_version}") {
             transitive(false)
         }
-        modApi("me.shedaniel.cloth:cloth-config:${cloth_config_version}:fabric") {
+        modApi("me.shedaniel.cloth:cloth-config-fabric:${cloth_config_version}") {
             exclude(module: "fabric-api")
         }
         modApi("org.jetbrains:annotations:19.0.0")
