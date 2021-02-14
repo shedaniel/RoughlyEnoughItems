@@ -33,7 +33,7 @@ import net.fabricmc.loader.api.VersionParsingException;
 
 import java.lang.reflect.InvocationTargetException;
 
-public class RoughlyEnoughItemsInitializer implements ModInitializer {
+public class RoughlyEnoughItemsInitializer implements ModInitializer, ClientModInitializer {
     @Override
     public void onInitialize() {
         checkRequiredFabricModules();
@@ -44,17 +44,18 @@ public class RoughlyEnoughItemsInitializer implements ModInitializer {
         
         if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
             initializeEntryPoint("me.shedaniel.rei.RoughlyEnoughItemsNetwork");
-            
-            if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-                initializeEntryPoint("me.shedaniel.rei.RoughlyEnoughItemsCore");
-                initializeEntryPoint("me.shedaniel.rei.impl.ClientHelperImpl");
-                initializeEntryPoint("me.shedaniel.rei.impl.ScreenHelper");
-            }
+        }
+    }
+    
+    @Override
+    public void onInitializeClient() {
+        if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
+            initializeEntryPoint("me.shedaniel.rei.RoughlyEnoughItemsCore");
+            initializeEntryPoint("me.shedaniel.rei.impl.ClientHelperImpl");
+            initializeEntryPoint("me.shedaniel.rei.impl.ScreenHelper");
         }
         
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            initializeEntryPoint("me.shedaniel.rei.impl.ErrorDisplayer");
-        }
+        initializeEntryPoint("me.shedaniel.rei.impl.ErrorDisplayer");
     }
     
     public void initializeEntryPoint(String className) {
