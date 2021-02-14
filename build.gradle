@@ -18,12 +18,6 @@ version = rootProject.base_version + "." + runNumber
 
 group = "me.shedaniel"
 
-static def buildTime() {
-    def df = new SimpleDateFormat("yyyyMMdd")
-    df.setTimeZone(TimeZone.getTimeZone("UTC"))
-    return df.format(new Date())
-}
-
 allprojects {
     apply plugin: 'maven-publish'
     apply plugin: 'forgified-fabric-loom'
@@ -69,7 +63,7 @@ allprojects {
         modApi("me.shedaniel.cloth.api:cloth-client-events-v0:${cloth_client_events_v0_version}") {
             transitive(false)
         }
-        modApi("me.shedaniel.cloth:cloth-config:${cloth_config_version}:fabric") {
+        modApi("me.shedaniel.cloth:cloth-config-fabric:${cloth_config_version}") {
             exclude(module: "fabric-api")
         }
         modApi("org.jetbrains:annotations:19.0.0")
