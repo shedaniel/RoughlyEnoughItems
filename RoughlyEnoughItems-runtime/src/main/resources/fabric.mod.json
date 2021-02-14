@@ -18,6 +18,9 @@
     "main": [
       "me.shedaniel.rei.RoughlyEnoughItemsInitializer"
     ],
+    "client": [
+      "me.shedaniel.rei.RoughlyEnoughItemsInitializer"
+    ],
     "modmenu": [
       "me.shedaniel.rei.REIModMenuEntryPoint"
     ],
