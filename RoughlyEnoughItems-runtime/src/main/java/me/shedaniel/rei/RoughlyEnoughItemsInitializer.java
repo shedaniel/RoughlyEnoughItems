@@ -28,6 +28,8 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.SemanticVersion;
+import net.fabricmc.loader.api.VersionParsingException;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -35,9 +37,12 @@ public class RoughlyEnoughItemsInitializer implements ModInitializer {
     @Override
     public void onInitialize() {
         checkRequiredFabricModules();
-        checkClothConfig();
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+            checkClothConfig();
+            checkModMenu();
+        }
         
-        if (checkRequiredFabricModules() && checkRequiredFabricModules()) {
+        if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
             initializeEntryPoint("me.shedaniel.rei.RoughlyEnoughItemsNetwork");
             
             if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
@@ -47,7 +52,9 @@ public class RoughlyEnoughItemsInitializer implements ModInitializer {
             }
         }
         
-        initializeEntryPoint("me.shedaniel.rei.impl.ErrorDisplayer");
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+            initializeEntryPoint("me.shedaniel.rei.impl.ErrorDisplayer");
+        }
     }
     
     public void initializeEntryPoint(String className) {
@@ -63,7 +70,7 @@ public class RoughlyEnoughItemsInitializer implements ModInitializer {
         }
     }
     
-    public static boolean checkRequiredFabricModules() {
+    public static void checkRequiredFabricModules() {
         ImmutableSet<String> requiredModules = FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT ?
                 ImmutableSet.<String>builder()
                         .add("fabric-api-base")
@@ -82,19 +89,34 @@ public class RoughlyEnoughItemsInitializer implements ModInitializer {
             boolean moduleLoaded = FabricLoader.getInstance().isModLoaded(module);
             if (!moduleLoaded) {
                 RoughlyEnoughItemsState.error("Fabric API is not installed!", "https://www.curseforge.com/minecraft/mc-mods/fabric-api/files/all");
-                return false;
+                break;
             }
         }
-        
-        return true;
     }
     
-    public static boolean checkClothConfig() {
-        if (!FabricLoader.getInstance().isModLoaded("cloth-config2")) {
-            RoughlyEnoughItemsState.error("Cloth Config is not installed!", "https://www.curseforge.com/minecraft/mc-mods/cloth-config/files/all");
-            return false;
+    public static void checkClothConfig() {
+        try {
+            if (!FabricLoader.getInstance().isModLoaded("cloth-config2")) {
+                RoughlyEnoughItemsState.error("Cloth Config is not installed!", "https://www.curseforge.com/minecraft/mc-mods/cloth-config/files/all");
+            } else if (SemanticVersion.parse(FabricLoader.getInstance().getModContainer("cloth-config2").get().getMetadata().getVersion().getFriendlyString()).compareTo(SemanticVersion.parse("4.10.9")) < 0) {
+                RoughlyEnoughItemsState.error("Your Cloth Config version is too old!", "https://www.curseforge.com/minecraft/mc-mods/cloth-config/files/all");
+            }
+        } catch (VersionParsingException e) {
+            RoughlyEnoughItemsState.error("Failed to parse Cloth Config version: " + e.getMessage());
+            e.printStackTrace();
         }
-        
-        return true;
+    }
+    
+    public static void checkModMenu() {
+        try {
+            if (FabricLoader.getInstance().isModLoaded("modmenu")) {
+                if (SemanticVersion.parse(FabricLoader.getInstance().getModContainer("modmenu").get().getMetadata().getVersion().getFriendlyString()).compareTo(SemanticVersion.parse("1.16.7")) < 0) {
+                    RoughlyEnoughItemsState.error("Your Mod Menu version is too old!", "https://www.curseforge.com/minecraft/mc-mods/modmenu/files/all");
+                }
+            }
+        } catch (VersionParsingException e) {
+            RoughlyEnoughItemsState.error("Failed to parse Mod Menu version: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }
