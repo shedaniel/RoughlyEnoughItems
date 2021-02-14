@@ -408,6 +408,9 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
         recipeHelper.removeAutoCraftButton(BEACON);
         recipeHelper.removeAutoCraftButton(BEACON_PAYMENT);
         recipeHelper.removeAutoCraftButton(INFO);
+        recipeHelper.removeAutoCraftButton(STRIPPING);
+        recipeHelper.removeAutoCraftButton(TILLING);
+        recipeHelper.removeAutoCraftButton(PATHING);
         recipeHelper.registerContainerClickArea(new Rectangle(88, 32, 28, 23), CraftingScreen.class, CRAFTING);
         recipeHelper.registerContainerClickArea(new Rectangle(137, 29, 10, 13), InventoryScreen.class, CRAFTING);
         recipeHelper.registerContainerClickArea(new Rectangle(97, 16, 14, 30), BrewingStandScreen.class, BREWING);
