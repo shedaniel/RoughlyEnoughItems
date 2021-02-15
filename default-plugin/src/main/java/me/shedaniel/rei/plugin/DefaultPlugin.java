@@ -407,6 +407,9 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
         registry.removeAutoCraftButton(BEACON);
         registry.removeAutoCraftButton(BEACON_PAYMENT);
         registry.removeAutoCraftButton(INFO);
+        registry.removeAutoCraftButton(STRIPPING);
+        registry.removeAutoCraftButton(TILLING);
+        registry.removeAutoCraftButton(PATHING);
         registry.registerContainerClickArea(new Rectangle(88, 32, 28, 23), CraftingScreen.class, CRAFTING);
         registry.registerContainerClickArea(new Rectangle(137, 29, 10, 13), InventoryScreen.class, CRAFTING);
         registry.registerContainerClickArea(new Rectangle(97, 16, 14, 30), BrewingStandScreen.class, BREWING);
