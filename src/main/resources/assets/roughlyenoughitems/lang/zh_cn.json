@@ -210,6 +210,7 @@
   "config.roughlyenoughitems.scrollingEntryListWidget.boolean.false": "分页",
   "config.roughlyenoughitems.horizontalEntriesBoundaries": "水平条目边界：",
   "config.roughlyenoughitems.verticalEntriesBoundaries": "垂直条目边界：",
+  "config.roughlyenoughitems.syntaxHighlightingMode": "语法高亮模式：",
   "config.roughlyenoughitems.syntaxHighlightingMode.config": "%s",
   "config.roughlyenoughitems.filteringScreen": "自定义过滤器",
   "config.roughlyenoughitems.filteringRulesScreen": "自定义过滤规则",
