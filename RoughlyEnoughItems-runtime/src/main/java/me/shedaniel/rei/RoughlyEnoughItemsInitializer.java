@@ -99,7 +99,7 @@ public class RoughlyEnoughItemsInitializer implements ModInitializer, ClientModI
         try {
             if (!FabricLoader.getInstance().isModLoaded("cloth-config2")) {
                 RoughlyEnoughItemsState.error("Cloth Config is not installed!", "https://www.curseforge.com/minecraft/mc-mods/cloth-config/files/all");
-            } else if (SemanticVersion.parse(FabricLoader.getInstance().getModContainer("cloth-config2").get().getMetadata().getVersion().getFriendlyString()).compareTo(SemanticVersion.parse("4.10.9")) < 0) {
+            } else if (SemanticVersion.parse(FabricLoader.getInstance().getModContainer("cloth-config2").get().getMetadata().getVersion().getFriendlyString()).compareTo(SemanticVersion.parse("4.11.14")) < 0) {
                 RoughlyEnoughItemsState.error("Your Cloth Config version is too old!", "https://www.curseforge.com/minecraft/mc-mods/cloth-config/files/all");
             }
         } catch (VersionParsingException e) {
