@@ -39,6 +39,9 @@ import me.shedaniel.rei.api.ingredient.entry.EntryDefinition;
 import me.shedaniel.rei.api.ingredient.entry.EntryType;
 import me.shedaniel.rei.api.ingredient.entry.EntryTypeRegistry;
 import me.shedaniel.rei.api.plugins.BuiltinPlugin;
+import me.shedaniel.rei.api.registry.CategoryRegistry;
+import me.shedaniel.rei.api.registry.EntryRegistry;
+import me.shedaniel.rei.api.registry.screens.ScreenRegistry;
 import me.shedaniel.rei.api.subsets.SubsetsRegistry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -60,14 +63,15 @@ import java.util.function.Supplier;
 public final class Internals {
     private static Supplier<ConfigManager> configManager = Internals::throwNotSetup;
     private static Supplier<ClientHelper> clientHelper = Internals::throwNotSetup;
-    private static Supplier<RecipeRegistry> recipeHelper = Internals::throwNotSetup;
+    private static Supplier<DisplayRegistry> displayRegistry = Internals::throwNotSetup;
     private static Supplier<REIHelper> reiHelper = Internals::throwNotSetup;
     private static Supplier<FluidSupportProvider> fluidSupportProvider = Internals::throwNotSetup;
     private static Supplier<EntryStackProvider> entryStackProvider = Internals::throwNotSetup;
     private static Supplier<EntryIngredientProvider> entryIngredientProvider = Internals::throwNotSetup;
     private static Supplier<SubsetsRegistry> subsetsRegistry = Internals::throwNotSetup;
     private static Supplier<EntryRegistry> entryRegistry = Internals::throwNotSetup;
-    private static Supplier<DisplayBoundsRegistry> displayHelper = Internals::throwNotSetup;
+    private static Supplier<CategoryRegistry> categoryRegistry = Internals::throwNotSetup;
+    private static Supplier<ScreenRegistry> displayHelper = Internals::throwNotSetup;
     private static Supplier<WidgetsProvider> widgetsProvider = Internals::throwNotSetup;
     private static Supplier<ClientHelper.ViewSearchBuilder> viewSearchBuilder = Internals::throwNotSetup;
     private static Supplier<FavoriteEntryType.Registry> favoriteEntryTypeRegistry = Internals::throwNotSetup;
@@ -83,63 +87,55 @@ public final class Internals {
         throw new AssertionError("REI Internals have not been initialized!");
     }
     
-    @NotNull
     public static ConfigManager getConfigManager() {
         return configManager.get();
     }
     
-    @NotNull
     public static ClientHelper getClientHelper() {
         return clientHelper.get();
     }
     
-    @NotNull
-    public static RecipeRegistry getRecipeHelper() {
-        return recipeHelper.get();
+    public static DisplayRegistry getDisplayRegistry() {
+        return displayRegistry.get();
     }
     
-    @NotNull
     public static REIHelper getREIHelper() {
         return reiHelper.get();
     }
     
-    @NotNull
     @ApiStatus.Experimental
     public static FluidSupportProvider getFluidSupportProvider() {
         return fluidSupportProvider.get();
     }
     
-    @NotNull
     public static EntryStackProvider getEntryStackProvider() {
         return entryStackProvider.get();
     }
     
-    @NotNull
     public static EntryIngredientProvider getEntryIngredientProvider() {
         return entryIngredientProvider.get();
     }
     
-    @NotNull
     public static SubsetsRegistry getSubsetsRegistry() {
         return subsetsRegistry.get();
     }
     
-    @NotNull
     public static EntryRegistry getEntryRegistry() {
         return entryRegistry.get();
     }
     
-    @NotNull
-    public static DisplayBoundsRegistry getDisplayHelper() {
+    public static CategoryRegistry getCategoryRegistry() {
+        return categoryRegistry.get();
+    }
+    
+    public static ScreenRegistry getDisplayHelper() {
         return displayHelper.get();
     }
     
-    @NotNull
     public static WidgetsProvider getWidgetsProvider() {
         return widgetsProvider.get();
     }
     
-    @NotNull
     public static ClientHelper.ViewSearchBuilder createViewSearchBuilder() {
         return viewSearchBuilder.get();
     }
@@ -148,17 +144,14 @@ public final class Internals {
         return favoriteEntryTypeRegistry.get();
     }
     
-    @NotNull
     public static ClickAreaHandler.Result createClickAreaHandlerResult(boolean applicable) {
         return clickAreaHandlerResult.apply(applicable);
     }
     
-    @NotNull
     public static Tooltip createTooltip(@Nullable Point point, Collection<Component> texts) {
         return tooltipProvider.apply(point, texts);
     }
     
-    @NotNull
     public static BuiltinPlugin getBuiltinPlugin() {
         return builtinPlugin.get();
     }

@@ -28,7 +28,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Get base class of a REI plugin.
  */
-public interface REIPlugin extends Comparable<REIPlugin> {
+public interface REIPluginEntry extends Comparable<REIPluginEntry> {
     /**
      * @return the priority of the plugin, the smaller the number, the earlier it is called.
      */
@@ -37,13 +37,13 @@ public interface REIPlugin extends Comparable<REIPlugin> {
     }
     
     default String getPluginName() {
-        Class<? extends REIPlugin> self = getClass();
+        Class<? extends REIPluginEntry> self = getClass();
         String simpleName = self.getSimpleName();
         return simpleName == null ? self.getName() : simpleName;
     }
     
     @Override
-    default int compareTo(@NotNull REIPlugin o) {
+    default int compareTo(@NotNull REIPluginEntry o) {
         return Double.compare(getPriority(), o.getPriority());
     }
 }

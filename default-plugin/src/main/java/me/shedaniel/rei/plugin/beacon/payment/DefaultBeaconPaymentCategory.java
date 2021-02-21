@@ -44,6 +44,8 @@ import me.shedaniel.rei.api.util.CollectionUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Blocks;
@@ -59,18 +61,18 @@ public class DefaultBeaconPaymentCategory implements DisplayCategory<DefaultBeac
     }
     
     @Override
-    public @NotNull String getCategoryName() {
-        return I18n.get("category.rei.beacon_payment");
+    public @NotNull Component getTitle() {
+        return new TranslatableComponent("category.rei.beacon_payment");
     }
     
     @Override
-    public @NotNull Renderer getLogo() {
+    public @NotNull Renderer getIcon() {
         return EntryStacks.of(Blocks.BEACON);
     }
     
     @Override
     public @NotNull DisplayRenderer getDisplayRenderer(DefaultBeaconPaymentDisplay display) {
-        String name = getCategoryName();
+        Component name = getTitle();
         return new DisplayRenderer() {
             @Override
             public int getHeight() {
@@ -100,7 +102,7 @@ public class DefaultBeaconPaymentCategory implements DisplayCategory<DefaultBeac
     }
     
     @Override
-    public int getFixedRecipesPerPage() {
+    public int getFixedDisplaysPerPage() {
         return 1;
     }
     

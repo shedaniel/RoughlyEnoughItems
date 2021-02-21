@@ -58,12 +58,12 @@ public class DefaultCompostingCategory implements DisplayCategory<DefaultCompost
     }
     
     @Override
-    public @NotNull Renderer getLogo() {
+    public @NotNull Renderer getIcon() {
         return EntryStacks.of(Blocks.COMPOSTER);
     }
     
     @Override
-    public @NotNull String getCategoryName() {
+    public @NotNull Component getTitle() {
         return I18n.get("category.rei.composting");
     }
     
@@ -115,7 +115,7 @@ public class DefaultCompostingCategory implements DisplayCategory<DefaultCompost
     }
     
     @Override
-    public int getFixedRecipesPerPage() {
+    public int getFixedDisplaysPerPage() {
         return 1;
     }
 }

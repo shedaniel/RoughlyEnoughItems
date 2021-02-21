@@ -27,13 +27,13 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ConfigObject;
-import me.shedaniel.rei.api.EntryRegistry;
+import me.shedaniel.rei.api.registry.EntryRegistry;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
+import me.shedaniel.rei.api.util.CollectionUtils;
 import me.shedaniel.rei.impl.filtering.FilteringContextImpl;
 import me.shedaniel.rei.impl.filtering.FilteringContextType;
 import me.shedaniel.rei.impl.filtering.FilteringRule;
-import me.shedaniel.rei.api.util.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.NonNullList;
@@ -76,11 +76,10 @@ public class EntryRegistryImpl implements EntryRegistry {
     @Override
     @NotNull
     public List<EntryStack<?>> getPreFilteredList() {
-        return preFilteredList;
+        return Collections.unmodifiableList(preFilteredList);
     }
     
     @Override
-    @ApiStatus.Experimental
     public void refilter() {
         Stopwatch stopwatch = Stopwatch.createStarted();
         
@@ -124,6 +123,8 @@ public class EntryRegistryImpl implements EntryRegistry {
         reloading = true;
     }
     
+    private static final Comparator<ItemStack> STACK_COMPARATOR = (a, b) -> ItemStack.matches(a, b) ? 0 : 1;
+    
     @NotNull
     @Override
     public List<ItemStack> appendStacksForItem(@NotNull Item item) {
@@ -131,16 +132,8 @@ public class EntryRegistryImpl implements EntryRegistry {
         item.fillItemCategory(item.getItemCategory(), list);
         if (list.isEmpty())
             return Collections.singletonList(item.getDefaultInstance());
+        list.sort(STACK_COMPARATOR);
         return list;
-    }
-    
-    @NotNull
-    @Override
-    public ItemStack[] getAllStacksFromItem(@NotNull Item item) {
-        List<ItemStack> list = appendStacksForItem(item);
-        ItemStack[] array = list.toArray(new ItemStack[0]);
-        Arrays.sort(array, (a, b) -> ItemStack.matches(a, b) ? 0 : 1);
-        return array;
     }
     
     @Override
@@ -182,20 +175,20 @@ public class EntryRegistryImpl implements EntryRegistry {
     }
     
     @Override
-    public void removeEntry(EntryStack<?> stack) {
+    public boolean removeEntry(EntryStack<?> stack) {
         if (reloading) {
-            reloadingRegistry.remove(new AmountIgnoredEntryStackWrapper(stack));
+            return reloadingRegistry.remove(new AmountIgnoredEntryStackWrapper(stack));
         } else {
-            entries.remove(stack);
+            return entries.remove(stack);
         }
     }
     
     @Override
-    public void removeEntryIf(Predicate<EntryStack<?>> stackPredicate) {
+    public boolean removeEntryIf(Predicate<? extends EntryStack<?>> predicate) {
         if (reloading) {
-            reloadingRegistry.removeIf(wrapper -> stackPredicate.test(wrapper.unwrap()));
+            return reloadingRegistry.removeIf(wrapper -> ((Predicate<EntryStack<?>>) predicate).test(wrapper.unwrap()));
         } else {
-            entries.removeIf(stackPredicate);
+            return entries.removeIf((Predicate<EntryStack<?>>) predicate);
         }
     }
 }

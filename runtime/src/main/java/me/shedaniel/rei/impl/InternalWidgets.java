@@ -68,7 +68,7 @@ public final class InternalWidgets {
                 .focusable(false)
                 .onClick(button -> {
                     AutoTransferHandler.Context context = AutoTransferHandler.Context.create(true, containerScreen, displaySupplier.get());
-                    for (AutoTransferHandler autoTransferHandler : RecipeRegistry.getInstance().getSortedAutoCraftingHandler())
+                    for (AutoTransferHandler autoTransferHandler : DisplayRegistry.getInstance().getSortedAutoCraftingHandler())
                         try {
                             AutoTransferHandler.Result result = autoTransferHandler.handle(context);
                             if (result.isBlocking()) {
@@ -90,7 +90,7 @@ public final class InternalWidgets {
                     visible[0] = false;
                     IntList redSlots = null;
                     AutoTransferHandler.Context context = AutoTransferHandler.Context.create(false, containerScreen, displaySupplier.get());
-                    for (AutoTransferHandler autoTransferHandler : RecipeRegistry.getInstance().getSortedAutoCraftingHandler()) {
+                    for (AutoTransferHandler autoTransferHandler : DisplayRegistry.getInstance().getSortedAutoCraftingHandler()) {
                         try {
                             AutoTransferHandler.Result result = autoTransferHandler.handle(context);
                             if (result.isApplicable())
@@ -158,7 +158,7 @@ public final class InternalWidgets {
                         str += CollectionUtils.mapAndJoinToString(errorTooltip[0], s -> ChatFormatting.RED.toString() + (errorTooltip[0].size() > 1 ? "- " : "") + I18n.get(s), "\n");
                     }
                     if (Minecraft.getInstance().options.advancedItemTooltips) {
-                        str += displaySupplier.get().getRecipeLocation().isPresent() ? I18n.get("text.rei.recipe_id", ChatFormatting.GRAY.toString(), displaySupplier.get().getRecipeLocation().get().toString()) : "";
+                        str += displaySupplier.get().getDisplayLocation().isPresent() ? I18n.get("text.rei.recipe_id", ChatFormatting.GRAY.toString(), displaySupplier.get().getDisplayLocation().get().toString()) : "";
                     }
                     return str;
                 });
@@ -180,10 +180,10 @@ public final class InternalWidgets {
             
             @Override
             public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-                if (displaySupplier.get().getRecipeLocation().isPresent() && ConfigObject.getInstance().getCopyRecipeIdentifierKeybind().matchesKey(keyCode, scanCode) && containsMouse(PointHelper.ofMouse())) {
-                    minecraft.keyboardHandler.setClipboard(displaySupplier.get().getRecipeLocation().get().toString());
+                if (displaySupplier.get().getDisplayLocation().isPresent() && ConfigObject.getInstance().getCopyRecipeIdentifierKeybind().matchesKey(keyCode, scanCode) && containsMouse(PointHelper.ofMouse())) {
+                    minecraft.keyboardHandler.setClipboard(displaySupplier.get().getDisplayLocation().get().toString());
                     if (ConfigObject.getInstance().isToastDisplayedOnCopyIdentifier()) {
-                        CopyRecipeIdentifierToast.addToast(I18n.get("msg.rei.copied_recipe_id"), I18n.get("msg.rei.recipe_id_details", displaySupplier.get().getRecipeLocation().get().toString()));
+                        CopyRecipeIdentifierToast.addToast(I18n.get("msg.rei.copied_recipe_id"), I18n.get("msg.rei.recipe_id_details", displaySupplier.get().getDisplayLocation().get().toString()));
                     }
                     return true;
                 }
@@ -192,10 +192,10 @@ public final class InternalWidgets {
             
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                if (displaySupplier.get().getRecipeLocation().isPresent() && ConfigObject.getInstance().getCopyRecipeIdentifierKeybind().matchesMouse(button) && containsMouse(PointHelper.ofMouse())) {
-                    minecraft.keyboardHandler.setClipboard(displaySupplier.get().getRecipeLocation().get().toString());
+                if (displaySupplier.get().getDisplayLocation().isPresent() && ConfigObject.getInstance().getCopyRecipeIdentifierKeybind().matchesMouse(button) && containsMouse(PointHelper.ofMouse())) {
+                    minecraft.keyboardHandler.setClipboard(displaySupplier.get().getDisplayLocation().get().toString());
                     if (ConfigObject.getInstance().isToastDisplayedOnCopyIdentifier()) {
-                        CopyRecipeIdentifierToast.addToast(I18n.get("msg.rei.copied_recipe_id"), I18n.get("msg.rei.recipe_id_details", displaySupplier.get().getRecipeLocation().get().toString()));
+                        CopyRecipeIdentifierToast.addToast(I18n.get("msg.rei.copied_recipe_id"), I18n.get("msg.rei.recipe_id_details", displaySupplier.get().getDisplayLocation().get().toString()));
                     }
                     return true;
                 }

@@ -28,7 +28,11 @@ import me.shedaniel.math.Rectangle;
 /**
  * The supplier for the + button area.
  */
+@FunctionalInterface
 public interface ButtonAreaSupplier {
+    static ButtonAreaSupplier defaultArea() {
+        return bounds -> new Rectangle(bounds.getMaxX() - 16, bounds.getMaxY() - 16, 10, 10);
+    }
     
     /**
      * Declares the button bounds

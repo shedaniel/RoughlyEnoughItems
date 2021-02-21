@@ -23,16 +23,34 @@
 
 package me.shedaniel.rei.api.plugins;
 
-import me.shedaniel.rei.api.DisplayBoundsRegistry;
-import me.shedaniel.rei.api.EntryRegistry;
-import me.shedaniel.rei.api.REIPlugin;
-import me.shedaniel.rei.api.RecipeRegistry;
+import me.shedaniel.rei.api.registry.screens.ScreenRegistry;
+import me.shedaniel.rei.api.DisplayRegistry;
+import me.shedaniel.rei.api.registry.EntryRegistry;
 import me.shedaniel.rei.api.ingredient.entry.EntryTypeRegistry;
 import me.shedaniel.rei.api.registry.CategoryRegistry;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
 @ApiStatus.OverrideOnly
-public interface REIPluginV0 extends REIPlugin {
+public interface REIPlugin extends Comparable<REIPlugin> {
+    /**
+     * @return the priority of the plugin, the smaller the number, the earlier it is called.
+     */
+    default int getPriority() {
+        return 0;
+    }
+    
+    default String getPluginName() {
+        Class<? extends REIPlugin> self = getClass();
+        String simpleName = self.getSimpleName();
+        return simpleName == null ? self.getName() : simpleName;
+    }
+    
+    @Override
+    default int compareTo(@NotNull REIPlugin o) {
+        return Double.compare(getPriority(), o.getPriority());
+    }
+    
     /**
      * Registers the types of entries
      */
@@ -42,9 +60,9 @@ public interface REIPluginV0 extends REIPlugin {
     }
     
     /**
-     * Registers entries on the item panel
+     * Registers entries on the entry panel.
      *
-     * @param registry the helper class
+     * @param registry the entry registry
      */
     @ApiStatus.OverrideOnly
     default void registerEntries(EntryRegistry registry) {
@@ -53,7 +71,7 @@ public interface REIPluginV0 extends REIPlugin {
     /**
      * Registers categories
      *
-     * @param registry the helper class
+     * @param registry the category registry
      */
     @ApiStatus.OverrideOnly
     default void registerCategories(CategoryRegistry registry) {
@@ -65,7 +83,7 @@ public interface REIPluginV0 extends REIPlugin {
      * @param registry the helper class
      */
     @ApiStatus.OverrideOnly
-    default void registerDisplays(RecipeRegistry registry) {
+    default void registerDisplays(DisplayRegistry registry) {
     }
     
     /**
@@ -74,7 +92,7 @@ public interface REIPluginV0 extends REIPlugin {
      * @param registry the helper class
      */
     @ApiStatus.OverrideOnly
-    default void registerBounds(DisplayBoundsRegistry registry) {
+    default void registerScreens(ScreenRegistry registry) {
     }
     
     /**
@@ -83,7 +101,7 @@ public interface REIPluginV0 extends REIPlugin {
      * @param registry the helper class
      */
     @ApiStatus.OverrideOnly
-    default void registerOthers(RecipeRegistry registry) {
+    default void registerOthers(DisplayRegistry registry) {
     }
     
     @ApiStatus.OverrideOnly
@@ -93,5 +111,4 @@ public interface REIPluginV0 extends REIPlugin {
     @ApiStatus.OverrideOnly
     default void postRegister() {
     }
-    
 }

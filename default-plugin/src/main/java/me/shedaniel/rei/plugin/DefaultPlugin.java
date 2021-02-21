@@ -39,9 +39,12 @@ import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.plugins.BuiltinPlugin;
-import me.shedaniel.rei.api.plugins.REIPluginV0;
+import me.shedaniel.rei.api.plugins.REIPlugin;
 import me.shedaniel.rei.api.registry.CategoryRegistry;
+import me.shedaniel.rei.api.registry.EntryRegistry;
 import me.shedaniel.rei.api.registry.display.Display;
+import me.shedaniel.rei.api.registry.screens.ExclusionZones;
+import me.shedaniel.rei.api.registry.screens.ScreenRegistry;
 import me.shedaniel.rei.plugin.autocrafting.DefaultRecipeBookHandler;
 import me.shedaniel.rei.plugin.beacon.base.DefaultBeaconBaseCategory;
 import me.shedaniel.rei.plugin.beacon.base.DefaultBeaconBaseDisplay;
@@ -121,7 +124,7 @@ import static me.shedaniel.rei.impl.Internals.attachInstance;
 
 @Environment(EnvType.CLIENT)
 @ApiStatus.Internal
-public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
+public class DefaultPlugin implements REIPlugin, BuiltinPlugin {
     private static final Logger LOGGER = LogManager.getFormatterLogger("REI/DefaultPlugin");
     public static final ResourceLocation CRAFTING = BuiltinPlugin.CRAFTING;
     public static final ResourceLocation SMELTING = BuiltinPlugin.SMELTING;
@@ -151,11 +154,11 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
     }
     
     public static void registerBrewingRecipe(RegisteredBrewingRecipe recipe) {
-        RecipeRegistry.getInstance().registerDisplay(new DefaultBrewingDisplay(recipe.input, recipe.ingredient, recipe.output));
+        DisplayRegistry.getInstance().registerDisplay(new DefaultBrewingDisplay(recipe.input, recipe.ingredient, recipe.output));
     }
     
     public static void registerInfoDisplay(DefaultInformationDisplay display) {
-        RecipeRegistry.getInstance().registerDisplay(display);
+        DisplayRegistry.getInstance().registerDisplay(display);
     }
     
     @Override
@@ -177,7 +180,7 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
             } catch (Exception ignored) {
             }
             if (stacks != null) {
-                for (ItemStack stack : registry.appendStacksForItem(item)) {
+                for (ItemStack stack : stacks) {
                     registry.registerEntry(EntryStacks.of(stack));
                 }
             } else
@@ -227,53 +230,54 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
                 new DefaultInformationCategory()
         );
     
-        registry.registerWorkingStations(CRAFTING, EntryStacks.of(Items.CRAFTING_TABLE));
-        registry.registerWorkingStations(SMELTING, EntryStacks.of(Items.FURNACE));
-        registry.registerWorkingStations(SMOKING, EntryStacks.of(Items.SMOKER));
-        registry.registerWorkingStations(BLASTING, EntryStacks.of(Items.BLAST_FURNACE));
-        registry.registerWorkingStations(CAMPFIRE, EntryStacks.of(Items.CAMPFIRE), EntryStacks.of(Items.SOUL_CAMPFIRE));
-        registry.registerWorkingStations(FUEL, EntryStacks.of(Items.FURNACE), EntryStacks.of(Items.SMOKER), EntryStacks.of(Items.BLAST_FURNACE));
-        registry.registerWorkingStations(BREWING, EntryStacks.of(Items.BREWING_STAND));
-        registry.registerWorkingStations(STONE_CUTTING, EntryStacks.of(Items.STONECUTTER));
-        registry.registerWorkingStations(COMPOSTING, EntryStacks.of(Items.COMPOSTER));
-        registry.registerWorkingStations(SMITHING, EntryStacks.of(Items.SMITHING_TABLE));
-        registry.registerWorkingStations(BEACON, EntryStacks.of(Items.BEACON));
-        registry.registerWorkingStations(BEACON_PAYMENT, EntryStacks.of(Items.BEACON));
+        registry.addWorkstations(CRAFTING, EntryStacks.of(Items.CRAFTING_TABLE));
+        registry.addWorkstations(SMELTING, EntryStacks.of(Items.FURNACE));
+        registry.addWorkstations(SMOKING, EntryStacks.of(Items.SMOKER));
+        registry.addWorkstations(BLASTING, EntryStacks.of(Items.BLAST_FURNACE));
+        registry.addWorkstations(CAMPFIRE, EntryStacks.of(Items.CAMPFIRE), EntryStacks.of(Items.SOUL_CAMPFIRE));
+        registry.addWorkstations(FUEL, EntryStacks.of(Items.FURNACE), EntryStacks.of(Items.SMOKER), EntryStacks.of(Items.BLAST_FURNACE));
+        registry.addWorkstations(BREWING, EntryStacks.of(Items.BREWING_STAND));
+        registry.addWorkstations(STONE_CUTTING, EntryStacks.of(Items.STONECUTTER));
+        registry.addWorkstations(COMPOSTING, EntryStacks.of(Items.COMPOSTER));
+        registry.addWorkstations(SMITHING, EntryStacks.of(Items.SMITHING_TABLE));
+        registry.addWorkstations(BEACON, EntryStacks.of(Items.BEACON));
+        registry.addWorkstations(BEACON_PAYMENT, EntryStacks.of(Items.BEACON));
+        
         Set<Item> axes = Sets.newHashSet(), hoes = Sets.newHashSet(), shovels = Sets.newHashSet();
         EntryRegistry.getInstance().getEntryStacks().filter(stack -> stack.getValueType() == ItemStack.class).map(stack -> ((ItemStack) stack.getValue()).getItem()).forEach(item -> {
             if (item instanceof AxeItem && axes.add(item)) {
-                registry.registerWorkingStations(STRIPPING, EntryStacks.of(item));
+                registry.addWorkstations(STRIPPING, EntryStacks.of(item));
             }
             if (item instanceof HoeItem && hoes.add(item)) {
-                registry.registerWorkingStations(TILLING, EntryStacks.of(item));
+                registry.addWorkstations(TILLING, EntryStacks.of(item));
             }
             if (item instanceof ShovelItem && shovels.add(item)) {
-                registry.registerWorkingStations(PATHING, EntryStacks.of(item));
+                registry.addWorkstations(PATHING, EntryStacks.of(item));
             }
         });
-        TagCollection<Item> itemTagCollection = Minecraft.getInstance().getConnection().getTags().getOrEmpty(Registry.ITEM_REGISTRY);
+        TagCollection<Item> itemTagCollection = Minecraft.getInstance().getConnection().getTags().getItems();
         Tag<Item> axesTag = itemTagCollection.getTag(new ResourceLocation("c", "axes"));
         if (axesTag != null) {
             for (Item item : axesTag.getValues()) {
-                if (axes.add(item)) registry.registerWorkingStations(STRIPPING, EntryStacks.of(item));
+                if (axes.add(item)) registry.addWorkstations(STRIPPING, EntryStacks.of(item));
             }
         }
         Tag<Item> hoesTag = itemTagCollection.getTag(new ResourceLocation("c", "hoes"));
         if (hoesTag != null) {
             for (Item item : hoesTag.getValues()) {
-                if (hoes.add(item)) registry.registerWorkingStations(TILLING, EntryStacks.of(item));
+                if (hoes.add(item)) registry.addWorkstations(TILLING, EntryStacks.of(item));
             }
         }
         Tag<Item> shovelsTag = itemTagCollection.getTag(new ResourceLocation("c", "shovels"));
         if (shovelsTag != null) {
             for (Item item : shovelsTag.getValues()) {
-                if (shovels.add(item)) registry.registerWorkingStations(PATHING, EntryStacks.of(item));
+                if (shovels.add(item)) registry.addWorkstations(PATHING, EntryStacks.of(item));
             }
         }
     }
     
     @Override
-    public void registerDisplays(RecipeRegistry registry) {
+    public void registerDisplays(DisplayRegistry registry) {
         registry.registerRecipes(CRAFTING, ShapelessRecipe.class, DefaultShapelessDisplay::new);
         registry.registerRecipes(CRAFTING, ShapedRecipe.class, DefaultShapedDisplay::new);
         registry.registerRecipes(SMELTING, SmeltingRecipe.class, DefaultSmeltingDisplay::new);
@@ -361,7 +365,7 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
         // Sit tight! This will be a fast journey!
         long time = System.currentTimeMillis();
         EntryRegistry.getInstance().getEntryStacks().forEach(this::applyPotionTransformer);
-        for (List<Display> displays : RecipeRegistry.getInstance().getAllRecipesNoHandlers().values()) {
+        for (List<Display> displays : DisplayRegistry.getInstance().getAllRecipesNoHandlers().values()) {
             for (Display display : displays) {
                 for (List<? extends EntryStack<?>> entries : display.getInputEntries())
                     for (EntryStack<?> stack : entries)
@@ -381,11 +385,11 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
     }
     
     @Override
-    public void registerBounds(DisplayBoundsRegistry registry) {
+    public void registerScreens(ScreenRegistry registry) {
         ExclusionZones exclusionZones = registry.exclusionZones();
         exclusionZones.register(EffectRenderingInventoryScreen.class, new DefaultPotionEffectExclusionZones());
         exclusionZones.register(RecipeUpdateListener.class, new DefaultRecipeBookExclusionZones());
-        registry.registerProvider(new DisplayBoundsRegistry.DisplayBoundsProvider<AbstractContainerScreen<?>>() {
+        registry.registerHandler(new ScreenRegistry.DisplayBoundsProvider<AbstractContainerScreen<?>>() {
             @Override
             public Rectangle getScreenBounds(AbstractContainerScreen<?> screen) {
                 return new Rectangle(screen.leftPos, screen.topPos, screen.imageWidth, screen.imageHeight);
@@ -399,7 +403,7 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
     }
     
     @Override
-    public void registerOthers(RecipeRegistry registry) {
+    public void registerOthers(DisplayRegistry registry) {
         registry.registerAutoCraftingHandler(new DefaultRecipeBookHandler());
         
         registry.removeAutoCraftButton(FUEL);
@@ -442,7 +446,7 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
     
     @Override
     public int getPriority() {
-        return -1;
+        return -100;
     }
     
 }

@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.ingredient.entry;
+package me.shedaniel.rei.api.gui;
 
 import me.shedaniel.rei.api.gui.Renderer;
 import net.minecraft.client.gui.GuiComponent;

@@ -25,8 +25,8 @@ package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.ExclusionZones;
-import me.shedaniel.rei.api.DisplayBoundsRegistry;
+import me.shedaniel.rei.api.registry.screens.ExclusionZones;
+import me.shedaniel.rei.api.registry.screens.ScreenRegistry;
 import me.shedaniel.rei.api.gui.config.DisplayPanelLocation;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -81,7 +81,7 @@ public class ExclusionZonesImpl implements ExclusionZones {
     }
     
     private long currentHashCode(DisplayPanelLocation location) {
-        return areasHashCode(DisplayBoundsRegistry.getInstance().getOverlayBounds(location, Minecraft.getInstance().screen), getExclusionZones(Minecraft.getInstance().screen.getClass(), false));
+        return areasHashCode(ScreenRegistry.getInstance().getOverlayBounds(location, Minecraft.getInstance().screen), getExclusionZones(Minecraft.getInstance().screen.getClass(), false));
     }
     
     @Override

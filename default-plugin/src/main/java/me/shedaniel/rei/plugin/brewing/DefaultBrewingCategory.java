@@ -37,6 +37,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Items;
@@ -53,12 +54,12 @@ public class DefaultBrewingCategory implements DisplayCategory<DefaultBrewingDis
     }
     
     @Override
-    public @NotNull Renderer getLogo() {
+    public @NotNull Renderer getIcon() {
         return EntryStacks.of(Blocks.BREWING_STAND);
     }
     
     @Override
-    public @NotNull String getCategoryName() {
+    public @NotNull Component getTitle() {
         return I18n.get("category.rei.brewing");
     }
     

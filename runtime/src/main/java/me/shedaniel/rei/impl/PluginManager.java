@@ -32,12 +32,16 @@ import me.shedaniel.rei.api.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.ingredient.EntryIngredient;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
-import me.shedaniel.rei.api.plugins.REIPluginV0;
+import me.shedaniel.rei.api.plugins.REIPlugin;
 import me.shedaniel.rei.api.registry.CategoryRegistry;
+import me.shedaniel.rei.api.registry.EntryRegistry;
 import me.shedaniel.rei.api.registry.ParentReloadable;
 import me.shedaniel.rei.api.registry.Reloadable;
 import me.shedaniel.rei.api.registry.display.Display;
 import me.shedaniel.rei.api.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.registry.screens.ExclusionZones;
+import me.shedaniel.rei.api.registry.screens.OverlayDecider;
+import me.shedaniel.rei.api.registry.screens.ScreenRegistry;
 import me.shedaniel.rei.api.subsets.SubsetsRegistry;
 import me.shedaniel.rei.api.util.CollectionUtils;
 import me.shedaniel.rei.impl.subsets.SubsetsRegistryImpl;
@@ -46,12 +50,12 @@ import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -65,24 +69,19 @@ import java.util.stream.Collectors;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
-public class RecipeRegistryImpl implements RecipeRegistry, ParentReloadable {
-    private static final Comparator<Recipe<?>> RECIPE_COMPARATOR = Comparator.comparing((Recipe<?> o) -> o.getId().getNamespace()).thenComparing(o -> o.getId().getPath());
-    
+public class PluginManager implements ParentReloadable {
+   
     private final List<Reloadable> reloadables = new ArrayList<>();
     private final List<FocusedStackProvider> focusedStackProviders = Lists.newArrayList();
     private final List<AutoTransferHandler> autoTransferHandlers = Lists.newArrayList();
     private final List<RecipeFunction<?>> recipeFunctions = Lists.newArrayList();
     private final Multimap<Class<? extends Screen>, ClickAreaHandler<?>> screenClickAreas = HashMultimap.create();
-    private final MutableInt recipeCount = new MutableInt(0);
-    private final Map<ResourceLocation, List<Display>> recipeDisplays = Maps.newHashMap();
-    private final BiMap<DisplayCategory<?>, ResourceLocation> categories = HashBiMap.create();
-    private final Map<ResourceLocation, ButtonAreaSupplier> autoCraftAreaSupplierMap = Maps.newHashMap();
     private final List<DisplayVisibilityHandler> displayVisibilityHandlers = Lists.newArrayList();
-    private final List<LiveRecipeGenerator<Display>> liveRecipeGenerators = Lists.newArrayList();
+    private final List<LiveDisplayGenerator<Display>> liveDisplayGenerators = Lists.newArrayList();
     private RecipeManager recipeManager;
     private boolean arePluginsLoading = false;
     
-    public RecipeRegistryImpl() {
+    public PluginManager() {
         reloadables.add(CategoryRegistry.getInstance());
     }
     
@@ -120,7 +119,7 @@ public class RecipeRegistryImpl implements RecipeRegistry, ParentReloadable {
     
     @Override
     public void registerDisplay(Display display) {
-        ResourceLocation identifier = Objects.requireNonNull(display.getRecipeCategory());
+        ResourceLocation identifier = Objects.requireNonNull(display.getCategoryIdentifier());
         if (!recipeDisplays.containsKey(identifier))
             throw new IllegalArgumentException("Unable to identify category: " + identifier.toString());
         recipeCount.increment();
@@ -199,10 +198,10 @@ public class RecipeRegistryImpl implements RecipeRegistry, ParentReloadable {
             }
         }
         
-        for (LiveRecipeGenerator<Display> liveRecipeGenerator : liveRecipeGenerators) {
+        for (LiveDisplayGenerator<Display> liveDisplayGenerator : liveDisplayGenerators) {
             Set<Display> set = Sets.newLinkedHashSet();
             for (EntryStack<?> stack : recipesFor) {
-                Optional<List<Display>> recipeForDisplays = liveRecipeGenerator.getRecipeFor(stack);
+                Optional<List<Display>> recipeForDisplays = liveDisplayGenerator.getRecipeFor(stack);
                 if (recipeForDisplays.isPresent()) {
                     for (Display display : recipeForDisplays.get()) {
                         if (isDisplayVisible(display))
@@ -211,7 +210,7 @@ public class RecipeRegistryImpl implements RecipeRegistry, ParentReloadable {
                 }
             }
             for (EntryStack<?> stack : usagesFor) {
-                Optional<List<Display>> usageForDisplays = liveRecipeGenerator.getUsageFor(stack);
+                Optional<List<Display>> usageForDisplays = liveDisplayGenerator.getUsageFor(stack);
                 if (usageForDisplays.isPresent()) {
                     for (Display display : usageForDisplays.get()) {
                         if (isDisplayVisible(display))
@@ -219,7 +218,7 @@ public class RecipeRegistryImpl implements RecipeRegistry, ParentReloadable {
                     }
                 }
             }
-            Optional<List<Display>> displaysGenerated = liveRecipeGenerator.getDisplaysGenerated(builder);
+            Optional<List<Display>> displaysGenerated = liveDisplayGenerator.getDisplaysGenerated(builder);
             if (displaysGenerated.isPresent()) {
                 for (Display display : displaysGenerated.get()) {
                     if (isDisplayVisible(display))
@@ -227,12 +226,12 @@ public class RecipeRegistryImpl implements RecipeRegistry, ParentReloadable {
                 }
             }
             if (!set.isEmpty()) {
-                CollectionUtils.getOrPutEmptyList(result, getCategory(liveRecipeGenerator.getCategoryIdentifier())).addAll(set);
+                CollectionUtils.getOrPutEmptyList(result, getCategory(liveDisplayGenerator.getCategoryIdentifier())).addAll(set);
             }
         }
         
         String message = String.format("Built Recipe View in %s for %d categories, %d recipes for, %d usages for and %d live recipe generators.",
-                stopwatch.stop().toString(), categories.size(), recipesFor.size(), usagesFor.size(), liveRecipeGenerators.size());
+                stopwatch.stop().toString(), categories.size(), recipesFor.size(), usagesFor.size(), liveDisplayGenerators.size());
         if (ConfigObject.getInstance().doDebugSearchTimeRequired()) {
             RoughlyEnoughItemsCore.LOGGER.info(message);
         } else {
@@ -304,8 +303,8 @@ public class RecipeRegistryImpl implements RecipeRegistry, ParentReloadable {
         sectionData.getLeft().reset();
     }
     
-    private void pluginSection(MutablePair<Stopwatch, String> sectionData, String sectionName, List<REIPluginV0> list, Consumer<REIPluginV0> consumer) {
-        for (REIPluginV0 plugin : list) {
+    private void pluginSection(MutablePair<Stopwatch, String> sectionData, String sectionName, List<REIPlugin> list, Consumer<REIPlugin> consumer) {
+        for (REIPlugin plugin : list) {
             startSection(sectionData, sectionName + " for " + plugin.getPluginName());
             try {
                 consumer.accept(plugin);
@@ -343,11 +342,11 @@ public class RecipeRegistryImpl implements RecipeRegistry, ParentReloadable {
         this.screenClickAreas.clear();
         this.recipeFunctions.clear();
         this.displayVisibilityHandlers.clear();
-        this.liveRecipeGenerators.clear();
+        this.liveDisplayGenerators.clear();
         this.autoTransferHandlers.clear();
         this.focusedStackProviders.clear();
         
-        DisplayBoundsRegistryImpl displayHelper = (DisplayBoundsRegistryImpl) DisplayBoundsRegistry.getInstance();
+        ScreenRegistryImpl displayHelper = (ScreenRegistryImpl) ScreenRegistry.getInstance();
         EntryRegistryImpl entryRegistry = (EntryRegistryImpl) EntryRegistry.getInstance();
         EntryTypeRegistryImpl entryTypeRegistry = EntryTypeRegistryImpl.getInstance();
         
@@ -356,36 +355,32 @@ public class RecipeRegistryImpl implements RecipeRegistry, ParentReloadable {
         ((SubsetsRegistryImpl) SubsetsRegistry.getInstance()).reset();
         ((FluidSupportProviderImpl) FluidSupportProvider.getInstance()).reset();
         displayHelper.resetData();
-        displayHelper.resetCache();
-        ExclusionZones exclusionZones = new ExclusionZonesImpl();
-        displayHelper.registerHandler(exclusionZones);
-        displayHelper.setExclusionZones(exclusionZones);
-        List<REIPlugin> plugins = RoughlyEnoughItemsCore.getPlugins();
-        plugins.sort(Comparator.comparingInt(REIPlugin::getPriority).reversed());
-        RoughlyEnoughItemsCore.LOGGER.info("Reloading REI, registered %d plugins: %s", plugins.size(), plugins.stream().map(REIPlugin::getPluginName).collect(Collectors.joining(", ")));
+        List<REIPluginEntry> plugins = RoughlyEnoughItemsCore.getPlugins();
+        plugins.sort(Comparator.comparingInt(REIPluginEntry::getPriority).reversed());
+        RoughlyEnoughItemsCore.LOGGER.info("Reloading REI, registered %d plugins: %s", plugins.size(), plugins.stream().map(REIPluginEntry::getPluginName).collect(Collectors.joining(", ")));
         Collections.reverse(plugins);
         entryRegistry.resetToReloadStart();
-        List<REIPluginV0> reiPluginV0s = new ArrayList<>();
+        List<REIPlugin> reiPlugins = new ArrayList<>();
         endSection(sectionData);
-        for (REIPlugin plugin : plugins) {
+        for (REIPluginEntry plugin : plugins) {
             startSection(sectionData, "pre-register for " + plugin.getPluginName());
             try {
-                if (plugin instanceof REIPluginV0) {
-                    ((REIPluginV0) plugin).preRegister();
-                    reiPluginV0s.add((REIPluginV0) plugin);
+                if (plugin instanceof REIPlugin) {
+                    ((REIPlugin) plugin).preRegister();
+                    reiPlugins.add((REIPlugin) plugin);
                 }
             } catch (Throwable e) {
                 RoughlyEnoughItemsCore.LOGGER.error(plugin.getPluginName() + " plugin failed to pre register!", e);
             }
             endSection(sectionData);
         }
-        pluginSection(sectionData, "register-entry-types", reiPluginV0s, plugin -> plugin.registerEntryTypes(entryTypeRegistry));
-        pluginSection(sectionData, "register-bounds", reiPluginV0s, plugin -> plugin.registerBounds(displayHelper));
-        pluginSection(sectionData, "register-entries", reiPluginV0s, plugin -> plugin.registerEntries(entryRegistry));
-        pluginSection(sectionData, "register-categories", reiPluginV0s, plugin -> plugin.registerCategories(this));
-        pluginSection(sectionData, "register-displays", reiPluginV0s, plugin -> plugin.registerDisplays(this));
-        pluginSection(sectionData, "register-others", reiPluginV0s, plugin -> plugin.registerOthers(this));
-        pluginSection(sectionData, "post-register", reiPluginV0s, REIPluginV0::postRegister);
+        pluginSection(sectionData, "register-entry-types", reiPlugins, plugin -> plugin.registerEntryTypes(entryTypeRegistry));
+        pluginSection(sectionData, "register-bounds", reiPlugins, plugin -> plugin.registerScreens(displayHelper));
+        pluginSection(sectionData, "register-entries", reiPlugins, plugin -> plugin.registerEntries(entryRegistry));
+        pluginSection(sectionData, "register-categories", reiPlugins, plugin -> plugin.registerCategories(this));
+        pluginSection(sectionData, "register-displays", reiPlugins, plugin -> plugin.registerDisplays(this));
+        pluginSection(sectionData, "register-others", reiPlugins, plugin -> plugin.registerOthers(this));
+        pluginSection(sectionData, "post-register", reiPlugins, REIPlugin::postRegister);
         startSection(sectionData, "recipe-functions");
         if (!recipeFunctions.isEmpty()) {
             List<Recipe<?>> allSortedRecipes = getAllSortedRecipes();
@@ -452,7 +447,6 @@ public class RecipeRegistryImpl implements RecipeRegistry, ParentReloadable {
         endSection(sectionData);
         
         // Clear Cache
-        displayHelper.resetCache();
         REIHelper.getInstance().getOverlay().ifPresent(REIOverlay::queueReloadOverlay);
         
         startSection(sectionData, "entry-registry-finalise");
@@ -470,7 +464,6 @@ public class RecipeRegistryImpl implements RecipeRegistry, ParentReloadable {
         startSection(sectionData, "finalizing");
         
         // Clear Cache Again!
-        displayHelper.resetCache();
         REIHelper.getInstance().getOverlay().ifPresent(REIOverlay::queueReloadOverlay);
         
         displayVisibilityHandlers.sort(Comparator.reverseOrder());
@@ -478,7 +471,7 @@ public class RecipeRegistryImpl implements RecipeRegistry, ParentReloadable {
         
         long usedTime = Util.getMillis() - startTime;
         RoughlyEnoughItemsCore.LOGGER.info("Reloaded %d stack entries, %d recipes displays, %d exclusion zones suppliers, %d overlay deciders, %d visibility handlers and %d categories (%s) in %dms.",
-                entryRegistry.getEntryStacks().count(), recipeCount.getValue(), ExclusionZones.getInstance().getZonesCount(), displayHelper.getAllOverlayDeciders().size(), getDisplayVisibilityHandlers().size(), categories.size(), categories.keySet().stream().map(DisplayCategory::getCategoryName).collect(Collectors.joining(", ")), usedTime);
+                entryRegistry.getEntryStacks().count(), recipeCount.getValue(), ExclusionZones.getInstance().getZonesCount(), displayHelper.getAllOverlayDeciders().size(), getDisplayVisibilityHandlers().size(), categories.size(), categories.keySet().stream().map(DisplayCategory::getTitle).map(Component::getString).collect(Collectors.joining(", ")), usedTime);
     }
     
     @Override
@@ -515,7 +508,7 @@ public class RecipeRegistryImpl implements RecipeRegistry, ParentReloadable {
     }
     
     @Override
-    public int getRecipeCount() {
+    public int getDisplayCount() {
         return recipeCount.getValue();
     }
     
@@ -570,7 +563,7 @@ public class RecipeRegistryImpl implements RecipeRegistry, ParentReloadable {
     
     @Override
     public boolean isDisplayVisible(Display display) {
-        DisplayCategory<?> category = getCategory(display.getRecipeCategory());
+        DisplayCategory<?> category = getCategory(display.getCategoryIdentifier());
         try {
             for (DisplayVisibilityHandler displayVisibilityHandler : displayVisibilityHandlers) {
                 InteractionResult visibility = displayVisibilityHandler.handleDisplay(category, display);
@@ -608,8 +601,8 @@ public class RecipeRegistryImpl implements RecipeRegistry, ParentReloadable {
     }
     
     @Override
-    public void registerLiveRecipeGenerator(LiveRecipeGenerator<?> liveRecipeGenerator) {
-        liveRecipeGenerators.add((LiveRecipeGenerator<Display>) liveRecipeGenerator);
+    public void registerLiveRecipeGenerator(LiveDisplayGenerator<?> liveDisplayGenerator) {
+        liveDisplayGenerators.add((LiveDisplayGenerator<Display>) liveDisplayGenerator);
     }
     
     public Multimap<Class<? extends Screen>, ClickAreaHandler<?>> getClickAreas() {

@@ -258,7 +258,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         @Nullable private EntryStack<?> inputNotice;
         @Nullable private EntryStack<?> outputNotice;
         @NotNull
-        private final LazyLoadedValue<Map<DisplayCategory<?>, List<Display>>> map = new LazyLoadedValue<>(() -> RecipeRegistry.getInstance().buildMapFor(this));
+        private final LazyLoadedValue<Map<DisplayCategory<?>, List<Display>>> map = new LazyLoadedValue<>(() -> DisplayRegistry.getInstance().buildMapFor(this));
         
         @Override
         public ClientHelper.ViewSearchBuilder addCategory(ResourceLocation category) {

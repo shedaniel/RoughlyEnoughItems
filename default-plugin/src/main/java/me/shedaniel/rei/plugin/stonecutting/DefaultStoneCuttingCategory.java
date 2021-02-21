@@ -33,6 +33,8 @@ import me.shedaniel.rei.api.gui.widgets.Widgets;
 import me.shedaniel.rei.api.gui.widgets.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
@@ -41,29 +43,33 @@ import java.util.List;
 
 public class DefaultStoneCuttingCategory implements DisplayCategory<DefaultStoneCuttingDisplay> {
     @Override
-    public @NotNull ResourceLocation getIdentifier() {
+    public ResourceLocation getIdentifier() {
         return DefaultPlugin.STONE_CUTTING;
     }
     
     @Override
-    public @NotNull Renderer getLogo() {
+    public Renderer getIcon() {
         return EntryStacks.of(Blocks.STONECUTTER);
     }
     
     @Override
-    public @NotNull String getCategoryName() {
-        return I18n.get("category.rei.stone_cutting");
+    public Component getTitle() {
+        return new TranslatableComponent("category.rei.stone_cutting");
     }
     
     @Override
-    public @NotNull List<Widget> setupDisplay(DefaultStoneCuttingDisplay display, Rectangle bounds) {
+    public List<Widget> setupDisplay(DefaultStoneCuttingDisplay display, Rectangle bounds) {
         Point startPoint = new Point(bounds.getCenterX() - 41, bounds.getCenterY() - 13);
         List<Widget> widgets = Lists.newArrayList();
         widgets.add(Widgets.createRecipeBase(bounds));
         widgets.add(Widgets.createArrow(new Point(startPoint.x + 27, startPoint.y + 4)));
         widgets.add(Widgets.createResultSlotBackground(new Point(startPoint.x + 61, startPoint.y + 5)));
-        widgets.add(Widgets.createSlot(new Point(startPoint.x + 4, startPoint.y + 5)).entries(display.getInputEntries().get(0)).markInput());
-        widgets.add(Widgets.createSlot(new Point(startPoint.x + 61, startPoint.y + 5)).entries(display.getResultingEntries().get(0)).disableBackground().markOutput());
+        widgets.add(Widgets.createSlot(new Point(startPoint.x + 61, startPoint.y + 5))
+                .entries(display.getResultingEntries().get(0))
+                .disableBackground()
+                .markOutput());
+        widgets.add(Widgets.createSlot(new Point(startPoint.x + 4, startPoint.y + 5))
+                .entries(display.getInputEntries().get(0)).markInput());
         return widgets;
     }
     

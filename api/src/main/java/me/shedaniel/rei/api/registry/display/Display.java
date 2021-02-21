@@ -51,18 +51,18 @@ public interface Display {
     }
     
     /**
-     * Gets the recipe display category identifier
+     * Gets the display display category identifier
      *
      * @return the identifier of the category
      */
-    ResourceLocation getRecipeCategory();
+    ResourceLocation getCategoryIdentifier();
     
     /**
-     * Gets the recipe location from datapack.
+     * Returns the display location from data packs.
      *
-     * @return the recipe location
+     * @return the display location
      */
-    default Optional<ResourceLocation> getRecipeLocation() {
+    default Optional<ResourceLocation> getDisplayLocation() {
         return Optional.empty();
     }
 }

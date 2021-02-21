@@ -78,7 +78,7 @@ public class DefaultCustomDisplay implements DefaultCraftingDisplay {
     }
     
     @Override
-    public @NotNull Optional<ResourceLocation> getRecipeLocation() {
+    public @NotNull Optional<ResourceLocation> getDisplayLocation() {
         return getRecipe().map(Recipe::getId);
     }
     

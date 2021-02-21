@@ -64,7 +64,7 @@ public class DefaultCampfireDisplay implements Display {
     }
     
     @Override
-    public @NotNull Optional<ResourceLocation> getRecipeLocation() {
+    public @NotNull Optional<ResourceLocation> getDisplayLocation() {
         return Optional.ofNullable(display).map(AbstractCookingRecipe::getId);
     }
     
@@ -84,7 +84,7 @@ public class DefaultCampfireDisplay implements Display {
     }
     
     @Override
-    public @NotNull ResourceLocation getRecipeCategory() {
+    public @NotNull ResourceLocation getCategoryIdentifier() {
         return DefaultPlugin.CAMPFIRE;
     }
     

@@ -28,7 +28,6 @@ import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import me.shedaniel.cloth.api.client.events.v0.ClothClientHooks;
-import me.shedaniel.clothconfig2.api.LazyResettable;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.api.Executor;
@@ -40,7 +39,10 @@ import me.shedaniel.rei.api.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
-import me.shedaniel.rei.api.plugins.REIPluginV0;
+import me.shedaniel.rei.api.plugins.REIPlugin;
+import me.shedaniel.rei.api.registry.EntryRegistry;
+import me.shedaniel.rei.api.registry.screens.OverlayDecider;
+import me.shedaniel.rei.api.registry.screens.ScreenRegistry;
 import me.shedaniel.rei.api.subsets.SubsetsRegistry;
 import me.shedaniel.rei.api.gui.DrawableConsumer;
 import me.shedaniel.rei.api.gui.Renderer;
@@ -124,9 +126,9 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
             }
             return typeCache.computeIfAbsent(id, EntryTypeDeferred::new);
         }, "entryTypeDeferred");
-        attachInstance(new RecipeRegistryImpl(), RecipeRegistry.class);
+        attachInstance(new PluginManager(), DisplayRegistry.class);
         attachInstance(new EntryRegistryImpl(), EntryRegistry.class);
-        attachInstance(new DisplayBoundsRegistryImpl(), DisplayBoundsRegistry.class);
+        attachInstance(new ScreenRegistryImpl(), ScreenRegistry.class);
         attachInstance(new FluidSupportProviderImpl(), FluidSupportProvider.class);
         attachInstance(new SubsetsRegistryImpl(), SubsetsRegistry.class);
         attachInstance(new Internals.EntryStackProvider() {
@@ -225,15 +227,14 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         }, Internals.WidgetsProvider.class);
         attachInstance((Supplier<FavoriteEntryType.Registry>) FavoriteEntryTypeRegistryImpl::getInstance, "favoriteEntryTypeRegistry");
         attachInstance((BiFunction<Supplier<FavoriteEntry>, Supplier<JsonObject>, FavoriteEntry>) (supplier, toJson) -> new FavoriteEntry() {
-            LazyResettable<FavoriteEntry> value = new LazyResettable<>(supplier);
-            
+            FavoriteEntry value = null;
+    
             @Override
             public FavoriteEntry getUnwrapped() {
-                FavoriteEntry entry = value.get();
-                if (entry == null) {
-                    value.reset();
+                if (this.value == null) {
+                    this.value = supplier.get();
                 }
-                return Objects.requireNonNull(entry).getUnwrapped();
+                return Objects.requireNonNull(value).getUnwrapped();
             }
             
             @Override
@@ -382,9 +383,9 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         }
         RecipeManager recipeManager = Minecraft.getInstance().getConnection().getRecipeManager();
         if (ConfigObject.getInstance().doesRegisterRecipesInAnotherThread()) {
-            CompletableFuture.runAsync(() -> ((RecipeRegistryImpl) RecipeRegistry.getInstance()).tryRecipesLoaded(recipeManager), SYNC_RECIPES);
+            CompletableFuture.runAsync(() -> ((PluginManager) DisplayRegistry.getInstance()).tryRecipesLoaded(recipeManager), SYNC_RECIPES);
         } else {
-            ((RecipeRegistryImpl) RecipeRegistry.getInstance()).tryRecipesLoaded(recipeManager);
+            ((PluginManager) DisplayRegistry.getInstance()).tryRecipesLoaded(recipeManager);
         }
     }
     
@@ -452,20 +453,18 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     }
     
     private void discoverPluginEntries() {
-        for (REIPlugin reiPlugin : Iterables.concat(
+        for (REIPlugin plugin : Iterables.concat(
                 FabricLoader.getInstance().getEntrypoints("rei_plugins", REIPlugin.class),
                 FabricLoader.getInstance().getEntrypoints("rei", REIPlugin.class)
         )) {
             try {
-                if (!REIPluginV0.class.isAssignableFrom(reiPlugin.getClass()))
-                    throw new IllegalArgumentException("REI plugin is too old!");
-                registerPlugin(reiPlugin);
+                registerPlugin(plugin);
             } catch (Exception e) {
                 e.printStackTrace();
-                RoughlyEnoughItemsCore.LOGGER.error("Can't load REI plugins from %s: %s", reiPlugin.getClass(), e.getLocalizedMessage());
+                RoughlyEnoughItemsCore.LOGGER.error("Can't load REI plugins from %s: %s", plugin.getClass(), e.getLocalizedMessage());
             }
         }
-        for (REIPluginV0 reiPlugin : FabricLoader.getInstance().getEntrypoints("rei_plugins_v0", REIPluginV0.class)) {
+        for (REIPlugin reiPlugin : FabricLoader.getInstance().getEntrypoints("rei_plugins_v0", REIPlugin.class)) {
             try {
                 registerPlugin(reiPlugin);
             } catch (Exception e) {
@@ -484,7 +483,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         }
         if (FabricLoader.getInstance().isModLoaded("libblockattributes-fluids")) {
             try {
-                registerPlugin((REIPlugin) Class.forName("me.shedaniel.rei.compat.LBASupportPlugin").getConstructor().newInstance());
+                registerPlugin((REIPluginEntry) Class.forName("me.shedaniel.rei.compat.LBASupportPlugin").getConstructor().newInstance());
             } catch (Throwable throwable) {
                 throwable.printStackTrace();
             }
@@ -499,7 +498,7 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     
     private boolean shouldReturn(Class<?> screen) {
         try {
-            for (OverlayDecider decider : DisplayBoundsRegistry.getInstance().getAllOverlayDeciders()) {
+            for (OverlayDecider decider : ScreenRegistry.getInstance().getAllOverlayDeciders()) {
                 if (!decider.isHandingScreen(screen))
                     continue;
                 InteractionResult result = decider.shouldScreenBeOverlaid(screen);

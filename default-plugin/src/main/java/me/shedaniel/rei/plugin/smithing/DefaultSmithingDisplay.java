@@ -82,12 +82,12 @@ public class DefaultSmithingDisplay implements Display {
     }
     
     @Override
-    public @NotNull ResourceLocation getRecipeCategory() {
+    public @NotNull ResourceLocation getCategoryIdentifier() {
         return DefaultPlugin.SMITHING;
     }
     
     @Override
-    public @NotNull Optional<ResourceLocation> getRecipeLocation() {
+    public @NotNull Optional<ResourceLocation> getDisplayLocation() {
         return Optional.ofNullable(location);
     }
 }

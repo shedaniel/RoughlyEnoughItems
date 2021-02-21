@@ -24,10 +24,12 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.registry.CategoryRegistry;
 import me.shedaniel.rei.api.registry.display.Display;
 import me.shedaniel.rei.api.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.util.CollectionUtils;
 import me.shedaniel.rei.api.util.FormattingUtils;
+import me.shedaniel.rei.api.util.Identifiable;
 import me.shedaniel.rei.impl.Internals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -183,7 +185,7 @@ public interface ClientHelper {
         ViewSearchBuilder addCategories(Collection<ResourceLocation> categories);
         
         default ViewSearchBuilder addAllCategories() {
-            return addCategories(CollectionUtils.map(RecipeRegistry.getInstance().getAllCategories(), DisplayCategory::getIdentifier));
+            return addCategories(CollectionUtils.map(CategoryRegistry.getInstance(), Identifiable::getIdentifier));
         }
         
         @NotNull Set<ResourceLocation> getCategories();

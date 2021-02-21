@@ -29,6 +29,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.gui.DrawableConsumer;
+import me.shedaniel.rei.api.gui.Renderer;
 import me.shedaniel.rei.impl.Internals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -52,12 +53,15 @@ public final class Widgets {
     private Widgets() {}
     
     @NotNull
-    public static Widget createDrawableWidget(@NotNull DrawableConsumer drawable) {
+    public static Widget createDrawableWidget(DrawableConsumer drawable) {
         return Internals.getWidgetsProvider().createDrawableWidget(drawable);
     }
     
     @NotNull
-    public static Widget wrapVanillaWidget(@NotNull GuiEventListener element) {
+    public static Widget wrapVanillaWidget(GuiEventListener element) {
+        Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+            
+        });
         return new VanillaWrappedWidget(element);
     }
     
@@ -79,6 +83,38 @@ public final class Widgets {
         @Override
         public List<? extends GuiEventListener> children() {
             return Collections.singletonList(element);
+        }
+    }
+    
+    @NotNull
+    public static WidgetWithBounds wrapRenderer(Rectangle bounds, Renderer renderer) {
+        return new RendererWrappedWidget(renderer);
+    }
+    
+    private static class RendererWrappedWidget extends WidgetWithBounds {
+        private Renderer renderer;
+        private Rectangle bounds;
+        
+        public RendererWrappedWidget(Renderer renderer) {
+            this.renderer = Objects.requireNonNull(renderer);
+        }
+        
+        @Override
+        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+            renderer.render(matrices, getBounds(), mouseX, mouseY, delta);
+        }
+        
+        @Override
+        public List<? extends GuiEventListener> children() {
+            if (renderer instanceof GuiEventListener)
+                return Collections.singletonList((GuiEventListener) renderer);
+            return Collections.emptyList();
+        }
+        
+        @NotNull
+        @Override
+        public Rectangle getBounds() {
+            return bounds;
         }
     }
     
@@ -159,16 +195,18 @@ public final class Widgets {
     
     @NotNull
     public static Panel createRecipeBase(@NotNull Rectangle rectangle) {
-        return Internals.getWidgetsProvider().createPanelWidget(rectangle).yTextureOffset(ConfigObject.getInstance().getRecipeBorderType().getYOffset()).rendering(Widgets::shouldRecipeBaseRender);
-    }
-    
-    @NotNull
-    public static Panel createCategoryBase(@NotNull Rectangle rectangle) {
-        return Internals.getWidgetsProvider().createPanelWidget(rectangle).rendering(Widgets::shouldSlotBaseRender);
+        return Internals.getWidgetsProvider().createPanelWidget(rectangle)
+                .yTextureOffset(ConfigObject.getInstance().getRecipeBorderType().getYOffset())
+                .rendering(Widgets::shouldRecipeBaseRender);
     }
     
     private static boolean shouldRecipeBaseRender(@NotNull Panel panel) {
         return ConfigObject.getInstance().getRecipeBorderType().isRendering() && Internals.getWidgetsProvider().isRenderingPanel(panel);
+    }
+    
+    @NotNull
+    public static Panel createCategoryBase(@NotNull Rectangle rectangle) {
+        return Internals.getWidgetsProvider().createPanelWidget(rectangle);
     }
     
     @NotNull

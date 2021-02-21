@@ -23,7 +23,10 @@
 
 package me.shedaniel.rei.api.gui.widgets;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
+import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.gui.Renderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
@@ -33,7 +36,7 @@ import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
  *
  * @see WidgetWithBounds for a widget with bounds
  */
-public abstract class Widget extends AbstractContainerEventHandler implements net.minecraft.client.gui.components.Widget {
+public abstract class Widget extends AbstractContainerEventHandler implements net.minecraft.client.gui.components.Widget, Renderer {
     
     /**
      * The Minecraft Client instance
@@ -71,4 +74,8 @@ public abstract class Widget extends AbstractContainerEventHandler implements ne
         return containsMouse(double_1, double_2);
     }
     
+    @Override
+    public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+        render(matrices, mouseX, mouseY, delta);
+    }
 }

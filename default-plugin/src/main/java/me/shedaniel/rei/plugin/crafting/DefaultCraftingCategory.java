@@ -41,6 +41,7 @@ import me.shedaniel.rei.api.server.ContainerInfo;
 import me.shedaniel.rei.api.server.ContainerInfoHandler;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -62,12 +63,12 @@ public class DefaultCraftingCategory implements TransferDisplayCategory<DefaultC
     }
     
     @Override
-    public @NotNull Renderer getLogo() {
+    public @NotNull Renderer getIcon() {
         return EntryStacks.of(Blocks.CRAFTING_TABLE);
     }
     
     @Override
-    public @NotNull String getCategoryName() {
+    public @NotNull Component getTitle() {
         return I18n.get("category.rei.crafting");
     }
     

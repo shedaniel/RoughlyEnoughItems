@@ -35,7 +35,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.gui.Renderer;
-import me.shedaniel.rei.api.ingredient.entry.AbstractRenderer;
+import me.shedaniel.rei.api.gui.AbstractRenderer;
 import me.shedaniel.rei.api.gui.widgets.Widgets;
 import me.shedaniel.rei.api.gui.DisplayRenderer;
 import me.shedaniel.rei.api.gui.widgets.Widget;
@@ -76,7 +76,7 @@ public class DefaultInformationCategory implements DisplayCategory<DefaultInform
     }
     
     @Override
-    public @NotNull String getCategoryName() {
+    public @NotNull Component getTitle() {
         return I18n.get("category.rei.information");
     }
     
@@ -98,7 +98,7 @@ public class DefaultInformationCategory implements DisplayCategory<DefaultInform
     
     @Override
     @NotNull
-    public Renderer getLogo() {
+    public Renderer getIcon() {
         return new AbstractRenderer() {
             @Override
             public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
@@ -130,7 +130,7 @@ public class DefaultInformationCategory implements DisplayCategory<DefaultInform
     }
     
     @Override
-    public int getFixedRecipesPerPage() {
+    public int getFixedDisplaysPerPage() {
         return 1;
     }
     

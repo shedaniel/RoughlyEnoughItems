@@ -37,12 +37,16 @@ import me.shedaniel.rei.api.gui.Renderer;
 import me.shedaniel.rei.api.gui.widgets.Panel;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.AbstractRenderer;
+import me.shedaniel.rei.api.gui.AbstractRenderer;
 import me.shedaniel.rei.api.ingredient.entry.ComparisonContext;
 import me.shedaniel.rei.api.ingredient.entry.EntryTypeRegistry;
 import me.shedaniel.rei.api.ingredient.entry.VanillaEntryTypes;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
-import me.shedaniel.rei.api.plugins.REIPluginV0;
+import me.shedaniel.rei.api.plugins.REIPlugin;
+import me.shedaniel.rei.api.registry.EntryRegistry;
+import me.shedaniel.rei.api.registry.screens.DisplayBoundsProvider;
+import me.shedaniel.rei.api.registry.screens.ExclusionZones;
+import me.shedaniel.rei.api.registry.screens.ScreenRegistry;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
@@ -72,7 +76,7 @@ import java.util.stream.Stream;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
-public class DefaultRuntimePlugin implements REIPluginV0 {
+public class DefaultRuntimePlugin implements REIPlugin {
     public static final ResourceLocation PLUGIN = new ResourceLocation("roughlyenoughitems", "default_runtime_plugin");
     
     @Override
@@ -107,15 +111,16 @@ public class DefaultRuntimePlugin implements REIPluginV0 {
     }
     
     @Override
-    public void registerBounds(DisplayBoundsRegistry registry) {
-        ExclusionZones exclusionZones = ExclusionZones.getInstance();
-        exclusionZones.register(RecipeViewingScreen.class, () -> {
+    public void registerScreens(ScreenRegistry registry) {
+        ExclusionZones zones = registry.exclusionZones();
+        zones.register();
+        zones.register(RecipeViewingScreen.class, () -> {
             Panel widget = ((RecipeViewingScreen) Minecraft.getInstance().screen).getWorkingStationsBaseWidget();
             if (widget == null)
                 return Collections.emptyList();
             return Collections.singletonList(widget.getBounds().clone());
         });
-        exclusionZones.register(Screen.class, () -> {
+        zones.register(Screen.class, () -> {
             FavoritesListWidget widget = ContainerScreenOverlay.getFavoritesListWidget();
             if (widget != null) {
                 if (widget.favoritePanelButton.isVisible())
@@ -123,7 +128,7 @@ public class DefaultRuntimePlugin implements REIPluginV0 {
             }
             return Collections.emptyList();
         });
-        registry.registerProvider(new DisplayBoundsRegistry.DisplayBoundsProvider<RecipeViewingScreen>() {
+        registry.registerHandler(new DisplayBoundsProvider<RecipeViewingScreen>() {
             @Override
             public Rectangle getScreenBounds(RecipeViewingScreen screen) {
                 return screen.getBounds();
@@ -139,7 +144,7 @@ public class DefaultRuntimePlugin implements REIPluginV0 {
                 return InteractionResult.SUCCESS;
             }
         });
-        registry.registerProvider(new DisplayBoundsRegistry.DisplayBoundsProvider<VillagerRecipeViewingScreen>() {
+        registry.registerHandler(new DisplayBoundsProvider<VillagerRecipeViewingScreen>() {
             @Override
             public Rectangle getScreenBounds(VillagerRecipeViewingScreen screen) {
                 return screen.bounds;
@@ -158,7 +163,7 @@ public class DefaultRuntimePlugin implements REIPluginV0 {
     }
     
     @Override
-    public void registerOthers(RecipeRegistry registry) {
+    public void registerOthers(DisplayRegistry registry) {
         registry.registerAutoCraftingHandler(new DefaultCategoryHandler());
         FavoriteEntryType.registry().register(EntryStackFavoriteType.INSTANCE.id, EntryStackFavoriteType.INSTANCE);
     }
