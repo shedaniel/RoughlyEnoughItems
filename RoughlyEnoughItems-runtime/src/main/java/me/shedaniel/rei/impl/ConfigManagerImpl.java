@@ -43,11 +43,11 @@ import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.JsonNull;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.JsonObject;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.JsonPrimitive;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.api.SyntaxError;
-import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
-import me.shedaniel.clothconfig2.api.Modifier;
-import me.shedaniel.clothconfig2.api.ModifierKeyCode;
+import me.shedaniel.clothconfig2.api.*;
+import me.shedaniel.clothconfig2.gui.AbstractConfigScreen;
 import me.shedaniel.clothconfig2.gui.GlobalizedClothConfigScreen;
 import me.shedaniel.clothconfig2.gui.entries.KeyCodeEntry;
+import me.shedaniel.clothconfig2.gui.entries.TextListEntry;
 import me.shedaniel.clothconfig2.impl.EasingMethod;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ConfigManager;
@@ -64,23 +64,23 @@ import me.shedaniel.rei.gui.config.entry.*;
 import me.shedaniel.rei.gui.credits.CreditsScreen;
 import me.shedaniel.rei.impl.filtering.FilteringRule;
 import me.shedaniel.rei.impl.filtering.rules.ManualFilteringRule;
+import me.shedaniel.rei.utils.ImmutableLiteralText;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
-import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.*;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.InteractionResult;
@@ -89,10 +89,7 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static me.shedaniel.autoconfig.util.Utils.getUnsafely;
 import static me.shedaniel.autoconfig.util.Utils.setUnsafely;
@@ -174,7 +171,7 @@ public class ConfigManagerImpl implements ConfigManager {
                         Collections.singletonList(new RecipeScreenTypeEntry(220, new TranslatableComponent(i13n), getUnsafely(field, config, RecipeScreenType.UNSET), getUnsafely(field, defaults), type -> setUnsafely(field, config, type)))
                 , (field) -> field.getType() == RecipeScreenType.class, ConfigObjectImpl.UseSpecialRecipeTypeScreen.class);
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) ->
-                        Collections.singletonList(new SearchFilterSyntaxHighlightingEntry( new TranslatableComponent(i13n), getUnsafely(field, config, SyntaxHighlightingMode.COLORFUL), getUnsafely(field, defaults), type -> setUnsafely(field, config, type)))
+                        Collections.singletonList(new SearchFilterSyntaxHighlightingEntry(new TranslatableComponent(i13n), getUnsafely(field, config, SyntaxHighlightingMode.COLORFUL), getUnsafely(field, defaults), type -> setUnsafely(field, config, type)))
                 , (field) -> field.getType() == SyntaxHighlightingMode.class, ConfigObjectImpl.UseSpecialSearchFilterSyntaxHighlightingScreen.class);
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) ->
                         REIHelper.getInstance().getPreviousContainerScreen() == null || Minecraft.getInstance().getConnection() == null || Minecraft.getInstance().getConnection().getRecipeManager() == null ?
@@ -231,6 +228,41 @@ public class ConfigManagerImpl implements ConfigManager {
     @SuppressWarnings("deprecation")
     @Override
     public Screen getConfigScreen(Screen parent) {
+        class EmptyEntry extends AbstractConfigListEntry<Object> {
+            private final int height;
+            
+            public EmptyEntry(int height) {
+                super(new TextComponent(UUID.randomUUID().toString()), false);
+                this.height = height;
+            }
+            
+            public int getItemHeight() {
+                return this.height;
+            }
+            
+            public Object getValue() {
+                return null;
+            }
+            
+            public Optional<Object> getDefaultValue() {
+                return Optional.empty();
+            }
+            
+            public boolean isMouseInside(int mouseX, int mouseY, int x, int y, int entryWidth, int entryHeight) {
+                return false;
+            }
+            
+            public void save() {
+            }
+            
+            public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
+            }
+            
+            public List<? extends GuiEventListener> children() {
+                return Collections.emptyList();
+            }
+        }
+        
         try {
             if (!detectWorkingOptifabric()) {
                 List<Tuple<String, String>> warnings = Lists.newArrayList();
@@ -261,6 +293,19 @@ public class ConfigManagerImpl implements ConfigManager {
                     builder.getOrCreateCategory(new TranslatableComponent("config.roughlyenoughitems.advanced")).getEntries().add(0, new ReloadPluginsEntry(220));
                 }
                 return builder.setAfterInitConsumer(screen -> {
+                    TextListEntry feedbackEntry = ConfigEntryBuilder.create().startTextDescription(
+                            new TranslatableComponent("text.rei.feedback", new TranslatableComponent("text.rei.feedback.link")
+                                    .withStyle(style -> style
+                                            .withColor(TextColor.fromRgb(0xff1fc3ff))
+                                            .withUnderlined(true)
+                                            .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://forms.gle/5tdnK5WN1wng78pV8"))
+                                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ImmutableLiteralText("https://forms.gle/5tdnK5WN1wng78pV8")))
+                                    ))
+                                    .withStyle(ChatFormatting.GRAY)
+                    ).build();
+                    feedbackEntry.setScreen((AbstractConfigScreen) screen);
+                    ((GlobalizedClothConfigScreen) screen).listWidget.children().add(0, (AbstractConfigEntry) feedbackEntry);
+                    ((GlobalizedClothConfigScreen) screen).listWidget.children().add(0, (AbstractConfigEntry) new EmptyEntry(4));
                     ((ScreenHooks) screen).cloth$addButtonWidget(new Button(screen.width - 104, 4, 100, 20, new TranslatableComponent("text.rei.credits"), button -> {
                         MutableLong current = new MutableLong(0);
                         CreditsScreen creditsScreen = new CreditsScreen(screen);
@@ -277,7 +322,7 @@ public class ConfigManagerImpl implements ConfigManager {
                         ((GlobalizedClothConfigScreen) screen).listWidget.bottom -= 10;
                         ((ScreenHooks) screen).cloth$addButtonWidget(new AbstractButton(0, screen.height - 40, screen.width, 10, new TextComponent(new String(BaseEncoding.base64().decode("TWVycnkgQ2hyaXN0bWFz")))) {
                             @Override
-                            public void onPress() { 
+                            public void onPress() {
                             }
                             
                             @Override

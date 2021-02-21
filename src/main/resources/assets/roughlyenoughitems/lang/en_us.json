@@ -8,6 +8,8 @@
   "text.rei.cheating_limited_creative_enabled": "§aCheating Enabled (Using Creative)",
   "text.rei.no_permission_cheat": "Operator permissions are required to cheat items",
   "text.rei.search.field.suggestion": "Search...",
+  "text.rei.feedback": "Any feedback you want to give to the REI developer? %s to submit your feedback!",
+  "text.rei.feedback.link": "Click me to visit the Google Form",
   "category.rei.crafting": "Crafting",
   "category.rei.smelting": "Smelting",
   "category.rei.smelting.fuel": "Fuel",
