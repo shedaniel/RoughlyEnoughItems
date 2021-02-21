@@ -24,15 +24,16 @@
 package me.shedaniel.rei.api.registry.display;
 
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.gui.Renderer;
-import me.shedaniel.rei.api.gui.widgets.Widgets;
 import me.shedaniel.rei.api.gui.DisplayRenderer;
+import me.shedaniel.rei.api.gui.Renderer;
 import me.shedaniel.rei.api.gui.SimpleDisplayRenderer;
 import me.shedaniel.rei.api.gui.widgets.Widget;
+import me.shedaniel.rei.api.gui.widgets.Widgets;
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.util.Identifiable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -40,33 +41,20 @@ import java.util.Collections;
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
-public interface DisplayCategory<T extends Display> {
-    
+public interface DisplayCategory<T extends Display> extends Identifiable {
     /**
-     * Gets the identifier of the category, must be unique
-     *
-     * @return the unique identifier of the category
-     */
-    @NotNull
-    ResourceLocation getIdentifier();
-    
-    /**
-     * Gets the renderer of the icon, allowing developers to render things other than items
+     * Returns the renderer of the icon.
      *
      * @return the renderer of the icon
      */
-    @NotNull
-    default Renderer getLogo() {
-        return EntryStack.empty();
-    }
+    Renderer getIcon();
     
     /**
-     * Gets the category name
+     * Returns the category title.
      *
-     * @return the name
+     * @return the title
      */
-    @NotNull
-    String getCategoryName();
+    Component getTitle();
     
     /**
      * Gets the recipe renderer for the category, used in {@link me.shedaniel.rei.gui.VillagerRecipeViewingScreen} for rendering simple recipes
@@ -75,7 +63,6 @@ public interface DisplayCategory<T extends Display> {
      * @return the display renderer
      */
     @ApiStatus.OverrideOnly
-    @NotNull
     default DisplayRenderer getDisplayRenderer(T display) {
         return SimpleDisplayRenderer.from(display::getInputEntries, display::getResultingEntries);
     }
@@ -84,13 +71,12 @@ public interface DisplayCategory<T extends Display> {
      * Setup the widgets for displaying the recipe
      *
      * @param display the recipe
-     * @param bounds        the bounds of the display, configurable with overriding the width, height methods.
+     * @param bounds  the bounds of the display, configurable with overriding the width, height methods.
      * @return the list of widgets
      */
     @ApiStatus.OverrideOnly
-    @NotNull
     default List<Widget> setupDisplay(T display, Rectangle bounds) {
-        return Collections.singletonList(Widgets.createCategoryBase(bounds));
+        return Collections.singletonList(Widgets.createRecipeBase(bounds));
     }
     
     /**
@@ -113,20 +99,20 @@ public interface DisplayCategory<T extends Display> {
     }
     
     /**
-     * Gets the maximum recipe per page.
+     * Gets the maximum number of displays per page.
      *
-     * @return the maximum amount of recipes for page
+     * @return the maximum number of displays for page
      */
-    default int getMaximumRecipePerPage() {
+    default int getMaximumDisplaysPerPage() {
         return 99;
     }
     
     /**
-     * Gets the fixed amount of recipes per page.
+     * Gets the fixed number of displays per page.
      *
-     * @return the amount of recipes, returns -1 if not fixed
+     * @return the number of displays, returns -1 if not fixed
      */
-    default int getFixedRecipesPerPage() {
+    default int getFixedDisplaysPerPage() {
         return -1;
     }
 }

@@ -33,7 +33,7 @@ import me.shedaniel.clothconfig2.api.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.EntryRegistry;
+import me.shedaniel.rei.api.registry.EntryRegistry;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;

@@ -64,7 +64,7 @@ public class DefaultCategoryHandler implements AutoTransferHandler {
         if (containerScreen == null)
             return Result.createNotApplicable();
         AbstractContainerMenu container = context.getContainer();
-        ContainerInfo<AbstractContainerMenu> containerInfo = (ContainerInfo<AbstractContainerMenu>) ContainerInfoHandler.getContainerInfo(recipe.getRecipeCategory(), container.getClass());
+        ContainerInfo<AbstractContainerMenu> containerInfo = (ContainerInfo<AbstractContainerMenu>) ContainerInfoHandler.getContainerInfo(recipe.getCategoryIdentifier(), container.getClass());
         if (containerInfo == null)
             return Result.createNotApplicable();
         if (recipe.getHeight() > containerInfo.getCraftingHeight(container) || recipe.getWidth() > containerInfo.getCraftingWidth(container))
@@ -82,7 +82,7 @@ public class DefaultCategoryHandler implements AutoTransferHandler {
         if (containerScreen instanceof RecipeUpdateListener)
             ((RecipeUpdateListener) containerScreen).getRecipeBookComponent().ghostRecipe.clear();
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-        buf.writeResourceLocation(recipe.getRecipeCategory());
+        buf.writeResourceLocation(recipe.getCategoryIdentifier());
         buf.writeBoolean(Screen.hasShiftDown());
         
         buf.writeInt(input.size());

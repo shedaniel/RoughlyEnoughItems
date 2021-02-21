@@ -47,6 +47,9 @@ import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.entry.*;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.registry.EntryRegistry;
+import me.shedaniel.rei.api.registry.screens.OverlayDecider;
+import me.shedaniel.rei.api.registry.screens.ScreenRegistry;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.api.gui.config.EntryPanelOrdering;
 import me.shedaniel.rei.impl.*;
@@ -122,7 +125,7 @@ public class EntryListWidget extends WidgetWithBounds {
     
     static boolean notSteppingOnExclusionZones(int left, int top, int width, int height, Rectangle listArea) {
         Minecraft instance = Minecraft.getInstance();
-        for (OverlayDecider decider : DisplayBoundsRegistry.getInstance().getSortedOverlayDeciders(instance.screen.getClass())) {
+        for (OverlayDecider decider : ScreenRegistry.getInstance().getSortedOverlayDeciders(instance.screen.getClass())) {
             InteractionResult fit = canItemSlotWidgetFit(left, top, width, height, decider);
             if (fit != InteractionResult.PASS)
                 return fit == InteractionResult.SUCCESS;
@@ -351,8 +354,8 @@ public class EntryListWidget extends WidgetWithBounds {
             matrices.popPose();
         }
         
-        if (containsMouse(mouseX, mouseY) && ClientHelper.getInstance().isCheating() && !minecraft.player.getInventory().getCarried().isEmpty() && RoughlyEnoughItemsCore.canDeleteItems()) {
-            EntryStack<?> stack = EntryStacks.of(minecraft.player.getInventory().getCarried().copy());
+        if (containsMouse(mouseX, mouseY) && ClientHelper.getInstance().isCheating() && !minecraft.player.inventory.getCarried().isEmpty() && RoughlyEnoughItemsCore.canDeleteItems()) {
+            EntryStack<?> stack = EntryStacks.of(minecraft.player.inventory.getCarried().copy());
             if (stack.getValueType() == FluidStack.class) {
                 Item bucketItem = ((FluidStack) stack.getValue()).getFluid().getBucket();
                 if (bucketItem != null) {
@@ -486,7 +489,7 @@ public class EntryListWidget extends WidgetWithBounds {
             boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
             IntSet workingItems = checkCraftable ? new IntOpenHashSet() : null;
             if (checkCraftable)
-                workingItems.addAll(CollectionUtils.map(RecipeRegistry.getInstance().findCraftableEntriesByItems(ScreenHelper.inventoryStacks), EntryStacks::hashIgnoreCount));
+                workingItems.addAll(CollectionUtils.map(DisplayRegistry.getInstance().findCraftableEntriesByItems(ScreenHelper.inventoryStacks), EntryStacks::hashIgnoreCount));
             List<EntryStack<?>> stacks = EntryRegistry.getInstance().getPreFilteredList();
             if (stacks instanceof CopyOnWriteArrayList && !stacks.isEmpty()) {
                 if (ConfigObject.getInstance().shouldAsyncSearch()) {
@@ -567,7 +570,7 @@ public class EntryListWidget extends WidgetWithBounds {
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (containsMouse(mouseX, mouseY)) {
             LocalPlayer player = minecraft.player;
-            if (ClientHelper.getInstance().isCheating() && player != null && player.getInventory() != null && !player.getInventory().getCarried().isEmpty() && RoughlyEnoughItemsCore.canDeleteItems()) {
+            if (ClientHelper.getInstance().isCheating() && player != null && player.inventory != null && !player.inventory.getCarried().isEmpty() && RoughlyEnoughItemsCore.canDeleteItems()) {
                 ClientHelper.getInstance().sendDeletePacket();
                 return true;
             }

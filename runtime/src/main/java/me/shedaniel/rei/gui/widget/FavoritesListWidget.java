@@ -46,6 +46,7 @@ import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
+import me.shedaniel.rei.api.registry.screens.ScreenRegistry;
 import me.shedaniel.rei.api.util.ImmutableLiteralText;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
@@ -53,7 +54,6 @@ import me.shedaniel.rei.gui.modules.Menu;
 import me.shedaniel.rei.gui.modules.MenuEntry;
 import me.shedaniel.rei.impl.*;
 import me.shedaniel.rei.api.util.CollectionUtils;
-import me.shedaniel.rei.api.util.ImmutableLiteralText;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -244,7 +244,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
     }
     
     public void updateFavoritesBounds(@Nullable String searchTerm) {
-        this.fullBounds = ScreenHelper.getFavoritesListArea(DisplayBoundsRegistry.getInstance().getOverlayBounds(ConfigObject.getInstance().getDisplayPanelLocation().mirror(), Minecraft.getInstance().screen));
+        this.fullBounds = ScreenHelper.getFavoritesListArea(ScreenRegistry.getInstance().getOverlayBounds(ConfigObject.getInstance().getDisplayPanelLocation().mirror(), Minecraft.getInstance().screen));
     }
     
     public void updateSearch(EntryListWidget listWidget, String searchTerm) {

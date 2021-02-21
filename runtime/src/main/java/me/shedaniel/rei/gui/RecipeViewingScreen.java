@@ -261,7 +261,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
                         currentCategoryIndex = categories.size() - 1;
                     ClientHelperImpl.getInstance().openRecipeViewingScreen(categoriesMap, categories.get(currentCategoryIndex).getIdentifier(), ingredientStackToNotice, resultStackToNotice);
                 }).tooltipLine(I18n.get("text.rei.previous_category")));
-        widgets.add(Widgets.createClickableLabel(new Point(bounds.getCenterX(), bounds.getY() + 7), new TextComponent(selectedCategory.getCategoryName()), clickableLabelWidget -> {
+        widgets.add(Widgets.createClickableLabel(new Point(bounds.getCenterX(), bounds.getY() + 7), selectedCategory.getTitle(), clickableLabelWidget -> {
             ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addAllCategories().fillPreferredOpenedCategory());
         }).tooltipLine(I18n.get("text.rei.view_all_categories")));
         widgets.add(categoryNext = Widgets.createButton(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 5, 12, 12), new TranslatableComponent("text.rei.right_arrow"))
@@ -310,10 +310,10 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
                     ClientHelperImpl.getInstance().openRecipeViewingScreen(categoriesMap, categories.get(widget.getId() + categoryPages * tabsPerPage).getIdentifier(), ingredientStackToNotice, resultStackToNotice);
                     return true;
                 }));
-                tab.setRenderer(categories.get(j), categories.get(j).getLogo(), categories.get(j).getCategoryName(), tab.getId() + categoryPages * tabsPerPage == categories.indexOf(selectedCategory));
+                tab.setRenderer(categories.get(j), categories.get(j).getIcon(), categories.get(j).getTitle(), tab.getId() + categoryPages * tabsPerPage == categories.indexOf(selectedCategory));
             }
         }
-        Optional<ButtonAreaSupplier> supplier = RecipeRegistry.getInstance().getAutoCraftButtonArea(selectedCategory);
+        Optional<ButtonAreaSupplier> supplier = DisplayRegistry.getInstance().getAutoCraftButtonArea(selectedCategory);
         int recipeHeight = selectedCategory.getDisplayHeight();
         List<Display> currentDisplayed = getCurrentDisplayed();
         for (int i = 0; i < currentDisplayed.size(); i++) {
@@ -389,10 +389,10 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
     }
     
     private int getRecipesPerPage() {
-        if (selectedCategory.getFixedRecipesPerPage() > 0)
-            return selectedCategory.getFixedRecipesPerPage() - 1;
+        if (selectedCategory.getFixedDisplaysPerPage() > 0)
+            return selectedCategory.getFixedDisplaysPerPage() - 1;
         int height = selectedCategory.getDisplayHeight();
-        return Mth.clamp(Mth.floor(((double) this.bounds.getHeight() - 36) / ((double) height + 4)) - 1, 0, Math.min(ConfigObject.getInstance().getMaxRecipePerPage() - 1, selectedCategory.getMaximumRecipePerPage() - 1));
+        return Mth.clamp(Mth.floor(((double) this.bounds.getHeight() - 36) / ((double) height + 4)) - 1, 0, Math.min(ConfigObject.getInstance().getMaxRecipePerPage() - 1, selectedCategory.getMaximumDisplaysPerPage() - 1));
     }
     
     @Override

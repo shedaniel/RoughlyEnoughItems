@@ -49,7 +49,7 @@ import me.shedaniel.clothconfig2.gui.entries.KeyCodeEntry;
 import me.shedaniel.clothconfig2.impl.EasingMethod;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ConfigManager;
-import me.shedaniel.rei.api.EntryRegistry;
+import me.shedaniel.rei.api.registry.EntryRegistry;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;

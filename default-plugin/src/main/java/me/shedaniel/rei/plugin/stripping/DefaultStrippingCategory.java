@@ -33,6 +33,7 @@ import me.shedaniel.rei.api.gui.widgets.Widgets;
 import me.shedaniel.rei.api.gui.widgets.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
@@ -47,12 +48,12 @@ public class DefaultStrippingCategory implements DisplayCategory<DefaultStrippin
     }
     
     @Override
-    public @NotNull Renderer getLogo() {
+    public @NotNull Renderer getIcon() {
         return EntryStacks.of(Items.IRON_AXE);
     }
     
     @Override
-    public @NotNull String getCategoryName() {
+    public @NotNull Component getTitle() {
         return I18n.get("category.rei.stripping");
     }
     

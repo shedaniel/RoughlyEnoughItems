@@ -32,6 +32,7 @@ import me.shedaniel.rei.api.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.gui.Renderer;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
@@ -51,7 +52,7 @@ public class TabWidget extends WidgetWithBounds {
     public boolean shown = false, selected = false;
     public Renderer renderer;
     public int id;
-    public String categoryName;
+    public Component categoryName;
     public Rectangle bounds;
     public DisplayCategory<?> category;
     public int u, v;
@@ -76,7 +77,7 @@ public class TabWidget extends WidgetWithBounds {
         return button == 0 && containsMouse(mouseX, mouseY) && onClick.test(this);
     }
     
-    public void setRenderer(DisplayCategory<?> category, Renderer renderer, String categoryName, boolean selected) {
+    public void setRenderer(DisplayCategory<?> category, Renderer renderer, Component categoryName, boolean selected) {
         if (renderer == null) {
             shown = false;
             this.renderer = null;
@@ -121,9 +122,9 @@ public class TabWidget extends WidgetWithBounds {
     
     private void drawTooltip() {
         if (this.minecraft.options.advancedItemTooltips)
-            Tooltip.create(new TextComponent(categoryName), new TextComponent(category.getIdentifier().toString()).withStyle(ChatFormatting.DARK_GRAY), ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())).queue();
+            Tooltip.create(categoryName, new TextComponent(category.getIdentifier().toString()).withStyle(ChatFormatting.DARK_GRAY), ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())).queue();
         else
-            Tooltip.create(new TextComponent(categoryName), ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())).queue();
+            Tooltip.create(categoryName, ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())).queue();
     }
     
     @NotNull

@@ -27,17 +27,17 @@ import alexiil.mc.lib.attributes.fluid.FluidAttributes;
 import alexiil.mc.lib.attributes.fluid.GroupedFluidInvView;
 import alexiil.mc.lib.attributes.fluid.amount.FluidAmount;
 import me.shedaniel.architectury.utils.Fraction;
-import me.shedaniel.rei.api.RecipeRegistry;
+import me.shedaniel.rei.api.DisplayRegistry;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
-import me.shedaniel.rei.api.plugins.REIPluginV0;
+import me.shedaniel.rei.api.plugins.REIPlugin;
 import net.minecraft.world.InteractionResultHolder;
 
 import java.util.stream.Stream;
 
-public class LBASupportPlugin implements REIPluginV0 {
+public class LBASupportPlugin implements REIPlugin {
     @Override
-    public void registerOthers(RecipeRegistry registry) {
+    public void registerOthers(DisplayRegistry registry) {
         FluidSupportProvider.getInstance().registerProvider(entry -> {
             GroupedFluidInvView view = FluidAttributes.GROUPED_INV_VIEW.get(entry.getValue());
             if (view.getStoredFluids().size() > 0)

@@ -33,15 +33,15 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.api.Executor;
 import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.api.gui.widgets.TextField;
-import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.registry.screens.OverlayDecider;
+import me.shedaniel.rei.api.registry.screens.ScreenRegistry;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.OverlaySearchField;
 import me.shedaniel.rei.gui.RecipeScreen;
-import me.shedaniel.rei.gui.WarningAndErrorScreen;
-import me.shedaniel.rei.api.gui.config.SearchFieldLocation;
-import me.shedaniel.rei.impl.widgets.TextFieldWidget;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -203,9 +203,9 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
     
     public static SearchFieldLocation getContextualSearchFieldLocation() {
         Window window = Minecraft.getInstance().getWindow();
-        for (OverlayDecider decider : DisplayBoundsRegistry.getInstance().getSortedOverlayDeciders(Minecraft.getInstance().screen.getClass())) {
-            if (decider instanceof DisplayBoundsRegistry.DisplayBoundsProvider) {
-                Rectangle containerBounds = ((DisplayBoundsRegistry.DisplayBoundsProvider<Screen>) decider).getScreenBounds(Minecraft.getInstance().screen);
+        for (OverlayDecider decider : ScreenRegistry.getInstance().getSortedOverlayDeciders(Minecraft.getInstance().screen.getClass())) {
+            if (decider instanceof ScreenRegistry.DisplayBoundsProvider) {
+                Rectangle containerBounds = ((ScreenRegistry.DisplayBoundsProvider<Screen>) decider).getScreenBounds(Minecraft.getInstance().screen);
                 if (window.getGuiScaledHeight() - 20 <= containerBounds.getMaxY())
                     return SearchFieldLocation.BOTTOM_SIDE;
                 else break;
@@ -235,24 +235,7 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
     @Override
     public void onInitializeClient() {
         ClothClientHooks.SCREEN_INIT_PRE.register((client, screen, screenHooks) -> {
-            if ((!RoughlyEnoughItemsState.getErrors().isEmpty() || !RoughlyEnoughItemsState.getWarnings().isEmpty()) && !(screen instanceof WarningAndErrorScreen)) {
-                WarningAndErrorScreen warningAndErrorScreen = new WarningAndErrorScreen("initialization", RoughlyEnoughItemsState.getWarnings(), RoughlyEnoughItemsState.getErrors(), (parent) -> {
-                    if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
-                        RoughlyEnoughItemsState.clear();
-                        RoughlyEnoughItemsState.continues();
-                        Minecraft.getInstance().setScreen(parent);
-                    } else {
-                        Minecraft.getInstance().stop();
-                    }
-                });
-                warningAndErrorScreen.setParent(screen);
-                try {
-                    if (client.screen != null) client.screen.removed();
-                } catch (Throwable ignored) {
-                }
-                client.screen = null;
-                client.setScreen(warningAndErrorScreen);
-            } else if (previousContainerScreen != screen && screen instanceof AbstractContainerScreen)
+            if (previousContainerScreen != screen && screen instanceof AbstractContainerScreen)
                 previousContainerScreen = (AbstractContainerScreen<?>) screen;
             return InteractionResult.PASS;
         });

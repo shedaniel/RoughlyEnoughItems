@@ -24,7 +24,6 @@
 package me.shedaniel.rei.api.gui;
 
 import me.shedaniel.math.Point;
-import me.shedaniel.rei.api.ingredient.entry.AbstractRenderer;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;

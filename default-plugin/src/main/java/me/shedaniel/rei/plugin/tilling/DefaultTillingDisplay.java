@@ -69,7 +69,7 @@ public class DefaultTillingDisplay implements Display {
     }
     
     @Override
-    public @NotNull ResourceLocation getRecipeCategory() {
+    public @NotNull ResourceLocation getCategoryIdentifier() {
         return DefaultPlugin.TILLING;
     }
     

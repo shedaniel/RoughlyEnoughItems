@@ -31,19 +31,21 @@ import me.shedaniel.clothconfig2.api.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.registry.display.DisplayCategory;
-import me.shedaniel.rei.api.gui.Renderer;
-import me.shedaniel.rei.api.ingredient.util.EntryStacks;
-import me.shedaniel.rei.api.gui.widgets.Slot;
-import me.shedaniel.rei.api.gui.widgets.Widgets;
 import me.shedaniel.rei.api.gui.DisplayRenderer;
+import me.shedaniel.rei.api.gui.Renderer;
+import me.shedaniel.rei.api.gui.widgets.Slot;
 import me.shedaniel.rei.api.gui.widgets.Widget;
 import me.shedaniel.rei.api.gui.widgets.WidgetWithBounds;
-import me.shedaniel.rei.plugin.DefaultPlugin;
+import me.shedaniel.rei.api.gui.widgets.Widgets;
+import me.shedaniel.rei.api.ingredient.util.EntryStacks;
+import me.shedaniel.rei.api.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.util.CollectionUtils;
+import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Blocks;
@@ -59,20 +61,19 @@ public class DefaultBeaconBaseCategory implements DisplayCategory<DefaultBeaconB
     }
     
     @Override
-    @NotNull
-    public String getCategoryName() {
-        return I18n.get("category.rei.beacon_base");
+    public @NotNull Component getTitle() {
+        return new TranslatableComponent("category.rei.beacon_base");
     }
     
     @Override
     @NotNull
-    public Renderer getLogo() {
+    public Renderer getIcon() {
         return EntryStacks.of(Blocks.BEACON);
     }
     
     @Override
     public @NotNull DisplayRenderer getDisplayRenderer(DefaultBeaconBaseDisplay display) {
-        String name = getCategoryName();
+        Component name = getTitle();
         return new DisplayRenderer() {
             @Override
             public int getHeight() {
@@ -102,7 +103,7 @@ public class DefaultBeaconBaseCategory implements DisplayCategory<DefaultBeaconB
     }
     
     @Override
-    public int getFixedRecipesPerPage() {
+    public int getFixedDisplaysPerPage() {
         return 1;
     }
     

@@ -41,7 +41,7 @@ import java.util.Optional;
 @Environment(EnvType.CLIENT)
 public interface DefaultCraftingDisplay extends TransferDisplay {
     @Override
-    default @NotNull ResourceLocation getRecipeCategory() {
+    default @NotNull ResourceLocation getCategoryIdentifier() {
         return DefaultPlugin.CRAFTING;
     }
     

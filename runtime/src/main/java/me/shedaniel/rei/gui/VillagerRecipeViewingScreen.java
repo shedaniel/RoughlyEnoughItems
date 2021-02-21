@@ -192,7 +192,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
         RecipeViewingScreen.transformIngredientNotice(setupDisplay, ingredientStackToNotice);
         RecipeViewingScreen.transformResultNotice(setupDisplay, resultStackToNotice);
         this.widgets.addAll(setupDisplay);
-        Optional<ButtonAreaSupplier> supplier = RecipeRegistry.getInstance().getAutoCraftButtonArea(category);
+        Optional<ButtonAreaSupplier> supplier = DisplayRegistry.getInstance().getAutoCraftButtonArea(category);
         if (supplier.isPresent() && supplier.get().get(recipeBounds) != null)
             this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(recipeBounds, supplier.get().get(recipeBounds), new TextComponent(supplier.get().getButtonText()), () -> display, setupDisplay, category));
         
@@ -225,7 +225,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
                     ClientHelperImpl.getInstance().openRecipeViewingScreen(categoryMap, tabCategory.getIdentifier(), ingredientStackToNotice, resultStackToNotice);
                     return true;
                 }));
-                tab.setRenderer(tabCategory, tabCategory.getLogo(), tabCategory.getCategoryName(), j == selectedCategoryIndex);
+                tab.setRenderer(tabCategory, tabCategory.getIcon(), tabCategory.getTitle(), j == selectedCategoryIndex);
             }
         }
         this.widgets.add(Widgets.createButton(new Rectangle(bounds.x + 2, bounds.y - 16, 10, 10), new TranslatableComponent("text.rei.left_arrow"))
@@ -245,7 +245,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
                 })
                 .enabled(categories.size() > tabsPerPage));
         
-        this.widgets.add(Widgets.createClickableLabel(new Point(bounds.x + 4 + scrollListBounds.width / 2, bounds.y + 6), new TextComponent(categories.get(selectedCategoryIndex).getCategoryName()), label -> {
+        this.widgets.add(Widgets.createClickableLabel(new Point(bounds.x + 4 + scrollListBounds.width / 2, bounds.y + 6), categories.get(selectedCategoryIndex).getTitle(), label -> {
             ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addAllCategories().fillPreferredOpenedCategory());
         }).tooltipLine(I18n.get("text.rei.view_all_categories")).noShadow().color(0xFF404040, 0xFFBBBBBB).hoveredColor(0xFF0041FF, 0xFFFFBD4D));
         

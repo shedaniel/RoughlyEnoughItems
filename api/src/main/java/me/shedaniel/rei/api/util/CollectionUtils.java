@@ -28,10 +28,13 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.UnmodifiableIterator;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import jdk.nashorn.internal.runtime.arrays.IteratorAction;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.Mth;
 
 import java.util.*;
@@ -158,6 +161,14 @@ public class CollectionUtils {
         return l;
     }
     
+    public static <T, R> List<R> map(Iterable<T> list, Function<T, R> function) {
+        List<R> l = new ArrayList<>();
+        for (T t : list) {
+            l.add(function.apply(t));
+        }
+        return l;
+    }
+    
     public static <T> IntList mapToInt(Collection<T> list, ToIntFunction<T> function) {
         IntList l = new IntArrayList(list.size() + 1);
         for (T t : list) {
@@ -236,6 +247,34 @@ public class CollectionUtils {
             joiner.add(function.apply(t));
         }
         return joiner.toString();
+    }
+    
+    public static <T> Component mapAndJoinToComponent(List<T> list, Function<T, Component> function, Component separator) {
+        TextComponent joiner = new TextComponent("");
+        boolean first = true;
+        for (T t : list) {
+            if (first) {
+                first = false;
+            } else {
+                joiner.append(separator.copy());
+            }
+            joiner.append(function.apply(t));
+        }
+        return joiner;
+    }
+    
+    public static <T> Component mapAndJoinToComponent(T[] list, Function<T, Component> function, Component separator) {
+        TextComponent joiner = new TextComponent("");
+        boolean first = true;
+        for (T t : list) {
+            if (first) {
+                first = false;
+            } else {
+                joiner.append(separator.copy());
+            }
+            joiner.append(function.apply(t));
+        }
+        return joiner;
     }
     
     public static <T, R> List<R> filterAndMap(List<T> list, Predicate<T> predicate, Function<T, R> function) {

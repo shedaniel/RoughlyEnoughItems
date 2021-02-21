@@ -28,6 +28,7 @@ import me.shedaniel.rei.api.server.RecipeFinder;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.ItemStack;
+import org.lwjgl.opengl.GL11;
 
 public class CraftingContainerInfoWrapper<T extends RecipeBookMenu<?>> implements ContainerInfo<T> {
     private Class<? extends RecipeBookMenu<?>> containerClass;

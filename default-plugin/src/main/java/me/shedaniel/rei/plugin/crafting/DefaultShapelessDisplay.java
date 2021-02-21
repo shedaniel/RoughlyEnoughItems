@@ -54,7 +54,7 @@ public class DefaultShapelessDisplay implements DefaultCraftingDisplay {
     }
     
     @Override
-    public @NotNull Optional<ResourceLocation> getRecipeLocation() {
+    public @NotNull Optional<ResourceLocation> getDisplayLocation() {
         return Optional.ofNullable(display).map(ShapelessRecipe::getId);
     }
     

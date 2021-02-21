@@ -21,26 +21,25 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api;
+package me.shedaniel.rei.api.registry.screens;
 
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.gui.config.DisplayPanelLocation;
+import me.shedaniel.rei.api.registry.Reloadable;
 import me.shedaniel.rei.impl.Internals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
-public interface DisplayBoundsRegistry {
-    
+public interface ScreenRegistry extends Reloadable {
     /**
-     * @return the instance of {@link DisplayBoundsRegistry}
+     * @return the instance of {@link ScreenRegistry}
      */
     @NotNull
-    static DisplayBoundsRegistry getInstance() {
+    static ScreenRegistry getInstance() {
         return Internals.getDisplayHelper();
     }
     
@@ -60,40 +59,13 @@ public interface DisplayBoundsRegistry {
      */
     void registerHandler(OverlayDecider decider);
     
-    default <T> void registerProvider(DisplayBoundsProvider<T> provider) {
-        registerHandler(provider);
-    }
-    
     /**
-     * Gets the left bounds of the overlay
+     * Gets the bounds of the overlay.
      *
      * @param screen the current screen
      * @return the left bounds
      */
     <T> Rectangle getOverlayBounds(DisplayPanelLocation location, T screen);
     
-    @ApiStatus.Experimental
-    void resetCache();
-    
     ExclusionZones exclusionZones();
-    
-    interface DisplayBoundsProvider<T> extends OverlayDecider {
-        /**
-         * @param screen the screen
-         * @return the boundary of the base container panel.
-         */
-        Rectangle getScreenBounds(T screen);
-        
-        /**
-         * Gets the base supported class for the bounds handler
-         *
-         * @return the base class
-         */
-        Class<?> getBaseSupportedClass();
-        
-        @Override
-        default boolean isHandingScreen(Class<?> screen) {
-            return getBaseSupportedClass().isAssignableFrom(screen);
-        }
-    }
 }

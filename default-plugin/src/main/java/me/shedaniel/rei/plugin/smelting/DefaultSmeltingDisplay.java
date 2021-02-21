@@ -38,7 +38,7 @@ public class DefaultSmeltingDisplay extends DefaultCookingDisplay {
     }
     
     @Override
-    public @NotNull ResourceLocation getRecipeCategory() {
+    public @NotNull ResourceLocation getCategoryIdentifier() {
         return DefaultPlugin.SMELTING;
     }
 }

@@ -40,6 +40,10 @@ import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.gui.config.SearchFieldLocation;
+import me.shedaniel.rei.api.registry.CategoryRegistry;
+import me.shedaniel.rei.api.registry.screens.OverlayDecider;
+import me.shedaniel.rei.api.registry.screens.ScreenRegistry;
+import me.shedaniel.rei.api.util.ImmutableLiteralText;
 import me.shedaniel.rei.gui.modules.Menu;
 import me.shedaniel.rei.gui.modules.entries.GameModeMenuEntry;
 import me.shedaniel.rei.gui.modules.entries.WeatherMenuEntry;
@@ -213,7 +217,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
         this.children().clear();
         this.removeOverlayMenu();
         this.window = Minecraft.getInstance().getWindow();
-        this.bounds = DisplayBoundsRegistry.getInstance().getOverlayBounds(ConfigObject.getInstance().getDisplayPanelLocation(), Minecraft.getInstance().screen);
+        this.bounds = ScreenRegistry.getInstance().getOverlayBounds(ConfigObject.getInstance().getDisplayPanelLocation(), Minecraft.getInstance().screen);
         widgets.add(ENTRY_LIST_WIDGET);
         if (ConfigObject.getInstance().isFavoritesEnabled()) {
             if (favoritesListWidget == null)
@@ -453,9 +457,9 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
                 return getBottomSideSearchFieldArea(widthRemoved);
             default:
             case CENTER: {
-                for (OverlayDecider decider : DisplayBoundsRegistry.getInstance().getSortedOverlayDeciders(Minecraft.getInstance().screen.getClass())) {
-                    if (decider instanceof DisplayBoundsRegistry.DisplayBoundsProvider) {
-                        Rectangle containerBounds = ((DisplayBoundsRegistry.DisplayBoundsProvider<Screen>) decider).getScreenBounds(Minecraft.getInstance().screen);
+                for (OverlayDecider decider : ScreenRegistry.getInstance().getSortedOverlayDeciders(Minecraft.getInstance().screen.getClass())) {
+                    if (decider instanceof ScreenRegistry.DisplayBoundsProvider) {
+                        Rectangle containerBounds = ((ScreenRegistry.DisplayBoundsProvider<Screen>) decider).getScreenBounds(Minecraft.getInstance().screen);
                         return getBottomCenterSearchFieldArea(containerBounds, widthRemoved);
                     }
                 }
@@ -509,7 +513,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
             ENTRY_LIST_WIDGET.updateSearch(ScreenHelper.getSearchField().getText(), true);
             init();
         } else {
-            for (OverlayDecider decider : DisplayBoundsRegistry.getInstance().getSortedOverlayDeciders(minecraft.screen.getClass())) {
+            for (OverlayDecider decider : ScreenRegistry.getInstance().getSortedOverlayDeciders(minecraft.screen.getClass())) {
                 if (decider != null && decider.shouldRecalculateArea(ConfigObject.getInstance().getDisplayPanelLocation(), bounds)) {
                     init();
                     break;
@@ -551,7 +555,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
                     return new Point(mouseX, mouseY);
                 }
             };
-            for (Map.Entry<Class<? extends Screen>, ClickAreaHandler<?>> area : ((RecipeRegistryImpl) RecipeRegistry.getInstance()).getClickAreas().entries()) {
+            for (Map.Entry<Class<? extends Screen>, ClickAreaHandler<?>> area : ((PluginManager) DisplayRegistry.getInstance()).getClickAreas().entries()) {
                 if (area.getKey().equals(screen.getClass())) {
                     ClickAreaHandler.Result result = area.getValue().handle(context);
                     if (result.isSuccessful()) {
@@ -562,7 +566,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
                 }
             }
             if (categories != null && !categories.isEmpty()) {
-                String collect = CollectionUtils.mapAndJoinToString(categories, identifier -> RecipeRegistry.getInstance().getCategory(identifier).getCategoryName(), ", ");
+                Component collect = CollectionUtils.mapAndJoinToComponent(categories, identifier -> CategoryRegistry.getInstance().get(identifier).getCategory().getTitle(), new ImmutableLiteralText(", "));
                 Tooltip.create(new TranslatableComponent("text.rei.view_recipes_for", collect)).queue();
             }
         }
@@ -678,7 +682,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
             ScreenHelper.toggleOverlayVisible();
             return true;
         }
-        EntryStack<?> stack = RecipeRegistry.getInstance().getScreenFocusedStack(Minecraft.getInstance().screen);
+        EntryStack<?> stack = DisplayRegistry.getInstance().getScreenFocusedStack(Minecraft.getInstance().screen);
         if (stack != null && !stack.isEmpty()) {
             stack = stack.copy();
             if (ConfigObject.getInstance().getRecipeKeybind().matchesKey(keyCode, scanCode)) {
@@ -731,7 +735,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
             ScreenHelper.toggleOverlayVisible();
             return true;
         }
-        EntryStack<?> stack = RecipeRegistry.getInstance().getScreenFocusedStack(Minecraft.getInstance().screen);
+        EntryStack<?> stack = DisplayRegistry.getInstance().getScreenFocusedStack(Minecraft.getInstance().screen);
         if (stack != null && !stack.isEmpty()) {
             stack = stack.copy();
             if (ConfigObject.getInstance().getRecipeKeybind().matchesMouse(button)) {
@@ -777,7 +781,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
                     return new Point(mouseX, mouseY);
                 }
             };
-            for (Map.Entry<Class<? extends Screen>, ClickAreaHandler<?>> area : ((RecipeRegistryImpl) RecipeRegistry.getInstance()).getClickAreas().entries()) {
+            for (Map.Entry<Class<? extends Screen>, ClickAreaHandler<?>> area : ((PluginManager) DisplayRegistry.getInstance()).getClickAreas().entries()) {
                 if (area.getKey().equals(screen.getClass())) {
                     ClickAreaHandler.Result result = area.getValue().handle(context);
                     if (result.isSuccessful()) {
@@ -824,7 +828,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
     }
     
     public boolean isNotInExclusionZones(double mouseX, double mouseY) {
-        for (OverlayDecider decider : DisplayBoundsRegistry.getInstance().getSortedOverlayDeciders(Minecraft.getInstance().screen.getClass())) {
+        for (OverlayDecider decider : ScreenRegistry.getInstance().getSortedOverlayDeciders(Minecraft.getInstance().screen.getClass())) {
             InteractionResult in = decider.isInZone(mouseX, mouseY);
             if (in != InteractionResult.PASS)
                 return in == InteractionResult.SUCCESS;

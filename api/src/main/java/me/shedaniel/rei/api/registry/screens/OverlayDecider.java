@@ -21,15 +21,16 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api;
+package me.shedaniel.rei.api.registry.screens;
 
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.gui.config.DisplayPanelLocation;
 import net.minecraft.world.InteractionResult;
+import org.jetbrains.annotations.NotNull;
 
 import static net.minecraft.world.InteractionResult.PASS;
 
-public interface OverlayDecider {
+public interface OverlayDecider extends Comparable<OverlayDecider> {
     boolean isHandingScreen(Class<?> screen);
     
     default InteractionResult shouldScreenBeOverlaid(Class<?> screen) {
@@ -65,5 +66,10 @@ public interface OverlayDecider {
      */
     default InteractionResult isInZone(double mouseX, double mouseY) {
         return PASS;
+    }
+    
+    @Override
+    default int compareTo(@NotNull OverlayDecider o) {
+        return Double.compare(getPriority(), o.getPriority());
     }
 }

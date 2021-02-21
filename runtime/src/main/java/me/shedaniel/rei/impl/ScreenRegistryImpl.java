@@ -27,9 +27,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.platform.Window;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.ExclusionZones;
-import me.shedaniel.rei.api.DisplayBoundsRegistry;
-import me.shedaniel.rei.api.OverlayDecider;
+import me.shedaniel.rei.api.registry.screens.ExclusionZones;
+import me.shedaniel.rei.api.registry.screens.DisplayBoundsProvider;
+import me.shedaniel.rei.api.registry.screens.OverlayDecider;
+import me.shedaniel.rei.api.registry.screens.ScreenRegistry;
 import me.shedaniel.rei.api.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.api.util.CollectionUtils;
 import net.fabricmc.api.EnvType;
@@ -44,9 +45,7 @@ import java.util.Map;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
-public class DisplayBoundsRegistryImpl implements DisplayBoundsRegistry {
-    private static final Comparator<OverlayDecider> BOUNDS_HANDLER_COMPARATOR = Comparator.comparingDouble(OverlayDecider::getPriority).reversed();
-    
+public class ScreenRegistryImpl implements ScreenRegistry {
     private List<OverlayDecider> screenDisplayBoundsHandlers = Lists.newArrayList();
     private Map<Class<?>, List<OverlayDecider>> deciderSortedCache = Maps.newHashMap();
     private ExclusionZones exclusionZones;
@@ -55,11 +54,14 @@ public class DisplayBoundsRegistryImpl implements DisplayBoundsRegistry {
     @Override
     public List<OverlayDecider> getSortedOverlayDeciders(Class<?> screenClass) {
         List<OverlayDecider> possibleCached = deciderSortedCache.get(screenClass);
-        if (possibleCached != null)
+        if (possibleCached != null) {
             return possibleCached;
+        }
+        
         tempScreen = screenClass;
-        deciderSortedCache.put(screenClass, CollectionUtils.filter(screenDisplayBoundsHandlers, this::filterResponsible));
-        return deciderSortedCache.get(screenClass);
+        List<OverlayDecider> deciders = CollectionUtils.filter(screenDisplayBoundsHandlers, this::filterResponsible);
+        deciderSortedCache.put(screenClass, deciders);
+        return deciders;
     }
     
     @Override
@@ -94,7 +96,9 @@ public class DisplayBoundsRegistryImpl implements DisplayBoundsRegistry {
     @Override
     public void registerHandler(OverlayDecider decider) {
         screenDisplayBoundsHandlers.add(decider);
-        screenDisplayBoundsHandlers.sort(BOUNDS_HANDLER_COMPARATOR);
+        screenDisplayBoundsHandlers.sort(Comparator.reverseOrder());
+        deciderSortedCache.clear();
+        tempScreen = null;
     }
     
     @Override
@@ -104,17 +108,16 @@ public class DisplayBoundsRegistryImpl implements DisplayBoundsRegistry {
     
     @ApiStatus.Internal
     public void setExclusionZones(ExclusionZones exclusionZones) {
+        registerHandler(exclusionZones);
         this.exclusionZones = exclusionZones;
     }
     
     @ApiStatus.Internal
+    @Override
     public void resetData() {
         screenDisplayBoundsHandlers.clear();
-    }
-    
-    @ApiStatus.Experimental
-    @Override
-    public void resetCache() {
         deciderSortedCache.clear();
+        tempScreen = null;
+        setExclusionZones(new ExclusionZonesImpl());
     }
 }

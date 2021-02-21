@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api;
+package me.shedaniel.rei.api.registry.screens;
 
 import me.shedaniel.math.Rectangle;
 import net.fabricmc.api.EnvType;
@@ -32,11 +32,6 @@ import java.util.function.Supplier;
 
 @Environment(EnvType.CLIENT)
 public interface ExclusionZones extends OverlayDecider {
-    
-    static ExclusionZones getInstance() {
-        return DisplayBoundsRegistry.getInstance().exclusionZones();
-    }
-    
     /**
      * Gets the exclusion zones by the screen class
      *

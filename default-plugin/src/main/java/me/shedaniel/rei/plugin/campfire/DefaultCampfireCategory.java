@@ -33,6 +33,7 @@ import me.shedaniel.rei.api.gui.widgets.Widgets;
 import me.shedaniel.rei.api.gui.widgets.Widget;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
@@ -48,12 +49,12 @@ public class DefaultCampfireCategory implements DisplayCategory<DefaultCampfireD
     }
     
     @Override
-    public @NotNull Renderer getLogo() {
+    public @NotNull Renderer getIcon() {
         return EntryStacks.of(Blocks.CAMPFIRE);
     }
     
     @Override
-    public @NotNull String getCategoryName() {
+    public @NotNull Component getTitle() {
         return I18n.get("category.rei.campfire");
     }
     

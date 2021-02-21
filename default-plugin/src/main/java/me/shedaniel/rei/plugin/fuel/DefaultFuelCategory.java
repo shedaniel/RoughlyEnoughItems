@@ -40,6 +40,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
@@ -60,7 +61,7 @@ public class DefaultFuelCategory implements DisplayCategory<DefaultFuelDisplay> 
     }
     
     @Override
-    public @NotNull String getCategoryName() {
+    public @NotNull Component getTitle() {
         return I18n.get("category.rei.fuel");
     }
     
@@ -70,7 +71,7 @@ public class DefaultFuelCategory implements DisplayCategory<DefaultFuelDisplay> 
     }
     
     @Override
-    public @NotNull Renderer getLogo() {
+    public @NotNull Renderer getIcon() {
         return EntryStacks.of(Items.COAL);
     }
     

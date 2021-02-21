@@ -54,7 +54,7 @@ public class DefaultFuelDisplay implements Display {
     }
     
     @Override
-    public ResourceLocation getRecipeCategory() {
+    public ResourceLocation getCategoryIdentifier() {
         return DefaultPlugin.FUEL;
     }
     

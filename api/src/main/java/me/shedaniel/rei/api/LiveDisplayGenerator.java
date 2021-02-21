@@ -30,13 +30,7 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.List;
 import java.util.Optional;
 
-public interface LiveRecipeGenerator<T extends Display> {
-    
-    /**
-     * @return the identifier of the category the recipes goes to.
-     */
-    ResourceLocation getCategoryIdentifier();
-    
+public interface LiveDisplayGenerator<T extends Display> {
     default Optional<List<T>> getRecipeFor(EntryStack<?> entry) {
         return Optional.empty();
     }
@@ -48,5 +42,4 @@ public interface LiveRecipeGenerator<T extends Display> {
     default Optional<List<T>> getDisplaysGenerated(ClientHelper.ViewSearchBuilder builder) {
         return Optional.empty();
     }
-    
 }

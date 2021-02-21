@@ -96,7 +96,7 @@ public class DefaultInformationDisplay implements Display {
     }
     
     @Override
-    public @NotNull ResourceLocation getRecipeCategory() {
+    public @NotNull ResourceLocation getCategoryIdentifier() {
         return DefaultPlugin.INFO;
     }
 }

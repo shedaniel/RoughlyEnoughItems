@@ -57,7 +57,7 @@ public abstract class DefaultCookingDisplay implements TransferDisplay {
     }
     
     @Override
-    public @NotNull Optional<ResourceLocation> getRecipeLocation() {
+    public @NotNull Optional<ResourceLocation> getDisplayLocation() {
         return Optional.ofNullable(recipe).map(AbstractCookingRecipe::getId);
     }
     
