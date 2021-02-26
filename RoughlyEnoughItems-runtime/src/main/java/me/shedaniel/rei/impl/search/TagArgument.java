@@ -23,7 +23,9 @@
 
 package me.shedaniel.rei.impl.search;
 
+import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.gui.config.SearchMode;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -60,6 +62,11 @@ public final class TagArgument extends Argument<Unit, String[]> {
     @Override
     public @NotNull Style getHighlightedStyle() {
         return STYLE;
+    }
+    
+    @Override
+    public SearchMode getSearchMode() {
+        return ConfigObject.getInstance().getTagSearchMode();
     }
     
     @Override

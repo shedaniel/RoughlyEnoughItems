@@ -28,6 +28,7 @@ import com.google.common.collect.Lists;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.EntryStack;
 import me.shedaniel.rei.api.widgets.Tooltip;
+import me.shedaniel.rei.gui.config.SearchMode;
 import me.shedaniel.rei.impl.search.AlwaysMatchingArgument;
 import me.shedaniel.rei.impl.search.Argument;
 import me.shedaniel.rei.impl.search.ArgumentsRegistry;
@@ -89,8 +90,8 @@ public class SearchArgument<T, R> {
         void addQuote(int index);
         
         void addSplitter(int index);
-    
-        void addPart(SearchArgument<?, ?> argument, Collection<IntRange> grammarRanges, int index);
+        
+        void addPart(SearchArgument<?, ?> argument, boolean usingGrammar, Collection<IntRange> grammarRanges, int index);
     }
     
     @ApiStatus.Internal
@@ -109,6 +110,7 @@ public class SearchArgument<T, R> {
             while (terms.find()) {
                 String term = MoreObjects.firstNonNull(terms.group(1), terms.group(2));
                 for (Argument<?, ?> argument : ArgumentsRegistry.ARGUMENT_LIST) {
+                    if (argument.getSearchMode() == SearchMode.NEVER) continue;
                     MatchStatus status = argument.matchesArgumentPrefix(term);
                     if (status.isMatched()) {
                         SearchArgument<?, ?> searchArgument;
@@ -124,7 +126,7 @@ public class SearchArgument<T, R> {
                             arguments.add(searchArgument = new SearchArgument<>(argument, status.getText(), !status.isInverted(), terms.start(2) + tokenStartIndex, terms.end(2) + tokenStartIndex, !status.shouldPreserveCasing()));
                         }
                         if (sink != null) {
-                            sink.addPart(searchArgument, status.grammarRanges(), terms.start() + tokenStartIndex);
+                            sink.addPart(searchArgument, status.isUsingGrammar(), status.grammarRanges(), terms.start() + tokenStartIndex);
                         }
                         break;
                     }

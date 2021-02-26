@@ -193,4 +193,10 @@ public interface ConfigObject {
     
     @ApiStatus.Experimental
     SyntaxHighlightingMode getSyntaxHighlightingMode();
+    
+    SearchMode getTooltipSearchMode();
+    
+    SearchMode getTagSearchMode();
+    
+    SearchMode getModSearchMode();
 }
