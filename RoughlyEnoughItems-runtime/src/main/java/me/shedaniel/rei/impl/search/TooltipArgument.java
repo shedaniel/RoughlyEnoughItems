@@ -23,7 +23,9 @@
 
 package me.shedaniel.rei.impl.search;
 
+import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.gui.config.SearchMode;
 import me.shedaniel.rei.impl.SearchArgument;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -56,6 +58,11 @@ public final class TooltipArgument extends Argument<Unit, String> {
     @Override
     public @NotNull Style getHighlightedStyle() {
         return STYLE;
+    }
+    
+    @Override
+    public SearchMode getSearchMode() {
+        return ConfigObject.getInstance().getTooltipSearchMode();
     }
     
     @Override

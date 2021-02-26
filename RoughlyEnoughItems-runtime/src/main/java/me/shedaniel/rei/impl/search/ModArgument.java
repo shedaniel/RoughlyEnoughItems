@@ -24,7 +24,9 @@
 package me.shedaniel.rei.impl.search;
 
 import me.shedaniel.rei.api.ClientHelper;
+import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryStack;
+import me.shedaniel.rei.gui.config.SearchMode;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Style;
@@ -53,6 +55,11 @@ public final class ModArgument extends Argument<Unit, ModArgument.@Nullable ModI
     @Override
     public @Nullable String getPrefix() {
         return "@";
+    }
+    
+    @Override
+    public SearchMode getSearchMode() {
+        return ConfigObject.getInstance().getModSearchMode();
     }
     
     @Override

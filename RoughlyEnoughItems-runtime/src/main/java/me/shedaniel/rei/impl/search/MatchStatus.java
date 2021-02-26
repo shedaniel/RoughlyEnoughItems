@@ -39,6 +39,7 @@ public final class MatchStatus {
     @Nullable
     private final String text;
     private final boolean preserveCasing;
+    private boolean usingGrammar = true;
     private final List<IntRange> grammarRanges = new ArrayList<>();
     
     private MatchStatus(MatchType type, @Nullable String text, boolean preserveCasing) {
@@ -95,6 +96,15 @@ public final class MatchStatus {
     
     public boolean isInverted() {
         return type == MatchType.INVERT_MATCHED;
+    }
+    
+    public MatchStatus notUsingGrammar() {
+        usingGrammar = false;
+        return this;
+    }
+    
+    public boolean isUsingGrammar() {
+        return usingGrammar;
     }
     
     public boolean shouldPreserveCasing() {
