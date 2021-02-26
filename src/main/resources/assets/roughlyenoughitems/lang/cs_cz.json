@@ -8,6 +8,8 @@
   "text.rei.cheating_limited_creative_enabled": "§aPodvádění povoleno (Používá Tvořivou hru)",
   "text.rei.no_permission_cheat": "Operátorská práva jsou vyžadována pro podvádění předmětů",
   "text.rei.search.field.suggestion": "Hledat...",
+  "text.rei.feedback": "Chcete poskytnout jakoukoliv zpětnou vazbu vývojáři REI? %s pro odeslání zpětné vazby!",
+  "text.rei.feedback.link": "Kliknutím zde navštívíte formulář Google",
   "category.rei.crafting": "Vyrábění",
   "category.rei.smelting": "Vypékání",
   "category.rei.smelting.fuel": "Palivo",
