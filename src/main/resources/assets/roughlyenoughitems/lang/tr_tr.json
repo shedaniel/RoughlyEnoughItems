@@ -171,6 +171,7 @@
   "config.roughlyenoughitems.accessibility.displayPanelLocation": "Girdi Listesi Yeri:",
   "config.roughlyenoughitems.accessibility.displayPanelLocation.left": "Sol Taraf",
   "config.roughlyenoughitems.accessibility.displayPanelLocation.right": "Sağ Taraf",
+  "config.roughlyenoughitems.search.tooltipSearch": "İpucu Araması (#):",
   "config.roughlyenoughitems.layout.debugRenderTimeRequired": "Girdi Listesi Hata Ayıklama Modu:",
   "config.roughlyenoughitems.search.debugSearchTimeRequired": "Arama Hata Ayıklama Modu:",
   "config.roughlyenoughitems.accessibility.resizeDynamically": "Dinamik Olarak Ölçekle:",
