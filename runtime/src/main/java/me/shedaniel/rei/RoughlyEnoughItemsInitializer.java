@@ -24,20 +24,18 @@
 package me.shedaniel.rei;
 
 import com.google.common.collect.ImmutableSet;
-import net.fabricmc.api.ClientModInitializer;
+import me.shedaniel.architectury.platform.Platform;
 import net.fabricmc.api.EnvType;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.SemanticVersion;
-import net.fabricmc.loader.api.VersionParsingException;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
-public class RoughlyEnoughItemsInitializer implements ModInitializer, ClientModInitializer {
-    @Override
-    public void onInitialize() {
-        checkRequiredFabricModules();
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+public class RoughlyEnoughItemsInitializer {
+    public static void onInitialize() {
+        if (Platform.isFabric()) {
+            checkRequiredFabricModules();
+        }
+        if (Platform.getEnv() == EnvType.CLIENT) {
             checkClothConfig();
         }
         
@@ -46,8 +44,7 @@ public class RoughlyEnoughItemsInitializer implements ModInitializer, ClientModI
         }
     }
     
-    @Override
-    public void onInitializeClient() {
+    public static void onInitializeClient() {
         if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
             initializeEntryPoint("me.shedaniel.rei.RoughlyEnoughItemsCore");
             initializeEntryPoint("me.shedaniel.rei.REIModMenuEntryPoint");
@@ -58,13 +55,25 @@ public class RoughlyEnoughItemsInitializer implements ModInitializer, ClientModI
         initializeEntryPoint("me.shedaniel.rei.impl.ErrorDisplayer");
     }
     
-    public void initializeEntryPoint(String className) {
+    public static void initializeEntryPoint(String className) {
         try {
-            Object instance = Class.forName(className).getConstructor().newInstance();
-            if (instance instanceof ModInitializer) {
-                ((ModInitializer) instance).onInitialize();
-            } else if (instance instanceof ClientModInitializer) {
-                ((ClientModInitializer) instance).onInitializeClient();
+            Class<?> name = Class.forName(className);
+            Object instance = name.getConstructor().newInstance();
+            Method method = null;
+            try {
+                method = name.getDeclaredMethod("onInitialize");
+            } catch (NoSuchMethodException ignored) {
+            }
+            if (method != null) {
+                method.invoke(instance);
+            } else if (Platform.getEnv() == EnvType.CLIENT) {
+                try {
+                    method = name.getDeclaredMethod("onInitializeClient");
+                } catch (NoSuchMethodException ignored) {
+                }
+                if (method != null) {
+                    method.invoke(instance);
+                }
             }
         } catch (InstantiationException | InvocationTargetException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException e) {
             throw new RuntimeException(e);
@@ -72,7 +81,7 @@ public class RoughlyEnoughItemsInitializer implements ModInitializer, ClientModI
     }
     
     public static void checkRequiredFabricModules() {
-        ImmutableSet<String> requiredModules = FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT ?
+        ImmutableSet<String> requiredModules = Platform.getEnv() == EnvType.CLIENT ?
                 ImmutableSet.<String>builder()
                         .add("fabric-api-base")
                         .add("fabric-resource-loader-v0")
@@ -87,7 +96,7 @@ public class RoughlyEnoughItemsInitializer implements ModInitializer, ClientModI
                         .add("fabric-lifecycle-events-v1")
                         .build();
         for (String module : requiredModules) {
-            boolean moduleLoaded = FabricLoader.getInstance().isModLoaded(module);
+            boolean moduleLoaded = Platform.isModLoaded(module);
             if (!moduleLoaded) {
                 RoughlyEnoughItemsState.error("Fabric API is not installed!", "https://www.curseforge.com/minecraft/mc-mods/fabric-api/files/all");
                 break;
@@ -96,15 +105,15 @@ public class RoughlyEnoughItemsInitializer implements ModInitializer, ClientModI
     }
     
     public static void checkClothConfig() {
-        try {
-            if (!FabricLoader.getInstance().isModLoaded("cloth-config2")) {
+        /*try {
+            if (!Platform.isModLoaded("cloth-config2")) {
                 RoughlyEnoughItemsState.error("Cloth Config is not installed!", "https://www.curseforge.com/minecraft/mc-mods/cloth-config/files/all");
-            } else if (SemanticVersion.parse(FabricLoader.getInstance().getModContainer("cloth-config2").get().getMetadata().getVersion().getFriendlyString()).compareTo(SemanticVersion.parse("4.10.9")) < 0) {
+            } else if (SemanticVersion.parse(Platform.getMod("cloth-config2").getVersion()).compareTo(SemanticVersion.parse("4.10.9")) < 0) {
                 RoughlyEnoughItemsState.error("Your Cloth Config version is too old!", "https://www.curseforge.com/minecraft/mc-mods/cloth-config/files/all");
             }
         } catch (VersionParsingException e) {
             RoughlyEnoughItemsState.error("Failed to parse Cloth Config version: " + e.getMessage());
             e.printStackTrace();
-        }
+        }*/
     }
 }

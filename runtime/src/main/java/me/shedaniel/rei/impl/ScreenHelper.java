@@ -45,7 +45,6 @@ import me.shedaniel.rei.api.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.OverlaySearchField;
 import me.shedaniel.rei.gui.RecipeScreen;
-import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -66,7 +65,7 @@ import static me.shedaniel.rei.impl.Internals.attachInstance;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
-public class ScreenHelper implements ClientModInitializer, REIHelper {
+public class ScreenHelper implements REIHelper {
     @ApiStatus.Internal
     public static boolean isWithinRecipeViewingScreen = false;
     private static final ResourceLocation DISPLAY_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/display.png");
@@ -234,7 +233,6 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
         return new Rectangle(bounds.x, bounds.y + yOffset, bounds.width, bounds.height - 3 - yOffset);
     }
     
-    @Override
     public void onInitializeClient() {
         GuiEvent.INIT_PRE.register((screen, widgets, children) -> {
             if (previousContainerScreen != screen && screen instanceof AbstractContainerScreen)

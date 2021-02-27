@@ -31,6 +31,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import me.shedaniel.architectury.hooks.ScreenHooks;
+import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
 import me.shedaniel.autoconfig.gui.ConfigScreenProvider;
@@ -230,7 +231,7 @@ public class ConfigManagerImpl implements ConfigManager {
     @Override
     public Screen getConfigScreen(Screen parent) {
         try {
-            if (!detectWorkingOptifabric()) {
+            if (Platform.isFabric() && !detectWorkingOptifabric()) {
                 List<Tuple<String, String>> warnings = Lists.newArrayList();
                 warnings.add(new Tuple<>(I18n.get("text.rei.config.optifine.title"), null));
                 warnings.add(new Tuple<>(I18n.get("text.rei.config.optifine.description"), null));

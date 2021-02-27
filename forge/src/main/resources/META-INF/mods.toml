@@ -1,0 +1,20 @@
+modLoader = "javafml"
+loaderVersion = "[36,)"
+issueTrackerURL = "https://github.com/shedaniel/RoughlyEnoughItems/issues"
+logoFile = "icon.png"
+authors = "shedaniel"
+license = "MIT"
+[[mods]]
+modId = "roughlyenoughitems"
+version = "${version}"
+displayName = "Roughly Enough Items"
+description = '''
+To allow players to view items and recipes.
+'''
+
+[[dependencies.roughlyenoughitems]]
+modId = "cloth-config"
+mandatory = true
+versionRange = "[4.0.1,)"
+ordering = "NONE"
+side = "CLIENT"

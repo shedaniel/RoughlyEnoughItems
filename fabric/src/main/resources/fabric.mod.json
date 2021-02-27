@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "id": "roughlyenoughitems-runtime",
-  "name": "REI (Runtime)",
-  "description": "The runtime implementation of Roughly Enough Items.",
+  "id": "roughlyenoughitems",
+  "name": "Roughly Enough Items",
+  "description": "Clean and Customizable.",
   "version": "${version}",
   "authors": [
     "shedaniel"
@@ -16,18 +16,19 @@
   "icon": "icon.png",
   "entrypoints": {
     "main": [
-      "me.shedaniel.rei.RoughlyEnoughItemsInitializer"
+      "me.shedaniel.rei.RoughlyEnoughItemsInitializer::onInitialize"
     ],
     "client": [
-      "me.shedaniel.rei.RoughlyEnoughItemsInitializer"
+      "me.shedaniel.rei.fabric.RoughlyEnoughItemsFabric",
+      "me.shedaniel.rei.RoughlyEnoughItemsInitializer::onInitializeClient"
     ],
-    "rei_plugins": [
+    "rei": [
+      "me.shedaniel.rei.plugin.DefaultPlugin",
       "me.shedaniel.rei.gui.plugin.DefaultRuntimePlugin"
     ]
   },
-  "accessWidener": "roughlyenoughitems-runtime.accessWidener",
+  "accessWidener": "roughlyenoughitems.accessWidener",
   "custom": {
-    "modmenu:parent": "roughlyenoughitems",
     "rei:translators": {
       "English": ["shedaniel"],
       "Japanese": ["swordglowsblue", "hinataaki"],

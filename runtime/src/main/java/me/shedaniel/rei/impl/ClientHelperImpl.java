@@ -25,6 +25,7 @@ package me.shedaniel.rei.impl;
 
 import io.netty.buffer.Unpooled;
 import me.shedaniel.architectury.networking.NetworkManager;
+import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
@@ -44,12 +45,8 @@ import me.shedaniel.rei.gui.PreRecipeViewingScreen;
 import me.shedaniel.rei.gui.RecipeScreen;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
-import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.ModContainer;
-import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -74,7 +71,7 @@ import static me.shedaniel.rei.impl.Internals.attachInstance;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
-public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
+public class ClientHelperImpl implements ClientHelper {
     @ApiStatus.Internal public final LazyLoadedValue<Boolean> isYog = new LazyLoadedValue<>(() -> {
         try {
             if (Minecraft.getInstance().getUser().getGameProfile().getId().equals(UUID.fromString("f9546389-9415-4358-9c29-2c26b25bff5b")))
@@ -113,9 +110,12 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         String any = modNameCache.getOrDefault(modId, null);
         if (any != null)
             return any;
-        String s = FabricLoader.getInstance().getModContainer(modId).map(ModContainer::getMetadata).map(ModMetadata::getName).orElse(modId);
-        modNameCache.put(modId, s);
-        return s;
+        if (Platform.isModLoaded(modId)) {
+            String modName = Platform.getMod(modId).getName();
+            modNameCache.put(modId, modName);
+            return modName;
+        }
+        return modId;
     }
     
     @Override
@@ -234,7 +234,6 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         return NetworkManager.canServerReceive(RoughlyEnoughItemsNetwork.MOVE_ITEMS_PACKET);
     }
     
-    @Override
     public void onInitializeClient() {
         attachInstance(this, ClientHelper.class);
         attachInstance((Supplier<ViewSearchBuilder>) ViewSearchBuilderImpl::new, "viewSearchBuilder");

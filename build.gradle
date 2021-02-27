@@ -1,13 +1,11 @@
 plugins {
-    id("forgified-fabric-loom") version("0.6.66") apply false
-    id("maven-publish")
-    id("java")
-    id("java-library")
-    id("net.minecrell.licenser") version("0.4.1")
+    id("architectury-plugin") version("3.0.89")
+    id("forgified-fabric-loom") version("0.6.71") apply false
+    id("org.cadixdev.licenser") version("0.5.0")
     id("com.matthewprenger.cursegradle") version("1.4.0")
+    id("java")
+    id("maven-publish")
 }
-
-import net.fabricmc.loom.task.RemapJarTask
 
 import java.text.SimpleDateFormat
 
@@ -18,111 +16,77 @@ version = rootProject.base_version + "." + runNumber
 
 group = "me.shedaniel"
 
-allprojects {
-    apply plugin: 'maven-publish'
-    apply plugin: 'forgified-fabric-loom'
-    apply plugin: 'net.minecrell.licenser'
-
-    sourceCompatibility = targetCompatibility = 1.8
+subprojects {
+    apply plugin: "forgified-fabric-loom"
 
     loom {
         silentMojangMappingsLicense()
-//        shareCaches = true
     }
 
+    dependencies {
+        minecraft("com.mojang:minecraft:${rootProject.minecraft_version}")
+        mappings(loom.officialMojangMappings())
+    }
+}
+
+allprojects {
+    apply plugin: "maven-publish"
+    apply plugin: "architectury-plugin"
+    apply plugin: "org.cadixdev.licenser"
+
+    sourceCompatibility = targetCompatibility = 1.8
+
     repositories {
+        mavenLocal()
         maven { url "https://maven.shedaniel.me" }
         maven { url "https://maven.terraformersmc.com/releases" }
     }
-
-    processResources {
-        filesMatching('fabric.mod.json') {
-            expand 'version': project.version
-        }
-        inputs.property "version", project.version
+    
+    architectury {
+        transformerVersion = "2.1.9999"
     }
 
     license {
-        header rootProject.file('HEADER')
-        include '**/*.java'
+        header rootProject.file("HEADER")
+        include "**/*.java"
     }
 
     jar {
         from rootProject.file("LICENSE")
     }
 
-    dependencies {
-        minecraft("com.mojang:minecraft:${project.minecraft_version}")
-        mappings(loom.officialMojangMappings())
-        modApi("net.fabricmc:fabric-loader:${project.fabricloader_version}")
-//        modApi(fabricApi.module("fabric-api-base", project.fabric_api))
-//        modApi(fabricApi.module("fabric-resource-loader-v0", project.fabric_api))
-//        modApi(fabricApi.module("fabric-networking-api-v1", project.fabric_api))
-//        modApi(fabricApi.module("fabric-lifecycle-events-v1", project.fabric_api))
-//        modApi(fabricApi.module("fabric-rendering-fluids-v1", project.fabric_api))
-        modApi("me.shedaniel.cloth:cloth-config-fabric:${cloth_config_version}") {
-            exclude(module: "fabric-api")
-        }
-        modApi("org.jetbrains:annotations:19.0.0")
-        modRuntime("com.terraformersmc:modmenu:${modmenu_version}") {
-            transitive(false)
-        }
-        modRuntime("me.shedaniel:SmoothScrollingEverywhere:3.0.3-unstable") {
-            transitive(false)
-        }
-        modCompileOnly("me.shedaniel:architectury:${architectury_version}") {
-            exclude(module: "fabric-api")
-        }
-        modRuntime("me.shedaniel:architectury-fabric:${architectury_version}")
-        modRuntime("net.fabricmc.fabric-api:fabric-api:${project.fabric_api}")
-    }
-
     tasks.withType(JavaCompile) {
         options.encoding = "UTF-8"
-    }
 
-    task sourcesJar(type: Jar, dependsOn: classes) {
-        classifier("sources")
-        from sourceSets.main.allSource
+        def targetVersion = 8
+        if (JavaVersion.current().isJava9Compatible()) {
+            options.release = targetVersion
+        }
     }
 }
 
 subprojects {
+//    apply plugin: "forgified-fabric-loom"
+    
     group = rootProject.group
     version = rootProject.version
 
-    task remapMavenJar(type: Copy, dependsOn: remapJar) {
-        afterEvaluate {
-            from("${project.buildDir}/libs/$archivesBaseName-${version}.jar")
-            into("${project.buildDir}/libs/")
-            rename { String fn -> "$archivesBaseName-${version}-maven.jar" }
-        }
+//    loom {
+//        silentMojangMappingsLicense()
+//    }
+
+    dependencies {
+//        minecraft("com.mojang:minecraft:${project.minecraft_version}")
+//        mappings(loom.officialMojangMappings())
+//        modApi("net.fabricmc:fabric-loader:${project.fabricloader_version}")
     }
 
-    configurations {
-        dev
-        remapped
-    }
-
-    jar {
-        classifier("dev")
-    }
-
-    remapJar {
-        classifier(null)
-    }
-
-    artifacts {
-        dev file: file("${project.buildDir}/libs/$archivesBaseName-${version}-dev.jar"), type: "jar", builtBy: jar
-        remapped file: file("${project.buildDir}/libs/$archivesBaseName-${version}.jar"), type: "jar", builtBy: remapJar
-    }
-
-    publishing {
+    /*publishing {
         publications {
             create("${archivesBaseName}_mavenJava", MavenPublication) {
                 afterEvaluate {
-                    artifact(file("${project.buildDir}/libs/$archivesBaseName-${version}-maven.jar")) {
-                        builtBy remapMavenJar
+                    artifact(jar) {
+                        builtBy mavenJar
                     }
                     artifact(sourcesJar) {
                         builtBy remapSourcesJar
@@ -142,25 +106,19 @@ subprojects {
                 }
             }
         }
-    }
+    }*/
 }
 
 task licenseFormatAll
 subprojects { licenseFormatAll.dependsOn("${path}:licenseFormat") }
-subprojects { rootProject.remapJar.dependsOn("${path}:remapJar") }
+//subprojects { rootProject.remapJar.dependsOn("${path}:remapJar") }
 
-task remapMavenJar(type: RemapJarTask, dependsOn: jar) {
-    input.set(file("${project.buildDir}/libs/${archivesBaseName}-${project.version}-dev.jar"))
-    archiveFileName = "${archivesBaseName}-${project.version}-maven.jar"
-    addNestedDependencies.set(false)
-}
-
-dependencies {
-    subprojects.each {
-        compile project(path: ":${it.name}", configuration: "dev")
-        include project(path: ":${it.name}", configuration: "remapped")
-    }
-}
+//dependencies {
+//    subprojects.each {
+//        compile project(path: ":${it.name}", configuration: "dev")
+//        include project(path: ":${it.name}", configuration: "remapped")
+//    }
+//}
 
 def releaseChangelog = "No changelog"
 
@@ -193,7 +151,7 @@ task releaseOnCf {
     dependsOn tasks.getByName("curseforge")
 }
 
-curseforge {
+/*curseforge {
     if (project.hasProperty('danielshe_curse_api_key') || System.getenv('danielshe_curse_api_key') != null) {
         apiKey = project.hasProperty('danielshe_curse_api_key') ? project.property('danielshe_curse_api_key') : System.getenv('danielshe_curse_api_key')
         project {
@@ -232,8 +190,8 @@ curseforge {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact(file("${project.buildDir}/libs/$archivesBaseName-${version}-maven.jar")) {
-                builtBy remapMavenJar
+            artifact(jar) {
+                builtBy remapJar
             }
             artifact(sourcesJar) {
                 builtBy remapSourcesJar
@@ -262,4 +220,4 @@ publishing {
             }
         }
     }
-}
+}*/

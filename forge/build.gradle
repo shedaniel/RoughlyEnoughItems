@@ -1,0 +1,26 @@
+archivesBaseName = "forge"
+
+architectury {
+    platformSetupLoomIde()
+    forge()
+}
+
+processResources {
+    filesMatching("META-INF/mods.toml") {
+        expand "version": project.version
+    }
+    inputs.property "version", project.version
+}
+
+dependencies {
+    forge("net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}")
+    modApi("me.shedaniel.cloth:cloth-config-forge:${cloth_config_version}")
+    modApi("me.shedaniel:architectury-forge:${architectury_version}")
+
+    implementation(project(path: ":api")) { transitive = false }
+    implementation(project(path: ":default-plugin")) { transitive = false }
+    implementation(project(path: ":runtime")) { transitive = false }
+    developmentForge(project(path: ":api")) { transitive = false }
+    developmentForge(project(path: ":default-plugin")) { transitive = false }
+    developmentForge(project(path: ":runtime")) { transitive = false }
+}
