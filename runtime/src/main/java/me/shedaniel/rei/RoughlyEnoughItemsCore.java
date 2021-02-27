@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -61,11 +60,8 @@ import me.shedaniel.rei.impl.entry.EntryIngredientImpl;
 import me.shedaniel.rei.impl.view.ViewsImpl;
 import me.shedaniel.rei.impl.widgets.*;
 import me.shedaniel.rei.tests.plugin.REITestPlugin;
-import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -110,7 +106,7 @@ import static me.shedaniel.rei.impl.Internals.attachInstance;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
-public class RoughlyEnoughItemsCore implements ClientModInitializer {
+public class RoughlyEnoughItemsCore {
     @ApiStatus.Internal public static final Logger LOGGER = LogManager.getFormatterLogger("REI");
     private static final List<REIPlugin> PLUGINS = new ArrayList<>();
     private static final ExecutorService SYNC_RECIPES = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "REI-SyncRecipes"));
@@ -396,15 +392,11 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
     }
     
     @SuppressWarnings("deprecation")
-    @Override
     public void onInitializeClient() {
         IssuesDetector.detect();
         registerClothEvents();
-        discoverPluginEntries();
-        for (ModContainer modContainer : FabricLoader.getInstance().getAllMods()) {
-            if (modContainer.getMetadata().containsCustomElement("roughlyenoughitems:plugins"))
-                RoughlyEnoughItemsCore.LOGGER.error("REI plugin from " + modContainer.getMetadata().getId() + " is not loaded because it is too old!");
-        }
+        PluginDetector.detectClientPlugins();
+        loadTestPlugins();
         
         Minecraft client = Minecraft.getInstance();
         NetworkManager.registerReceiver(NetworkManager.s2c(), RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, (buf, context) -> {
@@ -445,41 +437,9 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         });
     }
     
-    private void discoverPluginEntries() {
-        for (REIPlugin plugin : Iterables.concat(
-                FabricLoader.getInstance().getEntrypoints("rei_plugins", REIPlugin.class),
-                FabricLoader.getInstance().getEntrypoints("rei", REIPlugin.class)
-        )) {
-            try {
-                registerPlugin(plugin);
-            } catch (Exception e) {
-                e.printStackTrace();
-                RoughlyEnoughItemsCore.LOGGER.error("Can't load REI plugins from %s: %s", plugin.getClass(), e.getLocalizedMessage());
-            }
-        }
-        for (REIPlugin reiPlugin : FabricLoader.getInstance().getEntrypoints("rei_plugins_v0", REIPlugin.class)) {
-            try {
-                registerPlugin(reiPlugin);
-            } catch (Exception e) {
-                e.printStackTrace();
-                RoughlyEnoughItemsCore.LOGGER.error("Can't load REI plugins from %s: %s", reiPlugin.getClass(), e.getLocalizedMessage());
-            }
-        }
-        
-        // Test Only
-        loadTestPlugins();
-    }
-    
     private void loadTestPlugins() {
         if (isDebugModeEnabled()) {
             registerPlugin(new REITestPlugin());
-        }
-        if (FabricLoader.getInstance().isModLoaded("libblockattributes-fluids")) {
-            try {
-                registerPlugin((REIPlugin) Class.forName("me.shedaniel.rei.compat.LBASupportPlugin").getConstructor().newInstance());
-            } catch (Throwable throwable) {
-                throwable.printStackTrace();
-            }
         }
     }
     

@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.api.gui.widgets;
 
+import me.shedaniel.architectury.utils.EnvExecutor;
 import me.shedaniel.math.Point;
-import me.shedaniel.math.api.Executor;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.impl.Internals;
 import net.fabricmc.api.EnvType;
@@ -64,6 +64,6 @@ public interface Tooltip {
     List<Component> getText();
     
     default void queue() {
-        Executor.runIfEnv(EnvType.CLIENT, () -> () -> REIHelper.getInstance().queueTooltip(this));
+        EnvExecutor.runInEnv(EnvType.CLIENT, () -> () -> REIHelper.getInstance().queueTooltip(this));
     }
 }

@@ -26,12 +26,10 @@ package me.shedaniel.rei.impl;
 import me.shedaniel.architectury.event.events.GuiEvent;
 import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.gui.WarningAndErrorScreen;
-import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.InteractionResult;
 
-public class ErrorDisplayer implements ClientModInitializer {
-    @Override
+public class ErrorDisplayer {
     public void onInitializeClient() {
         GuiEvent.INIT_PRE.register((screen, widgets, children) -> {
             Minecraft minecraft = Minecraft.getInstance();

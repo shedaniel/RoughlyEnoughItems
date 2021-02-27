@@ -84,10 +84,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @ApiStatus.Internal
 public class EntryListWidget extends WidgetWithBounds {
@@ -285,37 +287,37 @@ public class EntryListWidget extends WidgetWithBounds {
         boolean fastEntryRendering = ConfigObject.getInstance().doesFastEntryRendering();
         if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
             ScissorsHandler.INSTANCE.scissor(bounds);
-    
+            
             int skip = Math.max(0, Mth.floor(scrolling.scrollAmount / (float) entrySize()));
             int nextIndex = skip * innerBounds.width / entrySize();
             int i = nextIndex;
             int cont = nextIndex;
             blockedCount = 0;
-    
+            
             Int2ObjectMap<List<EntryListEntry>> grouping = new Int2ObjectOpenHashMap<>();
             List<EntryListEntry> toRender = new ArrayList<>();
             Consumer<EntryListEntry> add;
-    
+            
             if (fastEntryRendering) {
                 add = entry -> {
                     int hash = BatchEntryRenderer.getBatchIdFrom(entry.getCurrentEntry());
                     List<EntryListEntry> entries = grouping.get(hash);
-            
+                    
                     if (entries == null) {
                         grouping.put(hash, entries = new ArrayList<>());
                     }
-            
+                    
                     entries.add(entry);
                 };
             } else {
                 add = toRender::add;
             }
-    
+            
             for (; cont < entries.size(); cont++) {
                 EntryListEntry entry = entries.get(cont);
-        
+                
                 Rectangle entryBounds = entry.getBounds();
-        
+                
                 entryBounds.y = (int) (entry.backupY - scrolling.scrollAmount);
                 if (entryBounds.y > this.bounds.getMaxY()) break;
                 if (allStacks.size() <= i) break;
@@ -330,7 +332,7 @@ public class EntryListWidget extends WidgetWithBounds {
                     blockedCount++;
                 }
             }
-    
+            
             if (fastEntryRendering) {
                 for (List<EntryListEntry> entries : grouping.values()) {
                     renderEntries(debugTime, size, time, fastEntryRendering, matrices, mouseX, mouseY, delta, entries);
@@ -338,10 +340,12 @@ public class EntryListWidget extends WidgetWithBounds {
             } else {
                 renderEntries(debugTime, size, time, fastEntryRendering, matrices, mouseX, mouseY, delta, toRender);
             }
-    
+            
             updatePosition(delta);
             ScissorsHandler.INSTANCE.removeLastScissor();
-            scrolling.renderScrollBar(0, 1, REIHelper.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
+            if (scrolling.getMaxScroll() > 0) {
+                scrolling.renderScrollBar(0, 1, REIHelper.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
+            }
         } else {
             for (Widget widget : renders) {
                 widget.render(matrices, mouseX, mouseY, delta);

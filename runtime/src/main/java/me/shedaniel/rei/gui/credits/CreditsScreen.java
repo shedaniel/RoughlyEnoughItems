@@ -32,7 +32,6 @@ import me.shedaniel.rei.gui.TransformingScreen;
 import me.shedaniel.rei.gui.credits.CreditsEntryListWidget.TextCreditsItem;
 import me.shedaniel.rei.gui.credits.CreditsEntryListWidget.TranslationCreditsItem;
 import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.metadata.CustomValue;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
@@ -47,7 +46,6 @@ import net.minecraft.util.Tuple;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -79,7 +77,7 @@ public class CreditsScreen extends Screen {
         entryListWidget.creditsClearEntries();
         List<Tuple<String, String>> translators = Lists.newArrayList();
         Exception[] exception = {null};
-        FabricLoader.getInstance().getModContainer("roughlyenoughitems-runtime").ifPresent(rei -> {
+        /*FabricLoader.getInstance().getModContainer("roughlyenoughitems").ifPresent(rei -> {
             try {
                 if (rei.getMetadata().containsCustomValue("rei:translators")) {
                     CustomValue.CvObject jsonObject = rei.getMetadata().getCustomValue("rei:translators").getAsObject();
@@ -94,7 +92,7 @@ public class CreditsScreen extends Screen {
                 exception[0] = e;
                 e.printStackTrace();
             }
-        });
+        });*/
         List<Tuple<String, String>> translatorsMapped = translators.stream().map(pair -> {
             return new Tuple<>(
                     "  " + (I18n.exists("language.roughlyenoughitems." + pair.getA().toLowerCase(Locale.ROOT).replace(' ', '_')) ? I18n.get("language.roughlyenoughitems." + pair.getA().toLowerCase(Locale.ROOT).replace(' ', '_')) : pair.getA()),

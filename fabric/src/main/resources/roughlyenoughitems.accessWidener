@@ -1,0 +1,33 @@
+accessWidener v1     named
+accessible    class  net/minecraft/client/gui/Font$StringRenderOutput
+accessible    class  net/minecraft/world/item/alchemy/PotionBrewing$Mix
+accessible    field  net/minecraft/client/gui/components/ImageButton                           resourceLocation        Lnet/minecraft/resources/ResourceLocation;
+accessible    field  net/minecraft/client/gui/screens/inventory/AbstractContainerScreen        hoveredSlot             Lnet/minecraft/world/inventory/Slot;
+accessible    field  net/minecraft/client/gui/screens/inventory/AbstractContainerScreen        imageHeight             I
+accessible    field  net/minecraft/client/gui/screens/inventory/AbstractContainerScreen        imageWidth              I
+accessible    field  net/minecraft/client/gui/screens/inventory/AbstractContainerScreen        isQuickCrafting         Z
+accessible    field  net/minecraft/client/gui/screens/inventory/AbstractContainerScreen        leftPos                 I
+accessible    field  net/minecraft/client/gui/screens/inventory/AbstractContainerScreen        topPos                  I
+accessible    field  net/minecraft/client/gui/screens/inventory/EffectRenderingInventoryScreen doRenderEffects         Z
+accessible    field  net/minecraft/client/gui/screens/recipebook/RecipeBookComponent           ghostRecipe             Lnet/minecraft/client/gui/screens/recipebook/GhostRecipe;
+accessible    field  net/minecraft/client/gui/screens/recipebook/RecipeBookComponent           searchBox               Lnet/minecraft/client/gui/components/EditBox;
+accessible    field  net/minecraft/client/gui/screens/recipebook/RecipeBookComponent           tabButtons              Ljava/util/List;
+accessible    field  net/minecraft/client/StringSplitter                                       widthProvider           Lnet/minecraft/client/StringSplitter$WidthProvider;
+accessible    field  net/minecraft/world/entity/player/Inventory                               compartments            Ljava/util/List;
+accessible    field  net/minecraft/world/item/alchemy/PotionBrewing                            ALLOWED_CONTAINERS      Ljava/util/List;
+accessible    field  net/minecraft/world/item/alchemy/PotionBrewing                            CONTAINER_MIXES         Ljava/util/List;
+accessible    field  net/minecraft/world/item/alchemy/PotionBrewing                            POTION_MIXES            Ljava/util/List;
+accessible    field  net/minecraft/world/item/alchemy/PotionBrewing$Mix                        from                    Ljava/lang/Object;
+accessible    field  net/minecraft/world/item/alchemy/PotionBrewing$Mix                        ingredient              Lnet/minecraft/world/item/crafting/Ingredient;
+accessible    field  net/minecraft/world/item/alchemy/PotionBrewing$Mix                        to                      Ljava/lang/Object;
+accessible    field  net/minecraft/world/item/BucketItem                                       content                 Lnet/minecraft/world/level/material/Fluid;
+accessible    field  net/minecraft/world/item/crafting/UpgradeRecipe                           addition                Lnet/minecraft/world/item/crafting/Ingredient;
+accessible    field  net/minecraft/world/item/crafting/UpgradeRecipe                           base                    Lnet/minecraft/world/item/crafting/Ingredient;
+accessible    field  net/minecraft/world/item/CreativeModeTab                                  langId                  Ljava/lang/String;
+accessible    method net/minecraft/client/gui/GuiComponent                                     innerBlit               (Lcom/mojang/math/Matrix4f;IIIIIFFFF)V
+accessible    method net/minecraft/client/gui/screens/Screen                                   addButton               (Lnet/minecraft/client/gui/components/AbstractWidget;)Lnet/minecraft/client/gui/components/AbstractWidget;
+accessible    method net/minecraft/client/gui/screens/Screen                                   addWidget               (Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;
+accessible    method net/minecraft/client/gui/screens/Screen                                   init                    ()V
+accessible    method net/minecraft/client/gui/screens/Screen                                   insertText              (Ljava/lang/String;Z)V
+accessible    method net/minecraft/client/gui/screens/Screen                                   isValidCharacterForName (Ljava/lang/String;CI)Z
+accessible    method net/minecraft/tags/TagContainer                                           get                     (Lnet/minecraft/resources/ResourceKey;)Lnet/minecraft/tags/TagCollection;

@@ -86,6 +86,7 @@ public class DefaultRuntimePlugin implements REIPlugin {
     public void registerEntryTypes(EntryTypeRegistry registry) {
         registry.register(VanillaEntryTypes.ITEM, new ItemEntryDefinition());
         registry.register(VanillaEntryTypes.FLUID, new FluidEntryDefinition());
+        
         registry.registerBridge(VanillaEntryTypes.ITEM, VanillaEntryTypes.FLUID, input -> {
             Optional<Stream<EntryStack<FluidStack>>> stream = FluidSupportProvider.getInstance().itemToFluids(input);
             if (!stream.isPresent()) {
@@ -97,7 +98,7 @@ public class DefaultRuntimePlugin implements REIPlugin {
     
     @Override
     public void registerEntries(EntryRegistry registry) {
-        if (ClientHelperImpl.getInstance().isAprilFools.get() || true) {
+        if (ClientHelperImpl.getInstance().isAprilFools.get()) {
             registry.registerEntry(EntryStacks.of(new AbstractRenderer() {
                 private ResourceLocation id = new ResourceLocation("roughlyenoughitems", "textures/gui/kirb.png");
         

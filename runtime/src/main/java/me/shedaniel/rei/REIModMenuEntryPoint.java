@@ -25,10 +25,8 @@ package me.shedaniel.rei;
 
 import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.rei.api.ConfigManager;
-import net.fabricmc.api.ClientModInitializer;
 
-public class REIModMenuEntryPoint implements ClientModInitializer {
-    @Override
+public class REIModMenuEntryPoint {
     public void onInitializeClient() {
         Platform.getMod("roughlyenoughitems").registerConfigurationScreen(ConfigManager.getInstance()::getConfigScreen);
     }

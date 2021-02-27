@@ -27,8 +27,6 @@ import com.google.common.collect.Lists;
 import io.netty.buffer.Unpooled;
 import me.shedaniel.architectury.networking.NetworkManager;
 import me.shedaniel.rei.api.server.InputSlotCrafter;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.NonNullList;
@@ -45,7 +43,7 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
-public class RoughlyEnoughItemsNetwork implements ModInitializer {
+public class RoughlyEnoughItemsNetwork {
     public static final ResourceLocation DELETE_ITEMS_PACKET = new ResourceLocation("roughlyenoughitems", "delete_item");
     public static final ResourceLocation CREATE_ITEMS_PACKET = new ResourceLocation("roughlyenoughitems", "create_item");
     public static final ResourceLocation CREATE_ITEMS_GRAB_PACKET = new ResourceLocation("roughlyenoughitems", "create_item_grab");
@@ -53,9 +51,8 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
     public static final ResourceLocation MOVE_ITEMS_PACKET = new ResourceLocation("roughlyenoughitems", "move_items");
     public static final ResourceLocation NOT_ENOUGH_ITEMS_PACKET = new ResourceLocation("roughlyenoughitems", "og_not_enough");
     
-    @Override
     public void onInitialize() {
-        FabricLoader.getInstance().getEntrypoints("rei_containers", Runnable.class).forEach(Runnable::run);
+        PluginDetector.detectServerPlugins();
         NetworkManager.registerReceiver(NetworkManager.c2s(), DELETE_ITEMS_PACKET, (buf, context) -> {
             ServerPlayer player = (ServerPlayer) context.getPlayer();
             if (player.getServer().getProfilePermissions(player.getGameProfile()) < player.getServer().getOperatorUserPermissionLevel()) {

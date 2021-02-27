@@ -23,9 +23,9 @@
 
 package me.shedaniel.rei;
 
-import com.google.common.collect.ImmutableSet;
+import me.shedaniel.architectury.platform.Platform;
+import me.shedaniel.architectury.utils.Env;
 import net.fabricmc.api.EnvType;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Tuple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -49,7 +49,7 @@ public class RoughlyEnoughItemsState {
     private static List<Runnable> continueCallbacks = new ArrayList<>();
     
     public static void error(String reason) {
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER || FabricLoader.getInstance().isDevelopmentEnvironment())
+        if (Platform.getEnvironment() == Env.SERVER || Platform.isDevelopmentEnvironment())
             throw new RuntimeException(reason);
         if (RoughlyEnoughItemsState.errorSet.add(reason + " " + null)) {
             RoughlyEnoughItemsState.errors.add(new Tuple<>(reason, null));
@@ -58,7 +58,7 @@ public class RoughlyEnoughItemsState {
     }
     
     public static void error(String reason, String link) {
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER || FabricLoader.getInstance().isDevelopmentEnvironment())
+        if (Platform.getEnvironment() == Env.SERVER || Platform.isDevelopmentEnvironment())
             throw new RuntimeException(reason + " " + link);
         if (RoughlyEnoughItemsState.errorSet.add(reason + " " + link)) {
             RoughlyEnoughItemsState.errors.add(new Tuple<>(reason, link));

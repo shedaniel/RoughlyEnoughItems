@@ -25,11 +25,11 @@ package me.shedaniel.rei.gui.widget;
 
 
 import com.google.common.collect.Lists;
+import me.shedaniel.architectury.platform.Platform;
+import me.shedaniel.architectury.utils.Env;
 import me.shedaniel.math.Point;
-import me.shedaniel.math.api.Executor;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
-import net.fabricmc.api.EnvType;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -50,11 +50,15 @@ public class QueuedTooltip implements Tooltip {
     private QueuedTooltip(Point location, Collection<Component> text) {
         this.location = location;
         if (this.location == null) {
-            Executor.runIfEnv(EnvType.CLIENT, () -> () -> {
-                this.location = PointHelper.ofMouse();
-            });
+            if (Platform.getEnvironment() == Env.CLIENT) {
+                setLocationToMouse();
+            }
         }
         this.text = Lists.newArrayList(text);
+    }
+    
+    private void setLocationToMouse() {
+        this.location = PointHelper.ofMouse();
     }
     
     @NotNull

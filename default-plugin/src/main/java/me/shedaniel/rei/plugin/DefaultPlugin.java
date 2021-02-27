@@ -30,6 +30,7 @@ import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
 import me.shedaniel.architectury.hooks.FluidStackHooks;
+import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.ingredient.EntryIngredient;
@@ -344,32 +345,34 @@ public class DefaultPlugin implements REIPlugin, BuiltinPlugin {
         });
         registry.registerDisplay(new DefaultBeaconBaseDisplay(CollectionUtils.map(Lists.newArrayList(BlockTags.BEACON_BASE_BLOCKS.getValues()), ItemStack::new)));
         registry.registerDisplay(new DefaultBeaconPaymentDisplay(CollectionUtils.map(Lists.newArrayList(ItemTags.BEACON_PAYMENT_ITEMS.getValues()), ItemStack::new)));
-        Set<Potion> potions = Sets.newLinkedHashSet();
-        for (Ingredient container : PotionBrewing.ALLOWED_CONTAINERS) {
-            for (PotionBrewing.Mix<Potion> mix : PotionBrewing.POTION_MIXES) {
-                Potion from = mix.from;
-                Ingredient ingredient = mix.ingredient;
-                Potion to = mix.to;
-                Ingredient base = Ingredient.of(Arrays.stream(container.getItems())
-                        .map(ItemStack::copy)
-                        .map(stack -> PotionUtils.setPotion(stack, from)));
-                ItemStack output = Arrays.stream(container.getItems())
-                        .map(ItemStack::copy)
-                        .map(stack -> PotionUtils.setPotion(stack, to))
-                        .findFirst().orElse(ItemStack.EMPTY);
-                registerBrewingRecipe(base, ingredient, output);
-                potions.add(from);
-                potions.add(to);
+        if (Platform.isFabric()) {
+            Set<Potion> potions = Sets.newLinkedHashSet();
+            for (Ingredient container : PotionBrewing.ALLOWED_CONTAINERS) {
+                for (PotionBrewing.Mix<Potion> mix : PotionBrewing.POTION_MIXES) {
+                    Potion from = mix.from;
+                    Ingredient ingredient = mix.ingredient;
+                    Potion to = mix.to;
+                    Ingredient base = Ingredient.of(Arrays.stream(container.getItems())
+                            .map(ItemStack::copy)
+                            .map(stack -> PotionUtils.setPotion(stack, from)));
+                    ItemStack output = Arrays.stream(container.getItems())
+                            .map(ItemStack::copy)
+                            .map(stack -> PotionUtils.setPotion(stack, to))
+                            .findFirst().orElse(ItemStack.EMPTY);
+                    registerBrewingRecipe(base, ingredient, output);
+                    potions.add(from);
+                    potions.add(to);
+                }
             }
-        }
-        for (Potion potion : potions) {
-            for (PotionBrewing.Mix<Item> mix : PotionBrewing.CONTAINER_MIXES) {
-                Item from = mix.from;
-                Ingredient ingredient = mix.ingredient;
-                Item to = mix.to;
-                Ingredient base = Ingredient.of(PotionUtils.setPotion(new ItemStack(from), potion));
-                ItemStack output = PotionUtils.setPotion(new ItemStack(to), potion);
-                registerBrewingRecipe(base, ingredient, output);
+            for (Potion potion : potions) {
+                for (PotionBrewing.Mix<Item> mix : PotionBrewing.CONTAINER_MIXES) {
+                    Item from = mix.from;
+                    Ingredient ingredient = mix.ingredient;
+                    Item to = mix.to;
+                    Ingredient base = Ingredient.of(PotionUtils.setPotion(new ItemStack(from), potion));
+                    ItemStack output = PotionUtils.setPotion(new ItemStack(to), potion);
+                    registerBrewingRecipe(base, ingredient, output);
+                }
             }
         }
     }
