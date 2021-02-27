@@ -26,19 +26,19 @@ package me.shedaniel.rei.plugin.autocrafting;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import me.shedaniel.architectury.networking.NetworkManager;
 import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
-import me.shedaniel.rei.api.AutoTransferHandler;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.registry.display.TransferDisplay;
 import me.shedaniel.rei.api.ingredient.entry.VanillaEntryTypes;
+import me.shedaniel.rei.api.registry.display.TransferDisplay;
+import me.shedaniel.rei.api.registry.transfer.TransferHandler;
 import me.shedaniel.rei.api.server.ContainerContext;
 import me.shedaniel.rei.api.server.ContainerInfo;
 import me.shedaniel.rei.api.server.ContainerInfoHandler;
 import me.shedaniel.rei.api.server.RecipeFinder;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -53,13 +53,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
-public class DefaultCategoryHandler implements AutoTransferHandler {
+public class DefaultCategoryHandler implements TransferHandler {
     @NotNull
     @Override
     public Result handle(@NotNull Context context) {
-        if (!(context.getRecipe() instanceof TransferDisplay))
+        if (!(context.getDisplay() instanceof TransferDisplay))
             return Result.createNotApplicable();
-        TransferDisplay recipe = (TransferDisplay) context.getRecipe();
+        TransferDisplay recipe = (TransferDisplay) context.getDisplay();
         AbstractContainerScreen<?> containerScreen = context.getContainerScreen();
         if (containerScreen == null)
             return Result.createNotApplicable();
@@ -95,7 +95,7 @@ public class DefaultCategoryHandler implements AutoTransferHandler {
                     buf.writeItem(ItemStack.EMPTY);
             }
         }
-        ClientPlayNetworking.send(RoughlyEnoughItemsNetwork.MOVE_ITEMS_PACKET, buf);
+        NetworkManager.sendToServer(RoughlyEnoughItemsNetwork.MOVE_ITEMS_PACKET, buf);
         return Result.createSuccessful();
     }
     

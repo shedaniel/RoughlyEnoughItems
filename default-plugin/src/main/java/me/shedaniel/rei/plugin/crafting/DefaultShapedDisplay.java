@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.plugin.crafting;
 
-import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.util.EntryStacks;
+import me.shedaniel.rei.api.ingredient.EntryIngredient;
+import me.shedaniel.rei.api.ingredient.util.EntryIngredients;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
@@ -39,13 +39,13 @@ import java.util.Optional;
 @Environment(EnvType.CLIENT)
 public class DefaultShapedDisplay implements DefaultCraftingDisplay {
     private ShapedRecipe display;
-    private List<? extends List<? extends EntryStack<?>>> input;
-    private List<? extends EntryStack<?>> output;
+    private List<EntryIngredient> input;
+    private EntryIngredient output;
     
     public DefaultShapedDisplay(ShapedRecipe recipe) {
         this.display = recipe;
-        this.input = EntryStacks.ofIngredients(recipe.getIngredients());
-        this.output = Collections.singletonList(EntryStacks.of(recipe.getResultItem()));
+        this.input = EntryIngredients.ofIngredients(recipe.getIngredients());
+        this.output = EntryIngredients.of(recipe.getResultItem());
     }
     
     @Override
@@ -54,18 +54,13 @@ public class DefaultShapedDisplay implements DefaultCraftingDisplay {
     }
     
     @Override
-    public @NotNull List<? extends List<? extends EntryStack<?>>> getInputEntries() {
+    public List<EntryIngredient> getInputEntries() {
         return input;
     }
     
     @Override
-    public @NotNull List<? extends List<? extends EntryStack<?>>> getResultingEntries() {
+    public List<EntryIngredient> getResultingEntries() {
         return Collections.singletonList(output);
-    }
-    
-    @Override
-    public @NotNull List<? extends List<? extends EntryStack<?>>> getRequiredEntries() {
-        return input;
     }
     
     @Override
@@ -82,5 +77,4 @@ public class DefaultShapedDisplay implements DefaultCraftingDisplay {
     public int getWidth() {
         return display.getWidth();
     }
-    
 }

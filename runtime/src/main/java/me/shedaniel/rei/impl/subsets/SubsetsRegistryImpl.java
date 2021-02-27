@@ -23,10 +23,10 @@
 
 package me.shedaniel.rei.impl.subsets;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.plugins.REIPlugin;
 import me.shedaniel.rei.api.subsets.SubsetsRegistry;
 import me.shedaniel.rei.api.util.CollectionUtils;
 import net.fabricmc.api.EnvType;
@@ -38,23 +38,28 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-@ApiStatus.Experimental
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public class SubsetsRegistryImpl implements SubsetsRegistry {
-    private final Map<String, Set<EntryStack<?>>> entryPaths = Maps.newHashMap();
+    private final Map<String, Set<EntryStack<?>>> paths = Maps.newHashMap();
     
-    public void reset() {
-        entryPaths.clear();
+    @Override
+    public void acceptPlugin(REIPlugin plugin) {
+        plugin.registerSubsets(this);
+    }
+    
+    @Override
+    public void startReload() {
+        paths.clear();
     }
     
     @Override
     public @NotNull List<String> getEntryPaths(@NotNull EntryStack<?> stack) {
         List<String> strings = null;
-        for (Map.Entry<String, Set<EntryStack<?>>> entry : entryPaths.entrySet()) {
+        for (Map.Entry<String, Set<EntryStack<?>>> entry : paths.entrySet()) {
             if (CollectionUtils.findFirstOrNullEqualsEntryIgnoreAmount(entry.getValue(), stack) != null) {
                 if (strings == null)
-                    strings = Lists.newArrayList();
+                    strings = new ArrayList<>();
                 strings.add(entry.getKey());
             }
         }
@@ -79,12 +84,12 @@ public class SubsetsRegistryImpl implements SubsetsRegistry {
     public Set<EntryStack<?>> getPathEntries(@NotNull String path) {
         if (!isPathValid(path))
             throw new IllegalArgumentException("Illegal path: " + path);
-        return entryPaths.get(path);
+        return paths.get(path);
     }
     
     @Override
     public @NotNull Set<String> getPaths() {
-        return entryPaths.keySet();
+        return paths.keySet();
     }
     
     @NotNull
@@ -92,7 +97,7 @@ public class SubsetsRegistryImpl implements SubsetsRegistry {
     public Set<EntryStack<?>> getOrCreatePathEntries(@NotNull String path) {
         Set<EntryStack<?>> paths = getPathEntries(path);
         if (paths == null) {
-            entryPaths.put(path, Sets.newLinkedHashSet());
+            this.paths.put(path, Sets.newLinkedHashSet());
             paths = Objects.requireNonNull(getPathEntries(path));
         }
         return paths;

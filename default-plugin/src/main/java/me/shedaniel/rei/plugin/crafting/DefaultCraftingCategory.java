@@ -28,25 +28,24 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.gui.Renderer;
-import me.shedaniel.rei.api.registry.display.TransferDisplayCategory;
-import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.gui.widgets.Slot;
-import me.shedaniel.rei.api.gui.widgets.Widgets;
 import me.shedaniel.rei.api.gui.widgets.Widget;
-import me.shedaniel.rei.plugin.DefaultPlugin;
+import me.shedaniel.rei.api.gui.widgets.Widgets;
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.ingredient.util.EntryStacks;
+import me.shedaniel.rei.api.registry.display.TransferDisplayCategory;
 import me.shedaniel.rei.api.server.ContainerInfo;
 import me.shedaniel.rei.api.server.ContainerInfoHandler;
+import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.Blocks;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -58,22 +57,22 @@ public class DefaultCraftingCategory implements TransferDisplayCategory<DefaultC
     }
     
     @Override
-    public @NotNull ResourceLocation getIdentifier() {
+    public ResourceLocation getIdentifier() {
         return DefaultPlugin.CRAFTING;
     }
     
     @Override
-    public @NotNull Renderer getIcon() {
+    public Renderer getIcon() {
         return EntryStacks.of(Blocks.CRAFTING_TABLE);
     }
     
     @Override
-    public @NotNull Component getTitle() {
-        return I18n.get("category.rei.crafting");
+    public Component getTitle() {
+        return new TranslatableComponent("category.rei.crafting");
     }
     
     @Override
-    public @NotNull List<Widget> setupDisplay(DefaultCraftingDisplay display, Rectangle bounds) {
+    public List<Widget> setupDisplay(DefaultCraftingDisplay display, Rectangle bounds) {
         Point startPoint = new Point(bounds.getCenterX() - 58, bounds.getCenterY() - 27);
         List<Widget> widgets = Lists.newArrayList();
         widgets.add(Widgets.createRecipeBase(bounds));

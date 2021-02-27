@@ -21,51 +21,36 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.registry.screens;
+package me.shedaniel.rei.api.registry.screen;
 
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.gui.config.DisplayPanelLocation;
-import me.shedaniel.rei.api.registry.Reloadable;
-import me.shedaniel.rei.impl.Internals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 @Environment(EnvType.CLIENT)
-public interface ScreenRegistry extends Reloadable {
+public interface ExclusionZones extends OverlayDecider {
     /**
-     * @return the instance of {@link ScreenRegistry}
+     * Gets the exclusion zones by the screen class
+     *
+     * @param currentScreenClass the current screen class
+     * @return the list of exclusion zones
      */
-    @NotNull
-    static ScreenRegistry getInstance() {
-        return Internals.getDisplayHelper();
+    default List<Rectangle> getExclusionZones(Class<?> currentScreenClass) {
+        return getExclusionZones(currentScreenClass, false);
     }
     
-    List<OverlayDecider> getSortedOverlayDeciders(Class<?> screenClass);
+    List<Rectangle> getExclusionZones(Class<?> currentScreenClass, boolean sort);
+    
+    int getZonesCount();
     
     /**
-     * Gets all registered overlay deciders
+     * Register an exclusion zone
      *
-     * @return the list of registered overlay deciders
+     * @param screenClass the screen
+     * @param supplier    the exclusion zone supplier, returns the list of exclusion zones
      */
-    List<OverlayDecider> getAllOverlayDeciders();
-    
-    /**
-     * Registers a bounds decider
-     *
-     * @param decider the decider to register
-     */
-    void registerHandler(OverlayDecider decider);
-    
-    /**
-     * Gets the bounds of the overlay.
-     *
-     * @param screen the current screen
-     * @return the left bounds
-     */
-    <T> Rectangle getOverlayBounds(DisplayPanelLocation location, T screen);
-    
-    ExclusionZones exclusionZones();
+    void register(Class<?> screenClass, Supplier<List<Rectangle>> supplier);
 }

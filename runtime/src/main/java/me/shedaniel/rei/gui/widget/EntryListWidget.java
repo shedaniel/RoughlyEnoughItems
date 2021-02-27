@@ -29,6 +29,8 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import me.shedaniel.architectury.fluid.FluidStack;
@@ -41,19 +43,26 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.gui.config.EntryPanelOrdering;
+import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.gui.widgets.Widget;
 import me.shedaniel.rei.api.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.*;
+import me.shedaniel.rei.api.ingredient.entry.BatchEntryRenderer;
+import me.shedaniel.rei.api.ingredient.entry.ComparisonContext;
+import me.shedaniel.rei.api.ingredient.entry.EntryRenderer;
+import me.shedaniel.rei.api.ingredient.entry.VanillaEntryTypes;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
-import me.shedaniel.rei.api.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.registry.EntryRegistry;
-import me.shedaniel.rei.api.registry.screens.OverlayDecider;
-import me.shedaniel.rei.api.registry.screens.ScreenRegistry;
-import me.shedaniel.rei.gui.ContainerScreenOverlay;
-import me.shedaniel.rei.api.gui.config.EntryPanelOrdering;
-import me.shedaniel.rei.impl.*;
+import me.shedaniel.rei.api.registry.entry.EntryRegistry;
+import me.shedaniel.rei.api.registry.screen.OverlayDecider;
+import me.shedaniel.rei.api.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.util.CollectionUtils;
+import me.shedaniel.rei.api.view.Views;
+import me.shedaniel.rei.gui.ContainerScreenOverlay;
+import me.shedaniel.rei.impl.ConfigManagerImpl;
+import me.shedaniel.rei.impl.ConfigObjectImpl;
+import me.shedaniel.rei.impl.ScreenHelper;
+import me.shedaniel.rei.impl.SearchArgument;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
@@ -71,16 +80,17 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @ApiStatus.Internal
 public class EntryListWidget extends WidgetWithBounds {
-    
     static final Comparator<? super EntryStack<?>> ENTRY_NAME_COMPARER = Comparator.comparing(stack -> stack.asFormatStrippedText().getString());
     static final Comparator<? super EntryStack<?>> ENTRY_GROUP_COMPARER = Comparator.comparingInt(stack -> {
         if (stack.getType() == VanillaEntryTypes.ITEM) {
@@ -125,7 +135,7 @@ public class EntryListWidget extends WidgetWithBounds {
     
     static boolean notSteppingOnExclusionZones(int left, int top, int width, int height, Rectangle listArea) {
         Minecraft instance = Minecraft.getInstance();
-        for (OverlayDecider decider : ScreenRegistry.getInstance().getSortedOverlayDeciders(instance.screen.getClass())) {
+        for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(instance.screen.getClass())) {
             InteractionResult fit = canItemSlotWidgetFit(left, top, width, height, decider);
             if (fit != InteractionResult.PASS)
                 return fit == InteractionResult.SUCCESS;
@@ -274,40 +284,61 @@ public class EntryListWidget extends WidgetWithBounds {
         long totalTimeStart = debugTime ? System.nanoTime() : 0;
         boolean fastEntryRendering = ConfigObject.getInstance().doesFastEntryRendering();
         if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-            for (EntryListEntry entry : entries)
-                entry.clearStacks();
             ScissorsHandler.INSTANCE.scissor(bounds);
-            
+    
             int skip = Math.max(0, Mth.floor(scrolling.scrollAmount / (float) entrySize()));
             int nextIndex = skip * innerBounds.width / entrySize();
-            int[] i = {nextIndex};
+            int i = nextIndex;
+            int cont = nextIndex;
             blockedCount = 0;
+    
+            Int2ObjectMap<List<EntryListEntry>> grouping = new Int2ObjectOpenHashMap<>();
+            List<EntryListEntry> toRender = new ArrayList<>();
+            Consumer<EntryListEntry> add;
+    
+            if (fastEntryRendering) {
+                add = entry -> {
+                    int hash = BatchEntryRenderer.getBatchIdFrom(entry.getCurrentEntry());
+                    List<EntryListEntry> entries = grouping.get(hash);
             
-            Stream<EntryListEntry> entryStream = this.entries.stream().skip(nextIndex).filter(entry -> {
+                    if (entries == null) {
+                        grouping.put(hash, entries = new ArrayList<>());
+                    }
+            
+                    entries.add(entry);
+                };
+            } else {
+                add = toRender::add;
+            }
+    
+            for (; cont < entries.size(); cont++) {
+                EntryListEntry entry = entries.get(cont);
+        
                 Rectangle entryBounds = entry.getBounds();
-                
+        
                 entryBounds.y = (int) (entry.backupY - scrolling.scrollAmount);
-                if (entryBounds.y > this.bounds.getMaxY()) return false;
+                if (entryBounds.y > this.bounds.getMaxY()) break;
+                if (allStacks.size() <= i) break;
                 if (notSteppingOnExclusionZones(entryBounds.x, entryBounds.y, entryBounds.width, entryBounds.height, innerBounds)) {
-                    EntryStack<?> stack = allStacks.get(i[0]++);
+                    EntryStack stack = allStacks.get(i++);
                     if (!stack.isEmpty()) {
+                        entry.clearStacks();
                         entry.entry(stack);
-                        return true;
+                        add.accept(entry);
                     }
                 } else {
                     blockedCount++;
                 }
-                return false;
-            }).limit(Math.max(0, allStacks.size() - i[0]));
-            
+            }
+    
             if (fastEntryRendering) {
-                for (List<EntryListEntry> entries : entryStream.collect(Collectors.groupingBy(entryListEntry -> BatchEntryRenderer.getBatchIdFrom(entryListEntry.getCurrentEntry()))).values()) {
+                for (List<EntryListEntry> entries : grouping.values()) {
                     renderEntries(debugTime, size, time, fastEntryRendering, matrices, mouseX, mouseY, delta, entries);
                 }
             } else {
-                renderEntries(debugTime, size, time, fastEntryRendering, matrices, mouseX, mouseY, delta, entryStream.collect(Collectors.toList()));
+                renderEntries(debugTime, size, time, fastEntryRendering, matrices, mouseX, mouseY, delta, toRender);
             }
-            
+    
             updatePosition(delta);
             ScissorsHandler.INSTANCE.removeLastScissor();
             scrolling.renderScrollBar(0, 1, REIHelper.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
@@ -489,9 +520,9 @@ public class EntryListWidget extends WidgetWithBounds {
             boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
             IntSet workingItems = checkCraftable ? new IntOpenHashSet() : null;
             if (checkCraftable)
-                workingItems.addAll(CollectionUtils.map(DisplayRegistry.getInstance().findCraftableEntriesByItems(ScreenHelper.inventoryStacks), EntryStacks::hashIgnoreCount));
+                workingItems.addAll(CollectionUtils.map(Views.getInstance().findCraftableEntriesByItems(ScreenHelper.inventoryStacks), EntryStacks::hashIgnoreCount));
             List<EntryStack<?>> stacks = EntryRegistry.getInstance().getPreFilteredList();
-            if (stacks instanceof CopyOnWriteArrayList && !stacks.isEmpty()) {
+            if (!stacks.isEmpty()) {
                 if (ConfigObject.getInstance().shouldAsyncSearch()) {
                     List<CompletableFuture<List<EntryStack<?>>>> completableFutures = Lists.newArrayList();
                     for (Iterable<EntryStack<?>> partitionStacks : CollectionUtils.partition(stacks, ConfigObject.getInstance().getAsyncSearchPartitionSize())) {

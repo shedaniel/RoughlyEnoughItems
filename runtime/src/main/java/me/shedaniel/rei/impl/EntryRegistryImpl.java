@@ -27,7 +27,8 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ConfigObject;
-import me.shedaniel.rei.api.registry.EntryRegistry;
+import me.shedaniel.rei.api.plugins.REIPlugin;
+import me.shedaniel.rei.api.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.util.CollectionUtils;
@@ -58,13 +59,34 @@ public class EntryRegistryImpl implements EntryRegistry {
     private List<AmountIgnoredEntryStackWrapper> reloadingRegistry;
     private boolean reloading;
     
-    public void finishReload() {
+    @Override
+    public void acceptPlugin(REIPlugin plugin) {
+        plugin.registerEntries(this);
+    }
+    
+    @Override
+    public void startReload() {
+        entries.clear();
+        if (reloadingRegistry != null)
+            reloadingRegistry.clear();
+        reloadingRegistry = Lists.newArrayListWithCapacity(Registry.ITEM.keySet().size() + 100);
+        preFilteredList.clear();
+        reloading = true;
+    }
+    
+    @Override
+    public void endReload() {
         reloading = false;
         preFilteredList.clear();
         reloadingRegistry.removeIf(AmountIgnoredEntryStackWrapper::isEmpty);
         entries.clear();
         entries.addAll(CollectionUtils.map(reloadingRegistry, AmountIgnoredEntryStackWrapper::unwrap));
         reloadingRegistry = null;
+    }
+    
+    @Override
+    public int size() {
+        return reloading ? reloadingRegistry.size() : entries.size();
     }
     
     @Override
@@ -112,15 +134,6 @@ public class EntryRegistryImpl implements EntryRegistry {
     static <T> Predicate<T> not(Predicate<? super T> target) {
         Objects.requireNonNull(target);
         return (Predicate<T>) target.negate();
-    }
-    
-    public void resetToReloadStart() {
-        entries.clear();
-        if (reloadingRegistry != null)
-            reloadingRegistry.clear();
-        reloadingRegistry = Lists.newArrayListWithCapacity(Registry.ITEM.keySet().size() + 100);
-        preFilteredList.clear();
-        reloading = true;
     }
     
     private static final Comparator<ItemStack> STACK_COMPARATOR = (a, b) -> ItemStack.matches(a, b) ? 0 : 1;

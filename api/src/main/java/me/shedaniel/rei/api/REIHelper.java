@@ -25,6 +25,7 @@ package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.api.gui.widgets.TextField;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.registry.Reloadable;
 import me.shedaniel.rei.impl.Internals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -37,7 +38,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
-public interface REIHelper {
+public interface REIHelper extends Reloadable {
     
     /**
      * @return the instance of {@link REIHelper}

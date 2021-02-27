@@ -23,28 +23,59 @@
 
 package me.shedaniel.rei.api.ingredient.entry;
 
+import me.shedaniel.rei.api.plugins.PluginManager;
+import me.shedaniel.rei.api.registry.Reloadable;
 import me.shedaniel.rei.impl.Internals;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public interface EntryTypeRegistry {
-    @NotNull
+public interface EntryTypeRegistry extends Reloadable {
     static EntryTypeRegistry getInstance() {
-        return Internals.getEntryTypeRegistry();
+        return PluginManager.getInstance().get(EntryTypeRegistry.class);
     }
     
-    default <T> void register(EntryType<T> id, EntryDefinition<T> definition) {
-        register(id.getId(), definition);
+    /**
+     * Registers a entry type, with its entry definition.
+     *
+     * @param type       the entry type
+     * @param definition the definition of the entry
+     * @param <T>        the type of the entry
+     */
+    default <T> void register(EntryType<T> type, EntryDefinition<T> definition) {
+        register(type.getId(), definition);
     }
     
+    /**
+     * Registers a entry type, with its entry definition.
+     *
+     * @param id         the identifier of the entry type
+     * @param definition the definition of the entry
+     * @param <T>        the type of the entry
+     */
     <T> void register(ResourceLocation id, EntryDefinition<T> definition);
     
-    <A, B> void registerBridge(EntryType<A> original, EntryType<B> destination, EntryTypeBridge<A, B> bridge);
+    /**
+     * Returns the entry definition from the entry type.
+     *
+     * @param type the entry type
+     * @return the definition of the entry, may be {@code null} if {@code type} was not registered
+     */
+    @Nullable
+    default <T> EntryDefinition<T> get(EntryType<T> type) {
+        return type.getDefinition();
+    }
     
+    /**
+     * Returns the entry definition from an identifier of the entry type.
+     *
+     * @param id the identifier of the entry type
+     * @return the definition of the entry, may be {@code null} if {@code id} is an unknown type
+     */
     @Nullable
     EntryDefinition<?> get(ResourceLocation id);
     
-    @NotNull
+    <A, B> void registerBridge(EntryType<A> original, EntryType<B> destination, EntryTypeBridge<A, B> bridge);
+    
     <A, B> Iterable<EntryTypeBridge<A, B>> getBridgesFor(EntryType<A> original, EntryType<B> destination);
 }

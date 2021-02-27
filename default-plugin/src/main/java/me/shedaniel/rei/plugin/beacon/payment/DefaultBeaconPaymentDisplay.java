@@ -23,44 +23,42 @@
 
 package me.shedaniel.rei.plugin.beacon.payment;
 
-import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.ingredient.EntryIngredient;
+import me.shedaniel.rei.api.ingredient.util.EntryIngredients;
 import me.shedaniel.rei.api.registry.display.Display;
-import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
 public class DefaultBeaconPaymentDisplay implements Display {
-    
-    private List<? extends EntryStack<?>> entries;
+    private EntryIngredient entries;
     
     public DefaultBeaconPaymentDisplay(List<ItemStack> entries) {
-        this.entries = EntryStacks.ofItemStacks(entries);
+        this.entries = EntryIngredients.ofItemStacks(entries);
     }
     
     @Override
-    public @NotNull List<? extends List<? extends EntryStack<?>>> getInputEntries() {
+    public List<EntryIngredient> getInputEntries() {
         return Collections.singletonList(entries);
     }
     
-    public List<? extends EntryStack<?>> getEntries() {
+    public EntryIngredient getEntries() {
         return entries;
     }
     
     @Override
-    public @NotNull List<? extends List<? extends EntryStack<?>>> getResultingEntries() {
+    public List<EntryIngredient> getResultingEntries() {
         return Collections.emptyList();
     }
     
     @Override
-    public @NotNull ResourceLocation getCategoryIdentifier() {
+    public ResourceLocation getCategoryIdentifier() {
         return DefaultPlugin.BEACON_PAYMENT;
     }
 }

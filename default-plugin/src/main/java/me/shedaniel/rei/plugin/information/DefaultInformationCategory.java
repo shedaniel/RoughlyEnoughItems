@@ -48,6 +48,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.NotNull;
@@ -60,7 +61,7 @@ import java.util.Objects;
 public class DefaultInformationCategory implements DisplayCategory<DefaultInformationDisplay> {
     protected static void innerBlit(Matrix4f matrix4f, int xStart, int xEnd, int yStart, int yEnd, int z, float uStart, float uEnd, float vStart, float vEnd) {
         BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
         bufferBuilder.vertex(matrix4f, xStart, yEnd, z).uv(uStart, vEnd).endVertex();
         bufferBuilder.vertex(matrix4f, xEnd, yEnd, z).uv(uEnd, vEnd).endVertex();
         bufferBuilder.vertex(matrix4f, xEnd, yStart, z).uv(uEnd, vStart).endVertex();
@@ -71,13 +72,13 @@ public class DefaultInformationCategory implements DisplayCategory<DefaultInform
     }
     
     @Override
-    public @NotNull ResourceLocation getIdentifier() {
+    public ResourceLocation getIdentifier() {
         return DefaultPlugin.INFO;
     }
     
     @Override
-    public @NotNull Component getTitle() {
-        return I18n.get("category.rei.information");
+    public Component getTitle() {
+        return new TranslatableComponent("category.rei.information");
     }
     
     @Override
@@ -113,7 +114,6 @@ public class DefaultInformationCategory implements DisplayCategory<DefaultInform
     }
     
     @Override
-    @NotNull
     public List<Widget> setupDisplay(DefaultInformationDisplay display, Rectangle bounds) {
         List<Widget> widgets = Lists.newArrayList();
         widgets.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.y + 3), display.getName()).noShadow().color(0xFF404040, 0xFFBBBBBB));

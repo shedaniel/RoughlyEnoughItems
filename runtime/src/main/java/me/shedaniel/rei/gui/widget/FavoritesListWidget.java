@@ -46,7 +46,7 @@ import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
-import me.shedaniel.rei.api.registry.screens.ScreenRegistry;
+import me.shedaniel.rei.api.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.util.ImmutableLiteralText;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;

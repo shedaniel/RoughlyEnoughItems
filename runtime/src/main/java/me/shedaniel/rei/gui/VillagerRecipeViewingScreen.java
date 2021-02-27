@@ -35,13 +35,15 @@ import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.ingredient.EntryIngredient;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.registry.CategoryRegistry;
+import me.shedaniel.rei.api.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.registry.display.Display;
 import me.shedaniel.rei.api.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.gui.widgets.Button;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.gui.widgets.Widgets;
 import me.shedaniel.rei.api.gui.DisplayRenderer;
+import me.shedaniel.rei.api.registry.display.DisplayRegistry;
+import me.shedaniel.rei.api.view.ViewSearchBuilder;
 import me.shedaniel.rei.gui.widget.TabWidget;
 import me.shedaniel.rei.api.gui.widgets.Widget;
 import me.shedaniel.rei.impl.ClientHelperImpl;
@@ -161,17 +163,17 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
         }
         this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - guiHeight / 2, guiWidth, guiHeight);
         
-        List<EntryIngredient> workingStations = CategoryRegistry.getInstance().getWorkingStations(category.getIdentifier());
-        if (!workingStations.isEmpty()) {
+        List<EntryIngredient> workstations = CategoryRegistry.getInstance().get(category.getIdentifier()).getWorkstations();
+        if (!workstations.isEmpty()) {
             int ww = Mth.floor((bounds.width - 16) / 18f);
-            int w = Math.min(ww, workingStations.size());
-            int h = Mth.ceil(workingStations.size() / ((float) ww));
+            int w = Math.min(ww, workstations.size());
+            int h = Mth.ceil(workstations.size() / ((float) ww));
             int xx = bounds.x + 16;
             int yy = bounds.y + bounds.height + 2;
             widgets.add(Widgets.createCategoryBase(new Rectangle(xx - 5, bounds.y + bounds.height - 5, 10 + w * 16, 12 + h * 16)));
             widgets.add(Widgets.createSlotBase(new Rectangle(xx - 1, yy - 1, 2 + w * 16, 2 + h * 16)));
             int index = 0;
-            for (EntryIngredient workingStation : workingStations) {
+            for (EntryIngredient workingStation : workstations) {
                 widgets.add(new RecipeViewingScreen.WorkstationSlotWidget(xx, yy, workingStation));
                 index++;
                 xx += 16;
@@ -192,7 +194,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
         RecipeViewingScreen.transformIngredientNotice(setupDisplay, ingredientStackToNotice);
         RecipeViewingScreen.transformResultNotice(setupDisplay, resultStackToNotice);
         this.widgets.addAll(setupDisplay);
-        Optional<ButtonAreaSupplier> supplier = DisplayRegistry.getInstance().getAutoCraftButtonArea(category);
+        Optional<ButtonAreaSupplier> supplier = CategoryRegistry.getInstance().get(category.getIdentifier()).getPlusButtonArea();
         if (supplier.isPresent() && supplier.get().get(recipeBounds) != null)
             this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(recipeBounds, supplier.get().get(recipeBounds), new TextComponent(supplier.get().getButtonText()), () -> display, setupDisplay, category));
         
@@ -246,7 +248,7 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
                 .enabled(categories.size() > tabsPerPage));
         
         this.widgets.add(Widgets.createClickableLabel(new Point(bounds.x + 4 + scrollListBounds.width / 2, bounds.y + 6), categories.get(selectedCategoryIndex).getTitle(), label -> {
-            ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addAllCategories().fillPreferredOpenedCategory());
+            ClientHelper.getInstance().openView(ViewSearchBuilder.builder().addAllCategories().fillPreferredOpenedCategory());
         }).tooltipLine(I18n.get("text.rei.view_all_categories")).noShadow().color(0xFF404040, 0xFFBBBBBB).hoveredColor(0xFF0041FF, 0xFFFFBD4D));
         
         this.children.addAll(buttonList);

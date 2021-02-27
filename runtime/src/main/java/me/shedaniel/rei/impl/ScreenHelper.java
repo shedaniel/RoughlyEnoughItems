@@ -27,25 +27,27 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.cloth.api.client.events.v0.ClothClientHooks;
+import me.shedaniel.architectury.event.events.GuiEvent;
+import me.shedaniel.architectury.event.events.client.ClientTickEvent;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.math.api.Executor;
-import me.shedaniel.rei.RoughlyEnoughItemsState;
-import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.ConfigManager;
+import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.REIHelper;
+import me.shedaniel.rei.api.REIOverlay;
 import me.shedaniel.rei.api.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.api.gui.widgets.TextField;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.registry.screens.OverlayDecider;
-import me.shedaniel.rei.api.registry.screens.ScreenRegistry;
+import me.shedaniel.rei.api.registry.screen.DisplayBoundsProvider;
+import me.shedaniel.rei.api.registry.screen.OverlayDecider;
+import me.shedaniel.rei.api.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.OverlaySearchField;
 import me.shedaniel.rei.gui.RecipeScreen;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -127,7 +129,7 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
     }
     
     @ApiStatus.Internal
-    public static void clearLastRecipeScreenData() {
+    public static void reload() {
         lastRecipeScreen.clear();
     }
     
@@ -203,9 +205,9 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
     
     public static SearchFieldLocation getContextualSearchFieldLocation() {
         Window window = Minecraft.getInstance().getWindow();
-        for (OverlayDecider decider : ScreenRegistry.getInstance().getSortedOverlayDeciders(Minecraft.getInstance().screen.getClass())) {
-            if (decider instanceof ScreenRegistry.DisplayBoundsProvider) {
-                Rectangle containerBounds = ((ScreenRegistry.DisplayBoundsProvider<Screen>) decider).getScreenBounds(Minecraft.getInstance().screen);
+        for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(Minecraft.getInstance().screen.getClass())) {
+            if (decider instanceof DisplayBoundsProvider) {
+                Rectangle containerBounds = ((DisplayBoundsProvider<Screen>) decider).getScreenBounds(Minecraft.getInstance().screen);
                 if (window.getGuiScaledHeight() - 20 <= containerBounds.getMaxY())
                     return SearchFieldLocation.BOTTOM_SIDE;
                 else break;
@@ -234,17 +236,24 @@ public class ScreenHelper implements ClientModInitializer, REIHelper {
     
     @Override
     public void onInitializeClient() {
-        ClothClientHooks.SCREEN_INIT_PRE.register((client, screen, screenHooks) -> {
+        GuiEvent.INIT_PRE.register((screen, widgets, children) -> {
             if (previousContainerScreen != screen && screen instanceof AbstractContainerScreen)
                 previousContainerScreen = (AbstractContainerScreen<?>) screen;
             return InteractionResult.PASS;
         });
-        RoughlyEnoughItemsState.checkRequiredFabricModules();
-        Executor.run(() -> () -> {
-            ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
-                if (isOverlayVisible() && getSearchField() != null)
-                    getSearchField().tick();
-            });
+        ClientTickEvent.CLIENT_POST.register(minecraft -> {
+            if (isOverlayVisible() && getSearchField() != null)
+                getSearchField().tick();
         });
+    }
+    
+    @Override
+    public void startReload() {
+        getOverlay().ifPresent(REIOverlay::queueReloadOverlay);
+    }
+    
+    @Override
+    public void endReload() {
+        getOverlay().ifPresent(REIOverlay::queueReloadOverlay);
     }
 }

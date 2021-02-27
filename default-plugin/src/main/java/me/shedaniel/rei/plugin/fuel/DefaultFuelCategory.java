@@ -27,24 +27,22 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.gui.DisplayRenderer;
 import me.shedaniel.rei.api.gui.Renderer;
-import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.gui.widgets.Slot;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.gui.widgets.Widgets;
-import me.shedaniel.rei.api.gui.DisplayRenderer;
 import me.shedaniel.rei.api.gui.widgets.Widget;
+import me.shedaniel.rei.api.gui.widgets.Widgets;
+import me.shedaniel.rei.api.ingredient.util.EntryStacks;
+import me.shedaniel.rei.api.registry.display.DisplayCategory;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.text.DecimalFormat;
@@ -56,13 +54,13 @@ public class DefaultFuelCategory implements DisplayCategory<DefaultFuelDisplay> 
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.##");
     
     @Override
-    public @NotNull ResourceLocation getIdentifier() {
+    public ResourceLocation getIdentifier() {
         return DefaultPlugin.FUEL;
     }
     
     @Override
-    public @NotNull Component getTitle() {
-        return I18n.get("category.rei.fuel");
+    public Component getTitle() {
+        return new TranslatableComponent("category.rei.fuel");
     }
     
     @Override
@@ -71,12 +69,12 @@ public class DefaultFuelCategory implements DisplayCategory<DefaultFuelDisplay> 
     }
     
     @Override
-    public @NotNull Renderer getIcon() {
+    public Renderer getIcon() {
         return EntryStacks.of(Items.COAL);
     }
     
     @Override
-    public @NotNull List<Widget> setupDisplay(DefaultFuelDisplay display, Rectangle bounds) {
+    public List<Widget> setupDisplay(DefaultFuelDisplay display, Rectangle bounds) {
         Point startPoint = new Point(bounds.getCenterX() - 41, bounds.getCenterY() - 17);
         String burnItems = DECIMAL_FORMAT.format(display.getFuelTime() / 200d);
         List<Widget> widgets = Lists.newArrayList();
@@ -89,7 +87,7 @@ public class DefaultFuelCategory implements DisplayCategory<DefaultFuelDisplay> 
     }
     
     @Override
-    public @NotNull DisplayRenderer getDisplayRenderer(DefaultFuelDisplay display) {
+    public DisplayRenderer getDisplayRenderer(DefaultFuelDisplay display) {
         Slot slot = Widgets.createSlot(new Point(0, 0)).entries(display.getInputEntries().get(0)).disableBackground().disableHighlight();
         String burnItems = DECIMAL_FORMAT.format(display.getFuelTime() / 200d);
         return new DisplayRenderer() {

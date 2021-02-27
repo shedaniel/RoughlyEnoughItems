@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.impl;
 
-import me.shedaniel.cloth.api.client.events.v0.ClothClientHooks;
+import me.shedaniel.architectury.event.events.GuiEvent;
 import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.gui.WarningAndErrorScreen;
 import net.fabricmc.api.ClientModInitializer;
@@ -33,7 +33,8 @@ import net.minecraft.world.InteractionResult;
 public class ErrorDisplayer implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
-        ClothClientHooks.SCREEN_INIT_PRE.register((client, screen, screenHooks) -> {
+        GuiEvent.INIT_PRE.register((screen, widgets, children) -> {
+            Minecraft minecraft = Minecraft.getInstance();
             if ((!RoughlyEnoughItemsState.getErrors().isEmpty() || !RoughlyEnoughItemsState.getWarnings().isEmpty()) && !(screen instanceof WarningAndErrorScreen)) {
                 WarningAndErrorScreen warningAndErrorScreen = new WarningAndErrorScreen("initialization", RoughlyEnoughItemsState.getWarnings(), RoughlyEnoughItemsState.getErrors(), (parent) -> {
                     if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
@@ -46,11 +47,11 @@ public class ErrorDisplayer implements ClientModInitializer {
                 });
                 warningAndErrorScreen.setParent(screen);
                 try {
-                    if (client.screen != null) client.screen.removed();
+                    if (minecraft.screen != null) minecraft.screen.removed();
                 } catch (Throwable ignored) {
                 }
-                client.screen = null;
-                client.setScreen(warningAndErrorScreen);
+                minecraft.screen = null;
+                minecraft.setScreen(warningAndErrorScreen);
             }
             return InteractionResult.PASS;
         });

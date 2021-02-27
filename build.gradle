@@ -55,21 +55,15 @@ allprojects {
         minecraft("com.mojang:minecraft:${project.minecraft_version}")
         mappings(loom.officialMojangMappings())
         modApi("net.fabricmc:fabric-loader:${project.fabricloader_version}")
-        modApi(fabricApi.module("fabric-api-base", project.fabric_api))
-        modApi(fabricApi.module("fabric-resource-loader-v0", project.fabric_api))
-        modApi(fabricApi.module("fabric-networking-api-v1", project.fabric_api))
-        modApi(fabricApi.module("fabric-lifecycle-events-v1", project.fabric_api))
-        modApi(fabricApi.module("fabric-rendering-fluids-v1", project.fabric_api))
-        modApi("me.shedaniel.cloth.api:cloth-client-events-v0:${cloth_client_events_v0_version}") {
-            transitive(false)
-        }
+//        modApi(fabricApi.module("fabric-api-base", project.fabric_api))
+//        modApi(fabricApi.module("fabric-resource-loader-v0", project.fabric_api))
+//        modApi(fabricApi.module("fabric-networking-api-v1", project.fabric_api))
+//        modApi(fabricApi.module("fabric-lifecycle-events-v1", project.fabric_api))
+//        modApi(fabricApi.module("fabric-rendering-fluids-v1", project.fabric_api))
         modApi("me.shedaniel.cloth:cloth-config-fabric:${cloth_config_version}") {
             exclude(module: "fabric-api")
         }
         modApi("org.jetbrains:annotations:19.0.0")
-        modCompileOnly("com.terraformersmc:modmenu:${modmenu_version}") {
-            transitive(false)
-        }
         modRuntime("com.terraformersmc:modmenu:${modmenu_version}") {
             transitive(false)
         }
@@ -79,7 +73,7 @@ allprojects {
         modCompileOnly("me.shedaniel:architectury:${architectury_version}") {
             exclude(module: "fabric-api")
         }
-        modRuntime("me.shedaniel:architectury:${architectury_version}:fabric")
+        modRuntime("me.shedaniel:architectury-fabric:${architectury_version}")
         modRuntime("net.fabricmc.fabric-api:fabric-api:${project.fabric_api}")
     }
 

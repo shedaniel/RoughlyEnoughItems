@@ -53,7 +53,7 @@ public abstract class EntryListEntryWidget extends EntryWidget {
     
     @Override
     public void queueTooltip(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        if (ClientHelper.getInstance().isCheating() && !minecraft.player.getInventory().getCarried().isEmpty()) {
+        if (ClientHelper.getInstance().isCheating() && !minecraft.player.inventory.getCarried().isEmpty()) {
             return;
         }
         super.queueTooltip(matrices, mouseX, mouseY, delta);

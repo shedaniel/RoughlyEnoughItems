@@ -35,6 +35,7 @@ import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.gui.widgets.Slot;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.view.ViewSearchBuilder;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -207,7 +208,7 @@ public class EntryWidget extends Slot {
     }
     
     public EntryWidget clearStacks() {
-        entryStacks.clear();
+        entryStacks = Collections.emptyList();
         return this;
     }
     
@@ -220,14 +221,26 @@ public class EntryWidget extends Slot {
     @NotNull
     @Override
     public EntryWidget entry(EntryStack<?> stack) {
-        entryStacks.add(stack);
+        if (entryStacks.isEmpty()) {
+            entryStacks = Collections.singletonList(stack);
+        } else {
+            if (!(entryStacks instanceof ArrayList)) {
+                entryStacks = new ArrayList<>(entryStacks);
+            }
+            entryStacks.add(stack);
+        }
         return this;
     }
     
     @NotNull
     @Override
     public EntryWidget entries(Collection<? extends EntryStack<?>> stacks) {
-        entryStacks.addAll(stacks);
+        if (!stacks.isEmpty()) {
+            if (!(entryStacks instanceof ArrayList)) {
+                entryStacks = new ArrayList<>(entryStacks);
+            }
+            entryStacks.addAll(stacks);
+        }
         return this;
     }
     
@@ -375,9 +388,9 @@ public class EntryWidget extends Slot {
                 }
             }
             if ((ConfigObject.getInstance().getRecipeKeybind().getType() != InputConstants.Type.MOUSE && button == 0) || ConfigObject.getInstance().getRecipeKeybind().matchesMouse(button))
-                return ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addRecipesFor(getCurrentEntry()).setOutputNotice(getCurrentEntry()).fillPreferredOpenedCategory());
+                return ClientHelper.getInstance().openView(ViewSearchBuilder.builder().addRecipesFor(getCurrentEntry()).setOutputNotice(getCurrentEntry()).fillPreferredOpenedCategory());
             else if ((ConfigObject.getInstance().getUsageKeybind().getType() != InputConstants.Type.MOUSE && button == 1) || ConfigObject.getInstance().getUsageKeybind().matchesMouse(button))
-                return ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addUsagesFor(getCurrentEntry()).setInputNotice(getCurrentEntry()).fillPreferredOpenedCategory());
+                return ClientHelper.getInstance().openView(ViewSearchBuilder.builder().addUsagesFor(getCurrentEntry()).setInputNotice(getCurrentEntry()).fillPreferredOpenedCategory());
         }
         return false;
     }
@@ -417,9 +430,9 @@ public class EntryWidget extends Slot {
                 }
             }
             if (ConfigObject.getInstance().getRecipeKeybind().matchesKey(int_1, int_2))
-                return ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addRecipesFor(getCurrentEntry()).setOutputNotice(getCurrentEntry()).fillPreferredOpenedCategory());
+                return ClientHelper.getInstance().openView(ViewSearchBuilder.builder().addRecipesFor(getCurrentEntry()).setOutputNotice(getCurrentEntry()).fillPreferredOpenedCategory());
             else if (ConfigObject.getInstance().getUsageKeybind().matchesKey(int_1, int_2))
-                return ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addUsagesFor(getCurrentEntry()).setInputNotice(getCurrentEntry()).fillPreferredOpenedCategory());
+                return ClientHelper.getInstance().openView(ViewSearchBuilder.builder().addUsagesFor(getCurrentEntry()).setInputNotice(getCurrentEntry()).fillPreferredOpenedCategory());
         }
         return false;
     }

@@ -23,11 +23,16 @@
 
 package me.shedaniel.rei.api.plugins;
 
-import me.shedaniel.rei.api.registry.screens.ScreenRegistry;
-import me.shedaniel.rei.api.DisplayRegistry;
-import me.shedaniel.rei.api.registry.EntryRegistry;
+import me.shedaniel.rei.api.favorites.FavoriteEntryType;
+import me.shedaniel.rei.api.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.ingredient.entry.EntryTypeRegistry;
-import me.shedaniel.rei.api.registry.CategoryRegistry;
+import me.shedaniel.rei.api.registry.category.CategoryRegistry;
+import me.shedaniel.rei.api.registry.display.DisplayRegistry;
+import me.shedaniel.rei.api.registry.entry.EntryRegistry;
+import me.shedaniel.rei.api.registry.screen.ExclusionZones;
+import me.shedaniel.rei.api.registry.screen.ScreenRegistry;
+import me.shedaniel.rei.api.registry.transfer.TransferHandlerRegistry;
+import me.shedaniel.rei.api.subsets.SubsetsRegistry;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -52,11 +57,55 @@ public interface REIPlugin extends Comparable<REIPlugin> {
     }
     
     /**
-     * Registers the types of entries
+     * Registers new types of entries
      */
     @ApiStatus.OverrideOnly
     default void registerEntryTypes(EntryTypeRegistry registry) {
-        
+    }
+    
+    /**
+     * Registers new item to fluid support providers.
+     *
+     * @param support the support registry
+     */
+    @ApiStatus.OverrideOnly
+    default void registerFluidSupport(FluidSupportProvider support) {
+    }
+    
+    /**
+     * Registers new categories
+     *
+     * @param registry the category registry
+     */
+    @ApiStatus.OverrideOnly
+    default void registerCategories(CategoryRegistry registry) {
+    }
+    
+    /**
+     * Registers new displays for categories
+     *
+     * @param registry the display registry
+     */
+    @ApiStatus.OverrideOnly
+    default void registerDisplays(DisplayRegistry registry) {
+    }
+    
+    /**
+     * Registers screen deciders
+     *
+     * @param registry the screen registry
+     */
+    @ApiStatus.OverrideOnly
+    default void registerScreens(ScreenRegistry registry) {
+    }
+    
+    /**
+     * Registers screen exclusion zones
+     *
+     * @param zones the exclusion zones registry
+     */
+    @ApiStatus.OverrideOnly
+    default void registerExclusionZones(ExclusionZones zones) {
     }
     
     /**
@@ -69,39 +118,30 @@ public interface REIPlugin extends Comparable<REIPlugin> {
     }
     
     /**
-     * Registers categories
+     * Registers favorite entry types.
      *
-     * @param registry the category registry
+     * @param registry the registry
      */
     @ApiStatus.OverrideOnly
-    default void registerCategories(CategoryRegistry registry) {
+    default void registerFavorites(FavoriteEntryType.Registry registry) {
     }
     
     /**
-     * Registers displays for categories
+     * Registers new subset categories
      *
-     * @param registry the helper class
+     * @param registry the registry
      */
     @ApiStatus.OverrideOnly
-    default void registerDisplays(DisplayRegistry registry) {
+    default void registerSubsets(SubsetsRegistry registry) {
     }
     
     /**
-     * Registers bounds handlers
+     * Registers new transfer handlers
      *
-     * @param registry the helper class
+     * @param registry the registry
      */
     @ApiStatus.OverrideOnly
-    default void registerScreens(ScreenRegistry registry) {
-    }
-    
-    /**
-     * Register other stuff
-     *
-     * @param registry the helper class
-     */
-    @ApiStatus.OverrideOnly
-    default void registerOthers(DisplayRegistry registry) {
+    default void registerTransferHandlers(TransferHandlerRegistry registry) {
     }
     
     @ApiStatus.OverrideOnly

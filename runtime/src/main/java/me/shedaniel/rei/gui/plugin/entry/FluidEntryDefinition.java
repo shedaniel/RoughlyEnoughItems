@@ -24,7 +24,10 @@
 package me.shedaniel.rei.gui.plugin.entry;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
 import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.architectury.utils.Fraction;
@@ -32,9 +35,9 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.entry.*;
-import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.impl.SimpleFluidRenderer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -138,7 +141,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack> {
     
     @Override
     public @NotNull Collection<ResourceLocation> getTagsFor(EntryStack<FluidStack> entry, FluidStack value) {
-        TagCollection<Fluid> collection = Minecraft.getInstance().getConnection().getTags().get(Registry.FLUID_REGISTRY);
+        TagCollection<Fluid> collection = Minecraft.getInstance().getConnection().getTags().getFluids();
         return collection == null ? Collections.emptyList() : collection.getMatchingTags(value.getFluid());
     }
     
@@ -159,7 +162,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack> {
                     Tesselator tess = Tesselator.getInstance();
                     BufferBuilder bb = tess.getBuilder();
                     Matrix4f matrix = matrices.last().pose();
-                    bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+                    bb.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
                     int z = entry.getZ();
                     bb.vertex(matrix, bounds.getMaxX(), bounds.y, z).uv(sprite.getU1(), sprite.getV0()).color(r, g, b, a).endVertex();
                     bb.vertex(matrix, bounds.x, bounds.y, z).uv(sprite.getU0(), sprite.getV0()).color(r, g, b, a).endVertex();

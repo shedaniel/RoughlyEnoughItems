@@ -24,16 +24,15 @@
 package me.shedaniel.rei.plugin.composting;
 
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
-import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.ingredient.EntryIngredient;
+import me.shedaniel.rei.api.ingredient.util.EntryIngredients;
 import me.shedaniel.rei.api.registry.display.Display;
-import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -41,24 +40,24 @@ import java.util.List;
 
 @Environment(EnvType.CLIENT)
 public class DefaultCompostingDisplay implements Display {
-    private List<List<EntryStack<?>>> inputs;
+    private List<EntryIngredient> inputs;
     private Object2FloatMap<ItemLike> inputMap;
-    private List<List<EntryStack<?>>> output;
+    private List<EntryIngredient> output;
     private int page;
     
     public DefaultCompostingDisplay(int page, List<Object2FloatMap.Entry<ItemLike>> inputs, Object2FloatMap<ItemLike> map, ItemStack output) {
         this.page = page;
         {
-            List<EntryStack<?>>[] result = new List[inputs.size()];
+            EntryIngredient[] result = new EntryIngredient[inputs.size()];
             int i = 0;
             for (Object2FloatMap.Entry<ItemLike> entry : inputs) {
-                result[i] = Collections.singletonList(EntryStacks.of(entry.getKey()));
+                result[i] = EntryIngredients.of(entry.getKey());
                 i++;
             }
             this.inputs = Arrays.asList(result);
         }
         this.inputMap = map;
-        this.output = Collections.singletonList(Collections.singletonList(EntryStacks.of(output)));
+        this.output = Collections.singletonList(EntryIngredients.of(output));
     }
     
     public int getPage() {
@@ -66,7 +65,7 @@ public class DefaultCompostingDisplay implements Display {
     }
     
     @Override
-    public @NotNull List<? extends List<? extends EntryStack<?>>> getInputEntries() {
+    public List<EntryIngredient> getInputEntries() {
         return inputs;
     }
     
@@ -75,17 +74,12 @@ public class DefaultCompostingDisplay implements Display {
     }
     
     @Override
-    public @NotNull List<? extends List<? extends EntryStack<?>>> getResultingEntries() {
+    public List<EntryIngredient> getResultingEntries() {
         return output;
     }
     
     @Override
-    public @NotNull ResourceLocation getCategoryIdentifier() {
+    public ResourceLocation getCategoryIdentifier() {
         return DefaultPlugin.COMPOSTING;
-    }
-    
-    @Override
-    public @NotNull List<? extends List<? extends EntryStack<?>>> getRequiredEntries() {
-        return inputs;
     }
 }

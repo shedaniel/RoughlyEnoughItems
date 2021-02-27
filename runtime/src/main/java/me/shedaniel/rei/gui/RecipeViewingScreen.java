@@ -36,13 +36,15 @@ import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.ingredient.EntryIngredient;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.registry.CategoryRegistry;
+import me.shedaniel.rei.api.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.registry.display.Display;
 import me.shedaniel.rei.api.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.util.ImmutableLiteralText;
 import me.shedaniel.rei.api.gui.widgets.Button;
 import me.shedaniel.rei.api.gui.widgets.Panel;
 import me.shedaniel.rei.api.gui.widgets.Widgets;
+import me.shedaniel.rei.api.view.ViewSearchBuilder;
 import me.shedaniel.rei.gui.widget.EntryWidget;
 import me.shedaniel.rei.gui.widget.RecipeChoosePageWidget;
 import me.shedaniel.rei.gui.widget.TabWidget;
@@ -262,7 +264,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
                     ClientHelperImpl.getInstance().openRecipeViewingScreen(categoriesMap, categories.get(currentCategoryIndex).getIdentifier(), ingredientStackToNotice, resultStackToNotice);
                 }).tooltipLine(I18n.get("text.rei.previous_category")));
         widgets.add(Widgets.createClickableLabel(new Point(bounds.getCenterX(), bounds.getY() + 7), selectedCategory.getTitle(), clickableLabelWidget -> {
-            ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addAllCategories().fillPreferredOpenedCategory());
+            ClientHelper.getInstance().openView(ViewSearchBuilder.builder().addAllCategories().fillPreferredOpenedCategory());
         }).tooltipLine(I18n.get("text.rei.view_all_categories")));
         widgets.add(categoryNext = Widgets.createButton(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 5, 12, 12), new TranslatableComponent("text.rei.right_arrow"))
                 .onClick(button -> {
@@ -313,7 +315,7 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
                 tab.setRenderer(categories.get(j), categories.get(j).getIcon(), categories.get(j).getTitle(), tab.getId() + categoryPages * tabsPerPage == categories.indexOf(selectedCategory));
             }
         }
-        Optional<ButtonAreaSupplier> supplier = DisplayRegistry.getInstance().getAutoCraftButtonArea(selectedCategory);
+        Optional<ButtonAreaSupplier> supplier = CategoryRegistry.getInstance().get(selectedCategory.getIdentifier()).getPlusButtonArea();
         int recipeHeight = selectedCategory.getDisplayHeight();
         List<Display> currentDisplayed = getCurrentDisplayed();
         for (int i = 0; i < currentDisplayed.size(); i++) {
@@ -335,18 +337,18 @@ public class RecipeViewingScreen extends Screen implements RecipeScreen {
             recipeChoosePageWidget = null;
         
         workingStationsBaseWidget = null;
-        List<EntryIngredient> workingStations = CategoryRegistry.getInstance().getWorkingStations(selectedCategory.getIdentifier());
-        if (!workingStations.isEmpty()) {
+        List<EntryIngredient> workstations = CategoryRegistry.getInstance().get(selectedCategory.getIdentifier()).getWorkstations();
+        if (!workstations.isEmpty()) {
             int hh = Mth.floor((bounds.height - 16) / 18f);
-            int actualHeight = Math.min(hh, workingStations.size());
-            int innerWidth = Mth.ceil(workingStations.size() / ((float) hh));
+            int actualHeight = Math.min(hh, workstations.size());
+            int innerWidth = Mth.ceil(workstations.size() / ((float) hh));
             int xx = bounds.x - (8 + innerWidth * 16) + 6;
             int yy = bounds.y + 16;
             preWidgets.add(workingStationsBaseWidget = Widgets.createCategoryBase(new Rectangle(xx - 5, yy - 5, 15 + innerWidth * 16, 10 + actualHeight * 16)));
             preWidgets.add(Widgets.createSlotBase(new Rectangle(xx - 1, yy - 1, innerWidth * 16 + 2, actualHeight * 16 + 2)));
             int index = 0;
             xx += (innerWidth - 1) * 16;
-            for (EntryIngredient workingStation : workingStations) {
+            for (EntryIngredient workingStation : workstations) {
                 preWidgets.add(new WorkstationSlotWidget(xx, yy, workingStation));
                 index++;
                 yy += 16;

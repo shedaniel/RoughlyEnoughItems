@@ -60,7 +60,7 @@ public class SimpleDisplayRenderer extends DisplayRenderer {
     private SimpleDisplayRenderer(List<EntryIngredient> input, List<EntryIngredient> output) {
         this.inputWidgets = simplify(input).stream().filter(stacks -> !stacks.isEmpty()).map(stacks -> Widgets.createSlot(new Point(0, 0)).entries(stacks).disableBackground().disableHighlight().disableTooltips()).collect(Collectors.toList());
         this.outputWidgets = CollectionUtils.map(simplify(output), outputStacks ->
-                Widgets.createSlot(new Point(0, 0)).entries(CollectionUtils.filter(outputStacks, stack -> !stack.isEmpty())).disableBackground().disableHighlight().disableTooltips());
+                Widgets.createSlot(new Point(0, 0)).entries(CollectionUtils.filterToList(outputStacks, stack -> !stack.isEmpty())).disableBackground().disableHighlight().disableTooltips());
     }
     
     private static List<EntryIngredient> simplify(List<EntryIngredient> original) {

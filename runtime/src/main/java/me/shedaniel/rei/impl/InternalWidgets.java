@@ -33,7 +33,10 @@ import me.shedaniel.rei.api.registry.display.Display;
 import me.shedaniel.rei.api.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.gui.widgets.Button;
 import me.shedaniel.rei.api.gui.widgets.Widgets;
+import me.shedaniel.rei.api.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.registry.display.TransferDisplayCategory;
+import me.shedaniel.rei.api.registry.transfer.TransferHandler;
+import me.shedaniel.rei.api.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.gui.toast.CopyRecipeIdentifierToast;
 import me.shedaniel.rei.gui.widget.LateRenderable;
 import me.shedaniel.rei.api.gui.widgets.Widget;
@@ -67,10 +70,10 @@ public final class InternalWidgets {
         Button autoCraftingButton = Widgets.createButton(rectangle, text)
                 .focusable(false)
                 .onClick(button -> {
-                    AutoTransferHandler.Context context = AutoTransferHandler.Context.create(true, containerScreen, displaySupplier.get());
-                    for (AutoTransferHandler autoTransferHandler : DisplayRegistry.getInstance().getSortedAutoCraftingHandler())
+                    TransferHandler.Context context = TransferHandler.Context.create(true, containerScreen, displaySupplier.get());
+                    for (TransferHandler autoTransferHandler : TransferHandlerRegistry.getInstance())
                         try {
-                            AutoTransferHandler.Result result = autoTransferHandler.handle(context);
+                            TransferHandler.Result result = autoTransferHandler.handle(context);
                             if (result.isBlocking()) {
                                 if (result.isReturningToScreen()) {
                                     break;
@@ -89,10 +92,10 @@ public final class InternalWidgets {
                     int color = 0;
                     visible[0] = false;
                     IntList redSlots = null;
-                    AutoTransferHandler.Context context = AutoTransferHandler.Context.create(false, containerScreen, displaySupplier.get());
-                    for (AutoTransferHandler autoTransferHandler : DisplayRegistry.getInstance().getSortedAutoCraftingHandler()) {
+                    TransferHandler.Context context = TransferHandler.Context.create(false, containerScreen, displaySupplier.get());
+                    for (TransferHandler autoTransferHandler : TransferHandlerRegistry.getInstance()) {
                         try {
-                            AutoTransferHandler.Result result = autoTransferHandler.handle(context);
+                            TransferHandler.Result result = autoTransferHandler.handle(context);
                             if (result.isApplicable())
                                 visible[0] = true;
                             if (result.isSuccessful()) {

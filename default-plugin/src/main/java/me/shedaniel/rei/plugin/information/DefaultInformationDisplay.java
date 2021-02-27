@@ -24,6 +24,7 @@
 package me.shedaniel.rei.plugin.information;
 
 import com.google.common.collect.Lists;
+import me.shedaniel.rei.api.ingredient.EntryIngredient;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.registry.display.Display;
 import me.shedaniel.rei.plugin.DefaultPlugin;
@@ -40,31 +41,31 @@ import java.util.List;
 
 @Environment(EnvType.CLIENT)
 public class DefaultInformationDisplay implements Display {
-    private List<? extends EntryStack<?>> entryStacks;
+    private EntryIngredient entryStacks;
     private List<Component> texts;
     private Component name;
     
-    protected DefaultInformationDisplay(List<? extends EntryStack<?>> entryStacks, Component name) {
+    protected DefaultInformationDisplay(EntryIngredient entryStacks, Component name) {
         this.entryStacks = entryStacks;
         this.name = name;
         this.texts = Lists.newArrayList();
     }
     
-    public static DefaultInformationDisplay createFromEntries(List<? extends EntryStack<?>> entryStacks, Component name) {
+    public static DefaultInformationDisplay createFromEntries(EntryIngredient entryStacks, Component name) {
         return new DefaultInformationDisplay(entryStacks, name);
     }
     
     public static DefaultInformationDisplay createFromEntry(EntryStack<?> entryStack, Component name) {
-        return createFromEntries(Collections.singletonList(entryStack), name);
+        return createFromEntries(EntryIngredient.of(entryStack), name);
     }
     
     @Override
-    public @NotNull List<? extends List<? extends EntryStack<?>>> getInputEntries() {
+    public @NotNull List<EntryIngredient> getInputEntries() {
         return Collections.singletonList(entryStacks);
     }
     
     @Override
-    public @NotNull List<? extends List<? extends EntryStack<?>>> getResultingEntries() {
+    public @NotNull List<EntryIngredient> getResultingEntries() {
         return Collections.singletonList(entryStacks);
     }
     

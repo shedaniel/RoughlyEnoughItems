@@ -21,10 +21,11 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.registry;
+package me.shedaniel.rei.api.registry.entry;
 
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.impl.Internals;
+import me.shedaniel.rei.api.plugins.PluginManager;
+import me.shedaniel.rei.api.registry.Reloadable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.world.item.Item;
@@ -38,13 +39,18 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 @Environment(EnvType.CLIENT)
-public interface EntryRegistry {
+public interface EntryRegistry extends Reloadable {
     /**
      * @return the instance of {@link EntryRegistry}
      */
     static EntryRegistry getInstance() {
-        return Internals.getEntryRegistry();
+        return PluginManager.getInstance().get(EntryRegistry.class);
     }
+    
+    /**
+     * @return the size of entry stacks, before being filtered by filtering rules.
+     */
+    int size();
     
     /**
      * @return the unmodifiable stream of entry stacks, before being filtered by filtering rules.

@@ -25,9 +25,9 @@ package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.registry.screens.ExclusionZones;
-import me.shedaniel.rei.api.registry.screens.ScreenRegistry;
 import me.shedaniel.rei.api.gui.config.DisplayPanelLocation;
+import me.shedaniel.rei.api.registry.screen.ExclusionZones;
+import me.shedaniel.rei.api.registry.screen.ScreenRegistry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -50,7 +50,7 @@ public class ExclusionZonesImpl implements ExclusionZones {
     private List<Tuple<Tuple<Class<?>, Float>, Supplier<List<Rectangle>>>> list = Lists.newArrayList();
     
     @Override
-    public boolean isHandingScreen(Class<?> screen) {
+    public <R extends Screen> boolean isHandingScreen(Class<R> screen) {
         return Screen.class.isAssignableFrom(screen);
     }
     

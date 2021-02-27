@@ -23,26 +23,30 @@
 
 package me.shedaniel.rei.impl;
 
-import com.google.common.collect.Maps;
 import io.netty.buffer.Unpooled;
+import me.shedaniel.architectury.networking.NetworkManager;
 import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
-import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.ClientHelper;
+import me.shedaniel.rei.api.ConfigManager;
+import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.REIHelper;
+import me.shedaniel.rei.api.gui.config.RecipeScreenType;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.ingredient.entry.VanillaEntryTypes;
+import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.registry.display.Display;
 import me.shedaniel.rei.api.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.view.ViewSearchBuilder;
+import me.shedaniel.rei.api.view.Views;
 import me.shedaniel.rei.gui.PreRecipeViewingScreen;
 import me.shedaniel.rei.gui.RecipeScreen;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
-import me.shedaniel.rei.api.gui.config.RecipeScreenType;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
@@ -71,7 +75,6 @@ import static me.shedaniel.rei.impl.Internals.attachInstance;
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
-    private static ClientHelperImpl instance;
     @ApiStatus.Internal public final LazyLoadedValue<Boolean> isYog = new LazyLoadedValue<>(() -> {
         try {
             if (Minecraft.getInstance().getUser().getGameProfile().getId().equals(UUID.fromString("f9546389-9415-4358-9c29-2c26b25bff5b")))
@@ -88,7 +91,11 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         }
         return false;
     });
-    private final Map<String, String> modNameCache = Maps.newHashMap();
+    private final Map<String, String> modNameCache = new HashMap<String, String>() {{
+        put("minecraft", "Minecraft");
+        put("c", "Global");
+        put("global", "Global");
+    }};
     
     /**
      * @return the instance of {@link ClientHelperImpl}
@@ -96,7 +103,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
      */
     @ApiStatus.Internal
     public static ClientHelperImpl getInstance() {
-        return instance;
+        return (ClientHelperImpl) ClientHelper.getInstance();
     }
     
     @Override
@@ -125,11 +132,11 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     @Override
     public void sendDeletePacket() {
         if (Minecraft.getInstance().screen instanceof CreativeModeInventoryScreen) {
-            Minecraft.getInstance().player.getInventory().setCarried(ItemStack.EMPTY);
+            Minecraft.getInstance().player.inventory.setCarried(ItemStack.EMPTY);
             ((CreativeModeInventoryScreen) Minecraft.getInstance().screen).isQuickCrafting = false;
             return;
         }
-        ClientPlayNetworking.send(RoughlyEnoughItemsNetwork.DELETE_ITEMS_PACKET, new FriendlyByteBuf(Unpooled.buffer()));
+        NetworkManager.sendToServer(RoughlyEnoughItemsNetwork.DELETE_ITEMS_PACKET, new FriendlyByteBuf(Unpooled.buffer()));
         if (Minecraft.getInstance().screen instanceof AbstractContainerScreen) {
             ((AbstractContainerScreen<?>) Minecraft.getInstance().screen).isQuickCrafting = false;
         }
@@ -141,10 +148,10 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
             return false;
         EntryStack<ItemStack> entry = (EntryStack<ItemStack>) e;
         if (Minecraft.getInstance().player == null) return false;
-        if (Minecraft.getInstance().player.getInventory() == null) return false;
+        if (Minecraft.getInstance().player.inventory == null) return false;
         ItemStack cheatedStack = entry.getValue().copy();
         if (ConfigObject.getInstance().isGrabbingItems() && Minecraft.getInstance().screen instanceof CreativeModeInventoryScreen) {
-            Inventory inventory = Minecraft.getInstance().player.getInventory();
+            Inventory inventory = Minecraft.getInstance().player.inventory;
             EntryStack<ItemStack> stack = entry.copy();
             if (!inventory.getCarried().isEmpty() && EntryStacks.equalsIgnoreCount(EntryStacks.of(inventory.getCarried()), stack)) {
                 stack.setAmount(Fraction.ofWhole(Mth.clamp(stack.getAmount().intValue() + inventory.getCarried().getCount(), 1, stack.getValue().getMaxStackSize())));
@@ -154,13 +161,13 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
             inventory.setCarried(stack.getValue().copy());
             return true;
         } else if (RoughlyEnoughItemsCore.canUsePackets()) {
-            Inventory inventory = Minecraft.getInstance().player.getInventory();
+            Inventory inventory = Minecraft.getInstance().player.inventory;
             EntryStack<ItemStack> stack = entry.copy();
             if (!inventory.getCarried().isEmpty() && !EntryStacks.equalsIgnoreCount(EntryStacks.of(inventory.getCarried()), stack)) {
                 return false;
             }
             try {
-                ClientPlayNetworking.send(ConfigObject.getInstance().isGrabbingItems() ? RoughlyEnoughItemsNetwork.CREATE_ITEMS_GRAB_PACKET : RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(cheatedStack));
+                NetworkManager.sendToServer(ConfigObject.getInstance().isGrabbingItems() ? RoughlyEnoughItemsNetwork.CREATE_ITEMS_GRAB_PACKET : RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(cheatedStack));
                 return true;
             } catch (Exception exception) {
                 return false;
@@ -183,7 +190,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     @ApiStatus.Internal
     public Set<EntryStack<?>> _getInventoryItemsTypes() {
-        return Minecraft.getInstance().player.getInventory().compartments.stream()
+        return Minecraft.getInstance().player.inventory.compartments.stream()
                 .flatMap(Collection::stream)
                 .map(EntryStacks::of)
                 .collect(Collectors.toSet());
@@ -195,7 +202,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     }
     
     @Override
-    public boolean openView(ClientHelper.ViewSearchBuilder builder) {
+    public boolean openView(ViewSearchBuilder builder) {
         Map<DisplayCategory<?>, List<Display>> map = builder.buildMap();
         if (map.isEmpty()) return false;
         Screen screen;
@@ -224,22 +231,18 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
     
     @Override
     public boolean canUseMovePackets() {
-        return ClientPlayNetworking.canSend(RoughlyEnoughItemsNetwork.MOVE_ITEMS_PACKET);
+        return NetworkManager.canServerReceive(RoughlyEnoughItemsNetwork.MOVE_ITEMS_PACKET);
     }
     
     @Override
     public void onInitializeClient() {
-        ClientHelperImpl.instance = this;
-        attachInstance(instance, ClientHelper.class);
-        attachInstance((Supplier<ClientHelper.ViewSearchBuilder>) ViewSearchBuilder::new, "viewSearchBuilder");
-        modNameCache.put("minecraft", "Minecraft");
-        modNameCache.put("c", "Global");
-        modNameCache.put("global", "Global");
+        attachInstance(this, ClientHelper.class);
+        attachInstance((Supplier<ViewSearchBuilder>) ViewSearchBuilderImpl::new, "viewSearchBuilder");
     }
     
-    private static abstract class AbstractViewSearchBuilder implements ClientHelper.ViewSearchBuilder {
+    private static abstract class AbstractViewSearchBuilder implements ViewSearchBuilder {
         @Override
-        public ClientHelper.ViewSearchBuilder fillPreferredOpenedCategory() {
+        public ViewSearchBuilder fillPreferredOpenedCategory() {
             if (getPreferredOpenedCategory() == null) {
                 Screen currentScreen = Minecraft.getInstance().screen;
                 if (currentScreen instanceof RecipeScreen) {
@@ -250,7 +253,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         }
     }
     
-    public static final class ViewSearchBuilder extends AbstractViewSearchBuilder {
+    public static final class ViewSearchBuilderImpl extends AbstractViewSearchBuilder {
         @NotNull private final Set<ResourceLocation> categories = new HashSet<>();
         @NotNull private final List<EntryStack<?>> recipesFor = new ArrayList<>();
         @NotNull private final List<EntryStack<?>> usagesFor = new ArrayList<>();
@@ -258,16 +261,16 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         @Nullable private EntryStack<?> inputNotice;
         @Nullable private EntryStack<?> outputNotice;
         @NotNull
-        private final LazyLoadedValue<Map<DisplayCategory<?>, List<Display>>> map = new LazyLoadedValue<>(() -> DisplayRegistry.getInstance().buildMapFor(this));
+        private final LazyLoadedValue<Map<DisplayCategory<?>, List<Display>>> map = new LazyLoadedValue<>(() -> Views.getInstance().buildMapFor(this));
         
         @Override
-        public ClientHelper.ViewSearchBuilder addCategory(ResourceLocation category) {
+        public ViewSearchBuilder addCategory(ResourceLocation category) {
             this.categories.add(category);
             return this;
         }
         
         @Override
-        public ClientHelper.ViewSearchBuilder addCategories(Collection<ResourceLocation> categories) {
+        public ViewSearchBuilder addCategories(Collection<ResourceLocation> categories) {
             this.categories.addAll(categories);
             return this;
         }
@@ -279,7 +282,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         }
         
         @Override
-        public ClientHelper.ViewSearchBuilder addRecipesFor(EntryStack<?> stack) {
+        public <T> ViewSearchBuilder addRecipesFor(EntryStack<T> stack) {
             this.recipesFor.add(stack);
             return this;
         }
@@ -291,7 +294,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         }
         
         @Override
-        public ClientHelper.ViewSearchBuilder addUsagesFor(EntryStack<?> stack) {
+        public <T> ViewSearchBuilder addUsagesFor(EntryStack<T> stack) {
             this.usagesFor.add(stack);
             return this;
         }
@@ -303,7 +306,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         }
         
         @Override
-        public ClientHelper.ViewSearchBuilder setPreferredOpenedCategory(@Nullable ResourceLocation category) {
+        public ViewSearchBuilder setPreferredOpenedCategory(@Nullable ResourceLocation category) {
             this.preferredOpenedCategory = category;
             return this;
         }
@@ -315,7 +318,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         }
         
         @Override
-        public ClientHelper.ViewSearchBuilder setInputNotice(@Nullable EntryStack<?> stack) {
+        public <T> ViewSearchBuilder setInputNotice(@Nullable EntryStack<T> stack) {
             this.inputNotice = stack;
             return this;
         }
@@ -327,7 +330,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         }
         
         @Override
-        public ClientHelper.ViewSearchBuilder setOutputNotice(@Nullable EntryStack<?> stack) {
+        public <T> ViewSearchBuilder setOutputNotice(@Nullable EntryStack<T> stack) {
             this.outputNotice = stack;
             return this;
         }
@@ -356,12 +359,12 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         }
         
         @Override
-        public ClientHelper.ViewSearchBuilder addCategory(ResourceLocation category) {
+        public ViewSearchBuilder addCategory(ResourceLocation category) {
             return this;
         }
         
         @Override
-        public ClientHelper.ViewSearchBuilder addCategories(Collection<ResourceLocation> categories) {
+        public ViewSearchBuilder addCategories(Collection<ResourceLocation> categories) {
             return this;
         }
         
@@ -371,7 +374,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         }
         
         @Override
-        public ClientHelper.ViewSearchBuilder addRecipesFor(EntryStack<?> stack) {
+        public <T> ViewSearchBuilder addRecipesFor(EntryStack<T> stack) {
             return this;
         }
         
@@ -381,7 +384,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         }
         
         @Override
-        public ClientHelper.ViewSearchBuilder addUsagesFor(EntryStack<?> stack) {
+        public <T> ViewSearchBuilder addUsagesFor(EntryStack<T> stack) {
             return this;
         }
         
@@ -391,7 +394,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         }
         
         @Override
-        public ClientHelper.ViewSearchBuilder setPreferredOpenedCategory(@Nullable ResourceLocation category) {
+        public ViewSearchBuilder setPreferredOpenedCategory(@Nullable ResourceLocation category) {
             this.preferredOpenedCategory = category;
             return this;
         }
@@ -403,7 +406,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         }
         
         @Override
-        public ClientHelper.ViewSearchBuilder setInputNotice(@Nullable EntryStack<?> stack) {
+        public <T> ViewSearchBuilder setInputNotice(@Nullable EntryStack<T> stack) {
             this.inputNotice = stack;
             return this;
         }
@@ -415,7 +418,7 @@ public class ClientHelperImpl implements ClientHelper, ClientModInitializer {
         }
         
         @Override
-        public ClientHelper.ViewSearchBuilder setOutputNotice(@Nullable EntryStack<?> stack) {
+        public <T> ViewSearchBuilder setOutputNotice(@Nullable EntryStack<T> stack) {
             this.outputNotice = stack;
             return this;
         }

@@ -24,7 +24,7 @@
 package me.shedaniel.rei.gui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.rei.api.DisplayRegistry;
+import me.shedaniel.rei.api.plugins.PluginManager;
 import net.minecraft.Util;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -49,7 +49,7 @@ public class ConfigReloadingScreen extends Screen {
     @Override
     public void render(PoseStack matrices, int int_1, int int_2, float float_1) {
         this.renderDirtBackground(0);
-        if (!DisplayRegistry.getInstance().arePluginsLoading())
+        if (!PluginManager.getInstance().arePluginsReloading())
             minecraft.setScreen(parent);
         drawCenteredString(matrices, this.font, I18n.get("text.rei.config.is.reloading"), this.width / 2, this.height / 2 - 50, 16777215);
         String string_3;

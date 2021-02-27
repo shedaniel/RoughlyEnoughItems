@@ -23,9 +23,9 @@
 
 package me.shedaniel.rei.plugin.campfire;
 
-import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.ingredient.EntryIngredient;
+import me.shedaniel.rei.api.ingredient.util.EntryIngredients;
 import me.shedaniel.rei.api.registry.display.Display;
-import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -35,7 +35,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
@@ -43,8 +42,8 @@ import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
 public class DefaultCampfireDisplay implements Display {
-    private List<? extends List<? extends EntryStack<?>>> inputs;
-    private List<? extends EntryStack<?>> output;
+    private List<EntryIngredient> inputs;
+    private List<EntryIngredient> output;
     private int cookTime;
     private CampfireCookingRecipe display;
     
@@ -54,8 +53,8 @@ public class DefaultCampfireDisplay implements Display {
     }
     
     public DefaultCampfireDisplay(NonNullList<Ingredient> ingredients, ItemStack output, int cookTime) {
-        this.inputs = EntryStacks.ofIngredients(ingredients);
-        this.output = Collections.singletonList(EntryStacks.of(output));
+        this.inputs = EntryIngredients.ofIngredients(ingredients);
+        this.output = Collections.singletonList(EntryIngredients.of(output));
         this.cookTime = cookTime;
     }
     
@@ -64,27 +63,22 @@ public class DefaultCampfireDisplay implements Display {
     }
     
     @Override
-    public @NotNull Optional<ResourceLocation> getDisplayLocation() {
+    public Optional<ResourceLocation> getDisplayLocation() {
         return Optional.ofNullable(display).map(AbstractCookingRecipe::getId);
     }
     
     @Override
-    public @NotNull List<? extends List<? extends EntryStack<?>>> getInputEntries() {
+    public List<EntryIngredient> getInputEntries() {
         return inputs;
     }
     
     @Override
-    public @NotNull List<? extends List<? extends EntryStack<?>>> getResultingEntries() {
-        return Collections.singletonList(output);
+    public List<EntryIngredient> getResultingEntries() {
+        return output;
     }
     
     @Override
-    public @NotNull List<? extends List<? extends EntryStack<?>>> getRequiredEntries() {
-        return inputs;
-    }
-    
-    @Override
-    public @NotNull ResourceLocation getCategoryIdentifier() {
+    public ResourceLocation getCategoryIdentifier() {
         return DefaultPlugin.CAMPFIRE;
     }
     

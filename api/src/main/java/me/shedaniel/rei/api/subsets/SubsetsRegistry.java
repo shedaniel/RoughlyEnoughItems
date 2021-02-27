@@ -24,11 +24,10 @@
 package me.shedaniel.rei.api.subsets;
 
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.impl.Internals;
+import me.shedaniel.rei.api.plugins.PluginManager;
+import me.shedaniel.rei.api.registry.Reloadable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -36,33 +35,29 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-@ApiStatus.Experimental
 @Environment(EnvType.CLIENT)
-public interface SubsetsRegistry {
+public interface SubsetsRegistry extends Reloadable {
     static SubsetsRegistry getInstance() {
-        return Internals.getSubsetsRegistry();
+        return PluginManager.getInstance().get(SubsetsRegistry.class);
     }
     
     /**
      * Gets all paths an entry is in, note that this is a really slow call as it looks through all paths.
      */
-    @NotNull
-    List<String> getEntryPaths(@NotNull EntryStack<?> stack);
+    List<String> getEntryPaths(EntryStack<?> stack);
     
     @Nullable
-    Set<EntryStack<?>> getPathEntries(@NotNull String path);
+    Set<EntryStack<?>> getPathEntries(String path);
     
-    @NotNull
-    Set<EntryStack<?>> getOrCreatePathEntries(@NotNull String path);
+    Set<EntryStack<?>> getOrCreatePathEntries(String path);
     
-    @NotNull
     Set<String> getPaths();
     
-    void registerPathEntry(@NotNull String path, @NotNull EntryStack<?> stack);
+    void registerPathEntry(String path, EntryStack<?> stack);
     
-    void registerPathEntries(@NotNull String path, @NotNull Collection<? extends EntryStack<?>> stacks);
+    void registerPathEntries(String path, Collection<? extends EntryStack<?>> stacks);
     
-    default void registerPathEntries(@NotNull String path, @NotNull EntryStack<?>... stacks) {
+    default void registerPathEntries(String path, EntryStack<?>... stacks) {
         registerPathEntries(path, Arrays.asList(stacks));
     }
 }

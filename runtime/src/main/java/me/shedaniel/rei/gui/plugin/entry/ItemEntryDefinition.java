@@ -216,7 +216,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack> {
     
     @Override
     public @NotNull Collection<ResourceLocation> getTagsFor(EntryStack<ItemStack> entry, ItemStack value) {
-        TagCollection<Item> collection = Minecraft.getInstance().getConnection().getTags().get(Registry.ITEM_REGISTRY);
+        TagCollection<Item> collection = Minecraft.getInstance().getConnection().getTags().getItems();
         return collection == null ? Collections.emptyList() : collection.getMatchingTags(value.getItem());
     }
     
@@ -239,7 +239,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack> {
         }
         
         private BakedModel getModelFromStack(ItemStack stack) {
-            return Minecraft.getInstance().getItemRenderer().getModel(stack, null, null, 0);
+            return Minecraft.getInstance().getItemRenderer().getModel(stack, null, null);
         }
         
         @Override

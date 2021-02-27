@@ -43,16 +43,19 @@ import me.shedaniel.rei.api.ingredient.entry.EntryTypeRegistry;
 import me.shedaniel.rei.api.ingredient.entry.VanillaEntryTypes;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.plugins.REIPlugin;
-import me.shedaniel.rei.api.registry.EntryRegistry;
-import me.shedaniel.rei.api.registry.screens.DisplayBoundsProvider;
-import me.shedaniel.rei.api.registry.screens.ExclusionZones;
-import me.shedaniel.rei.api.registry.screens.ScreenRegistry;
+import me.shedaniel.rei.api.registry.display.DisplayRegistry;
+import me.shedaniel.rei.api.registry.entry.EntryRegistry;
+import me.shedaniel.rei.api.registry.screen.DisplayBoundsProvider;
+import me.shedaniel.rei.api.registry.screen.ExclusionZones;
+import me.shedaniel.rei.api.registry.screen.ScreenRegistry;
+import me.shedaniel.rei.api.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
 import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
 import me.shedaniel.rei.gui.plugin.entry.FluidEntryDefinition;
 import me.shedaniel.rei.gui.plugin.entry.ItemEntryDefinition;
 import me.shedaniel.rei.gui.widget.FavoritesListWidget;
+import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.plugin.autocrafting.DefaultCategoryHandler;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -94,26 +97,27 @@ public class DefaultRuntimePlugin implements REIPlugin {
     
     @Override
     public void registerEntries(EntryRegistry registry) {
-        registry.registerEntry(EntryStacks.of(new AbstractRenderer() {
-            private ResourceLocation id = new ResourceLocation("roughlyenoughitems", "textures/gui/kirb.png");
-            
-            @Override
-            public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-                Minecraft.getInstance().getTextureManager().bind(id);
-                innerBlit(matrices.last().pose(), bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), getBlitOffset(), 0, 1, 0, 1);
-            }
-            
-            @Override
-            public @Nullable Tooltip getTooltip(Point point) {
-                return Tooltip.create(new TextComponent("Kirby"), ClientHelper.getInstance().getFormattedModFromModId("Dream Land"));
-            }
-        }));
+        if (ClientHelperImpl.getInstance().isAprilFools.get() || true) {
+            registry.registerEntry(EntryStacks.of(new AbstractRenderer() {
+                private ResourceLocation id = new ResourceLocation("roughlyenoughitems", "textures/gui/kirb.png");
+        
+                @Override
+                public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+                    Minecraft.getInstance().getTextureManager().bind(id);
+                    innerBlit(matrices.last().pose(), bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), getBlitOffset(), 0, 1, 0, 1);
+                }
+        
+                @Override
+                public @Nullable Tooltip getTooltip(Point point) {
+                    return Tooltip.create(new TextComponent("Kirby"), ClientHelper.getInstance().getFormattedModFromModId("Dream Land"));
+                }
+            }));
+        }
     }
     
     @Override
     public void registerScreens(ScreenRegistry registry) {
         ExclusionZones zones = registry.exclusionZones();
-        zones.register();
         zones.register(RecipeViewingScreen.class, () -> {
             Panel widget = ((RecipeViewingScreen) Minecraft.getInstance().screen).getWorkingStationsBaseWidget();
             if (widget == null)
@@ -128,14 +132,14 @@ public class DefaultRuntimePlugin implements REIPlugin {
             }
             return Collections.emptyList();
         });
-        registry.registerHandler(new DisplayBoundsProvider<RecipeViewingScreen>() {
+        registry.registerDecider(new DisplayBoundsProvider<RecipeViewingScreen>() {
             @Override
             public Rectangle getScreenBounds(RecipeViewingScreen screen) {
                 return screen.getBounds();
             }
             
             @Override
-            public Class<?> getBaseSupportedClass() {
+            public Class<? extends Screen> getBaseSupportedClass() {
                 return RecipeViewingScreen.class;
             }
             
@@ -144,14 +148,14 @@ public class DefaultRuntimePlugin implements REIPlugin {
                 return InteractionResult.SUCCESS;
             }
         });
-        registry.registerHandler(new DisplayBoundsProvider<VillagerRecipeViewingScreen>() {
+        registry.registerDecider(new DisplayBoundsProvider<VillagerRecipeViewingScreen>() {
             @Override
             public Rectangle getScreenBounds(VillagerRecipeViewingScreen screen) {
                 return screen.bounds;
             }
             
             @Override
-            public Class<?> getBaseSupportedClass() {
+            public Class<? extends Screen> getBaseSupportedClass() {
                 return VillagerRecipeViewingScreen.class;
             }
             
@@ -163,9 +167,13 @@ public class DefaultRuntimePlugin implements REIPlugin {
     }
     
     @Override
-    public void registerOthers(DisplayRegistry registry) {
-        registry.registerAutoCraftingHandler(new DefaultCategoryHandler());
-        FavoriteEntryType.registry().register(EntryStackFavoriteType.INSTANCE.id, EntryStackFavoriteType.INSTANCE);
+    public void registerFavorites(FavoriteEntryType.Registry registry) {
+        registry.register(EntryStackFavoriteType.INSTANCE.id, EntryStackFavoriteType.INSTANCE);
+    }
+    
+    @Override
+    public void registerTransferHandlers(TransferHandlerRegistry registry) {
+        registry.register(new DefaultCategoryHandler());
     }
     
     private enum EntryStackFavoriteType implements FavoriteEntryType<EntryStackFavoriteEntry> {

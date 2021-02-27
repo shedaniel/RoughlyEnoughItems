@@ -30,13 +30,13 @@ import com.google.gson.JsonElement;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
+import me.shedaniel.architectury.hooks.ScreenHooks;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
 import me.shedaniel.autoconfig.gui.ConfigScreenProvider;
 import me.shedaniel.autoconfig.gui.registry.GuiRegistry;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 import me.shedaniel.autoconfig.util.Utils;
-import me.shedaniel.cloth.api.client.events.v0.ScreenHooks;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Jankson;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.JsonNull;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.JsonObject;
@@ -49,16 +49,16 @@ import me.shedaniel.clothconfig2.gui.entries.KeyCodeEntry;
 import me.shedaniel.clothconfig2.impl.EasingMethod;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.ConfigManager;
-import me.shedaniel.rei.api.registry.EntryRegistry;
-import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
-import me.shedaniel.rei.gui.ContainerScreenOverlay;
-import me.shedaniel.rei.gui.TransformingScreen;
-import me.shedaniel.rei.gui.WarningAndErrorScreen;
 import me.shedaniel.rei.api.gui.config.RecipeScreenType;
 import me.shedaniel.rei.api.gui.config.SyntaxHighlightingMode;
 import me.shedaniel.rei.api.gui.config.entry.*;
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.registry.entry.EntryRegistry;
+import me.shedaniel.rei.gui.ContainerScreenOverlay;
+import me.shedaniel.rei.gui.TransformingScreen;
+import me.shedaniel.rei.gui.WarningAndErrorScreen;
 import me.shedaniel.rei.gui.credits.CreditsScreen;
 import me.shedaniel.rei.impl.filtering.FilteringRule;
 import me.shedaniel.rei.impl.filtering.rules.ManualFilteringRule;
@@ -96,13 +96,11 @@ import static me.shedaniel.autoconfig.util.Utils.setUnsafely;
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public class ConfigManagerImpl implements ConfigManager {
-    private static ConfigManagerImpl instance;
     private boolean craftableOnly;
     private final Gson gson = new GsonBuilder().create();
     private ConfigObjectImpl object;
     
     public ConfigManagerImpl() {
-        ConfigManagerImpl.instance = this;
         this.craftableOnly = false;
         Jankson jankson = Jankson.builder().build();
         AutoConfig.register(ConfigObjectImpl.class, (definition, configClass) -> new JanksonConfigSerializer<>(definition, configClass, Jankson.builder().registerPrimitiveTypeAdapter(InputConstants.Key.class, it -> {
@@ -182,8 +180,12 @@ public class ConfigManagerImpl implements ConfigManager {
         RoughlyEnoughItemsCore.LOGGER.info("Config loaded.");
     }
     
+    @Override
+    public void startReload() {
+    }
+    
     public static ConfigManagerImpl getInstance() {
-        return instance;
+        return (ConfigManagerImpl) ConfigManager.getInstance();
     }
     
     @Override
@@ -257,7 +259,7 @@ public class ConfigManagerImpl implements ConfigManager {
                     builder.getOrCreateCategory(new TranslatableComponent("config.roughlyenoughitems.advanced")).getEntries().add(0, new ReloadPluginsEntry(220));
                 }
                 return builder.setAfterInitConsumer(screen -> {
-                    ((ScreenHooks) screen).cloth$addButtonWidget(new Button(screen.width - 104, 4, 100, 20, new TranslatableComponent("text.rei.credits"), button -> {
+                    ScreenHooks.addButton(screen, new Button(screen.width - 104, 4, 100, 20, new TranslatableComponent("text.rei.credits"), button -> {
                         MutableLong current = new MutableLong(0);
                         CreditsScreen creditsScreen = new CreditsScreen(screen);
                         Minecraft.getInstance().setScreen(new TransformingScreen(false, creditsScreen,

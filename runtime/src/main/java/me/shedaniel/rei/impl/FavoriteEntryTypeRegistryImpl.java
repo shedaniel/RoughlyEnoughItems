@@ -28,6 +28,7 @@ import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.favorites.FavoriteEntryType;
+import me.shedaniel.rei.api.plugins.REIPlugin;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
@@ -41,12 +42,12 @@ import java.util.Map;
 
 @ApiStatus.Internal
 public class FavoriteEntryTypeRegistryImpl implements FavoriteEntryType.Registry {
-    private static final FavoriteEntryTypeRegistryImpl INSTANCE = new FavoriteEntryTypeRegistryImpl();
     private final BiMap<ResourceLocation, FavoriteEntryType<?>> registry = HashBiMap.create();
     private final Map<Component, FavoriteEntryType.Section> sections = Maps.newLinkedHashMap();
     
-    public static FavoriteEntryTypeRegistryImpl getInstance() {
-        return INSTANCE;
+    @Override
+    public void acceptPlugin(REIPlugin plugin) {
+        plugin.registerFavorites(this);
     }
     
     @Override
@@ -74,7 +75,8 @@ public class FavoriteEntryTypeRegistryImpl implements FavoriteEntryType.Registry
         return this.sections.values();
     }
     
-    public void clear() {
+    @Override
+    public void startReload() {
         this.registry.clear();
         this.sections.clear();
     }

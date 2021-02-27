@@ -23,8 +23,7 @@
 
 package me.shedaniel.rei.impl;
 
-import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
-import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
+import me.shedaniel.architectury.hooks.FluidStackHooks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
@@ -62,14 +61,8 @@ public final class SimpleFluidRenderer {
         }
         
         public static FluidRenderingData from(Fluid fluid) {
-            FluidRenderHandler fluidRenderHandler = FluidRenderHandlerRegistry.INSTANCE.get(fluid);
-            if (fluidRenderHandler == null)
-                return null;
-            TextureAtlasSprite[] sprites = fluidRenderHandler.getFluidSprites(Minecraft.getInstance().level, Minecraft.getInstance().level == null ? null : BlockPos.ZERO, fluid.defaultFluidState());
-            int color = -1;
-            if (Minecraft.getInstance().level != null)
-                color = fluidRenderHandler.getFluidColor(Minecraft.getInstance().level, BlockPos.ZERO, fluid.defaultFluidState());
-            return new FluidRenderingDataImpl(sprites[0], color);
+            return new FluidRenderingDataImpl(FluidStackHooks.getStillTexture(Minecraft.getInstance().level, Minecraft.getInstance().level == null ? null : BlockPos.ZERO, fluid.defaultFluidState()),
+                    FluidStackHooks.getColor(Minecraft.getInstance().level, BlockPos.ZERO, fluid.defaultFluidState()));
         }
         
         @Override

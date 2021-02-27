@@ -24,7 +24,8 @@
 package me.shedaniel.rei.api.favorites;
 
 import com.google.gson.JsonObject;
-import me.shedaniel.rei.impl.Internals;
+import me.shedaniel.rei.api.plugins.PluginManager;
+import me.shedaniel.rei.api.registry.Reloadable;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
@@ -34,24 +35,24 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public interface FavoriteEntryType<T extends FavoriteEntry> {
+    /**
+     * A builtin type of favorites, wrapping a {@link me.shedaniel.rei.api.ingredient.EntryStack}.
+     */
     ResourceLocation ENTRY_STACK = new ResourceLocation("roughlyenoughitems", "entry_stack");
     
     @NotNull
     static Registry registry() {
-        return Internals.getFavoriteEntryTypeRegistry();
+        return PluginManager.getInstance().get(FavoriteEntryType.Registry.class);
     }
     
-    @NotNull
-    T fromJson(@NotNull JsonObject object);
+    T fromJson(JsonObject object);
     
-    @NotNull
     T fromArgs(Object... args);
     
-    @NotNull
-    JsonObject toJson(@NotNull T entry, @NotNull JsonObject object);
+    JsonObject toJson(T entry, JsonObject object);
     
     @ApiStatus.NonExtendable
-    interface Registry {
+    interface Registry extends Reloadable {
         void register(ResourceLocation id, FavoriteEntryType<?> type);
         
         @Nullable <A extends FavoriteEntry> FavoriteEntryType<A> get(ResourceLocation id);
@@ -59,21 +60,17 @@ public interface FavoriteEntryType<T extends FavoriteEntry> {
         @Nullable
         ResourceLocation getId(FavoriteEntryType<?> type);
         
-        @NotNull
         Section getOrCrateSection(Component text);
         
-        @NotNull
         Iterable<Section> sections();
     }
     
     @ApiStatus.NonExtendable
     interface Section {
-        void add(@NotNull FavoriteEntry... entries);
+        void add(FavoriteEntry... entries);
         
-        @NotNull
         Component getText();
         
-        @NotNull
         List<FavoriteEntry> getEntries();
     }
 }
