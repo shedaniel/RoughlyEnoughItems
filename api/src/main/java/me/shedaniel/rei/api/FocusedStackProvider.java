@@ -28,6 +28,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.InteractionResultHolder;
 import org.jetbrains.annotations.NotNull;
 
+@FunctionalInterface
 public interface FocusedStackProvider extends Comparable<FocusedStackProvider> {
     /**
      * @return the priority of this handler, higher priorities will be called first.

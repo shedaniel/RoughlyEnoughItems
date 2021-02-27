@@ -26,14 +26,14 @@ package me.shedaniel.rei.plugin.smithing;
 import com.google.common.collect.Lists;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.gui.Renderer;
-import me.shedaniel.rei.api.ingredient.util.EntryStacks;
-import me.shedaniel.rei.api.gui.widgets.Widgets;
 import me.shedaniel.rei.api.gui.widgets.Widget;
+import me.shedaniel.rei.api.gui.widgets.Widgets;
+import me.shedaniel.rei.api.ingredient.util.EntryStacks;
+import me.shedaniel.rei.api.registry.display.DisplayCategory;
 import me.shedaniel.rei.plugin.DefaultPlugin;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
@@ -48,7 +48,7 @@ public class DefaultSmithingCategory implements DisplayCategory<DefaultSmithingD
     
     @Override
     public @NotNull Component getTitle() {
-        return I18n.get("category.rei.smithing");
+        return new TranslatableComponent("category.rei.smithing");
     }
     
     @Override

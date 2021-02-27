@@ -21,29 +21,15 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api;
+package me.shedaniel.rei.api.registry.transfer;
 
-import org.jetbrains.annotations.NotNull;
+import me.shedaniel.rei.api.plugins.PluginManager;
+import me.shedaniel.rei.api.registry.Reloadable;
 
-/**
- * Get base class of a REI plugin.
- */
-public interface REIPluginEntry extends Comparable<REIPluginEntry> {
-    /**
-     * @return the priority of the plugin, the smaller the number, the earlier it is called.
-     */
-    default int getPriority() {
-        return 0;
+public interface TransferHandlerRegistry extends Reloadable, Iterable<TransferHandler> {
+    static TransferHandlerRegistry getInstance() {
+        return PluginManager.getInstance().get(TransferHandlerRegistry.class);
     }
     
-    default String getPluginName() {
-        Class<? extends REIPluginEntry> self = getClass();
-        String simpleName = self.getSimpleName();
-        return simpleName == null ? self.getName() : simpleName;
-    }
-    
-    @Override
-    default int compareTo(@NotNull REIPluginEntry o) {
-        return Double.compare(getPriority(), o.getPriority());
-    }
+    void register(TransferHandler handler);
 }

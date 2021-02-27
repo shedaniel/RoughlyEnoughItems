@@ -35,19 +35,14 @@ import java.util.Collection;
 import java.util.Optional;
 
 public interface EntryDefinition<T> {
-    @NotNull
     Class<T> getValueType();
     
-    @NotNull
     EntryType<T> getType();
     
-    @NotNull
     EntryRenderer<T> getRenderer();
     
-    @NotNull
     Optional<ResourceLocation> getIdentifier(EntryStack<T> entry, T value);
     
-    @NotNull
     Fraction getAmount(EntryStack<T> entry, T value);
     
     void setAmount(EntryStack<T> entry, T value, Fraction amount);
@@ -61,20 +56,15 @@ public interface EntryDefinition<T> {
     
     boolean equals(T o1, T o2, ComparisonContext context);
     
-    @NotNull
     CompoundTag toTag(EntryStack<T> entry, T value);
     
-    @NotNull
-    T fromTag(@NotNull CompoundTag tag);
+    T fromTag(CompoundTag tag);
     
-    @NotNull
     Component asFormattedText(EntryStack<T> entry, T value);
     
-    @NotNull
     Collection<ResourceLocation> getTagsFor(EntryStack<T> entry, T value);
     
     @ApiStatus.NonExtendable
-    @NotNull
     default <O> EntryDefinition<O> cast() {
         return (EntryDefinition<O>) this;
     }

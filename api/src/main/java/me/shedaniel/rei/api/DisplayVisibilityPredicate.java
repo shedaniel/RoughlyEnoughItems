@@ -21,55 +21,38 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.registry.screens;
+package me.shedaniel.rei.api;
 
-import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.gui.config.DisplayPanelLocation;
+import me.shedaniel.rei.api.registry.display.Display;
+import me.shedaniel.rei.api.registry.display.DisplayCategory;
 import net.minecraft.world.InteractionResult;
 import org.jetbrains.annotations.NotNull;
 
-import static net.minecraft.world.InteractionResult.PASS;
-
-public interface OverlayDecider extends Comparable<OverlayDecider> {
-    boolean isHandingScreen(Class<?> screen);
-    
-    default InteractionResult shouldScreenBeOverlaid(Class<?> screen) {
-        return InteractionResult.PASS;
-    }
+public interface DisplayVisibilityPredicate extends Comparable<DisplayVisibilityPredicate> {
     
     /**
-     * Gets the priority of the handler, the higher it is, the earlier it is called.
+     * Gets the priority of the handler, the higher the priority, the earlier this is called.
      *
-     * @return the priority in float
+     * @return the priority
      */
     default float getPriority() {
         return 0f;
     }
     
     /**
-     * Checks if REI should recalculate the overlay bounds
+     * Handles the visibility of the display.
+     * {@link ActionResult#PASS} to pass the handling to another handler
+     * {@link ActionResult#SUCCESS} to always display it
+     * {@link ActionResult#FAIL} to never display it
      *
-     * @param location  the location of the display panel
-     * @param rectangle the current overlay bounds
-     * @return whether REI should recalculate the overlay bounds
+     * @param category the category of the display
+     * @param display  the display of the recipe
+     * @return the visibility
      */
-    default boolean shouldRecalculateArea(DisplayPanelLocation location, Rectangle rectangle) {
-        return false;
-    }
-    
-    /**
-     * Checks if mouse is inside the overlay
-     *
-     * @param mouseX mouse's x coordinates
-     * @param mouseY mouse's y coordinates
-     * @return whether mouse is inside the overlay
-     */
-    default InteractionResult isInZone(double mouseX, double mouseY) {
-        return PASS;
-    }
+    InteractionResult handleDisplay(DisplayCategory<?> category, Display display);
     
     @Override
-    default int compareTo(@NotNull OverlayDecider o) {
+    default int compareTo(@NotNull DisplayVisibilityPredicate o) {
         return Double.compare(getPriority(), o.getPriority());
     }
 }

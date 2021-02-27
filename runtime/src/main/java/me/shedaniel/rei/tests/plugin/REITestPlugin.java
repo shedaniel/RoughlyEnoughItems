@@ -24,7 +24,7 @@
 package me.shedaniel.rei.tests.plugin;
 
 import me.shedaniel.rei.api.plugins.REIPlugin;
-import me.shedaniel.rei.api.registry.EntryRegistry;
+import me.shedaniel.rei.api.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import net.fabricmc.api.EnvType;

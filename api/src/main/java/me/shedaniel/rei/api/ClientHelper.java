@@ -24,12 +24,8 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.registry.CategoryRegistry;
-import me.shedaniel.rei.api.registry.display.Display;
-import me.shedaniel.rei.api.registry.display.DisplayCategory;
-import me.shedaniel.rei.api.util.CollectionUtils;
 import me.shedaniel.rei.api.util.FormattingUtils;
-import me.shedaniel.rei.api.util.Identifiable;
+import me.shedaniel.rei.api.view.ViewSearchBuilder;
 import me.shedaniel.rei.impl.Internals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -41,17 +37,11 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 @Environment(EnvType.CLIENT)
 public interface ClientHelper {
-    
     /**
      * @return the instance of {@link me.shedaniel.rei.api.ClientHelper}
      */
@@ -60,7 +50,7 @@ public interface ClientHelper {
     }
     
     /**
-     * Checks if cheating is enabled
+     * Returns whether cheating is enabled
      *
      * @return whether cheating is enabled
      */
@@ -68,7 +58,7 @@ public interface ClientHelper {
     
     /**
      * Sets current cheating mode
-     * Should save the config in {@link ConfigManager}.
+     * Automatically calls {@link ConfigManager#saveConfig()}.
      *
      * @param cheating the new cheating mode
      */
@@ -174,48 +164,4 @@ public interface ClientHelper {
     boolean openView(ViewSearchBuilder builder);
     
     boolean canUseMovePackets();
-    
-    interface ViewSearchBuilder {
-        static ViewSearchBuilder builder() {
-            return Internals.createViewSearchBuilder();
-        }
-        
-        ViewSearchBuilder addCategory(ResourceLocation category);
-        
-        ViewSearchBuilder addCategories(Collection<ResourceLocation> categories);
-        
-        default ViewSearchBuilder addAllCategories() {
-            return addCategories(CollectionUtils.map(CategoryRegistry.getInstance(), Identifiable::getIdentifier));
-        }
-        
-        @NotNull Set<ResourceLocation> getCategories();
-        
-        ViewSearchBuilder addRecipesFor(EntryStack<?> stack);
-        
-        @NotNull List<EntryStack<?>> getRecipesFor();
-        
-        ViewSearchBuilder addUsagesFor(EntryStack<?> stack);
-        
-        @NotNull List<EntryStack<?>> getUsagesFor();
-        
-        ViewSearchBuilder setPreferredOpenedCategory(@Nullable ResourceLocation category);
-        
-        @Nullable
-        ResourceLocation getPreferredOpenedCategory();
-        
-        ViewSearchBuilder fillPreferredOpenedCategory();
-        
-        ViewSearchBuilder setInputNotice(@Nullable EntryStack<?> stack);
-        
-        @Nullable
-        EntryStack<?> getInputNotice();
-        
-        ViewSearchBuilder setOutputNotice(@Nullable EntryStack<?> stack);
-        
-        @Nullable
-        EntryStack<?> getOutputNotice();
-        
-        @NotNull
-        Map<DisplayCategory<?>, List<Display>> buildMap();
-    }
 }

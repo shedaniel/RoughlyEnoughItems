@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.plugin.fuel;
 
-import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.ingredient.EntryIngredient;
 import me.shedaniel.rei.api.registry.display.Display;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
@@ -35,21 +35,21 @@ import java.util.List;
 
 @Environment(EnvType.CLIENT)
 public class DefaultFuelDisplay implements Display {
-    private EntryStack<?> fuel;
+    private EntryIngredient fuel;
     private int fuelTime;
     
-    public DefaultFuelDisplay(EntryStack<?> fuel, int fuelTime) {
+    public DefaultFuelDisplay(EntryIngredient fuel, int fuelTime) {
         this.fuel = fuel;
         this.fuelTime = fuelTime;
     }
     
     @Override
-    public List<? extends List<? extends EntryStack<?>>> getInputEntries() {
-        return Collections.singletonList(Collections.singletonList(fuel));
+    public List<EntryIngredient> getInputEntries() {
+        return Collections.singletonList(fuel);
     }
     
     @Override
-    public List<? extends List<? extends EntryStack<?>>> getResultingEntries() {
+    public List<EntryIngredient> getResultingEntries() {
         return Collections.emptyList();
     }
     

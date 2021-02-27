@@ -25,9 +25,9 @@ package me.shedaniel.rei;
 
 import com.google.common.collect.Lists;
 import io.netty.buffer.Unpooled;
+import me.shedaniel.architectury.networking.NetworkManager;
 import me.shedaniel.rei.api.server.InputSlotCrafter;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -35,6 +35,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -55,34 +56,38 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
     @Override
     public void onInitialize() {
         FabricLoader.getInstance().getEntrypoints("rei_containers", Runnable.class).forEach(Runnable::run);
-        ServerPlayNetworking.registerGlobalReceiver(DELETE_ITEMS_PACKET, (server, player, handler, buf, responseSender) -> {
+        NetworkManager.registerReceiver(NetworkManager.c2s(), DELETE_ITEMS_PACKET, (buf, context) -> {
+            ServerPlayer player = (ServerPlayer) context.getPlayer();
             if (player.getServer().getProfilePermissions(player.getGameProfile()) < player.getServer().getOperatorUserPermissionLevel()) {
                 player.displayClientMessage(new TranslatableComponent("text.rei.no_permission_cheat").withStyle(ChatFormatting.RED), false);
                 return;
             }
-            if (!player.getInventory().getCarried().isEmpty()) {
-                player.getInventory().setCarried(ItemStack.EMPTY);
+            if (!player.inventory.getCarried().isEmpty()) {
+                player.inventory.setCarried(ItemStack.EMPTY);
                 player.broadcastCarriedItem();
             }
         });
-        ServerPlayNetworking.registerGlobalReceiver(CREATE_ITEMS_PACKET, (server, player, handler, buf, responseSender) -> {
+        NetworkManager.registerReceiver(NetworkManager.c2s(), CREATE_ITEMS_PACKET, (buf, context) -> {
+            ServerPlayer player = (ServerPlayer) context.getPlayer();
             if (player.getServer().getProfilePermissions(player.getGameProfile()) < player.getServer().getOperatorUserPermissionLevel()) {
                 player.displayClientMessage(new TranslatableComponent("text.rei.no_permission_cheat").withStyle(ChatFormatting.RED), false);
                 return;
             }
             ItemStack stack = buf.readItem();
-            if (player.getInventory().add(stack.copy())) {
-                responseSender.sendPacket(RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(stack.copy()).writeUtf(player.getScoreboardName(), 32767));
-            } else
+            if (player.inventory.add(stack.copy())) {
+                NetworkManager.sendToPlayer(player, RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(stack.copy()).writeUtf(player.getScoreboardName(), 32767));
+            } else {
                 player.displayClientMessage(new TranslatableComponent("text.rei.failed_cheat_items"), false);
+            }
         });
-        ServerPlayNetworking.registerGlobalReceiver(CREATE_ITEMS_GRAB_PACKET, (server, player, handler, buf, responseSender) -> {
+        NetworkManager.registerReceiver(NetworkManager.c2s(), CREATE_ITEMS_GRAB_PACKET, (buf, context) -> {
+            ServerPlayer player = (ServerPlayer) context.getPlayer();
             if (player.getServer().getProfilePermissions(player.getGameProfile()) < player.getServer().getOperatorUserPermissionLevel()) {
                 player.displayClientMessage(new TranslatableComponent("text.rei.no_permission_cheat").withStyle(ChatFormatting.RED), false);
                 return;
             }
             
-            Inventory inventory = player.getInventory();
+            Inventory inventory = player.inventory;
             ItemStack itemStack = buf.readItem();
             ItemStack stack = itemStack.copy();
             if (!inventory.getCarried().isEmpty() && ItemStack.isSameIgnoreDurability(inventory.getCarried(), stack) && ItemStack.tagMatches(inventory.getCarried(), stack)) {
@@ -92,9 +97,10 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
             }
             inventory.setCarried(stack.copy());
             player.broadcastCarriedItem();
-            responseSender.sendPacket(RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(itemStack.copy()).writeUtf(player.getScoreboardName(), 32767));
+            NetworkManager.sendToPlayer(player, RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(itemStack.copy()).writeUtf(player.getScoreboardName(), 32767));
         });
-        ServerPlayNetworking.registerGlobalReceiver(MOVE_ITEMS_PACKET, (server, player, handler, packetByteBuf, responseSender) -> {
+        NetworkManager.registerReceiver(NetworkManager.c2s(), MOVE_ITEMS_PACKET, (packetByteBuf, context) -> {
+            ServerPlayer player = (ServerPlayer) context.getPlayer();
             ResourceLocation category = packetByteBuf.readResourceLocation();
             AbstractContainerMenu container = player.containerMenu;
             InventoryMenu playerContainer = player.inventoryMenu;
@@ -123,7 +129,7 @@ public class RoughlyEnoughItemsNetwork implements ModInitializer {
                             buf.writeItem(stack);
                         }
                     }
-                    responseSender.sendPacket(NOT_ENOUGH_ITEMS_PACKET, buf);
+                    NetworkManager.sendToPlayer(player, NOT_ENOUGH_ITEMS_PACKET, buf);
                 } catch (IllegalStateException e) {
                     player.sendMessage(new TranslatableComponent(e.getMessage()).withStyle(ChatFormatting.RED), Util.NIL_UUID);
                 } catch (Exception e) {

@@ -132,7 +132,7 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
                 float n = h + 14 / 256f;
     
                 BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-                bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+                bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
                 bufferBuilder.vertex(matrix, i, l, m).uv(f, n).endVertex();
                 bufferBuilder.vertex(matrix, j, l, m).uv(g, n).endVertex();
                 bufferBuilder.vertex(matrix, j, k, m).uv(g, h).endVertex();

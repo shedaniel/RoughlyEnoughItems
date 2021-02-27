@@ -27,6 +27,7 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.ingredient.EntryIngredient;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.gui.Renderer;
@@ -51,24 +52,23 @@ import java.util.*;
 
 @Environment(EnvType.CLIENT)
 public class DefaultCompostingCategory implements DisplayCategory<DefaultCompostingDisplay> {
-    
     @Override
-    public @NotNull ResourceLocation getIdentifier() {
+    public  ResourceLocation getIdentifier() {
         return DefaultPlugin.COMPOSTING;
     }
     
     @Override
-    public @NotNull Renderer getIcon() {
+    public  Renderer getIcon() {
         return EntryStacks.of(Blocks.COMPOSTER);
     }
     
     @Override
-    public @NotNull Component getTitle() {
-        return I18n.get("category.rei.composting");
+    public  Component getTitle() {
+        return new TranslatableComponent("category.rei.composting");
     }
     
     @Override
-    public @NotNull DisplayRenderer getDisplayRenderer(DefaultCompostingDisplay display) {
+    public  DisplayRenderer getDisplayRenderer(DefaultCompostingDisplay display) {
         return new DisplayRenderer() {
             private Component text = new TranslatableComponent("text.rei.composting.page", display.getPage() + 1);
             
@@ -85,14 +85,14 @@ public class DefaultCompostingCategory implements DisplayCategory<DefaultCompost
     }
     
     @Override
-    public @NotNull List<Widget> setupDisplay(DefaultCompostingDisplay display, Rectangle bounds) {
+    public  List<Widget> setupDisplay(DefaultCompostingDisplay display, Rectangle bounds) {
         List<Widget> widgets = Lists.newArrayList();
         Point startingPoint = new Point(bounds.x + bounds.width - 55, bounds.y + 110);
-        List<List<? extends EntryStack<?>>> stacks = new ArrayList<>(display.getInputEntries());
+        List<EntryIngredient> stacks = new ArrayList<>(display.getInputEntries());
         int i = 0;
         for (int y = 0; y < 6; y++)
             for (int x = 0; x < 8; x++) {
-                List<? extends EntryStack<?>> entryStack = stacks.size() > i ? stacks.get(i) : Collections.emptyList();
+                EntryIngredient entryStack = stacks.size() > i ? stacks.get(i) : EntryIngredient.empty();
                 if (!entryStack.isEmpty()) {
                     display.getInputMap().object2FloatEntrySet().stream().filter(entry -> entry.getKey() != null && Objects.equals(entry.getKey().asItem(), entryStack.get(0).getValue())).findAny().map(Map.Entry::getValue).ifPresent(chance -> {
                         for (EntryStack<?> stack : entryStack) {

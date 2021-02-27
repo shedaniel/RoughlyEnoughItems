@@ -34,17 +34,22 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.*;
 import me.shedaniel.rei.api.ingredient.EntryIngredient;
 import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.ingredient.util.EntryIngredients;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.plugins.BuiltinPlugin;
 import me.shedaniel.rei.api.plugins.REIPlugin;
-import me.shedaniel.rei.api.registry.CategoryRegistry;
-import me.shedaniel.rei.api.registry.EntryRegistry;
+import me.shedaniel.rei.api.registry.category.CategoryRegistry;
+import me.shedaniel.rei.api.registry.display.DisplayRegistry;
+import me.shedaniel.rei.api.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.registry.display.Display;
-import me.shedaniel.rei.api.registry.screens.ExclusionZones;
-import me.shedaniel.rei.api.registry.screens.ScreenRegistry;
+import me.shedaniel.rei.api.registry.screen.DisplayBoundsProvider;
+import me.shedaniel.rei.api.registry.screen.ExclusionZones;
+import me.shedaniel.rei.api.registry.screen.ScreenRegistry;
+import me.shedaniel.rei.api.registry.transfer.TransferHandlerRegistry;
+import me.shedaniel.rei.api.subsets.SubsetsRegistry;
 import me.shedaniel.rei.plugin.autocrafting.DefaultRecipeBookHandler;
 import me.shedaniel.rei.plugin.beacon.base.DefaultBeaconBaseCategory;
 import me.shedaniel.rei.plugin.beacon.base.DefaultBeaconBaseDisplay;
@@ -88,6 +93,7 @@ import me.shedaniel.rei.api.util.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.*;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
 import net.minecraft.core.Registry;
@@ -167,8 +173,8 @@ public class DefaultPlugin implements REIPlugin, BuiltinPlugin {
     }
     
     @Override
-    public void registerInformation(List<? extends EntryStack<?>> entryStacks, Component name, UnaryOperator<List<Component>> textBuilder) {
-        registerInfoDisplay(DefaultInformationDisplay.createFromEntries(entryStacks, name).lines(textBuilder.apply(Lists.newArrayList())));
+    public void registerInformation(EntryIngredient ingredient, Component name, UnaryOperator<List<Component>> textBuilder) {
+        registerInfoDisplay(DefaultInformationDisplay.createFromEntries(ingredient, name).lines(textBuilder.apply(Lists.newArrayList())));
     }
     
     @Override
@@ -230,6 +236,15 @@ public class DefaultPlugin implements REIPlugin, BuiltinPlugin {
                 new DefaultInformationCategory()
         );
     
+        registry.removePlusButton(FUEL);
+        registry.removePlusButton(COMPOSTING);
+        registry.removePlusButton(BEACON);
+        registry.removePlusButton(BEACON_PAYMENT);
+        registry.removePlusButton(INFO);
+        registry.removePlusButton(STRIPPING);
+        registry.removePlusButton(TILLING);
+        registry.removePlusButton(PATHING);
+    
         registry.addWorkstations(CRAFTING, EntryStacks.of(Items.CRAFTING_TABLE));
         registry.addWorkstations(SMELTING, EntryStacks.of(Items.FURNACE));
         registry.addWorkstations(SMOKING, EntryStacks.of(Items.SMOKER));
@@ -278,16 +293,16 @@ public class DefaultPlugin implements REIPlugin, BuiltinPlugin {
     
     @Override
     public void registerDisplays(DisplayRegistry registry) {
-        registry.registerRecipes(CRAFTING, ShapelessRecipe.class, DefaultShapelessDisplay::new);
-        registry.registerRecipes(CRAFTING, ShapedRecipe.class, DefaultShapedDisplay::new);
-        registry.registerRecipes(SMELTING, SmeltingRecipe.class, DefaultSmeltingDisplay::new);
-        registry.registerRecipes(SMOKING, SmokingRecipe.class, DefaultSmokingDisplay::new);
-        registry.registerRecipes(BLASTING, BlastingRecipe.class, DefaultBlastingDisplay::new);
-        registry.registerRecipes(CAMPFIRE, CampfireCookingRecipe.class, DefaultCampfireDisplay::new);
-        registry.registerRecipes(STONE_CUTTING, StonecutterRecipe.class, DefaultStoneCuttingDisplay::new);
-        registry.registerRecipes(SMITHING, UpgradeRecipe.class, DefaultSmithingDisplay::new);
+        registry.registerRecipes( ShapelessRecipe.class, DefaultShapelessDisplay::new);
+        registry.registerRecipes( ShapedRecipe.class, DefaultShapedDisplay::new);
+        registry.registerRecipes( SmeltingRecipe.class, DefaultSmeltingDisplay::new);
+        registry.registerRecipes( SmokingRecipe.class, DefaultSmokingDisplay::new);
+        registry.registerRecipes( BlastingRecipe.class, DefaultBlastingDisplay::new);
+        registry.registerRecipes( CampfireCookingRecipe.class, DefaultCampfireDisplay::new);
+        registry.registerRecipes( StonecutterRecipe.class, DefaultStoneCuttingDisplay::new);
+        registry.registerRecipes( UpgradeRecipe.class, DefaultSmithingDisplay::new);
         for (Map.Entry<Item, Integer> entry : AbstractFurnaceBlockEntity.getFuel().entrySet()) {
-            registry.registerDisplay(new DefaultFuelDisplay(EntryStacks.of(entry.getKey()), entry.getValue()));
+            registry.registerDisplay(new DefaultFuelDisplay(EntryIngredients.of(entry.getKey()), entry.getValue()));
         }
         EntryIngredient arrowStack = EntryIngredient.of(EntryStacks.of(Items.ARROW));
         ReferenceSet<Potion> registeredPotions = new ReferenceOpenHashSet<>();
@@ -365,7 +380,7 @@ public class DefaultPlugin implements REIPlugin, BuiltinPlugin {
         // Sit tight! This will be a fast journey!
         long time = System.currentTimeMillis();
         EntryRegistry.getInstance().getEntryStacks().forEach(this::applyPotionTransformer);
-        for (List<Display> displays : DisplayRegistry.getInstance().getAllRecipesNoHandlers().values()) {
+        for (List<Display> displays : DisplayRegistry.getInstance().getAllDisplays().values()) {
             for (Display display : displays) {
                 for (List<? extends EntryStack<?>> entries : display.getInputEntries())
                     for (EntryStack<?> stack : entries)
@@ -385,63 +400,68 @@ public class DefaultPlugin implements REIPlugin, BuiltinPlugin {
     }
     
     @Override
+    public void registerExclusionZones(ExclusionZones zones) {
+        zones.register(EffectRenderingInventoryScreen.class, new DefaultPotionEffectExclusionZones());
+        zones.register(RecipeUpdateListener.class, new DefaultRecipeBookExclusionZones());
+    }
+    
+    @Override
     public void registerScreens(ScreenRegistry registry) {
-        ExclusionZones exclusionZones = registry.exclusionZones();
-        exclusionZones.register(EffectRenderingInventoryScreen.class, new DefaultPotionEffectExclusionZones());
-        exclusionZones.register(RecipeUpdateListener.class, new DefaultRecipeBookExclusionZones());
-        registry.registerHandler(new ScreenRegistry.DisplayBoundsProvider<AbstractContainerScreen<?>>() {
+        registry.registerDecider(new DisplayBoundsProvider<AbstractContainerScreen<?>>() {
             @Override
             public Rectangle getScreenBounds(AbstractContainerScreen<?> screen) {
                 return new Rectangle(screen.leftPos, screen.topPos, screen.imageWidth, screen.imageHeight);
             }
             
             @Override
-            public Class<?> getBaseSupportedClass() {
+            public Class<? extends Screen> getBaseSupportedClass() {
                 return AbstractContainerScreen.class;
             }
         });
-    }
     
-    @Override
-    public void registerOthers(DisplayRegistry registry) {
-        registry.registerAutoCraftingHandler(new DefaultRecipeBookHandler());
-        
-        registry.removeAutoCraftButton(FUEL);
-        registry.removeAutoCraftButton(COMPOSTING);
-        registry.removeAutoCraftButton(BEACON);
-        registry.removeAutoCraftButton(BEACON_PAYMENT);
-        registry.removeAutoCraftButton(INFO);
-        registry.removeAutoCraftButton(STRIPPING);
-        registry.removeAutoCraftButton(TILLING);
-        registry.removeAutoCraftButton(PATHING);
         registry.registerContainerClickArea(new Rectangle(88, 32, 28, 23), CraftingScreen.class, CRAFTING);
         registry.registerContainerClickArea(new Rectangle(137, 29, 10, 13), InventoryScreen.class, CRAFTING);
         registry.registerContainerClickArea(new Rectangle(97, 16, 14, 30), BrewingStandScreen.class, BREWING);
         registry.registerContainerClickArea(new Rectangle(78, 32, 28, 23), FurnaceScreen.class, SMELTING);
         registry.registerContainerClickArea(new Rectangle(78, 32, 28, 23), SmokerScreen.class, SMOKING);
         registry.registerContainerClickArea(new Rectangle(78, 32, 28, 23), BlastFurnaceScreen.class, BLASTING);
-        FluidSupportProvider.getInstance().registerProvider(entry -> {
+    }
+    
+    @Override
+    public void registerFluidSupport(FluidSupportProvider support) {
+        support.register(entry -> {
             ItemStack stack = entry.getValue();
             if (stack.getItem() instanceof BucketItem)
                 return InteractionResultHolder.success(Stream.of(EntryStacks.of(((BucketItem) stack.getItem()).content, FluidStackHooks.bucketAmount())));
             return InteractionResultHolder.pass(null);
         });
-//        SubsetsRegistry subsetsRegistry = SubsetsRegistry.INSTANCE;
-//        subsetsRegistry.registerPathEntry("roughlyenoughitems:food", EntryStacks.of(Items.MILK_BUCKET));
-//        subsetsRegistry.registerPathEntry("roughlyenoughitems:food/roughlyenoughitems:cookies", EntryStacks.of(Items.COOKIE));
-        
-        FavoriteEntryType.registry().register(GameModeFavoriteEntry.ID, GameModeFavoriteEntry.Type.INSTANCE);
-        FavoriteEntryType.registry().getOrCrateSection(new TranslatableComponent(GameModeFavoriteEntry.TRANSLATION_KEY))
+    }
+    
+    @Override
+    public void registerTransferHandlers(TransferHandlerRegistry registry) {
+        registry.register(new DefaultRecipeBookHandler());
+    }
+    
+    @Override
+    public void registerFavorites(FavoriteEntryType.Registry registry) {
+        registry.register(GameModeFavoriteEntry.ID, GameModeFavoriteEntry.Type.INSTANCE);
+        registry.getOrCrateSection(new TranslatableComponent(GameModeFavoriteEntry.TRANSLATION_KEY))
                 .add(Stream.concat(
                         Arrays.stream(GameType.values()),
                         Stream.of((GameType) null)
                 ).<FavoriteEntry>map(GameModeFavoriteEntry.Type.INSTANCE::fromArgs).toArray(FavoriteEntry[]::new));
-        FavoriteEntryType.registry().register(WeatherFavoriteEntry.ID, WeatherFavoriteEntry.Type.INSTANCE);
-        FavoriteEntryType.registry().getOrCrateSection(new TranslatableComponent(WeatherFavoriteEntry.TRANSLATION_KEY))
+        registry.register(WeatherFavoriteEntry.ID, WeatherFavoriteEntry.Type.INSTANCE);
+        registry.getOrCrateSection(new TranslatableComponent(WeatherFavoriteEntry.TRANSLATION_KEY))
                 .add(Stream.concat(
                         Arrays.stream(WeatherFavoriteEntry.Weather.values()),
                         Stream.of((WeatherFavoriteEntry.Weather) null)
                 ).<FavoriteEntry>map(WeatherFavoriteEntry.Type.INSTANCE::fromArgs).toArray(FavoriteEntry[]::new));
+    }
+    
+    @Override
+    public void registerSubsets(SubsetsRegistry registry) {
+//        registry.registerPathEntry("roughlyenoughitems:food", EntryStacks.of(Items.MILK_BUCKET));
+//        registry.registerPathEntry("roughlyenoughitems:food/roughlyenoughitems:cookies", EntryStacks.of(Items.COOKIE));
     }
     
     @Override

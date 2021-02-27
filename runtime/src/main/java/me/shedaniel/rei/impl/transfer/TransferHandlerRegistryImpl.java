@@ -21,48 +21,43 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api;
+package me.shedaniel.rei.impl.transfer;
 
-import me.shedaniel.math.Point;
-import me.shedaniel.rei.impl.Internals;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.resources.ResourceLocation;
+import com.google.common.collect.Iterators;
+import me.shedaniel.rei.api.plugins.REIPlugin;
+import me.shedaniel.rei.api.registry.transfer.TransferHandler;
+import me.shedaniel.rei.api.registry.transfer.TransferHandlerRegistry;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 
-@FunctionalInterface
-public interface ClickAreaHandler<T extends Screen> {
-    Result handle(ClickAreaContext<T> context);
+@ApiStatus.Internal
+public class TransferHandlerRegistryImpl implements TransferHandlerRegistry {
+    private final List<TransferHandler> handlers = new ArrayList<>();
     
-    @ApiStatus.NonExtendable
-    interface ClickAreaContext<T extends Screen> {
-        T getScreen();
-        
-        Point getMousePosition();
+    @Override
+    public void acceptPlugin(REIPlugin plugin) {
+        plugin.registerTransferHandlers(this);
     }
     
-    @ApiStatus.NonExtendable
-    interface Result {
-        static Result success() {
-            return Internals.createClickAreaHandlerResult(true);
-        }
-        
-        static Result fail() {
-            return Internals.createClickAreaHandlerResult(false);
-        }
-        
-        Result category(ResourceLocation category);
-        
-        default Result categories(Iterable<ResourceLocation> categories) {
-            for (ResourceLocation category : categories) {
-                category(category);
-            }
-            return this;
-        }
-        
-        boolean isSuccessful();
-        
-        Stream<ResourceLocation> getCategories();
+    @Override
+    public void startReload() {
+        handlers.clear();
+    }
+    
+    @Override
+    public void register(TransferHandler handler) {
+        handlers.add(handler);
+        handlers.sort(Comparator.reverseOrder());
+    }
+    
+    @NotNull
+    @Override
+    public Iterator<TransferHandler> iterator() {
+        return Iterators.unmodifiableIterator(handlers.iterator());
     }
 }

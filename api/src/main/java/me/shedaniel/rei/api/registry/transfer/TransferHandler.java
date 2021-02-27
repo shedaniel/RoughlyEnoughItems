@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api;
+package me.shedaniel.rei.api.registry.transfer;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
@@ -39,8 +39,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Supplier;
 
 @Environment(EnvType.CLIENT)
-public interface AutoTransferHandler extends Comparable<AutoTransferHandler> {
-    
+public interface TransferHandler extends Comparable<TransferHandler> {
     /**
      * @return the priority of this handler, higher priorities will be called first.
      */
@@ -52,7 +51,7 @@ public interface AutoTransferHandler extends Comparable<AutoTransferHandler> {
     Result handle(@NotNull Context context);
     
     @Override
-    default int compareTo(@NotNull AutoTransferHandler o) {
+    default int compareTo(@NotNull TransferHandler o) {
         return Double.compare(getPriority(), o.getPriority());
     }
     
@@ -169,7 +168,7 @@ public interface AutoTransferHandler extends Comparable<AutoTransferHandler> {
     
     @ApiStatus.NonExtendable
     interface Context {
-        static Context create(boolean actuallyCrafting, AbstractContainerScreen<?> containerScreen, Display display) {
+        static Context create(boolean actuallyCrafting, @Nullable AbstractContainerScreen<?> containerScreen, Display display) {
             return new ContextImpl(actuallyCrafting, containerScreen, () -> display);
         }
         
@@ -177,12 +176,17 @@ public interface AutoTransferHandler extends Comparable<AutoTransferHandler> {
             return Minecraft.getInstance();
         }
         
+        /**
+         * Returns whether we should actually move the items.
+         *
+         * @return whether we should actually move the items.
+         */
         boolean isActuallyCrafting();
+        
+        Display getDisplay();
         
         @Nullable
         AbstractContainerScreen<?> getContainerScreen();
-        
-        Display getRecipe();
         
         @Nullable
         default AbstractContainerMenu getContainer() {
@@ -285,7 +289,7 @@ public interface AutoTransferHandler extends Comparable<AutoTransferHandler> {
         }
         
         @Override
-        public Display getRecipe() {
+        public Display getDisplay() {
             return recipeDisplaySupplier.get();
         }
     }

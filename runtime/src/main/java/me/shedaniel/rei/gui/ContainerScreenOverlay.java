@@ -40,10 +40,14 @@ import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.gui.config.SearchFieldLocation;
-import me.shedaniel.rei.api.registry.CategoryRegistry;
-import me.shedaniel.rei.api.registry.screens.OverlayDecider;
-import me.shedaniel.rei.api.registry.screens.ScreenRegistry;
+import me.shedaniel.rei.api.registry.category.CategoryRegistry;
+import me.shedaniel.rei.api.registry.display.DisplayRegistry;
+import me.shedaniel.rei.api.registry.screen.ClickArea;
+import me.shedaniel.rei.api.registry.screen.DisplayBoundsProvider;
+import me.shedaniel.rei.api.registry.screen.OverlayDecider;
+import me.shedaniel.rei.api.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.util.ImmutableLiteralText;
+import me.shedaniel.rei.api.view.ViewSearchBuilder;
 import me.shedaniel.rei.gui.modules.Menu;
 import me.shedaniel.rei.gui.modules.entries.GameModeMenuEntry;
 import me.shedaniel.rei.gui.modules.entries.WeatherMenuEntry;
@@ -222,7 +226,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
         if (ConfigObject.getInstance().isFavoritesEnabled()) {
             if (favoritesListWidget == null)
                 favoritesListWidget = new FavoritesListWidget();
-//            favoritesListWidget.favoritePanel.resetRows();
+            favoritesListWidget.favoritePanel.resetRows();
             widgets.add(favoritesListWidget);
         }
         ENTRY_LIST_WIDGET.updateArea(ScreenHelper.getSearchField() == null ? "" : ScreenHelper.getSearchField().getText());
@@ -457,9 +461,9 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
                 return getBottomSideSearchFieldArea(widthRemoved);
             default:
             case CENTER: {
-                for (OverlayDecider decider : ScreenRegistry.getInstance().getSortedOverlayDeciders(Minecraft.getInstance().screen.getClass())) {
-                    if (decider instanceof ScreenRegistry.DisplayBoundsProvider) {
-                        Rectangle containerBounds = ((ScreenRegistry.DisplayBoundsProvider<Screen>) decider).getScreenBounds(Minecraft.getInstance().screen);
+                for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(Minecraft.getInstance().screen.getClass())) {
+                    if (decider instanceof DisplayBoundsProvider) {
+                        Rectangle containerBounds = ((DisplayBoundsProvider<Screen>) decider).getScreenBounds(Minecraft.getInstance().screen);
                         return getBottomCenterSearchFieldArea(containerBounds, widthRemoved);
                     }
                 }
@@ -513,7 +517,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
             ENTRY_LIST_WIDGET.updateSearch(ScreenHelper.getSearchField().getText(), true);
             init();
         } else {
-            for (OverlayDecider decider : ScreenRegistry.getInstance().getSortedOverlayDeciders(minecraft.screen.getClass())) {
+            for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(minecraft.screen.getClass())) {
                 if (decider != null && decider.shouldRecalculateArea(ConfigObject.getInstance().getDisplayPanelLocation(), bounds)) {
                     init();
                     break;
@@ -542,9 +546,8 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.renderWidgets(matrices, mouseX, mouseY, delta);
         if (ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
-            List<ResourceLocation> categories = null;
             Screen screen = Minecraft.getInstance().screen;
-            ClickAreaHandler.ClickAreaContext context = new ClickAreaHandler.ClickAreaContext<Screen>() {
+            ClickArea.ClickAreaContext<Screen> context = new ClickArea.ClickAreaContext<Screen>() {
                 @Override
                 public Screen getScreen() {
                     return screen;
@@ -555,16 +558,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
                     return new Point(mouseX, mouseY);
                 }
             };
-            for (Map.Entry<Class<? extends Screen>, ClickAreaHandler<?>> area : ((PluginManager) DisplayRegistry.getInstance()).getClickAreas().entries()) {
-                if (area.getKey().equals(screen.getClass())) {
-                    ClickAreaHandler.Result result = area.getValue().handle(context);
-                    if (result.isSuccessful()) {
-                        if (categories == null) {
-                            categories = result.getCategories().collect(Collectors.toList());
-                        } else categories.addAll(result.getCategories().collect(Collectors.toList()));
-                    }
-                }
-            }
+            Set<ResourceLocation> categories = ScreenRegistry.getInstance().handleClickArea((Class<Screen>) screen.getClass(), context);
             if (categories != null && !categories.isEmpty()) {
                 Component collect = CollectionUtils.mapAndJoinToComponent(categories, identifier -> CategoryRegistry.getInstance().get(identifier).getCategory().getTitle(), new ImmutableLiteralText(", "));
                 Tooltip.create(new TranslatableComponent("text.rei.view_recipes_for", collect)).queue();
@@ -682,13 +676,13 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
             ScreenHelper.toggleOverlayVisible();
             return true;
         }
-        EntryStack<?> stack = DisplayRegistry.getInstance().getScreenFocusedStack(Minecraft.getInstance().screen);
+        EntryStack<?> stack = ScreenRegistry.getInstance().getFocusedStack(Minecraft.getInstance().screen);
         if (stack != null && !stack.isEmpty()) {
             stack = stack.copy();
             if (ConfigObject.getInstance().getRecipeKeybind().matchesKey(keyCode, scanCode)) {
-                return ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addRecipesFor(stack).setOutputNotice(stack).fillPreferredOpenedCategory());
+                return ClientHelper.getInstance().openView(ViewSearchBuilder.builder().addRecipesFor(stack).setOutputNotice(stack).fillPreferredOpenedCategory());
             } else if (ConfigObject.getInstance().getUsageKeybind().matchesKey(keyCode, scanCode)) {
-                return ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addUsagesFor(stack).setInputNotice(stack).fillPreferredOpenedCategory());
+                return ClientHelper.getInstance().openView(ViewSearchBuilder.builder().addUsagesFor(stack).setInputNotice(stack).fillPreferredOpenedCategory());
             } else if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(keyCode, scanCode)) {
                 FavoriteEntry favoriteEntry = FavoriteEntry.fromEntryStack(stack);
                 if (!ConfigObject.getInstance().getFavoriteEntries().contains(favoriteEntry))
@@ -735,13 +729,13 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
             ScreenHelper.toggleOverlayVisible();
             return true;
         }
-        EntryStack<?> stack = DisplayRegistry.getInstance().getScreenFocusedStack(Minecraft.getInstance().screen);
+        EntryStack<?> stack = ScreenRegistry.getInstance().getFocusedStack(Minecraft.getInstance().screen);
         if (stack != null && !stack.isEmpty()) {
             stack = stack.copy();
             if (ConfigObject.getInstance().getRecipeKeybind().matchesMouse(button)) {
-                return ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addRecipesFor(stack).setOutputNotice(stack).fillPreferredOpenedCategory());
+                return ClientHelper.getInstance().openView(ViewSearchBuilder.builder().addRecipesFor(stack).setOutputNotice(stack).fillPreferredOpenedCategory());
             } else if (ConfigObject.getInstance().getUsageKeybind().matchesMouse(button)) {
-                return ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addUsagesFor(stack).setInputNotice(stack).fillPreferredOpenedCategory());
+                return ClientHelper.getInstance().openView(ViewSearchBuilder.builder().addUsagesFor(stack).setInputNotice(stack).fillPreferredOpenedCategory());
             } else if (ConfigObject.getInstance().getFavoriteKeyCode().matchesMouse(button)) {
                 FavoriteEntry favoriteEntry = FavoriteEntry.fromEntryStack(stack);
                 if (!ConfigObject.getInstance().getFavoriteEntries().contains(favoriteEntry))
@@ -768,31 +762,21 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
             }
         }
         if (ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
-            List<ResourceLocation> categories = null;
             Screen screen = Minecraft.getInstance().screen;
-            ClickAreaHandler.ClickAreaContext context = new ClickAreaHandler.ClickAreaContext<Screen>() {
+            ClickArea.ClickAreaContext<Screen> context = new ClickArea.ClickAreaContext<Screen>() {
                 @Override
                 public Screen getScreen() {
                     return screen;
                 }
-                
+        
                 @Override
                 public Point getMousePosition() {
                     return new Point(mouseX, mouseY);
                 }
             };
-            for (Map.Entry<Class<? extends Screen>, ClickAreaHandler<?>> area : ((PluginManager) DisplayRegistry.getInstance()).getClickAreas().entries()) {
-                if (area.getKey().equals(screen.getClass())) {
-                    ClickAreaHandler.Result result = area.getValue().handle(context);
-                    if (result.isSuccessful()) {
-                        if (categories == null) {
-                            categories = result.getCategories().collect(Collectors.toList());
-                        } else categories.addAll(result.getCategories().collect(Collectors.toList()));
-                    }
-                }
-            }
+            Set<ResourceLocation> categories = ScreenRegistry.getInstance().handleClickArea((Class<Screen>) screen.getClass(), context);
             if (categories != null && !categories.isEmpty()) {
-                ClientHelper.getInstance().openView(ClientHelper.ViewSearchBuilder.builder().addCategories(categories).fillPreferredOpenedCategory());
+                ClientHelper.getInstance().openView(ViewSearchBuilder.builder().addCategories(categories).fillPreferredOpenedCategory());
                 Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 return true;
             }
@@ -828,7 +812,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
     }
     
     public boolean isNotInExclusionZones(double mouseX, double mouseY) {
-        for (OverlayDecider decider : ScreenRegistry.getInstance().getSortedOverlayDeciders(Minecraft.getInstance().screen.getClass())) {
+        for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(Minecraft.getInstance().screen.getClass())) {
             InteractionResult in = decider.isInZone(mouseX, mouseY);
             if (in != InteractionResult.PASS)
                 return in == InteractionResult.SUCCESS;

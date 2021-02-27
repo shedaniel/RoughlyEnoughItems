@@ -25,7 +25,7 @@ package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.registry.display.Display;
-import net.minecraft.resources.ResourceLocation;
+import me.shedaniel.rei.api.view.ViewSearchBuilder;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,7 +39,7 @@ public interface LiveDisplayGenerator<T extends Display> {
         return Optional.empty();
     }
     
-    default Optional<List<T>> getDisplaysGenerated(ClientHelper.ViewSearchBuilder builder) {
+    default Optional<List<T>> generate(ViewSearchBuilder builder) {
         return Optional.empty();
     }
 }

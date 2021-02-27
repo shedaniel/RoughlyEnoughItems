@@ -21,36 +21,27 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.registry.screens;
+package me.shedaniel.rei.api.registry.screen;
 
 import me.shedaniel.math.Rectangle;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.screens.Screen;
 
-import java.util.List;
-import java.util.function.Supplier;
-
-@Environment(EnvType.CLIENT)
-public interface ExclusionZones extends OverlayDecider {
+public interface DisplayBoundsProvider<T> extends OverlayDecider {
     /**
-     * Gets the exclusion zones by the screen class
-     *
-     * @param currentScreenClass the current screen class
-     * @return the list of exclusion zones
+     * @param screen the screen
+     * @return the boundary of the base container panel.
      */
-    default List<Rectangle> getExclusionZones(Class<?> currentScreenClass) {
-        return getExclusionZones(currentScreenClass, false);
+    Rectangle getScreenBounds(T screen);
+    
+    /**
+     * Gets the base supported class for the bounds handler
+     *
+     * @return the base class
+     */
+    Class<? extends Screen> getBaseSupportedClass();
+    
+    @Override
+    default <R extends Screen> boolean isHandingScreen(Class<R> screen) {
+        return getBaseSupportedClass().isAssignableFrom(screen);
     }
-    
-    List<Rectangle> getExclusionZones(Class<?> currentScreenClass, boolean sort);
-    
-    int getZonesCount();
-    
-    /**
-     * Register an exclusion zone
-     *
-     * @param screenClass the screen
-     * @param supplier    the exclusion zone supplier, returns the list of exclusion zones
-     */
-    void register(Class<?> screenClass, Supplier<List<Rectangle>> supplier);
 }

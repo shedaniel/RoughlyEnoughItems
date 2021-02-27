@@ -25,8 +25,9 @@ package me.shedaniel.rei.impl;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.architectury.fluid.FluidStack;
-import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.plugins.REIPlugin;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.ItemStack;
@@ -39,17 +40,22 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-@ApiStatus.Experimental
 @ApiStatus.Internal
 public class FluidSupportProviderImpl implements FluidSupportProvider {
     private final List<Provider> providers = Lists.newCopyOnWriteArrayList();
     
-    public void reset() {
+    @Override
+    public void acceptPlugin(REIPlugin plugin) {
+        plugin.registerFluidSupport(this);
+    }
+    
+    @Override
+    public void startReload() {
         providers.clear();
     }
     
     @Override
-    public void registerProvider(@NotNull Provider provider) {
+    public void register(@NotNull Provider provider) {
         providers.add(Objects.requireNonNull(provider, "Registered provider is null!"));
     }
     

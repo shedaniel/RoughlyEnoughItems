@@ -25,36 +25,32 @@ package me.shedaniel.rei.api.fluid;
 
 import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.impl.Internals;
+import me.shedaniel.rei.api.plugins.PluginManager;
+import me.shedaniel.rei.api.registry.Reloadable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
- * Experimental library, scheduled to change if needed.
+ * A registry to provide support for getting fluids from items.
  */
-@ApiStatus.Experimental
 @Environment(EnvType.CLIENT)
-public interface FluidSupportProvider {
+public interface FluidSupportProvider extends Reloadable {
     static FluidSupportProvider getInstance() {
-        return Internals.getFluidSupportProvider();
+        return PluginManager.getInstance().get(FluidSupportProvider.class);
     }
     
-    void registerProvider(@NotNull Provider provider);
+    void register(Provider provider);
     
-    @NotNull
-    Optional<Stream<EntryStack<FluidStack>>> itemToFluids(@NotNull EntryStack<? extends ItemStack> itemStack);
+    Optional<Stream<EntryStack<FluidStack>>> itemToFluids(EntryStack<? extends ItemStack> itemStack);
     
     @FunctionalInterface
     interface Provider {
-        @NotNull
-        InteractionResultHolder<@Nullable Stream<@NotNull EntryStack<FluidStack>>> itemToFluid(@NotNull EntryStack<? extends ItemStack> itemStack);
+        InteractionResultHolder<@Nullable Stream<EntryStack<FluidStack>>> itemToFluid(EntryStack<? extends ItemStack> itemStack);
     }
 }

@@ -24,11 +24,14 @@
 package me.shedaniel.rei.api.ingredient.util;
 
 import com.google.common.collect.ImmutableList;
+import me.shedaniel.architectury.utils.Fraction;
+import me.shedaniel.rei.api.gui.Renderer;
 import me.shedaniel.rei.api.ingredient.EntryIngredient;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.material.Fluid;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,6 +40,34 @@ import java.util.List;
 
 public final class EntryIngredients {
     private EntryIngredients() {}
+    
+    public static EntryIngredient of(ItemLike stack) {
+        return EntryIngredient.of(EntryStacks.of(stack));
+    }
+    
+    public static EntryIngredient of(ItemStack stack) {
+        return EntryIngredient.of(EntryStacks.of(stack));
+    }
+    
+    public static EntryIngredient of(Fluid fluid) {
+        return EntryIngredient.of(EntryStacks.of(fluid));
+    }
+    
+    public static EntryIngredient of(Fluid fluid, int amount) {
+        return EntryIngredient.of(EntryStacks.of(fluid, amount));
+    }
+    
+    public static EntryIngredient of(Fluid fluid, double amount) {
+        return EntryIngredient.of(EntryStacks.of(fluid, amount));
+    }
+    
+    public static EntryIngredient of(Fluid fluid, Fraction amount) {
+        return EntryIngredient.of(EntryStacks.of(fluid, amount));
+    }
+    
+    public static EntryIngredient of(Renderer renderer) {
+        return EntryIngredient.of(EntryStacks.of(renderer));
+    }
     
     public static EntryIngredient ofItems(Collection<ItemLike> stacks) {
         if (stacks.size() == 0) return EntryIngredient.empty();
@@ -91,5 +122,15 @@ public final class EntryIngredients {
             emptyFlag = false;
         }
         return ImmutableList.copyOf(result);
+    }
+    
+    public static <T> boolean testFuzzy(EntryIngredient ingredient, EntryStack<T> stack) {
+        for (EntryStack<?> ingredientStack : ingredient) {
+            if (EntryStacks.equalsFuzzy(ingredientStack, stack)) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 }

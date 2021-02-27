@@ -26,39 +26,38 @@ package me.shedaniel.rei.plugin.stripping;
 import com.google.common.collect.Lists;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.gui.Renderer;
-import me.shedaniel.rei.api.ingredient.util.EntryStacks;
-import me.shedaniel.rei.api.gui.widgets.Widgets;
 import me.shedaniel.rei.api.gui.widgets.Widget;
+import me.shedaniel.rei.api.gui.widgets.Widgets;
+import me.shedaniel.rei.api.ingredient.util.EntryStacks;
+import me.shedaniel.rei.api.registry.display.DisplayCategory;
 import me.shedaniel.rei.plugin.DefaultPlugin;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 public class DefaultStrippingCategory implements DisplayCategory<DefaultStrippingDisplay> {
     
     @Override
-    public @NotNull ResourceLocation getIdentifier() {
+    public ResourceLocation getIdentifier() {
         return DefaultPlugin.STRIPPING;
     }
     
     @Override
-    public @NotNull Renderer getIcon() {
+    public Renderer getIcon() {
         return EntryStacks.of(Items.IRON_AXE);
     }
     
     @Override
-    public @NotNull Component getTitle() {
-        return I18n.get("category.rei.stripping");
+    public Component getTitle() {
+        return new TranslatableComponent("category.rei.stripping");
     }
     
     @Override
-    public @NotNull List<Widget> setupDisplay(DefaultStrippingDisplay display, Rectangle bounds) {
+    public List<Widget> setupDisplay(DefaultStrippingDisplay display, Rectangle bounds) {
         Point startPoint = new Point(bounds.getCenterX() - 41, bounds.getCenterY() - 13);
         List<Widget> widgets = Lists.newArrayList();
         widgets.add(Widgets.createRecipeBase(bounds));

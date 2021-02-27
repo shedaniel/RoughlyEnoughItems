@@ -23,7 +23,8 @@
 
 package me.shedaniel.rei.api;
 
-import me.shedaniel.rei.impl.Internals;
+import me.shedaniel.rei.api.plugins.PluginManager;
+import me.shedaniel.rei.api.registry.Reloadable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -31,14 +32,13 @@ import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.NotNull;
 
 @Environment(EnvType.CLIENT)
-public interface ConfigManager {
-    
+public interface ConfigManager extends Reloadable {
     /**
      * @return the instance of {@link me.shedaniel.rei.api.ConfigManager}
      */
     @NotNull
     static ConfigManager getInstance() {
-        return Internals.getConfigManager();
+        return PluginManager.getInstance().get(ConfigManager.class);
     }
     
     /**

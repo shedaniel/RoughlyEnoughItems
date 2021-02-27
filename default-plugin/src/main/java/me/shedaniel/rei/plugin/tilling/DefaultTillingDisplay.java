@@ -23,15 +23,16 @@
 
 package me.shedaniel.rei.plugin.tilling;
 
+import me.shedaniel.rei.api.ingredient.EntryIngredient;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.registry.display.Display;
+import me.shedaniel.rei.api.ingredient.util.EntryIngredients;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
+import me.shedaniel.rei.api.registry.display.Display;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
@@ -59,22 +60,17 @@ public class DefaultTillingDisplay implements Display {
     }
     
     @Override
-    public @NotNull List<? extends List<? extends EntryStack<?>>> getInputEntries() {
-        return Collections.singletonList(Collections.singletonList(in));
+    public List<EntryIngredient> getInputEntries() {
+        return Collections.singletonList(EntryIngredients.of(in));
     }
     
     @Override
-    public @NotNull List<? extends List<? extends EntryStack<?>>> getResultingEntries() {
-        return Collections.singletonList(Collections.singletonList(out));
+    public List<EntryIngredient> getResultingEntries() {
+        return Collections.singletonList(EntryIngredients.of(out));
     }
     
     @Override
-    public @NotNull ResourceLocation getCategoryIdentifier() {
+    public ResourceLocation getCategoryIdentifier() {
         return DefaultPlugin.TILLING;
-    }
-    
-    @Override
-    public @NotNull List<? extends List<? extends EntryStack<?>>> getRequiredEntries() {
-        return getInputEntries();
     }
 }

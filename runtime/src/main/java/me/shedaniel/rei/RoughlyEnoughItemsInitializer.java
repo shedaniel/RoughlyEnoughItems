@@ -39,7 +39,6 @@ public class RoughlyEnoughItemsInitializer implements ModInitializer, ClientModI
         checkRequiredFabricModules();
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
             checkClothConfig();
-            checkModMenu();
         }
         
         if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
@@ -51,6 +50,7 @@ public class RoughlyEnoughItemsInitializer implements ModInitializer, ClientModI
     public void onInitializeClient() {
         if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
             initializeEntryPoint("me.shedaniel.rei.RoughlyEnoughItemsCore");
+            initializeEntryPoint("me.shedaniel.rei.REIModMenuEntryPoint");
             initializeEntryPoint("me.shedaniel.rei.impl.ClientHelperImpl");
             initializeEntryPoint("me.shedaniel.rei.impl.ScreenHelper");
         }
@@ -104,19 +104,6 @@ public class RoughlyEnoughItemsInitializer implements ModInitializer, ClientModI
             }
         } catch (VersionParsingException e) {
             RoughlyEnoughItemsState.error("Failed to parse Cloth Config version: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-    
-    public static void checkModMenu() {
-        try {
-            if (FabricLoader.getInstance().isModLoaded("modmenu")) {
-                if (SemanticVersion.parse(FabricLoader.getInstance().getModContainer("modmenu").get().getMetadata().getVersion().getFriendlyString()).compareTo(SemanticVersion.parse("1.16.7")) < 0) {
-                    RoughlyEnoughItemsState.error("Your Mod Menu version is too old!", "https://www.curseforge.com/minecraft/mc-mods/modmenu/files/all");
-                }
-            }
-        } catch (VersionParsingException e) {
-            RoughlyEnoughItemsState.error("Failed to parse Mod Menu version: " + e.getMessage());
             e.printStackTrace();
         }
     }

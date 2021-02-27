@@ -27,44 +27,43 @@ import com.google.common.collect.Lists;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.gui.Renderer;
-import me.shedaniel.rei.api.ingredient.util.EntryStacks;
-import me.shedaniel.rei.api.gui.widgets.Widgets;
 import me.shedaniel.rei.api.gui.widgets.Widget;
+import me.shedaniel.rei.api.gui.widgets.Widgets;
+import me.shedaniel.rei.api.ingredient.util.EntryStacks;
+import me.shedaniel.rei.api.registry.display.DisplayCategory;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
 public class DefaultBrewingCategory implements DisplayCategory<DefaultBrewingDisplay> {
     @Override
-    public @NotNull ResourceLocation getIdentifier() {
+    public ResourceLocation getIdentifier() {
         return DefaultPlugin.BREWING;
     }
     
     @Override
-    public @NotNull Renderer getIcon() {
+    public Renderer getIcon() {
         return EntryStacks.of(Blocks.BREWING_STAND);
     }
     
     @Override
-    public @NotNull Component getTitle() {
-        return I18n.get("category.rei.brewing");
+    public Component getTitle() {
+        return new TranslatableComponent("category.rei.brewing");
     }
     
     @Override
-    public @NotNull List<Widget> setupDisplay(DefaultBrewingDisplay display, Rectangle bounds) {
+    public List<Widget> setupDisplay(DefaultBrewingDisplay display, Rectangle bounds) {
         Point startPoint = new Point(bounds.getCenterX() - 52, bounds.getCenterY() - 29);
         List<Widget> widgets = Lists.newArrayList();
         widgets.add(Widgets.createRecipeBase(bounds));
@@ -82,5 +81,4 @@ public class DefaultBrewingCategory implements DisplayCategory<DefaultBrewingDis
         widgets.add(Widgets.createSlot(new Point(startPoint.x + 86, startPoint.y + 35)).entries(display.getOutput(2)).disableBackground().markOutput());
         return widgets;
     }
-    
 }

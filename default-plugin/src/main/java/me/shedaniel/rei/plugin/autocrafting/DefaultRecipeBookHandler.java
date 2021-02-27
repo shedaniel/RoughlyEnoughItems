@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.plugin.autocrafting;
 
-import me.shedaniel.rei.api.AutoTransferHandler;
+import me.shedaniel.rei.api.registry.transfer.TransferHandler;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.registry.display.Display;
 import me.shedaniel.rei.api.registry.display.TransferDisplay;
@@ -41,13 +41,13 @@ import net.minecraft.world.item.crafting.Recipe;
 import org.jetbrains.annotations.NotNull;
 
 @Environment(EnvType.CLIENT)
-public class DefaultRecipeBookHandler implements AutoTransferHandler {
+public class DefaultRecipeBookHandler implements TransferHandler {
     @NotNull
     @Override
     public Result handle(@NotNull Context context) {
-        if (context.getRecipe() instanceof TransferDisplay && ClientHelper.getInstance().canUseMovePackets())
+        if (context.getDisplay() instanceof TransferDisplay && ClientHelper.getInstance().canUseMovePackets())
             return Result.createNotApplicable();
-        Display display = context.getRecipe();
+        Display display = context.getDisplay();
         if (!(context.getContainer() instanceof RecipeBookMenu))
             return Result.createNotApplicable();
         RecipeBookMenu<?> container = (RecipeBookMenu<?>) context.getContainer();

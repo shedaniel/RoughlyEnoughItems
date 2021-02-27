@@ -50,11 +50,11 @@ public class CollectionUtils {
         List<B> b = map.get(key);
         if (b != null)
             return b;
-        map.put(key, Lists.newArrayList());
+        map.put(key, new ArrayList<>());
         return map.get(key);
     }
     
-    public static <T> T findFirstOrNullEquals(List<T> list, T obj) {
+    public static <T> T findFirstOrNullEquals(Iterable<T> list, T obj) {
         for (T t : list) {
             if (t.equals(obj))
                 return t;
@@ -62,7 +62,7 @@ public class CollectionUtils {
         return null;
     }
     
-    public static <T, R> List<R> castAndMap(List<T> list, Class<R> castClass) {
+    public static <T, R> List<R> castAndMap(Iterable<T> list, Class<R> castClass) {
         List<R> l = new ArrayList<>();
         for (T t : list) {
             if (castClass.isAssignableFrom(t.getClass()))
@@ -71,7 +71,7 @@ public class CollectionUtils {
         return l;
     }
     
-    public static <T> T findFirstOrNull(List<T> list, Predicate<T> predicate) {
+    public static <T> T findFirstOrNull(Iterable<T> list, Predicate<T> predicate) {
         for (T t : list) {
             if (predicate.test(t))
                 return t;
@@ -79,7 +79,7 @@ public class CollectionUtils {
         return null;
     }
     
-    public static <T> boolean anyMatch(List<T> list, Predicate<T> predicate) {
+    public static <T> boolean anyMatch(Iterable<T> list, Predicate<T> predicate) {
         for (T t : list) {
             if (predicate.test(t))
                 return true;
@@ -88,17 +88,17 @@ public class CollectionUtils {
     }
     
     @Environment(EnvType.CLIENT)
-    public static boolean anyMatchEqualsAll(List<? extends EntryStack<?>> list, EntryStack<?> stack) {
+    public static boolean anyMatchEqualsAll(Iterable<? extends EntryStack<?>> list, EntryStack<?> stack) {
         return firstOrNullEqualsAll(list, stack) != null;
     }
     
     @Environment(EnvType.CLIENT)
-    public static boolean anyMatchEqualsEntryIgnoreAmount(List<? extends EntryStack<?>> list, EntryStack<?> stack) {
+    public static boolean anyMatchEqualsEntryIgnoreAmount(Iterable<? extends EntryStack<?>> list, EntryStack<?> stack) {
         return findFirstOrNullEqualsEntryIgnoreAmount(list, stack) != null;
     }
     
     @Environment(EnvType.CLIENT)
-    public static EntryStack<?> firstOrNullEqualsAll(List<? extends EntryStack<?>> list, EntryStack<?> stack) {
+    public static EntryStack<?> firstOrNullEqualsAll(Iterable<? extends EntryStack<?>> list, EntryStack<?> stack) {
         for (EntryStack<?> t : list) {
             if (EntryStacks.equalsExact(t, stack))
                 return t;
@@ -107,7 +107,7 @@ public class CollectionUtils {
     }
     
     @Environment(EnvType.CLIENT)
-    public static EntryStack<?> findFirstOrNullEqualsEntryIgnoreAmount(Collection<? extends EntryStack<?>> list, EntryStack<?> stack) {
+    public static EntryStack<?> findFirstOrNullEqualsEntryIgnoreAmount(Iterable<? extends EntryStack<?>> list, EntryStack<?> stack) {
         for (EntryStack<?> t : list) {
             if (EntryStacks.equalsIgnoreCount(t, stack))
                 return t;
@@ -115,7 +115,7 @@ public class CollectionUtils {
         return null;
     }
     
-    public static <T> List<T> filter(List<T> list, Predicate<T> predicate) {
+    public static <T> List<T> filterToList(Iterable<T> list, Predicate<T> predicate) {
         List<T> l = Lists.newArrayList();
         for (T t : list) {
             if (predicate.test(t)) {
@@ -125,30 +125,12 @@ public class CollectionUtils {
         return l;
     }
     
-    public static <T> Set<T> filter(Set<T> list, Predicate<T> predicate) {
+    public static <T> Set<T> filterToSet(Iterable<T> list, Predicate<T> predicate) {
         Set<T> l = Sets.newLinkedHashSet();
         for (T t : list) {
             if (predicate.test(t)) {
                 l.add(t);
             }
-        }
-        return l;
-    }
-    
-    public static <T> List<T> filterSetToList(Set<T> list, Predicate<T> predicate) {
-        List<T> l = Lists.newArrayList();
-        for (T t : list) {
-            if (predicate.test(t)) {
-                l.add(t);
-            }
-        }
-        return l;
-    }
-    
-    public static <T, R> List<R> map(List<T> list, Function<T, R> function) {
-        List<R> l = new ArrayList<>(list.size() + 1);
-        for (T t : list) {
-            l.add(function.apply(t));
         }
         return l;
     }
@@ -193,7 +175,7 @@ public class CollectionUtils {
         return l;
     }
     
-    public static <T, R> Optional<R> mapAndMax(List<T> list, Function<T, R> function, Comparator<R> comparator) {
+    public static <T, R> Optional<R> mapAndMax(Collection<T> list, Function<T, R> function, Comparator<R> comparator) {
         if (list.isEmpty())
             return Optional.empty();
         return list.stream().max(Comparator.comparing(function, comparator)).map(function);
@@ -205,7 +187,7 @@ public class CollectionUtils {
         return Stream.of(list).max(Comparator.comparing(function, comparator)).map(function);
     }
     
-    public static <T> Optional<T> max(List<T> list, Comparator<T> comparator) {
+    public static <T> Optional<T> max(Collection<T> list, Comparator<T> comparator) {
         if (list.isEmpty())
             return Optional.empty();
         return list.stream().max(comparator);
@@ -217,7 +199,7 @@ public class CollectionUtils {
         return Stream.of(list).max(comparator);
     }
     
-    public static String joinToString(List<String> list, String separator) {
+    public static String joinToString(Iterable<String> list, String separator) {
         StringJoiner joiner = new StringJoiner(separator);
         for (String t : list) {
             joiner.add(t);
@@ -233,7 +215,7 @@ public class CollectionUtils {
         return joiner.toString();
     }
     
-    public static <T> String mapAndJoinToString(List<T> list, Function<T, String> function, String separator) {
+    public static <T> String mapAndJoinToString(Iterable<T> list, Function<T, String> function, String separator) {
         StringJoiner joiner = new StringJoiner(separator);
         for (T t : list) {
             joiner.add(function.apply(t));
@@ -249,7 +231,7 @@ public class CollectionUtils {
         return joiner.toString();
     }
     
-    public static <T> Component mapAndJoinToComponent(List<T> list, Function<T, Component> function, Component separator) {
+    public static <T> Component mapAndJoinToComponent(Iterable<T> list, Function<T, Component> function, Component separator) {
         TextComponent joiner = new TextComponent("");
         boolean first = true;
         for (T t : list) {
@@ -277,7 +259,7 @@ public class CollectionUtils {
         return joiner;
     }
     
-    public static <T, R> List<R> filterAndMap(List<T> list, Predicate<T> predicate, Function<T, R> function) {
+    public static <T, R> List<R> filterAndMap(Iterable<T> list, Predicate<T> predicate, Function<T, R> function) {
         List<R> l = null;
         for (T t : list) {
             if (predicate.test(t)) {
@@ -289,7 +271,7 @@ public class CollectionUtils {
         return l == null ? Collections.emptyList() : l;
     }
     
-    public static <T> int sumInt(List<T> list, Function<T, Integer> function) {
+    public static <T> int sumInt(Iterable<T> list, Function<T, Integer> function) {
         int sum = 0;
         for (T t : list) {
             sum += function.apply(t);
@@ -297,7 +279,7 @@ public class CollectionUtils {
         return sum;
     }
     
-    public static <T> int sumInt(List<Integer> list) {
+    public static <T> int sumInt(Iterable<Integer> list) {
         int sum = 0;
         for (int t : list) {
             sum += t;
@@ -305,7 +287,7 @@ public class CollectionUtils {
         return sum;
     }
     
-    public static <T> double sumDouble(List<T> list, Function<T, Double> function) {
+    public static <T> double sumDouble(Iterable<T> list, Function<T, Double> function) {
         double sum = 0;
         for (T t : list) {
             sum += function.apply(t);
@@ -313,7 +295,7 @@ public class CollectionUtils {
         return sum;
     }
     
-    public static <T> double sumDouble(List<Double> list) {
+    public static <T> double sumDouble(Iterable<Double> list) {
         double sum = 0;
         for (double t : list) {
             sum += t;

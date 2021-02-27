@@ -28,7 +28,7 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.DisplayRegistry;
+import me.shedaniel.rei.api.plugins.PluginManager;
 import me.shedaniel.rei.gui.ConfigReloadingScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
@@ -48,10 +48,11 @@ public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
     private AbstractWidget buttonWidget = new Button(0, 0, 0, 20, NarratorChatListener.NO_TITLE, button -> RoughlyEnoughItemsCore.syncRecipes(null)) {
         @Override
         public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-            if (DisplayRegistry.getInstance().arePluginsLoading()) {
+            if (PluginManager.getInstance().arePluginsReloading()) {
                 Minecraft.getInstance().setScreen(new ConfigReloadingScreen(Minecraft.getInstance().screen));
-            } else
+            } else {
                 super.render(matrices, mouseX, mouseY, delta);
+            }
         }
     };
     private List<GuiEventListener> children = ImmutableList.of(buttonWidget);

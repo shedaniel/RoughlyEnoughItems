@@ -23,14 +23,13 @@
 
 package me.shedaniel.rei.plugin.crafting;
 
-import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.util.EntryStacks;
+import me.shedaniel.rei.api.ingredient.EntryIngredient;
+import me.shedaniel.rei.api.ingredient.util.EntryIngredients;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
@@ -39,13 +38,13 @@ import java.util.Optional;
 @Environment(EnvType.CLIENT)
 public class DefaultShapelessDisplay implements DefaultCraftingDisplay {
     private ShapelessRecipe display;
-    private List<? extends List<? extends EntryStack<?>>> input;
-    private List<? extends EntryStack<?>> output;
+    private List<EntryIngredient> input;
+    private EntryIngredient output;
     
     public DefaultShapelessDisplay(ShapelessRecipe recipe) {
         this.display = recipe;
-        this.input = EntryStacks.ofIngredients(recipe.getIngredients());
-        this.output = Collections.singletonList(EntryStacks.of(recipe.getResultItem()));
+        this.input = EntryIngredients.ofIngredients(recipe.getIngredients());
+        this.output = EntryIngredients.of(recipe.getResultItem());
     }
     
     @Override
@@ -54,23 +53,18 @@ public class DefaultShapelessDisplay implements DefaultCraftingDisplay {
     }
     
     @Override
-    public @NotNull Optional<ResourceLocation> getDisplayLocation() {
+    public Optional<ResourceLocation> getDisplayLocation() {
         return Optional.ofNullable(display).map(ShapelessRecipe::getId);
     }
     
     @Override
-    public @NotNull List<? extends List<? extends EntryStack<?>>> getInputEntries() {
+    public List<EntryIngredient> getInputEntries() {
         return input;
     }
     
     @Override
-    public @NotNull List<? extends List<? extends EntryStack<?>>> getResultingEntries() {
+    public List<EntryIngredient> getResultingEntries() {
         return Collections.singletonList(output);
-    }
-    
-    @Override
-    public @NotNull List<? extends List<? extends EntryStack<?>>> getRequiredEntries() {
-        return input;
     }
     
     @Override

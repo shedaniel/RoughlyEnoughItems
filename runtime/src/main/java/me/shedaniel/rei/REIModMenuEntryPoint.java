@@ -23,23 +23,13 @@
 
 package me.shedaniel.rei;
 
-import com.google.common.collect.ImmutableMap;
-import io.github.prospector.modmenu.api.ConfigScreenFactory;
-import io.github.prospector.modmenu.api.ModMenuApi;
+import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.rei.api.ConfigManager;
+import net.fabricmc.api.ClientModInitializer;
 
-import java.util.Map;
-
-public class REIModMenuEntryPoint implements ModMenuApi {
+public class REIModMenuEntryPoint implements ClientModInitializer {
     @Override
-    public ConfigScreenFactory<?> getModConfigScreenFactory() {
-        return parent -> ConfigManager.getInstance().getConfigScreen(parent);
-    }
-    
-    @Override
-    public Map<String, ConfigScreenFactory<?>> getProvidedConfigScreenFactories() {
-        return ImmutableMap.of(
-                "roughlyenoughitems", getModConfigScreenFactory()
-        );
+    public void onInitializeClient() {
+        Platform.getMod("roughlyenoughitems").registerConfigurationScreen(ConfigManager.getInstance()::getConfigScreen);
     }
 }

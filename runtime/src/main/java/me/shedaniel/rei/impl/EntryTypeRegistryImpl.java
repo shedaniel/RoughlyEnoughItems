@@ -31,6 +31,7 @@ import me.shedaniel.rei.api.ingredient.entry.EntryDefinition;
 import me.shedaniel.rei.api.ingredient.entry.EntryType;
 import me.shedaniel.rei.api.ingredient.entry.EntryTypeBridge;
 import me.shedaniel.rei.api.ingredient.entry.EntryTypeRegistry;
+import me.shedaniel.rei.api.plugins.REIPlugin;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -41,12 +42,12 @@ import java.util.List;
 
 @ApiStatus.Internal
 public class EntryTypeRegistryImpl implements EntryTypeRegistry {
-    private static final EntryTypeRegistryImpl INSTANCE = new EntryTypeRegistryImpl();
     private final BiMap<ResourceLocation, EntryDefinition<?>> entryTypes = HashBiMap.create();
     private final Table<ResourceLocation, ResourceLocation, List<EntryTypeBridge<?, ?>>> typeBridges = HashBasedTable.create();
     
-    public static EntryTypeRegistryImpl getInstance() {
-        return INSTANCE;
+    @Override
+    public void acceptPlugin(REIPlugin plugin) {
+        plugin.registerEntryTypes(this);
     }
     
     @Override
@@ -78,7 +79,8 @@ public class EntryTypeRegistryImpl implements EntryTypeRegistry {
         return (Iterable<EntryTypeBridge<A, B>>) list;
     }
     
-    public void reset() {
+    @Override
+    public void startReload() {
         entryTypes.clear();
         typeBridges.clear();
     }

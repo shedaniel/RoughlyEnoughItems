@@ -21,9 +21,6 @@
     "client": [
       "me.shedaniel.rei.RoughlyEnoughItemsInitializer"
     ],
-    "modmenu": [
-      "me.shedaniel.rei.REIModMenuEntryPoint"
-    ],
     "rei_plugins": [
       "me.shedaniel.rei.gui.plugin.DefaultRuntimePlugin"
     ]

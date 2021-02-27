@@ -27,17 +27,17 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.math.impl.PointHelper;
+import me.shedaniel.rei.api.gui.Renderer;
+import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.entry.*;
 import me.shedaniel.rei.api.util.ImmutableLiteralText;
-import me.shedaniel.rei.api.gui.Renderer;
-import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Unit;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -67,27 +67,27 @@ public enum EmptyEntryDefinition implements EntryDefinition<Object> {
     }
     
     @Override
-    public @NotNull Class<Object> getValueType() {
+    public Class<Object> getValueType() {
         return Object.class;
     }
     
     @Override
-    public @NotNull EntryType<Object> getType() {
+    public EntryType<Object> getType() {
         return type;
     }
     
     @Override
-    public @NotNull EntryRenderer<Object> getRenderer() {
+    public EntryRenderer<Object> getRenderer() {
         return renderer;
     }
     
     @Override
-    public @NotNull Optional<ResourceLocation> getIdentifier(EntryStack<Object> entry, Object value) {
+    public Optional<ResourceLocation> getIdentifier(EntryStack<Object> entry, Object value) {
         return Optional.empty();
     }
     
     @Override
-    public @NotNull Fraction getAmount(EntryStack<Object> entry, Object value) {
+    public Fraction getAmount(EntryStack<Object> entry, Object value) {
         return Fraction.zero();
     }
     
@@ -102,7 +102,7 @@ public enum EmptyEntryDefinition implements EntryDefinition<Object> {
     }
     
     @Override
-    public @NotNull Object copy(EntryStack<Object> entry, Object value) {
+    public Object copy(EntryStack<Object> entry, Object value) {
         return value;
     }
     
@@ -117,22 +117,28 @@ public enum EmptyEntryDefinition implements EntryDefinition<Object> {
     }
     
     @Override
-    public @NotNull CompoundTag toTag(EntryStack<Object> entry, Object value) {
+    public CompoundTag toTag(EntryStack<Object> entry, Object value) {
         return new CompoundTag();
     }
     
     @Override
-    public @NotNull Object fromTag(@NotNull CompoundTag tag) {
+    public Object fromTag(CompoundTag tag) {
         return defaultValue.get();
     }
     
     @Override
-    public @NotNull Component asFormattedText(EntryStack<Object> entry, Object value) {
+    public Component asFormattedText(EntryStack<Object> entry, Object value) {
+        if (value instanceof Renderer) {
+            Tooltip tooltip = ((Renderer) value).getTooltip(PointHelper.ofMouse());
+            if (tooltip != null && !tooltip.getText().isEmpty()) {
+                return tooltip.getText().get(0);
+            }
+        }
         return ImmutableLiteralText.EMPTY;
     }
     
     @Override
-    public @NotNull Collection<ResourceLocation> getTagsFor(EntryStack<Object> entry, Object value) {
+    public Collection<ResourceLocation> getTagsFor(EntryStack<Object> entry, Object value) {
         return Collections.emptyList();
     }
     

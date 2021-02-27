@@ -127,7 +127,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
             public @Nullable Tooltip getTooltip(Point mouse) {
                 if (gameMode == null)
                     return Tooltip.create(mouse, new TranslatableComponent("text.rei.gamemode_button.tooltip.dropdown"));
-                return Tooltip.create(mouse, new TranslatableComponent("text.rei.gamemode_button.tooltip.entry", gameMode.getLongDisplayName().getString()));
+                return Tooltip.create(mouse, new TranslatableComponent("text.rei.gamemode_button.tooltip.entry", gameMode.getDisplayName().getString()));
             }
         };
     }
@@ -209,7 +209,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
         private int textWidth = -69;
         
         public GameModeMenuEntry(GameType gameMode) {
-            this.text = gameMode.getLongDisplayName().getString();
+            this.text = gameMode.getDisplayName().getString();
             this.gameMode = gameMode;
         }
         
