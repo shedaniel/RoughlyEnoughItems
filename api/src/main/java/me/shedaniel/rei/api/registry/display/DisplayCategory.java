@@ -29,13 +29,11 @@ import me.shedaniel.rei.api.gui.Renderer;
 import me.shedaniel.rei.api.gui.SimpleDisplayRenderer;
 import me.shedaniel.rei.api.gui.widgets.Widget;
 import me.shedaniel.rei.api.gui.widgets.Widgets;
-import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.util.Identifiable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;

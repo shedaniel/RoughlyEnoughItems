@@ -9,19 +9,19 @@ import mezz.jei.api.ingredients.IIngredientType;
  * Get the instance from {@link IJeiRuntime#getIngredientFilter()}.
  */
 public interface IIngredientFilter {
-	/**
-	 * Set the search filter string for the ingredient list.
-	 */
-	void setFilterText(String filterText);
-
-	/**
-	 * @return the current search filter string for the ingredient list
-	 */
-	String getFilterText();
-
-	/**
-	 * @return a list containing all ingredients that match the current filter.
-	 * To get all the ingredients known to JEI, see {@link IIngredientManager#getAllIngredients(IIngredientType)}.
-	 */
-	ImmutableList<Object> getFilteredIngredients();
+    /**
+     * Set the search filter string for the ingredient list.
+     */
+    void setFilterText(String filterText);
+    
+    /**
+     * @return the current search filter string for the ingredient list
+     */
+    String getFilterText();
+    
+    /**
+     * @return a list containing all ingredients that match the current filter.
+     * To get all the ingredients known to JEI, see {@link IIngredientManager#getAllIngredients(IIngredientType)}.
+     */
+    ImmutableList<Object> getFilteredIngredients();
 }

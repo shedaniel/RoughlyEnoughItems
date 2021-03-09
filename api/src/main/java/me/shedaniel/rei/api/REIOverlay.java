@@ -24,11 +24,17 @@
 package me.shedaniel.rei.api;
 
 import me.shedaniel.rei.api.gui.drag.DraggingContext;
+import me.shedaniel.rei.api.gui.widgets.WidgetWithBounds;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Experimental
-public interface REIOverlay {
-    void queueReloadOverlay();
+public abstract class REIOverlay extends WidgetWithBounds {
+    @ApiStatus.Internal
+    public abstract void closeOverlayMenu();
     
-    DraggingContext getDraggingContext();
+    public abstract void queueReloadOverlay();
+    
+    public abstract DraggingContext getDraggingContext();
+    
+    public abstract boolean isNotInExclusionZones(double mouseX, double mouseY);
 }

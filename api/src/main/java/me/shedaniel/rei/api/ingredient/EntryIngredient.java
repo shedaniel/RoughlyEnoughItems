@@ -45,6 +45,6 @@ public interface EntryIngredient extends List<EntryStack<?>> {
     }
     
     static <T> EntryIngredient of(Iterable<? extends EntryStack<? extends T>> stacks) {
-        return Internals.getEntryIngredientProvider().of((Iterable<EntryStack<?>>) (Iterable) stacks);
+        return Internals.getEntryIngredientProvider().of((Iterable<EntryStack<?>>) stacks);
     }
 }

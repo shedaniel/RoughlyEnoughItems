@@ -8,10 +8,10 @@ import net.minecraftforge.fluids.FluidStack;
  * Built-in {@link IIngredientType} for vanilla Minecraft.
  */
 public final class VanillaTypes {
-	public static final IIngredientType<ItemStack> ITEM = () -> ItemStack.class;
-	public static final IIngredientType<FluidStack> FLUID = () -> FluidStack.class;
-
-	private VanillaTypes() {
-
-	}
+    public static final IIngredientType<ItemStack> ITEM = () -> ItemStack.class;
+    public static final IIngredientType<FluidStack> FLUID = () -> FluidStack.class;
+    
+    private VanillaTypes() {
+        
+    }
 }

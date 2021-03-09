@@ -8,15 +8,15 @@ import mezz.jei.api.recipe.IRecipeManager;
  * The IJeiRuntime instance is passed to your mod plugin in {@link IModPlugin#onRuntimeAvailable(IJeiRuntime)}.
  */
 public interface IJeiRuntime {
-	IRecipeManager getRecipeManager();
-
-	IRecipesGui getRecipesGui();
-
-	IIngredientFilter getIngredientFilter();
-
-	IIngredientListOverlay getIngredientListOverlay();
-
-	IBookmarkOverlay getBookmarkOverlay();
-
-	IIngredientManager getIngredientManager();
+    IRecipeManager getRecipeManager();
+    
+    IRecipesGui getRecipesGui();
+    
+    IIngredientFilter getIngredientFilter();
+    
+    IIngredientListOverlay getIngredientListOverlay();
+    
+    IBookmarkOverlay getBookmarkOverlay();
+    
+    IIngredientManager getIngredientManager();
 }

@@ -25,10 +25,10 @@ package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.REIHelper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
@@ -43,11 +43,12 @@ public class DefaultRecipeBookExclusionZones implements Supplier<List<Rectangle>
     
     @Override
     public List<Rectangle> get() {
-        if (!(Minecraft.getInstance().screen instanceof RecipeUpdateListener) || !(REIHelper.getInstance().getPreviousContainerScreen().getMenu() instanceof RecipeBookMenu) ||
-            !Minecraft.getInstance().player.getRecipeBook().isOpen(((RecipeBookMenu<?>) REIHelper.getInstance().getPreviousContainerScreen().getMenu()).getRecipeBookType()))
+        Screen screen = Minecraft.getInstance().screen;
+        if (!(screen instanceof RecipeUpdateListener) || !(screen instanceof AbstractContainerScreen) || !(((AbstractContainerScreen<?>) screen).getMenu() instanceof RecipeBookMenu) ||
+            !Minecraft.getInstance().player.getRecipeBook().isOpen(((RecipeBookMenu<?>) ((AbstractContainerScreen<?>) screen).getMenu()).getRecipeBookType()))
             return Collections.emptyList();
-        RecipeBookComponent recipeBookWidget = ((RecipeUpdateListener) Minecraft.getInstance().screen).getRecipeBookComponent();
-        AbstractContainerScreen<?> containerScreen = REIHelper.getInstance().getPreviousContainerScreen();
+        RecipeBookComponent recipeBookWidget = ((RecipeUpdateListener) screen).getRecipeBookComponent();
+        AbstractContainerScreen<?> containerScreen = (AbstractContainerScreen<?>) screen;
         List<Rectangle> l = Lists.newArrayList(new Rectangle(containerScreen.leftPos - 4 - 145, containerScreen.topPos, 4 + 145 + 30, containerScreen.imageHeight));
         int size = recipeBookWidget.tabButtons.size();
         if (size > 0)

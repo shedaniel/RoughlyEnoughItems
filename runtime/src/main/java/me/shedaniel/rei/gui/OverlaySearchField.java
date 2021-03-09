@@ -31,14 +31,14 @@ import me.shedaniel.math.Color;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.gui.config.SyntaxHighlightingMode;
-import me.shedaniel.rei.impl.widgets.TextFieldWidget;
 import me.shedaniel.rei.impl.OverlaySearchFieldSyntaxHighlighter;
-import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.TextTransformations;
 import me.shedaniel.rei.impl.search.Argument;
 import me.shedaniel.rei.impl.search.ArgumentsRegistry;
 import me.shedaniel.rei.impl.search.TextArgument;
+import me.shedaniel.rei.impl.widgets.TextFieldWidget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
@@ -232,7 +232,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     
     @Override
     public boolean containsMouse(double mouseX, double mouseY) {
-        return (!isMain || ScreenHelper.getLastOverlay().isNotInExclusionZones(mouseX, mouseY)) && super.containsMouse(mouseX, mouseY);
+        return (!isMain || REIHelper.getInstance().getOverlay().get().isNotInExclusionZones(mouseX, mouseY)) && super.containsMouse(mouseX, mouseY);
     }
     
     @Override

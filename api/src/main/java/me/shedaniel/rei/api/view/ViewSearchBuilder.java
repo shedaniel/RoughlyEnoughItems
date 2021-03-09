@@ -69,12 +69,12 @@ public interface ViewSearchBuilder {
     
     ViewSearchBuilder fillPreferredOpenedCategory();
     
-    <T> ViewSearchBuilder setInputNotice(@Nullable EntryStack<T>  stack);
+    <T> ViewSearchBuilder setInputNotice(@Nullable EntryStack<T> stack);
     
     @Nullable
     EntryStack<?> getInputNotice();
     
-    <T> ViewSearchBuilder setOutputNotice(@Nullable EntryStack<T>  stack);
+    <T> ViewSearchBuilder setOutputNotice(@Nullable EntryStack<T> stack);
     
     @Nullable
     EntryStack<?> getOutputNotice();

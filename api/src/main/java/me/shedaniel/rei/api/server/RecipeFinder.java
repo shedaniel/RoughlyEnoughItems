@@ -171,7 +171,7 @@ public class RecipeFinder {
                 this.bitSet.clear(0, this.ingredientCount + this.usableIngredientSize + this.ingredientCount);
                 int int_5 = 0;
                 List<Ingredient> list_1 = new ArrayList<>(ingredientsInput);
-    
+                
                 for (Ingredient ingredient : list_1) {
                     if (boolean_2 && ingredient.isEmpty()) {
                         intList_1.add(0);
@@ -185,7 +185,7 @@ public class RecipeFinder {
                                 }
                             }
                         }
-            
+                        
                         ++int_5;
                     }
                 }
@@ -196,7 +196,7 @@ public class RecipeFinder {
         
         private int[] getUsableIngredientItemIds() {
             IntCollection intCollection_1 = new IntAVLTreeSet();
-    
+            
             for (Ingredient ingredient_1 : this.ingredients) {
                 intCollection_1.addAll(ingredient_1.getStackingIds());
             }
@@ -321,15 +321,15 @@ public class RecipeFinder {
         @SuppressWarnings("deprecation")
         private int method_7415() {
             int int_1 = Integer.MAX_VALUE;
-    
+            
             for (Ingredient ingredient_1 : this.ingredients) {
                 int int_2 = 0;
-        
+                
                 int int_3;
                 for (IntListIterator var5 = ingredient_1.getStackingIds().iterator(); var5.hasNext(); int_2 = Math.max(int_2, RecipeFinder.this.idToAmountMap.get(int_3))) {
                     int_3 = var5.next();
                 }
-        
+                
                 if (int_1 > 0) {
                     int_1 = Math.min(int_1, int_2);
                 }

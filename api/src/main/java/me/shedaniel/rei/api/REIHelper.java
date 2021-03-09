@@ -23,16 +23,17 @@
 
 package me.shedaniel.rei.api;
 
+import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.api.gui.widgets.TextField;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.plugins.PluginManager;
 import me.shedaniel.rei.api.registry.Reloadable;
-import me.shedaniel.rei.impl.Internals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -44,14 +45,24 @@ public interface REIHelper extends Reloadable {
      * @return the instance of {@link REIHelper}
      */
     static REIHelper getInstance() {
-        return Internals.getREIHelper();
+        return PluginManager.getInstance().get(REIHelper.class);
     }
     
-    @ApiStatus.Experimental
-    Optional<REIOverlay> getOverlay();
+    boolean isOverlayVisible();
+    
+    void toggleOverlayVisible();
+    
+    default Optional<REIOverlay> getOverlay() {
+        return getOverlay(false);
+    }
+    
+    Optional<REIOverlay> getOverlay(boolean reset);
     
     @Nullable
     AbstractContainerScreen<?> getPreviousContainerScreen();
+    
+    @Nullable
+    Screen getPreviousScreen();
     
     boolean isDarkThemeEnabled();
     
@@ -60,6 +71,11 @@ public interface REIHelper extends Reloadable {
     
     void queueTooltip(@Nullable Tooltip tooltip);
     
-    @NotNull
     ResourceLocation getDefaultDisplayTexture();
+    
+    SearchFieldLocation getContextualSearchFieldLocation();
+    
+    Rectangle calculateEntryListArea();
+    
+    Rectangle calculateFavoritesListArea();
 }

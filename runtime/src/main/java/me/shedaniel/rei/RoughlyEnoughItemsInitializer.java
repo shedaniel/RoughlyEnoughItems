@@ -49,7 +49,7 @@ public class RoughlyEnoughItemsInitializer {
             initializeEntryPoint("me.shedaniel.rei.RoughlyEnoughItemsCore");
             initializeEntryPoint("me.shedaniel.rei.REIModMenuEntryPoint");
             initializeEntryPoint("me.shedaniel.rei.impl.ClientHelperImpl");
-            initializeEntryPoint("me.shedaniel.rei.impl.ScreenHelper");
+            initializeEntryPoint("me.shedaniel.rei.impl.REIHelperImpl");
         }
         
         initializeEntryPoint("me.shedaniel.rei.impl.ErrorDisplayer");

@@ -26,8 +26,6 @@ package me.shedaniel.rei.api.registry.display;
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.registry.display.Display;
-import me.shedaniel.rei.api.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.gui.widgets.Widget;
 import org.jetbrains.annotations.ApiStatus;
 

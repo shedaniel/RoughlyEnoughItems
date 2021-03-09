@@ -24,7 +24,10 @@
 package me.shedaniel.rei.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -35,7 +38,6 @@ public class SearchFilterSyntaxHighlightingScreen extends Screen {
     protected SearchFilterSyntaxHighlightingScreen(Component component) {
         super(component);
     }
-    
     
     
     @Override

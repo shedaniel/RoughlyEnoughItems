@@ -26,7 +26,10 @@ package me.shedaniel.rei.api.gui.config.entry;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
@@ -36,13 +39,13 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.ConfigObject;
-import me.shedaniel.rei.api.registry.entry.EntryRegistry;
-import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.registry.entry.EntryRegistry;
+import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.OverlaySearchField;
 import me.shedaniel.rei.gui.widget.EntryWidget;
-import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.SearchArgument;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -262,7 +265,7 @@ public class FilteringScreen extends Screen {
         this.backButton.render(matrices, mouseX, mouseY, delta);
         
         if (tooltip != null) {
-            ScreenHelper.getLastOverlay().renderTooltip(matrices, tooltip);
+            ((ContainerScreenOverlay) REIHelper.getInstance().getOverlay().get()).renderTooltip(matrices, tooltip);
         }
         
         this.font.drawShadow(matrices, this.title.getVisualOrderText(), this.width / 2.0F - this.font.width(this.title) / 2.0F, 12.0F, -1);
@@ -378,10 +381,7 @@ public class FilteringScreen extends Screen {
                 return true;
             }
         }
-        if (backButton.mouseClicked(double_1, double_2, int_1)) {
-            return true;
-        }
-        return false;
+        return backButton.mouseClicked(double_1, double_2, int_1);
     }
     
     @Override

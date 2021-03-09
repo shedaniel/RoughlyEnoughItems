@@ -23,21 +23,20 @@
 
 package me.shedaniel.rei.gui;
 
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
 public interface RecipeScreen {
-    @ApiStatus.Internal
+    Rectangle getBounds();
+    
     void addIngredientStackToNotice(EntryStack<?> stack);
     
-    @ApiStatus.Internal
     void addResultStackToNotice(EntryStack<?> stack);
     
-    @ApiStatus.Internal
     ResourceLocation getCurrentCategory();
     
-    @ApiStatus.Internal
     void recalculateCategoryPage();
 }

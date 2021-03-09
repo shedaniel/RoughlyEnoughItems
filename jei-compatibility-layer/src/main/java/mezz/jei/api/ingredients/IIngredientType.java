@@ -12,8 +12,8 @@ import java.util.Collection;
  * @see VanillaTypes for the built-in vanilla types {@link VanillaTypes#ITEM} and {@link VanillaTypes#FLUID}
  */
 public interface IIngredientType<T> {
-	/**
-	 * @return The class of the ingredient for this type.
-	 */
-	Class<? extends T> getIngredientClass();
+    /**
+     * @return The class of the ingredient for this type.
+     */
+    Class<? extends T> getIngredientClass();
 }

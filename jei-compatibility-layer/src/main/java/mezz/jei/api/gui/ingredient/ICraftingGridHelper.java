@@ -10,15 +10,15 @@ import java.util.List;
  * Get an instance from {@link IGuiHelper#createCraftingGridHelper(int)}.
  */
 public interface ICraftingGridHelper {
-
-	/**
-	 * Place inputs ingredients onto the crafting grid in a consistent way.
-	 */
-	<T> void setInputs(IGuiIngredientGroup<T> ingredientGroup, List<List<T>> inputs);
-
-	/**
-	 * Place inputs ingredients onto the crafting grid in a consistent way.
-	 */
-	<T> void setInputs(IGuiIngredientGroup<T> ingredientGroup, List<List<T>> inputs, int width, int height);
-
+    
+    /**
+     * Place inputs ingredients onto the crafting grid in a consistent way.
+     */
+    <T> void setInputs(IGuiIngredientGroup<T> ingredientGroup, List<List<T>> inputs);
+    
+    /**
+     * Place inputs ingredients onto the crafting grid in a consistent way.
+     */
+    <T> void setInputs(IGuiIngredientGroup<T> ingredientGroup, List<List<T>> inputs, int width, int height);
+    
 }

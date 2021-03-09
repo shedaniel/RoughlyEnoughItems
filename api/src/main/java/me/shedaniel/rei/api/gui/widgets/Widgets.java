@@ -194,19 +194,20 @@ public final class Widgets {
     }
     
     @NotNull
+    public static Panel createCategoryBase(@NotNull Rectangle rectangle) {
+        return Internals.getWidgetsProvider().createPanelWidget(rectangle);
+    }
+    
+    @NotNull
+    public static Panel createCategoryBase(@NotNull Rectangle rectangle, int color) {
+        return createCategoryBase(rectangle).color(color);
+    }
+    
+    @NotNull
     public static Panel createRecipeBase(@NotNull Rectangle rectangle) {
         return Internals.getWidgetsProvider().createPanelWidget(rectangle)
                 .yTextureOffset(ConfigObject.getInstance().getRecipeBorderType().getYOffset())
                 .rendering(Widgets::shouldRecipeBaseRender);
-    }
-    
-    private static boolean shouldRecipeBaseRender(@NotNull Panel panel) {
-        return ConfigObject.getInstance().getRecipeBorderType().isRendering() && Internals.getWidgetsProvider().isRenderingPanel(panel);
-    }
-    
-    @NotNull
-    public static Panel createCategoryBase(@NotNull Rectangle rectangle) {
-        return Internals.getWidgetsProvider().createPanelWidget(rectangle);
     }
     
     @NotNull
@@ -214,9 +215,8 @@ public final class Widgets {
         return createRecipeBase(rectangle).color(color);
     }
     
-    @NotNull
-    public static Panel createCategoryBase(@NotNull Rectangle rectangle, int color) {
-        return createCategoryBase(rectangle).color(color);
+    private static boolean shouldRecipeBaseRender(@NotNull Panel panel) {
+        return ConfigObject.getInstance().getRecipeBorderType().isRendering() && Internals.getWidgetsProvider().isRenderingPanel(panel);
     }
     
     @NotNull

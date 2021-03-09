@@ -147,7 +147,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
         textFieldWidget.setText(String.valueOf(currentPage + 1));
         widgets.add(btnDone = Widgets.createButton(new Rectangle(bounds.x + bounds.width - 45, bounds.y + bounds.height + 3, 40, 20), new TranslatableComponent("gui.done"))
                 .onClick(button -> {
-                    recipeViewingScreen.page = Mth.clamp(getIntFromString(textFieldWidget.getText()).orElse(0) - 1, 0, recipeViewingScreen.getTotalPages(recipeViewingScreen.getSelectedCategory()) - 1);
+                    recipeViewingScreen.page = Mth.clamp(getIntFromString(textFieldWidget.getText()).orElse(0) - 1, 0, recipeViewingScreen.getCurrentTotalPages() - 1);
                     recipeViewingScreen.choosePageActivated = false;
                     recipeViewingScreen.init();
                 }));
@@ -185,7 +185,7 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (int_1 == 335 || int_1 == 257) {
-            recipeViewingScreen.page = Mth.clamp(getIntFromString(textFieldWidget.getText()).orElse(0) - 1, 0, recipeViewingScreen.getTotalPages(recipeViewingScreen.getSelectedCategory()) - 1);
+            recipeViewingScreen.page = Mth.clamp(getIntFromString(textFieldWidget.getText()).orElse(0) - 1, 0, recipeViewingScreen.getCurrentTotalPages() - 1);
             recipeViewingScreen.choosePageActivated = false;
             recipeViewingScreen.init();
             return true;

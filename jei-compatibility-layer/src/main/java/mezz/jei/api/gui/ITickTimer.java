@@ -9,7 +9,7 @@ import mezz.jei.api.helpers.IGuiHelper;
  * These are used in the internal implementation of {@link IDrawableAnimated}.
  */
 public interface ITickTimer {
-	int getValue();
-
-	int getMaxValue();
+    int getValue();
+    
+    int getMaxValue();
 }

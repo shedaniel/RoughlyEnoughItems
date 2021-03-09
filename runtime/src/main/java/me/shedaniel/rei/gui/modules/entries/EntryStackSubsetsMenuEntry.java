@@ -27,15 +27,17 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.ConfigManager;
+import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.registry.entry.EntryRegistry;
+import me.shedaniel.rei.api.util.CollectionUtils;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.modules.Menu;
 import me.shedaniel.rei.gui.modules.MenuEntry;
-import me.shedaniel.rei.impl.ScreenHelper;
-import me.shedaniel.rei.api.util.CollectionUtils;
+import me.shedaniel.rei.impl.REIHelperImpl;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.sounds.SoundEvents;
@@ -100,13 +102,13 @@ public class EntryStackSubsetsMenuEntry extends MenuEntry {
                     } else {
                         filteredStacks.add(stack.copy());
                     }
-                    Menu subsetsMenu = ScreenHelper.getLastOverlay().getSubsetsMenu();
-                    if (subsetsMenu != null)
-                        recalculateFilter(subsetsMenu);
+                    Menu menu = ((ContainerScreenOverlay) REIHelper.getInstance().getOverlay().get()).getOverlayMenu();
+                    if (menu != null)
+                        recalculateFilter(menu);
                     ConfigManager.getInstance().saveConfig();
                     EntryRegistry.getInstance().refilter();
-                    if (ScreenHelper.getSearchField() != null)
-                        ContainerScreenOverlay.getEntryListWidget().updateSearch(ScreenHelper.getSearchField().getText(), true);
+                    if (REIHelperImpl.getSearchField() != null)
+                        ContainerScreenOverlay.getEntryListWidget().updateSearch(REIHelperImpl.getSearchField().getText(), true);
                 }
             } else if (!RoughlyEnoughItemsCore.isLeftModePressed) clickedLast = false;
         } else clickedLast = false;

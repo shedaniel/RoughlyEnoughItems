@@ -14,26 +14,26 @@ import mezz.jei.api.registration.IRecipeTransferRegistration;
  * @since JEI 7.3.0
  */
 public enum UidContext {
-	/**
-	 * Context used for comparing ingredients in the ingredient list.
-	 * This is the main context and should be more specific than {@link #Recipe}.
-	 *
-	 * Used for:
-	 * ingredients (see {@link IModIngredientRegistration}
-	 * blacklists from the config
-	 * debug info
-	 * bookmarks
-	 */
-	Ingredient,
-
-	/**
-	 * Context used for comparing ingredients in recipes.
-	 * This is a secondary context and should be less specific than {@link #Ingredient}, to allow for broader matches in recipes.
-	 *
-	 * Used for:
-	 * recipe lookups (see {@link IRecipeCategory#setIngredients(Object, IIngredients)})
-	 * recipe catalysts (see {@link IRecipeCatalystRegistration})
-	 * recipe transfer (since JEI 7.4.0) (see {@link IRecipeTransferRegistration}
-	 */
-	Recipe
+    /**
+     * Context used for comparing ingredients in the ingredient list.
+     * This is the main context and should be more specific than {@link #Recipe}.
+     * <p>
+     * Used for:
+     * ingredients (see {@link IModIngredientRegistration}
+     * blacklists from the config
+     * debug info
+     * bookmarks
+     */
+    Ingredient,
+    
+    /**
+     * Context used for comparing ingredients in recipes.
+     * This is a secondary context and should be less specific than {@link #Ingredient}, to allow for broader matches in recipes.
+     * <p>
+     * Used for:
+     * recipe lookups (see {@link IRecipeCategory#setIngredients(Object, IIngredients)})
+     * recipe catalysts (see {@link IRecipeCatalystRegistration})
+     * recipe transfer (since JEI 7.4.0) (see {@link IRecipeTransferRegistration}
+     */
+    Recipe
 }

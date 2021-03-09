@@ -209,7 +209,7 @@ public class ClientHelperImpl implements ClientHelper {
         if (ConfigObject.getInstance().getRecipeScreenType() == RecipeScreenType.VILLAGER) {
             screen = new VillagerRecipeViewingScreen(map, builder.getPreferredOpenedCategory());
         } else if (ConfigObject.getInstance().getRecipeScreenType() == RecipeScreenType.UNSET) {
-            screen = new PreRecipeViewingScreen(REIHelper.getInstance().getPreviousContainerScreen(), RecipeScreenType.UNSET, true, original -> {
+            screen = new PreRecipeViewingScreen(REIHelper.getInstance().getPreviousScreen(), RecipeScreenType.UNSET, true, original -> {
                 ConfigObject.getInstance().setRecipeScreenType(original ? RecipeScreenType.ORIGINAL : RecipeScreenType.VILLAGER);
                 ConfigManager.getInstance().saveConfig();
                 openView(builder);
@@ -224,7 +224,7 @@ public class ClientHelperImpl implements ClientHelper {
                 ((RecipeScreen) screen).addResultStackToNotice(builder.getOutputNotice());
         }
         if (Minecraft.getInstance().screen instanceof RecipeScreen)
-            ScreenHelper.storeRecipeScreen((RecipeScreen) Minecraft.getInstance().screen);
+            REIHelperImpl.getInstance().storeRecipeScreen((RecipeScreen) Minecraft.getInstance().screen);
         Minecraft.getInstance().setScreen(screen);
         return true;
     }

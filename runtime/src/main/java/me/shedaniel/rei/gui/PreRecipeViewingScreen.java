@@ -30,11 +30,11 @@ import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWi
 import me.shedaniel.clothconfig2.impl.EasingMethod;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.gui.widgets.Widgets;
+import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.gui.config.RecipeScreenType;
 import me.shedaniel.rei.api.gui.widgets.Widget;
 import me.shedaniel.rei.api.gui.widgets.WidgetWithBounds;
-import me.shedaniel.rei.impl.ScreenHelper;
+import me.shedaniel.rei.api.gui.widgets.Widgets;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
@@ -162,8 +162,9 @@ public class PreRecipeViewingScreen extends Screen {
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (int_1 == 256 || this.minecraft.options.keyInventory.matches(int_1, int_2)) {
             Minecraft.getInstance().setScreen(parent);
-            if (parent instanceof AbstractContainerScreen)
-                ScreenHelper.getLastOverlay().init();
+            if (parent instanceof AbstractContainerScreen) {
+                REIHelper.getInstance().getOverlay().get().queueReloadOverlay();
+            }
             return true;
         }
         return super.keyPressed(int_1, int_2, int_3);

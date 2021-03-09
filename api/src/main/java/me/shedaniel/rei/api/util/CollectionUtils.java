@@ -28,7 +28,6 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.UnmodifiableIterator;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import jdk.nashorn.internal.runtime.arrays.IteratorAction;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import net.fabricmc.api.EnvType;

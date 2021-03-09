@@ -2,7 +2,8 @@
 
 These extensions are an opt-in feature to allow other plugins to extend your recipe categories.
 
-By default, the vanilla crafting recipe category is extendable using this system. Plugins can extend the vanilla crafting recipe category by implementing `IModPlugin.registerVanillaCategoryExtensions`.
+By default, the vanilla crafting recipe category is extendable using this system. Plugins can extend the vanilla crafting recipe category by
+implementing `IModPlugin.registerVanillaCategoryExtensions`.
 
 ### Compared to 1.12.2
 
