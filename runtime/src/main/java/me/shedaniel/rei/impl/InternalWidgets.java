@@ -28,20 +28,20 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.REIHelper;
+import me.shedaniel.rei.api.gui.widgets.Button;
+import me.shedaniel.rei.api.gui.widgets.Widget;
+import me.shedaniel.rei.api.gui.widgets.WidgetWithBounds;
+import me.shedaniel.rei.api.gui.widgets.Widgets;
 import me.shedaniel.rei.api.registry.display.Display;
 import me.shedaniel.rei.api.registry.display.DisplayCategory;
-import me.shedaniel.rei.api.gui.widgets.Button;
-import me.shedaniel.rei.api.gui.widgets.Widgets;
-import me.shedaniel.rei.api.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.registry.display.TransferDisplayCategory;
 import me.shedaniel.rei.api.registry.transfer.TransferHandler;
 import me.shedaniel.rei.api.registry.transfer.TransferHandlerRegistry;
+import me.shedaniel.rei.api.util.CollectionUtils;
 import me.shedaniel.rei.gui.toast.CopyRecipeIdentifierToast;
 import me.shedaniel.rei.gui.widget.LateRenderable;
-import me.shedaniel.rei.api.gui.widgets.Widget;
-import me.shedaniel.rei.api.gui.widgets.WidgetWithBounds;
-import me.shedaniel.rei.api.util.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -84,10 +84,14 @@ public final class InternalWidgets {
                             e.printStackTrace();
                         }
                     Minecraft.getInstance().setScreen(containerScreen);
-                    ScreenHelper.getLastOverlay().init();
+                    REIHelper.getInstance().getOverlay().get().queueReloadOverlay();
                 })
                 .onRender((matrices, button) -> {
                     button.setEnabled(false);
+                    if (containerScreen == null) {
+                        button.setTint(0);
+                        return;
+                    }
                     List<String> error = null;
                     int color = 0;
                     visible[0] = false;

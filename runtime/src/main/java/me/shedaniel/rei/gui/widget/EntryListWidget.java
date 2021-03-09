@@ -64,7 +64,6 @@ import me.shedaniel.rei.api.view.Views;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.impl.ConfigManagerImpl;
 import me.shedaniel.rei.impl.ConfigObjectImpl;
-import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.SearchArgument;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -196,14 +195,14 @@ public class EntryListWidget extends WidgetWithBounds implements DraggableStackP
                     public EntryStack<?> getStack() {
                         return stack;
                     }
-    
+                    
                     @Override
                     public void drag() {
                     }
-    
+                    
                     @Override
                     public void release(boolean accepted) {
-                        context.registerRenderBackToPosition(this, () -> new Point(entry.getBounds().x - 8, entry.getBounds().y - 8));
+                        context.renderBackToPosition(this, () -> new Point(entry.getBounds().x - 8, entry.getBounds().y - 8));
                     }
                 };
             }
@@ -473,7 +472,7 @@ public class EntryListWidget extends WidgetWithBounds implements DraggableStackP
     }
     
     public void updateArea(@NotNull String searchTerm) {
-        this.bounds = ScreenHelper.getItemListArea(ScreenHelper.getLastOverlay().getBounds());
+        this.bounds = REIHelper.getInstance().calculateEntryListArea();
         FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
         if (favoritesListWidget != null)
             favoritesListWidget.updateFavoritesBounds(searchTerm);
@@ -552,10 +551,10 @@ public class EntryListWidget extends WidgetWithBounds implements DraggableStackP
             this.lastSearchTerm = searchTerm;
             this.lastSearchArguments = SearchArgument.processSearchTerm(searchTerm);
             List<EntryStack<?>> list = Lists.newArrayList();
-            boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ScreenHelper.inventoryStacks.isEmpty();
+            boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ContainerScreenOverlay.getInstance().inventoryStacks.isEmpty();
             IntSet workingItems = checkCraftable ? new IntOpenHashSet() : null;
             if (checkCraftable)
-                workingItems.addAll(CollectionUtils.map(Views.getInstance().findCraftableEntriesByItems(ScreenHelper.inventoryStacks), EntryStacks::hashIgnoreCount));
+                workingItems.addAll(CollectionUtils.map(Views.getInstance().findCraftableEntriesByItems(ContainerScreenOverlay.getInstance().inventoryStacks), EntryStacks::hashIgnoreCount));
             List<EntryStack<?>> stacks = EntryRegistry.getInstance().getPreFilteredList();
             if (!stacks.isEmpty()) {
                 if (ConfigObject.getInstance().shouldAsyncSearch()) {

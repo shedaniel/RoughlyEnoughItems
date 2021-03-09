@@ -70,7 +70,7 @@ public class PluginManagerImpl implements PluginManager {
         registerReloadable(new FavoriteEntryTypeRegistryImpl());
         registerReloadable(new SubsetsRegistryImpl());
         registerReloadable(new TransferHandlerRegistryImpl());
-        registerReloadable(ScreenHelper::reload);
+        registerReloadable(new REIHelperImpl());
     }
     
     @Override

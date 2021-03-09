@@ -28,7 +28,6 @@ import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.gui.modules.MenuEntry;
-import me.shedaniel.rei.impl.ScreenHelper;
 import me.shedaniel.rei.impl.Weather;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -101,7 +100,7 @@ public class WeatherMenuEntry extends MenuEntry {
         if (rendering && mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + 12) {
             Minecraft.getInstance().player.chat(ConfigObject.getInstance().getWeatherCommand().replaceAll("\\{weather}", weather.name().toLowerCase(Locale.ROOT)));
             minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-            ScreenHelper.getLastOverlay().removeOverlayMenu();
+            REIHelper.getInstance().getOverlay().get().closeOverlayMenu();
             return true;
         }
         return super.mouseClicked(mouseX, mouseY, button);

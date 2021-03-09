@@ -77,7 +77,7 @@ public final class MatchStatus {
     
     public MatchStatus grammar(int start, int end) {
         if (end - 1 >= start) {
-            this.grammarRanges.add(IntRange.of(start,  end - 1));
+            this.grammarRanges.add(IntRange.of(start, end - 1));
         }
         return this;
     }

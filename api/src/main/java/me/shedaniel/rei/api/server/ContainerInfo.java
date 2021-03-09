@@ -47,7 +47,7 @@ public interface ContainerInfo<T extends AbstractContainerMenu> {
             for (StackAccessor gridStack : getGridStacks(context)) {
                 GridCleanHandler.returnSlotToPlayerInventory(context, gridStack);
             }
-
+            
             clearCraftingSlots(container);
         };
     }

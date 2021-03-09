@@ -24,7 +24,6 @@
 package me.shedaniel.rei.api.registry.display;
 
 import me.shedaniel.rei.api.ingredient.EntryIngredient;
-import me.shedaniel.rei.api.registry.display.Display;
 import me.shedaniel.rei.api.server.ContainerInfo;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 

@@ -30,14 +30,17 @@ import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.ClientHelper;
+import me.shedaniel.rei.api.ConfigManager;
+import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
-import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.gui.widgets.Slot;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.view.ViewSearchBuilder;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
-import me.shedaniel.rei.impl.ScreenHelper;
+import me.shedaniel.rei.impl.REIHelperImpl;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.TextComponent;
@@ -355,7 +358,7 @@ public class EntryWidget extends Slot {
     
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        if (ScreenHelper.isWithinRecipeViewingScreen && entryStacks.size() > 1 && containsMouse(mouseX, mouseY)) {
+        if (REIHelperImpl.isWithinRecipeViewingScreen && entryStacks.size() > 1 && containsMouse(mouseX, mouseY)) {
             if (amount < 0) {
                 EntryWidget.stackDisplayOffset = ((System.currentTimeMillis() + stackDisplayOffset) / 1000 - 1) * 1000;
                 return true;
@@ -383,7 +386,7 @@ public class EntryWidget extends Slot {
                     ConfigManager.getInstance().saveConfig();
                     FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
                     if (favoritesListWidget != null)
-                        favoritesListWidget.updateSearch(ContainerScreenOverlay.getEntryListWidget(), ScreenHelper.getSearchField().getText());
+                        favoritesListWidget.updateSearch(ContainerScreenOverlay.getEntryListWidget(), REIHelperImpl.getSearchField().getText());
                     return true;
                 }
             }
@@ -425,7 +428,7 @@ public class EntryWidget extends Slot {
                     ConfigManager.getInstance().saveConfig();
                     FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
                     if (favoritesListWidget != null)
-                        favoritesListWidget.updateSearch(ContainerScreenOverlay.getEntryListWidget(), ScreenHelper.getSearchField().getText());
+                        favoritesListWidget.updateSearch(ContainerScreenOverlay.getEntryListWidget(), REIHelperImpl.getSearchField().getText());
                     return true;
                 }
             }

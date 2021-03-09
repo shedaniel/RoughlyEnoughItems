@@ -25,10 +25,10 @@ package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Ordering;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.REIHelper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -43,12 +43,13 @@ import java.util.function.Supplier;
 public class DefaultPotionEffectExclusionZones implements Supplier<List<Rectangle>> {
     @Override
     public List<Rectangle> get() {
-        if (!(REIHelper.getInstance().getPreviousContainerScreen() instanceof EffectRenderingInventoryScreen) || !((EffectRenderingInventoryScreen<?>) REIHelper.getInstance().getPreviousContainerScreen()).doRenderEffects)
+        Screen screen = Minecraft.getInstance().screen;
+        if (!(screen instanceof EffectRenderingInventoryScreen) || !((EffectRenderingInventoryScreen<?>) screen).doRenderEffects)
             return Collections.emptyList();
         Collection<MobEffectInstance> activePotionEffects = Minecraft.getInstance().player.getActiveEffects();
         if (activePotionEffects.isEmpty())
             return Collections.emptyList();
-        AbstractContainerScreen<?> containerScreen = REIHelper.getInstance().getPreviousContainerScreen();
+        AbstractContainerScreen<?> containerScreen = (AbstractContainerScreen<?>) screen;
         List<Rectangle> list = new ArrayList<>();
         int x = containerScreen.leftPos - 124;
         int y = containerScreen.topPos;

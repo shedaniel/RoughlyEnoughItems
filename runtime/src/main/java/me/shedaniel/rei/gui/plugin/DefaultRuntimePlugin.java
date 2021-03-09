@@ -29,29 +29,28 @@ import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
+import me.shedaniel.rei.api.gui.AbstractRenderer;
 import me.shedaniel.rei.api.gui.Renderer;
 import me.shedaniel.rei.api.gui.widgets.Panel;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.gui.AbstractRenderer;
 import me.shedaniel.rei.api.ingredient.entry.ComparisonContext;
 import me.shedaniel.rei.api.ingredient.entry.EntryTypeRegistry;
 import me.shedaniel.rei.api.ingredient.entry.VanillaEntryTypes;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.plugins.REIPlugin;
-import me.shedaniel.rei.api.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.registry.screen.DisplayBoundsProvider;
 import me.shedaniel.rei.api.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.registry.transfer.TransferHandlerRegistry;
+import me.shedaniel.rei.gui.AbstractRecipeViewingScreen;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.RecipeViewingScreen;
-import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
 import me.shedaniel.rei.gui.plugin.entry.FluidEntryDefinition;
 import me.shedaniel.rei.gui.plugin.entry.ItemEntryDefinition;
 import me.shedaniel.rei.gui.widget.FavoritesListWidget;
@@ -101,13 +100,13 @@ public class DefaultRuntimePlugin implements REIPlugin {
         if (ClientHelperImpl.getInstance().isAprilFools.get()) {
             registry.registerEntry(EntryStacks.of(new AbstractRenderer() {
                 private ResourceLocation id = new ResourceLocation("roughlyenoughitems", "textures/gui/kirb.png");
-        
+                
                 @Override
                 public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
                     Minecraft.getInstance().getTextureManager().bind(id);
                     innerBlit(matrices.last().pose(), bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), getBlitOffset(), 0, 1, 0, 1);
                 }
-        
+                
                 @Override
                 public @Nullable Tooltip getTooltip(Point point) {
                     return Tooltip.create(new TextComponent("Kirby"), ClientHelper.getInstance().getFormattedModFromModId("Dream Land"));
@@ -133,31 +132,15 @@ public class DefaultRuntimePlugin implements REIPlugin {
             }
             return Collections.emptyList();
         });
-        registry.registerDecider(new DisplayBoundsProvider<RecipeViewingScreen>() {
+        registry.registerDecider(new DisplayBoundsProvider<AbstractRecipeViewingScreen>() {
             @Override
-            public Rectangle getScreenBounds(RecipeViewingScreen screen) {
+            public Rectangle getScreenBounds(AbstractRecipeViewingScreen screen) {
                 return screen.getBounds();
             }
             
             @Override
             public Class<? extends Screen> getBaseSupportedClass() {
-                return RecipeViewingScreen.class;
-            }
-            
-            @Override
-            public InteractionResult shouldScreenBeOverlaid(Class<?> screen) {
-                return InteractionResult.SUCCESS;
-            }
-        });
-        registry.registerDecider(new DisplayBoundsProvider<VillagerRecipeViewingScreen>() {
-            @Override
-            public Rectangle getScreenBounds(VillagerRecipeViewingScreen screen) {
-                return screen.bounds;
-            }
-            
-            @Override
-            public Class<? extends Screen> getBaseSupportedClass() {
-                return VillagerRecipeViewingScreen.class;
+                return AbstractRecipeViewingScreen.class;
             }
             
             @Override

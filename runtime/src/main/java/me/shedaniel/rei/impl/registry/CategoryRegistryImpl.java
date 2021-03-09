@@ -35,7 +35,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 @ApiStatus.Internal
@@ -93,44 +92,46 @@ public class CategoryRegistryImpl implements CategoryRegistry, Reloadable {
     public int size() {
         return categories.size();
     }
+    
     private static class Configuration<T extends Display> implements CategoryConfiguration<T> {
         private final DisplayCategory<T> category;
         private final List<EntryIngredient> workstations = Collections.synchronizedList(new ArrayList<>());
-    
+        
         private Optional<ButtonAreaSupplier> plusButtonArea = Optional.of(ButtonAreaSupplier.defaultArea());
-    
+        
         public Configuration(DisplayCategory<T> category) {
             this.category = category;
         }
-    
+        
         @Override
         public void addWorkstations(EntryIngredient... stations) {
             this.workstations.addAll(Arrays.asList(stations));
         }
-    
+        
         @Override
         public void setPlusButtonArea(ButtonAreaSupplier supplier) {
             this.plusButtonArea = Optional.ofNullable(supplier);
         }
-    
+        
         @Override
         public Optional<ButtonAreaSupplier> getPlusButtonArea() {
             return plusButtonArea;
         }
-    
+        
         @Override
         public List<EntryIngredient> getWorkstations() {
             return Collections.unmodifiableList(this.workstations);
         }
-    
+        
         @Override
         public DisplayCategory<T> getCategory() {
             return this.category;
         }
+        
         @Override
         public ResourceLocation getIdentifier() {
             return this.category.getIdentifier();
         }
-    
+        
     }
 }

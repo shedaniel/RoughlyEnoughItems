@@ -74,7 +74,6 @@ import net.minecraft.client.gui.screens.recipebook.GhostRecipe;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TextComponent;
@@ -392,7 +391,6 @@ public class RoughlyEnoughItemsCore {
         return hasPermissionToUsePackets() || Minecraft.getInstance().gameMode.hasInfiniteItems();
     }
     
-    @SuppressWarnings("deprecation")
     public void onInitializeClient() {
         IssuesDetector.detect();
         registerClothEvents();
@@ -456,8 +454,9 @@ public class RoughlyEnoughItemsCore {
                 if (!decider.isHandingScreen(screen))
                     continue;
                 InteractionResult result = decider.shouldScreenBeOverlaid(screen);
-                if (result != InteractionResult.PASS)
-                    return result == InteractionResult.FAIL || REIHelper.getInstance().getPreviousContainerScreen() == null;
+                if (result != InteractionResult.PASS) {
+                    return result == InteractionResult.FAIL || REIHelper.getInstance().getPreviousScreen() == null;
+                }
             }
         } catch (ConcurrentModificationException ignored) {
         }
@@ -477,12 +476,11 @@ public class RoughlyEnoughItemsCore {
             return InteractionResult.PASS;
         });*/
         GuiEvent.INIT_POST.register((screen, widgets, children) -> {
+            REIHelperImpl.getInstance().setPreviousScreen(screen);
             if (shouldReturn(screen))
                 return;
             if (screen instanceof InventoryScreen && client.gameMode.hasInfiniteItems())
                 return;
-            if (screen instanceof AbstractContainerScreen)
-                ScreenHelper.setPreviousContainerScreen((AbstractContainerScreen<?>) screen);
             boolean alreadyAdded = false;
             for (GuiEventListener element : Lists.newArrayList(children))
                 if (ContainerScreenOverlay.class.isAssignableFrom(element.getClass()))
@@ -491,14 +489,14 @@ public class RoughlyEnoughItemsCore {
                     else
                         alreadyAdded = true;
             if (!alreadyAdded)
-                children.add(ScreenHelper.getLastOverlay(true, false));
+                children.add(REIHelper.getInstance().getOverlay(true).get());
         });
         ClientScreenInputEvent.MOUSE_CLICKED_PRE.register((minecraftClient, screen, mouseX, mouseY, button) -> {
             isLeftModePressed = true;
-            if (ScreenHelper.getOptionalOverlay().isPresent())
+            if (REIHelper.getInstance().getOverlay().isPresent())
                 if (screen instanceof CreativeModeInventoryScreen)
-                    if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().mouseClicked(mouseX, mouseY, button)) {
-                        screen.setFocused(ScreenHelper.getLastOverlay());
+                    if (REIHelper.getInstance().isOverlayVisible() && REIHelper.getInstance().getOverlay().get().mouseClicked(mouseX, mouseY, button)) {
+                        screen.setFocused(REIHelper.getInstance().getOverlay().get());
                         if (button == 0)
                             screen.setDragging(true);
                         return InteractionResult.SUCCESS;
@@ -509,8 +507,8 @@ public class RoughlyEnoughItemsCore {
             isLeftModePressed = false;
             if (shouldReturn(screen))
                 return InteractionResult.PASS;
-            if (ScreenHelper.getOptionalOverlay().isPresent())
-                if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().mouseReleased(mouseX, mouseY, button)) {
+            if (REIHelper.getInstance().getOverlay().isPresent())
+                if (REIHelper.getInstance().isOverlayVisible() && REIHelper.getInstance().getOverlay().get().mouseReleased(mouseX, mouseY, button)) {
                     return InteractionResult.SUCCESS;
                 }
             return InteractionResult.PASS;
@@ -518,29 +516,29 @@ public class RoughlyEnoughItemsCore {
         ClientScreenInputEvent.MOUSE_SCROLLED_PRE.register((minecraftClient, screen, mouseX, mouseY, amount) -> {
             if (shouldReturn(screen))
                 return InteractionResult.PASS;
-            if (ScreenHelper.isOverlayVisible() && ScreenHelper.getLastOverlay().mouseScrolled(mouseX, mouseY, amount))
+            if (REIHelper.getInstance().isOverlayVisible() && REIHelper.getInstance().getOverlay().get().mouseScrolled(mouseX, mouseY, amount))
                 return InteractionResult.SUCCESS;
             return InteractionResult.PASS;
         });
         ClientScreenInputEvent.CHAR_TYPED_PRE.register((minecraftClient, screen, character, keyCode) -> {
             if (shouldReturn(screen))
                 return InteractionResult.PASS;
-            if (ScreenHelper.getLastOverlay().charTyped(character, keyCode))
+            if (REIHelper.getInstance().getOverlay().get().charTyped(character, keyCode))
                 return InteractionResult.SUCCESS;
             return InteractionResult.PASS;
         });
         GuiEvent.RENDER_POST.register((screen, matrices, mouseX, mouseY, delta) -> {
             if (shouldReturn(screen))
                 return;
-            ScreenHelper.getLastOverlay().render(matrices, mouseX, mouseY, delta);
-            if (!ScreenHelper.isOverlayVisible())
+            REIHelper.getInstance().getOverlay().get().render(matrices, mouseX, mouseY, delta);
+            if (!REIHelper.getInstance().isOverlayVisible())
                 return;
-            ScreenHelper.getLastOverlay().lateRender(matrices, mouseX, mouseY, delta);
+            ((ContainerScreenOverlay) REIHelper.getInstance().getOverlay().get()).lateRender(matrices, mouseX, mouseY, delta);
         });
         ClientScreenInputEvent.MOUSE_DRAGGED_PRE.register((minecraftClient, screen, mouseX1, mouseY1, button, mouseX2, mouseY2) -> {
             if (shouldReturn(screen))
                 return InteractionResult.PASS;
-            if (screen instanceof AbstractContainerScreen && ScreenHelper.getLastOverlay().mouseDragged(mouseX1, mouseY1, button, mouseX2, mouseY2))
+            if (screen instanceof AbstractContainerScreen && REIHelper.getInstance().getOverlay().get().mouseDragged(mouseX1, mouseY1, button, mouseX2, mouseY2))
                 return InteractionResult.SUCCESS;
             return InteractionResult.PASS;
         });
@@ -554,7 +552,7 @@ public class RoughlyEnoughItemsCore {
                 }
             if (screen.getFocused() != null && screen.getFocused() instanceof EditBox || (screen.getFocused() instanceof RecipeBookComponent && ((RecipeBookComponent) screen.getFocused()).searchBox != null && ((RecipeBookComponent) screen.getFocused()).searchBox.isFocused()))
                 return InteractionResult.PASS;
-            if (ScreenHelper.getLastOverlay().keyPressed(i, i1, i2))
+            if (REIHelper.getInstance().getOverlay().get().keyPressed(i, i1, i2))
                 return InteractionResult.SUCCESS;
             return InteractionResult.PASS;
         });

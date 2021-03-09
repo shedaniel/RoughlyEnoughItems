@@ -54,7 +54,6 @@ import me.shedaniel.rei.api.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.entry.BatchEntryRenderer;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
-import me.shedaniel.rei.api.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.util.CollectionUtils;
 import me.shedaniel.rei.api.util.ImmutableLiteralText;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
@@ -63,7 +62,6 @@ import me.shedaniel.rei.gui.modules.MenuEntry;
 import me.shedaniel.rei.impl.Animator;
 import me.shedaniel.rei.impl.ConfigManagerImpl;
 import me.shedaniel.rei.impl.ConfigObjectImpl;
-import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -291,7 +289,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
     }
     
     public void updateFavoritesBounds(@Nullable String searchTerm) {
-        this.fullBounds = ScreenHelper.getFavoritesListArea(ScreenRegistry.getInstance().getOverlayBounds(ConfigObject.getInstance().getDisplayPanelLocation().mirror(), Minecraft.getInstance().screen));
+        this.fullBounds = REIHelper.getInstance().calculateFavoritesListArea();
     }
     
     public void updateSearch(EntryListWidget listWidget, String searchTerm) {
@@ -602,10 +600,10 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         
         @Override
         public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-            Optional<ContainerScreenOverlay> overlayOptional = ScreenHelper.getOptionalOverlay();
+            Optional<REIOverlay> overlayOptional = REIHelper.getInstance().getOverlay();
             Optional<Supplier<Collection<@NotNull FavoriteMenuEntry>>> menuEntries = favoriteEntry.getMenuEntries();
             if (Math.abs(entry.x.doubleValue() - entry.x.target()) < 1 && Math.abs(entry.y.doubleValue() - entry.y.target()) < 1 && overlayOptional.isPresent() && menuEntries.isPresent()) {
-                ContainerScreenOverlay overlay = overlayOptional.get();
+                ContainerScreenOverlay overlay = (ContainerScreenOverlay) overlayOptional.get();
                 UUID uuid = favoriteEntry.getUuid();
                 
                 boolean isOpened = overlay.isMenuOpened(uuid);
@@ -637,7 +635,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
                                         
                                         @Override
                                         public void updateInformation(int xPos, int yPos, boolean selected, boolean containsMouse, boolean rendering, int width) {
-                                            entry.closeMenu = overlay::removeOverlayMenu;
+                                            entry.closeMenu = overlay::closeOverlayMenu;
                                             entry.updateInformation(xPos, yPos, selected, containsMouse, rendering, width);
                                         }
                                         
@@ -655,7 +653,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
                                 menu.menuStartPoint.x -= menu.getBounds().width - getBounds().width;
                             overlay.openMenu(uuid, menu, this::containsMouse);
                         } else {
-                            overlay.removeOverlayMenu();
+                            overlay.closeOverlayMenu();
                         }
                     }
                 }

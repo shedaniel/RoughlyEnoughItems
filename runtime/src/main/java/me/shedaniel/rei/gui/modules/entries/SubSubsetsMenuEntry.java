@@ -28,16 +28,18 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.ConfigManager;
+import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.REIHelper;
+import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
-import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.registry.entry.EntryRegistry;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.modules.Menu;
 import me.shedaniel.rei.gui.modules.MenuEntry;
 import me.shedaniel.rei.gui.widget.TabWidget;
-import me.shedaniel.rei.impl.ScreenHelper;
+import me.shedaniel.rei.impl.REIHelperImpl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -151,12 +153,12 @@ public class SubSubsetsMenuEntry extends MenuEntry {
             if (clickedBefore) {
                 clickedBefore = false;
                 List<EntryStack<?>> filteredStacks = ConfigObject.getInstance().getFilteredStacks();
-                Menu subsetsMenu = ScreenHelper.getLastOverlay().getSubsetsMenu();
-                setFiltered(filteredStacks, subsetsMenu, this, !(getFilteredRatio() > 0));
+                Menu overlay = ((ContainerScreenOverlay) REIHelper.getInstance().getOverlay().get()).getOverlayMenu();
+                setFiltered(filteredStacks, overlay, this, !(getFilteredRatio() > 0));
                 ConfigManager.getInstance().saveConfig();
                 EntryRegistry.getInstance().refilter();
-                if (ScreenHelper.getSearchField() != null)
-                    ContainerScreenOverlay.getEntryListWidget().updateSearch(ScreenHelper.getSearchField().getText(), true);
+                if (REIHelperImpl.getSearchField() != null)
+                    ContainerScreenOverlay.getEntryListWidget().updateSearch(REIHelperImpl.getSearchField().getText(), true);
             } else {
                 clickedBefore = true;
             }

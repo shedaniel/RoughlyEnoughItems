@@ -32,27 +32,27 @@ import me.shedaniel.clothconfig2.api.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.ButtonAreaSupplier;
+import me.shedaniel.rei.api.ClientHelper;
+import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.REIHelper;
+import me.shedaniel.rei.api.gui.DisplayRenderer;
+import me.shedaniel.rei.api.gui.widgets.Button;
+import me.shedaniel.rei.api.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.gui.widgets.Widget;
+import me.shedaniel.rei.api.gui.widgets.Widgets;
 import me.shedaniel.rei.api.ingredient.EntryIngredient;
-import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.registry.display.Display;
 import me.shedaniel.rei.api.registry.display.DisplayCategory;
-import me.shedaniel.rei.api.gui.widgets.Button;
-import me.shedaniel.rei.api.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.gui.widgets.Widgets;
-import me.shedaniel.rei.api.gui.DisplayRenderer;
-import me.shedaniel.rei.api.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.view.ViewSearchBuilder;
 import me.shedaniel.rei.gui.widget.TabWidget;
-import me.shedaniel.rei.api.gui.widgets.Widget;
 import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.impl.InternalWidgets;
-import me.shedaniel.rei.impl.ScreenHelper;
+import me.shedaniel.rei.impl.REIHelperImpl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.TextComponent;
@@ -68,16 +68,12 @@ import java.util.Map;
 import java.util.Optional;
 
 @ApiStatus.Internal
-public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen {
-    private final Map<DisplayCategory<?>, List<Display>> categoryMap;
-    private final List<DisplayCategory<?>> categories;
+public class VillagerRecipeViewingScreen extends AbstractRecipeViewingScreen {
     private final List<Widget> widgets = Lists.newArrayList();
     private final List<Button> buttonList = Lists.newArrayList();
     private final List<DisplayRenderer> displayRenderers = Lists.newArrayList();
     private final List<TabWidget> tabs = Lists.newArrayList();
-    public Rectangle bounds, scrollListBounds;
-    private int tabsPerPage = 8;
-    private int selectedCategoryIndex = 0;
+    public Rectangle scrollListBounds;
     private int selectedRecipeIndex = 0;
     private final ScrollingContainer scrolling = new ScrollingContainer() {
         @Override
@@ -98,41 +94,9 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
     private float scrollBarAlphaFuture = 0;
     private long scrollBarAlphaFutureTime = -1;
     private int tabsPage = -1;
-    private EntryStack<?> ingredientStackToNotice = EntryStack.empty();
-    private EntryStack<?> resultStackToNotice = EntryStack.empty();
     
     public VillagerRecipeViewingScreen(Map<DisplayCategory<?>, List<Display>> categoryMap, @Nullable ResourceLocation category) {
-        super(NarratorChatListener.NO_TITLE);
-        this.categoryMap = categoryMap;
-        this.categories = Lists.newArrayList(categoryMap.keySet());
-        if (category != null) {
-            for (int i = 0; i < categories.size(); i++) {
-                if (categories.get(i).getIdentifier().equals(category)) {
-                    this.selectedCategoryIndex = i;
-                    break;
-                }
-            }
-        }
-    }
-    
-    @Override
-    public boolean isPauseScreen() {
-        return false;
-    }
-    
-    @Override
-    public void addIngredientStackToNotice(EntryStack<?> stack) {
-        ingredientStackToNotice = stack;
-    }
-    
-    @Override
-    public void addResultStackToNotice(EntryStack<?> stack) {
-        resultStackToNotice = stack;
-    }
-    
-    @Override
-    public ResourceLocation getCurrentCategory() {
-        return categories.get(selectedCategoryIndex).getIdentifier();
+        super(categoryMap, category, 8);
     }
     
     @Override
@@ -191,8 +155,8 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
         
         Rectangle recipeBounds = new Rectangle(bounds.x + 100 + (guiWidth - 100) / 2 - category.getDisplayWidth(display) / 2, bounds.y + bounds.height / 2 - category.getDisplayHeight() / 2, category.getDisplayWidth(display), category.getDisplayHeight());
         List<Widget> setupDisplay = category.setupDisplay(display, recipeBounds);
-        RecipeViewingScreen.transformIngredientNotice(setupDisplay, ingredientStackToNotice);
-        RecipeViewingScreen.transformResultNotice(setupDisplay, resultStackToNotice);
+        transformIngredientNotice(setupDisplay, ingredientStackToNotice);
+        transformResultNotice(setupDisplay, resultStackToNotice);
         this.widgets.addAll(setupDisplay);
         Optional<ButtonAreaSupplier> supplier = CategoryRegistry.getInstance().get(category.getIdentifier()).getPlusButtonArea();
         if (supplier.isPresent() && supplier.get().get(recipeBounds) != null)
@@ -304,14 +268,14 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
                 scrollBarAlphaFutureTime = System.currentTimeMillis();
             return true;
         }
-        ScreenHelper.isWithinRecipeViewingScreen = true;
+        REIHelperImpl.isWithinRecipeViewingScreen = true;
         for (GuiEventListener listener : children()) {
             if (listener.mouseScrolled(mouseX, mouseY, amount)) {
-                ScreenHelper.isWithinRecipeViewingScreen = false;
+                REIHelperImpl.isWithinRecipeViewingScreen = false;
                 return true;
             }
         }
-        ScreenHelper.isWithinRecipeViewingScreen = false;
+        REIHelperImpl.isWithinRecipeViewingScreen = false;
         int tabSize = ConfigObject.getInstance().isUsingCompactTabs() ? 24 : 28;
         if (mouseX >= bounds.x && mouseX <= bounds.getMaxX() && mouseY >= bounds.y - tabSize && mouseY < bounds.y) {
             if (amount < 0) selectedCategoryIndex++;
@@ -443,17 +407,16 @@ public class VillagerRecipeViewingScreen extends Screen implements RecipeScreen 
             if (element.keyPressed(keyCode, scanCode, modifiers))
                 return true;
         if (keyCode == 256 || this.minecraft.options.keyInventory.matches(keyCode, scanCode)) {
-            Minecraft.getInstance().setScreen(REIHelper.getInstance().getPreviousContainerScreen());
+            Minecraft.getInstance().setScreen(REIHelper.getInstance().getPreviousScreen());
             return true;
         }
         if (keyCode == 259) {
-            if (ScreenHelper.hasLastRecipeScreen())
-                minecraft.setScreen(ScreenHelper.getLastRecipeScreen());
+            if (REIHelperImpl.getInstance().hasLastRecipeScreen())
+                minecraft.setScreen(REIHelperImpl.getInstance().getLastRecipeScreen());
             else
-                minecraft.setScreen(REIHelper.getInstance().getPreviousContainerScreen());
+                minecraft.setScreen(REIHelper.getInstance().getPreviousScreen());
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
-    
 }

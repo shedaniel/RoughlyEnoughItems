@@ -23,15 +23,16 @@
 
 package me.shedaniel.rei.impl.widgets;
 
+import com.google.common.base.Predicates;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.gui.widgets.Panel;
 import me.shedaniel.rei.api.gui.config.RecipeBorderType;
 import me.shedaniel.rei.api.gui.config.RecipeScreenType;
+import me.shedaniel.rei.api.gui.widgets.Panel;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.resources.ResourceLocation;
@@ -52,7 +53,7 @@ public final class PanelWidget extends Panel {
     private int xTextureOffset = 0;
     private int yTextureOffset = RecipeBorderType.DEFAULT.getYOffset();
     @NotNull
-    private Predicate<Panel> rendering = PanelWidget::isRendering;
+    private Predicate<Panel> rendering = Predicates.alwaysTrue();
     
     public static boolean isRendering(Panel panel) {
         return ConfigObject.getInstance().getRecipeScreenType() != RecipeScreenType.VILLAGER;

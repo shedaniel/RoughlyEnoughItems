@@ -26,8 +26,8 @@ package me.shedaniel.rei.api.ingredient.entry;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.ingredient.EntryStack;
 import org.jetbrains.annotations.Nullable;
 
 public interface EntryRenderer<T> {

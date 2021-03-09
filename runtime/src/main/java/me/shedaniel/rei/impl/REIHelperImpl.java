@@ -26,10 +26,8 @@ package me.shedaniel.rei.impl;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.architectury.event.events.GuiEvent;
 import me.shedaniel.architectury.event.events.client.ClientTickEvent;
-import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.api.ConfigObject;
@@ -38,7 +36,6 @@ import me.shedaniel.rei.api.REIOverlay;
 import me.shedaniel.rei.api.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.api.gui.widgets.TextField;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.registry.screen.DisplayBoundsProvider;
 import me.shedaniel.rei.api.registry.screen.OverlayDecider;
 import me.shedaniel.rei.api.registry.screen.ScreenRegistry;
@@ -52,39 +49,32 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
-import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashSet;
 import java.util.Optional;
-import java.util.Set;
-
-import static me.shedaniel.rei.impl.Internals.attachInstance;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
-public class ScreenHelper implements REIHelper {
-    @ApiStatus.Internal
-    public static boolean isWithinRecipeViewingScreen = false;
+public class REIHelperImpl implements REIHelper {
     private static final ResourceLocation DISPLAY_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/display.png");
     private static final ResourceLocation DISPLAY_TEXTURE_DARK = new ResourceLocation("roughlyenoughitems", "textures/gui/display_dark.png");
-    private OverlaySearchField searchField;
     @ApiStatus.Internal
-    public static Set<EntryStack<?>> inventoryStacks = Sets.newHashSet();
-    private static ContainerScreenOverlay overlay;
-    private static AbstractContainerScreen<?> previousContainerScreen = null;
-    private static LinkedHashSet<RecipeScreen> lastRecipeScreen = Sets.newLinkedHashSetWithExpectedSize(5);
-    private static ScreenHelper instance;
+    public static boolean isWithinRecipeViewingScreen = false;
+    private ContainerScreenOverlay overlay;
+    private OverlaySearchField searchField;
+    private AbstractContainerScreen<?> previousContainerScreen = null;
+    private Screen previousScreen = null;
+    private LinkedHashSet<RecipeScreen> lastRecipeScreen = Sets.newLinkedHashSetWithExpectedSize(10);
     
     /**
      * @return the instance of screen helper
      * @see REIHelper#getInstance()
      */
     @ApiStatus.Internal
-    public static ScreenHelper getInstance() {
-        return instance;
+    public static REIHelperImpl getInstance() {
+        return (REIHelperImpl) REIHelper.getInstance();
     }
     
     @Override
@@ -97,6 +87,10 @@ public class ScreenHelper implements REIHelper {
     @Override
     @Nullable
     public TextField getSearchTextField() {
+        if (searchField == null) {
+            searchField = new OverlaySearchField(0, 0, 0, 0);
+        }
+        
         return searchField;
     }
     
@@ -105,86 +99,67 @@ public class ScreenHelper implements REIHelper {
         return (OverlaySearchField) getInstance().getSearchTextField();
     }
     
-    @ApiStatus.Internal
-    public static void setSearchField(OverlaySearchField searchField) {
-        getInstance().searchField = searchField;
-    }
-    
-    public static void storeRecipeScreen(RecipeScreen screen) {
-        while (lastRecipeScreen.size() >= 5)
+    public void storeRecipeScreen(RecipeScreen screen) {
+        while (lastRecipeScreen.size() >= 10)
             lastRecipeScreen.remove(Iterables.get(lastRecipeScreen, 0));
         lastRecipeScreen.add(screen);
     }
     
-    public static boolean hasLastRecipeScreen() {
+    public boolean hasLastRecipeScreen() {
         return !lastRecipeScreen.isEmpty();
     }
     
-    public static Screen getLastRecipeScreen() {
+    public Screen getLastRecipeScreen() {
         RecipeScreen screen = Iterables.getLast(lastRecipeScreen);
         lastRecipeScreen.remove(screen);
         screen.recalculateCategoryPage();
         return (Screen) screen;
     }
     
-    @ApiStatus.Internal
-    public static void reload() {
-        lastRecipeScreen.clear();
-    }
-    
-    public static boolean isOverlayVisible() {
+    @Override
+    public boolean isOverlayVisible() {
         return ConfigObject.getInstance().isOverlayVisible();
     }
     
-    public static void toggleOverlayVisible() {
+    @Override
+    public void toggleOverlayVisible() {
         ConfigObject.getInstance().setOverlayVisible(!ConfigObject.getInstance().isOverlayVisible());
         ConfigManager.getInstance().saveConfig();
     }
     
-    public static Optional<ContainerScreenOverlay> getOptionalOverlay() {
-        return Optional.ofNullable(overlay);
-    }
-    
     @Override
-    public Optional<REIOverlay> getOverlay() {
-        return Optional.ofNullable(overlay);
-    }
-    
-    public static ContainerScreenOverlay getLastOverlay(boolean reset, boolean setPage) {
+    public Optional<REIOverlay> getOverlay(boolean reset) {
         if (overlay == null || reset) {
             overlay = new ContainerScreenOverlay();
             overlay.init();
             getSearchField().setFocused(false);
         }
-        return overlay;
-    }
-    
-    public static ContainerScreenOverlay getLastOverlay() {
-        return getLastOverlay(false, false);
+        
+        return Optional.ofNullable(overlay);
     }
     
     @Override
+    @Nullable
     public AbstractContainerScreen<?> getPreviousContainerScreen() {
         return previousContainerScreen;
     }
     
-    public static void setPreviousContainerScreen(AbstractContainerScreen<?> previousContainerScreen) {
-        ScreenHelper.previousContainerScreen = previousContainerScreen;
+    @Override
+    @Nullable
+    public Screen getPreviousScreen() {
+        return previousScreen;
     }
     
-    public static void drawHoveringWidget(PoseStack matrices, int x, int y, TriConsumer<PoseStack, Point, Float> consumer, int width, int height, float delta) {
-        Window window = Minecraft.getInstance().getWindow();
-        drawHoveringWidget(matrices, window.getGuiScaledWidth(), window.getGuiScaledHeight(), x, y, consumer, width, height, delta);
-    }
-    
-    public static void drawHoveringWidget(PoseStack matrices, int screenWidth, int screenHeight, int x, int y, TriConsumer<PoseStack, Point, Float> consumer, int width, int height, float delta) {
-        int actualX = Math.max(x + 12, 6);
-        int actualY = Math.min(y - height / 2, screenHeight - height - 6);
-        if (actualX + width > screenWidth)
-            actualX -= 24 + width;
-        if (actualY < 6)
-            actualY += 24;
-        consumer.accept(matrices, new Point(actualX, actualY), delta);
+    public void setPreviousScreen(Screen previousScreen) {
+        if (previousScreen == null || previousScreen.getClass().getName().contains(".rei.")) {
+            return;
+        }
+        
+        this.previousScreen = previousScreen;
+        
+        if (previousScreen instanceof AbstractContainerScreen) {
+            this.previousContainerScreen = (AbstractContainerScreen<?>) previousScreen;
+        }
     }
     
     @Override
@@ -193,30 +168,29 @@ public class ScreenHelper implements REIHelper {
     }
     
     @Override
-    public @NotNull ResourceLocation getDefaultDisplayTexture() {
+    public ResourceLocation getDefaultDisplayTexture() {
         return isDarkThemeEnabled() ? DISPLAY_TEXTURE_DARK : DISPLAY_TEXTURE;
     }
     
-    public ScreenHelper() {
-        ScreenHelper.instance = this;
-        attachInstance(instance, REIHelper.class);
-    }
-    
-    public static SearchFieldLocation getContextualSearchFieldLocation() {
+    @Override
+    public SearchFieldLocation getContextualSearchFieldLocation() {
         Window window = Minecraft.getInstance().getWindow();
         for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(Minecraft.getInstance().screen.getClass())) {
             if (decider instanceof DisplayBoundsProvider) {
                 Rectangle containerBounds = ((DisplayBoundsProvider<Screen>) decider).getScreenBounds(Minecraft.getInstance().screen);
-                if (window.getGuiScaledHeight() - 20 <= containerBounds.getMaxY())
+                if (window.getGuiScaledHeight() - 20 <= containerBounds.getMaxY()) {
                     return SearchFieldLocation.BOTTOM_SIDE;
-                else break;
+                } else break;
             }
         }
+        
         return ConfigObject.getInstance().getSearchFieldLocation();
     }
     
-    public static Rectangle getItemListArea(Rectangle bounds) {
-        SearchFieldLocation searchFieldLocation = ScreenHelper.getContextualSearchFieldLocation();
+    @Override
+    public Rectangle calculateEntryListArea() {
+        Rectangle bounds = ScreenRegistry.getInstance().getOverlayBounds(ConfigObject.getInstance().getDisplayPanelLocation(), Minecraft.getInstance().screen);
+        SearchFieldLocation searchFieldLocation = getContextualSearchFieldLocation();
         
         int yOffset = 2;
         if (searchFieldLocation == SearchFieldLocation.TOP_SIDE) yOffset += 24;
@@ -226,11 +200,25 @@ public class ScreenHelper implements REIHelper {
         return new Rectangle(bounds.x, bounds.y + yOffset, bounds.width, bounds.height - 1 - yOffset - heightOffset);
     }
     
-    public static Rectangle getFavoritesListArea(Rectangle bounds) {
+    @Override
+    public Rectangle calculateFavoritesListArea() {
+        Rectangle bounds = ScreenRegistry.getInstance().getOverlayBounds(ConfigObject.getInstance().getDisplayPanelLocation().mirror(), Minecraft.getInstance().screen);
+        
         int yOffset = 8;
         if (ConfigObject.getInstance().doesShowUtilsButtons()) yOffset += 50;
         else if (!ConfigObject.getInstance().isLowerConfigButton()) yOffset += 25;
         return new Rectangle(bounds.x, bounds.y + yOffset, bounds.width, bounds.height - 3 - yOffset);
+    }
+    
+    @Override
+    public void startReload() {
+        getOverlay().ifPresent(REIOverlay::queueReloadOverlay);
+        lastRecipeScreen.clear();
+    }
+    
+    @Override
+    public void endReload() {
+        getOverlay().ifPresent(REIOverlay::queueReloadOverlay);
     }
     
     public void onInitializeClient() {
@@ -243,15 +231,5 @@ public class ScreenHelper implements REIHelper {
             if (isOverlayVisible() && getSearchField() != null)
                 getSearchField().tick();
         });
-    }
-    
-    @Override
-    public void startReload() {
-        getOverlay().ifPresent(REIOverlay::queueReloadOverlay);
-    }
-    
-    @Override
-    public void endReload() {
-        getOverlay().ifPresent(REIOverlay::queueReloadOverlay);
     }
 }

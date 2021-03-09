@@ -25,7 +25,6 @@ package me.shedaniel.rei;
 
 import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.architectury.utils.Env;
-import net.fabricmc.api.EnvType;
 import net.minecraft.util.Tuple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

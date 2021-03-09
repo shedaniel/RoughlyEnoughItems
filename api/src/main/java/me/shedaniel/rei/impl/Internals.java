@@ -27,7 +27,6 @@ import com.google.gson.JsonObject;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.gui.DrawableConsumer;
 import me.shedaniel.rei.api.gui.Renderer;
@@ -60,7 +59,6 @@ import java.util.function.Supplier;
 @ApiStatus.Internal
 public final class Internals {
     private static Supplier<ClientHelper> clientHelper = Internals::throwNotSetup;
-    private static Supplier<REIHelper> reiHelper = Internals::throwNotSetup;
     private static Supplier<EntryStackProvider> entryStackProvider = Internals::throwNotSetup;
     private static Supplier<EntryIngredientProvider> entryIngredientProvider = Internals::throwNotSetup;
     private static Supplier<WidgetsProvider> widgetsProvider = Internals::throwNotSetup;
@@ -80,10 +78,6 @@ public final class Internals {
     
     public static ClientHelper getClientHelper() {
         return clientHelper.get();
-    }
-    
-    public static REIHelper getREIHelper() {
-        return reiHelper.get();
     }
     
     public static EntryStackProvider getEntryStackProvider() {

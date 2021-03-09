@@ -40,12 +40,15 @@ import me.shedaniel.rei.api.server.ContainerInfo;
 import me.shedaniel.rei.api.server.ContainerInfoHandler;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.Blocks;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -97,18 +100,21 @@ public class DefaultCraftingCategory implements TransferDisplayCategory<DefaultC
     
     @Override
     public void renderRedSlots(PoseStack matrices, List<Widget> widgets, Rectangle bounds, DefaultCraftingDisplay display, IntList redSlots) {
-        if (REIHelper.getInstance().getPreviousContainerScreen() == null) return;
-        ContainerInfo<AbstractContainerMenu> info = (ContainerInfo<AbstractContainerMenu>) ContainerInfoHandler.getContainerInfo(getIdentifier(), REIHelper.getInstance().getPreviousContainerScreen().getMenu().getClass());
-        if (info == null)
+        @Nullable
+        Screen previousScreen = REIHelper.getInstance().getPreviousScreen();
+        if (!(previousScreen instanceof AbstractContainerScreen)) return;
+        AbstractContainerMenu containerMenu = ((AbstractContainerScreen<?>) previousScreen).getMenu();
+        ContainerInfo<AbstractContainerMenu> info = (ContainerInfo<AbstractContainerMenu>) ContainerInfoHandler.getContainerInfo(getIdentifier(), containerMenu.getClass());
+        if (info == null) {
             return;
+        }
         matrices.pushPose();
         matrices.translate(0, 0, 400);
         Point startPoint = new Point(bounds.getCenterX() - 58, bounds.getCenterY() - 27);
-        int width = info.getCraftingWidth(REIHelper.getInstance().getPreviousContainerScreen().getMenu());
-        for (Integer slot : redSlots) {
-            int i = slot;
-            int x = i % width;
-            int y = Mth.floor(i / (float) width);
+        int width = info.getCraftingWidth(containerMenu);
+        for (int slot : redSlots) {
+            int x = slot % width;
+            int y = Mth.floor(slot / (float) width);
             GuiComponent.fill(matrices, startPoint.x + 1 + x * 18, startPoint.y + 1 + y * 18, startPoint.x + 1 + x * 18 + 16, startPoint.y + 1 + y * 18 + 16, 0x60ff0000);
         }
         matrices.popPose();

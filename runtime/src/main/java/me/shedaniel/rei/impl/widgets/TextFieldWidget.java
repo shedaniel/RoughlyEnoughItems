@@ -24,7 +24,10 @@
 package me.shedaniel.rei.impl.widgets;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
@@ -157,7 +160,7 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
             textFiltered = textFiltered.substring(0, k);
             l = k;
         }
-    
+        
         String result = new StringBuilder(this.text)
                 .replace(highlightStart, highlightEnd, textFiltered)
                 .toString();
