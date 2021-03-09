@@ -1,6 +1,6 @@
 package mezz.jei.api.constants;
 
-import me.shedaniel.rei.api.BuiltinPlugin;
+import me.shedaniel.rei.api.plugins.BuiltinPlugin;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.recipe.category.extensions.vanilla.crafting.ICraftingCategoryExtension;
 import mezz.jei.api.recipe.category.extensions.vanilla.crafting.ICustomCraftingCategoryExtension;

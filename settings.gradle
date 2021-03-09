@@ -15,4 +15,4 @@ include "runtime"
 include "fabric"
 include "forge"
 
-//include "jei-compatibility-layer"
+include "jei-compatibility-layer"

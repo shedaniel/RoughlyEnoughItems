@@ -23,25 +23,27 @@
 
 package me.shedaniel.rei.gui;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector4f;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.gui.drag.DraggableStack;
+import me.shedaniel.rei.api.gui.drag.DraggableStackProvider;
+import me.shedaniel.rei.api.gui.drag.DraggableStackVisitor;
+import me.shedaniel.rei.api.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.gui.widgets.*;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.api.registry.category.CategoryRegistry;
-import me.shedaniel.rei.api.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.registry.screen.ClickArea;
 import me.shedaniel.rei.api.registry.screen.DisplayBoundsProvider;
 import me.shedaniel.rei.api.registry.screen.OverlayDecider;
@@ -60,7 +62,6 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -75,7 +76,6 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
-import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -83,7 +83,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 @ApiStatus.Internal
 public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverlay {
@@ -93,43 +92,11 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
     private static final EntryListWidget ENTRY_LIST_WIDGET = new EntryListWidget();
     private static FavoritesListWidget favoritesListWidget = null;
     private final List<Widget> widgets = Lists.newLinkedList();
-    public boolean shouldReInit = false;
-    private int tooltipWidth;
-    private int tooltipHeight;
-    private List<FormattedCharSequence> tooltipLines;
-    public final TriConsumer<PoseStack, Point, Float> renderTooltipCallback = (matrices, mouse, aFloat) -> {
-        RenderSystem.disableRescaleNormal();
-        RenderSystem.disableDepthTest();
-        matrices.pushPose();
-        matrices.translate(0, 0, 999);
-        int x = mouse.x;
-        int y = mouse.y;
-        this.fillGradient(matrices, x - 3, y - 4, x + tooltipWidth + 3, y - 3, -267386864, -267386864);
-        this.fillGradient(matrices, x - 3, y + tooltipHeight + 3, x + tooltipWidth + 3, y + tooltipHeight + 4, -267386864, -267386864);
-        this.fillGradient(matrices, x - 3, y - 3, x + tooltipWidth + 3, y + tooltipHeight + 3, -267386864, -267386864);
-        this.fillGradient(matrices, x - 4, y - 3, x - 3, y + tooltipHeight + 3, -267386864, -267386864);
-        this.fillGradient(matrices, x + tooltipWidth + 3, y - 3, x + tooltipWidth + 4, y + tooltipHeight + 3, -267386864, -267386864);
-        this.fillGradient(matrices, x - 3, y - 3 + 1, x - 3 + 1, y + tooltipHeight + 3 - 1, 1347420415, 1344798847);
-        this.fillGradient(matrices, x + tooltipWidth + 2, y - 3 + 1, x + tooltipWidth + 3, y + tooltipHeight + 3 - 1, 1347420415, 1344798847);
-        this.fillGradient(matrices, x - 3, y - 3, x + tooltipWidth + 3, y - 3 + 1, 1347420415, 1347420415);
-        this.fillGradient(matrices, x - 3, y + tooltipHeight + 2, x + tooltipWidth + 3, y + tooltipHeight + 3, 1344798847, 1344798847);
-        int currentY = y;
-        MultiBufferSource.BufferSource immediate = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        Matrix4f matrix = matrices.last().pose();
-        for (int lineIndex = 0; lineIndex < tooltipLines.size(); lineIndex++) {
-            font.drawInBatch(tooltipLines.get(lineIndex), x, currentY, -1, true, matrix, immediate, false, 0, 15728880);
-            currentY += lineIndex == 0 ? 12 : 10;
-        }
-        immediate.endBatch();
-        matrices.popPose();
-        RenderSystem.enableDepthTest();
-        RenderSystem.enableRescaleNormal();
-    };
+    public boolean shouldReload = false;
     private Rectangle bounds;
     private Window window;
     private Button leftButton, rightButton;
-    @ApiStatus.Experimental
-    private Rectangle subsetsButtonBounds;
+    private CurrentDraggingStack draggingStack = new CurrentDraggingStack();
     
     @Nullable
     private ContainerScreenOverlay.OverlayMenu overlayMenu = null;
@@ -208,7 +175,12 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
     
     @Override
     public void queueReloadOverlay() {
-        shouldReInit = true;
+        shouldReload = true;
+    }
+    
+    @Override
+    public DraggingContext getDraggingContext() {
+        return draggingStack;
     }
     
     public void init(boolean useless) {
@@ -216,7 +188,11 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
     }
     
     public void init() {
-        this.shouldReInit = false;
+        Iterable<DraggableStackProvider> stackProviders = (Iterable) Iterables.filter(widgets, widget -> widget instanceof DraggableStackProvider);
+        Iterable<DraggableStackVisitor> stackVisitors = (Iterable) Iterables.filter(widgets, widget -> widget instanceof DraggableStackVisitor);
+        draggingStack.set(DraggableStackProvider.from(() -> stackProviders), DraggableStackVisitor.from(() -> stackVisitors));
+        
+        this.shouldReload = false;
         //Update Variables
         this.children().clear();
         this.removeOverlayMenu();
@@ -224,8 +200,9 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
         this.bounds = ScreenRegistry.getInstance().getOverlayBounds(ConfigObject.getInstance().getDisplayPanelLocation(), Minecraft.getInstance().screen);
         widgets.add(ENTRY_LIST_WIDGET);
         if (ConfigObject.getInstance().isFavoritesEnabled()) {
-            if (favoritesListWidget == null)
+            if (favoritesListWidget == null) {
                 favoritesListWidget = new FavoritesListWidget();
+            }
             favoritesListWidget.favoritePanel.resetRows();
             widgets.add(favoritesListWidget);
         }
@@ -353,12 +330,12 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
                 helper.blit(matrices, weatherButton.getBounds().x + 3, weatherButton.getBounds().y + 3, getCurrentWeather().getId() * 14, 14, 14, 14);
             }));
         }
-        subsetsButtonBounds = getSubsetsButtonBounds();
+        Rectangle subsetsButtonBounds = getSubsetsButtonBounds();
         if (ConfigObject.getInstance().isSubsetsEnabled()) {
             widgets.add(InternalWidgets.wrapLateRenderable(InternalWidgets.wrapTranslate(Widgets.createButton(subsetsButtonBounds, ClientHelperImpl.getInstance().isAprilFools.get() ? new TranslatableComponent("text.rei.tiny_potato") : new TranslatableComponent("text.rei.subsets"))
                     .onClick(button -> {
                         proceedOpenMenuOrElse(Menu.SUBSETS, () -> {
-                            openMenu(Menu.SUBSETS, Menu.createSubsetsMenuFromRegistry(new Point(this.subsetsButtonBounds.x, this.subsetsButtonBounds.getMaxY())), point -> true);
+                            openMenu(Menu.SUBSETS, Menu.createSubsetsMenuFromRegistry(new Point(subsetsButtonBounds.x, subsetsButtonBounds.getMaxY())), point -> true);
                         }, menu -> {
                             removeOverlayMenu();
                         });
@@ -396,6 +373,56 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
                     }))
             ));
             tmp.setZ(600);
+        }
+        
+        widgets.add(draggingStack);
+        
+        if (Minecraft.getInstance().screen instanceof RecipeViewingScreen) {
+            widgets.add(new RecipeViewingScreenDraggable());
+        }
+    }
+    
+    private static class RecipeViewingScreenDraggable extends Widget implements DraggableStackProvider{
+        @Nullable
+        @Override
+        public DraggableStack getHoveredStack(DraggingContext context, double mouseX, double mouseY) {
+            for (Widget widget : ((RecipeViewingScreen) Minecraft.getInstance().screen).getWidgets()) {
+                if (widget instanceof EntryWidget) {
+                    if (widget.containsMouse(mouseX, mouseY)) {
+                        return new DraggableStack() {
+                            EntryStack<?> stack = ((EntryWidget)widget).getCurrentEntry().copy().rewrap();
+                            
+                            @Override
+                            public EntryStack<?> getStack() {
+                                return stack;
+                            }
+    
+                            @Override
+                            public void drag() {
+        
+                            }
+    
+                            @Override
+                            public void release(boolean accepted) {
+                                if (!accepted) {
+                                    context.registerRenderBackToPosition(this, () -> new Point(((EntryWidget) widget).getBounds().x - 8, ((EntryWidget) widget).getBounds().y - 8));
+                                }
+                            }
+                        };
+                    }
+                }
+            }
+            return null;
+        }
+    
+        @Override
+        public void render(PoseStack poseStack, int i, int j, float f) {
+        
+        }
+    
+        @Override
+        public List<? extends GuiEventListener> children() {
+            return Collections.emptyList();
         }
     }
     
@@ -513,7 +540,7 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        if (shouldReInit) {
+        if (shouldReload) {
             ENTRY_LIST_WIDGET.updateSearch(ScreenHelper.getSearchField().getText(), true);
             init();
         } else {

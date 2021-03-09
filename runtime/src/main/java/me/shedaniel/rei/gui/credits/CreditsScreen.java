@@ -25,13 +25,13 @@ package me.shedaniel.rei.gui.credits;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
+import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.clothconfig2.impl.EasingMethod;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.util.ImmutableLiteralText;
 import me.shedaniel.rei.gui.TransformingScreen;
 import me.shedaniel.rei.gui.credits.CreditsEntryListWidget.TextCreditsItem;
 import me.shedaniel.rei.gui.credits.CreditsEntryListWidget.TranslationCreditsItem;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
@@ -100,7 +100,7 @@ public class CreditsScreen extends Screen {
             );
         }).collect(Collectors.toList());
         int i = width - 80 - 6;
-        for (String line : String.format("§lRoughly Enough Items (v%s)\n§7Originally a fork for Almost Enough Items.\n\n§lLanguage Translation\n%s\n\n§lLicense\n§7Roughly Enough Items is licensed under MIT.", FabricLoader.getInstance().getModContainer("roughlyenoughitems").map(mod -> mod.getMetadata().getVersion().getFriendlyString()).orElse("Unknown"), "%translators%").split("\n"))
+        for (String line : String.format("§lRoughly Enough Items (v%s)\n§7Originally a fork for Almost Enough Items.\n\n§lLanguage Translation\n%s\n\n§lLicense\n§7Roughly Enough Items is licensed under MIT.", Platform.getMod("roughlyenoughitems").getVersion(), "%translators%").split("\n"))
             if (line.equalsIgnoreCase("%translators%")) {
                 if (exception[0] != null) {
                     entryListWidget.creditsAddEntry(new TextCreditsItem(new ImmutableLiteralText("Failed to get translators: " + exception[0].toString())));

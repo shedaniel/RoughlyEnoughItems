@@ -30,4 +30,3 @@ accessible    method net/minecraft/client/gui/screens/Screen                    
 accessible    method net/minecraft/client/gui/screens/Screen                                   init                    ()V
 accessible    method net/minecraft/client/gui/screens/Screen                                   insertText              (Ljava/lang/String;Z)V
 accessible    method net/minecraft/client/gui/screens/Screen                                   isValidCharacterForName (Ljava/lang/String;CI)Z
-accessible    method net/minecraft/tags/TagContainer                                           get                     (Lnet/minecraft/resources/ResourceKey;)Lnet/minecraft/tags/TagCollection;

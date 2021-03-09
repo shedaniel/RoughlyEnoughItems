@@ -27,7 +27,6 @@ import me.shedaniel.math.Rectangle;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class WidgetWithBounds extends Widget {
-    
     @NotNull
     public abstract Rectangle getBounds();
     
@@ -35,5 +34,4 @@ public abstract class WidgetWithBounds extends Widget {
     public boolean containsMouse(double mouseX, double mouseY) {
         return getBounds().contains(mouseX, mouseY);
     }
-    
 }

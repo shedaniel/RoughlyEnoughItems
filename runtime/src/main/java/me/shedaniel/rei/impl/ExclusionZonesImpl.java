@@ -23,7 +23,9 @@
 
 package me.shedaniel.rei.impl;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.api.registry.screen.ExclusionZones;
@@ -32,22 +34,22 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.InteractionResult;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public class ExclusionZonesImpl implements ExclusionZones {
-    
     private static final Comparator<? super Rectangle> RECTANGLE_COMPARER = Comparator.comparingLong(Rectangle::hashCode);
     
     private long lastArea = -1;
-    private List<Tuple<Tuple<Class<?>, Float>, Supplier<List<Rectangle>>>> list = Lists.newArrayList();
+    private Multimap<Class<?>, Supplier<List<Rectangle>>> list = HashMultimap.create();
     
     @Override
     public <R extends Screen> boolean isHandingScreen(Class<R> screen) {
@@ -62,12 +64,19 @@ public class ExclusionZonesImpl implements ExclusionZones {
     @Override
     public InteractionResult isInZone(double mouseX, double mouseY) {
         Class<? extends Screen> screenClass = Minecraft.getInstance().screen.getClass();
-        for (Tuple<Tuple<Class<?>, Float>, Supplier<List<Rectangle>>> pair : list) {
-            if (pair.getA().getA().isAssignableFrom(screenClass))
-                for (Rectangle zone : pair.getB().get())
-                    if (zone.contains(mouseX, mouseY))
-                        return InteractionResult.FAIL;
+        
+        for (Map.Entry<Class<?>, Collection<Supplier<List<Rectangle>>>> collectionEntry : list.asMap().entrySet()) {
+            if (collectionEntry.getKey().isAssignableFrom(screenClass)) {
+                for (Supplier<List<Rectangle>> listSupplier : collectionEntry.getValue()) {
+                    for (Rectangle zone : listSupplier.get()) {
+                        if (zone.contains(mouseX, mouseY)) {
+                            return InteractionResult.FAIL;
+                        }
+                    }
+                }
+            }
         }
+        
         return InteractionResult.PASS;
     }
     
@@ -81,18 +90,23 @@ public class ExclusionZonesImpl implements ExclusionZones {
     }
     
     private long currentHashCode(DisplayPanelLocation location) {
-        return areasHashCode(ScreenRegistry.getInstance().getOverlayBounds(location, Minecraft.getInstance().screen), getExclusionZones(Minecraft.getInstance().screen.getClass(), false));
+        return areasHashCode(ScreenRegistry.getInstance().getOverlayBounds(location, Minecraft.getInstance().screen),
+                getExclusionZones(Minecraft.getInstance().screen.getClass(), false));
     }
     
     @Override
     public List<Rectangle> getExclusionZones(Class<?> currentScreenClass, boolean sort) {
         List<Rectangle> rectangles = Lists.newArrayList();
-        for (Tuple<Tuple<Class<?>, Float>, Supplier<List<Rectangle>>> pair : list) {
-            if (pair.getA().getA().isAssignableFrom(currentScreenClass))
-                rectangles.addAll(pair.getB().get());
+        for (Map.Entry<Class<?>, Collection<Supplier<List<Rectangle>>>> collectionEntry : list.asMap().entrySet()) {
+            if (collectionEntry.getKey().isAssignableFrom(currentScreenClass)) {
+                for (Supplier<List<Rectangle>> listSupplier : collectionEntry.getValue()) {
+                    rectangles.addAll(listSupplier.get());
+                }
+            }
         }
-        if (sort)
+        if (sort) {
             rectangles.sort(RECTANGLE_COMPARER);
+        }
         return rectangles;
     }
     
@@ -103,7 +117,7 @@ public class ExclusionZonesImpl implements ExclusionZones {
     
     @Override
     public void register(Class<?> screenClass, Supplier<List<Rectangle>> supplier) {
-        list.add(new Tuple<>(new Tuple<>(screenClass, 0f), supplier));
+        list.put(screenClass, supplier);
     }
     
     private long areasHashCode(Rectangle rectangle, List<Rectangle> exclusionZones) {

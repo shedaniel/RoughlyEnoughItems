@@ -482,11 +482,6 @@ public class FilteringScreen extends Screen {
             }
         }
         
-        @Override
-        public EntryStack<?> getCurrentEntry() {
-            return super.getCurrentEntry();
-        }
-        
         public boolean isSelected() {
             return getSelection().intersects(getBounds());
         }

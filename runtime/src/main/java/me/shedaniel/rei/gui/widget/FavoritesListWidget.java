@@ -37,23 +37,33 @@ import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWi
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.api.gui.widgets.Widget;
-import me.shedaniel.rei.api.gui.widgets.WidgetWithBounds;
-import me.shedaniel.rei.api.ingredient.entry.BatchEntryRenderer;
+import me.shedaniel.rei.api.ConfigManager;
+import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.REIHelper;
+import me.shedaniel.rei.api.REIOverlay;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.favorites.FavoriteMenuEntry;
+import me.shedaniel.rei.api.gui.drag.DraggableStack;
+import me.shedaniel.rei.api.gui.drag.DraggableStackProvider;
+import me.shedaniel.rei.api.gui.drag.DraggableStackVisitor;
+import me.shedaniel.rei.api.gui.drag.DraggingContext;
+import me.shedaniel.rei.api.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.gui.widgets.Widget;
+import me.shedaniel.rei.api.gui.widgets.WidgetWithBounds;
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.ingredient.entry.BatchEntryRenderer;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.registry.screen.ScreenRegistry;
+import me.shedaniel.rei.api.util.CollectionUtils;
 import me.shedaniel.rei.api.util.ImmutableLiteralText;
-import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.modules.Menu;
 import me.shedaniel.rei.gui.modules.MenuEntry;
-import me.shedaniel.rei.impl.*;
-import me.shedaniel.rei.api.util.CollectionUtils;
+import me.shedaniel.rei.impl.Animator;
+import me.shedaniel.rei.impl.ConfigManagerImpl;
+import me.shedaniel.rei.impl.ConfigObjectImpl;
+import me.shedaniel.rei.impl.ScreenHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -77,7 +87,7 @@ import java.util.stream.Stream;
 import static me.shedaniel.rei.gui.widget.EntryListWidget.*;
 
 @ApiStatus.Internal
-public class FavoritesListWidget extends WidgetWithBounds {
+public class FavoritesListWidget extends WidgetWithBounds implements DraggableStackProvider, DraggableStackVisitor {
     protected final ScrollingContainer scrolling = new ScrollingContainer() {
         @Override
         public Rectangle getBounds() {
@@ -102,7 +112,6 @@ public class FavoritesListWidget extends WidgetWithBounds {
     private final Int2ObjectMap<Entry> removedEntries = new Int2ObjectLinkedOpenHashMap<>();
     private List<EntryListEntry> entriesList = Lists.newArrayList();
     private List<Widget> children = Lists.newArrayList();
-    private Entry lastTouchedEntry = null;
     
     public final AddFavoritePanel favoritePanel = new AddFavoritePanel(this);
     public final ToggleAddFavoritePanelButton favoritePanelButton = new ToggleAddFavoritePanelButton(this);
@@ -143,24 +152,79 @@ public class FavoritesListWidget extends WidgetWithBounds {
     }
     
     @Override
+    @Nullable
+    public DraggableStack getHoveredStack(DraggingContext context, double mouseX, double mouseY) {
+        Function<Entry, DraggableStack> apply = entry -> new DraggableStack() {
+            private FavoriteEntry favoriteEntry = entry.getEntry();
+            private EntryStack<?> stack = EntryStacks.of(favoriteEntry.getRenderer(false)).copy();
+            
+            @Override
+            public EntryStack<?> getStack() {
+                return stack;
+            }
+            
+            @Override
+            public void drag() {
+                entries.remove(entry.hashIgnoreAmount());
+                applyNewFavorites(entries.values().stream()
+                        .map(Entry::getEntry)
+                        .collect(Collectors.toList()));
+            }
+            
+            @Override
+            public void release(boolean accepted) {
+                if (!accepted) {
+                    drop(entry, this, favoriteEntry);
+                }
+            }
+        };
+        if (innerBounds.contains(mouseX, mouseY)) {
+            for (Entry entry : entries.values()) {
+                if (entry.getWidget().containsMouse(mouseX, mouseY)) {
+                    return apply.apply(entry);
+                }
+            }
+        }
+        if (favoritePanel.bounds.contains(mouseX, mouseY)) {
+            for (AddFavoritePanel.Row row : favoritePanel.rows.get()) {
+                if (row instanceof AddFavoritePanel.SectionEntriesRow) {
+                    for (AddFavoritePanel.SectionEntriesRow.SectionFavoriteWidget widget : ((AddFavoritePanel.SectionEntriesRow) row).widgets) {
+                        if (widget.containsMouse(mouseX, mouseY)) {
+                            Entry entry = new Entry(widget.entry.copy(), entrySize());
+                            entry.size.setAs(entrySize() * 100);
+                            return apply.apply(entry);
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+    
+    @Override
+    public Optional<Acceptor> visitDraggedStack(DraggableStack stack) {
+        if (innerBounds.contains(PointHelper.ofMouse())) {
+            return Optional.of(this::acceptDraggedStack);
+        }
+        return Optional.empty();
+    }
+    
+    private void acceptDraggedStack(DraggableStack stack) {
+        FavoriteEntry favoriteEntry = FavoriteEntry.fromEntryStack(stack.getStack().copy());
+        Entry entry = new Entry(favoriteEntry, entrySize());
+        entry.size.setAs(entrySize() * 100);
+        drop(entry, stack, favoriteEntry);
+    }
+    
+    @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (fullBounds.isEmpty() || currentBounds.isEmpty())
             return;
         int entrySize = entrySize();
         boolean fastEntryRendering = ConfigObject.getInstance().doesFastEntryRendering();
         updateEntriesPosition(entry -> true);
-        if (lastTouchedEntry != null && lastTouchedEntry.dragged) {
-            lastTouchedEntry.x.setAs(mouseX - entrySize / 2);
-            lastTouchedEntry.y.setAs(mouseY - entrySize / 2 + (int) scrolling.scrollAmount);
-            
-            if (!RoughlyEnoughItemsCore.isLeftModePressed)
-                resetDraggedEntry();
-        }
         for (Entry entry : entries.values()) {
             entry.update(delta);
-        }
-        if (lastTouchedEntry != null && lastTouchedEntry.madeUp) {
-            lastTouchedEntry.update(delta);
         }
         ObjectIterator<Entry> removedEntriesIterator = removedEntries.values().iterator();
         while (removedEntriesIterator.hasNext()) {
@@ -176,7 +240,6 @@ public class FavoritesListWidget extends WidgetWithBounds {
         ScissorsHandler.INSTANCE.scissor(currentBounds);
         
         Stream<EntryListEntry> entryStream = this.entriesList.stream()
-                .filter(entry -> lastTouchedEntry == null || entry != lastTouchedEntry.getWidget())
                 .filter(entry -> entry.getBounds().getMaxY() >= this.currentBounds.getY() && entry.getBounds().y <= this.currentBounds.getMaxY());
         
         if (fastEntryRendering) {
@@ -193,13 +256,6 @@ public class FavoritesListWidget extends WidgetWithBounds {
         ScissorsHandler.INSTANCE.removeLastScissor();
         
         renderAddFavorite(matrices, mouseX, mouseY, delta);
-        
-        if (lastTouchedEntry != null) {
-            matrices.pushPose();
-            matrices.translate(0, 0, 600);
-            lastTouchedEntry.widget.render(matrices, mouseX, mouseY, delta);
-            matrices.popPose();
-        }
     }
     
     private void renderAddFavorite(PoseStack matrices, int mouseX, int mouseY, float delta) {
@@ -209,15 +265,6 @@ public class FavoritesListWidget extends WidgetWithBounds {
     
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int int_1, double double_3, double double_4) {
-        if (lastTouchedEntry != null && !lastTouchedEntry.dragged) {
-            Point startPoint = lastTouchedEntry.startedDraggingPosition;
-            double xDistance = Math.abs(startPoint.x - mouseX);
-            double yDistance = Math.abs(startPoint.y - mouseY);
-            double requiredDistance = entrySize() * .4;
-            if (xDistance * xDistance + yDistance * yDistance > requiredDistance * requiredDistance) {
-                lastTouchedEntry.dragged = true;
-            }
-        }
         if (scrolling.mouseDragged(mouseX, mouseY, int_1, double_3, double_4, ConfigObject.getInstance().doesSnapToRows(), entrySize()))
             return true;
         return super.mouseDragged(mouseX, mouseY, int_1, double_3, double_4);
@@ -305,11 +352,10 @@ public class FavoritesListWidget extends WidgetWithBounds {
         int width = innerBounds.width / entrySize;
         int currentX = 0;
         int currentY = 0;
-        int releaseIndex = lastTouchedEntry != null && lastTouchedEntry.dragged ? getReleaseIndex() : -2;
+        int releaseIndex = getReleaseIndex();
         
         int slotIndex = 0;
         for (Entry entry : this.entries.values()) {
-            if (entry.dragged) continue;
             while (true) {
                 int xPos = currentX * entrySize + innerBounds.x;
                 int yPos = currentY * entrySize + innerBounds.y;
@@ -340,14 +386,15 @@ public class FavoritesListWidget extends WidgetWithBounds {
     }
     
     public int getReleaseIndex() {
-        if (lastTouchedEntry != null && lastTouchedEntry.dragged && currentBounds.contains(PointHelper.ofMouse())) {
+        DraggingContext context = DraggingContext.getInstance();
+        Point position = context.getCurrentPosition();
+        if (context.isDraggingStack() && currentBounds.contains(position)) {
             int entrySize = entrySize();
             int width = innerBounds.width / entrySize;
             int currentX = 0;
             int currentY = 0;
             List<Tuple<Entry, Point>> entriesPoints = Lists.newArrayList();
             for (Entry entry : this.entries.values()) {
-                if (entry.dragged) continue;
                 while (true) {
                     int xPos = currentX * entrySize + innerBounds.x;
                     int yPos = currentY * entrySize + innerBounds.y;
@@ -377,8 +424,8 @@ public class FavoritesListWidget extends WidgetWithBounds {
                 }
             }
             
-            double x = lastTouchedEntry.x.doubleValue();
-            double y = lastTouchedEntry.y.doubleValue();
+            double x = position.x - 8;
+            double y = position.y - 8;
             
             return Mth.clamp(entriesPoints.stream()
                             .filter(value -> {
@@ -397,115 +444,69 @@ public class FavoritesListWidget extends WidgetWithBounds {
                     0, entriesPoints.size());
         }
         
-        return entries.size();
+        return -2;
     }
     
-    public void resetDraggedEntry() {
-        if (lastTouchedEntry != null && lastTouchedEntry.dragged) {
-            Entry entry = lastTouchedEntry;
-            double x = entry.x.doubleValue();
-            double y = entry.y.doubleValue();
-            entry.startedDraggingPosition = null;
+    public void drop(Entry entry, DraggableStack stack, FavoriteEntry favoriteEntry) {
+        DraggingContext context = DraggingContext.getInstance();
+        double x = context.getCurrentPosition().x;
+        double y = context.getCurrentPosition().y;
+        entry.startedDraggingPosition = null;
+        
+        entry.x.setAs(x - 8);
+        entry.y.setAs(y - 8);
+        
+        boolean contains = currentBounds.contains(PointHelper.ofMouse());
+        int newIndex = contains ? getReleaseIndex() : Iterables.indexOf(entries.values(), e -> e == entry);
+        
+        if (entries.size() - 1 <= newIndex) {
+            this.entries.remove(entry.hashIgnoreAmount());
+            this.entries.put(entry.hashIgnoreAmount(), entry);
+        } else {
+            Int2ObjectMap<Entry> prevEntries = new Int2ObjectLinkedOpenHashMap<>(entries);
+            this.entries.clear();
             
-            boolean contains = currentBounds.contains(PointHelper.ofMouse());
-            if (contains || !entry.madeUp) {
-                int newIndex = contains ? getReleaseIndex() : Iterables.indexOf(entries.values(), e -> e == entry);
-                entry.dragged = false;
-                
-                if (entries.size() - 1 <= newIndex) {
-                    this.entries.remove(entry.hashIgnoreAmount());
+            int index = 0;
+            for (Int2ObjectMap.Entry<Entry> entryEntry : prevEntries.int2ObjectEntrySet()) {
+                if (index == newIndex)
                     this.entries.put(entry.hashIgnoreAmount(), entry);
-                } else {
-                    Int2ObjectMap<Entry> prevEntries = new Int2ObjectLinkedOpenHashMap<>(entries);
-                    this.entries.clear();
+                if (entryEntry.getIntKey() != entry.hashIgnoreAmount()) {
+                    this.entries.put(entryEntry.getIntKey(), entryEntry.getValue());
                     
-                    int index = 0;
-                    for (Int2ObjectMap.Entry<Entry> entryEntry : prevEntries.int2ObjectEntrySet()) {
-                        if (index == newIndex)
-                            this.entries.put(entry.hashIgnoreAmount(), entry);
-                        if (entryEntry.getIntKey() != entry.hashIgnoreAmount()) {
-                            this.entries.put(entryEntry.getIntKey(), entryEntry.getValue());
-                            
-                            index++;
-                        }
-                    }
+                    index++;
                 }
-                
-                applyNewEntriesList();
-                
-                if (ConfigObject.getInstance().isFavoritesEnabled()) {
-                    List<FavoriteEntry> favorites = ConfigObject.getInstance().getFavoriteEntries();
-                    favorites.clear();
-                    for (Entry value : this.entries.values()) {
-                        favorites.add(value.entry.copy());
-                    }
-                    
-                    ConfigManager.getInstance().saveConfig();
-                }
-                
-                if (entry.madeUp) {
-                    applyNewFavorites(this.entries.values().stream()
-                            .map(Entry::getEntry)
-                            .collect(Collectors.toList()));
-                }
-                
-                entry.madeUp = false;
             }
         }
         
-        lastTouchedEntry = null;
+        applyNewEntriesList();
+        
+        if (ConfigObject.getInstance().isFavoritesEnabled()) {
+            List<FavoriteEntry> favorites = ConfigObject.getInstance().getFavoriteEntries();
+            favorites.clear();
+            for (Entry value : this.entries.values()) {
+                favorites.add(value.entry.copy());
+            }
+            
+            ConfigManager.getInstance().saveConfig();
+        }
+        
+        applyNewFavorites(this.entries.values().stream()
+                .map(Entry::getEntry)
+                .collect(Collectors.toList()));
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int int_1) {
-        resetDraggedEntry();
-        
-        if (scrolling.updateDraggingState(mouseX, mouseY, int_1))
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (scrolling.updateDraggingState(mouseX, mouseY, button))
             return true;
-        if (innerBounds.contains(mouseX, mouseY)) {
-            for (Entry entry : entries.values()) {
-                if (entry.getWidget().containsMouse(mouseX, mouseY)) {
-                    lastTouchedEntry = entry;
-                    lastTouchedEntry.startedDraggingPosition = new Point(mouseX, mouseY);
-                    break;
-                }
-            }
-        } else if (favoritePanel.bounds.contains(mouseX, mouseY)) {
-            back:
-            for (AddFavoritePanel.Row row : favoritePanel.rows.get()) {
-                if (row instanceof AddFavoritePanel.SectionEntriesRow) {
-                    for (AddFavoritePanel.SectionEntriesRow.SectionFavoriteWidget widget : ((AddFavoritePanel.SectionEntriesRow) row).widgets) {
-                        if (widget.containsMouse(mouseX, mouseY)) {
-                            lastTouchedEntry = new Entry(widget.entry.copy(), entrySize());
-                            lastTouchedEntry.madeUp = true;
-                            lastTouchedEntry.dragged = true;
-                            lastTouchedEntry.size.setAs(entrySize() * 100);
-                            applyNewFavorites(this.entries.values().stream()
-                                    .map(Entry::getEntry)
-                                    .map(FavoriteEntry::copy)
-                                    .filter(entry -> !entry.equals(widget.entry))
-                                    .collect(Collectors.toList()));
-                            break back;
-                        }
-                    }
-                }
-            }
-        }
         for (Widget widget : children())
-            if (widget.mouseClicked(mouseX, mouseY, int_1))
+            if (widget.mouseClicked(mouseX, mouseY, button))
                 return true;
-        return lastTouchedEntry != null;
+        return false;
     }
     
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (lastTouchedEntry != null && lastTouchedEntry.dragged) {
-            resetDraggedEntry();
-            return true;
-        }
-        
-        lastTouchedEntry = null;
-        
         if (containsMouse(mouseX, mouseY)) {
             for (Widget widget : children())
                 if (widget.mouseReleased(mouseX, mouseY, button))
@@ -519,8 +520,6 @@ public class FavoritesListWidget extends WidgetWithBounds {
         private final EntryListEntry widget;
         private boolean hidden;
         private Point startedDraggingPosition;
-        private boolean dragged;
-        private boolean madeUp;
         private Animator x = new Animator();
         private Animator y = new Animator();
         private Animator size = new Animator();
@@ -602,18 +601,6 @@ public class FavoritesListWidget extends WidgetWithBounds {
         }
         
         @Override
-        public void queueTooltip(PoseStack matrices, int mouseX, int mouseY, float delta) {
-            if (lastTouchedEntry == null || !lastTouchedEntry.dragged)
-                super.queueTooltip(matrices, mouseX, mouseY, delta);
-        }
-        
-        @Override
-        protected void drawHighlighted(PoseStack matrices, int mouseX, int mouseY, float delta) {
-            if (lastTouchedEntry == null || !lastTouchedEntry.dragged)
-                super.drawHighlighted(matrices, mouseX, mouseY, delta);
-        }
-        
-        @Override
         public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
             Optional<ContainerScreenOverlay> overlayOptional = ScreenHelper.getOptionalOverlay();
             Optional<Supplier<Collection<@NotNull FavoriteMenuEntry>>> menuEntries = favoriteEntry.getMenuEntries();
@@ -622,11 +609,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
                 UUID uuid = favoriteEntry.getUuid();
                 
                 boolean isOpened = overlay.isMenuOpened(uuid);
-                if (entry.dragged || entry.madeUp) {
-                    if (isOpened) {
-                        overlay.removeOverlayMenu();
-                    }
-                } else if (isOpened || !overlay.isAnyMenuOpened()) {
+                if (isOpened || !overlay.isAnyMenuOpened()) {
                     boolean inBounds = containsMouse(mouseX, mouseY) || overlay.isMenuInBounds(uuid);
                     if (isOpened != inBounds) {
                         if (inBounds) {
@@ -955,7 +938,7 @@ public class FavoritesListWidget extends WidgetWithBounds {
                     this.getBounds().x = (int) Math.round(x.doubleValue() + offsetSize);
                     this.getBounds().y = (int) Math.round(y.doubleValue() + offsetSize) - (int) scroller.scrollAmount;
                 }
-    
+                
                 @Override
                 public @Nullable Tooltip getCurrentTooltip(Point point) {
                     Tooltip tooltip = super.getCurrentTooltip(point);
