@@ -29,11 +29,11 @@ import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
 import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.rei.api.gui.Renderer;
-import me.shedaniel.rei.api.util.TextRepresentable;
 import me.shedaniel.rei.api.ingredient.entry.ComparisonContext;
 import me.shedaniel.rei.api.ingredient.entry.EntryDefinition;
 import me.shedaniel.rei.api.ingredient.entry.EntryRenderer;
 import me.shedaniel.rei.api.ingredient.entry.EntryType;
+import me.shedaniel.rei.api.util.TextRepresentable;
 import me.shedaniel.rei.impl.Internals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -201,5 +201,10 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
     default EntryStack<T> simplifyAmount() {
         setAmount(getAmount().simplify());
         return this;
+    }
+    
+    @ApiStatus.NonExtendable
+    default <O> EntryStack<O> cast() {
+        return (EntryStack<O>) this;
     }
 }

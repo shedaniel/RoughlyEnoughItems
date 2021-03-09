@@ -25,10 +25,10 @@ package me.shedaniel.rei.api.ingredient.entry;
 
 import me.shedaniel.rei.api.plugins.PluginManager;
 import me.shedaniel.rei.api.registry.Reloadable;
-import me.shedaniel.rei.impl.Internals;
 import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Set;
 
 public interface EntryTypeRegistry extends Reloadable {
     static EntryTypeRegistry getInstance() {
@@ -74,6 +74,10 @@ public interface EntryTypeRegistry extends Reloadable {
      */
     @Nullable
     EntryDefinition<?> get(ResourceLocation id);
+    
+    Set<ResourceLocation> keySet();
+    
+    Set<EntryDefinition<?>> values();
     
     <A, B> void registerBridge(EntryType<A> original, EntryType<B> destination, EntryTypeBridge<A, B> bridge);
     

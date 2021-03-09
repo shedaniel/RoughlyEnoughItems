@@ -12,6 +12,10 @@ processResources {
     inputs.property "version", project.version
 }
 
+repositories {
+    maven { url "https://www.cursemaven.com" }
+}
+
 dependencies {
     forge("net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}")
     modApi("me.shedaniel.cloth:cloth-config-forge:${cloth_config_version}")
@@ -20,7 +24,13 @@ dependencies {
     implementation(project(path: ":api")) { transitive = false }
     implementation(project(path: ":default-plugin")) { transitive = false }
     implementation(project(path: ":runtime")) { transitive = false }
+    implementation(project(path: ":jei-compatibility-layer")) { transitive = false }
     developmentForge(project(path: ":api")) { transitive = false }
     developmentForge(project(path: ":default-plugin")) { transitive = false }
     developmentForge(project(path: ":runtime")) { transitive = false }
+    developmentForge(project(path: ":jei-compatibility-layer")) { transitive = false }
+
+    modRuntime("curse.maven:chiselsbits-231095:3176033")
+    modRuntime("curse.maven:jumbofurnace-390880:3120970")
+    modRuntime("curse.maven:cyclic-239286:3221427")
 }

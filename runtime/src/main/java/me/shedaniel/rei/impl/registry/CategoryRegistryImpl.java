@@ -40,8 +40,8 @@ import java.util.function.Consumer;
 
 @ApiStatus.Internal
 public class CategoryRegistryImpl implements CategoryRegistry, Reloadable {
-    private final Map<ResourceLocation, Configuration<?>> categories = new ConcurrentHashMap<>();
-    private final Map<ResourceLocation, List<Consumer<CategoryConfiguration<?>>>> listeners = new ConcurrentHashMap<>();
+    private final Map<ResourceLocation, Configuration<?>> categories = new LinkedHashMap<>();
+    private final Map<ResourceLocation, List<Consumer<CategoryConfiguration<?>>>> listeners = new HashMap<>();
     
     @Override
     public void acceptPlugin(REIPlugin plugin) {

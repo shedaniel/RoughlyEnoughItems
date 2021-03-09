@@ -39,6 +39,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 @ApiStatus.Internal
 public class EntryTypeRegistryImpl implements EntryTypeRegistry {
@@ -67,6 +68,16 @@ public class EntryTypeRegistryImpl implements EntryTypeRegistry {
     @Override
     public EntryDefinition<?> get(ResourceLocation id) {
         return this.entryTypes.get(id);
+    }
+    
+    @Override
+    public Set<ResourceLocation> keySet() {
+        return this.entryTypes.keySet();
+    }
+    
+    @Override
+    public Set<EntryDefinition<?>> values() {
+        return this.entryTypes.values();
     }
     
     @Override

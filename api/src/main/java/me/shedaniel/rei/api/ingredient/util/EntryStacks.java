@@ -26,9 +26,9 @@ package me.shedaniel.rei.api.ingredient.util;
 import com.google.common.collect.ImmutableList;
 import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.architectury.utils.Fraction;
+import me.shedaniel.rei.api.gui.Renderer;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.entry.*;
-import me.shedaniel.rei.api.gui.Renderer;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -57,6 +57,10 @@ public final class EntryStacks {
         return EntryStack.of(VanillaEntryTypes.FLUID, FluidStack.create(fluid, amount));
     }
     
+    public static EntryStack<FluidStack> of(FluidStack stack) {
+        return EntryStack.of(VanillaEntryTypes.FLUID, stack);
+    }
+    
     public static EntryStack<ItemStack> of(ItemStack stack) {
         return EntryStack.of(VanillaEntryTypes.ITEM, stack);
     }
@@ -67,7 +71,7 @@ public final class EntryStacks {
     
     public static EntryStack<?> of(Renderer renderer) {
         if (renderer instanceof EntryStack) {
-            return (EntryStack<Renderer>) renderer;
+            return (EntryStack<?>) renderer;
         }
         
         return EntryStack.of(BuiltinEntryTypes.RENDERING, renderer);

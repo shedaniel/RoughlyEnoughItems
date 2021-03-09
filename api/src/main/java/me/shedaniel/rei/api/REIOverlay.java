@@ -23,9 +23,12 @@
 
 package me.shedaniel.rei.api;
 
+import me.shedaniel.rei.api.gui.drag.DraggingContext;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Experimental
 public interface REIOverlay {
     void queueReloadOverlay();
+    
+    DraggingContext getDraggingContext();
 }

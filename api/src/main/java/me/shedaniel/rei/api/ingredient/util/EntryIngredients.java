@@ -24,10 +24,13 @@
 package me.shedaniel.rei.api.ingredient.util;
 
 import com.google.common.collect.ImmutableList;
+import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.rei.api.gui.Renderer;
 import me.shedaniel.rei.api.ingredient.EntryIngredient;
 import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.ingredient.entry.EntryDefinition;
+import me.shedaniel.rei.api.ingredient.entry.EntryType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
@@ -65,8 +68,26 @@ public final class EntryIngredients {
         return EntryIngredient.of(EntryStacks.of(fluid, amount));
     }
     
+    public static EntryIngredient of(FluidStack stack) {
+        return EntryIngredient.of(EntryStacks.of(stack));
+    }
+    
     public static EntryIngredient of(Renderer renderer) {
         return EntryIngredient.of(EntryStacks.of(renderer));
+    }
+    
+    public static <T> EntryIngredient of(EntryType<T> type, Collection<T> values) {
+        return of(type.getDefinition(), values);
+    }
+    
+    public static <T> EntryIngredient of(EntryDefinition<T> definition, Collection<T> values) {
+        if (values.size() == 0) return EntryIngredient.empty();
+        if (values.size() == 1) return EntryIngredient.of(EntryStack.of(definition, values.iterator().next()));
+        List<EntryStack<T>> result = new ArrayList<>(values.size());
+        for (T value : values) {
+            result.add(EntryStack.of(definition, value));
+        }
+        return EntryIngredient.of(result);
     }
     
     public static EntryIngredient ofItems(Collection<ItemLike> stacks) {

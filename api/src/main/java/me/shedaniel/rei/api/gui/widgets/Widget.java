@@ -75,6 +75,7 @@ public abstract class Widget extends AbstractContainerEventHandler implements ne
     }
     
     @Override
+    @Deprecated
     public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
         render(matrices, mouseX, mouseY, delta);
     }

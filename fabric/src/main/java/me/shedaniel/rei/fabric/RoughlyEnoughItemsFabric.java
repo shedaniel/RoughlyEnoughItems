@@ -1,16 +1,16 @@
 package me.shedaniel.rei.fabric;
 
 import me.shedaniel.rei.impl.IssuesDetector;
-import net.fabricmc.api.ModInitializer;
+import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Field;
 import java.util.Locale;
 
-public class RoughlyEnoughItemsFabric implements ModInitializer {
+public class RoughlyEnoughItemsFabric implements ClientModInitializer {
     @Override
-    public void onInitialize() {
+    public void onInitializeClient() {
         IssuesDetector.register(() -> {
             try {
                 FabricLoader instance = FabricLoader.getInstance();

@@ -74,6 +74,7 @@ import net.minecraft.client.gui.screens.recipebook.GhostRecipe;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TextComponent;
@@ -337,7 +338,7 @@ public class RoughlyEnoughItemsCore {
     @ApiStatus.Internal
     public static <T extends REIPlugin> T registerPlugin(T plugin) {
         PLUGINS.add(plugin);
-        RoughlyEnoughItemsCore.LOGGER.debug("Registered plugin %s", plugin.getPluginName());
+        RoughlyEnoughItemsCore.LOGGER.info("Registered plugin %s", plugin.getPluginName());
         return plugin;
     }
     
@@ -504,7 +505,7 @@ public class RoughlyEnoughItemsCore {
                     }
             return InteractionResult.PASS;
         });
-        ClientScreenInputEvent.KEY_RELEASED_PRE.register((minecraftClient, screen, mouseX, mouseY, button) -> {
+        ClientScreenInputEvent.MOUSE_RELEASED_PRE.register((minecraftClient, screen, mouseX, mouseY, button) -> {
             isLeftModePressed = false;
             if (shouldReturn(screen))
                 return InteractionResult.PASS;

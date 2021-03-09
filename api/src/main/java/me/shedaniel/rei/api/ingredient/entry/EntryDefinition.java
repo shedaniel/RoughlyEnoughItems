@@ -49,7 +49,6 @@ public interface EntryDefinition<T> {
     
     boolean isEmpty(EntryStack<T> entry, T value);
     
-    @NotNull
     T copy(EntryStack<T> entry, T value);
     
     int hash(EntryStack<T> entry, T value, ComparisonContext context);

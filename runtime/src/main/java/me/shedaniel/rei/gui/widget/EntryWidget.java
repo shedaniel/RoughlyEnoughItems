@@ -244,7 +244,7 @@ public class EntryWidget extends Slot {
         return this;
     }
     
-    protected EntryStack<?> getCurrentEntry() {
+    public EntryStack<?> getCurrentEntry() {
         if (entryStacks.isEmpty())
             return EntryStack.empty();
         if (entryStacks.size() == 1)
