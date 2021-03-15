@@ -14,6 +14,14 @@ processResources {
 
 repositories {
     maven { url "https://www.cursemaven.com" }
+    maven {
+        name "Modmaven"
+        url "https://modmaven.dev/"
+        // For Gradle 5.1 and above, limit it to just AE2
+        content {
+            includeGroup 'appeng'
+        }
+    }
 }
 
 dependencies {
@@ -33,4 +41,5 @@ dependencies {
     modRuntime("curse.maven:chiselsbits-231095:3176033")
     modRuntime("curse.maven:jumbofurnace-390880:3120970")
     modRuntime("curse.maven:cyclic-239286:3221427")
+    modRuntime("appeng:appliedenergistics2:8.2.0")
 }

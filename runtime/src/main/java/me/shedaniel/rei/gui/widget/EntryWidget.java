@@ -247,12 +247,14 @@ public class EntryWidget extends Slot {
         return this;
     }
     
+    @Override
     public EntryStack<?> getCurrentEntry() {
-        if (entryStacks.isEmpty())
+        int size = entryStacks.size();
+        if (size == 0)
             return EntryStack.empty();
-        if (entryStacks.size() == 1)
+        if (size == 1)
             return entryStacks.get(0);
-        return entryStacks.get(Mth.floor(((System.currentTimeMillis() + stackDisplayOffset) / 1000 % (double) entryStacks.size())));
+        return entryStacks.get(Mth.floor(((System.currentTimeMillis() + stackDisplayOffset) / 1000 % (double) size)));
     }
     
     @Override
@@ -266,7 +268,8 @@ public class EntryWidget extends Slot {
         return bounds;
     }
     
-    protected Rectangle getInnerBounds() {
+    @Override
+    public Rectangle getInnerBounds() {
         return new Rectangle(bounds.x + 1, bounds.y + 1, bounds.width - 2, bounds.height - 2);
     }
     

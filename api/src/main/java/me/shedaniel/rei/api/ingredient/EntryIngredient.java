@@ -44,7 +44,8 @@ public interface EntryIngredient extends List<EntryStack<?>> {
         return Internals.getEntryIngredientProvider().of(stacks);
     }
     
+    @SuppressWarnings({"RedundantCast", "rawtypes"})
     static <T> EntryIngredient of(Iterable<? extends EntryStack<? extends T>> stacks) {
-        return Internals.getEntryIngredientProvider().of((Iterable<EntryStack<?>>) stacks);
+        return Internals.getEntryIngredientProvider().of((Iterable<EntryStack<?>>) (Iterable) stacks);
     }
 }

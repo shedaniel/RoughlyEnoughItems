@@ -25,6 +25,7 @@ package me.shedaniel.rei.gui;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.gui.widgets.Slot;
 import me.shedaniel.rei.api.gui.widgets.Widget;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.registry.display.Display;
@@ -110,11 +111,11 @@ public abstract class AbstractRecipeViewingScreen extends Screen implements Reci
     }
     
     protected void transformIngredientNotice(List<Widget> setupDisplay, EntryStack<?> noticeStack) {
-        transformNotice(1, setupDisplay, noticeStack);
+        transformNotice(Slot.INPUT, setupDisplay, noticeStack);
     }
     
     protected void transformResultNotice(List<Widget> setupDisplay, EntryStack<?> noticeStack) {
-        transformNotice(2, setupDisplay, noticeStack);
+        transformNotice(Slot.OUTPUT, setupDisplay, noticeStack);
     }
     
     private static void transformNotice(int marker, List<Widget> setupDisplay, EntryStack<?> noticeStack) {

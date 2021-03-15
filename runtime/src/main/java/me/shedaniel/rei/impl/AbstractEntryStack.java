@@ -102,7 +102,8 @@ public abstract class AbstractEntryStack<A> extends AbstractRenderer implements 
     }
     
     @Override
-    public @Nullable Tooltip getTooltip(Point mouse) {
+    @Nullable
+    public Tooltip getTooltip(Point mouse) {
         return this.getDefinition().getRenderer().getTooltip(this, mouse);
     }
     

@@ -155,12 +155,18 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
         public static final Supplier<Boolean> TRUE = () -> true;
         public static final Supplier<Boolean> FALSE = () -> false;
         public static final Settings<Supplier<Boolean>> RENDER = new Settings<>(TRUE);
+        @Deprecated
         public static final Settings<Supplier<Boolean>> CHECK_TAGS = new Settings<>(FALSE);
+        @Deprecated
         public static final Settings<Supplier<Boolean>> CHECK_AMOUNT = new Settings<>(FALSE);
+        @Deprecated
         public static final Settings<Supplier<Boolean>> TOOLTIP_ENABLED = new Settings<>(TRUE);
+        @Deprecated
         public static final Settings<Supplier<Boolean>> TOOLTIP_APPEND_MOD = new Settings<>(TRUE);
         public static final Settings<Supplier<Boolean>> RENDER_COUNTS = new Settings<>(TRUE);
+        @Deprecated
         public static final Settings<Function<EntryStack<?>, List<Component>>> TOOLTIP_APPEND_EXTRA = new Settings<>(stack -> Collections.emptyList());
+        @Deprecated
         public static final Settings<Function<EntryStack<?>, String>> COUNTS = new Settings<>(stack -> null);
         
         private static short nextId;
