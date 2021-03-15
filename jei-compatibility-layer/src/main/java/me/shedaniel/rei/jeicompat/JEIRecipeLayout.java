@@ -23,6 +23,13 @@
 
 package me.shedaniel.rei.jeicompat;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.gui.widgets.Widget;
+import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroup;
+import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroupFluid;
+import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroupItem;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.gui.ingredient.IGuiFluidStackGroup;
@@ -31,11 +38,12 @@ import mezz.jei.api.gui.ingredient.IGuiItemStackGroup;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.category.IRecipeCategory;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.TODO;
 
@@ -64,7 +72,13 @@ public class JEIRecipeLayout<T> implements IRecipeLayout {
     @Override
     @NotNull
     public <T> IGuiIngredientGroup<T> getIngredientsGroup(@NotNull IIngredientType<T> ingredientType) {
-        return (IGuiIngredientGroup<T>) groups.computeIfAbsent(ingredientType, JEIGuiIngredientGroup::new);
+        return (IGuiIngredientGroup<T>) groups.computeIfAbsent(ingredientType, type -> {
+            if (Objects.equals(type.getIngredientClass(), ItemStack.class))
+                return new JEIGuiIngredientGroupItem(type.cast());
+            if (Objects.equals(type.getIngredientClass(), FluidStack.class))
+                return new JEIGuiIngredientGroupFluid(type.cast());
+            return new JEIGuiIngredientGroup<>(type);
+        });
     }
     
     @Override
@@ -91,5 +105,23 @@ public class JEIRecipeLayout<T> implements IRecipeLayout {
     @Override
     public void setShapeless() {
         throw TODO();
+    }
+    
+    public Map<IIngredientType<?>, IGuiIngredientGroup<?>> getGroups() {
+        return groups;
+    }
+    
+    public void addTo(List<Widget> widgets, Rectangle bounds) {
+        for (Map.Entry<IIngredientType<?>, IGuiIngredientGroup<?>> groupEntry : getGroups().entrySet()) {
+            Int2ObjectMap<JEIGuiIngredientGroup.SlotWrapper> guiIngredients = ((JEIGuiIngredientGroup) groupEntry.getValue()).getGuiIngredients();
+            IntArrayList integers = new IntArrayList(guiIngredients.keySet());
+            integers.sort(Comparator.naturalOrder());
+            for (int integer : integers) {
+                JEIGuiIngredientGroup.SlotWrapper wrapper = guiIngredients.get(integer);
+                wrapper.slot.getBounds().translate(bounds.x + 4, bounds.y + 4);
+                wrapper.slot.highlightEnabled(!wrapper.isEmpty());
+                widgets.add(wrapper.slot);
+            }
+        }
     }
 }

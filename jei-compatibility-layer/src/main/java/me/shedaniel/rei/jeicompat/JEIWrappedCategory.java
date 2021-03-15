@@ -99,7 +99,9 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
         widgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
             this.background.get().draw(matrices, bounds.x + 4, bounds.y + 4);
         }));
-        backingCategory.setRecipe(new JEIRecipeLayout<>(this, display), display.getBackingRecipe(), display.getIngredients());
+        JEIRecipeLayout<T> layout = new JEIRecipeLayout<>(this, display);
+        backingCategory.setRecipe(layout, display.getBackingRecipe(), display.getIngredients());
+        layout.addTo(widgets, bounds);
         widgets.add(new Widget() {
             @Override
             public void render(PoseStack arg, int i, int j, float f) {

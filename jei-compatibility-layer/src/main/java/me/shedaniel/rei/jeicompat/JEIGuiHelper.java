@@ -48,7 +48,7 @@ public enum JEIGuiHelper implements IGuiHelper {
     
     @Override
     @NotNull
-    public IDrawableBuilder drawableBuilder(ResourceLocation resourceLocation, int u, int v, int width, int height) {
+    public IDrawableBuilder drawableBuilder(@NotNull ResourceLocation resourceLocation, int u, int v, int width, int height) {
         return new IDrawableBuilder() {
             private int textureWidth = width;
             private int textureHeight = height;
@@ -62,6 +62,7 @@ public enum JEIGuiHelper implements IGuiHelper {
             private int paddingRight;
             
             @Override
+            @NotNull
             public IDrawableBuilder setTextureSize(int width, int height) {
                 this.textureWidth = width;
                 this.textureHeight = height;
@@ -69,6 +70,7 @@ public enum JEIGuiHelper implements IGuiHelper {
             }
             
             @Override
+            @NotNull
             public IDrawableBuilder addPadding(int paddingTop, int paddingBottom, int paddingLeft, int paddingRight) {
                 this.paddingTop = paddingTop;
                 this.paddingBottom = paddingBottom;
@@ -78,6 +80,7 @@ public enum JEIGuiHelper implements IGuiHelper {
             }
             
             @Override
+            @NotNull
             public IDrawableBuilder trim(int trimTop, int trimBottom, int trimLeft, int trimRight) {
                 this.trimTop = trimTop;
                 this.trimBottom = trimBottom;
@@ -88,43 +91,47 @@ public enum JEIGuiHelper implements IGuiHelper {
             
             @Override
             public IDrawableStatic build() {
-                Widget widget = Widgets.createTexturedWidget(resourceLocation, 0, 0, u, v, width, height, textureWidth, textureHeight);
+                int tw = textureWidth + paddingLeft + paddingRight - trimLeft - trimRight;
+                int th = textureHeight + paddingTop + paddingBottom - trimTop - trimBottom;
+                Widget widget = Widgets.createTexturedWidget(resourceLocation, 0, 0, u, v, width - paddingRight, height - paddingBottom, tw, th);
                 return new IDrawableStatic() {
                     @Override
-                    public void draw(PoseStack matrixStack, int xOffset, int yOffset, int maskTop, int maskBottom, int maskLeft, int maskRight) {
+                    public void draw(@NotNull PoseStack matrixStack, int xOffset, int yOffset, int maskTop, int maskBottom, int maskLeft, int maskRight) {
                         matrixStack.pushPose();
-                        matrixStack.translate(xOffset, yOffset, 0);
+                        matrixStack.translate(xOffset + paddingLeft, yOffset + paddingTop, 0);
                         widget.render(matrixStack, PointHelper.getMouseX(), PointHelper.getMouseY(), 0);
                         matrixStack.popPose();
                     }
                     
                     @Override
-                    public void draw(PoseStack matrixStack, int xOffset, int yOffset) {
+                    public void draw(@NotNull PoseStack matrixStack, int xOffset, int yOffset) {
                         matrixStack.pushPose();
-                        matrixStack.translate(xOffset, yOffset, 0);
+                        matrixStack.translate(xOffset + paddingLeft, yOffset + paddingTop, 0);
                         widget.render(matrixStack, PointHelper.getMouseX(), PointHelper.getMouseY(), 0);
                         matrixStack.popPose();
                     }
                     
                     @Override
                     public int getWidth() {
-                        return textureWidth + paddingLeft + paddingRight - trimLeft - trimRight;
+                        return tw;
                     }
                     
                     @Override
                     public int getHeight() {
-                        return textureHeight + paddingTop + paddingBottom - trimTop - trimBottom;
+                        return th;
                     }
                 };
             }
             
             @Override
-            public IDrawableAnimated buildAnimated(int ticksPerCycle, IDrawableAnimated.StartDirection startDirection, boolean inverted) {
+            @NotNull
+            public IDrawableAnimated buildAnimated(int ticksPerCycle, @NotNull IDrawableAnimated.StartDirection startDirection, boolean inverted) {
                 return createAnimatedDrawable(build(), ticksPerCycle, startDirection, inverted);
             }
             
             @Override
-            public IDrawableAnimated buildAnimated(ITickTimer tickTimer, IDrawableAnimated.StartDirection startDirection) {
+            @NotNull
+            public IDrawableAnimated buildAnimated(@NotNull ITickTimer tickTimer, @NotNull IDrawableAnimated.StartDirection startDirection) {
                 throw TODO();
             }
         };
@@ -132,7 +139,7 @@ public enum JEIGuiHelper implements IGuiHelper {
     
     @Override
     @NotNull
-    public IDrawableAnimated createAnimatedDrawable(IDrawableStatic drawable, int ticksPerCycle, IDrawableAnimated.StartDirection startDirection, boolean inverted) {
+    public IDrawableAnimated createAnimatedDrawable(@NotNull IDrawableStatic drawable, int ticksPerCycle, @NotNull IDrawableAnimated.StartDirection startDirection, boolean inverted) {
         // TODO Implement Animation
         return new IDrawableAnimated() {
             @Override
@@ -146,7 +153,7 @@ public enum JEIGuiHelper implements IGuiHelper {
             }
             
             @Override
-            public void draw(PoseStack matrixStack, int xOffset, int yOffset) {
+            public void draw(@NotNull PoseStack matrixStack, int xOffset, int yOffset) {
                 drawable.draw(matrixStack, xOffset, yOffset);
             }
         };
@@ -158,12 +165,12 @@ public enum JEIGuiHelper implements IGuiHelper {
         Panel base = Widgets.createSlotBase(new Rectangle(0, 0, 18, 18));
         return new IDrawableStatic() {
             @Override
-            public void draw(PoseStack matrixStack, int xOffset, int yOffset, int maskTop, int maskBottom, int maskLeft, int maskRight) {
+            public void draw(@NotNull PoseStack matrixStack, int xOffset, int yOffset, int maskTop, int maskBottom, int maskLeft, int maskRight) {
                 throw TODO();
             }
             
             @Override
-            public void draw(PoseStack matrixStack, int xOffset, int yOffset) {
+            public void draw(@NotNull PoseStack matrixStack, int xOffset, int yOffset) {
                 base.getBounds().setLocation(xOffset, yOffset);
                 base.render(matrixStack, PointHelper.getMouseX(), PointHelper.getMouseY(), 0);
             }
@@ -185,12 +192,12 @@ public enum JEIGuiHelper implements IGuiHelper {
     public IDrawableStatic createBlankDrawable(int width, int height) {
         return new IDrawableStatic() {
             @Override
-            public void draw(PoseStack matrixStack, int xOffset, int yOffset, int maskTop, int maskBottom, int maskLeft, int maskRight) {
+            public void draw(@NotNull PoseStack matrixStack, int xOffset, int yOffset, int maskTop, int maskBottom, int maskLeft, int maskRight) {
                 
             }
             
             @Override
-            public void draw(PoseStack matrixStack, int xOffset, int yOffset) {
+            public void draw(@NotNull PoseStack matrixStack, int xOffset, int yOffset) {
                 
             }
             
@@ -208,21 +215,21 @@ public enum JEIGuiHelper implements IGuiHelper {
     
     @Override
     @NotNull
-    public <V> IDrawable createDrawableIngredient(V ingredient) {
+    public <V> IDrawable createDrawableIngredient(@NotNull V ingredient) {
         EntryStack<?> stack = wrap(ingredient);
         return new IDrawable() {
             @Override
             public int getWidth() {
-                return 18;
+                return 16;
             }
             
             @Override
             public int getHeight() {
-                return 18;
+                return 16;
             }
             
             @Override
-            public void draw(PoseStack matrixStack, int xOffset, int yOffset) {
+            public void draw(@NotNull PoseStack matrixStack, int xOffset, int yOffset) {
                 stack.render(matrixStack, new Rectangle(xOffset, yOffset, getWidth(), getHeight()), PointHelper.getMouseX(), PointHelper.getMouseY(), 0);
             }
         };

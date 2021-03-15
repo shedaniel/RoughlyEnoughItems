@@ -206,11 +206,17 @@ public class JEIPluginDetector {
     }
     
     public static <T> EntryStack<T> wrap(IIngredientType<T> type, T stack) {
-        return EntryStack.of(wrapEntryDefinition(type), stack);
+        EntryDefinition<T> definition = wrapEntryDefinition(type);
+        if (definition.getType() == VanillaEntryTypes.FLUID)
+            return EntryStack.of(definition, (T) FluidStackHooksForge.fromForge((FluidStack) stack));
+        return EntryStack.of(definition, stack);
     }
     
-    public static <T> EntryIngredient wrap(IIngredientType<T> type, List<T> stack) {
-        return EntryIngredients.of(wrapEntryDefinition(type), stack);
+    public static <T> EntryIngredient wrapList(IIngredientType<T> type, List<T> stack) {
+        EntryDefinition<T> definition = wrapEntryDefinition(type);
+        if (definition.getType() == VanillaEntryTypes.FLUID)
+            return EntryIngredients.of(definition, CollectionUtils.map(stack, s -> (T) FluidStackHooksForge.fromForge((FluidStack) s)));
+        return EntryIngredients.of(definition, stack);
     }
     
     public static <T> EntryDefinition<T> wrapEntryDefinition(IIngredientType<T> type) {
@@ -379,7 +385,7 @@ public class JEIPluginDetector {
             
             @Override
             public <T> void addIngredientInfo(@NotNull List<T> ingredients, @NotNull IIngredientType<T> ingredientType, @NotNull String @NotNull ... descriptionKeys) {
-                EntryIngredient ingredient = wrap(ingredientType, ingredients);
+                EntryIngredient ingredient = wrapList(ingredientType, ingredients);
                 BuiltinPlugin.getInstance().registerInformation(ingredient, ImmutableLiteralText.EMPTY, components -> {
                     for (String key : descriptionKeys) {
                         components.add(new TranslatableComponent(key));

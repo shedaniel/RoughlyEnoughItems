@@ -16,4 +16,8 @@ public interface IIngredientType<T> {
      * @return The class of the ingredient for this type.
      */
     Class<? extends T> getIngredientClass();
+    
+    default <R> IIngredientType<R> cast() {
+        return (IIngredientType<R>) this;
+    }
 }

@@ -24,6 +24,7 @@
 package me.shedaniel.rei.api.gui.widgets;
 
 import me.shedaniel.math.Point;
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,21 +33,25 @@ import java.util.Collection;
 import java.util.List;
 
 public abstract class Slot extends WidgetWithBounds {
+    public static final byte UN_MARKED = 0;
+    public static final byte INPUT = 1;
+    public static final byte OUTPUT = 2;
+    
     @NotNull
     public Slot unmarkInputOrOutput() {
-        setNoticeMark((byte) 0);
+        setNoticeMark(UN_MARKED);
         return this;
     }
     
     @NotNull
     public final Slot markInput() {
-        setNoticeMark((byte) 1);
+        setNoticeMark(INPUT);
         return this;
     }
     
     @NotNull
     public final Slot markOutput() {
-        setNoticeMark((byte) 2);
+        setNoticeMark(OUTPUT);
         return this;
     }
     
@@ -148,8 +153,12 @@ public abstract class Slot extends WidgetWithBounds {
     @NotNull
     public abstract Slot entries(Collection<? extends EntryStack<?>> stacks);
     
+    public abstract EntryStack<?> getCurrentEntry();
+    
     @NotNull
     public abstract List<EntryStack<?>> getEntries();
+    
+    public abstract Rectangle getInnerBounds();
     
     @Nullable
     public Tooltip getCurrentTooltip(Point point) {

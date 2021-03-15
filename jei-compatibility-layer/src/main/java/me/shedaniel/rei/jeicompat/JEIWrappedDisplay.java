@@ -24,8 +24,6 @@
 package me.shedaniel.rei.jeicompat;
 
 import me.shedaniel.rei.api.ingredient.EntryIngredient;
-import me.shedaniel.rei.api.ingredient.entry.EntryDefinition;
-import me.shedaniel.rei.api.ingredient.util.EntryIngredients;
 import me.shedaniel.rei.api.registry.display.Display;
 import me.shedaniel.rei.api.util.CollectionUtils;
 import mezz.jei.api.constants.VanillaTypes;
@@ -37,7 +35,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapEntryDefinition;
+import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapList;
 
 public class JEIWrappedDisplay<T> implements Display {
     private final JEIWrappedCategory<T> backingCategory;
@@ -111,16 +109,14 @@ public class JEIWrappedDisplay<T> implements Display {
     
     private void compileIngredients() {
         for (Map.Entry<IIngredientType<?>, List<? extends List<?>>> entry : inputs.entrySet()) {
-            EntryDefinition<?> definition = wrapEntryDefinition(entry.getKey());
             for (List<?> slot : entry.getValue()) {
-                compiledInput.add(EntryIngredients.of((EntryDefinition<Object>) definition, (List<Object>) slot));
+                compiledInput.add(wrapList((IIngredientType<Object>) entry.getKey(), (List<Object>) slot));
             }
         }
         
         for (Map.Entry<IIngredientType<?>, List<? extends List<?>>> entry : outputs.entrySet()) {
-            EntryDefinition<?> definition = wrapEntryDefinition(entry.getKey());
             for (List<?> slot : entry.getValue()) {
-                compiledOutputs.add(EntryIngredients.of((EntryDefinition<Object>) definition, (List<Object>) slot));
+                compiledOutputs.add(wrapList((IIngredientType<Object>) entry.getKey(), (List<Object>) slot));
             }
         }
     }
