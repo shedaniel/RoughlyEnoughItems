@@ -69,7 +69,7 @@ public class CategoryRegistryImpl implements CategoryRegistry, Reloadable {
     
     @Override
     public <T extends Display> CategoryConfiguration<T> get(ResourceLocation category) {
-        return (CategoryConfiguration<T>) this.categories.get(category);
+        return (CategoryConfiguration<T>) Objects.requireNonNull(this.categories.get(category), category.toString());
     }
     
     @Override

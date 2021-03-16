@@ -38,6 +38,7 @@ import mezz.jei.api.gui.drawable.IDrawableStatic;
 import mezz.jei.api.gui.ingredient.ICraftingGridHelper;
 import mezz.jei.api.helpers.IGuiHelper;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.TODO;
@@ -159,6 +160,20 @@ public enum JEIGuiHelper implements IGuiHelper {
     @Override
     @NotNull
     public ITickTimer createTickTimer(int ticksPerCycle, int maxValue, boolean countDown) {
-        throw TODO();
+        return new ITickTimer() {
+            private double animationDuration = ticksPerCycle * 50.0D;
+            
+            @Override
+            public int getValue() {
+                int i = Mth.ceil((System.currentTimeMillis() / (animationDuration / maxValue) % ((double) maxValue)));
+                if (countDown) return maxValue - i;
+                return i;
+            }
+            
+            @Override
+            public int getMaxValue() {
+                return maxValue;
+            }
+        };
     }
 }

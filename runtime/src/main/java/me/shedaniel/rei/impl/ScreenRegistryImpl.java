@@ -149,7 +149,7 @@ public class ScreenRegistryImpl implements ScreenRegistry {
     }
     
     @Override
-    public <C extends AbstractContainerMenu, T extends AbstractContainerScreen<C>> void registerContainerClickArea(ScreenClickAreaProvider<T> provider, Class<T> screenClass, ResourceLocation... categories) {
+    public <C extends AbstractContainerMenu, T extends AbstractContainerScreen<C>> void registerContainerClickArea(ScreenClickAreaProvider<T> provider, Class<? extends T> screenClass, ResourceLocation... categories) {
         registerClickArea(screen -> {
             Rectangle rectangle = provider.provide(screen).clone();
             rectangle.translate(screen.leftPos, screen.topPos);
@@ -158,7 +158,7 @@ public class ScreenRegistryImpl implements ScreenRegistry {
     }
     
     @Override
-    public <T extends Screen> void registerClickArea(Class<T> screenClass, ClickArea<T> area) {
+    public <T extends Screen> void registerClickArea(Class<? extends T> screenClass, ClickArea<T> area) {
         clickAreas.put(screenClass, area);
     }
     

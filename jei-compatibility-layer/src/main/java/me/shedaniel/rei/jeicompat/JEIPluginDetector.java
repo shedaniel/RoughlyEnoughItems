@@ -47,6 +47,7 @@ import me.shedaniel.rei.api.registry.display.Display;
 import me.shedaniel.rei.api.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.registry.entry.EntryRegistry;
+import me.shedaniel.rei.api.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.util.CollectionUtils;
 import me.shedaniel.rei.api.util.ImmutableLiteralText;
 import me.shedaniel.rei.jeicompat.unwrap.JEIUnwrappedCategory;
@@ -55,6 +56,10 @@ import me.shedaniel.rei.jeicompat.wrap.JEIWrappedDisplay;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.gui.drawable.IDrawable;
+import mezz.jei.api.gui.handlers.IGhostIngredientHandler;
+import mezz.jei.api.gui.handlers.IGlobalGuiHandler;
+import mezz.jei.api.gui.handlers.IGuiContainerHandler;
+import mezz.jei.api.gui.handlers.IScreenHandler;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.helpers.IModIdHelper;
@@ -68,15 +73,15 @@ import mezz.jei.api.recipe.IRecipeManager;
 import mezz.jei.api.recipe.advanced.IRecipeManagerPlugin;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.recipe.vanilla.IVanillaRecipeFactory;
-import mezz.jei.api.registration.IAdvancedRegistration;
-import mezz.jei.api.registration.IRecipeCatalystRegistration;
-import mezz.jei.api.registration.IRecipeCategoryRegistration;
-import mezz.jei.api.registration.IRecipeRegistration;
+import mezz.jei.api.registration.*;
 import mezz.jei.api.runtime.*;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraftforge.fluids.FluidStack;
@@ -89,6 +94,23 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class JEIPluginDetector {
+    private static final Renderer EMPTY_RENDERER = new Renderer() {
+        @Override
+        public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+            
+        }
+        
+        @Override
+        public int getZ() {
+            return 0;
+        }
+        
+        @Override
+        public void setZ(int z) {
+            
+        }
+    };
+    
     public static void detect(BiConsumer<Class<?>, Consumer<?>> annotationScanner, Consumer<REIPlugin> pluginAdder) {
         annotationScanner.accept(JeiPlugin.class, plugin -> {
             pluginAdder.accept(new JEIPluginWrapper((IModPlugin) plugin));
@@ -183,12 +205,20 @@ public class JEIPluginDetector {
     }
     
     public static Renderer wrapDrawable(IDrawable drawable) {
+        if (drawable == null) return emptyRenderer();
         return new AbstractRenderer() {
             @Override
             public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+                matrices.pushPose();
+                matrices.translate(0, 0, getZ());
                 drawable.draw(matrices, bounds.x, bounds.y);
+                matrices.popPose();
             }
         };
+    }
+    
+    public static Renderer emptyRenderer() {
+        return EMPTY_RENDERER;
     }
     
     public static IStackHelper wrapStackHelper() {
@@ -493,7 +523,9 @@ public class JEIPluginDetector {
                         registry.registerDisplay(new JEIWrappedDisplay<>((JEIWrappedCategory) config.getCategory(), recipe));
                     }
                 } else {
-                    throw new IllegalArgumentException("Registering to non JEI-wrapped category! " + categoryId);
+                    for (Object recipe : recipes) {
+                        registry.registerDisplay(createDisplayFrom(recipe));
+                    }
                 }
             }
             
@@ -517,6 +549,41 @@ public class JEIPluginDetector {
                     }
                     return components;
                 });
+            }
+        };
+    }
+    
+    public static IGuiHandlerRegistration wrapGuiHandlerRegistration(ScreenRegistry registry) {
+        return new IGuiHandlerRegistration() {
+            @Override
+            public <T extends AbstractContainerScreen<?>> void addGuiContainerHandler(@NotNull Class<? extends T> guiClass, @NotNull IGuiContainerHandler<T> guiHandler) {
+                addGenericGuiContainerHandler(guiClass, guiHandler);
+            }
+            
+            @Override
+            public <T extends AbstractContainerScreen<?>> void addGenericGuiContainerHandler(@NotNull Class<? extends T> guiClass, @NotNull IGuiContainerHandler<?> guiHandler) {
+                throw TODO();
+            }
+            
+            @Override
+            public <T extends Screen> void addGuiScreenHandler(@NotNull Class<T> guiClass, @NotNull IScreenHandler<T> handler) {
+                throw TODO();
+            }
+            
+            @Override
+            public void addGlobalGuiHandler(@NotNull IGlobalGuiHandler globalGuiHandler) {
+                throw TODO();
+            }
+            
+            @Override
+            public <T extends AbstractContainerScreen<?>> void addRecipeClickArea(@NotNull Class<? extends T> guiContainerClass, int xPos, int yPos, int width, int height, @NotNull ResourceLocation @NotNull ... recipeCategoryUids) {
+                registry.registerContainerClickArea(new Rectangle(xPos, yPos, width, height), (Class<? extends AbstractContainerScreen<AbstractContainerMenu>>) guiContainerClass,
+                        (ResourceLocation[]) recipeCategoryUids);
+            }
+            
+            @Override
+            public <T extends Screen> void addGhostIngredientHandler(@NotNull Class<T> guiClass, @NotNull IGhostIngredientHandler<T> handler) {
+                throw TODO();
             }
         };
     }
@@ -548,12 +615,17 @@ public class JEIPluginDetector {
             }
             backingPlugin.registerAdvanced(wrapAdvancedRegistration(registry));
         }
-    
+        
+        @Override
+        public void registerScreens(ScreenRegistry registry) {
+            backingPlugin.registerGuiHandlers(wrapGuiHandlerRegistration(registry));
+        }
+        
         @Override
         public void postRegister() {
             backingPlugin.onRuntimeAvailable(wrapRuntime());
         }
-    
+        
         @Override
         public String getPluginName() {
             return "JEI Plugin [" + backingPlugin.getPluginUid().toString() + "]";
