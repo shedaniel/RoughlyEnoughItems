@@ -27,6 +27,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
+import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.rei.api.gui.Renderer;
 import me.shedaniel.rei.api.ingredient.entry.ComparisonContext;
@@ -195,8 +196,9 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
         }
         
         public static class Fluid {
+            private static final String FLUID_AMOUNT = Platform.isForge() ? "tooltip.rei.fluid_amount.forge" : "tooltip.rei.fluid_amount";
             // Return null to disable
-            public static final Settings<Function<EntryStack<?>, String>> AMOUNT_TOOLTIP = new Settings<>(stack -> I18n.get("tooltip.rei.fluid_amount", stack.simplifyAmount().getAmount()));
+            public static final Settings<Function<EntryStack<?>, String>> AMOUNT_TOOLTIP = new Settings<>(stack -> I18n.get(FLUID_AMOUNT, stack.simplifyAmount().getAmount()));
             
             private Fluid() {
             }
