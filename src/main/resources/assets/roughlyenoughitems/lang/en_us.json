@@ -103,6 +103,7 @@
   "favorite.section.gamemode": "Game Mode",
   "favorite.section.weather": "Weather",
   "tooltip.rei.fluid_amount": "§7%d Unit",
+  "tooltip.rei.fluid_amount.forge": "§7%d mB",
   "tooltip.rei.drag_to_add_favorites": "§7Drag this up to add this to your favorites!",
   "msg.rei.copied_recipe_id": "Copied Recipe Identifier",
   "msg.rei.recipe_id_details": "Recipe ID: %s",
