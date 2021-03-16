@@ -24,6 +24,7 @@
 package me.shedaniel.rei.api.gui.widgets;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Dimension;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -59,10 +60,33 @@ public final class Widgets {
     
     @NotNull
     public static Widget wrapVanillaWidget(GuiEventListener element) {
-        Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-            
-        });
         return new VanillaWrappedWidget(element);
+    }
+    
+    public static WidgetWithBounds withTranslate(Widget widget, double x, double y, double z) {
+        return withTranslate(widget, Matrix4f.createTranslateMatrix((float) x, (float) y, (float) z));
+    }
+    
+    public static WidgetWithBounds withTranslate(Widget widget, Matrix4f translate) {
+        WidgetWithBounds widgetWithBounds = wrapWidgetWithBounds(widget);
+        return new WidgetWithBoundsWithTranslate(widgetWithBounds, translate);
+    }
+    
+    private static class WidgetWithBoundsWithTranslate extends DelegateWidget {
+        private final Matrix4f translate;
+        
+        private WidgetWithBoundsWithTranslate(WidgetWithBounds widget, Matrix4f translate) {
+            super(widget);
+            this.translate = translate;
+        }
+        
+        @Override
+        public void render(PoseStack poseStack, int i, int j, float f) {
+            poseStack.pushPose();
+            poseStack.last().pose().multiply(translate);
+            super.render(poseStack, i, j, f);
+            poseStack.popPose();
+        }
     }
     
     private static class VanillaWrappedWidget extends Widget {
@@ -86,9 +110,16 @@ public final class Widgets {
         }
     }
     
-    @NotNull
     public static WidgetWithBounds wrapRenderer(Rectangle bounds, Renderer renderer) {
+        if (renderer instanceof Widget)
+            return wrapWidgetWithBounds((Widget) renderer);
         return new RendererWrappedWidget(renderer);
+    }
+    
+    public static WidgetWithBounds wrapWidgetWithBounds(Widget widget) {
+        if (widget instanceof WidgetWithBounds)
+            return (WidgetWithBounds) widget;
+        return new DelegateWidget(widget);
     }
     
     private static class RendererWrappedWidget extends WidgetWithBounds {
@@ -109,6 +140,16 @@ public final class Widgets {
             if (renderer instanceof GuiEventListener)
                 return Collections.singletonList((GuiEventListener) renderer);
             return Collections.emptyList();
+        }
+        
+        @Override
+        public void setZ(int z) {
+            renderer.setZ(z);
+        }
+        
+        @Override
+        public int getZ() {
+            return renderer.getZ();
         }
         
         @NotNull

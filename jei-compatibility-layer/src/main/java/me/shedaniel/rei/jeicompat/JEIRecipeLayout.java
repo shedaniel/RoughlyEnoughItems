@@ -27,6 +27,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.gui.widgets.Widget;
+import me.shedaniel.rei.api.gui.widgets.Widgets;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroup;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroupFluid;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroupItem;
@@ -122,7 +123,7 @@ public class JEIRecipeLayout<T> implements IRecipeLayout {
                 JEIGuiIngredientGroup.SlotWrapper wrapper = guiIngredients.get(integer);
                 wrapper.slot.getBounds().translate(bounds.x + 4, bounds.y + 4);
                 wrapper.slot.highlightEnabled(!wrapper.isEmpty());
-                widgets.add(wrapper.slot);
+                widgets.add(Widgets.withTranslate(wrapper.slot, 0, 0, 10));
             }
         }
     }

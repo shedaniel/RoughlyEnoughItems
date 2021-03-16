@@ -24,13 +24,18 @@
 package me.shedaniel.rei.gui.widget;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.gui.Renderer;
+import me.shedaniel.rei.api.gui.drag.DraggableStack;
+import me.shedaniel.rei.api.gui.drag.DraggableStackProvider;
+import me.shedaniel.rei.api.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.gui.widgets.Widget;
 import me.shedaniel.rei.api.gui.widgets.WidgetWithBounds;
+import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.registry.display.DisplayCategory;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -45,7 +50,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 @ApiStatus.Internal
-public class TabWidget extends WidgetWithBounds {
+public class TabWidget extends WidgetWithBounds implements DraggableStackProvider {
     
     public static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
     public static final ResourceLocation CHEST_GUI_TEXTURE_DARK = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
@@ -134,4 +139,29 @@ public class TabWidget extends WidgetWithBounds {
         return bounds;
     }
     
+    @Override
+    public @Nullable DraggableStack getHoveredStack(DraggingContext context, double mouseX, double mouseY) {
+        if (isShown() && renderer instanceof EntryStack && containsMouse(mouseX, mouseY)) {
+            return new DraggableStack() {
+                EntryStack<?> stack = ((EntryStack<?>) renderer).copy();
+                
+                @Override
+                public EntryStack<?> getStack() {
+                    return stack;
+                }
+                
+                @Override
+                public void drag() {
+                }
+                
+                @Override
+                public void release(boolean accepted) {
+                    if (!accepted) {
+                        context.renderBackToPosition(this, DraggingContext.getInstance().getCurrentPosition(), () -> new Point(getBounds().getCenterX() - 8, getBounds().getCenterY() - 8));
+                    }
+                }
+            };
+        }
+        return null;
+    }
 }

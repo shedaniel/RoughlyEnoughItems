@@ -30,10 +30,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.gui.widgets.Button;
-import me.shedaniel.rei.api.gui.widgets.Widget;
-import me.shedaniel.rei.api.gui.widgets.WidgetWithBounds;
-import me.shedaniel.rei.api.gui.widgets.Widgets;
+import me.shedaniel.rei.api.gui.widgets.*;
 import me.shedaniel.rei.api.registry.display.Display;
 import me.shedaniel.rei.api.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.registry.display.TransferDisplayCategory;
@@ -51,9 +48,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -169,22 +164,7 @@ public final class InternalWidgets {
                     }
                     return str;
                 });
-        return new WidgetWithBounds() {
-            @Override
-            public @NotNull Rectangle getBounds() {
-                return autoCraftingButton.getBounds();
-            }
-            
-            @Override
-            public List<? extends GuiEventListener> children() {
-                return Collections.singletonList(autoCraftingButton);
-            }
-            
-            @Override
-            public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-                autoCraftingButton.render(matrices, mouseX, mouseY, delta);
-            }
-            
+        return new DelegateWidget(autoCraftingButton) {
             @Override
             public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
                 if (displaySupplier.get().getDisplayLocation().isPresent() && ConfigObject.getInstance().getCopyRecipeIdentifierKeybind().matchesKey(keyCode, scanCode) && containsMouse(PointHelper.ofMouse())) {
@@ -211,19 +191,11 @@ public final class InternalWidgets {
         };
     }
     
-    public static WidgetWithBounds wrapLateRenderable(WidgetWithBounds widget) {
-        return new LateRenderableWidgetWithBounds(widget);
-    }
-    
-    public static WidgetWithBounds wrapTranslate(WidgetWithBounds widget, float x, float y, float z) {
-        return new WidgetWithBoundsWithTranslate(widget, x, y, z);
-    }
-    
-    public static Widget wrapLateRenderable(Widget widget) {
+    public static WidgetWithBounds wrapLateRenderable(Widget widget) {
         return new LateRenderableWidget(widget);
     }
     
-    public static Widget mergeWidgets(Widget widget1, Widget widget2) {
+    public static Widget concatWidgets(Widget widget1, Widget widget2) {
         return new MergedWidget(widget2, widget1);
     }
     
@@ -257,102 +229,9 @@ public final class InternalWidgets {
         }
     }
     
-    private static class LateRenderableWidget extends Widget implements LateRenderable {
-        private final Widget widget;
-        
+    private static class LateRenderableWidget extends DelegateWidget implements LateRenderable {
         private LateRenderableWidget(Widget widget) {
-            this.widget = widget;
-        }
-        
-        @Override
-        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-            this.widget.setZ(getZ());
-            this.widget.render(matrices, mouseX, mouseY, delta);
-        }
-        
-        @Override
-        public List<? extends GuiEventListener> children() {
-            return Collections.singletonList(this.widget);
-        }
-        
-        @Override
-        public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-            return this.widget.mouseScrolled(mouseX, mouseY, amount);
-        }
-    }
-    
-    private static class LateRenderableWidgetWithBounds extends WidgetWithBounds implements LateRenderable {
-        private final WidgetWithBounds widget;
-        
-        private LateRenderableWidgetWithBounds(WidgetWithBounds widget) {
-            this.widget = widget;
-        }
-        
-        @Override
-        public @NotNull Rectangle getBounds() {
-            return this.widget.getBounds();
-        }
-        
-        @Override
-        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-            this.widget.setZ(getZ());
-            this.widget.render(matrices, mouseX, mouseY, delta);
-        }
-        
-        @Override
-        public boolean containsMouse(double mouseX, double mouseY) {
-            return this.widget.containsMouse(mouseX, mouseY);
-        }
-        
-        @Override
-        public List<? extends GuiEventListener> children() {
-            return Collections.singletonList(this.widget);
-        }
-        
-        @Override
-        public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-            return this.widget.mouseScrolled(mouseX, mouseY, amount);
-        }
-    }
-    
-    private static class WidgetWithBoundsWithTranslate extends WidgetWithBounds implements LateRenderable {
-        private final WidgetWithBounds widget;
-        private final float x, y, z;
-        
-        public WidgetWithBoundsWithTranslate(WidgetWithBounds widget, float x, float y, float z) {
-            this.widget = widget;
-            this.x = x;
-            this.y = y;
-            this.z = z;
-        }
-        
-        @Override
-        public @NotNull Rectangle getBounds() {
-            return this.widget.getBounds();
-        }
-        
-        @Override
-        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-            matrices.pushPose();
-            matrices.translate(x, y, z);
-            this.widget.setZ(getZ());
-            this.widget.render(matrices, mouseX, mouseY, delta);
-            matrices.popPose();
-        }
-        
-        @Override
-        public boolean containsMouse(double mouseX, double mouseY) {
-            return this.widget.containsMouse(mouseX, mouseY);
-        }
-        
-        @Override
-        public List<? extends GuiEventListener> children() {
-            return Collections.singletonList(this.widget);
-        }
-        
-        @Override
-        public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-            return this.widget.mouseScrolled(mouseX, mouseY, amount);
+            super(widget);
         }
     }
 }

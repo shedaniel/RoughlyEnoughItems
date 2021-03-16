@@ -34,19 +34,21 @@ import me.shedaniel.rei.api.gui.drag.DraggableStackVisitor;
 import me.shedaniel.rei.api.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.gui.widgets.Widget;
 import me.shedaniel.rei.gui.widget.LateRenderable;
+import me.shedaniel.rei.impl.Animator;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Supplier;
+
+import static me.shedaniel.rei.gui.widget.EntryListWidget.entrySize;
 
 public class CurrentDraggingStack extends Widget implements LateRenderable, DraggingContext {
     private DraggableStackProvider provider;
     private DraggableStackVisitor visitor;
     @Nullable
     private DraggableEntry entry;
+    private final List<RenderBackEntry> backToOriginals = new ArrayList<>();
     
     public void set(DraggableStackProvider provider, DraggableStackVisitor visitor) {
         this.provider = provider;
@@ -64,6 +66,20 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
             matrices.translate(0, 0, 600);
             entry.stack.render(matrices, new Rectangle(mouseX - 8, mouseY - 8, 16, 16), mouseX, mouseY, delta);
             matrices.popPose();
+        }
+    
+        Iterator<RenderBackEntry> iterator = backToOriginals.iterator();
+        while (iterator.hasNext()) {
+            RenderBackEntry renderBackEntry = iterator.next();
+            renderBackEntry.update(delta);
+            if (Math.abs(renderBackEntry.x.doubleValue() - renderBackEntry.x.target()) <= 2 && Math.abs(renderBackEntry.y.doubleValue() - renderBackEntry.y.target()) <= 2) {
+                iterator.remove();
+            } else {
+                matrices.pushPose();
+                matrices.translate(0, 0, 600);
+                renderBackEntry.stack.render(matrices, new Rectangle(renderBackEntry.x.intValue(), renderBackEntry.y.intValue(), 16, 16), mouseX, mouseY, delta);
+                matrices.popPose();
+            }
         }
     }
     
@@ -131,8 +147,8 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
     }
     
     @Override
-    public void renderBackToPosition(DraggableStack stack, Supplier<Point> position) {
-        
+    public void renderBackToPosition(DraggableStack stack, Point initialPosition, Supplier<Point> position) {
+        backToOriginals.add(new RenderBackEntry(stack, initialPosition, position));
     }
     
     private class DraggableEntry {
@@ -143,6 +159,36 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
         private DraggableEntry(DraggableStack stack, Point start) {
             this.stack = stack;
             this.start = start;
+        }
+    }
+    
+    private static class RenderBackEntry {
+        private final DraggableStack stack;
+        private final Supplier<Point> position;
+        private Animator x = new Animator();
+        private Animator y = new Animator();
+        private int lastDestination = -1;
+        
+        public RenderBackEntry(DraggableStack stack, Point initialPosition, Supplier<Point> position) {
+            this.stack = stack;
+            this.x.setAs(initialPosition.x - 8);
+            this.y.setAs(initialPosition.y - 8);
+            this.position = position;
+        }
+        
+        public Point getPosition() {
+            return position.get();
+        }
+        
+        public void update(double delta) {
+            this.x.update(delta);
+            this.y.update(delta);
+            Point position = getPosition();
+            if (lastDestination != position.hashCode()) {
+                lastDestination = position.hashCode();
+                this.x.setTo(position.x, 200);
+                this.y.setTo(position.y, 200);
+            }
         }
     }
 }

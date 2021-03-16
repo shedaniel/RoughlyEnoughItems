@@ -35,7 +35,6 @@ import java.util.List;
 
 @Environment(EnvType.CLIENT)
 public interface ConfigObject {
-    
     /**
      * @return the instance of {@link me.shedaniel.rei.api.ConfigObject}
      */

@@ -34,6 +34,8 @@ import me.shedaniel.rei.api.util.CollectionUtils;
 import me.shedaniel.rei.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.ClientHelperImpl;
 import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.gui.components.events.ContainerEventHandler;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
@@ -118,10 +120,10 @@ public abstract class AbstractRecipeViewingScreen extends Screen implements Reci
         transformNotice(Slot.OUTPUT, setupDisplay, noticeStack);
     }
     
-    private static void transformNotice(int marker, List<Widget> setupDisplay, EntryStack<?> noticeStack) {
+    private static void transformNotice(int marker, List<? extends GuiEventListener> setupDisplay, EntryStack<?> noticeStack) {
         if (noticeStack.isEmpty())
             return;
-        for (Widget widget : setupDisplay) {
+        for (GuiEventListener widget : setupDisplay) {
             if (widget instanceof EntryWidget) {
                 EntryWidget entry = (EntryWidget) widget;
                 if (entry.getNoticeMark() == marker && entry.getEntries().size() > 1) {
@@ -131,6 +133,8 @@ public abstract class AbstractRecipeViewingScreen extends Screen implements Reci
                         entry.entry(stack);
                     }
                 }
+            } else if (widget instanceof ContainerEventHandler) {
+                transformNotice(marker, ((ContainerEventHandler) widget).children(), noticeStack);
             }
         }
     }

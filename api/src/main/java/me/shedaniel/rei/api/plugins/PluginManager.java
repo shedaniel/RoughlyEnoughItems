@@ -26,7 +26,13 @@ package me.shedaniel.rei.api.plugins;
 import me.shedaniel.rei.api.registry.ParentReloadable;
 import me.shedaniel.rei.api.registry.Reloadable;
 import me.shedaniel.rei.impl.Internals;
+import org.jetbrains.annotations.ApiStatus;
 
+import java.util.List;
+
+/**
+ * The plugin manager responsible for reloading and applying plugins.
+ */
 public interface PluginManager extends ParentReloadable {
     static PluginManager getInstance() {
         return Internals.getPluginManager();
@@ -35,4 +41,15 @@ public interface PluginManager extends ParentReloadable {
     boolean arePluginsReloading();
     
     <T extends Reloadable> T get(Class<T> reloadableClass);
+    
+    /**
+     * Registers a REI plugin
+     *
+     * @param plugin the plugin instance
+     * @return the plugin instance
+     */
+    @ApiStatus.Internal
+    <T extends REIPlugin> T registerPlugin(T plugin);
+    
+    List<REIPlugin> getPlugins();
 }

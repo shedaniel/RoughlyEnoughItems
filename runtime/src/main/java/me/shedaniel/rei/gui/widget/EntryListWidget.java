@@ -95,7 +95,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @ApiStatus.Internal
-public class EntryListWidget extends WidgetWithBounds implements DraggableStackProvider {
+public class EntryListWidget extends WidgetWithBounds {
     static final Comparator<? super EntryStack<?>> ENTRY_NAME_COMPARER = Comparator.comparing(stack -> stack.asFormatStrippedText().getString());
     static final Comparator<? super EntryStack<?>> ENTRY_GROUP_COMPARER = Comparator.comparingInt(stack -> {
         if (stack.getType() == VanillaEntryTypes.ITEM) {
@@ -181,33 +181,6 @@ public class EntryListWidget extends WidgetWithBounds implements DraggableStackP
         int width = Math.max(Mth.floor((bounds.width - 2) / (float) entrySize), 1);
         int height = Math.max(Mth.floor((bounds.height - 2) / (float) entrySize), 1);
         return new Rectangle((int) (bounds.getCenterX() - width * (entrySize / 2f)), (int) (bounds.getCenterY() - height * (entrySize / 2f)), width * entrySize, height * entrySize);
-    }
-    
-    @Override
-    @Nullable
-    public DraggableStack getHoveredStack(DraggingContext context, double mouseX, double mouseY) {
-        for (EntryListEntry entry : entries) {
-            if (!entry.getCurrentEntry().isEmpty() && entry.containsMouse(mouseX, mouseY)) {
-                return new DraggableStack() {
-                    EntryStack<?> stack = entry.getCurrentEntry().copy();
-                    
-                    @Override
-                    public EntryStack<?> getStack() {
-                        return stack;
-                    }
-                    
-                    @Override
-                    public void drag() {
-                    }
-                    
-                    @Override
-                    public void release(boolean accepted) {
-                        context.renderBackToPosition(this, () -> new Point(entry.getBounds().x - 8, entry.getBounds().y - 8));
-                    }
-                };
-            }
-        }
-        return null;
     }
     
     @Override
