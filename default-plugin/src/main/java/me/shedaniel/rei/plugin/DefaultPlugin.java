@@ -236,7 +236,7 @@ public class DefaultPlugin implements REIPlugin, BuiltinPlugin {
                 new DefaultPathingCategory(),
                 new DefaultInformationCategory()
         );
-    
+        
         registry.removePlusButton(FUEL);
         registry.removePlusButton(COMPOSTING);
         registry.removePlusButton(BEACON);
@@ -245,7 +245,7 @@ public class DefaultPlugin implements REIPlugin, BuiltinPlugin {
         registry.removePlusButton(STRIPPING);
         registry.removePlusButton(TILLING);
         registry.removePlusButton(PATHING);
-    
+        
         registry.addWorkstations(CRAFTING, EntryStacks.of(Items.CRAFTING_TABLE));
         registry.addWorkstations(SMELTING, EntryStacks.of(Items.FURNACE));
         registry.addWorkstations(SMOKING, EntryStacks.of(Items.SMOKER));
@@ -294,14 +294,14 @@ public class DefaultPlugin implements REIPlugin, BuiltinPlugin {
     
     @Override
     public void registerDisplays(DisplayRegistry registry) {
-        registry.registerRecipes( ShapelessRecipe.class, DefaultShapelessDisplay::new);
-        registry.registerRecipes( ShapedRecipe.class, DefaultShapedDisplay::new);
-        registry.registerRecipes( SmeltingRecipe.class, DefaultSmeltingDisplay::new);
-        registry.registerRecipes( SmokingRecipe.class, DefaultSmokingDisplay::new);
-        registry.registerRecipes( BlastingRecipe.class, DefaultBlastingDisplay::new);
-        registry.registerRecipes( CampfireCookingRecipe.class, DefaultCampfireDisplay::new);
-        registry.registerRecipes( StonecutterRecipe.class, DefaultStoneCuttingDisplay::new);
-        registry.registerRecipes( UpgradeRecipe.class, DefaultSmithingDisplay::new);
+        registry.registerFiller(ShapelessRecipe.class, DefaultShapelessDisplay::new);
+        registry.registerFiller(ShapedRecipe.class, DefaultShapedDisplay::new);
+        registry.registerFiller(SmeltingRecipe.class, DefaultSmeltingDisplay::new);
+        registry.registerFiller(SmokingRecipe.class, DefaultSmokingDisplay::new);
+        registry.registerFiller(BlastingRecipe.class, DefaultBlastingDisplay::new);
+        registry.registerFiller(CampfireCookingRecipe.class, DefaultCampfireDisplay::new);
+        registry.registerFiller(StonecutterRecipe.class, DefaultStoneCuttingDisplay::new);
+        registry.registerFiller(UpgradeRecipe.class, DefaultSmithingDisplay::new);
         for (Map.Entry<Item, Integer> entry : AbstractFurnaceBlockEntity.getFuel().entrySet()) {
             registry.registerDisplay(new DefaultFuelDisplay(EntryIngredients.of(entry.getKey()), entry.getValue()));
         }
@@ -421,7 +421,7 @@ public class DefaultPlugin implements REIPlugin, BuiltinPlugin {
                 return AbstractContainerScreen.class;
             }
         });
-    
+        
         registry.registerContainerClickArea(new Rectangle(88, 32, 28, 23), CraftingScreen.class, CRAFTING);
         registry.registerContainerClickArea(new Rectangle(137, 29, 10, 13), InventoryScreen.class, CRAFTING);
         registry.registerContainerClickArea(new Rectangle(97, 16, 14, 30), BrewingStandScreen.class, BREWING);

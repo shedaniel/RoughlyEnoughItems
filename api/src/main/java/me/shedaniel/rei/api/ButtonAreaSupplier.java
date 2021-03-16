@@ -31,7 +31,7 @@ import me.shedaniel.math.Rectangle;
 @FunctionalInterface
 public interface ButtonAreaSupplier {
     static ButtonAreaSupplier defaultArea() {
-        return bounds -> new Rectangle(bounds.getMaxX() - 16, bounds.getMaxY() - 16, 10, 10);
+        return bounds -> new Rectangle(bounds.getMaxX() + 2, bounds.getMaxY() - 16, 10, 10);
     }
     
     /**
