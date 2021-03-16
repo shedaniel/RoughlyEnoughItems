@@ -23,11 +23,14 @@
 
 package me.shedaniel.rei.jeicompat;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.architectury.hooks.forge.FluidStackHooksForge;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.LiveDisplayGenerator;
+import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.gui.AbstractRenderer;
 import me.shedaniel.rei.api.gui.Renderer;
 import me.shedaniel.rei.api.ingredient.EntryIngredient;
@@ -46,6 +49,9 @@ import me.shedaniel.rei.api.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.util.CollectionUtils;
 import me.shedaniel.rei.api.util.ImmutableLiteralText;
+import me.shedaniel.rei.jeicompat.unwrap.JEIUnwrappedCategory;
+import me.shedaniel.rei.jeicompat.wrap.JEIWrappedCategory;
+import me.shedaniel.rei.jeicompat.wrap.JEIWrappedDisplay;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.gui.drawable.IDrawable;
@@ -58,6 +64,7 @@ import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.subtypes.UidContext;
 import mezz.jei.api.recipe.IFocus;
+import mezz.jei.api.recipe.IRecipeManager;
 import mezz.jei.api.recipe.advanced.IRecipeManagerPlugin;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.recipe.vanilla.IVanillaRecipeFactory;
@@ -65,7 +72,7 @@ import mezz.jei.api.registration.IAdvancedRegistration;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
-import mezz.jei.api.runtime.IIngredientManager;
+import mezz.jei.api.runtime.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -78,6 +85,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class JEIPluginDetector {
@@ -109,6 +117,67 @@ public class JEIPluginDetector {
             @NotNull
             public IModIdHelper getModIdHelper() {
                 return wrapModIdHelper(ClientHelper.getInstance());
+            }
+        };
+    }
+    
+    public static IJeiRuntime wrapRuntime() {
+        return new IJeiRuntime() {
+            @Override
+            @NotNull
+            public IRecipeManager getRecipeManager() {
+                throw TODO();
+            }
+            
+            @Override
+            @NotNull
+            public IRecipesGui getRecipesGui() {
+                throw TODO();
+            }
+            
+            @Override
+            @NotNull
+            public IIngredientFilter getIngredientFilter() {
+                return wrapIngredientFilter();
+            }
+            
+            @Override
+            @NotNull
+            public IIngredientListOverlay getIngredientListOverlay() {
+                throw TODO();
+            }
+            
+            @Override
+            @NotNull
+            public IBookmarkOverlay getBookmarkOverlay() {
+                throw TODO();
+            }
+            
+            @Override
+            @NotNull
+            public IIngredientManager getIngredientManager() {
+                throw TODO();
+            }
+        };
+    }
+    
+    public static IIngredientFilter wrapIngredientFilter() {
+        return new IIngredientFilter() {
+            @Override
+            public void setFilterText(@NotNull String filterText) {
+                REIHelper.getInstance().getSearchTextField().setText(filterText);
+            }
+            
+            @Override
+            @NotNull
+            public String getFilterText() {
+                return REIHelper.getInstance().getSearchTextField().getText();
+            }
+            
+            @Override
+            @NotNull
+            public ImmutableList<Object> getFilteredIngredients() {
+                throw TODO();
             }
         };
     }
@@ -190,7 +259,7 @@ public class JEIPluginDetector {
         };
     }
     
-    public static IAdvancedRegistration wrapAdvancedRegistration() {
+    public static IAdvancedRegistration wrapAdvancedRegistration(DisplayRegistry registry) {
         return new IAdvancedRegistration() {
             @Override
             @NotNull
@@ -200,9 +269,65 @@ public class JEIPluginDetector {
             
             @Override
             public void addRecipeManagerPlugin(@NotNull IRecipeManagerPlugin plugin) {
-                throw TODO();
+                registry.registerGlobalDisplayGenerator(wrapLiveDisplayGenerator(plugin));
             }
         };
+    }
+    
+    public static LiveDisplayGenerator<Display> wrapLiveDisplayGenerator(IRecipeManagerPlugin plugin) {
+        return new LiveDisplayGenerator<Display>() {
+            private Optional<List<Display>> getDisplays(EntryStack<?> entry, IFocus.Mode mode) {
+                JEIFocus<?> focus = new JEIFocus<>(mode, unwrap(entry));
+                List<ResourceLocation> categoryIds = plugin.getRecipeCategoryUids(focus);
+                if (categoryIds.isEmpty()) {
+                    return Optional.empty();
+                }
+                List<Display> displays = null;
+                for (ResourceLocation categoryId : categoryIds) {
+                    IRecipeCategory<Object> category = (IRecipeCategory<Object>) unwrapCategory(CategoryRegistry.getInstance().get(categoryId).getCategory());
+                    List<Object> recipes = plugin.getRecipes(category, focus);
+                    if (recipes != null && !recipes.isEmpty()) {
+                        if (displays == null) displays = CollectionUtils.map(recipes, JEIPluginDetector::createDisplayFrom);
+                        else displays.addAll(CollectionUtils.map(recipes, JEIPluginDetector::createDisplayFrom));
+                    }
+                    recipes = plugin.getRecipes(category);
+                    if (recipes != null && !recipes.isEmpty()) {
+                        if (displays == null) displays = new ArrayList<>(CollectionUtils.map(recipes, JEIPluginDetector::createDisplayFrom));
+                        else displays.addAll(CollectionUtils.map(recipes, JEIPluginDetector::createDisplayFrom));
+                    }
+                }
+                return Optional.ofNullable(CollectionUtils.filterToList(displays, Objects::nonNull));
+            }
+            
+            @Override
+            public Optional<List<Display>> getRecipeFor(EntryStack<?> entry) {
+                return getDisplays(entry, IFocus.Mode.OUTPUT);
+            }
+            
+            @Override
+            public Optional<List<Display>> getUsageFor(EntryStack<?> entry) {
+                return getDisplays(entry, IFocus.Mode.INPUT);
+            }
+        };
+    }
+    
+    private static <T> Display createDisplayFrom(T object) {
+        return DisplayRegistry.getInstance().tryFillDisplay(object);
+    }
+    
+    public static IRecipeCategory<?> unwrapCategory(DisplayCategory<?> category) {
+        if (category instanceof JEIWrappedCategory) {
+            return ((JEIWrappedCategory<?>) category).getBackingCategory();
+        }
+        return new JEIUnwrappedCategory<>(category);
+    }
+    
+    public static <T> T unwrap(EntryStack<T> stack) {
+        T value = stack.getValue();
+        if (value instanceof me.shedaniel.architectury.fluid.FluidStack) {
+            return (T) FluidStackHooksForge.toForge((me.shedaniel.architectury.fluid.FluidStack) value);
+        }
+        return value;
     }
     
     public static <T> EntryStack<T> wrap(IIngredientType<T> type, T stack) {
@@ -416,17 +541,19 @@ public class JEIPluginDetector {
             backingPlugin.registerRecipes(wrapRecipeRegistration(registry));
             for (JEIWrappedCategory<?> category : categories) {
                 if (Recipe.class.isAssignableFrom(category.getRecipeClass())) {
-                    registry.registerRecipes(recipe -> category.getRecipeClass().isInstance(recipe) && ((JEIWrappedCategory<Recipe<Container>>) category).handlesRecipe(recipe),
+                    registry.registerFiller((Class<Recipe<Container>>) category.getRecipeClass(), ((JEIWrappedCategory<Recipe<Container>>) category)::handlesRecipe,
                             recipe -> new JEIWrappedDisplay(category, recipe));
                 }
+                registry.registerFiller(JEIWrappedDisplay.class, display -> display.getCategoryIdentifier().equals(category.getIdentifier()), Function.identity());
             }
+            backingPlugin.registerAdvanced(wrapAdvancedRegistration(registry));
         }
-        
+    
         @Override
-        public void preRegister() {
-            backingPlugin.registerAdvanced(wrapAdvancedRegistration());
+        public void postRegister() {
+            backingPlugin.onRuntimeAvailable(wrapRuntime());
         }
-        
+    
         @Override
         public String getPluginName() {
             return "JEI Plugin [" + backingPlugin.getPluginUid().toString() + "]";

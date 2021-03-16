@@ -31,9 +31,8 @@ import me.shedaniel.rei.api.registry.Reloadable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.Container;
-import net.minecraft.world.item.crafting.Recipe;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -82,6 +81,13 @@ public interface DisplayRegistry extends RecipeManagerContext, Reloadable {
     }
     
     /**
+     * Registers a global category-less display generator
+     *
+     * @param generator the generator to register
+     */
+    <A extends Display> void registerGlobalDisplayGenerator(LiveDisplayGenerator<A> generator);
+    
+    /**
      * Registers a display generator
      *
      * @param categoryId the identifier of the category
@@ -94,15 +100,22 @@ public interface DisplayRegistry extends RecipeManagerContext, Reloadable {
      *
      * @return an unmodifiable map of display generators
      */
-    Map<ResourceLocation, List<LiveDisplayGenerator<?>>> getAllDisplayGenerators();
+    Map<ResourceLocation, List<LiveDisplayGenerator<?>>> getCategoryDisplayGenerators();
+    
+    /**
+     * Returns an unmodifiable list of category-less display generators
+     *
+     * @return an unmodifiable list of category-less display generators
+     */
+    List<LiveDisplayGenerator<?>> getGlobalDisplayGenerators();
     
     /**
      * Returns the list of display generators for a category
      *
      * @return the list of display generators
      */
-    default List<LiveDisplayGenerator<?>> getDisplayGenerators(ResourceLocation categoryId) {
-        return getAllDisplayGenerators().getOrDefault(categoryId, Collections.emptyList());
+    default List<LiveDisplayGenerator<?>> getCategoryDisplayGenerators(ResourceLocation categoryId) {
+        return getCategoryDisplayGenerators().getOrDefault(categoryId, Collections.emptyList());
     }
     
     /**
@@ -137,9 +150,11 @@ public interface DisplayRegistry extends RecipeManagerContext, Reloadable {
      */
     List<DisplayVisibilityPredicate> getVisibilityPredicates();
     
-    default <A extends Container, T extends Recipe<A>, D extends Display> void registerRecipes(Class<T> recipeClass, Function<T, D> mappingFunction) {
-        registerRecipes(recipe -> recipeClass.isAssignableFrom(recipe.getClass()), mappingFunction);
+    default <T, D extends Display> void registerFiller(Class<T> typeClass, Function<T, D> mappingFunction) {
+        registerFiller(typeClass, typeClass::isInstance, mappingFunction);
     }
     
-    <A extends Container, T extends Recipe<A>, D extends Display> void registerRecipes(Predicate<? extends T> recipeFilter, Function<T, D> mappingFunction);
+    <T, D extends Display> void registerFiller(Class<T> typeClass, Predicate<? extends T> predicate, Function<T, D> mappingFunction);
+    
+    @Nullable <T> Display tryFillDisplay(T value);
 }

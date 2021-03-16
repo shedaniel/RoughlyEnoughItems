@@ -52,6 +52,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static me.shedaniel.rei.jeicompat.JEIPluginDetector.unwrap;
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrap;
 
 public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
@@ -74,6 +75,20 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
     public void set(@NotNull IIngredients ingredients) {
         List<List<T>> inputs = ingredients.getInputs(type);
         List<List<T>> outputs = ingredients.getOutputs(type);
+        for (Int2ObjectMap.Entry<SlotWrapper> entry : slots.int2ObjectEntrySet()) {
+            byte noticeMark = entry.getValue().slot.getNoticeMark();
+            if (noticeMark == Slot.INPUT) {
+                if (entry.getIntKey() < inputs.size()) {
+                    entry.getValue().slot.clearEntries();
+                    entry.getValue().slot.entries(JEIPluginDetector.wrapList(type, inputs.get(entry.getIntKey())));
+                }
+            } else if (noticeMark == Slot.OUTPUT) {
+                if (entry.getIntKey() < outputs.size()) {
+                    entry.getValue().slot.clearEntries();
+                    entry.getValue().slot.entries(JEIPluginDetector.wrapList(type, outputs.get(entry.getIntKey())));
+                }
+            }
+        }
     }
     
     @Override
@@ -135,7 +150,7 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
         @Override
         @Nullable
         public T getDisplayedIngredient() {
-            return slot.getCurrentEntry().<T>cast().getValue();
+            return unwrap(slot.getCurrentEntry().cast());
         }
         
         @Override
@@ -167,7 +182,7 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
         
         @Override
         public T get(int index) {
-            return slot.getEntries().get(index).<T>cast().getValue();
+            return unwrap(slot.getEntries().get(index).cast());
         }
         
         @Override

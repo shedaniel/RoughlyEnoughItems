@@ -44,6 +44,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @ApiStatus.Internal
@@ -115,42 +116,26 @@ public class ViewsImpl implements Views {
         
         int generatorsCount = 0;
         
-        for (Map.Entry<ResourceLocation, List<LiveDisplayGenerator<?>>> entry : DisplayRegistry.getInstance().getAllDisplayGenerators().entrySet()) {
+        for (Map.Entry<ResourceLocation, List<LiveDisplayGenerator<?>>> entry : DisplayRegistry.getInstance().getCategoryDisplayGenerators().entrySet()) {
             ResourceLocation categoryId = entry.getKey();
             Set<Display> set = new LinkedHashSet<>();
             generatorsCount += entry.getValue().size();
             
             for (LiveDisplayGenerator<Display> generator : (List<LiveDisplayGenerator<Display>>) (List) entry.getValue()) {
-                for (EntryStack<?> stack : recipesFor) {
-                    Optional<List<Display>> recipeForDisplays = generator.getRecipeFor(stack);
-                    if (recipeForDisplays.isPresent()) {
-                        for (Display display : recipeForDisplays.get()) {
-                            if (isDisplayVisible(display))
-                                set.add(display);
-                        }
-                    }
-                }
-                for (EntryStack<?> stack : usagesFor) {
-                    Optional<List<Display>> usageForDisplays = generator.getUsageFor(stack);
-                    if (usageForDisplays.isPresent()) {
-                        for (Display display : usageForDisplays.get()) {
-                            if (isDisplayVisible(display))
-                                set.add(display);
-                        }
-                    }
-                }
-                Optional<List<Display>> displaysGenerated = generator.generate(builder);
-                if (displaysGenerated.isPresent()) {
-                    for (Display display : displaysGenerated.get()) {
-                        if (isDisplayVisible(display))
-                            set.add(display);
-                    }
-                }
+                generateLiveDisplays(generator, builder, set::add);
             }
             
             if (!set.isEmpty()) {
                 CollectionUtils.getOrPutEmptyList(result, CategoryRegistry.getInstance().get(categoryId).getCategory()).addAll(set);
             }
+        }
+        
+        Consumer<Display> displayConsumer = display -> {
+            CollectionUtils.getOrPutEmptyList(result, CategoryRegistry.getInstance().get(display.getCategoryIdentifier()).getCategory()).add(display);
+        };
+        for (LiveDisplayGenerator<Display> generator : (List<LiveDisplayGenerator<Display>>) (List) DisplayRegistry.getInstance().getGlobalDisplayGenerators()) {
+            generatorsCount++;
+            generateLiveDisplays(generator, builder, displayConsumer);
         }
         
         String message = String.format("Built Recipe View in %s for %d categories, %d recipes for, %d usages for and %d live recipe generators.",
@@ -161,6 +146,39 @@ public class ViewsImpl implements Views {
             RoughlyEnoughItemsCore.LOGGER.trace(message);
         }
         return result;
+    }
+    
+    private <T extends Display> void generateLiveDisplays(LiveDisplayGenerator<T> generator, ViewSearchBuilder builder, Consumer<T> displayConsumer) {
+        for (EntryStack<?> stack : builder.getRecipesFor()) {
+            Optional<List<T>> recipeForDisplays = generator.getRecipeFor(stack);
+            if (recipeForDisplays.isPresent()) {
+                for (T display : recipeForDisplays.get()) {
+                    if (isDisplayVisible(display)) {
+                        displayConsumer.accept(display);
+                    }
+                }
+            }
+        }
+        
+        for (EntryStack<?> stack : builder.getUsagesFor()) {
+            Optional<List<T>> usageForDisplays = generator.getUsageFor(stack);
+            if (usageForDisplays.isPresent()) {
+                for (T display : usageForDisplays.get()) {
+                    if (isDisplayVisible(display)) {
+                        displayConsumer.accept(display);
+                    }
+                }
+            }
+        }
+        
+        Optional<List<T>> displaysGenerated = generator.generate(builder);
+        if (displaysGenerated.isPresent()) {
+            for (T display : displaysGenerated.get()) {
+                if (isDisplayVisible(display)) {
+                    displayConsumer.accept(display);
+                }
+            }
+        }
     }
     
     @Override

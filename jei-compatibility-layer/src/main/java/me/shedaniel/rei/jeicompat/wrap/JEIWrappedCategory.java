@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.jeicompat;
+package me.shedaniel.rei.jeicompat.wrap;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
@@ -32,6 +32,7 @@ import me.shedaniel.rei.api.gui.widgets.Widget;
 import me.shedaniel.rei.api.gui.widgets.Widgets;
 import me.shedaniel.rei.api.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.util.ImmutableLiteralText;
+import me.shedaniel.rei.jeicompat.JEIRecipeLayout;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -106,7 +107,7 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
             @Override
             public void render(PoseStack arg, int i, int j, float f) {
                 arg.pushPose();
-                arg.translate(bounds.x, bounds.y, 0);
+                arg.translate(bounds.x + 4, bounds.y + 4, 0);
                 backingCategory.draw(display.getBackingRecipe(), arg, i, j);
                 arg.popPose();
             }

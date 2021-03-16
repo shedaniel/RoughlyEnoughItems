@@ -32,10 +32,10 @@ import me.shedaniel.rei.api.registry.display.Display;
 import me.shedaniel.rei.api.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.registry.display.DisplayRegistry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.Container;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.crafting.Recipe;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,8 +45,9 @@ import java.util.function.Predicate;
 public class DisplayRegistryImpl extends RecipeManagerContextImpl implements DisplayRegistry {
     private final Map<ResourceLocation, List<Display>> displays = new ConcurrentHashMap<>();
     private final Map<ResourceLocation, List<LiveDisplayGenerator<?>>> displayGenerators = new ConcurrentHashMap<>();
+    private final List<LiveDisplayGenerator<?>> globalDisplayGenerators = new ArrayList<>();
     private final List<DisplayVisibilityPredicate> visibilityPredicates = new ArrayList<>();
-    private final List<RecipeFiller<?, ?, ?>> fillers = new ArrayList<>();
+    private final List<DisplayFiller<?, ?>> fillers = new ArrayList<>();
     private final MutableInt displayCount = new MutableInt(0);
     
     @Override
@@ -78,14 +79,24 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl implements Dis
     }
     
     @Override
+    public <A extends Display> void registerGlobalDisplayGenerator(LiveDisplayGenerator<A> generator) {
+        globalDisplayGenerators.add(generator);
+    }
+    
+    @Override
     public <A extends Display> void registerDisplayGenerator(ResourceLocation categoryId, LiveDisplayGenerator<A> generator) {
         displayGenerators.computeIfAbsent(categoryId, location -> new ArrayList<>())
                 .add(generator);
     }
     
     @Override
-    public Map<ResourceLocation, List<LiveDisplayGenerator<?>>> getAllDisplayGenerators() {
+    public Map<ResourceLocation, List<LiveDisplayGenerator<?>>> getCategoryDisplayGenerators() {
         return Collections.unmodifiableMap(displayGenerators);
+    }
+    
+    @Override
+    public List<LiveDisplayGenerator<?>> getGlobalDisplayGenerators() {
+        return Collections.unmodifiableList(globalDisplayGenerators);
     }
     
     @Override
@@ -117,8 +128,8 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl implements Dis
     }
     
     @Override
-    public <A extends Container, T extends Recipe<A>, D extends Display> void registerRecipes(Predicate<? extends T> recipeFilter, Function<T, D> mappingFunction) {
-        fillers.add(new RecipeFiller<>((Predicate<T>) recipeFilter, mappingFunction));
+    public <T, D extends Display> void registerFiller(Class<T> typeClass, Predicate<? extends T> predicate, Function<T, D> mappingFunction) {
+        fillers.add(new DisplayFiller<>(typeClass, (Predicate<T>) predicate, mappingFunction));
     }
     
     @Override
@@ -137,33 +148,47 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl implements Dis
             List<Recipe<?>> allSortedRecipes = getAllSortedRecipes();
             for (int i = allSortedRecipes.size() - 1; i >= 0; i--) {
                 Recipe<?> recipe = allSortedRecipes.get(i);
-                for (RecipeFiller<?, ?, ?> filler : fillers) {
-                    try {
-                        handleRecipe(filler, recipe);
-                    } catch (Throwable e) {
-                        RoughlyEnoughItemsCore.LOGGER.error("Failed to fill recipes!", e);
-                    }
+                Display display = tryFillDisplay(recipe);
+                if (display != null) {
+                    registerDisplay(0, display);
                 }
             }
         }
-        this.fillers.clear();
     }
     
-    private <A extends Container, T extends Recipe<A>, D extends Display> void handleRecipe(RecipeFiller<A, T, D> filler, Recipe<?> recipe) {
-        if (filler.recipeFilter.test((T) recipe)) {
-            registerDisplay(0, filler.mappingFunction.apply((T) recipe));
+    @Override
+    @Nullable
+    public <T> Display tryFillDisplay(T value) {
+        if (value instanceof Display) return (Display) value;
+        for (DisplayFiller<?, ?> filler : fillers) {
+            Display display = tryFillDisplayGenerics(filler, value);
+            if (display != null) return display;
         }
+        return null;
     }
     
-    private static class RecipeFiller<A extends Container, T extends Recipe<A>, D extends Display> {
-        private final Predicate<T> recipeFilter;
+    private <T, D extends Display> D tryFillDisplayGenerics(DisplayFiller<T, D> filler, Object value) {
+        try {
+            if (filler.typeClass.isInstance(value) && filler.predicate.test((T) value)) {
+                return filler.mappingFunction.apply((T) value);
+            }
+        } catch (Throwable e) {
+            RoughlyEnoughItemsCore.LOGGER.error("Failed to fill displays!", e);
+        }
+        
+        return null;
+    }
+    
+    private static class DisplayFiller<T, D extends Display> {
+        private final Class<T> typeClass;
+        private final Predicate<T> predicate;
         
         private final Function<T, D> mappingFunction;
         
-        public RecipeFiller(Predicate<T> recipeFilter, Function<T, D> mappingFunction) {
-            this.recipeFilter = recipeFilter;
+        public DisplayFiller(Class<T> typeClass, Predicate<T> predicate, Function<T, D> mappingFunction) {
+            this.typeClass = typeClass;
+            this.predicate = predicate;
             this.mappingFunction = mappingFunction;
         }
-        
     }
 }

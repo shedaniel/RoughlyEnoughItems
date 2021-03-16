@@ -49,92 +49,7 @@ public enum JEIGuiHelper implements IGuiHelper {
     @Override
     @NotNull
     public IDrawableBuilder drawableBuilder(@NotNull ResourceLocation resourceLocation, int u, int v, int width, int height) {
-        return new IDrawableBuilder() {
-            private int textureWidth = width;
-            private int textureHeight = height;
-            private int trimTop;
-            private int trimBottom;
-            private int trimLeft;
-            private int trimRight;
-            private int paddingTop;
-            private int paddingBottom;
-            private int paddingLeft;
-            private int paddingRight;
-            
-            @Override
-            @NotNull
-            public IDrawableBuilder setTextureSize(int width, int height) {
-                this.textureWidth = width;
-                this.textureHeight = height;
-                return this;
-            }
-            
-            @Override
-            @NotNull
-            public IDrawableBuilder addPadding(int paddingTop, int paddingBottom, int paddingLeft, int paddingRight) {
-                this.paddingTop = paddingTop;
-                this.paddingBottom = paddingBottom;
-                this.paddingLeft = paddingLeft;
-                this.paddingRight = paddingRight;
-                return this;
-            }
-            
-            @Override
-            @NotNull
-            public IDrawableBuilder trim(int trimTop, int trimBottom, int trimLeft, int trimRight) {
-                this.trimTop = trimTop;
-                this.trimBottom = trimBottom;
-                this.trimLeft = trimLeft;
-                this.trimRight = trimRight;
-                return this;
-            }
-            
-            @Override
-            public IDrawableStatic build() {
-                int tw = textureWidth + paddingLeft + paddingRight - trimLeft - trimRight;
-                int th = textureHeight + paddingTop + paddingBottom - trimTop - trimBottom;
-                Widget widget = Widgets.createTexturedWidget(resourceLocation, 0, 0, u, v, width - paddingRight, height - paddingBottom, tw, th);
-                return new IDrawableStatic() {
-                    @Override
-                    public void draw(@NotNull PoseStack matrixStack, int xOffset, int yOffset, int maskTop, int maskBottom, int maskLeft, int maskRight) {
-                        matrixStack.pushPose();
-                        matrixStack.translate(xOffset + paddingLeft, yOffset + paddingTop, 0);
-                        widget.render(matrixStack, PointHelper.getMouseX(), PointHelper.getMouseY(), 0);
-                        matrixStack.popPose();
-                    }
-                    
-                    @Override
-                    public void draw(@NotNull PoseStack matrixStack, int xOffset, int yOffset) {
-                        matrixStack.pushPose();
-                        matrixStack.translate(xOffset + paddingLeft, yOffset + paddingTop, 0);
-                        widget.render(matrixStack, PointHelper.getMouseX(), PointHelper.getMouseY(), 0);
-                        matrixStack.popPose();
-                    }
-                    
-                    @Override
-                    public int getWidth() {
-                        return tw;
-                    }
-                    
-                    @Override
-                    public int getHeight() {
-                        return th;
-                    }
-                };
-            }
-            
-            @Override
-            @NotNull
-            public IDrawableAnimated buildAnimated(int ticksPerCycle, @NotNull IDrawableAnimated.StartDirection startDirection, boolean inverted) {
-                return createAnimatedDrawable(build(), ticksPerCycle, startDirection, inverted);
-            }
-            
-            @Override
-            @NotNull
-            public IDrawableAnimated buildAnimated(@NotNull ITickTimer tickTimer, @NotNull IDrawableAnimated.StartDirection startDirection) {
-                throw TODO();
-            }
-        };
+        return new DrawableBuilder(resourceLocation, u, v, width, height);
     }
     
     @Override
@@ -166,13 +81,13 @@ public enum JEIGuiHelper implements IGuiHelper {
         return new IDrawableStatic() {
             @Override
             public void draw(@NotNull PoseStack matrixStack, int xOffset, int yOffset, int maskTop, int maskBottom, int maskLeft, int maskRight) {
-                throw TODO();
+                base.getBounds().setLocation(xOffset, yOffset);
+                base.render(matrixStack, PointHelper.getMouseX(), PointHelper.getMouseY(), 0);
             }
             
             @Override
             public void draw(@NotNull PoseStack matrixStack, int xOffset, int yOffset) {
-                base.getBounds().setLocation(xOffset, yOffset);
-                base.render(matrixStack, PointHelper.getMouseX(), PointHelper.getMouseY(), 0);
+                draw(matrixStack, xOffset, yOffset, 0, 0, 0, 0);
             }
             
             @Override
