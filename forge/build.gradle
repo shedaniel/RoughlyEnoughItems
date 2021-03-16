@@ -41,5 +41,6 @@ dependencies {
     modRuntime("curse.maven:chiselsbits-231095:3176033")
     modRuntime("curse.maven:jumbofurnace-390880:3120970")
     modRuntime("curse.maven:cyclic-239286:3221427")
+    modRuntime("curse.maven:mekanism-268560:3206392")
     modRuntime("appeng:appliedenergistics2:8.2.0")
 }

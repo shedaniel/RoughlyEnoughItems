@@ -95,7 +95,7 @@ public interface ScreenRegistry extends Reloadable {
      * @param categories  The categories of result.
      * @param <T>         The screen type to be registered to.
      */
-    default <C extends AbstractContainerMenu, T extends AbstractContainerScreen<C>> void registerContainerClickArea(Rectangle area, Class<T> screenClass, ResourceLocation... categories) {
+    default <C extends AbstractContainerMenu, T extends AbstractContainerScreen<C>> void registerContainerClickArea(Rectangle area, Class<? extends T> screenClass, ResourceLocation... categories) {
         registerContainerClickArea(screen -> area, screenClass, categories);
     }
     
@@ -107,7 +107,7 @@ public interface ScreenRegistry extends Reloadable {
      * @param categories  The categories of result.
      * @param <T>         The screen type to be registered to.
      */
-    <C extends AbstractContainerMenu, T extends AbstractContainerScreen<C>> void registerContainerClickArea(ScreenClickAreaProvider<T> provider, Class<T> screenClass, ResourceLocation... categories);
+    <C extends AbstractContainerMenu, T extends AbstractContainerScreen<C>> void registerContainerClickArea(ScreenClickAreaProvider<T> provider, Class<? extends T> screenClass, ResourceLocation... categories);
     
     /**
      * Registers a click area for a screen.
@@ -117,7 +117,7 @@ public interface ScreenRegistry extends Reloadable {
      * @param categories  The categories of result.
      * @param <T>         The screen type to be registered to.
      */
-    default <T extends Screen> void registerClickArea(ScreenClickAreaProvider<T> provider, Class<T> screenClass, ResourceLocation... categories) {
+    default <T extends Screen> void registerClickArea(ScreenClickAreaProvider<T> provider, Class<? extends T> screenClass, ResourceLocation... categories) {
         registerClickArea(screenClass, provider.toHandler(() -> categories));
     }
     
@@ -129,7 +129,7 @@ public interface ScreenRegistry extends Reloadable {
      * @param <T>         The screen type to be registered to.
      * @see #registerClickArea(ScreenClickAreaProvider, Class, ResourceLocation...) for a simpler way to handle areas without custom categories.
      */
-    <T extends Screen> void registerClickArea(Class<T> screenClass, ClickArea<T> area);
+    <T extends Screen> void registerClickArea(Class<? extends T> screenClass, ClickArea<T> area);
     
     @Nullable <T extends Screen> Set<ResourceLocation> handleClickArea(Class<T> screenClass, ClickArea.ClickAreaContext<T> context);
 }
