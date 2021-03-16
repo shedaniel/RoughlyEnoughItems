@@ -26,6 +26,7 @@ package me.shedaniel.rei.jeicompat.wrap;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.gui.Renderer;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.gui.widgets.Widget;
@@ -110,6 +111,15 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
                 arg.translate(bounds.x + 4, bounds.y + 4, 0);
                 backingCategory.draw(display.getBackingRecipe(), arg, i, j);
                 arg.popPose();
+                
+                Point mouse = PointHelper.ofMouse();
+                if (containsMouse(mouse)) {
+                    Tooltip tooltip = getTooltip(mouse);
+                    
+                    if (tooltip != null) {
+                        tooltip.queue();
+                    }
+                }
             }
             
             @Override

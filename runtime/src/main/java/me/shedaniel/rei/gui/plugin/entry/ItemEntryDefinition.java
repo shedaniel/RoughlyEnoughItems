@@ -223,7 +223,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack> {
     private List<Component> tryGetItemStackToolTip(EntryStack<ItemStack> entry, ItemStack value, boolean careAboutAdvanced) {
         if (!SEARCH_BLACKLISTED.contains(value.getItem()))
             try {
-                return value.getTooltipLines(Minecraft.getInstance().player, Minecraft.getInstance().options.advancedItemTooltips && careAboutAdvanced ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
+                return value.getTooltipLines(Minecraft.getInstance().player, careAboutAdvanced && Minecraft.getInstance().options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
             } catch (Throwable e) {
                 e.printStackTrace();
                 SEARCH_BLACKLISTED.add(value.getItem());

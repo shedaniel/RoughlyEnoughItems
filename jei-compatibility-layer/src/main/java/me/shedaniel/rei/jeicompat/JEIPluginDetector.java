@@ -35,9 +35,7 @@ import me.shedaniel.rei.api.gui.AbstractRenderer;
 import me.shedaniel.rei.api.gui.Renderer;
 import me.shedaniel.rei.api.ingredient.EntryIngredient;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.EntryDefinition;
-import me.shedaniel.rei.api.ingredient.entry.EntryTypeRegistry;
-import me.shedaniel.rei.api.ingredient.entry.VanillaEntryTypes;
+import me.shedaniel.rei.api.ingredient.entry.*;
 import me.shedaniel.rei.api.ingredient.util.EntryIngredients;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.plugins.BuiltinPlugin;
@@ -51,6 +49,7 @@ import me.shedaniel.rei.api.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.util.CollectionUtils;
 import me.shedaniel.rei.api.util.ImmutableLiteralText;
 import me.shedaniel.rei.jeicompat.unwrap.JEIUnwrappedCategory;
+import me.shedaniel.rei.jeicompat.wrap.JEIEntryDefinition;
 import me.shedaniel.rei.jeicompat.wrap.JEIWrappedCategory;
 import me.shedaniel.rei.jeicompat.wrap.JEIWrappedDisplay;
 import mezz.jei.api.IModPlugin;
@@ -67,6 +66,7 @@ import mezz.jei.api.helpers.IStackHelper;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredientType;
+import mezz.jei.api.ingredients.subtypes.ISubtypeManager;
 import mezz.jei.api.ingredients.subtypes.UidContext;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.IRecipeManager;
@@ -588,12 +588,38 @@ public class JEIPluginDetector {
         };
     }
     
+    public static IModIngredientRegistration wrapModIngredientRegistration(JEIPluginWrapper wrapper, EntryTypeRegistry registry) {
+        return new IModIngredientRegistration() {
+            @Override
+            @NotNull
+            public ISubtypeManager getSubtypeManager() {
+                throw TODO();
+            }
+            
+            @Override
+            public <V> void register(@NotNull IIngredientType<V> ingredientType, @NotNull Collection<V> allIngredients, @NotNull IIngredientHelper<V> ingredientHelper,
+                    @NotNull IIngredientRenderer<V> ingredientRenderer) {
+                ResourceLocation location = new ResourceLocation(wrapper.backingPlugin.getPluginUid() + "_" + ingredientType.getIngredientClass().getSimpleName().toLowerCase(Locale.ROOT));
+                registry.register(location, new JEIEntryDefinition<>(EntryType.deferred(location), ingredientType, ingredientHelper, ingredientRenderer));
+            }
+        };
+    }
+    
+    public static UidContext wrapContext(ComparisonContext context) {
+        return context.isIgnoresNbt() ? UidContext.Recipe : UidContext.Ingredient;
+    }
+    
     public static class JEIPluginWrapper implements REIPlugin {
         private final IModPlugin backingPlugin;
         private final List<JEIWrappedCategory<?>> categories = new ArrayList<>();
         
         public JEIPluginWrapper(IModPlugin backingPlugin) {
             this.backingPlugin = backingPlugin;
+        }
+        
+        @Override
+        public void registerEntryTypes(EntryTypeRegistry registry) {
+            backingPlugin.registerIngredients(wrapModIngredientRegistration(this, registry));
         }
         
         @Override

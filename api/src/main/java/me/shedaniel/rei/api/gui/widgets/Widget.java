@@ -70,8 +70,8 @@ public abstract class Widget extends AbstractContainerEventHandler implements ne
     }
     
     @Override
-    public final boolean isMouseOver(double double_1, double double_2) {
-        return containsMouse(double_1, double_2);
+    public final boolean isMouseOver(double mouseX, double mouseY) {
+        return containsMouse(mouseX, mouseY);
     }
     
     @Override

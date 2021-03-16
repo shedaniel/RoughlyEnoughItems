@@ -416,6 +416,11 @@ public class EntryWidget extends Slot {
     }
     
     @Override
+    public boolean containsMouse(double mouseX, double mouseY) {
+        return mouseX >= bounds.x + 1 && mouseY >= bounds.y + 1 && mouseX <= bounds.getMaxX() - 1 && mouseY <= bounds.getMaxY() - 1;
+    }
+    
+    @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (!interactable)
             return false;
