@@ -58,6 +58,7 @@ public class PluginManagerImpl implements PluginManager {
     private final List<Reloadable> reloadables = new ArrayList<>();
     private final Map<Class<? extends Reloadable>, Reloadable> cache = new ConcurrentHashMap<>();
     private boolean arePluginsLoading = false;
+    private final List<REIPlugin> plugins = new ArrayList<>();
     
     public PluginManagerImpl() {
         registerReloadable(new ConfigManagerImpl());
@@ -100,6 +101,18 @@ public class PluginManagerImpl implements PluginManager {
     @Override
     public List<Reloadable> getReloadables() {
         return Collections.unmodifiableList(reloadables);
+    }
+    
+    @Override
+    public <T extends REIPlugin> T registerPlugin(T plugin) {
+        plugins.add(plugin);
+        RoughlyEnoughItemsCore.LOGGER.info("Registered plugin %s", plugin.getPluginName());
+        return plugin;
+    }
+    
+    @Override
+    public List<REIPlugin> getPlugins() {
+        return Collections.unmodifiableList(plugins);
     }
     
     private static class SectionClosable implements Closeable {
@@ -156,7 +169,7 @@ public class PluginManagerImpl implements PluginManager {
         }
         
         arePluginsLoading = true;
-        List<REIPlugin> plugins = new ArrayList<>(RoughlyEnoughItemsCore.getPlugins());
+        List<REIPlugin> plugins = new ArrayList<>(getPlugins());
         plugins.sort(Comparator.comparingInt(REIPlugin::getPriority).reversed());
         RoughlyEnoughItemsCore.LOGGER.info("Reloading REI, registered %d plugins: %s", plugins.size(), CollectionUtils.mapAndJoinToString(plugins, REIPlugin::getPluginName, ", "));
         Collections.reverse(plugins);

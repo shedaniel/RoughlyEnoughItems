@@ -24,6 +24,7 @@
 package me.shedaniel.rei.forge;
 
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.api.plugins.PluginManager;
 import me.shedaniel.rei.gui.plugin.DefaultRuntimePlugin;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import me.shedaniel.rei.plugin.DefaultPlugin;
@@ -33,8 +34,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.function.Consumer;
 
-import static me.shedaniel.rei.RoughlyEnoughItemsCore.registerPlugin;
-
 public class PluginDetectorImpl {
     public static void detectServerPlugins() {
         new DefaultServerContainerPlugin().run();
@@ -42,12 +41,12 @@ public class PluginDetectorImpl {
     
     @OnlyIn(Dist.CLIENT)
     public static void detectClientPlugins() {
-        registerPlugin(new DefaultPlugin());
-        registerPlugin(new DefaultRuntimePlugin());
+        PluginManager.getInstance().registerPlugin(new DefaultPlugin());
+        PluginManager.getInstance().registerPlugin(new DefaultRuntimePlugin());
         RoughlyEnoughItemsForge.scanAnnotation(REIPlugin.class, plugin -> {
-            registerPlugin(((me.shedaniel.rei.api.plugins.REIPlugin) plugin));
+            PluginManager.getInstance().registerPlugin(((me.shedaniel.rei.api.plugins.REIPlugin) plugin));
         });
         JEIPluginDetector.detect((aClass, consumer) -> RoughlyEnoughItemsForge.scanAnnotation((Class<Object>) aClass, (Consumer<Object>) consumer),
-                RoughlyEnoughItemsCore::registerPlugin);
+                PluginManager.getInstance()::registerPlugin);
     }
 }

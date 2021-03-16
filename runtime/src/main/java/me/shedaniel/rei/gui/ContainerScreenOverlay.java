@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.gui;
 
+import com.google.common.collect.AbstractIterator;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -68,6 +69,7 @@ import me.shedaniel.rei.impl.REIHelperImpl;
 import me.shedaniel.rei.impl.Weather;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -170,7 +172,7 @@ public class ContainerScreenOverlay extends REIOverlay {
     }
     
     public void openMenu(UUID uuid, Menu menu, Predicate<Point> inPoint) {
-        this.overlayMenu = new OverlayMenu(uuid, menu, InternalWidgets.wrapTranslate(menu, 0, 0, 400), inPoint);
+        this.overlayMenu = new OverlayMenu(uuid, menu, Widgets.withTranslate(menu, 0, 0, 400), inPoint);
     }
     
     @ApiStatus.Internal
@@ -200,13 +202,44 @@ public class ContainerScreenOverlay extends REIOverlay {
         return draggingStack;
     }
     
+    private static <T> Iterable<T> buildWidgetsTree(Iterable<? extends GuiEventListener> listeners, Class<T> type) {
+        return () -> new AbstractIterator<T>() {
+            Stack<Iterator<? extends GuiEventListener>> stack;
+            
+            {
+                stack = new Stack<>();
+                stack.push(listeners.iterator());
+            }
+            
+            @Override
+            protected T computeNext() {
+                while (!stack.empty()) {
+                    Iterator<? extends GuiEventListener> peek = stack.peek();
+                    GuiEventListener listener = peek.next();
+                    if (!peek.hasNext())
+                        stack.pop();
+                    if (type.isInstance(listener)) {
+                        return (T) listener;
+                    }
+                    if (listener instanceof ContainerEventHandler) {
+                        List<? extends GuiEventListener> children = ((ContainerEventHandler) listener).children();
+                        if (!children.isEmpty()) {
+                            stack.push(children.iterator());
+                        }
+                    }
+                }
+                return endOfData();
+            }
+        };
+    }
+    
     public void init(boolean useless) {
         init();
     }
     
     public void init() {
-        Iterable<DraggableStackProvider> stackProviders = (Iterable) Iterables.filter(widgets, widget -> widget instanceof DraggableStackProvider);
-        Iterable<DraggableStackVisitor> stackVisitors = (Iterable) Iterables.filter(widgets, widget -> widget instanceof DraggableStackVisitor);
+        Iterable<DraggableStackProvider> stackProviders = buildWidgetsTree(Iterables.concat(widgets, Minecraft.getInstance().screen.children()), DraggableStackProvider.class);
+        Iterable<DraggableStackVisitor> stackVisitors = buildWidgetsTree(Iterables.concat(widgets, Minecraft.getInstance().screen.children()), DraggableStackVisitor.class);
         draggingStack.set(DraggableStackProvider.from(() -> stackProviders), DraggableStackVisitor.from(() -> stackVisitors));
         
         this.shouldReload = false;
@@ -252,7 +285,7 @@ public class ContainerScreenOverlay extends REIOverlay {
         
         final Rectangle configButtonArea = getConfigButtonArea();
         Widget tmp;
-        widgets.add(tmp = InternalWidgets.wrapLateRenderable(InternalWidgets.mergeWidgets(
+        widgets.add(tmp = InternalWidgets.wrapLateRenderable(InternalWidgets.concatWidgets(
                 Widgets.createButton(configButtonArea, NarratorChatListener.NO_TITLE)
                         .onClick(button -> {
                             if (Screen.hasShiftDown() || Screen.hasControlDown()) {
@@ -346,7 +379,7 @@ public class ContainerScreenOverlay extends REIOverlay {
         }
         Rectangle subsetsButtonBounds = getSubsetsButtonBounds();
         if (ConfigObject.getInstance().isSubsetsEnabled()) {
-            widgets.add(InternalWidgets.wrapLateRenderable(InternalWidgets.wrapTranslate(Widgets.createButton(subsetsButtonBounds, ClientHelperImpl.getInstance().isAprilFools.get() ? new TranslatableComponent("text.rei.tiny_potato") : new TranslatableComponent("text.rei.subsets"))
+            widgets.add(InternalWidgets.wrapLateRenderable(Widgets.withTranslate(Widgets.createButton(subsetsButtonBounds, ClientHelperImpl.getInstance().isAprilFools.get() ? new TranslatableComponent("text.rei.tiny_potato") : new TranslatableComponent("text.rei.subsets"))
                     .onClick(button -> {
                         proceedOpenMenuOrElse(Menu.SUBSETS, () -> {
                             openMenu(Menu.SUBSETS, Menu.createSubsetsMenuFromRegistry(new Point(subsetsButtonBounds.x, subsetsButtonBounds.getMaxY())), point -> true);
@@ -368,7 +401,7 @@ public class ContainerScreenOverlay extends REIOverlay {
             Rectangle area = getCraftableToggleArea();
             ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
             ItemStack icon = new ItemStack(Blocks.CRAFTING_TABLE);
-            this.widgets.add(tmp = InternalWidgets.wrapLateRenderable(InternalWidgets.mergeWidgets(
+            this.widgets.add(tmp = InternalWidgets.wrapLateRenderable(InternalWidgets.concatWidgets(
                     Widgets.createButton(area, NarratorChatListener.NO_TITLE)
                             .focusable(false)
                             .onClick(button -> {
@@ -390,54 +423,6 @@ public class ContainerScreenOverlay extends REIOverlay {
         }
         
         widgets.add(draggingStack);
-        
-        if (Minecraft.getInstance().screen instanceof RecipeViewingScreen) {
-            widgets.add(new RecipeViewingScreenDraggable());
-        }
-    }
-    
-    private static class RecipeViewingScreenDraggable extends Widget implements DraggableStackProvider {
-        @Nullable
-        @Override
-        public DraggableStack getHoveredStack(DraggingContext context, double mouseX, double mouseY) {
-            for (Widget widget : ((RecipeViewingScreen) Minecraft.getInstance().screen).getWidgets()) {
-                if (widget instanceof EntryWidget) {
-                    if (widget.containsMouse(mouseX, mouseY)) {
-                        return new DraggableStack() {
-                            EntryStack<?> stack = ((EntryWidget) widget).getCurrentEntry().copy().rewrap();
-                            
-                            @Override
-                            public EntryStack<?> getStack() {
-                                return stack;
-                            }
-                            
-                            @Override
-                            public void drag() {
-                                
-                            }
-                            
-                            @Override
-                            public void release(boolean accepted) {
-                                if (!accepted) {
-                                    context.renderBackToPosition(this, () -> new Point(((EntryWidget) widget).getBounds().x - 8, ((EntryWidget) widget).getBounds().y - 8));
-                                }
-                            }
-                        };
-                    }
-                }
-            }
-            return null;
-        }
-        
-        @Override
-        public void render(PoseStack poseStack, int i, int j, float f) {
-            
-        }
-        
-        @Override
-        public List<? extends GuiEventListener> children() {
-            return Collections.emptyList();
-        }
     }
     
     private Rectangle getSubsetsButtonBounds() {

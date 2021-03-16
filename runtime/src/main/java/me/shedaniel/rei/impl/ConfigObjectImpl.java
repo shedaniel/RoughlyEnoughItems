@@ -51,7 +51,6 @@ import java.util.List;
 @Config(name = "roughlyenoughitems/config")
 @Environment(EnvType.CLIENT)
 public class ConfigObjectImpl implements ConfigObject, ConfigData {
-    
     @ConfigEntry.Category("basics") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
     public Basics basics = new Basics();
     @ConfigEntry.Category("appearance") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName

@@ -108,7 +108,6 @@ import static me.shedaniel.rei.impl.Internals.attachInstance;
 @Environment(EnvType.CLIENT)
 public class RoughlyEnoughItemsCore {
     @ApiStatus.Internal public static final Logger LOGGER = LogManager.getFormatterLogger("REI");
-    private static final List<REIPlugin> PLUGINS = new ArrayList<>();
     private static final ExecutorService SYNC_RECIPES = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "REI-SyncRecipes"));
     @ApiStatus.Experimental
     public static boolean isLeftModePressed = false;
@@ -328,23 +327,6 @@ public class RoughlyEnoughItemsCore {
         }, "clickAreaHandlerResult");
     }
     
-    /**
-     * Registers a REI plugin
-     *
-     * @param plugin the plugin instance
-     * @return the plugin itself
-     */
-    @ApiStatus.Internal
-    public static <T extends REIPlugin> T registerPlugin(T plugin) {
-        PLUGINS.add(plugin);
-        RoughlyEnoughItemsCore.LOGGER.info("Registered plugin %s", plugin.getPluginName());
-        return plugin;
-    }
-    
-    public static List<REIPlugin> getPlugins() {
-        return Collections.unmodifiableList(PLUGINS);
-    }
-    
     public static boolean hasPermissionToUsePackets() {
         try {
             Minecraft.getInstance().getConnection().getSuggestionsProvider().hasPermission(0);
@@ -438,7 +420,7 @@ public class RoughlyEnoughItemsCore {
     
     private void loadTestPlugins() {
         if (isDebugModeEnabled()) {
-            registerPlugin(new REITestPlugin());
+            PluginManager.getInstance().registerPlugin(new REITestPlugin());
         }
     }
     

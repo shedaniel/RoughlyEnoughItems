@@ -25,13 +25,11 @@ package me.shedaniel.rei.fabric;
 
 import com.google.common.collect.Iterables;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.api.plugins.PluginManager;
 import me.shedaniel.rei.api.plugins.REIPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.ModContainer;
-
-import static me.shedaniel.rei.RoughlyEnoughItemsCore.registerPlugin;
 
 public class PluginDetectorImpl {
     public static void detectServerPlugins() {
@@ -46,7 +44,7 @@ public class PluginDetectorImpl {
                 FabricLoader.getInstance().getEntrypoints("rei_plugins_v0", REIPlugin.class)
         )) {
             try {
-                registerPlugin(plugin);
+                PluginManager.getInstance().registerPlugin(plugin);
             } catch (Exception e) {
                 e.printStackTrace();
                 RoughlyEnoughItemsCore.LOGGER.error("Can't load REI plugins from %s: %s", plugin.getClass(), e.getLocalizedMessage());
@@ -54,7 +52,7 @@ public class PluginDetectorImpl {
         }
         if (FabricLoader.getInstance().isModLoaded("libblockattributes-fluids")) {
             try {
-                registerPlugin((REIPlugin) Class.forName("me.shedaniel.rei.compat.LBASupportPlugin").getConstructor().newInstance());
+                PluginManager.getInstance().registerPlugin((REIPlugin) Class.forName("me.shedaniel.rei.compat.LBASupportPlugin").getConstructor().newInstance());
             } catch (Throwable throwable) {
                 throwable.printStackTrace();
             }

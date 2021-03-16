@@ -35,6 +35,9 @@ import me.shedaniel.rei.api.ConfigManager;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
+import me.shedaniel.rei.api.gui.drag.DraggableStack;
+import me.shedaniel.rei.api.gui.drag.DraggableStackProvider;
+import me.shedaniel.rei.api.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.gui.widgets.Slot;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.ingredient.EntryStack;
@@ -57,7 +60,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class EntryWidget extends Slot {
+public class EntryWidget extends Slot implements DraggableStackProvider {
     @ApiStatus.Internal
     public static long stackDisplayOffset = 0;
     protected static final ResourceLocation RECIPE_GUI = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
@@ -446,5 +449,32 @@ public class EntryWidget extends Slot {
                 return ClientHelper.getInstance().openView(ViewSearchBuilder.builder().addUsagesFor(getCurrentEntry()).setInputNotice(getCurrentEntry()).fillPreferredOpenedCategory());
         }
         return false;
+    }
+    
+    @Override
+    @Nullable
+    public DraggableStack getHoveredStack(DraggingContext context, double mouseX, double mouseY) {
+        if (!getCurrentEntry().isEmpty() && containsMouse(mouseX, mouseY)) {
+            return new DraggableStack() {
+                EntryStack<?> stack = getCurrentEntry().copy();
+                
+                @Override
+                public EntryStack<?> getStack() {
+                    return stack;
+                }
+                
+                @Override
+                public void drag() {
+                }
+                
+                @Override
+                public void release(boolean accepted) {
+                    if (!accepted) {
+                        context.renderBackToPosition(this, DraggingContext.getInstance().getCurrentPosition(), () -> new Point(getBounds().x, getBounds().y));
+                    }
+                }
+            };
+        }
+        return null;
     }
 }

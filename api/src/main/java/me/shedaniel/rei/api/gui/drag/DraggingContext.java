@@ -65,8 +65,9 @@ public interface DraggingContext {
      * Renders the draggable stack back to the position {@code position}.
      * This may be used to animate an unaccepted draggable stack returning to its initial position.
      *
-     * @param stack    the stack to use for render
-     * @param position the position supplier of the destination
+     * @param stack           the stack to use for render
+     * @param initialPosition the initial position of the stack
+     * @param position        the position supplier of the destination
      */
-    void renderBackToPosition(DraggableStack stack, Supplier<Point> position);
+    void renderBackToPosition(DraggableStack stack, Point initialPosition, Supplier<Point> position);
 }
