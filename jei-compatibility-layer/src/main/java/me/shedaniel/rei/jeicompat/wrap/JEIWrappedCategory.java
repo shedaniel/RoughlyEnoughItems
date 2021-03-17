@@ -108,17 +108,17 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
                 arg.translate(bounds.x + 4, bounds.y + 4, getZ());
                 backingCategory.draw(display.getBackingRecipe(), arg, i, j);
                 arg.popPose();
-            
+                
                 Point mouse = PointHelper.ofMouse();
                 if (containsMouse(mouse)) {
                     Tooltip tooltip = getTooltip(mouse);
-                
+                    
                     if (tooltip != null) {
                         tooltip.queue();
                     }
                 }
             }
-        
+            
             @Override
             public @Nullable Tooltip getTooltip(Point mouse) {
                 List<Component> strings = backingCategory.getTooltipStrings(display.getBackingRecipe(), mouse.x - bounds.x, mouse.y - bounds.y);
@@ -127,12 +127,12 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
                 }
                 return Tooltip.create(mouse, strings);
             }
-        
+            
             @Override
             public List<? extends GuiEventListener> children() {
                 return Collections.emptyList();
             }
-        
+            
             @Override
             public boolean mouseClicked(double d, double e, int i) {
                 return backingCategory.handleClick(display.getBackingRecipe(), d - bounds.x, e - bounds.y, i) || super.mouseClicked(d, e, i);

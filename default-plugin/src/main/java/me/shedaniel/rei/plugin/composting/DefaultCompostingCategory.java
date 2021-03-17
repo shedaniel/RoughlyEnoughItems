@@ -27,48 +27,46 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.gui.DisplayRenderer;
+import me.shedaniel.rei.api.gui.Renderer;
+import me.shedaniel.rei.api.gui.widgets.Widget;
+import me.shedaniel.rei.api.gui.widgets.Widgets;
 import me.shedaniel.rei.api.ingredient.EntryIngredient;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.registry.display.DisplayCategory;
-import me.shedaniel.rei.api.gui.Renderer;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
-import me.shedaniel.rei.api.gui.widgets.Widgets;
-import me.shedaniel.rei.api.gui.DisplayRenderer;
-import me.shedaniel.rei.api.gui.widgets.Widget;
+import me.shedaniel.rei.api.registry.display.DisplayCategory;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Blocks;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
 @Environment(EnvType.CLIENT)
 public class DefaultCompostingCategory implements DisplayCategory<DefaultCompostingDisplay> {
     @Override
-    public  ResourceLocation getIdentifier() {
+    public ResourceLocation getIdentifier() {
         return DefaultPlugin.COMPOSTING;
     }
     
     @Override
-    public  Renderer getIcon() {
+    public Renderer getIcon() {
         return EntryStacks.of(Blocks.COMPOSTER);
     }
     
     @Override
-    public  Component getTitle() {
+    public Component getTitle() {
         return new TranslatableComponent("category.rei.composting");
     }
     
     @Override
-    public  DisplayRenderer getDisplayRenderer(DefaultCompostingDisplay display) {
+    public DisplayRenderer getDisplayRenderer(DefaultCompostingDisplay display) {
         return new DisplayRenderer() {
             private Component text = new TranslatableComponent("text.rei.composting.page", display.getPage() + 1);
             
@@ -85,7 +83,7 @@ public class DefaultCompostingCategory implements DisplayCategory<DefaultCompost
     }
     
     @Override
-    public  List<Widget> setupDisplay(DefaultCompostingDisplay display, Rectangle bounds) {
+    public List<Widget> setupDisplay(DefaultCompostingDisplay display, Rectangle bounds) {
         List<Widget> widgets = Lists.newArrayList();
         Point startingPoint = new Point(bounds.x + bounds.width - 55, bounds.y + 110);
         List<EntryIngredient> stacks = new ArrayList<>(display.getInputEntries());

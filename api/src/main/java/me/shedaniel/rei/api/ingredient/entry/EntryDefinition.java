@@ -23,9 +23,7 @@
 
 package me.shedaniel.rei.api.ingredient.entry;
 
-import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;

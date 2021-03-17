@@ -27,7 +27,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.forge.api.PointHelper;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.gui.widgets.Panel;
-import me.shedaniel.rei.api.gui.widgets.Widget;
 import me.shedaniel.rei.api.gui.widgets.Widgets;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import mezz.jei.api.gui.ITickTimer;
