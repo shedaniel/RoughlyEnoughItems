@@ -64,7 +64,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class ItemEntryDefinition implements EntryDefinition<ItemStack> {
+public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySerializer<ItemStack> {
     private final EntryRenderer<ItemStack> renderer = new ItemEntryRenderer();
     
     @Override
@@ -85,16 +85,6 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack> {
     @Override
     public @NotNull Optional<ResourceLocation> getIdentifier(EntryStack<ItemStack> entry, ItemStack value) {
         return Optional.ofNullable(Registry.ITEM.getKey(value.getItem()));
-    }
-    
-    @Override
-    public @NotNull Fraction getAmount(EntryStack<ItemStack> entry, ItemStack value) {
-        return Fraction.ofWhole(value.getCount());
-    }
-    
-    @Override
-    public void setAmount(EntryStack<ItemStack> entry, ItemStack value, Fraction amount) {
-        value.setCount(amount.intValue());
     }
     
     @Override
@@ -186,12 +176,28 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack> {
     }
     
     @Override
-    public @NotNull CompoundTag toTag(EntryStack<ItemStack> entry, ItemStack value) {
+    @Nullable
+    public EntrySerializer<ItemStack> getSerializer() {
+        return this;
+    }
+    
+    @Override
+    public boolean supportSaving() {
+        return true;
+    }
+    
+    @Override
+    public boolean supportReading() {
+        return true;
+    }
+    
+    @Override
+    public CompoundTag save(EntryStack<ItemStack> entry, ItemStack value) {
         return value.save(new CompoundTag());
     }
     
     @Override
-    public @NotNull ItemStack fromTag(@NotNull CompoundTag tag) {
+    public ItemStack read(CompoundTag tag) {
         return ItemStack.of(tag);
     }
     

@@ -29,10 +29,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.ComparisonContext;
-import me.shedaniel.rei.api.ingredient.entry.EntryDefinition;
-import me.shedaniel.rei.api.ingredient.entry.EntryRenderer;
-import me.shedaniel.rei.api.ingredient.entry.EntryType;
+import me.shedaniel.rei.api.ingredient.entry.*;
 import me.shedaniel.rei.api.util.ImmutableLiteralText;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.IIngredientRenderer;
@@ -85,16 +82,6 @@ public class JEIEntryDefinition<T> implements EntryDefinition<T>, EntryRenderer<
     }
     
     @Override
-    public Fraction getAmount(EntryStack<T> entry, T value) {
-        return Fraction.ofWhole(1);
-    }
-    
-    @Override
-    public void setAmount(EntryStack<T> entry, T value, Fraction amount) {
-        
-    }
-    
-    @Override
     public boolean isEmpty(EntryStack<T> entry, T value) {
         return ingredientHelper.isValidIngredient(value);
     }
@@ -115,12 +102,8 @@ public class JEIEntryDefinition<T> implements EntryDefinition<T>, EntryRenderer<
     }
     
     @Override
-    public CompoundTag toTag(EntryStack<T> entry, T value) {
-        return null;
-    }
-    
-    @Override
-    public T fromTag(CompoundTag tag) {
+    @Nullable
+    public EntrySerializer<T> getSerializer() {
         return null;
     }
     

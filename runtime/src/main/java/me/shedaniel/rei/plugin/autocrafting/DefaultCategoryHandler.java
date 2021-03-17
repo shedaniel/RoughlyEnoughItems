@@ -130,7 +130,7 @@ public class DefaultCategoryHandler implements TransferHandler {
             for (EntryStack<?> possibleStack : possibleStacks) {
                 if (!done) {
                     if (possibleStack.getType() == VanillaEntryTypes.ITEM) {
-                        int invRequiredCount = possibleStack.getAmount().intValue();
+                        int invRequiredCount = possibleStack.<ItemStack>cast().getValue().getCount();
                         int key = RecipeFinder.getItemId((ItemStack) possibleStack.getValue());
                         while (invRequiredCount > 0 && recipeFinder.contains(key)) {
                             invRequiredCount--;
