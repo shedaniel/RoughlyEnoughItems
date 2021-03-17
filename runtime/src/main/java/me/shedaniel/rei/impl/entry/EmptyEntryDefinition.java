@@ -97,6 +97,11 @@ public enum EmptyEntryDefinition implements EntryDefinition<Object>, EntrySerial
     }
     
     @Override
+    public Object normalize(EntryStack<Object> entry, Object value) {
+        return value;
+    }
+    
+    @Override
     public int hash(EntryStack<Object> entry, Object value, ComparisonContext context) {
         return ordinal();
     }

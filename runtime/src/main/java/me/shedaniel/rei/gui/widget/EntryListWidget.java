@@ -535,7 +535,7 @@ public class EntryListWidget extends WidgetWithBounds {
                             List<EntryStack<?>> filtered = Lists.newArrayList();
                             for (EntryStack<?> stack : partitionStacks) {
                                 if (canLastSearchTermsBeAppliedTo(stack)) {
-                                    if (workingItems != null && !workingItems.contains(stack.hash(ComparisonContext.IGNORE_COUNT)))
+                                    if (workingItems != null && !workingItems.contains(EntryStacks.hashIgnoreCount(stack)))
                                         continue;
                                     filtered.add(stack.rewrap().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE));
                                 }
@@ -556,7 +556,7 @@ public class EntryListWidget extends WidgetWithBounds {
                 } else {
                     for (EntryStack<?> stack : stacks) {
                         if (canLastSearchTermsBeAppliedTo(stack)) {
-                            if (workingItems != null && !workingItems.contains(stack.hash(ComparisonContext.IGNORE_COUNT)))
+                            if (workingItems != null && !workingItems.contains(EntryStacks.hashIgnoreCount(stack)))
                                 continue;
                             list.add(stack.rewrap().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE));
                         }

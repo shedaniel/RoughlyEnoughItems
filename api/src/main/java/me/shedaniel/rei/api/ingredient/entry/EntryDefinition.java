@@ -45,6 +45,8 @@ public interface EntryDefinition<T> {
     
     T copy(EntryStack<T> entry, T value);
     
+    T normalize(EntryStack<T> entry, T value);
+    
     int hash(EntryStack<T> entry, T value, ComparisonContext context);
     
     boolean equals(T o1, T o2, ComparisonContext context);

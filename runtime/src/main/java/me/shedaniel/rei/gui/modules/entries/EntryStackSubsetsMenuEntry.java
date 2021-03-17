@@ -100,7 +100,7 @@ public class EntryStackSubsetsMenuEntry extends MenuEntry {
                     if (isFiltered()) {
                         filteredStacks.removeIf(next -> EntryStacks.equalsIgnoreCount(next, stack));
                     } else {
-                        filteredStacks.add(stack.copy());
+                        filteredStacks.add(stack.normalize());
                     }
                     Menu menu = ((ContainerScreenOverlay) REIHelper.getInstance().getOverlay().get()).getOverlayMenu();
                     if (menu != null)

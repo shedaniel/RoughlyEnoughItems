@@ -107,7 +107,7 @@ public abstract class EntryListEntryWidget extends EntryWidget {
                         entry = EntryStacks.of(bucketItem);
                     }
                 }
-                return EntryStacks.equals(entry, stack, ComparisonContext.IGNORE_COUNT);
+                return EntryStacks.equalsIgnoreCount(entry, stack);
             }
         }
         return super.cancelDeleteItems(stack);

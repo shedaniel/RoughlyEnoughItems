@@ -406,7 +406,7 @@ public class EntryWidget extends Slot implements DraggableStackProvider {
     
     @ApiStatus.Internal
     protected FavoriteEntry asFavoriteEntry() {
-        return FavoriteEntry.fromEntryStack(getCurrentEntry().copy());
+        return FavoriteEntry.fromEntryStack(getCurrentEntry().normalize());
     }
     
     @ApiStatus.Internal

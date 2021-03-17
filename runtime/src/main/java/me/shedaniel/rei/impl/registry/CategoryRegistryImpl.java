@@ -132,6 +132,5 @@ public class CategoryRegistryImpl implements CategoryRegistry, Reloadable {
         public ResourceLocation getIdentifier() {
             return this.category.getIdentifier();
         }
-        
     }
 }

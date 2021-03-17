@@ -29,6 +29,7 @@ import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.rei.api.gui.Renderer;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.entry.*;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -138,27 +139,29 @@ public final class EntryStacks {
         if (left == right) return true;
         EntryType<A> leftType = left.getType();
         EntryType<B> rightType = right.getType();
-        if (leftType == rightType)
+        if (leftType == rightType) {
             return left.equals((EntryStack<A>) right, context);
+        }
+        if (context == ComparisonContext.EXACT) return false;
         for (EntryTypeBridge<A, B> bridge : EntryTypeRegistry.getInstance().getBridgesFor(leftType, rightType)) {
             InteractionResultHolder<Stream<EntryStack<B>>> holder = bridge.bridge(left);
-            if (holder.getResult().shouldSwing()) {
+            if (holder.getResult() == InteractionResult.SUCCESS) {
                 Iterator<EntryStack<B>> iterator = holder.getObject().iterator();
                 while (iterator.hasNext()) {
-                    EntryStack<B> bridged = iterator.next();
-                    if (bridged.equals(right, context))
+                    if (iterator.next().equals(right, context)) {
                         return true;
+                    }
                 }
             }
         }
         for (EntryTypeBridge<B, A> bridge : EntryTypeRegistry.getInstance().getBridgesFor(rightType, leftType)) {
             InteractionResultHolder<Stream<EntryStack<A>>> holder = bridge.bridge(right);
-            if (holder.getResult().shouldSwing()) {
+            if (holder.getResult() == InteractionResult.SUCCESS) {
                 Iterator<EntryStack<A>> iterator = holder.getObject().iterator();
                 while (iterator.hasNext()) {
-                    EntryStack<A> bridged = iterator.next();
-                    if (bridged.equals(left, context))
+                    if (iterator.next().equals(left, context)) {
                         return true;
+                    }
                 }
             }
         }

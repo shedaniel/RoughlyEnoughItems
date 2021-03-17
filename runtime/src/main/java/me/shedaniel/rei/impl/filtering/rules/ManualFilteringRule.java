@@ -62,7 +62,7 @@ public class ManualFilteringRule extends AbstractFilteringRule<ManualFilteringRu
     
     private void processList(Collection<EntryStack<?>> stacks, FilteringResult result) {
         IntSet filteredStacks = CollectionUtils.mapParallel(ConfigObject.getInstance().getFilteredStacks(), EntryStacks::hashIgnoreCount, IntOpenHashSet::new);
-        result.hide(stacks.parallelStream().filter(stack -> filteredStacks.contains(stack.hash(ComparisonContext.IGNORE_COUNT))).collect(Collectors.toList()));
+        result.hide(stacks.parallelStream().filter(stack -> filteredStacks.contains(EntryStacks.hashIgnoreCount(stack))).collect(Collectors.toList()));
     }
     
     @Override
