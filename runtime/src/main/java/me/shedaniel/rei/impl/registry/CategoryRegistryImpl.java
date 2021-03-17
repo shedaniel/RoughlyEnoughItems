@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.impl.registry;
 
-import me.shedaniel.rei.api.ButtonAreaSupplier;
+import me.shedaniel.rei.api.registry.category.ButtonArea;
 import me.shedaniel.rei.api.ingredient.EntryIngredient;
 import me.shedaniel.rei.api.plugins.REIPlugin;
 import me.shedaniel.rei.api.registry.Reloadable;
@@ -97,7 +97,7 @@ public class CategoryRegistryImpl implements CategoryRegistry, Reloadable {
         private final DisplayCategory<T> category;
         private final List<EntryIngredient> workstations = Collections.synchronizedList(new ArrayList<>());
         
-        private Optional<ButtonAreaSupplier> plusButtonArea = Optional.of(ButtonAreaSupplier.defaultArea());
+        private Optional<ButtonArea> plusButtonArea = Optional.of(ButtonArea.defaultArea());
         
         public Configuration(DisplayCategory<T> category) {
             this.category = category;
@@ -109,12 +109,12 @@ public class CategoryRegistryImpl implements CategoryRegistry, Reloadable {
         }
         
         @Override
-        public void setPlusButtonArea(ButtonAreaSupplier supplier) {
-            this.plusButtonArea = Optional.ofNullable(supplier);
+        public void setPlusButtonArea(ButtonArea area) {
+            this.plusButtonArea = Optional.ofNullable(area);
         }
         
         @Override
-        public Optional<ButtonAreaSupplier> getPlusButtonArea() {
+        public Optional<ButtonArea> getPlusButtonArea() {
             return plusButtonArea;
         }
         

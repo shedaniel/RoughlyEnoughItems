@@ -24,7 +24,7 @@
 package me.shedaniel.rei;
 
 import me.shedaniel.architectury.platform.Platform;
-import me.shedaniel.rei.api.ConfigManager;
+import me.shedaniel.rei.api.config.ConfigManager;
 
 public class REIModMenuEntryPoint {
     public void onInitializeClient() {

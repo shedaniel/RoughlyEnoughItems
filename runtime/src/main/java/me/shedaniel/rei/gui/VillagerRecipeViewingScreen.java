@@ -32,9 +32,9 @@ import me.shedaniel.clothconfig2.api.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.ButtonAreaSupplier;
+import me.shedaniel.rei.api.registry.category.ButtonArea;
 import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.config.ConfigObject;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.gui.DisplayRenderer;
 import me.shedaniel.rei.api.gui.widgets.Button;
@@ -158,7 +158,7 @@ public class VillagerRecipeViewingScreen extends AbstractRecipeViewingScreen {
         transformIngredientNotice(setupDisplay, ingredientStackToNotice);
         transformResultNotice(setupDisplay, resultStackToNotice);
         this.widgets.addAll(setupDisplay);
-        Optional<ButtonAreaSupplier> supplier = CategoryRegistry.getInstance().get(category.getIdentifier()).getPlusButtonArea();
+        Optional<ButtonArea> supplier = CategoryRegistry.getInstance().get(category.getIdentifier()).getPlusButtonArea();
         if (supplier.isPresent() && supplier.get().get(recipeBounds) != null)
             this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(recipeBounds, supplier.get().get(recipeBounds), new TextComponent(supplier.get().getButtonText()), () -> display, setupDisplay, category));
         

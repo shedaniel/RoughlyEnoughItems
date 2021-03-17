@@ -25,10 +25,9 @@ package me.shedaniel.rei.gui.widget;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.architectury.fluid.FluidStack;
-import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.config.ConfigObject;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.entry.ComparisonContext;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;

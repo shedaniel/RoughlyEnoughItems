@@ -21,38 +21,33 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api;
+package me.shedaniel.rei.api.registry.category;
 
-import me.shedaniel.rei.api.registry.display.Display;
-import me.shedaniel.rei.api.registry.display.DisplayCategory;
-import net.minecraft.world.InteractionResult;
-import org.jetbrains.annotations.NotNull;
+import me.shedaniel.math.Rectangle;
 
-public interface DisplayVisibilityPredicate extends Comparable<DisplayVisibilityPredicate> {
-    
-    /**
-     * Gets the priority of the handler, the higher the priority, the earlier this is called.
-     *
-     * @return the priority
-     */
-    default float getPriority() {
-        return 0f;
+/**
+ * The area for the + button.
+ */
+@FunctionalInterface
+public interface ButtonArea {
+    static ButtonArea defaultArea() {
+        return bounds -> new Rectangle(bounds.getMaxX() + 2, bounds.getMaxY() - 16, 10, 10);
     }
     
     /**
-     * Handles the visibility of the display.
-     * {@link ActionResult#PASS} to pass the handling to another handler
-     * {@link ActionResult#SUCCESS} to always display it
-     * {@link ActionResult#FAIL} to never display it
+     * Declares the button bounds
      *
-     * @param category the category of the display
-     * @param display  the display of the recipe
-     * @return the visibility
+     * @param bounds the bounds of the recipe display
+     * @return the bounds of the button
      */
-    InteractionResult handleDisplay(DisplayCategory<?> category, Display display);
+    Rectangle get(Rectangle bounds);
     
-    @Override
-    default int compareTo(@NotNull DisplayVisibilityPredicate o) {
-        return Double.compare(getPriority(), o.getPriority());
+    /**
+     * Declares the button text
+     *
+     * @return the text of the button
+     */
+    default String getButtonText() {
+        return "+";
     }
 }

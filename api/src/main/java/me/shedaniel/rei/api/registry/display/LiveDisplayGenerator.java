@@ -21,33 +21,25 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api;
+package me.shedaniel.rei.api.registry.display;
 
-import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.registry.display.Display;
+import me.shedaniel.rei.api.view.ViewSearchBuilder;
 
-/**
- * The supplier for the + button area.
- */
-@FunctionalInterface
-public interface ButtonAreaSupplier {
-    static ButtonAreaSupplier defaultArea() {
-        return bounds -> new Rectangle(bounds.getMaxX() + 2, bounds.getMaxY() - 16, 10, 10);
+import java.util.List;
+import java.util.Optional;
+
+public interface LiveDisplayGenerator<T extends Display> {
+    default Optional<List<T>> getRecipeFor(EntryStack<?> entry) {
+        return Optional.empty();
     }
     
-    /**
-     * Declares the button bounds
-     *
-     * @param bounds the bounds of the recipe display
-     * @return the bounds of the button
-     */
-    Rectangle get(Rectangle bounds);
+    default Optional<List<T>> getUsageFor(EntryStack<?> entry) {
+        return Optional.empty();
+    }
     
-    /**
-     * Declares the button text
-     *
-     * @return the text of the button
-     */
-    default String getButtonText() {
-        return "+";
+    default Optional<List<T>> generate(ViewSearchBuilder builder) {
+        return Optional.empty();
     }
 }

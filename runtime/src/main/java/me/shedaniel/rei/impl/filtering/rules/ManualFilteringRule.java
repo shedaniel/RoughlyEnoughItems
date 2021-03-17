@@ -25,7 +25,7 @@ package me.shedaniel.rei.impl.filtering.rules;
 
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.config.ConfigObject;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.entry.ComparisonContext;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;

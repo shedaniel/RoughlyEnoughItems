@@ -33,9 +33,9 @@ import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.ButtonAreaSupplier;
+import me.shedaniel.rei.api.registry.category.ButtonArea;
 import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.config.ConfigObject;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.gui.widgets.Button;
 import me.shedaniel.rei.api.gui.widgets.Panel;
@@ -238,7 +238,7 @@ public class RecipeViewingScreen extends AbstractRecipeViewingScreen {
                 tab.setRenderer(categories.get(j), categories.get(j).getIcon(), categories.get(j).getTitle(), tab.getId() + categoryPages * tabsPerPage == selectedCategoryIndex);
             }
         }
-        Optional<ButtonAreaSupplier> supplier = CategoryRegistry.getInstance().get(getCurrentCategory()).getPlusButtonArea();
+        Optional<ButtonArea> supplier = CategoryRegistry.getInstance().get(getCurrentCategory()).getPlusButtonArea();
         int recipeHeight = getSelectedCategory().getDisplayHeight();
         List<Display> currentDisplayed = getCurrentDisplayed();
         for (int i = 0; i < currentDisplayed.size(); i++) {

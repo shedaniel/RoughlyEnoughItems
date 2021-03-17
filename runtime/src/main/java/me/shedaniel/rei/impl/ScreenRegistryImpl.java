@@ -27,8 +27,8 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.mojang.blaze3d.platform.Window;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.FocusedStackProvider;
-import me.shedaniel.rei.api.ScreenClickAreaProvider;
+import me.shedaniel.rei.api.registry.screen.FocusedStackProvider;
+import me.shedaniel.rei.api.registry.screen.SimpleClickArea;
 import me.shedaniel.rei.api.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
@@ -149,9 +149,9 @@ public class ScreenRegistryImpl implements ScreenRegistry {
     }
     
     @Override
-    public <C extends AbstractContainerMenu, T extends AbstractContainerScreen<C>> void registerContainerClickArea(ScreenClickAreaProvider<T> provider, Class<? extends T> screenClass, ResourceLocation... categories) {
+    public <C extends AbstractContainerMenu, T extends AbstractContainerScreen<C>> void registerContainerClickArea(SimpleClickArea<T> area, Class<? extends T> screenClass, ResourceLocation... categories) {
         registerClickArea(screen -> {
-            Rectangle rectangle = provider.provide(screen).clone();
+            Rectangle rectangle = area.provide(screen).clone();
             rectangle.translate(screen.leftPos, screen.topPos);
             return rectangle;
         }, screenClass, categories);

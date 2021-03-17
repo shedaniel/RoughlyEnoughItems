@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.api.registry.category;
 
-import me.shedaniel.rei.api.ButtonAreaSupplier;
 import me.shedaniel.rei.api.ingredient.EntryIngredient;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.plugins.PluginManager;
@@ -109,8 +108,8 @@ public interface CategoryRegistry extends Reloadable, Iterable<CategoryRegistry.
         configure(category, CategoryConfiguration::removePlusButton);
     }
     
-    default void setPlusButtonArea(ResourceLocation category, ButtonAreaSupplier supplier) {
-        configure(category, config -> config.setPlusButtonArea(supplier));
+    default void setPlusButtonArea(ResourceLocation category, ButtonArea area) {
+        configure(category, config -> config.setPlusButtonArea(area));
     }
     
     interface CategoryConfiguration<T extends Display> extends Identifiable {
@@ -140,16 +139,16 @@ public interface CategoryRegistry extends Reloadable, Iterable<CategoryRegistry.
         /**
          * Sets the plus button area
          *
-         * @param supplier the supplier of the button area
+         * @param area the button area
          */
-        void setPlusButtonArea(ButtonAreaSupplier supplier);
+        void setPlusButtonArea(ButtonArea area);
         
         /**
          * Returns the optional plus button area
          *
          * @return the optional plus button area
          */
-        Optional<ButtonAreaSupplier> getPlusButtonArea();
+        Optional<ButtonArea> getPlusButtonArea();
         
         List<EntryIngredient> getWorkstations();
         

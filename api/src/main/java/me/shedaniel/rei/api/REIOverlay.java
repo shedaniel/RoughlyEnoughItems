@@ -27,7 +27,6 @@ import me.shedaniel.rei.api.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.gui.widgets.WidgetWithBounds;
 import org.jetbrains.annotations.ApiStatus;
 
-@ApiStatus.Experimental
 public abstract class REIOverlay extends WidgetWithBounds {
     @ApiStatus.Internal
     public abstract void closeOverlayMenu();

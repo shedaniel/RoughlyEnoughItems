@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.api;
 
+import me.shedaniel.rei.api.config.ConfigManager;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.util.FormattingUtils;
 import me.shedaniel.rei.api.view.ViewSearchBuilder;

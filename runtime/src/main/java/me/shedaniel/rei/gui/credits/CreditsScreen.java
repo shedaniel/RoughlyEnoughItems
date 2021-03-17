@@ -27,7 +27,7 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.clothconfig2.impl.EasingMethod;
-import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.config.ConfigObject;
 import me.shedaniel.rei.api.util.ImmutableLiteralText;
 import me.shedaniel.rei.gui.TransformingScreen;
 import me.shedaniel.rei.gui.credits.CreditsEntryListWidget.TextCreditsItem;

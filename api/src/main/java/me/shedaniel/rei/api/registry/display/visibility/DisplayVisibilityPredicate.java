@@ -21,27 +21,38 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api;
+package me.shedaniel.rei.api.registry.display.visibility;
 
-import me.shedaniel.rei.api.ingredient.EntryStack;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.world.InteractionResultHolder;
+import me.shedaniel.rei.api.registry.display.Display;
+import me.shedaniel.rei.api.registry.display.DisplayCategory;
+import net.minecraft.world.InteractionResult;
 import org.jetbrains.annotations.NotNull;
 
-@FunctionalInterface
-public interface FocusedStackProvider extends Comparable<FocusedStackProvider> {
+public interface DisplayVisibilityPredicate extends Comparable<DisplayVisibilityPredicate> {
+    
     /**
-     * @return the priority of this handler, higher priorities will be called first.
+     * Gets the priority of the handler, the higher the priority, the earlier this is called.
+     *
+     * @return the priority
      */
-    default double getPriority() {
-        return 0d;
+    default float getPriority() {
+        return 0f;
     }
     
-    @NotNull
-    InteractionResultHolder<EntryStack<?>> provide(Screen screen);
+    /**
+     * Handles the visibility of the display.
+     * {@link ActionResult#PASS} to pass the handling to another handler
+     * {@link ActionResult#SUCCESS} to always display it
+     * {@link ActionResult#FAIL} to never display it
+     *
+     * @param category the category of the display
+     * @param display  the display of the recipe
+     * @return the visibility
+     */
+    InteractionResult handleDisplay(DisplayCategory<?> category, Display display);
     
     @Override
-    default int compareTo(@NotNull FocusedStackProvider o) {
+    default int compareTo(@NotNull DisplayVisibilityPredicate o) {
         return Double.compare(getPriority(), o.getPriority());
     }
 }

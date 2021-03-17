@@ -37,8 +37,8 @@ import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWi
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.ConfigManager;
-import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.config.ConfigManager;
+import me.shedaniel.rei.api.config.ConfigObject;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.REIOverlay;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;

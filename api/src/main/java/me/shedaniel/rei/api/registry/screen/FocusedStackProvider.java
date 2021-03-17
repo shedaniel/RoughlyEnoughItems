@@ -21,60 +21,27 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api;
+package me.shedaniel.rei.api.registry.screen;
 
-import me.shedaniel.rei.api.plugins.PluginManager;
-import me.shedaniel.rei.api.registry.Reloadable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
+import me.shedaniel.rei.api.ingredient.EntryStack;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.world.InteractionResultHolder;
 import org.jetbrains.annotations.NotNull;
 
-@Environment(EnvType.CLIENT)
-public interface ConfigManager extends Reloadable {
+@FunctionalInterface
+public interface FocusedStackProvider extends Comparable<FocusedStackProvider> {
     /**
-     * @return the instance of {@link me.shedaniel.rei.api.ConfigManager}
+     * @return the priority of this handler, higher priorities will be called first.
      */
+    default double getPriority() {
+        return 0d;
+    }
+    
     @NotNull
-    static ConfigManager getInstance() {
-        return PluginManager.getInstance().get(ConfigManager.class);
+    InteractionResultHolder<EntryStack<?>> provide(Screen screen);
+    
+    @Override
+    default int compareTo(@NotNull FocusedStackProvider o) {
+        return Double.compare(getPriority(), o.getPriority());
     }
-    
-    /**
-     * Saves the config.
-     */
-    void saveConfig();
-    
-    /**
-     * Gets if craftable only filter is enabled
-     *
-     * @return whether craftable only filter is enabled
-     */
-    boolean isCraftableOnlyEnabled();
-    
-    /**
-     * Toggles the craftable only filter
-     */
-    void toggleCraftableOnly();
-    
-    /**
-     * Opens the config screen
-     *
-     * @param parent the screen shown before
-     */
-    default void openConfigScreen(Screen parent) {
-        Minecraft.getInstance().setScreen(getConfigScreen(parent));
-    }
-    
-    /**
-     * Gets the config screen
-     *
-     * @param parent the screen shown before
-     * @return the config screen
-     */
-    Screen getConfigScreen(Screen parent);
-    
-    ConfigObject getConfig();
-    
 }
