@@ -43,7 +43,6 @@ import me.shedaniel.rei.api.util.CollectionUtils;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;

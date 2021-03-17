@@ -31,11 +31,11 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.gui.Renderer;
-import me.shedaniel.rei.api.gui.AbstractRenderer;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.favorites.FavoriteMenuEntry;
+import me.shedaniel.rei.api.gui.AbstractRenderer;
+import me.shedaniel.rei.api.gui.Renderer;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.util.CollectionUtils;
 import net.minecraft.Util;
@@ -130,7 +130,7 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
                 float g = f + 14 / 256f;
                 float h = 14 / 256f;
                 float n = h + 14 / 256f;
-    
+                
                 BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
                 bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
                 bufferBuilder.vertex(matrix, i, l, m).uv(f, n).endVertex();
