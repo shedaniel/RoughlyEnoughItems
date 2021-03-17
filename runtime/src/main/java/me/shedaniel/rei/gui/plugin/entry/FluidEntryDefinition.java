@@ -34,7 +34,7 @@ import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.config.ConfigObject;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.entry.*;

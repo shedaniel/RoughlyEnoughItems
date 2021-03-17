@@ -28,7 +28,7 @@ import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Dimension;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.config.ConfigObject;
 import me.shedaniel.rei.api.gui.DrawableConsumer;
 import me.shedaniel.rei.api.gui.Renderer;
 import me.shedaniel.rei.impl.Internals;

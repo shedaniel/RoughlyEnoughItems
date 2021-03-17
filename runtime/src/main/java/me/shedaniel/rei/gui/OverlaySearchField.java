@@ -30,7 +30,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Color;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.config.ConfigObject;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.gui.config.SyntaxHighlightingMode;
 import me.shedaniel.rei.impl.OverlaySearchFieldSyntaxHighlighter;

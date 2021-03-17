@@ -21,10 +21,9 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api;
+package me.shedaniel.rei.api.registry.screen;
 
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.registry.screen.ClickArea;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
@@ -33,11 +32,11 @@ import java.util.Arrays;
 import java.util.function.Supplier;
 
 @FunctionalInterface
-public interface ScreenClickAreaProvider<T extends Screen> {
+public interface SimpleClickArea<T extends Screen> {
     @NotNull
     Rectangle provide(@NotNull T screen);
     
-    default ClickArea<T> toHandler(Supplier<ResourceLocation[]> categories) {
+    default ClickArea<T> toClickArea(Supplier<ResourceLocation[]> categories) {
         return context -> {
             return provide(context.getScreen()).contains(context.getMousePosition())
                     ? ClickArea.Result.success().categories(Arrays.asList(categories.get()))

@@ -23,8 +23,7 @@
 
 package me.shedaniel.rei.api.registry.display;
 
-import me.shedaniel.rei.api.DisplayVisibilityPredicate;
-import me.shedaniel.rei.api.LiveDisplayGenerator;
+import me.shedaniel.rei.api.registry.display.visibility.DisplayVisibilityPredicate;
 import me.shedaniel.rei.api.plugins.PluginManager;
 import me.shedaniel.rei.api.registry.RecipeManagerContext;
 import me.shedaniel.rei.api.registry.Reloadable;

@@ -28,7 +28,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.config.ConfigObject;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.favorites.FavoriteEntryType;

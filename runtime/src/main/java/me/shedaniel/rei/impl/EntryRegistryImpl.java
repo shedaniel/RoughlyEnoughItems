@@ -26,7 +26,7 @@ package me.shedaniel.rei.impl;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.config.ConfigObject;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.plugins.REIPlugin;

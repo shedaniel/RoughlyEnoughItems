@@ -24,8 +24,8 @@
 package me.shedaniel.rei.impl.registry;
 
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.DisplayVisibilityPredicate;
-import me.shedaniel.rei.api.LiveDisplayGenerator;
+import me.shedaniel.rei.api.registry.display.visibility.DisplayVisibilityPredicate;
+import me.shedaniel.rei.api.registry.display.LiveDisplayGenerator;
 import me.shedaniel.rei.api.plugins.REIPlugin;
 import me.shedaniel.rei.api.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.registry.display.Display;

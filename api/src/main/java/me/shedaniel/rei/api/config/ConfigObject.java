@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api;
+package me.shedaniel.rei.api.config;
 
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
@@ -36,7 +36,7 @@ import java.util.List;
 @Environment(EnvType.CLIENT)
 public interface ConfigObject {
     /**
-     * @return the instance of {@link me.shedaniel.rei.api.ConfigObject}
+     * @return the instance of {@link ConfigObject}
      */
     static ConfigObject getInstance() {
         return ConfigManager.getInstance().getConfig();

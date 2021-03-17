@@ -28,7 +28,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.ConfigObject;
+import me.shedaniel.rei.api.config.ConfigObject;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.gui.widgets.*;
 import me.shedaniel.rei.api.registry.display.Display;

@@ -24,8 +24,6 @@
 package me.shedaniel.rei.api.registry.screen;
 
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.FocusedStackProvider;
-import me.shedaniel.rei.api.ScreenClickAreaProvider;
 import me.shedaniel.rei.api.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.plugins.PluginManager;
@@ -102,32 +100,32 @@ public interface ScreenRegistry extends Reloadable {
     /**
      * Registers a click area for a container screen.
      *
-     * @param provider    The click area provider that is offset to the container screen's top left corner.
+     * @param area        The click area that is offset to the container screen's top left corner.
      * @param screenClass The class of the screen.
      * @param categories  The categories of result.
      * @param <T>         The screen type to be registered to.
      */
-    <C extends AbstractContainerMenu, T extends AbstractContainerScreen<C>> void registerContainerClickArea(ScreenClickAreaProvider<T> provider, Class<? extends T> screenClass, ResourceLocation... categories);
+    <C extends AbstractContainerMenu, T extends AbstractContainerScreen<C>> void registerContainerClickArea(SimpleClickArea<T> area, Class<? extends T> screenClass, ResourceLocation... categories);
     
     /**
      * Registers a click area for a screen.
      *
-     * @param provider    The click area provider that is offset to the window's top left corner.
+     * @param area        The click area that is offset to the window's top left corner.
      * @param screenClass The class of the screen.
      * @param categories  The categories of result.
      * @param <T>         The screen type to be registered to.
      */
-    default <T extends Screen> void registerClickArea(ScreenClickAreaProvider<T> provider, Class<? extends T> screenClass, ResourceLocation... categories) {
-        registerClickArea(screenClass, provider.toHandler(() -> categories));
+    default <T extends Screen> void registerClickArea(SimpleClickArea<T> area, Class<? extends T> screenClass, ResourceLocation... categories) {
+        registerClickArea(screenClass, area.toClickArea(() -> categories));
     }
     
     /**
      * Registers a click area handler for a screen. A handler allows more specific implementation of click areas.
      *
      * @param screenClass The class of the screen.
-     * @param area        The click area provider that is offset to the window's top left corner.
+     * @param area        The click area that is offset to the window's top left corner.
      * @param <T>         The screen type to be registered to.
-     * @see #registerClickArea(ScreenClickAreaProvider, Class, ResourceLocation...) for a simpler way to handle areas without custom categories.
+     * @see #registerClickArea(SimpleClickArea, Class, ResourceLocation...) for a simpler way to handle areas without custom categories.
      */
     <T extends Screen> void registerClickArea(Class<? extends T> screenClass, ClickArea<T> area);
     
